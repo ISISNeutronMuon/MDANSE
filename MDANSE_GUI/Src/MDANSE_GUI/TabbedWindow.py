@@ -15,16 +15,22 @@
 
 import os
 from collections import defaultdict
+from importlib import metadata
 
 from icecream import ic
-from qtpy.QtCore import (
-    Slot,
-    QTimer,
-    Signal,
-    QMessageLogger,
-)
+from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger, Qt
 from qtpy.QtGui import QAction
-from qtpy.QtWidgets import QMainWindow, QFileDialog, QToolBar, QTabWidget
+from qtpy.QtWidgets import (
+    QMainWindow,
+    QFileDialog,
+    QToolBar,
+    QTabWidget,
+    QMenuBar,
+    QMessageBox,
+    QApplication,
+)
+
+import MDANSE
 
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
@@ -116,12 +122,29 @@ class TabbedWindow(QMainWindow):
         self.destroyed.connect(self.settings_timer.stop)
 
     def setupMenubar(self):
-        self._menuBar = self.menuBar()
-        self._menuBar.setObjectName("main menubar")
-        self._menuBar.setVisible(True)
-        self.exitAct = QAction("Exit", parent=self._menuBar)
-        self.exitAct.triggered.connect(self.destroy)
-        self._menuBar.addAction(self.exitAct)
+        menubar = QMenuBar()
+        menubar.setNativeMenuBar(False)  # this works around PyQt problems on MacOS
+        menubar.setObjectName("main menubar")
+        menubar.setVisible(True)
+        file_group = menubar.addMenu("File")
+        help_group = menubar.addMenu("Help")
+        self.exitAct = QAction("Exit", parent=menubar)
+        self.exitAct.triggered.connect(self.shut_down)
+        file_group.addAction(self.exitAct)
+        self.aboutAct = QAction("About MDANSE", parent=menubar)
+        self.aboutAct.triggered.connect(self.version_information)
+        help_group.addAction(self.aboutAct)
+        self.setMenuBar(menubar)
+
+    def shut_down(self):
+        QApplication.quit()
+        self.destroy(True, True)
+
+    def version_information(self):
+        version = ""
+        version += f"MDANSE version: {metadata.version('MDANSE')}\n"
+        version += f"MDANSE_GUI version: {metadata.version('MDANSE_GUI')}\n"
+        popup = QMessageBox.about(self, "MDANSE Version Information", version)
 
     def setupToolbar(self):
         self._toolBar = QToolBar("Main MDANSE toolbar", self)

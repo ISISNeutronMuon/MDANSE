@@ -28,6 +28,11 @@ dlp_field_v4 = os.path.join(file_wd, "Data", "FIELD4")
 dlp_history_v4 = os.path.join(file_wd, "Data", "HISTORY4")
 apoferritin_dcd = os.path.join(file_wd, "Data", "apoferritin.dcd")
 apoferritin_pdb = os.path.join(file_wd, "Data", "apoferritin.pdb")
+pbanew_md = os.path.join(file_wd, "Data", "PBAnew.md")
+h2o_trj = os.path.join(file_wd, "Data", "H2O.trj")
+h2o_xtd = os.path.join(file_wd, "Data", "H2O.xtd")
+md_pdb = os.path.join(file_wd, "Data", "md.pdb")
+md_xtc = os.path.join(file_wd, "Data", "md.xtc")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -316,4 +321,90 @@ def test_namd_mdt_conversion_file_exists_and_loads_up_successfully_and_chemical_
     assert hdftradj["instance"].chemical_system.number_of_atoms == 12397
 
     hdftradj["instance"].close()
+    os.remove(temp_name + ".mdt")
+
+
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_castep_md_conversion_file_exists_and_loads_up_successfully(compression):
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        "atom_aliases": "{}",
+        "castep_file": pbanew_md,
+        "fold": False,
+        "output_file": (temp_name, 64, compression),
+    }
+
+    castep = Converter.create("CASTEP")
+    castep.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+
+
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_dftb_conversion_file_exists_and_loads_up_successfully(compression):
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        "atom_aliases": "{}",
+        "fold": True,
+        "output_file": (temp_name, 64, compression),
+        "trj_file": h2o_trj,
+        "xtd_file": h2o_xtd,
+    }
+
+    dftb = Converter.create("DFTB")
+    dftb.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+
+
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_forcite_conversion_file_exists_and_loads_up_successfully(compression):
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        "atom_aliases": "{}",
+        "fold": False,
+        "output_file": (temp_name, 64, compression),
+        "trj_file": h2o_trj,
+        "xtd_file": h2o_xtd,
+    }
+
+    forcite = Converter.create("Forcite")
+    forcite.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+
+
+@pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
+def test_gromacs_conversion_file_exists_and_loads_up_successfully(compression):
+    temp_name = tempfile.mktemp()
+
+    parameters = {
+        "fold": False,
+        "output_file": (temp_name, 64, compression),
+        "pdb_file": md_pdb,
+        "xtc_file": md_xtc,
+    }
+
+    gromacs = Converter.create("Gromacs")
+    gromacs.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")

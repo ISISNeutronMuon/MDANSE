@@ -1,5 +1,9 @@
 from MDANSE.Framework.Formats.IFormat import IFormat
-from MDANSE.Framework.OutputVariables import IOutputVariable
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from .HDFFormat import HDFFormat
 
 
@@ -22,7 +26,7 @@ class MDAFormat(IFormat):
     def write(
         cls,
         filename: str,
-        data: dict[str, IOutputVariable],
+        data: dict[str, "IOutputVariable"],
         header: str = "",
         extension: str = extensions[0],
     ) -> None:

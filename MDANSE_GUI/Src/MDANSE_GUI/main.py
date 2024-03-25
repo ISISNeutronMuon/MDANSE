@@ -16,16 +16,20 @@ import sys
 import os
 import time
 
-from qtpy.QtWidgets import QApplication, QSplashScreen
+from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory
 from qtpy.QtCore import QSettings, Qt, QTimer
-from qtpy.QtGui import QPixmap
+from qtpy.QtGui import QPixmap, QIcon
 
 from MDANSE_GUI.TabbedWindow import TabbedWindow
 
 
 def startGUI(some_args):
     app = QApplication(some_args)
-    #
+    app.setStyle(QStyleFactory.create("Fusion"))
+
+    path = os.path.dirname(os.path.abspath(__file__))
+    app.setWindowIcon(QIcon(os.path.join(path, "MDANSE.ico")))
+
     settings = QSettings(
         "ISIS Neutron and Muon Source", "MDANSE for Python 3", parent=app
     )

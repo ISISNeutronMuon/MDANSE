@@ -24,6 +24,7 @@ class Selector:
     _default = {
         # True selects atoms
         "all": True,
+        "dummy": False,
         "hs_on_heteroatom": False,
         "primary_amine": False,
         "hydroxy": False,
@@ -43,6 +44,7 @@ class Selector:
 
     _funcs = {
         "all": select_all,
+        "dummy": select_dummy,
         "hs_on_heteroatom": select_hs_on_heteroatom,
         "primary_amine": select_primary_amine,
         "hydroxy": select_hydroxy,
@@ -70,7 +72,7 @@ class Selector:
             The chemical system to apply the selection to.
         """
         self.system = system
-        self.all_idxs = select_all(system)
+        self.all_idxs = set([at.index for at in system.atom_list])
         self.settings = copy.deepcopy(self._default)
 
         symbols = set([at.symbol for at in system.atom_list])
@@ -156,7 +158,7 @@ class Selector:
                 if not switch:
                     continue
 
-                idxs = idxs | self._funcs[k](self.system, **args)
+                idxs.update(self._funcs[k](self.system, **args))
 
         if self.settings["invert"]:
             return self.all_idxs - idxs

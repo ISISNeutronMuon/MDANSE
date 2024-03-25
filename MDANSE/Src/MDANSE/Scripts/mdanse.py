@@ -22,8 +22,7 @@ import sys
 import textwrap
 
 from MDANSE.Core.Error import Error
-from MDANSE import PLATFORM, REGISTRY
-from MDANSE.Framework.Handlers.IHandler import IHandler
+from MDANSE import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.JobStatus import JobState

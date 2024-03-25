@@ -29,6 +29,8 @@ class StaticStructureFactor(DistanceHistogram):
 
     label = "Static Structure Factor"
 
+    enabled = True
+
     category = (
         "Analysis",
         "Structure",

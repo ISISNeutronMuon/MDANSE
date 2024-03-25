@@ -17,8 +17,6 @@ import os
 
 import numpy as np
 
-import netCDF4
-
 import h5py
 
 from qtpy import QtCore, QtGui
@@ -354,108 +352,6 @@ class HDFDataItem(DataItem):
         return info
 
 
-class NetCDFDataItem(DataItem):
-    def __init__(self, filename):
-        """Constructor.
-
-        Args:
-            filename (str): the NetCDF filename
-        """
-        try:
-            file = netCDF4.Dataset(filename, "r")
-        except Exception as e:
-            raise DataItemError(str(e))
-        else:
-            self._filename = filename
-            self._file = file
-            self._group = None
-            self._name = os.path.basename(filename)
-            self._path = filename
-            self._parent = None
-            self._is_group = True
-            self._children = []
-
-        self._parse(self, self._file)
-
-    def _parse(self, node, group):
-        """Retrieve recursively all the variables stored in a HDF file and build the tree out of this.
-
-        Args:
-            node (NodeItem): the current node
-            groupp (bool): True if this node is a group, False otherwise
-        """
-        for var in group.variables.values():
-            path = os.path.join(var.group().path, var.name)
-            node.add_child(NodeItem(path, False))
-
-        for _, sub_group in group.groups.items():
-            sub_node = NodeItem(sub_group.path, True)
-            node.add_child(sub_node)
-            self._parse(sub_node, sub_group)
-
-    def get_dataset_info(self, dataset, add_data=False):
-        """Returns the information about a given dataset.
-
-        Args:
-            dataset (str): the dataset
-            add_data (bool): if True the actual data will be added to the information
-
-        Returns:
-            dict: the information about the dataset
-        """
-        netcdf_variable = self._file[dataset]
-
-        info = {}
-        info["plottable"] = True
-        info["path"] = dataset
-        info["status"] = info["path"]
-
-        info["variable"] = os.path.basename(netcdf_variable.name)
-
-        info["units"] = getattr(netcdf_variable, "units", "au")
-        try:
-            _ = measure(1.0, info["units"], equivalent=True)
-        except UnitError:
-            info["plottable"] = False
-            info["status"] = "unknown unit"
-
-        info["original_shape"] = netcdf_variable.shape
-
-        if netcdf_variable.ndim > 1:
-            info["shape"] = tuple([s for s in netcdf_variable.shape if s > 1])
-            if not info["shape"]:
-                info["shape"] = (1,)
-        elif netcdf_variable.ndim == 1:
-            info["shape"] = netcdf_variable.shape
-        else:
-            info["shape"] = (1,)
-
-        info["dimension"] = len(info["shape"])
-        info["axis"] = getattr(
-            netcdf_variable, "axis", "|".join(["index"] * info["dimension"])
-        )
-
-        # Check type
-        if np.issubdtype(netcdf_variable.dtype, np.number):
-            info["type"] = netcdf_variable.dtype.name
-        else:
-            info["type"] = "str"
-            info["plottable"] = False
-            info["status"] = "invalid data type"
-
-        if add_data:
-            if netcdf_variable.ndim > 1:
-                info["data"] = np.squeeze(netcdf_variable[:])
-                if not info["data"].shape:
-                    info["data"] = np.expand_dims(info["data"], axis=0)
-            elif netcdf_variable.ndim == 1:
-                info["data"] = netcdf_variable[:]
-            else:
-                info["data"] = np.expand_dims(netcdf_variable[:], axis=0)
-
-        return info
-
-
 class DataTreeModel(QtCore.QAbstractItemModel):
     __metaclass__ = abc.ABCMeta
 
@@ -693,9 +589,6 @@ class DataTreeModel(QtCore.QAbstractItemModel):
 
 
 DATA_ITEMS = {
-    ".nc": NetCDFDataItem,
-    ".cdf": NetCDFDataItem,
-    ".netcdf": NetCDFDataItem,
     ".mda": HDFDataItem,
     ".hdf": HDFDataItem,
     ".h5": HDFDataItem,

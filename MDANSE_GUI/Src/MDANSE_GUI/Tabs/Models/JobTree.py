@@ -65,6 +65,12 @@ class JobTree(QStandardItemModel):
         self._nodes[new_number] = new_node
         self._values[new_number] = thing
         self._docstrings[new_number] = thing.__doc__
+        try:
+            self._docstrings[new_number] += "\n" + thing.build_doc()
+        except AttributeError:
+            pass
+        except TypeError:
+            pass
         if hasattr(thing, "category"):
             if filter:
                 if filter in thing.category:

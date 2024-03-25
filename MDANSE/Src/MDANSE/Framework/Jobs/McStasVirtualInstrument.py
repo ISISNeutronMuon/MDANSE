@@ -18,7 +18,7 @@ import os
 import shutil
 import subprocess
 import tempfile
-import string
+import sys
 import io
 
 import numpy as np
@@ -30,9 +30,11 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 MCSTAS_UNITS_LUT = {
-    "THz": measure(1, "THz", equivalent=True).toval("meV"),
+    "rad/ps": measure(1, "rad/ps", equivalent=True).toval("meV"),
+    "nm2/ps": measure(1, "nm2/ps", equivalent=True).toval("b/ps"),
     "nm2": measure(1, "nm2").toval("b"),
     "1/nm": measure(1, "1/nm").toval("1/ang"),
 }
@@ -74,7 +76,7 @@ class McStasVirtualInstrument(IJob):
         {
             "widget": "InputFileConfigurator",
             "label": "MDANSE Coherent Structure Factor",
-            "variables": ["q", "frequency", "s(q,f)_total"],
+            "variables": ["q", "omega", "s(q,f)_total"],
             "default": "dcsf_prot.h5",
         },
     )
@@ -83,11 +85,17 @@ class McStasVirtualInstrument(IJob):
         {
             "widget": "InputFileConfigurator",
             "label": "MDANSE Incoherent Structure Factor",
-            "variables": ["q", "frequency", "s(q,f)_total"],
+            "variables": ["q", "omega", "s(q,f)_total"],
             "default": "disf_prot.h5",
         },
     )
-    settings["temperature"] = ("FloatConfigurator", {"default": 298.0})
+    settings["temperature"] = (
+        "FloatConfigurator",
+        {
+            "default": 298.0,
+            "label": "The sample temperature to be used in the simulation.",
+        },
+    )
     settings["display"] = (
         "BooleanConfigurator",
         {"label": "trace the 3D view of the simulation"},
@@ -119,43 +127,56 @@ class McStasVirtualInstrument(IJob):
         self.numberOfSteps = 1
 
         symbols = sorted_atoms(
-            self.configuration["trajectory"]["instance"].universe, "symbol"
+            self.configuration["trajectory"]["instance"]._chemical_system.atom_list,
+            "symbol",
         )
 
         # Compute some parameters used for a proper McStas run
         self._mcStasPhysicalParameters = {"density": 0.0}
+        self._mcStasPhysicalParameters["V_rho"] = 0.0
         self._mcStasPhysicalParameters["weight"] = sum(
             [ATOMS_DATABASE.get_atom_property(s, "atomic_weight") for s in symbols]
         )
         self._mcStasPhysicalParameters["sigma_abs"] = (
-            sum([ATOMS_DATABASE.get_atom_property(s, "xs_absorption") for s in symbols])
+            np.mean(
+                [ATOMS_DATABASE.get_atom_property(s, "xs_absorption") for s in symbols]
+            )
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_coh"] = (
-            sum([ATOMS_DATABASE.get_atom_property(s, "xs_coherent") for s in symbols])
+            np.mean(
+                [ATOMS_DATABASE.get_atom_property(s, "xs_coherent") for s in symbols]
+            )
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_inc"] = (
-            sum([ATOMS_DATABASE.get_atom_property(s, "xs_incoherent") for s in symbols])
+            np.mean(
+                [ATOMS_DATABASE.get_atom_property(s, "xs_incoherent") for s in symbols]
+            )
             * MCSTAS_UNITS_LUT["nm2"]
         )
         for frameIndex in self.configuration["frames"]["value"]:
-            self.configuration["trajectory"]["instance"].universe.setFromTrajectory(
-                self.configuration["trajectory"]["instance"], frameIndex
+            configuration = self.configuration["trajectory"]["instance"].configuration(
+                frameIndex
             )
-            cellVolume = self.configuration["trajectory"][
-                "instance"
-            ].universe.cellVolume()
+            cellVolume = configuration._unit_cell.volume
             self._mcStasPhysicalParameters["density"] += (
                 self._mcStasPhysicalParameters["weight"] / cellVolume
             )
+            self._mcStasPhysicalParameters["V_rho"] += (
+                configuration._chemical_system.number_of_atoms / cellVolume
+            )
         self._mcStasPhysicalParameters["density"] /= self.configuration["frames"][
+            "n_frames"
+        ]
+        self._mcStasPhysicalParameters["V_rho"] /= self.configuration["frames"][
             "n_frames"
         ]
         # The density is converty in g/cm3
         self._mcStasPhysicalParameters["density"] /= NAVOGADRO / measure(
             1.0, "cm3"
         ).toval("nm3")
+        self._mcStasPhysicalParameters["V_rho"] *= measure(1.0, "1/nm3").toval("1/ang3")
 
     def run_step(self, index):
         """
@@ -172,6 +193,13 @@ class McStasVirtualInstrument(IJob):
         self.outFile = {}
         for typ in sqw:
             fout = tempfile.NamedTemporaryFile(mode="w", delete=False)
+            # for debugging, we use a real file here:
+            # fout = open(
+            #     "/Users/maciej.bartkowiak/an_example/mcstas/Persistent_file_for_"
+            #     + typ
+            #     + ".sqw",
+            #     "w",
+            # )
 
             fout.write("# Physical parameters:\n")
             for k, v in list(self._mcStasPhysicalParameters.items()):
@@ -180,23 +208,34 @@ class McStasVirtualInstrument(IJob):
             fout.write(
                 "# Temperature %s \n" % self.configuration["temperature"]["value"]
             )
-            fout.write("# classical 1 \n\n")
+            fout.write("#\n")
 
             for var in self.configuration[typ].variables:
                 fout.write("# %s\n" % var)
 
                 data = self.configuration[typ][var][:]
+                print(f"In {typ} the variable {var} has shape {data.shape}")
+                print(f"Values of {var}: min={data.min()}, max = {data.max()}")
+                data_unit = self.configuration[typ]._units[var]
                 try:
-                    data *= MCSTAS_UNITS_LUT[self.configuration[typ][var].units]
+                    data *= MCSTAS_UNITS_LUT[data_unit]
                 except KeyError:
-                    pass
+                    print(
+                        f"Could not find the physical unit {data_unit} in the lookup table."
+                    )
 
-                np.savetxt(fout, data)
-                fout.write("\n")
+                np.savetxt(fout, np.atleast_2d(data), delimiter=" ", newline="\n")
 
             fout.close()
             self.outFile[typ] = fout.name
+            # self.outFile[typ] = (
+            #     "/Users/maciej.bartkowiak/an_example/mcstas/Persistent_file_for_"
+            #     + typ
+            #     + ".sqw"
+            # )
             sqwInput += "%s=%s " % (typ, fout.name)
+
+        # sys.exit(0)
 
         trace = ""
         if self.configuration["display"]["value"]:
@@ -211,6 +250,8 @@ class McStasVirtualInstrument(IJob):
         cmdLine.append(trace)
         cmdLine.extend(parameters)
 
+        print(" ".join(cmdLine))
+
         s = subprocess.Popen(
             " ".join(cmdLine),
             stdout=subprocess.PIPE,
@@ -220,7 +261,7 @@ class McStasVirtualInstrument(IJob):
         out, _ = s.communicate()
 
         for line in out.splitlines():
-            if "ERROR" in line:
+            if "ERROR" in line.decode(encoding="utf-8"):
                 raise McStasError("An error occured during McStas run: %s" % out)
 
         with open(
@@ -230,7 +271,7 @@ class McStasVirtualInstrument(IJob):
             ),
             "w",
         ) as f:
-            f.write(out)
+            f.write(out.decode(encoding="utf-8"))
 
         return index, None
 
@@ -439,7 +480,7 @@ class McStasVirtualInstrument(IJob):
             Line = Line.split(":")
             Field = Line[0]
             Value = ""
-            Value = string.join(string.join(Line[1 : len(Line)], ":").split("'"), "")
+            Value = "".join(":".join(Line[1 : len(Line)]).split("'"))
             strStruct = strStruct + "'" + Field + "':'" + Value + "'"
             if j < len(Header) - 1:
                 strStruct += ","
