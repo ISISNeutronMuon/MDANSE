@@ -275,7 +275,7 @@ class Discover(Converter):
     )
     settings["fold"] = (
         "BooleanConfigurator",
-        {"default": True, "label": "Fold coordinates into box"},
+        {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "OutputTrajectoryConfigurator",

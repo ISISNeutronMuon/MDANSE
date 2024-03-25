@@ -76,22 +76,22 @@ def fold_coordinates(
             by = box_coords[i,j,1]
             bz = box_coords[i,j,2]
     
-            while bx < -0.5:
+            while bx < 0.0:
                 bx += 1.0
 
-            while by < -0.5:
+            while by < 0.0:
                 by += 1.0
 
-            while bz < -0.5:
+            while bz < 0.0:
                 bz += 1.0
 
-            while bx > 0.5:
+            while bx >= 1.0:
                 bx -= 1.0
 
-            while by > 0.5:
+            while by >= 1.0:
                 by -= 1.0
 
-            while bz > 0.5:
+            while bz >= 1.0:
                 bz -= 1.0
 
             box_coords[i,j,0] = bx
