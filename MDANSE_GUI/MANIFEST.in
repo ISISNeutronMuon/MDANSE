@@ -3,6 +3,4 @@ include LICENSE
 recursive-include Src/MDANSE_GUI/Icons *.png
 recursive-include Src/MDANSE_GUI/MolecularViewer/database *.yml
 
-recursive-include Doc *
-
 recursive-include Tests *.py
