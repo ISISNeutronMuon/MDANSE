@@ -24,9 +24,6 @@ jobs:
       - name: Install build packages
         run: python -m pip install build wheel setuptools pytest
 
-      - name: Install dependencies
-        run: (cd MDANSE && python -m pip install -r requirements.txt)
-
       - name: install MDANSE
         run: (cd MDANSE && python -m pip install .)
 
