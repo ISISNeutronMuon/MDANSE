@@ -54,7 +54,7 @@ class DFTB(Forcite):
     )
     settings["fold"] = (
         "BooleanConfigurator",
-        {"default": True, "label": "Fold coordinates in to box"},
+        {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_file"] = (
         "OutputTrajectoryConfigurator",

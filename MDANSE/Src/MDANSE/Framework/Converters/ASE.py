@@ -79,6 +79,10 @@ class ASE(Converter):
             "mini": 0,
         },
     )
+    settings["fold"] = (
+        "BooleanConfigurator",
+        {"default": False, "label": "Fold coordinates into box"},
+    )
     settings["output_file"] = (
         "OutputTrajectoryConfigurator",
         {
@@ -156,6 +160,8 @@ class ASE(Converter):
             realConf = PeriodicRealConfiguration(
                 self._trajectory.chemical_system, coords, unitCell
             )
+            if self._configuration["fold"]["value"]:
+                realConf.fold_coordinates()
         else:
             realConf = RealConfiguration(
                 self._trajectory.chemical_system,

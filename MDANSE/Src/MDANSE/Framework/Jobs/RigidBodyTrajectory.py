@@ -46,6 +46,8 @@ class RigidBodyTrajectory(IJob):
     doi: 10.1080/08927029108022453.
     """
 
+    enabled = False
+
     label = "Rigid Body Trajectory"
 
     category = (

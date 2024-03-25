@@ -32,7 +32,7 @@ def qvector_spherical_lattice(trajectory):
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def dcsf():
     temp_name = tempfile.mktemp()
     parameters = {}
@@ -45,7 +45,7 @@ def dcsf():
         "SphericalLatticeQVectors",
         {"seed": 0, "shells": (5.0, 36, 10.0), "n_vectors": 10, "width": 9.0},
     )
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_coherent"
     dcsf = IJob.create("DynamicCoherentStructureFactor")
@@ -54,7 +54,7 @@ def dcsf():
     os.remove(temp_name + ".mda")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def disf():
     temp_name = tempfile.mktemp()
     parameters = {}
@@ -67,7 +67,7 @@ def disf():
         "SphericalLatticeQVectors",
         {"seed": 0, "shells": (5.0, 36, 10.0), "n_vectors": 10, "width": 9.0},
     )
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
     disf = IJob.create("DynamicIncoherentStructureFactor")
@@ -151,21 +151,16 @@ def test_gdisf(trajectory):
     os.remove(temp_name + ".mda")
 
 
-@pytest.mark.xfail(reason="see docstring")
 def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
-    """A known problem that will have to be fixed."""
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["atom_selection"] = None
     parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1)
     parameters["disf_input_file"] = disf
     parameters["dcsf_input_file"] = dcsf
-    parameters["q_vectors"] = qvector_spherical_lattice
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["output_files"] = (temp_name, ("MDAFormat",))
-    parameters["weights"] = "b_incoherent2"
     ndtsf = IJob.create("NeutronDynamicTotalStructureFactor")
     ndtsf.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
@@ -173,13 +168,12 @@ def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
     os.remove(temp_name + ".mda")
 
 
-@pytest.mark.xfail(reason="see docstring")
 def test_ssfsf(disf):
     """Also fails at the moment. Must be fixed soon"""
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["sample_inc"] = disf
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     ndtsf = IJob.create("StructureFactorFromScatteringFunction")
@@ -203,7 +197,7 @@ def test_ccf(qvector_spherical_lattice):
     parameters["interpolation_mode"] = "automatic"
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["q_vectors"] = qvector_spherical_lattice
-    parameters["running_mode"] = ("monoprocessor",)
+    parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_coherent"
     ndtsf = IJob.create("CurrentCorrelationFunction")

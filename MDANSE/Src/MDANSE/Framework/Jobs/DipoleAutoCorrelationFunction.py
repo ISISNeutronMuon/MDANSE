@@ -25,6 +25,8 @@ from MDANSE.Mathematics.Signal import correlation
 class DipoleAutoCorrelationFunction(IJob):
     """ """
 
+    enabled = False
+
     label = "Dipole AutoCorrelation Function"
 
     category = (

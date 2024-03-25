@@ -47,6 +47,8 @@ class GlobalMotionFilteredTrajectory(IJob):
     In the global motion filtered trajectory, the universe is made infinite and all the configurations contiguous.
     """
 
+    enabled = False
+
     label = "Global Motion Filtered Trajectory"
 
     category = (
