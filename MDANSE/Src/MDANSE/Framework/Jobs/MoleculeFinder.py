@@ -70,15 +70,22 @@ class MoleculeFinder(IJob):
         self.numberOfSteps = self.configuration["frames"]["number"]
         self._input_trajectory = self.configuration["trajectory"]["instance"]
         self._tolerance = self.configuration["tolerance"]["value"]
-        self._indices = self.configuration["atom_selecion"]["indexes"]
+        self._indices = self.configuration["atom_selection"]["indexes"]
+        selected_indices = [
+            idx
+            for idxs in self.configuration["atom_selection"]["indexes"]
+            for idx in idxs
+        ]
         chemical_system = self._input_trajectory.chemical_system
 
         print(f"Molfinder: bonds before the run {chemical_system._bonds}")
 
-        conn = Connectivity(trajectory=self._input_trajectory)
+        conn = Connectivity(
+            trajectory=self._input_trajectory, selection=selected_indices
+        )
         conn.find_molecules(tolerance=self._tolerance)
         conn.add_bond_information()
-        chemical_system.rebuild(conn._molecules)
+        chemical_system.rebuild(conn._molecules, selected_indices)
         configuration = chemical_system.configuration
         coords = configuration.contiguous_configuration().coordinates
         for entity in chemical_system.chemical_entities:

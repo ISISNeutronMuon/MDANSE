@@ -2631,7 +2631,7 @@ class ChemicalSystem(_ChemicalEntity):
 
         return cs
 
-    def rebuild(self, cluster_list: List[Tuple[int]]):
+    def rebuild(self, cluster_list: List[Tuple[int]], selection: List[int] = None):
         """
         Copies the instance of ChemicalSystem into a new, identical instance.
 
@@ -2642,12 +2642,25 @@ class ChemicalSystem(_ChemicalEntity):
         atom_names_before = [atom.name for atom in self.atoms]
         clusters = []
 
-        for cluster_number, index_list in enumerate(cluster_list):
-            temp = AtomCluster(
-                "cluster_" + str(cluster_number + 1),
-                [self.atom_list[index] for index in index_list],
-            )
-            clusters.append(temp)
+        if selection is not None:
+            for cluster_number, index_list in enumerate(cluster_list):
+                temp = AtomCluster(
+                    "cluster_" + str(cluster_number + 1),
+                    [
+                        self.atom_list[index]
+                        for index in index_list
+                        if index in selection
+                    ],
+                )
+                if temp.number_of_atoms > 0:
+                    clusters.append(temp)
+        else:
+            for cluster_number, index_list in enumerate(cluster_list):
+                temp = AtomCluster(
+                    "cluster_" + str(cluster_number + 1),
+                    [self.atom_list[index] for index in index_list],
+                )
+                clusters.append(temp)
 
         self._chemical_entities = []
 
