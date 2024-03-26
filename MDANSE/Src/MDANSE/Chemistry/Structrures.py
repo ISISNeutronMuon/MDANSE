@@ -51,6 +51,8 @@ class MoleculeTester:
         temp_pdb.close()
         mol_object = MolFromPDBBlock(buffer.getvalue())
         buffer._close()
+        if mol_object is None:
+            return ""
         try:
             rdDetermineBonds.DetermineBonds(mol_object, charge=0)
         except ValueError:
