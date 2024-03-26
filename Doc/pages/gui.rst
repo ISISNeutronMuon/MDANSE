@@ -2,45 +2,24 @@
 Navigating the MDANSE GUI
 ==========================
 
-The MDANSE Graphical User Interface (GUI) is the central hub for
-performing various actions, including opening trajectories, configuring
-analysis parameters, and visualizing results. This section provides an
-overview of how to effectively utilize the MDANSE GUI.
+The MDANSE Graphical User Interface (GUI) is set up to walk the user
+through all the steps of the analysis while providing additional
+information about each step.
 
 Key Actions in the MDANSE GUI
 ------------------------------
 
 Through the MDANSE GUI, you can perform a range of essential tasks:
 
-- Opening Trajectories: Begin by opening a trajectory, which serves as
-  the foundation for your analyses.
-- Configuring Analysis: Specify the parameters for the analysis you wish
-  to perform, tailoring it to your research needs.
-- Initiating Calculations: Start the calculation process to obtain
-  insightful results.
+- Converting Trajectories: each MD trajectory has to be converted to
+  an .mdt file, an HDF5 file storing the MDANSE data structures.
+- Viewing Trajectories: each .mdt file can be inspected and visualised.
+- Performing Analysis: Specify the parameters for the analysis you wish
+  to perform. Once all the inputs are valid, the analysis can be run.
 - Plotting Analysis Results: Visualize and interpret the outcomes of your
   analysis through plots and graphs.
-- File Conversions: Perform file conversions, enabling compatibility with
-  different formats.
-- Geometrical Structure Visualization: Explore the geometrical structure
-  of your calculations for deeper insights.
 - Creating Input Files and Scripts: Generate input files for the
-  command-line interface or auto-start analysis Python scripts directly
-  from the GUI.
-
-Operating the MDANSE GUI
--------------------------
-
-The MDANSE GUI offers user-friendly interaction methods, including the
-following:
-
-- Double-Click: You can double-click various objects within the GUI to
-  trigger actions.
-- Drag & Drop:
-  Simply drag your trajectory into the main GUI window, and a tab will
-  be created. Drop an analysis operation into the tab to perform the
-  analysis on the trajectory. Drop the Molecular Viewer into the tab to
-  visualize the trajectory.
+  command-line interface.
 
 Starting the MDANSE GUI
 -------------------------------

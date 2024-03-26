@@ -41,8 +41,8 @@ sys.path.insert(0, os.path.abspath('..'))
 # project = 'MDANSE'
 # copyright = '2015-2022, Eric Pellegrini'
 author = 'Eric Pellegrini'
-release = '1.5.2'
-version = '1.5'
+release = '2.0.0a1'
+version = '2.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -86,7 +86,7 @@ numfig = True
 current_year = datetime.date.today().year
 # General information about the project.
 project = u'MDANSE'
-copyright = u'2015-' + str(current_year) + u', MDANSE is developed and supported by the Institut Laue-Langevin and the ISIS Neutron and Muon Source', '![UKRI Logo](_static/UKRI_Logo.png)'
+copyright = u'2015-' + str(current_year) + u', MDANSE is developed and supported by the Institut Laue-Langevin and the ISIS Neutron and Muon Source, ![UKRI Logo](_static/UKRI_Logo.png)'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

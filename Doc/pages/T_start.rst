@@ -1,6 +1,8 @@
 Tutorial: Get started (Installation)
 ====================================
 
+.. _installation_tutorial:
+
 MDANSE Installation Steps
 --------------------------
 
@@ -42,7 +44,7 @@ activation command varies by operating system:
 
 - On Windows:
 
-  .. code-block:: bash
+  .. code-block:: console
 
      mdanse\Scripts\activate
 
@@ -53,7 +55,7 @@ Use `pip` to install the MDANSE package from the specified GitHub repository:
 
 .. code-block:: bash
 
-   python -m pip install "git+https://github.com/ISISNeutronMuon/MDANSE@protos#egg=MDANSE&subdirectory=MDANSE"
+   pip install MDANSE
 
 Install MDANSE_GUI Package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,16 +64,7 @@ Similarly, install the MDANSE_GUI package using `pip`:
 
 .. code-block:: bash
 
-   python -m pip install "git+https://github.com/ISISNeutronMuon/MDANSE@protos#egg=MDANSE_GUI&subdirectory=MDANSE_GUI"
-
-Install PyQt6
-~~~~~~~~~~~~~
-
-MDANSE relies on PyQt6, a Python binding for the Qt library. Install it using `pip`:
-
-.. code-block:: bash
-
-   pip install PyQt6
+   pip install MDANSE_GUI
 
 Run MDANSE
 ~~~~~~~~~~

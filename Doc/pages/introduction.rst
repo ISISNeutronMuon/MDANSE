@@ -13,13 +13,13 @@ and position auto- and cross-correlation functions, Fourier transformations, and
 convolutions with instrument parameters, to obtain neutron observables that can
 be directly compared with experimental data.
 
-MDANSE: Your Gateway to Insights
---------------------------------
+Compare Simulation and Experiment Results 
+-----------------------------------------
 
-Some of these essential steps have been meticulously implemented within MDANSE
+Some of these steps have been implemented within MDANSE
 (Molecular Dynamics Analysis of Neutron Scattering Experiments) [^Ref1^]. This
-Python-based application has established connections with more than ten MD codes,
-including powerful ab initio MD packages detailed in Trajectory Converters.
+Python-based application has established connections with more than ten MD packages,
+both those employing classical and ab-initio force calculations.
 
 Purpose and Capabilities
 ------------------------
@@ -36,19 +36,19 @@ Flexibility and Compatibility
 
 MDANSE offers:
 
-- A user-friendly Python-based graphical user interface (GUI) for effortless
-  analysis and visualization.
-- Command-line utilities that can be seamlessly integrated into Python scripts
-  for accessibility and adaptability.
-- A molecular viewer and a versatile 2D/3D plotter to enhance the user experience
-  when dissecting neutron experimental data.
+- A Python-based graphical user interface (GUI) via the MDANSE_GUI package,
+  including a trajectory viewer and a data plotter.
+- Command-line utilities for creating and running MDANSE jobs as Python scripts.
+- Possiblity of exporting analysis jobs as Python scripts.
+- Specialised trajectory converters for specific MD engines.
+- A general trajectory converter based on ASE.
 
 Your Guide to MDANSE
 ---------------------
 
 This user's guide provides a detailed overview of MDANSE's capabilities, along
 with theoretical background information and installation instructions for three
-different platforms: Windows, Mac OS, and Ubuntu.
+different platforms: Windows, MacOS, and Ubuntu.
 
 Collaboration and Feedback
 --------------------------
@@ -61,11 +61,4 @@ GitHub Repository
 -----------------
 
 You can report issues and make suggestions on our GitHub repository. Please visit
-the following link to access the repository:
-
-<div style="background-color: black; padding: 10px; display: inline-block; border-radius: 5px;">
-   <a href="https://github.com/ISISNeutronMuon/MDANSE" style="color: white; text-decoration: none;">
-      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Logo.png" alt="GitHub Logo" style="vertical-align: middle; height: 20px; margin-right: 5px;">
-      MDANSE GitHub Repository
-   </a>
-</div>
+the following link to access the `MDANSE GitHub repository <https://github.com/ISISNeutronMuon/MDANSE>`_

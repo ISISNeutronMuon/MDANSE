@@ -11,7 +11,7 @@ MDANSE Installation
 
 To get started with MDANSE, you can follow the MDANSE Installation Tutorial below:
 
-- [MDANSE Installation Tutorial](T_start.rst)
+- :ref:`installation_tutorial`
 
 
 Explore the Documentation
@@ -29,12 +29,4 @@ Sample Data
 
 MDANSE often provides sample datasets that you can use for
 testing and learning.  You can typically find sample
-data within the MDANSE GitHub repository. 
-
-<div style="background-color: black; padding: 10px; display: inline-block; border-radius: 5px;">
-   <a href="https://github.com/ISISNeutronMuon/MDANSE" style="color: white; text-decoration: none;">
-      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Logo.png" alt="GitHub Logo" style="vertical-align: middle; height: 20px; margin-right: 5px;">
-      MDANSE GitHub Repository
-   </a>
-</div>
-
+data within the `MDANSE-Examples GitHub repository <https://github.com/ISISNeutronMuon/MDANSE-Examples>`_. 
