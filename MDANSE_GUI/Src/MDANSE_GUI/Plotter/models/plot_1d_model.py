@@ -190,12 +190,10 @@ class Plot1DModel(QtCore.QAbstractListModel):
         elif role == QtCore.Qt.ItemDataRole.ForegroundRole:
             matplotlib_color = line.get_color()
             try:
-                color = matplotlib_color.lstrip("#")
-                r, g, b = tuple(int(color[i : i + 2], 16) / 255.0 for i in (0, 2, 4))
-            except AttributeError:
+                color = QtGui.QColor(matplotlib_color)
+            except TypeError:
                 r, g, b = matplotlib_color
-            finally:
-                color = QtGui.QColor(r * 255, g * 255, b * 255)
+                color = QtGui.QColor(int(r * 255), int(g * 255), int(b * 255))
             return color
 
         elif role == Plot1DModel.LineRole:
