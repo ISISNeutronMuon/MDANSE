@@ -80,15 +80,7 @@ class Action(QWidget):
         self.set_trajectory(default_path, input_trajectory)
         super().__init__(*args, **kwargs)
 
-        buffer = QWidget(self)
-        scroll_area = QScrollArea()
-        scroll_area.setWidget(buffer)
-        scroll_area.setWidgetResizable(True)
-        self.layout = QVBoxLayout(buffer)
-        base_layout = QVBoxLayout(self)
-        buffer.setLayout(self.layout)
-        base_layout.addWidget(scroll_area)
-        self.setLayout(base_layout)
+        self.layout = QVBoxLayout(self)
         self.handlers = {}
         self._widgets = []
         self._widgets_in_layout = []
@@ -263,16 +255,14 @@ class Action(QWidget):
             pass
         else:
             self.last_paths[cname] = path
-        pardict = self.set_parameters(mock_labels=True)
+        pardict = self.set_parameters()
         self._job_instance.save(result, pardict)
 
-    def set_parameters(self, mock_labels=False):
+    def set_parameters(self):
         results = {}
         for widnum, key in enumerate(self._job_instance.settings.keys()):
-            if mock_labels:
-                results[key] = (self._widgets[widnum].get_widget_value(), "")
-            else:
-                results[key] = self._widgets[widnum].get_widget_value()
+            label = self._job_instance.settings[key][1]["label"]
+            results[key] = (self._widgets[widnum].get_widget_value(), label)
         return results
 
     @Slot()

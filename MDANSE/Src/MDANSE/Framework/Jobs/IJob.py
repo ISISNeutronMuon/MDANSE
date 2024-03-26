@@ -183,7 +183,10 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         f.write("parameters = {\n")
         for k, (v, label) in sorted(parameters.items()):
-            f.write(f"    {repr(k) + ': ' + repr(v) + ',':<50}  # {label}\n")
+            if label:
+                f.write(f"    {repr(k) + ': ' + repr(v) + ',':<50}  # {label}\n")
+            else:
+                f.write(f"    {repr(k) + ': ' + repr(v) + ',':<50}\n")
         f.write("}\n")
 
         f.write("\n")
