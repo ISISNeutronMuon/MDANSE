@@ -165,7 +165,7 @@ class Configurable(object):
 
                 if conf.check_dependencies(configured):
                     if not conf.optional:
-                        conf.configure(parameters[name])
+                        conf.configure(parameters[name][0])
                         self._info.append(conf.get_information())
                     else:
                         if parameters[name]:
