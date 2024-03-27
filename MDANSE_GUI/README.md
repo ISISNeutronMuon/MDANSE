@@ -39,6 +39,12 @@ and start the GUI by typing
 mdanse_gui
 ```
 
+If you experience problems with the installation, you may want to upgrade pip
+```
+pip install --upgrade pip
+```
+and try again.
+
 ## Quick start: workflow
 
 The typical workflow of MDANSE:
