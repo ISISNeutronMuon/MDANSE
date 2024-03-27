@@ -255,14 +255,17 @@ class Action(QWidget):
             pass
         else:
             self.last_paths[cname] = path
-        pardict = self.set_parameters()
+        pardict = self.set_parameters(labels=True)
         self._job_instance.save(result, pardict)
 
-    def set_parameters(self):
+    def set_parameters(self, labels=False):
         results = {}
         for widnum, key in enumerate(self._job_instance.settings.keys()):
-            label = self._job_instance.settings[key][1]["label"]
-            results[key] = (self._widgets[widnum].get_widget_value(), label)
+            if labels:
+                label = self._job_instance.settings[key][1]["label"]
+                results[key] = (self._widgets[widnum].get_widget_value(), label)
+            else:
+                results[key] = self._widgets[widnum].get_widget_value()
         return results
 
     @Slot()
