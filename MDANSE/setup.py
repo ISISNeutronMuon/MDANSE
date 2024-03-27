@@ -16,11 +16,6 @@ try:
 except ImportError:
     sphinx = None
 
-try:
-    import stdeb
-except ImportError:
-    stdeb = None
-
 
 #################################
 # Modules variables
