@@ -18,7 +18,11 @@
 # Copyright (C)  ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 # Copyright (C)  Pauli Virtanen, 2010.
 # Authors:    Scientific Computing Group at ILL (see AUTHORS)
-
+# 
+# Copyright (C)  Pauli Virtanen, 2010.
+#
+# Distributed under the same BSD license as Scipy.
+#
 
 
 import threading
