@@ -1,23 +1,17 @@
-# This module defines a class that handles I/O using
-# Fortran-compatible format specifications.
+#    This file is part of MDANSE.
 #
+#    MDANSE is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-# Warning: Fortran formatting is a complex business and I don't
-# claim that this module works for anything complicated. It knows
-# only the most frequent formatting options. Known limitations:
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-# 1) Only A, D, E, F, G, I, and X formats are supported (plus string constants
-#    for output).
-# 2) No direct support for complex numbers. You have to split them into
-#    real and imaginary parts before output, and for input you get
-#    two float numbers anyway.
-# 3) No overflow check. If an output field gets too large, it will
-#    take more space, instead of being replaced by stars.
-#
-#
-# Written by Konrad Hinsen <hinsen@cnrs-orleans.fr>
-# With contributions from Andreas Prlic <andreas@came.sbg.ac.at>
-# last revision: 2008-8-18
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
 """

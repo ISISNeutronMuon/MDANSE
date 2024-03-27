@@ -1,16 +1,20 @@
-# **************************************************************************
+#    This file is part of MDANSE_GUI.
 #
-# MDANSE: Molecular Dynamics Analysis for Neutron Scattering Experiments
+#    MDANSE_GUI is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-# @file      Src/PyQtGUI/Plotter/__init__.py
-# @brief     root file of Plotter
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-# @homepage  https://mdanse.org
-# @license   GNU General Public License v3 or higher (see LICENSE)
-# @copyright Institut Laue Langevin 2023-now
-# @authors   Eric Pellegrini
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-# **************************************************************************
+# Copyright (C)  Institut Laue Langevin 2023-now
+# Authors:    Eric Pellegrini
 
 import logging
 

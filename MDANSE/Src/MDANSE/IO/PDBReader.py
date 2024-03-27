@@ -1,3 +1,18 @@
+#    This file is part of MDANSE.
+#
+#    MDANSE is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
 import copy
 import string
 
@@ -214,7 +229,6 @@ class PDBReader:
 
         atoms_not_found = []
 
-        # Loop over the PDB atoms of this residue
         for comp, pdb_atom in enumerate(pdb_atoms):
             # Loop over the atoms of this residue stored in the corresponding residue database entry
             for at, info in RESIDUES_DATABASE[code]["atoms"].items():
