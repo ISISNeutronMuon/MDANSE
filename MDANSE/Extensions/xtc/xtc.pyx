@@ -42,7 +42,7 @@
 # License along with MDTraj. If not, see <http://www.gnu.org/licenses/>.
 ##############################################################################
 
-
+# cython: c_string_type=str, c_string_encoding=ascii
 
 import os
 import warnings
