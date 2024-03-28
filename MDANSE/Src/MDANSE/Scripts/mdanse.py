@@ -373,11 +373,11 @@ class CommandLineParser(optparse.OptionParser):
 
 
 def main():
-    from MDANSE.__pkginfo__ import __version__, __date__
+    import MDANSE
 
     # Creates the option parser.
     parser = CommandLineParser(
-        formatter=IndentedHelp(), version="MDANSE %s (%s)" % (__version__, __date__)
+        formatter=IndentedHelp(), version="MDANSE %s " % MDANSE.__version__
     )
 
     # Creates a first the group of general options.

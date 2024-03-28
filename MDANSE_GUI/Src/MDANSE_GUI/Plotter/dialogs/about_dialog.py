@@ -20,8 +20,7 @@ import h5py
 
 from qtpy import QtCore, QtWidgets
 
-from MDANSE_GUI.Plotter.__pkginfo__ import __version__
-from MDANSE_GUI.Plotter.icons import ICONS
+import MDANSE_GUI
 
 
 class AboutDialog(QtWidgets.QDialog):
@@ -65,7 +64,7 @@ class AboutDialog(QtWidgets.QDialog):
         uname = platform.uname()
 
         info = {
-            "Plotter_version": __version__,
+            "Plotter_version": MDANSE_GUI.__version__,
             "h5py_version": h5py.version.version,
             "hdf5_version": h5py.version.hdf5_version,
             "qt_version": QtCore.qVersion(),

@@ -13,12 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import importlib.metadata
+__version__ = importlib.metadata.version("MDANSE_GUI")
 
 import warnings
 
 warnings.filterwarnings("ignore")
-
-from .__pkginfo__ import __version__, __author__, __date__
 
 import vtk
 
