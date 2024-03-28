@@ -26,6 +26,8 @@ class GeneralAutoCorrelationFunction(IJob):
     Computes the autocorrelation for any available trajectory variable.
     """
 
+    enabled = False
+
     label = "General AutoCorrelation Function"
 
     category = (
