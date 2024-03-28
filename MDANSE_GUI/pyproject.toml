@@ -41,7 +41,7 @@ dependencies = [
 
 [project.urls]
 homepage = "https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx"
-documentation = "https://mdanse.readthedocs.io/en/latest/"
+documentation = "https://mdanse.readthedocs.io/en/protos/"
 repository = "https://github.com/ISISNeutronMuon/MDANSE"
 
 [tool.setuptools]
