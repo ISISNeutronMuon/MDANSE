@@ -147,8 +147,8 @@ information.
 MDANSE started as a fork of [version 3 of the nMOLDYN program](https://github.com/khinsen/nMOLDYN3).
 nMOLDYN was originally developed by Gerald Kneller in 1995 and subsequently also by Konrad Hinsen, Tomasz Rog,
 Krzysztof Murzyn, Slawomir Stachura, and Eric Pellegrini. MDANSE includes most of the code of nMOLDYN3, and also code
-from the libraries [](https://github.com/khinsen/) and [ScientificPython](https://github.com/khinsen/ScientificPython),
-in order to reduce dependencies and thus facilitate installation.
+from the libraries [MMTK](https://github.com/khinsen/MMTK), [ScientificPython](https://github.com/khinsen/ScientificPython)
+and [MDTraj](https://github.com/mdtraj/mdtraj).
 
 For more information see:
 
