@@ -109,14 +109,6 @@ def find_data(where=".", exclude=EXCLUDE, exclude_directories=EXCLUDE_DIRECTORIE
 
 
 #################################
-# Packages section
-#################################
-
-PACKAGE_INFO = {}
-exec(open('Src/MDANSE_GUI/__pkginfo__.py','r').read(), {}, PACKAGE_INFO)
-
-
-#################################
 # Documentation
 #################################
 
@@ -217,15 +209,6 @@ if sphinx:
 #################################
 
 setup (name             = "MDANSE GUI",
-       version          = PACKAGE_INFO["__version__"],
-       description      = PACKAGE_INFO["__description__"],
-       long_description = PACKAGE_INFO["__long_description__"],
-       author           = PACKAGE_INFO["__author__"],
-       author_email     = PACKAGE_INFO["__author_email__"],
-       maintainer       = PACKAGE_INFO["__maintainer__"],
-       maintainer_email = PACKAGE_INFO["__maintainer_email__"],
-       url              = PACKAGE_INFO["__url__"],
-       license          = PACKAGE_INFO["__license__"],
        packages=find_packages("Src"),
        package_dir={"": "Src"},
        platforms        = ['Unix','Windows'],

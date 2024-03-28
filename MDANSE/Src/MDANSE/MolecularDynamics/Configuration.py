@@ -1,3 +1,18 @@
+#    This file is part of MDANSE.
+#
+#    MDANSE is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
 from __future__ import annotations
 import abc
 import copy
@@ -111,8 +126,6 @@ class _Configuration(metaclass=abc.ABCMeta):
         rot = transfo.rotation().tensor.array
         conf[:] = np.dot(conf, np.transpose(rot))
 
-        # The casting here must be set to 'unsafe' to allow for conversion from int to float; the vector array may be
-        # of float dtype while conf, after the dot product, can be int.
         np.add(
             conf,
             transfo.translation().vector.array[np.newaxis, :],

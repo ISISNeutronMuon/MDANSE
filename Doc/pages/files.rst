@@ -34,9 +34,10 @@ HDF5 format using the Trajectory Converter tool.
 DAT File Format
 -----------------
 
-During an Analysis in MDANSE, the default output format is now `DAT files <https://en.wikipedia.org/wiki/DAT_file>`_, which
+An alternative output format of Analysis results is in the form of 
+`DAT files <https://en.wikipedia.org/wiki/DAT_file>`_, which
 are text-based and easily readable. Each DAT file corresponds to a specific
-variable generated during the analysis. If the ASCII option is selected, a
+variable generated during the analysis. If the Text option is selected, a
 tarball is generated, which contains multiple files, including:
 
 - ``jobinfo.txt``: A text file documenting the analysis options selected during
@@ -68,35 +69,3 @@ repetitive tasks and ensuring consistency in analysis procedures.
 This update streamlines the analysis process and facilitates the reproducibility
 of results within MDANSE.
 
-.. _convert_netcdf:
-
-NetCDF to HDF5 Conversion Script
----------------------------------------
-
-MDANSE now provides a versatile Python script that simplifies the process
-of converting existing NetCDF files to the HDF5 format. This script is especially
-valuable for users with legacy data stored in NetCDF files who wish to take
-advantage of the enhanced capabilities and compatibility offered by MDANSE's
-shift to HDF5.
-
-To perform the conversion, follow these steps:
-
-1. Open a terminal or command prompt.
-2. Navigate to the directory containing the NetCDF files you want to convert.
-3. Run the following command, replacing [input_file.nc] with the name of your
-   NetCDF file and [output_file.h5] with your desired name for the resulting
-   HDF5 file::
-
-      .. code-block:: bash
-
-         python convert_netcdf_to_hdf5.py [input_file.nc] [output_file.h5]
-
-   This command will execute the conversion script and generate an HDF5 file
-   with the specified name.
-
-4. Once the conversion is complete, you can use the newly created HDF5 file
-   seamlessly within MDANSE for advanced analysis and visualization.
-
-This convenient script streamlines the migration of existing data to the HDF5
-format, ensuring that users can leverage MDANSE's enhanced features while
-preserving their valuable data.
