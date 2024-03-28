@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools", "cython", "numpy", "pip", "wheel"]
+requires = ["setuptools", "cython", "numpy", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE"
-version = "2.0.0"
+version = "2.0.0a1"
 description = 'MDANSE Core package - Molecular Dynamics trajectory handling and analysis code'
 readme = "README.md"
 requires-python = ">=3.9"
@@ -17,7 +17,7 @@ maintainers = [
   {name = "Sanghamitra Mukhopadhyay", email = "sanghamitra.mukhopadhyay@stfc.ac.uk"}
 ]
 classifiers = [
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
 
         'Intended Audience :: Science/Research',
         'Topic :: Software Development :: Build Tools',
@@ -27,15 +27,13 @@ classifiers = [
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Operating System :: OS Independent'
 ]
-
 dependencies = [
-  "numpy",
-  "scipy",
-  "h5py",
-  "icecream",
-  "ase",
-  "railroad-diagrams",
-  "rdkit"
+    "numpy",
+    "scipy",
+    "h5py",
+    "icecream",
+    "ase",
+    "rdkit"
 ]
 
 # dynamic = ["version", "description"]

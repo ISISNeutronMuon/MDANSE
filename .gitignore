@@ -30,8 +30,5 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# extensions
-*.pyd
-
 # pycharm
 .idea

@@ -1,14 +1,10 @@
 import fnmatch
-import glob
 import os
 import sys
 
 import numpy
 
 from setuptools import setup, find_packages
-
-from pip._internal.req import parse_requirements
-from pip._internal.network.session import PipSession
 from distutils.sysconfig import get_config_vars
 from distutils.util import convert_path
 
@@ -17,18 +13,6 @@ try:
 except ImportError:
     sphinx = None
 
-try:
-    import stdeb
-except ImportError:
-    stdeb = None
-
-requirements = []
-
-with open('requirements.txt', 'r') as source:
-    for line in source:
-        toks = line.split()
-        if len(toks[0]) > 0:
-            requirements.append(toks[0])
 
 #################################
 # Modules variables
@@ -229,6 +213,4 @@ setup (name             = "MDANSE GUI",
        package_dir={"": "Src"},
        platforms        = ['Unix','Windows'],
        cmdclass         = CMDCLASS,
-       # entry_points     = {"console_scripts": []}
-       install_requires = [pr.requirement for pr in parse_requirements('requirements.txt', session= PipSession())],
     )

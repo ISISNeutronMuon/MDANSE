@@ -39,7 +39,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-""" 
+"""
 Created on Feb 17, 2023
 
 @author: Maciej Bartkowiak
@@ -139,7 +139,7 @@ def test_copy(chemical_system):
     print(original.number_of_atoms)
     print(copied.atom_list)
     print(copied.number_of_atoms)
-    assert(original == copied)
+    assert(repr(original) == repr(copied))
 
 def test_compression(sample_trajectory,
                     gzipped_trajectory,

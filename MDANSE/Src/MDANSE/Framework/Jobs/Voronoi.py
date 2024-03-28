@@ -18,8 +18,10 @@ import collections
 import math
 
 import numpy as np
+from scipy.spatial import Voronoi as scipyVoronoi
+from scipy.spatial import Delaunay as scipyDelaunay
 
-from MDANSE.Extensions import mic_fast_calc, qhull
+from MDANSE.Extensions import mic_fast_calc
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -129,7 +131,7 @@ class Voronoi(IJob):
             )
 
         # Computing Voronoi Diagram ...
-        Voronoi = qhull.Voronoi(conf)
+        Voronoi = scipyVoronoi(conf)
         vertices_coords = Voronoi.vertices  # Option qhull v p
 
         # Extracting valid Voronoi regions ...
@@ -176,9 +178,9 @@ class Voronoi(IJob):
                 delaunay_regions_for_each_valid_voronoi_region[vrid] = [ids]
                 continue
             lut = np.array(ids)
-            Delaunay = qhull.Delaunay(vertices_coords[ids])
+            Delaunay = scipyDelaunay(vertices_coords[ids])
             delaunay_regions_for_each_valid_voronoi_region[vrid] = [
-                lut[dv] for dv in Delaunay.vertices
+                lut[dv] for dv in Delaunay.simplices
             ]
 
         # Volume Computation ... "

@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from PyQt6.QtCore import QAbstractItemModel, QObject
+from qtpy.QtCore import QAbstractItemModel
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
 from qtpy.QtWidgets import QMenu, QTableView, QAbstractItemView, QMessageBox
 from qtpy.QtGui import QStandardItem, QContextMenuEvent

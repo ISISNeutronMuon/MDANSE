@@ -16,21 +16,33 @@ J Chem Inf Model. 57(1):1-5 (2017).
 
 This is the development version of MDANSE. The main difference compared to the previous version is the transition from Python 2 to Python 3, and from wxWidgets to Qt. The previous version, formerly in the 'develop' branch, can now be found in the **legacy** branch.
 
-The current version of MDANSE is currently still at the _alpha_ stage. Once the _beta_ version has been created, it will be possible to install MDANSE directly from PyPI using `pip install`.
+The current version of MDANSE is currently still at the _alpha_ stage. You can help it advance to the _beta_ stage by reporting problems you experience while using MDANSE.
 
-## Quick start
+## Quick start: installation
 
-The untested version of MDANSE can be downloaded from GitHub Actions as a Python wheel. There is one wheel for the main code ('MDANSE'), platform depenedent, and another for the GUI ('MDANSE_GUI'). Once downloaded, they can be installed by typing `pip install MDANSE-*.whl`. The GUI script can be run using the `mdanse_gui` command (`mdanse_gui.exe` on windows).
+We recommend that you install MDANSE in a Python virtual environment. You can create a virtual environment named mdanse_env by typing
+```
+python3 -m venv mdanse_env
+```
 
-As an alternative, it is possible to install MDANSE directly from the GitHub repository by typing
+To activate your virtual environment, type
+```
+source mdanse_env/bin/activate
+```
+in a bash console, or
+```
+mdanse_end/Scripts/activate.bat
+```
+if you are using cmd.exe on Windows.
 
-python3 -m pip install  "git+https://github.com/ISISNeutronMuon/MDANSE@protos#egg=MDANSE&subdirectory=MDANSE"
-
-for the main part of the code, and
-
-python3 -m pip install  "git+https://github.com/ISISNeutronMuon/MDANSE@protos#egg=MDANSE_GUI&subdirectory=MDANSE_GUI"
-
-for the GUI.
+While your virtual environment is active, you can install MDANSE:
+```
+pip install MDANSE MDANSE_GUI
+```
+and start the graphical interface by typing
+```
+mdanse_gui
+```
 
 The typical workflow of MDANSE:
 
@@ -117,12 +129,6 @@ different elements/isotopes. Finally, their results can be saved in an MDA file 
 
 More detailed information on how MDANSE works, what it can do, and the science can all be found on [our Read the Docs page](https://mdanse.readthedocs.io/en/protos).
 
-## Version Information
-
-The latest development version of MDANSE, now upgraded to Python 3, represents a major change from the previous version. The user interface has transitioned from wxWidgets to Qt, providing a more refined and user-friendly experience. The earlier version, which was located in the 'develop' branch, has been moved to the **legacy** branch.
-
-MDANSE is currently in its _alpha_ phase in this new Python 3 version. The progression to the _beta_ stage is in progress. With the beta release, MDANSE will be available for direct installation via PyPI. Users can install it using the command `pip install`. `pip install`.
-
 ## Citing MDANSE
 
 If you used MDANSE in your research, please cite the following paper:
@@ -141,8 +147,8 @@ information.
 MDANSE started as a fork of [version 3 of the nMOLDYN program](https://github.com/khinsen/nMOLDYN3).
 nMOLDYN was originally developed by Gerald Kneller in 1995 and subsequently also by Konrad Hinsen, Tomasz Rog,
 Krzysztof Murzyn, Slawomir Stachura, and Eric Pellegrini. MDANSE includes most of the code of nMOLDYN3, and also code
-from the libraries [](https://github.com/khinsen/) and [ScientificPython](https://github.com/khinsen/ScientificPython),
-in order to reduce dependencies and thus facilitate installation.
+from the libraries [MMTK](https://github.com/khinsen/MMTK), [ScientificPython](https://github.com/khinsen/ScientificPython)
+and [MDTraj](https://github.com/mdtraj/mdtraj).
 
 For more information see:
 
