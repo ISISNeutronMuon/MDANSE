@@ -29,14 +29,14 @@ def startGUI(some_args):
     app.setStyle(QStyleFactory.create("Fusion"))
 
     path = os.path.dirname(os.path.abspath(__file__))
-    app.setWindowIcon(QIcon(os.path.join(path, "MDANSE.ico")))
+    app.setWindowIcon(QIcon(os.path.join(path, "Icons/MDANSE.ico")))
 
     settings = QSettings(
         "ISIS Neutron and Muon Source", "MDANSE for Python 3", parent=app
     )
 
     path = os.path.dirname(os.path.abspath(__file__))
-    splash_img = QPixmap(os.path.join(path, "splash.png"))
+    splash_img = QPixmap(os.path.join(path, "Resources/splash.png"))
     splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
     splash.show()
     t0 = time.time()
