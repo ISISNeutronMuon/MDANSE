@@ -155,9 +155,10 @@ class Connectivity:
                 up to 20% larger than the nominal length of the bond (default: {0.2})
         """
         if frames is None:
-            samples = [len(self._frames) // denom for denom in [2, 3, 4, 5]]
+            samples = [len(self._frames) // denom for denom in [2, 3, 4, 5, 6, 7]]
         else:
             samples = frames
+        samples = list(np.unique(samples))
         bonds = []
         pairs = product(self._unique_elements, repeat=2)
         maxbonds = {
