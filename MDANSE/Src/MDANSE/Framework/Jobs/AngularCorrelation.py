@@ -150,21 +150,26 @@ class AngularCorrelation(IJob):
         """
 
         molecule = self.molecules[index]
-        reference_atom_index = molecule.atom_list[0].index
+        reference_atom = molecule.atom_list[0]
+        chemical_system = self.configuration["trajectory"]["instance"].chemical_system
 
-        at1_traj = self.configuration["trajectory"]["instance"].read_com_trajectory(
-            molecule,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
-        )
+        at1_traj = np.empty((self.configuration["frames"]["n_frames"], 3))
+        at2_traj = np.empty((self.configuration["frames"]["n_frames"], 3))
 
-        at2_traj = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
-            reference_atom_index,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
-        )
+        for frame_index in range(
+            self.configuration["frames"]["first"],
+            self.configuration["frames"]["last"] + 1,
+            self.configuration["frames"]["step"],
+        ):
+            configuration = self.configuration["trajectory"]["instance"].configuration(
+                frame_index
+            )
+            contiguous_configuration = configuration.contiguous_configuration()
+            chemical_system.configuration = contiguous_configuration
+            at1_traj[frame_index] = molecule.centre_of_mass(contiguous_configuration)
+            at2_traj[frame_index] = reference_atom.centre_of_mass(
+                contiguous_configuration
+            )
 
         diff = at2_traj - at1_traj
 

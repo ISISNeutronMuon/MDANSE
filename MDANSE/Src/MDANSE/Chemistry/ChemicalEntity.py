@@ -186,8 +186,9 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
             ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight")
             for at in self.atom_list
         ]
+        indices = [at.index for at in self.atom_list]
 
-        return center_of_mass(coords, masses)
+        return center_of_mass(coords[indices], masses)
 
     def centre_of_mass(self, configuration: _Configuration) -> NDArray[np.float64]:
         """Wrapper around the :py:meth: `center_of_mass()` method."""
