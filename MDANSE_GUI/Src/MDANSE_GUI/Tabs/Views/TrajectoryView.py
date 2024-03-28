@@ -15,7 +15,6 @@
 #
 # Copyright (C)  Institut Laue Langevin 2013-now
 # Copyright (C)  ISIS Neutron and Muon Source, STFC, UKRI 2021-now
-# Authors:    Scientific Computing Group at ILL (see AUTHORS)
 from typing import Union
 
 from qtpy.QtCore import Slot, Signal, QModelIndex

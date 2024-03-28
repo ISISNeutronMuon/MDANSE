@@ -16,7 +16,6 @@
 #
 # Copyright (C)  Institut Laue Langevin 2013-now
 # Copyright (C)  ISIS Neutron and Muon Source, STFC, UKRI 2021-now
-# Authors:    Scientific Computing Group at ILL (see AUTHORS)
 
 import cython
 import numpy as np
