@@ -2628,6 +2628,8 @@ class ChemicalSystem(_ChemicalEntity):
 
         if self._atoms is not None:
             _ = cs.atoms
+        else:
+            cs._atoms = None
 
         return cs
 

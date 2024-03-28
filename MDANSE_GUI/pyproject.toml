@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools", "numpy", "pip", "wheel"]
+requires = ["setuptools", "numpy", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE_GUI"
-version = "0.1.0"
+version = "0.1.0a1"
 description = 'MDANSE GUI package - the graphical interface for MDANSE'
 readme = "README.md"
 requires-python = ">=3.9"
@@ -28,13 +28,13 @@ classifiers = [
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Operating System :: OS Independent'
 ]
-
 dependencies = [
-  "qtpy",
-  "vtk",
-  "MDANSE",
-  "PyYAML",
-  "PyQt6"
+    "MDANSE",
+    "matplotlib",
+    "qtpy",
+    "vtk",
+    "PyQt6",
+    "PyYAML",
 ]
 
 # dynamic = ["version", "description"]

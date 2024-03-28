@@ -21,11 +21,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install build packages
-        run: python -m pip install build wheel setuptools pytest
-
-      - name: Install dependencies
-        run: (cd MDANSE && python -m pip install -r requirements.txt)
+      - name: Install pytest
+        run: python -m pip install pytest
 
       - name: install MDANSE
         run: (cd MDANSE && python -m pip install .)

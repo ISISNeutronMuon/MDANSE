@@ -1,12 +1,11 @@
-include LICENCE
-include requirements.txt
+include LICENSE
 
 recursive-include Extensions/qhull_lib *.h *c *.pxd
 recursive-include Extensions/xtc *.h *c *.pxd
 recursive-include Src/MDANSE/Chemistry *.json
 recursive-include Src/MDANSE/Framework *.json
-recursive-include Tests/Data/*
 
-recursive-include Doc *
+graft Tests/UnitTests/Data
+graft Doc
 
 recursive-include Tests *.py
