@@ -37,15 +37,6 @@ EXTENSIONS_PATH = "Extensions"
 
 INCLUDE_DIR = [numpy.get_include()]
 
-QHULL_DIR = os.path.join("Extensions", "qhull_lib")
-
-QHULL_INCLUDE_DIR = (
-    INCLUDE_DIR
-    + [EXTENSIONS_PATH]
-    + [os.path.join(QHULL_DIR, "ext")]
-    + [os.path.join(QHULL_DIR, "src")]
-)
-
 #################################
 # Helper function
 #################################
@@ -320,13 +311,6 @@ EXTENSIONS = [
         include_dirs=INCLUDE_DIR,
         sources=[os.path.join("Extensions", "mic_fast_calc.pyx")],
         language="c++",
-    ),
-    Extension(
-        "MDANSE.Extensions.qhull",
-        include_dirs=QHULL_INCLUDE_DIR,
-        sources=glob.glob(os.path.join(QHULL_DIR, "src", "*.c"))
-        + [os.path.join("Extensions", "qhull.pyx")],
-        define_macros=[("qh_QHpointer", "1")],
     ),
     Extension(
         "MDANSE.Extensions.xtc",
