@@ -54,6 +54,8 @@ class OrderParameter(IJob):
     AOUN Bachir, PELLEGRINI Eric
     """
 
+    enabled = False
+
     label = "Order parameter"
 
     category = (
@@ -72,12 +74,21 @@ class OrderParameter(IJob):
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["axis_selection"] = (
-        "AtomsListConfigurator",
+    settings["molecule_name"] = (
+        "MoleculeSelectionConfigurator",
         {
+            "label": "molecule name",
+            "default": "",
             "dependencies": {"trajectory": "trajectory"},
-            "nAtoms": 2,
-            "default": ("C284H438N84O79S7", ("C", "C_beta")),
+        },
+    )
+    settings["axis_selection"] = (
+        "MultipleChoicesConfigurator",
+        {
+            "label": "atom indices in molecule",
+            "choices": list(range(100)),
+            "nChoices": 2,
+            "default": [0, 1],
         },
     )
     settings["reference_direction"] = (

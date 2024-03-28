@@ -82,5 +82,8 @@ class InputFileConfigurator(IConfigurator):
         :return: the information about this configurator
         :rtype: str
         """
-
-        return "Input file: %r\n" % self["value"]
+        try:
+            filename = self["value"]
+        except KeyError:
+            filename = "None"
+        return f"Input file: {filename}\n"

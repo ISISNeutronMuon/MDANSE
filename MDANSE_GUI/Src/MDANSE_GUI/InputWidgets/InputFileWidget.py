@@ -80,8 +80,9 @@ class InputFileWidget(WidgetBase):
             self._qt_file_association,  # text string specifying the file name filter.
         )
         if new_value is not None:
-            self._field.setText(new_value[0])
-            self.updateValue()
+            if new_value[0]:
+                self._field.setText(new_value[0])
+                self.updateValue()
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""

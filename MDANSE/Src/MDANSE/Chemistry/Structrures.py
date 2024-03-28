@@ -16,12 +16,10 @@
 
 from io import StringIO
 
-import numpy as np
-from rdkit.Chem.rdchem import Mol
-from rdkit.Chem.rdmolops import SanitizeMol
-from rdkit.Chem.rdmolops import GetMolFrags
 from rdkit.Chem.inchi import MolToInchi
 from rdkit.Chem.rdmolfiles import MolFromPDBBlock
+from rdkit.Chem import rdDetermineBonds
+
 
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
@@ -53,9 +51,9 @@ class MoleculeTester:
         buffer = DummyStringIO()
         temp_pdb = PDBFile(buffer, mode="w")
         for natom, atom in enumerate(self.chemical_entity.atom_list):
-            coords = positions[natom]
+            coords = positions[natom] * 10.0
             atom_data = {
-                "position": positions[natom],
+                "position": coords,
                 "serial_number": atom.index,
                 "name": atom.name,
                 "occupancy": 1.0,
@@ -69,8 +67,15 @@ class MoleculeTester:
         temp_pdb.close()
         mol_object = MolFromPDBBlock(buffer.getvalue())
         buffer._close()
+        if mol_object is None:
+            return ""
+        try:
+            rdDetermineBonds.DetermineBonds(mol_object, charge=0)
+        except ValueError:
+            self.molecule_string = ""
+        else:
+            self.molecule_string = MolToInchi(mol_object)
         self.molecule_object = mol_object
-        self.molecule_string = MolToInchi(mol_object)
         return self.molecule_string
 
 

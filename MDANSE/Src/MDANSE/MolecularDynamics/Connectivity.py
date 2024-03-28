@@ -30,8 +30,15 @@ class Connectivity:
     and identifies potential molecules based on distances alone.
     """
 
-    def __init__(self, *args, trajectory: Trajectory = None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        trajectory: Trajectory = None,
+        selection: List[int] = None,
+        **kwargs,
+    ):
         self._chemical_system = trajectory.chemical_system
+        self._selection = selection
         self._frames = trajectory
         self._unit_cell = self._chemical_system.configuration
         self._periodic = self._chemical_system.configuration.is_periodic
@@ -48,7 +55,12 @@ class Connectivity:
         Arguments:
             chemical -- ChemicalSystem instance connected to the trajectory.
         """
-        atom_elements = [atom.symbol for atom in chemical.atoms]
+        if self._selection is not None:
+            atom_elements = [
+                atom.symbol for atom in chemical.atoms if atom.index in self._selection
+            ]
+        else:
+            atom_elements = [atom.symbol for atom in chemical.atoms]
         unique_elements = np.unique(atom_elements)
         radii = {
             element: ATOMS_DATABASE.get_atom_property(element, "covalent_radius")
@@ -70,7 +82,10 @@ class Connectivity:
         """
         if frame_number < 0 or frame_number >= len(self._frames):
             return None
-        return self._frames.coordinates(frame_number)
+        if self._selection is not None:
+            return self._frames.coordinates(frame_number)[self._selection, :]
+        else:
+            return self._frames.coordinates(frame_number)
 
     def internal_distances(self, frame_number: int = 0) -> NDArray[np.float64]:
         """Calculates an (N,N) array of interatomic distances SQUARED within
@@ -142,9 +157,10 @@ class Connectivity:
                 up to 20% larger than the nominal length of the bond (default: {0.2})
         """
         if frames is None:
-            samples = [len(self._frames) // denom for denom in [2, 3, 4, 5]]
+            samples = [len(self._frames) // denom for denom in [2, 3, 4, 5, 6, 7]]
         else:
             samples = frames
+        samples = list(np.unique(samples))
         bonds = []
         pairs = product(self._unique_elements, repeat=2)
         maxbonds = {
