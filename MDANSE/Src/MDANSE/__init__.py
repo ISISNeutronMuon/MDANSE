@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import importlib.metadata
+
 __version__ = importlib.metadata.version("MDANSE")
 
 import warnings
