@@ -74,8 +74,12 @@ def test_identify_molecules(trajectory: Trajectory):
         moltester = MoleculeTester(entity, coords)
         inchistring = moltester.identify_molecule()
         molstrings.append(inchistring)
+        if entity.number_of_atoms > 1:
+            entity.name = inchistring
     assert len(molstrings) == 20
     result = True
     for ms in molstrings[1:]:
         result = result and ms == molstrings[0]
     assert result
+    print(chemical_system.unique_molecules())
+    assert len(chemical_system.unique_molecules()) == 1

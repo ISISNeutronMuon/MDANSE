@@ -2699,7 +2699,6 @@ class TestChemicalEntity(unittest.TestCase):
         self.assertTrue(
             np.allclose(np.array([1, 1, 1]), self.protein.center_of_mass(configuration))
         )
-        configuration = {"coordinates": np.ones((3, 3))}
         self.assertTrue(
             np.allclose(np.array([1, 1, 1]), group.center_of_mass(configuration))
         )

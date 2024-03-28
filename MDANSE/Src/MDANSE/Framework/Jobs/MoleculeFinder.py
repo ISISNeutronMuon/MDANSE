@@ -19,7 +19,9 @@ import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.TrajectoryUtils import brute_formula
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
+from MDANSE.Chemistry.Structrures import MoleculeTester
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
@@ -28,8 +30,19 @@ from MDANSE.MolecularDynamics.Configuration import (
 
 class MoleculeFinder(IJob):
     """
+    Use this if your trajectory contains molecules, but MDANSE has not assigned
+    labels to them. MoleculeFinder will output a new trajectory in which bond
+    information is stored and groups of atoms connected by bonds are given labels
+    which are either InChI strings or chemical formulae of the groups.
+    </p>
+    <b> THIS IS USABLE, BUT STILL AT AN EARLY STAGE AND NOT OPTIMISED </b>
+    </p>
     Finds potential molecules in the trajectory, based on
     interatomic distances.
+    </p>
+    The tolerance is a fraction of expected bond length calculated from covalent radii.
+    This means that a pair of C and H atoms will be considered as connected by a bond
+    if they are at a distance smaller than (r_C + r_H) * (1 + tolerance).
     """
 
     label = "Molecule Finder"
@@ -45,7 +58,7 @@ class MoleculeFinder(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["tolerance"] = (
         "FloatConfigurator",
-        {"default": 0.2},
+        {"default": 0.25},
     )
     settings["frames"] = (
         "FramesConfigurator",
@@ -66,14 +79,20 @@ class MoleculeFinder(IJob):
         self._tolerance = self.configuration["tolerance"]["value"]
         chemical_system = self._input_trajectory.chemical_system
 
-        print(f"Molfinder: bonds before the run {chemical_system._bonds}")
-
         conn = Connectivity(trajectory=self._input_trajectory)
         conn.find_molecules(tolerance=self._tolerance)
         conn.add_bond_information()
         chemical_system.rebuild(conn._molecules)
-
-        print(f"Molfinder: bonds after connectivity {chemical_system._bonds}")
+        configuration = chemical_system.configuration
+        coords = configuration.contiguous_configuration().coordinates
+        for entity in chemical_system.chemical_entities:
+            if entity.number_of_atoms > 1:
+                moltester = MoleculeTester(entity, coords)
+                inchistring = moltester.identify_molecule()
+                if len(inchistring) > 0:
+                    entity.name = inchistring
+                else:
+                    entity.name = brute_formula(entity)
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(

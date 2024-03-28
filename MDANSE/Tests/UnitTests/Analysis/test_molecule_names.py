@@ -14,7 +14,7 @@ short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
     "Data",
-    "short_trajectory_after_changes.mdt",
+    "named_molecules.mdt",
 )
 
 
@@ -41,6 +41,8 @@ def parameters():
     parameters["q_values"] = (0.0, 10.0, 0.1)
     parameters["r_values"] = (0.0, 10.0, 0.1)
     parameters["per_axis"] = False
+    parameters["molecule_name"] = "InChI=1S/CO2/c2-1-3"
+    parameters["axis"] = "ab"
     parameters["reference_direction"] = (0, 0, 1)
     parameters["instrument_resolution"] = ("Gaussian", {"sigma": 1.0, "mu": 0.0})
     parameters["interpolation_order"] = "3rd order"
@@ -54,14 +56,8 @@ def parameters():
 @pytest.mark.parametrize(
     "job_type",
     [
-        "RadiusOfGyration",
-        "SolventAccessibleSurface",
-        "RootMeanSquareDeviation",
-        "RootMeanSquareFluctuation",
-        "DensityProfile",
-        "MolecularTrace",
-        "Voronoi",
-        "Eccentricity",
+        "AreaPerMolecule",
+        "AngularCorrelation",
     ],
 )
 def test_structure_analysis(parameters, job_type):

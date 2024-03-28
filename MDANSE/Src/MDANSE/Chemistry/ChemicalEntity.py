@@ -186,8 +186,9 @@ class _ChemicalEntity(metaclass=abc.ABCMeta):
             ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight")
             for at in self.atom_list
         ]
+        indices = [at.index for at in self.atom_list]
 
-        return center_of_mass(coords, masses)
+        return center_of_mass(coords[indices], masses)
 
     def centre_of_mass(self, configuration: _Configuration) -> NDArray[np.float64]:
         """Wrapper around the :py:meth: `center_of_mass()` method."""
@@ -2633,7 +2634,7 @@ class ChemicalSystem(_ChemicalEntity):
 
         return cs
 
-    def rebuild(self, cluster_list: List[Tuple[int]]):
+    def rebuild(self, cluster_list: List[Tuple[int]], selection: List[int] = None):
         """
         Copies the instance of ChemicalSystem into a new, identical instance.
 
@@ -2644,12 +2645,25 @@ class ChemicalSystem(_ChemicalEntity):
         atom_names_before = [atom.name for atom in self.atoms]
         clusters = []
 
-        for cluster_number, index_list in enumerate(cluster_list):
-            temp = AtomCluster(
-                "cluster_" + str(cluster_number + 1),
-                [self.atom_list[index] for index in index_list],
-            )
-            clusters.append(temp)
+        if selection is not None:
+            for cluster_number, index_list in enumerate(cluster_list):
+                temp = AtomCluster(
+                    "cluster_" + str(cluster_number + 1),
+                    [
+                        self.atom_list[index]
+                        for index in index_list
+                        if index in selection
+                    ],
+                )
+                if temp.number_of_atoms > 0:
+                    clusters.append(temp)
+        else:
+            for cluster_number, index_list in enumerate(cluster_list):
+                temp = AtomCluster(
+                    "cluster_" + str(cluster_number + 1),
+                    [self.atom_list[index] for index in index_list],
+                )
+                clusters.append(temp)
 
         self._chemical_entities = []
 
@@ -2671,6 +2685,18 @@ class ChemicalSystem(_ChemicalEntity):
             raise RuntimeError(
                 "ChemicalSystem.rebuild() changed the order of atoms. This needs to be handled!"
             )
+
+    def unique_molecules(self) -> List[str]:
+        """Returns the list of unique names in the chemical system"""
+        result = np.unique(
+            [ce.name for ce in self.chemical_entities if ce.number_of_atoms > 1]
+        )
+        return list(result)
+
+    def number_of_molecules(self, molecule_name: str) -> int:
+        """Returns the number of molecules with the given name in the system"""
+        result = [1 for ce in self.chemical_entities if ce.name == molecule_name]
+        return len(result)
 
     def load(self, h5_filename: Union[str, h5py.File]) -> None:
         """
