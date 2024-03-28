@@ -13,8 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-# Copyright (C)  Institut Laue Langevin 2013-now
-# Copyright (C)  ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 from typing import Union, Iterator
 from itertools import count, groupby
 from qtpy.QtCore import Qt, QEvent, Slot, QObject

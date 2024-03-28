@@ -14,8 +14,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-# Copyright (C)  Institut Laue Langevin 2013-now
-# Copyright (C)  ISIS Neutron and Muon Source, STFC, UKRI 2021-now
 
 cimport numpy as np 
 import numpy as np

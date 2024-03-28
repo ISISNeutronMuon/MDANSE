@@ -13,9 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-# Copyright (C)  Institut Laue Langevin 2013-now
-# Copyright (C)  ISIS Neutron and Muon Source, STFC, UKRI 2021-now
-# Authors:    RSE Group at ISIS (see AUTHORS)
 
 """The number of neutrons arriving at the sample in a unit of time
 will be, necessarily, wavelength-dependent. While on a direct TOF
