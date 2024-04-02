@@ -52,7 +52,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
         :type value: str one of *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*.
         """
 
-        if not value:
+        if value is None:
             value = self._default
 
         IntegerConfigurator.configure(self, value)
