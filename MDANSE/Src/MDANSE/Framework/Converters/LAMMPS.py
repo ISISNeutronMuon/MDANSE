@@ -68,12 +68,12 @@ class LAMMPS(Converter):
     )
     settings["time_step"] = (
         "FloatConfigurator",
-        {"label": "time step (fs)", "default": 1.0, "mini": 1.0e-9},
+        {"label": "Time step (fs)", "default": 1.0, "mini": 1.0e-9},
     )
     settings["n_steps"] = (
         "IntegerConfigurator",
         {
-            "label": "number of time steps (0 for automatic detection)",
+            "label": "Number of time steps (0 for automatic detection)",
             "default": 0,
             "mini": 0,
         },

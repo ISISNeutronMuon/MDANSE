@@ -55,7 +55,7 @@ class VASP(Converter):
     )
     settings["time_step"] = (
         "FloatConfigurator",
-        {"label": "time step", "default": 1.0, "mini": 1.0e-9},
+        {"label": "Time step (fs)", "default": 1.0, "mini": 1.0e-9},
     )
     settings["fold"] = (
         "BooleanConfigurator",
