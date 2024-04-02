@@ -390,7 +390,7 @@ class Trajectory:
         bool
             True if variable exists.
         """
-        if variable not in self._h5_file["/configuration"]:
+        if variable in self._h5_file["/configuration"]:
             return False
         else:
             return True
