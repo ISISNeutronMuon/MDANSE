@@ -391,9 +391,9 @@ class Trajectory:
             True if variable exists.
         """
         if variable in self._h5_file["/configuration"]:
-            return False
-        else:
             return True
+        else:
+            return False
 
     @property
     def chemical_system(self):
