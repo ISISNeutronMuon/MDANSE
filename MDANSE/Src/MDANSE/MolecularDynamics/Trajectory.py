@@ -366,7 +366,7 @@ class Trajectory:
         if last is None:
             last = len(self)
 
-        if self.has_variable(variable):
+        if not self.has_variable(variable):
             raise TrajectoryError(
                 "The variable {} is not stored in the trajectory".format(variable)
             )
