@@ -66,16 +66,16 @@ class ASE(Converter):
     )
     settings["time_step"] = (
         "FloatConfigurator",
-        {"label": "time step (fs)", "default": 1.0, "mini": 1.0e-9},
+        {"label": "Time step", "default": 1.0, "mini": 1.0e-9},
     )
     settings["time_unit"] = (
         "SingleChoiceConfigurator",
-        {"label": "time step unit", "choices": ["fs", "ps", "ns"], "default": "fs"},
+        {"label": "Time step unit", "choices": ["fs", "ps", "ns"], "default": "fs"},
     )
     settings["n_steps"] = (
         "IntegerConfigurator",
         {
-            "label": "number of time steps (0 for automatic detection)",
+            "label": "Number of time steps (0 for automatic detection)",
             "default": 0,
             "mini": 0,
         },
