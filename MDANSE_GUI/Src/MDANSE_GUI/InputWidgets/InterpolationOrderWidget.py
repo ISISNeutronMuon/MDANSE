@@ -37,6 +37,7 @@ class InterpolationOrderWidget(WidgetBase):
         source_object = kwargs.get("source_object", None)
 
         self._field = QSpinBox(self._base)
+        self._field.setMaximum(5)
         self._field.setValue(1)
         label = QLabel("Interpolation order", self._base)
         self.numerator = QLabel("st order")
