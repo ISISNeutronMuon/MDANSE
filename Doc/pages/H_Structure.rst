@@ -327,10 +327,11 @@ Radius Of Gyration (ROG)
 --------------------------
 Index : GUI Radius Of Gyration (ROG)
 
-**Purpose:** The Radius of Gyration is a key measure in molecular science that
-calculates how compact a molecule is. It's determined by the average distance of
-the molecule's atoms from its center of mass. This helps in understanding the
-size and spread of molecules, especially larger ones like proteins.
+**Purpose:** The Radius of Gyration can be used, for example, to
+determine the compactness of a molecule. It is calculated as a root
+(mass weighted) mean square distance of the atoms of a molecule relative to
+its centre of mass. *ROG* can be used to follow the size and spread
+of a molecule during the molecular dynamics simulation.
 
 2. **Load Atomic Data:**
    - Click on the "File" menu.
