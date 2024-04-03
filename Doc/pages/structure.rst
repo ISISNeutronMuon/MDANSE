@@ -316,7 +316,7 @@ Mathematically, it can be defined as:
 .. math::
    :label: pfx134
 
-    {r_{\mathrm{RG}}{(t) = \sqrt{\frac{\sum_{i}^{N}m_{i}\vert {\mathbf{r}_{i}{(t) - \mathbf{r}_{\mathrm{CM}}}(t)} \vert^{2}}{\sum_{i}^{N}m_{i}}}}}
+    {\mathrm{ROG}{(t) = \sqrt{\frac{\sum_{i}^{N}m_{i}\vert {\mathbf{r}_{i}{(t) - \mathbf{r}_{\mathrm{CM}}}(t)} \vert^{2}}{\sum_{i}^{N}m_{i}}}}}
 
 where :math:`N` is the number of atoms of the system,
 :math:`r_{i}(t)` are the positions of the
