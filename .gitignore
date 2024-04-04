@@ -30,5 +30,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# doc build files
+Doc/_build/
+
 # pycharm
 .idea
