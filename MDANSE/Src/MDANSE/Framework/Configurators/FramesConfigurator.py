@@ -25,7 +25,7 @@ class FramesConfigurator(RangeConfigurator):
     
     The frame selection can be input as:
     
-    #. a 3-tuple where the 1st, 2nd will corresponds respectively to the indexes of the first and \
+    #. a 3-tuple where the 1st, 2nd will correspond respectively to the indexes of the first and \
     last (excluded) frames to be selected while the 3rd element will correspond to the step number between two frames. For example (1,11,3) will give 1,4,7,10
     #. *'all'* keyword, in such case, all the frames of the trajectory are selected
     #. ``None`` keyword, in such case, all the frames of the trajectory are selected
@@ -54,25 +54,39 @@ class FramesConfigurator(RangeConfigurator):
         """
 
         trajConfig = self._configurable[self._dependencies["trajectory"]]
+        n_steps = trajConfig["length"]
 
-        input_is_num = True
+        # if all or None set to default
+        if value in ["all", None]:
+            value = [0, n_steps, 1]
+
+        # check all values castable to int
         try:
             num_values = [int(x) for x in value[0:3]]
-        except:
-            input_is_num = False
-        else:
-            step_size = num_values[-1]
+        except (ValueError, TypeError):
+            self.error_status = "Input values must castable to int"
+            return
 
-        if value in ["all", None]:
-            value = (0, trajConfig["length"], 1)
-        elif input_is_num and step_size == 0:
-            self.error_status = "Cannot create a range with a step=0"
+        # special case for negative last step option
+        if num_values[1] < 0:
+            num_values[1] = n_steps - num_values[1]
+
+        first, last, step = num_values
+
+        # check first setting
+        if first < 0 or first > n_steps - 1:
+            self.error_status = f"First frame needs to be between 0 and {n_steps - 1}"
             return
-        elif not input_is_num:
-            self.error_status = "Input values must be numbers"
+
+        # check last setting
+        if last <= 0 or last > n_steps or last <= first:
+            self.error_status = f"Last frame needs to be between 1 and {n_steps} and greater than the first frame"
             return
-        elif np.allclose(num_values, [0, -1, 1]):
-            value = (0, trajConfig["length"], 1)
+
+        # check step setting
+        if step < 1:
+            self.error_status = f"Cannot create a range with a step: {step}"
+            return
 
         self._mini = 0
         self._maxi = trajConfig["length"]
