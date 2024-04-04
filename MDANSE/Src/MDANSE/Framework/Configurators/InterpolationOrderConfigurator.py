@@ -66,6 +66,12 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
 
             self["variable"] = "velocities"
 
+        elif value > 5:
+            self.error_status = (
+                f"Use an interpolation order greater than 5 is not implemented."
+            )
+            return
+
         else:
             self["variable"] = "coordinates"
         self.error_status = "OK"
