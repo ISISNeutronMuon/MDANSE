@@ -24,9 +24,11 @@ from MDANSE.MolecularDynamics.Analysis import radius_of_gyration
 
 class RadiusOfGyration(IJob):
     """
-    Radius Of Gyration (ROG) is a measure of the size of an object,
-    a surface, or an ensemble of points. It is calculated as the Root Mean Square Distance between
-    the system and a reference which, in MDANSE, is the centre of gravity of the system.
+    The Radius of Gyration can be used, for example, to determine the
+    compactness of a molecule. It is calculated as a root (mass weighted)
+    mean square distance of the atoms of a molecule relative to its
+    centre of mass. ROG can be used to follow the size and spread of
+    a molecule during the molecular dynamics simulation.
     """
 
     label = "Radius of Gyration"
