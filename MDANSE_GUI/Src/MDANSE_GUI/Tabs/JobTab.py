@@ -43,7 +43,7 @@ class JobTab(GeneralTab):
         self._job_starter = None
         self._trajectory_combo = QComboBox()
         self._trajectory_combo.setEditable(False)
-        self._trajectory_combo.currentTextChanged.connect(self.set_current_trajectory)
+        self._trajectory_combo.currentIndexChanged.connect(self.set_current_trajectory)
         if cmodel is not None:
             self._trajectory_combo.setModel(cmodel)
         self._core.add_widget(self._trajectory_combo)
@@ -52,9 +52,9 @@ class JobTab(GeneralTab):
         self._job_starter = job_starter
         self.action.new_thread_objects.connect(self._job_starter.startProcess)
 
-    @Slot(str)
-    def set_current_trajectory(self, new_name: str) -> None:
-        self._current_trajectory = new_name
+    @Slot(int)
+    def set_current_trajectory(self, index: int) -> None:
+        self._current_trajectory = self._trajectory_combo.currentText()
 
         traj_model = self._trajectory_combo.model()
         if traj_model.rowCount() < 1:
@@ -64,9 +64,9 @@ class JobTab(GeneralTab):
             self.action.clear_panel()
             return
 
-        node_number = traj_model.item(self._trajectory_combo.currentIndex(), 0).data()
+        node_number = traj_model.item(index, 0).data()
         print(
-            f"Combo model: node_number {node_number} found in item {self._trajectory_combo.currentText()}"
+            f"Combo model: node_number {node_number} found in item {self._current_trajectory}"
         )
         # The combobox was changed we need to update the action
         # widgets with the new trajectory
