@@ -37,7 +37,14 @@ class InterpolationOrderWidget(WidgetBase):
         source_object = kwargs.get("source_object", None)
 
         self._field = QSpinBox(self._base)
-        self._field.setValue(1)
+        self._field.setMaximum(5)
+        configurator = self._configurator
+        trajectory = configurator._configurable[
+            configurator._dependencies["trajectory"]
+        ]["instance"]
+        if not trajectory.has_variable("velocities"):
+            self._field.setMinimum(1)
+            self._field.setValue(1)
         label = QLabel("Interpolation order", self._base)
         self.numerator = QLabel("st order")
 

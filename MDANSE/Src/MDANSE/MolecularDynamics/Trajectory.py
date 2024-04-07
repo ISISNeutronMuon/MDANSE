@@ -366,16 +366,34 @@ class Trajectory:
         if last is None:
             last = len(self)
 
-        grp = self._h5_file["/configuration"]
-
-        if variable not in grp:
+        if not self.has_variable(variable):
             raise TrajectoryError(
                 "The variable {} is not stored in the trajectory".format(variable)
             )
 
+        grp = self._h5_file["/configuration"]
         variable = grp[variable][first:last:step, index, :].astype(np.float64)
 
         return variable
+
+    def has_variable(self, variable: str) -> bool:
+        """Check if the trajectory has a specific variable e.g.
+        velocities.
+
+        Parameters
+        ----------
+        variable : str
+            The variable to check the existence of.
+
+        Returns
+        -------
+        bool
+            True if variable exists.
+        """
+        if variable in self._h5_file["/configuration"]:
+            return True
+        else:
+            return False
 
     @property
     def chemical_system(self):

@@ -52,7 +52,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
         :type value: str one of *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*.
         """
 
-        if not value:
+        if value is None or value == "":
             value = self._default
 
         IntegerConfigurator.configure(self, value)
@@ -65,6 +65,12 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
                 return
 
             self["variable"] = "velocities"
+
+        elif value > 5:
+            self.error_status = (
+                f"Use an interpolation order greater than 5 is not implemented."
+            )
+            return
 
         else:
             self["variable"] = "coordinates"
