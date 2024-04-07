@@ -303,48 +303,29 @@ or any molecular system subject to temporal variations.
 
 Radius Of Gyration
 ''''''''''''''''''
-                         
-Radius Of Gyration (*ROG*) is the name of several related measures of
-the size of an object, a surface, or an ensemble of points. It is
-calculated as the Root Mean Square Distance between the system and a
-reference that can be either the centre of gravity of the system either
-a given axis. 
 
-The *ROG* serves as a quantitative measure that characterizes the spatial distribution
-and compactness of molecular or ensemble structures. ROG is instrumental in size determination,
-providing precise insights into the dimensions of objects or systems. Moreover, it
-plays a crucial role in shape analysis, elucidating how molecular components
-are arranged concerning the center of gravity. Its ability to track
-structural fluctuations over time is essential for studying dynamic processes
-in molecular systems.
+Radius Of Gyration (*ROG*) is calculated as a root (mass weighted) mean
+square distance of the components of a system relative to either its centre of
+mass or a given axis of rotation. The *ROG* serves as a quantitative
+measure which can be used to characterizes the spatial distribution of
+a system such as a molecule or a cluster of atoms.
 
-In *MDANSE*, the reference is chosen to be the centre of
-gravity of the system under study. Mathematically, it can be defined as:
+In MDANSE *ROG* is calculated relative to the systems centre of mass.
+Mathematically, it can be defined as:
 
 .. math::
    :label: pfx134
 
-   {\mathit{ROG}{(t) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{cms}}}(t)} \right)}{N_{\alpha}}}}}
+    {\mathrm{ROG}{(t) = \sqrt{\frac{\sum_{i}^{N}m_{i}\vert {\mathbf{r}_{i}{(t) - \mathbf{r}_{\mathrm{CM}}}(t)} \vert^{2}}{\sum_{i}^{N}m_{i}}}}}
 
-where :math:`N_{\alpha}`
-is the number of atoms of the system, and :math:`r_{\alpha}(t)` and
-:math:`r_{cms}(t)` are respectively the position of atom :math:`\alpha` and the
-centre of mass of the system at time t.
+where :math:`N` is the number of atoms of the system,
+:math:`r_{i}(t)` are the positions of the
+atoms :math:`i`, :math:`r_{\mathrm{CM}}(t)` is the centre of mass of
+the system and :math:`t` is the time of the simulation.
 
-*ROG* describes the overall spread of the molecule and as such is a good
-measure for the molecule compactness. For example, it can be useful when
-monitoring folding process.
-
-In *MDANSE*, *ROG* is computed using the discretized version of equation
-:math:numref:`pfx131`:
-
-.. math::
-   :label: pfx135
-
-   {\mathit{ROG}{\left( {n\cdot\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{cms}}}(t)} \right)}{N_{\alpha}}}},{n = 0}\ldots{N_{t} - 1.}}
-
-where N\ :sub:`t` is the number of frames and Δt is the time step.
-
+*ROG* can be used to describe the overall spread of the molecule and
+as such is a good measure for the molecule compactness. For example,
+it can be useful when monitoring folding process of a protein.
 
 
 Solvent Accessible Surface
