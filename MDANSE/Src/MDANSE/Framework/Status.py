@@ -16,23 +16,9 @@
 
 import abc
 
-import datetime
+import time
 
 import numpy as np
-
-
-def total_seconds(td):
-    return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10.0**6
-
-
-def convert_duration(seconds):
-    """
-    Convert a duration in seconds in days, hours, minutes and seconds
-    """
-
-    d = datetime.datetime(1, 1, 1) + datetime.timedelta(seconds=seconds)
-
-    return (d.day - 1, d.hour, d.minute, d.second)
 
 
 class Status(object, metaclass=abc.ABCMeta):
@@ -48,9 +34,8 @@ class Status(object, metaclass=abc.ABCMeta):
         self._nSteps = None
         self._finished = False
         self._stopped = False
-        self._startTime = datetime.datetime.today()
-        self._deltas = [self._startTime]
-        self._eta = "N/A"
+        self._startTime = time.time()
+        self._deltas = [self._startTime, self._startTime + 1.0]
         self._elapsedTime = "N/A"
         self._lastRefresh = self._startTime
 
@@ -76,11 +61,7 @@ class Status(object, metaclass=abc.ABCMeta):
 
     @property
     def elapsedTime(self):
-        return self._elapsedTime
-
-    @property
-    def eta(self):
-        return self._eta
+        return str(self._deltas[1] - self._deltas[0])
 
     def finish(self):
         self._finished = True
@@ -91,7 +72,7 @@ class Status(object, metaclass=abc.ABCMeta):
         return self._currentStep
 
     def get_elapsed_time(self):
-        return self._elapsedTime
+        return self.elapsedTime
 
     def get_number_of_steps(self):
         return self._nSteps
@@ -121,7 +102,6 @@ class Status(object, metaclass=abc.ABCMeta):
         self.start_status()
 
     def stop(self):
-        self._eta = "N/A"
         self._stopped = True
         self.stop_status()
 
@@ -131,24 +111,11 @@ class Status(object, metaclass=abc.ABCMeta):
 
         self._currentStep += 1
 
-        lastUpdate = datetime.datetime.today()
+        lastUpdate = time.time()
 
-        self._deltas.append(lastUpdate)
+        self._deltas[1] = lastUpdate
 
-        if force or (total_seconds(lastUpdate - self._lastRefresh) > 5):
+        if force or ((lastUpdate - self._lastRefresh) > 5):
             self._lastRefresh = lastUpdate
-
-            if self._nSteps is not None:
-                self._elapsedTime = "%02dd:%02dh:%02dm:%02ds" % convert_duration(
-                    total_seconds(datetime.datetime.today() - self._startTime)
-                )
-                duration = [
-                    total_seconds(self._deltas[i + 1] - self._deltas[i])
-                    for i in range(self._currentStep)
-                ]
-                duration = np.median(duration) * (self._nSteps - self._currentStep)
-                duration = datetime.timedelta(seconds=round(duration))
-                duration = convert_duration(total_seconds(duration))
-                self._eta = "%02dd:%02dh:%02dm:%02ds" % duration
 
         self.update_status()
