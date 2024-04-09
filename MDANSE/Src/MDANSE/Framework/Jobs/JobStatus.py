@@ -16,7 +16,7 @@
 
 import collections
 import pickle
-import datetime
+import time
 import os
 import threading
 import time
@@ -36,11 +36,8 @@ class JobStatus(Status):
         self._state = JobState()
         self._state["pid"] = PLATFORM.pid()
         self._state["type"] = job.__class__.__name__
-        self._state["start"] = datetime.datetime.strftime(
-            datetime.datetime.today(), "%d-%m-%Y %H:%M:%S"
-        )
+        self._state["start"] = str(time.time())
         self._state["elapsed"] = "N/A"
-        self._state["eta"] = "N/A"
         self._state["current_step"] = 0
         self._state["n_steps"] = 0
         self._state["progress"] = 0
@@ -87,10 +84,8 @@ class JobStatus(Status):
         self._state["elapsed"] = self.elapsedTime
         self._state["current_step"] = self.currentStep
         if self._nSteps is not None:
-            self._state["eta"] = self.eta
             self._state["progress"] = 100 * self.currentStep / self.nSteps
         else:
-            self._eta = "N/A"
             self._state["progress"] = 0
 
         self.save_status()
