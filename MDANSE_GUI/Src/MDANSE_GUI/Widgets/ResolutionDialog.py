@@ -68,15 +68,16 @@ def convert_parameters(fwhm: float, centre: float, peak_type: str) -> List[float
     if peak_type == "ideal":
         return []
     elif peak_type == "triangular":
-        return [fwhm, centre]
+        vals = [fwhm, centre]
     elif peak_type == "square":
-        return [fwhm, centre]
+        vals = [fwhm / 2, centre]
     elif peak_type == "gaussian":
-        return [fwhm / gauss_denum, centre]
+        vals = [fwhm / gauss_denum, centre]
     elif peak_type == "lorentzian":
-        return [fwhm / 2, centre]
+        vals = [fwhm / 2, centre]
     else:
-        return [fwhm, centre]
+        vals = [fwhm, centre]
+    return vals[0], vals[1]
 
 
 class ResolutionDialog(QDialog):
@@ -96,6 +97,8 @@ class ResolutionDialog(QDialog):
         self._eta = QLineEdit("N/A", self)
         self._eta.setEnabled(False)
         self._omega_axis = np.linspace(-1.0, 1.0, 500)
+        self._output_field = QTextEdit(self)
+        self._output_field.setReadOnly(True)
         text_labels = ["Peak function", "Energy unit", "FWHM", "Centre", "eta"]
         for number, widget in enumerate(
             [
@@ -108,6 +111,7 @@ class ResolutionDialog(QDialog):
         ):
             layout.addWidget(QLabel(text_labels[number], self), number, 0)
             layout.addWidget(widget, number, 1)
+        layout.addWidget(self._output_field, number + 1, 0, 1, 2)
         canvas = self.make_canvas()
         layout.addWidget(canvas, 0, 2, 7, 1)
         for widget in [self._fwhm, self._centre, self._eta]:
@@ -132,7 +136,6 @@ class ResolutionDialog(QDialog):
 
     @Slot(str)
     def update_model(self, new_model: str):
-        ic()
         self._resolution_name = new_model
         self._resolution = IInstrumentResolution.create(widget_text_map[new_model])
         self._resolution.build_configuration()
@@ -146,7 +149,6 @@ class ResolutionDialog(QDialog):
 
     @Slot()
     def recalculate_peak(self):
-        ic()
         try:
             fwhm = float(self._fwhm.text())
         except:
@@ -175,8 +177,9 @@ class ResolutionDialog(QDialog):
             self.set_peak_parameter(gauss_sigma * factor, "sigma_gaussian")
             self.set_peak_parameter(eta, "eta")
         else:
+            temp_name = widget_text_map[self._resolution_name]
             try:
-                sigma, mu = convert_parameters(fwhm, centre, self._resolution_name)
+                sigma, mu = convert_parameters(fwhm, centre, temp_name)
             except ValueError:
                 print(f"Failed to convert parameters for {self._resolution_name}")
                 self._fwhm_value = 0.0
@@ -185,13 +188,19 @@ class ResolutionDialog(QDialog):
                 self.set_peak_parameter(sigma * factor, "sigma")
         self._omega_axis = np.linspace(-3 * factor * fwhm, 3 * factor * fwhm, 500)
         self._resolution.set_kernel(self._omega_axis, 1.0)
+        self.update_text_output()
         self.update_plot()
 
     def set_peak_parameter(self, value: float, key: str):
         self._resolution._configuration[key].configure(value)
 
+    def update_text_output(self):
+        text = "Parameters in MDANSE internal units\n"
+        for key, value in self._resolution._configuration.items():
+            text += f"settings[{key}] = {value['value']}\n"
+        self._output_field.setText(text)
+
     def update_plot(self):
-        ic()
         self._figure.clear()
         axes = self._figure.add_axes(111)
         axes.plot(self._omega_axis, self._resolution._omegaWindow)
@@ -210,12 +219,12 @@ class ResolutionDialog(QDialog):
         ys = np.array([0.0, hh, hh, 0.0])
         axes.plot(xs * self._factor_value, ys, "r:")
         axes.grid(True)
-        axes.set_xlabel(f"Energy [{self._unit_value}]")
         scale = self._factor_value
         second_axis = axes.secondary_xaxis(
-            "top", functions=(lambda x: x * scale, lambda x: x * scale)
+            "top", functions=(lambda x: x / scale, lambda x: x / scale)
         )
-        second_axis.set_xlabel("Energy [rad/ps]")
+        axes.set_xlabel("Energy [rad/ps]")
+        second_axis.set_xlabel(f"Energy [{self._unit_value}]")
         self._figure.canvas.draw()
 
 
