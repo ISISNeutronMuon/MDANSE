@@ -50,7 +50,7 @@ class InstrumentResolutionWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         kwargs["layout_type"] = "QGridLayout"
         super().__init__(*args, **kwargs)
-        self._layout.addWidget(QLabel("Resolution function", self._base), 0, 0)
+        # self._layout.addWidget(QLabel("Resolution function", self._base), 0, 0)
         self._type_combo = QComboBox(parent=self._base)
         self._dialog_button = QPushButton("Helper Dialog", self._base)
         self._dialog_button.clicked.connect(self.helper_dialog)
@@ -58,7 +58,7 @@ class InstrumentResolutionWidget(WidgetBase):
         self.helper = ResolutionDialog(self._base)
         self.helper.parameters_changed.connect(self.set_parameters_from_dialog)
         self._layout.addWidget(self._type_combo, 0, 1)
-        self._layout.addWidget(self._dialog_button, 1, 0)
+        self._layout.addWidget(self._dialog_button, 0, 0)
         self._labels = []
         self._fields = []
         self._defaults = []

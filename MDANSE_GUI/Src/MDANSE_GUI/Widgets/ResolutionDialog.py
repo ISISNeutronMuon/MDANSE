@@ -207,12 +207,21 @@ class ResolutionDialog(QDialog):
     def set_peak_parameter(self, value: float, key: str):
         self._resolution._configuration[key].configure(value)
 
-    def update_text_output(self):
+    def update_text_output(self, rounding_precision=3):
         text = "Parameters in MDANSE internal units\n"
         results = {"function": self._resolution_name}
         for key, value in self._resolution._configuration.items():
-            text += f"settings[{key}] = {value['value']}\n"
-            results[key] = value["value"]
+            original_value = value["value"]
+            if abs(original_value) < 1e-12:
+                rounded_value = 0.0
+            else:
+                rounded_value = round(
+                    original_value,
+                    abs(math.floor(math.log10(abs(original_value))))
+                    + rounding_precision,
+                )
+            text += f"settings[{key}] = {rounded_value}\n"
+            results[key] = rounded_value
         self._output_field.setText(text)
         self.parameters_changed.emit(results)
 
