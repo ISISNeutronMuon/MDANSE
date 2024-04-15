@@ -58,7 +58,16 @@ from MDANSE.Framework.Units import measure
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )
-from MDANSE_GUI.InputWidgets.InstrumentResolutionWidget import widget_text_map
+
+
+widget_text_map = {
+    "ideal": "ideal",
+    "Gaussian": "gaussian",
+    "Lorentzian": "lorentzian",
+    "triangular": "triangular",
+    "square": "square",
+    "pseudo-Voigt": "pseudovoigt",
+}
 
 
 gauss_denum = 2.0 * (2.0 * math.log(2.0)) ** 0.5
@@ -81,6 +90,8 @@ def convert_parameters(fwhm: float, centre: float, peak_type: str) -> List[float
 
 
 class ResolutionDialog(QDialog):
+
+    parameters_changed = Signal(dict)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -186,7 +197,9 @@ class ResolutionDialog(QDialog):
             else:
                 self.set_peak_parameter(mu * factor, "mu")
                 self.set_peak_parameter(sigma * factor, "sigma")
-        self._omega_axis = np.linspace(-3 * factor * fwhm, 3 * factor * fwhm, 500)
+        self._omega_axis = np.linspace(
+            factor * (centre - 3 * fwhm), factor * (centre + 3 * fwhm), 500
+        )
         self._resolution.set_kernel(self._omega_axis, 1.0)
         self.update_text_output()
         self.update_plot()
@@ -196,9 +209,12 @@ class ResolutionDialog(QDialog):
 
     def update_text_output(self):
         text = "Parameters in MDANSE internal units\n"
+        results = {"function": self._resolution_name}
         for key, value in self._resolution._configuration.items():
             text += f"settings[{key}] = {value['value']}\n"
+            results[key] = value["value"]
         self._output_field.setText(text)
+        self.parameters_changed.emit(results)
 
     def update_plot(self):
         self._figure.clear()
