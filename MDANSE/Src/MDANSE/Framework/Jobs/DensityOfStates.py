@@ -26,8 +26,9 @@ from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 class DensityOfStates(IJob):
     """
     The Density Of States describes the number of vibrations per unit frequency.
-        It is determined as the power spectrum (Fourier transform) of the Velocity AutoCorrelation Function (VACF).
-        The partial Density of States corresponds to selected sets of atoms or molecules.
+    In MDANSE the DOS calculation returns the Fourier transform (FT) of the weighted Velocity AutoCorrelation Function (VACF).
+    With an atomic mass weighting scheme the MDANSE DOS result is proportional to the actual DOS.
+    The partial DOS corresponds to selected sets of atoms or molecules.
     """
 
     label = "Density Of States"
@@ -98,18 +99,18 @@ class DensityOfStates(IJob):
         self._outputData.add(
             "time_window",
             "LineOutputVariable",
-            instrResolution["time_window"],
+            instrResolution["rtime_window"],
             axis="time",
             units="au",
         )
 
         self._outputData.add(
-            "omega", "LineOutputVariable", instrResolution["omega"], units="rad/ps"
+            "omega", "LineOutputVariable", instrResolution["romega"], units="rad/ps"
         )
         self._outputData.add(
             "omega_window",
             "LineOutputVariable",
-            instrResolution["omega_window"],
+            instrResolution["romega_window"],
             axis="omega",
             units="au",
         )
@@ -125,9 +126,9 @@ class DensityOfStates(IJob):
             self._outputData.add(
                 "dos_%s" % element,
                 "LineOutputVariable",
-                (instrResolution["n_omegas"],),
+                (instrResolution["n_romegas"],),
                 axis="omega",
-                units="nm2/ps",
+                units="au",
             )
         self._outputData.add(
             "vacf_total",
@@ -139,9 +140,9 @@ class DensityOfStates(IJob):
         self._outputData.add(
             "dos_total",
             "LineOutputVariable",
-            (instrResolution["n_omegas"],),
+            (instrResolution["n_romegas"],),
             axis="omega",
-            units="nm2/ps",
+            units="au",
         )
 
         self._atoms = sorted_atoms(
@@ -220,14 +221,12 @@ class DensityOfStates(IJob):
                 self._outputData["vacf_%s" % element],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
+                fft="rfft"
             )
 
         weights = self.configuration["weights"].get_weights()
-        vacfTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "vacf_%s")
-        self._outputData["vacf_total"][:] = vacfTotal
-
-        dosTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "dos_%s")
-        self._outputData["dos_total"][:] = dosTotal
+        weight(weights, self._outputData, nAtomsPerElement, 1, "vacf_%s", update_values=True)
+        weight(weights, self._outputData, nAtomsPerElement, 1, "dos_%s", update_values=True)
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

@@ -16,6 +16,8 @@
 
 import abc
 
+import numpy as np
+
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
 
@@ -35,8 +37,19 @@ class IInstrumentResolution(Configurable, metaclass=SubclassFactory):
         self._timeWindow = None
 
     @abc.abstractmethod
-    def set_kernel(self, omegas, dt):
+    def set_kernel(self, omegas, dt, fft="fft"):
         pass
+
+    def apply_fft(self, omegaWindow, dt, fft="fft"):
+        if fft == "fft":
+            timeWindow = np.fft.fftshift(
+                np.fft.ifft(np.fft.ifftshift(omegaWindow)) / dt
+            )
+        elif fft == "rfft":
+            timeWindow = np.fft.irfft(np.fft.ifftshift(omegaWindow)) / dt
+        else:
+            raise ValueError("fft variable should be fft or rfft.")
+        return timeWindow
 
     @property
     def omegaWindow(self):
