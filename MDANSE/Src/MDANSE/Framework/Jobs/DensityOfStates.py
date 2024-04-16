@@ -221,12 +221,21 @@ class DensityOfStates(IJob):
                 self._outputData["vacf_%s" % element],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
-                fft="rfft"
+                fft="rfft",
             )
 
         weights = self.configuration["weights"].get_weights()
-        weight(weights, self._outputData, nAtomsPerElement, 1, "vacf_%s", update_values=True)
-        weight(weights, self._outputData, nAtomsPerElement, 1, "dos_%s", update_values=True)
+        weight(
+            weights,
+            self._outputData,
+            nAtomsPerElement,
+            1,
+            "vacf_%s",
+            update_values=True,
+        )
+        weight(
+            weights, self._outputData, nAtomsPerElement, 1, "dos_%s", update_values=True
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

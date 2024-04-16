@@ -79,9 +79,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
         self["n_omegas"] = len(self["omega"])
 
         self["romega"] = (
-            2.0
-            * np.pi
-            * np.fft.rfftfreq(2 * self["n_frames"] - 1, self["time_step"])
+            2.0 * np.pi * np.fft.rfftfreq(2 * self["n_frames"] - 1, self["time_step"])
         )
         self["n_romegas"] = len(self["romega"])
 
