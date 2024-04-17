@@ -269,8 +269,9 @@ def get_spectrum(signal, window=None, timeStep=1.0, axis=0, fft="fft"):
 
     s = tuple(s)
 
-    # We compute the unitary inverse fourier transform with angular frequencies as described in
-    # https://en.wikipedia.org/wiki/Fourier_transform#Discrete_Fourier_Transforms_and_Fast_Fourier_Transforms
+    # We compute the non-unitary fourier transform with angular
+    # frequencies with a 1/2pi factor applied to the forward transform.
+    # This is done for some historical reason see the git history.
 
     # For information about the manipulation around fftshift and ifftshift
     # http://www.mathworks.com/matlabcentral/newsreader/view_thread/285244
