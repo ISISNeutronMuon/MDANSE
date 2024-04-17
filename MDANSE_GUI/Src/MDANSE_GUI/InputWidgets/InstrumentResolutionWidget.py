@@ -160,4 +160,5 @@ class InstrumentResolutionWidget(WidgetBase):
         if self.helper.isVisible():
             self.helper.close()
         else:
+            self.helper.update_fields(self.get_widget_value())
             self.helper.show()

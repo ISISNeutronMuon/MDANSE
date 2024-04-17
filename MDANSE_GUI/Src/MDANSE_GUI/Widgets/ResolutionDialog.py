@@ -74,6 +74,25 @@ gauss_denum = 2.0 * (2.0 * math.log(2.0)) ** 0.5
 
 
 def convert_parameters(fwhm: float, centre: float, peak_type: str) -> List[float]:
+    """Takes the values from the ResolutionDialog as input,
+    and returns the sigma and mu values as expected by MDANSE.
+    The conversion between sigma and FWHM is different for
+    different peak functions.
+
+    Parameters
+    ----------
+    fwhm : float
+        The FWHM of the peak, in rad/ps
+    centre : float
+        The centre of the peak, in rad/ps
+    peak_type : str
+        Name of the function, one of the values of the widget_text_map dict
+
+    Returns
+    -------
+    List[float]
+        A pair of [sigma, mu] values, or empty for ideal
+    """
     if peak_type == "ideal":
         return []
     elif peak_type == "triangular":
@@ -86,6 +105,42 @@ def convert_parameters(fwhm: float, centre: float, peak_type: str) -> List[float
         vals = [fwhm / 2, centre]
     else:
         vals = [fwhm, centre]
+    return vals[0], vals[1]
+
+
+def revert_parameters(values: dict, peak_type: str) -> List[float]:
+    """Converts the sigma and mu values back to FWHM and peak centre.
+    Used for passing the values from the main GUI back to the
+    helper dialog.
+
+    Parameters
+    ----------
+    values : dict
+        A dictionary of all the peak parameters from the InstrumentResolutionWidget
+    peak_type : str
+        Name of the function, one of the values of the widget_text_map dict
+
+    Returns
+    -------
+    List[float]
+        A pair of [FWHM, centre] values
+    """
+    if peak_type == "ideal":
+        return [0, 0]
+    elif peak_type == "triangular":
+        vals = [values["sigma"], values["mu"]]
+    elif peak_type == "square":
+        vals = [values["sigma"] * 2, values["mu"]]
+    elif peak_type == "gaussian":
+        vals = [values["sigma"] * gauss_denum, values["mu"]]
+    elif peak_type == "lorentzian":
+        vals = [values["sigma"] * 2, values["mu"]]
+    elif "oigt" in peak_type:
+        sigma = values["sigma_gaussian"] * gauss_denum + values["sigma_lorentzian"] * 2
+        mu = values["mu_gaussian"] + values["mu_lorentzian"]
+        vals = [sigma / 2, mu / 2]
+    else:
+        vals = [values["sigma"], values["mu"]]
     return vals[0], vals[1]
 
 
@@ -132,6 +187,22 @@ class ResolutionDialog(QDialog):
         self.update_model(self._peak_selector.currentText())
 
     def make_canvas(self, width=12.0, height=9.0, dpi=150):
+        """Creates a matplotlib figure for plotting
+
+        Parameters
+        ----------
+        width : float, optional
+            Figure width in inches, by default 12.0
+        height : float, optional
+            Figure height in inches, by default 9.0
+        dpi : int, optional
+            Figure resolution in dots per inch, by default 150
+
+        Returns
+        -------
+        QWidget
+            a widget containing both the figure and a toolbar below
+        """
         canvas = QWidget(self)
         layout = QVBoxLayout(canvas)
         figure = mpl.figure(figsize=[width, height], dpi=dpi, frameon=True)
@@ -147,6 +218,14 @@ class ResolutionDialog(QDialog):
 
     @Slot(str)
     def update_model(self, new_model: str):
+        """Activated on new value in the peak type combo box,
+        creates the new IInstrumentResolution subclass.
+
+        Parameters
+        ----------
+        new_model : str
+            Name of the resolution class to create.
+        """
         self._resolution_name = new_model
         self._resolution = IInstrumentResolution.create(widget_text_map[new_model])
         self._resolution.build_configuration()
@@ -160,6 +239,11 @@ class ResolutionDialog(QDialog):
 
     @Slot()
     def recalculate_peak(self):
+        """The main method of the dialog.
+        Collects the inputs from text fields and
+        calculates the peak function on an array
+        of points around the peak centre.
+        """
         try:
             fwhm = float(self._fwhm.text())
         except:
@@ -192,7 +276,6 @@ class ResolutionDialog(QDialog):
             try:
                 sigma, mu = convert_parameters(fwhm, centre, temp_name)
             except ValueError:
-                print(f"Failed to convert parameters for {self._resolution_name}")
                 self._fwhm_value = 0.0
             else:
                 self.set_peak_parameter(mu * factor, "mu")
@@ -204,10 +287,77 @@ class ResolutionDialog(QDialog):
         self.update_text_output()
         self.update_plot()
 
+    def update_fields(self, widget_values):
+        """Method for passing the values from the main
+        GUI into the helper dialog. Converts all the
+        numbers from MDANSE inputs (sigma in rad/ps)
+        to the ResolutionDialog values (FWHM in users's preferred units).
+        During the execution of this method the signals
+        of the widgets are blocked, not to trigger
+        the sending of the input values which would
+        overwrite the GUI values.
+
+        Parameters
+        ----------
+        widget_values : tuple[str, dict]
+            Widget values from InstrumentResolutionWidget
+        """
+        self.blockSignals(True)
+        new_function_name = widget_values[0]
+        offical_name = "missing"
+        for key, value in widget_text_map.items():
+            if new_function_name == value:
+                offical_name = key
+        new_params = widget_values[1]
+        new_eta = new_params.get("eta", "N/A")
+        self._peak_selector.setCurrentText(offical_name)
+        fwhm, centre = revert_parameters(new_params, new_function_name)
+        if abs(fwhm) < 1e-12:
+            new_fwhm = 0.0
+        else:
+            temp_value = fwhm / self._factor_value
+            new_fwhm = round(
+                temp_value,
+                abs(math.floor(math.log10(abs(temp_value)))) + 3,
+            )
+        if abs(centre) < 1e-12:
+            new_centre = 0.0
+        else:
+            temp_value = centre / self._factor_value
+            new_centre = round(
+                temp_value,
+                abs(math.floor(math.log10(abs(temp_value)))) + 3,
+            )
+        self._fwhm.setText(str(new_fwhm))
+        self._centre.setText(str(new_centre))
+        self._eta.setText(str(new_eta))
+        self.blockSignals(False)
+        self.recalculate_peak()
+
     def set_peak_parameter(self, value: float, key: str):
+        """A convenience method for passing an input value
+        to the IInstrumentResolution class instance.
+
+        Parameters
+        ----------
+        value : float
+            numerical value of the peak parameter
+        key : str
+            name of the parameter from the 'settings' dictionary
+        """
         self._resolution._configuration[key].configure(value)
 
     def update_text_output(self, rounding_precision=3):
+        """Updates the text in the QTextEdit widget.
+        It shows the user what MDANSE values will be
+        created out of the current inputs.
+        Rounding is applied to the numbers for legibility.
+
+        Parameters
+        ----------
+        rounding_precision : int, optional
+            number of significant places to include, by default 3
+        """
         text = "Parameters in MDANSE internal units\n"
         results = {"function": self._resolution_name}
         for key, value in self._resolution._configuration.items():
@@ -226,6 +376,13 @@ class ResolutionDialog(QDialog):
         self.parameters_changed.emit(results)
 
     def update_plot(self):
+        """Plots the latest peak function in the
+        matplotlib figure.
+        The plot has two x axes: one in user's units,
+        and the other in MDANSE units.
+        A dashed line indicates the full width at
+        half maximum of the peak.
+        """
         self._figure.clear()
         axes = self._figure.add_axes(111)
         axes.plot(self._omega_axis, self._resolution._omegaWindow)
