@@ -245,7 +245,7 @@ class ResolutionDialog(QDialog):
         of points around the peak centre.
         """
         try:
-            fwhm = float(self._fwhm.text())
+            fwhm = abs(float(self._fwhm.text()))
         except:
             return
         try:
