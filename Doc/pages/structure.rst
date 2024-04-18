@@ -256,35 +256,22 @@ the difference between two structures. It can be defined as:
 .. math::
    :label: pfx131
 
-   {\mathit{RMSD}{(t) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\alpha}}\left( t_{\mathit{ref}} \right)} \right)}{N_{\alpha}}}}}
+   {\mathrm{RMSD}{\left( {n\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha}^{N_{\alpha}}\vert {\mathbf{r}_{\alpha}{(n\Delta t) - \mathbf{r}_{\alpha}}(n_{\mathrm{ref}}\Delta t)} \vert^{2}}{N_{\alpha}}}} \qquad {n = 0}\ldots{N_{t} - 1}}
 
-where N\_ is the number of atoms of the system, and r_(t) and r_(tref )
-are respectively the position of atom :math:`\alpha` at time t and tref where tref is
-a reference time usually chosen as the first step of the simulation.
+where :math:`N_{t}` is the number of frames, :math:`\mathrm{\Delta}t`
+is the time step, :math:`N_{\alpha}` is the number of selected atoms of
+the system and :math:`\mathbf{r}_{\alpha}(n\Delta t)` and
+:math:`\mathbf{r}_{\alpha}(n_{\mathrm{ref}}\Delta t)`
+are respectively the position of atom :math:`\alpha` at time :math:`n\Delta t` and :math:`n_{\mathrm{ref}}\Delta t` where :math:`n_{\mathrm{ref}}` is
+a reference frame usually chosen as the zeroth frame of the simulation.
+
 Typically, *RMSD* is used to quantify the structural evolution of the
 system during the simulation. It can provide precious information about
 the system especially if it reached equilibrium or conversely if major
-structural changes occurred during the simulation.
+structural changes occurred during the simulation. MDANSE calculates the
+*RMSD* of individual atoms types, for example, the *RMSD* of the oxygen
+atoms in addition to the RMSD of all atoms of the system.
 
-In Molecular Dynamics Analysis for Neutron Scattering Experiments
-(*MDANSE*), *RMSD* is computed using the discretized version of equation
-:math:numref:`pfx130`:
-
-.. math::
-   :label: pfx132
-
-   {\mathit{RMSD}{\left( {n\cdot\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{ref}}}(t)} \right)}{N_{\alpha}}}},{n = 0}\ldots{N_{t} - 1}.}
-
-where Nt is the number of frames and
-
-.. math::
-   :label: pfx133
-   
-   {\mathrm{\Delta}t}
-
-\ is the time step.
-
-.
 
 Root Mean Square Fluctuation
 ''''''''''''''''''''''''''''
@@ -304,24 +291,25 @@ or any molecular system subject to temporal variations.
 Radius Of Gyration
 ''''''''''''''''''
 
-Radius Of Gyration (*ROG*) is calculated as a root (mass weighted) mean
+Radius Of Gyration (*ROG*) is calculated as a root (atomic mass weighted) mean
 square distance of the components of a system relative to either its centre of
 mass or a given axis of rotation. The *ROG* serves as a quantitative
-measure which can be used to characterizes the spatial distribution of
+measure which can be used to characterize the spatial distribution of
 a system such as a molecule or a cluster of atoms.
 
 In MDANSE *ROG* is calculated relative to the systems centre of mass.
-Mathematically, it can be defined as:
+It can be defined as:
 
 .. math::
    :label: pfx134
 
-    {\mathrm{ROG}{(t) = \sqrt{\frac{\sum_{i}^{N}m_{i}\vert {\mathbf{r}_{i}{(t) - \mathbf{r}_{\mathrm{CM}}}(t)} \vert^{2}}{\sum_{i}^{N}m_{i}}}}}
+    {\mathrm{ROG}{({n\Delta t}) = \sqrt{\frac{\sum_{i}^{N}m_{i}\vert {\mathbf{r}_{i}{(n\Delta t) - \mathbf{r}_{\mathrm{CM}}}(n\Delta t)} \vert^{2}}{\sum_{i}^{N}m_{i}}}} \qquad {n = 0}\ldots{N_{t} - 1}}
 
-where :math:`N` is the number of atoms of the system,
-:math:`r_{i}(t)` are the positions of the
-atoms :math:`i`, :math:`r_{\mathrm{CM}}(t)` is the centre of mass of
-the system and :math:`t` is the time of the simulation.
+where :math:`N_{t}` is the number of frames, :math:`\mathrm{\Delta}t`
+is the time step, :math:`N` is the number of atoms of the system,
+:math:`\mathbf{r}_{i}(n\Delta t)` are the positions of the
+atoms :math:`i`, :math:`\mathbf{r}_{\mathrm{CM}}(n\Delta t)` is the centre of mass of
+the system and :math:`n\Delta t` is the time of the simulation.
 
 *ROG* can be used to describe the overall spread of the molecule and
 as such is a good measure for the molecule compactness. For example,

@@ -93,6 +93,13 @@ class AtomSelectionConfigurator(IConfigurator):
         self.error_status = "OK"
 
     def get_natoms(self):
+        """
+        Returns
+        -------
+        dict
+            A dictionary with the atom name for the key and
+            number of atoms selected for its value.
+        """
         nAtomsPerElement = {}
         for v in self["names"]:
             if v in nAtomsPerElement:
@@ -101,6 +108,15 @@ class AtomSelectionConfigurator(IConfigurator):
                 nAtomsPerElement[v] = 1
 
         return nAtomsPerElement
+
+    def get_total_natoms(self):
+        """
+        Returns
+        -------
+        int
+            The total number of atoms selected.
+        """
+        return len(self["names"])
 
     def get_indexes(self):
         indexesPerElement = {}
