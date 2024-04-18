@@ -136,8 +136,16 @@ def revert_parameters(values: dict, peak_type: str) -> List[float]:
     elif peak_type == "lorentzian":
         vals = [values["sigma"] * 2, values["mu"]]
     elif "oigt" in peak_type:
-        sigma = values["sigma_gaussian"] * gauss_denum + values["sigma_lorentzian"] * 2
-        mu = values["mu_gaussian"] + values["mu_lorentzian"]
+        try:
+            sigma = (
+                values["sigma_gaussian"] * gauss_denum + values["sigma_lorentzian"] * 2
+            )
+        except KeyError:
+            sigma = 2.0
+        try:
+            mu = values["mu_gaussian"] + values["mu_lorentzian"]
+        except KeyError:
+            mu = 0.0
         vals = [sigma / 2, mu / 2]
     else:
         vals = [values["sigma"], values["mu"]]
@@ -286,12 +294,23 @@ class ResolutionDialog(QDialog):
             else:
                 self.set_peak_parameter(mu * factor, "mu")
                 self.set_peak_parameter(sigma * factor, "sigma")
+        extra_width = abs(fwhm)
+        if extra_width <= 1e-14:
+            extra_width = 1
         self._omega_axis = np.linspace(
-            factor * (centre - 3 * fwhm), factor * (centre + 3 * fwhm), 500
+            factor * (centre - 3 * extra_width),
+            factor * (centre + 3 * extra_width),
+            500,
         )
-        self._resolution.set_kernel(self._omega_axis, 1.0)
-        self.update_text_output()
-        self.update_plot()
+        try:
+            self._resolution.set_kernel(self._omega_axis, 1.0)
+        except:
+            self.update_text_output(error=True)
+            self._apply_button.setEnabled(False)
+        else:
+            self._apply_button.setEnabled(True)
+            self.update_text_output()
+            self.update_plot()
 
     def update_fields(self, widget_values):
         """Method for passing the values from the main
@@ -316,8 +335,12 @@ class ResolutionDialog(QDialog):
                 offical_name = key
         new_params = widget_values[1]
         new_eta = new_params.get("eta", "N/A")
+        try:
+            fwhm, centre = revert_parameters(new_params, new_function_name)
+        except:
+            self.blockSignals(False)
+            return
         self._peak_selector.setCurrentText(offical_name)
-        fwhm, centre = revert_parameters(new_params, new_function_name)
         if abs(fwhm) < 1e-12:
             new_fwhm = 0.0
         else:
@@ -353,7 +376,7 @@ class ResolutionDialog(QDialog):
         """
         self._resolution._configuration[key].configure(value)
 
-    def update_text_output(self, rounding_precision=3):
+    def update_text_output(self, rounding_precision=3, error=False):
         """Updates the text in the QTextEdit widget.
         It shows the user what MDANSE values will be
         created out of the current inputs.
@@ -364,6 +387,11 @@ class ResolutionDialog(QDialog):
         rounding_precision : int, optional
             number of significant places to include, by default 3
         """
+        if error:
+            text = "Current parameters do not produce a valid peak function.\n"
+            text += "If your FWHM=0, you may need to change it."
+            self._output_field.setText(text)
+            return
         text = "Parameters in MDANSE internal units\n"
         results = {"function": self._resolution_name}
         for key, value in self._resolution._configuration.items():
