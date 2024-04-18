@@ -142,6 +142,7 @@ class InstrumentResolutionWidget(WidgetBase):
                 else:
                     self._fields[index].setStyleSheet("")
                 params[key] = value
+        self.helper.update_fields((function, params))
         return (function, params)
 
     @Slot(dict)
@@ -160,5 +161,4 @@ class InstrumentResolutionWidget(WidgetBase):
         if self.helper.isVisible():
             self.helper.close()
         else:
-            self.helper.update_fields(self.get_widget_value())
             self.helper.show()

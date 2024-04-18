@@ -152,6 +152,7 @@ class ResolutionDialog(QDialog):
         super().__init__(*args, **kwargs)
 
         layout = QGridLayout(self)
+        self.setWindowTitle("Resolution Helper for MDANSE")
         self._resolution = None
         self.setLayout(layout)
         self._peak_selector = QComboBox(self)
@@ -160,11 +161,15 @@ class ResolutionDialog(QDialog):
         self._unit_selector.addItems(["meV", "1/cm", "THz"])
         self._fwhm = QLineEdit("1.0", self)
         self._centre = QLineEdit("0.0", self)
+        for ledit in [self._fwhm, self._centre]:
+            ledit.setValidator(QDoubleValidator(ledit))
         self._eta = QLineEdit("N/A", self)
         self._eta.setEnabled(False)
         self._omega_axis = np.linspace(-1.0, 1.0, 500)
         self._output_field = QTextEdit(self)
         self._output_field.setReadOnly(True)
+        self._apply_button = QPushButton("Apply", self)
+        self._apply_button.clicked.connect(self.apply_changes)
         text_labels = ["Peak function", "Energy unit", "FWHM", "Centre", "eta"]
         for number, widget in enumerate(
             [
@@ -178,15 +183,16 @@ class ResolutionDialog(QDialog):
             layout.addWidget(QLabel(text_labels[number], self), number, 0)
             layout.addWidget(widget, number, 1)
         layout.addWidget(self._output_field, number + 1, 0, 1, 2)
+        layout.addWidget(self._apply_button, number + 2, 0)
         canvas = self.make_canvas()
-        layout.addWidget(canvas, 0, 2, 7, 1)
+        layout.addWidget(canvas, 0, 2, 8, 1)
         for widget in [self._fwhm, self._centre, self._eta]:
             widget.textChanged.connect(self.recalculate_peak)
         self._peak_selector.currentTextChanged.connect(self.update_model)
         self._unit_selector.currentTextChanged.connect(self.recalculate_peak)
         self.update_model(self._peak_selector.currentText())
 
-    def make_canvas(self, width=12.0, height=9.0, dpi=150):
+    def make_canvas(self, width=12.0, height=9.0, dpi=100):
         """Creates a matplotlib figure for plotting
 
         Parameters
@@ -196,7 +202,7 @@ class ResolutionDialog(QDialog):
         height : float, optional
             Figure height in inches, by default 9.0
         dpi : int, optional
-            Figure resolution in dots per inch, by default 150
+            Figure resolution in dots per inch, by default 100
 
         Returns
         -------
@@ -373,7 +379,10 @@ class ResolutionDialog(QDialog):
             text += f"settings[{key}] = {rounded_value}\n"
             results[key] = rounded_value
         self._output_field.setText(text)
-        self.parameters_changed.emit(results)
+        self._results = results
+
+    def apply_changes(self):
+        self.parameters_changed.emit(self._results)
 
     def update_plot(self):
         """Plots the latest peak function in the
