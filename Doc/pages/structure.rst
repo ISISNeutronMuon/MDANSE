@@ -256,10 +256,10 @@ the difference between two structures. It can be defined as:
 .. math::
    :label: pfx131
 
-   {\mathit{RMSD}{(t) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\alpha}}\left( t_{\mathit{ref}} \right)} \right)}{N_{\alpha}}}}}
+   {\mathit{RMSD}{(t) = \sqrt{\frac{\sum\limits_{\alpha}^{N_{\alpha}}\vert {r_{\alpha}{(t) - r_{\alpha}}\left( t_{\mathrm{ref}} \right)} \vert^{2}}{N_{\alpha}}}}}
 
-where N\_ is the number of atoms of the system, and r_(t) and r_(tref )
-are respectively the position of atom :math:`\alpha` at time t and tref where tref is
+where :math:`N_{\alpha}` is the number of selected atoms of the system and :math:`r_{\alpha}(t)` and :math:`r_{\alpha}(t_{\mathrm{ref}})`
+are respectively the position of atom :math:`\alpha` at time :math:`t` and :math:`t_{\mathrm{ref}}` where :math:`t_{\mathrm{ref}}` is
 a reference time usually chosen as the first step of the simulation.
 Typically, *RMSD* is used to quantify the structural evolution of the
 system during the simulation. It can provide precious information about
@@ -268,23 +268,18 @@ structural changes occurred during the simulation.
 
 In Molecular Dynamics Analysis for Neutron Scattering Experiments
 (*MDANSE*), *RMSD* is computed using the discretized version of equation
-:math:numref:`pfx130`:
+:math:numref:`pfx131`:
 
 .. math::
    :label: pfx132
 
-   {\mathit{RMSD}{\left( {n\cdot\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha = 1}^{N_{\alpha}}\left( {r_{\alpha}{(t) - r_{\mathit{ref}}}(t)} \right)}{N_{\alpha}}}},{n = 0}\ldots{N_{t} - 1}.}
+   {\mathit{RMSD}{\left( {n\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha}^{N_{\alpha}}\vert {r_{\alpha}{(t) - r_{\alpha}}(t_{\mathrm{ref}})} \vert^{2}}{N_{\alpha}}}} \qquad {n = 0}\ldots{N_{t} - 1}.}
 
-where Nt is the number of frames and
+where :math:`N_{t}` is the number of frames and :math:`\mathrm{\Delta}t` is the time step.
+Additionally MDANSE will also calculate the RMSD of individual atoms types,
+for example, the RMSD of the oxygen atoms in addition to the RMSD of all
+atoms of the system.
 
-.. math::
-   :label: pfx133
-   
-   {\mathrm{\Delta}t}
-
-\ is the time step.
-
-.
 
 Root Mean Square Fluctuation
 ''''''''''''''''''''''''''''

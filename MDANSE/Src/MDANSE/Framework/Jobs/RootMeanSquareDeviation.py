@@ -71,10 +71,6 @@ class RootMeanSquareDeviation(IJob):
             }
         },
     )
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {"dependencies": {"atom_selection": "atom_selection"}},
-    )
     settings["output_files"] = (
         "OutputFilesConfigurator",
         {"formats": ["MDAFormat", "TextFormat"]},
@@ -94,7 +90,7 @@ class RootMeanSquareDeviation(IJob):
             units="ps",
         )
 
-        # Will store the mean square deviation
+        # Will initially store the mean square deviation before appling the root
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
                 "rmsd_{}".format(element),
@@ -103,6 +99,13 @@ class RootMeanSquareDeviation(IJob):
                 axis="time",
                 units="nm",
             )
+        self._outputData.add(
+            "rmsd_all",
+            "LineOutputVariable",
+            (self.configuration["frames"]["number"],),
+            axis="time",
+            units="nm",
+        )
 
         self._atoms = sorted_atoms(
             self.configuration["trajectory"]["instance"].chemical_system.atom_list
@@ -142,28 +145,24 @@ class RootMeanSquareDeviation(IJob):
         element = self.configuration["atom_selection"]["names"][index]
 
         self._outputData["rmsd_%s" % element] += x
+        self._outputData["rmsd_all"] += x
 
     def finalize(self):
         """
         Finalize the job.
         """
 
-        # The RMSDs per element are averaged.
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
             self._outputData["rmsd_{}".format(element)] /= number
-
-        weights = self.configuration["weights"].get_weights()
-        rmsdTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "rmsd_%s")
-        rmsdTotal = np.sqrt(rmsdTotal)
-        self._outputData.add(
-            "rmsd_total", "LineOutputVariable", rmsdTotal, axis="time", units="nm"
-        )
 
         for element, number in nAtomsPerElement.items():
             self._outputData["rmsd_{}".format(element)] = np.sqrt(
                 self._outputData["rmsd_{}".format(element)]
             )
+
+        self._outputData["rmsd_all"] /= self.configuration["atom_selection"].get_total_natoms()
+        self._outputData["rmsd_all"] = np.sqrt(self._outputData["rmsd_total"])
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
