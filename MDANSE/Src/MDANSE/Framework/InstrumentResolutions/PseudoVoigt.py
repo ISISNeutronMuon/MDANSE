@@ -34,7 +34,7 @@ class PseudoVoigt(IInstrumentResolution):
     settings["mu_gaussian"] = ("FloatConfigurator", {"default": 0.0})
     settings["sigma_gaussian"] = ("FloatConfigurator", {"default": 1.0})
 
-    def set_kernel(self, omegas, dt):
+    def set_kernel(self, omegas, dt, fft="fft"):
         eta = self._configuration["eta"]["value"]
         muL = self._configuration["mu_lorentzian"]["value"]
         sigmaL = self._configuration["sigma_lorentzian"]["value"]
@@ -48,6 +48,4 @@ class PseudoVoigt(IInstrumentResolution):
         lorentzian = (2.0 * sigmaL) / ((omegas - muL) ** 2 + sigmaL**2)
 
         self._omegaWindow = eta * lorentzian + (1.0 - eta) * gaussian
-        self._timeWindow = np.fft.fftshift(
-            np.fft.ifft(np.fft.ifftshift(self._omegaWindow)) / dt
-        )
+        self._timeWindow = self.apply_fft(self._omegaWindow, dt, fft)
