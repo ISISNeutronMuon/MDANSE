@@ -76,23 +76,29 @@ class InstrumentResolutionConfigurator(IConfigurator):
                 np.fft.fftfreq(2 * self["n_frames"] - 1, self["time_step"])
             )
         )
-
         self["n_omegas"] = len(self["omega"])
 
+        # generate the rfftfreq for the positive frequency only results
+        self["romega"] = (
+            2.0 * np.pi * np.fft.rfftfreq(2 * self["n_frames"] - 1, self["time_step"])
+        )
+        self["n_romegas"] = len(self["romega"])
+
         kernel, parameters = value
-
-        resolution = IInstrumentResolution.create(kernel)
-
-        resolution.setup(parameters)
-
-        resolution.set_kernel(self["omega"], self["time_step"])
-
-        self["omega_window"] = resolution.omegaWindow
-
-        self["time_window"] = resolution.timeWindow.real
-
         self["kernel"] = kernel
         self["parameters"] = parameters
+
+        resolution = IInstrumentResolution.create(kernel)
+        resolution.setup(parameters)
+        resolution.set_kernel(self["omega"], self["time_step"])
+        self["omega_window"] = resolution.omegaWindow
+        self["time_window"] = resolution.timeWindow.real
+
+        rresolution = IInstrumentResolution.create(kernel)
+        rresolution.setup(parameters)
+        rresolution.set_kernel(self["romega"], self["time_step"], fft="rfft")
+        self["romega_window"] = rresolution.omegaWindow
+        self["rtime_window"] = rresolution.timeWindow.real
 
     def get_information(self):
         """
