@@ -162,7 +162,7 @@ class RootMeanSquareDeviation(IJob):
             )
 
         self._outputData["rmsd_all"] /= self.configuration["atom_selection"].get_total_natoms()
-        self._outputData["rmsd_all"] = np.sqrt(self._outputData["rmsd_total"])
+        self._outputData["rmsd_all"] = np.sqrt(self._outputData["rmsd_all"])
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
