@@ -90,6 +90,7 @@ class Selector:
         self.settings = copy.deepcopy(self._default)
 
         symbols = set([at.symbol for at in system.atom_list])
+        # all possible values for the system
         self._kwarg_vals = {
             "element": symbols,
             "hs_on_element": symbols,
@@ -98,6 +99,7 @@ class Selector:
             "index": self.all_idxs | set([str(i) for i in self.all_idxs]),
         }
 
+        # figure out if a match exists for the selector function
         self.match_exists = self.full_settings
         for k0, v0 in self.match_exists.items():
             if k0 == "invert":

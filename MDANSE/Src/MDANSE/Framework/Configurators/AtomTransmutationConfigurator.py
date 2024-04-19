@@ -13,112 +13,76 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import json
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
-from MDANSE.Framework.AtomSelector import Selector
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.AtomTransmutation import AtomTransmuter
 
 
 class AtomTransmutationConfigurator(IConfigurator):
+    """This configurator allows to define a set of atoms to be
+    transmuted to a given chemical element.
+
+    For some analysis it can be necessary to change the nature of the
+    chemical element of a given part of the system to have results
+    closer to experience. A good example is to change some hydrogen
+    atoms to deuterium in order to fit with experiments where
+    deuteration experiments have been performed for improving the
+    contrast and having a better access to the dynamics of a specific
+    part of the molecular system.
+
+    Attributes
+    ----------
+    _default : str
+        The defaults transmutation setting.
     """
-    This configurator allows to define a set of atoms to be transmutated to a given chemical
-    element.
 
-    For some analysis it can be necessary to change the nature of the chemical element of a given
-    part of the system to have results closer to experience. A good example is to change some
-    hydrogen atoms to deuterium in order to fit with experiments where deuteration experiments have
-    been performed for improving the contrast and having a better access to the dynamic of a specific part
-    of the molecular system.
+    _default = "{}"
 
-    :note: this configurator depends on 'trajectory' and 'atom_selection' configurators to be configured
-    """
+    def configure(self, value: str):
+        """Configure an input value.
 
-    _default = None
-
-    def configure(self, value):
-        """
-        Configure an input value. 
-        
-        The value can be:
-        
-        #. ``None``: no transmutation is performed
-        #. (str,str)-dict: for each (str,str) pair, a transmutation will be performed by parsing \
-        the 1st element as an atom selection string and transmutating the corresponding atom \
-        selection to the target chemical element stored in the 2nd element
-        #. str: the transmutation will be performed by reading the corresponding user definition
-        
-        :param value: the input value
-        :type value: None or (str,str)-dict or str 
+        Parameters
+        ----------
+        value : str
+            The transmutation setting in a json readable format.
         """
 
         self["value"] = value
 
         # if the input value is None, do not perform any transmutation
-        if value is None:
+        if value is None or value == "":
             return
 
-        if not isinstance(value, (list, tuple)):
+        if not isinstance(value, str):
             self.error_status = "Invalid input value."
             return
 
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
-
-        self._nTransmutatedAtoms = 0
-
-        selector = Selector(trajConfig["instance"].chemical_system)
-        for json_string, element in value:
-            # Otherwise, it must be a string that will be found as a user-definition keys
-            if not isinstance(json_string, str):
-                self.error_status = "Wrong format for atom transmutation configurator."
-                return
-
-            if UD_STORE.has_definition(
-                trajConfig["basename"], "atom_selection", json_string
-            ):
-                ud = UD_STORE.get_definition(
-                    trajConfig["basename"], "atom_selection", json_string
-                )
-                indexes = ud["indexes"]
-            else:
-                selector.update_from_json(json_string, reset_first=True)
-                indexes = selector.get_idxs()
-
-            self.transmutate(indexes, element)
-
-            self._nTransmutatedAtoms += len(indexes)
-
-    def transmutate(self, selection, element):
-        """
-        Transmutates a set of atoms to a given element
-
-        :param selection: the indexes of the atoms to be transmutated
-        :type selection: list of int
-        :param element: the symbol of the element to which the selected atoms should be transmutated
-        :type element: str
-        """
-
-        if element not in ATOMS_DATABASE:
-            self.error_status = (
-                f"the element {element} is not registered in the database"
-            )
+        try:
+            value = json.loads(value)
+        except json.decoder.JSONDecodeError:
+            self.error_status = "Unable to load JSON string."
             return
 
-        atomSelConfigurator = self._configurable[self._dependencies["atom_selection"]]
+        self._nTransmutatedAtoms = 0
+        for idx, element in value.items():
 
-        for idx in selection:
             try:
-                idxInSelection = atomSelConfigurator["flatten_indexes"].index(idx)
+                idx = int(idx)
             except ValueError:
-                pass
-            else:
-                atomSelConfigurator["names"][idxInSelection] = element
-                atomSelConfigurator["elements"][idxInSelection] = [element]
+                self.error_status = "Key of transmutation map should be castable to int"
+                return
 
+            if element not in ATOMS_DATABASE:
+                self.error_status = (
+                    f"the element {element} is not registered in the database"
+                )
+                return
+
+            self.transmutate(idx, element)
+
+        atomSelConfigurator = self._configurable[self._dependencies["atom_selection"]]
         atomSelConfigurator["unique_names"] = sorted(set(atomSelConfigurator["names"]))
         atomSelConfigurator["masses"] = [
             [ATOMS_DATABASE.get_atom_property(n, "atomic_weight")]
@@ -126,14 +90,34 @@ class AtomTransmutationConfigurator(IConfigurator):
         ]
         self.error_status = "OK"
 
-    def get_information(self):
-        """
-        Returns some informations the atoms selected for being transmutated.
+    def transmutate(self, idx: int, element: str) -> None:
+        """Transmute the atom index to the chosen element.
 
-        :return: the information about the atoms selected for being transmutated.
-        :rtype: str
+        Parameters
+        ----------
+        idx : int
+            The index of the atom to transmute.
+        element : str
+            The element to transmute the atom to.
         """
+        atomSelConfigurator = self._configurable[self._dependencies["atom_selection"]]
 
+        try:
+            idxInSelection = atomSelConfigurator["flatten_indexes"].index(idx)
+        except ValueError:
+            pass
+        else:
+            atomSelConfigurator["names"][idxInSelection] = element
+            atomSelConfigurator["elements"][idxInSelection] = [element]
+            self._nTransmutatedAtoms += 1
+
+    def get_information(self) -> str:
+        """
+        Returns
+        -------
+        str
+            Some information on the atoms selected for being transmuted.
+        """
         if "value" not in self:
             return "Not configured yet"
 
@@ -141,3 +125,15 @@ class AtomTransmutationConfigurator(IConfigurator):
             return "No atoms selected for transmutation\n"
 
         return "Number of transmutated atoms:%d\n" % self._nTransmutatedAtoms
+
+    def get_transmuter(self) -> AtomTransmuter:
+        """
+        Returns
+        -------
+        AtomTransmuter
+            The atom transmuter object initialised with the trajectories
+            chemical system.
+        """
+        traj_config = self._configurable[self._dependencies["trajectory"]]
+        transmuter = AtomTransmuter(traj_config["instance"].chemical_system)
+        return transmuter
