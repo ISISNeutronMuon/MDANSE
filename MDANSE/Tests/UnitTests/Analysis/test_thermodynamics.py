@@ -60,15 +60,21 @@ def test_temperature_nonzero(trajectory, interp_order):
     assert np.all(temperature > 0.0)
 
 
-def test_density(trajectory):
+@pytest.mark.parametrize("output_format", ["MDAFormat", "TextFormat"])
+def test_density(trajectory, output_format):
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["output_files"] = (temp_name, (output_format,))
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     den = IJob.create("Density")
     den.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
+    if output_format == "MDAFormat":
+        assert path.exists(temp_name + ".mda")
+        assert path.isfile(temp_name + ".mda")
+        os.remove(temp_name + ".mda")
+    elif output_format == "TextFormat":
+        assert path.exists(temp_name + "_text.tar")
+        assert path.isfile(temp_name + "_text.tar")
+        os.remove(temp_name + "_text.tar")

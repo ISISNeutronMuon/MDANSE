@@ -84,23 +84,34 @@ def parameters():
     return parameters
 
 
-@pytest.mark.parametrize(
-    "job_type",
-    [
-        # "AngularCorrelation",
-        # "GeneralAutoCorrelationFunction",
-        "DensityOfStates",
-        "MeanSquareDisplacement",
-        "VelocityAutoCorrelationFunction",
-        # "OrderParameter",
-        "PositionAutoCorrelationFunction",
-    ],
-)
-def test_dynamics_analysis(parameters, job_type):
+total_list = []
+
+for jt in [
+    # "AngularCorrelation",
+    # "GeneralAutoCorrelationFunction",
+    "DensityOfStates",
+    "MeanSquareDisplacement",
+    "VelocityAutoCorrelationFunction",
+    # "OrderParameter",
+    "PositionAutoCorrelationFunction",
+]:
+    for rm in [("single-core", 1), ("threadpool", 4), ("multicore", 4)]:
+        for of in ["MDAFormat", "TextFormat"]:
+            total_list.append((jt, rm, of))
+
+
+@pytest.mark.parametrize("job_type,running_mode,output_format", total_list)
+def test_dynamics_analysis(parameters, job_type, running_mode, output_format):
     temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["running_mode"] = running_mode
+    parameters["output_files"] = (temp_name, (output_format,))
     job = IJob.create(job_type)
     job.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
+    if output_format == "MDAFormat":
+        assert path.exists(temp_name + ".mda")
+        assert path.isfile(temp_name + ".mda")
+        os.remove(temp_name + ".mda")
+    elif output_format == "TextFormat":
+        assert path.exists(temp_name + "_text.tar")
+        assert path.isfile(temp_name + "_text.tar")
+        os.remove(temp_name + "_text.tar")
