@@ -85,7 +85,6 @@ def test_CroppedTrajectory(parameters):
     os.remove(temp_name + ".mdt")
 
 
-@pytest.mark.xfail(reason="see docstring")
 def test_CenterOfMassesTrajectory(parameters):
     """This will need to detect molecules before it can
     find the centre of each one of them."""

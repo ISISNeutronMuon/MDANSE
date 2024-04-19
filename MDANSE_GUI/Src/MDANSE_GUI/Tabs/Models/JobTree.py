@@ -81,7 +81,7 @@ class JobTree(QStandardItemModel):
         self._values[new_number] = thing
         self._docstrings[new_number] = thing.__doc__
         try:
-            self._docstrings[new_number] += "\n" + thing.build_doc()
+            self._docstrings[new_number] += "\n" + thing.build_doc(use_html_table=True)
         except AttributeError:
             pass
         except TypeError:
