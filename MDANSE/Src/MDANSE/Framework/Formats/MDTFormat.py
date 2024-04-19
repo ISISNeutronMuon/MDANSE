@@ -20,6 +20,7 @@ from MDANSE.Framework.Formats.IFormat import IFormat
 
 if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
+    from MDANSE.Framework.Jobs.IJob import IJob
 from .HDFFormat import HDFFormat
 
 
@@ -44,7 +45,7 @@ class MDTFormat(IFormat):
         filename: str,
         data: Dict[str, "IOutputVariable"],
         header: str = "",
-        inputs: Dict[str, str] = None,
+        run_instance: "IJob" = None,
         extension: str = extensions[0],
     ) -> None:
         """Write a set of output variables into an HDF file with the

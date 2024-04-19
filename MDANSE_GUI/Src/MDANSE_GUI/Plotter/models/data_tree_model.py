@@ -349,7 +349,10 @@ class HDFDataItem(DataItem):
             elif hdf_variable.ndim == 1:
                 info["data"] = hdf_variable[:]
             else:
-                info["data"] = np.expand_dims(hdf_variable[:], axis=0)
+                try:
+                    info["data"] = np.expand_dims(hdf_variable[:], axis=0)
+                except ValueError:
+                    info["data"] = np.array(hdf_variable)
 
         return info
 

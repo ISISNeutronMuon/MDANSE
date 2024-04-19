@@ -19,12 +19,16 @@ import io
 import tarfile
 import codecs
 import time
-from typing import Dict
+from typing import Dict, TYPE_CHECKING
+from importlib import metadata
 
 import numpy as np
 
 
 from MDANSE.Framework.Formats.IFormat import IFormat
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Jobs.IJob import IJob
 
 
 def length_stringio(input: "io.BytesIO") -> int:
@@ -43,7 +47,7 @@ class TextFormat(IFormat):
     extensions = [".dat", ".txt"]
 
     @classmethod
-    def write(cls, filename, data, header: str = "", inputs: Dict[str, str] = None):
+    def write(cls, filename, data, header: str = "", run_instance: "IJob" = None):
         """
         Write a set of output variables into a set of Text files.
 
@@ -74,9 +78,12 @@ class TextFormat(IFormat):
             info.mtime = time.time()
             tf.addfile(tarinfo=info, fileobj=real_buffer)
 
-        if inputs is not None:
+        if run_instance is not None:
+            inputs = run_instance.output_configuration()
             real_buffer = io.BytesIO()
             tempStr = codecs.getwriter("utf-8")(real_buffer)
+            tempStr.write(f"run type: {run_instance.__class__.__name__}\n")
+            tempStr.write(f"MDANSE version: {metadata.version('MDANSE')}\n")
             for key, value in inputs.items():
                 tempStr.write(f"parameters[{str(key)}] = {str(value)}\n")
             tempStr.write("\n\n")

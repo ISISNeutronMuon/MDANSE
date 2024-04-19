@@ -14,7 +14,12 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+from typing import TYPE_CHECKING
+
 from MDANSE.Core.SubclassFactory import SubclassFactory
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Jobs.IJob import IJob
 
 
 class IFormat(metaclass=SubclassFactory):
@@ -27,7 +32,7 @@ class IFormat(metaclass=SubclassFactory):
     """
 
     @classmethod
-    def write(cls, filename, data, header="", inputs=None):
+    def write(cls, filename, data, header="", run_instance: "IJob" = None):
         """
         Write a set of output variables into filename using a given file format.
 
@@ -37,8 +42,8 @@ class IFormat(metaclass=SubclassFactory):
         :type data: dict of Framework.OutputVariables.IOutputVariable
         :param header: the header to add to the output file.
         :type header: str
-        :param inputs: the verbatim values of the parameter inputs
-        :type inputs: dict[str, str]
+        :param run_instance: the instance of the job, to be queried for parameters
+        :type run_instance: IJob
         """
 
         pass

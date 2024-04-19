@@ -66,7 +66,7 @@ def test_parallel_meansquare():
         h5py.File(temp_name2 + ".mda") as parallel,
     ):
         for kk in single.keys():
-            if not "inputs" in kk:
+            if not "metadata" in kk:
                 assert np.allclose(np.array(single[kk]), np.array(parallel[kk]), 1e-5, 1e-4)
     os.remove(temp_name + ".mda")
     os.remove(temp_name2 + ".mda")

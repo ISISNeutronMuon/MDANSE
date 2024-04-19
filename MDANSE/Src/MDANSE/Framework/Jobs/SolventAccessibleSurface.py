@@ -177,7 +177,7 @@ class SolventAccessibleSurface(IJob):
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
             self._info,
-            self.output_configuration(),
+            self,
         )
 
         self.configuration["trajectory"]["instance"].close()
