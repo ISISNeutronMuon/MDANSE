@@ -15,6 +15,7 @@
 #
 
 from abc import ABCMeta, abstractmethod, abstractclassmethod
+from importlib import metadata
 
 import h5py
 
@@ -191,6 +192,24 @@ class Converter(IJob, metaclass=SubclassFactory):
     def run_step(self, index):
         pass
 
+    def write_metadata(self, output_file):
+        string_dt = h5py.special_dtype(vlen=str)
+        meta = output_file.create_group("metadata")
+        meta.create_dataset(
+            "task_name", data=str(self.__class__.__name__), dtype=string_dt
+        )
+        meta.create_dataset(
+            "MDANSE_version", data=str(metadata.version("MDANSE")), dtype=string_dt
+        )
+
+        inputs = self.output_configuration()
+
+        if inputs is not None:
+            print(inputs)
+            dgroup = meta.create_group("inputs")
+            for key, value in inputs.items():
+                dgroup.create_dataset(key, data=value, dtype=string_dt)
+
     def finalize(self):
         if not hasattr(self, "_trajectory"):
             return
@@ -200,6 +219,8 @@ class Converter(IJob, metaclass=SubclassFactory):
             # f = netCDF4.Dataset(self._trajectory.filename,'a')
         except:
             return
+
+        self.write_metadata(output_file)
 
         try:
             if "time" in output_file.variables:
