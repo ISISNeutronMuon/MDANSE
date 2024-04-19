@@ -28,6 +28,7 @@ from qtpy.QtWidgets import (
     QGroupBox,
     QLabel,
     QTextEdit,
+    QWidget,
 )
 from MDANSE.Framework.AtomSelector import Selector
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
@@ -158,16 +159,18 @@ class CheckableComboBox(QComboBox):
             self.lineEdit().setText(",".join(vals))
 
 
-class HelperDialog(QDialog):
+class SelectionHelper(QDialog):
     """Generates a string that specifies the atom selection.
 
     Attributes
     ----------
+    _helper_title : str
+        The title of the helper dialog window.
     _cbox_text : dict
         The dictionary that maps the selector settings to text used in
         the helper dialog.
     """
-
+    _helper_title = "Atom selection helper"
     _cbox_text = {
         "all": "All atoms (excl. dummy atoms):",
         "dummy": "All dummy atoms:",
@@ -196,9 +199,9 @@ class HelperDialog(QDialog):
             The QLineEdit field that will need to be updated when
             applying the setting.
         """
-        self.min_width = kwargs.pop("min_width", 450)
+        self.min_width = kwargs.pop("min_width", 500)
         super().__init__(parent, *args, **kwargs)
-        self.setWindowTitle("Atom selection helper")
+        self.setWindowTitle(self._helper_title)
         self.resize(self.min_width, self.height())
         self.setMinimumWidth(self.min_width)
         self.selector = selector
@@ -211,22 +214,39 @@ class HelperDialog(QDialog):
         layouts = self.create_layouts()
 
         bottom = QHBoxLayout()
-        apply = QPushButton("Use Setting")
-        close = QPushButton("Close")
-        apply.clicked.connect(self.apply)
-        close.clicked.connect(self.close)
-        bottom.addWidget(apply)
-        bottom.addWidget(close)
+        for button in self.create_buttons():
+            bottom.addWidget(button)
+
         layouts[-1].addLayout(bottom)
 
         helper_layout = QHBoxLayout()
         for layout in layouts:
-            helper_layout.addLayout(layout, 5)
+            helper_layout.addLayout(layout, 6)
 
         self.setLayout(helper_layout)
         self.update_selection_textbox()
 
-    def create_layouts(self):
+    def create_buttons(self) -> list[QPushButton]:
+        """
+        Returns
+        -------
+        list[QPushButton]
+            List of push buttons to add to the last layout from
+            create_layouts.
+        """
+        apply = QPushButton("Use Setting")
+        close = QPushButton("Close")
+        apply.clicked.connect(self.apply)
+        close.clicked.connect(self.close)
+        return [apply, close]
+
+    def create_layouts(self) -> list[QVBoxLayout]:
+        """
+        Returns
+        -------
+        list[QVBoxLayout]
+            List of QVBoxLayout to add to the helper layout.
+        """
         left = QVBoxLayout()
         for widget in self.left_widgets():
             left.addWidget(widget)
@@ -236,7 +256,14 @@ class HelperDialog(QDialog):
 
         return [left, right]
 
-    def left_widgets(self):
+    def left_widgets(self) -> list[QWidget]:
+        """
+        Returns
+        -------
+        list[QWidget]
+            List of QWidgets to add to the first layout from
+            create_layouts.
+        """
         match_exists = self.selector.match_exists
 
         select = QGroupBox("selection")
@@ -313,7 +340,7 @@ class HelperDialog(QDialog):
         text = [f"Number of atoms selected:\n{num_sel}\n\nSelected atoms:\n"]
         atoms = self.selector.system.atom_list
         for idx in idxs:
-            text.append(f"{idx}   {atoms[idx].full_name}\n")
+            text.append(f"{idx}  ({atoms[idx].full_name})\n")
 
         self.selection_textbox.setText("".join(text))
 
@@ -327,30 +354,35 @@ class HelperDialog(QDialog):
 
 class AtomSelectionWidget(WidgetBase):
     """The atoms selection widget."""
-    push_button_text = "Atom selection helper"
-    default_value = '{"all": true}'
-    tooltip_text = "Specify which atoms will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
+    _push_button_text = "Atom selection helper"
+    _default_value = '{"all": true}'
+    _tooltip_text = "Specify which atoms will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._value = self.default_value
-        self._field = QLineEdit(self.default_value, self._base)
-        self._field.setPlaceholderText(self.default_value)
+        self._value = self._default_value
+        self._field = QLineEdit(self._default_value, self._base)
+        self._field.setPlaceholderText(self._default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
         self._field.textChanged.connect(self.updateValue)
         self.helper = self.create_helper()
-        helper_button = QPushButton(self.push_button_text, self._base)
+        helper_button = QPushButton(self._push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
-        self._default_value = self.default_value
         self._layout.addWidget(self._field)
         self._layout.addWidget(helper_button)
         self.update_labels()
         self.updateValue()
-        self._field.setToolTip(self.tooltip_text)
+        self._field.setToolTip(self._tooltip_text)
 
-    def create_helper(self) -> HelperDialog:
+    def create_helper(self) -> SelectionHelper:
+        """
+        Returns
+        -------
+        SelectionHelper
+            Create and return the selection helper QDialog.
+        """
         selector = self._configurator.get_selector()
-        return HelperDialog(selector, self._field, self._base)
+        return SelectionHelper(selector, self._field, self._base)
 
     @Slot()
     def helper_dialog(self) -> None:

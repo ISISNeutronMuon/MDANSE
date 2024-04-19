@@ -15,42 +15,31 @@
 #
 import operator
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.AtomSelector import Selector
 
 
 class AtomSelectionConfigurator(IConfigurator):
-    """
-    This configurator allows the selection of a specific set of atoms on which the analysis will be performed.
+    """This configurator allows the selection of a specific set of
+    atoms on which the analysis will be performed. The defaults setting
+    selects all atoms.
 
-    Without any selection, all the atoms stored into the trajectory file will be selected.
-
-    After the call to :py:meth:`~MDANSE.Framework.Configurators.AtomSelectionConfigurator.AtomSelectionConfigurator.configure` method
-    the following keys will be available for this configurator
-
-    #. value: the input value used to configure this configurator
-    #. indexes: the sorted (in increasing order) indexes of the selected atoms
-    #. n_selected_atoms: the number of selected atoms
-    #. elements: a nested-list of the chemical symbols of the selected atoms. The size of the nested list depends on the grouping_level selected via :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurator.
-
-    :note: this configurator depends on :py:class:`~MDANSE.Framework.Configurators.HDFTrajectoryConfigurator.HDFTrajectoryConfigurator` and :py:class:`~MDANSE.Framework.Configurators.GroupingLevelConfigurator.GroupingLevelConfigurator` configurators to be configured
+    Attributes
+    ----------
+    _default : str
+        The defaults selection setting.
     """
 
     _default = '{"all": true}'
 
-    def configure(self, value):
+    def configure(self, value: str) -> None:
+        """Configure an input value.
+
+        Parameters
+        ----------
+        value : str
+            The selection setting in a json readable format.
         """
-        Configure an input value.
-
-        The value must be a string that can be either an atom selection string or a valid user definition.
-
-        :param value: the input value
-        :type value: str
-        """
-
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 
         if value is None:
@@ -92,13 +81,12 @@ class AtomSelectionConfigurator(IConfigurator):
         ]
         self.error_status = "OK"
 
-    def get_natoms(self):
+    def get_natoms(self) -> dict[str, int]:
         """
         Returns
         -------
         dict
-            A dictionary with the atom name for the key and
-            number of atoms selected for its value.
+            A dictionary of the number of atom per element.
         """
         nAtomsPerElement = {}
         for v in self["names"]:
@@ -109,7 +97,7 @@ class AtomSelectionConfigurator(IConfigurator):
 
         return nAtomsPerElement
 
-    def get_total_natoms(self):
+    def get_total_natoms(self) -> int:
         """
         Returns
         -------
@@ -128,14 +116,13 @@ class AtomSelectionConfigurator(IConfigurator):
 
         return indexesPerElement
 
-    def get_information(self):
+    def get_information(self) -> str:
         """
-        Returns some informations the atom selection.
-
-        :return: the information about the atom selection.
-        :rtype: str
+        Returns
+        -------
+        str
+            Some information on the atom selection.
         """
-
         if "selection_length" not in self:
             return "Not configured yet\n"
 
@@ -146,6 +133,13 @@ class AtomSelectionConfigurator(IConfigurator):
         return "\n".join(info) + "\n"
 
     def get_selector(self) -> Selector:
+        """
+        Returns
+        -------
+        Selector
+            The atom selector object initialised with the trajectories
+            chemical system.
+        """
         traj_config = self._configurable[self._dependencies["trajectory"]]
         selector = Selector(traj_config["instance"].chemical_system)
         return selector
