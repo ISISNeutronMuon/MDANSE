@@ -17,11 +17,9 @@
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.AtomSelector import Selector
+from MDANSE.Framework.AtomTransmutation import AtomTransmuter
 
 
 class AtomTransmutationConfigurator(IConfigurator):
@@ -141,3 +139,8 @@ class AtomTransmutationConfigurator(IConfigurator):
             return "No atoms selected for transmutation\n"
 
         return "Number of transmutated atoms:%d\n" % self._nTransmutatedAtoms
+
+    def get_transmuter(self) -> AtomTransmuter:
+        traj_config = self._configurable[self._dependencies["trajectory"]]
+        transmuter = AtomTransmuter(traj_config["instance"].chemical_system)
+        return transmuter

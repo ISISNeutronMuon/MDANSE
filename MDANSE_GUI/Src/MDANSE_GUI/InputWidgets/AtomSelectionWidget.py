@@ -196,17 +196,48 @@ class HelperDialog(QDialog):
             The QLineEdit field that will need to be updated when
             applying the setting.
         """
+        self.min_width = kwargs.pop("min_width", 450)
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle("Atom selection helper")
-        self.min_width = kwargs.get("min_width", 450)
         self.resize(self.min_width, self.height())
         self.setMinimumWidth(self.min_width)
         self.selector = selector
         self._field = field
         self.full_settings = self.selector.full_settings
-        match_exists = self.selector.match_exists
 
-        self.left = QVBoxLayout()
+        self.selection_textbox = QTextEdit()
+        self.selection_textbox.setReadOnly(True)
+
+        layouts = self.create_layouts()
+
+        bottom = QHBoxLayout()
+        apply = QPushButton("Use Setting")
+        close = QPushButton("Close")
+        apply.clicked.connect(self.apply)
+        close.clicked.connect(self.close)
+        bottom.addWidget(apply)
+        bottom.addWidget(close)
+        layouts[-1].addLayout(bottom)
+
+        helper_layout = QHBoxLayout()
+        for layout in layouts:
+            helper_layout.addLayout(layout, 5)
+
+        self.setLayout(helper_layout)
+        self.update_selection_textbox()
+
+    def create_layouts(self):
+        left = QVBoxLayout()
+        for widget in self.left_widgets():
+            left.addWidget(widget)
+
+        right = QVBoxLayout()
+        right.addWidget(self.selection_textbox)
+
+        return [left, right]
+
+    def left_widgets(self):
+        match_exists = self.selector.match_exists
 
         select = QGroupBox("selection")
         select_layout = QVBoxLayout()
@@ -225,7 +256,7 @@ class HelperDialog(QDialog):
                 checkbox.setLayoutDirection(Qt.RightToLeft)
                 label = QLabel(self._cbox_text[k])
                 checkbox.setObjectName(k)
-                checkbox.stateChanged.connect(self.update)
+                checkbox.stateChanged.connect(self.update_selection_textbox)
                 if not match_exists[k]:
                     checkbox.setEnabled(False)
                     label.setStyleSheet("color: grey;")
@@ -247,7 +278,7 @@ class HelperDialog(QDialog):
                 combo.addItems(items)
                 combo.model().blockSignals(False)
                 combo.setObjectName(k)
-                combo.model().dataChanged.connect(self.update)
+                combo.model().dataChanged.connect(self.update_selection_textbox)
                 label = QLabel(self._cbox_text[k])
                 if len(items) == 0:
                     combo.setEnabled(False)
@@ -259,29 +290,10 @@ class HelperDialog(QDialog):
 
         select.setLayout(select_layout)
         invert.setLayout(invert_layout)
-        self.left.addWidget(select)
-        self.left.addWidget(invert)
 
-        bottom = QHBoxLayout()
-        apply = QPushButton("Apply")
-        close = QPushButton("Close")
-        apply.clicked.connect(self.apply)
-        close.clicked.connect(self.close)
-        bottom.addWidget(apply)
-        bottom.addWidget(close)
+        return [select, invert]
 
-        self.left.addLayout(bottom)
-        self.right = QTextEdit()
-        self.right.setReadOnly(True)
-
-        layout = QHBoxLayout()
-        layout.addLayout(self.left, 5)
-        layout.addWidget(self.right, 4)
-
-        self.setLayout(layout)
-        self.update()
-
-    def update(self) -> None:
+    def update_selection_textbox(self) -> None:
         """Using the checkbox and combobox widgets: update the settings,
         get the selection and update the textedit box with details of
         the current selection.
@@ -301,9 +313,9 @@ class HelperDialog(QDialog):
         text = [f"Number of atoms selected:\n{num_sel}\n\nSelected atoms:\n"]
         atoms = self.selector.system.atom_list
         for idx in idxs:
-            text.append(f"{idx})  {atoms[idx].full_name}\n")
+            text.append(f"{idx}   {atoms[idx].full_name}\n")
 
-        self.right.setText("".join(text))
+        self.selection_textbox.setText("".join(text))
 
     def apply(self) -> None:
         """Set the field of the AtomSelectionWidget to the currently
@@ -315,29 +327,30 @@ class HelperDialog(QDialog):
 
 class AtomSelectionWidget(WidgetBase):
     """The atoms selection widget."""
+    push_button_text = "Atom selection helper"
+    default_value = '{"all": true}'
+    tooltip_text = "Specify which atoms will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        default_value = '{"all": true}'
-        self._value = default_value
-        self._field = QLineEdit(default_value, self._base)
-        self._field.setPlaceholderText(default_value)
+        self._value = self.default_value
+        self._field = QLineEdit(self.default_value, self._base)
+        self._field.setPlaceholderText(self.default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
         self._field.textChanged.connect(self.updateValue)
-        if self._tooltip:
-            tooltip_text = self._tooltip
-        else:
-            tooltip_text = "Specify which atoms will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
-        self.selector = self._configurator.get_selector()
-        self.helper = HelperDialog(self.selector, self._field, self._base)
-        helper_button = QPushButton("Atom selection helper", self._base)
+        self.helper = self.create_helper()
+        helper_button = QPushButton(self.push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
-        self._default_value = default_value
+        self._default_value = self.default_value
         self._layout.addWidget(self._field)
         self._layout.addWidget(helper_button)
         self.update_labels()
         self.updateValue()
-        self._field.setToolTip(tooltip_text)
+        self._field.setToolTip(self.tooltip_text)
+
+    def create_helper(self) -> HelperDialog:
+        selector = self._configurator.get_selector()
+        return HelperDialog(selector, self._field, self._base)
 
     @Slot()
     def helper_dialog(self) -> None:

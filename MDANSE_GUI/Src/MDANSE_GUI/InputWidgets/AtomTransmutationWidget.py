@@ -13,52 +13,69 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from qtpy.QtCore import Qt, QEvent, Slot, QObject
+from qtpy.QtGui import QStandardItem
+from qtpy.QtWidgets import (
+    QComboBox,
+    QLineEdit,
+    QPushButton,
+    QDialog,
+    QCheckBox,
+    QVBoxLayout,
+    QHBoxLayout,
+    QGroupBox,
+    QLabel,
+    QTextEdit,
+)
 
-
-import glob
-import itertools
-import os
-import os.path
-
-from qtpy.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
-from qtpy.QtCore import Qt, Slot
-from qtpy.QtGui import QStandardItemModel, QStandardItem
-
-from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE.Framework.AtomTransmutation import AtomTransmuter
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import AtomSelectionWidget
+from MDANSE_GUI.InputWidgets.AtomSelectionWidget import HelperDialog
 
 
-class AtomTransmutationWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
-        kwargs["layout_type"] = "QVBoxLayout"
-        super().__init__(*args, **kwargs)
-        newline_button = QPushButton("Add transmutation", self._base)
-        self._layout.addWidget(newline_button)
-        self._lines = []
-        self.updateValue()
+class TransmutationHelper(HelperDialog):
 
-    def add_line(self):
-        line_base = QWidget(self._base)
-        line_layout = QHBoxLayout(line_base)
-        line_base.setLayout(line_layout)
-        default_value = "all"
-        starter = QLabel("Transmute ", line_base)
-        leftfield = QLineEdit(default_value, self._base)
-        spacer = QLabel(" to ", line_base)
-        rightfield = QLineEdit("Au", self._base)
-        for wid in [starter, leftfield, spacer, rightfield]:
-            line_layout.append(wid)
-        self._lines.append({"from": leftfield, "to": rightfield})
+    def __init__(self, transmuter: AtomTransmuter, field: QLineEdit, parent, *args,
+                 **kwargs):
+        self.transmuter = transmuter
+        self.transmutation_textbox = QTextEdit()
+        self.transmutation_textbox.setReadOnly(True)
+        super().__init__(transmuter.selector, field, parent, min_width=700, *args, **kwargs)
 
-    def configure_using_default(self):
-        """This is too complex to have a default value"""
+    def create_layouts(self):
+        layouts = super().create_layouts()
+        right = QVBoxLayout()
+        right.addWidget(self.transmutation_textbox)
+        return layouts + [right]
 
-    def get_widget_value(self):
-        result = []
-        for line in self._lines:
-            result.append((line["from"], line["to"]))
-        if len(result) == 0:
-            self._empty = True
-            return None
-        self._empty = False
-        return result
+    def left_widgets(self):
+        widgets = super().left_widgets()
+        transmutation = QGroupBox("transmutation")
+        transmutation_layout = QVBoxLayout()
+
+        combo_layout = QHBoxLayout()
+        combo = QComboBox()
+        combo.addItems(ATOMS_DATABASE.atoms)
+        label = QLabel("Transmute selection to:")
+
+        combo_layout.addWidget(label)
+        combo_layout.addWidget(combo)
+        transmutation_layout.addLayout(combo_layout)
+
+        transmute = QPushButton("Transmute")
+        transmutation_layout.addWidget(transmute)
+
+        transmutation.setLayout(transmutation_layout)
+        return widgets + [transmutation]
+
+
+class AtomTransmutationWidget(AtomSelectionWidget):
+    """The atoms transmutation widget."""
+    push_button_text = "Atom transmutation helper"
+    default_value = "{}"
+    tooltip_text = "Specify the atom transmutation that will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
+
+    def create_helper(self) -> HelperDialog:
+        transmuter = self._configurator.get_transmuter()
+        return TransmutationHelper(transmuter, self._field, self._base)
