@@ -210,39 +210,7 @@ class Configurable(object):
         return "\n".join(self._info)
 
     @classmethod
-    def build_doc(cls):
-        """
-        Return the documentation about a configurable class based on its configurators contents.
-
-        :param cls: the configurable class for which documentation should be built
-        :type cls: an instance of MDANSE.Framework.Configurable.Configurable derived class
-
-        :return: the documentation about the configurable class
-        :rtype: str
-        """
-        from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-
-        settings = getattr(cls, "settings", {})
-
-        if not isinstance(settings, dict):
-            raise ConfigurationError(
-                "Invalid type for settings: must be a mapping-like object"
-            )
-
-        doclist = []
-
-        for name, (typ, kwds) in list(settings.items()):
-            cfg = IConfigurator.create(typ, name, **kwds)
-            descr = kwds.get("description", "")
-            descr += "\n" + str(cfg.__doc__)
-            doclist.append(
-                {
-                    "Configurator": name,
-                    "Default value": repr(cfg.default),
-                    "Description": descr,
-                }
-            )
-
+    def build_doc_example(cls):
         docstring = ":Example:\n\n"
         docstring += ">>> \n"
         docstring += ">>> \n"
@@ -253,8 +221,11 @@ class Configurable(object):
         docstring += ">>> job = IJob.create(%r)\n" % cls.__name__
         docstring += ">>> job.setup(parameters)\n"
         docstring += ">>> job.run()\n"
+        return docstring
 
-        docstring += "\n**Job input configurators:** \n\n"
+    @classmethod
+    def build_doc_texttable(cls, doclist):
+        docstring = "\n**Job input configurators:** \n\n"
 
         columns = ["Configurator", "Default value", "Description"]
 
@@ -314,6 +285,79 @@ class Configurable(object):
             )
 
         docstring += "\n"
+        return docstring
+
+    @classmethod
+    def build_doc_htmltable(cls, doclist):
+        docstring = "\n**Job input configurators:**"
+
+        columns = ["Configurator", "Default value", "Description"]
+
+        for v in doclist:
+            # Case of Description field: has to be splitted and parsed for inserting sphinx "|" keyword for multiline
+            v["Description"] = v["Description"].strip()
+            v["Description"] = v["Description"].split("\n")
+            v["Description"] = ["" + vv.strip() for vv in v["Description"]]
+
+        docstring += "<table>\n"
+        docstring += "<tr>"
+        for col in columns:
+            docstring += f"<th>{col}</th>"
+        docstring += "</tr>\n"
+
+        for v in doclist:
+            docstring += "<tr>"
+            for item in [
+                v["Configurator"],
+                v["Default value"],
+                v["Description"][0],
+            ]:
+                docstring += f"<td>{item}</td>"
+            docstring += "</tr>\n"
+
+        docstring += "</table>\n"
+        return docstring
+
+    @classmethod
+    def build_doc(cls, use_html_table=False):
+        """
+        Return the documentation about a configurable class based on its configurators contents.
+
+        :param cls: the configurable class for which documentation should be built
+        :type cls: an instance of MDANSE.Framework.Configurable.Configurable derived class
+
+        :return: the documentation about the configurable class
+        :rtype: str
+        """
+        from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
+        settings = getattr(cls, "settings", {})
+
+        if not isinstance(settings, dict):
+            raise ConfigurationError(
+                "Invalid type for settings: must be a mapping-like object"
+            )
+
+        doclist = []
+
+        for name, (typ, kwds) in list(settings.items()):
+            cfg = IConfigurator.create(typ, name, **kwds)
+            descr = kwds.get("description", "")
+            descr += "\n" + str(cfg.__doc__)
+            doclist.append(
+                {
+                    "Configurator": name,
+                    "Default value": repr(cfg.default),
+                    "Description": descr,
+                }
+            )
+
+        docstring = cls.build_doc_example()
+
+        if use_html_table:
+            docstring += cls.build_doc_htmltable(doclist)
+        else:
+            docstring += cls.build_doc_texttable(doclist)
 
         return docstring
 
