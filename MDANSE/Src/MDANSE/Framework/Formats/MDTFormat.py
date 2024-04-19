@@ -61,4 +61,4 @@ class MDTFormat(IFormat):
         extension : str
             The extension of the file.
         """
-        HDFFormat.write(filename, data, header, extension)
+        HDFFormat.write(filename, data, header, inputs, extension)

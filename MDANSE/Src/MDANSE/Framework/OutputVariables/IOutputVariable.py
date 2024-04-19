@@ -36,10 +36,10 @@ class OutputData(collections.OrderedDict):
             IOutputVariable.create(dataType, data, dataName, **kwargs),
         )
 
-    def write(self, basename, formats, header=None):
+    def write(self, basename, formats, header=None, inputs=None):
         for fmt in formats:
             temp_format = IFormat.create(fmt)
-            temp_format.write(basename, self, header)
+            temp_format.write(basename, self, header, inputs)
 
 
 class IOutputVariable(np.ndarray, metaclass=SubclassFactory):

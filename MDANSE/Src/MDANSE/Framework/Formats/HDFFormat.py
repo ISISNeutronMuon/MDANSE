@@ -75,6 +75,7 @@ class HDFFormat(IFormat):
             outputFile.attrs["header"] = header
 
         if inputs is not None:
+            print(inputs)
             dgroup = outputFile.create_group("inputs")
             string_dt = h5py.special_dtype(vlen=str)
             for key, value in inputs.items():
