@@ -39,7 +39,9 @@ class AtomTransmuter:
             self._original_map[at.index] = at.symbol
         self._new_map = {}
 
-    def apply_transmutation(self, selection_dict: dict[str, Union[bool, dict]], symbol: str) -> None:
+    def apply_transmutation(
+        self, selection_dict: dict[str, Union[bool, dict]], symbol: str
+    ) -> None:
         """With the selection dictionary update the transmutation map.
 
         Parameters

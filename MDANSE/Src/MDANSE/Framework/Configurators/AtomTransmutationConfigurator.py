@@ -42,7 +42,7 @@ class AtomTransmutationConfigurator(IConfigurator):
 
     def configure(self, value: str):
         """Configure an input value.
-        
+
         Parameters
         ----------
         value : str

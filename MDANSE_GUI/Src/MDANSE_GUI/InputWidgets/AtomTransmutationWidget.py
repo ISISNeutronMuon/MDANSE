@@ -42,8 +42,9 @@ class TransmutationHelper(SelectionHelper):
 
     _helper_title = "Atom transmutation helper"
 
-    def __init__(self, transmuter: AtomTransmuter, field: QLineEdit, parent, *args,
-                 **kwargs):
+    def __init__(
+        self, transmuter: AtomTransmuter, field: QLineEdit, parent, *args, **kwargs
+    ):
         """
         Parameters
         ----------
@@ -60,7 +61,9 @@ class TransmutationHelper(SelectionHelper):
         self.transmutation_combo = QComboBox()
         self.transmutation_combo.addItems(ATOMS_DATABASE.atoms)
         self.transmuter.selector.settings["all"] = False
-        super().__init__(transmuter.selector, field, parent, min_width=750, *args, **kwargs)
+        super().__init__(
+            transmuter.selector, field, parent, min_width=750, *args, **kwargs
+        )
         self.update_transmutation_textbox()
 
     def create_buttons(self) -> list[QPushButton]:
@@ -125,7 +128,9 @@ class TransmutationHelper(SelectionHelper):
         transmutation and update the transmutation textbox with the new
         transmutation setting.
         """
-        self.transmuter.apply_transmutation(self.full_settings, self.transmutation_combo.currentText())
+        self.transmuter.apply_transmutation(
+            self.full_settings, self.transmutation_combo.currentText()
+        )
         self.update_transmutation_textbox()
 
     def update_transmutation_textbox(self) -> None:
@@ -137,7 +142,9 @@ class TransmutationHelper(SelectionHelper):
         text = [f"Number of atoms transmuted:\n{len(map)}\n\nTransmuted atoms:\n"]
         atoms = self.selector.system.atom_list
         for idx, symbol in map.items():
-            text.append(f"{idx}  ({atoms[idx].full_name}): {atoms[idx].symbol} -> {symbol}\n")
+            text.append(
+                f"{idx}  ({atoms[idx].full_name}): {atoms[idx].symbol} -> {symbol}\n"
+            )
 
         self.transmutation_textbox.setText("".join(text))
 
@@ -155,6 +162,7 @@ class TransmutationHelper(SelectionHelper):
 
 class AtomTransmutationWidget(AtomSelectionWidget):
     """The atoms transmutation widget."""
+
     _push_button_text = "Atom transmutation helper"
     _default_value = "{}"
     _tooltip_text = "Specify the atom transmutation that will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."

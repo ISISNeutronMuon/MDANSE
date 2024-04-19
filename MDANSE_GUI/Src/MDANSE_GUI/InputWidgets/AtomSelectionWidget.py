@@ -170,6 +170,7 @@ class SelectionHelper(QDialog):
         The dictionary that maps the selector settings to text used in
         the helper dialog.
     """
+
     _helper_title = "Atom selection helper"
     _cbox_text = {
         "all": "All atoms (excl. dummy atoms):",
@@ -354,6 +355,7 @@ class SelectionHelper(QDialog):
 
 class AtomSelectionWidget(WidgetBase):
     """The atoms selection widget."""
+
     _push_button_text = "Atom selection helper"
     _default_value = '{"all": true}'
     _tooltip_text = "Specify which atoms will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
