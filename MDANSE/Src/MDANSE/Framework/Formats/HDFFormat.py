@@ -81,10 +81,16 @@ class HDFFormat(IFormat):
         meta = outputFile.create_group("metadata")
         if run_instance is not None:
             meta.create_dataset(
-                "task_name", data=str(run_instance.__class__.__name__), dtype=string_dt
+                "task_name",
+                (1,),
+                data=str(run_instance.__class__.__name__),
+                dtype=string_dt,
             )
             meta.create_dataset(
-                "MDANSE_version", data=str(metadata.version("MDANSE")), dtype=string_dt
+                "MDANSE_version",
+                (1,),
+                data=str(metadata.version("MDANSE")),
+                dtype=string_dt,
             )
 
             inputs = run_instance.output_configuration()
@@ -93,7 +99,7 @@ class HDFFormat(IFormat):
                 print(inputs)
                 dgroup = meta.create_group("inputs")
                 for key, value in inputs.items():
-                    dgroup.create_dataset(key, data=value, dtype=string_dt)
+                    dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
 
         # Loop over the OutputVariable instances to write.
 
