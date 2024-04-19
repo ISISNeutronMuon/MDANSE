@@ -19,6 +19,7 @@ import io
 import tarfile
 import codecs
 import time
+from typing import Dict
 
 import numpy as np
 
@@ -42,7 +43,7 @@ class TextFormat(IFormat):
     extensions = [".dat", ".txt"]
 
     @classmethod
-    def write(cls, filename, data, header=""):
+    def write(cls, filename, data, header: str = "", inputs: Dict[str, str] = None):
         """
         Write a set of output variables into a set of Text files.
 
@@ -69,6 +70,18 @@ class TextFormat(IFormat):
             tempStr.write("\n\n")
             real_buffer.seek(0)
             info = tarfile.TarInfo(name="jobinfo.txt")
+            info.size = length_stringio(real_buffer)
+            info.mtime = time.time()
+            tf.addfile(tarinfo=info, fileobj=real_buffer)
+
+        if inputs is not None:
+            real_buffer = io.BytesIO()
+            tempStr = codecs.getwriter("utf-8")(real_buffer)
+            for key, value in inputs.items():
+                tempStr.write(f"parameters[{str(key)}] = {str(value)}\n")
+            tempStr.write("\n\n")
+            real_buffer.seek(0)
+            info = tarfile.TarInfo(name="job_parameters.txt")
             info.size = length_stringio(real_buffer)
             info.mtime = time.time()
             tf.addfile(tarinfo=info, fileobj=real_buffer)

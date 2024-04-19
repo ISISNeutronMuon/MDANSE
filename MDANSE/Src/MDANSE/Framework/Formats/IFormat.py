@@ -27,7 +27,7 @@ class IFormat(metaclass=SubclassFactory):
     """
 
     @classmethod
-    def write(cls, filename, data, header=""):
+    def write(cls, filename, data, header="", inputs=None):
         """
         Write a set of output variables into filename using a given file format.
 
@@ -37,6 +37,8 @@ class IFormat(metaclass=SubclassFactory):
         :type data: dict of Framework.OutputVariables.IOutputVariable
         :param header: the header to add to the output file.
         :type header: str
+        :param inputs: the verbatim values of the parameter inputs
+        :type inputs: dict[str, str]
         """
 
         pass

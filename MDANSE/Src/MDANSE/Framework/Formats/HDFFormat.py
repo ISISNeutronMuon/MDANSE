@@ -14,9 +14,14 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
+from typing import TYPE_CHECKING, Dict
+
 import h5py
+
 from MDANSE.Framework.Formats.IFormat import IFormat
-from MDANSE.Framework.OutputVariables import IOutputVariable
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 
 
 class HDFFormat(IFormat):
@@ -38,8 +43,9 @@ class HDFFormat(IFormat):
     def write(
         cls,
         filename: str,
-        data: dict[str, IOutputVariable],
+        data: Dict[str, "IOutputVariable"],
         header: str = "",
+        inputs: Dict[str, str] = None,
         extension: str = extensions[0],
     ) -> None:
         """Write a set of output variables into an HDF file.
@@ -67,6 +73,12 @@ class HDFFormat(IFormat):
             header = str(header)
 
             outputFile.attrs["header"] = header
+
+        if inputs is not None:
+            dgroup = outputFile.create_group("inputs")
+            string_dt = h5py.special_dtype(vlen=str)
+            for key, value in inputs.items():
+                dgroup.create_dataset(key, data=value, dtype=string_dt)
 
         # Loop over the OutputVariable instances to write.
 

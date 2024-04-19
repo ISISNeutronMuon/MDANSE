@@ -57,6 +57,7 @@ class MultipleChoicesConfigurator(IConfigurator):
         :param value: the input selection list.
         :type value: list
         """
+        self._original_input = value
 
         if self._nChoices is not None:
             if len(value) != self._nChoices:

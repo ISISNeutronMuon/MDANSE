@@ -190,6 +190,7 @@ class DensityProfile(IJob):
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
             self._info,
+            self.output_configuration(),
         )
 
         self.configuration["trajectory"]["instance"].close()

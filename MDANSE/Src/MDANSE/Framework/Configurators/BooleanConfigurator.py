@@ -57,6 +57,7 @@ class BooleanConfigurator(IConfigurator):
         :param value: the input value
         :type value: one of True/False, 'true'/'false', 'yes'/'no', 'y'/'n', '1'/'0', 1/0
         """
+        self._original_input = value
 
         if value not in self._shortCuts:
             self.error_status = "Input is not recognised as a true/false value"
