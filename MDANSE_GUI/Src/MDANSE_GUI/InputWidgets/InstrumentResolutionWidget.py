@@ -27,6 +27,7 @@ from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QDoubleValidator
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.Widgets.ResolutionDialog import ResolutionDialog, widget_text_map
 
 
 init_parameters = {
@@ -45,23 +46,19 @@ init_parameters = {
 }
 
 
-widget_text_map = {
-    "ideal": "ideal",
-    "Gaussian": "gaussian",
-    "Lorentzian": "lorentzian",
-    "triangular": "triangular",
-    "square": "square",
-    "pseudo-Voigt": "pseudovoigt",
-}
-
-
 class InstrumentResolutionWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         kwargs["layout_type"] = "QGridLayout"
         super().__init__(*args, **kwargs)
-        self._layout.addWidget(QLabel("Resolution function", self._base), 0, 0)
+        # self._layout.addWidget(QLabel("Resolution function", self._base), 0, 0)
         self._type_combo = QComboBox(parent=self._base)
+        self._dialog_button = QPushButton("Helper Dialog", self._base)
+        self._dialog_button.clicked.connect(self.helper_dialog)
+        self._dialog_button.setEnabled(True)
+        self.helper = ResolutionDialog(self._base)
+        self.helper.parameters_changed.connect(self.set_parameters_from_dialog)
         self._layout.addWidget(self._type_combo, 0, 1)
+        self._layout.addWidget(self._dialog_button, 0, 0)
         self._labels = []
         self._fields = []
         self._defaults = []
@@ -72,7 +69,7 @@ class InstrumentResolutionWidget(WidgetBase):
         # first row
         for num in range(1, 3):
             label = QLabel("", parent=self._base)
-            field = QLineEdit("0.0", parent=self._base)
+            field = QLineEdit("N/A", parent=self._base)
             field.setEnabled(False)
             self._layout.addWidget(label, 0, 2 * num)
             self._layout.addWidget(field, 0, 2 * num + 1)
@@ -84,7 +81,7 @@ class InstrumentResolutionWidget(WidgetBase):
         # first row
         for num in range(0, 3):
             label = QLabel("", parent=self._base)
-            field = QLineEdit("0.0", parent=self._base)
+            field = QLineEdit("N/A", parent=self._base)
             field.setEnabled(False)
             self._layout.addWidget(label, 1, 2 * num)
             self._layout.addWidget(field, 1, 2 * num + 1)
@@ -107,9 +104,7 @@ class InstrumentResolutionWidget(WidgetBase):
     def configure_using_default(self):
         """This is too complex to have a default value"""
 
-    @Slot(str)
-    def change_function(self, function: str):
-        new_params = init_parameters[function]
+    def set_field_values(self, new_params: dict):
         np = list(new_params.items())
         for index in range(5):
             try:
@@ -125,6 +120,11 @@ class InstrumentResolutionWidget(WidgetBase):
                 self._fields[index].setPlaceholderText("N/A")
                 self._fields[index].setEnabled(False)
                 self._defaults[index] = 0.0
+
+    @Slot(str)
+    def change_function(self, function: str):
+        new_params = init_parameters[function]
+        self.set_field_values(new_params)
 
     def get_widget_value(self):
         function = widget_text_map[self._type_combo.currentText()]
@@ -142,4 +142,23 @@ class InstrumentResolutionWidget(WidgetBase):
                 else:
                     self._fields[index].setStyleSheet("")
                 params[key] = value
+        self.helper.update_fields((function, params))
         return (function, params)
+
+    @Slot(dict)
+    def set_parameters_from_dialog(self, input: dict):
+        peak_function = input.get("function", None)
+        if peak_function is None:
+            return
+        self._type_combo.setCurrentText(peak_function)
+        temp_parameters = init_parameters[peak_function]
+        for key in temp_parameters.keys():
+            temp_parameters[key] = input.get(key, 0.0)
+        self.set_field_values(temp_parameters)
+
+    @Slot()
+    def helper_dialog(self):
+        if self.helper.isVisible():
+            self.helper.close()
+        else:
+            self.helper.show()
