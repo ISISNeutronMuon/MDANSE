@@ -57,7 +57,7 @@ def test_parallel_meansquare():
     parameters = {}
     parameters["frames"] = (0, 10, 1)
     parameters["output_files"] = (temp_name2, ("MDAFormat",))
-    parameters["running_mode"] = ("multicore", 4)
+    parameters["running_mode"] = ("multicore", -4)
     parameters["trajectory"] = short_traj
     msd_par = IJob.create("MeanSquareDisplacement")
     msd_par.run(parameters, status=True)
