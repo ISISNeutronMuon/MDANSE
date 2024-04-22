@@ -130,7 +130,8 @@ def test_identity(chemical_system):
     for i in range(nAtoms):
         temp.add_chemical_entity(Atom(symbol="H"))
     # assert(temp == chemical_system)
-    assert(chemical_system == chemical_system)
+    assert chemical_system == chemical_system
+
 
 def test_copy(chemical_system):
     original = chemical_system
@@ -139,11 +140,10 @@ def test_copy(chemical_system):
     print(original.number_of_atoms)
     print(copied.atom_list)
     print(copied.number_of_atoms)
-    assert(repr(original) == repr(copied))
+    assert repr(original) == repr(copied)
 
-def test_compression(sample_trajectory,
-                    gzipped_trajectory,
-                    lzffed_trajectory):
+
+def test_compression(sample_trajectory, gzipped_trajectory, lzffed_trajectory):
     size_uncompressed = os.stat(sample_trajectory).st_size
     size_gzipped = os.stat(gzipped_trajectory).st_size
     size_lzffed = os.stat(lzffed_trajectory).st_size
