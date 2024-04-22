@@ -72,7 +72,7 @@ class StructureFactorFromScatteringFunction(IJob):
         self._outputData.add(
             "time_window",
             "LineOutputVariable",
-            inputFile["time_window"][:],
+            resolution["time_window_positive"],
             axis="time",
             units="au",
         )

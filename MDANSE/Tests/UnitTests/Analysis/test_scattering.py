@@ -184,7 +184,6 @@ def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
 
 
 def test_ssfsf(disf):
-    """Also fails at the moment. Must be fixed soon"""
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["sample_inc"] = disf
@@ -199,7 +198,6 @@ def test_ssfsf(disf):
     assert path.exists(temp_name + "_text.tar")
     assert path.isfile(temp_name + "_text.tar")
     os.remove(temp_name + "_text.tar")
-    assert False
 
 
 @pytest.mark.xfail(reason="see docstring")

@@ -102,18 +102,21 @@ class DensityOfStates(IJob):
         self._outputData.add(
             "time_window",
             "LineOutputVariable",
-            instrResolution["rtime_window"],
+            instrResolution["time_window_positive"],
             axis="time",
             units="au",
         )
 
         self._outputData.add(
-            "omega", "LineOutputVariable", instrResolution["romega"], units="rad/ps"
+            "omega", "LineOutputVariable", instrResolution["omega"], units="rad/ps"
+        )
+        self._outputData.add(
+            "romega", "LineOutputVariable", instrResolution["romega"], units="rad/ps"
         )
         self._outputData.add(
             "omega_window",
             "LineOutputVariable",
-            instrResolution["romega_window"],
+            instrResolution["omega_window"],
             axis="omega",
             units="au",
         )
@@ -130,7 +133,7 @@ class DensityOfStates(IJob):
                 "dos_%s" % element,
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
-                axis="omega",
+                axis="romega",
                 units="au",
             )
         self._outputData.add(
@@ -144,7 +147,7 @@ class DensityOfStates(IJob):
             "dos_total",
             "LineOutputVariable",
             (instrResolution["n_romegas"],),
-            axis="omega",
+            axis="romega",
             units="au",
         )
 
