@@ -38,6 +38,17 @@ class HDFTrajectoryInputData(InputFileData):
 
     def info(self):
         val = []
+        try:
+            time_axis = self._data._h5_file["time"][:]
+        except:
+            timeline = "No time information!\n"
+        else:
+            if len(time_axis) < 1:
+                timeline = "N/A\n"
+            elif len(time_axis) < 5:
+                timeline = f"{time_axis}\n"
+            else:
+                timeline = f"[{time_axis[0]}, {time_axis[1]}, ..., {time_axis[2]}]\n"
 
         val.append("Path:")
         val.append("%s\n" % self._name)
@@ -45,6 +56,8 @@ class HDFTrajectoryInputData(InputFileData):
         val.append("%s\n" % len(self._data))
         val.append("Configuration:")
         val.append("\tIs periodic: {}\n".format("unit_cell" in self._data.file))
+        val.append("Frame times (1st, 2nd, ..., last) in ps:")
+        val.append(timeline)
         val.append("Variables:")
         for k, v in self._data.file["/configuration"].items():
             val.append("\t- {}: {}".format(k, v.shape))
