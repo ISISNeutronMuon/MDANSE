@@ -126,7 +126,7 @@ def revert_parameters(values: dict, peak_type: str) -> List[float]:
         A pair of [FWHM, centre] values
     """
     if peak_type == "ideal":
-        return [0, 0]
+        return [1.0, 0]
     elif peak_type == "triangular":
         vals = [values["sigma"], values["mu"]]
     elif peak_type == "square":
@@ -169,10 +169,11 @@ class ResolutionDialog(QDialog):
         self._unit_selector.addItems(["meV", "1/cm", "THz"])
         self._fwhm = QLineEdit("1.0", self)
         self._centre = QLineEdit("0.0", self)
-        for ledit in [self._fwhm, self._centre]:
-            ledit.setValidator(QDoubleValidator(ledit))
-        self._eta = QLineEdit("N/A", self)
+        self._eta = QLineEdit("0.0", self)
         self._eta.setEnabled(False)
+        for ledit in [self._fwhm, self._centre, self._eta]:
+            ledit.setValidator(QDoubleValidator(ledit))
+            ledit.setPlaceholderText("N/A")
         self._omega_axis = np.linspace(-1.0, 1.0, 500)
         self._output_field = QTextEdit(self)
         self._output_field.setReadOnly(True)
@@ -244,11 +245,15 @@ class ResolutionDialog(QDialog):
         self._resolution = IInstrumentResolution.create(widget_text_map[new_model])
         self._resolution.build_configuration()
         if "oigt" in new_model:
-            self._eta.setEnabled(True)
-            self._eta.setText("0.0")
+            for field in [self._fwhm, self._centre, self._eta]:
+                field.setEnabled(True)
+        elif "deal" in new_model:
+            for field in [self._fwhm, self._centre, self._eta]:
+                field.setEnabled(False)
         else:
+            for field in [self._fwhm, self._centre]:
+                field.setEnabled(True)
             self._eta.setEnabled(False)
-            self._eta.setText("N/A")
         self.recalculate_peak()
 
     @Slot()
@@ -300,7 +305,7 @@ class ResolutionDialog(QDialog):
         self._omega_axis = np.linspace(
             factor * (centre - 3 * extra_width),
             factor * (centre + 3 * extra_width),
-            500,
+            501,  # odd number is needed for 'ideal' function to work
         )
         try:
             self._resolution.set_kernel(self._omega_axis, 1.0)
@@ -334,7 +339,7 @@ class ResolutionDialog(QDialog):
             if new_function_name == value:
                 offical_name = key
         new_params = widget_values[1]
-        new_eta = new_params.get("eta", "N/A")
+        new_eta = new_params.get("eta", "0.0")
         try:
             fwhm, centre = revert_parameters(new_params, new_function_name)
         except:
@@ -436,7 +441,8 @@ class ResolutionDialog(QDialog):
             + self._centre_value
         )
         ys = np.array([0.0, hh, hh, 0.0])
-        axes.plot(xs * self._factor_value, ys, "r:")
+        if not "deal" in self._resolution_name:
+            axes.plot(xs * self._factor_value, ys, "r:")
         axes.grid(True)
         scale = self._factor_value
         second_axis = axes.secondary_xaxis(

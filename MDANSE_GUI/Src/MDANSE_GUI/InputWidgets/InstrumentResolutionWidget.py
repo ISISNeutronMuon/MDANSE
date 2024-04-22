@@ -69,7 +69,7 @@ class InstrumentResolutionWidget(WidgetBase):
         # first row
         for num in range(1, 3):
             label = QLabel("", parent=self._base)
-            field = QLineEdit("0.0", parent=self._base)
+            field = QLineEdit("N/A", parent=self._base)
             field.setEnabled(False)
             self._layout.addWidget(label, 0, 2 * num)
             self._layout.addWidget(field, 0, 2 * num + 1)
@@ -81,7 +81,7 @@ class InstrumentResolutionWidget(WidgetBase):
         # first row
         for num in range(0, 3):
             label = QLabel("", parent=self._base)
-            field = QLineEdit("0.0", parent=self._base)
+            field = QLineEdit("N/A", parent=self._base)
             field.setEnabled(False)
             self._layout.addWidget(label, 1, 2 * num)
             self._layout.addWidget(field, 1, 2 * num + 1)
