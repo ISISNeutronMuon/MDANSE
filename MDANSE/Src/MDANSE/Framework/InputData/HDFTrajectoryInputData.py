@@ -48,7 +48,7 @@ class HDFTrajectoryInputData(InputFileData):
             elif len(time_axis) < 5:
                 timeline = f"{time_axis}\n"
             else:
-                timeline = f"[{time_axis[0]}, {time_axis[1]}, ..., {time_axis[2]}]\n"
+                timeline = f"[{time_axis[0]}, {time_axis[1]}, ..., {time_axis[-1]}]\n"
 
         val.append("Path:")
         val.append("%s\n" % self._name)
