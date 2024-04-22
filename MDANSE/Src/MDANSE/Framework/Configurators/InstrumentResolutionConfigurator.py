@@ -93,7 +93,9 @@ class InstrumentResolutionConfigurator(IConfigurator):
         resolution.set_kernel(self["omega"], self["time_step"])
         self["omega_window"] = resolution.omegaWindow
         self["time_window"] = resolution.timeWindow.real
-        self["time_window_positive"] = np.fft.ifftshift(self["time_window"])[:len(time)]
+        self["time_window_positive"] = np.fft.ifftshift(self["time_window"])[
+            : len(time)
+        ]
 
     def get_information(self):
         """

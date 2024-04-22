@@ -41,9 +41,7 @@ class IInstrumentResolution(Configurable, metaclass=SubclassFactory):
         pass
 
     def apply_fft(self, omegaWindow, dt):
-        timeWindow = np.fft.fftshift(
-            np.fft.ifft(np.fft.ifftshift(omegaWindow)) / dt
-        )
+        timeWindow = np.fft.fftshift(np.fft.ifft(np.fft.ifftshift(omegaWindow)) / dt)
         return timeWindow
 
     @property
