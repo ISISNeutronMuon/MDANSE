@@ -266,8 +266,32 @@ class HDFDataItem(DataItem):
             self._parent = None
             self._is_group = True
             self._children = []
+            self._metadata = {}
 
+        self.check_metadata()
         self._parse(self, self._file)
+
+    def check_metadata(self):
+        def read_from_hdf5(group, key, dictionary):
+            try:
+                subnodes = group.keys()
+            except AttributeError:
+                try:
+                    dictionary[key] = group[key][:].decode()
+                except TypeError:
+                    return dictionary
+            else:
+                subdict = {}
+                for newkey in subnodes:
+                    dictionary[key] = read_from_hdf5(group, newkey, subdict)
+            return dictionary
+
+        try:
+            meta = self._file["metadata"]
+        except KeyError:
+            return
+        else:
+            self._metadata = read_from_hdf5(meta, meta.keys, {})
 
     def _parse(self, node, group):
         """Retrieve recursively all the variables stored in a HDF file and build the tree out of this.
