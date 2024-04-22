@@ -95,7 +95,7 @@ for jt in [
     # "OrderParameter",
     "PositionAutoCorrelationFunction",
 ]:
-    for rm in [("single-core", 1), ("threadpool", 4), ("multicore", 4)]:
+    for rm in [("single-core", 1), ("multicore", 4)]:
         for of in ["MDAFormat", "TextFormat"]:
             total_list.append((jt, rm, of))
 
