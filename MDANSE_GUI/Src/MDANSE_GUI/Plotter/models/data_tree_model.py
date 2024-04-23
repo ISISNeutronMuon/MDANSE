@@ -16,6 +16,7 @@
 
 import abc
 import os
+import json
 
 import numpy as np
 
@@ -24,6 +25,9 @@ import h5py
 from qtpy import QtCore, QtGui
 
 from MDANSE.Framework.Units import measure, UnitError
+
+
+json_decoder = json.decoder.JSONDecoder()
 
 
 class DataItemError(Exception):
@@ -280,7 +284,10 @@ class HDFDataItem(DataItem):
             except:
                 print(f"Decode failed for {name}: {obj}")
             else:
-                meta_dict[name] = string
+                try:
+                    meta_dict[name] = json_decoder.decode(string)
+                except ValueError:
+                    meta_dict[name] = string
 
         try:
             meta = self._file["metadata"]
