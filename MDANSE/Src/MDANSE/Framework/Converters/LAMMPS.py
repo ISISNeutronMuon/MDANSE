@@ -58,6 +58,14 @@ class LAMMPS(Converter):
             "default": "INPUT_FILENAME.lammps",
         },
     )
+    settings["trajectory_format"] = (
+        "SingleChoiceConfigurator",
+        {"label": "LAMMPS trajectory format", "choices": ["custom", "xyz", "h5md"], "default": "custom"},
+    )
+    settings["lammps_units"] = (
+        "SingleChoiceConfigurator",
+        {"label": "LAMMPS unit system", "choices": ["real", "metal", "si", "cgs", "electron", "micro", "nano"], "default": "real"},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -102,6 +110,9 @@ class LAMMPS(Converter):
 
         self._lammpsConfig = self.configuration["config_file"]
 
+        self._lammps_units = self.configuration["lammps_units"]["value"]
+
+        self.set_units()
         self.parse_first_step(self._atomicAliases)
 
         # Estimate number of steps if needed
@@ -145,7 +156,7 @@ class LAMMPS(Converter):
         time = (
             float(self._lammps.readline())
             * self.configuration["time_step"]["value"]
-            * measure(1.0, "fs").toval("ps")
+            * measure(1.0, self._time_unit).toval("ps")
         )
 
         for _ in range(
@@ -195,7 +206,7 @@ class LAMMPS(Converter):
 
         unitCell = np.reshape(unitCell, (3, 3))
 
-        unitCell *= measure(1.0, "ang").toval("nm")
+        unitCell *= measure(1.0, self._length_unit).toval("nm")
         unitCell = UnitCell(unitCell)
 
         for _ in range(
@@ -222,7 +233,7 @@ class LAMMPS(Converter):
             )
             realConf = conf.to_real_configuration()
         else:
-            coords *= measure(1.0, "ang").toval("nm")
+            coords *= measure(1.0, self._length_unit).toval("nm")
             realConf = PeriodicRealConfiguration(
                 self._trajectory.chemical_system, coords, unitCell
             )
@@ -374,3 +385,53 @@ class LAMMPS(Converter):
                 self._nAtoms = int(self._lammps.readline())
                 comp += 1
                 continue
+    
+    def set_units(self):
+        self._energy_unit = ''
+        self._time_unit = ''
+        self._length_unit = ''
+        self._velocity_unit = ''
+        self._mass_unit = ''
+        if self._lammps_units == 'real':
+            self._energy_unit = 'kcal_per_mole'
+            self._time_unit = 'fs'
+            self._length_unit = 'ang'
+            self._velocity_unit = 'ang/fs'
+            self._mass_unit = 'uma'
+        elif self._lammps_units == 'metal':
+            self._energy_unit = 'eV'
+            self._time_unit = 'ps'
+            self._length_unit = 'ang'
+            self._velocity_unit = 'ang/ps'
+            self._mass_unit = 'uma'
+        elif self._lammps_units == 'si':
+            self._energy_unit = 'J'
+            self._time_unit = 's'
+            self._length_unit = 'm'
+            self._velocity_unit = 'm/s'
+            self._mass_unit = 'kg'
+        elif self._lammps_units == 'cgs':
+            self._energy_unit = 'erg'  # this will fail
+            self._time_unit = 's'
+            self._length_unit = 'cm'
+            self._velocity_unit = 'cm/s'
+            self._mass_unit = 'g'
+        elif self._lammps_units == 'electron':
+            self._energy_unit = 'Ha'
+            self._time_unit = 'fs'
+            self._length_unit = 'Bohr'
+            self._velocity_unit = 'ang/fs'
+            self._mass_unit = 'uma'
+        elif self._lammps_units == 'micro':
+            self._energy_unit = 'pg*m/s'
+            self._time_unit = 'us'
+            self._length_unit = 'um'
+            self._velocity_unit = 'm/s'
+            self._mass_unit = 'pg'
+        elif self._lammps_units == 'nano':
+            self._energy_unit = 'ag*m/s'
+            self._time_unit = 'ns'
+            self._length_unit = 'nm'
+            self._velocity_unit = 'm/s'
+            self._mass_unit = 'ag'
+

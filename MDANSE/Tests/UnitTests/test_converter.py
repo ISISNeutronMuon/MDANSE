@@ -57,6 +57,28 @@ def test_lammps_mdt_conversion_file_exists_and_loads_up_successfully(compression
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
 
+@pytest.mark.parametrize("unit_system", ["real", "metal", "si", "cgs", "electron", "micro", "nano"])
+def test_lammps_mdt_conversion_unit_system(unit_system):
+    temp_name = tempfile.mktemp()
+
+    parameters = {}
+    parameters["config_file"] = lammps_config
+    parameters["mass_tolerance"] = 0.05
+    parameters["n_steps"] = 0
+    parameters["output_file"] = (temp_name, 64, "gzip")
+    parameters["smart_mass_association"] = True
+    parameters["time_step"] = 1.0
+    parameters["trajectory_file"] = lammps_lammps
+    parameters["lammps_units"] = unit_system
+
+    lammps = Converter.create("LAMMPS")
+    lammps.run(parameters, status=True)
+
+    HDFTrajectoryConfigurator("trajectory").configure(temp_name + ".mdt")
+
+    assert os.path.exists(temp_name + ".mdt")
+    assert os.path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
 
 def test_lammps_mdt_conversion_raise_exception_with_incorrect_format():
     temp_name = tempfile.mktemp()
