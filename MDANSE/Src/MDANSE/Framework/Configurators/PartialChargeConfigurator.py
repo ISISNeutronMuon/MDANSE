@@ -13,79 +13,164 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from typing import Union
+import json
 
-import os
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.AtomSelector import Selector
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
 
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
+class PartialChargeMapper:
+    """The partial charge mapper. Updates an atom partial charge map
+    with applications of the update_charges method with a selection
+    setting and partial charge."""
+
+    def __init__(self, system: ChemicalSystem) -> None:
+        """
+        Parameters
+        ----------
+        system : ChemicalSystem
+            The chemical system object.
+        """
+        self.selector = Selector(system)
+        self._original_map = {}
+        for at in system.atom_list:
+            self._original_map[at.index] = 0.0
+        self._new_map = {}
+
+    def update_charges(
+        self, selection_dict: dict[str, Union[bool, dict]], charge: float
+    ) -> None:
+        """With the selection dictionary update the selector and then
+        update the partial charge map.
+
+        Parameters
+        ----------
+        selection_dict: dict[str, Union[bool, dict]]
+            The selection setting to get the indexes to map the inputted
+            partial charge.
+        charge: float
+            The partial charge to map the selected atoms to.
+        """
+        self.selector.update_settings(selection_dict, reset_first=True)
+        for idx in self.selector.get_idxs():
+            self._new_map[idx] = charge
+
+    def get_full_setting(self) -> dict[int, float]:
+        """
+        Returns
+        -------
+        dict[int, float]
+            The full partial charge setting.
+        """
+        full_map = {}
+        for k, v in self._original_map.items():
+            if k not in self._new_map:
+                full_map[k] = v
+            else:
+                full_map[k] = self._new_map[k]
+        return full_map
+
+    def get_setting(self) -> dict[int, float]:
+        """
+        Returns
+        -------
+        dict[int, float]
+            The minimal partial charge setting.
+        """
+        minimal_map = {}
+        for k, v in self._original_map.items():
+            if k not in self._new_map:
+                continue
+            if self._new_map[k] != v:
+                minimal_map[k] = self._new_map[k]
+        return minimal_map
+
+    def get_json_setting(self) -> str:
+        """
+        Returns
+        -------
+        str
+            A json string of the minimal partial charge setting.
+        """
+        return json.dumps(self.get_setting())
+
+    def reset_setting(self) -> None:
+        """Resets the partial charge setting."""
+        self._new_map = {}
 
 
 class PartialChargeConfigurator(IConfigurator):
-    """
-    This configurator allows to input partial charges.
-    """
+    """This configurator allows to input partial charges."""
 
-    _default = ""
+    _default = "{}"
 
     def configure(self, value):
         """
-        Configure a python script.
-
-        :param value: the path for the python script.
-        :type value: str
+        Parameters
+        ----------
+        value
+            The partial charge setting in the json format.
         """
+        if value is None or value == "":
+            value = self._default
 
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
+        if not isinstance(value, str):
+            self.error_status = "Invalid input value."
+            return
 
-        if UD_STORE.has_definition(trajConfig["basename"], "partial_charges", value):
-            self.update(
-                UD_STORE.get_definition(
-                    trajConfig["basename"], "partial_charges", value
-                )
-            )
-        else:
-            if isinstance(value, str):
-                # Case of a python script
-                if os.path.exists(value):
-                    namespace = {}
+        try:
+            value = json.loads(value)
+        except json.decoder.JSONDecodeError:
+            self.error_status = "Unable to load JSON string."
+            return
 
-                    exec(
-                        compile(open(value, "rb").read(), value, "exec"),
-                        self.__dict__,
-                        namespace,
-                    )
-
-                    if "charges" not in namespace:
-                        self.error_status = (
-                            f"The variable 'charges' is not defined in"
-                            f"the {value} python script file"
-                        )
-                        return
-
-                    self.update(namespace)
-                else:
-                    self.error_status = f"The python script defining partial charges {value} could not be found."
-                    return
-
-            elif isinstance(value, dict):
-                self["charges"] = value
-            else:
-                self.error_status = f"Invalid type for partial charges."
+        for k in value.keys():
+            try:
+                int(k)
+            except ValueError:
+                self.error_status = "Setting not valid - keys should be castable to an int."
                 return
+
+        traj_config = self._configurable[self._dependencies["trajectory"]]
+        system = traj_config["instance"].chemical_system
+
+        idxs = [at.index for at in system.atom_list]
+        if any([int(i) not in idxs for i in value.keys()]):
+            self.error_status = "Inputted setting not valid - atom index not found in the current system."
+            return
+
+        self["charges"] = {}
+        for idx in idxs:
+            if str(idx) in value:
+                self["charges"][idx] = value[str(idx)]
+            else:
+                self["charges"][idx] = 0.0
+
         self.error_status = "OK"
 
     def get_information(self):
-        """
-        Returns some basic informations about the partial charges.
+        """Returns some basic information about the partial charges.
 
-        :return: the informations about the partial charges.
-        :rtype: str
+        Returns
+        -------
+        str
+            The information about the partial charges.
         """
 
         info = "Sum of partial charges = %8.3f\n" % sum(self["charges"].values())
 
         return info
+
+    def get_charge_mapper(self) -> PartialChargeMapper:
+        """
+        Returns
+        -------
+        PartialChargeMapper
+            The partial charge mapper object initialised with the
+            trajectories chemical system.
+        """
+        traj_config = self._configurable[self._dependencies["trajectory"]]
+        mapper = PartialChargeMapper(traj_config["instance"].chemical_system)
+        return mapper

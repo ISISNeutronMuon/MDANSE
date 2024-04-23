@@ -43,7 +43,8 @@ class AtomTransmuter:
     def apply_transmutation(
         self, selection_dict: dict[str, Union[bool, dict]], symbol: str
     ) -> None:
-        """With the selection dictionary update the transmutation map.
+        """With the selection dictionary update selector and then
+        update the transmutation map.
 
         Parameters
         ----------

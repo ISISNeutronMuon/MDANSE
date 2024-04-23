@@ -63,6 +63,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "AtomMappingConfigurator": AtomMappingWidget,
     "AtomTransmutationConfigurator": AtomTransmutationWidget,
     "InstrumentResolutionConfigurator": InstrumentResolutionWidget,
+    "PartialChargeConfigurator": PartialChargeWidget
 }
 
 
