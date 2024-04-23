@@ -135,8 +135,8 @@ class PartialChargeConfigurator(IConfigurator):
 
         traj_config = self._configurable[self._dependencies["trajectory"]]
         system = traj_config["instance"].chemical_system
-
         idxs = [at.index for at in system.atom_list]
+
         if any([int(i) not in idxs for i in value.keys()]):
             self.error_status = "Inputted setting not valid - atom index not found in the current system."
             return

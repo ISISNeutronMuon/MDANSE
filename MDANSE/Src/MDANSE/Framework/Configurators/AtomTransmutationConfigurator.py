@@ -135,6 +135,10 @@ class AtomTransmutationConfigurator(IConfigurator):
             self.error_status = "Unable to load JSON string."
             return
 
+        traj_config = self._configurable[self._dependencies["trajectory"]]
+        system = traj_config["instance"].chemical_system
+        idxs = [at.index for at in system.atom_list]
+
         self._nTransmutatedAtoms = 0
         for idx, element in value.items():
 
@@ -142,6 +146,10 @@ class AtomTransmutationConfigurator(IConfigurator):
                 idx = int(idx)
             except ValueError:
                 self.error_status = "Key of transmutation map should be castable to int"
+                return
+
+            if idx not in idxs:
+                self.error_status = "Inputted setting not valid - atom index not found in the current system."
                 return
 
             if element not in ATOMS_DATABASE:
