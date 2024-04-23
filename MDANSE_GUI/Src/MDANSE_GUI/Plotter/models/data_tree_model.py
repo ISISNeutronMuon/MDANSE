@@ -272,26 +272,23 @@ class HDFDataItem(DataItem):
         self._parse(self, self._file)
 
     def check_metadata(self):
-        def read_from_hdf5(group, key, dictionary):
+        meta_dict = {}
+
+        def put_into_dict(name, obj):
             try:
-                subnodes = group.keys()
-            except AttributeError:
-                try:
-                    dictionary[key] = group[key][:].decode()
-                except TypeError:
-                    return dictionary
+                string = obj[:][0].decode()
+            except:
+                print(f"Decode failed for {name}: {obj}")
             else:
-                subdict = {}
-                for newkey in subnodes:
-                    dictionary[key] = read_from_hdf5(group, newkey, subdict)
-            return dictionary
+                meta_dict[name] = string
 
         try:
             meta = self._file["metadata"]
         except KeyError:
             return
         else:
-            self._metadata = read_from_hdf5(meta, meta.keys, {})
+            meta.visititems(put_into_dict)
+        self._metadata = meta_dict
 
     def _parse(self, node, group):
         """Retrieve recursively all the variables stored in a HDF file and build the tree out of this.
@@ -483,7 +480,11 @@ class DataTreeModel(QtCore.QAbstractItemModel):
         elif role == QtCore.Qt.ItemDataRole.ToolTipRole:
             node = index.internalPointer()
             if node.is_group():
-                return node.path
+                try:
+                    metadata = str(node._metadata)
+                except:
+                    metadata = "No metadata found in the file"
+                return node.path + "\n" + metadata
             else:
                 data_root_item = self.get_data_root_item(node)
                 variable_info = data_root_item.get_dataset_info(node.path, False)

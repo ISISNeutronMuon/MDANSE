@@ -24,6 +24,7 @@ class HDFTrajectoryInputData(InputFileData):
     extension = "mdt"
 
     def load(self):
+        self._metadata = {}
         try:
             traj = Trajectory(self._name)
         except IOError as e:
@@ -32,6 +33,7 @@ class HDFTrajectoryInputData(InputFileData):
             raise InputDataError(str(e))
 
         self._data = traj
+        self.check_metadata()
 
     def close(self):
         self._data.close()
@@ -62,6 +64,10 @@ class HDFTrajectoryInputData(InputFileData):
         for k, v in self._data.file["/configuration"].items():
             val.append("\t- {}: {}".format(k, v.shape))
 
+        val.append("\nConversion history:")
+        for k, v in self._metadata.items():
+            val.append(f"{k}: {v}")
+
         mol_types = {}
         val.append("\nMolecular types found:")
         for ce in self._data.chemical_system.chemical_entities:
@@ -76,6 +82,25 @@ class HDFTrajectoryInputData(InputFileData):
         val = "\n".join(val)
 
         return val
+
+    def check_metadata(self):
+        meta_dict = {}
+
+        def put_into_dict(name, obj):
+            try:
+                string = obj[:][0].decode()
+            except:
+                print(f"Decode failed for {name}: {obj}")
+            else:
+                meta_dict[name] = string
+
+        try:
+            meta = self._data.file["metadata"]
+        except KeyError:
+            return
+        else:
+            meta.visititems(put_into_dict)
+        self._metadata = meta_dict
 
     @property
     def trajectory(self):
