@@ -53,6 +53,9 @@ class LocalSession(QObject):
         value = self._paths.get(key, ".")
         return value
 
+    def set_path(self, key: str, value: str):
+        self._paths[key] = value
+
     def get_unit(self, key: str) -> str:
         value = self._units.get(key, "1")
         return value
