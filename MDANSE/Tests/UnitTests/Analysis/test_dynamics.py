@@ -61,7 +61,7 @@ def parameters():
     # parameters['atom_transmutation'] = None
     # parameters['frames'] = (0, 1000, 1)
     parameters["trajectory"] = short_traj
-    parameters["running_mode"] = ("threadpool", 4)
+    parameters["running_mode"] = ("threadpool", -4)
     parameters["q_vectors"] = (
         "SphericalLatticeQVectors",
         {
