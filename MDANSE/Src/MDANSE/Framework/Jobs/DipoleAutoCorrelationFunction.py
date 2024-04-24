@@ -106,13 +106,13 @@ class DipoleAutoCorrelationFunction(IJob):
         """
         molecule = self.molecules[index]
         dipoleMoments = np.zeros(
-            (self.configuration["frames"]["number"], 3), dtype=np.float64
+            (self.configuration["frames"]["n_frames"], 3), dtype=np.float64
         )
-        for frame_index in range(
+        for i, frame_index in enumerate(range(
             self.configuration["frames"]["first"],
             self.configuration["frames"]["last"] + 1,
             self.configuration["frames"]["step"],
-        ):
+        )):
             configuration = self.configuration["trajectory"]["instance"].configuration(
                 frame_index
             )
@@ -122,7 +122,7 @@ class DipoleAutoCorrelationFunction(IJob):
             for atm in molecule.atom_list:
                 idx = atm.index
                 q = self.configuration["atom_charges"]["charges"][idx]
-                dipoleMoments[frame_index] = q * (
+                dipoleMoments[i] = q * (
                     contiguous_configuration["coordinates"][idx, :] - com
                 )
 
