@@ -91,6 +91,7 @@ experimental data, or used as a prediction of results of a potential experiment.
 
 <details><summary>Infrared</summary><ul>
 <li>Dipole Autocorrelation Function</li>
+<li>Infrared</li>
 </ul></details>
 
 <details><summary>Scattering</summary><ul>
