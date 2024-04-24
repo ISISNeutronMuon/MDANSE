@@ -29,7 +29,7 @@ class Ideal(IInstrumentResolution):
 
     settings = collections.OrderedDict()
 
-    def set_kernel(self, omegas, dt, fft="fft"):
+    def set_kernel(self, omegas, dt):
         nOmegas = len(omegas)
         self._omegaWindow = np.zeros(nOmegas, dtype=np.float64)
         self._omegaWindow[int(nOmegas / 2)] = 1.0

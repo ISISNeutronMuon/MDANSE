@@ -28,7 +28,7 @@ def parameters():
     # parameters['atom_transmutation'] = None
     # parameters['frames'] = (0, 1000, 1)
     parameters["trajectory"] = short_traj
-    parameters["running_mode"] = ("threadpool", 4)
+    parameters["running_mode"] = ("threadpool", -4)
     parameters["q_vectors"] = (
         "SphericalLatticeQVectors",
         {
@@ -51,24 +51,35 @@ def parameters():
     return parameters
 
 
-@pytest.mark.parametrize(
-    "job_type",
-    [
-        "RadiusOfGyration",
-        "SolventAccessibleSurface",
-        "RootMeanSquareDeviation",
-        "RootMeanSquareFluctuation",
-        "DensityProfile",
-        "MolecularTrace",
-        "Voronoi",
-        "Eccentricity",
-    ],
-)
-def test_structure_analysis(parameters, job_type):
+total_list = []
+
+for jt in [
+    "RadiusOfGyration",
+    "SolventAccessibleSurface",
+    "RootMeanSquareDeviation",
+    "RootMeanSquareFluctuation",
+    "DensityProfile",
+    "MolecularTrace",
+    "Voronoi",
+    "Eccentricity",
+]:
+    for rm in [("single-core", 1), ("multicore", -4)]:
+        for of in ["MDAFormat", "TextFormat"]:
+            total_list.append((jt, rm, of))
+
+
+@pytest.mark.parametrize("job_type,running_mode,output_format", total_list)
+def test_structure_analysis(parameters, job_type, running_mode, output_format):
     temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["running_mode"] = running_mode
+    parameters["output_files"] = (temp_name, (output_format,))
     job = IJob.create(job_type)
     job.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
+    if output_format == "MDAFormat":
+        assert path.exists(temp_name + ".mda")
+        assert path.isfile(temp_name + ".mda")
+        os.remove(temp_name + ".mda")
+    elif output_format == "TextFormat":
+        assert path.exists(temp_name + "_text.tar")
+        assert path.isfile(temp_name + "_text.tar")
+        os.remove(temp_name + "_text.tar")
