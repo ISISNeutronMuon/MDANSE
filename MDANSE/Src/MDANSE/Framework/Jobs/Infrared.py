@@ -18,10 +18,10 @@ import collections
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Signal import correlation
+from MDANSE.Mathematics.Signal import correlation, differentiate, get_spectrum
 
 
-class DipoleAutoCorrelationFunction(IJob):
+class Infrared(IJob):
 
     enabled = True
 
@@ -39,6 +39,10 @@ class DipoleAutoCorrelationFunction(IJob):
     settings["frames"] = (
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["instrument_resolution"] = (
+        "InstrumentResolutionConfigurator",
+        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
     settings["molecule_name"] = (
         "MoleculeSelectionConfigurator",
@@ -74,20 +78,44 @@ class DipoleAutoCorrelationFunction(IJob):
         ]
 
         self.numberOfSteps = len(self.molecules)
+        instrResolution = self.configuration["instrument_resolution"]
 
-        # Will store the time.
         self._outputData.add(
             "time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
         )
+        self._outputData.add(
+            "time_window",
+            "LineOutputVariable",
+            instrResolution["rtime_window"],
+            axis="time",
+            units="au",
+        )
 
         self._outputData.add(
-            "dacf",
+            "omega", "LineOutputVariable", instrResolution["romega"], units="rad/ps"
+        )
+        self._outputData.add(
+            "omega_window",
+            "LineOutputVariable",
+            instrResolution["romega_window"],
+            axis="omega",
+            units="au",
+        )
+
+        self._outputData.add(
+            "ddacf",
             "LineOutputVariable",
             (self.configuration["frames"]["number"],),
             axis="time",
+        )
+        self._outputData.add(
+            "ir",
+            "LineOutputVariable",
+            (instrResolution["n_romegas"],),
+            axis="omega",
         )
 
     def run_step(self, index) -> tuple[int, np.ndarray]:
@@ -101,11 +129,11 @@ class DipoleAutoCorrelationFunction(IJob):
         Returns
         -------
         tuple[int, np.ndarray]
-            The index of the step and the calculated dipole
+            The index of the step and the calculated d/dt dipole
             auto-correlation function for a molecule.
         """
         molecule = self.molecules[index]
-        dipoleMoments = np.zeros(
+        ddipole = np.zeros(
             (self.configuration["frames"]["number"], 3), dtype=np.float64
         )
         for frame_index in range(
@@ -122,22 +150,35 @@ class DipoleAutoCorrelationFunction(IJob):
             for atm in molecule.atom_list:
                 idx = atm.index
                 q = self.configuration["atom_charges"]["charges"][idx]
-                dipoleMoments[frame_index] = q * (
-                        contiguous_configuration["coordinates"][idx, :] - com
+                ddipole[frame_index] = q * (
+                    contiguous_configuration["coordinates"][idx, :] - com
                 )
 
-        mol_dacf = correlation(dipoleMoments, axis=0, average=1)
-        return index, mol_dacf
+        for axis in range(3):
+            ddipole[:, axis] = differentiate(
+                ddipole[:, axis],
+                order=2,
+                dt=self.configuration["frames"]["time_step"],
+            )
+
+        mol_ddacf = correlation(ddipole, axis=0, average=1)
+        return index, mol_ddacf
 
     def combine(self, index, x):
         """Combines returned results of run_step."""
-        self._outputData["dacf"] += x
+        self._outputData["ddacf"] += x
 
     def finalize(self):
         """Finalizes the calculations (e.g. averaging the total term,
         output files creations ...).
         """
-        self._outputData["dacf"] /= self.numberOfSteps
+        self._outputData["ddacf"] /= self.numberOfSteps
+        self._outputData["ir"][:] = get_spectrum(
+            self._outputData["ddacf"],
+            self.configuration["instrument_resolution"]["time_window"],
+            self.configuration["instrument_resolution"]["time_step"],
+            fft="rfft",
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

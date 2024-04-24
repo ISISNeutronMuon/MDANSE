@@ -130,7 +130,9 @@ class PartialChargeConfigurator(IConfigurator):
             try:
                 int(k)
             except ValueError:
-                self.error_status = "Setting not valid - keys should be castable to an int."
+                self.error_status = (
+                    "Setting not valid - keys should be castable to an int."
+                )
                 return
 
         traj_config = self._configurable[self._dependencies["trajectory"]]
