@@ -136,11 +136,13 @@ class Infrared(IJob):
         ddipole = np.zeros(
             (self.configuration["frames"]["n_frames"], 3), dtype=np.float64
         )
-        for i, frame_index in enumerate(range(
-            self.configuration["frames"]["first"],
-            self.configuration["frames"]["last"] + 1,
-            self.configuration["frames"]["step"],
-        )):
+        for i, frame_index in enumerate(
+            range(
+                self.configuration["frames"]["first"],
+                self.configuration["frames"]["last"] + 1,
+                self.configuration["frames"]["step"],
+            )
+        ):
             configuration = self.configuration["trajectory"]["instance"].configuration(
                 frame_index
             )
@@ -150,9 +152,7 @@ class Infrared(IJob):
             for atm in molecule.atom_list:
                 idx = atm.index
                 q = self.configuration["atom_charges"]["charges"][idx]
-                ddipole[i] = q * (
-                    contiguous_configuration["coordinates"][idx, :] - com
-                )
+                ddipole[i] = q * (contiguous_configuration["coordinates"][idx, :] - com)
 
         for axis in range(3):
             ddipole[:, axis] = differentiate(

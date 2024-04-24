@@ -108,11 +108,13 @@ class DipoleAutoCorrelationFunction(IJob):
         dipoleMoments = np.zeros(
             (self.configuration["frames"]["n_frames"], 3), dtype=np.float64
         )
-        for i, frame_index in enumerate(range(
-            self.configuration["frames"]["first"],
-            self.configuration["frames"]["last"] + 1,
-            self.configuration["frames"]["step"],
-        )):
+        for i, frame_index in enumerate(
+            range(
+                self.configuration["frames"]["first"],
+                self.configuration["frames"]["last"] + 1,
+                self.configuration["frames"]["step"],
+            )
+        ):
             configuration = self.configuration["trajectory"]["instance"].configuration(
                 frame_index
             )

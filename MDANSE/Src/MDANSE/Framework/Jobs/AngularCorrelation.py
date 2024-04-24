@@ -157,20 +157,20 @@ class AngularCorrelation(IJob):
         at1_traj = np.empty((self.configuration["frames"]["n_frames"], 3))
         at2_traj = np.empty((self.configuration["frames"]["n_frames"], 3))
 
-        for i, frame_index in enumerate(range(
-            self.configuration["frames"]["first"],
-            self.configuration["frames"]["last"] + 1,
-            self.configuration["frames"]["step"],
-        )):
+        for i, frame_index in enumerate(
+            range(
+                self.configuration["frames"]["first"],
+                self.configuration["frames"]["last"] + 1,
+                self.configuration["frames"]["step"],
+            )
+        ):
             configuration = self.configuration["trajectory"]["instance"].configuration(
                 frame_index
             )
             contiguous_configuration = configuration.contiguous_configuration()
             chemical_system.configuration = contiguous_configuration
             at1_traj[i] = molecule.centre_of_mass(contiguous_configuration)
-            at2_traj[i] = reference_atom.centre_of_mass(
-                contiguous_configuration
-            )
+            at2_traj[i] = reference_atom.centre_of_mass(contiguous_configuration)
 
         diff = at2_traj - at1_traj
 
