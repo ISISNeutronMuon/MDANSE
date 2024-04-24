@@ -62,6 +62,7 @@ ALL_JOBS = [
     "XPLOR",
     "DFTB",
     "DMol",
+    'Infrared',
 ]
 
 
