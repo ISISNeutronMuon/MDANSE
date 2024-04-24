@@ -123,7 +123,7 @@ class DipoleAutoCorrelationFunction(IJob):
                 idx = atm.index
                 q = self.configuration["atom_charges"]["charges"][idx]
                 dipoleMoments[frame_index] = q * (
-                        contiguous_configuration["coordinates"][idx, :] - com
+                    contiguous_configuration["coordinates"][idx, :] - com
                 )
 
         mol_dacf = correlation(dipoleMoments, axis=0, average=1)
