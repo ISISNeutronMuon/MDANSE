@@ -113,8 +113,11 @@ class PartialChargeConfigurator(IConfigurator):
         value
             The partial charge setting in the json format.
         """
+        self["charges"] = {}
+
         if value is None or value == "":
             value = self._default
+        self._original_input = value
 
         if not isinstance(value, str):
             self.error_status = "Invalid input value."
@@ -143,7 +146,6 @@ class PartialChargeConfigurator(IConfigurator):
             self.error_status = "Inputted setting not valid - atom index not found in the current system."
             return
 
-        self["charges"] = {}
         for idx in idxs:
             if str(idx) in value:
                 self["charges"][idx] = value[str(idx)]
@@ -161,8 +163,7 @@ class PartialChargeConfigurator(IConfigurator):
             The information about the partial charges.
         """
 
-        info = "Sum of partial charges = %8.3f\n" % sum(self["charges"].values())
-
+        info = f"Charge map setting {self['charges']}\n"
         return info
 
     def get_charge_mapper(self) -> PartialChargeMapper:

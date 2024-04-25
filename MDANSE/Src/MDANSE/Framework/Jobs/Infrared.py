@@ -89,7 +89,7 @@ class Infrared(IJob):
         self._outputData.add(
             "time_window",
             "LineOutputVariable",
-            instrResolution["rtime_window"],
+            instrResolution["time_window_positive"],
             axis="time",
             units="au",
         )
@@ -100,7 +100,7 @@ class Infrared(IJob):
         self._outputData.add(
             "omega_window",
             "LineOutputVariable",
-            instrResolution["romega_window"],
+            instrResolution["omega_window"],
             axis="omega",
             units="au",
         )
@@ -184,6 +184,7 @@ class Infrared(IJob):
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
             self._info,
+            self,
         )
 
         self.configuration["trajectory"]["instance"].close()
