@@ -41,6 +41,7 @@ class PythonObjectConfigurator(IConfigurator):
         :param value: the python object to be configured and evaluated.
         :type value: strings, numbers, tuples, lists, dicts, booleans or None type.
         """
+        self._original_input = value
 
         try:
             value = ast.literal_eval(repr(value))

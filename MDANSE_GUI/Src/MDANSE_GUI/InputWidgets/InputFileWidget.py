@@ -14,6 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import os
+
 from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog
 from qtpy.QtCore import Slot
 
@@ -29,15 +31,21 @@ class InputFileWidget(WidgetBase):
             default_value = configurator.default
         else:
             default_value = ""
+        parent = kwargs.get("parent", None)
+        if parent is not None:
+            self._job_name = parent._job_name
+            self._session = parent._session
         try:
-            parent = kwargs.get("parent", None)
-            self.default_path = parent.default_path
-        except KeyError:
-            self.default_path = "."
-            print("KeyError in InputFileWidget - can't get default path.")
+            self.default_path = self._session.get_path(self._job_name)
         except AttributeError:
-            self.default_path = "."
-            print("AttributeError in InputFileWidget - can't get default path.")
+            try:
+                self.default_path = parent.default_path
+            except KeyError:
+                self.default_path = "."
+                print("KeyError in InputFileWidget - can't get default path.")
+            except AttributeError:
+                self.default_path = "."
+                print("AttributeError in InputFileWidget - can't get default path.")
         default_value = kwargs.get("default", "")
         if self._tooltip:
             tooltip_text = self._tooltip
@@ -73,6 +81,10 @@ class InputFileWidget(WidgetBase):
         This will start a FileDialog, take the resulting path,
         and emit a signal to update the value show by the GUI.
         """
+        try:
+            self.default_path = self._session.get_path(self._job_name)
+        except:
+            print(f"session.get_path failed for {self._job_name}")
         new_value = self._file_dialog(
             self.parent(),  # the parent of the dialog
             "Load a file",  # the label of the window
@@ -83,6 +95,12 @@ class InputFileWidget(WidgetBase):
             if new_value[0]:
                 self._field.setText(new_value[0])
                 self.updateValue()
+            try:
+                self._session.set_path(self._job_name, os.path.split(new_value[0])[0])
+            except:
+                print(
+                    f"session.set_path failed for {self._job_name}, {os.path.split(new_value[0])[0]}"
+                )
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""

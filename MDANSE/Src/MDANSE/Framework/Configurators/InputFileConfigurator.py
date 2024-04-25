@@ -53,6 +53,7 @@ class InputFileConfigurator(IConfigurator):
         :param value: the input file.
         :type value: str
         """
+        self._original_input = value
 
         value = PLATFORM.get_path(value)
 

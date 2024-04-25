@@ -53,6 +53,7 @@ class OutputDirectoryConfigurator(IConfigurator):
         :param value: the path for the output directory.
         :type value: str
         """
+        self._original_input = value
 
         value = PLATFORM.get_path(value)
 

@@ -14,9 +14,16 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
+from typing import TYPE_CHECKING, Dict
+from importlib import metadata
+
 import h5py
+
 from MDANSE.Framework.Formats.IFormat import IFormat
-from MDANSE.Framework.OutputVariables import IOutputVariable
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
+    from MDANSE.Framework.Jobs.IJob import IJob
 
 
 class HDFFormat(IFormat):
@@ -38,8 +45,9 @@ class HDFFormat(IFormat):
     def write(
         cls,
         filename: str,
-        data: dict[str, IOutputVariable],
+        data: Dict[str, "IOutputVariable"],
         header: str = "",
+        run_instance: "IJob" = None,
         extension: str = extensions[0],
     ) -> None:
         """Write a set of output variables into an HDF file.
@@ -55,6 +63,8 @@ class HDFFormat(IFormat):
         extension : str
             The extension of the file.
         """
+        string_dt = h5py.special_dtype(vlen=str)
+
         filename = os.path.splitext(filename)[0]
 
         filename = "%s%s" % (filename, extension)
@@ -67,6 +77,29 @@ class HDFFormat(IFormat):
             header = str(header)
 
             outputFile.attrs["header"] = header
+
+        meta = outputFile.create_group("metadata")
+        if run_instance is not None:
+            meta.create_dataset(
+                "task_name",
+                (1,),
+                data=str(run_instance.__class__.__name__),
+                dtype=string_dt,
+            )
+            meta.create_dataset(
+                "MDANSE_version",
+                (1,),
+                data=str(metadata.version("MDANSE")),
+                dtype=string_dt,
+            )
+
+            inputs = run_instance.output_configuration()
+
+            if inputs is not None:
+                print(inputs)
+                dgroup = meta.create_group("inputs")
+                for key, value in inputs.items():
+                    dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
 
         # Loop over the OutputVariable instances to write.
 

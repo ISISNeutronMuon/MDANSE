@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+from typing import Dict
 import collections
 
 from MDANSE.Core.Error import Error
@@ -195,6 +196,14 @@ class Configurable(object):
                 )
 
         self._configured = True
+
+    def output_configuration(self) -> Dict[str, str]:
+        if not self._configured:
+            return
+        result = {}
+        for name, conf in list(self._configuration.items()):
+            result[name] = conf.to_json()
+        return result
 
     def __str__(self):
         """

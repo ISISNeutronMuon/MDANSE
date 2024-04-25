@@ -28,6 +28,7 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
         filepath : str
             The file path.
         """
+        self._original_input = filepath
         super().configure(filepath)
         if self.error_status != "OK":
             return

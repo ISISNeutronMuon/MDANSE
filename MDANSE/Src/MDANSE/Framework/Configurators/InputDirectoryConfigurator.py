@@ -38,6 +38,7 @@ class InputDirectoryConfigurator(IConfigurator):
         :param value: the input directory.
         :type value: str
         """
+        self._original_input = value
 
         value = PLATFORM.get_path(value)
 

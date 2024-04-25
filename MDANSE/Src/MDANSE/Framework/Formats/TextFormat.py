@@ -19,11 +19,16 @@ import io
 import tarfile
 import codecs
 import time
+from typing import Dict, TYPE_CHECKING
+from importlib import metadata
 
 import numpy as np
 
 
 from MDANSE.Framework.Formats.IFormat import IFormat
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Jobs.IJob import IJob
 
 
 def length_stringio(input: "io.BytesIO") -> int:
@@ -42,7 +47,7 @@ class TextFormat(IFormat):
     extensions = [".dat", ".txt"]
 
     @classmethod
-    def write(cls, filename, data, header=""):
+    def write(cls, filename, data, header: str = "", run_instance: "IJob" = None):
         """
         Write a set of output variables into a set of Text files.
 
@@ -69,6 +74,21 @@ class TextFormat(IFormat):
             tempStr.write("\n\n")
             real_buffer.seek(0)
             info = tarfile.TarInfo(name="jobinfo.txt")
+            info.size = length_stringio(real_buffer)
+            info.mtime = time.time()
+            tf.addfile(tarinfo=info, fileobj=real_buffer)
+
+        if run_instance is not None:
+            inputs = run_instance.output_configuration()
+            real_buffer = io.BytesIO()
+            tempStr = codecs.getwriter("utf-8")(real_buffer)
+            tempStr.write(f"run type: {run_instance.__class__.__name__}\n")
+            tempStr.write(f"MDANSE version: {metadata.version('MDANSE')}\n")
+            for key, value in inputs.items():
+                tempStr.write(f"parameters[{str(key)}] = {str(value)}\n")
+            tempStr.write("\n\n")
+            real_buffer.seek(0)
+            info = tarfile.TarInfo(name="job_parameters.txt")
             info.size = length_stringio(real_buffer)
             info.mtime = time.time()
             tf.addfile(tarinfo=info, fileobj=real_buffer)

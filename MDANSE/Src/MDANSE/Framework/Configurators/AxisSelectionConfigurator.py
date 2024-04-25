@@ -47,6 +47,7 @@ class AxisSelectionConfigurator(IConfigurator):
         :param value: the input value
         :type value: tuple or str 
         """
+        self._original_input = value
 
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 

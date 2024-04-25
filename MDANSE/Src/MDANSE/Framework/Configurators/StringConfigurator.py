@@ -55,6 +55,7 @@ class StringConfigurator(IConfigurator):
         :param value: the input string
         :type value: str
         """
+        self._original_input = value
 
         value = str(value)
 

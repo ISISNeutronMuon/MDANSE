@@ -84,6 +84,8 @@ class RangeConfigurator(IConfigurator):
         :type value: 3-tuple
         """
 
+        self._original_input = value
+
         first, last, step = value
 
         if step == 0:

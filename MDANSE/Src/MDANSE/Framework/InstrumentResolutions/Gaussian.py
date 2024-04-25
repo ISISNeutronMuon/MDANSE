@@ -31,11 +31,11 @@ class Gaussian(IInstrumentResolution):
     settings["mu"] = ("FloatConfigurator", {"default": 0.0})
     settings["sigma"] = ("FloatConfigurator", {"default": 1.0})
 
-    def set_kernel(self, omegas, dt, fft="fft"):
+    def set_kernel(self, omegas, dt):
         mu = self._configuration["mu"]["value"]
         sigma = self._configuration["sigma"]["value"]
 
         self._omegaWindow = (np.sqrt(2.0 * np.pi) / sigma) * np.exp(
             -0.5 * ((omegas - mu) / sigma) ** 2
         )
-        self._timeWindow = self.apply_fft(self._omegaWindow, dt, fft)
+        self._timeWindow = self.apply_fft(self._omegaWindow, dt)

@@ -77,6 +77,7 @@ class Action(QWidget):
         self._default_path = None
         self._input_trajectory = None
         self._trajectory_configurator = None
+        self._session = None
         default_path = kwargs.pop("path", None)
         input_trajectory = kwargs.pop("trajectory", None)
         self.set_trajectory(default_path, input_trajectory)
@@ -86,6 +87,9 @@ class Action(QWidget):
         self.handlers = {}
         self._widgets = []
         self._widgets_in_layout = []
+
+    def set_session(self, session):
+        self._session = session
 
     def set_trajectory(self, path: Optional[str], trajectory: Optional[str]) -> None:
         """Set the trajectory path and filename.
