@@ -19,8 +19,7 @@ from collections import defaultdict
 from importlib import metadata
 
 from icecream import ic
-from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger, Qt
-from qtpy.QtGui import QAction
+from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger
 from qtpy.QtWidgets import (
     QMainWindow,
     QFileDialog,
@@ -29,6 +28,7 @@ from qtpy.QtWidgets import (
     QMenuBar,
     QMessageBox,
     QApplication,
+    QAction,
 )
 
 import MDANSE
