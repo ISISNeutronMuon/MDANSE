@@ -144,12 +144,13 @@ class MainWindow(QtWidgets.QMainWindow):
         """Callback called when a file is opened."""
         extensions = " ".join([f"*{k}" for k in DATA_ITEMS.keys()])
         filter_mask = f"Data files {extensions}"
-        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
+        filenames, _ = QtWidgets.QFileDialog.getOpenFileNames(
             self, "Open Data File(s)", "", filter_mask
         )
-        if not filename:
+        if not filenames:
             return
-        self.add_data(filename)
+        for filename in filenames:
+            self.add_data(filename)
 
     def on_plot_in_new_figure(self, plot_type):
         """Callback when the plot in a new figure button is clicked.

@@ -51,6 +51,7 @@ class MDMCTrajectoryConfigurator(IConfigurator):
         :param value: an instance of the MdanseTrajectory class
         :type value: MdanseTrajectory from MDMC
         """
+        self._original_input = value
 
         self["value"] = value
         self["filename"] = "MDMC.temp"

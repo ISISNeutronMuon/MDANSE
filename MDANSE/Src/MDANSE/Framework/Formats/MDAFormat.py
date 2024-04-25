@@ -15,10 +15,11 @@
 #
 from MDANSE.Framework.Formats.IFormat import IFormat
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
+    from MDANSE.Framework.Jobs.IJob import IJob
 from .HDFFormat import HDFFormat
 
 
@@ -41,8 +42,9 @@ class MDAFormat(IFormat):
     def write(
         cls,
         filename: str,
-        data: dict[str, "IOutputVariable"],
+        data: Dict[str, "IOutputVariable"],
         header: str = "",
+        run_instance: "IJob" = None,
         extension: str = extensions[0],
     ) -> None:
         """Write a set of output variables into an HDF file with the
@@ -59,4 +61,4 @@ class MDAFormat(IFormat):
         extension : str
             The extension of the file.
         """
-        HDFFormat.write(filename, data, header, extension)
+        HDFFormat.write(filename, data, header, run_instance, extension)

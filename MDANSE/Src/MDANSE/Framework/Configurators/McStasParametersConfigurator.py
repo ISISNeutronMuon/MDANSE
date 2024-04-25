@@ -70,6 +70,7 @@ class McStasParametersConfigurator(IConfigurator):
         :param value: the McStas instrument parameters.
         :type value: dict
         """
+        self._original_input = value
 
         instrConfig = self._configurable[self._dependencies["instrument"]]
 

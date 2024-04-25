@@ -52,6 +52,7 @@ class FramesConfigurator(RangeConfigurator):
         :param value: the input value
         :type value: 3-tuple, 'all' or None
         """
+        self._original_input = value
 
         trajConfig = self._configurable[self._dependencies["trajectory"]]
         n_steps = trajConfig["length"]

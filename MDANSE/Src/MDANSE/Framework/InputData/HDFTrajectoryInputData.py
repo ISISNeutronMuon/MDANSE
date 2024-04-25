@@ -14,16 +14,21 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import json
 
 from MDANSE.Framework.InputData.IInputData import InputDataError
 from MDANSE.Framework.InputData.InputFileData import InputFileData
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
+json_decoder = json.decoder.JSONDecoder()
+
+
 class HDFTrajectoryInputData(InputFileData):
     extension = "mdt"
 
     def load(self):
+        self._metadata = {}
         try:
             traj = Trajectory(self._name)
         except IOError as e:
@@ -32,12 +37,24 @@ class HDFTrajectoryInputData(InputFileData):
             raise InputDataError(str(e))
 
         self._data = traj
+        self.check_metadata()
 
     def close(self):
         self._data.close()
 
     def info(self):
         val = []
+        try:
+            time_axis = self._data._h5_file["time"][:]
+        except:
+            timeline = "No time information!\n"
+        else:
+            if len(time_axis) < 1:
+                timeline = "N/A\n"
+            elif len(time_axis) < 5:
+                timeline = f"{time_axis}\n"
+            else:
+                timeline = f"[{time_axis[0]}, {time_axis[1]}, ..., {time_axis[-1]}]\n"
 
         val.append("Path:")
         val.append("%s\n" % self._name)
@@ -45,9 +62,15 @@ class HDFTrajectoryInputData(InputFileData):
         val.append("%s\n" % len(self._data))
         val.append("Configuration:")
         val.append("\tIs periodic: {}\n".format("unit_cell" in self._data.file))
+        val.append("Frame times (1st, 2nd, ..., last) in ps:")
+        val.append(timeline)
         val.append("Variables:")
         for k, v in self._data.file["/configuration"].items():
             val.append("\t- {}: {}".format(k, v.shape))
+
+        val.append("\nConversion history:")
+        for k, v in self._metadata.items():
+            val.append(f"{k}: {v}")
 
         mol_types = {}
         val.append("\nMolecular types found:")
@@ -63,6 +86,28 @@ class HDFTrajectoryInputData(InputFileData):
         val = "\n".join(val)
 
         return val
+
+    def check_metadata(self):
+        meta_dict = {}
+
+        def put_into_dict(name, obj):
+            try:
+                string = obj[:][0].decode()
+            except:
+                print(f"Decode failed for {name}: {obj}")
+            else:
+                try:
+                    meta_dict[name] = json_decoder.decode(string)
+                except ValueError:
+                    meta_dict[name] = string
+
+        try:
+            meta = self._data.file["metadata"]
+        except KeyError:
+            return
+        else:
+            meta.visititems(put_into_dict)
+        self._metadata = meta_dict
 
     @property
     def trajectory(self):

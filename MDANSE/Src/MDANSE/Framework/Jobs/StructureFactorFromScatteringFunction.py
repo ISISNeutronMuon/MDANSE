@@ -144,6 +144,7 @@ class StructureFactorFromScatteringFunction(IJob):
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
             self._info,
+            self,
         )
 
         self.configuration["sample_inc"]["instance"].close()

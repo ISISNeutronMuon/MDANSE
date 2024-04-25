@@ -60,6 +60,7 @@ class AtomsListConfigurator(IConfigurator):
         :type value: str
         """
 
+        self._original_input = value
         traj_configurator = self._configurable[self._dependencies["trajectory"]]
 
         if UD_STORE.has_definition(

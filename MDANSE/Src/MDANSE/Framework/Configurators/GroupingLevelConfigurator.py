@@ -97,6 +97,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         :param value: the level of granularity at which the atoms should be grouped
         :type value: str
         """
+        self._original_input = value
 
         if value is None:
             value = "atom"

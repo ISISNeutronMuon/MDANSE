@@ -50,6 +50,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         """
 
         self["value"] = value
+        self._original_input = value
 
         # if the input value is None, do not perform any transmutation
         if value is None or value == "":

@@ -38,6 +38,7 @@ class PartialChargeConfigurator(IConfigurator):
         :param value: the path for the python script.
         :type value: str
         """
+        self._original_input = value
 
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 

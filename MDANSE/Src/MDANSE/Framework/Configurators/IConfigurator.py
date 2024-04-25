@@ -15,6 +15,7 @@
 #
 
 import abc
+import json
 
 from MDANSE.Core.Error import Error
 
@@ -81,6 +82,9 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
     _default = None
 
+    _encoder = json.encoder.JSONEncoder()
+    _decoder = json.decoder.JSONDecoder()
+
     _doc_ = "undocumented"
 
     def __init__(self, name, **kwargs):
@@ -129,6 +133,8 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         self._valid = True
 
         self._error_status = "OK"
+
+        self._original_input = ""
 
     @property
     def configurable(self):
@@ -252,6 +258,12 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         :note: this is an abstract method.
         """
+
+    def to_json(self) -> str:
+        return self._encoder.encode(self._original_input)
+
+    def from_json(self, json_input: str):
+        self.configure(self._decoder.decode(json_input))
 
     def set_configured(self, configured):
         self._configured = configured

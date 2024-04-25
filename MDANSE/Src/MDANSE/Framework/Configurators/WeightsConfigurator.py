@@ -51,6 +51,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :param value: the name of the weight to use.
         :type value: one of the numeric properties of MDANSE.Data.ElementsDatabase.ElementsDatabase
         """
+        self._original_input = value
 
         if not isinstance(value, str):
             self.error_status = "Invalid type for weight. Must be a string."
