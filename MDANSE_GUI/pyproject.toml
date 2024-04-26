@@ -20,7 +20,9 @@ classifiers = [
         'Development Status :: 3 - Alpha',
 
         'Intended Audience :: Science/Research',
-        'Topic :: Software Development :: Build Tools',
+        'Topic :: Scientific/Engineering :: Chemistry',
+        'Topic :: Scientific/Engineering :: Physics',
+        'Topic :: Scientific/Engineering :: Visualization',
 
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.9',
