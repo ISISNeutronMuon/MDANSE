@@ -61,7 +61,10 @@ def test_lammps_mdt_conversion_file_exists_and_loads_up_successfully(compression
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
 
-@pytest.mark.parametrize("unit_system", ["real", "metal", "si", "cgs", "electron", "micro", "nano"])
+
+@pytest.mark.parametrize(
+    "unit_system", ["real", "metal", "si", "cgs", "electron", "micro", "nano"]
+)
 def test_lammps_mdt_conversion_unit_system(unit_system):
     temp_name = tempfile.mktemp()
 
@@ -84,14 +87,16 @@ def test_lammps_mdt_conversion_unit_system(unit_system):
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
 
-@pytest.mark.parametrize("trajectory_file,trajectory_format", [(lammps_custom, 'custom'),
-                                                               (lammps_xyz, 'xyz'),
-                                                               (lammps_h5md, 'h5md')])
+
+@pytest.mark.parametrize(
+    "trajectory_file,trajectory_format",
+    [(lammps_custom, "custom"), (lammps_xyz, "xyz"), (lammps_h5md, "h5md")],
+)
 def test_lammps_mdt_conversion_trajectory_format(trajectory_file, trajectory_format):
     temp_name = tempfile.mktemp()
 
     parameters = {}
-    parameters["config_file"] = lammps_config
+    parameters["config_file"] = lammps_moly
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
     parameters["output_file"] = (temp_name, 64, "gzip")
@@ -99,7 +104,7 @@ def test_lammps_mdt_conversion_trajectory_format(trajectory_file, trajectory_for
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = trajectory_file
     parameters["trajectory_format"] = trajectory_format
-    parameters["lammps_units"] = 'electron'
+    parameters["lammps_units"] = "electron"
 
     lammps = Converter.create("LAMMPS")
     lammps.run(parameters, status=True)
@@ -109,6 +114,7 @@ def test_lammps_mdt_conversion_trajectory_format(trajectory_file, trajectory_for
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+
 
 def test_lammps_mdt_conversion_raise_exception_with_incorrect_format():
     temp_name = tempfile.mktemp()

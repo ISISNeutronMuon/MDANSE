@@ -471,7 +471,7 @@ class LAMMPS(Converter):
             compression=self.configuration["output_file"]["compression"],
         )
 
-        self._nameToIndex = dict(
+        self._reader._nameToIndex = dict(
             [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
         )
 
