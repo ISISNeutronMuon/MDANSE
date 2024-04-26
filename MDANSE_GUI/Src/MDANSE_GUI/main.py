@@ -40,7 +40,9 @@ def startGUI(some_args):
     splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
     splash.show()
     t0 = time.time()
-    root = TabbedWindow(parent=None, title="MDANSE for Python 3", settings=settings)
+    root = TabbedWindow(
+        parent=None, title="MDANSE for Python 3", settings=settings, app_instance=app
+    )
     root.show()
     t1 = time.time()
     # only allow the splash screen to stay up for maximum of 2s if the

@@ -50,6 +50,7 @@ class PythonScriptConfigurator(InputFileConfigurator):
         :param value: the path for the python script.
         :type value: str
         """
+        self._original_input = value
 
         InputFileConfigurator.configure(self, value)
 

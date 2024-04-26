@@ -14,10 +14,80 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import json
+from typing import Union
 
-from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Framework.AtomTransmutation import AtomTransmuter
+from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
+from MDANSE.Framework.AtomSelector import Selector
+
+
+class AtomTransmuter:
+    """The atom transmuter setting generator. Updates an atom
+    transmutation setting with applications of the apply_transmutation
+    method with a selection setting and symbol."""
+
+    def __init__(self, system: ChemicalSystem) -> None:
+        """
+        Parameters
+        ----------
+        system : ChemicalSystem
+            The chemical system object.
+        """
+        self.selector = Selector(system)
+        self._original_map = {}
+        for at in system.atom_list:
+            self._original_map[at.index] = at.symbol
+        self._new_map = {}
+
+    def apply_transmutation(
+        self, selection_dict: dict[str, Union[bool, dict]], symbol: str
+    ) -> None:
+        """With the selection dictionary update selector and then
+        update the transmutation map.
+
+        Parameters
+        ----------
+        selection_dict: dict[str, Union[bool, dict]]
+            The selection setting to get the indexes to map the inputted
+            symbol.
+        symbol: str
+            The element to map the selected atoms to.
+        """
+        if symbol not in ATOMS_DATABASE:
+            raise ValueError(f"{symbol} not found in the atom database.")
+
+        self.selector.update_settings(selection_dict, reset_first=True)
+        for idx in self.selector.get_idxs():
+            self._new_map[idx] = symbol
+
+    def get_setting(self) -> dict[int, str]:
+        """
+        Returns
+        -------
+        dict[int, str]
+            The minimal transmutation setting.
+        """
+        minimal_map = {}
+        for k, v in self._original_map.items():
+            if k not in self._new_map:
+                continue
+            if self._new_map[k] != v:
+                minimal_map[k] = self._new_map[k]
+        return minimal_map
+
+    def get_json_setting(self) -> str:
+        """
+        Returns
+        -------
+        str
+            A json string of the minimal transmutation setting.
+        """
+        return json.dumps(self.get_setting())
+
+    def reset_setting(self) -> None:
+        """Resets the transmutation setting."""
+        self._new_map = {}
 
 
 class AtomTransmutationConfigurator(IConfigurator):
@@ -50,6 +120,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         """
 
         self["value"] = value
+        self._original_input = value
 
         # if the input value is None, do not perform any transmutation
         if value is None or value == "":
@@ -65,6 +136,10 @@ class AtomTransmutationConfigurator(IConfigurator):
             self.error_status = "Unable to load JSON string."
             return
 
+        traj_config = self._configurable[self._dependencies["trajectory"]]
+        system = traj_config["instance"].chemical_system
+        idxs = [at.index for at in system.atom_list]
+
         self._nTransmutatedAtoms = 0
         for idx, element in value.items():
 
@@ -72,6 +147,10 @@ class AtomTransmutationConfigurator(IConfigurator):
                 idx = int(idx)
             except ValueError:
                 self.error_status = "Key of transmutation map should be castable to int"
+                return
+
+            if idx not in idxs:
+                self.error_status = "Inputted setting not valid - atom index not found in the current system."
                 return
 
             if element not in ATOMS_DATABASE:
@@ -124,7 +203,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         if self["value"] is None:
             return "No atoms selected for transmutation\n"
 
-        return "Number of transmutated atoms:%d\n" % self._nTransmutatedAtoms
+        return "Number of transmuted atoms:%d\n" % self._nTransmutatedAtoms
 
     def get_transmuter(self) -> AtomTransmuter:
         """

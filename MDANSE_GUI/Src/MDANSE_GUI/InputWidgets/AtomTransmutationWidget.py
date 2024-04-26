@@ -25,7 +25,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE.Framework.AtomTransmutation import AtomTransmuter
+from MDANSE.Framework.Configurators.AtomTransmutationConfigurator import AtomTransmuter
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import AtomSelectionWidget
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import SelectionHelper

@@ -59,6 +59,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
         is a dictionary that stores the parameters for this kernel.
         :type value: 2-tuple
         """
+        self._original_input = value
 
         framesCfg = self._configurable[self._dependencies["frames"]]
 
@@ -93,12 +94,9 @@ class InstrumentResolutionConfigurator(IConfigurator):
         resolution.set_kernel(self["omega"], self["time_step"])
         self["omega_window"] = resolution.omegaWindow
         self["time_window"] = resolution.timeWindow.real
-
-        rresolution = IInstrumentResolution.create(kernel)
-        rresolution.setup(parameters)
-        rresolution.set_kernel(self["romega"], self["time_step"], fft="rfft")
-        self["romega_window"] = rresolution.omegaWindow
-        self["rtime_window"] = rresolution.timeWindow.real
+        self["time_window_positive"] = np.fft.ifftshift(self["time_window"])[
+            : len(time)
+        ]
 
     def get_information(self):
         """

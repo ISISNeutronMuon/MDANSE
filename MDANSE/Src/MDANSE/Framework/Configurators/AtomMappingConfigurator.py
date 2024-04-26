@@ -39,6 +39,7 @@ class AtomMappingConfigurator(IConfigurator):
         """
         if value is None:
             value = self._default
+        self._original_input = value
 
         if not isinstance(value, str):
             self.error_status = "Invalid input value."

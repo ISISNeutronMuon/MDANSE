@@ -411,7 +411,8 @@ class %(classname)s(IJob):
         """ 
 
         # The output data are written
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info)
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info,
+            self.output_configuration())
         
         # The trajectory is closed
         self.configuration['trajectory']['instance'].close()        

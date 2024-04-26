@@ -47,6 +47,7 @@ class BasisSelectionConfigurator(IConfigurator):
 
         :note: this configurator depends on 'trajectory' configurator to be configured
         """
+        self._original_input = value
 
         trajConfig = self._configurable[self._dependencies["trajectory"]]
 

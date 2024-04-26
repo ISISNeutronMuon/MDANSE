@@ -28,7 +28,7 @@ class RunningModeConfigurator(IConfigurator):
     """
     This configurator allows to choose the mode used to run the calculation.
 
-    MDANSE currently support single-core or multicore (SMP) running modes. In the laster case, you have to
+    MDANSE currently support single-core or multicore (SMP) running modes. In the latter case, you have to
     specify the number of slots used for running the analysis.
     """
 
@@ -44,6 +44,7 @@ class RunningModeConfigurator(IConfigurator):
         must be *'multicore'* and 2nd element the number of slots allocated for running the analysis.
         :type value: *'single-core'* or 2-tuple
         """
+        self._original_input = value
 
         if isinstance(value, str):
             mode = value
@@ -59,16 +60,19 @@ class RunningModeConfigurator(IConfigurator):
 
         else:
             slots = int(value[1])
+            maxSlots = multiprocessing.cpu_count()
 
-            if mode == "multicore":
-                maxSlots = multiprocessing.cpu_count()
+            if slots == 0:
+                self.error_status = "invalid number of allocated slots."
+                return
+            elif slots < 0:
+                slots = abs(slots)
+                if slots > maxSlots:
+                    slots = maxSlots
+            else:
                 if slots > maxSlots:
                     self.error_status = "invalid number of allocated slots."
                     return
-
-            if slots <= 0:
-                self.error_status = "invalid number of allocated slots."
-                return
 
         self["mode"] = mode
 

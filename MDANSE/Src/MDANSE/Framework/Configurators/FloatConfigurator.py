@@ -59,6 +59,7 @@ class FloatConfigurator(IConfigurator):
         :type value: float
         """
         self["value"] = self._default
+        self._original_input = value
 
         try:
             value = float(value)

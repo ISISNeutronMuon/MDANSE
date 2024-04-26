@@ -57,7 +57,7 @@ def test_parallel_meansquare():
     parameters = {}
     parameters["frames"] = (0, 10, 1)
     parameters["output_files"] = (temp_name2, ("MDAFormat",))
-    parameters["running_mode"] = ("threadpool", 4)
+    parameters["running_mode"] = ("multicore", -4)
     parameters["trajectory"] = short_traj
     msd_par = IJob.create("MeanSquareDisplacement")
     msd_par.run(parameters, status=True)
@@ -66,7 +66,8 @@ def test_parallel_meansquare():
         h5py.File(temp_name2 + ".mda") as parallel,
     ):
         for kk in single.keys():
-            assert np.allclose(np.array(single[kk]), np.array(parallel[kk]), 1e-5, 1e-4)
+            if not "metadata" in kk:
+                assert np.allclose(np.array(single[kk]), np.array(parallel[kk]), 1e-5, 1e-4)
     os.remove(temp_name + ".mda")
     os.remove(temp_name2 + ".mda")
 

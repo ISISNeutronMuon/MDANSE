@@ -55,6 +55,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
         :param value: the input file.
         :type value: str
         """
+        self._original_input = values
         try:
             value, file_format = values
         except ValueError:

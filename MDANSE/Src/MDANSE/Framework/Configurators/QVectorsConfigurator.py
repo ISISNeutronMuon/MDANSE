@@ -57,6 +57,7 @@ class QVectorsConfigurator(IConfigurator):
         and 2nd element the parameters for this configurator or a string that matches a Q vectors user definition.
         :type value: 2-tuple or str
         """
+        self._original_input = value
 
         trajConfig = self._configurable[self._dependencies["trajectory"]]
         if isinstance(value, str):

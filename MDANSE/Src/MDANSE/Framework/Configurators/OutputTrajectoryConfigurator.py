@@ -58,6 +58,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self._compression = "none"
 
     def configure(self, value: tuple):
+        self._original_input = value
 
         root, dtype, compression = value
 

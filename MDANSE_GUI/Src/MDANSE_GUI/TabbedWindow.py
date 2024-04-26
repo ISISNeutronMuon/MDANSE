@@ -19,8 +19,7 @@ from collections import defaultdict
 from importlib import metadata
 
 from icecream import ic
-from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger, Qt
-from qtpy.QtGui import QAction
+from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger
 from qtpy.QtWidgets import (
     QMainWindow,
     QFileDialog,
@@ -29,6 +28,7 @@ from qtpy.QtWidgets import (
     QMenuBar,
     QMessageBox,
     QApplication,
+    QAction,
 )
 
 import MDANSE
@@ -62,7 +62,15 @@ class TabbedWindow(QMainWindow):
     file_name_for_loading = Signal(str)
     converter_name_for_dialog = Signal(str)
 
-    def __init__(self, *args, parent=None, title="MDANSE", settings=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        parent=None,
+        title="MDANSE",
+        settings=None,
+        app_instance=None,
+        **kwargs,
+    ):
         super().__init__(parent, *args, **kwargs)
         self.tabs = QTabWidget(self)
         self.setCentralWidget(self.tabs)
@@ -91,6 +99,10 @@ class TabbedWindow(QMainWindow):
         self.style_selector.connectStyleDatabase(self._style_database)
         self.style_selector.new_style.connect(self.setStyleSheet)
         self.style_selector.icon_swap.connect(self.invertToolbar)
+
+        if app_instance is not None:
+            app_instance.aboutToQuit.connect(self._session.save_json)
+        self._session.load_json()
 
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()

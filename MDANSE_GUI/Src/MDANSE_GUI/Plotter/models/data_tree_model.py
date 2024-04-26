@@ -16,6 +16,7 @@
 
 import abc
 import os
+import json
 
 import numpy as np
 
@@ -24,6 +25,9 @@ import h5py
 from qtpy import QtCore, QtGui
 
 from MDANSE.Framework.Units import measure, UnitError
+
+
+json_decoder = json.decoder.JSONDecoder()
 
 
 class DataItemError(Exception):
@@ -266,8 +270,32 @@ class HDFDataItem(DataItem):
             self._parent = None
             self._is_group = True
             self._children = []
+            self._metadata = {}
 
+        self.check_metadata()
         self._parse(self, self._file)
+
+    def check_metadata(self):
+        meta_dict = {}
+
+        def put_into_dict(name, obj):
+            try:
+                string = obj[:][0].decode()
+            except:
+                print(f"Decode failed for {name}: {obj}")
+            else:
+                try:
+                    meta_dict[name] = json_decoder.decode(string)
+                except ValueError:
+                    meta_dict[name] = string
+
+        try:
+            meta = self._file["metadata"]
+        except KeyError:
+            return
+        else:
+            meta.visititems(put_into_dict)
+        self._metadata = meta_dict
 
     def _parse(self, node, group):
         """Retrieve recursively all the variables stored in a HDF file and build the tree out of this.
@@ -349,7 +377,10 @@ class HDFDataItem(DataItem):
             elif hdf_variable.ndim == 1:
                 info["data"] = hdf_variable[:]
             else:
-                info["data"] = np.expand_dims(hdf_variable[:], axis=0)
+                try:
+                    info["data"] = np.expand_dims(hdf_variable[:], axis=0)
+                except ValueError:
+                    info["data"] = np.array(hdf_variable)
 
         return info
 
@@ -456,7 +487,11 @@ class DataTreeModel(QtCore.QAbstractItemModel):
         elif role == QtCore.Qt.ItemDataRole.ToolTipRole:
             node = index.internalPointer()
             if node.is_group():
-                return node.path
+                try:
+                    metadata = str(node._metadata)
+                except:
+                    metadata = "No metadata found in the file"
+                return node.path + "\n" + metadata
             else:
                 data_root_item = self.get_data_root_item(node)
                 variable_info = data_root_item.get_dataset_info(node.path, False)

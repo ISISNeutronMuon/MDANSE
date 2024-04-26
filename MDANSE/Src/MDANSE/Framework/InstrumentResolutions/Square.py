@@ -31,7 +31,7 @@ class Square(IInstrumentResolution):
     settings["mu"] = ("FloatConfigurator", {"default": 0.0})
     settings["sigma"] = ("FloatConfigurator", {"default": 1.0})
 
-    def set_kernel(self, omegas, dt, fft="fft"):
+    def set_kernel(self, omegas, dt):
         mu = self._configuration["mu"]["value"]
         sigma = self._configuration["sigma"]["value"]
 
@@ -41,4 +41,4 @@ class Square(IInstrumentResolution):
             * np.where((np.abs(omegas - mu) - sigma) > 0, 0.0, 1.0 / (2.0 * sigma))
         )
 
-        self._timeWindow = self.apply_fft(self._omegaWindow, dt, fft)
+        self._timeWindow = self.apply_fft(self._omegaWindow, dt)

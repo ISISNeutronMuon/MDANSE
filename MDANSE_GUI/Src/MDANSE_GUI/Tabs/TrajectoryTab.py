@@ -42,24 +42,29 @@ class TrajectoryTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._core.add_button("Load an .MDT Trajectory", self.load_trajectory)
+        self._core.add_button("Load .MDT Trajectories", self.load_trajectories)
 
     @Slot()
-    def load_trajectory(self):
-        fname = QFileDialog.getOpenFileName(
+    def load_trajectories(self):
+        fnames = QFileDialog.getOpenFileNames(
             self._core,
             "Load an MD trajectory",
             self._session.get_path("root_directory"),
             "MDANSE trajectory files (*.mdt);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
         )
-        if len(fname[0]) > 0:
-            _, short_name = os.path.split(fname[0])
+        for fname in fnames[0]:
+            self.load_trajectory(fname)
+
+    @Slot()
+    def load_trajectory(self, fname: str):
+        if len(fname) > 0:
+            _, short_name = os.path.split(fname)
             try:
-                data = HDFTrajectoryInputData(fname[0])
+                data = HDFTrajectoryInputData(fname)
             except Exception as e:
                 self._core.error(repr(e))
             else:
-                self._core._model.append_object(((fname[0], data), short_name))
+                self._core._model.append_object(((fname, data), short_name))
 
     @classmethod
     def standard_instance(cls):

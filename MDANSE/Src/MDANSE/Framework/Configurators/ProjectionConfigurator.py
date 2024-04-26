@@ -44,6 +44,7 @@ class ProjectionConfigurator(IConfigurator):
         :type value: 2-tuple
         """
         self["axis"] = None
+        self._original_input = value
 
         if value is None:
             value = ("NullProjector", None)

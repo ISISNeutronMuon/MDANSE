@@ -31,7 +31,7 @@ class Triangular(IInstrumentResolution):
     settings["mu"] = ("FloatConfigurator", {"default": 0.0})
     settings["sigma"] = ("FloatConfigurator", {"default": 1.0})
 
-    def set_kernel(self, omegas, dt, fft="fft"):
+    def set_kernel(self, omegas, dt):
         mu = self._configuration["mu"]["value"]
         sigma = self._configuration["sigma"]["value"]
 
@@ -39,4 +39,4 @@ class Triangular(IInstrumentResolution):
 
         self._omegaWindow = 2.0 * np.pi * np.where(val >= 0, 0.0, -val / sigma**2)
 
-        self._timeWindow = self.apply_fft(self._omegaWindow, dt, fft)
+        self._timeWindow = self.apply_fft(self._omegaWindow, dt)

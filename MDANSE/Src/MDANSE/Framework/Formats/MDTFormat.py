@@ -13,8 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+from typing import TYPE_CHECKING, Dict
+
 from MDANSE.Framework.Formats.IFormat import IFormat
-from MDANSE.Framework.OutputVariables import IOutputVariable
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
+    from MDANSE.Framework.Jobs.IJob import IJob
 from .HDFFormat import HDFFormat
 
 
@@ -37,8 +43,9 @@ class MDTFormat(IFormat):
     def write(
         cls,
         filename: str,
-        data: dict[str, IOutputVariable],
+        data: Dict[str, "IOutputVariable"],
         header: str = "",
+        run_instance: "IJob" = None,
         extension: str = extensions[0],
     ) -> None:
         """Write a set of output variables into an HDF file with the
@@ -55,4 +62,4 @@ class MDTFormat(IFormat):
         extension : str
             The extension of the file.
         """
-        HDFFormat.write(filename, data, header, extension)
+        HDFFormat.write(filename, data, header, run_instance, extension)

@@ -49,6 +49,7 @@ class SingleChoiceConfigurator(IConfigurator):
         :param value: the input selection list.
         :type value: list
         """
+        self._original_input = value
 
         try:
             self["index"] = self._choices.index(value)

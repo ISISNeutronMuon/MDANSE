@@ -2,9 +2,7 @@ import sys
 import tempfile
 import os
 from os import path
-import pytest
 from icecream import ic
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -14,50 +12,37 @@ short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
     "Data",
-    "short_trajectory_after_changes.mdt",
+    "named_molecules.mdt",
 )
 
 
-################################################################
-# Job parameters                                               #
-################################################################
-@pytest.fixture(scope="function")
-def parameters():
-    parameters = {}
-    parameters["atom_selection"] = '{"all": true}'
-    # parameters['atom_transmutation'] = None
-    # parameters['frames'] = (0, 1000, 1)
-    parameters["trajectory"] = short_traj
-    parameters["running_mode"] = ("threadpool", 4)
-    parameters["q_vectors"] = (
-        "SphericalLatticeQVectors",
-        {
-            "seed": 0,
-            "shells": (0, 5.0, 0.5),
-            "n_vectors": 100,
-            "width": 0.5,
-        },
-    )
-    parameters["q_values"] = (0.0, 10.0, 0.1)
-    parameters["r_values"] = (0.0, 10.0, 0.1)
-    parameters["per_axis"] = False
-    parameters["reference_direction"] = (0, 0, 1)
-    parameters["instrument_resolution"] = ("Gaussian", {"sigma": 1.0, "mu": 0.0})
-    parameters["interpolation_order"] = "3rd order"
-    parameters["projection"] = None
-    parameters["normalize"] = True
-    parameters["grouping_level"] = "atom"
-    parameters["weights"] = "equal"
-    return parameters
-
-
-@pytest.mark.xfail(reason="see docstring")
-def test_infrared_analysis(parameters):
-    """It is a known problem, and will have to be fixed:
-    the input must contain a partail charge for every atom."""
+def test_dacf_analysis():
     temp_name = tempfile.mktemp()
+    parameters = {}
+    parameters["frames"] = (0, 100, 1)
     parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["running_mode"] = ("single-core", 1)
+    parameters["trajectory"] = short_traj
+    parameters["atom_charges"] = "{}"
+    parameters["molecule_name"] = "InChI=1S/CO2/c2-1-3"
     job = IJob.create("DipoleAutoCorrelationFunction")
+    job.run(parameters, status=True)
+    assert path.exists(temp_name + ".mda")
+    assert path.isfile(temp_name + ".mda")
+    os.remove(temp_name + ".mda")
+
+
+def test_ir_analysis():
+    temp_name = tempfile.mktemp()
+    parameters = {}
+    parameters["frames"] = (0, 100, 1)
+    parameters["instrument_resolution"] = ("Gaussian", {"sigma": 1.0, "mu": 0.0})
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["running_mode"] = ("single-core", 1)
+    parameters["trajectory"] = short_traj
+    parameters["atom_charges"] = "{}"
+    parameters["molecule_name"] = "InChI=1S/CO2/c2-1-3"
+    job = IJob.create("Infrared")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")

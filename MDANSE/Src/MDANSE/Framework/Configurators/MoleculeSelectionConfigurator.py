@@ -52,6 +52,7 @@ class MoleculeSelectionConfigurator(IConfigurator):
         value : str
             The atom map setting JSON string.
         """
+        self._original_input = value
         if value is None:
             value = self._default
 
