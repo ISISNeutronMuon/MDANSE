@@ -16,6 +16,8 @@
 import collections
 import numpy as np
 
+import h5py
+
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
@@ -34,257 +36,102 @@ class LAMMPSTrajectoryFileError(Error):
     pass
 
 
-class LAMMPS(Converter):
-    """
-    Converts a LAMMPS trajectory to a HDF trajectory.
-    """
+class LAMMPSReader:
 
-    label = "LAMMPS"
+    def __init__(self, *args, **kwargs):
+        self._units = kwargs.get("lammps_units", "real")
+        self._timestep = kwargs.get("timestep", 1.0)
+        self._fold = kwargs.get("fold_coordinates", False)
+        self.set_units(self._units)
+        self._file = None
 
-    settings = collections.OrderedDict()
-    settings["config_file"] = (
-        "ConfigFileConfigurator",
-        {
-            "label": "LAMMPS configuration file",
-            "wildcard": "Config files (*.config)|*.config|All files|*",
-            "default": "INPUT_FILENAME.config",
-        },
-    )
-    settings["trajectory_file"] = (
-        "InputFileConfigurator",
-        {
-            "label": "LAMMPS trajectory file",
-            "wildcard": "lammps files (*.lammps)|*.lammps|All files|*",
-            "default": "INPUT_FILENAME.lammps",
-        },
-    )
-    settings["trajectory_format"] = (
-        "SingleChoiceConfigurator",
-        {"label": "LAMMPS trajectory format", "choices": ["custom", "xyz", "h5md"], "default": "custom"},
-    )
-    settings["lammps_units"] = (
-        "SingleChoiceConfigurator",
-        {"label": "LAMMPS unit system", "choices": ["real", "metal", "si", "cgs", "electron", "micro", "nano"], "default": "real"},
-    )
-    settings["atom_aliases"] = (
-        "AtomMappingConfigurator",
-        {
-            "default": "{}",
-            "label": "Atom mapping",
-            "dependencies": {"input_file": "config_file"},
-        },
-    )
-    settings["time_step"] = (
-        "FloatConfigurator",
-        {"label": "Time step (fs)", "default": 1.0, "mini": 1.0e-9},
-    )
-    settings["n_steps"] = (
-        "IntegerConfigurator",
-        {
-            "label": "Number of time steps (0 for automatic detection)",
-            "default": 0,
-            "mini": 0,
-        },
-    )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates in to box"},
-    )
-    settings["output_file"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "formats": ["MDTFormat"],
-            "root": "config_file",
-            "label": "MDANSE trajectory (filename, format)",
-        },
-    )
+    def close(self):
+        try:
+            self._file.close()
+        except:
+            print(f"Could not close file: {self._file}")
 
-    def initialize(self):
-        """
-        Initialize the job.
-        """
-        self._atomicAliases = self.configuration["atom_aliases"]["value"]
+    def set_output(self, output_trajectory):
+        self._trajectory = output_trajectory
 
-        # The number of steps of the analysis.
-        self.numberOfSteps = self.configuration["n_steps"]["value"]
+    def set_units(self, lammps_units):
+        self._energy_unit = ""
+        self._time_unit = ""
+        self._length_unit = ""
+        self._velocity_unit = ""
+        self._mass_unit = ""
+        if lammps_units == "real":
+            self._energy_unit = "kcal_per_mole"
+            self._time_unit = "fs"
+            self._length_unit = "ang"
+            self._velocity_unit = "ang/fs"
+            self._mass_unit = "uma"
+        elif lammps_units == "metal":
+            self._energy_unit = "eV"
+            self._time_unit = "ps"
+            self._length_unit = "ang"
+            self._velocity_unit = "ang/ps"
+            self._mass_unit = "uma"
+        elif lammps_units == "si":
+            self._energy_unit = "J"
+            self._time_unit = "s"
+            self._length_unit = "m"
+            self._velocity_unit = "m/s"
+            self._mass_unit = "kg"
+        elif lammps_units == "cgs":
+            self._energy_unit = "erg"  # this will fail
+            self._time_unit = "s"
+            self._length_unit = "cm"
+            self._velocity_unit = "cm/s"
+            self._mass_unit = "g"
+        elif lammps_units == "electron":
+            self._energy_unit = "Ha"
+            self._time_unit = "fs"
+            self._length_unit = "Bohr"
+            self._velocity_unit = "ang/fs"
+            self._mass_unit = "uma"
+        elif lammps_units == "micro":
+            self._energy_unit = "pg*m/s"
+            self._time_unit = "us"
+            self._length_unit = "um"
+            self._velocity_unit = "m/s"
+            self._mass_unit = "pg"
+        elif lammps_units == "nano":
+            self._energy_unit = "ag*m/s"
+            self._time_unit = "ns"
+            self._length_unit = "nm"
+            self._velocity_unit = "m/s"
+            self._mass_unit = "ag"
 
-        self._lammpsConfig = self.configuration["config_file"]
 
-        self._lammps_units = self.configuration["lammps_units"]["value"]
+class LAMMPScustom(LAMMPSReader):
 
-        self.set_units()
-        self.parse_first_step(self._atomicAliases)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        # Estimate number of steps if needed
-        if self.numberOfSteps == 0:
-            self.numberOfSteps = 1
-            for line in self._lammps:
+    def get_time_steps(self, filename: str) -> int:
+        number_of_steps = 0
+        self.open_file(filename)
+        if number_of_steps == 0:
+            number_of_steps = 1
+            for line in self._file:
                 if line.startswith("ITEM: TIMESTEP"):
-                    self.numberOfSteps += 1
+                    number_of_steps += 1
+        self.close()
+        return number_of_steps
 
-        # A trajectory is opened for writing.
-        self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
-            self._chemicalSystem,
-            self.numberOfSteps,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
-        )
-
-        self._nameToIndex = dict(
-            [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
-        )
-
-        self._lammps.seek(0, 0)
-
+    def open_file(self, filename: str):
+        self._file = open(filename, "r")
         self._start = 0
 
-    def run_step(self, index):
-        """Runs a single step of the job.
-
-        @param index: the index of the step.
-        @type index: int.
-
-        @note: the argument index is the index of the loop note the index of the frame.
-        """
-
-        for _ in range(self._itemsPosition["TIMESTEP"][0]):
-            line = self._lammps.readline()
-            if not line:
-                return index, None
-
-        time = (
-            float(self._lammps.readline())
-            * self.configuration["time_step"]["value"]
-            * measure(1.0, self._time_unit).toval("ps")
-        )
-
-        for _ in range(
-            self._itemsPosition["TIMESTEP"][1], self._itemsPosition["BOX BOUNDS"][0]
-        ):
-            self._lammps.readline()
-
-        unitCell = np.zeros((9), dtype=np.float64)
-        temp = [float(v) for v in self._lammps.readline().split()]
-        if len(temp) == 2:
-            xlo, xhi = temp
-            xy = 0.0
-        elif len(temp) == 3:
-            xlo, xhi, xy = temp
-        else:
-            raise LAMMPSTrajectoryFileError("Bad format for A vector components")
-
-        temp = [float(v) for v in self._lammps.readline().split()]
-        if len(temp) == 2:
-            ylo, yhi = temp
-            xz = 0.0
-        elif len(temp) == 3:
-            ylo, yhi, xz = temp
-        else:
-            raise LAMMPSTrajectoryFileError("Bad format for B vector components")
-
-        temp = [float(v) for v in self._lammps.readline().split()]
-        if len(temp) == 2:
-            zlo, zhi = temp
-            yz = 0.0
-        elif len(temp) == 3:
-            zlo, zhi, yz = temp
-        else:
-            raise LAMMPSTrajectoryFileError("Bad format for C vector components")
-
-        # The ax component.
-        unitCell[0] = xhi - xlo
-
-        # The bx and by components.
-        unitCell[3] = xy
-        unitCell[4] = yhi - ylo
-
-        # The cx, cy and cz components.
-        unitCell[6] = xz
-        unitCell[7] = yz
-        unitCell[8] = zhi - zlo
-
-        unitCell = np.reshape(unitCell, (3, 3))
-
-        unitCell *= measure(1.0, self._length_unit).toval("nm")
-        unitCell = UnitCell(unitCell)
-
-        for _ in range(
-            self._itemsPosition["BOX BOUNDS"][1], self._itemsPosition["ATOMS"][0]
-        ):
-            self._lammps.readline()
-
-        coords = np.empty(
-            (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
-        )
-
-        for i, _ in enumerate(
-            range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])
-        ):
-            temp = self._lammps.readline().split()
-            idx = self._nameToIndex[self._rankToName[int(temp[0]) - 1]]
-            coords[idx, :] = np.array(
-                [temp[self._x], temp[self._y], temp[self._z]], dtype=np.float64
-            )
-
-        if self._fractionalCoordinates:
-            conf = PeriodicBoxConfiguration(
-                self._trajectory.chemical_system, coords, unitCell
-            )
-            realConf = conf.to_real_configuration()
-        else:
-            coords *= measure(1.0, self._length_unit).toval("nm")
-            realConf = PeriodicRealConfiguration(
-                self._trajectory.chemical_system, coords, unitCell
-            )
-
-        if self.configuration["fold"]["value"]:
-            # The whole configuration is folded in to the simulation box.
-            realConf.fold_coordinates()
-
-        self._trajectory.chemical_system.configuration = realConf
-
-        # A snapshot is created out of the current configuration.
-        self._trajectory.dump_configuration(
-            time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
-        )
-
-        self._start += self._last
-
-        return index, None
-
-    def combine(self, index, x):
-        """
-        @param index: the index of the step.
-        @type index: int.
-
-        @param x:
-        @type x: any.
-        """
-
-        pass
-
-    def finalize(self):
-        """
-        Finalize the job.
-        """
-
-        self._lammps.close()
-
-        # Close the output trajectory.
-        self._trajectory.close()
-
-        super(LAMMPS, self).finalize()
-
-    def parse_first_step(self, aliases):
-        self._lammps = open(self.configuration["trajectory_file"]["value"], "r")
+    def parse_first_step(self, aliases, config):
 
         self._itemsPosition = collections.OrderedDict()
 
         comp = -1
 
         while True:
-            line = self._lammps.readline()
+            line = self._file.readline()
             comp += 1
 
             if not line:
@@ -331,22 +178,20 @@ class LAMMPS(Converter):
                 g = Graph()
                 self._itemsPosition["ATOMS"] = [comp + 1, comp + self._nAtoms + 1]
                 for i in range(self._nAtoms):
-                    temp = self._lammps.readline().split()
+                    temp = self._file.readline().split()
                     idx = int(temp[self._id]) - 1
                     ty = int(temp[self._type]) - 1
-                    label = str(self._lammpsConfig["elements"][ty][0])
-                    mass = str(self._lammpsConfig["elements"][ty][1])
-                    name = "{:s}_{:d}".format(
-                        str(self._lammpsConfig["elements"][ty][0]), idx
-                    )
+                    label = str(config["elements"][ty][0])
+                    mass = str(config["elements"][ty][1])
+                    name = "{:s}_{:d}".format(str(config["elements"][ty][0]), idx)
                     self._rankToName[int(temp[0]) - 1] = name
                     g.add_node(idx, label=label, mass=mass, atomName=name)
 
-                if self._lammpsConfig["n_bonds"] is not None:
-                    for idx1, idx2 in self._lammpsConfig["bonds"]:
+                if config["n_bonds"] is not None:
+                    for idx1, idx2 in config["bonds"]:
                         g.add_link(idx1, idx2)
 
-                self._chemicalSystem = ChemicalSystem()
+                chemicalSystem = ChemicalSystem()
 
                 for cluster in g.build_connected_components():
                     if len(cluster) == 1:
@@ -376,62 +221,326 @@ class LAMMPS(Converter):
                         )
                         obj = AtomCluster(name, atList)
 
-                    self._chemicalSystem.add_chemical_entity(obj)
+                    chemicalSystem.add_chemical_entity(obj)
                 self._last = comp + self._nAtoms + 1
 
                 break
 
             elif line.startswith("ITEM: NUMBER OF ATOMS"):
-                self._nAtoms = int(self._lammps.readline())
+                self._nAtoms = int(self._file.readline())
                 comp += 1
                 continue
-    
-    def set_units(self):
-        self._energy_unit = ''
-        self._time_unit = ''
-        self._length_unit = ''
-        self._velocity_unit = ''
-        self._mass_unit = ''
-        if self._lammps_units == 'real':
-            self._energy_unit = 'kcal_per_mole'
-            self._time_unit = 'fs'
-            self._length_unit = 'ang'
-            self._velocity_unit = 'ang/fs'
-            self._mass_unit = 'uma'
-        elif self._lammps_units == 'metal':
-            self._energy_unit = 'eV'
-            self._time_unit = 'ps'
-            self._length_unit = 'ang'
-            self._velocity_unit = 'ang/ps'
-            self._mass_unit = 'uma'
-        elif self._lammps_units == 'si':
-            self._energy_unit = 'J'
-            self._time_unit = 's'
-            self._length_unit = 'm'
-            self._velocity_unit = 'm/s'
-            self._mass_unit = 'kg'
-        elif self._lammps_units == 'cgs':
-            self._energy_unit = 'erg'  # this will fail
-            self._time_unit = 's'
-            self._length_unit = 'cm'
-            self._velocity_unit = 'cm/s'
-            self._mass_unit = 'g'
-        elif self._lammps_units == 'electron':
-            self._energy_unit = 'Ha'
-            self._time_unit = 'fs'
-            self._length_unit = 'Bohr'
-            self._velocity_unit = 'ang/fs'
-            self._mass_unit = 'uma'
-        elif self._lammps_units == 'micro':
-            self._energy_unit = 'pg*m/s'
-            self._time_unit = 'us'
-            self._length_unit = 'um'
-            self._velocity_unit = 'm/s'
-            self._mass_unit = 'pg'
-        elif self._lammps_units == 'nano':
-            self._energy_unit = 'ag*m/s'
-            self._time_unit = 'ns'
-            self._length_unit = 'nm'
-            self._velocity_unit = 'm/s'
-            self._mass_unit = 'ag'
+        return chemicalSystem
 
+    def run_step(self, index):
+        """Runs a single step of the job.
+
+        @param index: the index of the step.
+        @type index: int.
+
+        @note: the argument index is the index of the loop note the index of the frame.
+        """
+
+        for _ in range(self._itemsPosition["TIMESTEP"][0]):
+            line = self._file.readline()
+            if not line:
+                return index, None
+
+        time = (
+            float(self._file.readline())
+            * self._timestep
+            * measure(1.0, self._time_unit).toval("ps")
+        )
+
+        for _ in range(
+            self._itemsPosition["TIMESTEP"][1], self._itemsPosition["BOX BOUNDS"][0]
+        ):
+            self._file.readline()
+
+        unitCell = np.zeros((9), dtype=np.float64)
+        temp = [float(v) for v in self._file.readline().split()]
+        if len(temp) == 2:
+            xlo, xhi = temp
+            xy = 0.0
+        elif len(temp) == 3:
+            xlo, xhi, xy = temp
+        else:
+            raise LAMMPSTrajectoryFileError("Bad format for A vector components")
+
+        temp = [float(v) for v in self._file.readline().split()]
+        if len(temp) == 2:
+            ylo, yhi = temp
+            xz = 0.0
+        elif len(temp) == 3:
+            ylo, yhi, xz = temp
+        else:
+            raise LAMMPSTrajectoryFileError("Bad format for B vector components")
+
+        temp = [float(v) for v in self._file.readline().split()]
+        if len(temp) == 2:
+            zlo, zhi = temp
+            yz = 0.0
+        elif len(temp) == 3:
+            zlo, zhi, yz = temp
+        else:
+            raise LAMMPSTrajectoryFileError("Bad format for C vector components")
+
+        # The ax component.
+        unitCell[0] = xhi - xlo
+
+        # The bx and by components.
+        unitCell[3] = xy
+        unitCell[4] = yhi - ylo
+
+        # The cx, cy and cz components.
+        unitCell[6] = xz
+        unitCell[7] = yz
+        unitCell[8] = zhi - zlo
+
+        unitCell = np.reshape(unitCell, (3, 3))
+
+        unitCell *= measure(1.0, self._length_unit).toval("nm")
+        unitCell = UnitCell(unitCell)
+
+        for _ in range(
+            self._itemsPosition["BOX BOUNDS"][1], self._itemsPosition["ATOMS"][0]
+        ):
+            self._file.readline()
+
+        coords = np.empty(
+            (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
+        )
+
+        for i, _ in enumerate(
+            range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])
+        ):
+            temp = self._file.readline().split()
+            idx = self._nameToIndex[self._rankToName[int(temp[0]) - 1]]
+            coords[idx, :] = np.array(
+                [temp[self._x], temp[self._y], temp[self._z]], dtype=np.float64
+            )
+
+        if self._fractionalCoordinates:
+            conf = PeriodicBoxConfiguration(
+                self._trajectory.chemical_system, coords, unitCell
+            )
+            realConf = conf.to_real_configuration()
+        else:
+            coords *= measure(1.0, self._length_unit).toval("nm")
+            realConf = PeriodicRealConfiguration(
+                self._trajectory.chemical_system, coords, unitCell
+            )
+
+        if self._fold:
+            # The whole configuration is folded in to the simulation box.
+            realConf.fold_coordinates()
+
+        self._trajectory.chemical_system.configuration = realConf
+
+        # A snapshot is created out of the current configuration.
+        self._trajectory.dump_configuration(
+            time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
+        )
+
+        self._start += self._last
+
+        return index, self._start
+
+
+class LAMMPSxyz(LAMMPSReader):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def open_file(self, filename: str):
+        self._file = open(self.configuration["trajectory_file"]["value"], "r")
+
+
+class LAMMPSh5md(LAMMPSReader):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def open_file(self, filename: str):
+        self._file = h5py.File(self.configuration["trajectory_file"]["value"], "r")
+
+
+class LAMMPS(Converter):
+    """
+    Converts a LAMMPS trajectory to a HDF trajectory.
+    """
+
+    label = "LAMMPS"
+
+    settings = collections.OrderedDict()
+    settings["config_file"] = (
+        "ConfigFileConfigurator",
+        {
+            "label": "LAMMPS configuration file",
+            "wildcard": "Config files (*.config)|*.config|All files|*",
+            "default": "INPUT_FILENAME.config",
+        },
+    )
+    settings["trajectory_file"] = (
+        "InputFileConfigurator",
+        {
+            "label": "LAMMPS trajectory file",
+            "wildcard": "lammps files (*.lammps)|*.lammps|All files|*",
+            "default": "INPUT_FILENAME.lammps",
+        },
+    )
+    settings["trajectory_format"] = (
+        "SingleChoiceConfigurator",
+        {
+            "label": "LAMMPS trajectory format",
+            "choices": ["custom", "xyz", "h5md"],
+            "default": "custom",
+        },
+    )
+    settings["lammps_units"] = (
+        "SingleChoiceConfigurator",
+        {
+            "label": "LAMMPS unit system",
+            "choices": ["real", "metal", "si", "cgs", "electron", "micro", "nano"],
+            "default": "real",
+        },
+    )
+    settings["atom_aliases"] = (
+        "AtomMappingConfigurator",
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "config_file"},
+        },
+    )
+    settings["time_step"] = (
+        "FloatConfigurator",
+        {"label": "Time step (fs)", "default": 1.0, "mini": 1.0e-9},
+    )
+    settings["n_steps"] = (
+        "IntegerConfigurator",
+        {
+            "label": "Number of time steps (0 for automatic detection)",
+            "default": 0,
+            "mini": 0,
+        },
+    )
+    settings["fold"] = (
+        "BooleanConfigurator",
+        {"default": False, "label": "Fold coordinates in to box"},
+    )
+    settings["output_file"] = (
+        "OutputTrajectoryConfigurator",
+        {
+            "formats": ["MDTFormat"],
+            "root": "config_file",
+            "label": "MDANSE trajectory (filename, format)",
+        },
+    )
+
+    def initialize(self):
+        """
+        Initialize the job.
+        """
+        self._atomicAliases = self.configuration["atom_aliases"]["value"]
+
+        # The number of steps of the analysis.
+        self.numberOfSteps = self.configuration["n_steps"]["value"]
+
+        self._lammpsConfig = self.configuration["config_file"]
+
+        self._lammps_units = self.configuration["lammps_units"]["value"]
+        self._lammps_format = self.configuration["trajectory_format"]["value"]
+
+        self._reader = self.create_reader(self._lammps_format)
+
+        self._reader.set_units(self._lammps_units)
+        self._chemicalSystem = self.parse_first_step(self._atomicAliases)
+
+        if self.numberOfSteps == 0:
+            self.numberOfSteps = self._reader.get_time_steps(
+                self.configuration["trajectory_file"]["value"]
+            )
+
+        # A trajectory is opened for writing.
+        self._trajectory = TrajectoryWriter(
+            self.configuration["output_file"]["file"],
+            self._chemicalSystem,
+            self.numberOfSteps,
+            positions_dtype=self.configuration["output_file"]["dtype"],
+            compression=self.configuration["output_file"]["compression"],
+        )
+
+        self._nameToIndex = dict(
+            [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
+        )
+
+        self._start = 0
+        self._reader.open_file(self.configuration["trajectory_file"]["value"])
+        self._reader.set_output(self._trajectory)
+
+    def create_reader(self, trajectory_type: str) -> "LAMMPSReader":
+        reader = None
+        if trajectory_type == "custom":
+            reader = LAMMPScustom(
+                lammps_units=self._lammps_units,
+                timestep=self.configuration["time_step"]["value"],
+                fold_coordinates=self.configuration["fold"]["value"],
+            )
+        if trajectory_type == "xyz":
+            reader = LAMMPSxyz(
+                lammps_units=self._lammps_units,
+                timestep=self.configuration["time_step"]["value"],
+                fold_coordinates=self.configuration["fold"]["value"],
+            )
+        if trajectory_type == "h5md":
+            reader = LAMMPSh5md(
+                lammps_units=self._lammps_units,
+                timestep=self.configuration["time_step"]["value"],
+                fold_coordinates=self.configuration["fold"]["value"],
+            )
+        return reader
+
+    def run_step(self, index):
+        """Runs a single step of the job.
+
+        @param index: the index of the step.
+        @type index: int.
+
+        @note: the argument index is the index of the loop note the index of the frame.
+        """
+
+        val1, val2 = self._reader.run_step(index)
+
+        self._start = val2
+
+        return val1, None
+
+    def combine(self, index, x):
+        """
+        @param index: the index of the step.
+        @type index: int.
+
+        @param x:
+        @type x: any.
+        """
+
+        pass
+
+    def finalize(self):
+        """
+        Finalize the job.
+        """
+
+        self._reader.close()
+
+        # Close the output trajectory.
+        self._trajectory.close()
+
+        super(LAMMPS, self).finalize()
+
+    def parse_first_step(self, aliases):
+        self._reader.open_file(self.configuration["trajectory_file"]["value"])
+        chemicalSystem = self._reader.parse_first_step(aliases, self._lammpsConfig)
+        self._reader.close()
+        return chemicalSystem
