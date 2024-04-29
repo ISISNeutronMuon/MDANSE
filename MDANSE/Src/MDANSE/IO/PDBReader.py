@@ -37,7 +37,7 @@ from MDANSE.Chemistry import (
     MOLECULES_DATABASE,
     NUCLEOTIDES_DATABASE,
     RESIDUES_DATABASE,
-    RESIDUE_ALT_NAMES
+    RESIDUE_ALT_NAMES,
 )
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.IO.PDB import PDBMolecule, PDBNucleotideChain, PDBPeptideChain, Structure
@@ -484,7 +484,9 @@ class PDBReader:
                 # go through each name that code could be
                 atoms_found = [None] * len(pdb_atoms)
                 for comp, pdb_atom in enumerate(pdb_atoms):
-                    if len(atoms_found) != len(RESIDUES_DATABASE[new_code]["atoms"].items()):
+                    if len(atoms_found) != len(
+                        RESIDUES_DATABASE[new_code]["atoms"].items()
+                    ):
                         # different number of atoms break and try the next name
                         break
                     for at, info in RESIDUES_DATABASE[new_code]["atoms"].items():
@@ -518,7 +520,9 @@ class PDBReader:
                         break
                 else:
                     raise PDBReaderError(
-                        "The atom {}{}:{} is unknown".format(code, residue.number, pdb_atom)
+                        "The atom {}{}:{} is unknown".format(
+                            code, residue.number, pdb_atom
+                        )
                     )
 
         resname = "{}{}".format(code, residue.number)
