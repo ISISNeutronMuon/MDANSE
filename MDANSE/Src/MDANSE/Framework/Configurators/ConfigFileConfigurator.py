@@ -26,6 +26,30 @@ class LAMMPSConfigFileError(Error):
     pass
 
 
+def parse_unit_cell(inputs):
+
+    unit_cell = np.zeros(9)
+
+    xlo, xhi, xy = inputs[0], inputs[1], inputs[2]
+    ylo, yhi, yz = inputs[3], inputs[4], inputs[5]
+    zlo, zhi, xz = inputs[6], inputs[7], inputs[8]
+    # The ax component.
+    unit_cell[0] = xhi - xlo
+
+    # The bx and by components.
+    unit_cell[3] = xy
+    unit_cell[4] = yhi - ylo
+
+    # The cx, cy and cz components.
+    unit_cell[6] = xz
+    unit_cell[7] = yz
+    unit_cell[8] = zhi - zlo
+
+    unit_cell = np.reshape(unit_cell, (3, 3))
+
+    return unit_cell
+
+
 class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
     def parse(self):
@@ -41,15 +65,37 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
         self["elements"] = []
 
-        unit = open(self._filename, "r")
-        lines = []
-        for l in unit.readlines():
-            l = l.strip()
-            if l:
-                lines.append(l)
-        unit.close()
+        self["unit_cell"] = np.zeros((3, 3))
+
+        with open(self._filename, "r") as source_file:
+            lines = []
+            for l in source_file.readlines():
+                l = l.strip()
+                if l:
+                    lines.append(l)
 
         for i, line in enumerate(lines):
+            toks = line.split()
+
+            if "xlo" in line and "xhi" in line:
+                try:
+                    x_inputs = [float(x) for x in toks[0:3]]
+                except:
+                    xspan = float(toks[1]) - float(toks[0])
+                    self["unit_cell"][0, 0] = xspan
+            elif "ylo" in line and "yhi" in line:
+                try:
+                    y_inputs = [float(x) for x in toks[0:3]]
+                except:
+                    yspan = float(toks[1]) - float(toks[0])
+                    self["unit_cell"][1, 1] = yspan
+            elif "zlo" in line and "zhi" in line:
+                try:
+                    z_inputs = [float(x) for x in toks[0:3]]
+                except:
+                    zspan = float(toks[1]) - float(toks[0])
+                    self["unit_cell"][2, 2] = zspan
+
             if self["n_atoms"] is None:
                 m = re.match("^\s*(\d+)\s*atoms\s*$", line, re.I)
                 if m:
@@ -88,6 +134,15 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                     at2 = int(at2) - 1
                     self["bonds"].append([at1, at2])
                 self["bonds"] = np.array(self["bonds"], dtype=np.int32)
+
+        if np.trace(np.abs(self["unit_cell"])) < 1e-8:
+            # print(f"Concatenated: {np.concatenate([x_inputs, y_inputs, z_inputs])}")
+            try:
+                self["unit_cell"] = parse_unit_cell(
+                    np.concatenate([x_inputs, y_inputs, z_inputs])
+                )
+            except:
+                print(f"LAMMPS ConfigFileConfigurator failed to find a unit cell")
 
     def get_atom_labels(self) -> list[AtomLabel]:
         """

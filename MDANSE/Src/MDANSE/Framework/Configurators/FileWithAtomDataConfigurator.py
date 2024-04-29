@@ -34,7 +34,7 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
             return
         try:
             self.parse()
-        except Exception:
+        except Exception as e:
             self.error_status = "File parsing error"
 
     @abstractmethod

@@ -351,9 +351,167 @@ class LAMMPSxyz(LAMMPSReader):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._full_cell = None
+
+    def get_time_steps(self, filename: str) -> int:
+        number_of_steps = 0
+        self.open_file(filename)
+        if number_of_steps == 0:
+            for line in self._file:
+                if len(line.split()) == 1:
+                    number_of_steps += 1
+        self.close()
+        return number_of_steps
 
     def open_file(self, filename: str):
-        self._file = open(self.configuration["trajectory_file"]["value"], "r")
+        self._file = open(filename, "r")
+
+    def set_output(self, output_trajectory):
+        self._trajectory = output_trajectory
+
+    def read_any_step(self):
+
+        line = self._file.readline()
+        number_of_atoms = int(line)
+        line = self._file.readline()
+        timestep = int(line.split()[-1])
+
+        positions = np.empty((number_of_atoms, 3))
+        atom_types = np.empty(number_of_atoms, dtype=int)
+
+        for at_num in range(number_of_atoms):
+
+            line = self._file.readline()
+
+            if not line:
+                break
+
+            toks = line.split()
+
+            if len(toks) == 4:
+                atom_id = int(toks[0])
+                atom_pos = [float(x) for x in toks[1:]]
+                positions[at_num] = atom_pos
+                atom_types[at_num] = atom_id
+
+        return timestep, atom_types, positions
+
+    def parse_first_step(self, aliases, config):
+
+        _, atom_types, positions = self.read_any_step()
+
+        self._nAtoms = len(atom_types)
+
+        self._fractionalCoordinates = False
+        unit_cell = config["unit_cell"]
+        span = np.max(positions, axis=0) - np.min(positions, axis=0)
+        cellspan = np.linalg.norm(unit_cell, axis=1)
+        if np.allclose(cellspan, [0, 0, 0]):
+            self._fractionalCoordinates = False
+            full_cell = None
+        elif np.allclose(span, [1.0, 1.0, 1.0], rtol=0.1, atol=0.1):
+            if np.allclose(cellspan, [1.0, 1.0, 1.0], rtol=0.1, atol=0.1):
+                self._fractionalCoordinates = False
+            else:
+                self._fractionalCoordinates = True
+            full_cell = unit_cell
+        else:
+            self._fractionalCoordinates = False
+            multiplicity = np.round(np.abs(span / cellspan)).astype(int)
+            full_cell = unit_cell * multiplicity.reshape((3, 1))
+
+        full_cell *= measure(1.0, self._length_unit).toval("nm")
+
+        self._full_cell = full_cell
+
+        self._rankToName = {}
+
+        g = Graph()
+        for i in range(self._nAtoms):
+            idx = i
+            ty = atom_types[i] - 1
+            label = str(config["elements"][ty][0])
+            mass = str(config["elements"][ty][1])
+            name = "{:s}_{:d}".format(str(config["elements"][ty][0]), idx)
+            self._rankToName[idx] = name
+            g.add_node(idx, label=label, mass=mass, atomName=name)
+
+        if config["n_bonds"] is not None:
+            for idx1, idx2 in config["bonds"]:
+                g.add_link(idx1, idx2)
+
+        chemicalSystem = ChemicalSystem()
+
+        for cluster in g.build_connected_components():
+            if len(cluster) == 1:
+                node = cluster.pop()
+                try:
+                    element = get_element_from_mapping(
+                        aliases, node.label, mass=node.mass
+                    )
+                    obj = Atom(symbol=element, name=node.atomName)
+                except TypeError:
+                    print("EXCEPTION in LAMMPS loader")
+                    print(f"node.element = {node.element}")
+                    print(f"node.atomName = {node.atomName}")
+                    print(f"rankToName = {self._rankToName}")
+                obj.index = node.name
+            else:
+                atList = []
+                for atom in cluster:
+                    element = get_element_from_mapping(
+                        aliases, atom.label, mass=atom.mass
+                    )
+                    at = Atom(symbol=element, name=atom.atomName)
+                    atList.append(at)
+                c = collections.Counter([at.label for at in cluster])
+                name = "".join(["{:s}{:d}".format(k, v) for k, v in sorted(c.items())])
+                obj = AtomCluster(name, atList)
+
+            chemicalSystem.add_chemical_entity(obj)
+
+        return chemicalSystem
+
+    def run_step(self, index):
+        """Runs a single step of the job.
+
+        @param index: the index of the step.
+        @type index: int.
+
+        @note: the argument index is the index of the loop note the index of the frame.
+        """
+
+        try:
+            timestep, _, positions = self.read_any_step()
+        except ValueError:
+            return
+
+        unitCell = UnitCell(self._full_cell)
+        time = timestep * self._timestep * measure(1.0, self._time_unit).toval("ps")
+
+        if self._fractionalCoordinates:
+            conf = PeriodicBoxConfiguration(
+                self._trajectory.chemical_system, positions, unitCell
+            )
+            realConf = conf.to_real_configuration()
+        else:
+            positions *= measure(1.0, self._length_unit).toval("nm")
+            realConf = PeriodicRealConfiguration(
+                self._trajectory.chemical_system, positions, unitCell
+            )
+
+        if self._fold:
+            # The whole configuration is folded in to the simulation box.
+            realConf.fold_coordinates()
+
+        self._trajectory.chemical_system.configuration = realConf
+
+        # A snapshot is created out of the current configuration.
+        self._trajectory.dump_configuration(
+            time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
+        )
+
+        return index, 0
 
 
 class LAMMPSh5md(LAMMPSReader):
