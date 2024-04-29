@@ -366,9 +366,6 @@ class LAMMPSxyz(LAMMPSReader):
     def open_file(self, filename: str):
         self._file = open(filename, "r")
 
-    def set_output(self, output_trajectory):
-        self._trajectory = output_trajectory
-
     def read_any_step(self):
 
         line = self._file.readline()
@@ -519,8 +516,124 @@ class LAMMPSh5md(LAMMPSReader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def get_time_steps(self, filename: str) -> int:
+        number_of_steps = 0
+        self.open_file(filename)
+        number_of_steps = len(self._file["/particles/all/position/time"][:])
+        self.close()
+        return number_of_steps
+
     def open_file(self, filename: str):
         self._file = h5py.File(self.configuration["trajectory_file"]["value"], "r")
+
+    def parse_first_step(self, aliases, config):
+
+        try:
+            atom_types = self._file["/particles/all/species/value"][:]
+        except KeyError:
+            atom_types = config["atom_types"]
+
+        self._nAtoms = len(self._file["/particles/all/position/value"][0])
+
+        if len(atom_types) < self._nAtoms:
+            atom_types = int(round(self._nAtoms / len(atom_types))) * list(atom_types)
+
+        self._fractionalCoordinates = False
+        cell_edges = self._file["/particles/all/box/edges/value"][0]
+        full_cell = np.array(
+            [[cell_edges[0], 0, 0], [0, cell_edges[1], 0], [0, 0, cell_edges[2]]]
+        )
+
+        full_cell *= measure(1.0, self._length_unit).toval("nm")
+
+        self._full_cell = full_cell
+
+        self._rankToName = {}
+
+        g = Graph()
+        for i in range(self._nAtoms):
+            idx = i
+            ty = atom_types[i] - 1
+            label = str(config["elements"][ty][0])
+            mass = str(config["elements"][ty][1])
+            name = "{:s}_{:d}".format(str(config["elements"][ty][0]), idx)
+            self._rankToName[idx] = name
+            g.add_node(idx, label=label, mass=mass, atomName=name)
+
+        if config["n_bonds"] is not None:
+            for idx1, idx2 in config["bonds"]:
+                g.add_link(idx1, idx2)
+
+        chemicalSystem = ChemicalSystem()
+
+        for cluster in g.build_connected_components():
+            if len(cluster) == 1:
+                node = cluster.pop()
+                try:
+                    element = get_element_from_mapping(
+                        aliases, node.label, mass=node.mass
+                    )
+                    obj = Atom(symbol=element, name=node.atomName)
+                except TypeError:
+                    print("EXCEPTION in LAMMPS loader")
+                    print(f"node.element = {node.element}")
+                    print(f"node.atomName = {node.atomName}")
+                    print(f"rankToName = {self._rankToName}")
+                obj.index = node.name
+            else:
+                atList = []
+                for atom in cluster:
+                    element = get_element_from_mapping(
+                        aliases, atom.label, mass=atom.mass
+                    )
+                    at = Atom(symbol=element, name=atom.atomName)
+                    atList.append(at)
+                c = collections.Counter([at.label for at in cluster])
+                name = "".join(["{:s}{:d}".format(k, v) for k, v in sorted(c.items())])
+                obj = AtomCluster(name, atList)
+
+            chemicalSystem.add_chemical_entity(obj)
+
+        return chemicalSystem
+
+    def run_step(self, index):
+        """Runs a single step of the job.
+
+        @param index: the index of the step.
+        @type index: int.
+
+        @note: the argument index is the index of the loop note the index of the frame.
+        """
+
+        positions = self._file["/particles/all/position/value"][index]
+        timestep = self._file["/particles/all/position/step"][index]
+
+        unitCell = UnitCell(self._full_cell)
+        time = timestep * self._timestep * measure(1.0, self._time_unit).toval("ps")
+
+        if self._fractionalCoordinates:
+            conf = PeriodicBoxConfiguration(
+                self._trajectory.chemical_system, positions, unitCell
+            )
+            realConf = conf.to_real_configuration()
+        else:
+            positions *= measure(1.0, self._length_unit).toval("nm")
+            realConf = PeriodicRealConfiguration(
+                self._trajectory.chemical_system, positions, unitCell
+            )
+
+        if self._fold:
+            # The whole configuration is folded in to the simulation box.
+            realConf.fold_coordinates()
+
+        self._trajectory.chemical_system.configuration = realConf
+
+        # A snapshot is created out of the current configuration.
+        self._trajectory.dump_configuration(
+            time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
+        )
+
+        return index, 0
 
 
 class LAMMPS(Converter):
@@ -573,7 +686,11 @@ class LAMMPS(Converter):
     )
     settings["time_step"] = (
         "FloatConfigurator",
-        {"label": "Time step (fs)", "default": 1.0, "mini": 1.0e-9},
+        {
+            "label": "Time step (lammps units, depends on unit system)",
+            "default": 1.0,
+            "mini": 1.0e-9,
+        },
     )
     settings["n_steps"] = (
         "IntegerConfigurator",

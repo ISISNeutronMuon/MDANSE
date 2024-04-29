@@ -65,6 +65,8 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
         self["elements"] = []
 
+        self["atom_types"] = []
+
         self["unit_cell"] = np.zeros((3, 3))
 
         with open(self._filename, "r") as source_file:
@@ -134,6 +136,13 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                     at2 = int(at2) - 1
                     self["bonds"].append([at1, at2])
                 self["bonds"] = np.array(self["bonds"], dtype=np.int32)
+
+            if re.match("^\s*Atoms\s*$", line):
+                if self["n_atoms"] is not None:
+                    self["atom_types"] = self["n_atoms"] * [0]
+                    for j in range(self["n_atoms"]):
+                        atoks = lines[i + j + 1].split()
+                        self["atom_types"][j] = int(atoks[2])
 
         if np.trace(np.abs(self["unit_cell"])) < 1e-8:
             # print(f"Concatenated: {np.concatenate([x_inputs, y_inputs, z_inputs])}")
