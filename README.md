@@ -31,7 +31,7 @@ source mdanse_env/bin/activate
 ```
 in a bash console, or
 ```
-mdanse_end/Scripts/activate.bat
+mdanse_end\Scripts\activate.bat
 ```
 if you are using cmd.exe on Windows.
 
@@ -43,6 +43,18 @@ and start the graphical interface by typing
 ```
 mdanse_gui
 ```
+
+## Installation: development version
+
+At the moment MDANSE and MDANSE_GUI are undergoing frequent changes. If you would
+like to try out the latest development version, you can install directly from GitHub
+using pip:
+```
+python3 -m pip install "git+https://github.com/ISISNeutronMuon/MDANSE@protos#egg=MDANSE&subdirectory=MDANSE"
+python3 -m pip install "git+https://github.com/ISISNeutronMuon/MDANSE@protos#egg=MDANSE_GUI&subdirectory=MDANSE_GUI"
+```
+
+## Quick start: the workflow
 
 The typical workflow of MDANSE:
 
