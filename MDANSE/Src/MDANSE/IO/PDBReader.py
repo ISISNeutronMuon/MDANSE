@@ -504,7 +504,7 @@ class PDBReader:
                 # went through all alternative names looks like we were
                 # unable to match the code to the MDANSE residues
                 raise PDBReaderError(
-                    "Unable to fine residue for {}{}".format(code, residue.number)
+                    "Unable to find residue for {}{}".format(code, residue.number)
                 )
             # found the match from the alternate name to the name in
             # mdanse lets rename the code
