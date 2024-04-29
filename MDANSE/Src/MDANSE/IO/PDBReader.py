@@ -37,6 +37,7 @@ from MDANSE.Chemistry import (
     MOLECULES_DATABASE,
     NUCLEOTIDES_DATABASE,
     RESIDUES_DATABASE,
+    RESIDUE_ALT_NAMES
 )
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.IO.PDB import PDBMolecule, PDBNucleotideChain, PDBPeptideChain, Structure
@@ -473,17 +474,52 @@ class PDBReader:
 
         pdb_atoms = [at.name for at in residue]
 
-        atoms_found = [None] * len(pdb_atoms)
-
-        for comp, pdb_atom in enumerate(pdb_atoms):
-            for at, info in RESIDUES_DATABASE[code]["atoms"].items():
-                if pdb_atom == at or pdb_atom in info["alternatives"]:
-                    atoms_found[comp] = at
+        if code in RESIDUE_ALT_NAMES:
+            # RESIDUES_DATABASE is a many-to-one map multiple codes
+            # can map to one residue in MDANSE.
+            # If the code is in RESIDUE_ALT_NAMES then it is a
+            # many-to-many map. In this case the code can map to many
+            # different residues.
+            for new_code in RESIDUE_ALT_NAMES[code]:
+                # go through each name that code could be
+                atoms_found = [None] * len(pdb_atoms)
+                for comp, pdb_atom in enumerate(pdb_atoms):
+                    if len(atoms_found) != len(RESIDUES_DATABASE[new_code]["atoms"].items()):
+                        # different number of atoms break and try the next name
+                        break
+                    for at, info in RESIDUES_DATABASE[new_code]["atoms"].items():
+                        if pdb_atom == at or pdb_atom in info["alternatives"]:
+                            atoms_found[comp] = at
+                            break
+                    else:
+                        # unable to match the atom in the RESIDUES_DATABASE
+                        # try the next residue name
+                        break
+                if None not in atoms_found:
+                    # matched all atoms found the residue so break
                     break
             else:
+                # went through all alternative names looks like we were
+                # unable to match the code to the MDANSE residues
                 raise PDBReaderError(
-                    "The atom {}{}:{} is unknown".format(code, residue.number, pdb_atom)
+                    "Unable to fine residue for {}{}".format(code, residue.number)
                 )
+            # found the match from the alternate name to the name in
+            # mdanse lets rename the code
+            code = new_code
+            residue.name = code
+
+        else:
+            atoms_found = [None] * len(pdb_atoms)
+            for comp, pdb_atom in enumerate(pdb_atoms):
+                for at, info in RESIDUES_DATABASE[code]["atoms"].items():
+                    if pdb_atom == at or pdb_atom in info["alternatives"]:
+                        atoms_found[comp] = at
+                        break
+                else:
+                    raise PDBReaderError(
+                        "The atom {}{}:{} is unknown".format(code, residue.number, pdb_atom)
+                    )
 
         resname = "{}{}".format(code, residue.number)
         new_residue = Residue(code, resname, variant=None)
