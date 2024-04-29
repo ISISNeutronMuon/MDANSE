@@ -1,8 +1,8 @@
-How to Guide Analysis: Scattering
-==================================
+Running Scattering Calculations
+===============================
 
-Current Correlation Function Analysis 
-''''''''''''''''''''''''''''''''''''''
+Current Correlation Function
+''''''''''''''''''''''''''''
 **Index 1:** Current Correlation Function Analysis 
 
 **Purpose:**
@@ -69,8 +69,8 @@ of density fluctuations and propagating shear modes within the molecular system.
     - Overlay multiple CCF plots to facilitate comparisons.
 
 
-Dynamic Coherent Structure Factor Analysis 
-'''''''''''''''''''''''''''''''''''''''''''
+Dynamic Coherent Structure Factor
+'''''''''''''''''''''''''''''''''
 **Index 2:** Dynamic Coherent Structure Factor Analysis
 
 **Purpose:**
@@ -126,8 +126,8 @@ following plotting suggestions for better visualization and interpretation:
    - Use contour plots to visualize the evolution of the dynamic incoherent
    structure factor over time.
 
-Dynamic Incoherent Structure Factor Analysis 
-'''''''''''''''''''''''''''''''''''''''''''''
+Dynamic Incoherent Structure Factor
+'''''''''''''''''''''''''''''''''''
 **Index 3:** Dynamic Incoherent Structure Factor Analysis
 
 **Purpose:**
@@ -187,8 +187,8 @@ system.
      of Q and time, highlighting prominent features.
 
 
-Elastic Incoherent Structure Factor Analysis 
-'''''''''''''''''''''''''''''''''''''''''''''
+Elastic Incoherent Structure Factor
+'''''''''''''''''''''''''''''''''''
 **Index 4:** Elastic Incoherent Structure Factor Analysis
 
 **Purpose:**
@@ -243,8 +243,8 @@ and the EISF within the system.
      - Generate 2D contour plots to explore correlations between Q vectors and
        their impact on the EISF.
 
-Gaussian Dynamic Incoherent Structure Factor Analysis 
-''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Gaussian Dynamic Incoherent Structure Factor
+''''''''''''''''''''''''''''''''''''''''''''
 **Index 5:** Gaussian Dynamic Incoherent Structure Factor Analysis
 
 **Purpose:**
@@ -300,8 +300,8 @@ neutron-specific studies.
        dynamic changes within the system.
 
 
-Neutron Dynamic Total Structure Factor Analysis 
-''''''''''''''''''''''''''''''''''''''''''''''''
+Neutron Dynamic Total Structure Factor
+''''''''''''''''''''''''''''''''''''''
 **Index 6:** Neutron Dynamic Total Structure Factor Analysis
 
 **Purpose:**

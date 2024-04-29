@@ -1,5 +1,5 @@
-Running Batch Jobs in MDANSE: Tutorial
-=============================================
+Running Batch Jobs
+==================
 
 Introduction
 ------------

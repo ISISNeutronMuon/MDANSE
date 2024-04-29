@@ -3,8 +3,8 @@ This section is dealing with specific types of analysis performed by
 MDANSE. If you are not sure where these fit into the general workflow
 of data analysis, please read :ref:`workflow-of-analysis`.
 
-Analysis: Scattering
-====================
+Analysis Theory: Scattering
+===========================
 
 This section discusses plugins used
 to calculate neutron spectroscopy observables from the trajectory.

@@ -1,5 +1,5 @@
-How-to Guide: Analysis Structure 
-=================================
+Running Structure Calculations
+==============================
 
 Area Per Molecule
 -----------------

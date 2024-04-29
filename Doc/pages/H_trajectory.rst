@@ -1,13 +1,13 @@
-Trajectory Converters
-=====================
+Converting Trajectories
+=======================
 
-Below is the list of converters present in MDANSE. These allow for the
+Below is the list of converters present in MDANSE. These converters allow for the
 outputs of a variety of MD simulation software to be able to be used in
-MDANSE by converting the various file formats to HDF format that can be
-used by MDANSE. All converters convert the positions and other vital
-values such as unit cell parameters, but velocities and forces are
-converted by only select converters. This section explains why they are
-used.
+MDANSE by converting the various file formats to the HDF format. These trajectory
+converters convert positions and other vital
+information such as the unit cell parameters. Additionally when available the trajectory
+converters also converter information such as velocities and forces.
+This section explains why they are used.
 
 To utilize the trajectory converters effectively, please refer to the
 comprehensive technical reference documentation provided with MDANSE.
@@ -59,9 +59,9 @@ the trajectory data.
 DL_POLY Converter
 -----------------
 
-The DL_POLY Converter is capable of converting DL POLY trajectory data to HDF
+The DL_POLY Converter is capable of converting DL_POLY trajectory data to HDF
 format. It not only includes positions but also velocities and forces of
-particles in the output HDF file. Researchers who utilize DL POLY for molecular
+particles in the output HDF file. Researchers who utilize DL_POLY for molecular
 dynamics simulations can benefit from this converter to analyze their simulation
 results.
 
