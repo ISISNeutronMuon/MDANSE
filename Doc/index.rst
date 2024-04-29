@@ -61,6 +61,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/installation
    pages/files
    pages/workflow
+   pages/trajectory
    pages/dynamics
    pages/scattering
    pages/structure
@@ -76,7 +77,6 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/H_cli
    pages/H_gui
    pages/gui
-   pages/H_trajectory
    pages/H_gloss
    pages/H_Dynamics
    pages/H_Scattering

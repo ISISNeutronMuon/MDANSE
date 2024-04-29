@@ -1,5 +1,5 @@
-Converting Trajectories
-=======================
+Trajectory Converters
+=====================
 
 Below is the list of converters present in MDANSE. These converters allow for the
 outputs of a variety of MD simulation software to be able to be used in
