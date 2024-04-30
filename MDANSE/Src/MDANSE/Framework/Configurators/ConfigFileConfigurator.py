@@ -122,7 +122,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                 for j in range(1, self["n_atom_types"] + 1):
                     data_line = (
                         lines[i + j].strip().split("#")[0]
-                    )  # Remove commentary if any
+                    )  # Remove comments, if present
                     idx, mass = data_line.split()[0:2]
                     idx = int(idx)
                     mass = float(mass)
