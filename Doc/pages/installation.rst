@@ -1,17 +1,15 @@
-Getting Started with MDANSE
-=============================
+Getting Started
+===============
 
 MDANSE (Molecular Dynamics Analysis for Neutron Scattering
 Experiments) is a powerful tool for analyzing molecular dynamics
-simulations in the context of neutron scattering experiments. To
-begin using MDANSE, here are some helpful tips:
+simulations in the context of neutron scattering experiments.
 
 MDANSE Installation 
 --------------------
 
-To get started with MDANSE, you can follow the MDANSE Installation Tutorial below:
-
-- :ref:`installation_tutorial`
+To get started with MDANSE, you can follow the MDANSE Installation Tutorial
+at :ref:`installation_tutorial`.
 
 
 Explore the Documentation

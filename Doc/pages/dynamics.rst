@@ -3,8 +3,8 @@ This section is dealing with specific types of analysis performed by
 MDANSE. If you are not sure where these fit into the general workflow
 of data analysis, please read :ref:`workflow-of-analysis`.
 
-Analysis: Dynamics
-==================
+Analysis Theory: Dynamics
+=========================
 
 This section contains the following Plugins:
 
@@ -171,6 +171,7 @@ should be calculated.
 .. _figure-one:
 
 .. figure:: ./Pictures/10000000000001BC00000163C18A769B32940652.png
+   :align: center
    :width: 11.748cm
    :height: 9.393cm
 

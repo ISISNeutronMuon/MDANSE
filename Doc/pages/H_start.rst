@@ -1,5 +1,5 @@
-Tutorial: Get started (Installation)
-====================================
+Installing MDANSE
+=================
 
 .. _installation_tutorial:
 

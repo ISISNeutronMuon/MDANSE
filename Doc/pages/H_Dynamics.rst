@@ -1,5 +1,5 @@
-How to Guide: Analysis Dynamics
-======================================
+Running Dynamics Calculations
+=============================
 
 Angular Correlation
 -------------------

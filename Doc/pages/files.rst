@@ -1,7 +1,7 @@
 .. _file_formats:
 
-How to Guide Supported File Formats
-==================================
+Supported File Formats
+======================
 
 In the updated MDANSE version, there have been significant changes to the
 supported file formats for input and output. This section provides an

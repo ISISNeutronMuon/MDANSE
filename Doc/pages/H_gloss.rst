@@ -1,8 +1,6 @@
-How-to Guide: Glossary of Parameters
-=====================================
+Configuring Parameters
+======================
 
-Configuring Parameters and Running Analyses in MDANSE
--------------------------------------------------------
 **Index 1: Configuring Parameters and Running Analyses**
 
 **Purpose:**
@@ -110,7 +108,7 @@ of molecular systems.
 
 
 Creating Selections
-===================
+-------------------
 
 **Purpose:**
 In MDANSE, creating selections is a powerful way to fine-tune your analysis,
