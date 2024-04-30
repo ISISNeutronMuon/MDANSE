@@ -102,16 +102,17 @@ class Plot1DModel(QtCore.QAbstractListModel):
             y_data_info (dict): the information about the Y of the line
         """
         y_variable = y_data_info["variable"]
-        line_names = [line[0] for line in self._lines]
-        if y_variable in line_names:
+        line_ids = [":".join([line[0], line[3]]) for line in self._lines]
+        current_id = ":".join([y_variable, y_data_info["filename"]])
+        if current_id in line_ids:
             return
 
         axis = y_data_info["axis"].split("|")
         if len(axis) != 1:
-            raise Plot1DModelError("Can not add line: incompatible number of X axis")
+            raise Plot1DModelError("Cannot add line: incompatible number of X axis")
         else:
             if axis[0] != self._x_data_info["variable"]:
-                raise Plot1DModelError("Can not add line: incompatible X axis")
+                raise Plot1DModelError("Cannot add line: incompatible X axis")
 
         y_data = y_data_info["data"]
 
@@ -130,7 +131,7 @@ class Plot1DModel(QtCore.QAbstractListModel):
                 m = measure(1.0, self._y_initial_unit, equivalent=True)
                 y_conversion_factor = m.toval(y_unit)
             except UnitError:
-                raise Plot1DModelError("Can not add line: incompatible Y unit")
+                raise Plot1DModelError("Cannot add line: incompatible Y unit")
 
         if not self._y_axis_label:
             self._y_axis_label = y_variable
@@ -142,7 +143,7 @@ class Plot1DModel(QtCore.QAbstractListModel):
             y_data * y_conversion_factor,
             picker=3,
         )[0]
-        self._lines.append([y_variable, line, y_data])
+        self._lines.append([y_variable, line, y_data, y_data_info["filename"]])
         self.endInsertRows()
 
         self.update_legend()

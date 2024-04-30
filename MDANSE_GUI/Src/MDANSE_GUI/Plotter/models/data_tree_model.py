@@ -331,6 +331,7 @@ class HDFDataItem(DataItem):
         info["plottable"] = True
         info["path"] = dataset
         info["status"] = info["path"]
+        info["filename"] = self._file.filename
         info["variable"] = os.path.basename(hdf_variable.name)
 
         # Check units
