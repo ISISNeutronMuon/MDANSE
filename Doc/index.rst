@@ -33,7 +33,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
        <div class="grid-item">
            <h3>💡 Explanations</h3>
            <p>Learn the basics and core concepts of MDANSE.</p>
-           <a href="pages/explanations.html">Learn More</a>
+           <a href="pages/introduction.html">Learn More</a>
        </div>
        <div class="grid-item">
            <h3>⚛️ How-To Guides</h3>
@@ -43,7 +43,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
        <div class="grid-item">
            <h3>🧪 Tutorials</h3>
            <p>Detailed tutorials to help you get started with MDANSE.</p>
-           <a href="pages/T_Batch.html">Learn More</a>
+           <a href="pages/T_Water_IR.html">Learn More</a>
        </div>
        <div class="grid-item">
            <h3>📚 Technical References</h3>
@@ -105,10 +105,3 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/R_units
    pages/R_further
    pages/references
-
-Indices and Tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

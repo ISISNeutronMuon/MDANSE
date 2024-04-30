@@ -92,7 +92,7 @@ numfig = True
 current_year = datetime.date.today().year
 # General information about the project.
 project = u'MDANSE'
-copyright = u'2015-' + str(current_year) + u', MDANSE is developed and supported by the Institut Laue-Langevin and the ISIS Neutron and Muon Source, ![UKRI Logo](_static/UKRI_Logo.png)'
+copyright = u'2015-' + str(current_year) + u', MDANSE is developed and supported by the Institut Laue-Langevin and the ISIS Neutron and Muon Source.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -126,6 +126,14 @@ html_theme_options = {'sidebarwidth':250}#, 'nosidebar':True}
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'MDANSE_doc'
+
+html_context = {
+    "display_github": True, # Integrate GitHub
+    "github_user": "ISISNeutronMuon", # Username
+    "github_repo": "MDANSE", # Repo name
+    "github_version": "protos", # Version
+    "conf_py_path": "/Doc/", # Path in the checkout to the docs root
+}
 
 latex_documents = [
     (master_doc, 'theory_help.tex', 'Theory background of MDANSE',
