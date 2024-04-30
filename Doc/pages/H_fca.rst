@@ -1,5 +1,5 @@
-How to Guide: FCA algorithm
-===========================
+Using the FCA algorithm
+=======================
 
 Guide Steps
 '''''''''''

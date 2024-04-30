@@ -1,6 +1,5 @@
-How to Guide: Using MDANSE Graphical User Interface
-===================================================
-
+Using the MDANSE GUI
+====================
 
 Opening Trajectories
 --------------------

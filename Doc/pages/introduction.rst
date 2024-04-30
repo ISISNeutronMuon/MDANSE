@@ -1,15 +1,15 @@
 Introduction
 ============
 
-Neutron scattering experiments are valuable tools for investigating atomic
-positions and molecular dynamics in materials. Computational simulations and
-modeling play a crucial role in analyzing and interpreting such experiments,
+Neutron scattering experiments are valuable tools for investigating the
+structure and dynamics of materials. Computational simulations and
+modeling plays a crucial role in analyzing and interpreting such experiments,
 leading to improvements in existing materials and the design of new ones.
 Atomistic simulations, particularly molecular dynamics (MD) simulations, are
 increasingly employed for these purposes. However, predicting neutron observables
 from MD trajectories is a complex process that involves various calculations and
 transformations, such as mean square displacements, densities of states, velocity
-and position auto- and cross-correlation functions, Fourier transformations, and
+and position auto- and cross-correlation functions, and
 convolutions with instrument parameters, to obtain neutron observables that can
 be directly compared with experimental data.
 
@@ -17,8 +17,8 @@ Compare Simulation and Experiment Results
 -----------------------------------------
 
 Some of these steps have been implemented within MDANSE
-(Molecular Dynamics Analysis of Neutron Scattering Experiments) [^Ref1^]. This
-Python-based application has established connections with more than ten MD packages,
+(Molecular Dynamics Analysis of Neutron Scattering Experiments) [Ref1]_. This
+Python-based application has support with more than ten MD packages,
 both those employing classical and ab-initio force calculations.
 
 Purpose and Capabilities
@@ -39,7 +39,6 @@ MDANSE offers:
 - A Python-based graphical user interface (GUI) via the MDANSE_GUI package,
   including a trajectory viewer and a data plotter.
 - Command-line utilities for creating and running MDANSE jobs as Python scripts.
-- Possiblity of exporting analysis jobs as Python scripts.
 - Specialised trajectory converters for specific MD engines.
 - A general trajectory converter based on ASE.
 

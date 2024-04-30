@@ -1,5 +1,5 @@
-How to Guide Analysis: Other Options
-=====================================
+Running Other Calculations
+==========================
 
 Infrared: Dipole AutoCorrelation Function
 -----------------------------------------

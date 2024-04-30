@@ -1,6 +1,5 @@
-
 Navigating the MDANSE GUI
-==========================
+=========================
 
 The MDANSE Graphical User Interface (GUI) is set up to walk the user
 through all the steps of the analysis while providing additional
