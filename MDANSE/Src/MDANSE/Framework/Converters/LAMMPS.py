@@ -113,7 +113,6 @@ class LAMMPScustom(LAMMPSReader):
         number_of_steps = 0
         self.open_file(filename)
         if number_of_steps == 0:
-            number_of_steps = 1
             for line in self._file:
                 if line.startswith("ITEM: TIMESTEP"):
                     number_of_steps += 1
