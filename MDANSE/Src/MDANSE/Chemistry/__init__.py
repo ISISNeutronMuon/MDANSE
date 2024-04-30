@@ -13,6 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import os
+import json
+
 from MDANSE.Chemistry.Databases import (
     AtomsDatabase,
     MoleculesDatabase,
@@ -27,3 +30,6 @@ MOLECULES_DATABASE = MoleculesDatabase()
 RESIDUES_DATABASE = ResiduesDatabase()
 
 NUCLEOTIDES_DATABASE = NucleotidesDatabase()
+
+with open(os.path.join(os.path.dirname(__file__), "residues_alt_names.json"), "r") as f:
+    RESIDUE_ALT_NAMES = json.load(f)

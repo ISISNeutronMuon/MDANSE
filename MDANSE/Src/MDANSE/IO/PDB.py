@@ -73,12 +73,11 @@ Example::
 @undocumented: export_filters
 @undocumented: DummyChain
 """
-
 import string
 
 import numpy as np
 
-from MDANSE.Chemistry import NUCLEOTIDES_DATABASE, RESIDUES_DATABASE
+from MDANSE.Chemistry import NUCLEOTIDES_DATABASE, RESIDUES_DATABASE, RESIDUE_ALT_NAMES
 from MDANSE.IO.FortranFormat import FortranFormat, FortranLine
 from MDANSE.IO.PDBExportFilters import export_filters
 from MDANSE.IO.TextFile import TextFile
@@ -490,7 +489,11 @@ class PDBFile:
         name = name.upper()
         if self.export_filter is not None:
             name, number = self.export_filter.processResidue(name, number, terminus)
-        self.het_flag = not (name in RESIDUES_DATABASE or name in NUCLEOTIDES_DATABASE)
+        self.het_flag = not (
+            name in RESIDUES_DATABASE
+            or name in RESIDUE_ALT_NAMES
+            or name in NUCLEOTIDES_DATABASE
+        )
         self.data["residue_name"] = name
         self.data["residue_number"] = (self.data["residue_number"] + 1) % 10000
         self.data["insertion_code"] = ""
@@ -1052,7 +1055,10 @@ class PDBPeptideChain(PDBChain):
         return (
             chain_data["chain_id"] == self.chain_id
             and chain_data["segment_id"] == self.segment_id
-            and residue_data["residue_name"] in RESIDUES_DATABASE
+            and (
+                residue_data["residue_name"] in RESIDUES_DATABASE
+                or residue_data["residue_name"] in RESIDUE_ALT_NAMES
+            )
         )
 
 
@@ -1097,6 +1103,7 @@ class PDBDummyChain(PDBChain):
             chain_data["chain_id"] == self.chain_id
             and chain_data["segment_id"] == self.segment_id
             and residue_data["residue_name"] not in RESIDUES_DATABASE
+            and residue_data["residue_name"] not in RESIDUE_ALT_NAMES
             and residue_data["residue_name"] not in NUCLEOTIDES_DATABASE
         )
 
@@ -1279,7 +1286,7 @@ class Structure:
     def newResidue(self, residue_data):
         name = residue_data["residue_name"]
         residue_number = residue_data["residue_number"]
-        if name in RESIDUES_DATABASE:
+        if name in RESIDUES_DATABASE or name in RESIDUE_ALT_NAMES:
             residue = PDBAminoAcidResidue(name, [], residue_number)
         elif name in NUCLEOTIDES_DATABASE:
             residue = PDBNucleotideResidue(name, [], residue_number)
