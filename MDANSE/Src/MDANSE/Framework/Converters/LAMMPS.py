@@ -524,12 +524,12 @@ class LAMMPSh5md(LAMMPSReader):
         return number_of_steps
 
     def open_file(self, filename: str):
-        self._file = h5py.File(self.configuration["trajectory_file"]["value"], "r")
+        self._file = h5py.File(filename, "r")
 
     def parse_first_step(self, aliases, config):
 
         try:
-            atom_types = self._file["/particles/all/species/value"][:]
+            atom_types = self._file["/particles/all/species/value"][0]
         except KeyError:
             atom_types = config["atom_types"]
 
