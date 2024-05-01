@@ -29,20 +29,8 @@ class PlotDataInfo(QTextBrowser):
         self.setOpenExternalLinks(True)
 
     @Slot(object)
-    def update_panel(self, data: tuple):
-        fullpath, incoming = data
-        try:
-            text = incoming.info()  # this is from a trajectory object
-        except AttributeError:
-            self.error.emit(f"Trajectory info received {incoming}")
-            self.clear()
-            return
-        try:
-            cs = incoming.chemical_system
-        except AttributeError:
-            self.error.emit(f"Trajectory {incoming} has no chemical system")
-        else:
-            text += self.summarise_chemical_system(cs)
+    def update_panel(self, input_text: str):
+        text = str(input_text)
         filtered = self.filter(text)
         self.setHtml(filtered)
 

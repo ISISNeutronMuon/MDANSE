@@ -25,9 +25,7 @@ import h5py
 from qtpy import QtCore, QtGui
 
 from MDANSE.Framework.Units import measure, UnitError
-
-
-json_decoder = json.decoder.JSONDecoder()
+from MDANSE_GUI.Session.LocalSession import json_decoder
 
 
 class DataItemError(Exception):

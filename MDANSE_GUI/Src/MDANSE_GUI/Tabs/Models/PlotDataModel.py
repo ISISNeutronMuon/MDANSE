@@ -13,8 +13,111 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex
+
+from abc import abstractmethod
+
+import numpy as np
+import h5py
+
+from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
+
+from MDANSE_GUI.Session.LocalSession import json_decoder
+
+
+class BasicPlotDataItem(QStandardItem):
+    """Each item in the PlotDataModel is a BasicPlotDataItem.
+    Since there are only two levels of nesting in the data tree,
+    there are two types of item we will use, both of them
+    derived from BasicPlotDataItem
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @abstractmethod
+    def data_path(self):
+        pass
+
+    @abstractmethod
+    def file_number(self):
+        pass
+
+    def populate(self, file):
+        for key in file.items():
+            try:
+                file[key]
+            except:
+                pass
+            else:
+                child = DataSetItem()
+                child.setData(key)
+                self.appendRow(child)
+
+
+class DataSetItem(BasicPlotDataItem):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def data_path(self) -> str:
+        parent_path = self.parent().data_path()
+        own_path = self.data()
+        return "/".join([parent_path, own_path])
+
+    def file_number(self) -> int:
+        return self.parent().file_number()
+
+
+class DataFileItem(BasicPlotDataItem):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def data_path(self) -> str:
+        return ""
+
+    def file_number(self) -> int:
+        return self.data(role=Qt.ItemDataRole.UserRole)
+
+
+class MDADataStructure:
+
+    def __init__(self, filename: str):
+        self._file = h5py.File(filename)
+        self.check_metadata()
+        self.find_information()
+
+    def close(self):
+        self._file.close()
+
+    def find_information(self):
+        self._main_dataset = ""
+        self._components = []
+        self._axis_datasets = []
+        self._supporting_datasets = []
+
+    def check_metadata(self):
+        meta_dict = {}
+
+        def put_into_dict(name, obj):
+            try:
+                string = obj[:][0].decode()
+            except:
+                print(f"Decode failed for {name}: {obj}")
+            else:
+                try:
+                    meta_dict[name] = json_decoder.decode(string)
+                except ValueError:
+                    meta_dict[name] = string
+
+        try:
+            meta = self._file["metadata"]
+        except KeyError:
+            return
+        else:
+            meta.visititems(put_into_dict)
+        self._metadata = meta_dict
 
 
 class PlotDataModel(QStandardItemModel):
@@ -28,9 +131,23 @@ class PlotDataModel(QStandardItemModel):
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
         self.mutex = QMutex()
-        self._node_numbers = []
         self._nodes = {}
         self._next_number = 0
+
+    @Slot(str)
+    def add_file(self, filename: str):
+        try:
+            new_datafile = MDADataStructure(filename)
+        except Exception as e:
+            print(f"Invalid: {str(e)}", role=Qt.ItemDataRole.DisplayRole)
+        else:
+            self._nodes[self._next_number] = new_datafile
+            new_item = DataFileItem()
+            new_item.setData(f"{filename}", role=Qt.ItemDataRole.DisplayRole)
+            new_item.setData(self._next_number, role=Qt.ItemDataRole.UserRole)
+            self._next_number += 1
+            self.appendRow(new_item)
+            new_item.populate(new_datafile._file)
 
     @Slot(tuple)
     def append_object(self, input: tuple):
@@ -46,6 +163,10 @@ class PlotDataModel(QStandardItemModel):
         self.mutex.unlock()
         self.summarise_items()
         return retval
+
+    def inner_object(self, index: QModelIndex) -> MDADataStructure:
+        number = self.itemFromIndex(index).file_number()
+        return self._nodes[number]
 
     def summarise_items(self):
         result = []
@@ -63,8 +184,8 @@ class PlotDataModel(QStandardItemModel):
             node_number = self.item(row).data()
         except AttributeError:
             return
-        self._nodes.pop(node_number)
-        self._node_numbers.pop(self._node_numbers.index(node_number))
+        data_object = self._nodes.pop(node_number)
+        data_object.close()
         if parent is None:
             super().removeRow(row)
         else:

@@ -22,12 +22,12 @@ from qtpy.QtGui import QMouseEvent, QDrag
 
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.DataViewModel.ActionsHolder import ActionsHolder
-from MDANSE_GUI.Tabs.Visualisers.Action import Action
-from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
+from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
 
 
 class PlotDataView(QTreeView):
-    jobname_selected = Signal(str)
+    dataset_selected = Signal(object)
     execute_action = Signal(object)
     item_details = Signal(object)
     error = Signal(str)
@@ -73,7 +73,7 @@ class PlotDataView(QTreeView):
         item = model.itemFromIndex(index)
         text = item.text()
         print("tree: clicked on ", text)
-        self.jobname_selected.emit(text)
+        self.dataset_selected.emit(text)
 
     def pop_action_dialog(self, index):
         model = self.model()
@@ -98,14 +98,16 @@ class PlotDataView(QTreeView):
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
         model = self.model()
-        node_number = model.itemFromIndex(index).data(Qt.ItemDataRole.UserRole)
+        mda_data = model.inner_object(index)
         try:
-            job_description = model._docstrings[node_number]
-        except KeyError:
-            job_description = "No further information"
-        self.item_details.emit(job_description)  # this should emit the job name
+            description = str(mda_data._metadata)
+        except AttributeError:
+            description = "No further information"
+        self.item_details.emit(description)  # this should emit the job name
 
-    def connect_to_visualiser(self, visualiser: Union[Action, TextInfo]) -> None:
+    def connect_to_visualiser(
+        self, visualiser: Union[DataPlotter, PlotDataInfo]
+    ) -> None:
         """Connect to a visualiser.
 
         Parameters
@@ -113,9 +115,9 @@ class PlotDataView(QTreeView):
         visualiser : Action or TextInfo
             A visualiser to connect to this view.
         """
-        if isinstance(visualiser, Action):
-            self.jobname_selected.connect(visualiser.update_panel)
-        elif isinstance(visualiser, TextInfo):
+        if isinstance(visualiser, DataPlotter):
+            self.dataset_selected.connect(visualiser.plot_data)
+        elif isinstance(visualiser, PlotDataInfo):
             self.item_details.connect(visualiser.update_panel)
         else:
             raise NotImplementedError(

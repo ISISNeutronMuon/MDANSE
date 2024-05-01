@@ -57,12 +57,7 @@ class PlottingTab(GeneralTab):
     def load_results(self, fname: str):
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
-            try:
-                data = HDFTrajectoryInputData(fname)
-            except Exception as e:
-                self._core.error(repr(e))
-            else:
-                self._core._model.append_object(((fname, data), short_name))
+            self._model.add_file(fname)
 
     @classmethod
     def standard_instance(cls):

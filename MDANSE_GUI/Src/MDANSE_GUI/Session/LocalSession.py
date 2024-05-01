@@ -21,6 +21,9 @@ from qtpy.QtCore import QObject, Signal, Slot
 
 from MDANSE import PLATFORM
 
+json_encoder = json.encoder.JSONEncoder()
+json_decoder = json.decoder.JSONDecoder()
+
 
 class LocalSession(QObject):
     """Stores different parameters, and the state
@@ -68,7 +71,7 @@ class LocalSession(QObject):
         all_items = {}
         all_items["paths"] = self._paths
         all_items["units"] = self._units
-        output = json.encoder.JSONEncoder().encode(all_items)
+        output = json_encoder.encode(all_items)
         if fname is None:
             fname = os.path.join(PLATFORM.application_directory(), "gui_session.json")
         with open(fname, "w") as target:
@@ -83,6 +86,6 @@ class LocalSession(QObject):
         except:
             print(f"Failed to read session settings from {fname}")
         else:
-            all_items = json.decoder.JSONDecoder().decode(all_items_text)
+            all_items = json_decoder.decode(all_items_text)
             self._paths = all_items["paths"]
             self._units = all_items["units"]

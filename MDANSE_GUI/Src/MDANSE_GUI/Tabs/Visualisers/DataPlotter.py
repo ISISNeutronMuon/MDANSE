@@ -16,9 +16,6 @@
 from qtpy.QtWidgets import QWidget, QVBoxLayout
 from qtpy.QtCore import Slot, Signal
 
-from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
-from MDANSE_GUI.MolecularViewer.Controls import ViewerControls
-
 
 class DataPlotter(QWidget):
     error = Signal(str)
@@ -29,22 +26,10 @@ class DataPlotter(QWidget):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
 
-        controls = ViewerControls(self)
-        viewer = MolecularViewer(controls)
-        controls.setViewer(viewer)
-        layout.addWidget(controls)
-        self._viewer = viewer
-        self._controls = controls
+    @Slot(object)
+    def plot_data(self, data_set):
+        print(f"Received {data_set}")
 
-    @Slot(tuple)
-    def update_panel(self, data: tuple):
-        fullpath, incoming = data
-        if fullpath == "" or data is None:
-            self._viewer.clear_panel()
-            return
-
-        try:
-            self._viewer._new_trajectory_object(fullpath, incoming)
-        except AttributeError:
-            self.error.emit(f"3D View could not visualise {fullpath}")
-            self._viewer.clear_trajectory()
+    @Slot()
+    def clear(self):
+        print(f"Cleared the plot")
