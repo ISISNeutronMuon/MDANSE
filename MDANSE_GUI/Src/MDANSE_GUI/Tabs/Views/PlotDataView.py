@@ -99,16 +99,25 @@ class PlotDataView(QTreeView):
     def item_picked(self, index: QModelIndex):
         model = self.model()
         model_item = model.itemFromIndex(index)
+        item_type = model_item._item_type
         mda_data = model.inner_object(index)
-        try:
-            mda_data.shape
-        except AttributeError:
+        if item_type == "file":
             try:
                 description = mda_data._metadata
             except AttributeError:
                 description = f"File {mda_data._file.filename}, no further information"
+        elif item_type == "dataset":
+            dataset = model.inner_object(index)
+            description = f"{dataset}{model_item.data(role=Qt.ItemDataRole.UserRole)}\n"
+            for key in dataset.attrs.keys():
+                description += f"{key}: {dataset.attrs[key]}\n"
+        elif item_type == "group":
+            dataset = model.inner_object(index)
+            description = f"{dataset}{model_item.data(role=Qt.ItemDataRole.UserRole)}\n"
+            for key in dataset.attrs.keys():
+                description += f"{key}: {dataset.attrs[key]}\n"
         else:
-            description = model_item.description()
+            description = "generic item"
         self.item_details.emit(description)  # this should emit the job name
 
     def connect_to_visualiser(

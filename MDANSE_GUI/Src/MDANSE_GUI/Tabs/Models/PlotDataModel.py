@@ -34,6 +34,7 @@ class BasicPlotDataItem(QStandardItem):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._item_type = "generic"
 
     @abstractmethod
     def data_path(self):
@@ -54,6 +55,10 @@ class BasicPlotDataItem(QStandardItem):
                 child.setText(key)
                 child.setData(key, role=Qt.ItemDataRole.DisplayRole)
                 child.setData(key, role=Qt.ItemDataRole.UserRole)
+                try:
+                    file[key][:]
+                except:
+                    child._item_type = "group"
                 self.appendRow(child)
 
 
@@ -61,10 +66,11 @@ class DataSetItem(BasicPlotDataItem):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._item_type = "dataset"
 
     def data_path(self) -> str:
         parent_path = self.parent().data_path()
-        own_path = self.data()
+        own_path = self.data(role=Qt.ItemDataRole.UserRole)
         return "/".join([parent_path, own_path])
 
     def file_number(self) -> int:
@@ -75,6 +81,7 @@ class DataFileItem(BasicPlotDataItem):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._item_type = "file"
 
     def data_path(self) -> str:
         return ""
@@ -107,6 +114,7 @@ class MDADataStructure:
                 string = obj[:][0].decode()
             except:
                 print(f"Decode failed for {name}: {obj}")
+                meta_dict[name] = str(obj)
             else:
                 try:
                     meta_dict[name] = json_decoder.decode(string)
@@ -169,10 +177,10 @@ class PlotDataModel(QStandardItemModel):
     def inner_object(self, index: QModelIndex) -> MDADataStructure:
         model_item = self.itemFromIndex(index)
         number = model_item.file_number()
-        data_path = model_item.file_number()
+        data_path = model_item.data_path()
         data_structure = self._nodes[number]
         if data_path:
-            return data_structure[data_path]
+            return data_structure._file[data_path]
         return data_structure
 
     def summarise_items(self):
