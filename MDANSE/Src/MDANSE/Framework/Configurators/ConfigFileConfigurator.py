@@ -31,8 +31,8 @@ def parse_unit_cell(inputs):
     unit_cell = np.zeros(9)
 
     xlo, xhi, xy = inputs[0], inputs[1], inputs[2]
-    ylo, yhi, yz = inputs[3], inputs[4], inputs[5]
-    zlo, zhi, xz = inputs[6], inputs[7], inputs[8]
+    ylo, yhi, xz = inputs[3], inputs[4], inputs[5]
+    zlo, zhi, yz = inputs[6], inputs[7], inputs[8]
     # The ax component.
     unit_cell[0] = xhi - xlo
 

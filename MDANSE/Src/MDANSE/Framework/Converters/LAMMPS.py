@@ -647,7 +647,7 @@ class LAMMPS(Converter):
         "ConfigFileConfigurator",
         {
             "label": "LAMMPS configuration file",
-            "wildcard": "Config files (*.config)|*.config|All files|*",
+            "wildcard": "All files (*);;Config files (*.config)",
             "default": "INPUT_FILENAME.config",
         },
     )
@@ -655,7 +655,7 @@ class LAMMPS(Converter):
         "InputFileConfigurator",
         {
             "label": "LAMMPS trajectory file",
-            "wildcard": "lammps files (*.lammps)|*.lammps|All files|*",
+            "wildcard": "All files (*);;XYZ files (*.xyz);;H5MD files (*.h5);;lammps files (*.lammps)",
             "default": "INPUT_FILENAME.lammps",
         },
     )

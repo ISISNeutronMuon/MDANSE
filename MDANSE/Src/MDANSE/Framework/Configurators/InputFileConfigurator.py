@@ -30,7 +30,7 @@ class InputFileConfigurator(IConfigurator):
 
     _default = ""
 
-    def __init__(self, name, wildcard="All files|*", **kwargs):
+    def __init__(self, name, wildcard="All files (*)", **kwargs):
         """
         Initializes the configurator object.
 
