@@ -101,6 +101,8 @@ class AtomProperties(QStandardItemModel):
         self.itemChanged.connect(self.onNewValues)
         self._groups = []
         self._total_length = 0
+        self.colours = np.array([], dtype=int)
+        self.radii = np.array([], dtype=float)
 
     def clear_table(self):
         """This was meant to be used for cleaning up,
@@ -186,6 +188,7 @@ class AtomProperties(QStandardItemModel):
 
     @Slot()
     def onNewValues(self):
+        self.rebuild_colours()
         colours = np.empty(self._total_length, dtype=int)
         radii = np.empty(self._total_length, dtype=float)
         numbers = np.arange(self._total_length)
@@ -197,5 +200,6 @@ class AtomProperties(QStandardItemModel):
             indices = entry.indices()
             radii[indices] = radius
             colours[indices] = vtk_colour
-        scalars = ndarray_to_vtkarray(colours, radii, numbers)
-        self.new_atom_properties.emit(scalars)
+        self.radii = radii
+        self.colours = colours
+        self.new_atom_properties.emit((colours, radii, numbers))

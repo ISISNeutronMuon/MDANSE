@@ -32,6 +32,9 @@ from qtpy.QtWidgets import (
 )
 from MDANSE.Framework.AtomSelector import Selector
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
+from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewerWithPicking
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
 
 class CheckableComboBox(QComboBox):
@@ -212,6 +215,7 @@ class SelectionHelper(QDialog):
         self.selection_textbox = QTextEdit()
         self.selection_textbox.setReadOnly(True)
 
+        self.view_3d = View3D(MolecularViewerWithPicking())
         layouts = self.create_layouts()
 
         bottom = QHBoxLayout()
@@ -226,6 +230,13 @@ class SelectionHelper(QDialog):
 
         self.setLayout(helper_layout)
         self.update_selection_textbox()
+
+    def closeEvent(self, a0):
+        """Hide the window instead of closing. Some issues occur in the
+        3D viewer when it is closed and then reopened.
+        """
+        a0.ignore()
+        self.hide()
 
     def create_buttons(self) -> list[QPushButton]:
         """
@@ -248,6 +259,8 @@ class SelectionHelper(QDialog):
         list[QVBoxLayout]
             List of QVBoxLayout to add to the helper layout.
         """
+        layout_3d = QVBoxLayout()
+        layout_3d.addWidget(self.view_3d)
         left = QVBoxLayout()
         for widget in self.left_widgets():
             left.addWidget(widget)
@@ -255,7 +268,7 @@ class SelectionHelper(QDialog):
         right = QVBoxLayout()
         right.addWidget(self.selection_textbox)
 
-        return [left, right]
+        return [layout_3d, left, right]
 
     def left_widgets(self) -> list[QWidget]:
         """
@@ -367,7 +380,13 @@ class AtomSelectionWidget(WidgetBase):
         self._field.setPlaceholderText(self._default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
         self._field.textChanged.connect(self.updateValue)
+        traj_config = self._configurator._configurable[
+            self._configurator._dependencies["trajectory"]
+        ]
+        traj_filename = traj_config["filename"]
+        hdf_traj = HDFTrajectoryInputData(traj_config["filename"])
         self.helper = self.create_helper()
+        self.helper.view_3d.update_panel((traj_filename, hdf_traj))
         helper_button = QPushButton(self._push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
         self._layout.addWidget(self._field)
