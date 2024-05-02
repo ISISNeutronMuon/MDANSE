@@ -159,21 +159,6 @@ class PlotDataModel(QStandardItemModel):
             self.appendRow(new_item)
             new_item.populate(new_datafile._file)
 
-    @Slot(tuple)
-    def append_object(self, input: tuple):
-        thing, label = input
-        self.mutex.lock()
-        self._nodes[self._next_number] = thing
-        self._node_numbers.append(self._next_number)
-        retval = int(self._next_number)
-        self._next_number += 1
-        item = QStandardItem(label)
-        item.setData(retval)
-        self.appendRow(item)
-        self.mutex.unlock()
-        self.summarise_items()
-        return retval
-
     def inner_object(self, index: QModelIndex) -> MDADataStructure:
         model_item = self.itemFromIndex(index)
         number = model_item.file_number()
@@ -182,16 +167,6 @@ class PlotDataModel(QStandardItemModel):
         if data_path:
             return data_structure._file[data_path]
         return data_structure
-
-    def summarise_items(self):
-        result = []
-        self.mutex.lock()
-        for nrow in range(self.rowCount()):
-            index = self.index(nrow, 0)
-            item = self.itemFromIndex(index)
-            result.append([item.text(), item.data()])
-        self.mutex.unlock()
-        self.all_elements.emit(result)
 
     def removeRow(self, row: int, parent: QModelIndex = None):
         self.mutex.lock()
@@ -206,4 +181,3 @@ class PlotDataModel(QStandardItemModel):
         else:
             super().removeRow(row, parent)
         self.mutex.unlock()
-        self.summarise_items()

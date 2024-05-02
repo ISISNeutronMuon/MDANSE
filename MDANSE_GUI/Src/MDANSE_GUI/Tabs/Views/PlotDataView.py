@@ -20,10 +20,9 @@ from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
 from qtpy.QtGui import QMouseEvent, QDrag
 
-from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
-from MDANSE_GUI.DataViewModel.ActionsHolder import ActionsHolder
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
+from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem
 
 
 class PlotDataView(QTreeView):
@@ -89,8 +88,8 @@ class PlotDataView(QTreeView):
         action = model._values[number]
         self.execute_action.emit(action)
 
-    @Slot(DataTreeItem)
-    def showValidActions(self, item: DataTreeItem):
+    @Slot(BasicPlotDataItem)
+    def showValidActions(self, item: BasicPlotDataItem):
         ic("Creating model from", item)
         new_model = ActionsHolder(item)
         self.setModel(new_model)

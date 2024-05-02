@@ -63,7 +63,7 @@ class PlottingTab(GeneralTab):
     def standard_instance(cls):
         the_tab = cls(
             window,
-            name="Trajectories",
+            name="Plotting",
             session=LocalSession(),
             model=PlotDataModel(),
             view=PlotDataView(),
