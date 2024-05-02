@@ -44,14 +44,16 @@ class BasicPlotDataItem(QStandardItem):
         pass
 
     def populate(self, file):
-        for key in file.items():
+        for key in file.keys():
             try:
                 file[key]
-            except:
-                pass
+            except Exception as e:
+                print(f"error {e} when accessing file[{key}]")
             else:
                 child = DataSetItem()
-                child.setData(key)
+                child.setText(key)
+                child.setData(key, role=Qt.ItemDataRole.DisplayRole)
+                child.setData(key, role=Qt.ItemDataRole.UserRole)
                 self.appendRow(child)
 
 
@@ -165,8 +167,13 @@ class PlotDataModel(QStandardItemModel):
         return retval
 
     def inner_object(self, index: QModelIndex) -> MDADataStructure:
-        number = self.itemFromIndex(index).file_number()
-        return self._nodes[number]
+        model_item = self.itemFromIndex(index)
+        number = model_item.file_number()
+        data_path = model_item.file_number()
+        data_structure = self._nodes[number]
+        if data_path:
+            return data_structure[data_path]
+        return data_structure
 
     def summarise_items(self):
         result = []

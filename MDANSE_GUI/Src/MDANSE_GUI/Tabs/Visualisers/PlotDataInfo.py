@@ -29,8 +29,11 @@ class PlotDataInfo(QTextBrowser):
         self.setOpenExternalLinks(True)
 
     @Slot(object)
-    def update_panel(self, input_text: str):
-        text = str(input_text)
+    def update_panel(self, input_text):
+        try:
+            text = "\n".join([f"{key}: {item}" for key, item in input_text.items()])
+        except:
+            text = str(input_text)
         filtered = self.filter(text)
         self.setHtml(filtered)
 

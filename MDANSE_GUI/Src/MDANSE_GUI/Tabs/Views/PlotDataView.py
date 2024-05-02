@@ -98,11 +98,17 @@ class PlotDataView(QTreeView):
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
         model = self.model()
+        model_item = model.itemFromIndex(index)
         mda_data = model.inner_object(index)
         try:
-            description = str(mda_data._metadata)
+            mda_data.shape
         except AttributeError:
-            description = "No further information"
+            try:
+                description = mda_data._metadata
+            except AttributeError:
+                description = f"File {mda_data._file.filename}, no further information"
+        else:
+            description = model_item.description()
         self.item_details.emit(description)  # this should emit the job name
 
     def connect_to_visualiser(
