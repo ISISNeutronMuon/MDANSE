@@ -23,7 +23,6 @@ from MDANSE.Framework.Configurators.AseInputFileConfigurator import (
 )
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-from MDANSE_GUI.Widgets.GeneralWidgets import translate_file_associations
 
 
 class AseInputFileWidget(WidgetBase):
@@ -48,8 +47,7 @@ class AseInputFileWidget(WidgetBase):
             tooltip_text = self._tooltip
         else:
             tooltip_text = "Specify a path to an existing file."
-        file_association = kwargs.get("wildcard", "")
-        self._qt_file_association = translate_file_associations(file_association)
+        self._qt_file_association = kwargs.get("wildcard", "")
         combo = QComboBox(self._base)
         combo.addItems(AseInputFileConfigurator._allowed_formats)
         combo.setEditable(False)

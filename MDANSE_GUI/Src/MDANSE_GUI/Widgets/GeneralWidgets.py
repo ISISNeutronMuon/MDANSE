@@ -234,24 +234,6 @@ class InputGroup(QObject):
         return result
 
 
-def translate_file_associations(input_str: str):
-    """Takes the string describing valid file formats, as specified for
-    wxWidgets in the MDANSE framework, and converts it to an equivalent
-    string for Qt.
-
-    Arguments:
-        input_str -- string specifying the file formats for the FileDialog,
-        in the text format from wxWidgets
-
-    Returns:
-        String of the valid file formats in the FileDialog, in the format
-        valid for Qt.
-    """
-    toks = input_str.split("|")[::2]
-    basic_replacement = ";;".join(toks[:-1] + ["All files (*.*)"])
-    return basic_replacement
-
-
 class InputFactory:
     """Factory generating input fields for Dialogs. It is meant to standardise
     the way inputs are hanlded, so that any kind of variable can be processed
@@ -350,8 +332,7 @@ class InputFactory:
         kind = kwargs.get("kind", "String")
         default_value = kwargs.get("default", "")
         tooltip_text = kwargs.get("tooltip", "Specify a path to an existing file.")
-        file_association = kwargs.get("wildcard", "")
-        qt_file_association = translate_file_associations(file_association)
+        qt_file_association = file_association = kwargs.get("wildcard", "")
         ic(kind)
         ic(default_value)
         ic(tooltip_text)
@@ -388,8 +369,7 @@ class InputFactory:
         tooltip_text = kwargs.get(
             "tooltip", "Specify the name of the output trajectory."
         )
-        file_association = kwargs.get("wildcard", "")
-        qt_file_association = translate_file_associations(file_association)
+        qt_file_association = kwargs.get("wildcard", "")
         base, layout = InputFactory.createBase(*args, **kwargs)
         field = QLineEdit(base)
         main_handler = InputGroup(base)

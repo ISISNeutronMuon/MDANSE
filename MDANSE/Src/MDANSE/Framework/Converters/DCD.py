@@ -281,7 +281,7 @@ class DCD(Converter):
     settings["pdb_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "PDB files (*.pdb)|*.pdb|All files|*",
+            "wildcard": "PDB files (*.pdb);;All files (*)",
             "default": "INPUT_FILENAME.pdb",
             "label": "Input PDB file",
         },
@@ -289,7 +289,7 @@ class DCD(Converter):
     settings["dcd_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "DCD files (*.dcd)|*.dcd|All files|*",
+            "wildcard": "DCD files (*.dcd);;All files (*)",
             "default": "INPUT_FILENAME.dcd",
             "label": "Input DCD file",
         },

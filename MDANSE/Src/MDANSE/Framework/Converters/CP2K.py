@@ -111,7 +111,7 @@ class CP2K(Converter):
     settings["pos_file"] = (
         "XYZFileConfigurator",
         {
-            "wildcard": "XYZ files (*.xyz)|*.xyz|All files|*",
+            "wildcard": "XYZ files (*.xyz);;All files (*)",
             "default": "INPUT_FILENAME.xyz",
             "label": "Positions file (XYZ)",
         },
@@ -119,7 +119,7 @@ class CP2K(Converter):
     settings["vel_file"] = (
         "XYZFileConfigurator",
         {
-            "wildcard": "XYZ files (*.xyz)|*.xyz|All files|*",
+            "wildcard": "XYZ files (*.xyz);;All files (*)",
             "default": "INPUT_FILENAME.xyz",
             "optional": True,
             "label": "Velocity file (XYZ, optional)",
@@ -128,7 +128,7 @@ class CP2K(Converter):
     settings["cell_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "Cell files (*.cell)|*.cell|All files|*",
+            "wildcard": "Cell files (*.cell);;All files (*)",
             "default": "INPUT_FILENAME.cell",
             "label": "CP2K unit cell file (.cell)",
         },

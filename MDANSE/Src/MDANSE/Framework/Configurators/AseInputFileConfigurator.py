@@ -30,7 +30,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
     _default = ""
     _allowed_formats = ["guess"] + [str(x) for x in all_formats.keys()]
 
-    def __init__(self, name, wildcard="All files|*", **kwargs):
+    def __init__(self, name, wildcard="All files (*)", **kwargs):
         """
         Initializes the configurator object.
 
