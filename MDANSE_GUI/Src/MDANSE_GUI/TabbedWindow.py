@@ -102,6 +102,7 @@ class TabbedWindow(QMainWindow):
 
         if app_instance is not None:
             app_instance.aboutToQuit.connect(self._session.save_json)
+            self._app_instance = app_instance
         self._session.load_json()
 
     def createCommonModels(self):
@@ -231,9 +232,13 @@ class TabbedWindow(QMainWindow):
         if dark:
             for obj, key in self._toolbar_buttons:
                 obj.setIcon(self.resources._inverted_icons[key])
+                self._app_instance.setWindowIcon(
+                    self.resources._inverted_icons["MDANSE"]
+                )
         else:
             for obj, key in self._toolbar_buttons:
                 obj.setIcon(self.resources._icons[key])
+                self._app_instance.setWindowIcon(self.resources._icons["MDANSE"])
 
     def createTrajectoryViewer(self):
         name = "Trajectories"

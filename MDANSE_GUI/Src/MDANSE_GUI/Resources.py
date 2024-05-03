@@ -32,7 +32,7 @@ class Resources:
         res_dir = QDir(str(temp.joinpath("Icons")))
         print(f"Resources are in {res_dir.absolutePath()}")
         # res_dir.addSearchPath('icons', 'Src/PyQtGUI/Icons/')
-        res_dir.setNameFilters(["*.png"])
+        res_dir.setNameFilters(["*.png", "*.ico"])
         files = res_dir.entryList()
         for f in files:
             label = ".".join(str(f).split(".")[:-1])
