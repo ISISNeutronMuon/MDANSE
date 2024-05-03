@@ -136,9 +136,6 @@ class InstrumentResolutionWidget(WidgetBase):
                     value = float(self._fields[index].text())
                 except ValueError:
                     value = self._defaults[index]
-                    self._fields[index].setStyleSheet(
-                        "background-color:rgb(180,20,180); font-weight: bold"
-                    )
                 else:
                     self._fields[index].setStyleSheet("")
                 params[key] = value

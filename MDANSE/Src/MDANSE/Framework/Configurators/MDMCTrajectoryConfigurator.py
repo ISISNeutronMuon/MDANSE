@@ -28,7 +28,7 @@ class MDMCTrajectoryConfigurator(IConfigurator):
 
     _default = None
 
-    def __init__(self, name, wildcard="All files|*", **kwargs):
+    def __init__(self, name, wildcard="All files (*)", **kwargs):
         """
         Initializes the configurator object.
 

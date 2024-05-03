@@ -40,7 +40,7 @@ class VASP(Converter):
     settings["xdatcar_file"] = (
         "XDATCARFileConfigurator",
         {
-            "wildcard": "XDATCAR files (XDATCAR*)|XDATCAR*|All files|*",
+            "wildcard": "XDATCAR files (XDATCAR*);;All files (*)",
             "default": "INPUT_FILENAME",
             "label": "Input XDATCAR file",
         },

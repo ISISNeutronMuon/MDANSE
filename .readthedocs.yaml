@@ -12,6 +12,6 @@
     configuration: Doc/conf.py
 
  # Dependencies required to build your docs
- # python:
- #    install:
- #    - requirements: docs/requirements.txt
+ python:
+    install:
+    - requirements: Doc/requirements.txt

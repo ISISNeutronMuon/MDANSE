@@ -20,7 +20,6 @@ from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog
 from qtpy.QtCore import Slot
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-from MDANSE_GUI.Widgets.GeneralWidgets import translate_file_associations
 
 
 class InputFileWidget(WidgetBase):
@@ -55,7 +54,7 @@ class InputFileWidget(WidgetBase):
             file_association = configurator.wildcard
         except AttributeError:
             file_association = kwargs.get("wildcard", "")
-        self._qt_file_association = translate_file_associations(file_association)
+        self._qt_file_association = file_association
         field = QLineEdit(self._base)
         self._field = field
         field.textChanged.connect(self.updateValue)

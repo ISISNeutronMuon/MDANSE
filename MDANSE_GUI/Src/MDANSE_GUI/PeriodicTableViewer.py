@@ -256,7 +256,7 @@ class ElementButton(QToolButton):
         varbox_stylesheet = (
             "QToolButton {background-color:rgb("
             + text_rgb
-            + "); font-size: 20pt ; font-weight: bold}"
+            + "); font-size: 20pt ; font-weight: bold; font: ; color: rgb(20,0,0)}"
         )
         self.setStyleSheet(varbox_stylesheet)
 
@@ -328,7 +328,7 @@ class InfoDisplay(QFrame):
 
         self.fields = fields
 
-        stylesheet = "background-color:rgb(180,220,180); font-weight: bold"
+        stylesheet = "font-weight: bold"
         self.setStyleSheet(stylesheet)
 
     @Slot(object)
@@ -376,10 +376,6 @@ class PeriodicTableViewer(QDialog):
         self.glayout.addWidget(self.data_display, 1, 5, 3, 8)
 
         self.placeElements()
-
-        self.setStyleSheet(
-            "QLabel {background-color:rgb(250,250,250); qproperty-alignment: AlignCenter}"
-        )
 
     def placeElements(self):
         for key, value in _LAYOUT.items():

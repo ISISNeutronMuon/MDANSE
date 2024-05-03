@@ -253,7 +253,7 @@ class Discover(Converter):
     settings["xtd_file"] = (
         "XTDFileConfigurator",
         {
-            "wildcard": "XTD files (*.xtd)|*.xtd|All files|*",
+            "wildcard": "XTD files (*.xtd);;All files (*)",
             "default": "INPUT_FILENAME.xtd",
             "label": "Input XTD file",
         },
@@ -261,7 +261,7 @@ class Discover(Converter):
     settings["his_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "HIS files (*.his)|*.his|All files|*",
+            "wildcard": "HIS files (*.his);;All files (*)",
             "default": "INPUT_FILENAME.his",
             "label": "Input HIS file",
         },

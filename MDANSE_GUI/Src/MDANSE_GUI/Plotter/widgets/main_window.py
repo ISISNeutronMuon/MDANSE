@@ -142,7 +142,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_open_file(self):
         """Callback called when a file is opened."""
-        extensions = " ".join([f"*{k}" for k in DATA_ITEMS.keys()])
+        extensions = ";;".join([f"*{k}" for k in DATA_ITEMS.keys()])
         filter_mask = f"Data files {extensions}"
         filenames, _ = QtWidgets.QFileDialog.getOpenFileNames(
             self, "Open Data File(s)", "", filter_mask

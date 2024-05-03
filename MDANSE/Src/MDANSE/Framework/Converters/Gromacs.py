@@ -43,7 +43,7 @@ class Gromacs(Converter):
     settings["pdb_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "PDB files (*.pdb)|*.pdb|All files|*",
+            "wildcard": "PDB files (*.pdb);;All files (*)",
             "default": "INPUT_FILENAME.pdb",
             "label": "Input PDB file",
         },
@@ -51,7 +51,7 @@ class Gromacs(Converter):
     settings["xtc_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "XTC files (*.xtc)|*.xtc|TRR files (*.trr)|*.trr|All files|*",
+            "wildcard": "XTC files (*.xtc);;TRR files (*.trr);;All files (*)",
             "default": "INPUT_FILENAME.xtc",
             "label": "xtc or trr file",
         },

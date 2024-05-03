@@ -29,9 +29,4 @@ GitHub Repository
 You can report issues and make suggestions on our GitHub repository. Please visit
 the following link to access the repository:
 
-<div style="background-color: black; padding: 10px; display: inline-block; border-radius: 5px;">
-   <a href="https://github.com/ISISNeutronMuon/MDANSE" style="color: white; text-decoration: none;">
-      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Logo.png" alt="GitHub Logo" style="vertical-align: middle; height: 20px; margin-right: 5px;">
-      MDANSE GitHub Repository
-   </a>
-</div>
+`MDANSE GitHub Page <https://github.com/ISISNeutronMuon/MDANSE>`_
