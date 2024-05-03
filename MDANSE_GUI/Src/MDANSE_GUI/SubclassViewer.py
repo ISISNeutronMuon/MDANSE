@@ -83,9 +83,6 @@ class RegistryViewer(QDialog):
         self.doc_panel = QTextEdit(self)
         self.glayout.addWidget(self.doc_panel, 3, 2, 1, 1)
 
-        self.setStyleSheet(
-            "QLabel {background-color:rgb(250,250,250); qproperty-alignment: AlignCenter}"
-        )
         self.filter_field.textChanged.connect(self.filterEntries)
 
         self.viewer.clicked.connect(self.updateDocstring)
