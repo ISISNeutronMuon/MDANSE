@@ -1,6 +1,6 @@
 name: Test MDANSE
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   test:
@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04, windows-2019, macOS-11]
-        python-version: ["3.9", "3.10", "3.11", 3.12]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         # os: [ubuntu-20.04, windows-2019, macOS-11, ubuntu-latest, windows-latest, macOS-latest]
     if: |
       !contains( github.ref, 'legacy' )
