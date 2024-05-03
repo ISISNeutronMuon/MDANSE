@@ -14,13 +14,15 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from vtk.util.numpy_support import numpy_to_vtk
 import vtk
 from qtpy.QtGui import QStandardItemModel, QStandardItem, QColor
 from qtpy.QtCore import Signal, Slot, QObject
+
+from MDANSE.Chemistry.Databases import AtomsDatabase
 
 RGB_COLOURS = []
 RGB_COLOURS.append((1.00, 0.20, 1.00))  # selection
@@ -144,20 +146,28 @@ class AtomProperties(QStandardItemModel):
         return new_index
 
     def reinitialise_from_database(
-        self, atoms: list[str], element_database=None
+        self,
+        atoms: list[str],
+        element_database: AtomsDatabase,
+        dummy_size: Optional[float] = None,
     ) -> list[int]:
         """Puts colours into the list based on chemical elements list
         and a database with colour values.
 
-        Arguments:
-            atoms -- list[str] of chemical element names
+        Parameters
+        ----------
+        atoms : list[str]
+            list[str] of chemical element names
+        element_database : AtomsDatabase
+            a dictionary containing RGB values for chemical elements,
+            typically the MDANSE_GUI.MolecularViewer.database.CHEMICAL_ELEMENTS
+        dummy_size : float or None
+            Override the size of the dummy atoms.
 
-        Keyword Arguments:
-            element_database -- a dictionary containing RGB values for chemical elements,
-               typically the MDANSE_GUI.MolecularViewer.database.CHEMICAL_ELEMENTS
-
-        Returns:
-            list[int] -- a list of indices of colours, with one numbed per atom.
+        Returns
+        -------
+        list[int]
+            A list of indices of colours, with one numbed per atom.
         """
         self.removeRows(0, self.rowCount())
         self._groups = []
@@ -172,6 +182,13 @@ class AtomProperties(QStandardItemModel):
 
         colour_index_list = []
         for atom in unique_atoms:
+            if (
+                element_database.get_atom_property(atom, "element") == "dummy"
+                and dummy_size is not None
+            ):
+                size = dummy_size
+            else:
+                size = round(element_database[atom]["vdw_radius"], 2)
             atom_entry = AtomEntry()
             rgb = [int(x) for x in element_database[atom]["color"].split(";")]
             colour_index_list.append(self.add_colour(rgb))
@@ -179,7 +196,7 @@ class AtomProperties(QStandardItemModel):
                 atom,
                 groups[atom],
                 QColor(rgb[0], rgb[1], rgb[2]).name(QColor.NameFormat.HexRgb),
-                round(element_database[atom]["vdw_radius"], 2),
+                size,
             )
             self.appendRow(item_row)
             self._groups.append(atom_entry)

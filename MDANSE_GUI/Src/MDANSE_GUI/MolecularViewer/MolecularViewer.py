@@ -132,6 +132,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._current_frame = 0
 
         self._colour_manager = AtomProperties()
+        self.dummy_size = 0.0
 
     def setDataModel(self, datamodel: TrajectoryAtomData):
         self._datamodel = datamodel
@@ -609,7 +610,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._resolution = 4 if self._resolution < 4 else self._resolution
 
         self._atom_colours = self._colour_manager.reinitialise_from_database(
-            self._atoms, CHEMICAL_ELEMENTS
+            self._atoms, CHEMICAL_ELEMENTS, self.dummy_size
         )
         # this returs a list of indices, mapping colours to atoms
 
@@ -667,6 +668,9 @@ class MolecularViewerWithPicking(MolecularViewer):
 
     def __init__(self):
         super().__init__()
+        # we set dummy size to something non-zero since we need to be
+        # able to see it for picking purposes
+        self.dummy_size = 0.1
         self._picking_domain = None
         self._picked_polydata = None
         self._polydata_opacity = 0.15
@@ -730,18 +734,19 @@ class MolecularViewerWithPicking(MolecularViewer):
             atoms.SetPoint(i, x, y, z)
         self._picked_polydata.SetPoints(atoms)
 
-        if self._bonds_visible and len(picked) >= 1:
+        not_du = np.array(
+            [
+                i
+                for i, j in enumerate(picked)
+                if CHEMICAL_ELEMENTS.get_atom_property(
+                    self._reader.atom_types[j], "element"
+                )
+                != "dummy"
+            ]
+        )
+
+        if self._bonds_visible and len(not_du) >= 1:
             # do not bond atoms to dummy atoms
-            not_du = np.array(
-                [
-                    i
-                    for i, j in enumerate(picked)
-                    if CHEMICAL_ELEMENTS.get_atom_property(
-                        self._reader.atom_types[j], "element"
-                    )
-                    != "dummy"
-                ]
-            )
             rs = coords[picked][not_du]
             covs = np.array(
                 [
