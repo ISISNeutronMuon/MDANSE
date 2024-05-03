@@ -730,7 +730,7 @@ class MolecularViewerWithPicking(MolecularViewer):
             atoms.SetPoint(i, x, y, z)
         self._picked_polydata.SetPoints(atoms)
 
-        if self._bonds_visible and len(picked) > 1:
+        if self._bonds_visible and len(picked) >= 1:
             # do not bond atoms to dummy atoms
             not_du = np.array(
                 [
