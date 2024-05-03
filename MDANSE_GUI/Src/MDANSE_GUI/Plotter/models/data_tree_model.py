@@ -478,11 +478,7 @@ class DataTreeModel(QtCore.QAbstractItemModel):
             else:
                 data_root_item = self.get_data_root_item(node)
                 variable_info = data_root_item.get_dataset_info(node.path, False)
-                return (
-                    QtGui.QColor("black")
-                    if variable_info["plottable"]
-                    else QtGui.QColor("red")
-                )
+                return None if variable_info["plottable"] else QtGui.QColor("red")
 
         elif role == QtCore.Qt.ItemDataRole.ToolTipRole:
             node = index.internalPointer()

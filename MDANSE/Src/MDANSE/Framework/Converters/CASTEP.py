@@ -44,7 +44,7 @@ class CASTEP(Converter):
     settings["castep_file"] = (
         "MDFileConfigurator",
         {
-            "wildcard": "MD files (*.md)|*.md|All files|*",
+            "wildcard": "MD files (*.md);;All files (*)",
             "default": "INPUT_FILENAME.md",
             "label": "Input MD file",
         },

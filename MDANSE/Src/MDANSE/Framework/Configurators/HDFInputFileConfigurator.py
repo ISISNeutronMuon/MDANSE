@@ -33,7 +33,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         self,
         name,
         variables=None,
-        wildcard="MDA analysis results (*.mda)|*.mda|HDF5 files (*.h5)|*.h5|All files|*",
+        wildcard="MDA analysis results (*.mda);;HDF5 files (*.h5);;All files (*)",
         **kwargs,
     ):
         """

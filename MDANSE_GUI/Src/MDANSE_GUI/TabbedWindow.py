@@ -220,7 +220,7 @@ class TabbedWindow(QMainWindow):
             self,
             "Load an MD trajectory",
             self.workdir,
-            "MDT files (*.mdt);;HDF5 files (*.h5 *.hdf);;All files(*.*)",
+            "MDT files (*.mdt);;HDF5 files (*.h5 *.hdf);;All files (*)",
         )
         ic(fname)
         if len(fname[0]) > 0:

@@ -32,7 +32,7 @@ class DFTB(Forcite):
     settings["xtd_file"] = (
         "XTDFileConfigurator",
         {
-            "wildcard": "XTD files (*.xtd)|*.xtd|All files|*",
+            "wildcard": "XTD files (*.xtd);;All files (*)",
             "default": "INPUT_FILENAME.xtd",
             "label": "The XTD file",
         },
@@ -40,7 +40,7 @@ class DFTB(Forcite):
     settings["trj_file"] = (
         "InputFileConfigurator",
         {
-            "wildcard": "TRJ files (*.trj)|*.trj|All files|*",
+            "wildcard": "TRJ files (*.trj);;All files (*)",
             "default": "INPUT_FILENAME.trj",
             "label": "The TRJ file",
         },

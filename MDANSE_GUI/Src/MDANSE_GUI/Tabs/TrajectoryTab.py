@@ -51,7 +51,7 @@ class TrajectoryTab(GeneralTab):
             self._core,
             "Load an MD trajectory",
             self._session.get_path("root_directory"),
-            "MDANSE trajectory files (*.mdt);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
+            "MDANSE trajectory files (*.mdt);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files (*)",
         )
         for fname in fnames[0]:
             self.load_trajectory(fname)
