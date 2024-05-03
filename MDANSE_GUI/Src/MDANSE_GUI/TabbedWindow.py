@@ -36,7 +36,7 @@ import MDANSE
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
 from MDANSE_GUI.Widgets.Generator import WidgetGenerator
-from MDANSE_GUI.Resources import Resources
+from MDANSE_GUI.Resources import Resources, is_dark
 from MDANSE_GUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
@@ -104,6 +104,7 @@ class TabbedWindow(QMainWindow):
             app_instance.aboutToQuit.connect(self._session.save_json)
             self._app_instance = app_instance
         self._session.load_json()
+        self.invertToolbar(False)
 
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
@@ -229,7 +230,8 @@ class TabbedWindow(QMainWindow):
 
     @Slot(bool)
     def invertToolbar(self, dark=False):
-        if dark:
+        system_dark = is_dark(self._app_instance.palette().base().color())
+        if dark or system_dark:
             for obj, key in self._toolbar_buttons:
                 obj.setIcon(self.resources._inverted_icons[key])
                 self._app_instance.setWindowIcon(

@@ -15,7 +15,17 @@
 #
 
 from qtpy.QtCore import QDir, QSize
-from qtpy.QtGui import QIcon, QPixmap
+from qtpy.QtGui import QIcon, QPixmap, QColor
+
+
+def is_dark(color: QColor) -> bool:
+    r, g, b, a = color.getRgb()
+    print(f"background rgb: {r} {g} {b}")
+    hsp = ((0.241 * r * r) + (0.691 * g * g) + (0.068 * b * b)) ** 0.5
+    if hsp > 127.5:
+        return False
+    else:
+        return True
 
 
 class Resources:
