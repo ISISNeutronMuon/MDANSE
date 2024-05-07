@@ -663,8 +663,7 @@ class MolecularViewer(QtWidgets.QWidget):
 class MolecularViewerWithPicking(MolecularViewer):
     """This class implements a molecular viewer with picking."""
 
-    picked_atom_changed = Signal(int)
-    show_atom_info = Signal(int)
+    picked_atoms_changed = Signal(object)
 
     def __init__(self):
         super().__init__()
@@ -720,6 +719,12 @@ class MolecularViewerWithPicking(MolecularViewer):
         else:
             self.picked_atoms.add(picked_atom)
 
+        self.update_picked_polydata()
+        self.update_renderer()
+        self.picked_atoms_changed.emit(self.picked_atoms)
+
+    def change_picked(self, picked: set[int]):
+        self.picked_atoms = picked
         self.update_picked_polydata()
         self.update_renderer()
 

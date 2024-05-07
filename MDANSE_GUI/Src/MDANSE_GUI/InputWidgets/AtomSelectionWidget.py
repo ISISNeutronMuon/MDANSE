@@ -192,13 +192,23 @@ class SelectionHelper(QDialog):
         "invert": "Invert the selection:",
     }
 
-    def __init__(self, selector: Selector, field: QLineEdit, parent, *args, **kwargs):
+    def __init__(
+        self,
+        selector: Selector,
+        traj_data: tuple[str, HDFTrajectoryInputData],
+        field: QLineEdit,
+        parent,
+        *args,
+        **kwargs,
+    ):
         """
         Parameters
         ----------
         selector : Selector
             The MDANSE selector initialized with the current chemical
             system.
+        traj_data : tuple[str, HDFTrajectoryInputData]
+            A tuple of the trajectory data used to load the 3D viewer.
         field : QLineEdit
             The QLineEdit field that will need to be updated when
             applying the setting.
@@ -216,6 +226,8 @@ class SelectionHelper(QDialog):
         self.selection_textbox.setReadOnly(True)
 
         self.view_3d = View3D(MolecularViewerWithPicking())
+        self.view_3d.update_panel(traj_data)
+
         layouts = self.create_layouts()
 
         bottom = QHBoxLayout()
@@ -229,7 +241,7 @@ class SelectionHelper(QDialog):
             helper_layout.addLayout(layout, 6)
 
         self.setLayout(helper_layout)
-        self.update_selection_textbox()
+        self.update_others()
 
     def closeEvent(self, a0):
         """Hide the window instead of closing. Some issues occur in the
@@ -297,7 +309,7 @@ class SelectionHelper(QDialog):
                 checkbox.setLayoutDirection(Qt.RightToLeft)
                 label = QLabel(self._cbox_text[k])
                 checkbox.setObjectName(k)
-                checkbox.stateChanged.connect(self.update_selection_textbox)
+                checkbox.stateChanged.connect(self.update_others)
                 if not match_exists[k]:
                     checkbox.setEnabled(False)
                     label.setStyleSheet("color: grey;")
@@ -319,7 +331,7 @@ class SelectionHelper(QDialog):
                 combo.addItems(items)
                 combo.model().blockSignals(False)
                 combo.setObjectName(k)
-                combo.model().dataChanged.connect(self.update_selection_textbox)
+                combo.model().dataChanged.connect(self.update_others)
                 label = QLabel(self._cbox_text[k])
                 if len(items) == 0:
                     combo.setEnabled(False)
@@ -334,10 +346,10 @@ class SelectionHelper(QDialog):
 
         return [select, invert]
 
-    def update_selection_textbox(self) -> None:
+    def update_others(self) -> None:
         """Using the checkbox and combobox widgets: update the settings,
         get the selection and update the textedit box with details of
-        the current selection.
+        the current selection and the 3d view to match the selection.
         """
         for check_box in self.check_boxes:
             self.full_settings[check_box.objectName()] = check_box.isChecked()
@@ -349,8 +361,9 @@ class SelectionHelper(QDialog):
 
         self.selector.update_settings(self.full_settings)
         idxs = self.selector.get_idxs()
-        num_sel = len(idxs)
+        self.view_3d._viewer.change_picked(idxs)
 
+        num_sel = len(idxs)
         text = [f"Number of atoms selected:\n{num_sel}\n\nSelected atoms:\n"]
         atoms = self.selector.system.atom_list
         for idx in idxs:
@@ -385,8 +398,7 @@ class AtomSelectionWidget(WidgetBase):
         ]
         traj_filename = traj_config["filename"]
         hdf_traj = HDFTrajectoryInputData(traj_config["filename"])
-        self.helper = self.create_helper()
-        self.helper.view_3d.update_panel((traj_filename, hdf_traj))
+        self.helper = self.create_helper((traj_filename, hdf_traj))
         helper_button = QPushButton(self._push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
         self._layout.addWidget(self._field)
@@ -395,15 +407,22 @@ class AtomSelectionWidget(WidgetBase):
         self.updateValue()
         self._field.setToolTip(self._tooltip_text)
 
-    def create_helper(self) -> SelectionHelper:
+    def create_helper(
+        self, traj_data: tuple[str, HDFTrajectoryInputData]
+    ) -> SelectionHelper:
         """
+        Parameters
+        ----------
+        traj_data : tuple[str, HDFTrajectoryInputData]
+            A tuple of the trajectory data used to load the 3D viewer.
+
         Returns
         -------
         SelectionHelper
             Create and return the selection helper QDialog.
         """
         selector = self._configurator.get_selector()
-        return SelectionHelper(selector, self._field, self._base)
+        return SelectionHelper(selector, traj_data, self._field, self._base)
 
     @Slot()
     def helper_dialog(self) -> None:

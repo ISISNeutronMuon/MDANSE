@@ -26,6 +26,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Framework.Configurators.AtomTransmutationConfigurator import AtomTransmuter
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import AtomSelectionWidget
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import SelectionHelper
@@ -43,7 +44,13 @@ class TransmutationHelper(SelectionHelper):
     _helper_title = "Atom transmutation helper"
 
     def __init__(
-        self, transmuter: AtomTransmuter, field: QLineEdit, parent, *args, **kwargs
+        self,
+        transmuter: AtomTransmuter,
+        traj_data: tuple[str, HDFTrajectoryInputData],
+        field: QLineEdit,
+        parent,
+        *args,
+        **kwargs,
     ):
         """
         Parameters
@@ -51,6 +58,8 @@ class TransmutationHelper(SelectionHelper):
         transmuter : AtomTransmuter
             The MDANSE atom transmuter initialized with the current
             chemical system.
+        traj_data : tuple[str, HDFTrajectoryInputData]
+            A tuple of the trajectory data used to load the 3D viewer.
         field : QLineEdit
             The QLineEdit field that will need to be updated when
             applying the setting.
@@ -62,7 +71,13 @@ class TransmutationHelper(SelectionHelper):
         self.transmutation_combo.addItems(ATOMS_DATABASE.atoms)
         self.transmuter.selector.settings["all"] = False
         super().__init__(
-            transmuter.selector, field, parent, min_width=750, *args, **kwargs
+            transmuter.selector,
+            traj_data,
+            field,
+            parent,
+            min_width=750,
+            *args,
+            **kwargs,
         )
         self.update_transmutation_textbox()
 
@@ -167,12 +182,19 @@ class AtomTransmutationWidget(AtomSelectionWidget):
     _default_value = "{}"
     _tooltip_text = "Specify the atom transmutation that will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
 
-    def create_helper(self) -> TransmutationHelper:
+    def create_helper(
+        self, traj_data: tuple[str, HDFTrajectoryInputData]
+    ) -> TransmutationHelper:
         """
+        Parameters
+        ----------
+        traj_data : tuple[str, HDFTrajectoryInputData]
+            A tuple of the trajectory data used to load the 3D viewer.
+
         Returns
         -------
         TransmutationHelper
             Create and return the transmutation helper QDialog.
         """
         transmuter = self._configurator.get_transmuter()
-        return TransmutationHelper(transmuter, self._field, self._base)
+        return TransmutationHelper(transmuter, traj_data, self._field, self._base)
