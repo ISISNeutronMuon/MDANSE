@@ -389,8 +389,7 @@ class SelectionHelper(QDialog):
                     item.setCheckState(Qt.Checked)
                 else:
                     item.setCheckState(Qt.Unchecked)
-            if combo_box.objectName() == "index":
-                combo_box.update_all_selected()
+            combo_box.update_all_selected()
             combo_box.update_line_edit()
             combo_box.model().blockSignals(False)
 
