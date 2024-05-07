@@ -82,16 +82,19 @@ class CheckableComboBox(QComboBox):
                 item.setCheckState(check_uncheck)
             else:
                 item.setCheckState(check_uncheck)
-                # check/uncheck select all since everything is/isn't selected
-                if all([i.checkState() == Qt.Checked for i in self.getItems()]):
-                    self.model().item(0).setCheckState(Qt.Checked)
-                else:
-                    self.model().item(0).setCheckState(Qt.Unchecked)
+                self.update_all_selected()
 
             self.update_line_edit()
             return True
 
         return super().eventFilter(a0, a1)
+
+    def update_all_selected(self):
+        """check/uncheck select all since everything is/isn't selected."""
+        if all([i.checkState() == Qt.Checked for i in self.getItems()]):
+            self.model().item(0).setCheckState(Qt.Checked)
+        else:
+            self.model().item(0).setCheckState(Qt.Unchecked)
 
     def addItems(self, texts: list[str]) -> None:
         """
@@ -189,7 +192,6 @@ class SelectionHelper(QDialog):
         "element": "Elements:",
         "hs_on_element": "Hs on elements:",
         "index": "Indexes:",
-        "invert": "Invert the selection:",
     }
 
     def __init__(
@@ -225,7 +227,9 @@ class SelectionHelper(QDialog):
         self.selection_textbox = QTextEdit()
         self.selection_textbox.setReadOnly(True)
 
-        self.view_3d = View3D(MolecularViewerWithPicking())
+        mol_view = MolecularViewerWithPicking()
+        mol_view.picked_atoms_changed.connect(self.update_from_3d_view)
+        self.view_3d = View3D(mol_view)
         self.view_3d.update_panel(traj_data)
 
         layouts = self.create_layouts()
@@ -294,8 +298,6 @@ class SelectionHelper(QDialog):
 
         select = QGroupBox("selection")
         select_layout = QVBoxLayout()
-        invert = QGroupBox("inversion")
-        invert_layout = QVBoxLayout()
 
         self.check_boxes = []
         self.combo_boxes = []
@@ -316,10 +318,7 @@ class SelectionHelper(QDialog):
                 self.check_boxes.append(checkbox)
                 check_layout.addWidget(label)
                 check_layout.addWidget(checkbox)
-                if k == "invert":
-                    invert_layout.addLayout(check_layout)
-                else:
-                    select_layout.addLayout(check_layout)
+                select_layout.addLayout(check_layout)
 
             elif isinstance(v, dict):
                 combo_layout = QHBoxLayout()
@@ -342,9 +341,7 @@ class SelectionHelper(QDialog):
                 select_layout.addLayout(combo_layout)
 
         select.setLayout(select_layout)
-        invert.setLayout(invert_layout)
-
-        return [select, invert]
+        return [select]
 
     def update_others(self) -> None:
         """Using the checkbox and combobox widgets: update the settings,
@@ -362,13 +359,54 @@ class SelectionHelper(QDialog):
         self.selector.update_settings(self.full_settings)
         idxs = self.selector.get_idxs()
         self.view_3d._viewer.change_picked(idxs)
+        self.update_selection_textbox(idxs)
 
+    def update_from_3d_view(self, selection: set[int]) -> None:
+        """A selection/deselection was made in the 3d view, update the
+        check_boxes, combo_boxes and textbox.
+
+        Parameters
+        ----------
+        selection : set[int]
+            Selection indexes from the 3d view.
+        """
+        self.selector.update_with_idxs(selection)
+        self.full_settings = self.selector.full_settings
+
+        for check_box in self.check_boxes:
+            check_box.blockSignals(True)
+            if self.full_settings[check_box.objectName()]:
+                check_box.setCheckState(Qt.Checked)
+            else:
+                check_box.setCheckState(Qt.Unchecked)
+            check_box.blockSignals(False)
+        for combo_box in self.combo_boxes:
+            combo_box.model().blockSignals(True)
+            for item in combo_box.getItems():
+                if self.full_settings[combo_box.objectName()][item.text()]:
+                    item.setCheckState(Qt.Checked)
+                else:
+                    item.setCheckState(Qt.Unchecked)
+            if combo_box.objectName() == "index":
+                combo_box.update_all_selected()
+            combo_box.update_line_edit()
+            combo_box.model().blockSignals(False)
+
+        self.update_selection_textbox(self.selector.get_idxs())
+
+    def update_selection_textbox(self, idxs: set[int]) -> None:
+        """Update the selection textbox.
+
+        Parameters
+        ----------
+        idxs : set[int]
+            The selected indexes.
+        """
         num_sel = len(idxs)
         text = [f"Number of atoms selected:\n{num_sel}\n\nSelected atoms:\n"]
         atoms = self.selector.system.atom_list
         for idx in idxs:
             text.append(f"{idx}  ({atoms[idx].full_name})\n")
-
         self.selection_textbox.setText("".join(text))
 
     def apply(self) -> None:

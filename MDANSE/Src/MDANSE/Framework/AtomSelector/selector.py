@@ -52,8 +52,6 @@ class Selector:
         "hs_on_element": {},
         # e.g. {"1": True} or {1: True}
         "index": {},
-        # True inverts the selection
-        "invert": False,
     }
 
     _funcs = {
@@ -102,9 +100,6 @@ class Selector:
         # figure out if a match exists for the selector function
         self.match_exists = self.full_settings
         for k0, v0 in self.match_exists.items():
-            if k0 == "invert":
-                self.match_exists[k0] = True
-                continue
             if isinstance(v0, dict):
                 for k1 in v0.keys():
                     self.match_exists[k0][k1] = self._funcs[k0](
@@ -160,8 +155,6 @@ class Selector:
         idxs = set([])
 
         for k, v in self.settings.items():
-            if k == "invert":
-                continue
 
             if isinstance(v, dict):
                 args = [{self._kwarg_keys[k]: i} for i in v.keys()]
@@ -170,16 +163,58 @@ class Selector:
                 args = [{}]
                 switches = [v]
 
-            for args, switch in zip(args, switches):
+            for arg, switch in zip(args, switches):
                 if not switch:
                     continue
 
-                idxs.update(self._funcs[k](self.system, **args))
+                idxs.update(self._funcs[k](self.system, **arg))
 
-        if self.settings["invert"]:
-            return self.all_idxs - idxs
-        else:
-            return idxs
+        return idxs
+
+    def update_with_idxs(self, idxs: set[int]) -> None:
+        """Using the inputted idxs change the selection setting so
+        that it would return the same idxs with get_idxs. It will
+        switch off the setting if idxs is not a superset of the
+        selection for that setting.
+
+        Parameters
+        ----------
+        idxs : set[int]
+            With the indexes of the atom selection.
+        """
+        new_settings = copy.deepcopy(self.settings)
+        added = set([])
+        prev_selected = set([])
+        for k, v in self.settings.items():
+
+            if isinstance(v, dict):
+                args = [{self._kwarg_keys[k]: i} for i in v.keys()]
+                switches = v.values()
+            else:
+                args = [{}]
+                switches = [v]
+
+            for arg, switch in zip(args, switches):
+                if not switch:
+                    continue
+
+                selection = self._funcs[k](self.system, **arg)
+                if idxs.issuperset(selection):
+                    added.update(selection)
+                    continue
+
+                prev_selected.update(selection)
+                if isinstance(v, dict):
+                    new_settings[k][arg[self._kwarg_keys[k]]] = False
+                else:
+                    new_settings[k] = False
+
+        for idx in idxs - added:
+            new_settings["index"][str(idx)] = True
+        for idx in prev_selected - idxs:
+            new_settings["index"][str(idx)] = False
+
+        self.settings = new_settings
 
     def settings_to_json(self) -> str:
         """Return the minimal json string required to achieve the same
