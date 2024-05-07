@@ -99,7 +99,7 @@ class Selector:
             "element": symbols,
             "hs_on_element": symbols,
             "name": set([at.name for at in system.atom_list]),
-            "fullname":  set([at.full_name for at in system.atom_list]),
+            "fullname": set([at.full_name for at in system.atom_list]),
             # we allow index keys to be str or int, this is mostly
             # done since JSON keys are str, it will be stored
             # internally here as a str
