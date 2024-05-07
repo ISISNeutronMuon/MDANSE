@@ -93,7 +93,8 @@ class Selector:
             "element": symbols,
             "hs_on_element": symbols,
             # we allow index keys to be str or int, this is mostly
-            # done since JSON keys are str
+            # done since JSON keys are str, it will be stored
+            # internally here as a str
             "index": self.all_idxs | set([str(i) for i in self.all_idxs]),
         }
 
@@ -140,7 +141,7 @@ class Selector:
         for k0, v0 in settings.items():
             if isinstance(self.settings[k0], dict):
                 for k1, v1 in v0.items():
-                    self.settings[k0][k1] = v1
+                    self.settings[k0][str(k1)] = v1
             else:
                 self.settings[k0] = v0
 
@@ -302,7 +303,6 @@ class Selector:
             settings = json.loads(json_string)
         except ValueError:
             return False
-
         return self.check_valid_setting(settings)
 
     @property
