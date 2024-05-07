@@ -191,6 +191,8 @@ class SelectionHelper(QDialog):
         "water": "Water molecules:",
         "element": "Elements:",
         "hs_on_element": "Hs on elements:",
+        "name": "Atom name:",
+        "fullname": "Atom fullname:",
         "index": "Indexes:",
     }
 

@@ -50,6 +50,8 @@ class Selector:
         # e.g. {"S": True}
         "element": {},
         "hs_on_element": {},
+        "name": {},
+        "fullname": {},
         # e.g. {"1": True} or {1: True}
         "index": {},
     }
@@ -67,12 +69,16 @@ class Selector:
         "water": select_water,
         "element": select_element,
         "hs_on_element": select_hs_on_element,
+        "name": select_atom_name,
+        "fullname": select_atom_fullname,
         "index": select_index,
     }
 
     _kwarg_keys = {
         "element": "symbol",
         "hs_on_element": "symbol",
+        "name": "name",
+        "fullname": "fullname",
         "index": "index",
     }
 
@@ -92,6 +98,8 @@ class Selector:
         self._kwarg_vals = {
             "element": symbols,
             "hs_on_element": symbols,
+            "name": set([at.name for at in system.atom_list]),
+            "fullname":  set([at.full_name for at in system.atom_list]),
             # we allow index keys to be str or int, this is mostly
             # done since JSON keys are str, it will be stored
             # internally here as a str
