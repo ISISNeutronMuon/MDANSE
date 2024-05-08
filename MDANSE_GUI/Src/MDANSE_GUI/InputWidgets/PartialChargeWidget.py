@@ -74,6 +74,14 @@ class ChargeHelper(SelectionHelper):
         self.update_charge_textbox()
 
     def right_widgets(self) -> list[QWidget]:
+        """Add the charge textbox to the right widgets.
+
+        Returns
+        -------
+        list[QWidget]
+            List of QWidgets to add to the right layout from
+            create_layouts.
+        """
         widgets = super().right_widgets()
         return widgets + [self.charge_textbox]
 

@@ -82,6 +82,14 @@ class TransmutationHelper(SelectionHelper):
         self.update_transmutation_textbox()
 
     def right_widgets(self) -> list[QWidget]:
+        """Add the transmutation textbox to the right widgets.
+
+        Returns
+        -------
+        list[QWidget]
+            List of QWidgets to add to the right layout from
+            create_layouts.
+        """
         widgets = super().right_widgets()
         return widgets + [self.transmutation_textbox]
 
