@@ -48,8 +48,8 @@ class Selector:
         "thiol": False,
         "water": False,
         # e.g. {"S": True}
-        "element": {},
         "hs_on_element": {},
+        "element": {},
         "name": {},
         "fullname": {},
         # e.g. {"1": True} or {1: True}
@@ -67,16 +67,16 @@ class Selector:
         "sulphate": select_sulphate,
         "thiol": select_thiol,
         "water": select_water,
-        "element": select_element,
         "hs_on_element": select_hs_on_element,
+        "element": select_element,
         "name": select_atom_name,
         "fullname": select_atom_fullname,
         "index": select_index,
     }
 
     _kwarg_keys = {
-        "element": "symbol",
         "hs_on_element": "symbol",
+        "element": "symbol",
         "name": "name",
         "fullname": "fullname",
         "index": "index",
