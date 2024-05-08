@@ -97,7 +97,13 @@ class Selector:
         # all possible values for the system
         self._kwarg_vals = {
             "element": symbols,
-            "hs_on_element": symbols,
+            "hs_on_element": set(
+                [
+                    symbol
+                    for symbol in symbols
+                    if select_hs_on_element(system, symbol, check_exists=True)
+                ]
+            ),
             "name": set([at.name for at in system.atom_list]),
             "fullname": set([at.full_name for at in system.atom_list]),
             # we allow index keys to be str or int, this is mostly
@@ -111,9 +117,7 @@ class Selector:
         for k0, v0 in self.match_exists.items():
             if isinstance(v0, dict):
                 for k1 in v0.keys():
-                    self.match_exists[k0][k1] = self._funcs[k0](
-                        self.system, **{self._kwarg_keys[k0]: k1}, check_exists=True
-                    )
+                    self.match_exists[k0][k1] = True
             else:
                 self.match_exists[k0] = self._funcs[k0](self.system, check_exists=True)
 

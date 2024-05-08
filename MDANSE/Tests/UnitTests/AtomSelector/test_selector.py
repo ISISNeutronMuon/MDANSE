@@ -315,3 +315,27 @@ def test_selector_returns_false_with_incorrect_json_setting_2(protein_chemical_s
     assert not selector.check_valid_json_settings(
         '{"all": False, "index": {"0": true, "1": true}}'
     )
+
+
+def test_selector_with_atom_fullname(protein_chemical_system):
+    selector = Selector(protein_chemical_system)
+    selector.update_settings(
+        {
+            "all": False,
+            "fullname": {"...LYS1.N": True, "...VAL2.O": True},
+        }
+    )
+    atm_idxs = selector.get_idxs()
+    assert len(atm_idxs) == 2
+
+
+def test_selector_with_atom_name(protein_chemical_system):
+    selector = Selector(protein_chemical_system)
+    selector.update_settings(
+        {
+            "all": False,
+            "name": {"N": True, "O": True},
+        }
+    )
+    atm_idxs = selector.get_idxs()
+    assert len(atm_idxs) == 258
