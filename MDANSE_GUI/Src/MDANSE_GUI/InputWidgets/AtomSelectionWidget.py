@@ -464,7 +464,7 @@ class AtomSelectionWidget(WidgetBase):
             self._configurator._dependencies["trajectory"]
         ]
         traj_filename = traj_config["filename"]
-        hdf_traj = HDFTrajectoryInputData(traj_config["filename"])
+        hdf_traj = traj_config["hdf_trajectory"]
         self.helper = self.create_helper((traj_filename, hdf_traj))
         helper_button = QPushButton(self._push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
