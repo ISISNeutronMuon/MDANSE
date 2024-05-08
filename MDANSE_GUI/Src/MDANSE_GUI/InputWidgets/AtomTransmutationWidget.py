@@ -82,18 +82,9 @@ class TransmutationHelper(SelectionHelper):
         self.all_selection = False
         self.update_transmutation_textbox()
 
-    def create_layouts(self) -> list[QVBoxLayout]:
-        """Add one addition layout to the right over the selection
-        helper.
-
-        Returns
-        -------
-        list[QVBoxLayout]
-            List of QVBoxLayout to add to the helper layout.
-        """
-        layouts = super().create_layouts()
-        layouts[-1].addWidget(self.transmutation_textbox)
-        return layouts
+    def right_widgets(self) -> list[QWidget]:
+        widgets = super().right_widgets()
+        return widgets + [self.transmutation_textbox]
 
     def left_widgets(self) -> list[QWidget]:
         """Adds a transmutation widget to the selection helper.

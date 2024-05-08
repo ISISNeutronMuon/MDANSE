@@ -283,21 +283,33 @@ class SelectionHelper(QDialog):
         """
         layout_3d = QVBoxLayout()
         layout_3d.addWidget(self.view_3d)
+
         left = QVBoxLayout()
         for widget in self.left_widgets():
             left.addWidget(widget)
 
         right = QVBoxLayout()
-        right.addWidget(self.selection_textbox)
+        for widget in self.right_widgets():
+            right.addWidget(widget)
 
         return [layout_3d, left, right]
+
+    def right_widgets(self) -> list[QWidget]:
+        """
+        Returns
+        -------
+        list[QWidget]
+            List of QWidgets to add to the right layout from
+            create_layouts.
+        """
+        return [self.selection_textbox]
 
     def left_widgets(self) -> list[QWidget]:
         """
         Returns
         -------
         list[QWidget]
-            List of QWidgets to add to the first layout from
+            List of QWidgets to add to the left layout from
             create_layouts.
         """
         match_exists = self.selector.match_exists
