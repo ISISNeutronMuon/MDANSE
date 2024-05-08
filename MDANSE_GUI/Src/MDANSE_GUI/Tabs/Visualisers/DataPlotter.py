@@ -115,10 +115,13 @@ class PlottingContext:
         if self.set_axes() is None:
             print("Axis check failed.")
             return
-        for dataset in self._datasets:
-            axes = target.add_axes("111")
+        axes = target.add_subplot(111)
+        for name, dataset in self._datasets.items():
             xtags = list(dataset._axes.keys())
-            axes.plot(dataset._axes[xtags[0]], dataset._data)
+            axes.plot(dataset._axes[xtags[0]], dataset._data, label=name)
+        axes.grid(True)
+        axes.legend(loc=0)
+        target.canvas.draw()
 
 
 class PlotWidget(QWidget):
