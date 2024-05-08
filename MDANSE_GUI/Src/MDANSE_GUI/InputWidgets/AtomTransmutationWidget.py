@@ -79,23 +79,8 @@ class TransmutationHelper(SelectionHelper):
             *args,
             **kwargs,
         )
+        self.all_selection = False
         self.update_transmutation_textbox()
-
-    def create_buttons(self) -> list[QPushButton]:
-        """
-        Returns
-        -------
-        list[QPushButton]
-            List of push buttons to add to the last layout from
-            create_layouts.
-        """
-        apply = QPushButton("Use Setting")
-        reset = QPushButton("Reset")
-        close = QPushButton("Close")
-        apply.clicked.connect(self.apply)
-        reset.clicked.connect(self.reset)
-        close.clicked.connect(self.close)
-        return [apply, reset, close]
 
     def create_layouts(self) -> list[QVBoxLayout]:
         """Add one addition layout to the right over the selection
@@ -107,9 +92,8 @@ class TransmutationHelper(SelectionHelper):
             List of QVBoxLayout to add to the helper layout.
         """
         layouts = super().create_layouts()
-        right = QVBoxLayout()
-        right.addWidget(self.transmutation_textbox)
-        return layouts + [right]
+        layouts[-1].addWidget(self.transmutation_textbox)
+        return layouts
 
     def left_widgets(self) -> list[QWidget]:
         """Adds a transmutation widget to the selection helper.
@@ -165,6 +149,7 @@ class TransmutationHelper(SelectionHelper):
 
     def reset(self):
         """Reset the transmuter so that no transmutation are set."""
+        super().reset()
         self.transmuter.reset_setting()
         self.update_transmutation_textbox()
 

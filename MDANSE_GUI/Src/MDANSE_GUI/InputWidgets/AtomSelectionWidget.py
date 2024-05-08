@@ -249,6 +249,8 @@ class SelectionHelper(QDialog):
         self.setLayout(helper_layout)
         self.update_others()
 
+        self.all_selection = True
+
     def closeEvent(self, a0):
         """Hide the window instead of closing. Some issues occur in the
         3D viewer when it is closed and then reopened.
@@ -265,10 +267,12 @@ class SelectionHelper(QDialog):
             create_layouts.
         """
         apply = QPushButton("Use Setting")
+        reset = QPushButton("Reset")
         close = QPushButton("Close")
         apply.clicked.connect(self.apply)
+        reset.clicked.connect(self.reset)
         close.clicked.connect(self.close)
-        return [apply, close]
+        return [apply, reset, close]
 
     def create_layouts(self) -> list[QVBoxLayout]:
         """
@@ -374,7 +378,13 @@ class SelectionHelper(QDialog):
         """
         self.selector.update_with_idxs(selection)
         self.full_settings = self.selector.full_settings
+        self.update_selection_widgets()
+        self.update_selection_textbox(self.selector.get_idxs())
 
+    def update_selection_widgets(self) -> None:
+        """Updates the selection widgets so that it matches the full
+        setting.
+        """
         for check_box in self.check_boxes:
             check_box.blockSignals(True)
             if self.full_settings[check_box.objectName()]:
@@ -392,8 +402,6 @@ class SelectionHelper(QDialog):
             combo_box.update_all_selected()
             combo_box.update_line_edit()
             combo_box.model().blockSignals(False)
-
-        self.update_selection_textbox(self.selector.get_idxs())
 
     def update_selection_textbox(self, idxs: set[int]) -> None:
         """Update the selection textbox.
@@ -416,6 +424,16 @@ class SelectionHelper(QDialog):
         """
         self.selector.update_settings(self.full_settings)
         self._field.setText(self.selector.settings_to_json())
+
+    def reset(self) -> None:
+        """Resets the helper to the default state."""
+        self.selector.reset_settings()
+        self.selector.settings["all"] = self.all_selection
+        self.full_settings = self.selector.full_settings
+        self.update_selection_widgets()
+        idxs = self.selector.get_idxs()
+        self.view_3d._viewer.change_picked(idxs)
+        self.update_selection_textbox(idxs)
 
 
 class AtomSelectionWidget(WidgetBase):
