@@ -69,9 +69,7 @@ class ChargeHelper(SelectionHelper):
         self.charge_qline = QLineEdit()
         self.charge_qline.setValidator(QDoubleValidator())
         self.mapper.selector.settings["all"] = False
-        super().__init__(
-            mapper.selector, traj_data, field, parent, *args, **kwargs
-        )
+        super().__init__(mapper.selector, traj_data, field, parent, *args, **kwargs)
         self.all_selection = False
         self.update_charge_textbox()
 
