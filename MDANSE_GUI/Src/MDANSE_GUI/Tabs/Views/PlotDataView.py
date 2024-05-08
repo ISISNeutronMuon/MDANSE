@@ -40,7 +40,7 @@ class PlotDataView(QTreeView):
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.click_position = None
 
-        self.clicked.connect(self.on_select_action)
+        self.clicked.connect(self.on_select_dataset)
         self.doubleClicked.connect(self.pop_action_dialog)
         self.clicked.connect(self.item_picked)
 
@@ -67,12 +67,16 @@ class PlotDataView(QTreeView):
                 drag.setMimeData(mime_data)
                 drag.exec()
 
-    def on_select_action(self, index):
+    def on_select_dataset(self, index):
         model = self.model()
         item = model.itemFromIndex(index)
         text = item.text()
-        print("tree: clicked on ", text)
-        self.dataset_selected.emit(text)
+        mda_data_structure = model.inner_object(index)
+        try:
+            packet = text, mda_data_structure._file
+        except AttributeError:
+            packet = text, mda_data_structure.file
+        self.dataset_selected.emit(packet)
 
     def pop_action_dialog(self, index):
         model = self.model()
