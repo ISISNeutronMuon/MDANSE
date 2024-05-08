@@ -217,11 +217,9 @@ class SelectionHelper(QDialog):
             The QLineEdit field that will need to be updated when
             applying the setting.
         """
-        self.min_width = kwargs.pop("min_width", 500)
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle(self._helper_title)
-        self.resize(self.min_width, self.height())
-        self.setMinimumWidth(self.min_width)
+
         self.selector = selector
         self._field = field
         self.full_settings = self.selector.full_settings
@@ -244,7 +242,7 @@ class SelectionHelper(QDialog):
 
         helper_layout = QHBoxLayout()
         for layout in layouts:
-            helper_layout.addLayout(layout, 6)
+            helper_layout.addLayout(layout)
 
         self.setLayout(helper_layout)
         self.update_others()

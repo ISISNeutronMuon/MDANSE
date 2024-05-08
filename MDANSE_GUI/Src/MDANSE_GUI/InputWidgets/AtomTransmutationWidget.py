@@ -75,7 +75,6 @@ class TransmutationHelper(SelectionHelper):
             traj_data,
             field,
             parent,
-            min_width=750,
             *args,
             **kwargs,
         )
