@@ -162,6 +162,9 @@ class HistoryFile:
     def __len__(self):
         return len(self._inner_dictionary)
 
+    def __contains__(self, key):
+        return key in self._inner_dictionary
+
     def read_step(self, step):
         self["instance"].seek(self._headerSize + step * self._frameSize)
 

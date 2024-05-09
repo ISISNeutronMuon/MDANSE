@@ -145,6 +145,9 @@ class IConfigurator(metaclass=SubclassFactory):
     def __len__(self):
         return len(self._inner_dictionary)
 
+    def __contains__(self, key):
+        return key in self._inner_dictionary
+
     @property
     def configurable(self):
         return self._configurable

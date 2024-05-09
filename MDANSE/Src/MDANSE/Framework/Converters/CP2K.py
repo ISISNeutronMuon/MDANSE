@@ -83,6 +83,9 @@ class CellFile:
     def __len__(self):
         return len(self._inner_dictionary)
 
+    def __contains__(self, key):
+        return key in self._inner_dictionary
+
     def read_step(self, step: int):
         """Reads and returns the unit cell constants at the requested
         simulation step (frame)
