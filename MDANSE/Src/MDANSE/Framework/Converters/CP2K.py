@@ -30,12 +30,14 @@ class CellFileError(Error):
     pass
 
 
-class CellFile(dict):
+class CellFile:
     """Opens and reads the CP2K output file containing the
     unit cell size for each simulation step.
     """
 
     def __init__(self, filename):
+        self._inner_dictionary = {}
+
         self["instance"] = open(filename, "r")
 
         # Skip the first line
@@ -71,6 +73,15 @@ class CellFile(dict):
             self["time_step"] = 0.0
         else:
             self["time_step"] = time_steps[1] - time_steps[0]
+
+    def __setitem__(self, key, item):
+        self._inner_dictionary[key] = item
+
+    def __getitem__(self, key):
+        return self._inner_dictionary[key]
+
+    def __len__(self):
+        return len(self._inner_dictionary)
 
     def read_step(self, step: int):
         """Reads and returns the unit cell constants at the requested

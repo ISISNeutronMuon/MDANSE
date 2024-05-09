@@ -27,11 +27,22 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-class HisFile(dict):
+class HisFile:
     def __init__(self, hisfilename):
+        self._inner_dictionary = {}
+
         self["instance"] = open(hisfilename, "rb")
 
         self.parse_header()
+
+    def __setitem__(self, key, item):
+        self._inner_dictionary[key] = item
+
+    def __getitem__(self, key):
+        return self._inner_dictionary[key]
+
+    def __len__(self):
+        return len(self._inner_dictionary)
 
     def parse_header(self):
         hisfile = self["instance"]

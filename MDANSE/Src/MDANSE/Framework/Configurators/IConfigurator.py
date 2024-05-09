@@ -67,7 +67,7 @@ class ConfiguratorError(Error):
         return self._configurator
 
 
-class IConfigurator(dict, metaclass=SubclassFactory):
+class IConfigurator(metaclass=SubclassFactory):
     """
     This class implements the base class for configurator objects. A configurator object is a dictionary-derived object that is used
     to configure one item of a given configuration. Once the input value given for that item is configured, the dictionary is updated
@@ -84,8 +84,6 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
     _encoder = json.encoder.JSONEncoder()
     _decoder = json.decoder.JSONDecoder()
-
-    _doc_ = "undocumented"
 
     def __init__(self, name, **kwargs):
         """
@@ -104,6 +102,8 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         :param widget: the configurator widget that corresponds to this configurator.
         :type widget: str
         """
+
+        self._inner_dictionary = {}
 
         self._name = name
 
@@ -135,6 +135,15 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         self._error_status = "OK"
 
         self._original_input = ""
+
+    def __setitem__(self, key, item):
+        self._inner_dictionary[key] = item
+
+    def __getitem__(self, key):
+        return self._inner_dictionary[key]
+
+    def __len__(self):
+        return len(self._inner_dictionary)
 
     @property
     def configurable(self):

@@ -75,10 +75,11 @@ class DL_POLYConverterError(Error):
     pass
 
 
-class HistoryFile(dict):
+class HistoryFile:
 
     def __init__(self, filename):
-        super().__init__()
+        self._inner_dictionary = {}
+
         self["instance"] = open(filename, "rb")
 
         version = self.determine_version()
@@ -151,6 +152,15 @@ class HistoryFile(dict):
             self._maskStep += 1
 
         self["instance"].seek(0)
+
+    def __setitem__(self, key, item):
+        self._inner_dictionary[key] = item
+
+    def __getitem__(self, key):
+        return self._inner_dictionary[key]
+
+    def __len__(self):
+        return len(self._inner_dictionary)
 
     def read_step(self, step):
         self["instance"].seek(self._headerSize + step * self._frameSize)

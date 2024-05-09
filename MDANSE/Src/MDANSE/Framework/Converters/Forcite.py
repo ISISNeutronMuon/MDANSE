@@ -28,11 +28,22 @@ FORCE_FACTOR = measure(1.0, "kcal_per_mole/ang", equivalent=True).toval(
 )
 
 
-class TrjFile(dict):
+class TrjFile:
     def __init__(self, trjfilename):
+        self._inner_dictionary = {}
+
         self["instance"] = open(trjfilename, "rb")
 
         self.parse_header()
+
+    def __setitem__(self, key, item):
+        self._inner_dictionary[key] = item
+
+    def __getitem__(self, key):
+        return self._inner_dictionary[key]
+
+    def __len__(self):
+        return len(self._inner_dictionary)
 
     def parse_header(self):
         trjfile = self["instance"]
