@@ -34,7 +34,7 @@ class PlatformError(Error):
     pass
 
 
-class Platform(object, metaclass=abc.ABCMeta):
+class Platform(metaclass=abc.ABCMeta):
     """
     This is the base class for OS-free standard operations.
     """

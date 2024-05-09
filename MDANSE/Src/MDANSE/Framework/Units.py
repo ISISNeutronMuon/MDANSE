@@ -136,7 +136,7 @@ def _str_to_unit(s):
             raise UnitError("Invalid unit: {}".format(s))
 
 
-class _Unit(object):
+class _Unit:
     def __init__(
         self, uname, factor, kg=0, m=0, s=0, K=0, mol=0, A=0, cd=0, rad=0, sr=0
     ):

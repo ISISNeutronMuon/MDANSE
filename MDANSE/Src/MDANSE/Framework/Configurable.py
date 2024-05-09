@@ -28,7 +28,7 @@ class ConfigurationError(Error):
     pass
 
 
-class Configurable(object):
+class Configurable:
     """
     This class allows any object that derives from it to be configurable within the MDANSE framework.
     

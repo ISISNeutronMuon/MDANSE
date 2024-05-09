@@ -26,7 +26,7 @@ class UserDefinitionStoreError(Error):
     pass
 
 
-class UserDefinitionStore(object, metaclass=Singleton):
+class UserDefinitionStore(metaclass=Singleton):
     """
     This class is used to register, save and delete MDANSE user definitions (a.k.a. UD).
 

@@ -17,7 +17,7 @@
 import collections
 
 
-class Node(object):
+class Node:
     def __init__(self, name, **kwargs):
         self._name = name
         self._links = set()
@@ -37,7 +37,7 @@ class Node(object):
         other._links.add(self)
 
 
-class Graph(object):
+class Graph:
     def __init__(self):
         self._nodes = collections.OrderedDict()
 

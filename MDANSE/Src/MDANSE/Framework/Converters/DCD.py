@@ -79,7 +79,7 @@ def get_byte_order(filename):
     return byteOrder
 
 
-class FortranBinaryFile(object):
+class FortranBinaryFile:
     """Sets up a Fortran binary file reader.
 
     @note: written by Konrad Hinsen.

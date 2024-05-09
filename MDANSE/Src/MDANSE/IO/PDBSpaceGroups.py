@@ -20,7 +20,7 @@ from MDANSE.Mathematics.LinearAlgebra import Vector, Tensor
 from MDANSE.Mathematics.Transformation import Rotation, Translation
 
 
-class SpaceGroup(object):
+class SpaceGroup:
     def __init__(self, number, labels, transformations):
         self.number = number
         self.labels = labels

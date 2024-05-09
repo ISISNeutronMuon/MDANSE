@@ -21,7 +21,7 @@ import time
 import numpy as np
 
 
-class Status(object, metaclass=abc.ABCMeta):
+class Status(metaclass=abc.ABCMeta):
     """
     This class defines an interface for status objects.
     This kind of object is used to store the status a loop-based task.
