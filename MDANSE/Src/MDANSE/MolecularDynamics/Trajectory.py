@@ -22,6 +22,7 @@ import numpy as np
 from icecream import ic
 import h5py
 
+from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem, _ChemicalEntity
 from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
@@ -37,54 +38,34 @@ from MDANSE.MolecularDynamics.TrajectoryUtils import (
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-class TrajectoryError(Exception):
-    pass
-
-
 class Trajectory:
-    def __init__(self, h5_filename):
-        """Constructor.
+    """This is a wrapper class, allowing us to implement
+    multiple trajectory formats, while keeping the API unchanged
+    for the analysis code.
+    """
 
-        :param h5_filename: the trajectory filename
-        :type h5_filename: str
+    def __init__(self, filename, trajectory_format=None):
+        self._filename = filename
+        self._format = trajectory_format
+        if self._format is None:
+            self.guess_correct_format()
+        self._trajectory = self.open_trajectory(self._format)
+
+    def guess_correct_format(self):
+        """This is a placeholder for now. As the number of
+        formats increases, they will have to be handled here.
         """
+        self._format = "MDANSE"
 
-        ic("Trajectory.__init__ started")
-        self._h5_filename = h5_filename
-
-        self._h5_file = h5py.File(self._h5_filename, "r")
-
-        ic("Trajectory.__init__ h5py.File created")
-        # Load the chemical system
-        self._chemical_system = ChemicalSystem(
-            os.path.splitext(os.path.basename(self._h5_filename))[0]
-        )
-        self._chemical_system.load(self._h5_filename)
-
-        ic("Trajectory.__init__ created ChemicalSystem")
-        # Load all the unit cells
-        self._load_unit_cells()
-
-        ic("Trajectory.__init__ loaded unit cells")
-        # Load the first configuration
-        coords = self._h5_file["/configuration/coordinates"][0, :, :]
-        if self._unit_cells:
-            unit_cell = self._unit_cells[0]
-            conf = PeriodicRealConfiguration(self._chemical_system, coords, unit_cell)
-        else:
-            conf = RealConfiguration(self._chemical_system, coords)
-        self._chemical_system.configuration = conf
-
-        ic("Trajectory.__init__ read coordinates")
-        # Define a default name for all chemical entities which have no name
-        resolve_undefined_molecules_name(self._chemical_system)
-
-        ic("Trajectory.__init__ ended")
+    def open_trajectory(self, trajectory_format):
+        if trajectory_format == "MDANSE":
+            trajectory = MdanseTrajectory(self._filename)
+        return trajectory
 
     def close(self):
         """Close the trajectory."""
 
-        self._h5_file.close()
+        self._trajectory.close()
 
     def __getitem__(self, frame):
         """Return the configuration at a given frame
@@ -95,26 +76,19 @@ class Trajectory:
         :return: the configuration
         :rtype: dict of ndarray
         """
-
-        grp = self._h5_file["/configuration"]
-        configuration = {}
-        for k, v in grp.items():
-            configuration[k] = v[frame].astype(np.float64)
-
-        for k in self._h5_file.keys():
-            if k in ("time", "unit_cell"):
-                configuration[k] = self._h5_file[k][frame].astype(np.float64)
-
-        return configuration
+        return self._trajectory[frame]
 
     def __getstate__(self):
         d = self.__dict__.copy()
-        del d["_h5_file"]
+        del d["_trajectory"]
         return d
 
     def __setstate__(self, state):
         self.__dict__ = state
-        self._h5_file = h5py.File(state["_h5_filename"], "r")
+        self._trajectory = self.open_trajectory(self._format)
+
+    def __len__(self):
+        return len(self._trajectory)
 
     def coordinates(self, frame):
         """Return the coordinates at a given frame.
@@ -126,12 +100,7 @@ class Trajectory:
         :rtype: ndarray
         """
 
-        if frame < 0 or frame >= len(self):
-            raise TrajectoryError(f"Invalid frame number: {frame}")
-
-        grp = self._h5_file["/configuration"]
-
-        return grp["coordinates"][frame].astype(np.float64)
+        return self._trajectory.coordinates(frame)
 
     def configuration(self, frame):
         """Build and return a configuration at a given frame.
@@ -143,40 +112,11 @@ class Trajectory:
         :rtype: MDANSE.MolecularDynamics.Configuration.Configuration
         """
 
-        if frame < 0 or frame >= len(self):
-            raise TrajectoryError(f"Invalid frame number: {frame}")
-
-        if self._unit_cells is not None:
-            unit_cell = self._unit_cells[frame]
-        else:
-            unit_cell = None
-
-        variables = {}
-        for k, v in self._h5_file["configuration"].items():
-            variables[k] = v[frame, :, :].astype(np.float64)
-
-        coordinates = variables.pop("coordinates")
-
-        if unit_cell is None:
-            conf = RealConfiguration(self._chemical_system, coordinates, **variables)
-        else:
-            conf = PeriodicRealConfiguration(
-                self._chemical_system, coordinates, unit_cell, **variables
-            )
-
-        return conf
+        return self._trajectory.configuration(frame)
 
     def _load_unit_cells(self):
         """Load all the unit cells."""
-        ic("_load_unit_cells")
-        if "unit_cell" in self._h5_file:
-            ic("_load_unit_cells: unit_cell IS in self._h5_file")
-            self._unit_cells = [UnitCell(uc) for uc in self._h5_file["unit_cell"][:]]
-            ic("_load_unit_cells: got unit_cell from self._h5_file")
-        else:
-            ic("_load_unit_cells: unit_cell IS NOT in self._h5_file")
-            self._unit_cells = None
-        ic("_load_unit_cells finished")
+        self._trajectory._load_unit_cells()
 
     def unit_cell(self, frame):
         """Return the unit cell at a given frame. If no unit cell is defined, returns None.
@@ -188,24 +128,7 @@ class Trajectory:
         :rtype: ndarray
         """
 
-        if frame < 0 or frame >= len(self):
-            raise TrajectoryError(f"Invalid frame number: {frame}")
-
-        if self._unit_cells is not None:
-            return self._unit_cells[frame]
-        else:
-            return None
-
-    def __len__(self):
-        """Returns the length of the trajectory.
-
-        :return: the number of frames of the trajectory
-        :rtype: int
-        """
-
-        grp = self._h5_file["/configuration"]
-
-        return grp["coordinates"].shape[0]
+        return self._trajectory.unit_cell(frame)
 
     def read_com_trajectory(
         self, atoms, first=0, last=None, step=1, box_coordinates=False
@@ -226,57 +149,9 @@ class Trajectory:
         :return: 2D array containing the center of mass trajectory for the selected frames
         :rtype: ndarray
         """
-
-        if last is None:
-            last = len(self)
-
-        indexes = [at.index for at in atoms]
-        masses = np.array(
-            [
-                ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight")
-                for at in atoms
-            ]
+        return self._trajectory.read_com_trajectory(
+            atoms, first=first, last=last, step=step, box_coordinates=box_coordinates
         )
-        grp = self._h5_file["/configuration"]
-
-        coords = grp["coordinates"][first:last:step, :, :].astype(np.float64)
-
-        if coords.ndim == 2:
-            coords = coords[np.newaxis, :, :]
-
-        if self._unit_cells is not None:
-            direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
-            inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
-
-            top_lvl_chemical_entities = set(
-                [at.top_level_chemical_entity for at in atoms]
-            )
-            top_lvl_chemical_entities_indexes = [
-                [at.index for at in e.atom_list] for e in top_lvl_chemical_entities
-            ]
-            bonds = {}
-            for e in top_lvl_chemical_entities:
-                for at in e.atom_list:
-                    bonds[at.index] = [other_at.index for other_at in at.bonds]
-
-            com_traj = com_trajectory.com_trajectory(
-                coords,
-                direct_cells,
-                inverse_cells,
-                masses,
-                top_lvl_chemical_entities_indexes,
-                indexes,
-                bonds,
-                box_coordinates=box_coordinates,
-            )
-
-        else:
-            com_traj = np.sum(
-                coords[:, indexes, :] * masses[np.newaxis, :, np.newaxis], axis=1
-            )
-            com_traj /= np.sum(masses)
-
-        return com_traj
 
     def to_real_coordinates(self, box_coordinates, first, last, step):
         """Convert box coordinates to real coordinates for a set of frames.
@@ -293,19 +168,7 @@ class Trajectory:
         :return: 2D array containing the real coordinates converted from box coordinates.
         :rtype: ndarray
         """
-
-        if self._unit_cells is not None:
-            real_coordinates = np.empty(box_coordinates.shape, dtype=np.float64)
-            comp = 0
-            for i in range(first, last, step):
-                direct_cell = self._unit_cells[i].transposed_direct
-                real_coordinates[comp, :] = np.matmul(
-                    direct_cell, box_coordinates[comp, :]
-                )
-                comp += 1
-            return real_coordinates
-        else:
-            return box_coordinates
+        return self._trajectory.to_real_coordinates(box_coordinates, first, last, step)
 
     def read_atomic_trajectory(
         self, index, first=0, last=None, step=1, box_coordinates=False
@@ -327,21 +190,9 @@ class Trajectory:
         :rtype: ndarray
         """
 
-        if last is None:
-            last = len(self)
-
-        grp = self._h5_file["/configuration"]
-        coords = grp["coordinates"][first:last:step, index, :].astype(np.float64)
-
-        if self._unit_cells is not None:
-            direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
-            inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
-            atomic_traj = atomic_trajectory.atomic_trajectory(
-                coords, direct_cells, inverse_cells, box_coordinates
-            )
-            return atomic_traj
-        else:
-            return coords
+        return self._trajectory.read_atomic_trajectory(
+            index, first=first, last=last, step=step, box_coordinates=box_coordinates
+        )
 
     def read_configuration_trajectory(
         self, index, first=0, last=None, step=1, variable="velocities"
@@ -362,19 +213,9 @@ class Trajectory:
         :return: 2D array containing the atomic trajectory for the selected frames
         :rtype: ndarray
         """
-
-        if last is None:
-            last = len(self)
-
-        if not self.has_variable(variable):
-            raise TrajectoryError(
-                "The variable {} is not stored in the trajectory".format(variable)
-            )
-
-        grp = self._h5_file["/configuration"]
-        variable = grp[variable][first:last:step, index, :].astype(np.float64)
-
-        return variable
+        return self._trajectory.read_configuration_trajectory(
+            index, first=first, last=last, step=step, variable=variable
+        )
 
     def has_variable(self, variable: str) -> bool:
         """Check if the trajectory has a specific variable e.g.
@@ -390,10 +231,7 @@ class Trajectory:
         bool
             True if variable exists.
         """
-        if variable in self._h5_file["/configuration"]:
-            return True
-        else:
-            return False
+        return self._trajectory.has_variable(variable)
 
     @property
     def chemical_system(self):
@@ -402,7 +240,7 @@ class Trajectory:
         :return: the chemical system
         :rtype: MDANSE.Chemistry.ChemicalEntity.ChemicalSystem
         """
-        return self._chemical_system
+        return self._trajectory.chemical_system
 
     @property
     def file(self):
@@ -412,7 +250,7 @@ class Trajectory:
         :rtype: HDF5 file object
         """
 
-        return self._h5_file
+        return self._trajectory.file
 
     @property
     def filename(self):
@@ -422,7 +260,7 @@ class Trajectory:
         :rtype: str
         """
 
-        return self._h5_filename
+        return self._trajectory.filename
 
     def variables(self):
         """Return the configuration variables stored in this trajectory.
@@ -431,9 +269,7 @@ class Trajectory:
         :rtype: list
         """
 
-        grp = self._h5_file["/configuration"]
-
-        return list(grp.keys())
+        return self._trajectory.variables()
 
 
 class TrajectoryWriterError(Exception):
@@ -526,7 +362,7 @@ class TrajectoryWriter:
         """
 
         if self._current_index >= self._n_steps:
-            raise TrajectoryError(
+            raise IndexError(
                 f"The current index {self._current_index} is greater than the actual number of steps of the trajectory {self._n_steps}"
             )
 
