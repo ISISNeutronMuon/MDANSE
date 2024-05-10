@@ -14,30 +14,26 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from ast import operator
 import os
-from typing import Collection
 
 import numpy as np
 from icecream import ic
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem, _ChemicalEntity
-from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
+from MDANSE.Extensions import atomic_trajectory, com_trajectory
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
 )
 from MDANSE.MolecularDynamics.TrajectoryUtils import (
-    build_connectivity,
     resolve_undefined_molecules_name,
-    sorted_atoms,
 )
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-class MdanseTrajectory:
+class H5MDTrajectory:
     """This used to be Trajectory, but has now been renamed.
     Trajectory is now a wrapper object, and MdanseTrajectory
     is the original implementation of the Mdanse HDF5 format.
@@ -91,10 +87,7 @@ class MdanseTrajectory:
             result = False
         else:
             try:
-                temp_cs = ChemicalSystem(
-                    os.path.splitext(os.path.basename(filename))[0]
-                )
-                temp_cs.load(filename)
+                temp["h5md"]
             except:
                 result = False
         return result

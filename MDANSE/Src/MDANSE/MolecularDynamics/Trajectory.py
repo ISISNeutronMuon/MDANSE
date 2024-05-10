@@ -15,7 +15,6 @@
 #
 
 from ast import operator
-import os
 from typing import Collection
 
 import numpy as np
@@ -23,19 +22,23 @@ from icecream import ic
 import h5py
 
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
+from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem, _ChemicalEntity
-from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
+from MDANSE.Extensions import fold_coordinates
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
     RealConfiguration,
 )
 from MDANSE.MolecularDynamics.TrajectoryUtils import (
-    build_connectivity,
-    resolve_undefined_molecules_name,
     sorted_atoms,
+    resolve_undefined_molecules_name,
 )
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+
+available_formats = {
+    "MDANSE": MdanseTrajectory,
+    "H5MD": H5MDTrajectory,
+}
 
 
 class Trajectory:
@@ -55,11 +58,13 @@ class Trajectory:
         """This is a placeholder for now. As the number of
         formats increases, they will have to be handled here.
         """
-        self._format = "MDANSE"
+        for fname, fclass in available_formats.items():
+            if fclass.file_is_right(self._filename):
+                self._format = fname
 
     def open_trajectory(self, trajectory_format):
-        if trajectory_format == "MDANSE":
-            trajectory = MdanseTrajectory(self._filename)
+        trajectory_class = available_formats[trajectory_format]
+        trajectory = trajectory_class(self._filename)
         return trajectory
 
     def close(self):
