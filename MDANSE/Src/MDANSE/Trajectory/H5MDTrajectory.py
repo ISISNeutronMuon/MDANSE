@@ -53,10 +53,11 @@ class H5MDTrajectory:
 
         ic("Trajectory.__init__ h5py.File created")
         # Load the chemical system
+        chemical_elements = self._h5_file["/particles/all/species/value"]
         self._chemical_system = ChemicalSystem(
             os.path.splitext(os.path.basename(self._h5_filename))[0]
         )
-        self._chemical_system.load(self._h5_filename)
+        self._chemical_system.from_element_list(chemical_elements)
 
         ic("Trajectory.__init__ created ChemicalSystem")
         # Load all the unit cells
@@ -64,7 +65,7 @@ class H5MDTrajectory:
 
         ic("Trajectory.__init__ loaded unit cells")
         # Load the first configuration
-        coords = self._h5_file["/configuration/coordinates"][0, :, :]
+        coords = self._h5_file["/particles/all/positions/value"][0, :, :]
         if self._unit_cells:
             unit_cell = self._unit_cells[0]
             conf = PeriodicRealConfiguration(self._chemical_system, coords, unit_cell)
@@ -107,7 +108,7 @@ class H5MDTrajectory:
         :rtype: dict of ndarray
         """
 
-        grp = self._h5_file["/configuration"]
+        grp = self._h5_file["/particles/all/position/value"]
         configuration = {}
         for k, v in grp.items():
             configuration[k] = v[frame].astype(np.float64)
@@ -180,13 +181,12 @@ class H5MDTrajectory:
     def _load_unit_cells(self):
         """Load all the unit cells."""
         ic("_load_unit_cells")
-        if "unit_cell" in self._h5_file:
-            ic("_load_unit_cells: unit_cell IS in self._h5_file")
-            self._unit_cells = [UnitCell(uc) for uc in self._h5_file["unit_cell"][:]]
-            ic("_load_unit_cells: got unit_cell from self._h5_file")
-        else:
-            ic("_load_unit_cells: unit_cell IS NOT in self._h5_file")
+        try:
+            cells = self._h5_file["/particles/all/box/edges/value"]
+        except KeyError:
             self._unit_cells = None
+        else:
+            self._unit_cells = [UnitCell(uc) for uc in cells[:]]
         ic("_load_unit_cells finished")
 
     def unit_cell(self, frame):
