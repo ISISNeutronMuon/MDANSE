@@ -134,7 +134,7 @@ class PlotDataView(QTreeView):
             A visualiser to connect to this view.
         """
         if isinstance(visualiser, DataPlotter):
-            self.dataset_selected.connect(visualiser.plot_data)
+            self.dataset_selected.connect(visualiser.accept_data)
         elif isinstance(visualiser, PlotDataInfo):
             self.item_details.connect(visualiser.update_panel)
         else:

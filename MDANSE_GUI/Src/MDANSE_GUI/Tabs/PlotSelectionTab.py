@@ -28,9 +28,10 @@ from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 
 
-label_text = """This tab is intended for plotting
-the MDANSE analysis results.
-Load an .mda file to access its contents.
+label_text = """Here you can create plots of specific
+data sets. Load the files and assign the data sets
+to a plot. The plotting interface will appear
+in a new tab of the interface.
 """
 
 

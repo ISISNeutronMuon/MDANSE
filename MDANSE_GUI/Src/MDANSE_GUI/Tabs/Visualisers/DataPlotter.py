@@ -27,158 +27,18 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
 
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QTabWidget
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QTableView, QPushButton, QHBoxLayout
 from qtpy.QtCore import Slot, Signal, QObject, QModelIndex
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
+from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 
 unit_lookup = {"rad/ps": "energy", "nm": "distance", "ps": "time", "N/A": "arbitrary"}
 
 
-class SingleDataset:
-
-    def __init__(self, name: str, source: "h5py.File"):
-        self._name = name
-        self._filename = source.filename
-        self._valid = True
-        try:
-            self._data = source[name][:]
-        except KeyError:
-            print(f"{name} is not a data set in the file")
-            self._valid = False
-            return
-        except TypeError:
-            self._valid = False
-            print(f"{name} is not plottable")
-            return
-        self._data_unit = source[name].attrs["units"]
-        self._axes_tag = source[name].attrs["axis"]
-        self._axes = {}
-        self._axes_units = {}
-        for axis_name in self._axes_tag.split("|"):
-            aname = axis_name.strip()
-            if aname == "index":
-                self._axes[aname] = range(len(self._data))
-                self._axes_units[aname] = "N/A"
-            else:
-                self._axes[aname] = source[aname][:]
-                self._axes_units[aname] = source[aname].attrs["units"]
-
-
-class PlottingContext(QStandardItemModel):
-
-    def __init__(self, *args, unit_preference=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._datasets = {}
-        self._current_axis = [None, None, None]
-        self._figure = None
-        if unit_preference is None:
-            self._unit_preference = {}
-        else:
-            self._unit_preference = unit_preference
-
-    def add_dataset(self, new_dataset: SingleDataset):
-        newkey = f"{new_dataset._filename}:{new_dataset._name}"
-        self._datasets[newkey] = new_dataset
-        item = QStandardItem(newkey)
-        self.appendRow(item)
-
-    def set_axes(self):
-        if len(self._datasets) == 0:
-            return
-        for dataset in self._datasets.values():
-            n_dimensions = len(dataset._data.shape)
-            # some extra code needed here
-        axis_count = 0
-        for name, unit in dataset._axes_units.items():
-            if self._current_axis[axis_count] is None:
-                quantity = unit_lookup[unit]
-                if quantity in self._unit_preference:
-                    new_unit = self._unit_preference[quantity]
-                else:
-                    new_unit = unit
-                self._current_axis[axis_count] = new_unit
-            axis_count += 1
-        if not axis_count == n_dimensions:
-            print(
-                f"PlottingContext found {axis_count} axes for {n_dimensions} dimensions. Stopped."
-            )
-            return
-        self._ndim = n_dimensions
-        return "Configured!"
-
-    def plot_datasets(self, figure: "Figure" = None):
-        if figure is None:
-            target = self._figure
-        else:
-            target = figure
-        if target is None:
-            print(f"PlottingContext can't plot to {target}")
-            return
-        target.clear()
-        if self.set_axes() is None:
-            print("Axis check failed.")
-            return
-        axes = target.add_subplot(111)
-        for name, dataset in self._datasets.items():
-            xtags = list(dataset._axes.keys())
-            axes.plot(dataset._axes[xtags[0]], dataset._data, label=name)
-        axes.grid(True)
-        axes.legend(loc=0)
-        target.canvas.draw()
-
-    @Slot(QModelIndex)
-    def delete_dataset(self, index: QModelIndex):
-        dkey = index.data()
-        self.removeRow(index.row())
-        self._datasets.pop(dkey, None)
-
-
-class PlotWidget(QWidget):
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.make_canvas()
-        self._plotting_context = None
-
-    def set_context(self, new_context: PlottingContext):
-        self._plotting_context = new_context
-        self._plotting_context._figure = self._figure
-
-    def make_canvas(self, width=12.0, height=9.0, dpi=100):
-        """Creates a matplotlib figure for plotting
-
-        Parameters
-        ----------
-        width : float, optional
-            Figure width in inches, by default 12.0
-        height : float, optional
-            Figure height in inches, by default 9.0
-        dpi : int, optional
-            Figure resolution in dots per inch, by default 100
-
-        Returns
-        -------
-        QWidget
-            a widget containing both the figure and a toolbar below
-        """
-        canvas = self
-        layout = QVBoxLayout(canvas)
-        figure = mpl.figure(figsize=[width, height], dpi=dpi, frameon=True)
-        figAgg = FigureCanvasQTAgg(figure)
-        figAgg.setParent(canvas)
-        figAgg.updateGeometry()
-        toolbar = NavigationToolbar2QTAgg(figAgg, canvas)
-        toolbar.update()
-        layout.addWidget(figAgg)
-        layout.addWidget(toolbar)
-        self._figure = figure
-
-
-class DataPlotter(QTabWidget):
-    """This is the top-layer widget which will host any number of
-    PlotWidgets.
-    """
+class DataPlotter(QWidget):
+    """This part of the interface will show the selection of datasets
+    created by the user, and allow the creation of a plot."""
 
     error = Signal(str)
 
@@ -186,14 +46,32 @@ class DataPlotter(QTabWidget):
         super().__init__(*args, **kwargs)
 
         layout = QVBoxLayout(self)
-        self._context = {}
-        self._plotter = {}
-        self._current_id = -1
-        self.setLayout(layout)
-        self._current_id = self.new_plot("preview")
+        button_bar = QWidget(self)
+        button_layout = QHBoxLayout(button_bar)
+        self._selection_viewer = QTableView(self)
+        layout.addWidget(self._selection_viewer)
+        layout.addWidget(button_bar)
+        buttons = [("Plot", self.new_plot), ("Clear", self.clear)]
+        for name, function in buttons:
+            button = QPushButton(name, button_bar)
+            button_layout.addWidget(button)
+            if function is not None:
+                button.clicked.connect(function)
+        self._model = None
 
-    @Slot(str)
-    def new_plot(self, tab_name: str) -> int:
+    @Slot(object)
+    def add_dataset(self, dataset: SingleDataset):
+        if self._model is None:
+            try:
+                preferred_units = self._session._units
+            except:
+                preferred_units = None
+            self._model = PlottingContext(unit_preference=preferred_units)
+            self._selection_viewer.setModel(self._model)
+        self._model.add_dataset(dataset)
+
+    @Slot()
+    def new_plot(self):
         try:
             preferred_units = self._session._units
         except:
@@ -204,18 +82,16 @@ class DataPlotter(QTabWidget):
         tab_id = self.addTab(plotter, tab_name)
         self._context[tab_id] = plotting_context
         self._plotter[tab_id] = plotter
-        return tab_id
 
     @Slot(object)
-    def plot_data(self, data_set):
+    def accept_data(self, data_set):
         print(f"Received {data_set}")
         dataset = SingleDataset(data_set[0], data_set[1])
-        context = self._context[self._current_id]
-        if dataset._valid:
-            context.add_dataset(dataset)
-        context.set_axes()
-        context.plot_datasets()
+        self.add_dataset(dataset)
 
     @Slot()
     def clear(self):
+        if self._model is None:
+            return
+        self._model.clear()
         print(f"Cleared the plot")
