@@ -20,10 +20,9 @@ from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget, QFileDialog
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
-from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
+from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Tabs.Views.PlotDataView import PlotDataView
-from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
+from MDANSE_GUI.Tabs.Views.PlotDetailsView import PlotDetailsView
 from MDANSE_GUI.Tabs.Visualisers.PlotHolder import PlotHolder
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
@@ -64,9 +63,9 @@ class PlotTab(GeneralTab):
             name="Plotting",
             session=LocalSession(),
             model=PlottingContext(),
-            view=PlotDataView(),
+            view=PlotDetailsView(),
             visualiser=PlotHolder(),
-            layout=partial(TriplePanel, left_panel=PlotDataInfo()),
+            layout=DoublePanel,
             label_text=label_text,
         )
         return the_tab
@@ -88,9 +87,9 @@ class PlotTab(GeneralTab):
             settings=settings,
             logger=logger,
             model=kwargs.get("model", PlottingContext()),
-            view=PlotDataView(),
+            view=PlotDetailsView(),
             visualiser=PlotHolder(),
-            layout=partial(TriplePanel, left_panel=PlotDataInfo()),
+            layout=DoublePanel,
             label_text=label_text,
         )
         return the_tab

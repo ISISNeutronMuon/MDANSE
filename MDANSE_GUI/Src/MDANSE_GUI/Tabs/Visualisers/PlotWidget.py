@@ -45,7 +45,7 @@ class PlotWidget(QWidget):
         self._plotter = None
         self._plotting_context = None
 
-    def set_context(self, new_context: PlottingContext):
+    def set_context(self, new_context: "PlottingContext"):
         self._plotting_context = new_context
         self._plotting_context._figure = self._figure
 

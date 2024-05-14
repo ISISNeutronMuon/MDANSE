@@ -48,6 +48,7 @@ from MDANSE_GUI.Tabs.RunTab import RunTab
 from MDANSE_GUI.Tabs.LoggingTab import LoggingTab
 from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
+from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
 from MDANSE_GUI.Plotter.widgets.main_window import MainWindow
 
@@ -115,6 +116,7 @@ class TabbedWindow(QMainWindow):
         self.createActionsViewer()
         self.createJobsViewer()
         self.createPlotSelection()
+        self.createPlotHolder()
         # self.createLogViewer()
         self.setupMenubar()
         self.setupToolbar()
@@ -289,6 +291,18 @@ class TabbedWindow(QMainWindow):
     def createPlotSelection(self):
         name = "Plot Creator"
         plot_tab = PlotSelectionTab.gui_instance(
+            self.tabs,
+            name,
+            self._session,
+            self._settings,
+            self._logger,
+        )
+        self.tabs.addTab(plot_tab._core, name)
+        self._tabs[name] = plot_tab
+
+    def createPlotHolder(self):
+        name = "Plot Holder"
+        plot_tab = PlotTab.gui_instance(
             self.tabs,
             name,
             self._session,

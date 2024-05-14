@@ -36,7 +36,7 @@ class Plotter:
             return
         target.clear()
 
-    def plot(self, plotting_context: PlottingContext, figure: "Figure" = None):
+    def plot(self, plotting_context: "PlottingContext", figure: "Figure" = None):
         if figure is None:
             target = self._figure
         else:

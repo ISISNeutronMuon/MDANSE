@@ -16,15 +16,11 @@
 
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
-
-
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-from qtpy.QtCore import Slot, Signal, QObject, QModelIndex
-from qtpy.QtGui import QStandardItemModel, QStandardItem
+from qtpy.QtWidgets import QVBoxLayout, QTabWidget
+from qtpy.QtCore import Slot, Signal
 
 from MDANSE_GUI.Tabs.Visualisers.PlotWidget import PlotWidget
+from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
 unit_lookup = {"rad/ps": "energy", "nm": "distance", "ps": "time", "N/A": "arbitrary"}
@@ -60,3 +56,8 @@ class PlotHolder(QTabWidget):
         self._context[tab_id] = plotting_context
         self._plotter[tab_id] = plotter
         return tab_id
+
+    @Slot(object)
+    def update_plot_details(self, input):
+        """This will change the line colour, thickness, etc.
+        At the moment it doesn't do anything."""
