@@ -22,10 +22,10 @@ from qtpy.QtWidgets import QWidget, QFileDialog
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Tabs.Models.PlotDataModel import PlotDataModel
 from MDANSE_GUI.Tabs.Views.PlotDataView import PlotDataView
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
-from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
+from MDANSE_GUI.Tabs.Visualisers.PlotHolder import PlotHolder
+from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
 label_text = """This tab manages a single plot.
@@ -34,7 +34,7 @@ here.
 """
 
 
-class PlottingTab(GeneralTab):
+class PlotTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -63,9 +63,9 @@ class PlottingTab(GeneralTab):
             window,
             name="Plotting",
             session=LocalSession(),
-            model=PlotDataModel(),
+            model=PlottingContext(),
             view=PlotDataView(),
-            visualiser=DataPlotter(),
+            visualiser=PlotHolder(),
             layout=partial(TriplePanel, left_panel=PlotDataInfo()),
             label_text=label_text,
         )
@@ -87,9 +87,9 @@ class PlottingTab(GeneralTab):
             session=session,
             settings=settings,
             logger=logger,
-            model=kwargs.get("model", PlotDataModel()),
+            model=kwargs.get("model", PlottingContext()),
             view=PlotDataView(),
-            visualiser=DataPlotter(),
+            visualiser=PlotHolder(),
             layout=partial(TriplePanel, left_panel=PlotDataInfo()),
             label_text=label_text,
         )
@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     window = QMainWindow()
-    the_tab = PlottingTab.standard_instance()
+    the_tab = PlotTab.standard_instance()
     window.setCentralWidget(the_tab._core)
     window.show()
     app.exec()

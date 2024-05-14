@@ -35,7 +35,7 @@ in a new tab of the interface.
 """
 
 
-class PlottingTab(GeneralTab):
+class PlotSelectionTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     window = QMainWindow()
-    the_tab = PlottingTab.standard_instance()
+    the_tab = PlotSelectionTab.standard_instance()
     window.setCentralWidget(the_tab._core)
     window.show()
     app.exec()

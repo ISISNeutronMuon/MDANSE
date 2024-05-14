@@ -16,20 +16,8 @@
 
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import h5py
-    from matplotlib.figure import Figure
-
-from PyQt6.QtCore import Qt
-import matplotlib.pyplot as mpl
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qt5agg import (
-    NavigationToolbar2QT as NavigationToolbar2QTAgg,
-)
-
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QTableView, QPushButton, QHBoxLayout
-from qtpy.QtCore import Slot, Signal, QObject, QModelIndex
-from qtpy.QtGui import QStandardItemModel, QStandardItem
+from qtpy.QtCore import Slot, Signal
 
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 
@@ -41,6 +29,7 @@ class DataPlotter(QWidget):
     created by the user, and allow the creation of a plot."""
 
     error = Signal(str)
+    data_for_plotting = Signal(object)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -69,19 +58,11 @@ class DataPlotter(QWidget):
             self._model = PlottingContext(unit_preference=preferred_units)
             self._selection_viewer.setModel(self._model)
         self._model.add_dataset(dataset)
+        self._selection_viewer.resizeColumnsToContents()
 
     @Slot()
     def new_plot(self):
-        try:
-            preferred_units = self._session._units
-        except:
-            preferred_units = None
-        plotting_context = PlottingContext(unit_preference=preferred_units)
-        plotter = PlotWidget(self)
-        plotter.set_context(plotting_context)
-        tab_id = self.addTab(plotter, tab_name)
-        self._context[tab_id] = plotting_context
-        self._plotter[tab_id] = plotter
+        self.data_for_plotting.emit(self._model)
 
     @Slot(object)
     def accept_data(self, data_set):

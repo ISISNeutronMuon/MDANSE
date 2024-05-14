@@ -99,6 +99,7 @@ class PlottingContext(QStandardItemModel):
         ]
         for item in items:
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
+            item.setEditable(False)
         temp = items[4]
         temp.setCheckable(True)
         temp.setCheckState(Qt.CheckState.Checked)
@@ -127,26 +128,6 @@ class PlottingContext(QStandardItemModel):
             return
         self._ndim = n_dimensions
         return "Configured!"
-
-    def plot_datasets(self, figure: "Figure" = None):
-        if figure is None:
-            target = self._figure
-        else:
-            target = figure
-        if target is None:
-            print(f"PlottingContext can't plot to {target}")
-            return
-        target.clear()
-        if self.set_axes() is None:
-            print("Axis check failed.")
-            return
-        axes = target.add_subplot(111)
-        for name, dataset in self._datasets.items():
-            xtags = list(dataset._axes.keys())
-            axes.plot(dataset._axes[xtags[0]], dataset._data, label=name)
-        axes.grid(True)
-        axes.legend(loc=0)
-        target.canvas.draw()
 
     @Slot()
     def clear(self) -> None:
