@@ -28,7 +28,8 @@ from matplotlib.backends.backend_qt5agg import (
 )
 
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-from qtpy.QtCore import Slot, Signal, QObject
+from qtpy.QtCore import Slot, Signal, QObject, QModelIndex
+from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 
 unit_lookup = {"rad/ps": "energy", "nm": "distance", "ps": "time", "N/A": "arbitrary"}
@@ -64,9 +65,10 @@ class SingleDataset:
                 self._axes_units[aname] = source[aname].attrs["units"]
 
 
-class PlottingContext:
+class PlottingContext(QStandardItemModel):
 
-    def __init__(self, unit_preference=None):
+    def __init__(self, *args, unit_preference=None, **kwargs):
+        super().__init__(*args, **kwargs)
         self._datasets = {}
         self._current_axis = [None, None, None]
         self._figure = None
@@ -78,6 +80,8 @@ class PlottingContext:
     def add_dataset(self, new_dataset: SingleDataset):
         newkey = f"{new_dataset._filename}:{new_dataset._name}"
         self._datasets[newkey] = new_dataset
+        item = QStandardItem(newkey)
+        self.appendRow(item)
 
     def set_axes(self):
         if len(self._datasets) == 0:
@@ -122,6 +126,12 @@ class PlottingContext:
         axes.grid(True)
         axes.legend(loc=0)
         target.canvas.draw()
+
+    @Slot(QModelIndex)
+    def delete_dataset(self, index: QModelIndex):
+        dkey = index.data()
+        self.removeRow(index.row())
+        self._datasets.pop(dkey, None)
 
 
 class PlotWidget(QWidget):

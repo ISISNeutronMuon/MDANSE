@@ -19,8 +19,6 @@ from functools import partial
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget, QFileDialog
 
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
-
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
