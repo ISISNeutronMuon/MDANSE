@@ -15,8 +15,9 @@
 #
 
 from typing import TYPE_CHECKING
+import math
 
-from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
     import h5py
@@ -24,30 +25,10 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
-class Plotter(metaclass=SubclassFactory):
+class Grid(Plotter):
 
     def __init__(self) -> None:
         self._figure = None
-
-    def clear(self, figure: "Figure" = None):
-        if figure is None:
-            target = self._figure
-        else:
-            target = figure
-        if target is None:
-            return
-        target.clear()
-
-    def get_figure(self, figure: "Figure" = None):
-        if figure is None:
-            target = self._figure
-        else:
-            target = figure
-        if target is None:
-            print(f"PlottingContext can't plot to {target}")
-            return
-        target.clear()
-        return target
 
     def plot(self, plotting_context: "PlottingContext", figure: "Figure" = None):
         target = self.get_figure(figure)
@@ -56,10 +37,14 @@ class Plotter(metaclass=SubclassFactory):
         if plotting_context.set_axes() is None:
             print("Axis check failed.")
             return
-        axes = target.add_subplot(111)
+        nplots = len(plotting_context._datasets)
+        gridsize = int(math.ceil(nplots**0.5))
+        startnum = 1
         for name, dataset in plotting_context._datasets.items():
+            axes = target.add_subplot(gridsize, gridsize, startnum)
             xtags = list(dataset._axes.keys())
             axes.plot(dataset._axes[xtags[0]], dataset._data, label=name)
-        axes.grid(True)
-        axes.legend(loc=0)
+            axes.grid(True)
+            axes.legend(loc=0)
+            startnum += 1
         target.canvas.draw()

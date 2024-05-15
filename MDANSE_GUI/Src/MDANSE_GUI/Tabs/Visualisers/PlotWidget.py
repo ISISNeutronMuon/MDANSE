@@ -46,16 +46,22 @@ class PlotWidget(QWidget):
         self._plotting_context = new_context
         self._plotting_context._figure = self._figure
 
-    @Slot(int)
-    def set_plotter(self, plotter_option: int):
-        self._plotter = Plotter()
+    @Slot(str)
+    def set_plotter(self, plotter_option: str):
+        try:
+            self._plotter = Plotter.create(plotter_option)
+        except:
+            self._plotter = Plotter()
+        self.plot_data()
 
     def available_plotters(self) -> List[str]:
-        return ["Plotter"]
+        return ["Plotter"] + [str(x) for x in Plotter.indirect_subclasses()]
 
     def plot_data(self):
         if self._plotter is None:
             print("No plotter present in PlotWidget.")
+            return
+        if self._plotting_context is None:
             return
         self._plotter.plot(self._plotting_context, self._figure)
 
@@ -90,5 +96,5 @@ class PlotWidget(QWidget):
         plot_selector = QComboBox(self)
         layout.addWidget(plot_selector)
         plot_selector.addItems(self.available_plotters())
-        plot_selector.currentIndexChanged.connect(self.set_plotter)
-        self.set_plotter(plot_selector.currentIndex())
+        plot_selector.currentTextChanged.connect(self.set_plotter)
+        self.set_plotter(plot_selector.currentText())

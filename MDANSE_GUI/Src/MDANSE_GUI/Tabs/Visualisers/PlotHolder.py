@@ -33,12 +33,13 @@ class PlotHolder(QTabWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._last_number = 1
         layout = QVBoxLayout(self)
         self._context = {}
         self._plotter = {}
         self._current_id = -1
         self.setLayout(layout)
-        self._current_id = self.new_plot("preview")
+        self._current_id = self.new_plot("Preview")
 
     @Slot(str)
     def new_plot(self, tab_name: str) -> int:
@@ -46,12 +47,16 @@ class PlotHolder(QTabWidget):
             preferred_units = self._session._units
         except:
             preferred_units = None
+        if not tab_name:
+            tab_name = f"New plot {self._last_number}"
+            self._last_number += 1
         plotting_context = PlottingContext(unit_preference=preferred_units)
         plotter = PlotWidget(self)
         plotter.set_context(plotting_context)
         tab_id = self.addTab(plotter, tab_name)
         self._context[tab_id] = plotting_context
         self._plotter[tab_id] = plotter
+        self.setCurrentIndex(tab_id)
         return tab_id
 
     @property
