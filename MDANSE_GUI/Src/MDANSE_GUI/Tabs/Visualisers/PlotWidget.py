@@ -28,22 +28,19 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
 
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QTabWidget
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QComboBox
 from qtpy.QtCore import Slot, Signal, QObject
 
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
-
-
-unit_lookup = {"rad/ps": "energy", "nm": "distance", "ps": "time", "N/A": "arbitrary"}
 
 
 class PlotWidget(QWidget):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.make_canvas()
         self._plotter = None
         self._plotting_context = None
+        self.make_canvas()
 
     def set_context(self, new_context: "PlottingContext"):
         self._plotting_context = new_context
@@ -58,6 +55,7 @@ class PlotWidget(QWidget):
 
     def plot_data(self):
         if self._plotter is None:
+            print("No plotter present in PlotWidget.")
             return
         self._plotter.plot(self._plotting_context, self._figure)
 
@@ -89,3 +87,8 @@ class PlotWidget(QWidget):
         layout.addWidget(figAgg)
         layout.addWidget(toolbar)
         self._figure = figure
+        plot_selector = QComboBox(self)
+        layout.addWidget(plot_selector)
+        plot_selector.addItems(self.available_plotters())
+        plot_selector.currentIndexChanged.connect(self.set_plotter)
+        self.set_plotter(plot_selector.currentIndex())

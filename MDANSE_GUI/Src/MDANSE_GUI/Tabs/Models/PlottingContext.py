@@ -80,6 +80,15 @@ class PlottingContext(QStandardItemModel):
             ["Dataset", "Trajectory", "Size", "Unit", "Use it?"]
         )
 
+    @Slot(object)
+    def accept_external_data(self, other: "PlottingContext"):
+        """Crucial slot for transferring data
+        between tabs. DataPlotter will send the datasets
+        into this slot."""
+        for dataset in other._datasets.values():
+            self.add_dataset(dataset)
+        self.set_axes()
+
     def add_dataset(self, new_dataset: SingleDataset):
         if not new_dataset._valid:
             return

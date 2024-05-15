@@ -21,8 +21,6 @@ from qtpy.QtCore import Slot, Signal
 
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 
-unit_lookup = {"rad/ps": "energy", "nm": "distance", "ps": "time", "N/A": "arbitrary"}
-
 
 class DataPlotter(QWidget):
     """This part of the interface will show the selection of datasets
@@ -30,6 +28,8 @@ class DataPlotter(QWidget):
 
     error = Signal(str)
     data_for_plotting = Signal(object)
+    data_for_new_plot = Signal(object)
+    create_new_plot = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,7 +40,11 @@ class DataPlotter(QWidget):
         self._selection_viewer = QTableView(self)
         layout.addWidget(self._selection_viewer)
         layout.addWidget(button_bar)
-        buttons = [("Plot", self.new_plot), ("Clear", self.clear)]
+        buttons = [
+            ("Plot Data", self.plot_data),
+            ("Clear", self.clear),
+            ("New Plot", self.new_plot),
+        ]
         for name, function in buttons:
             button = QPushButton(name, button_bar)
             button_layout.addWidget(button)
@@ -62,6 +66,10 @@ class DataPlotter(QWidget):
 
     @Slot()
     def new_plot(self):
+        self.create_new_plot.emit("")
+
+    @Slot()
+    def plot_data(self):
         self.data_for_plotting.emit(self._model)
 
     @Slot(object)

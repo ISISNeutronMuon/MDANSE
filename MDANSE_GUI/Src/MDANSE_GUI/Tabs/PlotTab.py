@@ -37,24 +37,8 @@ class PlotTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._core.add_button("Load .MDA results", self.load_files)
-
-    @Slot()
-    def load_files(self):
-        fnames = QFileDialog.getOpenFileNames(
-            self._core,
-            "Load an MDA file (MDANSE analysis results)",
-            self._session.get_path("root_directory"),
-            "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
-        )
-        for fname in fnames[0]:
-            self.load_results(fname)
-
-    @Slot()
-    def load_results(self, fname: str):
-        if len(fname) > 0:
-            _, short_name = os.path.split(fname)
-            self._model.add_file(fname)
+        self._visualiser.currentChanged.connect(self.switch_model)
+        self._view.setModel(self.model)
 
     @classmethod
     def standard_instance(cls):
@@ -86,13 +70,26 @@ class PlotTab(GeneralTab):
             session=session,
             settings=settings,
             logger=logger,
-            model=kwargs.get("model", PlottingContext()),
+            model=None,
             view=PlotDetailsView(),
             visualiser=PlotHolder(),
             layout=DoublePanel,
             label_text=label_text,
         )
         return the_tab
+
+    @property
+    def model(self):
+        return self._visualiser.model
+
+    @Slot(object)
+    def accept_external_data(self, data_model):
+        self._visualiser.model.accept_external_data(data_model)
+        self._visualiser.plotter.plot_data()
+
+    @Slot(int)
+    def switch_model(self, tab_id):
+        self._view.setModel(self.model)
 
 
 if __name__ == "__main__":

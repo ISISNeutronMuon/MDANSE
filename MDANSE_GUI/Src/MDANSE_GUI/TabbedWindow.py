@@ -106,6 +106,13 @@ class TabbedWindow(QMainWindow):
             app_instance.aboutToQuit.connect(self._session.save_json)
         self._session.load_json()
 
+        self._tabs["Plot Creator"]._visualiser.data_for_plotting.connect(
+            self._tabs["Plot Holder"].accept_external_data
+        )
+        self._tabs["Plot Creator"]._visualiser.create_new_plot.connect(
+            self._tabs["Plot Holder"]._visualiser.new_plot
+        )
+
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
         self._job_holder = JobHolder()

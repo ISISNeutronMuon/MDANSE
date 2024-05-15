@@ -23,9 +23,6 @@ from MDANSE_GUI.Tabs.Visualisers.PlotWidget import PlotWidget
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
-unit_lookup = {"rad/ps": "energy", "nm": "distance", "ps": "time", "N/A": "arbitrary"}
-
-
 class PlotHolder(QTabWidget):
     """This is the top-layer widget which will host any number of
     PlotWidgets.
@@ -56,6 +53,16 @@ class PlotHolder(QTabWidget):
         self._context[tab_id] = plotting_context
         self._plotter[tab_id] = plotter
         return tab_id
+
+    @property
+    def model(self):
+        tab_id = self.currentIndex()
+        return self._context[tab_id]
+
+    @property
+    def plotter(self):
+        tab_id = self.currentIndex()
+        return self._plotter[tab_id]
 
     @Slot(object)
     def update_plot_details(self, input):
