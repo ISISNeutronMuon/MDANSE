@@ -17,6 +17,7 @@
 from typing import TYPE_CHECKING
 import math
 
+from MDANSE.Framework.Units import measure
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
@@ -30,8 +31,14 @@ class Grid(Plotter):
     def __init__(self) -> None:
         self._figure = None
 
-    def plot(self, plotting_context: "PlottingContext", figure: "Figure" = None):
+    def plot(
+        self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
+    ):
         target = self.get_figure(figure)
+        self.get_mpl_colors()
+        if colours is not None:
+            self._current_colours = colours
+        number_of_colours = len(self._current_colours)
         if target is None:
             return
         if plotting_context.set_axes() is None:
@@ -40,10 +47,20 @@ class Grid(Plotter):
         nplots = len(plotting_context._datasets)
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
+        xaxis_unit = plotting_context._current_axis[0]
         for name, dataset in plotting_context._datasets.items():
             axes = target.add_subplot(gridsize, gridsize, startnum)
             xtags = list(dataset._axes.keys())
-            axes.plot(dataset._axes[xtags[0]], dataset._data, label=name)
+            plotlabel = dataset._labels["medium"]
+            conversion_factor = measure(
+                1.0, dataset._axes_units[xtags[0]], equivalent=True
+            ).toval(xaxis_unit)
+            axes.plot(
+                dataset._axes[xtags[0]] * conversion_factor,
+                dataset._data,
+                color=self._current_colours[(startnum - 1) % number_of_colours],
+                label=plotlabel,
+            )
             axes.grid(True)
             axes.legend(loc=0)
             startnum += 1

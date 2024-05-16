@@ -17,7 +17,7 @@
 from typing import TYPE_CHECKING
 
 from matplotlib.pyplot import style as mpl_style
-from matplotlib import colors
+from matplotlib import colors, rcParams
 
 from MDANSE.Framework.Units import measure
 from MDANSE.Core.SubclassFactory import SubclassFactory
@@ -32,6 +32,7 @@ class Plotter(metaclass=SubclassFactory):
 
     def __init__(self) -> None:
         self._figure = None
+        self._current_colours = []
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
@@ -41,6 +42,11 @@ class Plotter(metaclass=SubclassFactory):
         if target is None:
             return
         target.clear()
+
+    def get_mpl_colors(self):
+        cycler = rcParams["axes.prop_cycle"]
+        colours = cycler.by_key()["color"]
+        self._current_colours = colours
 
     def get_figure(self, figure: "Figure" = None):
         if figure is None:
@@ -57,6 +63,9 @@ class Plotter(metaclass=SubclassFactory):
         self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
     ):
         target = self.get_figure(figure)
+        self.get_mpl_colors()
+        if colours is not None:
+            self._current_colours = colours
         if target is None:
             return
         if plotting_context.set_axes() is None:
@@ -88,12 +97,19 @@ class Plotter(metaclass=SubclassFactory):
         xaxis_unit = plotting_context._current_axis[0]
         for name, dataset in plotting_context._datasets.items():
             xtags = list(dataset._axes.keys())
-            conversion_factor = measure(
-                1.0, dataset._axes_units[xtags[0]], equivalent=True
-            ).toval(xaxis_unit)
-            axes.plot(
-                dataset._axes[xtags[0]] * conversion_factor, dataset._data, label=name
-            )
+            plotlabel = dataset._labels["medium"]
+            try:
+                conversion_factor = measure(
+                    1.0, dataset._axes_units[xtags[0]], equivalent=True
+                ).toval(xaxis_unit)
+            except:
+                continue
+            else:
+                axes.plot(
+                    dataset._axes[xtags[0]] * conversion_factor,
+                    dataset._data,
+                    label=plotlabel,
+                )
         axes.set_xlabel(xaxis_unit)
         axes.grid(True)
         axes.legend(loc=0)

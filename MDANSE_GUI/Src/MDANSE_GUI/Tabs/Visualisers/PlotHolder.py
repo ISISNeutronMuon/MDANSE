@@ -56,7 +56,7 @@ class PlotHolder(QTabWidget):
         plotting_context = PlottingContext(unit_preference=preferred_units)
         self._session.new_units.connect(plotting_context.accept_units)
         plotting_context.needs_an_update.connect(self.update_plots)
-        plotter = PlotWidget(self, colours=preferred_colours)
+        plotter = PlotWidget(self)
         plotter.set_context(plotting_context)
         tab_id = self.addTab(plotter, tab_name)
         self._context[tab_id] = plotting_context

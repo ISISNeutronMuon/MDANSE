@@ -104,6 +104,7 @@ class PlotSettings(QWidget):
             else:
                 result["distance"] = distance
         self.units_changed.emit(result)
+        self.plot_settings_changed.emit()
 
     def make_layout(self, width=12.0, height=9.0, dpi=100):
         """Creates a matplotlib figure for plotting
@@ -124,7 +125,9 @@ class PlotSettings(QWidget):
         """
         layout = QVBoxLayout(self)
         style_selector = QComboBox(self)
+        style_selector.addItem("default")
         style_selector.addItems(mpl.style.available)
+        style_selector.setCurrentText("default")
         style_selector.currentTextChanged.connect(self.set_style)
         layout.addWidget(style_selector)
         box = QGroupBox("Units", self)

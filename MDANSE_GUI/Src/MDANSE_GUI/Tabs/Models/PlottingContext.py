@@ -15,6 +15,7 @@
 #
 
 from typing import TYPE_CHECKING, Dict
+import os
 
 if TYPE_CHECKING:
     import h5py
@@ -40,6 +41,12 @@ class SingleDataset:
     def __init__(self, name: str, source: "h5py.File"):
         self._name = name
         self._filename = source.filename
+        bare_name = os.path.split(self._filename)[-1]
+        self._labels = {
+            "minimal": name,
+            "medium": f"{bare_name}:{name}",
+            "full": f"{self._filename}:{name}",
+        }
         self._valid = True
         try:
             self._data = source[name][:]
