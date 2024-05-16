@@ -28,3 +28,4 @@ class TriplePanel(DoublePanel):
             self._leftlayout.addWidget(left_panel)
             if self._view is not None:
                 self._view.connect_to_visualiser(left_panel)
+            self._extra_visualiser = left_panel

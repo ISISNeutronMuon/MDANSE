@@ -30,9 +30,10 @@ class PlotHolder(QTabWidget):
 
     error = Signal(str)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, session=None, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._session = session
         self._last_number = 1
         layout = QVBoxLayout(self)
         self._context = {}
@@ -45,13 +46,17 @@ class PlotHolder(QTabWidget):
     def new_plot(self, tab_name: str) -> int:
         try:
             preferred_units = self._session._units
+            preferred_colours = self._session._colours
         except:
             preferred_units = None
+            preferred_colours = None
         if not tab_name:
             tab_name = f"New plot {self._last_number}"
             self._last_number += 1
         plotting_context = PlottingContext(unit_preference=preferred_units)
-        plotter = PlotWidget(self)
+        self._session.new_units.connect(plotting_context.accept_units)
+        plotting_context.needs_an_update.connect(self.update_plots)
+        plotter = PlotWidget(self, colours=preferred_colours)
         plotter.set_context(plotting_context)
         tab_id = self.addTab(plotter, tab_name)
         self._context[tab_id] = plotting_context
@@ -73,3 +78,10 @@ class PlotHolder(QTabWidget):
     def update_plot_details(self, input):
         """This will change the line colour, thickness, etc.
         At the moment it doesn't do anything."""
+
+    @Slot()
+    def update_plots(self):
+        """This will change the line colour, thickness, etc.
+        At the moment it doesn't do anything."""
+        for plotter in self._plotter.values():
+            plotter.plot_data()

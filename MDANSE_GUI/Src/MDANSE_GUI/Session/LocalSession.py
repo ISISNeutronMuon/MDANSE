@@ -16,6 +16,7 @@
 
 import os
 import json
+from typing import Dict, List
 
 from qtpy.QtCore import QObject, Signal, Slot
 
@@ -37,11 +38,14 @@ class LocalSession(QObject):
     is largely a mock object.
     """
 
+    new_units = Signal(dict)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._parameters = {}
         self._paths = {}
         self._units = {}
+        self._colours = {}
         self._state = None
         self.populate_defaults()
 
@@ -50,6 +54,14 @@ class LocalSession(QObject):
         self._units["energy"] = "meV"
         self._units["time"] = "fs"
         self._units["distance"] = "Ang"
+        self._colours["colormap"] = "viridis"
+        self._colours["style"] = "ggplot"
+
+    @Slot(dict)
+    def update_units(self, input: Dict):
+        for key, value in input.items():
+            self._units[key] = value
+        self.new_units.emit(self._units)
 
     def get_parameter(self, key: str) -> str:
         value = self._parameters.get(key, None)
@@ -66,11 +78,15 @@ class LocalSession(QObject):
         value = self._units.get(key, "1")
         return value
 
+    def sections(self) -> List[Dict[str, str]]:
+        return [self._units, self._colours]
+
     @Slot()
     def save_json(self, fname: str = None):
         all_items = {}
         all_items["paths"] = self._paths
         all_items["units"] = self._units
+        all_items["colours"] = self._colours
         output = json_encoder.encode(all_items)
         if fname is None:
             fname = os.path.join(PLATFORM.application_directory(), "gui_session.json")
@@ -89,3 +105,5 @@ class LocalSession(QObject):
             all_items = json_decoder.decode(all_items_text)
             self._paths = all_items["paths"]
             self._units = all_items["units"]
+            if "colours" in all_items:
+                self._colours = all_items["colours"]

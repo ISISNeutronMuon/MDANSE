@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     import h5py
@@ -67,6 +67,8 @@ class SingleDataset:
 
 class PlottingContext(QStandardItemModel):
 
+    needs_an_update = Signal()
+
     def __init__(self, *args, unit_preference=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._datasets = {}
@@ -87,6 +89,14 @@ class PlottingContext(QStandardItemModel):
         into this slot."""
         for dataset in other._datasets.values():
             self.add_dataset(dataset)
+        self.set_axes()
+
+    @Slot(dict)
+    def accept_units(self, units: Dict):
+        """Crucial slot for transferring data
+        between tabs. DataPlotter will send the datasets
+        into this slot."""
+        self._unit_preference = units
         self.set_axes()
 
     def add_dataset(self, new_dataset: SingleDataset):
@@ -122,13 +132,12 @@ class PlottingContext(QStandardItemModel):
             # some extra code needed here
         axis_count = 0
         for name, unit in dataset._axes_units.items():
-            if self._current_axis[axis_count] is None:
-                quantity = unit_lookup[unit]
-                if quantity in self._unit_preference:
-                    new_unit = self._unit_preference[quantity]
-                else:
-                    new_unit = unit
-                self._current_axis[axis_count] = new_unit
+            quantity = unit_lookup[unit]
+            if quantity in self._unit_preference:
+                new_unit = self._unit_preference[quantity]
+            else:
+                new_unit = unit
+            self._current_axis[axis_count] = new_unit
             axis_count += 1
         if not axis_count == n_dimensions:
             print(
@@ -136,6 +145,7 @@ class PlottingContext(QStandardItemModel):
             )
             return
         self._ndim = n_dimensions
+        # self.needs_an_update.emit()
         return "Configured!"
 
     @Slot()

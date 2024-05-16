@@ -36,10 +36,11 @@ from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 class PlotWidget(QWidget):
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, colours=None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._plotting_context = None
+        self._colours = colours
         self.make_canvas()
 
     def set_context(self, new_context: "PlottingContext"):
@@ -63,7 +64,7 @@ class PlotWidget(QWidget):
             return
         if self._plotting_context is None:
             return
-        self._plotter.plot(self._plotting_context, self._figure)
+        self._plotter.plot(self._plotting_context, self._figure, colours=self._colours)
 
     def make_canvas(self, width=12.0, height=9.0, dpi=100):
         """Creates a matplotlib figure for plotting

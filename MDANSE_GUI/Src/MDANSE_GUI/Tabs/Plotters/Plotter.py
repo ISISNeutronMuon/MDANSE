@@ -16,6 +16,10 @@
 
 from typing import TYPE_CHECKING
 
+from matplotlib.pyplot import style as mpl_style
+from matplotlib import colors
+
+from MDANSE.Framework.Units import measure
 from MDANSE.Core.SubclassFactory import SubclassFactory
 
 if TYPE_CHECKING:
@@ -49,7 +53,9 @@ class Plotter(metaclass=SubclassFactory):
         target.clear()
         return target
 
-    def plot(self, plotting_context: "PlottingContext", figure: "Figure" = None):
+    def plot(
+        self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
+    ):
         target = self.get_figure(figure)
         if target is None:
             return
@@ -57,9 +63,38 @@ class Plotter(metaclass=SubclassFactory):
             print("Axis check failed.")
             return
         axes = target.add_subplot(111)
+        try:
+            matplotlib_style = colours["style"]
+        except:
+            pass
+        else:
+            if matplotlib_style is not None:
+                mpl_style.use(matplotlib_style)
+        try:
+            bkg_col = colours["background"]
+        except:
+            pass
+        else:
+            if bkg_col is not None:
+                target.set_facecolor(bkg_col)
+                axes.set_facecolor(bkg_col)
+        try:
+            col_seq = colours["curves"]
+        except:
+            pass
+        else:
+            if col_seq is not None:
+                axes.set_prop_cycle("color", col_seq)
+        xaxis_unit = plotting_context._current_axis[0]
         for name, dataset in plotting_context._datasets.items():
             xtags = list(dataset._axes.keys())
-            axes.plot(dataset._axes[xtags[0]], dataset._data, label=name)
+            conversion_factor = measure(
+                1.0, dataset._axes_units[xtags[0]], equivalent=True
+            ).toval(xaxis_unit)
+            axes.plot(
+                dataset._axes[xtags[0]] * conversion_factor, dataset._data, label=name
+            )
+        axes.set_xlabel(xaxis_unit)
         axes.grid(True)
         axes.legend(loc=0)
         target.canvas.draw()
