@@ -14,14 +14,15 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, List
 import os
+import itertools
 
 if TYPE_CHECKING:
     import h5py
     from matplotlib.figure import Figure
 
-from PyQt6.QtCore import Qt
+import numpy as np
 import matplotlib.pyplot as mpl
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import (
@@ -29,7 +30,7 @@ from matplotlib.backends.backend_qt5agg import (
 )
 
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-from qtpy.QtCore import Slot, Signal, QObject, QModelIndex
+from qtpy.QtCore import Slot, Signal, QObject, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 
@@ -47,6 +48,8 @@ class SingleDataset:
     def __init__(self, name: str, source: "h5py.File"):
         self._name = name
         self._filename = source.filename
+        self._curves = {}
+        self._planes = {}
         bare_name = os.path.split(self._filename)[-1]
         self._labels = {
             "minimal": name,
@@ -76,6 +79,53 @@ class SingleDataset:
             else:
                 self._axes[aname] = source[aname][:]
                 self._axes_units[aname] = source[aname].attrs["units"]
+
+    def available_x_axes(self) -> List[str]:
+        return list(self._axes_units.values())
+
+    def longest_axis(self) -> str:
+        length = -1
+        best_unit = "none"
+        for aname, aunit in self._axes_units.items():
+            xaxis = self._axes[aname]
+            xlen = len(xaxis)
+            if xlen > length:
+                length = xlen
+                best_unit = aunit
+        return best_unit
+
+    def curves_vs_axis(self, axis_unit: str) -> List[np.ndarray]:
+        found = -1
+        total_ndim = len(self._data.shape)
+        data_shape = self._data.shape
+        for aname, aunit in self._axes_units.items():
+            if aunit == axis_unit:
+                xaxis = self._axes[aname]
+                xlen = len(xaxis)
+                for dim in range(total_ndim):
+                    if xlen == self._data.shape[dim]:
+                        found = dim
+                        break
+        slicer = []
+        indexer = []
+        for dim in range(total_ndim):
+            if dim == found:
+                slicer.append([None])
+                indexer.append([None])
+            else:
+                slicer.append(np.arange(data_shape[dim]))
+                indexer.append(np.arange(data_shape[dim]))
+        indices = list(itertools.product(*indexer))
+        slicers = list(itertools.product(*slicer))
+        for n in range(len(indices)):
+            self._curves[tuple(indices[n])] = self._data[slicers[n]].squeeze()
+        return self._curves
+        # slicer = tuple(slicer)
+        # temp = self._data[slicer].squeeze()
+        # for line in temp:
+        #     if len(line) != xlen:
+        #         print("Wrong data length in the curves_vs_axis method of PlottingContext")
+        # return temp
 
 
 class PlottingContext(QStandardItemModel):

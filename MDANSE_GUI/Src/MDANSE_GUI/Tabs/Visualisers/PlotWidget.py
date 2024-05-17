@@ -21,7 +21,6 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
-from PyQt6.QtCore import Qt
 import matplotlib.pyplot as mpl
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import (
