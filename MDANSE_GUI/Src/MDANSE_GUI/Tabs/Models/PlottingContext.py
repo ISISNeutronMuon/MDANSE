@@ -110,14 +110,20 @@ class SingleDataset:
         indexer = []
         for dim in range(total_ndim):
             if dim == found:
-                slicer.append([None])
-                indexer.append([None])
+                slicer.append([slice(None)])
+                # indexer.append([None])
             else:
                 slicer.append(np.arange(data_shape[dim]))
                 indexer.append(np.arange(data_shape[dim]))
         indices = list(itertools.product(*indexer))
         slicers = list(itertools.product(*slicer))
+        print(f"data shape is {data_shape}")
+        print(f"xaxis dimension is found to be {found}")
+        print(f"len(indices) = {len(indices)}")
+        print(f"len(slicers) = {len(slicers)}")
         for n in range(len(indices)):
+            print(f"indices[{n}] = {indices[n]}")
+            print(f"slicers[{n}] = {slicers[n]}")
             self._curves[tuple(indices[n])] = self._data[slicers[n]].squeeze()
         return self._curves
         # slicer = tuple(slicer)
