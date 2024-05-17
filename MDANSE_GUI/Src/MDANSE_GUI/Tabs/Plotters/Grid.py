@@ -44,12 +44,14 @@ class Grid(Plotter):
         if plotting_context.set_axes() is None:
             print("Axis check failed.")
             return
+        self._axes = []
         nplots = len(plotting_context._datasets)
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
         xaxis_unit = plotting_context._current_axis[0]
-        for name, dataset in plotting_context._datasets.items():
+        for name, dataset in plotting_context.datasets().items():
             axes = target.add_subplot(gridsize, gridsize, startnum)
+            self._axes.append(axes)
             xtags = list(dataset._axes.keys())
             plotlabel = dataset._labels["medium"]
             conversion_factor = measure(
@@ -62,6 +64,8 @@ class Grid(Plotter):
                 label=plotlabel,
             )
             axes.grid(True)
+            axes.set_xlabel(xaxis_unit)
             axes.legend(loc=0)
             startnum += 1
+        self.apply_settings(plotting_context, colours)
         target.canvas.draw()

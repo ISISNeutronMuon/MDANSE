@@ -15,12 +15,10 @@
 #
 
 from typing import TYPE_CHECKING
-
-from matplotlib.pyplot import style as mpl_style
-from matplotlib import colors, rcParams
+import math
 
 from MDANSE.Framework.Units import measure
-from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
     import h5py
@@ -28,12 +26,11 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
-class Plotter(metaclass=SubclassFactory):
+class Single(Plotter):
 
     def __init__(self) -> None:
         self._figure = None
         self._current_colours = []
-        self._axes = []
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
@@ -43,11 +40,6 @@ class Plotter(metaclass=SubclassFactory):
         if target is None:
             return
         target.clear()
-
-    def get_mpl_colors(self):
-        cycler = rcParams["axes.prop_cycle"]
-        colours = cycler.by_key()["color"]
-        self._current_colours = colours
 
     def get_figure(self, figure: "Figure" = None):
         if figure is None:
@@ -60,36 +52,6 @@ class Plotter(metaclass=SubclassFactory):
         target.clear()
         return target
 
-    def apply_settings(self, plotting_context: "PlottingContext", colours=None):
-        if colours is not None:
-            self._current_colours = colours
-        if plotting_context.set_axes() is None:
-            print("Axis check failed.")
-            return
-        try:
-            matplotlib_style = colours["style"]
-        except:
-            pass
-        else:
-            if matplotlib_style is not None:
-                mpl_style.use(matplotlib_style)
-        try:
-            bkg_col = colours["background"]
-        except:
-            pass
-        else:
-            if bkg_col is not None:
-                for axes in self._axes:
-                    axes.set_facecolor(bkg_col)
-        try:
-            col_seq = colours["curves"]
-        except:
-            pass
-        else:
-            if col_seq is not None:
-                for axes in self._axes:
-                    axes.set_prop_cycle("color", col_seq)
-
     def plot(
         self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
     ):
@@ -100,3 +62,23 @@ class Plotter(metaclass=SubclassFactory):
         axes = target.add_subplot(111)
         self._axes = [axes]
         self.apply_settings(plotting_context, colours)
+        xaxis_unit = plotting_context._current_axis[0]
+        for name, dataset in plotting_context.datasets().items():
+            xtags = list(dataset._axes.keys())
+            plotlabel = dataset._labels["medium"]
+            try:
+                conversion_factor = measure(
+                    1.0, dataset._axes_units[xtags[0]], equivalent=True
+                ).toval(xaxis_unit)
+            except:
+                continue
+            else:
+                axes.plot(
+                    dataset._axes[xtags[0]] * conversion_factor,
+                    dataset._data,
+                    label=plotlabel,
+                )
+        axes.set_xlabel(xaxis_unit)
+        axes.grid(True)
+        axes.legend(loc=0)
+        target.canvas.draw()

@@ -33,7 +33,13 @@ from qtpy.QtCore import Slot, Signal, QObject, QModelIndex
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 
-unit_lookup = {"rad/ps": "energy", "nm": "distance", "ps": "time", "N/A": "arbitrary"}
+unit_lookup = {
+    "rad/ps": "energy",
+    "nm": "distance",
+    "ps": "time",
+    "1/nm": "reciprocal",
+    "N/A": "arbitrary",
+}
 
 
 class SingleDataset:
@@ -106,6 +112,18 @@ class PlottingContext(QStandardItemModel):
         self._unit_preference = units
         self.set_axes()
 
+    def datasets(self) -> Dict:
+        result = {}
+        for row in range(self.rowCount()):
+            key = self.index(row, 0).data(role=Qt.ItemDataRole.UserRole)
+            useit = (
+                self.itemFromIndex(self.index(row, 4)).checkState()
+                == Qt.CheckState.Checked
+            )
+            if useit:
+                result[key] = self._datasets[key]
+        return result
+
     def add_dataset(self, new_dataset: SingleDataset):
         if not new_dataset._valid:
             return
@@ -129,6 +147,7 @@ class PlottingContext(QStandardItemModel):
         temp = items[4]
         temp.setCheckable(True)
         temp.setCheckState(Qt.CheckState.Checked)
+        self.itemChanged.connect(self.needs_an_update)
         self.appendRow(items)
 
     def set_axes(self):
@@ -139,7 +158,7 @@ class PlottingContext(QStandardItemModel):
             # some extra code needed here
         axis_count = 0
         for name, unit in dataset._axes_units.items():
-            quantity = unit_lookup[unit]
+            quantity = unit_lookup.get(unit, "unknown")
             if quantity in self._unit_preference:
                 new_unit = self._unit_preference[quantity]
             else:

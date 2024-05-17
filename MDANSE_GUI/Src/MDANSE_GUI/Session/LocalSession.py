@@ -53,7 +53,8 @@ class LocalSession(QObject):
         self._paths["root_directory"] = os.path.expanduser("~")
         self._units["energy"] = "meV"
         self._units["time"] = "fs"
-        self._units["distance"] = "Ang"
+        self._units["distance"] = "ang"
+        self._units["reciprocal"] = "1/ang"
         self._colours["colormap"] = "viridis"
         self._colours["style"] = "ggplot"
 

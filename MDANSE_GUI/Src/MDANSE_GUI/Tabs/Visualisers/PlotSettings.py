@@ -103,6 +103,17 @@ class PlotSettings(QWidget):
                 pass
             else:
                 result["distance"] = distance
+        try:
+            reciprocal = self._unit_fields["reciprocal"].currentText()
+        except:
+            pass
+        else:
+            try:
+                measure(1.0, "1/nm").toval(distance)
+            except:
+                pass
+            else:
+                result["reciprocal"] = reciprocal
         self.units_changed.emit(result)
         self.plot_settings_changed.emit()
 
@@ -141,11 +152,16 @@ class PlotSettings(QWidget):
         time_combo.addItems(["fs", "ps", "ns"])
         time_combo.currentTextChanged.connect(self.update_units)
         distance_combo = QComboBox(box)
-        distance_combo.addItems(["Ang", "Bohr", "nm", "pm"])
+        distance_combo.addItems(["ang", "Bohr", "nm", "pm"])
         distance_combo.currentTextChanged.connect(self.update_units)
+        reciprocal_combo = QComboBox(box)
+        reciprocal_combo.addItems(["1/ang", "1/Bohr", "1/nm", "1/pm"])
+        reciprocal_combo.currentTextChanged.connect(self.update_units)
         unit_layout.addRow("Energy unit:", energy_combo)
         unit_layout.addRow("Time unit:", time_combo)
         unit_layout.addRow("Distance unit:", distance_combo)
+        unit_layout.addRow("Reciprocal space unit:", reciprocal_combo)
         self._unit_fields["energy"] = energy_combo
         self._unit_fields["time"] = time_combo
         self._unit_fields["distance"] = distance_combo
+        self._unit_fields["reciprocal"] = reciprocal_combo

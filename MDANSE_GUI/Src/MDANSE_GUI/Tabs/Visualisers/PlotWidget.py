@@ -56,7 +56,7 @@ class PlotWidget(QWidget):
         self.plot_data()
 
     def available_plotters(self) -> List[str]:
-        return ["Plotter"] + [str(x) for x in Plotter.indirect_subclasses()]
+        return [str(x) for x in Plotter.indirect_subclasses()]
 
     def plot_data(self):
         if self._plotter is None:
@@ -97,5 +97,6 @@ class PlotWidget(QWidget):
         plot_selector = QComboBox(self)
         layout.addWidget(plot_selector)
         plot_selector.addItems(self.available_plotters())
+        plot_selector.setCurrentText("Single")
         plot_selector.currentTextChanged.connect(self.set_plotter)
         self.set_plotter(plot_selector.currentText())
