@@ -49,6 +49,7 @@ class SingleDataset:
         self._name = name
         self._filename = source.filename
         self._curves = {}
+        self._curve_labels = {}
         self._planes = {}
         bare_name = os.path.split(self._filename)[-1]
         self._labels = {
@@ -68,6 +69,7 @@ class SingleDataset:
             print(f"{name} is not plottable")
             return
         self._data_unit = source[name].attrs["units"]
+        self._n_dim = len(self._data.shape)
         self._axes_tag = source[name].attrs["axis"]
         self._axes = {}
         self._axes_units = {}
@@ -86,13 +88,15 @@ class SingleDataset:
     def longest_axis(self) -> str:
         length = -1
         best_unit = "none"
+        best_axis = "none"
         for aname, aunit in self._axes_units.items():
             xaxis = self._axes[aname]
             xlen = len(xaxis)
             if xlen > length:
                 length = xlen
                 best_unit = aunit
-        return best_unit
+                best_axis = aname
+        return best_unit, best_axis
 
     def curves_vs_axis(self, axis_unit: str) -> List[np.ndarray]:
         found = -1
@@ -117,14 +121,9 @@ class SingleDataset:
                 indexer.append(np.arange(data_shape[dim]))
         indices = list(itertools.product(*indexer))
         slicers = list(itertools.product(*slicer))
-        print(f"data shape is {data_shape}")
-        print(f"xaxis dimension is found to be {found}")
-        print(f"len(indices) = {len(indices)}")
-        print(f"len(slicers) = {len(slicers)}")
         for n in range(len(indices)):
-            print(f"indices[{n}] = {indices[n]}")
-            print(f"slicers[{n}] = {slicers[n]}")
             self._curves[tuple(indices[n])] = self._data[slicers[n]].squeeze()
+            self._curve_labels[tuple(indices[n])] = str(tuple(indices[n]))
         return self._curves
         # slicer = tuple(slicer)
         # temp = self._data[slicer].squeeze()
@@ -143,6 +142,10 @@ class PlottingContext(QStandardItemModel):
         self._datasets = {}
         self._current_axis = [None, None, None]
         self._figure = None
+        self._ndim_lowest = 1
+        self._ndim_highest = 3
+        self._all_xunits = []
+        self._best_xunits = []
         if unit_preference is None:
             self._unit_preference = {}
         else:
@@ -167,6 +170,14 @@ class PlottingContext(QStandardItemModel):
         into this slot."""
         self._unit_preference = units
         self.set_axes()
+
+    def get_conversion_factor(self, unit):
+        quantity = unit_lookup.get(unit, "unknown")
+        if quantity in self._unit_preference:
+            new_unit = self._unit_preference[quantity]
+        else:
+            new_unit = unit
+        return new_unit
 
     def datasets(self) -> Dict:
         result = {}
@@ -209,24 +220,27 @@ class PlottingContext(QStandardItemModel):
     def set_axes(self):
         if len(self._datasets) == 0:
             return
+        all_axes = []
+        all_dimensions = []
+        longest_axes = []
+        unit_to_axname = {}
         for dataset in self._datasets.values():
-            n_dimensions = len(dataset._data.shape)
-            # some extra code needed here
-        axis_count = 0
-        for name, unit in dataset._axes_units.items():
-            quantity = unit_lookup.get(unit, "unknown")
-            if quantity in self._unit_preference:
-                new_unit = self._unit_preference[quantity]
-            else:
-                new_unit = unit
-            self._current_axis[axis_count] = new_unit
-            axis_count += 1
-        if not axis_count == n_dimensions:
-            print(
-                f"PlottingContext found {axis_count} axes for {n_dimensions} dimensions. Stopped."
-            )
-            return
-        self._ndim = n_dimensions
+            n_dimensions = dataset._n_dim
+            if n_dimensions not in all_dimensions:
+                all_dimensions.append(n_dimensions)
+            best_units, best_axis = dataset.longest_axis()
+            unit_to_axname[best_units] = best_axis
+            for unit in dataset._axes_units.values():
+                if unit not in all_axes:
+                    all_axes.append(unit)
+            if best_units not in longest_axes:
+                longest_axes.append(best_units)
+        self._ndim = 1
+        self._ndim_highest = np.max(all_dimensions)
+        self._ndim_lowest = np.min(all_dimensions)
+        self._best_xunits = longest_axes
+        self._all_xunits = all_axes
+        self._unit_to_axname = unit_to_axname
         # self.needs_an_update.emit()
         return "Configured!"
 

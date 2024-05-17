@@ -45,27 +45,33 @@ class Grid(Plotter):
             print("Axis check failed.")
             return
         self._axes = []
-        nplots = len(plotting_context._datasets)
+        self.apply_settings(plotting_context, colours)
+        nplots = 0
+        for ds in plotting_context.datasets().values():
+            best_unit, best_axis = ds.longest_axis()
+            curves = ds.curves_vs_axis(best_unit)
+            nplots += len(curves)
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
-        xaxis_unit = plotting_context._current_axis[0]
         for name, dataset in plotting_context.datasets().items():
-            axes = target.add_subplot(gridsize, gridsize, startnum)
-            self._axes.append(axes)
-            xtags = list(dataset._axes.keys())
-            plotlabel = dataset._labels["medium"]
-            conversion_factor = measure(
-                1.0, dataset._axes_units[xtags[0]], equivalent=True
-            ).toval(xaxis_unit)
-            axes.plot(
-                dataset._axes[xtags[0]] * conversion_factor,
-                dataset._data,
-                color=self._current_colours[(startnum - 1) % number_of_colours],
-                label=plotlabel,
-            )
-            axes.grid(True)
-            axes.set_xlabel(xaxis_unit)
-            axes.legend(loc=0)
-            startnum += 1
+            best_unit, best_axis = dataset.longest_axis()
+            xaxis_unit = plotting_context.get_conversion_factor(best_unit)
+            for key, curve in dataset._curves.items():
+                axes = target.add_subplot(gridsize, gridsize, startnum)
+                self._axes.append(axes)
+                plotlabel = dataset._labels["medium"]
+                conversion_factor = measure(1.0, best_unit, equivalent=True).toval(
+                    xaxis_unit
+                )
+                axes.plot(
+                    dataset._axes[best_axis] * conversion_factor,
+                    curve,
+                    color=self._current_colours[(startnum - 1) % number_of_colours],
+                    label=plotlabel + ":" + dataset._curve_labels[key],
+                )
+                axes.grid(True)
+                axes.set_xlabel(xaxis_unit)
+                axes.legend(loc=0)
+                startnum += 1
         self.apply_settings(plotting_context, colours)
         target.canvas.draw()

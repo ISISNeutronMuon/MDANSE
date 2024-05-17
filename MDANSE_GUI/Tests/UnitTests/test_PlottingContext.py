@@ -42,7 +42,7 @@ def test_available_x_axes_1d(file_1d):
     axes = temp.available_x_axes()
     assert axes == ["rad/ps"]
     longest = temp.longest_axis()
-    assert longest == "rad/ps"
+    assert longest[0] == "rad/ps"
 
 
 def test_available_x_axes_2d(file_2d):
@@ -52,7 +52,7 @@ def test_available_x_axes_2d(file_2d):
     assert axes == ["1/nm", "ps"]
     longest = temp.longest_axis()
     print(longest)
-    assert longest == "ps"
+    assert longest[0] == "ps"
 
 
 def test_curves_vs_axis_1d(file_1d):

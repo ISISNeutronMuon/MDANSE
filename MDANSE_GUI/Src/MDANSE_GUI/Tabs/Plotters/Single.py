@@ -62,22 +62,40 @@ class Single(Plotter):
         axes = target.add_subplot(111)
         self._axes = [axes]
         self.apply_settings(plotting_context, colours)
-        xaxis_unit = plotting_context._current_axis[0]
+        if plotting_context.set_axes() is None:
+            print("Axis check failed.")
+            return
         for name, dataset in plotting_context.datasets().items():
-            xtags = list(dataset._axes.keys())
+            best_unit, best_axis = dataset.longest_axis()
             plotlabel = dataset._labels["medium"]
+            xaxis_unit = plotting_context.get_conversion_factor(best_unit)
             try:
-                conversion_factor = measure(
-                    1.0, dataset._axes_units[xtags[0]], equivalent=True
-                ).toval(xaxis_unit)
+                conversion_factor = measure(1.0, best_unit, equivalent=True).toval(
+                    xaxis_unit
+                )
             except:
                 continue
             else:
-                axes.plot(
-                    dataset._axes[xtags[0]] * conversion_factor,
-                    dataset._data,
-                    label=plotlabel,
-                )
+                if dataset._n_dim == 1:
+                    axes.plot(
+                        dataset._axes[best_axis] * conversion_factor,
+                        dataset._data,
+                        label=plotlabel,
+                    )
+                else:
+                    multi_curves = dataset.curves_vs_axis(best_unit)
+                    for key, value in multi_curves.items():
+                        try:
+                            axes.plot(
+                                dataset._axes[best_axis] * conversion_factor,
+                                value,
+                                label=plotlabel + ":" + dataset._curve_labels[key],
+                            )
+                        except ValueError:
+                            print(f"Plotting failed for {plotlabel} using {best_axis}")
+                            print(f"x_axis={dataset._axes[best_axis]}")
+                            print(f"values={value}")
+                            return
         axes.set_xlabel(xaxis_unit)
         axes.grid(True)
         axes.legend(loc=0)
