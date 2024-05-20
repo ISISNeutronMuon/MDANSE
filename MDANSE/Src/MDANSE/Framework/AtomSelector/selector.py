@@ -52,7 +52,7 @@ class Selector:
         "element": {},
         "name": {},
         "fullname": {},
-        # e.g. {"1": True} or {1: True}
+        # e.g. {1: True}
         "index": {},
     }
 
@@ -106,10 +106,7 @@ class Selector:
             ),
             "name": set([at.name for at in system.atom_list]),
             "fullname": set([at.full_name for at in system.atom_list]),
-            # we allow index keys to be str or int, this is mostly
-            # done since JSON keys are str, it will be stored
-            # internally here as a str
-            "index": self.all_idxs | set([str(i) for i in self.all_idxs]),
+            "index": self.all_idxs,
         }
 
         # figure out if a match exists for the selector function
@@ -153,7 +150,7 @@ class Selector:
         for k0, v0 in settings.items():
             if isinstance(self.settings[k0], dict):
                 for k1, v1 in v0.items():
-                    self.settings[k0][str(k1)] = v1
+                    self.settings[k0][k1] = v1
             else:
                 self.settings[k0] = v0
 
@@ -223,9 +220,9 @@ class Selector:
                     new_settings[k] = False
 
         for idx in idxs - added:
-            new_settings["index"][str(idx)] = True
+            new_settings["index"][idx] = True
         for idx in prev_selected - idxs:
-            new_settings["index"][str(idx)] = False
+            new_settings["index"][idx] = False
 
         self.settings = new_settings
 
@@ -243,25 +240,49 @@ class Selector:
             if isinstance(v0, bool) and (k0 == "all" or k0 != "all" and v0):
                 minimal_dict[k0] = v0
             elif isinstance(v0, dict):
-                sub_dict = {}
+                sub_list = []
                 for k1, v1 in v0.items():
                     if v1:
-                        sub_dict[k1] = v1
-                if sub_dict:
-                    minimal_dict[k0] = sub_dict
+                        sub_list.append(k1)
+                if sub_list:
+                    minimal_dict[k0] = sub_list
         return json.dumps(minimal_dict)
 
-    def update_from_json(self, json_string: str, reset_first: bool = False) -> None:
-        """Update the selection settings from a JSON string.
+    def json_to_settings(self, json_string: str) -> dict[str, Union[bool, dict]]:
+        """Loads the json string and converts to a settings.
 
         Parameters
         ----------
         json_string : str
             The JSON string of settings.
-        reset_first : bool, optional
-            Resets the settings to the default before loading.
+
+        Returns
+        -------
+        dict[str, Union[bool, dict]]
+            The selection settings.
         """
-        self.update_settings(json.loads(json_string), reset_first)
+        json_setting = json.loads(json_string)
+        settings = {}
+        for k0, v0 in json_setting.items():
+            if isinstance(v0, bool):
+                settings[k0] = v0
+            elif isinstance(v0, list):
+                sub_dict = {}
+                for k1 in v0:
+                    sub_dict[k1] = True
+                if sub_dict:
+                    settings[k0] = sub_dict
+        return settings
+
+    def load_from_json(self, json_string: str) -> None:
+        """Load the selection settings from a JSON string.
+
+        Parameters
+        ----------
+        json_string : str
+            The JSON string of settings.
+        """
+        self.update_settings(self.json_to_settings(json_string), reset_first=True)
 
     def check_valid_setting(self, settings: dict[str, Union[bool, dict]]) -> bool:
         """Checks that the input settings are valid.
@@ -291,7 +312,7 @@ class Selector:
                 if not isinstance(v0, dict):
                     return False
                 for k1, v1 in v0.items():
-                    if str(k1) not in self._kwarg_vals[k0]:
+                    if k1 not in self._kwarg_vals[k0]:
                         return False
                     if not isinstance(v1, bool):
                         return False
@@ -312,7 +333,7 @@ class Selector:
             True if settings are valid.
         """
         try:
-            settings = json.loads(json_string)
+            settings = self.json_to_settings(json_string)
         except ValueError:
             return False
         return self.check_valid_setting(settings)
@@ -327,13 +348,7 @@ class Selector:
         """
         settings = copy.deepcopy(self.settings)
         for k, vs in self._kwarg_vals.items():
-            if any([isinstance(i, int) for i in vs]):
-                # when the arg vals can also be int in addition to str
-                options = sorted(list(set([int(i) for i in vs])))
-                options = [str(i) for i in options]
-            else:
-                options = sorted(vs)
-            for v in options:
+            for v in sorted(vs):
                 if v not in settings[k]:
                     settings[k][v] = False
         return settings
