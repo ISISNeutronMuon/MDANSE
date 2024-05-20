@@ -123,6 +123,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atoms = []
 
         self._polydata = None
+        self._polydata_bonds_exist = False
         self._uc_polydata = None
 
         self._surface = None
@@ -249,7 +250,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._cell_visible:
             uc_actor = self.create_uc_actor()
             actors.append(uc_actor)
-        if self._bonds_visible:
+        if self._bonds_visible and self._polydata_bonds_exist:
             actors.append(line_actor)
         if self._atoms_visible:
             actors.append(ball_actor)
@@ -389,14 +390,20 @@ class MolecularViewer(QtWidgets.QWidget):
                 ]
             )[not_du]
 
-            bonds = self.create_bond_cell_array(rs, covs, not_du)
-            self._polydata.SetLines(bonds)
+            bonds, bonds_exist = self.create_bond_cell_array(rs, covs, not_du)
+            if bonds_exist:
+                self._polydata.SetLines(bonds)
+                self._polydata_bonds_exist = True
+                return
+
+        self._polydata_bonds_exist = False
 
     def create_bond_cell_array(self, rs, covs, not_du, tolerance=0.04):
         # determine and set bonds without PBC applied
         tree = KDTree(rs)
         bonds = vtk.vtkCellArray()
         contacts = tree.query_ball_tree(tree, 2 * np.max(covs) + tolerance)
+        n_bonds = 0
         for i, idxs in enumerate(contacts):
             if len(idxs) == 0:
                 continue
@@ -404,12 +411,14 @@ class MolecularViewer(QtWidgets.QWidget):
             dist = np.sum(diff * diff, axis=1)
             sum_radii = (covs[i] + covs[idxs] + tolerance) ** 2
             js = np.array(idxs)[(0 < dist) & (dist < sum_radii)]
-            for j in not_du[js[i < js]]:
+            js = not_du[js[i < js]]
+            n_bonds += len(js)
+            for j in js:
                 line = vtk.vtkLine()
                 line.GetPointIds().SetId(0, not_du[i])
                 line.GetPointIds().SetId(1, j)
                 bonds.InsertNextCell(line)
-        return bonds
+        return bonds, n_bonds > 0
 
     def update_uc_polydata(self):
         uc = self._reader.read_pbc(self._current_frame)
@@ -672,6 +681,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.dummy_size = 0.1
         self._picking_domain = None
         self._picked_polydata = None
+        self._picked_polydata_bonds_exist = False
         self._polydata_opacity = 0.15
         self.picked_atoms = set()
         self.build_events()
@@ -739,6 +749,18 @@ class MolecularViewerWithPicking(MolecularViewer):
             atoms.SetPoint(i, x, y, z)
         self._picked_polydata.SetPoints(atoms)
 
+        picked_colours = []
+        picked_radii = []
+        for i in sorted(list(self.picked_atoms)):
+            picked_colours.append(self._colour_manager.colours[i])
+            picked_radii.append(self._colour_manager.radii[i])
+        scalars = ndarray_to_vtkarray(
+            np.array(picked_colours),
+            np.array(picked_radii),
+            np.arange(len(self.picked_atoms)),
+        )
+        self._picked_polydata.GetPointData().SetScalars(scalars)
+
         not_du = np.array(
             [
                 i
@@ -762,20 +784,13 @@ class MolecularViewerWithPicking(MolecularViewer):
                 ]
             )[not_du]
 
-            bonds = self.create_bond_cell_array(rs, covs, not_du)
-            self._picked_polydata.SetLines(bonds)
+            bonds, bonds_exist = self.create_bond_cell_array(rs, covs, not_du)
+            if bonds_exist:
+                self._picked_polydata.SetLines(bonds)
+                self._picked_polydata_bonds_exist = True
+                return
 
-        picked_colours = []
-        picked_radii = []
-        for i in sorted(list(self.picked_atoms)):
-            picked_colours.append(self._colour_manager.colours[i])
-            picked_radii.append(self._colour_manager.radii[i])
-        scalars = ndarray_to_vtkarray(
-            np.array(picked_colours),
-            np.array(picked_radii),
-            np.arange(len(self.picked_atoms)),
-        )
-        self._picked_polydata.GetPointData().SetScalars(scalars)
+        self._picked_polydata_bonds_exist = False
 
     def reset_all_polydata(self):
         super().reset_all_polydata()
@@ -798,8 +813,9 @@ class MolecularViewerWithPicking(MolecularViewer):
         if self._cell_visible:
             uc_actor = self.create_uc_actor()
             actors.append(uc_actor)
-        if self._bonds_visible:
+        if self._bonds_visible and self._polydata_bonds_exist:
             actors.append(line_actor)
+        if self._bonds_visible and self._picked_polydata_bonds_exist:
             actors.append(picked_line_actor)
         if self._atoms_visible:
             self._picking_domain = ball_actor
