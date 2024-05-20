@@ -46,10 +46,8 @@ class PlotHolder(QTabWidget):
     def new_plot(self, tab_name: str) -> int:
         try:
             preferred_units = self._session._units
-            preferred_colours = self._session._colours
         except:
             preferred_units = None
-            preferred_colours = None
         if not tab_name:
             tab_name = f"New plot {self._last_number}"
             self._last_number += 1

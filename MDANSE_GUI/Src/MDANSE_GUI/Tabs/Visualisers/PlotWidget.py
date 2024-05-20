@@ -27,8 +27,8 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
 
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QComboBox
-from qtpy.QtCore import Slot, Signal, QObject
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSlider
+from qtpy.QtCore import Slot, Signal, QObject, Qt
 
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
@@ -40,6 +40,7 @@ class PlotWidget(QWidget):
         self._plotter = None
         self._plotting_context = None
         self._colours = colours
+        self._slider_max = 100
         self.make_canvas()
 
     def set_context(self, new_context: "PlottingContext"):
@@ -53,6 +54,10 @@ class PlotWidget(QWidget):
         except:
             self._plotter = Plotter()
         self.plot_data()
+
+    @Slot(int)
+    def slider_change(self, new_value: int):
+        self._plotter.handle_slider(new_value / self._slider_max)
 
     def available_plotters(self) -> List[str]:
         return [str(x) for x in Plotter.indirect_subclasses()]
@@ -91,6 +96,12 @@ class PlotWidget(QWidget):
         toolbar = NavigationToolbar2QTAgg(figAgg, canvas)
         toolbar.update()
         layout.addWidget(figAgg)
+        slider = QSlider(Qt.Orientation.Horizontal, self)
+        slider.setValue(0)
+        slider.setMinimum(-self._slider_max)
+        slider.setMaximum(self._slider_max)
+        slider.valueChanged.connect(self.slider_change)
+        layout.addWidget(slider)
         layout.addWidget(toolbar)
         self._figure = figure
         plot_selector = QComboBox(self)

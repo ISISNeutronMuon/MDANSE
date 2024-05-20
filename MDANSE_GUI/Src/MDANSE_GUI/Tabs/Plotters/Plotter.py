@@ -34,6 +34,7 @@ class Plotter(metaclass=SubclassFactory):
         self._figure = None
         self._current_colours = []
         self._axes = []
+        self._slider_value = 0.0
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
@@ -89,6 +90,9 @@ class Plotter(metaclass=SubclassFactory):
             if col_seq is not None:
                 for axes in self._axes:
                     axes.set_prop_cycle("color", col_seq)
+
+    def handle_slider(self, new_value: float):
+        self._slider_value = new_value
 
     def plot(
         self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
