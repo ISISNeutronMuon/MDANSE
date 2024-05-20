@@ -56,7 +56,7 @@ class AtomSelectionConfigurator(IConfigurator):
 
         self["value"] = value
 
-        selector.update_from_json(value)
+        selector.load_from_json(value)
         indexes = selector.get_idxs()
 
         self["flatten_indexes"] = sorted(list(indexes))
