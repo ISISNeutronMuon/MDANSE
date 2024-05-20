@@ -48,12 +48,12 @@ class Selector:
         "thiol": False,
         "water": False,
         # e.g. {"S": True}
-        "element": {},
         "hs_on_element": {},
+        "element": {},
+        "name": {},
+        "fullname": {},
         # e.g. {"1": True} or {1: True}
         "index": {},
-        # True inverts the selection
-        "invert": False,
     }
 
     _funcs = {
@@ -67,14 +67,18 @@ class Selector:
         "sulphate": select_sulphate,
         "thiol": select_thiol,
         "water": select_water,
-        "element": select_element,
         "hs_on_element": select_hs_on_element,
+        "element": select_element,
+        "name": select_atom_name,
+        "fullname": select_atom_fullname,
         "index": select_index,
     }
 
     _kwarg_keys = {
-        "element": "symbol",
         "hs_on_element": "symbol",
+        "element": "symbol",
+        "name": "name",
+        "fullname": "fullname",
         "index": "index",
     }
 
@@ -93,23 +97,27 @@ class Selector:
         # all possible values for the system
         self._kwarg_vals = {
             "element": symbols,
-            "hs_on_element": symbols,
+            "hs_on_element": set(
+                [
+                    symbol
+                    for symbol in symbols
+                    if select_hs_on_element(system, symbol, check_exists=True)
+                ]
+            ),
+            "name": set([at.name for at in system.atom_list]),
+            "fullname": set([at.full_name for at in system.atom_list]),
             # we allow index keys to be str or int, this is mostly
-            # done since JSON keys are str
+            # done since JSON keys are str, it will be stored
+            # internally here as a str
             "index": self.all_idxs | set([str(i) for i in self.all_idxs]),
         }
 
         # figure out if a match exists for the selector function
         self.match_exists = self.full_settings
         for k0, v0 in self.match_exists.items():
-            if k0 == "invert":
-                self.match_exists[k0] = True
-                continue
             if isinstance(v0, dict):
                 for k1 in v0.keys():
-                    self.match_exists[k0][k1] = self._funcs[k0](
-                        self.system, **{self._kwarg_keys[k0]: k1}, check_exists=True
-                    )
+                    self.match_exists[k0][k1] = True
             else:
                 self.match_exists[k0] = self._funcs[k0](self.system, check_exists=True)
 
@@ -145,7 +153,7 @@ class Selector:
         for k0, v0 in settings.items():
             if isinstance(self.settings[k0], dict):
                 for k1, v1 in v0.items():
-                    self.settings[k0][k1] = v1
+                    self.settings[k0][str(k1)] = v1
             else:
                 self.settings[k0] = v0
 
@@ -160,8 +168,6 @@ class Selector:
         idxs = set([])
 
         for k, v in self.settings.items():
-            if k == "invert":
-                continue
 
             if isinstance(v, dict):
                 args = [{self._kwarg_keys[k]: i} for i in v.keys()]
@@ -170,16 +176,58 @@ class Selector:
                 args = [{}]
                 switches = [v]
 
-            for args, switch in zip(args, switches):
+            for arg, switch in zip(args, switches):
                 if not switch:
                     continue
 
-                idxs.update(self._funcs[k](self.system, **args))
+                idxs.update(self._funcs[k](self.system, **arg))
 
-        if self.settings["invert"]:
-            return self.all_idxs - idxs
-        else:
-            return idxs
+        return idxs
+
+    def update_with_idxs(self, idxs: set[int]) -> None:
+        """Using the inputted idxs change the selection setting so
+        that it would return the same idxs with get_idxs. It will
+        switch off the setting if idxs is not a superset of the
+        selection for that setting.
+
+        Parameters
+        ----------
+        idxs : set[int]
+            With the indexes of the atom selection.
+        """
+        new_settings = copy.deepcopy(self.settings)
+        added = set([])
+        prev_selected = set([])
+        for k, v in self.settings.items():
+
+            if isinstance(v, dict):
+                args = [{self._kwarg_keys[k]: i} for i in v.keys()]
+                switches = v.values()
+            else:
+                args = [{}]
+                switches = [v]
+
+            for arg, switch in zip(args, switches):
+                if not switch:
+                    continue
+
+                selection = self._funcs[k](self.system, **arg)
+                if idxs.issuperset(selection):
+                    added.update(selection)
+                    continue
+
+                prev_selected.update(selection)
+                if isinstance(v, dict):
+                    new_settings[k][arg[self._kwarg_keys[k]]] = False
+                else:
+                    new_settings[k] = False
+
+        for idx in idxs - added:
+            new_settings["index"][str(idx)] = True
+        for idx in prev_selected - idxs:
+            new_settings["index"][str(idx)] = False
+
+        self.settings = new_settings
 
     def settings_to_json(self) -> str:
         """Return the minimal json string required to achieve the same
@@ -267,7 +315,6 @@ class Selector:
             settings = json.loads(json_string)
         except ValueError:
             return False
-
         return self.check_valid_setting(settings)
 
     @property

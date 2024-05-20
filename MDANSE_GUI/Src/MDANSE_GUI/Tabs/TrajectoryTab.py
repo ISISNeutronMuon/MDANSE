@@ -28,6 +28,7 @@ from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
+from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 
 
 label_text = """Here you can load the .mdt files.
@@ -74,7 +75,7 @@ class TrajectoryTab(GeneralTab):
             session=LocalSession(),
             model=GeneralModel(),
             view=TrajectoryView(),
-            visualiser=View3D(),
+            visualiser=View3D(MolecularViewer()),
             layout=partial(TriplePanel, left_panel=TrajectoryInfo()),
             label_text=label_text,
         )
@@ -98,7 +99,7 @@ class TrajectoryTab(GeneralTab):
             logger=logger,
             model=kwargs.get("model", GeneralModel()),
             view=TrajectoryView(),
-            visualiser=View3D(),
+            visualiser=View3D(MolecularViewer()),
             layout=partial(TriplePanel, left_panel=TrajectoryInfo()),
             label_text=label_text,
         )

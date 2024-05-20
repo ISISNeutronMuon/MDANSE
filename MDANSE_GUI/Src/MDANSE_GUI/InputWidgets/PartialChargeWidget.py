@@ -26,6 +26,7 @@ from qtpy.QtWidgets import (
 from qtpy.QtGui import QDoubleValidator
 
 from MDANSE.Framework.Configurators.PartialChargeConfigurator import PartialChargeMapper
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import AtomSelectionWidget
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import SelectionHelper
 
@@ -42,7 +43,13 @@ class ChargeHelper(SelectionHelper):
     _helper_title = "Partial charge helper"
 
     def __init__(
-        self, mapper: PartialChargeMapper, field: QLineEdit, parent, *args, **kwargs
+        self,
+        mapper: PartialChargeMapper,
+        traj_data: tuple[str, HDFTrajectoryInputData],
+        field: QLineEdit,
+        parent,
+        *args,
+        **kwargs,
     ):
         """
         Parameters
@@ -50,6 +57,8 @@ class ChargeHelper(SelectionHelper):
         mapper : PartialChargeMapper
             The charge mapper initialized with the current chemical
             system.
+        traj_data : tuple[str, HDFTrajectoryInputData]
+            A tuple of the trajectory data used to load the 3D viewer.
         field : QLineEdit
             The QLineEdit field that will need to be updated when
             applying the setting.
@@ -60,38 +69,21 @@ class ChargeHelper(SelectionHelper):
         self.charge_qline = QLineEdit()
         self.charge_qline.setValidator(QDoubleValidator())
         self.mapper.selector.settings["all"] = False
-        super().__init__(mapper.selector, field, parent, min_width=750, *args, **kwargs)
+        super().__init__(mapper.selector, traj_data, field, parent, *args, **kwargs)
+        self.all_selection = False
         self.update_charge_textbox()
 
-    def create_buttons(self) -> list[QPushButton]:
-        """
+    def right_widgets(self) -> list[QWidget]:
+        """Add the charge textbox to the right widgets.
+
         Returns
         -------
-        list[QPushButton]
-            List of push buttons to add to the last layout from
+        list[QWidget]
+            List of QWidgets to add to the right layout from
             create_layouts.
         """
-        apply = QPushButton("Use Setting")
-        reset = QPushButton("Reset")
-        close = QPushButton("Close")
-        apply.clicked.connect(self.apply)
-        reset.clicked.connect(self.reset)
-        close.clicked.connect(self.close)
-        return [apply, reset, close]
-
-    def create_layouts(self) -> list[QVBoxLayout]:
-        """Add one addition layout to the right over the selection
-        helper.
-
-        Returns
-        -------
-        list[QVBoxLayout]
-            List of QVBoxLayout to add to the helper layout.
-        """
-        layouts = super().create_layouts()
-        right = QVBoxLayout()
-        right.addWidget(self.charge_textbox)
-        return layouts + [right]
+        widgets = super().right_widgets()
+        return widgets + [self.charge_textbox]
 
     def left_widgets(self) -> list[QWidget]:
         """Adds a partial charge widget to the selection helper.
@@ -148,6 +140,7 @@ class ChargeHelper(SelectionHelper):
 
     def reset(self):
         """Reset the mapper so that no charges are set."""
+        super().reset()
         self.mapper.reset_setting()
         self.update_charge_textbox()
 
@@ -165,12 +158,19 @@ class PartialChargeWidget(AtomSelectionWidget):
     _default_value = "{}"
     _tooltip_text = "Specify the partial charges that will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
 
-    def create_helper(self) -> ChargeHelper:
+    def create_helper(
+        self, traj_data: tuple[str, HDFTrajectoryInputData]
+    ) -> ChargeHelper:
         """
+        Parameters
+        ----------
+        traj_data : tuple[str, HDFTrajectoryInputData]
+            A tuple of the trajectory data used to load the 3D viewer.
+
         Returns
         -------
         ChargeHelper
             Create and return the partial charge helper QDialog.
         """
         mapper = self._configurator.get_charge_mapper()
-        return ChargeHelper(mapper, self._field, self._base)
+        return ChargeHelper(mapper, traj_data, self._field, self._base)
