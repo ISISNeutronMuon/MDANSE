@@ -57,7 +57,7 @@ class AtomMappingHelperDialog(QDialog):
         """
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle("Atom mapping helper")
-        self.min_width = kwargs.get("min_width", 450)
+        self.min_width = kwargs.get("min_width", 400)
         self.resize(self.min_width, self.height())
         self.setMinimumWidth(self.min_width)
         self._field = field

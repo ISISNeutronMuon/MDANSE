@@ -21,6 +21,8 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 __all__ = [
     "select_element",
     "select_dummy",
+    "select_atom_name",
+    "select_atom_fullname",
     "select_hs_on_element",
     "select_hs_on_heteroatom",
     "select_index",
@@ -79,8 +81,64 @@ def select_dummy(
         return set([at.index for at in system.atom_list if at.element == "dummy"])
 
 
+def select_atom_name(
+    system: ChemicalSystem, name: str, check_exists: bool = False
+) -> Union[set[int], bool]:
+    """Selects all atoms with the input name in the chemical system.
+
+    Parameters
+    ----------
+    system : ChemicalSystem
+        The MDANSE chemical system.
+    name : str
+        The name of the atom to match.
+    check_exists : bool, optional
+        Check if a match exists.
+
+    Returns
+    -------
+    Union[set[int], bool]
+        All atom indices or a bool if checking match.
+    """
+    if check_exists:
+        for atm in system.atom_list:
+            if atm.name == name:
+                return True
+        return False
+    else:
+        return set([at.index for at in system.atom_list if at.name == name])
+
+
+def select_atom_fullname(
+    system: ChemicalSystem, fullname: str, check_exists: bool = False
+) -> Union[set[int], bool]:
+    """Selects all atoms with the input fullname in the chemical system.
+
+    Parameters
+    ----------
+    system : ChemicalSystem
+        The MDANSE chemical system.
+    fullname : str
+        The fullname of the atom to match.
+    check_exists : bool, optional
+        Check if a match exists.
+
+    Returns
+    -------
+    Union[set[int], bool]
+        All atom indices or a bool if checking match.
+    """
+    if check_exists:
+        for atm in system.atom_list:
+            if atm.full_name == fullname:
+                return True
+        return False
+    else:
+        return set([at.index for at in system.atom_list if at.full_name == fullname])
+
+
 def select_hs_on_element(
-    system: ChemicalSystem, symbol: Union[list[str], str], check_exists: bool = False
+    system: ChemicalSystem, symbol: str, check_exists: bool = False
 ) -> Union[set[int], bool]:
     """Selects all H atoms bonded to the input element.
 
@@ -88,7 +146,7 @@ def select_hs_on_element(
     ----------
     system : ChemicalSystem
         The MDANSE chemical system.
-    symbol : list[str] or str
+    symbol : str
         Symbol of the element that the H atoms are bonded to.
     check_exists : bool, optional
         Check if a match exists.
