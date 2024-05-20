@@ -23,14 +23,14 @@ from MDANSE_GUI.MolecularViewer.Controls import ViewerControls
 class View3D(QWidget):
     error = Signal(str)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, viewer: MolecularViewer, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         layout = QVBoxLayout(self)
         self.setLayout(layout)
 
         controls = ViewerControls(self)
-        viewer = MolecularViewer(controls)
+        viewer.setParent(controls)
         controls.setViewer(viewer)
         layout.addWidget(controls)
         self._viewer = viewer
