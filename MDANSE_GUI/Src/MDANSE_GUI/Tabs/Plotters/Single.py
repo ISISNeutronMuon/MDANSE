@@ -58,6 +58,7 @@ class Single(Plotter):
         target = self.get_figure(figure)
         if target is None:
             return
+        xaxis_unit = None
         self.get_mpl_colors()
         axes = target.add_subplot(111)
         self._axes = [axes]
@@ -96,7 +97,8 @@ class Single(Plotter):
                             print(f"x_axis={dataset._axes[best_axis]}")
                             print(f"values={value}")
                             return
-        axes.set_xlabel(xaxis_unit)
+        if xaxis_unit is not None:
+            axes.set_xlabel(xaxis_unit)
         axes.grid(True)
         axes.legend(loc=0)
         target.canvas.draw()

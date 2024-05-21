@@ -262,6 +262,21 @@ class PlottingContext(QStandardItemModel):
         temp.setCheckable(True)
         temp.setCheckState(Qt.CheckState.Checked)
         self.itemChanged.connect(self.needs_an_update)
+        # test for possible nested items
+        best_axis = new_dataset.longest_axis()
+        curves = new_dataset.curves_vs_axis(best_axis[0])
+        if len(curves) > 1:
+            counter = 1
+            for indices, curve in curves.items():
+                temp = SingleCurve(new_dataset._name, new_dataset._filename)
+                temp.set_data(curve, new_dataset._data_unit)
+                temp.set_x_axis(new_dataset._axes[best_axis[1]], best_axis[0])
+                # optionally, we should set y and z as well
+                subitems = temp.standard_items(newkey + f":{counter}")
+                items[0].appendRow(subitems)
+                counter += 1
+        else:
+            print("No curves!")
         self.appendRow(items)
 
     def set_axes(self):
