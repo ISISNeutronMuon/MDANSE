@@ -13,12 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import collections
+
+from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation, differentiate, normalize
+from MDANSE.Mathematics.Signal import differentiate, normalize
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 
@@ -62,7 +63,7 @@ class VelocityAutoCorrelationFunction(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["interpolation_order"] = (
@@ -108,16 +109,15 @@ class VelocityAutoCorrelationFunction(IJob):
         self._outputData.add(
             "time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.configuration["frames"]["cduration"],
             units="ps",
         )
 
-        # Will store the mean square displacement evolution.
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
                 "vacf_%s" % element,
                 "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
+                (self.configuration["frames"]["n_cframes"],),
                 axis="time",
                 units="nm2/ps2",
             )
@@ -125,7 +125,7 @@ class VelocityAutoCorrelationFunction(IJob):
         self._outputData.add(
             "vacf_total",
             "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
+            (self.configuration["frames"]["n_cframes"],),
             axis="time",
             units="nm2/ps2",
         )
@@ -177,9 +177,9 @@ class VelocityAutoCorrelationFunction(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        atomicVACF = correlation(series, axis=0, average=1)
-
-        return index, atomicVACF
+        n_cseries = self.configuration["frames"]["n_frames"] - self.configuration["frames"]["n_cframes"] + 1
+        atomicVACF = correlate(series, series[:n_cseries], mode="valid") / (3 * n_cseries)
+        return index, atomicVACF.T[0]
 
     def combine(self, index, x):
         """

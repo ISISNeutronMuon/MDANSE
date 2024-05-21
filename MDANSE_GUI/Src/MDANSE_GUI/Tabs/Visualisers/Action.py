@@ -32,6 +32,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "BooleanConfigurator": BooleanWidget,
     "StringConfigurator": StringWidget,
     "IntegerConfigurator": IntegerWidget,
+    "CorrelationFramesConfigurator": CorrelationFramesWidget,
     "FramesConfigurator": FramesWidget,
     "RangeConfigurator": RangeWidget,
     "VectorConfigurator": VectorWidget,
