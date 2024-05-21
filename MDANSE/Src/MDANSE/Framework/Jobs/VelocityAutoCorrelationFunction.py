@@ -109,7 +109,7 @@ class VelocityAutoCorrelationFunction(IJob):
         self._outputData.add(
             "time",
             "LineOutputVariable",
-            self.configuration["frames"]["cduration"],
+            self.configuration["frames"]["duration"],
             units="ps",
         )
 
@@ -117,7 +117,7 @@ class VelocityAutoCorrelationFunction(IJob):
             self._outputData.add(
                 "vacf_%s" % element,
                 "LineOutputVariable",
-                (self.configuration["frames"]["n_cframes"],),
+                (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2/ps2",
             )
@@ -125,7 +125,7 @@ class VelocityAutoCorrelationFunction(IJob):
         self._outputData.add(
             "vacf_total",
             "LineOutputVariable",
-            (self.configuration["frames"]["n_cframes"],),
+            (self.configuration["frames"]["n_frames"],),
             axis="time",
             units="nm2/ps2",
         )
@@ -177,7 +177,7 @@ class VelocityAutoCorrelationFunction(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        n_cseries = self.configuration["frames"]["n_frames"] - self.configuration["frames"]["n_cframes"] + 1
+        n_cseries = self.configuration["frames"]["number"] - self.configuration["frames"]["n_frames"] + 1
         atomicVACF = correlate(series, series[:n_cseries], mode="valid") / (3 * n_cseries)
         return index, atomicVACF.T[0]
 

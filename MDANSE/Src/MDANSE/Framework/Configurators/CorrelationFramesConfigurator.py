@@ -42,6 +42,6 @@ class CorrelationFramesConfigurator(FramesConfigurator):
                                  f"should be greater then zero.")
             return
 
-        self["n_cframes"] = c_frames
-        self["ctime"] = self["time"][:c_frames]
-        self["cduration"] = self["ctime"] - self["ctime"][0]
+        self["n_frames"] = c_frames
+        self["time"] = self["time"][:c_frames]
+        self["duration"] = self["time"] - self["time"][0]
