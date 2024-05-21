@@ -134,12 +134,14 @@ class PlotSettings(QWidget):
             a widget containing both the figure and a toolbar below
         """
         layout = QVBoxLayout(self)
+        top_layout = QFormLayout()
         style_selector = QComboBox(self)
         style_selector.addItem("default")
         style_selector.addItems(mpl.style.available)
         style_selector.setCurrentText("default")
         style_selector.currentTextChanged.connect(self.set_style)
-        layout.addWidget(style_selector)
+        top_layout.addRow("Matplotlib style:", style_selector)
+        layout.addLayout(top_layout)
         box = QGroupBox("Units", self)
         layout.addWidget(box)
         unit_layout = QFormLayout(box)

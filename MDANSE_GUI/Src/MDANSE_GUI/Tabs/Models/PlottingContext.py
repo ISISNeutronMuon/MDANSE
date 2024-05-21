@@ -20,16 +20,9 @@ import itertools
 
 if TYPE_CHECKING:
     import h5py
-    from matplotlib.figure import Figure
 
 import numpy as np
-import matplotlib.pyplot as mpl
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qt5agg import (
-    NavigationToolbar2QT as NavigationToolbar2QTAgg,
-)
 
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QTabWidget
 from qtpy.QtCore import Slot, Signal, QObject, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
@@ -140,6 +133,51 @@ class SingleDataset:
         #     if len(line) != xlen:
         #         print("Wrong data length in the curves_vs_axis method of PlottingContext")
         # return temp
+
+
+class SingleCurve:
+
+    def __init__(self, data_name: str, file_name: str, *args, **kwargs):
+        self._name = data_name
+        self._filename = file_name
+        self._curve = []
+        self._x_axis = []
+        self._y_axis = None
+        self._z_axis = None
+        bare_name = os.path.split(self._filename)[-1]
+        self._labels = {
+            "minimal": data_name,
+            "medium": f"{bare_name}:{data_name}",
+            "full": f"{file_name}:{data_name}",
+        }
+        self._label = self._labels["medium"]
+        self._units = {"data": "arbitrary", "x": None, "y": None, "z": None}
+        self._colour = "#000000"
+        self._line = "-"
+
+    def set_data(self, array: np.ndarray, unit: str):
+        self._curve = array
+        self._units["data"] = unit
+
+    def set_x_axis(self, array: np.ndarray, unit: str):
+        self._x_axis = array
+        self._units["x"] = unit
+
+    def set_y_axis(self, value: float, unit: str):
+        self._y_axis = value
+        self._units["y"] = unit
+
+    def set_z_axis(self, value: float, unit: str):
+        self._z_axis = value
+        self._units["z"] = unit
+
+    def standard_items(self, key: int) -> List["QStandardItem"]:
+        result = []
+        for val in []:
+            item = QStandardItem(str(val))
+            item.setData(key, role=Qt.ItemDataRole.UserRole)
+            result.append(item)
+        return result
 
 
 class PlottingContext(QStandardItemModel):

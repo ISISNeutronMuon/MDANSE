@@ -17,9 +17,8 @@
 from typing import TYPE_CHECKING
 
 from matplotlib.pyplot import style as mpl_style
-from matplotlib import colors, rcParams
+from matplotlib import rcParams
 
-from MDANSE.Framework.Units import measure
 from MDANSE.Core.SubclassFactory import SubclassFactory
 
 if TYPE_CHECKING:
