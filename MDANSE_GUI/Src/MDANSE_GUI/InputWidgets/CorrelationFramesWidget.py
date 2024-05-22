@@ -37,7 +37,7 @@ class CorrelationFramesWidget(FramesWidget):
         field.textChanged.connect(self.updateValue)
         field.setPlaceholderText(c_frames)
 
-        self._layout.addWidget(QLabel("Number of correlation frames", self._base), 1, 0)
+        self._layout.addWidget(QLabel("Correlation frames", self._base), 1, 0)
         self._layout.addWidget(field, 1, 1)
 
         self._fields.append(field)
