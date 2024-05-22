@@ -103,14 +103,14 @@ def test_selector_json_dump_0(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     selector.update_settings({"all": False, "element": {"S": True}})
     json_dump = selector.settings_to_json()
-    assert json_dump == '{"all": false, "element": {"S": true}}'
+    assert json_dump == '{"all": false, "element": ["S"]}'
 
 
 def test_selector_json_dump_1(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     selector.update_settings({"all": False, "element": {"S": True}, "water": True})
     json_dump = selector.settings_to_json()
-    assert json_dump == '{"all": false, "water": true, "element": {"S": true}}'
+    assert json_dump == '{"all": false, "water": true, "element": ["S"]}'
 
 
 def test_selector_json_dump_2(protein_chemical_system):
@@ -127,7 +127,7 @@ def test_selector_json_dump_3(protein_chemical_system):
     )
     json_dump = selector.settings_to_json()
     assert (
-        json_dump == '{"all": false, "water": true, "element": {"S": true, "H": true}}'
+        json_dump == '{"all": false, "water": true, "element": ["S", "H"]}'
     )
 
 
@@ -144,7 +144,7 @@ def test_selector_json_dump_4(protein_chemical_system):
     json_dump = selector.settings_to_json()
     assert (
         json_dump
-        == '{"all": false, "water": true, "element": {"S": true, "H": true}, "index": {"0": true, "1": true}}'
+        == '{"all": false, "water": true, "element": ["S", "H"], "index": [0, 1]}'
     )
 
 
@@ -154,7 +154,7 @@ def test_selector_json_dump_with_second_update(protein_chemical_system):
     selector.update_settings({"element": {"S": True, "O": True}, "water": True})
     json_dump = selector.settings_to_json()
     assert (
-        json_dump == '{"all": false, "water": true, "element": {"S": true, "O": true}}'
+        json_dump == '{"all": false, "water": true, "element": ["S", "O"]}'
     )
 
 
@@ -164,7 +164,7 @@ def test_selector_json_dump_with_third_update(protein_chemical_system):
     selector.update_settings({"element": {"S": True, "O": True}, "water": True})
     selector.update_settings({"element": {"S": False}})
     json_dump = selector.settings_to_json()
-    assert json_dump == '{"all": false, "water": true, "element": {"O": true}}'
+    assert json_dump == '{"all": false, "water": true, "element": ["O"]}'
 
 
 def test_selector_json_dump_with_fourth_update(protein_chemical_system):
@@ -174,7 +174,7 @@ def test_selector_json_dump_with_fourth_update(protein_chemical_system):
     selector.update_settings({"element": {"S": False}})
     selector.update_settings({"water": False})
     json_dump = selector.settings_to_json()
-    assert json_dump == '{"all": false, "element": {"O": true}}'
+    assert json_dump == '{"all": false, "element": ["O"]}'
 
 
 def test_selector_returns_correct_number_of_atom_idxs_after_setting_settings_again_with_reset_first(
@@ -201,13 +201,13 @@ def test_selector_returns_correct_number_of_atom_idxs_after_setting_settings_aga
 def test_selector_json_dump_and_load_0(protein_chemical_system):
     selector = Selector(protein_chemical_system)
     selector.update_settings(
-        {"all": False, "index": {0: True, "1": True}}
+        {"all": False, "index": {0: True, 1: True}}
     )
     json_dump = selector.settings_to_json()
     assert (
-        json_dump == '{"all": false, "index": {"0": true, "1": true}}'
+        json_dump == '{"all": false, "index": [0, 1]}'
     )
-    selector.update_from_json(json_dump, reset_first=True)
+    selector.load_from_json(json_dump)
     atm_idxs = selector.get_idxs()
     assert len(atm_idxs) == 2
 
@@ -220,9 +220,9 @@ def test_selector_json_dump_and_load_1(protein_chemical_system):
     json_dump = selector.settings_to_json()
     assert (
         json_dump
-        == '{"all": false, "water": true, "element": {"S": true}}'
+        == '{"all": false, "water": true, "element": ["S"]}'
     )
-    selector.update_from_json(json_dump, reset_first=True)
+    selector.load_from_json(json_dump)
     atm_idxs = selector.get_idxs()
     assert len(atm_idxs) == 28746 + 10
 
