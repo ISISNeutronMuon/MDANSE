@@ -135,7 +135,13 @@ class Eccentricity(IJob):
                 units="nm",
             )
 
-        self._outputData.add("eccentricity", "LineOutputVariable", npoints, axis="time")
+        self._outputData.add(
+            "eccentricity",
+            "LineOutputVariable",
+            npoints,
+            axis="time",
+            main_result=True,
+        )
 
         self._outputData.add(
             "ratio_of_largest_to_smallest", "LineOutputVariable", npoints, axis="time"

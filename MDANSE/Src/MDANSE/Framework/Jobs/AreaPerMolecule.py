@@ -120,6 +120,7 @@ class AreaPerMolecule(IJob):
             (self.configuration["frames"]["number"],),
             axis="time",
             units="1/nm2",
+            main_result=True,
         )
 
     def run_step(self, index):
