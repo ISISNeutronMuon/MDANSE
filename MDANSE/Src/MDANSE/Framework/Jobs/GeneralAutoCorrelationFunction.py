@@ -94,6 +94,8 @@ class GeneralAutoCorrelationFunction(IJob):
                 (self.configuration["frames"]["number"],),
                 axis="time",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
 
         self._outputData.add(
@@ -102,6 +104,7 @@ class GeneralAutoCorrelationFunction(IJob):
             (self.configuration["frames"]["number"],),
             axis="time",
             units="au",
+            main_result=True,
         )
 
     def run_step(self, index):

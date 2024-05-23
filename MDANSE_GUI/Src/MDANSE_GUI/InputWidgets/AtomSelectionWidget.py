@@ -369,9 +369,9 @@ class SelectionHelper(QDialog):
         for combo_box in self.combo_boxes:
             for item in combo_box.getItems():
                 txt = item.text()
-                try:
+                if combo_box.objectName() == "index":
                     key = int(txt)
-                except ValueError:
+                else:
                     key = txt
                 self.full_settings[combo_box.objectName()][key] = (
                     item.checkState() == Qt.Checked
@@ -411,9 +411,9 @@ class SelectionHelper(QDialog):
             combo_box.model().blockSignals(True)
             for item in combo_box.getItems():
                 txt = item.text()
-                try:
+                if combo_box.objectName() == "index":
                     key = int(txt)
-                except ValueError:
+                else:
                     key = txt
                 if self.full_settings[combo_box.objectName()][key]:
                     item.setCheckState(Qt.Checked)

@@ -160,6 +160,8 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                 (self._nQShells, self._nOmegas),
                 axis="q|omega",
                 units="nm2/ps",
+                main_result=True,
+                partial_result=True,
             )
 
         self._outputData.add(
@@ -175,6 +177,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             (self._nQShells, self._nOmegas),
             axis="q|omega",
             units="nm2/ps",
+            main_result=True,
         )
 
         self._atoms = sorted_atoms(

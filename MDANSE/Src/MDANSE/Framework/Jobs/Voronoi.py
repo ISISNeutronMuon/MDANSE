@@ -222,7 +222,11 @@ class Voronoi(IJob):
             self.neighbourhood[k] = v
 
         self._outputData.add(
-            "mean_volume", "LineOutputVariable", self.mean_volume, units="nm3"
+            "mean_volume",
+            "LineOutputVariable",
+            self.mean_volume,
+            units="nm3",
+            main_result=True,
         )
 
         self._outputData.add(

@@ -90,6 +90,7 @@ class SolventAccessibleSurface(IJob):
             (self.configuration["frames"]["number"],),
             axis="time",
             units="nm2",
+            main_result=True,
         )
 
         # Generate the sphere points that will be used to evaluate the sas per atom.
