@@ -62,7 +62,7 @@ class MeanSquareDisplacement(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["projection"] = (
@@ -122,7 +122,7 @@ class MeanSquareDisplacement(IJob):
             self._outputData.add(
                 "msd_%s" % element,
                 "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
+                (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2",
             )
@@ -165,9 +165,13 @@ class MeanSquareDisplacement(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        msd = mean_square_displacement(series)
+        msd = np.zeros(self.configuration["frames"]["n_frames"])
+        n_frames = self.configuration["frames"]["n_frames"]
+        n_configs = self.configuration["frames"]["number"] - self.configuration["frames"]["n_frames"] + 1
+        for i in range(n_configs):
+            msd += np.sum((series[i] - series[i:i+n_frames])**2, axis=1)
 
-        return index, msd
+        return index, msd / n_configs
 
     def combine(self, index, result):
         """

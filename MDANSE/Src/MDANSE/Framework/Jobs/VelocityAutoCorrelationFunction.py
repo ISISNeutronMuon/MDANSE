@@ -177,8 +177,8 @@ class VelocityAutoCorrelationFunction(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        n_cseries = self.configuration["frames"]["number"] - self.configuration["frames"]["n_frames"] + 1
-        atomicVACF = correlate(series, series[:n_cseries], mode="valid") / (3 * n_cseries)
+        n_configs = self.configuration["frames"]["number"] - self.configuration["frames"]["n_frames"] + 1
+        atomicVACF = correlate(series, series[:n_configs], mode="valid") / (3 * n_configs)
         return index, atomicVACF.T[0]
 
     def combine(self, index, x):
