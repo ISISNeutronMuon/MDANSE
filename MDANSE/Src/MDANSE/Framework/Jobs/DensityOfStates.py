@@ -202,8 +202,6 @@ class DensityOfStates(IJob):
         atomicVACF = correlate(series, series[:n_configs], mode="valid") / (3 * n_configs)
         return index, atomicVACF.T[0]
 
-        return index, atomicVACF
-
     def combine(self, index, x):
         """
         Combines returned results of run_step.\n
