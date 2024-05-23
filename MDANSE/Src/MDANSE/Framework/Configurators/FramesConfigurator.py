@@ -108,6 +108,11 @@ class FramesConfigurator(RangeConfigurator):
 
         self["duration"] = self["time"] - self["time"][0]
 
+    def preview_output_axis(self):
+        if not self.is_configured():
+            return None
+        return self["time"], "ps"
+
     def get_information(self):
         """
         Returns some informations about this configurator.

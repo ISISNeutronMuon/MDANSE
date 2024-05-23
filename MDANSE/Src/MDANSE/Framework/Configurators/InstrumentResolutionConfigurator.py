@@ -98,6 +98,11 @@ class InstrumentResolutionConfigurator(IConfigurator):
             : len(time)
         ]
 
+    def preview_output_axis(self):
+        if not self.is_configured():
+            return None
+        return self["romega"], "rad/ps"
+
     def get_information(self):
         """
         Returns some informations the instrument resolution.
