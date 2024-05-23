@@ -95,6 +95,7 @@ class Temperature(IJob):
             (self._nFrames,),
             axis="time",
             units="K",
+            main_result=True,
         )
 
         self._atoms = sorted_atoms(
