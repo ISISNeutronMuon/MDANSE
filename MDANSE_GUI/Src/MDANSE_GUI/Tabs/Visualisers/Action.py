@@ -228,11 +228,11 @@ class Action(QWidget):
 
         self.layout.addWidget(buttonbase)
         self._widgets_in_layout.append(buttonbase)
-        self.allow_execution()
         self.show_output_prediction()
 
     @Slot()
     def show_output_prediction(self):
+        self.allow_execution()
         print("Show output prediction")
         pardict = self.set_parameters()
         self._job_instance.setup(pardict)

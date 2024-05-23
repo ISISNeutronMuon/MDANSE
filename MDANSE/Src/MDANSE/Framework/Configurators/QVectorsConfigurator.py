@@ -105,7 +105,9 @@ class QVectorsConfigurator(IConfigurator):
 
     def preview_output_axis(self):
         if not self.is_configured():
-            return None
+            return None, None
+        if not self._valid:
+            return None, None
         return self["shells"], "1/nm"
 
     def get_information(self):

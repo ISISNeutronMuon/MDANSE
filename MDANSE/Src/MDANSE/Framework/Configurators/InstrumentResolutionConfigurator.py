@@ -65,6 +65,9 @@ class InstrumentResolutionConfigurator(IConfigurator):
 
         time = framesCfg["time"]
         self["n_frames"] = len(time)
+        if len(time) < 2:
+            framesCfg.error_status = "This analysis requires more time steps"
+            return
 
         self._timeStep = framesCfg["time"][1] - framesCfg["time"][0]
         self["time_step"] = self._timeStep
@@ -100,8 +103,13 @@ class InstrumentResolutionConfigurator(IConfigurator):
 
     def preview_output_axis(self):
         if not self.is_configured():
-            return None
-        return self["romega"], "rad/ps"
+            return None, None
+        if not self._valid:
+            return None, None
+        if "romega" in self:
+            return self["romega"], "rad/ps"
+        else:
+            return None, None
 
     def get_information(self):
         """
