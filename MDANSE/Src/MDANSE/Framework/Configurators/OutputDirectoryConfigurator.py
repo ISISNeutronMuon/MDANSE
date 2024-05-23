@@ -72,5 +72,7 @@ class OutputDirectoryConfigurator(IConfigurator):
         :return: the information about this configurator.
         :rtype: str
         """
+        if "value" not in self:
+            return "Not configured yet\n"
 
         return "Output directory: %r\n" % self["value"]
