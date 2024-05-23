@@ -98,6 +98,8 @@ class RootMeanSquareDeviation(IJob):
                 (self.configuration["frames"]["number"],),
                 axis="time",
                 units="nm",
+                main_result=True,
+                partial_result=True,
             )
         self._outputData.add(
             "rmsd_all",
@@ -105,6 +107,7 @@ class RootMeanSquareDeviation(IJob):
             (self.configuration["frames"]["number"],),
             axis="time",
             units="nm",
+            main_result=True,
         )
 
         self._atoms = sorted_atoms(

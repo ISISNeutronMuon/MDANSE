@@ -207,6 +207,8 @@ class CurrentCorrelationFunction(IJob):
                 (nQShells, self._nOmegas),
                 axis="q|omega",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
             self._outputData.add(
                 "J(q,f)_trans_%s%s" % pair,
@@ -214,6 +216,8 @@ class CurrentCorrelationFunction(IJob):
                 (nQShells, self._nOmegas),
                 axis="q|omega",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
 
         self._outputData.add(
@@ -229,6 +233,7 @@ class CurrentCorrelationFunction(IJob):
             (nQShells, self._nOmegas),
             axis="q|omega",
             units="au",
+            main_result=True,
         )
         self._outputData.add(
             "j(q,t)_trans_total",
@@ -243,6 +248,7 @@ class CurrentCorrelationFunction(IJob):
             (nQShells, self._nOmegas),
             axis="q|omega",
             units="au",
+            main_result=True,
         )
 
         traj = self.configuration["trajectory"]["instance"]

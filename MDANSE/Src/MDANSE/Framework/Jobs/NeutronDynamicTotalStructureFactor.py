@@ -334,6 +334,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
             (nQValues, nOmegas),
             axis="q|omega",
             units="nm2/ps",
+            main_result=True,
+            partial_result=True,
         )
         self._outputData.add(
             "s(q,f)_inc_total",
@@ -341,6 +343,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
             (nQValues, nOmegas),
             axis="q|omega",
             units="nm2/ps",
+            main_result=True,
+            partial_result=True,
         )
         self._outputData.add(
             "s(q,f)_total",
@@ -348,6 +352,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             (nQValues, nOmegas),
             axis="q|omega",
             units="nm2/ps",
+            main_result=True,
         )
 
     def run_step(self, index):

@@ -106,6 +106,8 @@ class StructureFactorFromScatteringFunction(IJob):
                     (nQVectors, nOmegas),
                     axis="q|omega",
                     units="au",
+                    main_result=True,
+                    partial_result=True,
                 )
                 self._outputData["s(q,f)_%s" % suffix][:] = get_spectrum(
                     v[:],

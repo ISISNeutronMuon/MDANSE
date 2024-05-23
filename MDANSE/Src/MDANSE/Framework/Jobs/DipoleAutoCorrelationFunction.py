@@ -88,6 +88,7 @@ class DipoleAutoCorrelationFunction(IJob):
             "LineOutputVariable",
             (self.configuration["frames"]["number"],),
             axis="time",
+            main_result=True,
         )
 
     def run_step(self, index) -> tuple[int, np.ndarray]:

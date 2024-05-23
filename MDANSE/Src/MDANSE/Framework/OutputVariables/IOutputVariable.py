@@ -50,7 +50,15 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
     Those extra attributes will be contain information necessary for the the MDANSE plotter.
     """
 
-    def __new__(cls, value, varname, axis="index", units="unitless"):
+    def __new__(
+        cls,
+        value,
+        varname,
+        axis="index",
+        units="unitless",
+        main_result=False,
+        partial_result=False,
+    ):
         """
         Instanciate a new MDANSE output variable.
 
@@ -88,6 +96,14 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         obj.units = units
 
         obj.axis = axis
+
+        data_tags = []
+        if main_result:
+            data_tags.append("main")
+        if partial_result:
+            data_tags.append("partial")
+
+        obj.tags = ",".join(data_tags)
 
         return obj
 

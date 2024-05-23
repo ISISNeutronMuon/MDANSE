@@ -113,6 +113,8 @@ class DensityProfile(IJob):
                 (self._n_bins,),
                 axis="r",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
 
         self._extent = 0.0
