@@ -339,7 +339,7 @@ class SelectionHelper(QDialog):
             elif isinstance(v, dict):
                 combo_layout = QHBoxLayout()
                 combo = CheckableComboBox()
-                items = [i for i in v.keys() if match_exists[k][i]]
+                items = [str(i) for i in v.keys() if match_exists[k][i]]
                 # we blocksignals here as there can be some
                 # performance issues with a large number of items
                 combo.model().blockSignals(True)
@@ -368,7 +368,12 @@ class SelectionHelper(QDialog):
             self.full_settings[check_box.objectName()] = check_box.isChecked()
         for combo_box in self.combo_boxes:
             for item in combo_box.getItems():
-                self.full_settings[combo_box.objectName()][item.text()] = (
+                txt = item.text()
+                try:
+                    key = int(txt)
+                except ValueError:
+                    key = txt
+                self.full_settings[combo_box.objectName()][key] = (
                     item.checkState() == Qt.Checked
                 )
 
@@ -405,7 +410,12 @@ class SelectionHelper(QDialog):
         for combo_box in self.combo_boxes:
             combo_box.model().blockSignals(True)
             for item in combo_box.getItems():
-                if self.full_settings[combo_box.objectName()][item.text()]:
+                txt = item.text()
+                try:
+                    key = int(txt)
+                except ValueError:
+                    key = txt
+                if self.full_settings[combo_box.objectName()][key]:
                     item.setCheckState(Qt.Checked)
                 else:
                     item.setCheckState(Qt.Unchecked)
