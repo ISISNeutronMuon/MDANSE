@@ -116,6 +116,7 @@ class Infrared(IJob):
             "LineOutputVariable",
             (instrResolution["n_romegas"],),
             axis="omega",
+            main_result=True,
         )
 
     def run_step(self, index) -> tuple[int, np.ndarray]:

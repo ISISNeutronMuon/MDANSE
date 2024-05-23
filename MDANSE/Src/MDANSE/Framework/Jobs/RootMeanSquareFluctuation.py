@@ -84,6 +84,7 @@ class RootMeanSquareFluctuation(IJob):
             (self.configuration["atom_selection"]["selection_length"],),
             axis="indexes",
             units="nm",
+            main_result=True,
         )
 
         self._atoms = sorted_atoms(
