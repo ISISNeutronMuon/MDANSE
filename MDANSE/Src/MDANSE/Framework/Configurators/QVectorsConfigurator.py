@@ -103,6 +103,13 @@ class QVectorsConfigurator(IConfigurator):
         self["value"] = self["q_vectors"]
         self.error_status = "OK"
 
+    def preview_output_axis(self):
+        if not self.is_configured():
+            return None, None
+        if not self._valid:
+            return None, None
+        return self["shells"], "1/nm"
+
     def get_information(self):
         """
         Returns string information about this configurator.

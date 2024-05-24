@@ -85,5 +85,7 @@ class AxisSelectionConfigurator(IConfigurator):
         :return: the information about this configurator
         :rtype: str
         """
+        if "value" not in self:
+            return "Not configured yet\n"
 
         return "Axis vector:%s\n" % self["value"]

@@ -107,5 +107,7 @@ class McStasOptionsConfigurator(IConfigurator):
         :return: the McStas command-line options.
         :rtype: str
         """
+        if "value" not in self:
+            return "Not configured yet\n"
 
         return "McStas command line options: %s\n" % self["value"]

@@ -123,5 +123,7 @@ class McStasParametersConfigurator(IConfigurator):
         :return: the McStas command-line parameters.
         :rtype: str
         """
+        if "value" not in self:
+            return "Not configured yet\n"
 
         return "McStas command line parameters:%s\n" % self["value"]
