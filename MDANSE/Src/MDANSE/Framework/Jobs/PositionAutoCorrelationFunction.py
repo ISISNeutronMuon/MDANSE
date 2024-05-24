@@ -136,7 +136,9 @@ class PositionAutoCorrelationFunction(IJob):
         series = self.configuration["projection"]["projector"](series)
 
         n_configs = self.configuration["frames"]["n_configs"]
-        atomicPACF = correlate(series, series[:n_configs], mode="valid") / (3 * n_configs)
+        atomicPACF = correlate(series, series[:n_configs], mode="valid") / (
+            3 * n_configs
+        )
         return index, atomicPACF.T[0]
 
     def combine(self, index, x):
