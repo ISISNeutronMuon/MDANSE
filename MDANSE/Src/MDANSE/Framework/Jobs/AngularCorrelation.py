@@ -177,7 +177,7 @@ class AngularCorrelation(IJob):
 
         diff /= modulus[:, np.newaxis]
 
-        n_configs = self.configuration["frames"]["number"] - self.configuration["frames"]["n_frames"] + 1
+        n_configs = self.configuration["frames"]["n_configs"]
         ac = correlate(diff, diff[:n_configs], mode="valid") / (3 * n_configs)
         return index, ac.T[0]
 

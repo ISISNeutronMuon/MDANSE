@@ -167,7 +167,7 @@ class MeanSquareDisplacement(IJob):
 
         msd = np.zeros(self.configuration["frames"]["n_frames"])
         n_frames = self.configuration["frames"]["n_frames"]
-        n_configs = self.configuration["frames"]["number"] - self.configuration["frames"]["n_frames"] + 1
+        n_configs = self.configuration["frames"]["n_configs"]
         for i in range(n_configs):
             msd += np.sum((series[i] - series[i:i+n_frames])**2, axis=1)
 

@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import math
+
 from .FramesConfigurator import FramesConfigurator
 
 
@@ -28,6 +30,13 @@ class CorrelationFramesConfigurator(FramesConfigurator):
             The frames setting plus the number of frames used for the
             correlations.
         """
+        trajConfig = self._configurable[self._dependencies["trajectory"]]
+        n_steps = trajConfig["length"]
+
+        # if all or None set to default
+        if value in ["all", None]:
+            value = [0, n_steps, 1, math.ceil(n_steps / 2)]
+
         first, last, step, c_frames = value
         super().configure((first, last, step))
 
@@ -43,5 +52,6 @@ class CorrelationFramesConfigurator(FramesConfigurator):
             return
 
         self["n_frames"] = c_frames
+        self["n_configs"] = self["number"] - c_frames + 1
         self["time"] = self["time"][:c_frames]
         self["duration"] = self["time"] - self["time"][0]
