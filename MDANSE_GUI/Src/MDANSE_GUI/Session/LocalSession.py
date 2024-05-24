@@ -16,14 +16,33 @@
 
 import os
 import json
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from qtpy.QtCore import QObject, Signal, Slot
 
 from MDANSE import PLATFORM
+from MDANSE.Framework.Units import measure
 
 json_encoder = json.encoder.JSONEncoder()
 json_decoder = json.decoder.JSONDecoder()
+
+
+unit_lookup = {
+    "rad/ps": "energy",
+    "meV": "energy",
+    "1/cm": "energy",
+    "THz": "energy",
+    "nm": "distance",
+    "ang": "distance",
+    "pm": "distance",
+    "Bohr": "distance",
+    "ps": "time",
+    "fs": "time",
+    "ns": "time",
+    "1/nm": "reciprocal",
+    "1/ang": "reciprocal",
+    "N/A": "arbitrary",
+}
 
 
 class LocalSession(QObject):
@@ -63,6 +82,36 @@ class LocalSession(QObject):
         for key, value in input.items():
             self._units[key] = value
         self.new_units.emit(self._units)
+
+    def conversion_factor(self, input_unit: str) -> Tuple[float, str]:
+        """Finds the conversion factor from an input unit
+        to the unit preferred by the user for a given
+        physical property.
+
+        Parameters
+        ----------
+        input_unit : str
+            Name/abbreviation of a physical unit
+
+        Returns
+        -------
+        Tuple[float, str]
+            factor F and text label str
+            Conversion factor F for converting from the input unit
+            to the unit saved by the LocalSession instance.
+            The conversion will be done outside of this
+            function, following the formula:
+            converted_value = F * input_value
+        """
+        conversion_factor = 1.0
+        target_unit = input_unit
+        property = unit_lookup.get(input_unit, "unknown")
+        if property in self._units:
+            target_unit = self._units[property]
+            conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
+                target_unit
+            )
+        return conversion_factor, target_unit
 
     def get_parameter(self, key: str) -> str:
         value = self._parameters.get(key, None)
