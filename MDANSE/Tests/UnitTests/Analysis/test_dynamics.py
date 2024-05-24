@@ -115,3 +115,13 @@ def test_dynamics_analysis(parameters, job_type, running_mode, output_format):
         assert path.exists(temp_name + "_text.tar")
         assert path.isfile(temp_name + "_text.tar")
         os.remove(temp_name + "_text.tar")
+
+
+def test_output_axis_preview(parameters):
+    temp_name = tempfile.mktemp()
+    parameters["running_mode"] = ("single-core", 1)
+    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    job = IJob.create("DensityOfStates")
+    job.setup(parameters)
+    axes = job.preview_output_axis()
+    assert len(axes) == 2  # two configurators return valid arrays

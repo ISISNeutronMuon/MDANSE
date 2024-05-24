@@ -143,10 +143,20 @@ class OrderParameter(IJob):
             self._doRotation = True
 
         self._outputData.add(
-            "p1", "LineOutputVariable", (self._nFrames,), axis="time", units="au"
+            "p1",
+            "LineOutputVariable",
+            (self._nFrames,),
+            axis="time",
+            units="au",
+            main_result=True,
         )
         self._outputData.add(
-            "p2", "LineOutputVariable", (self._nFrames,), axis="time", units="au"
+            "p2",
+            "LineOutputVariable",
+            (self._nFrames,),
+            axis="time",
+            units="au",
+            main_result=True,
         )
         self._outputData.add(
             "s2", "LineOutputVariable", (self._nAxis,), axis="time", units="au"
@@ -159,6 +169,8 @@ class OrderParameter(IJob):
                 (self._nAxis, self._nFrames),
                 axis="axis_index|time",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
             self._outputData.add(
                 "p2_per_axis",
@@ -166,6 +178,8 @@ class OrderParameter(IJob):
                 (self._nAxis, self._nFrames),
                 axis="axis_index|time",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
 
     def run_step(self, index):

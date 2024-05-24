@@ -125,6 +125,8 @@ class MeanSquareDisplacement(IJob):
                 (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2",
+                main_result=True,
+                partial_result=True,
             )
 
         self._atoms = sorted_atoms(
@@ -204,7 +206,12 @@ class MeanSquareDisplacement(IJob):
         msdTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "msd_%s")
 
         self._outputData.add(
-            "msd_total", "LineOutputVariable", msdTotal, axis="time", units="nm2"
+            "msd_total",
+            "LineOutputVariable",
+            msdTotal,
+            axis="time",
+            units="nm2",
+            main_result=True,
         )
 
         self._outputData.write(

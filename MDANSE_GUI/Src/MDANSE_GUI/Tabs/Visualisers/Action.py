@@ -21,6 +21,7 @@ from qtpy.QtWidgets import (
     QWidget,
     QHBoxLayout,
     QScrollArea,
+    QTextEdit,
 )
 from qtpy.QtCore import Signal, Slot
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -74,11 +75,12 @@ class Action(QWidget):
 
     last_paths = {}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, use_preview=False, **kwargs):
         self._default_path = None
         self._input_trajectory = None
         self._trajectory_configurator = None
         self._session = None
+        self._use_preview = use_preview
         default_path = kwargs.pop("path", None)
         input_trajectory = kwargs.pop("trajectory", None)
         self.set_trajectory(default_path, input_trajectory)
@@ -120,6 +122,7 @@ class Action(QWidget):
             self.layout.removeWidget(widget)
         self._widgets = []
         self._widgets_in_layout = []
+        self._preview_box = None
 
     def update_panel(self, job_name: str) -> None:
         """Sets all the widgets for the selected job.
@@ -191,6 +194,8 @@ class Action(QWidget):
                 self._widgets_in_layout.append(widget)
                 self._widgets.append(input_widget)
                 input_widget.valid_changed.connect(self.allow_execution)
+                if self._use_preview:
+                    input_widget.value_updated.connect(self.show_output_prediction)
                 print(f"Set up the right widget for {key}")
             # self.handlers[key] = data_handler
             configured = False
@@ -203,6 +208,11 @@ class Action(QWidget):
                 iterations += 1
                 if iterations > 5:
                     break
+
+        if self._use_preview:
+            self._preview_box = QTextEdit(self)
+            self.layout.addWidget(self._preview_box)
+            self._widgets_in_layout.append(self._preview_box)
 
         buttonbase = QWidget(self)
         buttonlayout = QHBoxLayout(buttonbase)
@@ -219,7 +229,23 @@ class Action(QWidget):
 
         self.layout.addWidget(buttonbase)
         self._widgets_in_layout.append(buttonbase)
+        self.show_output_prediction()
+
+    @Slot()
+    def show_output_prediction(self):
         self.allow_execution()
+        print("Show output prediction")
+        pardict = self.set_parameters()
+        self._job_instance.setup(pardict)
+        axes = self._job_instance.preview_output_axis()
+        print(f"Axes = {axes.keys()}")
+        text = "<p><b>The results will cover the following range:</b></p>"
+        for unit, array in axes.items():
+            if len(array) < 6:
+                text += f"<p>{array} ({unit})</p>"
+            else:
+                text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({unit})</p>"
+        self._preview_box.setHtml(text)
 
     @Slot(dict)
     def parse_updated_params(self, new_params: dict):

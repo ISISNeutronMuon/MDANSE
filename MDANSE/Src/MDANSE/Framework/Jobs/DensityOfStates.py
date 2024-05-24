@@ -135,6 +135,8 @@ class DensityOfStates(IJob):
                 (instrResolution["n_romegas"],),
                 axis="romega",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
         self._outputData.add(
             "vacf_total",
@@ -149,6 +151,7 @@ class DensityOfStates(IJob):
             (instrResolution["n_romegas"],),
             axis="romega",
             units="au",
+            main_result=True,
         )
 
         self._atoms = sorted_atoms(

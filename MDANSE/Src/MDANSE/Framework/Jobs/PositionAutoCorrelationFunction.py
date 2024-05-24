@@ -104,6 +104,8 @@ class PositionAutoCorrelationFunction(IJob):
                 (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2",
+                main_result=True,
+                partial_result=True,
             )
 
         self._atoms = sorted_atoms(
@@ -179,7 +181,12 @@ class PositionAutoCorrelationFunction(IJob):
         pacfTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "pacf_%s")
 
         self._outputData.add(
-            "pacf_total", "LineOutputVariable", pacfTotal, axis="time", units="nm2"
+            "pacf_total",
+            "LineOutputVariable",
+            pacfTotal,
+            axis="time",
+            units="nm2",
+            main_result=True,
         )
 
         self._outputData.write(

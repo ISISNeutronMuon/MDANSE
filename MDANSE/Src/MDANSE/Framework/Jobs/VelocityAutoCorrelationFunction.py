@@ -120,6 +120,8 @@ class VelocityAutoCorrelationFunction(IJob):
                 (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2/ps2",
+                main_result=True,
+                partial_result=True,
             )
 
         self._outputData.add(
@@ -128,6 +130,7 @@ class VelocityAutoCorrelationFunction(IJob):
             (self.configuration["frames"]["n_frames"],),
             axis="time",
             units="nm2/ps2",
+            main_result=True,
         )
 
         self._atoms = sorted_atoms(

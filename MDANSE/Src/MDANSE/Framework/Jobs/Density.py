@@ -83,6 +83,7 @@ class Density(IJob):
             (self._n_frames,),
             axis="time",
             units="g/cm3",
+            main_result=True,
         )
 
         self._outputData.add(

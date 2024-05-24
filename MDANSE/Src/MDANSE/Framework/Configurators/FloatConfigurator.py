@@ -125,5 +125,7 @@ class FloatConfigurator(IConfigurator):
         :return: the information about this configurator
         :rtype: str
         """
+        if "value" not in self:
+            return "Not configured yet\n"
 
         return "Value: %r\n" % self["value"]

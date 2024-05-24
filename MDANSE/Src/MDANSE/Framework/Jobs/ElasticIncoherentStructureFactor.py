@@ -118,10 +118,17 @@ class ElasticIncoherentStructureFactor(IJob):
                 (self._nQShells,),
                 axis="q",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
 
         self._outputData.add(
-            "eisf_total", "LineOutputVariable", (self._nQShells,), axis="q", units="au"
+            "eisf_total",
+            "LineOutputVariable",
+            (self._nQShells,),
+            axis="q",
+            units="au",
+            main_result=True,
         )
 
         self._atoms = sorted_atoms(

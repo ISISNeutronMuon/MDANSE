@@ -76,6 +76,7 @@ class RadiusOfGyration(IJob):
             (self.configuration["frames"]["number"],),
             axis="time",
             units="nm",
+            main_result=True,
         )
 
         self._indexes = [

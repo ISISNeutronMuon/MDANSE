@@ -127,6 +127,7 @@ class MolecularTrace(IJob):
             "molecular_trace",
             "VolumeOutputVariable",
             tuple(np.ceil(np.array([dimx, dimy, dimz]) / self.resolution).astype(int)),
+            main_result=True,
         )
 
         self._indexes = [

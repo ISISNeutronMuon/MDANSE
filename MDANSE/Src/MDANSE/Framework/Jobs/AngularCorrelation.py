@@ -120,6 +120,7 @@ class AngularCorrelation(IJob):
             (self.configuration["frames"]["n_frames"],),
             axis="time",
             units="au",
+            main_result=True,
         )
 
         if self.configuration["per_axis"]["value"]:
@@ -136,6 +137,8 @@ class AngularCorrelation(IJob):
                 ),
                 axis="axis_index|time",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
 
     def run_step(self, index):
