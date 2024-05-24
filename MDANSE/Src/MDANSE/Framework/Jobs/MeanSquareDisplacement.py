@@ -17,10 +17,10 @@
 import collections
 
 import numpy as np
+from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 
@@ -165,13 +165,15 @@ class MeanSquareDisplacement(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        msd = np.zeros(self.configuration["frames"]["n_frames"])
-        n_frames = self.configuration["frames"]["n_frames"]
         n_configs = self.configuration["frames"]["n_configs"]
-        for i in range(n_configs):
-            msd += np.sum((series[i] - series[i:i+n_frames])**2, axis=1)
 
-        return index, msd / n_configs
+        r2 = series * series
+        window = np.ones((n_configs, 3))
+        r2t = correlate(r2, window, mode="valid").T[0] / n_configs
+        rtr0 = correlate(series, series[:n_configs], mode="valid").T[0] / n_configs
+        msd = r2t[0] + r2t - 2 * rtr0
+
+        return index, msd
 
     def combine(self, index, result):
         """
