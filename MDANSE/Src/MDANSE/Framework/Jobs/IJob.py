@@ -151,6 +151,15 @@ class IJob(Configurable, metaclass=SubclassFactory):
     def run_step(self, index):
         pass
 
+    def preview_output_axis(self):
+        axes = {}
+        for configurator in self._configuration.values():
+            axis, unit = configurator.preview_output_axis()
+            if axis is None:
+                continue
+            axes[unit] = axis
+        return axes
+
     @classmethod
     def save(cls, jobFile, parameters=None):
         """

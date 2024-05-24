@@ -172,5 +172,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         :return: the information about this configurator
         :rtype: str
         """
+        if "value" not in self:
+            return "Not configured yet\n"
 
         return "Grouping level: %r\n" % self["value"]

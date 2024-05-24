@@ -53,5 +53,7 @@ class InputDirectoryConfigurator(IConfigurator):
         :return: the information about this configurator
         :rtype: str
         """
+        if "value" not in self:
+            return "Not configured yet\n"
 
         return "Input directory: %r\n" % self["value"]

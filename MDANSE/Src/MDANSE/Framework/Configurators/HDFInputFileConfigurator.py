@@ -117,6 +117,8 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         :return: the informations about the contents of the HDF file.
         :rtype: str
         """
+        if "value" not in self:
+            return "Not configured yet\n"
 
         info = ["HDF input file: %r" % self["value"]]
 

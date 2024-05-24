@@ -111,7 +111,7 @@ class JobTab(GeneralTab):
         logger,
         **kwargs,
     ):
-        action = Action()
+        action = Action(use_preview=True)
         the_tab = cls(
             parent,
             name=name,
