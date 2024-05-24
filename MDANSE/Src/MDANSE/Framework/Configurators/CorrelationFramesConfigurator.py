@@ -48,7 +48,7 @@ class CorrelationFramesConfigurator(FramesConfigurator):
             )
             return
 
-        if c_frames < 1:
+        if c_frames < 2:
             self.error_status = (
                 f"Number of frames used for the correlation "
                 f"should be greater then zero."
