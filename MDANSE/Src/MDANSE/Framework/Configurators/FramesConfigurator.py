@@ -34,6 +34,7 @@ class FramesConfigurator(RangeConfigurator):
     """
 
     _label = "Subset of frames to be selected (first, last, step size)"
+    _default = "all"
 
     def __init__(self, name, **kwargs):
         """
