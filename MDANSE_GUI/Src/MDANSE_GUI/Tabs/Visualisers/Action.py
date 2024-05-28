@@ -235,21 +235,22 @@ class Action(QWidget):
 
     @Slot()
     def show_output_prediction(self):
-        self.allow_execution()
-        print("Show output prediction")
-        pardict = self.set_parameters()
-        self._job_instance.setup(pardict)
-        axes = self._job_instance.preview_output_axis()
-        print(f"Axes = {axes.keys()}")
-        text = "<p><b>The results will cover the following range:</b></p>"
-        for unit, old_array in axes.items():
-            scale_factor, new_unit = self._session.conversion_factor(unit)
-            array = np.array(old_array) * scale_factor
-            if len(array) < 6:
-                text += f"<p>{array} ({new_unit})</p>"
-            else:
-                text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({new_unit})</p>"
-        self._preview_box.setHtml(text)
+        if self._use_preview:
+            self.allow_execution()
+            print("Show output prediction")
+            pardict = self.set_parameters()
+            self._job_instance.setup(pardict)
+            axes = self._job_instance.preview_output_axis()
+            print(f"Axes = {axes.keys()}")
+            text = "<p><b>The results will cover the following range:</b></p>"
+            for unit, old_array in axes.items():
+                scale_factor, new_unit = self._session.conversion_factor(unit)
+                array = np.array(old_array) * scale_factor
+                if len(array) < 6:
+                    text += f"<p>{array} ({new_unit})</p>"
+                else:
+                    text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({new_unit})</p>"
+            self._preview_box.setHtml(text)
 
     @Slot(dict)
     def parse_updated_params(self, new_params: dict):
