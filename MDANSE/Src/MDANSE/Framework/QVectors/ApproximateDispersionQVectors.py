@@ -67,7 +67,7 @@ class ApproximateDispersionQVectors(LatticeQVectors):
         hkls = np.rint(np.dot(self._directUnitCell, vects))
 
         dists = np.sqrt(np.sum(vects**2, axis=0))
-        dists = zip(range(len(dists)), dists)
+        dists = list(zip(range(len(dists)), dists))
         dists.sort(key=operator.itemgetter(1))
         qGroups = itertools.groupby(dists, key=operator.itemgetter(1))
         qGroups = collections.OrderedDict(
