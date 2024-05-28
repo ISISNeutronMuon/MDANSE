@@ -211,11 +211,20 @@ class RangeConfigurator(IConfigurator):
         :rtype: str
         """
 
-        info = "%d values from %s to %s" % (self["number"], self["first"], self["last"])
+        if self._valid:
 
-        if self._includeLast:
-            info += " last value included"
+            info = "%d values from %s to %s" % (
+                self["number"],
+                self["first"],
+                self["last"],
+            )
+
+            if self._includeLast:
+                info += " last value included"
+            else:
+                info += " last value excluded"
+
+            return info + "\n"
+
         else:
-            info += " last value excluded"
-
-        return info + "\n"
+            return "Invalid input parameters\n"

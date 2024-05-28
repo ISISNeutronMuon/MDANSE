@@ -15,7 +15,6 @@
 #
 
 
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     ConfiguratorError,
@@ -60,43 +59,32 @@ class QVectorsConfigurator(IConfigurator):
         self._original_input = value
 
         trajConfig = self._configurable[self._dependencies["trajectory"]]
-        if isinstance(value, str):
-            if UD_STORE.has_definition(trajConfig["basename"], "q_vectors", value):
-                ud = UD_STORE.get_definition(trajConfig["basename"], "q_vectors", value)
-                self["parameters"] = ud["parameters"]
-                self["type"] = ud["generator"]
-                self["is_lattice"] = ud["is_lattice"]
-                self["q_vectors"] = ud["q_vectors"]
-            else:
-                self.error_status = (
-                    f"Q vectors user definition {value} is not stored on this machine"
-                )
+        if isinstance(value, tuple):
+            try:
+                generator, parameters = value
+            except ValueError:
+                self.error_status = f"Invalid q vectors settings {value}"
+                return
+            generator = IQVectors.create(
+                generator, trajConfig["instance"].chemical_system
+            )
+            generator.setup(parameters)
+            generator.generate()
+
+            if not "q_vectors" in generator.configuration:
+                self.error_status = "Wrong inputs for q-vector generation. At the moment there are no valid Q points."
+                return
+            elif not generator.configuration["q_vectors"]:
+                self.error_status = "no Q vectors could be generated"
                 return
 
+            self["parameters"] = parameters
+            # self["type"] = generator._type
+            self["is_lattice"] = generator.is_lattice
+            self["q_vectors"] = generator.configuration["q_vectors"]
         else:
-            if isinstance(value, tuple):
-                try:
-                    generator, parameters = value
-                except ValueError:
-                    self.error_status = f"Invalid q vectors settings {value}"
-                    return
-                generator = IQVectors.create(
-                    generator, trajConfig["instance"].chemical_system
-                )
-                generator.setup(parameters)
-                generator.generate()
-
-                if not generator.configuration["q_vectors"]:
-                    self.error_status = "no Q vectors could be generated"
-                    return
-
-                self["parameters"] = parameters
-                # self["type"] = generator._type
-                self["is_lattice"] = generator.is_lattice
-                self["q_vectors"] = generator.configuration["q_vectors"]
-            else:
-                self.error_status = "Q vectors setting must be a tuple {value}"
-                return
+            self.error_status = f"Q vectors setting must be a tuple {value}"
+            return
 
         self["shells"] = list(self["q_vectors"].keys())
         self["n_shells"] = len(self["q_vectors"])
