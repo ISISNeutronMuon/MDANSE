@@ -232,19 +232,20 @@ class Action(QWidget):
 
     @Slot()
     def show_output_prediction(self):
-        self.allow_execution()
-        print("Show output prediction")
-        pardict = self.set_parameters()
-        self._job_instance.setup(pardict)
-        axes = self._job_instance.preview_output_axis()
-        print(f"Axes = {axes.keys()}")
-        text = "<p><b>The results will cover the following range:</b></p>"
-        for unit, array in axes.items():
-            if len(array) < 6:
-                text += f"<p>{array} ({unit})</p>"
-            else:
-                text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({unit})</p>"
-        self._preview_box.setHtml(text)
+        if self._use_preview:
+            self.allow_execution()
+            print("Show output prediction")
+            pardict = self.set_parameters()
+            self._job_instance.setup(pardict)
+            axes = self._job_instance.preview_output_axis()
+            print(f"Axes = {axes.keys()}")
+            text = "<p><b>The results will cover the following range:</b></p>"
+            for unit, array in axes.items():
+                if len(array) < 6:
+                    text += f"<p>{array} ({unit})</p>"
+                else:
+                    text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({unit})</p>"
+            self._preview_box.setHtml(text)
 
     @Slot(dict)
     def parse_updated_params(self, new_params: dict):
