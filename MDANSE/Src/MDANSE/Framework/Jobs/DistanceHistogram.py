@@ -161,9 +161,10 @@ class DistanceHistogram(IJob):
 
             cell_volume = conf.unit_cell.volume
         except:
-            raise Error(
-                "Pair distribution function cannot be calculated for infinite universe trajectories"
-            )
+            direct_cell = np.eye(3)
+            inverse_cell = np.eye(3)
+
+            cell_volume = 1.0
 
         coords = conf["coordinates"]
 
