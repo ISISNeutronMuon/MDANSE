@@ -24,6 +24,9 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class VectorModel(QStandardItemModel):
+
+    type_changed = Signal()
+
     def __init__(self, *args, chemical_system=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._generator = None
@@ -47,6 +50,7 @@ class VectorModel(QStandardItemModel):
             for it in items[1::2]:
                 it.setData(value, role=Qt.ItemDataRole.ToolTipRole)
             self.appendRow(items)
+        self.type_changed.emit()
 
     def params_summary(self) -> dict:
         params = {}
@@ -102,6 +106,7 @@ class QVectorsWidget(WidgetBase):
         self._selector.currentTextChanged.connect(self._model.switch_qvector_type)
         self._selector.setCurrentIndex(1)
         self._model.itemChanged.connect(self.updateValue)
+        self._model.type_changed.connect(self.updateValue)
         self.updateValue()
         if self._tooltip:
             tooltip_text = self._tooltip

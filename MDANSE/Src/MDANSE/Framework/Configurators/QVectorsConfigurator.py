@@ -68,8 +68,17 @@ class QVectorsConfigurator(IConfigurator):
             generator = IQVectors.create(
                 generator, trajConfig["instance"].chemical_system
             )
-            generator.setup(parameters)
-            generator.generate()
+            try:
+                generator.setup(parameters)
+            except:
+                self.error_status = f"Could not configure q vectors using {parameters}"
+                return
+
+            try:
+                generator.generate()
+            except:
+                self.error_status = "Q Vector parameters were parsed correctly, but caused an error. Invalid values?"
+                return
 
             if not "q_vectors" in generator.configuration:
                 self.error_status = "Wrong inputs for q-vector generation. At the moment there are no valid Q points."
