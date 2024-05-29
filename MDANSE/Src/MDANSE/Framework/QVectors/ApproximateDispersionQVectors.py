@@ -42,7 +42,7 @@ class ApproximateDispersionQVectors(LatticeQVectors):
             "label": "Q end (nm^-1)",
             "valueType": float,
             "notNull": False,
-            "default": [0, 0, 0],
+            "default": [1, 0, 0],
         },
     )
     settings["q_step"] = (
