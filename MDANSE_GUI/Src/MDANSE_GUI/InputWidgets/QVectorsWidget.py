@@ -62,9 +62,7 @@ class VectorModel(QStandardItemModel):
                     QBrush(Qt.GlobalColor.red), role=Qt.ItemDataRole.BackgroundRole
                 )
             else:
-                self.item(rownum, 1).setData(
-                    QBrush(Qt.GlobalColor.white), role=Qt.ItemDataRole.BackgroundRole
-                )
+                self.item(rownum, 1).setData(0, role=Qt.ItemDataRole.BackgroundRole)
         return params
 
     def parse_vtype(self, vtype: str, value: str, vname: str):
