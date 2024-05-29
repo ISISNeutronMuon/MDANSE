@@ -98,15 +98,16 @@ class Voronoi(IJob):
         first_conf = self.configuration["trajectory"][
             "instance"
         ].chemical_system.configuration
-        if not first_conf.is_periodic:
-            raise VoronoiError(
-                "Voronoi analysis cannot be computed for chemical system without periodc boundary conditions"
-            )
 
-        cell = first_conf.unit_cell.direct
-        self.cell_param = np.array(
-            [cell[0, 0], cell[1, 1], cell[2, 2]], dtype=np.float64
-        )
+        try:
+            cell = first_conf.unit_cell.direct
+            self.cell_param = np.array(
+                [cell[0, 0], cell[1, 1], cell[2, 2]], dtype=np.float64
+            )
+        except:
+            raise VoronoiError(
+                "Voronoi analysis cannot be computed if simulation box is not defined"
+            )
 
         self.dim = 3
 

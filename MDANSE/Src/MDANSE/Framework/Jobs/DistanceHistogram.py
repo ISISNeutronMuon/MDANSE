@@ -155,15 +155,15 @@ class DistanceHistogram(IJob):
 
         conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
 
-        if not conf.is_periodic:
+        try:
+            direct_cell = conf.unit_cell.transposed_direct
+            inverse_cell = conf.unit_cell.transposed_inverse
+
+            cell_volume = conf.unit_cell.volume
+        except:
             raise Error(
                 "Pair distribution function cannot be calculated for infinite universe trajectories"
             )
-
-        direct_cell = conf.unit_cell.transposed_direct
-        inverse_cell = conf.unit_cell.transposed_inverse
-
-        cell_volume = conf.unit_cell.volume
 
         coords = conf["coordinates"]
 
