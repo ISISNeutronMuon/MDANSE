@@ -114,8 +114,10 @@ class OutputTrajectoryConfigurator(IConfigurator):
         :return: the information about this configurator.
         :rtype: str
         """
-
-        info = "Output file: %s\n" % self["file"]
+        try:
+            info = "Output file: %s\n" % self["file"]
+        except KeyError:
+            info = "Output Trajectory has not been defined"
 
         return info
 

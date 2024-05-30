@@ -119,6 +119,8 @@ class OutputFilesConfigurator(IConfigurator):
         :return: the information about this configurator.
         :rtype: str
         """
+        if not "files" in self:
+            return "Output Files have not been defined"
 
         info = ["Input files:\n"]
         for f in self["files"]:
