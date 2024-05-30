@@ -16,9 +16,10 @@
 import collections
 
 import numpy as np
+from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Signal import correlation, differentiate, get_spectrum
+from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 
 
 class Infrared(IJob):
@@ -37,7 +38,7 @@ class Infrared(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["instrument_resolution"] = (
@@ -108,7 +109,7 @@ class Infrared(IJob):
         self._outputData.add(
             "ddacf",
             "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
+            (self.configuration["frames"]["n_frames"],),
             axis="time",
         )
         self._outputData.add(
@@ -135,7 +136,7 @@ class Infrared(IJob):
         """
         molecule = self.molecules[index]
         ddipole = np.zeros(
-            (self.configuration["frames"]["n_frames"], 3), dtype=np.float64
+            (self.configuration["frames"]["number"], 3), dtype=np.float64
         )
         for i, frame_index in enumerate(
             range(
@@ -162,8 +163,11 @@ class Infrared(IJob):
                 dt=self.configuration["frames"]["time_step"],
             )
 
-        mol_ddacf = correlation(ddipole, axis=0, average=1)
-        return index, mol_ddacf
+        n_configs = self.configuration["frames"]["n_configs"]
+        mol_ddacf = correlate(ddipole, ddipole[:n_configs], mode="valid") / (
+            3 * n_configs
+        )
+        return index, mol_ddacf.T[0]
 
     def combine(self, index, x):
         """Combines returned results of run_step."""

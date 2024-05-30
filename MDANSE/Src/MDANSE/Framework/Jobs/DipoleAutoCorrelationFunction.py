@@ -16,9 +16,9 @@
 import collections
 
 import numpy as np
+from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Signal import correlation
 
 
 class DipoleAutoCorrelationFunction(IJob):
@@ -37,7 +37,7 @@ class DipoleAutoCorrelationFunction(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["molecule_name"] = (
@@ -86,7 +86,7 @@ class DipoleAutoCorrelationFunction(IJob):
         self._outputData.add(
             "dacf",
             "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
+            (self.configuration["frames"]["n_frames"],),
             axis="time",
             main_result=True,
         )
@@ -106,8 +106,8 @@ class DipoleAutoCorrelationFunction(IJob):
             auto-correlation function for a molecule.
         """
         molecule = self.molecules[index]
-        dipoleMoments = np.zeros(
-            (self.configuration["frames"]["n_frames"], 3), dtype=np.float64
+        dipoles = np.zeros(
+            (self.configuration["frames"]["number"], 3), dtype=np.float64
         )
         for i, frame_index in enumerate(
             range(
@@ -125,12 +125,15 @@ class DipoleAutoCorrelationFunction(IJob):
             for atm in molecule.atom_list:
                 idx = atm.index
                 q = self.configuration["atom_charges"]["charges"][idx]
-                dipoleMoments[i] = q * (
+                dipoles[i] = q * (
                     contiguous_configuration["coordinates"][idx, :] - com
                 )
 
-        mol_dacf = correlation(dipoleMoments, axis=0, average=1)
-        return index, mol_dacf
+        n_configs = self.configuration["frames"]["n_configs"]
+        mol_dacf = correlate(dipoles, dipoles[:n_configs], mode="valid") / (
+            3 * n_configs
+        )
+        return index, mol_dacf.T[0]
 
     def combine(self, index, x):
         """Combines returned results of run_step."""
