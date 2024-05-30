@@ -53,7 +53,14 @@ class H5MDTrajectory:
 
         ic("Trajectory.__init__ h5py.File created")
         # Load the chemical system
-        chemical_elements = self._h5_file["/particles/simulation/species/value"]
+        try:
+            chemical_elements = self._h5_file["/particles/all/species/value"]
+        except KeyError:
+            chemical_elements = self._h5_file["/particles/all/species"]
+        try:
+            atom_masses = self._h5_file["/particles/all/mass/value"]
+        except KeyError:
+            atom_masses = self._h5_file["/particles/all/mass"]
         self._chemical_system = ChemicalSystem(
             os.path.splitext(os.path.basename(self._h5_filename))[0]
         )
@@ -65,7 +72,7 @@ class H5MDTrajectory:
 
         ic("Trajectory.__init__ loaded unit cells")
         # Load the first configuration
-        coords = self._h5_file["/particles/simulation/positions/value"][0, :, :]
+        coords = self._h5_file["/particles/all/positions/value"][0, :, :]
         if self._unit_cells:
             unit_cell = self._unit_cells[0]
             conf = PeriodicRealConfiguration(self._chemical_system, coords, unit_cell)
@@ -108,16 +115,16 @@ class H5MDTrajectory:
         :rtype: dict of ndarray
         """
 
-        grp = self._h5_file["/particles/simulation/position/value"]
+        grp = self._h5_file["/particles/all/position/value"]
         configuration = {}
-        configuration["coordinates"] = self._h5_file["/particles/simulation/position/value"][frame,:,:]
+        configuration["coordinates"] = self._h5_file["/particles/all/position/value"][frame,:,:]
         try:
-            configuration["velocities"] = self._h5_file["/particles/simulation/velocity/value"][frame,:,:]
+            configuration["velocities"] = self._h5_file["/particles/all/velocity/value"][frame,:,:]
         except:
             pass
 
-        configuration["time"] = self._h5_file["/particles/simulation/position/time"][frame].astype(np.float64)
-        configuration["unit_cell"] = self._h5_file["/particles/simulation/box/value"][frame].astype(np.float64)
+        configuration["time"] = self._h5_file["/particles/all/position/time"][frame].astype(np.float64)
+        configuration["unit_cell"] = self._h5_file["/particles/all/box/value"][frame].astype(np.float64)
 
         return configuration
 
@@ -184,7 +191,7 @@ class H5MDTrajectory:
         """Load all the unit cells."""
         ic("_load_unit_cells")
         try:
-            cells = self._h5_file["/particles/simulation/box/edges/value"]
+            cells = self._h5_file["/particles/all/box/edges/value"]
         except KeyError:
             self._unit_cells = None
         else:
@@ -447,130 +454,3 @@ class H5MDTrajectory:
         grp = self._h5_file["/configuration"]
 
         return list(grp.keys())
-
-
-
-class LAMMPSh5md(LAMMPSReader):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def get_time_steps(self, filename: str) -> int:
-        number_of_steps = 0
-        self.open_file(filename)
-        number_of_steps = len(self._file["/particles/simulation/position/time"][:])
-        self.close()
-        return number_of_steps
-
-    def open_file(self, filename: str):
-        self._file = h5py.File(filename, "r")
-
-    def parse_first_step(self, aliases, config):
-
-        try:
-            atom_types = self._file["/particles/simulation/species/value"][0]
-        except KeyError:
-            atom_types = config["atom_types"]
-
-        self._nAtoms = len(self._file["/particles/simulation/position/value"][0])
-
-        if len(atom_types) < self._nAtoms:
-            atom_types = int(round(self._nAtoms / len(atom_types))) * list(atom_types)
-
-        self._fractionalCoordinates = False
-        cell_edges = self._file["/particles/simulation/box/edges/value"][0]
-        full_cell = np.array(
-            [[cell_edges[0], 0, 0], [0, cell_edges[1], 0], [0, 0, cell_edges[2]]]
-        )
-
-        full_cell *= measure(1.0, self._length_unit).toval("nm")
-
-        self._full_cell = full_cell
-
-        self._rankToName = {}
-
-        g = Graph()
-        for i in range(self._nAtoms):
-            idx = i
-            ty = atom_types[i] - 1
-            label = str(config["elements"][ty][0])
-            mass = str(config["elements"][ty][1])
-            name = "{:s}_{:d}".format(str(config["elements"][ty][0]), idx)
-            self._rankToName[idx] = name
-            g.add_node(idx, label=label, mass=mass, atomName=name)
-
-        if config["n_bonds"] is not None:
-            for idx1, idx2 in config["bonds"]:
-                g.add_link(idx1, idx2)
-
-        chemicalSystem = ChemicalSystem()
-
-        for cluster in g.build_connected_components():
-            if len(cluster) == 1:
-                node = cluster.pop()
-                try:
-                    element = get_element_from_mapping(
-                        aliases, node.label, mass=node.mass
-                    )
-                    obj = Atom(symbol=element, name=node.atomName)
-                except TypeError:
-                    print("EXCEPTION in LAMMPS loader")
-                    print(f"node.element = {node.element}")
-                    print(f"node.atomName = {node.atomName}")
-                    print(f"rankToName = {self._rankToName}")
-                obj.index = node.name
-            else:
-                atList = []
-                for atom in cluster:
-                    element = get_element_from_mapping(
-                        aliases, atom.label, mass=atom.mass
-                    )
-                    at = Atom(symbol=element, name=atom.atomName)
-                    atList.append(at)
-                c = collections.Counter([at.label for at in cluster])
-                name = "".join(["{:s}{:d}".format(k, v) for k, v in sorted(c.items())])
-                obj = AtomCluster(name, atList)
-
-            chemicalSystem.add_chemical_entity(obj)
-
-        return chemicalSystem
-
-    def run_step(self, index):
-        """Runs a single step of the job.
-
-        @param index: the index of the step.
-        @type index: int.
-
-        @note: the argument index is the index of the loop note the index of the frame.
-        """
-
-        positions = self._file["/particles/simulation/position/value"][index]
-        timestep = self._file["/particles/simulation/position/step"][index]
-
-        unitCell = UnitCell(self._full_cell)
-        time = timestep * self._timestep * measure(1.0, self._time_unit).toval("ps")
-
-        if self._fractionalCoordinates:
-            conf = PeriodicBoxConfiguration(
-                self._trajectory.chemical_system, positions, unitCell
-            )
-            realConf = conf.to_real_configuration()
-        else:
-            positions *= measure(1.0, self._length_unit).toval("nm")
-            realConf = PeriodicRealConfiguration(
-                self._trajectory.chemical_system, positions, unitCell
-            )
-
-        if self._fold:
-            # The whole configuration is folded in to the simulation box.
-            realConf.fold_coordinates()
-
-        self._trajectory.chemical_system.configuration = realConf
-
-        # A snapshot is created out of the current configuration.
-        self._trajectory.dump_configuration(
-            time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
-        )
-
-        return index, 0
-
