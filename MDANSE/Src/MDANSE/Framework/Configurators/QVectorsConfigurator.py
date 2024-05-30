@@ -115,8 +115,14 @@ class QVectorsConfigurator(IConfigurator):
         :rtype: str
         """
 
-        info = ["%d Q shells generated\n" % self["n_shells"]]
-        for qValue, qVectors in list(self["q_vectors"].items()):
-            info.append("Shell %s: %d Q vectors generated\n" % (qValue, len(qVectors)))
+        try:
+            info = ["%d Q shells generated\n" % self["n_shells"]]
+        except KeyError:
+            return "QVectors could not be configured correctly"
+        else:
+            for qValue, qVectors in list(self["q_vectors"].items()):
+                info.append(
+                    "Shell %s: %d Q vectors generated\n" % (qValue, len(qVectors))
+                )
 
-        return "".join(info)
+            return "".join(info)
