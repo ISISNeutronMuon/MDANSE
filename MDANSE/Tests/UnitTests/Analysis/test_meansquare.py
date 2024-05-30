@@ -33,7 +33,7 @@ short_traj = os.path.join(
 def test_basic_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -47,7 +47,7 @@ def test_basic_meansquare():
 def test_parallel_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -55,7 +55,7 @@ def test_parallel_meansquare():
     msd.run(parameters, status=True)
     temp_name2 = tempfile.mktemp()
     parameters = {}
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["output_files"] = (temp_name2, ("MDAFormat",))
     parameters["running_mode"] = ("multicore", -4)
     parameters["trajectory"] = short_traj
@@ -77,7 +77,7 @@ def test_parallel_meansquare():
 def test_atom_selection():
     temp_name = tempfile.mktemp()
     parameters = {}
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj

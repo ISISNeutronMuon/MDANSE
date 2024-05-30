@@ -17,10 +17,10 @@
 import collections
 
 import numpy as np
+from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 
@@ -62,7 +62,7 @@ class MeanSquareDisplacement(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["projection"] = (
@@ -122,9 +122,11 @@ class MeanSquareDisplacement(IJob):
             self._outputData.add(
                 "msd_%s" % element,
                 "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
+                (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2",
+                main_result=True,
+                partial_result=True,
             )
 
         self._atoms = sorted_atoms(
@@ -165,7 +167,13 @@ class MeanSquareDisplacement(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        msd = mean_square_displacement(series)
+        n_configs = self.configuration["frames"]["n_configs"]
+
+        r2 = series * series
+        window = np.ones((n_configs, 3))
+        r2t = correlate(r2, window, mode="valid").T[0] / n_configs
+        rtr0 = correlate(series, series[:n_configs], mode="valid").T[0] / n_configs
+        msd = r2t[0] + r2t - 2 * rtr0
 
         return index, msd
 
@@ -198,7 +206,12 @@ class MeanSquareDisplacement(IJob):
         msdTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "msd_%s")
 
         self._outputData.add(
-            "msd_total", "LineOutputVariable", msdTotal, axis="time", units="nm2"
+            "msd_total",
+            "LineOutputVariable",
+            msdTotal,
+            axis="time",
+            units="nm2",
+            main_result=True,
         )
 
         self._outputData.write(

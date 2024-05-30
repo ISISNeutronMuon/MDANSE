@@ -30,6 +30,7 @@ from qtpy.QtWidgets import (
 class WidgetBase(QObject):
 
     valid_changed = Signal()
+    value_updated = Signal()
 
     def __init__(self, *args, **kwargs):
         parent = kwargs.get("parent", None)
@@ -128,6 +129,7 @@ class WidgetBase(QObject):
             )
         if self._configurator.valid:
             self.clear_error()
+            self.value_updated.emit()
         else:
             self.mark_error(self._configurator.error_status)
 

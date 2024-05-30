@@ -274,6 +274,9 @@ class IConfigurator(dict, metaclass=SubclassFactory):
     def set_configurable(self, configurable):
         self._configurable = configurable
 
+    def preview_output_axis(self):
+        return None, None
+
     def check_dependencies(self, configured=None):
         """
         Check that the configurators on which this configurator depends on have already been configured.

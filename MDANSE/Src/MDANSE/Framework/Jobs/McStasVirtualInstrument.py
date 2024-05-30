@@ -453,6 +453,8 @@ class McStasVirtualInstrument(IJob):
                 I,
                 axis="%s|%s" % (xlabel, ylabel),
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
 
         return FileStruct

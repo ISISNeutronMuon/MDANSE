@@ -13,13 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import collections
 
+from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation, differentiate, get_spectrum
+from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 
@@ -43,7 +43,7 @@ class DensityOfStates(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["instrument_resolution"] = (
@@ -125,7 +125,7 @@ class DensityOfStates(IJob):
             self._outputData.add(
                 "vacf_%s" % element,
                 "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
+                (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2/ps2",
             )
@@ -135,11 +135,13 @@ class DensityOfStates(IJob):
                 (instrResolution["n_romegas"],),
                 axis="romega",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
         self._outputData.add(
             "vacf_total",
             "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
+            (self.configuration["frames"]["n_frames"],),
             axis="time",
             units="nm2/ps2",
         )
@@ -149,6 +151,7 @@ class DensityOfStates(IJob):
             (instrResolution["n_romegas"],),
             axis="romega",
             units="au",
+            main_result=True,
         )
 
         self._atoms = sorted_atoms(
@@ -198,9 +201,11 @@ class DensityOfStates(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        atomicVACF = correlation(series, axis=0, average=1)
-
-        return index, atomicVACF
+        n_configs = self.configuration["frames"]["n_configs"]
+        atomicVACF = correlate(series, series[:n_configs], mode="valid") / (
+            3 * n_configs
+        )
+        return index, atomicVACF.T[0]
 
     def combine(self, index, x):
         """

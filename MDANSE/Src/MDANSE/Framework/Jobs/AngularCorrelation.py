@@ -17,9 +17,8 @@
 import collections
 
 import numpy as np
+from scipy.signal import correlate
 
-
-from MDANSE.Mathematics.Signal import correlation
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -58,7 +57,7 @@ class AngularCorrelation(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["molecule_name"] = (
@@ -118,9 +117,10 @@ class AngularCorrelation(IJob):
         self._outputData.add(
             "ac",
             "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
+            (self.configuration["frames"]["n_frames"],),
             axis="time",
             units="au",
+            main_result=True,
         )
 
         if self.configuration["per_axis"]["value"]:
@@ -133,10 +133,12 @@ class AngularCorrelation(IJob):
                     ].chemical_system.number_of_molecules(
                         self.configuration["molecule_name"]["value"]
                     ),
-                    self.configuration["frames"]["number"],
+                    self.configuration["frames"]["n_frames"],
                 ),
                 axis="axis_index|time",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
 
     def run_step(self, index):
@@ -154,8 +156,8 @@ class AngularCorrelation(IJob):
         reference_atom = molecule.atom_list[0]
         chemical_system = self.configuration["trajectory"]["instance"].chemical_system
 
-        at1_traj = np.empty((self.configuration["frames"]["n_frames"], 3))
-        at2_traj = np.empty((self.configuration["frames"]["n_frames"], 3))
+        at1_traj = np.empty((self.configuration["frames"]["number"], 3))
+        at2_traj = np.empty((self.configuration["frames"]["number"], 3))
 
         for i, frame_index in enumerate(
             range(
@@ -178,9 +180,9 @@ class AngularCorrelation(IJob):
 
         diff /= modulus[:, np.newaxis]
 
-        ac = correlation(diff, axis=0, average=1)
-
-        return index, ac
+        n_configs = self.configuration["frames"]["n_configs"]
+        ac = correlate(diff, diff[:n_configs], mode="valid") / (3 * n_configs)
+        return index, ac.T[0]
 
     def combine(self, index, x):
         """

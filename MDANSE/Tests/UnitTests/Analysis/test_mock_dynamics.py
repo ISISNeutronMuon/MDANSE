@@ -39,7 +39,7 @@ mock_json = os.path.join(file_wd, "..", "Data", "mock.json")
 def test_vacf(interp_order, normalise):
     temp_name = tempfile.mktemp()
     parameters = {}
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["interpolation_order"] = interp_order
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("single-core",)

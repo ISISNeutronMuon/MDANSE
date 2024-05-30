@@ -34,6 +34,7 @@ class FramesConfigurator(RangeConfigurator):
     """
 
     _label = "Subset of frames to be selected (first, last, step size)"
+    _default = "all"
 
     def __init__(self, name, **kwargs):
         """
@@ -107,6 +108,13 @@ class FramesConfigurator(RangeConfigurator):
             self["time_step"] = 1.0
 
         self["duration"] = self["time"] - self["time"][0]
+
+    def preview_output_axis(self):
+        if not self.is_configured():
+            return None, None
+        if not self._valid:
+            return None, None
+        return self["time"], "ps"
 
     def get_information(self):
         """
