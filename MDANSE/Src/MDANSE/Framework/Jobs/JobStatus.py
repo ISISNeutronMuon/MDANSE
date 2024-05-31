@@ -80,6 +80,9 @@ class JobStatus(Status):
     def stop_status(self):
         pass
 
+    def fixed_status(self, current_progress: int):
+        pass
+
     def update_status(self):
         self._state["elapsed"] = self.elapsedTime
         self._state["current_step"] = self.currentStep

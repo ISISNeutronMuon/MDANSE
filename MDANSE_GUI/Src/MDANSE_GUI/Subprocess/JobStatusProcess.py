@@ -94,3 +94,9 @@ class JobStatusProcess(Status):
         temp = int(self._progress_meter) * self._updateStep
         self._pipe.send(("STEP", temp))
         self._mutex.release()
+
+    def fixed_status(self, current_progress: int):
+        self._mutex.acquire()
+        temp = int(current_progress) * self._updateStep
+        self._pipe.send(("STEP", temp))
+        self._mutex.release()

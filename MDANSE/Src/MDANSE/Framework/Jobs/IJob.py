@@ -272,8 +272,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
                         if not self._status._end_event.is_set():
                             return False
                 output = self.run_step(index)
-                if self._status is not None:
-                    self._status.update()
                 outputs.put(output)
 
         return True
@@ -304,6 +302,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
         while inputQueue.qsize() > 0:
             if self._keep_running:
                 time.sleep(0.1)
+                if self._status is not None:
+                    self._status.fixed_status(outputQueue.qsize())
             else:
                 for p in self._processes:
                     p.terminate()
