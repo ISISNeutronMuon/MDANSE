@@ -118,8 +118,14 @@ class Action(QWidget):
     def clear_panel(self) -> None:
         """Clear the widgets so that it leaves an empty layout"""
         for widget in self._widgets_in_layout:
-            widget.setParent(None)
             self.layout.removeWidget(widget)
+            # fixes #448
+            # even with the call to deleteLater sometimes the widget
+            # windows can pop up and then disappear we need to hide
+            # them first to make sure this doesn't happen
+            widget.hide()
+            widget.setParent(None)
+            widget.deleteLater()
         self._widgets = []
         self._widgets_in_layout = []
         self._preview_box = None
