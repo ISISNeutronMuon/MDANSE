@@ -106,12 +106,13 @@ class Density(IJob):
         frame_index = self.configuration["frames"]["value"][index]
 
         conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
-        if not conf.is_periodic:
-            raise DensityError(
-                "Density cannot be computed for chemical system without periodc boundary conditions"
-            )
 
-        cell_volume = conf.unit_cell.volume * measure(1.0, "nm3").toval("cm3")
+        try:
+            cell_volume = conf.unit_cell.volume * measure(1.0, "nm3").toval("cm3")
+        except:
+            raise DensityError(
+                "Density cannot be computed for chemical system without a defined simulation box"
+            )
 
         atomic_density = self._n_atoms / cell_volume
 

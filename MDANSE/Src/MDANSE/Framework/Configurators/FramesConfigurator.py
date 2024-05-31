@@ -124,9 +124,17 @@ class FramesConfigurator(RangeConfigurator):
         :rtype: str
         """
 
-        return "%d frames selected (first=%.3f ; last = %.3f ; time step = %.3f)\n" % (
-            self["n_frames"],
-            self["time"][0],
-            self["time"][-1],
-            self["time_step"],
-        )
+        try:
+            result = (
+                "%d frames selected (first=%.3f ; last = %.3f ; time step = %.3f)\n"
+                % (
+                    self["n_frames"],
+                    self["time"][0],
+                    self["time"][-1],
+                    self["time_step"],
+                )
+            )
+        except KeyError:
+            result = "FramesConfigurator could not be configured!"
+
+        return result
