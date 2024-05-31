@@ -32,16 +32,28 @@ class Subprocess(Process):
         sending_pipe = kwargs.get("pipe")
         receiving_queue = kwargs.get("queue")
         pause_event = kwargs.get("pause_event")
-        self.construct_job(job_name, sending_pipe, receiving_queue, pause_event)
+        end_event = kwargs.get("end_event")
+        self.construct_job(
+            job_name, sending_pipe, receiving_queue, pause_event, end_event
+        )
 
     def construct_job(
-        self, job: str, pipe: Connection, queue: "Queue", pause_event: "Event"
+        self,
+        job: str,
+        pipe: Connection,
+        queue: "Queue",
+        pause_event: "Event",
+        end_event: "Event",
     ):
         job_instance = IJob.create(job)
         job_instance.build_configuration()
-        status = JobStatusProcess(pipe, queue, pause_event)
+        status = JobStatusProcess(pipe, queue, pause_event, end_event)
         job_instance._status = status
         self._job_instance = job_instance
 
     def run(self):
         self._job_instance.run(self._job_parameters)
+
+    def terminate(self) -> None:
+        self._job_instance.terminate()
+        return super().terminate()

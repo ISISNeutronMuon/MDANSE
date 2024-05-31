@@ -22,7 +22,7 @@ import queue
 import random
 import stat
 import string
-import subprocess
+import time
 import sys
 import traceback
 from concurrent.futures import ThreadPoolExecutor as PoolExecutor
@@ -130,6 +130,14 @@ class IJob(Configurable, metaclass=SubclassFactory):
         self._status_constructor = JobStatus
 
         self._status = None
+
+        self._processes = []
+        self._keep_running = True
+
+    def __getstate__(self):
+        d = self.__dict__.copy()
+        del d["_processes"]
+        return d
 
     @property
     def name(self):
@@ -257,14 +265,22 @@ class IJob(Configurable, metaclass=SubclassFactory):
                     self.configuration["trajectory"]["instance"].close()
                     break
             else:
+                if self._status is not None:
+                    if hasattr(self._status, "_pause_event"):
+                        self._status._pause_event.wait()
+                    if hasattr(self._status, "_end_event"):
+                        if not self._status._end_event.is_set():
+                            return False
                 output = self.run_step(index)
+                if self._status is not None:
+                    self._status.update()
                 outputs.put(output)
 
         return True
 
     def _run_multicore(self):
-        oldrecursionlimit = sys.getrecursionlimit()
-        sys.setrecursionlimit(100000)
+        # oldrecursionlimit = sys.getrecursionlimit()
+        # sys.setrecursionlimit(100000)
 
         ctx = multiprocessing.get_context("spawn")
 
@@ -272,7 +288,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         inputQueue = manager.Queue()
         outputQueue = manager.Queue()
 
-        processes = []
+        self._processes = []
 
         for i in range(self.numberOfSteps):
             inputQueue.put(i)
@@ -281,11 +297,19 @@ class IJob(Configurable, metaclass=SubclassFactory):
             p = multiprocessing.Process(
                 target=self.process_tasks_queue, args=(inputQueue, outputQueue)
             )
-            processes.append(p)
+            self._processes.append(p)
             p.daemon = False
             p.start()
 
-        for p in processes:
+        while inputQueue.qsize() > 0:
+            if self._keep_running:
+                time.sleep(0.1)
+            else:
+                for p in self._processes:
+                    p.terminate()
+                break
+
+        for p in self._processes:
             p.join()
 
         while True:
@@ -296,7 +320,10 @@ class IJob(Configurable, metaclass=SubclassFactory):
             else:
                 self.combine(index, result)
 
-        sys.setrecursionlimit(oldrecursionlimit)
+        # sys.setrecursionlimit(oldrecursionlimit)
+
+    def terminate(self):
+        self._keep_running = False
 
     def _run_remote(self):
         raise NotImplementedError(

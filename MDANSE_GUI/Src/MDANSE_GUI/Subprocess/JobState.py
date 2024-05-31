@@ -75,6 +75,7 @@ class Running(JobState):
 
     def terminate(self):
         """Instructs the process to stop"""
+        self._parent._end_event.clear()
         self._parent._current_state = self._parent._Aborted
 
     def kill(self):
@@ -227,6 +228,7 @@ class Paused(JobState):
 
     def terminate(self):
         """Instructs the process to stop"""
+        self._parent._end_event.clear()
         self._parent._current_state = self._parent._Aborted
 
     def kill(self):

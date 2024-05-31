@@ -31,7 +31,7 @@ from MDANSE_GUI.Subprocess.JobState import (
     Paused,
     Aborted,
 )
-from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess, JobCommunicator
+from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
 
 
 class JobThread(QThread):
@@ -81,11 +81,14 @@ class JobEntry(QObject):
     """This coordinates all the objects that make up one line on the list
     of current jobs. It is used for reporting the task progress to the GUI."""
 
-    def __init__(self, *args, command=None, entry_number=0, pause_event=None):
+    def __init__(
+        self, *args, command=None, entry_number=0, pause_event=None, end_event=None
+    ):
         super().__init__(*args)
         self._command = command
         self._parameters = {}
         self._pause_event = pause_event
+        self._end_event = end_event
         # state pattern
         self._current_state = Starting(self)
         self._Starting = Starting(self)
@@ -199,6 +202,7 @@ class JobHolder(QStandardItemModel):
         main_pipe, child_pipe = Pipe()
         main_queue = Queue()
         pause_event = Event()
+        end_event = Event()
         try:
             subprocess_ref = Subprocess(
                 job_name=job_vars[0],
@@ -206,6 +210,7 @@ class JobHolder(QStandardItemModel):
                 pipe=child_pipe,
                 queue=main_queue,
                 pause_event=pause_event,
+                end_event=end_event,
             )
         except:
             ic(f"Failed to create Subprocess using {job_vars}")
@@ -215,7 +220,10 @@ class JobHolder(QStandardItemModel):
         communicator.moveToThread(watcher_thread)
         entry_number = self.next_number
         item_th = JobEntry(
-            command=job_vars[0], entry_number=entry_number, pause_event=pause_event
+            command=job_vars[0],
+            entry_number=entry_number,
+            pause_event=pause_event,
+            end_event=end_event,
         )
         item_th.parameters = job_vars[1]
         communicator.target.connect(item_th.on_started)  # int

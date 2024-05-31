@@ -15,7 +15,7 @@
 #
 
 from typing import Tuple
-from multiprocessing import Pipe, Queue, Process, Event
+from multiprocessing import Pipe, Queue, Process, Event, Lock
 from multiprocessing.connection import Connection
 
 from icecream import ic
@@ -48,7 +48,12 @@ class JobCommunicator(QObject):
 
 class JobStatusProcess(Status):
     def __init__(
-        self, pipe: "Connection", queue: Queue, pause_event: "Event", **kwargs
+        self,
+        pipe: "Connection",
+        queue: Queue,
+        pause_event: "Event",
+        end_event: "Event",
+        **kwargs,
     ):
         super().__init__()
         self._pipe = pipe
@@ -57,6 +62,9 @@ class JobStatusProcess(Status):
         self._progress_meter = 0
         self._pause_event = pause_event
         self._pause_event.set()
+        self._end_event = end_event
+        self._end_event.set()
+        self._mutex = Lock()
 
     @property
     def state(self):
@@ -81,6 +89,8 @@ class JobStatusProcess(Status):
         self._pipe.send(("FINISHED", False))
 
     def update_status(self):
+        self._mutex.acquire()
         self._progress_meter += 1
         temp = int(self._progress_meter) * self._updateStep
         self._pipe.send(("STEP", temp))
+        self._mutex.release()
