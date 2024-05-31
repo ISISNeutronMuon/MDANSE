@@ -93,5 +93,9 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :return: the information about this configurator.
         :rtype: str
         """
+        try:
+            info = "selected weight: %s\n" % self["property"]
+        except KeyError:
+            info = "Weights have not been configured"
 
-        return "selected weight: %s\n" % self["property"]
+        return info
