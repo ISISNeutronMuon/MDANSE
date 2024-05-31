@@ -47,13 +47,15 @@ class Grid(Plotter):
         self._axes = []
         self.apply_settings(plotting_context, colours)
         nplots = 0
-        for ds in plotting_context.datasets().values():
+        for databundle in plotting_context.datasets().values():
+            ds, colour, style = databundle
             best_unit, best_axis = ds.longest_axis()
             curves = ds.curves_vs_axis(best_unit)
             nplots += len(curves)
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
-        for name, dataset in plotting_context.datasets().items():
+        for name, databundle in plotting_context.datasets().items():
+            dataset, colour, style = databundle
             best_unit, best_axis = dataset.longest_axis()
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)
             for key, curve in dataset._curves.items():
@@ -66,7 +68,8 @@ class Grid(Plotter):
                 axes.plot(
                     dataset._axes[best_axis] * conversion_factor,
                     curve,
-                    color=self._current_colours[(startnum - 1) % number_of_colours],
+                    style,
+                    color=colour,
                     label=plotlabel + ":" + dataset._curve_labels[key],
                 )
                 axes.grid(True)

@@ -43,6 +43,9 @@ class PlotTab(GeneralTab):
         self._core._extra_visualiser.plot_settings_changed.connect(
             self._visualiser.update_plots
         )
+        self._core._extra_visualiser.plot_settings_changed.connect(
+            self.model.regenerate_colours
+        )
 
     @classmethod
     def standard_instance(cls):

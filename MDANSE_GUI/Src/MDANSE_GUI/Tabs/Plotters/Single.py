@@ -66,7 +66,8 @@ class Single(Plotter):
         if plotting_context.set_axes() is None:
             print("Axis check failed.")
             return
-        for name, dataset in plotting_context.datasets().items():
+        for name, databundle in plotting_context.datasets().items():
+            dataset, colour, style = databundle
             best_unit, best_axis = dataset.longest_axis()
             plotlabel = dataset._labels["medium"]
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)
@@ -81,7 +82,9 @@ class Single(Plotter):
                     axes.plot(
                         dataset._axes[best_axis] * conversion_factor,
                         dataset._data,
+                        style,
                         label=plotlabel,
+                        color=colour,
                     )
                 else:
                     multi_curves = dataset.curves_vs_axis(best_unit)

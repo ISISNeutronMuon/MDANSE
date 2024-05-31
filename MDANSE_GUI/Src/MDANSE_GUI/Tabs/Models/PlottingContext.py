@@ -22,11 +22,19 @@ if TYPE_CHECKING:
     import h5py
 
 import numpy as np
+from matplotlib.pyplot import style as mpl_style
+from matplotlib import rcParams
 
 from qtpy.QtCore import Slot, Signal, QObject, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 from MDANSE_GUI.Session.LocalSession import unit_lookup
+
+
+def get_mpl_colours():
+    cycler = rcParams["axes.prop_cycle"]
+    colours = cycler.by_key()["color"]
+    return colours
 
 
 class SingleDataset:
@@ -62,7 +70,7 @@ class SingleDataset:
         for axis_name in self._axes_tag.split("|"):
             aname = axis_name.strip()
             if aname == "index":
-                self._axes[aname] = range(len(self._data))
+                self._axes[aname] = np.arange(len(self._data))
                 self._axes_units[aname] = "N/A"
             else:
                 self._axes[aname] = source[aname][:]
@@ -177,13 +185,30 @@ class PlottingContext(QStandardItemModel):
         self._ndim_highest = 3
         self._all_xunits = []
         self._best_xunits = []
+        self._colour_list = get_mpl_colours()
+        self._last_colour = 0
         if unit_preference is None:
             self._unit_preference = {}
         else:
             self._unit_preference = unit_preference
         self.setHorizontalHeaderLabels(
-            ["Dataset", "Trajectory", "Size", "Unit", "Use it?"]
+            ["Dataset", "Trajectory", "Size", "Unit", "Use it?", "Colour", "Line style"]
         )
+
+    def generate_colour(self, number: int):
+        return self._colour_list[number % len(self._colour_list)]
+
+    def next_colour(self):
+        colour = self.generate_colour(self._last_colour)
+        self._last_colour += 1
+        return colour
+
+    @Slot()
+    def regenerate_colours(self):
+        self._colour_list = get_mpl_colours()
+        self._last_colour = 0
+        for row in range(self.rowCount()):
+            self.item(row, 5).setText(str(self.next_colour()))
 
     @Slot(object)
     def accept_external_data(self, other: "PlottingContext"):
@@ -218,8 +243,10 @@ class PlottingContext(QStandardItemModel):
                 self.itemFromIndex(self.index(row, 4)).checkState()
                 == Qt.CheckState.Checked
             )
+            colour = self.itemFromIndex(self.index(row, 5)).text()
+            style = self.itemFromIndex(self.index(row, 6)).text()
             if useit:
-                result[key] = self._datasets[key]
+                result[key] = (self._datasets[key], colour, style)
         return result
 
     def add_dataset(self, new_dataset: SingleDataset):
@@ -237,6 +264,8 @@ class PlottingContext(QStandardItemModel):
                 new_dataset._data.shape,
                 new_dataset._data_unit,
                 "",
+                self.next_colour(),
+                "-",
             ]
         ]
         for item in items:
