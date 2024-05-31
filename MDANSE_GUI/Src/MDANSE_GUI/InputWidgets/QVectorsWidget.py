@@ -24,6 +24,10 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class VectorModel(QStandardItemModel):
+
+    type_changed = Signal()
+    input_is_valid = Signal(bool)
+
     def __init__(self, *args, chemical_system=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._generator = None
@@ -47,9 +51,11 @@ class VectorModel(QStandardItemModel):
             for it in items[1::2]:
                 it.setData(value, role=Qt.ItemDataRole.ToolTipRole)
             self.appendRow(items)
+        self.type_changed.emit()
 
     def params_summary(self) -> dict:
         params = {}
+        all_inputs_are_valid = True
         for rownum in range(self.rowCount()):
             name = str(self.item(rownum, 0).text())
             value = str(self.item(rownum, 1).text())
@@ -61,10 +67,10 @@ class VectorModel(QStandardItemModel):
                 self.item(rownum, 1).setData(
                     QBrush(Qt.GlobalColor.red), role=Qt.ItemDataRole.BackgroundRole
                 )
+                all_inputs_are_valid = False
             else:
-                self.item(rownum, 1).setData(
-                    QBrush(Qt.GlobalColor.white), role=Qt.ItemDataRole.BackgroundRole
-                )
+                self.item(rownum, 1).setData(0, role=Qt.ItemDataRole.BackgroundRole)
+        self.input_is_valid.emit(all_inputs_are_valid)
         return params
 
     def parse_vtype(self, vtype: str, value: str, vname: str):
@@ -102,6 +108,7 @@ class QVectorsWidget(WidgetBase):
         self._selector.currentTextChanged.connect(self._model.switch_qvector_type)
         self._selector.setCurrentIndex(1)
         self._model.itemChanged.connect(self.updateValue)
+        self._model.type_changed.connect(self.updateValue)
         self.updateValue()
         if self._tooltip:
             tooltip_text = self._tooltip
@@ -111,6 +118,14 @@ class QVectorsWidget(WidgetBase):
         self._selector.setToolTip(
             "The q vectors will be generated using the method chosen here."
         )
+        self._model.input_is_valid.connect(self.validate_model_parameters)
+
+    @Slot(bool)
+    def validate_model_parameters(self, all_are_correct: bool):
+        if all_are_correct:
+            self.clear_error()
+        else:
+            self.mark_error("Some entries in the parameter table are invalid.")
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""

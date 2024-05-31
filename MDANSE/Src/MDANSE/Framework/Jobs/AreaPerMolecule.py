@@ -141,14 +141,16 @@ class AreaPerMolecule(IJob):
             frame_index
         )
 
-        if not configuration.is_periodic:
-            raise AreaPerMoleculeError("The configuration must be periodic")
+        try:
+            unit_cell = configuration.unit_cell._unit_cell
+            normalVect = np.cross(
+                unit_cell[self._axisIndexes[0]], unit_cell[self._axisIndexes[1]]
+            )
+        except:
+            raise AreaPerMoleculeError(
+                "The unit cell must be defined for AreaPerMolecule"
+            )
 
-        # Compute the area and then the area per molecule
-        unit_cell = configuration.unit_cell._unit_cell
-        normalVect = np.cross(
-            unit_cell[self._axisIndexes[0]], unit_cell[self._axisIndexes[1]]
-        )
         apm = np.sqrt(np.sum(normalVect**2)) / self._nMolecules
 
         return index, apm
