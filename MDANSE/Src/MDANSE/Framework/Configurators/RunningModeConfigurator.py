@@ -86,5 +86,9 @@ class RunningModeConfigurator(IConfigurator):
         :return: the information about this configurator.
         :rtype: str
         """
+        try:
+            info = "Run in %s mode (%d slots)\n" % (self["mode"], self["slots"])
+        except KeyError:
+            info = "Running mode has not been configured"
 
-        return "Run in %s mode (%d slots)\n" % (self["mode"], self["slots"])
+        return info

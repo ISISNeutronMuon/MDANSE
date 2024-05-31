@@ -19,7 +19,7 @@ short_traj = os.path.join(
 def test_dacf_analysis():
     temp_name = tempfile.mktemp()
     parameters = {}
-    parameters["frames"] = (0, 100, 1)
+    parameters["frames"] = (0, 100, 1, 51)
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("single-core", 1)
     parameters["trajectory"] = short_traj
@@ -35,7 +35,7 @@ def test_dacf_analysis():
 def test_ir_analysis():
     temp_name = tempfile.mktemp()
     parameters = {}
-    parameters["frames"] = (0, 100, 1)
+    parameters["frames"] = (0, 100, 1, 51)
     parameters["instrument_resolution"] = ("Gaussian", {"sigma": 1.0, "mu": 0.0})
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("single-core", 1)

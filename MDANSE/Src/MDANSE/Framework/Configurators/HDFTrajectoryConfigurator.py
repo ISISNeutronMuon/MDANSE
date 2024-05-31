@@ -77,16 +77,21 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         :return: the informations about the contents of the HDF trajectory file.
         :rtype: str
         """
-
-        info = ["HDF input trajectory: %r\n" % self["filename"]]
-        info.append("Number of steps: %d\n" % self["length"])
-        info.append(
-            "Size of the chemical system: %d\n"
-            % self["instance"].chemical_system.number_of_atoms
-        )
-        if self["has_velocities"]:
-            info.append("The trajectory contains atomic velocities\n")
+        try:
+            info = ["HDF input trajectory: %r\n" % self["filename"]]
+            info.append("Number of steps: %d\n" % self["length"])
+        except KeyError:
+            info = "Input trajectory has not been configured"
         else:
-            info.append("The trajectory does not contain atomic velocities\n")
+            info.append(
+                "Size of the chemical system: %d\n"
+                % self["instance"].chemical_system.number_of_atoms
+            )
 
-        return "".join(info)
+            if self["has_velocities"]:
+                info.append("The trajectory contains atomic velocities\n")
+            else:
+                info.append("The trajectory does not contain atomic velocities\n")
+            info = "".join(info)
+
+        return info

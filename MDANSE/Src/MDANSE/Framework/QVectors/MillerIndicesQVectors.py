@@ -67,7 +67,7 @@ class MillerIndicesQVectors(LatticeQVectors):
 
         # The hkl matrix (3,n_hkls)
         hkls = np.mgrid[hSlice, kSlice, lSlice]
-        hkls = hkls.reshape(3, hkls.size / 3)
+        hkls = hkls.reshape(3, int(round(hkls.size / 3)))
 
         # The k matrix (3,n_hkls)
         vects = np.dot(self._inverseUnitCell, hkls)

@@ -13,12 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import collections
+
 import numpy as np
+from scipy.signal import correlate
+
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation, normalize
+from MDANSE.Mathematics.Signal import normalize
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 
@@ -39,7 +41,7 @@ class PositionAutoCorrelationFunction(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["normalize"] = ("BooleanConfigurator", {"default": False})
@@ -99,7 +101,7 @@ class PositionAutoCorrelationFunction(IJob):
             self._outputData.add(
                 "pacf_%s" % element,
                 "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
+                (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2",
                 main_result=True,
@@ -135,9 +137,11 @@ class PositionAutoCorrelationFunction(IJob):
         series = series - np.average(series, axis=0)
         series = self.configuration["projection"]["projector"](series)
 
-        atomicPACF = correlation(series, axis=0, average=1)
-
-        return index, atomicPACF
+        n_configs = self.configuration["frames"]["n_configs"]
+        atomicPACF = correlate(series, series[:n_configs], mode="valid") / (
+            3 * n_configs
+        )
+        return index, atomicPACF.T[0]
 
     def combine(self, index, x):
         """

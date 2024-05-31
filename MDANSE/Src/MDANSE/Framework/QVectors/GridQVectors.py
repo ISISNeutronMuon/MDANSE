@@ -71,7 +71,7 @@ class GridQVectors(LatticeQVectors):
 
         dists = bins[inds]
 
-        dists = zip(range(len(dists)), dists)
+        dists = list(zip(range(len(dists)), dists))
         dists.sort(key=operator.itemgetter(1))
         qGroups = itertools.groupby(dists, key=operator.itemgetter(1))
         qGroups = collections.OrderedDict(
