@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import math
+
 import numpy as np
 from numpy.typing import ArrayLike
 
@@ -144,3 +146,52 @@ class UnitCell:
         gamma = np.linalg.norm(np.cross(a, b)) / (abc[0] * abc[1])
         angles = np.degrees(np.arcsin([alpha, beta, gamma]))
         return *abc, *angles
+
+
+def get_expansions(direct, cutoff) -> tuple[int, int, int]:
+    """Determine the expansions to generate a supercell which can
+    contain all atoms within at cutoff distance from any point in
+    the unit cell.
+
+    Parameters
+    ----------
+    direct : numpy.ndarray
+        The direct matrix of the unit cell.
+    cutoff : float
+        Max cutoff distance used to determine the expansions of the
+        supercell.
+
+    Returns
+    -------
+    tuple[int, int, int]
+        A tuple of supercell expansions.
+    """
+    cutoff += np.linalg.norm(np.sum(direct, axis=0))
+
+    vec_a, vec_b, vec_c = direct
+    a = np.linalg.norm(vec_a)
+    b = np.linalg.norm(vec_b)
+    c = np.linalg.norm(vec_c)
+
+    i, j, k = reversed(np.argsort([a, b, c]))
+    vecs = [vec_a, vec_b, vec_c]
+    lens = [a, b, c]
+
+    vec_i = vecs[i]
+    vec_j = vecs[j]
+    vec_k = vecs[k]
+
+    # expand with the longest vector
+    max_i = math.ceil(abs(cutoff / lens[i]))
+
+    # expand with the second-longest vector
+    oproj = vec_j - vec_i * (vec_j @ vec_i) / (vec_i @ vec_i)
+    max_j = math.ceil(abs(cutoff / np.linalg.norm(oproj)))
+
+    # expand with the smallest vector
+    cross_ij = np.cross(vec_i, vec_j)
+    proj = cross_ij * (vec_k @ cross_ij) / (cross_ij @ cross_ij)
+    max_k = math.ceil(abs(cutoff / np.linalg.norm(proj)))
+
+    maxs = sorted(zip([max_i, max_j, max_k], [i, j, k]), key=lambda x: x[1])
+    return maxs[0][0], maxs[1][0], maxs[2][0]

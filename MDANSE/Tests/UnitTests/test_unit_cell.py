@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.MolecularDynamics.UnitCell import get_expansions
 
 
 class TestUnitCell(unittest.TestCase):
@@ -89,3 +90,53 @@ class TestUnitCell(unittest.TestCase):
 
     def test_volume(self):
         self.assertAlmostEqual(1, self.cell.volume)
+
+
+def test_get_expansions_0():
+    direct_matrix = np.array([
+        [1, 0, 0],
+        [0, 2, 0],
+        [0, 0, 2],
+    ]
+    )
+    assert (10, 5, 5) == get_expansions(direct_matrix, 10 - 3)
+
+
+def test_get_expansions_1():
+    direct_matrix = np.array([
+        [2, 0, 0],
+        [0, 10, 0],
+        [0, 0, 11],
+    ]
+    )
+    assert (15, 3, 3) == get_expansions(direct_matrix, 30 - 15)
+
+
+def test_get_expansions_2():
+    direct_matrix = np.array([
+        [2, 0, 0],
+        [0, 0, 11],
+        [0, 10, 0],
+    ]
+    )
+    assert (15, 3, 3) == get_expansions(direct_matrix, 30 - 15)
+
+
+def test_get_expansions_3():
+    direct_matrix = np.array([
+        [0, 0, 11],
+        [2, 0, 0],
+        [0, 10, 0],
+    ]
+    )
+    assert (3, 15, 3) == get_expansions(direct_matrix, 30 - 15)
+
+
+def test_get_expansions_4():
+    direct_matrix = np.array([
+        [0, 0, 11],
+        [0, 10, 0],
+        [2, 0, 0],
+    ]
+    )
+    assert (3, 3, 15) == get_expansions(direct_matrix, 30 - 15)
