@@ -120,7 +120,7 @@ class PlotSettings(QWidget):
             pass
         else:
             try:
-                measure(1.0, "1/nm").toval(distance)
+                measure(1.0, "1/nm").toval(reciprocal)
             except:
                 pass
             else:

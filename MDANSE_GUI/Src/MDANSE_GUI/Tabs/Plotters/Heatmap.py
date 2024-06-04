@@ -17,6 +17,8 @@
 from typing import TYPE_CHECKING
 import math
 
+from matplotlib.pyplot import colorbar as mpl_colorbar
+
 from MDANSE.Framework.Units import measure
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
@@ -61,17 +63,28 @@ class Heatmap(Plotter):
         xaxis_unit = None
         yaxis_unit = None
         self.get_mpl_colors()
-        axes = target.add_subplot(111)
-        self._axes = [axes]
+        self._axes = []
         self.apply_settings(plotting_context, colours)
         if plotting_context.set_axes() is None:
             print("Axis check failed.")
             return
+        nplots = 0
+        for databundle in plotting_context.datasets().values():
+            ds, _, _ = databundle
+            if ds._n_dim == 1:
+                continue
+            nplots += 1
+        gridsize = int(math.ceil(nplots**0.5))
+        startnum = 1
         for name, databundle in plotting_context.datasets().items():
             dataset, _, _ = databundle
             if dataset._n_dim == 1:
                 continue
+            axes = target.add_subplot(gridsize, gridsize, startnum)
+            startnum += 1
+            self._axes.append(axes)
             limits = []
+            axis_units = []
             for key, value in dataset._axes_units.items():
                 target_unit = plotting_context.get_conversion_factor(value)
                 axis_array = dataset._axes[key]
@@ -81,17 +94,23 @@ class Heatmap(Plotter):
                     )
                 except:
                     limits += [axis_array[0], axis_array[-1]]
+                    axis_units.append(value)
                 else:
                     limits += [
                         axis_array[0] * conversion_factor,
                         axis_array[-1] * conversion_factor,
                     ]
-            axes.imshow(
-                dataset._data.T,
+                    axis_units.append(target_unit)
+            image = axes.imshow(
+                dataset._data.T[::-1, :],
                 extent=limits,
                 aspect="auto",
                 interpolation=None,
                 cmap=plotting_context._colour_map,
             )
-        axes.grid(True)
+            colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
+            colorbar.set_label(dataset._data_unit)
+            axes.set_xlabel(axis_units[0])
+            axes.set_ylabel(axis_units[1])
+        # axes.grid(True)
         target.canvas.draw()
