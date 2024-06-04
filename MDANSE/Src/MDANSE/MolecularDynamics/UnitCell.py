@@ -166,8 +166,6 @@ def get_expansions(direct, cutoff) -> tuple[int, int, int]:
     tuple[int, int, int]
         A tuple of supercell expansions.
     """
-    cutoff += np.linalg.norm(np.sum(direct, axis=0))
-
     vec_a, vec_b, vec_c = direct
     a = np.linalg.norm(vec_a)
     b = np.linalg.norm(vec_b)
@@ -182,16 +180,18 @@ def get_expansions(direct, cutoff) -> tuple[int, int, int]:
     vec_k = vecs[k]
 
     # expand with the longest vector
-    max_i = math.ceil(abs(cutoff / lens[i]))
+    max_i = math.ceil((cutoff + 0.5 * lens[i]) / lens[i])
 
     # expand with the second-longest vector
     oproj = vec_j - vec_i * (vec_j @ vec_i) / (vec_i @ vec_i)
-    max_j = math.ceil(abs(cutoff / np.linalg.norm(oproj)))
+    mag_o = np.linalg.norm(oproj)
+    max_j = math.ceil((cutoff + 0.5 * mag_o) / np.linalg.norm(oproj))
 
     # expand with the smallest vector
     cross_ij = np.cross(vec_i, vec_j)
     proj = cross_ij * (vec_k @ cross_ij) / (cross_ij @ cross_ij)
-    max_k = math.ceil(abs(cutoff / np.linalg.norm(proj)))
+    mag_p = np.linalg.norm(proj)
+    max_k = math.ceil((cutoff + 0.5 * mag_p) / np.linalg.norm(proj))
 
     maxs = sorted(zip([max_i, max_j, max_k], [i, j, k]), key=lambda x: x[1])
     return maxs[0][0], maxs[1][0], maxs[2][0]
