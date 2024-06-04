@@ -53,6 +53,7 @@ class PlotHolder(QTabWidget):
             self._last_number += 1
         plotting_context = PlottingContext(unit_preference=preferred_units)
         self._session.new_units.connect(plotting_context.accept_units)
+        self._session.new_cmap.connect(plotting_context.accept_cmap)
         plotting_context.needs_an_update.connect(self.update_plots)
         plotter = PlotWidget(self)
         plotter.set_context(plotting_context)

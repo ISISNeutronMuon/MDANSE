@@ -45,6 +45,7 @@ class PlotSettings(QWidget):
 
     plot_settings_changed = Signal()
     units_changed = Signal(dict)
+    cmap_changed = Signal(str)
 
     def __init__(self, *args, session=None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -52,6 +53,7 @@ class PlotSettings(QWidget):
         self._unit_fields = {}
         self.make_layout()
         self.units_changed.connect(self._session.update_units)
+        self.cmap_changed.connect(self._session.update_cmap)
 
     @Slot(str)
     def set_style(self, style_name: str):
@@ -60,6 +62,16 @@ class PlotSettings(QWidget):
         except:
             print(f"Could not set matplotlib style to {style_name}")
         else:
+            self.plot_settings_changed.emit()
+
+    @Slot(str)
+    def set_cmap(self, cmap_name: str):
+        try:
+            self._session._colours["colormap"] = cmap_name
+        except:
+            print(f"Could not set matplotlib style to {cmap_name}")
+        else:
+            self.cmap_changed.emit(cmap_name)
             self.plot_settings_changed.emit()
 
     @Slot(object)
@@ -141,6 +153,15 @@ class PlotSettings(QWidget):
         style_selector.setCurrentText("default")
         style_selector.currentTextChanged.connect(self.set_style)
         top_layout.addRow("Matplotlib style:", style_selector)
+        try:
+            current_cmap = self._session._colours["colormap"]
+        except KeyError:
+            current_cmap = "viridis"
+        cmap_selector = QComboBox(self)
+        cmap_selector.addItems(mpl.colormaps())
+        cmap_selector.setCurrentText(current_cmap)
+        cmap_selector.currentTextChanged.connect(self.set_cmap)
+        top_layout.addRow("Colormap:", cmap_selector)
         layout.addLayout(top_layout)
         box = QGroupBox("Units", self)
         layout.addWidget(box)

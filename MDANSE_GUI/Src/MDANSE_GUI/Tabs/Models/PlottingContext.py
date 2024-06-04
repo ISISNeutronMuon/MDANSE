@@ -186,6 +186,7 @@ class PlottingContext(QStandardItemModel):
         self._all_xunits = []
         self._best_xunits = []
         self._colour_list = get_mpl_colours()
+        self._colour_map = kwargs.get("colormap", "viridis")
         self._last_colour = 0
         if unit_preference is None:
             self._unit_preference = {}
@@ -226,6 +227,13 @@ class PlottingContext(QStandardItemModel):
         into this slot."""
         self._unit_preference = units
         self.set_axes()
+
+    @Slot(str)
+    def accept_cmap(self, cmap: str):
+        """Crucial slot for transferring data
+        between tabs. DataPlotter will send the datasets
+        into this slot."""
+        self._colour_map = cmap
 
     def get_conversion_factor(self, unit):
         quantity = unit_lookup.get(unit, "unknown")

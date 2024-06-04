@@ -58,6 +58,7 @@ class LocalSession(QObject):
     """
 
     new_units = Signal(dict)
+    new_cmap = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -82,6 +83,11 @@ class LocalSession(QObject):
         for key, value in input.items():
             self._units[key] = value
         self.new_units.emit(self._units)
+
+    @Slot(str)
+    def update_cmap(self, input: str):
+        self._colours["colormap"] = input
+        self.new_cmap.emit(self._colours["colormap"])
 
     def conversion_factor(self, input_unit: str) -> Tuple[float, str]:
         """Finds the conversion factor from an input unit
