@@ -54,9 +54,9 @@ class DistanceHistogram(IJob):
             "mini": 0.0,
         },
     )
-    settings["pbc"] = (
+    settings["supercell"] = (
         "BooleanConfigurator",
-        {"label": "apply periodic boundary conditions", "default": False},
+        {"label": "create supercell", "default": False},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
@@ -173,7 +173,7 @@ class DistanceHistogram(IJob):
         mol_idxs = self.indexToMolecule
         sym_idxs = self.indexToSymbol
 
-        if self.configuration["pbc"]["value"]:
+        if self.configuration["supercell"]["value"]:
             rs, direct, inverse, mol_idxs, sym_idxs = create_supercell(
                 rs,
                 direct,
