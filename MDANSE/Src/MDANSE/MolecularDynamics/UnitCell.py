@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import math
+import itertools as it
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -149,9 +150,8 @@ class UnitCell:
 
 
 def get_expansions(direct, cutoff) -> tuple[int, int, int]:
-    """Determine the expansions to generate a supercell which can
-    contain all atoms within at cutoff distance from any point in
-    the unit cell.
+    """Determine the expansions required to generate a supercell which
+    can contain a sphere with a radius of the cutoff distance.
 
     Parameters
     ----------
@@ -180,18 +180,70 @@ def get_expansions(direct, cutoff) -> tuple[int, int, int]:
     vec_k = vecs[k]
 
     # expand with the longest vector
-    max_i = math.ceil((cutoff + 0.5 * lens[i]) / lens[i])
+    max_i = math.ceil(2 * cutoff / lens[i])
 
     # expand with the second-longest vector
     oproj = vec_j - vec_i * (vec_j @ vec_i) / (vec_i @ vec_i)
-    mag_o = np.linalg.norm(oproj)
-    max_j = math.ceil((cutoff + 0.5 * mag_o) / np.linalg.norm(oproj))
+    max_j = math.ceil(2 * cutoff / np.linalg.norm(oproj))
 
     # expand with the smallest vector
     cross_ij = np.cross(vec_i, vec_j)
     proj = cross_ij * (vec_k @ cross_ij) / (cross_ij @ cross_ij)
-    mag_p = np.linalg.norm(proj)
-    max_k = math.ceil((cutoff + 0.5 * mag_p) / np.linalg.norm(proj))
+    max_k = math.ceil(2 * cutoff / np.linalg.norm(proj))
 
     maxs = sorted(zip([max_i, max_j, max_k], [i, j, k]), key=lambda x: x[1])
     return maxs[0][0], maxs[1][0], maxs[2][0]
+
+
+def create_supercell(rs, direct, inverse, mol_idxs, sym_idxs, cutoff):
+    """Create a supercell which can contain a sphere with a radius of
+    the cutoff distance.
+
+    Parameters
+    ----------
+    rs : np.ndarray
+        Unit cell coordinates.
+    direct : np.ndarray
+        The direct matrix of the unit cell.
+    inverse : np.ndarray
+        The inverse matrix of the unit cell.
+    mol_idxs : np.ndarray
+        Molecule indexes.
+    sym_idxs : np.ndarray
+        Atom symbol indexes.
+    cutoff : float
+        The cutoff distance.
+
+    Returns
+    -------
+    tuple
+        A tuple of the supercell coordinates, direct and inverse
+        matrices, and the molecule and symbol indexes
+    """
+    max_u, max_v, max_w = get_expansions(direct, cutoff)
+
+    us = np.arange(max_u)
+    vs = np.arange(max_v)
+    ws = np.arange(max_w)
+
+    rs_frac = rs @ inverse.T
+    sc_pos_frac = [rs_frac]
+    for u, v, w in it.product(us, vs, ws):
+        if (u, v, w) == (0, 0, 0):
+            continue
+        sc_pos_frac.append(np.array([u, v, w]) + rs_frac)
+    sc_rs = np.vstack(sc_pos_frac) @ direct.T
+
+    sc_direct = np.array([[max_u], [max_v], [max_w]]) * direct
+
+    n_atms = len(mol_idxs)
+    sc_mol_idxs = [mol_idxs]
+    for i in range(max_u * max_v * max_w):
+        if i == 0:
+            continue
+        sc_mol_idxs.append(mol_idxs + i * n_atms)
+    sc_mol_idxs = np.hstack(sc_mol_idxs)
+
+    sc_sym_idxs = np.tile(sym_idxs, max_u * max_v * max_w)
+
+    return sc_rs, sc_direct, np.linalg.pinv(sc_direct), sc_mol_idxs, sc_sym_idxs

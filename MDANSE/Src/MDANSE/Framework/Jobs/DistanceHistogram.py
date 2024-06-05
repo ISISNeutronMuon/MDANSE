@@ -19,7 +19,7 @@ import itertools
 
 import numpy as np
 
-from MDANSE.Core.Error import Error
+from MDANSE.MolecularDynamics.UnitCell import create_supercell
 from MDANSE.Extensions import distance_histogram
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
@@ -53,6 +53,10 @@ class DistanceHistogram(IJob):
             "includeLast": True,
             "mini": 0.0,
         },
+    )
+    settings["pbc"] = (
+        "BooleanConfigurator",
+        {"label": "apply periodic boundary conditions", "default": False},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
@@ -155,32 +159,40 @@ class DistanceHistogram(IJob):
 
         conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
 
-        try:
-            direct_cell = conf.unit_cell.transposed_direct
-            inverse_cell = conf.unit_cell.transposed_inverse
+        direct = conf.unit_cell.direct
+        inverse = conf.unit_cell.inverse
 
-            cell_volume = conf.unit_cell.volume
-        except:
-            direct_cell = np.eye(3)
-            inverse_cell = np.eye(3)
-
-            cell_volume = 1.0
+        cell_volume = conf.unit_cell.volume
 
         coords = conf["coordinates"]
 
         hIntraTemp = np.zeros(self.hIntra.shape, dtype=np.float64)
         hInterTemp = np.zeros(self.hInter.shape, dtype=np.float64)
 
+        rs = coords[self._indexes]
+        mol_idxs = self.indexToMolecule
+        sym_idxs = self.indexToSymbol
+
+        if self.configuration["pbc"]["value"]:
+            rs, direct, inverse, mol_idxs, sym_idxs = create_supercell(
+                rs,
+                direct,
+                inverse,
+                mol_idxs,
+                sym_idxs,
+                self.configuration["r_values"]["value"][-1],
+            )
+
         distance_histogram.distance_histogram(
-            coords[self._indexes, :],
-            direct_cell,
-            inverse_cell,
+            rs,
+            direct.T,
+            inverse.T,
             self._indexes,
-            self.indexToMolecule,
-            self.indexToSymbol,
+            mol_idxs,
+            sym_idxs,
             hIntraTemp,
             hInterTemp,
-            self.scaleconfig,
+            np.zeros_like(rs),
             self.configuration["r_values"]["first"],
             self.configuration["r_values"]["step"],
         )
