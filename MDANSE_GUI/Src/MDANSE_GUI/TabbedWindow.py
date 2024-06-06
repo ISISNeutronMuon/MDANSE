@@ -38,6 +38,7 @@ from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
 from MDANSE_GUI.Widgets.Generator import WidgetGenerator
 from MDANSE_GUI.Resources import Resources
 from MDANSE_GUI.UnitsEditor import UnitsEditor
+from MDANSE_GUI.UserSettingsEditor import UserSettingsEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
@@ -103,6 +104,7 @@ class TabbedWindow(QMainWindow):
         if app_instance is not None:
             app_instance.aboutToQuit.connect(self._session.save_json)
         self._session.load_json()
+        self.settings_editor = UserSettingsEditor(self, current_session=self._session)
 
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
@@ -140,10 +142,14 @@ class TabbedWindow(QMainWindow):
         menubar.setObjectName("main menubar")
         menubar.setVisible(True)
         file_group = menubar.addMenu("File")
+        settings_group = menubar.addMenu("Settings")
         help_group = menubar.addMenu("Help")
         self.exitAct = QAction("Exit", parent=menubar)
         self.exitAct.triggered.connect(self.shut_down)
         file_group.addAction(self.exitAct)
+        self.settingsAct = QAction("User Settings", parent=menubar)
+        self.settingsAct.triggered.connect(self.launchSettingsEditor)
+        settings_group.addAction(self.settingsAct)
         self.aboutAct = QAction("About MDANSE", parent=menubar)
         self.aboutAct.triggered.connect(self.version_information)
         help_group.addAction(self.aboutAct)
@@ -195,6 +201,10 @@ class TabbedWindow(QMainWindow):
     @Slot()
     def launchStyleSelector(self):
         self.launch_dialog(self.style_selector)
+
+    @Slot()
+    def launchSettingsEditor(self):
+        self.launch_dialog(self.settings_editor)
 
     @Slot()
     def launchElementsEditor(self):
