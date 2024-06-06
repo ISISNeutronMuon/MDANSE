@@ -21,19 +21,113 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
+import numpy as np
 import matplotlib.pyplot as mpl
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
 
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSlider
+from qtpy.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QComboBox,
+    QSlider,
+    QLabel,
+    QGridLayout,
+    QRadioButton,
+    QButtonGroup,
+    QDoubleSpinBox,
+)
 from qtpy.QtCore import Slot, Signal, QObject, Qt
 
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 
+class SliderPack(QWidget):
+
+    new_values = Signal(object)
+
+    def __init__(self, *args, n_sliders=2, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        layout = QGridLayout(self)
+        self.setLayout(layout)
+        self._labels = []
+        self._sliders = []
+        self._spinboxes = []
+        self._minarray = np.zeros(n_sliders)
+        self._maxarray = np.ones(n_sliders)
+        self._valarray = np.ones(n_sliders) * 0.5
+        self._steparray = np.ones(n_sliders) * 0.01
+        self._clickarray = np.array(n_sliders * [100], dtype=int)
+        current_row = 0
+        for n in range(n_sliders):
+            label = QLabel(self)
+            slider = QSlider(self)
+            slider.setOrientation(Qt.Orientation.Horizontal)
+            box = QDoubleSpinBox(self)
+            box.setSingleStep(self._steparray[n])
+            layout.addWidget(label, current_row, 0)
+            layout.addWidget(slider, current_row, 1, 1, 2)
+            layout.addWidget(box, current_row, 3)
+            current_row += 1
+            self._labels.append(label)
+            self._sliders.append(slider)
+            self._spinboxes.append(box)
+            slider.valueChanged.connect(self.slider_to_box)
+            box.valueChanged.connect(self.box_to_slider)
+            box.valueChanged.connect(self.collect_values)
+
+    @Slot(object)
+    def new_slider_labels(self, input):
+        for number, element in enumerate(input):
+            self._labels[number].setText(element)
+
+    @Slot(object)
+    def new_limits(self, input):
+        for number, element in enumerate(input):
+            minimum, maximum, stepsize = element[0], element[1], element[2]
+            clicks = int(round((maximum - minimum) / stepsize))
+            self._minarray[number] = minimum
+            self._maxarray[number] = maximum
+            self._steparray[number] = stepsize
+            self._clickarray[number] = clicks
+        self._sliders[number].setText(element)
+
+    @Slot()
+    def slider_to_box(self):
+        vals = np.zeros_like(self._valarray)
+        clicks = np.zeros_like(self._clickarray)
+        for ns, slider in enumerate(self._sliders):
+            clicks[ns] = slider.value()
+        vals = self._minarray + clicks * self._steparray
+        for ns, box in enumerate(self._spinboxes):
+            box.setValue(vals[ns])
+
+    @Slot()
+    def box_to_slider(self):
+        self.blockSignals(True)
+        vals = np.zeros_like(self._valarray)
+        clicks = np.zeros_like(self._clickarray)
+        for ns, box in enumerate(self._spinboxes):
+            vals[ns] = box.value()
+        clicks = np.round((vals - self._minarray) / self._steparray).astype(int)
+        for ns, slider in enumerate(self._sliders):
+            slider.setValue(clicks[ns])
+        self.blockSignals(False)
+
+    @Slot()
+    def collect_values(self):
+        result = []
+        for box in self._spinboxes:
+            result.append(box.value())
+        self.new_values.emit(result)
+
+
 class PlotWidget(QWidget):
+
+    change_slider_labels = Signal(object)
+    change_slider_limits = Signal(object)
 
     def __init__(self, *args, colours=None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -53,11 +147,13 @@ class PlotWidget(QWidget):
             self._plotter = Plotter.create(plotter_option)
         except:
             self._plotter = Plotter()
+        self.change_slider_labels.emit(self._plotter.slider_labels())
+        self.change_slider_limits.emit(self._plotter.slider_limits())
         self.plot_data()
 
-    @Slot(int)
-    def slider_change(self, new_value: int):
-        self._plotter.handle_slider(new_value / self._slider_max)
+    @Slot(object)
+    def slider_change(self, new_values: object):
+        self._plotter.handle_slider(new_values)
 
     def available_plotters(self) -> List[str]:
         return [str(x) for x in Plotter.indirect_subclasses()]
@@ -96,11 +192,10 @@ class PlotWidget(QWidget):
         toolbar = NavigationToolbar2QTAgg(figAgg, canvas)
         toolbar.update()
         layout.addWidget(figAgg)
-        slider = QSlider(Qt.Orientation.Horizontal, self)
-        slider.setValue(0)
-        slider.setMinimum(-self._slider_max)
-        slider.setMaximum(self._slider_max)
-        slider.valueChanged.connect(self.slider_change)
+        slider = SliderPack(self)
+        self.change_slider_labels.connect(slider.new_slider_labels)
+        self.change_slider_limits.connect(slider.new_limits)
+        slider.new_values.connect(self.slider_change)
         layout.addWidget(slider)
         layout.addWidget(toolbar)
         self._figure = figure

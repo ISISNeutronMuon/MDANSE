@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from matplotlib.pyplot import style as mpl_style
 from matplotlib import rcParams
@@ -43,6 +43,9 @@ class Plotter(metaclass=SubclassFactory):
         if target is None:
             return
         target.clear()
+
+    def slider_labels(self) -> List[str]:
+        return ["Slider 1", "Slider 2"]
 
     def get_mpl_colors(self):
         cycler = rcParams["axes.prop_cycle"]
