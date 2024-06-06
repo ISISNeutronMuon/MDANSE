@@ -34,6 +34,7 @@ class Single(Plotter):
         self._current_colours = []
         self._active_curves = []
         self._backup_curves = []
+        self._curve_limit_per_dataset = 12
         self.height_max, self.length_max = 0.0, 0.0
 
     def clear(self, figure: "Figure" = None):
@@ -118,7 +119,11 @@ class Single(Plotter):
                     self.length_max = max(self.length_max, temp.get_xdata().max())
                 else:
                     multi_curves = dataset.curves_vs_axis(best_unit)
+                    counter = 0
                     for key, value in multi_curves.items():
+                        counter += 1
+                        if counter >= self._curve_limit_per_dataset:
+                            break
                         try:
                             [temp] = axes.plot(
                                 dataset._axes[best_axis] * conversion_factor,
