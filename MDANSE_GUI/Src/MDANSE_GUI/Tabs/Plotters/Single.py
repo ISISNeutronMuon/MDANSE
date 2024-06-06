@@ -120,7 +120,7 @@ class Single(Plotter):
                     multi_curves = dataset.curves_vs_axis(best_unit)
                     for key, value in multi_curves.items():
                         try:
-                            temp = axes.plot(
+                            [temp] = axes.plot(
                                 dataset._axes[best_axis] * conversion_factor,
                                 value,
                                 label=plotlabel + ":" + dataset._curve_labels[key],
@@ -129,8 +129,12 @@ class Single(Plotter):
                             self._backup_curves.append(
                                 [temp.get_xdata(), temp.get_ydata()]
                             )
-                            self.height_max = max(self.height_max, temp.get_ydata())
-                            self.length_max = max(self.length_max, temp.get_xdata())
+                            self.height_max = max(
+                                self.height_max, temp.get_ydata().max()
+                            )
+                            self.length_max = max(
+                                self.length_max, temp.get_xdata().max()
+                            )
                         except ValueError:
                             print(f"Plotting failed for {plotlabel} using {best_axis}")
                             print(f"x_axis={dataset._axes[best_axis]}")

@@ -103,6 +103,15 @@ class SliderPack(QWidget):
             self._sliders[number].setValue(click_value)
             self._spinboxes[number].setValue(temp_value)
 
+    def set_values(self, new_values: List[float]):
+        nv = np.array(new_values)
+        nv = np.maximum(nv, self._minarray)
+        nv = np.minimum(nv, self._maxarray)
+        clicks = np.round((nv - self._minarray) / self._steparray).astype(int)
+        for n in range(len(nv)):
+            self._spinboxes[n].setValue(nv[n])
+            self._sliders[n].setValue(clicks[n])
+
     @Slot()
     def slider_to_box(self):
         vals = np.zeros_like(self._valarray)
@@ -137,10 +146,12 @@ class PlotWidget(QWidget):
 
     change_slider_labels = Signal(object)
     change_slider_limits = Signal(object)
+    reset_slider_values = Signal(bool)
 
     def __init__(self, *args, colours=None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._plotter = None
+        self._sliderpack = None
         self._plotting_context = None
         self._colours = colours
         self._slider_max = 100
@@ -159,11 +170,18 @@ class PlotWidget(QWidget):
             self._plotter = Plotter()
         self.change_slider_labels.emit(self._plotter.slider_labels())
         self.change_slider_limits.emit(self._plotter.slider_limits())
+        self.reset_slider_values.emit(self._plotter._value_reset_needed)
         self.plot_data()
 
     @Slot(object)
     def slider_change(self, new_values: object):
         self._plotter.handle_slider(new_values)
+
+    @Slot(bool)
+    def set_slider_values(self, reset_needed: bool):
+        if reset_needed and self._sliderpack is not None:
+            values = self._plotter._initial_values
+            self._sliderpack.set_values(values)
 
     def available_plotters(self) -> List[str]:
         return [str(x) for x in Plotter.indirect_subclasses()]
@@ -205,7 +223,9 @@ class PlotWidget(QWidget):
         slider = SliderPack(self)
         self.change_slider_labels.connect(slider.new_slider_labels)
         self.change_slider_limits.connect(slider.new_limits)
+        self.reset_slider_values.connect(self.set_slider_values)
         slider.new_values.connect(self.slider_change)
+        self._sliderpack = slider
         layout.addWidget(slider)
         layout.addWidget(toolbar)
         self._figure = figure

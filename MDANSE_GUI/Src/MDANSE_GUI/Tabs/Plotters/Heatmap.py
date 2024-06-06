@@ -17,6 +17,7 @@
 from typing import TYPE_CHECKING, List
 import math
 
+import numpy as np
 from matplotlib.pyplot import colorbar as mpl_colorbar
 
 from MDANSE.Framework.Units import measure
@@ -34,6 +35,10 @@ class Heatmap(Plotter):
         super().__init__()
         self._figure = None
         self._current_colours = []
+        self._backup_images = []
+        self._backup_arrays = []
+        self._initial_values = [0.0, 100.0]
+        self._slider_values = [0.0, 100.0]
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
@@ -45,10 +50,10 @@ class Heatmap(Plotter):
         target.clear()
 
     def slider_labels(self) -> List[str]:
-        return ["Minimum", "Maximum"]
+        return ["Minimum (percentile)", "Maximum (percentile)"]
 
     def slider_limits(self) -> List[str]:
-        return self._number_of_sliders * [[0.0, 1.0, 0.01]]
+        return self._number_of_sliders * [[0.0, 100.0, 0.1]]
 
     def get_figure(self, figure: "Figure" = None):
         if figure is None:
@@ -61,12 +66,29 @@ class Heatmap(Plotter):
         target.clear()
         return target
 
+    def handle_slider(self, new_value: List[float]):
+        super().handle_slider(new_value)
+        target = self._figure
+        if target is None:
+            return
+        for num, image in enumerate(self._backup_images):
+            array = self._backup_arrays[num]
+            newmax = np.percentile(array, new_value[1])
+            newmin = np.percentile(array, new_value[0])
+            if newmax >= newmin:
+                image.set_clim([newmin, newmax])
+                self._figure.canvas.draw_idle()
+        target.canvas.draw()
+
     def plot(
         self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
     ):
         target = self.get_figure(figure)
         if target is None:
             return
+        self._figure = target
+        self._backup_images = []
+        self._backup_arrays = []
         xaxis_unit = None
         yaxis_unit = None
         self.get_mpl_colors()
@@ -119,5 +141,7 @@ class Heatmap(Plotter):
             colorbar.set_label(dataset._data_unit)
             axes.set_xlabel(axis_units[0])
             axes.set_ylabel(axis_units[1])
+            self._backup_images.append(image)
+            self._backup_arrays.append([np.nan_to_num(dataset._data)])
         # axes.grid(True)
         target.canvas.draw()

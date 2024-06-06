@@ -33,8 +33,10 @@ class Plotter(metaclass=SubclassFactory):
         self._figure = None
         self._current_colours = []
         self._axes = []
+        self._initial_values = [0.0, 0.0]
         self._slider_values = [0.0, 0.0]
         self._number_of_sliders = 2
+        self._value_reset_needed = True
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
