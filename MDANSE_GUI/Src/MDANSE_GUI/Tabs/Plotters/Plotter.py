@@ -33,7 +33,8 @@ class Plotter(metaclass=SubclassFactory):
         self._figure = None
         self._current_colours = []
         self._axes = []
-        self._slider_value = 0.0
+        self._slider_values = [0.0, 0.0]
+        self._number_of_sliders = 2
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
@@ -46,6 +47,9 @@ class Plotter(metaclass=SubclassFactory):
 
     def slider_labels(self) -> List[str]:
         return ["Slider 1", "Slider 2"]
+
+    def slider_limits(self) -> List[str]:
+        return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
 
     def get_mpl_colors(self):
         cycler = rcParams["axes.prop_cycle"]
@@ -93,8 +97,8 @@ class Plotter(metaclass=SubclassFactory):
                 for axes in self._axes:
                     axes.set_prop_cycle("color", col_seq)
 
-    def handle_slider(self, new_value: float):
-        self._slider_value = new_value
+    def handle_slider(self, new_value: List[float]):
+        self._slider_values = new_value
 
     def plot(
         self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None

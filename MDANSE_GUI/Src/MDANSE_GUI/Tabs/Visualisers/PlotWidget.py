@@ -59,7 +59,7 @@ class SliderPack(QWidget):
         self._maxarray = np.ones(n_sliders)
         self._valarray = np.ones(n_sliders) * 0.5
         self._steparray = np.ones(n_sliders) * 0.01
-        self._clickarray = np.array(n_sliders * [100], dtype=int)
+        self._clickarray = np.array(n_sliders * [101], dtype=int)
         current_row = 0
         for n in range(n_sliders):
             label = QLabel(self)
@@ -92,7 +92,16 @@ class SliderPack(QWidget):
             self._maxarray[number] = maximum
             self._steparray[number] = stepsize
             self._clickarray[number] = clicks
-        self._sliders[number].setText(element)
+            temp_value = self._spinboxes[number].value()
+            self._sliders[number].setMaximum(clicks)
+            self._spinboxes[number].setMinimum(minimum)
+            self._spinboxes[number].setMaximum(maximum)
+            self._spinboxes[number].setSingleStep(stepsize)
+            temp_value = min(maximum, temp_value)
+            temp_value = max(minimum, temp_value)
+            click_value = int(round((temp_value - minimum) / stepsize))
+            self._sliders[number].setValue(click_value)
+            self._spinboxes[number].setValue(temp_value)
 
     @Slot()
     def slider_to_box(self):
@@ -136,6 +145,7 @@ class PlotWidget(QWidget):
         self._colours = colours
         self._slider_max = 100
         self.make_canvas()
+        self.set_plotter("Single")
 
     def set_context(self, new_context: "PlottingContext"):
         self._plotting_context = new_context

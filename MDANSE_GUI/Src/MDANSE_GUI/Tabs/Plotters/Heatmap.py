@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 import math
 
 from matplotlib.pyplot import colorbar as mpl_colorbar
@@ -31,6 +31,7 @@ if TYPE_CHECKING:
 class Heatmap(Plotter):
 
     def __init__(self) -> None:
+        super().__init__()
         self._figure = None
         self._current_colours = []
 
@@ -42,6 +43,12 @@ class Heatmap(Plotter):
         if target is None:
             return
         target.clear()
+
+    def slider_labels(self) -> List[str]:
+        return ["Minimum", "Maximum"]
+
+    def slider_limits(self) -> List[str]:
+        return self._number_of_sliders * [[0.0, 1.0, 0.01]]
 
     def get_figure(self, figure: "Figure" = None):
         if figure is None:

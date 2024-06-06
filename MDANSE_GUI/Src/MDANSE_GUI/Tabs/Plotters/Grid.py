@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 import math
 
 from MDANSE.Framework.Units import measure
@@ -29,7 +29,14 @@ if TYPE_CHECKING:
 class Grid(Plotter):
 
     def __init__(self) -> None:
+        super().__init__()
         self._figure = None
+
+    def slider_labels(self) -> List[str]:
+        return ["Inactive", "Inactive"]
+
+    def slider_limits(self) -> List[str]:
+        return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
 
     def plot(
         self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
