@@ -165,7 +165,9 @@ class MeanSquareDisplacement(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        msd = mean_square_displacement(series, self.configuration["frames"]["n_configs"])
+        msd = mean_square_displacement(
+            series, self.configuration["frames"]["n_configs"]
+        )
 
         return index, msd
 
