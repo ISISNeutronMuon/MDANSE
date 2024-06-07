@@ -40,13 +40,15 @@ class LocalSession(QObject):
         self._paths = {}
         self._units = {}
         self._state = None
+        self._filename = None
         self.populate_defaults()
 
     def populate_defaults(self):
         self._paths["root_directory"] = os.path.expanduser("~")
         self._units["energy"] = "meV"
         self._units["time"] = "fs"
-        self._units["distance"] = "Ang"
+        self._units["distance"] = "ang"
+        self._units["reciprocal"] = "1/ang"
 
     def get_parameter(self, key: str) -> str:
         value = self._parameters.get(key, None)
@@ -70,9 +72,19 @@ class LocalSession(QObject):
         all_items["units"] = self._units
         output = json.encoder.JSONEncoder().encode(all_items)
         if fname is None:
-            fname = os.path.join(PLATFORM.application_directory(), "gui_session.json")
-        with open(fname, "w") as target:
-            target.write(output)
+            if self._filename is None:
+                fname = os.path.join(
+                    PLATFORM.application_directory(), "gui_session.json"
+                )
+            else:
+                fname = self._filename
+        try:
+            with open(fname, "w") as target:
+                target.write(output)
+        except:
+            return
+        else:
+            self._filename = fname
 
     def load_json(self, fname: str = None):
         if fname is None:
@@ -86,3 +98,4 @@ class LocalSession(QObject):
             all_items = json.decoder.JSONDecoder().decode(all_items_text)
             self._paths = all_items["paths"]
             self._units = all_items["units"]
+            self._filename = fname

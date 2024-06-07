@@ -23,7 +23,7 @@ from qtpy.QtWidgets import (
     QLineEdit,
     QTreeView,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QSortFilterProxyModel
+from qtpy.QtCore import Signal, Slot, Qt, QSortFilterProxyModel, QModelIndex
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE_GUI.Session.LocalSession import LocalSession
@@ -41,18 +41,59 @@ class UserSettingsModel(QStandardItemModel):
         else:
             self._session = session
         self.populate_model()
+        self.setHeaderData(0, Qt.Orientation.Horizontal, "Item")
+        self.setHeaderData(1, Qt.Orientation.Horizontal, "Value")
+        self.setHeaderData(2, Qt.Orientation.Horizontal, "Comment")
+
+        self.dataChanged.connect(self.save_new_value)
+        # self.scan_model()
 
     def populate_model(self):
-        for attr in ["_parameters", "_paths", "_units"]:
+        comments = [
+            "Internal software parameters",
+            "Recently used paths to files",
+            "Preferred units for plotting",
+        ]
+        for number, attr in enumerate(["_parameters", "_paths", "_units"]):
             if hasattr(self._session, attr):
                 section = getattr(self._session, attr)
                 section_item = QStandardItem(attr)
+                section_item.setData(attr)
                 section_item.setEditable(False)
-                self.appendRow([section_item, QStandardItem("")])
+                self.appendRow([section_item, QStandardItem(comments[number])])
                 for key, value in section.items():
                     key_item, value_item = QStandardItem(key), QStandardItem(value)
+                    key_item.setData(key)
+                    value_item.setData(value)
                     key_item.setEditable(False)
                     section_item.appendRow([key_item, value_item])
+
+    def scan_model(self):
+        """This is meant to be used for debugging purposes only"""
+
+        def scan_children(parent_item: QStandardItem):
+            for row in range(parent_item.rowCount()):
+                for column in range(parent_item.columnCount()):
+                    item = parent_item.child(row, column)
+                    print(f"row={row}, column={column}, data={item.data()}")
+                    if item.hasChildren():
+                        scan_children(item)
+
+        scan_children(self.invisibleRootItem())
+
+    @Slot(QModelIndex)
+    def save_new_value(self, item_index: QModelIndex):
+        item = self.itemFromIndex(item_index)
+        row_number = item.row()
+        new_value = item.data(role=Qt.ItemDataRole.DisplayRole)
+        key = item.parent().child(row_number, 0).data()
+        attribute = item.parent().data()
+        try:
+            group = getattr(self._session, attribute)
+            group[key] = new_value
+            setattr(self._session, attribute, group)
+        except:
+            print(f"Could not store {new_value} in session.{attribute}[{key}]")
 
     @Slot(str)
     def writeout_settings(self, target_filename: str):
@@ -74,14 +115,17 @@ class UserSettingsEditor(QDialog):
 
         self.filename_widget = QLineEdit(self)
         layout.addWidget(self.filename_widget)
+        if current_session is not None:
+            if current_session._filename is not None:
+                self.filename_widget.setText(str(current_session._filename))
 
         self.viewer = QTreeView(self)
-        self.viewer.setHeaderHidden(True)
         self.viewer.setAnimated(True)
         layout.addWidget(self.viewer)
 
         self.writeout_button = QPushButton("Save settings", self)
         layout.addWidget(self.writeout_button)
+        self.writeout_button.clicked.connect(self.save_changes)
 
         self.data_model = UserSettingsModel(session=current_session)
 
@@ -91,9 +135,11 @@ class UserSettingsEditor(QDialog):
         self.viewer.setModel(self.proxy_model)
         self.viewer.resizeColumnToContents(0)
 
+    @Slot()
     def save_changes(self):
         target_filename = self.filename_widget.text()
-        self.data_model.writeout_settings(target_filename)
+        if len(target_filename) > 0:
+            self.data_model.writeout_settings(target_filename)
 
 
 if __name__ == "__main__":
