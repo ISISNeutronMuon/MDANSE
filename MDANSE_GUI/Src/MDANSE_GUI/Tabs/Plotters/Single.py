@@ -69,11 +69,21 @@ class Single(Plotter):
         target = self._figure
         if target is None:
             return
+        saved_xmin, saved_xmax, saved_ymin, saved_ymax = self._backup_limits
         for num, curve in enumerate(self._active_curves):
             xdata = self._backup_curves[num][0]
             ydata = self._backup_curves[num][1]
-            curve.set_xdata(xdata + num * self.length_max * new_value[1])
-            curve.set_ydata(ydata + num * self.height_max * new_value[0])
+            new_xdata = xdata + num * self.length_max * new_value[1]
+            new_ydata = ydata + num * self.height_max * new_value[0]
+            curve.set_xdata(new_xdata)
+            curve.set_ydata(new_ydata)
+            xmin, xmax = new_xdata.min(), new_xdata.max()
+            ymin, ymax = new_ydata.min(), new_ydata.max()
+            saved_xmin = min(xmin, saved_xmin)
+            saved_xmax = max(xmax, saved_xmax)
+            saved_ymin = min(ymin, saved_ymin)
+            saved_ymax = max(ymax, saved_ymax)
+        self._backup_limits = [saved_xmin, saved_xmax, saved_ymin, saved_ymax]
         target.canvas.draw()
 
     def plot(
@@ -152,7 +162,7 @@ class Single(Plotter):
                             return
         if update_only:
             axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
-            axes.set_xlim((self._backup_limits[2], self._backup_limits[3]))
+            axes.set_ylim((self._backup_limits[2], self._backup_limits[3]))
         else:
             xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
             self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
