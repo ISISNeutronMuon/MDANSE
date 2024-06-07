@@ -83,7 +83,7 @@ class ElasticIncoherentStructureFactor(IJob):
     settings["weights"] = (
         "WeightsConfigurator",
         {
-            "default": "b_incoherent",
+            "default": "b_incoherent2",
             "dependencies": {"atom_selection": "atom_selection"},
         },
     )
