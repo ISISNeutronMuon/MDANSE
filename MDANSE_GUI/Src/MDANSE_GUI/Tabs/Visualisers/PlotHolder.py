@@ -83,4 +83,4 @@ class PlotHolder(QTabWidget):
         """This will change the line colour, thickness, etc.
         At the moment it doesn't do anything."""
         for plotter in self._plotter.values():
-            plotter.plot_data()
+            plotter.plot_data(update_only=True)

@@ -186,13 +186,18 @@ class PlotWidget(QWidget):
     def available_plotters(self) -> List[str]:
         return [str(x) for x in Plotter.indirect_subclasses()]
 
-    def plot_data(self):
+    def plot_data(self, update_only=False):
         if self._plotter is None:
             print("No plotter present in PlotWidget.")
             return
         if self._plotting_context is None:
             return
-        self._plotter.plot(self._plotting_context, self._figure, colours=self._colours)
+        self._plotter.plot(
+            self._plotting_context,
+            self._figure,
+            colours=self._colours,
+            update_only=update_only,
+        )
 
     def make_canvas(self, width=12.0, height=9.0, dpi=100):
         """Creates a matplotlib figure for plotting

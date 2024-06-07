@@ -103,7 +103,11 @@ class Plotter(metaclass=SubclassFactory):
         self._slider_values = new_value
 
     def plot(
-        self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
+        self,
+        plotting_context: "PlottingContext",
+        figure: "Figure" = None,
+        colours=None,
+        update_only=False,
     ):
         target = self.get_figure(figure)
         if target is None:

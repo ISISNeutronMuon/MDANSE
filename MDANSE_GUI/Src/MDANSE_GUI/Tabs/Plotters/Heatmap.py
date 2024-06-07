@@ -38,6 +38,7 @@ class Heatmap(Plotter):
         self._backup_images = []
         self._backup_arrays = []
         self._backup_minmax = []
+        self._backup_limits = []
         self._initial_values = [0.0, 100.0]
         self._slider_values = [0.0, 100.0]
         self._last_minmax = [-1, -1]
@@ -97,7 +98,11 @@ class Heatmap(Plotter):
         target.canvas.draw()
 
     def plot(
-        self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
+        self,
+        plotting_context: "PlottingContext",
+        figure: "Figure" = None,
+        colours=None,
+        update_only=False,
     ):
         target = self.get_figure(figure)
         if target is None:
@@ -155,12 +160,44 @@ class Heatmap(Plotter):
             )
             colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
             colorbar.set_label(dataset._data_unit)
-            try:
-                last_minmax = self._backup_minmax[ds_num]
-            except IndexError:
-                pass
+            xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
+            if update_only:
+                try:
+                    last_minmax = self._backup_minmax[ds_num]
+                except IndexError:
+                    pass
+                else:
+                    image.set_clim(last_minmax)
+                try:
+                    last_limits = self._backup_limits[ds_num]
+                except IndexError:
+                    while len(self._backup_limits) < (ds_num + 1):
+                        self._backup_limits.append(
+                            [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
+                        )
+                else:
+                    axes.set_xlim((last_limits[0], last_limits[1]))
+                    axes.set_ylim((last_limits[2], last_limits[3]))
             else:
-                image.set_clim(last_minmax)
+                try:
+                    last_limits = self._backup_limits[ds_num]
+                except IndexError:
+                    while len(self._backup_limits) < (ds_num + 1):
+                        self._backup_limits.append(
+                            [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
+                        )
+                try:
+                    last_minmax = self._backup_minmax[ds_num]
+                except IndexError:
+                    while len(self._backup_minmax) < (ds_num + 1):
+                        self._backup_minmax.append([-1, -1])
+                self._backup_minmax[ds_num] = [dataset._data.min(), dataset._data.max()]
+                self._backup_limits[ds_num] = [
+                    xlimits[0],
+                    xlimits[1],
+                    ylimits[0],
+                    ylimits[1],
+                ]
             axes.set_xlabel(axis_units[0])
             axes.set_ylabel(axis_units[1])
             self._backup_images.append(image)

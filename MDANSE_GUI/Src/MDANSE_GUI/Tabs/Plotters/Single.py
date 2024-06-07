@@ -34,6 +34,7 @@ class Single(Plotter):
         self._current_colours = []
         self._active_curves = []
         self._backup_curves = []
+        self._backup_limits = []
         self._curve_limit_per_dataset = 12
         self.height_max, self.length_max = 0.0, 0.0
 
@@ -76,7 +77,11 @@ class Single(Plotter):
         target.canvas.draw()
 
     def plot(
-        self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
+        self,
+        plotting_context: "PlottingContext",
+        figure: "Figure" = None,
+        colours=None,
+        update_only=False,
     ):
         target = self.get_figure(figure)
         if target is None:
@@ -145,6 +150,12 @@ class Single(Plotter):
                             print(f"x_axis={dataset._axes[best_axis]}")
                             print(f"values={value}")
                             return
+        if update_only:
+            axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
+            axes.set_xlim((self._backup_limits[2], self._backup_limits[3]))
+        else:
+            xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
+            self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
         if xaxis_unit is not None:
             axes.set_xlabel(xaxis_unit)
         axes.grid(True)

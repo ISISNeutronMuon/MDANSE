@@ -31,6 +31,7 @@ class Grid(Plotter):
     def __init__(self) -> None:
         super().__init__()
         self._figure = None
+        self._backup_limits = []
 
     def slider_labels(self) -> List[str]:
         return ["Inactive", "Inactive"]
@@ -39,7 +40,11 @@ class Grid(Plotter):
         return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
 
     def plot(
-        self, plotting_context: "PlottingContext", figure: "Figure" = None, colours=None
+        self,
+        plotting_context: "PlottingContext",
+        figure: "Figure" = None,
+        colours=None,
+        update_only=False,
     ):
         target = self.get_figure(figure)
         self.get_mpl_colors()
@@ -62,7 +67,7 @@ class Grid(Plotter):
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
         for name, databundle in plotting_context.datasets().items():
-            dataset, colour, style, _ = databundle
+            dataset, colour, style, ds_num = databundle
             best_unit, best_axis = dataset.longest_axis()
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)
             for key, curve in dataset._curves.items():
@@ -79,6 +84,22 @@ class Grid(Plotter):
                     color=colour,
                     label=plotlabel + ":" + dataset._curve_labels[key],
                 )
+                xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
+                try:
+                    new_limits = self._backup_limits[ds_num]
+                except IndexError:
+                    while len(self._backup_limits) < (ds_num + 1):
+                        self._backup_limits.append([])
+                if not update_only:
+                    self._backup_limits[ds_num] = [
+                        xlimits[0],
+                        xlimits[1],
+                        ylimits[0],
+                        ylimits[1],
+                    ]
+                else:
+                    axes.set_xlim((new_limits[0], new_limits[1]))
+                    axes.set_ylim((new_limits[2], new_limits[3]))
                 axes.grid(True)
                 axes.set_xlabel(xaxis_unit)
                 axes.legend(loc=0)
