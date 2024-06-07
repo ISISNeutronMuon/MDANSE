@@ -1,4 +1,6 @@
 /*.c
 /*.cpp
+/*.html
 /xtc/xtc.c
 /xtc/trr.c
+/xtc/*.html

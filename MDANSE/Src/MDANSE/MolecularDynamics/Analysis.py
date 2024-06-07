@@ -16,10 +16,10 @@
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.signal import correlate
 
 from MDANSE.Core.Error import Error
 from MDANSE.Mathematics.Geometry import center_of_mass
-from MDANSE.Mathematics.Signal import correlation
 
 
 class AnalysisError(Error):
@@ -69,46 +69,27 @@ def mean_square_deviation(
     return rmsd
 
 
-def mean_square_displacement(coords: np.ndarray) -> NDArray[np.float64]:
+def mean_square_displacement(coords: np.ndarray, n_configs: int) -> NDArray[np.float64]:
+    """Computes the mean square displacement of a set of coordinates
+    using the MSD algorithm described in Kneller et al., Com. Phys. Com., 1995.
+
+    Parameters
+    ----------
+    coords : np.ndarray
+        Coordinates used to calculate MSD.
+    n_configs : int
+        Size of the window used to correlated positions.
+
+    Returns
+    -------
+    np.ndarray
+        An array of the MSD.
     """
-    Computes the mean square displacement of a set of coordinates using the MSD algorithm described in Kneller et al.,
-    Com. Phys. Com., 1995.
-
-    :param coords: the set of n coordinates.
-    :type coords: (n,3) numpy array
-
-    :return: the mean square displacement.
-    :rtype: np.ndarray
-    """
-
-    dsq = np.add.reduce(coords**2, 1)
-
-    # sum_dsq1 is the cumulative sum of dsq
-    sum_dsq1 = np.add.accumulate(dsq)
-
-    # sum_dsq1 is the reversed cumulative sum of dsq
-    sum_dsq2 = np.add.accumulate(dsq[::-1])
-
-    # sumsq refers to SUMSQ in the published algorithm
-    sumsq = 2.0 * sum_dsq1[-1]
-
-    # this line refers to the instruction SUMSQ <-- SUMSQ - DSQ(m-1) - DSQ(N - m) of the published algorithm
-    # In this case, msd is an array because the instruction is computed for each m ranging from 0 to len(traj) - 1
-    # So, this single instruction is performing the loop in the published algorithm
-    Saabb = (
-        sumsq
-        - np.concatenate(([0.0], sum_dsq1[:-1]))
-        - np.concatenate(([0.0], sum_dsq2[:-1]))
-    )
-
-    # Saabb refers to SAA+BB/(N-m) in the published algorithm
-    # Sab refers to SAB(m)/(N-m) in the published algorithm
-    Saabb = Saabb / (len(dsq) - np.arange(len(dsq)))
-    Sab = 2.0 * correlation(coords, axis=0, sumOverAxis=1)
-
-    # The atomic MSD.
-    msd = Saabb - Sab
-
+    r2 = coords * coords
+    window = np.ones((n_configs, 3))
+    r2t = correlate(r2, window, mode="valid").T[0] / n_configs
+    rtr0 = correlate(coords, coords[:n_configs], mode="valid").T[0] / n_configs
+    msd = r2t[0] + r2t - 2 * rtr0
     return msd
 
 
