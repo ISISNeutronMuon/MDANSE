@@ -37,8 +37,10 @@ class Heatmap(Plotter):
         self._current_colours = []
         self._backup_images = []
         self._backup_arrays = []
+        self._backup_minmax = []
         self._initial_values = [0.0, 100.0]
         self._slider_values = [0.0, 100.0]
+        self._last_minmax = [-1, -1]
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
@@ -72,12 +74,26 @@ class Heatmap(Plotter):
         if target is None:
             return
         for num, image in enumerate(self._backup_images):
+            try:
+                last_minmax = self._backup_minmax[num]
+            except IndexError:
+                while len(self._backup_minmax) < (num + 1):
+                    self._backup_minmax.append([-1, -1])
+                last_minmax = [-1, -1]
             array = self._backup_arrays[num]
             newmax = np.percentile(array, new_value[1])
             newmin = np.percentile(array, new_value[0])
+            if newmax < newmin:
+                if newmax == last_minmax[1]:
+                    newmin = float(newmax)
+                else:
+                    newmax = float(newmin)
+            if newmin == last_minmax[0] and newmax == last_minmax[1]:
+                return
             if newmax >= newmin:
                 image.set_clim([newmin, newmax])
                 self._figure.canvas.draw_idle()
+                self._backup_minmax[num] = [newmin, newmax]
         target.canvas.draw()
 
     def plot(
@@ -99,14 +115,14 @@ class Heatmap(Plotter):
             return
         nplots = 0
         for databundle in plotting_context.datasets().values():
-            ds, _, _ = databundle
+            ds, _, _, _ = databundle
             if ds._n_dim == 1:
                 continue
             nplots += 1
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
         for name, databundle in plotting_context.datasets().items():
-            dataset, _, _ = databundle
+            dataset, _, _, ds_num = databundle
             if dataset._n_dim == 1:
                 continue
             axes = target.add_subplot(gridsize, gridsize, startnum)
@@ -139,6 +155,12 @@ class Heatmap(Plotter):
             )
             colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
             colorbar.set_label(dataset._data_unit)
+            try:
+                last_minmax = self._backup_minmax[ds_num]
+            except IndexError:
+                pass
+            else:
+                image.set_clim(last_minmax)
             axes.set_xlabel(axis_units[0])
             axes.set_ylabel(axis_units[1])
             self._backup_images.append(image)

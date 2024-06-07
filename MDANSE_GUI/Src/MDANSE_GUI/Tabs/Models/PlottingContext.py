@@ -245,7 +245,7 @@ class PlottingContext(QStandardItemModel):
 
     def datasets(self) -> Dict:
         result = {}
-        for row in range(self.rowCount()):
+        for ds_num, row in enumerate(range(self.rowCount())):
             key = self.index(row, 0).data(role=Qt.ItemDataRole.UserRole)
             useit = (
                 self.itemFromIndex(self.index(row, 4)).checkState()
@@ -254,7 +254,7 @@ class PlottingContext(QStandardItemModel):
             colour = self.itemFromIndex(self.index(row, 5)).text()
             style = self.itemFromIndex(self.index(row, 6)).text()
             if useit:
-                result[key] = (self._datasets[key], colour, style)
+                result[key] = (self._datasets[key], colour, style, ds_num)
         return result
 
     def add_dataset(self, new_dataset: SingleDataset):

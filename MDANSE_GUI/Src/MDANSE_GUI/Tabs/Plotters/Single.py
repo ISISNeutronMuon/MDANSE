@@ -94,7 +94,7 @@ class Single(Plotter):
             print("Axis check failed.")
             return
         for name, databundle in plotting_context.datasets().items():
-            dataset, colour, style = databundle
+            dataset, colour, style, _ = databundle
             best_unit, best_axis = dataset.longest_axis()
             plotlabel = dataset._labels["medium"]
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)

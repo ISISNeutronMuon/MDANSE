@@ -39,10 +39,7 @@ class PlotDataView(QTreeView):
         self.setDragDropMode(QAbstractItemView.DragDropMode.DragDrop)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.click_position = None
-
         self.clicked.connect(self.on_select_dataset)
-        self.doubleClicked.connect(self.pop_action_dialog)
-        self.clicked.connect(self.item_picked)
 
     def mousePressEvent(self, e: QMouseEvent) -> None:
         self.click_position = e.position()
@@ -77,26 +74,6 @@ class PlotDataView(QTreeView):
         except AttributeError:
             packet = text, mda_data_structure.file
         self.dataset_selected.emit(packet)
-
-    def pop_action_dialog(self, index):
-        model = self.model()
-        item = model.itemFromIndex(index)
-        # debug
-        text = item.text()
-        ic(f"About to execute action {text}")
-        #
-        number = item.data(Qt.ItemDataRole.UserRole)
-        ic(f"Node number is {number}")
-        if number is None:
-            return
-        action = model._values[number]
-        self.execute_action.emit(action)
-
-    @Slot(BasicPlotDataItem)
-    def showValidActions(self, item: BasicPlotDataItem):
-        ic("Creating model from", item)
-        new_model = ActionsHolder(item)
-        self.setModel(new_model)
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):

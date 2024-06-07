@@ -50,7 +50,6 @@ from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
-from MDANSE_GUI.Plotter.widgets.main_window import MainWindow
 
 
 class TabbedWindow(QMainWindow):
@@ -93,7 +92,6 @@ class TabbedWindow(QMainWindow):
         self.makeBasicLayout()
         self.workdir = os.path.expanduser("~")
 
-        self.data_plotter = MainWindow(self)
         self.periodic_table = PeriodicTableViewer(self)
         self.element_editor = ElementsDatabaseEditor(self)
         self.unit_editor = UnitsEditor(self)
@@ -177,7 +175,6 @@ class TabbedWindow(QMainWindow):
         valid_keys = [
             # ('load', self.loadTrajectory),
             # ('plus', self.loadTrajectory),
-            ("plot", self.launchDataPlotter),
             ("periodic_table", self.launchPeriodicTable),
             ("element", self.launchElementsEditor),
             ("units", self.launchUnitsEditor),
@@ -210,10 +207,6 @@ class TabbedWindow(QMainWindow):
     @Slot()
     def launchElementsEditor(self):
         self.launch_dialog(self.element_editor)
-
-    @Slot()
-    def launchDataPlotter(self):
-        self.launch_dialog(self.data_plotter)
 
     def launch_dialog(self, dialog) -> None:
         if dialog.isVisible():
