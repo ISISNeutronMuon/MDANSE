@@ -123,6 +123,7 @@ class QVectorsWidget(WidgetBase):
         policy = self._view.sizePolicy()
         policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
         self._view.setSizePolicy(policy)
+        self._view.horizontalHeader().hide()
 
     @Slot(bool)
     def validate_model_parameters(self, all_are_correct: bool):
