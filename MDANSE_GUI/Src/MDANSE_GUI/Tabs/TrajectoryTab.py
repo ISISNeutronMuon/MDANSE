@@ -32,9 +32,12 @@ from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 
 
 label_text = """Here you can load the .mdt files.
-They are MD trajectories in HDF5 format created by one of the MDANSE converters.
-You can select trajectories. They will be visualised in the 3D view window.
-The animation of the MD trajectory will allow you to verify if the contents 
+They are MD trajectories in HDF5 format
+created by one of the MDANSE converters.
+Any trajectory you select will be visualised
+in the 3D view window on the right side.
+The animation of the MD trajectory will
+allow you to verify if the contents 
 of the trajectory are what you expected.
 """
 

@@ -73,9 +73,6 @@ class DoublePanel(QWidget):
         scroll_area_right.setWidgetResizable(True)
         rightlayout = QVBoxLayout(rightside)
         rightside.setLayout(rightlayout)
-        rpolicy = rightside.sizePolicy()
-        rpolicy.setHorizontalStretch(2)
-        rightside.setSizePolicy(rpolicy)
 
         self._splitter.addWidget(scroll_area_left)
         self._splitter.addWidget(scroll_area_right)
@@ -105,6 +102,9 @@ class DoublePanel(QWidget):
             self._rightlayout.addWidget(visualiser_side)
             if self._view is not None:
                 self._view.connect_to_visualiser(visualiser_side)
+
+        self._splitter.setStretchFactor(0, 1)
+        self._splitter.setStretchFactor(1, 2)
 
     def connect_logging(self):
         self.error.connect(self._tab_reference.error)
