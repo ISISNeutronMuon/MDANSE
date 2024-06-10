@@ -66,9 +66,13 @@ class Single(Plotter):
 
     def handle_slider(self, new_value: List[float]):
         super().handle_slider(new_value)
+        self.offset_curves()
+
+    def offset_curves(self):
         target = self._figure
         if target is None:
             return
+        new_value = self._slider_values
         saved_xmin, saved_xmax, saved_ymin, saved_ymax = self._backup_limits
         for num, curve in enumerate(self._active_curves):
             xdata = self._backup_curves[num][0]
@@ -84,6 +88,13 @@ class Single(Plotter):
             saved_ymin = min(ymin, saved_ymin)
             saved_ymax = max(ymax, saved_ymax)
         self._backup_limits = [saved_xmin, saved_xmax, saved_ymin, saved_ymax]
+        self._axes[0].relim()
+        self._axes[0].autoscale()
+        if self._toolbar is not None:
+            self._toolbar.update()
+            self._toolbar.push_current()
+        self._axes[0].set_xlim(saved_xmin, saved_xmax)
+        self._axes[0].set_ylim(saved_ymin, saved_ymax)
         target.canvas.draw()
 
     def plot(
@@ -92,10 +103,13 @@ class Single(Plotter):
         figure: "Figure" = None,
         colours=None,
         update_only=False,
+        toolbar=None,
     ):
         target = self.get_figure(figure)
         if target is None:
             return
+        if toolbar is not None:
+            self._toolbar = toolbar
         self._figure = target
         xaxis_unit = None
         self._active_curves = []
@@ -170,4 +184,4 @@ class Single(Plotter):
             axes.set_xlabel(xaxis_unit)
         axes.grid(True)
         axes.legend(loc=0)
-        target.canvas.draw()
+        self.offset_curves()

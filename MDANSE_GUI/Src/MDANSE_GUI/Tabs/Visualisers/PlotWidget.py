@@ -197,6 +197,7 @@ class PlotWidget(QWidget):
             self._figure,
             colours=self._colours,
             update_only=update_only,
+            toolbar=self._toolbar,
         )
 
     def make_canvas(self, width=12.0, height=9.0, dpi=100):
@@ -234,6 +235,7 @@ class PlotWidget(QWidget):
         layout.addWidget(slider)
         layout.addWidget(toolbar)
         self._figure = figure
+        self._toolbar = toolbar
         plot_selector = QComboBox(self)
         layout.addWidget(plot_selector)
         plot_selector.addItems(self.available_plotters())

@@ -45,6 +45,7 @@ class Grid(Plotter):
         figure: "Figure" = None,
         colours=None,
         update_only=False,
+        toolbar=None,
     ):
         target = self.get_figure(figure)
         self.get_mpl_colors()
@@ -53,6 +54,8 @@ class Grid(Plotter):
         number_of_colours = len(self._current_colours)
         if target is None:
             return
+        if toolbar is not None:
+            self._toolbar = toolbar
         if plotting_context.set_axes() is None:
             print("Axis check failed.")
             return

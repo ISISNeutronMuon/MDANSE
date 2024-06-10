@@ -37,6 +37,7 @@ class Plotter(metaclass=SubclassFactory):
         self._slider_values = [0.0, 0.0]
         self._number_of_sliders = 2
         self._value_reset_needed = True
+        self._toolbar = None
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
@@ -108,10 +109,13 @@ class Plotter(metaclass=SubclassFactory):
         figure: "Figure" = None,
         colours=None,
         update_only=False,
+        toolbar=None,
     ):
         target = self.get_figure(figure)
         if target is None:
             return
+        if toolbar is not None:
+            self._toolbar = toolbar
         self.get_mpl_colors()
         axes = target.add_subplot(111)
         self._axes = [axes]

@@ -103,10 +103,13 @@ class Heatmap(Plotter):
         figure: "Figure" = None,
         colours=None,
         update_only=False,
+        toolbar=None,
     ):
         target = self.get_figure(figure)
         if target is None:
             return
+        if toolbar is not None:
+            self._toolbar = toolbar
         self._figure = target
         self._backup_images = []
         self._backup_arrays = []
