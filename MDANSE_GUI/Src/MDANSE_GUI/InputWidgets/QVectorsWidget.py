@@ -14,9 +14,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QLineEdit, QComboBox, QLabel, QTableView
+from qtpy.QtWidgets import QSizePolicy, QComboBox, QLabel, QTableView
 from qtpy.QtCore import Slot, Signal, Qt
-from qtpy.QtGui import QIntValidator, QStandardItemModel, QStandardItem, QBrush
+from qtpy.QtGui import QStandardItemModel, QStandardItem, QBrush
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
@@ -120,6 +120,9 @@ class QVectorsWidget(WidgetBase):
             "The q vectors will be generated using the method chosen here."
         )
         self._model.input_is_valid.connect(self.validate_model_parameters)
+        policy = self._view.sizePolicy()
+        policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
+        self._view.setSizePolicy(policy)
 
     @Slot(bool)
     def validate_model_parameters(self, all_are_correct: bool):
