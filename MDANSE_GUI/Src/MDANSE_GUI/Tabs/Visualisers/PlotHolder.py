@@ -41,6 +41,9 @@ class PlotHolder(QTabWidget):
         self._current_id = -1
         self.setLayout(layout)
         self._current_id = self.new_plot("Preview")
+        self._protected_id = int(self._current_id)
+        self.setTabsClosable(True)
+        self.tabCloseRequested.connect(self.clean_up_closed_tab)
 
     @Slot(str)
     def new_plot(self, tab_name: str) -> int:
@@ -62,6 +65,23 @@ class PlotHolder(QTabWidget):
         self._plotter[tab_id] = plotter
         self.setCurrentIndex(tab_id)
         return tab_id
+
+    @Slot(int)
+    def clean_up_closed_tab(self, tab_id: int):
+        if tab_id == self._protected_id:
+            return
+        valid_id_values = [int(idnum) for idnum in self._plotter.keys()]
+        if tab_id in valid_id_values:
+            valid_id_values.pop(valid_id_values.index(tab_id))
+        if self._current_id == tab_id:
+            if len(valid_id_values) > 0:
+                self._current_id = valid_id_values[0]
+                self.setCurrentIndex(self._current_id)
+        if tab_id in self._context.keys():
+            self._context.pop(tab_id)
+        if tab_id in self._plotter.keys():
+            self._plotter.pop(tab_id)
+        self.removeTab(tab_id)
 
     @property
     def model(self):
