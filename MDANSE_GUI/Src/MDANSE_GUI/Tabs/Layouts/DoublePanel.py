@@ -73,6 +73,9 @@ class DoublePanel(QWidget):
         scroll_area_right.setWidgetResizable(True)
         rightlayout = QVBoxLayout(rightside)
         rightside.setLayout(rightlayout)
+        rpolicy = rightside.sizePolicy()
+        rpolicy.setHorizontalStretch(2)
+        rightside.setSizePolicy(rpolicy)
 
         self._splitter.addWidget(scroll_area_left)
         self._splitter.addWidget(scroll_area_right)

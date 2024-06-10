@@ -94,6 +94,7 @@ class QVectorsWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         kwargs["layout_type"] = "QVBoxLayout"
         super().__init__(*args, **kwargs)
+        self._relative_size = 3
         trajectory_configurator = kwargs.get("trajectory_configurator", None)
         chemical_system = None
         if trajectory_configurator is not None:

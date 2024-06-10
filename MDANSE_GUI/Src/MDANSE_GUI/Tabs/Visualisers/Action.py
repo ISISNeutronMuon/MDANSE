@@ -165,7 +165,7 @@ class Action(QWidget):
             widget_class = widget_lookup[dtype]
             input_widget = widget_class(parent=self, **ddict)
             widget = input_widget._base
-            self.layout.addWidget(widget)
+            self.layout.addWidget(widget, stretch=widget._relative_size)
             self._widgets_in_layout.append(widget)
             self._widgets.append(input_widget)
             self._trajectory_configurator = input_widget._configurator
@@ -187,7 +187,7 @@ class Action(QWidget):
                 )
                 placeholder = BackupWidget(parent=self, **ddict)
                 widget = placeholder._base
-                self.layout.addWidget(widget)
+                self.layout.addWidget(widget, stretch=widget._relative_size)
                 self._widgets_in_layout.append(widget)
                 self._widgets.append(placeholder)
                 print(f"Could not find the right widget for {key}")
@@ -196,7 +196,7 @@ class Action(QWidget):
                 # expected = {key: ddict[key] for key in widget_class.__init__.__code__.co_varnames}
                 input_widget = widget_class(parent=self, **ddict)
                 widget = input_widget._base
-                self.layout.addWidget(widget)
+                self.layout.addWidget(widget, stretch=widget._relative_size)
                 self._widgets_in_layout.append(widget)
                 self._widgets.append(input_widget)
                 input_widget.valid_changed.connect(self.allow_execution)
