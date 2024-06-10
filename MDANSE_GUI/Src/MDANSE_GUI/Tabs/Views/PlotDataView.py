@@ -16,9 +16,9 @@
 from typing import Union
 
 from icecream import ic
-from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication
+from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication, QMenu
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
-from qtpy.QtGui import QMouseEvent, QDrag
+from qtpy.QtGui import QMouseEvent, QDrag, QContextMenuEvent, QStandardItem
 
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
@@ -63,6 +63,31 @@ class PlotDataView(QTreeView):
                 mime_data.setText(text)
                 drag.setMimeData(mime_data)
                 drag.exec()
+
+    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
+        index = self.indexAt(event.pos())
+        if index.row() == -1:
+            # block right click when it's not on a trajectory
+            return
+        model = self.model()
+        qitem = model.itemFromIndex(index)
+        if qitem.parent() is not None:
+            return
+        menu = QMenu()
+        item = model.itemData(index)
+        self.populateMenu(menu, item)
+        menu.exec_(event.globalPos())
+
+    def populateMenu(self, menu: QMenu, item: QStandardItem):
+        for action, method in [("Delete", self.deleteNode)]:
+            temp_action = menu.addAction(action)
+            temp_action.triggered.connect(method)
+
+    @Slot()
+    def deleteNode(self):
+        model = self.model()
+        index = self.currentIndex()
+        model.removeRow(index.row())
 
     def on_select_dataset(self, index):
         model = self.model()

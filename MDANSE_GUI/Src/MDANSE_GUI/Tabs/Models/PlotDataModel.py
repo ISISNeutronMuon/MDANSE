@@ -171,7 +171,7 @@ class PlotDataModel(QStandardItemModel):
     def removeRow(self, row: int, parent: QModelIndex = None):
         self.mutex.lock()
         try:
-            node_number = self.item(row).data()
+            node_number = self.item(row).data(role=Qt.ItemDataRole.UserRole)
         except AttributeError:
             return
         data_object = self._nodes.pop(node_number)
