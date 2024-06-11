@@ -95,19 +95,6 @@ class DynamicCoherentStructureFactor(IJob):
         Initialize the input parameters and analysis self variables
         """
 
-        if not self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.configuration.is_periodic:
-            raise DynamicCoherentStructureFactorError(
-                "Cannot start %s analysis on non-periodic system" % self.label
-            )
-
-        if not self.configuration["q_vectors"]["is_lattice"]:
-            raise DynamicCoherentStructureFactorError(
-                "The Q vectors must be generated on a lattice to run %s analysis"
-                % self.label
-            )
-
         self.numberOfSteps = self.configuration["q_vectors"]["n_shells"]
 
         nQShells = self.configuration["q_vectors"]["n_shells"]

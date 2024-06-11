@@ -93,12 +93,14 @@ class DensityProfile(IJob):
         first_conf = self.configuration["trajectory"][
             "instance"
         ].chemical_system.configuration
-        if not first_conf.is_periodic:
+
+        try:
+            axis = first_conf.unit_cell.direct[axis_index, :]
+        except:
             raise DensityProfileError(
-                "Density profile cannot be computed for chemical system without periodc boundary conditions"
+                "Density profile cannot be computed without a simulation box"
             )
 
-        axis = first_conf.unit_cell.direct[axis_index, :]
         axis_length = np.sqrt(np.sum(axis**2))
         self._n_bins = int(axis_length / self._dr) + 1
 

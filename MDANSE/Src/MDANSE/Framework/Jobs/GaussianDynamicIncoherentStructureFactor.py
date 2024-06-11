@@ -42,7 +42,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["q_shells"] = (
@@ -102,7 +102,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         self._nQShells = self.configuration["q_shells"]["number"]
 
-        self._nFrames = self.configuration["frames"]["number"]
+        self._nFrames = self.configuration["frames"]["n_frames"]
 
         self._instrResolution = self.configuration["instrument_resolution"]
 
@@ -210,7 +210,9 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         atomicSF = np.zeros((self._nQShells, self._nFrames), dtype=np.float64)
 
-        msd = mean_square_displacement(series)
+        msd = mean_square_displacement(
+            series, self.configuration["frames"]["n_configs"]
+        )
 
         for i, q2 in enumerate(self._kSquare):
             gaussian = np.exp(-msd * q2 / 6.0)

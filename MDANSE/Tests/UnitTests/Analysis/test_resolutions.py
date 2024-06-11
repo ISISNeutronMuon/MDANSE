@@ -31,7 +31,7 @@ def test_disf(trajectory):
     parameters = {}
     parameters["atom_selection"] = None
     parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["q_vectors"] = (
         "SphericalLatticeQVectors",

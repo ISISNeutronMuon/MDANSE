@@ -37,7 +37,7 @@ class TestAnalysis(unittest.TestCase):
 
     def test_mean_square_displacement(self):
         coords = np.array([[1, 1, 1], [2, 1, 1], [3, 1, 1]])
-        msd = mean_square_displacement(coords)
+        msd = mean_square_displacement(coords, 1)
         self.assertTrue(np.allclose([0.0, 1.0, 4.0], msd), f"\nactual = {msd}")
 
     def test_mean_square_fluctuation_no_root(self):

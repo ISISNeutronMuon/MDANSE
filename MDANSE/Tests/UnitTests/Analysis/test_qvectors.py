@@ -30,13 +30,13 @@ def test_disf(trajectory):
     parameters = {}
     parameters["atom_selection"] = None
     parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
-    for qvector_generator in IQVectors.subclasses():
+    for qvector_generator in IQVectors.indirect_subclasses():
         instance = IQVectors.create(qvector_generator, trajectory.chemical_system)
         qvector_defaults = {
             name: value[1]["default"] for name, value in instance.settings.items()

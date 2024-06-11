@@ -17,11 +17,11 @@
 import collections
 
 import numpy as np
-
+from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation, get_spectrum
+from MDANSE.Mathematics.Signal import get_spectrum
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 
@@ -43,7 +43,7 @@ class DynamicIncoherentStructureFactor(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["instrument_resolution"] = (
@@ -107,7 +107,7 @@ class DynamicIncoherentStructureFactor(IJob):
 
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
 
-        self._nFrames = self.configuration["frames"]["number"]
+        self._nFrames = self.configuration["frames"]["n_frames"]
 
         self._instrResolution = self.configuration["instrument_resolution"]
 
@@ -223,13 +223,16 @@ class DynamicIncoherentStructureFactor(IJob):
         for q in self.configuration["q_vectors"]["shells"]:
             disf_per_q_shell[q] = np.zeros((self._nFrames,), dtype=np.float64)
 
+        n_configs = self.configuration["frames"]["n_configs"]
         for q in self.configuration["q_vectors"]["shells"]:
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
 
             rho = np.exp(1j * np.dot(series, qVectors))
-            res = correlation(rho, axis=0, average=1)
+            res = correlate(rho, rho[:n_configs], mode="valid").T[0] / (
+                n_configs * qVectors.shape[1]
+            )
 
-            disf_per_q_shell[q] += res
+            disf_per_q_shell[q] += res.real
 
         return index, disf_per_q_shell
 

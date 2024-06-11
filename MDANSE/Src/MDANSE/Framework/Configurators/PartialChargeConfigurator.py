@@ -162,8 +162,11 @@ class PartialChargeConfigurator(IConfigurator):
         str
             The information about the partial charges.
         """
+        try:
+            info = f"Charge map setting {self['charges']}\n"
+        except KeyError:
+            info = "Charges have not been configured"
 
-        info = f"Charge map setting {self['charges']}\n"
         return info
 
     def get_charge_mapper(self) -> PartialChargeMapper:
