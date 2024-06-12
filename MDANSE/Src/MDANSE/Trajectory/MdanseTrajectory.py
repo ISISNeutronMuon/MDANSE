@@ -196,6 +196,9 @@ class MdanseTrajectory:
             self._unit_cells = None
         ic("_load_unit_cells finished")
 
+    def time(self):
+        return self._h5_file["time"][:]
+
     def unit_cell(self, frame):
         """Return the unit cell at a given frame. If no unit cell is defined, returns None.
 
@@ -441,6 +444,15 @@ class MdanseTrajectory:
         """
 
         return self._h5_filename
+
+    def variable(self, name: str):
+        """Returns a specific dataset corresponding
+        to a trajectory variable called 'name'.
+        """
+
+        grp = self._h5_file["/configuration/" + name]
+
+        return grp
 
     def variables(self):
         """Return the configuration variables stored in this trajectory.

@@ -28,6 +28,8 @@ def trajectory():
 
 @pytest.mark.parametrize("interp_order", [1, 3])
 def test_temperature_nonzero(trajectory, interp_order):
+    print(f"Trajectory length: {len(trajectory.trajectory)}")
+    print(f"Positions array shape: {trajectory.trajectory.variable('position').shape}")
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)

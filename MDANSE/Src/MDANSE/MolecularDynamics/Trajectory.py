@@ -123,6 +123,9 @@ class Trajectory:
         """Load all the unit cells."""
         self._trajectory._load_unit_cells()
 
+    def time(self):
+        return self._trajectory.time()
+
     def unit_cell(self, frame):
         """Return the unit cell at a given frame. If no unit cell is defined, returns None.
 
@@ -266,6 +269,13 @@ class Trajectory:
         """
 
         return self._trajectory.filename
+
+    def variable(self, name: str):
+        """Return a variable stored in the trajectory
+        under the key 'name'.
+        """
+
+        return self._trajectory.variable(name)
 
     def variables(self):
         """Return the configuration variables stored in this trajectory.

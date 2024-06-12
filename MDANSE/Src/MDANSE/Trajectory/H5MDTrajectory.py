@@ -20,6 +20,7 @@ import numpy as np
 from icecream import ic
 import h5py
 
+from MDANSE.Framework.Units import measure
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Extensions import atomic_trajectory, com_trajectory
@@ -54,7 +55,9 @@ class H5MDTrajectory:
         ic("Trajectory.__init__ h5py.File created")
         # Load the chemical system
         try:
-            chemical_elements = self._h5_file["/particles/all/species/value"]
+            chemical_elements = [
+                byte.decode() for byte in self._h5_file["/parameters/atom_symbols"]
+            ]
         except KeyError:
             chemical_elements = self._h5_file["/particles/all/species"]
         try:
@@ -72,7 +75,16 @@ class H5MDTrajectory:
 
         ic("Trajectory.__init__ loaded unit cells")
         # Load the first configuration
-        coords = self._h5_file["/particles/all/positions/value"][0, :, :]
+        coords = self._h5_file["/particles/all/position/value"][0, :, :]
+        try:
+            pos_unit = self._h5_file["/particles/all/position/value"].attrs["unit"]
+        except:
+            conv_factor = 1.0
+        else:
+            if pos_unit == "Ang":
+                pos_unit = "ang"
+            conv_factor = measure(1.0, pos_unit).toval("nm")
+        coords *= conv_factor
         if self._unit_cells:
             unit_cell = self._unit_cells[0]
             conf = PeriodicRealConfiguration(self._chemical_system, coords, unit_cell)
@@ -116,15 +128,34 @@ class H5MDTrajectory:
         """
 
         grp = self._h5_file["/particles/all/position/value"]
-        configuration = {}
-        configuration["coordinates"] = self._h5_file["/particles/all/position/value"][frame,:,:]
         try:
-            configuration["velocities"] = self._h5_file["/particles/all/velocity/value"][frame,:,:]
+            pos_unit = self._h5_file["/particles/all/position/value"].attrs["unit"]
+        except:
+            conv_factor = 1.0
+        else:
+            if pos_unit == "Ang":
+                pos_unit = "ang"
+            conv_factor = measure(1.0, pos_unit).toval("nm")
+        configuration = {}
+        configuration["coordinates"] = (
+            self._h5_file["/particles/all/position/value"][frame, :, :] * conv_factor
+        )
+        try:
+            try:
+                vel_unit = self._h5_file["/particles/all/velocity/value"].attrs["unit"]
+            except:
+                vel_unit = "ang/fs"
+            configuration["velocities"] = self._h5_file[
+                "/particles/all/velocity/value"
+            ][frame, :, :] * measure(1.0, vel_unit).toval("nm/ps")
         except:
             pass
 
-        configuration["time"] = self._h5_file["/particles/all/position/time"][frame].astype(np.float64)
-        configuration["unit_cell"] = self._h5_file["/particles/all/box/value"][frame].astype(np.float64)
+        configuration["time"] = self.time()[frame]
+        try:
+            configuration["unit_cell"] = self._unit_cells[frame]
+        except IndexError:
+            configuration["unit_cell"] = self._unit_cells[0]
 
         return configuration
 
@@ -149,10 +180,18 @@ class H5MDTrajectory:
 
         if frame < 0 or frame >= len(self):
             raise IndexError(f"Invalid frame number: {frame}")
+        try:
+            pos_unit = self._h5_file["/particles/all/position/value"].attrs["unit"]
+        except:
+            conv_factor = 1.0
+        else:
+            if pos_unit == "Ang":
+                pos_unit = "ang"
+            conv_factor = measure(1.0, pos_unit).toval("nm")
 
-        grp = self._h5_file["/configuration"]
+        retval = self._h5_file["/particles/all/position/value"][frame, :, :]
 
-        return grp["coordinates"][frame].astype(np.float64)
+        return retval.astype(np.float64) * conv_factor
 
     def configuration(self, frame):
         """Build and return a configuration at a given frame.
@@ -190,13 +229,47 @@ class H5MDTrajectory:
     def _load_unit_cells(self):
         """Load all the unit cells."""
         ic("_load_unit_cells")
+        self._unit_cells = []
+        print(self._h5_file["/particles/all/box/edges/value"][:])
         try:
-            cells = self._h5_file["/particles/all/box/edges/value"]
+            box_unit = self._h5_file["/particles/all/positions/value"].attrs["unit"]
+        except:
+            conv_factor = 1.0
+        else:
+            if box_unit == "Ang":
+                box_unit = "ang"
+            conv_factor = measure(1.0, box_unit).toval("nm")
+        try:
+            cells = self._h5_file["/particles/all/box/edges/value"][:] * conv_factor
         except KeyError:
             self._unit_cells = None
         else:
-            self._unit_cells = [UnitCell(uc) for uc in cells[:]]
+            if len(cells.shape) > 1:
+                for cell in cells:
+                    temp_array = np.array(
+                        [[cell[0], 0.0, 0.0], [0.0, cell[1], 0.0], [0.0, 0.0, cell[2]]]
+                    )
+                    uc = UnitCell(temp_array)
+                    self._unit_cells.append(uc)
+            else:
+                temp_array = np.array(
+                    [[cells[0], 0.0, 0.0], [0.0, cells[1], 0.0], [0.0, 0.0, cells[2]]]
+                )
+                self._unit_cells.append(UnitCell(temp_array))
         ic("_load_unit_cells finished")
+
+    def time(self):
+        try:
+            time_unit = self._h5_file["/particles/all/position/time"].attrs["unit"]
+        except:
+            conv_factor = 1.0
+        else:
+            conv_factor = measure(1.0, time_unit).toval("ps")
+        try:
+            time = self._h5_file["/particles/all/position/time"] * conv_factor
+        except:
+            time = []
+        return time
 
     def unit_cell(self, frame):
         """Return the unit cell at a given frame. If no unit cell is defined, returns None.
@@ -212,7 +285,11 @@ class H5MDTrajectory:
             raise IndexError(f"Invalid frame number: {frame}")
 
         if self._unit_cells is not None:
-            return self._unit_cells[frame]
+            try:
+                uc = self._unit_cells[frame]
+            except IndexError:
+                uc = self._unit_cells[0]
+            return uc
         else:
             return None
 
@@ -223,9 +300,9 @@ class H5MDTrajectory:
         :rtype: int
         """
 
-        grp = self._h5_file["/configuration"]
+        grp = self._h5_file["/particles/all/position/value"]
 
-        return grp["coordinates"].shape[0]
+        return grp.shape[0]
 
     def read_com_trajectory(
         self, atoms, first=0, last=None, step=1, box_coordinates=False
@@ -257,9 +334,17 @@ class H5MDTrajectory:
                 for at in atoms
             ]
         )
-        grp = self._h5_file["/configuration"]
+        grp = self._h5_file["/particles/all/position/value"]
+        try:
+            pos_unit = self._h5_file["/particles/all/position/value"].attrs["unit"]
+        except:
+            conv_factor = 1.0
+        else:
+            if pos_unit == "Ang":
+                pos_unit = "ang"
+            conv_factor = measure(1.0, pos_unit).toval("nm")
 
-        coords = grp["coordinates"][first:last:step, :, :].astype(np.float64)
+        coords = grp[first:last:step, :, :].astype(np.float64) * conv_factor
 
         if coords.ndim == 2:
             coords = coords[np.newaxis, :, :]
@@ -350,8 +435,16 @@ class H5MDTrajectory:
         if last is None:
             last = len(self)
 
-        grp = self._h5_file["/configuration"]
-        coords = grp["coordinates"][first:last:step, index, :].astype(np.float64)
+        grp = self._h5_file["/particles/all/position/value"]
+        try:
+            pos_unit = self._h5_file["/particles/all/position/value"].attrs["unit"]
+        except:
+            conv_factor = 1.0
+        else:
+            if pos_unit == "Ang":
+                pos_unit = "ang"
+            conv_factor = measure(1.0, pos_unit).toval("nm")
+        coords = grp[first:last:step, index, :].astype(np.float64) * conv_factor
 
         if self._unit_cells is not None:
             direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
@@ -391,8 +484,8 @@ class H5MDTrajectory:
                 "The variable {} is not stored in the trajectory".format(variable)
             )
 
-        grp = self._h5_file["/configuration"]
-        variable = grp[variable][first:last:step, index, :].astype(np.float64)
+        grp = self._h5_file["/particles/all"]
+        variable = grp[variable]["value"][first:last:step, index, :].astype(np.float64)
 
         return variable
 
@@ -410,7 +503,7 @@ class H5MDTrajectory:
         bool
             True if variable exists.
         """
-        if variable in self._h5_file["/configuration"]:
+        if variable in self._h5_file["/particles/all"]:
             return True
         else:
             return False
@@ -444,6 +537,18 @@ class H5MDTrajectory:
 
         return self._h5_filename
 
+    def variable(self, name: str):
+        """Returns a specific dataset corresponding
+        to a trajectory variable called 'name'.
+        """
+
+        try:
+            grp = self._h5_file["/particles/all/" + name + "/value"]
+        except KeyError:
+            grp = self._h5_file["/particles/all/" + name]
+
+        return grp
+
     def variables(self):
         """Return the configuration variables stored in this trajectory.
 
@@ -451,6 +556,6 @@ class H5MDTrajectory:
         :rtype: list
         """
 
-        grp = self._h5_file["/configuration"]
+        grp = self._h5_file["/particles/all"]
 
         return list(grp.keys())

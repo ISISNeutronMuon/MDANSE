@@ -37,7 +37,7 @@ class HDF5Wrapper(IReader):
         ]
 
     def read_frame(self, frame: int) -> "np.array":
-        coords = self._trajectory[frame]["coordinates"]
+        coords = self._trajectory.coordinates(frame)
         return np.array(coords)
 
     def read_pbc(self, frame: int) -> UnitCell:
