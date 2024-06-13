@@ -352,8 +352,18 @@ class H5MDTrajectory:
             coords = coords[np.newaxis, :, :]
 
         if self._unit_cells is not None:
-            direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
-            inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
+            direct_cells = np.array(
+                [
+                    self.unit_cell(nf).transposed_direct
+                    for nf in range(first, last, step)
+                ]
+            )
+            inverse_cells = np.array(
+                [
+                    self.unit_cell(nf).transposed_inverse
+                    for nf in range(first, last, step)
+                ]
+            )
 
             top_lvl_chemical_entities = set(
                 [at.top_level_chemical_entity for at in atoms]
@@ -449,8 +459,18 @@ class H5MDTrajectory:
         coords = grp[first:last:step, index, :].astype(np.float64) * conv_factor
 
         if self._unit_cells is not None:
-            direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
-            inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
+            direct_cells = np.array(
+                [
+                    self.unit_cell(nf).transposed_direct
+                    for nf in range(first, last, step)
+                ]
+            )
+            inverse_cells = np.array(
+                [
+                    self.unit_cell(nf).transposed_inverse
+                    for nf in range(first, last, step)
+                ]
+            )
             atomic_traj = atomic_trajectory.atomic_trajectory(
                 coords, direct_cells, inverse_cells, box_coordinates
             )
