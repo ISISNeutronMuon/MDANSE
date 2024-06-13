@@ -96,6 +96,8 @@ class H5MDTrajectory:
         # Define a default name for all chemical entities which have no name
         resolve_undefined_molecules_name(self._chemical_system)
 
+        self._variables_to_skip = []
+
         ic("Trajectory.__init__ ended")
 
     @classmethod
@@ -207,15 +209,19 @@ class H5MDTrajectory:
             raise IndexError(f"Invalid frame number: {frame}")
 
         if self._unit_cells is not None:
-            unit_cell = self._unit_cells[frame]
+            unit_cell = self.unit_cell(frame)
         else:
             unit_cell = None
 
         variables = {}
-        for k, v in self._h5_file["configuration"].items():
-            variables[k] = v[frame, :, :].astype(np.float64)
+        for k in self.variables():
+            if k not in self._variables_to_skip:
+                try:
+                    variables[k] = self.variable(k)[frame, :, :].astype(np.float64)
+                except:
+                    self._variables_to_skip.append(k)
 
-        coordinates = variables.pop("coordinates")
+        coordinates = self.coordinates(frame)
 
         if unit_cell is None:
             conf = RealConfiguration(self._chemical_system, coordinates, **variables)
@@ -230,7 +236,6 @@ class H5MDTrajectory:
         """Load all the unit cells."""
         ic("_load_unit_cells")
         self._unit_cells = []
-        print(self._h5_file["/particles/all/box/edges/value"][:])
         try:
             box_unit = self._h5_file["/particles/all/box/edges/value"].attrs["unit"]
         except:
@@ -251,12 +256,10 @@ class H5MDTrajectory:
                     )
                     uc = UnitCell(temp_array)
                     self._unit_cells.append(uc)
-                print(temp_array)
             else:
                 temp_array = np.array(
                     [[cells[0], 0.0, 0.0], [0.0, cells[1], 0.0], [0.0, 0.0, cells[2]]]
                 )
-                print(temp_array)
                 self._unit_cells.append(UnitCell(temp_array))
         ic("_load_unit_cells finished")
 
