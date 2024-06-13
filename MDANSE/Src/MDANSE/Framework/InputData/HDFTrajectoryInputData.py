@@ -67,7 +67,13 @@ class HDFTrajectoryInputData(InputFileData):
         val.append("Variables:")
         for k in self._data.variables():
             v = self._data.variable(k)
-            val.append("\t- {}: {}".format(k, v.shape))
+            try:
+                val.append("\t- {}: {}".format(k, v.shape))
+            except AttributeError:
+                try:
+                    val.append("\t- {}: {}".format(k, v["value"].shape))
+                except KeyError:
+                    continue
 
         val.append("\nConversion history:")
         for k, v in self._metadata.items():

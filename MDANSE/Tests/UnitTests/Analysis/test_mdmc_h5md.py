@@ -16,7 +16,7 @@ short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
     "Data",
-    "test_file.h5",
+    "Ar_mdmc_h5md.h5",
 )
 
 
@@ -28,6 +28,8 @@ def trajectory():
 
 @pytest.mark.parametrize("interp_order", [1, 3])
 def test_temperature_nonzero(trajectory, interp_order):
+    pos = trajectory._data.coordinates(0)
+    print(f"Coordinates span: {pos.min()}, {pos.max()}")
     print(f"Trajectory length: {len(trajectory.trajectory)}")
     print(f"Positions array shape: {trajectory.trajectory.variable('position').shape}")
     temp_name = tempfile.mktemp()

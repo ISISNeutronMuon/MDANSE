@@ -232,7 +232,7 @@ class H5MDTrajectory:
         self._unit_cells = []
         print(self._h5_file["/particles/all/box/edges/value"][:])
         try:
-            box_unit = self._h5_file["/particles/all/positions/value"].attrs["unit"]
+            box_unit = self._h5_file["/particles/all/box/edges/value"].attrs["unit"]
         except:
             conv_factor = 1.0
         else:
@@ -251,10 +251,12 @@ class H5MDTrajectory:
                     )
                     uc = UnitCell(temp_array)
                     self._unit_cells.append(uc)
+                print(temp_array)
             else:
                 temp_array = np.array(
                     [[cells[0], 0.0, 0.0], [0.0, cells[1], 0.0], [0.0, 0.0, cells[2]]]
                 )
+                print(temp_array)
                 self._unit_cells.append(UnitCell(temp_array))
         ic("_load_unit_cells finished")
 
