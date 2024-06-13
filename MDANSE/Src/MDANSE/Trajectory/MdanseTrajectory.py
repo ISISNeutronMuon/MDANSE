@@ -19,7 +19,6 @@ import os
 from typing import Collection
 
 import numpy as np
-from icecream import ic
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE
@@ -50,23 +49,19 @@ class MdanseTrajectory:
         :type h5_filename: str
         """
 
-        ic("Trajectory.__init__ started")
         self._h5_filename = h5_filename
 
         self._h5_file = h5py.File(self._h5_filename, "r")
 
-        ic("Trajectory.__init__ h5py.File created")
         # Load the chemical system
         self._chemical_system = ChemicalSystem(
             os.path.splitext(os.path.basename(self._h5_filename))[0]
         )
         self._chemical_system.load(self._h5_filename)
 
-        ic("Trajectory.__init__ created ChemicalSystem")
         # Load all the unit cells
         self._load_unit_cells()
 
-        ic("Trajectory.__init__ loaded unit cells")
         # Load the first configuration
         coords = self._h5_file["/configuration/coordinates"][0, :, :]
         if self._unit_cells:
@@ -76,11 +71,8 @@ class MdanseTrajectory:
             conf = RealConfiguration(self._chemical_system, coords)
         self._chemical_system.configuration = conf
 
-        ic("Trajectory.__init__ read coordinates")
         # Define a default name for all chemical entities which have no name
         resolve_undefined_molecules_name(self._chemical_system)
-
-        ic("Trajectory.__init__ ended")
 
     @classmethod
     def file_is_right(self, filename):
@@ -186,15 +178,10 @@ class MdanseTrajectory:
 
     def _load_unit_cells(self):
         """Load all the unit cells."""
-        ic("_load_unit_cells")
         if "unit_cell" in self._h5_file:
-            ic("_load_unit_cells: unit_cell IS in self._h5_file")
             self._unit_cells = [UnitCell(uc) for uc in self._h5_file["unit_cell"][:]]
-            ic("_load_unit_cells: got unit_cell from self._h5_file")
         else:
-            ic("_load_unit_cells: unit_cell IS NOT in self._h5_file")
             self._unit_cells = None
-        ic("_load_unit_cells finished")
 
     def time(self):
         return self._h5_file["time"][:]

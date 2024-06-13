@@ -17,7 +17,6 @@
 import os
 
 import numpy as np
-from icecream import ic
 import h5py
 
 from MDANSE.Framework.Units import measure
@@ -47,12 +46,10 @@ class H5MDTrajectory:
         :type h5_filename: str
         """
 
-        ic("Trajectory.__init__ started")
         self._h5_filename = h5_filename
 
         self._h5_file = h5py.File(self._h5_filename, "r")
 
-        ic("Trajectory.__init__ h5py.File created")
         # Load the chemical system
         try:
             chemical_elements = [
@@ -60,20 +57,14 @@ class H5MDTrajectory:
             ]
         except KeyError:
             chemical_elements = self._h5_file["/particles/all/species"]
-        try:
-            atom_masses = self._h5_file["/particles/all/mass/value"]
-        except KeyError:
-            atom_masses = self._h5_file["/particles/all/mass"]
         self._chemical_system = ChemicalSystem(
             os.path.splitext(os.path.basename(self._h5_filename))[0]
         )
         self._chemical_system.from_element_list(chemical_elements)
 
-        ic("Trajectory.__init__ created ChemicalSystem")
         # Load all the unit cells
         self._load_unit_cells()
 
-        ic("Trajectory.__init__ loaded unit cells")
         # Load the first configuration
         coords = self._h5_file["/particles/all/position/value"][0, :, :]
         try:
@@ -92,13 +83,10 @@ class H5MDTrajectory:
             conf = RealConfiguration(self._chemical_system, coords)
         self._chemical_system.configuration = conf
 
-        ic("Trajectory.__init__ read coordinates")
         # Define a default name for all chemical entities which have no name
         resolve_undefined_molecules_name(self._chemical_system)
 
         self._variables_to_skip = []
-
-        ic("Trajectory.__init__ ended")
 
     @classmethod
     def file_is_right(self, filename):
@@ -234,7 +222,6 @@ class H5MDTrajectory:
 
     def _load_unit_cells(self):
         """Load all the unit cells."""
-        ic("_load_unit_cells")
         self._unit_cells = []
         try:
             box_unit = self._h5_file["/particles/all/box/edges/value"].attrs["unit"]
@@ -261,7 +248,6 @@ class H5MDTrajectory:
                     [[cells[0], 0.0, 0.0], [0.0, cells[1], 0.0], [0.0, 0.0, cells[2]]]
                 )
                 self._unit_cells.append(UnitCell(temp_array))
-        ic("_load_unit_cells finished")
 
     def time(self):
         try:
@@ -333,12 +319,18 @@ class H5MDTrajectory:
             last = len(self)
 
         indexes = [at.index for at in atoms]
-        masses = np.array(
-            [
-                ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight")
-                for at in atoms
-            ]
-        )
+        try:
+            masses = self._h5_file["/particles/all/mass/value"][:].astype(np.float64)
+        except KeyError:
+            try:
+                masses = self._h5_file["/particles/all/mass"][:].astype(np.float64)
+            except KeyError:
+                masses = np.array(
+                    [
+                        ATOMS_DATABASE.get_atom_property(at.symbol, "atomic_weight")
+                        for at in atoms
+                    ]
+                )
         grp = self._h5_file["/particles/all/position/value"]
         try:
             pos_unit = self._h5_file["/particles/all/position/value"].attrs["unit"]
@@ -418,7 +410,7 @@ class H5MDTrajectory:
             real_coordinates = np.empty(box_coordinates.shape, dtype=np.float64)
             comp = 0
             for i in range(first, last, step):
-                direct_cell = self._unit_cells[i].transposed_direct
+                direct_cell = self.unit_cell(i).transposed_direct
                 real_coordinates[comp, :] = np.matmul(
                     direct_cell, box_coordinates[comp, :]
                 )
