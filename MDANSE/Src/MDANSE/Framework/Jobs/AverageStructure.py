@@ -26,12 +26,17 @@ from MDANSE.Framework.Jobs.IJob import IJob
 
 
 class AverageStructure(IJob):
-    """
-    Outputs a single structure file containing the atom positions
+    """<p>Outputs a single structure file containing the atom positions
     averaged over time. Only makes sense for crystalline systems
     where atoms remain within a finite distance around their
-    equilibrium positions.
-    """
+    equilibrium positions.</p>
+    <p><b> Please run Mean Square Displacement analysis on your
+    trajectory to make sure that the atoms remain around their
+    equilibrium position</b>. Otherwise the time-averaged
+    atom positions will be meaningless. (If your system consists
+    of a crystalline material with migrating guest atoms,
+    you can output just the crystalline part using atom
+    selection.)</p>"""
 
     label = "Average Structure"
 
@@ -51,6 +56,13 @@ class AverageStructure(IJob):
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["fold"] = (
+        "BooleanConfigurator",
+        {
+            "default": False,
+            "label": "Fold coordinates in to box. Normally it should not be necessary.",
+        },
     )
     settings["output_units"] = (
         "SingleChoiceConfigurator",
@@ -144,6 +156,11 @@ class AverageStructure(IJob):
         average_unit_cell = np.mean(unit_cells, axis=0) * self._conversion_factor
 
         self._ase_atoms.set_cell(average_unit_cell)
+
+        if self.configuration["fold"]["value"]:
+            temp = self._ase_atoms.get_scaled_positions()
+            correction = np.floor(temp)
+            self._ase_atoms.set_scaled_positions(temp - correction)
 
         ase_write(
             self.configuration["output_file"]["file"],
