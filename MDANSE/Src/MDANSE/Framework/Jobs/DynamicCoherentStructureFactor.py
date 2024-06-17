@@ -18,12 +18,12 @@ import collections
 import itertools
 
 import numpy as np
-
+from scipy.signal import correlate
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import correlation, get_spectrum
+from MDANSE.Mathematics.Signal import get_spectrum
 
 
 class DynamicCoherentStructureFactorError(Error):
@@ -49,7 +49,7 @@ class DynamicCoherentStructureFactor(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "FramesConfigurator",
+        "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["instrument_resolution"] = (
@@ -99,7 +99,7 @@ class DynamicCoherentStructureFactor(IJob):
 
         nQShells = self.configuration["q_vectors"]["n_shells"]
 
-        self._nFrames = self.configuration["frames"]["number"]
+        self._nFrames = self.configuration["frames"]["n_frames"]
 
         self._instrResolution = self.configuration["instrument_resolution"]
 
@@ -205,7 +205,10 @@ class DynamicCoherentStructureFactor(IJob):
 
             rho = {}
             for element in self.configuration["atom_selection"]["unique_names"]:
-                rho[element] = np.zeros((self._nFrames, nQVectors), dtype=np.complex64)
+                rho[element] = np.zeros(
+                    (self.configuration["frames"]["number"], nQVectors),
+                    dtype=np.complex64,
+                )
 
             # loop over the trajectory time steps
             for i, frame in enumerate(self.configuration["frames"]["value"]):
@@ -230,9 +233,14 @@ class DynamicCoherentStructureFactor(IJob):
         """
 
         if x is not None:
+            n_configs = self.configuration["frames"]["n_configs"]
             for pair in self._elementsPairs:
-                corr = correlation(x[pair[0]], x[pair[1]], average=1)
-                self._outputData["f(q,t)_%s%s" % pair][index, :] += corr
+                # F_ab(Q,t) = F_ba(Q,t) this is valid as long as
+                # n_configs is sufficiently large
+                corr = correlate(x[pair[0]], x[pair[1]][:n_configs], mode="valid").T[
+                    0
+                ] / (n_configs * x[pair[0]].shape[1])
+                self._outputData["f(q,t)_%s%s" % pair][index, :] += corr.real
 
     def finalize(self):
         """
