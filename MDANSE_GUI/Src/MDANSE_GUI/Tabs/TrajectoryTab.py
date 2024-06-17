@@ -54,7 +54,7 @@ class TrajectoryTab(GeneralTab):
             self._core,
             "Load an MD trajectory",
             self._session.get_path("root_directory"),
-            "MDANSE trajectory files (*.mdt);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files (*)",
+            "HDF5 files, MDANSE or H5MD format (*.mdt *.h5);;H5MD files (*.h5);;All files (*)",
         )
         for fname in fnames[0]:
             self.load_trajectory(fname)
@@ -66,7 +66,7 @@ class TrajectoryTab(GeneralTab):
             try:
                 data = HDFTrajectoryInputData(fname)
             except Exception as e:
-                self._core.error(repr(e))
+                self._core.error.emit(repr(e))
             else:
                 self._core._model.append_object(((fname, data), short_name))
 

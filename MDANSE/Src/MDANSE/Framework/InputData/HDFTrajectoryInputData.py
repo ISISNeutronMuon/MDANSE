@@ -45,7 +45,7 @@ class HDFTrajectoryInputData(InputFileData):
     def info(self):
         val = []
         try:
-            time_axis = self._data._h5_file["time"][:]
+            time_axis = self._data.time()
         except:
             timeline = "No time information!\n"
         else:
@@ -65,8 +65,15 @@ class HDFTrajectoryInputData(InputFileData):
         val.append("Frame times (1st, 2nd, ..., last) in ps:")
         val.append(timeline)
         val.append("Variables:")
-        for k, v in self._data.file["/configuration"].items():
-            val.append("\t- {}: {}".format(k, v.shape))
+        for k in self._data.variables():
+            v = self._data.variable(k)
+            try:
+                val.append("\t- {}: {}".format(k, v.shape))
+            except AttributeError:
+                try:
+                    val.append("\t- {}: {}".format(k, v["value"].shape))
+                except KeyError:
+                    continue
 
         val.append("\nConversion history:")
         for k, v in self._metadata.items():

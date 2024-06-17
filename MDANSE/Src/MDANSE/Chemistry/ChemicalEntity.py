@@ -2712,6 +2712,11 @@ class ChemicalSystem(_ChemicalEntity):
         result = [1 for ce in self.chemical_entities if ce.name == molecule_name]
         return len(result)
 
+    def from_element_list(self, elements: List[str]):
+        for element in elements:
+            ce = Atom(element)
+            self.add_chemical_entity(ce)
+
     def load(self, h5_filename: Union[str, h5py.File]) -> None:
         """
         Loads a ChemicalSystem from an HDF5 file. The HDF5 file must be organised in such a way that it can parsed by
