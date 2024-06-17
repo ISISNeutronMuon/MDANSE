@@ -29,8 +29,9 @@ from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 
 
 tab_label = """Convert your trajectory to the MDANSE MDT format.
-If you cannot find the converter for your MD engine, the
-ASE converter can be tried as a backup option.
+If you cannot find a dedciated converter
+for your MD engine, the ASE converter
+can be tried as a backup option.
 """
 
 

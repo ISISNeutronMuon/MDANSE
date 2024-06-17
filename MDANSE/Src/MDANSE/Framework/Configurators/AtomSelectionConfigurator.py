@@ -79,7 +79,11 @@ class AtomSelectionConfigurator(IConfigurator):
             [ATOMS_DATABASE.get_atom_property(n, "atomic_weight")]
             for n in self["names"]
         ]
-        self.error_status = "OK"
+        if self["selection_length"] == 0:
+            self.error_status = "The atom selection is empty."
+            return
+        else:
+            self.error_status = "OK"
 
     def get_natoms(self) -> dict[str, int]:
         """
