@@ -38,7 +38,7 @@ def dcsf():
     parameters = {}
     parameters["atom_selection"] = None
     parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["q_vectors"] = (
@@ -60,7 +60,7 @@ def disf():
     parameters = {}
     parameters["atom_selection"] = None
     parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1, 10)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["q_vectors"] = (
@@ -81,7 +81,7 @@ def test_dcsf(trajectory, qvector_spherical_lattice):
     parameters = {}
     parameters["atom_selection"] = None
     parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"))
     parameters["q_vectors"] = qvector_spherical_lattice
@@ -103,7 +103,7 @@ def test_output_axis_preview(qvector_spherical_lattice):
     parameters = {}
     parameters["atom_selection"] = None
     parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"))
     parameters["q_vectors"] = qvector_spherical_lattice
