@@ -29,12 +29,7 @@ class RangeWidget(WidgetBase):
 
     def setup_fields(self, *args, **kwargs):
         start, end, step = kwargs.get("default", self._configurator._default)
-
         num_type = kwargs.get("valueType", int)
-        if num_type is int and isinstance(step, float):
-            step = 1
-        elif num_type is float and isinstance(step, int):
-            step = 0.1
 
         labels = [
             QLabel("From", self._base),
