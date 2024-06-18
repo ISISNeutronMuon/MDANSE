@@ -26,9 +26,11 @@ from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 
 
-job_tab_label = """This is the list of jobs you can run using MDANSE.
+job_tab_label = """This is the list of jobs
+you can run using MDANSE.
 Pick a job to see additional information.
-Use the button to start a job.
+Use the button to start a job,
+or to save the inputs as a script.
 """
 
 

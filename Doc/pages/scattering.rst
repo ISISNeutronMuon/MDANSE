@@ -606,7 +606,7 @@ one can write:
 .. math::
    :label: pfx101
 
-   {\mathit{EISF}{(q) = b_{\text{inc}}^{2{\int d^{3}}}}r\exp\left\lbrack {\mathit{iq}\cdot r} \right\rbrack G_{s}\left( {r,{t = \infty}} \right).}
+   {\mathit{EISF}(q) = b_{\text{inc}}^{2}{\int d^{3}}r\exp\left\lbrack {\mathit{iq}\cdot r} \right\rbrack G_{s}\left( {r,{t = \infty}} \right).}
 
 The *EISF* gives the sampling distribution of the points in space in the
 limit of infinite time. In a real experiment this means times longer

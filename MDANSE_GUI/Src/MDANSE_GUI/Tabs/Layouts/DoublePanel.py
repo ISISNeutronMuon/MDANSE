@@ -103,6 +103,9 @@ class DoublePanel(QWidget):
             if self._view is not None:
                 self._view.connect_to_visualiser(visualiser_side)
 
+        self._splitter.setStretchFactor(0, 1)
+        self._splitter.setStretchFactor(1, 2)
+
     def connect_logging(self):
         self.error.connect(self._tab_reference.error)
         for thing in [self._view, self._visualiser, self._model]:

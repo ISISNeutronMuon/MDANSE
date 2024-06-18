@@ -22,25 +22,26 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class RangeWidget(WidgetBase):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, layout_type="QGridLayout", **kwargs)
-        source_object = kwargs.get("source_object", None)
+        self.setup_fields(*args, **kwargs)
+
+    def setup_fields(self, *args, **kwargs):
+        start, end, step = kwargs.get("default", self._configurator._default)
         num_type = kwargs.get("valueType", int)
-        if num_type is int:
-            step_val = 1
-        else:
-            step_val = 0.1
+
         labels = [
             QLabel("From", self._base),
             QLabel("to", self._base),
             QLabel("in steps of", self._base),
         ]
         fields = [
-            QLineEdit(str(num_type(0)), self._base),
-            QLineEdit(str(num_type(5)), self._base),
-            QLineEdit(str(num_type(step_val)), self._base),
+            QLineEdit(str(num_type(start)), self._base),
+            QLineEdit(str(num_type(end)), self._base),
+            QLineEdit(str(num_type(step)), self._base),
         ]
-        placeholders = [str(num_type(0)), str(num_type(5)), str(num_type(step_val))]
+        placeholders = [str(num_type(start)), str(num_type(end)), str(num_type(step))]
         if num_type is int:
             validators = [QIntValidator(parent_field) for parent_field in fields]
         else:
