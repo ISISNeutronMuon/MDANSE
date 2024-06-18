@@ -25,7 +25,7 @@ import string
 import time
 import sys
 import traceback
-from concurrent.futures import ThreadPoolExecutor as PoolExecutor
+from concurrent.futures import ProcessPoolExecutor as PoolExecutor
 
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
@@ -238,7 +238,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status.update()
             self.combine(idx, result)
 
-    def _run_threadpool(self):
+    def _run_processpool(self):
         def helper(self, index):
             if self._status is not None:
                 if hasattr(self._status, "_pause_event"):
@@ -273,8 +273,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
         return True
 
     def _run_multicore(self):
-        # oldrecursionlimit = sys.getrecursionlimit()
-        # sys.setrecursionlimit(100000)
 
         ctx = multiprocessing.get_context("spawn")
 
@@ -296,14 +294,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
             p.start()
 
         while inputQueue.qsize() > 0:
-            if self._keep_running:
-                time.sleep(0.1)
-                if self._status is not None:
-                    self._status.fixed_status(outputQueue.qsize())
-            else:
-                for p in self._processes:
-                    p.terminate()
-                break
+            time.sleep(0.1)
+            if self._status is not None:
+                self._status.fixed_status(outputQueue.qsize())
 
         for p in self._processes:
             p.join()
@@ -316,7 +309,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
             else:
                 self.combine(index, result)
 
-        # sys.setrecursionlimit(oldrecursionlimit)
+        for p in self._processes:
+            p.close()
 
     def _run_remote(self):
         raise NotImplementedError(
@@ -325,7 +319,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
     _runner = {
         "single-core": _run_singlecore,
-        "threadpool": _run_threadpool,
+        "processpool": _run_processpool,
         "multicore": _run_multicore,
         "remote": _run_remote,
     }
