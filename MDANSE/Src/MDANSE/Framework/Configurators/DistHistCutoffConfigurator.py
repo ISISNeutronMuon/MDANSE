@@ -16,7 +16,9 @@ class DistHistCutoffConfigurator(RangeConfigurator):
             A tuple of the range parameters.
         """
         if value[1] > floor(self.get_largest_cutoff() * 100) / 100:
-            self.error_status = "The cutoff distance goes into the simulation box periodic images."
+            self.error_status = (
+                "The cutoff distance goes into the simulation box periodic images."
+            )
             return
 
         super().configure(value)

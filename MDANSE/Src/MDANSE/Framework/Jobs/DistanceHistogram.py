@@ -52,7 +52,7 @@ class DistanceHistogram(IJob):
             "valueType": float,
             "includeLast": True,
             "mini": 0.0,
-            "dependencies": {"trajectory": "trajectory"}
+            "dependencies": {"trajectory": "trajectory"},
         },
     )
     settings["atom_selection"] = (
