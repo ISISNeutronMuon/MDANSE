@@ -46,12 +46,13 @@ class DistanceHistogram(IJob):
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["r_values"] = (
-        "RangeConfigurator",
+        "DistHistCutoffConfigurator",
         {
             "label": "r values (nm)",
             "valueType": float,
             "includeLast": True,
             "mini": 0.0,
+            "dependencies": {"trajectory": "trajectory"}
         },
     )
     settings["atom_selection"] = (
