@@ -89,3 +89,6 @@ class JobStatus(Status):
             self._state["progress"] = 0
 
         self.save_status()
+
+    def fixed_status(self, current_progress: int):
+        pass
