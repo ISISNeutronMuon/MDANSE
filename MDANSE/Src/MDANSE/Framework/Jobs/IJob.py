@@ -238,23 +238,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status.update()
             self.combine(idx, result)
 
-    def _run_processpool(self):
-        def helper(self, index):
-            if self._status is not None:
-                if hasattr(self._status, "_pause_event"):
-                    self._status._pause_event.wait()
-            idx, result = self.run_step(index)
-            if self._status is not None:
-                self._status.update()
-            self.combine(idx, result)
-
-        pool = PoolExecutor(max_workers=self.configuration["running_mode"]["slots"])
-
-        futures = [
-            pool.submit(helper, self, index) for index in range(self.numberOfSteps)
-        ]
-        results = [future.result() for future in futures]
-
     def process_tasks_queue(self, tasks, outputs):
         while True:
             try:
@@ -319,7 +302,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
     _runner = {
         "single-core": _run_singlecore,
-        "processpool": _run_processpool,
         "multicore": _run_multicore,
         "remote": _run_remote,
     }
