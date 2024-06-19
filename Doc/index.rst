@@ -59,7 +59,6 @@ J Chem Inf Model. 57(1):1-5 (2017).
 
    pages/introduction
    pages/installation
-   pages/files
    pages/workflow
    pages/trajectory
    pages/dynamics
@@ -67,6 +66,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/structure
    pages/analysis
    pages/fca
+   pages/files
 
 .. toctree::
    :maxdepth: 5
