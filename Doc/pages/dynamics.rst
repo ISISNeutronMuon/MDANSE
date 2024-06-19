@@ -48,7 +48,7 @@ and the angular correlation averaged over all triplets is:
 .. math::
    :label: pfx4
 
-   {\mathrm{AC}_{i}{(t) = {\sum\limits_{g = 1}^{N_{\mathrm{triplets}}}{AC_{g,i}(t)}}} \qquad {i = 1,2,3}}
+   {\mathrm{AC}_{i}{(t) = {\sum\limits_{g = 1}^{N_{\mathrm{triplets}}}{\mathrm{AC}_{g,i}(t)}}} \qquad {i = 1,2,3}}
 
 where :math:`N_{\mathrm{triplets}}` is the number of selected triplets.
 
