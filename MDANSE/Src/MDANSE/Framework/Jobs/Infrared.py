@@ -17,7 +17,9 @@ import collections
 
 import numpy as np
 from scipy.signal import correlate
+from scipy.spatial import cKDTree as KDTree
 
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 
@@ -49,7 +51,7 @@ class Infrared(IJob):
         "MoleculeSelectionConfigurator",
         {
             "label": "molecule name",
-            "default": "",
+            "default": "bulk",
             "dependencies": {"trajectory": "trajectory"},
         },
     )
@@ -72,13 +74,18 @@ class Infrared(IJob):
         ce_list = self.configuration["trajectory"][
             "instance"
         ].chemical_system.chemical_entities
-        self.molecules = [
-            ce
-            for ce in ce_list
-            if ce.name == self.configuration["molecule_name"]["value"]
-        ]
 
-        self.numberOfSteps = len(self.molecules)
+        if self.configuration["molecule_name"]["value"] == "bulk":
+            self.bonds = self.persistent_bonds()
+            self.numberOfSteps = len(self.bonds)
+        else:
+            self.molecules = [
+                ce
+                for ce in ce_list
+                if ce.name == self.configuration["molecule_name"]["value"]
+            ]
+
+            self.numberOfSteps = len(self.molecules)
         instrResolution = self.configuration["instrument_resolution"]
 
         self._outputData.add(
@@ -120,6 +127,66 @@ class Infrared(IJob):
             main_result=True,
         )
 
+    def find_bonds(self, frame: int, tolerance=0.04):
+        coords = self.configuration["trajectory"]["instance"].coordinates(frame)
+        atom_types = [
+            atom.symbol
+            for atom in self.configuration["trajectory"][
+                "instance"
+            ].chemical_system.atoms
+        ]
+        not_du = np.array(
+            [
+                i
+                for i, at in enumerate(atom_types)
+                if ATOMS_DATABASE.get_atom_property(at, "element") != "dummy"
+            ]
+        )
+        rs = coords[not_du]
+        covs = np.array(
+            [
+                ATOMS_DATABASE.get_atom_property(at, "covalent_radius")
+                for at in atom_types
+            ]
+        )[not_du]
+
+        # determine and set bonds without PBC applied
+        tree = KDTree(rs)
+        contacts = tree.query_ball_tree(tree, 2 * np.max(covs) + tolerance)
+        n_bonds = 0
+        bonds = []
+        for i, idxs in enumerate(contacts):
+            if len(idxs) == 0:
+                continue
+            diff = rs[i] - rs[idxs]
+            dist = np.sum(diff * diff, axis=1)
+            sum_radii = (covs[i] + covs[idxs] + tolerance) ** 2
+            js = np.array(idxs)[(0 < dist) & (dist < sum_radii)]
+            js = not_du[js[i < js]]
+            n_bonds += len(js)
+            for j in js:
+                bonds.append([not_du[i], j])
+
+        return bonds
+
+    def persistent_bonds(self):
+        permanent_bonds = []
+        for i, frame_index in enumerate(
+            range(
+                self.configuration["frames"]["first"],
+                self.configuration["frames"]["last"] + 1,
+                self.configuration["frames"]["step"],
+            )
+        ):
+            last_bonds = self.find_bonds(frame_index)
+            if i == 0:
+                permanent_bonds = last_bonds
+            else:
+                permanent_bonds = [
+                    bond for bond in permanent_bonds if bond in last_bonds
+                ]
+        return permanent_bonds
+
     def run_step(self, index) -> tuple[int, np.ndarray]:
         """Runs a single step of the job.
 
@@ -134,40 +201,75 @@ class Infrared(IJob):
             The index of the step and the calculated d/dt dipole
             auto-correlation function for a molecule.
         """
-        molecule = self.molecules[index]
-        ddipole = np.zeros(
-            (self.configuration["frames"]["number"], 3), dtype=np.float64
-        )
-        for i, frame_index in enumerate(
-            range(
-                self.configuration["frames"]["first"],
-                self.configuration["frames"]["last"] + 1,
-                self.configuration["frames"]["step"],
+        if self.configuration["molecule_name"]["value"] == "bulk":
+            bond = self.bonds[index]
+            ddipole = np.zeros(
+                (self.configuration["frames"]["number"], 3), dtype=np.float64
             )
-        ):
-            configuration = self.configuration["trajectory"]["instance"].configuration(
-                frame_index
+            for i, frame_index in enumerate(
+                range(
+                    self.configuration["frames"]["first"],
+                    self.configuration["frames"]["last"] + 1,
+                    self.configuration["frames"]["step"],
+                )
+            ):
+                positions = self.configuration["trajectory"]["instance"].coordinates(
+                    frame_index
+                )
+                idx1, idx2 = bond
+                q1 = self.configuration["atom_charges"]["charges"][idx1]
+                q2 = self.configuration["atom_charges"]["charges"][idx2]
+                ddipole[i] = q1 * positions[idx1] - q2 * positions[idx2]
+
+            for axis in range(3):
+                ddipole[:, axis] = differentiate(
+                    ddipole[:, axis],
+                    order=2,
+                    dt=self.configuration["frames"]["time_step"],
+                )
+
+            n_configs = self.configuration["frames"]["n_configs"]
+            mol_ddacf = correlate(ddipole, ddipole[:n_configs], mode="valid") / (
+                3 * n_configs
             )
-            contiguous_configuration = configuration.contiguous_configuration()
-            com = molecule.center_of_mass(contiguous_configuration)
-
-            for atm in molecule.atom_list:
-                idx = atm.index
-                q = self.configuration["atom_charges"]["charges"][idx]
-                ddipole[i] = q * (contiguous_configuration["coordinates"][idx, :] - com)
-
-        for axis in range(3):
-            ddipole[:, axis] = differentiate(
-                ddipole[:, axis],
-                order=2,
-                dt=self.configuration["frames"]["time_step"],
+            return index, mol_ddacf.T[0]
+        else:
+            molecule = self.molecules[index]
+            ddipole = np.zeros(
+                (self.configuration["frames"]["number"], 3), dtype=np.float64
             )
+            for i, frame_index in enumerate(
+                range(
+                    self.configuration["frames"]["first"],
+                    self.configuration["frames"]["last"] + 1,
+                    self.configuration["frames"]["step"],
+                )
+            ):
+                configuration = self.configuration["trajectory"][
+                    "instance"
+                ].configuration(frame_index)
+                contiguous_configuration = configuration.contiguous_configuration()
+                com = molecule.center_of_mass(contiguous_configuration)
 
-        n_configs = self.configuration["frames"]["n_configs"]
-        mol_ddacf = correlate(ddipole, ddipole[:n_configs], mode="valid") / (
-            3 * n_configs
-        )
-        return index, mol_ddacf.T[0]
+                for atm in molecule.atom_list:
+                    idx = atm.index
+                    q = self.configuration["atom_charges"]["charges"][idx]
+                    ddipole[i] = q * (
+                        contiguous_configuration["coordinates"][idx, :] - com
+                    )
+
+            for axis in range(3):
+                ddipole[:, axis] = differentiate(
+                    ddipole[:, axis],
+                    order=2,
+                    dt=self.configuration["frames"]["time_step"],
+                )
+
+            n_configs = self.configuration["frames"]["n_configs"]
+            mol_ddacf = correlate(ddipole, ddipole[:n_configs], mode="valid") / (
+                3 * n_configs
+            )
+            return index, mol_ddacf.T[0]
 
     def combine(self, index, x):
         """Combines returned results of run_step."""

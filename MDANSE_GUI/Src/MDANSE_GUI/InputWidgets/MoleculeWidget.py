@@ -24,9 +24,9 @@ class MoleculeWidget(WidgetBase):
         super().__init__(*args, **kwargs)
         configurator = kwargs.get("configurator", None)
         trajectory_configurator = kwargs.get("trajectory_configurator", None)
-        default_option = ""
+        default_option = "bulk"
         if trajectory_configurator is not None:
-            option_list = trajectory_configurator[
+            option_list = ["bulk"] + trajectory_configurator[
                 "instance"
             ].chemical_system.unique_molecules()
             if len(option_list) > 0:
