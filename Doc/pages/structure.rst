@@ -6,6 +6,25 @@ of data analysis, please read :ref:`workflow-of-analysis`.
 Analysis Theory: Structure
 ==========================
 
+This section contains the following plugins:
+
+-  :ref:`area-per-molecule`
+-  :ref:`coordination-number`
+-  :ref:`density-profile`
+-  :ref:`eccentricity`
+-  :ref:`molecular-trace`
+-  :ref:`pair-distribution-function`
+-  :ref:`root-mean-square-deviation`
+-  :ref:`root-mean-square-fluctuation`
+-  :ref:`radius-of-gyration`
+-  :ref:`solvent-accessible-surface`
+-  :ref:`spatial-density`
+-  :ref:`static-structure-factor`
+-  :ref:`voronoi`
+-  :ref:`xray-static-structure-factor`
+
+.. _area-per-molecule:
+
 Area Per Molecule
 '''''''''''''''''
 
@@ -22,6 +41,7 @@ biological processes. By utilizing APM analysis in MDANSE, researchers can gain 
 deeper understanding of molecular systems and their behavior, ultimately contributing
 to advancements in fields like biophysics and structural biology.
 
+.. _coordination-number:
 
 Coordination Number
 '''''''''''''''''''
@@ -92,7 +112,7 @@ averaged intra and intermolecular *CN*. Finally, the same equations
 cumulative *CN*. *MDANSE* computes all these variations.
 
 
-
+.. _density-profile:
 
 Density Profile
 '''''''''''''''
@@ -107,6 +127,7 @@ distributed within the system. It is a useful tool for understanding the spatial
 arrangement and concentration of particles, making it valuable for identifying
 regions of interest and tracking changes over time in molecular simulations.
 
+.. _eccentricity:
 
 Eccentricity
 ''''''''''''
@@ -118,6 +139,7 @@ conformation, aiding the differentiation of molecules by shape. This analysis is
 vital for studying structural properties in complex molecular systems and
 characterizing molecular shape and morphology.
 
+.. _molecular-trace:
 
 Molecular Trace
 '''''''''''''''
@@ -140,6 +162,8 @@ to a specific location within the molecular system. The resolution parameter
 controls the spacing and granularity of these grid points, influencing the
 detail of the analysis.
 
+
+.. _pair-distribution-function:
 
 Pair Distribution Function
 ''''''''''''''''''''''''''
@@ -243,6 +267,8 @@ that differ from those of nMOLDYN.
    {\mathit{TCF}_{\mathit{total}}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}_{\mathit{total}}{(r) - 1}} \right),}
 
 
+.. _root-mean-square-deviation:
+
 Root Mean Square Deviation
 ''''''''''''''''''''''''''
                          
@@ -272,6 +298,7 @@ structural changes occurred during the simulation. MDANSE calculates the
 *RMSD* of individual atoms types, for example, the *RMSD* of the oxygen
 atoms in addition to the RMSD of all atoms of the system.
 
+.. _root-mean-square-fluctuation:
 
 Root Mean Square Fluctuation
 ''''''''''''''''''''''''''''
@@ -287,6 +314,8 @@ groups of atoms exhibit significant fluctuations. This information can be crucia
 for studying the dynamic behavior of biomolecules, protein-ligand interactions,
 or any molecular system subject to temporal variations.
 
+
+.. _radius-of-gyration:
 
 Radius Of Gyration
 ''''''''''''''''''
@@ -316,6 +345,8 @@ as such is a good measure for the molecule compactness. For example,
 it can be useful when monitoring folding process of a protein.
 
 
+.. _solvent-accessible-surface:
+
 Solvent Accessible Surface
 ''''''''''''''''''''''''''
 
@@ -331,6 +362,8 @@ smaller surface features and intricacies.
   radii provide a more detailed and comprehensive assessment of the
   molecular surface area, often resulting in a larger reported surface
   area due to increased sensitivity to surface features.
+
+.. _spatial-density:
 
 Spatial Density
 '''''''''''''''
@@ -440,7 +473,7 @@ following way:
      {n_{\mathit{tg}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) = n_{\mathit{tg}}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) + 1}}
 
 
-`
+.. _static-structure-factor:
 
 Static Structure Factor
 '''''''''''''''''''''''
@@ -457,6 +490,8 @@ facilitating a comprehensive exploration of the material's structural
 properties.
 
 
+.. _voronoi:
+
 Voronoi
 ''''''''
 
@@ -472,6 +507,7 @@ accurate analysis, particularly for systems extending beyond the simulation
 box. This capability enables users to uncover valuable details about
 molecular structures and dynamics.
 
+.. _xray-static-structure-factor:
 
 Xray Static Structure Factor
 ''''''''''''''''''''''''''''
