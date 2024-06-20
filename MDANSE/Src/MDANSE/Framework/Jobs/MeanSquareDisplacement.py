@@ -184,8 +184,6 @@ class MeanSquareDisplacement(IJob):
 
         self._outputData["msd_%s" % element] += result
 
-        IJob.combine(self)
-
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).

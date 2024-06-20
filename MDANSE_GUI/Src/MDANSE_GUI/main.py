@@ -23,6 +23,8 @@ from qtpy.QtGui import QPixmap, QIcon
 
 from MDANSE_GUI.TabbedWindow import TabbedWindow
 
+os.environ["OMP_NUM_THREADS"] = "1"
+
 
 def startGUI(some_args):
     app = QApplication(some_args)
