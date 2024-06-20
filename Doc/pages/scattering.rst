@@ -6,14 +6,6 @@ of data analysis, please read :ref:`workflow-of-analysis`.
 Analysis Theory: Scattering
 ===========================
 
-This section discusses plugins used
-to calculate neutron spectroscopy observables from the trajectory.
-These plugins will be explored in depth in further sections, however,
-before that, it is important to understand how MDANSE performs these
-analyses. A part of that are :ref:`param-q-vectors`, which
-are used to perform these analyses. An in-depth discussion of this
-aspect is present in `Appendix 2 <#_Appendix_2>`__.
-
 This section contains the following plugins:
 
 -  :ref:`current-correlation-function`
@@ -23,6 +15,14 @@ This section contains the following plugins:
 -  :ref:`gaussian-dynamic-incoherent-structure-factor`
 -  :ref:`neutron-dynamic-total-structure-factor`
 -  :ref:`structure-factor-from-scattering-function`
+
+This section discusses plugins used
+to calculate neutron spectroscopy observables from the trajectory.
+These plugins will be explored in depth in further sections, however,
+before that, it is important to understand how MDANSE performs these
+analyses. A part of that are :ref:`param-q-vectors`, which
+are used to perform these analyses. An in-depth discussion of this
+aspect is present in `Appendix 2 <#_Appendix_2>`__.
 
 .. _scattering_theory:
 
