@@ -646,7 +646,7 @@ on a grid of equidistantly spaced points along the *q*-axis:
 .. math::
    :label: pfx105
 
-   {\mathrm{EISF}\left( q_{m} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I}\mathit{EIS}F_{I}\left( q_{m} \right)}},{m = 0}\ldots{N_{q} - 1.}}
+   {\mathrm{EISF}\left( q_{m} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I}\mathrm{EISF}_{I}\left( q_{m} \right)}},{m = 0}\ldots{N_{q} - 1.}}
 
 where :math:`N_q` is a user-defined number of :math:`q`-shells, the values for
 :math:`q_m` are defined as
