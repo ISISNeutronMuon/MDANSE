@@ -252,7 +252,7 @@ function,
    {C_{\mathit{ii}}{(t) = \left\langle {P_{2}\left( {\mu_{i}(0)\cdot\mu_{i}(t)} \right)} \right\rangle}}
 
 which describes the dynamics of a unit vector :math:`\mu_{i}(t)` pointing
-along the :sup:`15`\ N-:sup:`1`\ H bond of the residue *i* in the
+along the :sup:`15`\ N-:sup:`1`\ H bond of the residue :math:`i` in the
 laboratory frame. Here :math:`P_{2}(x)` is the second order Legendre
 polynomial. The Redfield theory shows that relaxation measurements probe
 the relaxation dynamics of a selected nuclear spin only at a few
@@ -292,7 +292,7 @@ degree of spatial restriction of the internal motions of a bond vector,
 while the characteristic time :math:`\tau_{\mathrm{eff},i}` is an
 effective correlation time, setting the time scale of the
 internal relaxation processes. :math:`S_{i}^{2}` can adopt values
-ranging from 0 (completely disordered) to 1 (fully ordered). So,
+ranging from :math:`0` (completely disordered) to :math:`1` (fully ordered). So,
 :math:`S_{i}^{2}` is the appropriate indicator of protein backbone motions in
 computationally feasible timescales as it describes the spatial aspects
 of the reorientational motion of N-H peptidic bonds vector.
