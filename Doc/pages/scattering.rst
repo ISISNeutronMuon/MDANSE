@@ -646,7 +646,7 @@ on a grid of equidistantly spaced points along the *q*-axis:
 .. math::
    :label: pfx105
 
-   {\mathit{EISF}\left( q_{m} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I}\mathit{EIS}F_{I}\left( q_{m} \right)}},{m = 0}\ldots{N_{q} - 1.}}
+   {\mathrm{EISF}\left( q_{m} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I}\mathit{EIS}F_{I}\left( q_{m} \right)}},{m = 0}\ldots{N_{q} - 1.}}
 
 where :math:`N_q` is a user-defined number of :math:`q`-shells, the values for
 :math:`q_m` are defined as
@@ -662,7 +662,7 @@ incoherent scattering function is:
 .. math::
    :label: pfx107
 
-   {\mathrm{EIS}F_{I}{\left( q_{m} \right) = \frac{1}{n_{I}}}{\sum\limits_{\alpha}^{n_{I}}{\overline{\left\langle {|{\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle}}^{q}}.}
+   {\mathrm{EISF}_{I}{\left( q_{m} \right) = \frac{1}{n_{I}}}{\sum\limits_{\alpha}^{n_{I}}{\overline{\left\langle {|{\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}} \right\rbrack\left. {} \right|^{2}}} \right\rangle}}^{q}}.}
 
 Here the symbol :math:`{\overline{...}}^{q}`
 denotes an average over the *q*-vectors having the same modulus
@@ -874,8 +874,8 @@ analysis is (assuming that the chosen weights are b_incoherent2):
    I^{\mathrm{inc}}(Q,t) = \frac{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,\mathrm{inc}}^{2}I_{\alpha}^{\mathrm{inc}}(Q,t)}}{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,\mathrm{inc}}^{2}}}
 
 Naturally, similar expressions apply to the dynamic structure factors,
-:math:`S_{\alpha\beta}^{coh}(Q,\omega)` and
-:math:`S_{\alpha}^{inc}(Q,\omega)`.
+:math:`S_{\alpha\beta}^{\mathrm{coh}}(Q,\omega)` and
+:math:`S_{\alpha}^{\mathrm{inc}}(Q,\omega)`.
 
 .. _structure-factor-from-scattering-function:
 
