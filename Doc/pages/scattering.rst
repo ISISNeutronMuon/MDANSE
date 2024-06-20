@@ -231,7 +231,7 @@ where :math:`M` is the mass of the atoms.
 **Recoil Moment:** Formula :math:numref:`pfx76` shows that the
 first moment is given by the average kinetic energy (in units of
 :math:`\hbar`) of a particle which receives a momentum transfer
-:math:`\hbar q`. Therefore,F
+:math:`\hbar q`. Therefore,
 :math:`\langle\omega\rangle`
 is called the *recoil moment*. A number of 'recipes' has been suggested
 to correct classical dynamic structure factors for detailed balance and
