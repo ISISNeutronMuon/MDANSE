@@ -6,7 +6,7 @@ of data analysis, please read :ref:`workflow-of-analysis`.
 Analysis Theory: Dynamics
 =========================
 
-This section contains the following Plugins:
+This section contains the following plugins:
 
 -  :ref:`analysis-angular-correlation`
 -  :ref:`analysis-dos`
