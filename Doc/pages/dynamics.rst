@@ -67,23 +67,23 @@ section on :ref:`analysis-vacf`) defined as:
 .. math::
    :label: pfx5
 
-   {\mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)\doteq{\sum\limits_{\alpha}\omega_{\alpha}}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\cdot\mathit{\Delta\nu}} \right) \qquad {n = 0}\ldots{N_{t} - 1.}}
+   {\mathrm{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)\doteq{\sum\limits_{\alpha}\omega_{\alpha}}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\cdot\mathit{\Delta\nu}} \right) \qquad {n = 0}\ldots{N_{t} - 1.}}
 
 where :math:`N_{t}` is the total number of time steps of the correlation function,
 :math:`{\mathit{\Delta\nu} = 1}\text{/}\left( {2N_{t}\Delta t} \right)`
 is the frequency step, :math:`{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\cdot\mathit{\Delta\nu}} \right)`
 is the Fourier transform of the velocity autocorrelation function and
 :math:`\omega_{\alpha}` is the weighting factor used for atom :math:`\alpha`.
-:math:`{\mathit{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)}`
+:math:`{\mathrm{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)}`
 can be computed either for the isotropic case or with respect to a
 user-defined axis. The spectrum
-:math:`{\mathit{DOS}\left( {n\cdot\Delta\nu} \right)}`
-is computed from the *unnormalized VACF*, such that :math:`\mathit{DOS}(0)` gives an
+:math:`{\mathrm{DOS}\left( {n\cdot\Delta\nu} \right)}`
+is computed from the *unnormalized VACF*, such that :math:`\mathrm{DOS}(0)` gives an
 approximate value for the diffusion constant
 :math:`D = {\sum\limits_{\alpha}D_{\alpha}}`
 (see Eqs. :math:numref:`pfx20` and :math:numref:`pfx21`).
 
-:math:`{\mathit{DOS}\left( {n\cdot\Delta\nu} \right)}`
+:math:`{\mathrm{DOS}\left( {n\cdot\Delta\nu} \right)}`
 can be smoothed by, for example, a Gaussian window applied in the time domain
 [Ref10]_ (see the section :ref:`appendix-fca`). Its width in the time domain
 is :math:`{\sigma_{t} = \alpha}\text{/}T`
