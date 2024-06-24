@@ -267,9 +267,9 @@ motions, such that:
 .. math::
    :label: pfx35
 
-   {C_{\mathit{ii}}{(t) = C^{G}}(t)\cdot C_{\mathit{ii}}^{I}(t)}
+   {C_{\mathit{ii}}{(t) = C^{\mathrm{G}}}(t)\cdot C_{\mathit{ii}}^{\mathrm{I}}(t)}
 
-where :math:`C^{G}(t)` and :math:`C_{\mathit{ii}}^{I}(t)` denote the
+where :math:`C^{\mathrm{G}}(t)` and :math:`C_{\mathit{ii}}^{\mathrm{I}}(t)` denote the
 global and the internal time correlation function,
 respectively. Within the so-called model free approach
 [Ref14]_, [Ref15]_
@@ -278,7 +278,7 @@ the internal correlation function is modelled by an exponential,
 .. math::
    :label: pfx37
 
-   {C_{\mathit{ii}}^{I}{(t) = {S_{i}^{2} + \left( {1 - S_{i}^{2}} \right)}}\exp\left( \frac{- t}{\tau_{\mathrm{eff},i}} \right)}
+   {C_{\mathit{ii}}^{\mathrm{I}}{(t) = {S_{i}^{2} + \left( {1 - S_{i}^{2}} \right)}}\exp\left( \frac{- t}{\tau_{\mathrm{eff},i}} \right)}
 
 Here the asymptotic value
 
@@ -305,7 +305,7 @@ bonds defined as:
 .. math::
    :label: pfx44
 
-   {C^{I}{(t) = {\sum\limits_{i = 1}^{N_{\mathrm{bonds}}}{C_{\mathit{ii}}^{I}(t)}}}}
+   {C^{\mathrm{I}}{(t) = {\sum\limits_{i = 1}^{N_{\mathrm{bonds}}}{C_{\mathit{ii}}^{\mathrm{I}}(t)}}}}
 
 where :math:`N_{\mathrm{bonds}}` is the number of selected bonds for the analysis.
 
