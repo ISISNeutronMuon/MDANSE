@@ -214,7 +214,7 @@ and also to a loss of all odd moments
 .. math::
    :label: pfx75
 
-   {\left\langle \omega^{2{n + 1}} \right\rangle\doteq{\int\limits_{- \infty}^{+ \infty}{d\omega}}\omega^{2{n + 1}}S\left( {q,\omega} \right) \qquad {n = 1,2},\ldots.}
+   {\left\langle \omega^{2{n + 1}} \right\rangle\doteq{\int\limits_{- \infty}^{+ \infty}{d\omega}}\, \omega^{2{n + 1}}S\left( {q,\omega} \right) \qquad {n = 1,2},\ldots.}
 
 The odd moments vanish since the classical dynamic structure factor is
 even in :math:`\omega`, assuming invariance of the scattering process with respect to

@@ -305,9 +305,9 @@ bonds defined as:
 .. math::
    :label: pfx44
 
-   {C^{I}{(t) = {\sum\limits_{i = 1}^{N_{\mathit{bonds}}}{C_{\mathit{ii}}^{I}(t)}}}}
+   {C^{I}{(t) = {\sum\limits_{i = 1}^{N_{\mathrm{bonds}}}{C_{\mathit{ii}}^{I}(t)}}}}
 
-where N\ :sub:`bonds` is the number of selected bonds for the analysis.
+where :math:`N_{\mathrm{bonds}}` is the number of selected bonds for the analysis.
 
 
 .. _analysis-pacf:
