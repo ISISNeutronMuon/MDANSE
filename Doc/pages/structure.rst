@@ -31,9 +31,7 @@ Area Per Molecule
 The Area Per Molecule (APM) analysis in Molecular Dynamics (MD) assesses the surface
 area occupied by each molecule within a given system. This tool plays a crucial role
 in comprehending molecular arrangement and interactions. Users can specify the
-molecule they wish to analyze, such as the default DMPC (a common phospholipid),
-ensuring that the molecule's name matches the one in the data file, typically in HDF
-format. The APM analysis provides valuable insights into how molecules are
+molecule they wish to analyze. The APM analysis provides valuable insights into how molecules are
 distributed and interact with one another. This analysis is particularly vital in the
 study of complex structures like cell membranes. It aids in understanding membrane
 functionality and its response to various conditions, shedding light on essential
@@ -75,13 +73,13 @@ In this context, the *CN* is defined as:
 .. math::
    :label: pfx118
 
-   {n{\left( {r,{r + \mathit{dr}}} \right) = \frac{1}{N_{G}}}{\sum\limits_{g = 1}^{N_{G}}{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{\mathit{gI}}\left( {r,{r + \mathit{dr}}} \right)}}}}
+   {n{\left( {r,{r + \mathit{dr}}} \right) = \frac{1}{N_{\mathrm{G}}}}{\sum\limits_{g = 1}^{N_{\mathrm{G}}}{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{n_{\mathit{gI}}\left( {r,{r + \mathit{dr}}} \right)}}}}
 
-where NG is the number of groups of atoms, N\ :sub:`species` is the
-number of species found in the system and n\ :sub:`gI`\ (r) is the *CN*
-defined for species *I* defined as the number of atoms of species *I*
-found in a shell of width *dr* at a distance *r* of the center of
-gravity of the group of atom *g*.
+where :math:`N_{\mathrm{G}}` is the number of groups of atoms, :math:`N_{\mathrm{species}}` is the
+number of species found in the system and :math:`n_{gI}(r)` is the *CN*
+defined for species :math:`I` defined as the number of atoms of species :math:`I`
+found in a shell of width :math:`dr` at a distance :math:`r` of the center of
+gravity of the group of atom :math:`g`.
 
 *MDANSE* allows one to compute the *CN* on a set of equidistantly spaced
 distances at different times
@@ -89,19 +87,18 @@ distances at different times
 .. math::
    :label: pfx119
 
-   {\mathit{CN}\left( r_{m} \right)\doteq\frac{1}{N_{\mathit{frames}}}\frac{1}{N_{G}}{\sum\limits_{f = 1}^{N_{\mathit{frames}}}{\sum\limits_{g = 1}^{N_{G}}{\sum\limits_{I = 1}^{N_{\mathit{species}}}{CN_{\mathit{gI}}\left( {r_{m},t_{f}} \right)}}}},\\
-   {m = 0}\ldots{N_{r} - 1},{n = 0}\ldots{N_{\mathit{frames}} - 1.}}
+   {\mathrm{CN}\left( r_{m} \right)\doteq\frac{1}{N_{\mathrm{frames}}}\frac{1}{N_{\mathrm{G}}}{\sum\limits_{f = 1}^{N_{\mathrm{frames}}}{\sum\limits_{g = 1}^{N_{\mathrm{G}}}{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{CN_{\mathit{gI}}\left( {r_{m},t_{f}} \right)}}}}}
 
-where N\ :sub:`r` and N\ :sub:`frames` are respectively the number of
+where :math:`{m = 0}, \ldots, {N_{r} - 1}` and :math:`{n = 0}, \ldots, {N_{\mathrm{frames}} - 1}`. :math:`N_r` and :math:`N_{\mathrm{frames}}` are respectively the number of
 distances and times at which the *CN* is evaluated and
 
 .. math::
    :label: pfx120
 
-   {CN_{\mathit{gI}}{\left( {r_{m},t_{f}} \right) = n_{\mathit{gI}}}\left( {r_{m},t_{f}} \right),}
+   {\mathrm{CN}_{\mathit{gI}}{\left( {r_{m},t_{f}} \right) = n_{\mathit{gI}}}\left( {r_{m},t_{f}} \right),}
 
-is the number of atoms of species *I* found within [rm, rm + dr] at frame
-*f* from the centre of gravity of group *g*.
+is the number of atoms of species :math:`I` found within :math:`[r_m, r_m + dr]` at frame
+*f* from the centre of gravity of group :math:`g`.
 
 From these expressions, several remarks can be done. Firstly, the Eqs.
 :math:numref:`pfx119` and :math:numref:`pfx120` can be restricted
@@ -122,7 +119,7 @@ distribution of particles or molecules along a specified axis within a
 simulation box. This analysis provides valuable insights into how the density of
 particles or molecules varies across the system along the chosen axis. By
 dividing the axis into segments or bins and specifying the size of each bin
-using the parameter **dr**, the Density Profile reveals how particles are
+using the parameter :math:`dr`, the Density Profile reveals how particles are
 distributed within the system. It is a useful tool for understanding the spatial
 arrangement and concentration of particles, making it valuable for identifying
 regions of interest and tracking changes over time in molecular simulations.
@@ -189,82 +186,65 @@ Mathematically, the *PDF* can be computed using the following formula:
 .. math::
    :label: pfx121
 
-   {\mathit{PDF}{(r) = {\sum\limits_{{I = 1},J\geq I}^{N_{\mathit{species}}}n_{I}}}n_{J}\omega_{I}\omega_{J}g_{\mathit{IJ}}(r)}
+   {\mathrm{PDF}{(r) = {\sum\limits_{{I = 1},J\geq I}^{N_{\mathrm{species}}}n_{I}}}n_{J}\omega_{I}\omega_{J}g_{\mathit{IJ}}(r)}
 
-where N\ :sub:`species` is the number of selected species, n\ :sub:`I`
-and n\ :sub:`J` are respectively the numbers of atoms of species *I* and
-*J*, :math:`\omega`\ :sub:`I` and :math:`\omega`\ :sub:`J` respectively the weights for species
-*I* and *J* (see Section `Coordination Number`_ for more details) and
-
-.. math::
-   :label: pfx122
-   
-   {\mathit{PD}F_{\mathit{\alpha\beta}}(r)}
-
-\ is the partial *PDF* for I and J species that can be defined as:
+where :math:`N_{\mathrm{species}}` is the number of selected species, :math:`n_I`
+and :math:`n_J` are respectively the numbers of atoms of species :math:`I` and
+:math:`J`, :math:`\omega_I` and :math:`\omega_J` respectively the weights for species
+:math:`I` and :math:`J` (see Section `Coordination Number`_ for more details) and
+:math:`\mathrm{PDF}_{\mathit{\alpha\beta}}(r)` is the partial *PDF* for :math:`I` and :math:`J` species that can be defined as:
 
 .. math::
    :label: pfx123
 
-   {\mathit{PD}F_{\mathit{IJ}}{(r) = \frac{\left\langle {\sum\limits_{\alpha = 1}^{n_{I}}{n_{\alpha J}(r)}} \right\rangle}{n_{I}\rho_{J}4\pi r^{2}\mathit{dr}}}}
+   {\mathrm{PDF}_{\mathit{IJ}}{(r) = \frac{\left\langle {\sum\limits_{\alpha = 1}^{n_{I}}{n_{\alpha J}(r)}} \right\rangle}{n_{I}\rho_{J}4\pi r^{2}\mathit{dr}}}}
 
-where :math:`\rho`\ :sub:`J` is the density of atom of species *J* and
+where :math:`\rho_J` is the density of atom of species :math:`J` and
+:math:`n_{\alpha J}(r)` is the mean number of atoms of species :math:`J` in
+a shell of width :math:`dr` at distance :math:`r` of the atom :math:`\alpha`
+of species :math:`I`.
 
-.. math::
-   :label: pfx124
-   
-   {n_{\alpha J}(r)}
-
-\ is the mean number of atoms of species *J* in a shell of width *dr* at
-distance *r* of the atom :math:`\alpha` of species *I*.
-
-From the computation of PDF, two related quantities are also calculated;
-the Radial Distribution Function (RDF), defined as
+From the computation of *PDF*, two related quantities are also calculated;
+the Radial Distribution Function (*RDF*), defined as
 
 .. math::
    :label: pfx125
 
-   {\mathit{RDF}{(r) = 4}\pi r^{2}\rho_{0}\mathit{PDF}(r),}
+   {\mathrm{RDF}{(r) = 4}\pi r^{2}\rho_{0}\mathrm{PDF}(r),}
 
-and the Total Correlation Function (TCF), defined as
+and the Total Correlation Function (*TCF*), defined as
 
 .. math::
    :label: pfx126
 
-   {\mathit{TCF}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}{(r) - 1}} \right),}
+   {\mathrm{TCF}{(r) = 4}\pi r\rho_{0}\left( {\mathrm{PDF}{(r) - 1}} \right),}
 
-where :math:`\rho`\ :sub:`0` is the average atomic density, which is defined as
-
-.. math::
-   :label: pfx127
-
-   {{\rho_{0} = \frac{N}{V}},}
-
-where N is the total number of atoms in the system and V the volume of
-the simulation.
+where :math:`\rho_0` is the average atomic density, which is defined as
+:math:`\rho_{0} = N / V` where :math:`N` is the total number of atoms in the
+system and :math:`V` the volume of the simulation.
 
 All these quantities are initially calculated as intramolecular and
 intermolecular parts for each pair of atoms, which are then added to
-create the total PDF/RDF/TCF for each pair of atoms, as well as the
+create the total *PDF*/*RDF*/*TCF* for each pair of atoms, as well as the
 total intramolecular and total intermolecular values. Lastly, the total
-functions are computed. Please note, however, that in the case of TCF,
+functions are computed. Please note, however, that in the case of *TCF*,
 the below set of equations has been chosen, which will return results
 that differ from those of nMOLDYN.
 
 .. math::
    :label: pfx128
 
-   {\mathit{TCF}_{\mathit{intramolecular}}{(r) = 4}\pi r\rho_{0}\mathit{PDF}_{\mathit{intramolecular}}(r),}
+   {\mathrm{TCF}_{\mathrm{intramolecular}}{(r) = 4}\pi r\rho_{0}\mathrm{PDF}_{\mathrm{intramolecular}}(r),}
 
 .. math::
    :label: pfx129
 
-   {\mathit{TCF}_{\mathit{intermolecular}}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}_{\mathit{intermolecular}}{(r) - 1}} \right),}
+   {\mathrm{TCF}_{\mathrm{intermolecular}}{(r) = 4}\pi r\rho_{0}\left( {\mathrm{PDF}_{\mathrm{intermolecular}}{(r) - 1}} \right),}
 
 .. math::
    :label: pfx130
 
-   {\mathit{TCF}_{\mathit{total}}{(r) = 4}\pi r\rho_{0}\left( {\mathit{PDF}_{\mathit{total}}{(r) - 1}} \right),}
+   {\mathrm{TCF}_{\mathrm{total}}{(r) = 4}\pi r\rho_{0}\left( {\mathrm{PDF}_{\mathrm{total}}{(r) - 1}} \right),}
 
 
 .. _root-mean-square-deviation:
@@ -282,7 +262,7 @@ the difference between two structures. It can be defined as:
 .. math::
    :label: pfx131
 
-   {\mathrm{RMSD}{\left( {n\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha}^{N_{\alpha}}\vert {\mathbf{r}_{\alpha}{(n\Delta t) - \mathbf{r}_{\alpha}}(n_{\mathrm{ref}}\Delta t)} \vert^{2}}{N_{\alpha}}}} \qquad {n = 0}\ldots{N_{t} - 1}}
+   {\mathrm{RMSD}{\left( {n\Delta t} \right) = \sqrt{\frac{\sum\limits_{\alpha}^{N_{\alpha}}\vert {\mathbf{r}_{\alpha}{(n\Delta t) - \mathbf{r}_{\alpha}}(n_{\mathrm{ref}}\Delta t)} \vert^{2}}{N_{\alpha}}}} \qquad {n = 0}, \ldots, {N_{t} - 1}}
 
 where :math:`N_{t}` is the number of frames, :math:`\mathrm{\Delta}t`
 is the time step, :math:`N_{\alpha}` is the number of selected atoms of
@@ -303,12 +283,12 @@ atoms in addition to the RMSD of all atoms of the system.
 Root Mean Square Fluctuation
 ''''''''''''''''''''''''''''
 
-Root Mean Square Fluctuation (RMSF) assesses how the positions of atoms or
-molecules within a system fluctuate over time. Specifically, RMSF measures the
+Root Mean Square Fluctuation (*RMSF*) assesses how the positions of atoms or
+molecules within a system fluctuate over time. Specifically, *RMSF* measures the
 average magnitude of deviations or fluctuations in atomic positions from their
 mean positions during a simulation.
 
-RMSF analysis is valuable for understanding the flexibility and stability of
+*RMSF* analysis is valuable for understanding the flexibility and stability of
 molecules within a simulation, providing insights into regions where atoms or
 groups of atoms exhibit significant fluctuations. This information can be crucial
 for studying the dynamic behavior of biomolecules, protein-ligand interactions,
@@ -332,7 +312,7 @@ It can be defined as:
 .. math::
    :label: pfx134
 
-    {\mathrm{ROG}{({n\Delta t}) = \sqrt{\frac{\sum_{i}^{N}m_{i}\vert {\mathbf{r}_{i}{(n\Delta t) - \mathbf{r}_{\mathrm{CM}}}(n\Delta t)} \vert^{2}}{\sum_{i}^{N}m_{i}}}} \qquad {n = 0}\ldots{N_{t} - 1}}
+    {\mathrm{ROG}{({n\Delta t}) = \sqrt{\frac{\sum\limits_{i}^{N}m_{i}\vert {\mathbf{r}_{i}{(n\Delta t) - \mathbf{r}_{\mathrm{CM}}}(n\Delta t)} \vert^{2}}{\sum\limits_{i}^{N}m_{i}}}} \qquad {n = 0}, \ldots, {N_{t} - 1}}
 
 where :math:`N_{t}` is the number of frames, :math:`\mathrm{\Delta}t`
 is the time step, :math:`N` is the number of atoms of the system,
@@ -357,11 +337,11 @@ level of detail in the surface representation. Essentially, a higher
 density of points leads to a finer-grained representation, capturing
 smaller surface features and intricacies.
 
-- **Probe Radius**: Measured in nanometers, the probe radius is a crucial
-  parameter influencing the precision of the calculation. Smaller probe
-  radii provide a more detailed and comprehensive assessment of the
-  molecular surface area, often resulting in a larger reported surface
-  area due to increased sensitivity to surface features.
+**Probe Radius**: Measured in nanometers, the probe radius is a crucial
+parameter influencing the precision of the calculation. Smaller probe
+radii provide a more detailed and comprehensive assessment of the
+molecular surface area, often resulting in a larger reported surface
+area due to increased sensitivity to surface features.
 
 .. _spatial-density:
 
@@ -390,87 +370,40 @@ triplets of atoms using the formula:
 .. math::
    :label: pfx136
    
-   {\mathit{SD}\left( {r_{l},\theta_{m},\phi_{n}} \right)\doteq\frac{1}{N_{\mathit{triplets}N_{\mathit{groups}}}}{\sum\limits_{t = 1}^{N_{\mathit{triplets}}}{\sum\limits_{g = 1}^{N_{\mathit{groups}}}\left\langle {n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)} \right\rangle}},}
+   {\mathrm{SD}\left( {r_{l},\theta_{m},\phi_{n}} \right)\doteq\frac{1}{N_{\mathrm{triplets}}N_{\mathrm{groups}}}{\sum\limits_{t = 1}^{N_{\mathrm{triplets}}}{\sum\limits_{g = 1}^{N_{\mathrm{groups}}}\left\langle {n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)} \right\rangle}},}
 
-.. math::
-   :label: pfx137
-
-   {l = 0}\ldots{N_{r} - 1},{m = 0}\ldots{N_{\theta} - 1},{n = 0}\ldots{N_{\phi} - 1.}
-
-where N\ :sub:`triplets` and N\ :sub:`groups` are respectively the
-number of triplets and groups, r\ :sub:`l`, θ\ :sub:`m` and φ\ :sub:`n`
+where :math:`{l = 0}, \ldots, {N_{r} - 1}`; :math:`{m = 0}, \ldots, {N_{\theta} - 1}`; and :math:`{n = 0}, \ldots, {N_{\phi} - 1}`.
+:math:`N_{\mathrm{triplets}}` and :math:`N_{\mathrm{groups}}` are respectively the
+number of triplets and groups, :math:`r_{l}`, :math:`\theta_{m}` and :math:`\phi_{n}`
 are the spherical coordinates at which the *SD* is evaluated,
-N\ :sub:`r`, :math:`N_{\theta}` and :math:`N_{\phi}`
-are respectively the number of discrete *r*, θ and φ values and
-n\ :sub:`tg`\ (r\ :sub:`l`, θ\ :sub:`m`, φ\ :sub:`n`) is the number of
-group of atoms of type *g* whose centres of mass is found to be in the
-volume element defined by [r, r + dr], [θ, θ + dθ] and [φ, φ + dφ] in
+:math:`N_{r}`, :math:`N_{\theta}` and :math:`N_{\phi}`
+are respectively the number of discrete :math:`r`, :math:`\theta` and :math:`\phi` values and
+:math:`n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)` is the number of
+group of atoms of type :math:`g` whose centres of mass is found to be in the
+volume element defined by :math:`[r, r + dr]`, :math:`[\theta, \theta + d\theta]`
+and :math:`[\phi, \phi + d\phi]` in
 the spherical coordinates basis cantered on the centre of mass of
-triplet *t*. So technically, *MDANSE* proceeds more or less in the
-following way:
+triplet :math:`t`.
 
--  defines the centre of mass
+So technically, *MDANSE* proceeds more or less in the following way:
 
-   .. math::
-     :label: pfx138
-   
-     {c_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}}
+- defines the centre of mass :math:`c_{i}^{t}` where :math:`{i = 1}, 2, \ldots, N_{\mathrm{triplets}}` for each triplet of atoms
 
-   \ for each triplet of atoms,
+- defines the centre of mass :math:`c_{i}^{g}` where :math:`{i = 1}, 2, \ldots, N_{\mathrm{groups}}` for each group of atoms
 
--  defines the centre of mass
+- constructs an oriented orthonormal basis :math:`R_{i}^{t}` where :math:`{i = 1}, 2, \ldots,  N_{\mathrm{triplets}}` cantered on each :math:`c^t`, this basis is defined from the three vectors :math:`v_1`, :math:`v_2`, :math:`v_3`:
 
-   .. math::
-     :label: pfx139
-     
-     {c_{i}^{g}{i = 1},2\ldots N_{\mathit{groups}}}
+    - :math:`v_{1} = (n_{1} + n_{2}) / \left| {n_{1} + n_{2}} \right|` where :math:`n_1` and :math:`n_2` are respectively the normalized vectors in (:math:`a_1`, :math:`a_2`) and (:math:`a_1`, :math:`a_3`) directions where (:math:`a_1`, :math:`a_2`, :math:`a_3`) are the three atoms of the triplet :math:`t`,
+    - :math:`v_2` is defined as the clockwise normal vector orthogonal to :math:`v_1` that belongs to the plane defined by :math:`a_1`, :math:`a_2` and :math:`a_3` atoms,
+    - :math:`{\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}`
 
-   \ for each group of atoms,
+-  expresses the cartesian coordinates of each :math:`c^g` in each :math:`R^t`
 
--  constructs an oriented orthonormal basis
+-  transforms these coordinates in spherical coordinates
 
-   .. math::
-     :label: pfx140
-     
-     {R_{i}^{t}{i = 1},2\ldots N_{\mathit{triplets}}}
+-  discretizes the spherical coordinates in :math:`r_l`, :math:`\theta_m` and :math:`\phi_n`
 
-   \ cantered on each c\ :sup:`t`, this basis is defined from the three
-   vectors **v1**, **v2**, **v3**,
-
-   -  
-
-      .. math::
-        :label: pfx141 
-        
-        {v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}}
-
-      \ where **n1** and **n2** are respectively the normalized vectors
-      in (**a1**,\ **a2**) and (**a1**,\ **a3**) directions where
-      (**a1**,\ **a2**,\ **a3**) are the three atoms of the triplet *t*,
-   -  v\ :sub:`2` is defined as the clockwise normal vector orthogonal
-      to v1 that belongs to the plane defined by **a1**, **a2** and
-      **a3** atoms,
-   -  
-
-      .. math::
-        :label: pfx142
-        
-        {{\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}}
-
--  expresses the cartesian coordinates of each c\ :sup:`g` in each
-   R\ :sup:`t`,
-
--  transforms these coordinates in spherical coordinates,
-
--  discretizes the spherical coordinates in r\ :sub:`l`, θ\ :sub:`m` and
-   φ\ :sub:`n`,
-
--  does
-
-   .. math::
-     :label: pfx143
-     
-     {n_{\mathit{tg}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) = n_{\mathit{tg}}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) + 1}}
+-  does :math:`n_{\mathit{tg}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) = n_{\mathit{tg}}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) + 1}`
 
 
 .. _static-structure-factor:
@@ -479,13 +412,13 @@ Static Structure Factor
 '''''''''''''''''''''''
 
 The **Static Structure Factor** analysis offers a convenient method to
-calculate the static coherent structure factor, represented as S(q), where
-S(q) = F\ :sub:`coh`\ (q, t = 0). This factor is fundamental for gaining
+calculate the static coherent structure factor, represented as :math:`S(q)`, where
+:math:`S(q) = F_{\mathrm{coh}}(q, t = 0)`. This factor is fundamental for gaining
 insights into the ordered arrangements of particles within a material.
 
 This analysis serves as a valuable tool, especially in trajectory-based
 simulations, for assessing the ordered structures of particles in a material.
-It provides the flexibility to control both distance and q-value ranges,
+It provides the flexibility to control both distance and :math:`q`-value ranges,
 facilitating a comprehensive exploration of the material's structural
 properties.
 
@@ -517,7 +450,7 @@ and X-ray scattering experiments in material science. It systematically
 investigates material structural properties by analyzing particle
 distribution and ordering. Researchers gain precise insights into
 fundamental aspects like atomic spacing and ordered patterns. MDANSE
-provides fine-grained control over "r values" and "q values," enabling
+provides fine-grained control over ":math:`r` values" and ":math:`q` values," enabling
 customization for probing specific material structural characteristics.
 This tool is invaluable for advancing scientific and industrial research,
 especially in neutron scattering experiments.
