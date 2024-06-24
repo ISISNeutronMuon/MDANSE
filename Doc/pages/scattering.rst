@@ -26,8 +26,8 @@ aspect is present in `Appendix 2 <#_Appendix_2>`__.
 
 .. _scattering_theory:
 
-Theory and background
-'''''''''''''''''''''
+Background
+''''''''''
 **Dynamic Structure Factor S(q, ω):** This is a central
 concept in neutron scattering experiments. This factor characterizes how
 scattering intensity changes with alterations in momentum (:math:`q`) and energy (:math:`\omega`)
