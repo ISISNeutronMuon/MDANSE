@@ -6,7 +6,7 @@ of data analysis, please read :ref:`workflow-of-analysis`.
 Analysis Theory: Scattering
 ===========================
 
-This section contains the following plugins:
+This section contains background theory for following plugins:
 
 -  :ref:`current-correlation-function`
 -  :ref:`dynamic-coherent-structure-factor`
