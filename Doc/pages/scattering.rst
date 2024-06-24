@@ -134,7 +134,7 @@ the relative orientation of the spin of the neutron and the spin of the
 scattering nucleus. If the spins of the nuclei and the neutron are not
 prepared in a special orientation one can assume a random relative
 orientation and that spin and position of the nuclei are uncorrelated.
-The overbars :math:`\overline{...}` appearing in :math:`{\Gamma_{\mathit{\alpha\beta}}}`
+The overline :math:`\overline{...}` appearing in :math:`{\Gamma_{\mathit{\alpha\beta}}}`
 denotes an average over isotopes and relative spin orientations of
 neutron and nucleus.
 
@@ -351,7 +351,7 @@ where :math:`{k = 0}, \ldots, {N_{t} - 1}` and :math:`{m = 0}, \ldots, {N_{q} - 
 :math:`N_{\mathrm{species}}` is the number of selected species, :math:`n_{I}`
 is the number of atoms of species :math:`I`, :math:`\omega_{I}` the weight
 for species :math:`I` (see Section :ref:`target_CN` for more details)
-and :math:`{\rho_{I}( {q,k\cdot\Delta t})}`. The overbar
+and :math:`{\rho_{I}( {q,k\cdot\Delta t})}`. The overline
 :math:`{\overline{...}}^{q}` in Eq. :math:numref:`pfx80` denotes an average
 over :math:`q`-vectors having *approximately* the same modulus
 
@@ -479,7 +479,7 @@ is defined as:
 
    {\text{F}_{I,\mathrm{inc}}{\left( {q_{m},k\cdot\Delta t} \right) = \sum\limits_{\alpha = 1}^{n_{I}}}{\overline{\left\langle {\exp\left\lbrack {{-i}q\cdot R_{\alpha}(0)} \right\rbrack\exp\left\lbrack {iq\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle}}^{q}.}
 
-The overbar :math:`{\overline{...}}^{q}` in Eq. :math:numref:`pfx92`
+The overline :math:`{\overline{...}}^{q}` in Eq. :math:numref:`pfx92`
 denotes an average
 over :math:`q`-vectors having *approximately* the same modulus
 :math:`{{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q}`. The
