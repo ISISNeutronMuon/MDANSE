@@ -39,10 +39,9 @@ molecular dipole:
 .. math::
    :label: pfx115
 
-   I(\omega) \propto \frac{1}{2\pi}\int\limits_{-\infty}^{\infty} \mathrm{d}t \, e^{i\omega t} \langle \overline{\dot{\mu}(t_0) \cdot \dot{\mu}(t_0 + t)} \rangle_{t_0}
+   I(\omega) \propto \frac{1}{2\pi} \int\limits_{-\infty}^{\infty} \mathrm{d}t \, e^{i\omega t}\frac{1}{3 N_{\alpha}}\sum_{\alpha} \langle \dot{\mu}_{\alpha}(t_0) \cdot \dot{\mu}_{\alpha}(t_0 + t) \rangle_{t_0}
 
-here the overline :math:`\overline{...}` appearing above denotes that the property is
-averaged over all molecules in the trajectory. :math:`\dot{\mu}(t)` is
+where :math:`N_{\alpha}` is the number of molecules :math:`\alpha` and :math:`\dot{\mu}(t)` is
 the time-derivative of the molecular dipole moment.
 
 .. _dipole-autocorrelation-function:
