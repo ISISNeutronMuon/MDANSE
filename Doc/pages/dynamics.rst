@@ -28,8 +28,8 @@ For a given triplet of non-colinear atoms :math:`g=(a_1,a_2,a_3)`, one can
 derive an orthonormal set of three vectors :math:`v_1`, :math:`v_2`, :math:`v_3` using the
 following scheme:
 
--  :math:`v_{1} = \frac{n_{1} + n_{2}}{\left| \left| {n_{1} + n_{2}} \right| \right|}`
-   where **n**\ :sub:`1` and **n**\ :sub:`2` are respectively the
+-  :math:`v_{1} = (n_{1} + n_{2}) / \left| {n_{1} + n_{2}} \right|`
+   where :math:`n_1` and :math:`n_2` are respectively the
    normalized vectors along :math:`(a_1, a_2)` and :math:`(a_1, a_3)` directions.
 -  :math:`v_2` is defined as the clockwise normal vector orthogonal to :math:`v_1` that
    belongs to the plane defined by :math:`a_1`, :math:`a_2` and :math:`a_3` atoms
