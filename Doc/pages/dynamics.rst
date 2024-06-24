@@ -67,7 +67,7 @@ section on :ref:`analysis-vacf`) defined as:
 .. math::
    :label: pfx5
 
-   {\mathrm{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)\doteq{\sum\limits_{\alpha}\omega_{\alpha}}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\cdot\mathit{\Delta\nu}} \right) \qquad {n = 0}\ldots{N_{t} - 1.}}
+   {\mathrm{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)\doteq{\sum\limits_{\alpha}\omega_{\alpha}}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\cdot\mathit{\Delta\nu}} \right) \qquad {n = 0}, \ldots, {N_{t} - 1.}}
 
 where :math:`N_{t}` is the total number of time steps of the correlation function,
 :math:`{\mathit{\Delta\nu} = 1}\text{/}\left( {2N_{t}\Delta t} \right)`
