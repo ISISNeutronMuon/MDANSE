@@ -345,7 +345,7 @@ rectangular grid of equidistantly spaced points along the time-and the
    
    {{F}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathrm{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},}
 
-where :math:`{k = 0},\ldots,{N_{t} - 1}` and :math:`{m = 0},\ldots,{N_{q} - 1}`.
+where :math:`{k = 0}, \ldots, {N_{t} - 1}` and :math:`{m = 0}, \ldots, {N_{q} - 1}`.
 :math:`N_t` is the number of time steps in the coordinate time series,
 :math:`N_q` is a user-defined number of :math:`q`-shells,
 :math:`N_{\mathrm{species}}` is the number of selected species, :math:`n_{I}`
@@ -466,7 +466,7 @@ rectangular grid of equidistantly spaced points along the time-and the
    {\text{F}_{\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{n_{I}\omega_{I,\text{inc}}}}\text{F}_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)}
 
 
-where :math:`{k = 0}\ldots{N_{t} - 1}` and :math:`{m = 0}\ldots{N_{q} - 1}`. :math:`N_t`
+where :math:`{k = 0}, \ldots, {N_{t} - 1}` and :math:`{m = 0}, \ldots, {N_{q} - 1}`. :math:`N_t`
 is the number of time steps in the coordinate time series, :math:`N_q`
 is a user-defined number of :math:`q`-shells, :math:`N_{\mathrm{species}}`
 is the number of selected species, :math:`n_I` the
