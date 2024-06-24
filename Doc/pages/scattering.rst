@@ -450,7 +450,7 @@ Dynamic Incoherent Structure Factor
                       
 In this analysis, *MDANSE* proceeds in two steps. First, it computes
 the partial and total intermediate incoherent scattering function
-:math:`F_{\mathrm{inc}}(q, t)` using equation :math:numref:`pfx69`. Then, the
+:math:`F_{\mathrm{inc}}(q, t)` using equation :math:numref:`pfx70`. Then, the
 partial and total dynamic incoherent structure factors are obtained by
 performing the Fourier Transformation, defined in Eq. :math:numref:`pfx61`,
 respectively on the total and partial intermediate incoherent
