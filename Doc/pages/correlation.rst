@@ -60,7 +60,7 @@ normalization of the spectrum. For example, a Gaussian window
    W(m) = \exp\left[
    -\frac{1}{2}\left(\alpha\frac{|m|}{N_{\mathrm{c}}-1}\right)^2
    \right]
-   \qquad m = -(N_{\mathrm{c}}-1)\ldots N_{\mathrm{c}}-1.
+   \qquad m = -(N_{\mathrm{c}}-1), \ldots, N_{\mathrm{c}}-1.
 
 Its widths in the time and frequency domain are :math:`\sigma_t = \alpha/T`
 and :math:`\sigma_\nu = 1/(2\pi\sigma_t)`, respectively.
