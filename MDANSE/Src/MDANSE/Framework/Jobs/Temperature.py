@@ -90,12 +90,26 @@ class Temperature(IJob):
             units="kJ_per_mole",
         )
         self._outputData.add(
+            "avg_kinetic_energy",
+            "LineOutputVariable",
+            (self._nFrames,),
+            axis="time",
+            units="kJ_per_mole",
+        )
+        self._outputData.add(
             "temperature",
             "LineOutputVariable",
             (self._nFrames,),
             axis="time",
             units="K",
             main_result=True,
+        )
+        self._outputData.add(
+            "avg_temperature",
+            "LineOutputVariable",
+            (self._nFrames,),
+            axis="time",
+            units="K",
         )
 
         self._atoms = sorted_atoms(
@@ -167,8 +181,14 @@ class Temperature(IJob):
         nAtoms = len(self._atoms)
         self._outputData["kinetic_energy"] /= nAtoms - 1
 
+        norm = np.arange(1, self._outputData["kinetic_energy"].shape[0] + 1)
+        self._outputData["avg_kinetic_energy"][:] = np.cumsum(self._outputData["kinetic_energy"]) / norm
+
         self._outputData["temperature"][:] = (
             2.0 * self._outputData["kinetic_energy"] / (3.0 * KB)
+        )
+        self._outputData["avg_temperature"][:] = (
+            2.0 * self._outputData["avg_kinetic_energy"] / (3.0 * KB)
         )
 
         self._outputData.write(
