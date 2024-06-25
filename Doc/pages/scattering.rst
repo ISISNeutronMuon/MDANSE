@@ -36,19 +36,19 @@ molecular structures of materials.
 
 **Double Differential Cross-Section:** :math:`S(q, \omega)` is closely related to the
 double differential cross-section [7], which is a vital measurement in neutron
-scattering. The double differential cross-section, :math:`{d^{2}{\sigma/\mathit{d\Omega
-dE}}}`, is defined as the number of
+scattering. The double differential cross-section, :math:`{\mathrm{d}^{2}{\sigma/\mathit{\mathrm{d}\Omega
+\mathrm{d}E}}}`, is defined as the number of
 neutrons scattered per unit time into the solid angle interval
-:math:`{\left\lbrack {\Omega, {\Omega + d}\Omega} \right\rbrack}` with an
-energy in the interval :math:`{\left\lbrack {E, {E + d}E} \right\rbrack}`. To make meaningful comparisons, the double differential cross-section
-is normalized by :math:`d\Omega`, :math:`dE`, and the flux of the incoming neutrons. The relationship
+:math:`{\left\lbrack {\Omega, {\Omega + \mathrm{d}}\Omega} \right\rbrack}` with an
+energy in the interval :math:`{\left\lbrack {E, {E + \mathrm{d}}E} \right\rbrack}`. To make meaningful comparisons, the double differential cross-section
+is normalized by :math:`\mathrm{d}\Omega`, :math:`\mathrm{d}E`, and the flux of the incoming neutrons. The relationship
 between the double differential cross-section and the dynamic structure factor
 is given by:
 
 .. math::
    :label: pfx55
 
-   {{\frac{d^{2}\sigma}{d\Omega\mathit{dE}} = N}\cdot\frac{k}{k_{0}}S\left( {q,\omega} \right).}
+   {{\frac{\mathrm{d}^{2}\sigma}{\mathrm{d}\Omega\mathrm{d}E} = N}\frac{k}{k_{0}}S\left( {q,\omega} \right).}
 
 This equation relates the double differential cross-section, which represents
 the number of neutrons scattered per unit time into specific solid angle and
@@ -108,7 +108,7 @@ scattering system [Ref16]_. It can be written as:
 .. math::
    :label: pfx61
 
-   {S{\left( {q,\omega} \right) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathit{dt}}\exp\left\lbrack {{- i}\omega t} \right\rbrack F\left( {q,t} \right).}
+   {S{\left( {q,\omega} \right) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathrm{d}t \, }\exp\left\lbrack {{- i}\omega t} \right\rbrack F\left( {q,t} \right).}
 
 :math:`F(q, t)` is called the *intermediate scattering function* and is defined as
 
@@ -214,7 +214,7 @@ and also to a loss of all odd moments
 .. math::
    :label: pfx75
 
-   {\left\langle \omega^{2{n + 1}} \right\rangle\doteq{\int\limits_{- \infty}^{+ \infty}{d\omega}}\, \omega^{2{n + 1}}S\left( {q,\omega} \right) \qquad {n = 1,2},\ldots.}
+   {\left\langle \omega^{2{n + 1}} \right\rangle\doteq{\int\limits_{- \infty}^{+ \infty}{\mathrm{d}\omega}}\, \omega^{2{n + 1}}S\left( {q,\omega} \right) \qquad {n = 1,2},\ldots.}
 
 The odd moments vanish since the classical dynamic structure factor is
 even in :math:`\omega`, assuming invariance of the scattering process with respect to
@@ -260,7 +260,7 @@ at zero time delay :math:`t = 0`.
 .. math::
    :label: pfx73
 
-   {\text{S}(q)\doteq{\int\limits_{- \infty}^{+ \infty}{d\omega}}\,\text{S}_{\mathrm{coh}}\left( {q,\omega} \right) = \text{F}_{\mathrm{coh}}\left( {q,0} \right).}
+   {\text{S}(q)\doteq{\int\limits_{- \infty}^{+ \infty}{\mathrm{d}\omega}}\,\text{S}_{\mathrm{coh}}\left( {q,\omega} \right) = \text{F}_{\mathrm{coh}}\left( {q,0} \right).}
 
 **Total Structure Factors:** MDANSE computes the partial :math:`S(Q)` as the Fourier transform of the
 partial pair distribution function :math:`g(r)`, corresponding to the Faber-Ziman definition:
@@ -268,7 +268,7 @@ partial pair distribution function :math:`g(r)`, corresponding to the Faber-Zima
 .. math::
    :label: pfx78
    
-   {S_{\alpha\beta}(Q) = 1 + \frac{4\pi\rho_0}{Q}\int\limits_{0}^{\infty}{dr \, r \sin(Qr) \left\lbrack {g_{\alpha\beta}}(r)-1 \right\rbrack}}
+   {S_{\alpha\beta}(Q) = 1 + \frac{4\pi\rho_0}{Q}\int\limits_{0}^{\infty}{\mathrm{d}r \, r \sin(Qr) \left\lbrack {g_{\alpha\beta}}(r)-1 \right\rbrack}}
 
 The total :math:`S(Q)` is computed as a weighted sum similar to the one used for
 the total :math:`g(r)`. In the case of the analysis 'X-ray Static structure
@@ -343,7 +343,7 @@ rectangular grid of equidistantly spaced points along the time-and the
 .. math::
    :label: pfx80
    
-   {{F}_{\text{coh}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathrm{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\cdot\Delta t} \right)} \right\rangle}}^{q},}
+   {{F}_{\text{coh}}\left( {q_{m},k\Delta t} \right)\doteq{\sum\limits_{{I = 1},J\geq I}^{N_{\mathrm{species}}}\sqrt{n_{I}n_{J}\omega_{I,\text{com}}\omega_{I,\text{com}}}}{\overline{\left\langle {\rho_{I}\left( {{-q},0} \right)\rho_{J}\left( {q,k\Delta t} \right)} \right\rangle}}^{q},}
 
 where :math:`{k = 0}, \ldots, {N_{t} - 1}` and :math:`{m = 0}, \ldots, {N_{q} - 1}`.
 :math:`N_t` is the number of time steps in the coordinate time series,
@@ -351,7 +351,7 @@ where :math:`{k = 0}, \ldots, {N_{t} - 1}` and :math:`{m = 0}, \ldots, {N_{q} - 
 :math:`N_{\mathrm{species}}` is the number of selected species, :math:`n_{I}`
 is the number of atoms of species :math:`I`, :math:`\omega_{I}` the weight
 for species :math:`I` (see Section :ref:`target_CN` for more details)
-and :math:`{\rho_{I}( {q,k\cdot\Delta t})}`. The overline
+and :math:`{\rho_{I}( {q,k\Delta t})}`. The overline
 :math:`{\overline{...}}^{q}` in Eq. :math:numref:`pfx80` denotes an average
 over :math:`q`-vectors having *approximately* the same modulus
 
@@ -361,20 +361,20 @@ the Fourier-transformed particle density for species :math:`I`:
 .. math::
    :label: pfx83
 
-   {\rho_{I}{\left( {q,k\cdot\Delta t} \right) = \sum\limits_{\alpha}^{n_{I}}}\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}\left( {k\cdot\Delta t} \right)} \right\rbrack.}
+   {\rho_{I}{\left( {q,k\cdot\Delta t} \right) = \sum\limits_{\alpha}^{n_{I}}}\exp\left\lbrack {\mathit{iq}\cdot R_{\alpha}\left( {k\Delta t} \right)} \right\rbrack.}
 
 
-**q-Vectors on a Reciprocal Lattice:** Below describes the selection of q-vectors on a lattice reciprocal to the MD box lattice.
+**q-Vectors on a Reciprocal Lattice:** Below describes the selection of :math:`q`-vectors on a lattice reciprocal to the MD box lattice.
 
 .. math::
    :label: pfx85
    
-   {{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q}
+   {{q_{m} = {q_{\mathit{\min}} + m}}\Delta q}
 
 
 The particle density must not change if jumps in the particle
 trajectories due to periodic boundary conditions occur. In addition, the
-*average* particle density, :math:`N/V` , must not change. 
+*average* particle density (:math:`N/V`) must not change.
 
 **Position Vector in the MD Cell** This can be achieved by choosing :math:`q`-vectors on a
 lattice which is reciprocal to the lattice defined by the *MD* box. Let
@@ -437,7 +437,7 @@ lengths, i.e.
 
 Defines the use of negative coherent scattering lengths for hydrogenous materials.
 Negative coherent scattering lengths occur in hydrogenous materials
-since :math:`b_{\mathrm{coh},H}` is negative [Ref20]_.
+since :math:`b_{\mathrm{H},\mathrm{coh}}` is negative [Ref20]_.
 
 When the default value of weights (:math:`b_{\mathrm{coherent}}`) is chosen for this
 analysis, the result will correspond to that of the equation :math:numref:`ntdsf-eq6`
@@ -463,32 +463,32 @@ rectangular grid of equidistantly spaced points along the time-and the
 .. math::
    :label: pfx90
 
-   {\text{F}_{\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{n_{I}\omega_{I,\text{inc}}}}\text{F}_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)}
+   {\text{F}_{\text{inc}}\left( {q_{m},k\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{n_{I}\omega_{I,\text{inc}}}}\text{F}_{I,\text{inc}}\left( {q_{m},k\Delta t} \right)}
 
 
-where :math:`{k = 0}, \ldots, {N_{t} - 1}` and :math:`{m = 0}, \ldots, {N_{q} - 1}`. :math:`N_t`
+where :math:`{k = 0}, \ldots, {N_t - 1}` and :math:`{m = 0}, \ldots, {N_q - 1}`. :math:`N_t`
 is the number of time steps in the coordinate time series, :math:`N_q`
 is a user-defined number of :math:`q`-shells, :math:`N_{\mathrm{species}}`
 is the number of selected species, :math:`n_I` the
 number of atoms of species :math:`n_I`, :math:`\omega_{I}` the weight for species :math:`I`
-(see Section :ref:`target_CN` for more details) and :math:`{F_{I,\text{inc}}\left( {q_{m},k\cdot\Delta t} \right)}`
+(see Section :ref:`target_CN` for more details) and :math:`{F_{I,\text{inc}}\left( {q_{m},k\Delta t} \right)}`
 is defined as:
 
 .. math::
    :label: pfx92
 
-   {\text{F}_{I,\mathrm{inc}}{\left( {q_{m},k\cdot\Delta t} \right) = \sum\limits_{\alpha = 1}^{n_{I}}}{\overline{\left\langle {\exp\left\lbrack {{-i}q\cdot R_{\alpha}(0)} \right\rbrack\exp\left\lbrack {iq\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle}}^{q}.}
+   {\text{F}_{I,\mathrm{inc}}{\left( {q_{m},k\Delta t} \right) = \sum\limits_{\alpha = 1}^{n_{I}}}{\overline{\left\langle {\exp\left\lbrack {{-i}q\cdot R_{\alpha}(0)} \right\rbrack\exp\left\lbrack {iq\cdot R_{\alpha}(t)} \right\rbrack} \right\rangle}}^{q}.}
 
 The overline :math:`{\overline{...}}^{q}` in Eq. :math:numref:`pfx92`
 denotes an average
 over :math:`q`-vectors having *approximately* the same modulus
-:math:`{{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q}`. The
+:math:`{{q_{m} = {q_{\mathit{\min}} + m}}\Delta q}`. The
 particle density must not change if jumps in the particle
 trajectories due to periodic boundary conditions occur. 
 
 
 **Selection of q-Vectors on a Reciprocal Lattice:** In addition, the
-*average* particle density, :math:`N/V`, must not change. This can be achieved
+*average* particle density (:math:`N/V`) must not change. This can be achieved
 by choosing :math:`q`-vectors on a lattice which is reciprocal to the lattice
 defined by the *MD* box. Let :math:`b_1`, :math:`b_2`,
 :math:`b_3` be the basis vectors which span the *MD* cell. Any
@@ -587,7 +587,7 @@ function :math:`G_{\mathrm{s}}(r, t)` [Ref20]_,
 .. math::
    :label: pfx100
 
-   {b_{\text{inc}}^{2}G_{\mathrm{s}}\left( {r,t} \right)\doteq\frac{1}{2\pi^{3}}{\int d^{3}}q\exp\left\lbrack {{- i}q\cdot r} \right\rbrack\text{F}_{\mathrm{inc}}\left( {q,t} \right),}
+   {b_{\text{inc}}^{2}G_{\mathrm{s}}\left( {r,t} \right)\doteq\frac{1}{2\pi^{3}}{\int \mathrm{d}^{3}}q \, \exp\left\lbrack {{- i}q\cdot r} \right\rbrack\text{F}_{\mathrm{inc}}\left( {q,t} \right),}
 
 which can be interpreted as the conditional probability to find a tagged
 particle at the position :math:`r` at time :math:`t`, given it started at :math:`r = 0`,
@@ -596,7 +596,7 @@ one can write:
 .. math::
    :label: pfx101
 
-   {\mathrm{EISF}(q) = b_{\text{inc}}^{2}{\int d^{3}}r\exp\left\lbrack {\mathit{iq}\cdot r} \right\rbrack G_{\mathrm{s}}\left( {r,{t = \infty}} \right).}
+   {\mathrm{EISF}(q) = b_{\text{inc}}^{2}{\int \mathrm{d}^{3}}r \, \exp\left\lbrack {\mathit{iq}\cdot r} \right\rbrack G_{\mathrm{s}}\left( {r,{t = \infty}} \right).}
 
 The *EISF* gives the sampling distribution of the points in space in the
 limit of infinite time. In a real experiment this means times longer
@@ -653,7 +653,7 @@ where :math:`N_q` is a user-defined number of :math:`q`-shells, the values for
 .. math::
    :label: pfx106
    
-   {{q_{m} = {q_{\mathit{\min}} + m}}\cdot\Delta q}
+   {{q_{m} = {q_{\mathit{\min}} + m}}\Delta q}
 
 and for each species the following expression for the elastic
 incoherent scattering function is:
@@ -724,9 +724,9 @@ function in the *Gaussian approximation* by discretizing equation
 .. math::
    :label: pfx113
 
-   {\text{F}_{\text{inc}}^{\mathrm{g}}\left( {q_{m},k\cdot\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}\text{F}_{I,\text{inc}}^{\mathrm{g}}\left( {q_{m},k\cdot\Delta t} \right)}}}
+   {\text{F}_{\text{inc}}^{\mathrm{g}}\left( {q_{m},k\Delta t} \right)\doteq{\sum\limits_{I = 1}^{N_{\mathit{species}}}{n_{I}\omega_{I,\text{inc}}\text{F}_{I,\text{inc}}^{\mathrm{g}}\left( {q_{m},k\Delta t} \right)}}}
 
-where :math:`{k = 0}\ldots{N_{t} - 1}` and :math:`{m = 0}\ldots{N_{q} - 1}`.
+where :math:`{k = 0}, \ldots, {N_t - 1}` and :math:`{m = 0}, \ldots ,{N_q - 1}`.
 
 **Intermediate Scattering Function:** for each species the
 following expression for the intermediate scattering function
@@ -734,12 +734,12 @@ following expression for the intermediate scattering function
 .. math::
    :label: pfx114
 
-   {\text{F}_{I,\alpha,\text{inc}}^{\mathrm{g}}{\left( {q_{m},k\cdot\Delta t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {\frac{- \left( q_{m} \right)^{2}}{6}\Delta_{\alpha}^{2}\left( {k\cdot\Delta t} \right)} \right\rbrack \quad \mathrm{isotropic\ system}}
+   {\text{F}_{I,\alpha,\text{inc}}^{\mathrm{g}}{\left( {q_{m},k\Delta t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {\frac{- \left( q_{m} \right)^{2}}{6}\Delta_{\alpha}^{2}\left( {k\Delta t} \right)} \right\rbrack \quad \mathrm{isotropic\ system}}
 
 .. math::
    :label: pfx115
 
-   {\text{F}_{I,\alpha,\text{inc}}^{\mathrm{g}}{\left( {q_{m},k\cdot\Delta t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {\frac{- \left( q_{m} \right)^{2}}{2}\Delta_{\alpha}^{2}\left( {k\cdot\Delta t;n} \right)} \right\rbrack \quad \mathrm{isotropic\ system}}
+   {\text{F}_{I,\alpha,\text{inc}}^{\mathrm{g}}{\left( {q_{m},k\Delta t} \right) = \frac{1}{n_{I}}}\sum\limits_{\alpha}^{n_{I}}\exp\left\lbrack {\frac{- \left( q_{m} \right)^{2}}{2}\Delta_{\alpha}^{2}\left( {k\Delta t;n} \right)} \right\rbrack \quad \mathrm{isotropic\ system}}
 
 :math:`N_t` is the total number of time steps in the coordinate time
 series and :math:`N_q` is a user-defined number of :math:`q`-shells. The (:math:`q`,
@@ -781,15 +781,15 @@ incoherent neutron scattering lengths :math:`{b^{2}}_{\mathrm{incoherent}}`. The
 this analysis the weights option is not available.
 
 The partial coherent intermediate scattering functions
-:math:`I_{\alpha\beta}^{\mathrm{coh}}(Q,t)` (and their corresponding Fourier
+:math:`I_{\alpha\beta}^{\mathrm{coh}}(q,t)` and their corresponding Fourier
 transforms giving the partial coherent dynamic structure factors,
-:math:`S_{\alpha\beta}^{\mathrm{coh}}(Q,\omega)`) are calculated exactly in the
+:math:`S_{\alpha\beta}^{\mathrm{coh}}(q,\omega)` are calculated exactly in the
 same way as in the DCSF analysis, i.e.:
 
 .. math::
    :label: ntdsf-eq1
    
-   I_{\alpha\beta}^{\mathrm{coh}}(Q,t) = \left| \frac{1}{\sqrt{N_{\alpha}N_{\beta}}}\sum_{i \in \alpha,j \in \beta}^{N_{\alpha},N_{\beta}}\left\langle e^{- i\mathbf{Q}\mathbf{r}_{i}(t_{0})}e^{i\mathbf{Q}\mathbf{r}_{j}(t_{0} + t)} \right\rangle \right|_{\mathbf{Q}}
+   I_{\alpha\beta}^{\mathrm{coh}}(q,t) = \left| \frac{1}{\sqrt{N_{\alpha}N_{\beta}}}\sum_{i \in \alpha,j \in \beta}^{N_{\alpha},N_{\beta}}\left\langle \exp\left[- iq \cdot r_{i}(t_{0})\right] \exp \left[iq \cdot r_{j}(t_{0} + t)\right] \right\rangle_{t_0} \right|_{q}
 
 where :math:`\alpha` and :math:`\beta` refer to the chemical elements,
 :math:`N_{\alpha}` and :math:`N_{\beta}` are the respective number of
@@ -797,21 +797,21 @@ atoms of each type, :math:`i` and :math:`j` are two specific atoms of
 type :math:`\alpha` and :math:`\beta`, respectively, and
 :math:`\mathbf{r}_{i}(0)` and :math:`\mathbf{r}_{j}(t)` are their
 positions at the time origin and at the time :math:`t`, respectively.
-The notation :math:`\left\langle \ldots \right\rangle` indicates an
+The notation :math:`\left\langle \ldots \right\rangle_{t_0}` indicates an
 average over all possible time origins :math:`t_{0}` and
-:math:`|\ldots|_{\mathbf{Q}}` represents an average over all the
-:math:`\mathbf{Q}` vectors contributing to the corresponding
-:math:`Q`-bin.
+:math:`|\ldots|_{q}` represents an average over all the
+:math:`q`-vectors contributing to the corresponding
+:math:`q`-bin.
 
 Similarly, the partial incoherent intermediate scattering functions
-:math:`I_{\alpha}^{\mathrm{inc}}(Q,t)` and the partial incoherent dynamic
-structure factors :math:`S_{\alpha}^{\mathrm{inc}}(Q,\omega)` are obtained as in
+:math:`I_{\alpha}^{\mathrm{inc}}(q,t)` and the partial incoherent dynamic
+structure factors :math:`S_{\alpha}^{\mathrm{inc}}(q,\omega)` are obtained as in
 the DISF analysis:
 
 .. math::
    :label: ntdsf-eq2
    
-   I_{\alpha}^{\mathrm{inc}}(Q,t) = \left| \frac{1}{N_{\alpha}}\sum_{i \in \alpha}^{N_{\alpha}}\left\langle e^{- i\mathbf{Q}\mathbf{r}_{i}(t_{0})}e^{i\mathbf{Q}\mathbf{r}_{i}(t_{0} + t)} \right\rangle \right|_{\mathbf{Q}}
+   I_{\alpha}^{\mathrm{inc}}(q,t) = \left| \frac{1}{N_{\alpha}}\sum_{i \in \alpha}^{N_{\alpha}}\left\langle \exp\left[- iq \cdot r_{i}(t_{0})\right] \exp \left[iq \cdot r_{i}(t_{0} + t)\right] \right\rangle_{t_0} \right|_{q}
 
 
 **Combination of Partial Contributions:** The main difference between
@@ -825,17 +825,17 @@ calculated as:
 .. math::
    :label: ntdsf-eq3
    
-   I^{\mathrm{inc}}(Q,t) = \sum_{\alpha}^{N_{\alpha}}{c_{\alpha}b_{\alpha,\text{inc}}^{2}}I_{\alpha}^{\mathrm{inc}}(Q,t)
+   I^{\mathrm{inc}}(q,t) = \sum_{\alpha}^{N_{\alpha}}{c_{\alpha}b_{\alpha,\text{inc}}^{2}}I_{\alpha}^{\mathrm{inc}}(q,t)
 
 .. math::
    :label: ntdsf-eq4
    
-   I^{\mathrm{coh}}(Q,t) = \sum_{\alpha,\beta}^{N_{\alpha},N_{\beta}}{\sqrt{c_{\alpha}c_{\beta}}b_{\alpha,\text{coh}}b_{\beta,\text{coh}}I_{\alpha\beta}^{\mathrm{coh}}(Q,t)}
+   I^{\mathrm{coh}}(q,t) = \sum_{\alpha,\beta}^{N_{\alpha},N_{\beta}}{\sqrt{c_{\alpha}c_{\beta}}b_{\alpha,\text{coh}}b_{\beta,\text{coh}}I_{\alpha\beta}^{\mathrm{coh}}(q,t)}
 
 .. math::
    :label: ntdsf-eq5
    
-   I^{\mathrm{tot}}(Q,t) = I^{\mathrm{inc}}(Q,t) + I^{\mathrm{coh}}(Q,t)
+   I^{\mathrm{tot}}(q,t) = I^{\mathrm{inc}}(q,t) + I^{\mathrm{coh}}(q,t)
 
 where :math:`c_{\alpha} = N_{\alpha} / N` and
 :math:`c_{\beta} =  N_{\beta} / N` are the concentration numbers
@@ -862,7 +862,7 @@ b_coherent):
 .. math::
    :label: ntdsf-eq6
    
-   I^{\mathrm{coh}}(Q,t) = \frac{\sum_{\alpha\beta}^{n}{c_{\alpha}c_{\beta}b_{\alpha,\mathrm{coh}}b_{\beta,\mathrm{coh}}I_{\alpha\beta}^{\mathrm{coh}}(Q,t)}}{\sum_{\alpha\beta}^{n}{c_{\alpha}c_{\beta}b_{\alpha,\mathrm{coh}}b_{\beta,\mathrm{coh}}}}
+   I^{\mathrm{coh}}(q,t) = \frac{\sum_{\alpha\beta}^{n}{c_{\alpha}c_{\beta}b_{\alpha,\mathrm{coh}}b_{\beta,\mathrm{coh}}I_{\alpha\beta}^{\mathrm{coh}}(q,t)}}{\sum_{\alpha\beta}^{n}{c_{\alpha}c_{\beta}b_{\alpha,\mathrm{coh}}b_{\beta,\mathrm{coh}}}}
 
 and the incoherent intermedicate scattering function given by the DISF
 analysis is (assuming that the chosen weights are b_incoherent2):
@@ -870,11 +870,11 @@ analysis is (assuming that the chosen weights are b_incoherent2):
 .. math::
    :label: ntdsf-eq7
    
-   I^{\mathrm{inc}}(Q,t) = \frac{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,\mathrm{inc}}^{2}I_{\alpha}^{\mathrm{inc}}(Q,t)}}{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,\mathrm{inc}}^{2}}}
+   I^{\mathrm{inc}}(q,t) = \frac{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,\mathrm{inc}}^{2}I_{\alpha}^{\mathrm{inc}}(q,t)}}{\sum_{\alpha}^{n}{c_{\alpha}b_{\alpha,\mathrm{inc}}^{2}}}
 
 Naturally, similar expressions apply to the dynamic structure factors,
-:math:`S_{\alpha\beta}^{\mathrm{coh}}(Q,\omega)` and
-:math:`S_{\alpha}^{\mathrm{inc}}(Q,\omega)`.
+:math:`S_{\alpha\beta}^{\mathrm{coh}}(q,\omega)` and
+:math:`S_{\alpha}^{\mathrm{inc}}(q,\omega)`.
 
 .. _structure-factor-from-scattering-function:
 

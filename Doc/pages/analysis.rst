@@ -251,7 +251,7 @@ which can be written as
 .. math::
    :label: pfx152
 
-   m{(q) = {\sum\limits_{\alpha}{\omega_{\alpha}\left\lbrack {{D(q)r}_{\alpha}^{(0)} - r_{\alpha}} \right\rbrack^{2}}}\overset{!}{=}\mathit{Min}}.
+   m{(q) = {\sum\limits_{\alpha}{\omega_{\alpha}\left\lbrack {{D(q)r}_{\alpha}^{(0)} - r_{\alpha}} \right\rbrack^{2}}}\overset{!}{=}\mathrm{Min}}.
 
 The relative position vectors
 
@@ -283,7 +283,7 @@ representation of an arbitrary quaternion,
 .. math::
    :label: pfx156
 
-   {{A = a_{0}}\cdot{1 + a_{1}}\cdot{I + a_{2}}\cdot{J + a_{3}}\cdot K,}
+   {{A = a_{0}}{1 + a_{1}}{I + a_{2}}{J + a_{3}} K,}
 
 reads
 
@@ -306,7 +306,7 @@ rotations in space. Consider the quaternion representation of a vector
 .. math::
    :label: pfx158
 
-   {{R = x}\cdot{I + y}\cdot{J + z}\cdot K,}
+   {{R = x}{I + y}{J + z} K,}
 
 and perform the operation
 
@@ -328,7 +328,7 @@ written as
 .. math::
    :label: pfx161
 
-   {{R^{'} = x^{'}}\cdot{I + y^{'}}\cdot{J + z^{'}}\cdot K,}
+   {{R^{'} = x^{'}}{I + y^{'}}{J + z^{'}} K,}
 
 where the components :math:`x'`, :math:`y'`, :math:`z'`, abbreviated as :math:`r'`, are given by :math:`r^{'} = D(q)r`.
 
@@ -346,7 +346,7 @@ this may also be written as
 .. math::
    :label: pfx164
 
-   {{{m{(q) = {\sum\limits_{\alpha}\omega_{\alpha}}}\text{|}\mathit{QR}}_{\alpha}^{(0)} - R_{\alpha}}Q\text{|}^{2}{\overset{!}{=}\mathrm{Min}}.}
+   {{{m{(q) = {\sum\limits_{\alpha}\omega_{\alpha}}}\text{|}\mathit{QR}_{\alpha}^{(0)}} - R_{\alpha}}Q\text{|}^{2}{\overset{!}{=}\mathrm{Min}}.}
 
 This follows from the simple fact that :math:`\text{|}A{\text{|} = \text{|}}\mathit{AQ}\text{|}`
 if :math:`Q` is normalized. Eq. `104` shows that the

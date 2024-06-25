@@ -33,7 +33,7 @@ following scheme:
    normalized vectors along (:math:`a_1`, :math:`a_2`) and (:math:`a_1`, :math:`a_3`) directions.
 -  :math:`v_2` is defined as the clockwise normal vector orthogonal to :math:`v_1` that
    belongs to the plane defined by :math:`a_1`, :math:`a_2` and :math:`a_3` atoms
--  :math:`{\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}`
+-  :math:`v_{3} = v_{1}\times v_{2}`
 
 Thus, one can define the following autocorrelation functions for the
 vectors :math:`v_1`, :math:`v_2` and :math:`v_3` defined on triplet :math:`i`:
@@ -67,23 +67,23 @@ section on :ref:`analysis-vacf`) defined as:
 .. math::
    :label: pfx5
 
-   {\mathrm{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)\doteq{\sum\limits_{\alpha}\omega_{\alpha}}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\cdot\mathit{\Delta\nu}} \right) \qquad {n = 0}, \ldots, {N_{t} - 1.}}
+   {\mathrm{DOS}\left( {n\Delta\nu} \right)\doteq{\sum\limits_{\alpha}\omega_{\alpha}}{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\Delta\nu} \right) \qquad {n = 0}, \ldots, {N_{t} - 1.}}
 
 where :math:`N_{t}` is the total number of time steps of the correlation function,
-:math:`{\mathit{\Delta\nu} = 1}\text{/}\left( {2N_{t}\Delta t} \right)`
-is the frequency step, :math:`{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\cdot\mathit{\Delta\nu}} \right)`
+:math:`{\Delta\nu = 1}\text{/}\left( {2N_{t}\Delta t} \right)`
+is the frequency step, :math:`{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}\left( {n\Delta\nu} \right)`
 is the Fourier transform of the velocity autocorrelation function and
 :math:`\omega_{\alpha}` is the weighting factor used for atom :math:`\alpha`.
-:math:`{\mathrm{DOS}\left( {n\cdot\mathit{\Delta\nu}} \right)}`
+:math:`{\mathrm{DOS}\left( {n\Delta\nu} \right)}`
 can be computed either for the isotropic case or with respect to a
 user-defined axis. The spectrum
-:math:`{\mathrm{DOS}\left( {n\cdot\Delta\nu} \right)}`
+:math:`{\mathrm{DOS}\left( {n\Delta\nu} \right)}`
 is computed from the *unnormalized VACF*, such that :math:`\mathrm{DOS}(0)` gives an
 approximate value for the diffusion constant
 :math:`D = {\sum\limits_{\alpha}D_{\alpha}}`
 (see Eqs. :math:numref:`pfx20` and :math:numref:`pfx21`).
 
-:math:`{\mathrm{DOS}\left( {n\cdot\Delta\nu} \right)}`
+:math:`{\mathrm{DOS}\left( {n\Delta\nu} \right)}`
 can be smoothed by, for example, a Gaussian window applied in the time domain
 [Ref10]_ (see the section :ref:`appendix-fca`). Its width in the time domain
 is :math:`{\sigma_{t} = \alpha}\text{/}T`
@@ -175,7 +175,7 @@ velocity autocorrelation function. Writing
 .. math::
    :label: pfx18
    
-   {d_{\alpha}{(t) = {\int\limits_{0}^{t}{\mathit{d\tau}v_{\alpha}(\tau)}}}}
+   {d_{\alpha}{(t) = {\int\limits_{0}^{t}{\mathrm{d}\tau \, v_{\alpha}(\tau)}}}}
 
 in Eq. :math:numref:`pfx14` one can show (see
 e.g. [Ref11]_) that
@@ -183,7 +183,7 @@ e.g. [Ref11]_) that
 .. math::
    :label: pfx19
 
-   {\mathrm{\Delta}_{\alpha}^{2}{(t) = 6}{\int\limits_{0}^{t}{\mathit{d\tau}\left( {t - \tau} \right)C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)}}.}
+   {\mathrm{\Delta}_{\alpha}^{2}{(t) = 6}{\int\limits_{0}^{t}{\mathrm{d}\tau \, \left( {t - \tau} \right)C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)}}.}
 
 where :math:`C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)` is the velocity autocorrelation function. Using now the definition :math:numref:`pfx17` of the diffusion
 coefficient one obtains the relation
@@ -191,7 +191,7 @@ coefficient one obtains the relation
 .. math::
    :label: pfx20
 
-   {{D_{\alpha} = {\int\limits_{0}^{t}{\mathit{d\tau}C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)}}}.}
+   {{D_{\alpha} = {\int\limits_{0}^{t}{\mathrm{d}\tau \, C_{\mathit{\upsilon\upsilon};\mathit{\alpha\alpha}}(t)}}}.}
 
 and can also be written as
 
@@ -267,7 +267,7 @@ motions, such that:
 .. math::
    :label: pfx35
 
-   {C_{\mathit{ii}}{(t) = C^{\mathrm{G}}}(t)\cdot C_{\mathit{ii}}^{\mathrm{I}}(t)}
+   {C_{\mathit{ii}}{(t) = C^{\mathrm{G}}}(t) C_{\mathit{ii}}^{\mathrm{I}}(t)}
 
 where :math:`C^{\mathrm{G}}(t)` and :math:`C_{\mathit{ii}}^{\mathrm{I}}(t)` denote the
 global and the internal time correlation function,
@@ -414,7 +414,7 @@ reads
 .. math::
    :label: pfx50
 
-   {{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}{(\omega) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathit{dt}}\exp\left\lbrack {{- i}\omega t} \right\rbrack C_{\mathit{vv};\mathit{\alpha\alpha}}(t).}
+   {{\overset{\sim}{C}}_{\mathit{vv};\mathit{\alpha\alpha}}{(\omega) = \frac{1}{2\pi}}{\int\limits_{- \infty}^{+ \infty}\mathrm{d} t \,}\exp\left\lbrack {{- i}\omega t} \right\rbrack C_{\mathit{vv};\mathit{\alpha\alpha}}(t).}
 
 For non-isotropic systems, relation :math:numref:`pfx48` holds if the *DOS*
 is computed from the atomic velocity autocorrelation

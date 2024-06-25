@@ -73,12 +73,12 @@ In this context, the *CN* is defined as:
 .. math::
    :label: pfx118
 
-   {n{\left( {r,{r + \mathit{dr}}} \right) = \frac{1}{N_{\mathrm{G}}}}{\sum\limits_{g = 1}^{N_{\mathrm{G}}}{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{n_{\mathit{gI}}\left( {r,{r + \mathit{dr}}} \right)}}}}
+   {n{\left( {r,{r + \mathrm{d}r}} \right) = \frac{1}{N_{\mathrm{G}}}}{\sum\limits_{g = 1}^{N_{\mathrm{G}}}{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{n_{\mathit{gI}}\left( {r,{r + \mathrm{d}r}} \right)}}}}
 
 where :math:`N_{\mathrm{G}}` is the number of groups of atoms, :math:`N_{\mathrm{species}}` is the
 number of species found in the system and :math:`n_{gI}(r)` is the *CN*
 defined for species :math:`I` defined as the number of atoms of species :math:`I`
-found in a shell of width :math:`dr` at a distance :math:`r` of the center of
+found in a shell of width :math:`\mathrm{d}r` at a distance :math:`r` of the center of
 gravity of the group of atom :math:`g`.
 
 *MDANSE* allows one to compute the *CN* on a set of equidistantly spaced
@@ -87,9 +87,9 @@ distances at different times
 .. math::
    :label: pfx119
 
-   {\mathrm{CN}\left( r_{m} \right)\doteq\frac{1}{N_{\mathrm{frames}}}\frac{1}{N_{\mathrm{G}}}{\sum\limits_{f = 1}^{N_{\mathrm{frames}}}{\sum\limits_{g = 1}^{N_{\mathrm{G}}}{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{CN_{\mathit{gI}}\left( {r_{m},t_{f}} \right)}}}}}
+   {\mathrm{CN}\left( r_{m} \right)\doteq\frac{1}{N_{\mathrm{frames}}}\frac{1}{N_{\mathrm{G}}}{\sum\limits_{f = 1}^{N_{\mathrm{frames}}}{\sum\limits_{g = 1}^{N_{\mathrm{G}}}{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{\mathrm{CN}_{\mathit{gI}}\left( {r_{m},t_{f}} \right)}}}}}
 
-where :math:`{m = 0}, \ldots, {N_{r} - 1}` and :math:`{n = 0}, \ldots, {N_{\mathrm{frames}} - 1}`. :math:`N_r` and :math:`N_{\mathrm{frames}}` are respectively the number of
+where :math:`{m = 0}, \ldots, {N_r - 1}` and :math:`{n = 0}, \ldots, {N_{\mathrm{frames}} - 1}`. :math:`N_r` and :math:`N_{\mathrm{frames}}` are respectively the number of
 distances and times at which the *CN* is evaluated and
 
 .. math::
@@ -97,8 +97,8 @@ distances and times at which the *CN* is evaluated and
 
    {\mathrm{CN}_{\mathit{gI}}{\left( {r_{m},t_{f}} \right) = n_{\mathit{gI}}}\left( {r_{m},t_{f}} \right),}
 
-is the number of atoms of species :math:`I` found within :math:`[r_m, r_m + dr]` at frame
-*f* from the centre of gravity of group :math:`g`.
+is the number of atoms of species :math:`I` found within :math:`[r_m, r_m + \mathrm{d}r]` at frame
+:math:`f` from the centre of gravity of group :math:`g`.
 
 From these expressions, several remarks can be done. Firstly, the Eqs.
 :math:numref:`pfx119` and :math:numref:`pfx120` can be restricted
@@ -197,11 +197,11 @@ and :math:`n_J` are respectively the numbers of atoms of species :math:`I` and
 .. math::
    :label: pfx123
 
-   {\mathrm{PDF}_{\mathit{IJ}}{(r) = \frac{\left\langle {\sum\limits_{\alpha = 1}^{n_{I}}{n_{\alpha J}(r)}} \right\rangle}{n_{I}\rho_{J}4\pi r^{2}\mathit{dr}}}}
+   {\mathrm{PDF}_{\mathit{IJ}}{(r) = \frac{\left\langle {\sum\limits_{\alpha = 1}^{n_{I}}{n_{\alpha J}(r)}} \right\rangle}{n_{I}\rho_{J}4\pi r^{2}\mathrm{d}r}}}
 
 where :math:`\rho_J` is the density of atom of species :math:`J` and
 :math:`n_{\alpha J}(r)` is the mean number of atoms of species :math:`J` in
-a shell of width :math:`dr` at distance :math:`r` of the atom :math:`\alpha`
+a shell of width :math:`\mathrm{d}r` at distance :math:`r` of the atom :math:`\alpha`
 of species :math:`I`.
 
 From the computation of *PDF*, two related quantities are also calculated;
@@ -380,8 +380,8 @@ are the spherical coordinates at which the *SD* is evaluated,
 are respectively the number of discrete :math:`r`, :math:`\theta` and :math:`\phi` values and
 :math:`n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)` is the number of
 group of atoms of type :math:`g` whose centres of mass is found to be in the
-volume element defined by :math:`[r, r + dr]`, :math:`[\theta, \theta + d\theta]`
-and :math:`[\phi, \phi + d\phi]` in
+volume element defined by :math:`[r, r + \mathrm{d}r]`, :math:`[\theta, \theta + \mathrm{d}\theta]`
+and :math:`[\phi, \phi + \mathrm{d}\phi]` in
 the spherical coordinates basis cantered on the centre of mass of
 triplet :math:`t`.
 
@@ -395,7 +395,7 @@ So technically, *MDANSE* proceeds more or less in the following way:
 
     - :math:`v_{1} = (n_{1} + n_{2}) / \left| {n_{1} + n_{2}} \right|` where :math:`n_1` and :math:`n_2` are respectively the normalized vectors in (:math:`a_1`, :math:`a_2`) and (:math:`a_1`, :math:`a_3`) directions where (:math:`a_1`, :math:`a_2`, :math:`a_3`) are the three atoms of the triplet :math:`t`,
     - :math:`v_2` is defined as the clockwise normal vector orthogonal to :math:`v_1` that belongs to the plane defined by :math:`a_1`, :math:`a_2` and :math:`a_3` atoms,
-    - :math:`{\overrightarrow{v_{3}} = \overrightarrow{v_{1}}}\times\overrightarrow{v_{2}}`
+    - :math:`v_{3} = v_{1} \times v_{2}`
 
 -  expresses the cartesian coordinates of each :math:`c^g` in each :math:`R^t`
 
