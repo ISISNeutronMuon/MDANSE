@@ -7,17 +7,18 @@ MDANSE by converting the various file formats to the HDF format. These trajector
 converters convert positions and other vital
 information such as the unit cell parameters.
 
+- ASE
 - CASTEP
-- CHARMM
-- DFTB
-- Discover
-- DL_POLY
-- DMol
+- DCD
+- CP2K
 - Forcite
+- Discover
+- DFTB
+- DMol
+- DL_POLY
 - Gromacs
 - LAMMPS
-- NAMD
-- PDB
 - VASP
+- CHARMM
+- NAMD
 - XPLOR
-- ASE

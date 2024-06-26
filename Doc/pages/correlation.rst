@@ -12,11 +12,11 @@ is done in a consistent way. Consider two time series
 .. math::
    :label: eqn-fca1
 
-   a(k\cdot\Delta t)
-   \qquad b(k\cdot\Delta t)
+   a(k\Delta t)
+   \qquad b(k\Delta t)
    \qquad k = 0, \ldots, N_t-1,
 
-of length :math:`T = (N_t -1)\cdot\Delta t` which are
+of length :math:`T = (N_t -1)\Delta t` which are
 to be correlated. The following the shorthands
 :math:`a(k)` and :math:`b(k)` will be used. Now we choose a specific
 number of correlation frames :math:`N_c` to use which will define

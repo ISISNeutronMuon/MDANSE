@@ -228,7 +228,7 @@ define the deviation
 Here :math:`D(q)` is a rotation matrix which depends on also yet
 undetermined angular coordinates which we chose to be *quaternion
 parameters*, abbreviated as vector :math:`q = (q_0, q_1, q_2, q_3)`.
-The quaternion parameters fulfil the normalization condition :math:`q \dot {q = 1}` [Ref25]_.
+The quaternion parameters fulfil the normalization condition :math:`q \cdot {q = 1}` [Ref25]_.
 The target function to be minimized is now defined as
 
 .. math::

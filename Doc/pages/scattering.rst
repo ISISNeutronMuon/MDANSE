@@ -167,7 +167,7 @@ treatments for coherent and incoherent scattering lengths.
 
    {\text{F}_{\text{inc}}{\left( {q,t} \right) = \frac{1}{N}}{\sum\limits_{\alpha}{b_{\alpha,\mathrm{inc}}^{2}\left\langle {\exp\left\lbrack {{- i}q\cdot\hat{R}_{\alpha}(0)} \right\rbrack\exp\left\lbrack {iq\cdot\hat{R}_{\alpha}(t)} \right\rbrack} \right\rangle}}.}
 
-*MDANSE* introduces the partial terms, this consider different species :math:`(I, J)` and their contributions to the scattering process.
+*MDANSE* introduces the partial terms, this considers the contributions from different species :math:`(I, J)` to the scattering process.
 
 .. math::
    :label: pfx69
@@ -710,7 +710,7 @@ The cumulants :math:`\rho_{\alpha,k}(t)` are identified as
    :label: pfx112
    {\vdots}
 
-**Gaussian Approximation:** The vector :math:`nq` is the unit vector
+**Gaussian Approximation:** The vector :math:`n_q` is the unit vector
 in the direction of :math:`q`. In the Gaussian
 approximation the above expansion is truncated after the
 :math:`q^2`-term. For certain model systems like the ideal gas, the
