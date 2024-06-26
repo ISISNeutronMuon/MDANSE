@@ -182,7 +182,9 @@ class Temperature(IJob):
         self._outputData["kinetic_energy"] /= nAtoms - 1
 
         norm = np.arange(1, self._outputData["kinetic_energy"].shape[0] + 1)
-        self._outputData["avg_kinetic_energy"][:] = np.cumsum(self._outputData["kinetic_energy"]) / norm
+        self._outputData["avg_kinetic_energy"][:] = (
+            np.cumsum(self._outputData["kinetic_energy"]) / norm
+        )
 
         self._outputData["temperature"][:] = (
             2.0 * self._outputData["kinetic_energy"] / (3.0 * KB)

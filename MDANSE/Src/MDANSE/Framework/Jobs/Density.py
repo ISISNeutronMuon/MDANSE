@@ -164,8 +164,12 @@ class Density(IJob):
         """
 
         norm = np.arange(1, self._outputData["atomic_density"].shape[0] + 1)
-        self._outputData["avg_atomic_density"][:] = np.cumsum(self._outputData["atomic_density"]) / norm
-        self._outputData["avg_mass_density"][:] = np.cumsum(self._outputData["mass_density"]) / norm
+        self._outputData["avg_atomic_density"][:] = (
+            np.cumsum(self._outputData["atomic_density"]) / norm
+        )
+        self._outputData["avg_mass_density"][:] = (
+            np.cumsum(self._outputData["mass_density"]) / norm
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
