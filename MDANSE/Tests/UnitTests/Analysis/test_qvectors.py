@@ -30,7 +30,7 @@ def test_disf(trajectory):
     parameters = {}
     parameters["atom_selection"] = None
     parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1)
+    parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["output_files"] = (temp_name, ("MDAFormat",))
     parameters["running_mode"] = ("single-core",)

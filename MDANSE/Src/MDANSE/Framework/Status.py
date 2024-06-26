@@ -55,6 +55,10 @@ class Status(object, metaclass=abc.ABCMeta):
     def update_status(self):
         pass
 
+    @abc.abstractmethod
+    def fixed_status(self, current_progress: int):
+        pass
+
     @property
     def currentStep(self):
         return self._currentStep

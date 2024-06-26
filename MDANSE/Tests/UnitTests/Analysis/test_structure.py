@@ -17,6 +17,13 @@ short_traj = os.path.join(
     "short_trajectory_after_changes.mdt",
 )
 
+mdmc_traj = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    "..",
+    "Data",
+    "Ar_mdmc_h5md.h5",
+)
+
 
 ################################################################
 # Job parameters                                               #
@@ -28,7 +35,7 @@ def parameters():
     # parameters['atom_transmutation'] = None
     # parameters['frames'] = (0, 1000, 1)
     parameters["trajectory"] = short_traj
-    parameters["running_mode"] = ("threadpool", -4)
+    parameters["running_mode"] = ("multicore", -4)
     parameters["q_vectors"] = (
         "SphericalLatticeQVectors",
         {
@@ -53,24 +60,26 @@ def parameters():
 
 total_list = []
 
-for jt in [
-    "RadiusOfGyration",
-    "SolventAccessibleSurface",
-    "RootMeanSquareDeviation",
-    "RootMeanSquareFluctuation",
-    "DensityProfile",
-    "MolecularTrace",
-    "Voronoi",
-    "Eccentricity",
-]:
-    for rm in [("single-core", 1), ("multicore", -4)]:
-        for of in ["MDAFormat", "TextFormat"]:
-            total_list.append((jt, rm, of))
+for tp in (short_traj, mdmc_traj):
+    for jt in [
+        "RadiusOfGyration",
+        "SolventAccessibleSurface",
+        "RootMeanSquareDeviation",
+        "RootMeanSquareFluctuation",
+        "DensityProfile",
+        "MolecularTrace",
+        "Voronoi",
+        "Eccentricity",
+    ]:
+        for rm in [("single-core", 1), ("multicore", -4)]:
+            for of in ["MDAFormat", "TextFormat"]:
+                total_list.append((tp, jt, rm, of))
 
 
-@pytest.mark.parametrize("job_type,running_mode,output_format", total_list)
-def test_structure_analysis(parameters, job_type, running_mode, output_format):
+@pytest.mark.parametrize("traj_path,job_type,running_mode,output_format", total_list)
+def test_structure_analysis(parameters, traj_path, job_type, running_mode, output_format):
     temp_name = tempfile.mktemp()
+    parameters["trajectory"] = traj_path
     parameters["running_mode"] = running_mode
     parameters["output_files"] = (temp_name, (output_format,))
     job = IJob.create(job_type)

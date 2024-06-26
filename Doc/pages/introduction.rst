@@ -13,14 +13,6 @@ and position auto- and cross-correlation functions, and
 convolutions with instrument parameters, to obtain neutron observables that can
 be directly compared with experimental data.
 
-Compare Simulation and Experiment Results 
------------------------------------------
-
-Some of these steps have been implemented within MDANSE
-(Molecular Dynamics Analysis of Neutron Scattering Experiments) [Ref1]_. This
-Python-based application has support with more than ten MD packages,
-both those employing classical and ab-initio force calculations.
-
 Purpose and Capabilities
 ------------------------
 

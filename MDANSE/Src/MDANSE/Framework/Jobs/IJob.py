@@ -22,10 +22,10 @@ import queue
 import random
 import stat
 import string
-import subprocess
+import time
 import sys
 import traceback
-from concurrent.futures import ThreadPoolExecutor as PoolExecutor
+from concurrent.futures import ProcessPoolExecutor as PoolExecutor
 
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
@@ -131,6 +131,13 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         self._status = None
 
+        self._processes = []
+
+    def __getstate__(self):
+        d = self.__dict__.copy()
+        del d["_processes"]
+        return d
+
     @property
     def name(self):
         return self._name
@@ -231,23 +238,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status.update()
             self.combine(idx, result)
 
-    def _run_threadpool(self):
-        def helper(self, index):
-            if self._status is not None:
-                if hasattr(self._status, "_pause_event"):
-                    self._status._pause_event.wait()
-            idx, result = self.run_step(index)
-            if self._status is not None:
-                self._status.update()
-            self.combine(idx, result)
-
-        pool = PoolExecutor(max_workers=self.configuration["running_mode"]["slots"])
-
-        futures = [
-            pool.submit(helper, self, index) for index in range(self.numberOfSteps)
-        ]
-        results = [future.result() for future in futures]
-
     def process_tasks_queue(self, tasks, outputs):
         while True:
             try:
@@ -257,14 +247,15 @@ class IJob(Configurable, metaclass=SubclassFactory):
                     self.configuration["trajectory"]["instance"].close()
                     break
             else:
+                if self._status is not None:
+                    if hasattr(self._status, "_pause_event"):
+                        self._status._pause_event.wait()
                 output = self.run_step(index)
                 outputs.put(output)
 
         return True
 
     def _run_multicore(self):
-        oldrecursionlimit = sys.getrecursionlimit()
-        sys.setrecursionlimit(100000)
 
         ctx = multiprocessing.get_context("spawn")
 
@@ -272,7 +263,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         inputQueue = manager.Queue()
         outputQueue = manager.Queue()
 
-        processes = []
+        self._processes = []
 
         for i in range(self.numberOfSteps):
             inputQueue.put(i)
@@ -281,11 +272,16 @@ class IJob(Configurable, metaclass=SubclassFactory):
             p = multiprocessing.Process(
                 target=self.process_tasks_queue, args=(inputQueue, outputQueue)
             )
-            processes.append(p)
+            self._processes.append(p)
             p.daemon = False
             p.start()
 
-        for p in processes:
+        while inputQueue.qsize() > 0:
+            time.sleep(0.1)
+            if self._status is not None:
+                self._status.fixed_status(outputQueue.qsize())
+
+        for p in self._processes:
             p.join()
 
         while True:
@@ -296,7 +292,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
             else:
                 self.combine(index, result)
 
-        sys.setrecursionlimit(oldrecursionlimit)
+        for p in self._processes:
+            p.close()
 
     def _run_remote(self):
         raise NotImplementedError(
@@ -305,7 +302,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
     _runner = {
         "single-core": _run_singlecore,
-        "threadpool": _run_threadpool,
         "multicore": _run_multicore,
         "remote": _run_remote,
     }

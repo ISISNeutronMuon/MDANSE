@@ -16,9 +16,10 @@
 
 import collections
 
+import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Framework.Jobs.IJob import IJob, JobError
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 
@@ -85,9 +86,24 @@ class Density(IJob):
             units="g/cm3",
             main_result=True,
         )
+        self._outputData.add(
+            "avg_mass_density",
+            "LineOutputVariable",
+            (self._n_frames,),
+            axis="time",
+            units="g/cm3",
+            main_result=True,
+        )
 
         self._outputData.add(
             "atomic_density",
+            "LineOutputVariable",
+            (self._n_frames,),
+            axis="time",
+            units="1/cm3",
+        )
+        self._outputData.add(
+            "avg_atomic_density",
             "LineOutputVariable",
             (self._n_frames,),
             axis="time",
@@ -146,6 +162,14 @@ class Density(IJob):
         """
         Finalize the job.
         """
+
+        norm = np.arange(1, self._outputData["atomic_density"].shape[0] + 1)
+        self._outputData["avg_atomic_density"][:] = (
+            np.cumsum(self._outputData["atomic_density"]) / norm
+        )
+        self._outputData["avg_mass_density"][:] = (
+            np.cumsum(self._outputData["mass_density"]) / norm
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
