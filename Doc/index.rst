@@ -66,7 +66,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    pages/scattering
    pages/structure
    pages/analysis
-   pages/fca
+   pages/correlation
 
 .. toctree::
    :maxdepth: 5

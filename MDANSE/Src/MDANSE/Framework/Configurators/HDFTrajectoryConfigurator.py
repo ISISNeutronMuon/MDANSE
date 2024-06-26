@@ -61,14 +61,15 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
 
         self["length"] = len(self["instance"])
 
+        time_axis = self["instance"].time()
         try:
-            self["md_time_step"] = (
-                self["instance"].file["/time"][1] - self["instance"].file["/time"][0]
-            )
+            self["md_time_step"] = time_axis[1] - time_axis[0]
         except IndexError:
             self["md_time_step"] = 1.0
+        except ValueError:
+            self["md_time_step"] = 1.0
 
-        self["has_velocities"] = "velocities" in self["instance"].file["/configuration"]
+        self["has_velocities"] = "velocities" in self["instance"].variables()
 
     def get_information(self):
         """

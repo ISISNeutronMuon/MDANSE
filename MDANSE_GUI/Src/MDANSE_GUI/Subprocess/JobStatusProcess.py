@@ -14,12 +14,14 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import os
 from typing import Tuple
-from multiprocessing import Pipe, Queue, Process, Event
+from multiprocessing import Queue
 from multiprocessing.connection import Connection
+from multiprocessing.synchronize import Event
 
 from icecream import ic
-from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
+from qtpy.QtCore import QObject, Slot, Signal
 
 from MDANSE.Framework.Status import Status
 
@@ -34,6 +36,7 @@ class JobCommunicator(QObject):
         key, value = input
         if key == "FINISHED":
             self.finished.emit(value)
+            self.terminate_the_process()
         elif key == "STEP":
             self.progress.emit(value)
         elif key == "STARTED":
@@ -44,11 +47,29 @@ class JobCommunicator(QObject):
         elif key == "COMMUNICATION":
             print(f"Communication with the subprocess is now {value}")
             self.finished.emit(value)
+            self.terminate_the_process()
+
+    @Slot()
+    def terminate_the_process(self):
+        print(f"JobCommunicator PID: {os.getpid()} started 'terminate_the_process")
+        try:
+            self._process.terminate()
+        except:
+            return
+        else:
+            try:
+                self._process.close()
+            except:
+                return
 
 
 class JobStatusProcess(Status):
     def __init__(
-        self, pipe: "Connection", queue: Queue, pause_event: "Event", **kwargs
+        self,
+        pipe: "Connection",
+        queue: Queue,
+        pause_event: "Event",
+        **kwargs,
     ):
         super().__init__()
         self._pipe = pipe
@@ -68,6 +89,7 @@ class JobStatusProcess(Status):
 
     def start_status(self):
         ic()
+        print(f"JobStatusProcess PID: {os.getpid()} started 'start_status")
         try:
             temp = int(self._nSteps)
         except:
@@ -83,4 +105,8 @@ class JobStatusProcess(Status):
     def update_status(self):
         self._progress_meter += 1
         temp = int(self._progress_meter) * self._updateStep
+        self._pipe.send(("STEP", temp))
+
+    def fixed_status(self, current_progress: int):
+        temp = int(current_progress) * self._updateStep
         self._pipe.send(("STEP", temp))

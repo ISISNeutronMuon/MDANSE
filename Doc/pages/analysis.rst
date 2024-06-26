@@ -6,12 +6,45 @@ of data analysis, please read :ref:`workflow-of-analysis`.
 Analysis Theory: Other
 ======================
 
+This section contains background theory for following plugins:
+
+-  :ref:`infrared`
+-  :ref:`dipole-autocorrelation-function`
+-  :ref:`refolded-membrane-trajectory`
+-  :ref:`density`
+-  :ref:`temperature`
+-  :ref:`box-translated-trajectory`
+-  :ref:`center-of-masses-trajectory`
+-  :ref:`cropped-trajectory`
+-  :ref:`global-motion-filtered-trajectory`
+-  :ref:`rigid-body-trajectory`
+-  :ref:`unfolded-trajectory`
+-  :ref:`mcstas-virtual-instrument`
+
 
 Infrared
 ^^^^^^^^
 
+^^^^^^^^
+
+.. _infrared:
+
 Infrared
 ''''''''
+Calculates the molecular infrared spectrum averaged over all molecules
+in the trajectory. The infrared spectrum is calculated from the Fourier
+transform of the autocorrelation of the time-derivative of the
+molecular dipole:
+
+.. math::
+   :label: pfx115
+
+   I(\omega) \propto \frac{1}{2\pi} \int\limits_{-\infty}^{\infty} \mathrm{d}t \, e^{i\omega t}\frac{1}{3 N_{\alpha}}\sum_{\alpha} \langle \dot{\mu}_{\alpha}(t_0) \cdot \dot{\mu}_{\alpha}(t_0 + t) \rangle_{t_0}
+
+where :math:`N_{\alpha}` is the number of molecules :math:`\alpha` and :math:`\dot{\mu}(t)` is
+the time-derivative of the molecular dipole moment.
+
+.. _dipole-autocorrelation-function:
 
 Dipole AutoCorrelation Function
 '''''''''''''''''''''''''''''''
@@ -23,9 +56,12 @@ of chemical compounds. Infrared spectroscopy is a fundamental technique
 in chemistry and material science, making this analysis essential for
 understanding molecular behavior and composition in simulations.
 
-
 Macromolecules
 ^^^^^^^^^^^^^^
+
+^^^^^^^^^^^^^^
+
+.. _refolded-membrane-trajectory:
 
 Refolded Membrane Trajectory
 ''''''''''''''''''''''''''''
@@ -39,11 +75,12 @@ materials science.
 Thermodynamics
 ^^^^^^^^^^^^^^
 
-This section contains the following Plugins:
+^^^^^^^^^^^^^^
+
+.. _density:
 
 Density
 '''''''
-
 Density is used in molecular dynamics simulations to calculate and
 analyze the density of particles within a simulated system. Density
 refers to the concentration of particles (atoms, molecules, or ions)
@@ -55,9 +92,10 @@ clusters, or the behavior of molecules in various regions of the system.
 Understanding density is crucial for studying phase changes, solvation,
 and other thermodynamic processes in molecular systems.
 
+.. _temperature:
+
 Temperature
 '''''''''''
-
 The temperature is another essential tool in molecular dynamics
 simulations that allows researchers to monitor and control the
 temperature of the simulated system. Temperature is a fundamental
@@ -74,12 +112,12 @@ equilibrium properties of molecular systems.
 Trajectory
 ^^^^^^^^^^
 
-The Plugins within this section are listed below. They are used to
-adjust the trajectory in some way.
+^^^^^^^^^^
+
+.. _box-translated-trajectory:
 
 Box Translated Trajectory
 '''''''''''''''''''''''''
-
 A "Box Translated Trajectory" in molecular dynamics simulations refers to a
 technique where the entire simulation box, representing the space in which
 molecules interact, is shifted or translated during the simulation. This
@@ -89,10 +127,10 @@ or mitigating surface effects. The translation of the simulation box allows
 researchers to explore specific aspects of molecular behavior and system
 properties within the computational environment.
 
+.. _center-of-masses-trajectory:
 
 Center Of Masses Trajectory
 '''''''''''''''''''''''''''
-
 The Center Of Mass Trajectory (*COMT*) analysis consists in deriving the
 trajectory of the respective centres of mass of a set of groups of
 atoms. In order to produce a visualizable trajectory, *MDANSE* assigns
@@ -101,10 +139,10 @@ mass of their associated group. Thus, the produced trajectory can be
 reused for other analysis. In that sense, *COMT* analysis is a practical
 way to reduce noticeably the dimensionality of a system.
 
+.. _cropped-trajectory:
 
 Cropped Trajectory
 ''''''''''''''''''
-
 A "Cropped Trajectory" in molecular dynamics simulations refers to a
 shortened version of the trajectory data file, focusing on a specific time
 segment of a simulation. This cropping process is useful for reducing data
@@ -113,9 +151,10 @@ enhancing visualization. It allows researchers to concentrate on the critical
 dynamics or interactions within a molecular system while excluding
 unnecessary or transient data.
 
+.. _global-motion-filtered-trajectory:
+
 Global Motion Filtered Trajectory
 '''''''''''''''''''''''''''''''''
-
 It is often of interest to separate global motion from internal motion,
 both for quantitative analysis and for visualization by animated
 display. Obviously, this can be done under the hypothesis that global
@@ -140,10 +179,10 @@ internal motions. This analysis can be useful in case where diffusive
 motions are not of interest or simply not accessible to the experiment
 (time resolution, powder analysis . . . ).
 
+.. _rigid-body-trajectory:
 
 Rigid Body Trajectory
 '''''''''''''''''''''
-
 To analyse the dynamics of complex molecular systems it is often
 desirable to consider the overall motion of molecules or molecular
 subunits. We will call this motion rigid-body motion in the following.
@@ -173,23 +212,12 @@ the atomic positions of the corresponding structure in the *MD*
 configuration. Here 'as close as possible' means as close as possible in
 a least-squares sense.
 
-**Optimal superposition.** We consider a given time frame in which the
-atomic positions of a (sub)molecule are given by
-
-.. math::
-   :label: pfx145
-   
-   {x_{\alpha},{\alpha = 1}\ldots N}
-
-. The corresponding positions in the reference structure are denoted as
-
-.. math::
-   :label: pfx146
-   
-   {x_{\alpha}^{(0)},{\alpha = 1}\ldots N}
-
-. For both the given structure and the reference structure we introduce
-the yet undetermined centroids X and X\ :sup:`(0)`, respectively, and
+**Optimal superposition:** We consider a given time frame in which the
+atomic positions of a (sub)molecule are given by :math:`x_{\alpha}` where :math:`{\alpha = 1}, \ldots, N`.
+The corresponding positions in the reference structure are denoted as
+:math:`x_{\alpha}^{(0)}` where :math:`{\alpha = 1}, \ldots, N`.
+For both the given structure and the reference structure we introduce
+the yet undetermined centroids :math:`X` and :math:`X^{(0)}`, respectively, and
 define the deviation
 
 .. math::
@@ -197,19 +225,11 @@ define the deviation
 
    {\Delta_{\alpha}\doteq D(q){\left\lbrack {x_{\alpha}^{(0)} - X^{(0)}} \right\rbrack - \left\lbrack {x_{\alpha} - X} \right\rbrack}.}
 
-Here **D(q)** is a rotation matrix which depends on also yet
+Here :math:`D(q)` is a rotation matrix which depends on also yet
 undetermined angular coordinates which we chose to be *quaternion
-parameters*, abbreviated as vector **q** = (q\ :sub:`0`, q\ :sub:`1`,
-q\ :sub:`2`, q\ :sub:`3`). The quaternion parameters fulfil the
-normalization condition
-
-.. math::
-   :label: pfx148
-   
-   {q \dot {q = 1}}
-
-\ [Ref25]_. The target function to be
-minimized is now defined as
+parameters*, abbreviated as vector :math:`q = (q_0, q_1, q_2, q_3)`.
+The quaternion parameters fulfil the normalization condition :math:`q \cdot {q = 1}` [Ref25]_.
+The target function to be minimized is now defined as
 
 .. math::
    :label: pfx149
@@ -223,12 +243,7 @@ respect to the quaternion parameters and yields
 .. math::
    :label: pfx150
 
-   {{X = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha},}
-
-.. math::
-   :label: pfx151
-
-   {{X^{(0)} = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha}^{(0)}.}
+   {{X = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha} \qquad\qquad  {X^{(0)} = {\sum\limits_{\alpha}\omega_{\alpha}}}x_{\alpha}^{(0)}}
 
 We are now left with a minimization problem for the rotational part
 which can be written as
@@ -236,19 +251,14 @@ which can be written as
 .. math::
    :label: pfx152
 
-   m{(q) = {\sum\limits_{\alpha}{\omega_{\alpha}\left\lbrack {{D(q)r}_{\alpha}^{(0)} - r_{\alpha}} \right\rbrack^{2}}}\overset{!}{=}\mathit{Min}}.
+   m{(q) = {\sum\limits_{\alpha}{\omega_{\alpha}\left\lbrack {{D(q)r}_{\alpha}^{(0)} - r_{\alpha}} \right\rbrack^{2}}}\overset{!}{=}\mathrm{Min}}.
 
 The relative position vectors
 
 .. math::
    :label: pfx153
 
-   {{r_{\alpha} = {x_{\alpha} - X}},}
-
-.. math::
-   :label: pfx154
-
-   {r_{\alpha}^{(0)} = {x_{\alpha}^{(0)} - X^{(0)}}}
+   {{r_{\alpha} = {x_{\alpha} - X}} \qquad\qquad r_{\alpha}^{(0)} = {x_{\alpha}^{(0)} - X^{(0)}}}
 
 are fixed and the rotation matrix reads
 [Ref25]_
@@ -256,46 +266,47 @@ are fixed and the rotation matrix reads
 .. math::
    :label: pfx155
 
-   D(q) = \begin{matrix}
+   D(q) = \begin{pmatrix}
    {q_{0}^{2} + q_{1}^{2} - q_{2}^{2} - q_{3}^{2}} & {2\left( {{- q_{0}}{q_{3} + q_{1}}q_{2}} \right)} & {2\left( {q_{0}{q_{2} + q_{1}}q_{3}} \right)} \\
    {2\left( {q_{0}{q_{3} + q_{1}}q_{2}} \right)} & {q_{0}^{2} + q_{2}^{2} - q_{1}^{2} - q_{3}^{2}} & {2\left( {{- q_{0}}{q_{1} + q_{2}}q_{3}} \right)} \\
    {2\left( {{- q_{0}}{q_{2} + q_{1}}q_{3}} \right)} & {2\left( {q_{0}{q_{1} + q_{2}}q_{3}} \right)} & {q_{0}^{2} + q_{3}^{2} - q_{1}^{2} - q_{2}^{2}} \\
-   \end{matrix}
+   \end{pmatrix}
 
-**Quaternions and rotations.** The rotational minimization problem can
+
+**Quaternions and rotations:** The rotational minimization problem can
 be elegantly solved by using quaternion algebra. Quaternions are
 so-called hypercomplex numbers, having a real unit, 1, and three
-imaginary units, **I**, **J**, and **K**. Since **IJ** = **K** (cyclic),
+imaginary units, :math:`I`, :math:`J`, and :math:`K`. Since :math:`IJ = K` (cyclic),
 quaternion multiplication is not commutative. A possible matrix
 representation of an arbitrary quaternion,
 
 .. math::
    :label: pfx156
 
-   {{A = a_{0}}\cdot{1 + a_{1}}\cdot{I + a_{2}}\cdot{J + a_{3}}\cdot K,}
+   {{A = a_{0}}{1 + a_{1}}{I + a_{2}}{J + a_{3}} K,}
 
 reads
 
 .. math::
    :label: pfx157
 
-   A = \begin{matrix}
+   A = \begin{pmatrix}
    a_{0} & {- a_{1}} & {- a_{2}} & {- a_{3}} \\
    a_{1} & a_{0} & {- a_{3}} & a_{2} \\
    a_{2} & a_{3} & a_{0} & {- a_{1}} \\
    a_{3} & {- a_{2}} & a_{1} & a_{0} \\
-   \end{matrix}
+   \end{pmatrix}
 
 The components :math:`a_{\upsilon}`
 are real numbers. Similarly, as normal complex numbers allow one to
 represent rotations in a plane, quaternions allow one to represent
 rotations in space. Consider the quaternion representation of a vector
-r, which is given by
+:math:`R`, which is given by
 
 .. math::
    :label: pfx158
 
-   {{R = x}\cdot{I + y}\cdot{J + z}\cdot K,}
+   {{R = x}{I + y}{J + z} K,}
 
 and perform the operation
 
@@ -304,73 +315,51 @@ and perform the operation
 
    {{R^{'} = \mathit{QRQ}^{T}},}
 
-where Q is a normalised quaternion
+where :math:`Q` is a normalised quaternion
 
 .. math::
    :label: pfx160
 
-   {\text{|}Q\text{|}^{2}\doteq{{q_{0}^{2} + q_{1}^{2} + q_{2}^{2} + q_{3}^{2}} = \frac{1}{4}}\mathit{tr}\text{\textbackslash\{}Q^{T}Q{\text{\textbackslash\}} = 1.}}
+   {\text{|}Q\text{|}^{2}\doteq{{q_{0}^{2} + q_{1}^{2} + q_{2}^{2} + q_{3}^{2}} = \frac{1}{4}\mathrm{Tr}\, Q^{T}Q = 1}}.
 
-The symbol *tr* stands for 'trace'. We note that a normalized quaternion
-is represented by an *orthogonal* 4 x 4 matrix. **R'** may then be
+We note that a normalized quaternion is represented by an *orthogonal* 4 x 4 matrix. :math:`R'` may then be
 written as
 
 .. math::
    :label: pfx161
 
-   {{R^{'} = x^{'}}\cdot{I + y^{'}}\cdot{J + z^{'}}\cdot K,}
+   {{R^{'} = x^{'}}{I + y^{'}}{J + z^{'}} K,}
 
-where the components x', y', z', abbreviated as r', are given by
+where the components :math:`x'`, :math:`y'`, :math:`z'`, abbreviated as :math:`r'`, are given by :math:`r^{'} = D(q)r`.
 
-.. math::
-   :label: pfx162
-
-   {{r^{'} = D}(q)r.}
-
-The matrix **D**\ (**q**) is the rotation matrix defined in
-`95`.
-
-**Solution of the minimization problem**. In quaternion algebra, the
+**Solution of the minimization problem:** In quaternion algebra, the
 rotational minimization problem may now be phrased as follows:
 
 .. math::
    :label: pfx163
 
-   {m{(q) = {{\sum\limits_{\alpha}{{\omega_{\alpha}\text{|}\mathit{QR}}_{\alpha}^{(0)}Q}^{T}} - R_{\alpha}}}{\text{|}^{2}\overset{!}{=}\mathit{Min}}.}
+   {m{(q) = {{\sum\limits_{\alpha}{{\omega_{\alpha}\text{|}\mathit{QR}}_{\alpha}^{(0)}Q}^{T}} - R_{\alpha}}}{\text{|}^{2}\overset{!}{=}\mathrm{Min}}.}
 
-Since the matrix Q representing a normalized quaternion is orthogonal
+Since the matrix :math:`Q` representing a normalized quaternion is orthogonal
 this may also be written as
 
 .. math::
    :label: pfx164
 
-   {{{m{(q) = {\sum\limits_{\alpha}\omega_{\alpha}}}\text{|}\mathit{QR}}_{\alpha}^{(0)} - R_{\alpha}}Q\text{|}^{2}{.\overset{!}{=}\mathit{Min}}.}
+   {{{m{(q) = {\sum\limits_{\alpha}\omega_{\alpha}}}\text{|}\mathit{QR}_{\alpha}^{(0)}} - R_{\alpha}}Q\text{|}^{2}{\overset{!}{=}\mathrm{Min}}.}
 
-This follows from the simple fact that
-
-.. math::
-   :label: pfx165
-   
-   {\text{|}A{\text{|} = \text{|}}\mathit{AQ}\text{|}}
-
-, if Q is normalized. Eq. `104` shows that the
+This follows from the simple fact that :math:`\text{|}A{\text{|} = \text{|}}\mathit{AQ}\text{|}`
+if :math:`Q` is normalized. Eq. `104` shows that the
 target function to be minimized can be written as a simple quadratic
 form in the quaternion parameters [Ref24]_,
 
 .. math::
    :label: pfx166
 
-   {m{(q) = q}\cdot\mathit{Mq},}
+   {m{(q) = q}\cdot\mathit{Mq} \qquad\qquad {M = {\sum\limits_{\alpha}{\omega_{\alpha}M_{\alpha}}}}}
 
-.. math::
-   :label: pfx167
-
-   {{M = {\sum\limits_{\alpha}{\omega_{\alpha}M_{\alpha}}}}.}
-
-The matrices M\_ are positive semi-definite matrices depending on the
-positions :math:`r_{\alpha}` and :math:`r_{\alpha}^{(0)}`:
-
-|image32|\ 
+The matrices :math:`M` are positive semi-definite matrices depending on the
+positions :math:`r_{\alpha}` and :math:`r_{\alpha}^{(0)}`.
 
 The rotational fit is now reduced to the problem of finding the minimum
 of a quadratic form with the constraint that the quaternion to be
@@ -380,38 +369,31 @@ to account for the normalization constraint we have
 .. math::
    :label: pfx169
 
-   {m^{'}{\left( {q,\lambda} \right) = q}\cdot{\mathit{Mq} - \lambda}{\left( {q\cdot{q - 1}} \right)\overset{!}{=}\mathit{Min}}.}
+   {m^{'}{\left( {q,\lambda} \right) = q}\cdot{\mathit{Mq} - \lambda}{\left( {q\cdot{q - 1}} \right)\overset{!}{=}\mathrm{Min}}.}
 
 This leads immediately to the eigenvalue problem
 
 .. math::
    :label: pfx170
 
-   {{\mathit{Mq} = \lambda}q,}
+   {{\mathit{Mq} = \lambda}q \qquad\qquad q\cdot{q = 1.}}
 
-.. math::
-   :label: pfx171
-
-   {q\cdot{q = 1.}}
-
-Now any normalized eigenvector **q** fulfils the relation
+Now any normalized eigenvector :math:`q` fulfils the relation
 
 .. math::
    :label: pfx172
    
    {{\lambda = q}\cdot\mathit{Mq}\equiv m(q)}
 
-. Therefore, the eigenvector belonging to the smallest eigenvalue,
-λ\ :sub:`min`, is the desired solution. At the same time λ\ :sub:`min`
+Therefore, the eigenvector belonging to the smallest eigenvalue,
+:math:`\lambda_{\mathrm{min}}`, is the desired solution. At the same time :math:`\lambda_{\mathrm{min}}`
 gives the average error per atom. The result of *RBT* analysis is stored
 in a new trajectory file that contains only *RBT* motions.
 
-
-
+.. _unfolded-trajectory:
 
 Unfolded Trajectory
 '''''''''''''''''''
-
 An "Unfolded Trajectory" in the context of molecular dynamics
 simulations refers to a trajectory data file that has been processed or
 analyzed to reveal the unfolding or expansion of molecular structures over
@@ -423,12 +405,16 @@ Unfolding trajectories provide valuable insights into molecular behavior
 and interactions, contributing to the development of new materials and the
 design of therapeutic compounds.
 
+
 Virtual Instruments
 ^^^^^^^^^^^^^^^^^^^
 
+^^^^^^^^^^^^^^^^^^^
+
+.. _mcstas-virtual-instrument:
+
 McStas Virtual Instrument
 '''''''''''''''''''''''''
-
 McStas enables researchers to create virtual instruments that replicate the
 behavior of real neutron or X-ray instruments. This capability streamlines
 the design, optimization, and testing of experiments within a virtual
@@ -437,112 +423,3 @@ researchers conserve valuable time and resources while simultaneously
 enhancing the precision and reliability of their experiments. McStas finds
 widespread application in fields like materials science and condensed
 matter physics.
-
-
-Miscellaneous
-^^^^^^^^^^^^^
-
-This section normally contains only one Plugin, which is present for
-both trajectories and analysis results. However, some other Plugins
-appear under certain circumstances.
-
-.. _analysis-info:
-
-Data info
-^^^^^^^^^
-
-The "Data Info" function provides an overview of the data stored in the
-selected HDF (Hierarchical Data Format) file. When used with trajectory
-files, it displays information such as the location of the trajectory on
-disk, the number of time steps, the universe (the HDF object), direct cell
-parameters at the beginning, reciprocal cell parameters at the beginning,
-a list of molecules, and a list of variables contained within the
-trajectory. It serves as a helpful tool for understanding the details of
-the data in the file, which can be vital for further analysis or
-interpretation.
-
-Animation
-^^^^^^^^^
-
-The Animation feature enhances the functionality of the Molecular Viewer.
-When activated, it creates a new bar below the Molecular Viewer interface,
-allowing users to visually observe the entire molecular dynamics (MD)
-simulation. This feature provides a visual representation of the simulation's
-progress, making it easier for researchers to observe and analyze the dynamic
-behavior of molecules throughout the simulation. It's a valuable tool for
-gaining insights into molecular interactions and motions over time.
-
-
-Density Superposition
-^^^^^^^^^^^^^^^^^^^^^
-
-The Density Superposition function is specifically designed for
-trajectories. It becomes accessible when the Molecular Viewer is active,
-and a left-click action is performed within it. When activated, it allows
-users to overlay density information from the trajectory data. This feature
-can be valuable for comparing the density distributions of different
-molecular species or analyzing density changes over the course of a
-simulation, providing insights into molecular arrangements and interactions
-within the system.
-
-
-Trajectory Viewer
-^^^^^^^^^^^^^^^^^
-
-The Trajectory Viewer is a graphical interface that allows users to
-visualize and inspect trajectory data from molecular dynamics simulations.
-It provides a visual representation of the movement and behavior of molecules
-over time, enabling researchers to gain insights into molecular interactions
-and dynamics.
-
-
-My jobs
-^^^^^^^
-
-This section only appears if you have used the `Save analysis
-template <#save_analysis_template>`__ button in the main window's
-toolbar. It contains all the analyses created this way and allows them
-to be run.
-
-Plotter
-^^^^^^^
-
-2D/3D Plotter
-'''''''''''''
-
-The "Plotter," including the "2D/3D Plotter," is a data visualization tool
-designed for visualizing and graphically representing data obtained from
-analysis results. It allows users to create two-dimensional (2D) and
-three-dimensional (3D) plots and charts, facilitating data analysis and
-presentation.
-
-
-User definition
-^^^^^^^^^^^^^^^
-
-This section contains definitions or selections made for the selected HDF
-(Hierarchical Data Format) file. These user-defined selections serve a similar
-purpose to the "User Definition Editor" and help customize interactions with
-the data within the HDF file.
-
-Viewer
-^^^^^^
-
-Molecular Viewer
-''''''''''''''''
-
-Jobs
-^^^^
-
-The Viewer, specifically the "Molecular Viewer," is a tool for visualizing
-molecular structures and simulations. It provides an interactive 3D
-representation of molecules, allowing users to explore and analyze molecular
-dynamics. The "Jobs" panel lists ongoing or completed analysis jobs, helping
-users track the progress of their analyses and providing information on
-started, completed, or running analyses.
-
-These features and sections enhance the functionality of the software for
-molecular dynamics simulations, simplifying data visualization, analysis, and
-management for researchers.
-
-

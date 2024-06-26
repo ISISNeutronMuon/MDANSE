@@ -32,7 +32,7 @@ class RunningModeConfigurator(IConfigurator):
     specify the number of slots used for running the analysis.
     """
 
-    availablesModes = ["single-core", "threadpool", "multicore"]
+    availablesModes = ["single-core", "multicore"]
 
     _default = ("single-core", 1)
 
