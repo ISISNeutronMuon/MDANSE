@@ -63,6 +63,7 @@ class DataPlotter(QWidget):
             self._selection_viewer.setModel(self._model)
         self._model.add_dataset(dataset)
         self._selection_viewer.resizeColumnsToContents()
+        self._selection_viewer.hideColumn(4)
 
     @Slot()
     def new_plot(self):
