@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, List
 import math
 
 import numpy as np
+from scipy.interpolate import interp1d
 from matplotlib.pyplot import colorbar as mpl_colorbar
 
 from MDANSE.Framework.Units import measure
@@ -38,6 +39,7 @@ class Heatmap(Plotter):
         self._backup_images = []
         self._backup_arrays = []
         self._backup_minmax = []
+        self._backup_scale_interpolators = []
         self._backup_limits = []
         self._initial_values = [0.0, 100.0]
         self._slider_values = [0.0, 100.0]
@@ -82,8 +84,9 @@ class Heatmap(Plotter):
                     self._backup_minmax.append([-1, -1])
                 last_minmax = [-1, -1]
             array = self._backup_arrays[num]
-            newmax = np.percentile(array, new_value[1])
-            newmin = np.percentile(array, new_value[0])
+            interpolator = self._backup_scale_interpolators[num]
+            newmax = interpolator(new_value[1])
+            newmin = interpolator(new_value[0])
             if newmax < newmin:
                 if newmax == last_minmax[1]:
                     newmin = float(newmax)
@@ -113,6 +116,7 @@ class Heatmap(Plotter):
         self._figure = target
         self._backup_images = []
         self._backup_arrays = []
+        self._backup_scale_interpolators = []
         xaxis_unit = None
         yaxis_unit = None
         self.get_mpl_colors()
@@ -205,5 +209,10 @@ class Heatmap(Plotter):
             axes.set_ylabel(axis_units[1])
             self._backup_images.append(image)
             self._backup_arrays.append([np.nan_to_num(dataset._data)])
+            percentiles = np.linspace(0, 100.0, 21)
+            results = [
+                np.percentile(self._backup_arrays[-1], perc) for perc in percentiles
+            ]
+            self._backup_scale_interpolators.append(interp1d(percentiles, results))
         # axes.grid(True)
         target.canvas.draw()
