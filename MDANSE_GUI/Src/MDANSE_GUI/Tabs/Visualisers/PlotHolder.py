@@ -36,8 +36,8 @@ class PlotHolder(QTabWidget):
         self._session = session
         self._last_number = 1
         layout = QVBoxLayout(self)
-        self._context = {}
-        self._plotter = {}
+        self._context = []
+        self._plotter = []
         self._current_id = -1
         self.setLayout(layout)
         self._current_id = self.new_plot("Preview")
@@ -61,8 +61,9 @@ class PlotHolder(QTabWidget):
         plotter = PlotWidget(self)
         plotter.set_context(plotting_context)
         tab_id = self.addTab(plotter, tab_name)
-        self._context[tab_id] = plotting_context
-        self._plotter[tab_id] = plotter
+        print(f"PlotHolder created tab: {tab_id}")
+        self._context.append(plotting_context)
+        self._plotter.append(plotter)
         self.setCurrentIndex(tab_id)
         return tab_id
 
@@ -70,28 +71,36 @@ class PlotHolder(QTabWidget):
     def clean_up_closed_tab(self, tab_id: int):
         if tab_id == self._protected_id:
             return
-        valid_id_values = [int(idnum) for idnum in self._plotter.keys()]
+        valid_id_values = [int(idnum) for idnum in range(len(self._plotter))]
         if tab_id in valid_id_values:
             valid_id_values.pop(valid_id_values.index(tab_id))
+        if tab_id < len(self._context):
+            self._context.pop(tab_id)
+        if tab_id < len(self._plotter):
+            self._plotter.pop(tab_id)
         if self._current_id == tab_id:
             if len(valid_id_values) > 0:
                 self._current_id = valid_id_values[0]
                 self.setCurrentIndex(self._current_id)
-        if tab_id in self._context.keys():
-            self._context.pop(tab_id)
-        if tab_id in self._plotter.keys():
-            self._plotter.pop(tab_id)
         self.removeTab(tab_id)
 
     @property
     def model(self):
         tab_id = self.currentIndex()
-        return self._context[tab_id]
+        try:
+            return self._context[tab_id]
+        except KeyError:
+            print(f"Plotting context is missing for tab {tab_id}")
+            print(self._context)
 
     @property
     def plotter(self):
         tab_id = self.currentIndex()
-        return self._plotter[tab_id]
+        try:
+            return self._plotter[tab_id]
+        except KeyError:
+            print(f"PlotWidget is missing for tab {tab_id}")
+            print(self._plotter)
 
     @Slot(object)
     def update_plot_details(self, input):
@@ -102,5 +111,5 @@ class PlotHolder(QTabWidget):
     def update_plots(self):
         """This will change the line colour, thickness, etc.
         At the moment it doesn't do anything."""
-        for plotter in self._plotter.values():
+        for plotter in self._plotter:
             plotter.plot_data(update_only=True)
