@@ -41,6 +41,7 @@ class Heatmap(Plotter):
         self._backup_minmax = []
         self._backup_scale_interpolators = []
         self._backup_limits = []
+        self._last_axes_units = []
         self._initial_values = [0.0, 100.0]
         self._slider_values = [0.0, 100.0]
         self._last_minmax = [-1, -1]
@@ -121,6 +122,8 @@ class Heatmap(Plotter):
         yaxis_unit = None
         self.get_mpl_colors()
         self._axes = []
+        if not update_only:
+            self._last_axes_units = []
         self.apply_settings(plotting_context, colours)
         if plotting_context.set_axes() is None:
             print("Axis check failed.")
@@ -133,7 +136,7 @@ class Heatmap(Plotter):
             nplots += 1
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
-        for name, databundle in plotting_context.datasets().items():
+        for num, databundle in enumerate(plotting_context.datasets().values()):
             dataset, _, _, ds_num = databundle
             if dataset._n_dim == 1:
                 continue
@@ -183,8 +186,15 @@ class Heatmap(Plotter):
                             [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
                         )
                 else:
-                    axes.set_xlim((last_limits[0], last_limits[1]))
-                    axes.set_ylim((last_limits[2], last_limits[3]))
+                    previous_units = self._last_axes_units[num]
+                    if axis_units[0] == previous_units[0]:
+                        axes.set_xlim((last_limits[0], last_limits[1]))
+                    else:
+                        self._last_axes_units[num][0] = axis_units[0]
+                    if axis_units[1] == previous_units[1]:
+                        axes.set_ylim((last_limits[2], last_limits[3]))
+                    else:
+                        self._last_axes_units[num][1] = axis_units[1]
             else:
                 try:
                     last_limits = self._backup_limits[ds_num]
@@ -205,6 +215,7 @@ class Heatmap(Plotter):
                     ylimits[0],
                     ylimits[1],
                 ]
+                self._last_axes_units.append(axis_units)
             axes.set_xlabel(axis_units[0])
             axes.set_ylabel(axis_units[1])
             self._backup_images.append(image)
