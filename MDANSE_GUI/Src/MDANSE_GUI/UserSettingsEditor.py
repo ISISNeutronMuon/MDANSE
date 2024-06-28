@@ -37,7 +37,7 @@ class UserSettingsModel(QStandardItemModel):
         super().__init__(*args, **kwargs)
         if session is None:
             self._session = LocalSession()
-            self._session.load_json()
+            self._session.load()
         else:
             self._session = session
         self.populate_model()
@@ -98,7 +98,7 @@ class UserSettingsModel(QStandardItemModel):
     @Slot(str)
     def writeout_settings(self, target_filename: str):
         try:
-            self._session.save_json(target_filename)
+            self._session.save(target_filename)
         except Exception as e:
             print(f"Writeout failed: {e}")
 

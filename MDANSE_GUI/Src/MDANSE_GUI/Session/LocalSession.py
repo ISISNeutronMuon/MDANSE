@@ -66,7 +66,7 @@ class LocalSession(QObject):
         return value
 
     @Slot()
-    def save_json(self, fname: str = None):
+    def save(self, fname: str = None):
         all_items = {}
         all_items["paths"] = self._paths
         all_items["units"] = self._units
@@ -86,7 +86,7 @@ class LocalSession(QObject):
         else:
             self._filename = fname
 
-    def load_json(self, fname: str = None):
+    def load(self, fname: str = None):
         if fname is None:
             fname = os.path.join(PLATFORM.application_directory(), "gui_session.json")
         try:

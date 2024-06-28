@@ -102,8 +102,8 @@ class TabbedWindow(QMainWindow):
         self.style_selector.icon_swap.connect(self.invertToolbar)
 
         if app_instance is not None:
-            app_instance.aboutToQuit.connect(self._session.save_json)
-        self._session.load_json()
+            app_instance.aboutToQuit.connect(self._session.save)
+        self._session.load()
         self.settings_editor = UserSettingsEditor(self, current_session=self._session)
 
     def createCommonModels(self):
