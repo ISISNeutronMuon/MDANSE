@@ -72,6 +72,8 @@ class Single(Plotter):
         target = self._figure
         if target is None:
             return
+        if len(self._active_curves) == 0:
+            return
         new_value = self._slider_values
         saved_xmin, saved_xmax, saved_ymin, saved_ymax = self._backup_limits
         for num, curve in enumerate(self._active_curves):

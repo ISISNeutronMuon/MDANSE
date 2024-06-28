@@ -71,7 +71,8 @@ class DataPlotter(QWidget):
 
     @Slot()
     def plot_data(self):
-        self.data_for_plotting.emit(self._model)
+        if self._model is not None:
+            self.data_for_plotting.emit(self._model)
 
     @Slot(object)
     def accept_data(self, data_set):
