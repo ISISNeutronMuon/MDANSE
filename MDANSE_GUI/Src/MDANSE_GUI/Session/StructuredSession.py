@@ -24,6 +24,8 @@ import tomlkit
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
 
+from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
+
 
 class SettingsGroup:
 
@@ -31,6 +33,22 @@ class SettingsGroup:
         self._name = group_name
         self._settings = {}
         self._comments = {}
+        self._group_comment = ""
+
+    def set_comment(self, comment: str):
+        self._group_comment = comment
+
+    def add(self, varname: str, value: str, comment: str):
+        self._settings[varname] = value
+        self._comments[varname] = comment
+
+    def set(self, varname: str, value: str):
+        if not varname in self._settings:
+            print(
+                f"Group {self._name} has no entry {varname}. Add it first using add()."
+            )
+            return False
+        self._settings[varname] = value
 
     def populate(self, settings: Dict, comments: Dict):
         for key, value in settings.items():
@@ -56,6 +74,7 @@ class SettingsGroup:
 
     def as_toml(self):
         results = tomlkit.table()
+        results.comment(self._group_comment)
         for key in self._settings.keys():
             results[key] = self._settings[key]
             results[key].comment(self._comments.get(key, "---"))
@@ -91,6 +110,21 @@ class SettingsFile:
                     temp_comments[inner_key] = table[inner_key].trivia.comment
                 group.populate(temp_values, temp_comments)
 
+    def keys(self):
+        return self._groups.keys()
+
+    @property
+    def groups(self):
+        return self._groups
+
+    def group(self, group_name: str) -> "SettingsGroup":
+        try:
+            group = self._groups[group_name]
+        except KeyError:
+            group = SettingsGroup(group_name)
+            self._groups[group_name] = group
+        return group
+
     def save_values(self):
         newdoc = tomlkit.document()
         for gr in self._groups:
@@ -98,15 +132,15 @@ class SettingsFile:
         self._file.write(newdoc)
 
     def overwrite_settings(self, group_name, values, comments):
-        group = self._groups.get(group_name, SettingsGroup(group_name))
+        group = self.group(group_name)
         group.populate(values, comments)
 
     def extend_settings(self, group_name, values, comments):
-        group = self._groups.get(group_name, SettingsGroup(group_name))
+        group = self.group(group_name)
         group.update(values, comments)
 
     def check_settings(self, group_name, values, comments):
-        group = self._groups.get(group_name, SettingsGroup(group_name))
+        group = self.group(group_name)
         unused_values, unused_comments = group.compare(values, comments)
         for val in unused_values:
             print(
@@ -121,35 +155,58 @@ class StructuredSession(QObject):
         super().__init__(*args, **kwargs)
         self._configs = {}
         self._state = None
-        self._filename = kwargs.get("filename", None)
+        self._main_config_name = "mdanse_general_settings"
+        self._filename = kwargs.get("filename", self._main_config_name)
         self.populate_defaults()
 
-    def register_config(self, name: str, valdict: Dict, docdict: Dict):
-        if name in self._groups:
-            group = self._groups.pop(name)
-        else:
-            group = SettingsGroup(name)
-        group.populate(valdict, docdict)
-        self._groups[name] = group
+    def obtain_settings(self, gui_element):
+        try:
+            name = gui_element._name
+        except AttributeError:
+            name = self._main_config_name
+        try:
+            sf = self._configs[name]
+        except KeyError:
+            sf = SettingsFile(name)
+            self._configs[name] = sf
+        gui_element._settings = sf
 
     def populate_defaults(self):
-        self._paths["root_directory"] = os.path.expanduser("~")
-        self._units["energy"] = "meV"
-        self._units["time"] = "fs"
-        self._units["distance"] = "ang"
-        self._units["reciprocal"] = "1/ang"
-
-    def get_parameter(self, key: str) -> str:
-        value = self._parameters.get(key, None)
-        return value
+        gs = SettingsFile(self._main_config_name)
+        paths = gs.group("paths")
+        paths.set_comment("Lookup of working directory paths for the main GUI")
+        units = gs.group("units")
+        units.set_comment(
+            "The GUI will, where possible and indicated, use these physical units."
+        )
+        paths.add(
+            "root_directory",
+            os.path.expanduser("~"),
+            "Starting path for any file search",
+        )
+        units.add("energy", "meV", "The unit of energy preferred by the user.")
+        units.add("time", "fs", "The unit of time preferred by the user.")
+        units.add("distance", "ang", "The unit of distance preferred by the user")
+        units.add(
+            "reciprocal", "1/ang", "The momentum (transfer) unit preferred by the user"
+        )
+        gs.load_from_file()
+        gs.save_values()
+        self._configs[self._main_config_name] = gs
 
     def get_path(self, key: str) -> str:
-        value = self._paths.get(key, ".")
+        settings = self._configs[self._main_config_name]
+        group = settings["paths"]
+        value = group.get(key, ".")
         return value
 
     def set_path(self, key: str, value: str):
-        self._paths[key] = value
+        settings = self._configs[self._main_config_name]
+        group = settings["paths"]
+        group.set(key, value)
 
     def get_unit(self, key: str) -> str:
-        value = self._units.get(key, "1")
+        settings = self._configs[self._main_config_name]
+        group = settings["units"]
+        value = group.get(key, "N/A")
         return value

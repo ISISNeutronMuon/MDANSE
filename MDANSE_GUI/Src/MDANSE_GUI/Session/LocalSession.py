@@ -21,6 +21,8 @@ from qtpy.QtCore import QObject, Signal, Slot
 
 from MDANSE import PLATFORM
 
+from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
+
 
 class LocalSession(QObject):
     """Stores different parameters, and the state
@@ -64,6 +66,9 @@ class LocalSession(QObject):
     def get_unit(self, key: str) -> str:
         value = self._units.get(key, "1")
         return value
+
+    def obtain_settings(self, gui_element):
+        return LocalSettings()
 
     @Slot()
     def save(self, fname: str = None):

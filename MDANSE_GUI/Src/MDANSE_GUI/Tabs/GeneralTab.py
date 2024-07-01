@@ -45,7 +45,7 @@ class GeneralTab(QObject):
     def __init__(self, *args, **kwargs):
         self._name = kwargs.pop("name", "Unnamed GUI part")
         self._session = kwargs.pop("session", LocalSession())
-        self._settings = kwargs.pop("settings", LocalSettings())
+        self._settings = self._session.obtain_settings(self)
         self._model = kwargs.pop("model", None)
         self._visualiser = kwargs.pop("visualiser", TextInfo())
         self._view = kwargs.pop("view", QListView())

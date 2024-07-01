@@ -33,8 +33,7 @@ from qtpy.QtWidgets import (
 
 import MDANSE
 
-from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
+from MDANSE_GUI.Session.StructuredSession import StructuredSession
 from MDANSE_GUI.Widgets.Generator import WidgetGenerator
 from MDANSE_GUI.Resources import Resources
 from MDANSE_GUI.UnitsEditor import UnitsEditor
@@ -78,8 +77,8 @@ class TabbedWindow(QMainWindow):
         self._views = defaultdict(list)
         self._actions = []
         self._tabs = {}
-        self._settings = LocalSettings()
-        self._session = LocalSession()
+        self._session = StructuredSession()
+        self._settings = self._session.obtain_settings(self)
         self._logger = QMessageLogger()
         self._toolbar_buttons = []  # list of (widget, icon_key:str) pairs
         self._style_database = StyleDatabase(self)
