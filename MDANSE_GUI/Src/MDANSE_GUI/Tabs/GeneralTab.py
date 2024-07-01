@@ -45,6 +45,7 @@ class GeneralTab(QObject):
     def __init__(self, *args, **kwargs):
         self._name = kwargs.pop("name", "Unnamed GUI part")
         self._session = kwargs.pop("session", LocalSession())
+        _ = kwargs.pop("settings", None)
         self._settings = self._session.obtain_settings(self)
         self._model = kwargs.pop("model", None)
         self._visualiser = kwargs.pop("visualiser", TextInfo())
@@ -64,6 +65,29 @@ class GeneralTab(QObject):
             self._core.set_model(self._model)
         self._core.set_label_text(label_text)
         self._core.connect_logging
+
+    def grouped_settings(self):
+        """This method tells the Session object what settings
+        this Tab will store in its settings file,
+        and what each of the settings means.
+
+        This way each GUI component can have its own settings
+        without interfering with the others, and the user
+        does not risk breaking all the settings by
+        mangling a single file.
+
+        Returns
+        -------
+        List[str, Dict[str, str], Dict[str, str]]
+        """
+        group1 = [
+            "Generic settings",  # name of the group of settings
+            {"path": "."},  # a dictionary of settings
+            {
+                "path": "The path last used by this GUI element."
+            },  # a dictionary of comments
+        ]
+        return [group1]
 
     @Slot()
     def save_state(self):

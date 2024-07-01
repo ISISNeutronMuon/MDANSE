@@ -53,14 +53,14 @@ class SettingsGroup:
     def populate(self, settings: Dict, comments: Dict):
         for key, value in settings.items():
             self._settings[key] = value
-            self._comments[key].comment(comments.get(key, "---"))
+            self._comments[key] = comments.get(key, "---")
 
     def update(self, settings: Dict, comments: Dict):
         for key, value in settings.items():
             if key in self._settings:
                 continue
             self._settings[key] = value
-            self._comments[key].comment(comments.get(key, "---"))
+            self._comments[key] = comments.get(key, "---")
 
     def compare(self, settings: Dict, comments: Dict):
         obsolete_values, obsolete_comments = [], []
@@ -127,7 +127,7 @@ class SettingsFile:
 
     def save_values(self):
         newdoc = tomlkit.document()
-        for gr in self._groups:
+        for gr in self._groups.values():
             newdoc[gr._name] = gr.as_toml()
         self._file.write(newdoc)
 
@@ -159,6 +159,15 @@ class StructuredSession(QObject):
         self._filename = kwargs.get("filename", self._main_config_name)
         self.populate_defaults()
 
+    @Slot()
+    def save(self, fname: str = None):
+        for name, config in self._configs.items():
+            config.save_values()
+
+    def load(self, fname: str = None):
+        """Included for compatibility with LocalSession only.
+        Now each component loads its own config separately."""
+
     def obtain_settings(self, gui_element):
         try:
             name = gui_element._name
@@ -169,6 +178,17 @@ class StructuredSession(QObject):
         except KeyError:
             sf = SettingsFile(name)
             self._configs[name] = sf
+        sf.load_from_file()
+        try:
+            setting_groups = gui_element.grouped_settings()
+        except AttributeError:
+            pass
+        else:
+            for group in setting_groups:
+                gname, settings, comments = group[0], group[1], group[2]
+                sf.extend_settings(gname, settings, comments)
+                sf.check_settings(gname, settings, comments)
+            sf.save_values()
         gui_element._settings = sf
 
     def populate_defaults(self):
