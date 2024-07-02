@@ -48,10 +48,8 @@ class PlotDataView(QTreeView):
         return super().mousePressEvent(e)
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        # print("Mouse Move Event!", event.button(), QtCore.Qt.MouseButton.LeftButton)
         if event.buttons() == Qt.MouseButton.LeftButton:
             # if event.button():
-            print("dragging")
             new_position = event.position()
             distance = (self.click_position - new_position).manhattanLength()
             if distance > QApplication.startDragDistance():
@@ -99,6 +97,10 @@ class PlotDataView(QTreeView):
         except AttributeError:
             packet = text, mda_data_structure.file
         self.dataset_selected.emit(packet)
+        if hasattr(mda_data_structure, "_metadata"):
+            self.item_details.emit(mda_data_structure._metadata)
+        else:
+            self.item_details.emit("No additional information included.")
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
