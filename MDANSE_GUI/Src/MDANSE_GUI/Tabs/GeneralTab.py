@@ -65,6 +65,7 @@ class GeneralTab(QObject):
             self._core.set_model(self._model)
         self._core.set_label_text(label_text)
         self._core.connect_logging
+        self.propagate_session()
 
     def grouped_settings(self):
         """This method tells the Session object what settings
@@ -95,6 +96,11 @@ class GeneralTab(QObject):
 
     def load_state(self):
         self._session.load_state(self)
+
+    def propagate_session(self):
+        for target in [self._model, self._visualiser, self._view, self._logger]:
+            if target is not None:
+                target._session = self._session
 
     @Slot(str)
     def critical(self, message: str):

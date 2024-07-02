@@ -13,19 +13,26 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from .DoublePanel import DoublePanel
+from typing import Union
+
+from icecream import ic
+from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication
+from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
+from qtpy.QtGui import QMouseEvent, QDrag
 
 
-class TriplePanel(DoublePanel):
-    """The triple panel layout which adds an extra visualiser panel to
-    the left side of the layout"""
+class PlotDetailsView(QTreeView):
+    details_changed = Signal(object)
 
     def __init__(self, *args, **kwargs):
-        left_panel = kwargs.pop("left_panel", None)
         super().__init__(*args, **kwargs)
 
-        if left_panel is not None:
-            self._leftlayout.addWidget(left_panel)
-            if self._view is not None:
-                self._view.connect_to_visualiser(left_panel)
-            self._extra_visualiser = left_panel
+    def connect_to_visualiser(self, visualiser) -> None:
+        """Connect to a visualiser.
+
+        Parameters
+        ----------
+        visualiser : Action or TextInfo
+            A visualiser to connect to this view.
+        """
+        self.details_changed.connect(visualiser.update_plot_details)

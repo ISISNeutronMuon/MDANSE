@@ -47,8 +47,9 @@ from MDANSE_GUI.Tabs.JobTab import JobTab
 from MDANSE_GUI.Tabs.RunTab import RunTab
 from MDANSE_GUI.Tabs.LoggingTab import LoggingTab
 from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
+from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
+from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
-from MDANSE_GUI.Plotter.widgets.main_window import MainWindow
 
 
 class TabbedWindow(QMainWindow):
@@ -91,7 +92,6 @@ class TabbedWindow(QMainWindow):
         self.makeBasicLayout()
         self.workdir = os.path.expanduser("~")
 
-        self.data_plotter = MainWindow(self)
         self.periodic_table = PeriodicTableViewer(self)
         self.element_editor = ElementsDatabaseEditor(self)
         self.unit_editor = UnitsEditor(self)
@@ -105,6 +105,13 @@ class TabbedWindow(QMainWindow):
         self._session.load()
         self.settings_editor = UserSettingsEditor(self, current_session=self._session)
 
+        self._tabs["Plot Creator"]._visualiser.data_for_plotting.connect(
+            self._tabs["Plot Holder"].accept_external_data
+        )
+        self._tabs["Plot Creator"]._visualiser.create_new_plot.connect(
+            self._tabs["Plot Holder"]._visualiser.new_plot
+        )
+
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
         self._job_holder = JobHolder()
@@ -114,6 +121,8 @@ class TabbedWindow(QMainWindow):
         self.createTrajectoryViewer()
         self.createActionsViewer()
         self.createJobsViewer()
+        self.createPlotSelection()
+        self.createPlotHolder()
         # self.createLogViewer()
         self.setupMenubar()
         self.setupToolbar()
@@ -171,7 +180,6 @@ class TabbedWindow(QMainWindow):
         valid_keys = [
             # ('load', self.loadTrajectory),
             # ('plus', self.loadTrajectory),
-            ("plot", self.launchDataPlotter),
             ("periodic_table", self.launchPeriodicTable),
             ("element", self.launchElementsEditor),
             ("units", self.launchUnitsEditor),
@@ -208,10 +216,6 @@ class TabbedWindow(QMainWindow):
     @Slot()
     def launchElementsEditor(self):
         self.launch_dialog(self.element_editor)
-
-    @Slot()
-    def launchDataPlotter(self):
-        self.launch_dialog(self.data_plotter)
 
     def launch_dialog(self, dialog) -> None:
         if dialog.isVisible():
@@ -292,6 +296,30 @@ class TabbedWindow(QMainWindow):
         job_tab.set_job_starter(self._job_holder)
         self.tabs.addTab(job_tab._core, name)
         self._tabs[name] = job_tab
+
+    def createPlotSelection(self):
+        name = "Plot Creator"
+        plot_tab = PlotSelectionTab.gui_instance(
+            self.tabs,
+            name,
+            self._session,
+            self._settings,
+            self._logger,
+        )
+        self.tabs.addTab(plot_tab._core, name)
+        self._tabs[name] = plot_tab
+
+    def createPlotHolder(self):
+        name = "Plot Holder"
+        plot_tab = PlotTab.gui_instance(
+            self.tabs,
+            name,
+            self._session,
+            self._settings,
+            self._logger,
+        )
+        self.tabs.addTab(plot_tab._core, name)
+        self._tabs[name] = plot_tab
 
     def createLogViewer(self):
         name = "Logger"
