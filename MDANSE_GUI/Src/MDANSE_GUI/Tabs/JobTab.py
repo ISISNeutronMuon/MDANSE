@@ -18,7 +18,7 @@ from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget, QComboBox
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
-from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
+from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
@@ -91,12 +91,12 @@ class JobTab(GeneralTab):
             view=ActionsTree(),
             visualiser=Action(),
             layout=partial(
-                TriplePanel,
-                left_panel=TextInfo(
+                MultiPanel,
+                left_panels=[TextInfo(
                     header="MDANSE Analysis",
                     footer="Look up our Read The Docs page:"
                     + "https://mdanse.readthedocs.io/en/protos/",
-                ),
+                )],
             ),
             label_text=job_tab_label,
             action=action,
@@ -125,13 +125,13 @@ class JobTab(GeneralTab):
             view=ActionsTree(),
             visualiser=action,
             layout=partial(
-                TriplePanel,
-                left_panel=TextInfo(
+                MultiPanel,
+                left_panels=[TextInfo(
                     header="MDANSE Analysis",
                     footer="Look up our "
                     + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
                     + " page.",
-                ),
+                )],
             ),
             label_text=job_tab_label,
             action=action,
@@ -153,13 +153,13 @@ if __name__ == "__main__":
         view=ActionsTree(),
         visualiser=action,
         layout=partial(
-            TriplePanel,
-            left_panel=TextInfo(
+            MultiPanel,
+            left_panels=[TextInfo(
                 header="MDANSE Analysis",
                 footer="Look up our "
                 + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
                 + " page.",
-            ),
+            )],
         ),
         label_text=job_tab_label,
         action=action,
