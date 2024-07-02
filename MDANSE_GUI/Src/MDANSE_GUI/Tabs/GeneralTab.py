@@ -13,19 +13,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import QObject, Slot, Signal
 
 
+from typing import Dict, Tuple
 import os
 
 from qtpy.QtCore import QObject, Slot, Signal, QMessageLogger
 from qtpy.QtWidgets import QListView
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Units import measure, unit_lookup
 
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 
@@ -88,7 +88,66 @@ class GeneralTab(QObject):
                 "path": "The path last used by this GUI element."
             },  # a dictionary of comments
         ]
-        return [group1]
+        group2 = [
+            "units",  # name of the group of settings
+            {"energy": "meV", "time": "fs", "distance": "ang", "reciprocal": "1/ang"},
+            {
+                "energy": "The unit of energy preferred by the user.",
+                "time": "The unit of time preferred by the user.",
+                "distance": "The unit of distance preferred by the user",
+                "reciprocal": "The momentum (transfer) unit preferred by the user",
+            },
+        ]
+        return [group1, group2]
+
+    def conversion_factor(self, input_unit: str) -> Tuple[float, str]:
+        """Finds the conversion factor from an input unit
+        to the unit preferred by the user for a given
+        physical property.
+
+        Parameters
+        ----------
+        input_unit : str
+            Name/abbreviation of a physical unit
+
+        Returns
+        -------
+        Tuple[float, str]
+            factor F and text label str
+            Conversion factor F for converting from the input unit
+            to the unit saved by the LocalSession instance.
+            The conversion will be done outside of this
+            function, following the formula:
+            converted_value = F * input_value
+        """
+        conversion_factor = 1.0
+        target_unit = input_unit
+        property = unit_lookup.get(input_unit, "unknown")
+        unit_group = self._session.group("units")
+        if property in unit_group:
+            target_unit = unit_group[property]
+            conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
+                target_unit
+            )
+        return conversion_factor, target_unit
+
+    def get_path(self, path_key: str):
+        paths_group = self._settings.group("paths")
+        try:
+            path = paths_group.get(path_key)
+        except KeyError:
+            paths_group.add(
+                path_key, ".", f"Filesystem path recently used by {path_key}"
+            )
+            path = "."
+        return path
+
+    def set_path(self, path_key: str, path_value: str):
+        paths_group = self._settings.group("paths")
+        if not paths_group.set(path_key, path_value):
+            paths_group.add(
+                path_key, path_value, f"Filesystem path recently used by {path_key}"
+            )
 
     @Slot()
     def save_state(self):

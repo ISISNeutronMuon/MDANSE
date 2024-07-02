@@ -39,6 +39,7 @@ class JobTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         self.action = kwargs.pop("action")
+        self.action._parent_tab = self
         cmodel = kwargs.pop("combo_model", None)
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""

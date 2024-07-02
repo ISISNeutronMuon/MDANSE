@@ -28,7 +28,7 @@ from matplotlib import rcParams
 from qtpy.QtCore import Slot, Signal, QObject, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
-from MDANSE_GUI.Session.LocalSession import unit_lookup
+from MDANSE.Framework.Units import unit_lookup
 
 
 def get_mpl_colours():

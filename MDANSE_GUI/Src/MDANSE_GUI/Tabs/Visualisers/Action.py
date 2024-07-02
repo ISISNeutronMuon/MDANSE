@@ -83,8 +83,9 @@ class Action(QWidget):
     def __init__(self, *args, use_preview=False, **kwargs):
         self._default_path = None
         self._input_trajectory = None
+        self._parent_tab = None
         self._trajectory_configurator = None
-        self._session = None
+        self._settings = None
         self._use_preview = use_preview
         default_path = kwargs.pop("path", None)
         input_trajectory = kwargs.pop("trajectory", None)
@@ -96,8 +97,8 @@ class Action(QWidget):
         self._widgets = []
         self._widgets_in_layout = []
 
-    def set_session(self, session):
-        self._session = session
+    def set_settings(self, settings):
+        self._settings = settings
 
     def set_trajectory(self, path: Optional[str], trajectory: Optional[str]) -> None:
         """Set the trajectory path and filename.
@@ -253,7 +254,7 @@ class Action(QWidget):
             print(f"Axes = {axes.keys()}")
             text = "<p><b>The results will cover the following range:</b></p>"
             for unit, old_array in axes.items():
-                scale_factor, new_unit = self._session.conversion_factor(unit)
+                scale_factor, new_unit = self._parent_tab.conversion_factor(unit)
                 array = np.array(old_array) * scale_factor
                 if len(array) < 6:
                     text += f"<p>{array} ({new_unit})</p>"

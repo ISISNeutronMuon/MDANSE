@@ -106,7 +106,7 @@ class ConverterTab(GeneralTab):
             label_text=tab_label,
             action=action,
         )
-        action.set_session(the_tab._session)
+        action.set_settings(the_tab._settings)
         return the_tab
 
 

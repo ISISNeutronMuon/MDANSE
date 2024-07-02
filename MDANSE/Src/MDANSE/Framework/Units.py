@@ -48,6 +48,23 @@ _PREFIXES = {
     "Y": 1e24,  # yotta
 }
 
+unit_lookup = {
+    "rad/ps": "energy",
+    "meV": "energy",
+    "1/cm": "energy",
+    "THz": "energy",
+    "nm": "distance",
+    "ang": "distance",
+    "pm": "distance",
+    "Bohr": "distance",
+    "ps": "time",
+    "fs": "time",
+    "ns": "time",
+    "1/nm": "reciprocal",
+    "1/ang": "reciprocal",
+    "N/A": "arbitrary",
+}
+
 
 class UnitError(Exception):
     pass

@@ -40,13 +40,14 @@ class PlotSelectionTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDA results", self.load_files)
+        self._visualiser._settings = self._settings
 
     @Slot()
     def load_files(self):
         fnames = QFileDialog.getOpenFileNames(
             self._core,
             "Load an MDA file (MDANSE analysis results)",
-            self._session.get_path("root_directory"),
+            self.get_path("root_directory"),
             "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
         )
         for fname in fnames[0]:

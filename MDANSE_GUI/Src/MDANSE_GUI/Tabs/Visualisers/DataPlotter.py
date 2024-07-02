@@ -54,9 +54,10 @@ class DataPlotter(QWidget):
 
     @Slot(object)
     def add_dataset(self, dataset: SingleDataset):
+        unit_group = self._settings.group("units")
         if self._model is None:
             try:
-                preferred_units = self._session._units
+                preferred_units = unit_group.as_dict()
             except:
                 preferred_units = None
             self._model = PlottingContext(unit_preference=preferred_units)

@@ -38,6 +38,8 @@ class PlotTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._visualiser._settings = self._settings
+        self._core._extra_visualiser._settings = self._settings
         self._visualiser.currentChanged.connect(self.switch_model)
         self._view.setModel(self.model)
         self._core._extra_visualiser.plot_settings_changed.connect(
@@ -79,8 +81,8 @@ class PlotTab(GeneralTab):
             logger=logger,
             model=None,
             view=PlotDetailsView(),
-            visualiser=PlotHolder(session=session),
-            layout=partial(TriplePanel, left_panel=PlotSettings(session=session)),
+            visualiser=PlotHolder(),
+            layout=partial(TriplePanel, left_panel=PlotSettings()),
             label_text=label_text,
         )
         return the_tab

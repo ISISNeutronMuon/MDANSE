@@ -148,12 +148,13 @@ class PlotWidget(QWidget):
     change_slider_limits = Signal(object)
     reset_slider_values = Signal(bool)
 
-    def __init__(self, *args, colours=None, **kwargs) -> None:
+    def __init__(self, *args, colours=None, settings=None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None
         self._plotting_context = None
         self._colours = colours
+        self._settings = settings
         self._slider_max = 100
         self.make_canvas()
         self.set_plotter("Single")
@@ -168,6 +169,7 @@ class PlotWidget(QWidget):
             self._plotter = Plotter.create(plotter_option)
         except:
             self._plotter = Plotter()
+        self._plotter._settings = self._settings
         self.change_slider_labels.emit(self._plotter.slider_labels())
         self.change_slider_limits.emit(self._plotter.slider_limits())
         self.reset_slider_values.emit(self._plotter._value_reset_needed)

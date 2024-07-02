@@ -44,16 +44,12 @@ from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 class PlotSettings(QWidget):
 
     plot_settings_changed = Signal()
-    units_changed = Signal(dict)
-    cmap_changed = Signal(str)
 
-    def __init__(self, *args, session=None, **kwargs) -> None:
+    def __init__(self, *args, settings=None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._session = session
+        self._settings = settings
         self._unit_fields = {}
         self.make_layout()
-        self.units_changed.connect(self._session.update_units)
-        self.cmap_changed.connect(self._session.update_cmap)
 
     @Slot(str)
     def set_style(self, style_name: str):
@@ -66,13 +62,14 @@ class PlotSettings(QWidget):
 
     @Slot(str)
     def set_cmap(self, cmap_name: str):
-        try:
-            self._session._colours["colormap"] = cmap_name
-        except:
-            print(f"Could not set matplotlib style to {cmap_name}")
-        else:
-            self.cmap_changed.emit(cmap_name)
-            self.plot_settings_changed.emit()
+        colour_group = self._settings.group("colours")
+        if not colour_group.set("colormap", cmap_name):
+            colour_group.add(
+                "colormap",
+                cmap_name,
+                "Name of the matplotlib colormap to be used in 2D plots.",
+            )
+        self.plot_settings_changed.emit()
 
     @Slot(object)
     def update_plot_details(self, input):
@@ -80,7 +77,7 @@ class PlotSettings(QWidget):
 
     @Slot()
     def update_units(self):
-        result = {}
+        unit_group = self._settings.group("units")
         try:
             energy = self._unit_fields["energy"].currentText()
         except:
@@ -91,7 +88,12 @@ class PlotSettings(QWidget):
             except:
                 pass
             else:
-                result["energy"] = energy
+                if not unit_group.set("energy", energy):
+                    unit_group.add(
+                        "energy",
+                        energy,
+                        "Preferred physical unit for expressing energy.",
+                    )
         try:
             time = self._unit_fields["time"].currentText()
         except:
@@ -102,7 +104,10 @@ class PlotSettings(QWidget):
             except:
                 pass
             else:
-                result["time"] = time
+                if not unit_group.set("time", time):
+                    unit_group.add(
+                        "time", time, "Preferred physical unit for expressing time."
+                    )
         try:
             distance = self._unit_fields["distance"].currentText()
         except:
@@ -113,7 +118,12 @@ class PlotSettings(QWidget):
             except:
                 pass
             else:
-                result["distance"] = distance
+                if not unit_group.set("distance", distance):
+                    unit_group.add(
+                        "distance",
+                        distance,
+                        "Preferred physical unit for expressing distance.",
+                    )
         try:
             reciprocal = self._unit_fields["reciprocal"].currentText()
         except:
@@ -124,8 +134,12 @@ class PlotSettings(QWidget):
             except:
                 pass
             else:
-                result["reciprocal"] = reciprocal
-        self.units_changed.emit(result)
+                if not unit_group.set("reciprocal", reciprocal):
+                    unit_group.add(
+                        "reciprocal",
+                        reciprocal,
+                        "Preferred physical unit for expressing (quasi)momentum, i.e. reciprocal space units.",
+                    )
         self.plot_settings_changed.emit()
 
     def make_layout(self, width=12.0, height=9.0, dpi=100):
@@ -153,9 +167,15 @@ class PlotSettings(QWidget):
         style_selector.setCurrentText("default")
         style_selector.currentTextChanged.connect(self.set_style)
         top_layout.addRow("Matplotlib style:", style_selector)
+        colour_group = self._settings.group("colours")
         try:
-            current_cmap = self._session._colours["colormap"]
+            current_cmap = colour_group.get("colormap")
         except KeyError:
+            colour_group.add(
+                "colormap",
+                "viridis",
+                "Name of the matplotlib colormap to be used in 2D plots.",
+            )
             current_cmap = "viridis"
         cmap_selector = QComboBox(self)
         cmap_selector.addItems(mpl.colormaps())

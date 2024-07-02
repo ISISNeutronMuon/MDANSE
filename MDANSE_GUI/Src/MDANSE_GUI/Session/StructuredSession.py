@@ -18,13 +18,12 @@ import os
 from typing import Dict
 
 from qtpy.QtCore import QObject, Signal, Slot
-
-from MDANSE import PLATFORM
 import tomlkit
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
 
-from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
+from MDANSE import PLATFORM
+from MDANSE.Framework.Units import measure, unit_lookup
 
 
 class SettingsGroup:
@@ -49,6 +48,9 @@ class SettingsGroup:
             )
             return False
         self._settings[varname] = value
+
+    def get(self, varname: str):
+        return self._settings[varname]
 
     def populate(self, settings: Dict, comments: Dict):
         for key, value in settings.items():
@@ -79,6 +81,9 @@ class SettingsGroup:
             results[key] = self._settings[key]
             results[key].comment(self._comments.get(key, "---"))
         return results
+
+    def as_dict(self):
+        return self._settings
 
 
 class SettingsFile:
@@ -189,7 +194,7 @@ class StructuredSession(QObject):
                 sf.extend_settings(gname, settings, comments)
                 sf.check_settings(gname, settings, comments)
             sf.save_values()
-        gui_element._settings = sf
+        return sf
 
     def populate_defaults(self):
         gs = SettingsFile(self._main_config_name)

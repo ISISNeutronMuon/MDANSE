@@ -30,10 +30,10 @@ class PlotHolder(QTabWidget):
 
     error = Signal(str)
 
-    def __init__(self, *args, session=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._session = session
+        self._settings = None
         self._last_number = 1
         layout = QVBoxLayout(self)
         self._context = []
@@ -47,16 +47,15 @@ class PlotHolder(QTabWidget):
 
     @Slot(str)
     def new_plot(self, tab_name: str) -> int:
+        unit_group = self._settings.group("units")
         try:
-            preferred_units = self._session._units
+            preferred_units = unit_group.as_dict()
         except:
             preferred_units = None
         if not tab_name:
             tab_name = f"New plot {self._last_number}"
             self._last_number += 1
         plotting_context = PlottingContext(unit_preference=preferred_units)
-        self._session.new_units.connect(plotting_context.accept_units)
-        self._session.new_cmap.connect(plotting_context.accept_cmap)
         plotting_context.needs_an_update.connect(self.update_plots)
         plotter = PlotWidget(self)
         plotter.set_context(plotting_context)

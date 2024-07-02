@@ -53,7 +53,7 @@ class TrajectoryTab(GeneralTab):
         fnames = QFileDialog.getOpenFileNames(
             self._core,
             "Load an MD trajectory",
-            self._session.get_path("root_directory"),
+            self.get_path("root_directory"),
             "HDF5 files, MDANSE or H5MD format (*.mdt *.h5);;H5MD files (*.h5);;All files (*)",
         )
         for fname in fnames[0]:
