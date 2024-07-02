@@ -32,7 +32,7 @@ class MultiPanel(DoublePanel):
                 self._view.connect_to_visualiser(left_panel)
 
         for right_panel in right_panels:
-            self._leftlayout.addWidget(right_panel)
+            self._rightlayout.addWidget(right_panel)
             if self._view is not None:
                 self._view.connect_to_visualiser(right_panel)
 
