@@ -167,15 +167,18 @@ class PlotSettings(QWidget):
         style_selector.setCurrentText("default")
         style_selector.currentTextChanged.connect(self.set_style)
         top_layout.addRow("Matplotlib style:", style_selector)
-        colour_group = self._settings.group("colours")
         try:
-            current_cmap = colour_group.get("colormap")
-        except KeyError:
-            colour_group.add(
-                "colormap",
-                "viridis",
-                "Name of the matplotlib colormap to be used in 2D plots.",
-            )
+            colour_group = self._settings.group("colours")
+            try:
+                current_cmap = colour_group.get("colormap")
+            except KeyError:
+                colour_group.add(
+                    "colormap",
+                    "viridis",
+                    "Name of the matplotlib colormap to be used in 2D plots.",
+                )
+                current_cmap = "viridis"
+        except:
             current_cmap = "viridis"
         cmap_selector = QComboBox(self)
         cmap_selector.addItems(mpl.colormaps())

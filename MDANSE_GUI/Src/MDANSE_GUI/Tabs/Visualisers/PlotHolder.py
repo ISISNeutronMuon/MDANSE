@@ -47,11 +47,15 @@ class PlotHolder(QTabWidget):
 
     @Slot(str)
     def new_plot(self, tab_name: str) -> int:
-        unit_group = self._settings.group("units")
         try:
-            preferred_units = unit_group.as_dict()
+            unit_group = self._settings.group("units")
         except:
             preferred_units = None
+        else:
+            try:
+                preferred_units = unit_group.as_dict()
+            except:
+                preferred_units = None
         if not tab_name:
             tab_name = f"New plot {self._last_number}"
             self._last_number += 1

@@ -186,6 +186,7 @@ class PlottingContext(QStandardItemModel):
         self._all_xunits = []
         self._best_xunits = []
         self._colour_list = get_mpl_colours()
+        self._last_colour_list = get_mpl_colours()
         self._colour_map = kwargs.get("colormap", "viridis")
         self._last_colour = 0
         if unit_preference is None:
@@ -209,7 +210,14 @@ class PlottingContext(QStandardItemModel):
         self._colour_list = get_mpl_colours()
         self._last_colour = 0
         for row in range(self.rowCount()):
-            self.item(row, 5).setText(str(self.next_colour()))
+            current_colour = self.item(row, 5).text()
+            if (
+                current_colour
+                != self._last_colour_list[row % len(self._last_colour_list)]
+            ):
+                self.item(row, 5).setText(str(self.next_colour()))
+            else:
+                self._last_colour += 1
 
     @Slot(object)
     def accept_external_data(self, other: "PlottingContext"):
@@ -278,6 +286,7 @@ class PlottingContext(QStandardItemModel):
         ]
         for item in items:
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
+        for item in items[:5]:
             item.setEditable(False)
         temp = items[4]
         temp.setCheckable(True)
