@@ -25,9 +25,7 @@ import h5py
 from qtpy import QtCore, QtGui
 
 from MDANSE.Framework.Units import measure, UnitError
-
-
-json_decoder = json.decoder.JSONDecoder()
+from MDANSE_GUI.Session.LocalSession import json_decoder
 
 
 class DataItemError(Exception):
@@ -331,6 +329,7 @@ class HDFDataItem(DataItem):
         info["plottable"] = True
         info["path"] = dataset
         info["status"] = info["path"]
+        info["filename"] = self._file.filename
         info["variable"] = os.path.basename(hdf_variable.name)
 
         # Check units

@@ -16,6 +16,7 @@ def colour_manager(request):
     temp.clear_table()
     reload(vtk)
 
+
 @pytest.mark.xfail(reason="see docstring")
 def test_ColourList(colour_manager: ColourManager):
     """It seems that in the second run of this test
