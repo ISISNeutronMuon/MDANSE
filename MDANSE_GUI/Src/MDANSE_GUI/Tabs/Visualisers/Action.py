@@ -147,7 +147,7 @@ class Action(QWidget):
         self.clear_panel()
 
         self._job_name = job_name
-        self.last_paths[job_name] = "."
+        self.last_paths[job_name] = self._parent_tab.get_path(job_name)
         try:
             job_instance = IJob.create(job_name)
         except ValueError as e:
@@ -290,7 +290,7 @@ class Action(QWidget):
         except:
             currentpath = "."
         else:
-            currentpath = self.last_paths[cname]
+            currentpath = self._parent_tab.get_path(self._job_name + "_script")
         result, ftype = QFileDialog.getSaveFileName(
             self, "Save job as a Python script", currentpath, "Python script (*.py)"
         )
@@ -303,6 +303,7 @@ class Action(QWidget):
             pass
         else:
             self.last_paths[cname] = path
+            self._parent_tab.set_path(self._job_name + "_script", path)
         pardict = self.set_parameters(labels=True)
         self._job_instance.save(result, pardict)
 
@@ -320,6 +321,7 @@ class Action(QWidget):
     def execute_converter(self):
         pardict = self.set_parameters()
         print(pardict)
+        self._parent_tab.set_path(self._job_name, self._default_path)
         # when we are ready, we can consider running it
         # self.converter_instance.run(pardict)
         # this would send the actual instance, which _may_ be wrong

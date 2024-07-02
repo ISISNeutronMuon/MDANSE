@@ -44,29 +44,20 @@ class JobStatus(Status):
         self._state["state"] = "running"
         self._state["name"] = job.name
         self._state["traceback"] = ""
-        self._state["temporary_file"] = os.path.join(
-            PLATFORM.temporary_files_directory(), self._state["name"]
-        )
+        self._state["temporary_file"] = None
         self._state["info"] = ""
 
         self.save_status()
 
     def finish_status(self):
-        # Launch a thread that will wait before erasing the file
-        t = threading.Thread(target=self.cleanup)
-        t.start()
+        pass
 
     @property
     def state(self):
         return self._state
 
     def cleanup(self):
-        # Wait before cleaning
-        time.sleep(PLATFORM.jobs_launch_delay())
-        try:
-            os.unlink(self._state["temporary_file"])
-        except:
-            pass
+        pass
 
     def start_status(self):
         self._state["n_steps"] = self.nSteps
@@ -74,8 +65,7 @@ class JobStatus(Status):
         self.save_status()
 
     def save_status(self):
-        with open(self._state["temporary_file"], "wb") as f:
-            pickle.dump(self._state, f, protocol=2)
+        pass
 
     def stop_status(self):
         pass

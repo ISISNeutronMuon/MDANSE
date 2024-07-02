@@ -47,11 +47,13 @@ class PlotSelectionTab(GeneralTab):
         fnames = QFileDialog.getOpenFileNames(
             self._core,
             "Load an MDA file (MDANSE analysis results)",
-            self.get_path("root_directory"),
+            self.get_path("plot_selection"),
             "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
         )
         for fname in fnames[0]:
             self.load_results(fname)
+            last_path, _ = os.path.split(fname)
+        self.set_path("plot_selection", last_path)
 
     @Slot()
     def load_results(self, fname: str):

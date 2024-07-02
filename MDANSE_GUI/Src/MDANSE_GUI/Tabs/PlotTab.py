@@ -17,7 +17,7 @@ import os
 from functools import partial
 
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QWidget, QFileDialog
+from qtpy.QtWidgets import QWidget
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
