@@ -86,6 +86,7 @@ class PlotDataView(QTreeView):
         model = self.model()
         index = self.currentIndex()
         model.removeRow(index.row())
+        self.item_details.emit("")
 
     def on_select_dataset(self, index):
         model = self.model()
@@ -100,7 +101,13 @@ class PlotDataView(QTreeView):
         if hasattr(mda_data_structure, "_metadata"):
             self.item_details.emit(mda_data_structure._metadata)
         else:
-            self.item_details.emit("No additional information included.")
+            try:
+                text += "\n"
+                for attr in mda_data_structure.attrs:
+                    text += f"{attr}: {mda_data_structure.attrs[attr]}\n"
+                self.item_details.emit(text)
+            except:
+                self.item_details.emit("No additional information included.")
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
