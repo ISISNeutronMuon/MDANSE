@@ -211,6 +211,7 @@ class TabbedWindow(QMainWindow):
 
     @Slot()
     def launchSettingsEditor(self):
+        self.settings_editor.update_combo()
         self.launch_dialog(self.settings_editor)
 
     @Slot()

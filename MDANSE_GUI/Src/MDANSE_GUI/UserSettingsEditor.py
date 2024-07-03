@@ -20,26 +20,30 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QApplication,
     QMenu,
-    QLineEdit,
+    QComboBox,
     QTreeView,
 )
 from qtpy.QtCore import Signal, Slot, Qt, QSortFilterProxyModel, QModelIndex
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Session.StructuredSession import (
+    StructuredSession,
+    SettingsFile,
+    SettingsGroup,
+)
 
 
 class UserSettingsModel(QStandardItemModel):
 
     file_loaded = Signal(str)
 
-    def __init__(self, *args, session=None, **kwargs):
+    def __init__(self, *args, settings_filename: str = "", **kwargs):
         super().__init__(*args, **kwargs)
-        if session is None:
-            self._session = LocalSession()
-            self._session.load()
+        if settings_filename:
+            self._settings = SettingsFile(settings_filename)
+            self._settings.load_from_file()
         else:
-            self._session = session
+            return
         self.populate_model()
         self.setHeaderData(0, Qt.Orientation.Horizontal, "Item")
         self.setHeaderData(1, Qt.Orientation.Horizontal, "Value")
@@ -49,24 +53,24 @@ class UserSettingsModel(QStandardItemModel):
         # self.scan_model()
 
     def populate_model(self):
-        comments = [
-            "Internal software parameters",
-            "Recently used paths to files",
-            "Preferred units for plotting",
-        ]
-        for number, attr in enumerate(["_parameters", "_paths", "_units"]):
-            if hasattr(self._session, attr):
-                section = getattr(self._session, attr)
-                section_item = QStandardItem(attr)
-                section_item.setData(attr)
-                section_item.setEditable(False)
-                self.appendRow([section_item, QStandardItem(comments[number])])
-                for key, value in section.items():
-                    key_item, value_item = QStandardItem(key), QStandardItem(value)
-                    key_item.setData(key)
-                    value_item.setData(value)
-                    key_item.setEditable(False)
-                    section_item.appendRow([key_item, value_item])
+        for number, groupname in enumerate(self._settings.keys()):
+            group = self._settings.group(groupname)
+            section = group._name
+            section_item = QStandardItem(section)
+            section_item.setData(section)
+            section_item.setEditable(False)
+            section_comment = group._group_comment
+            self.appendRow(
+                [section_item, QStandardItem(), QStandardItem(section_comment)]
+            )
+            for key, value in group.as_dict().items():
+                key_item, value_item = QStandardItem(key), QStandardItem(value)
+                key_item.setData(key)
+                value_item.setData(value)
+                comment_item = QStandardItem(group._comments[key])
+                comment_item.setData(group._comments[key])
+                key_item.setEditable(False)
+                section_item.appendRow([key_item, value_item, comment_item])
 
     def scan_model(self):
         """This is meant to be used for debugging purposes only"""
@@ -95,12 +99,9 @@ class UserSettingsModel(QStandardItemModel):
         except:
             print(f"Could not store {new_value} in session.{attribute}[{key}]")
 
-    @Slot(str)
-    def writeout_settings(self, target_filename: str):
-        try:
-            self._session.save(target_filename)
-        except Exception as e:
-            print(f"Writeout failed: {e}")
+    @Slot()
+    def writeout_settings(self):
+        self._settings.save_values()
 
 
 class UserSettingsEditor(QDialog):
@@ -113,11 +114,9 @@ class UserSettingsEditor(QDialog):
 
         self.setLayout(layout)
 
-        self.filename_widget = QLineEdit(self)
+        self.filename_widget = QComboBox(self)
         layout.addWidget(self.filename_widget)
-        if current_session is not None:
-            if current_session._filename is not None:
-                self.filename_widget.setText(str(current_session._filename))
+        self._session = current_session
 
         self.viewer = QTreeView(self)
         self.viewer.setAnimated(True)
@@ -126,20 +125,33 @@ class UserSettingsEditor(QDialog):
         self.writeout_button = QPushButton("Save settings", self)
         layout.addWidget(self.writeout_button)
         self.writeout_button.clicked.connect(self.save_changes)
+        self.filename_widget.currentTextChanged.connect(self.switch_model)
+        self.viewer.expanded.connect(self.expand_columns)
 
-        self.data_model = UserSettingsModel(session=current_session)
-
+    @Slot(str)
+    def switch_model(self, model_key: str):
+        self.data_model = UserSettingsModel(settings_filename=model_key)
         self.proxy_model = QSortFilterProxyModel(self)
-
         self.proxy_model.setSourceModel(self.data_model)
         self.viewer.setModel(self.proxy_model)
-        self.viewer.resizeColumnToContents(0)
+        self.expand_columns()
+
+    @Slot()
+    def expand_columns(self):
+        for ncol in range(3):
+            self.viewer.resizeColumnToContents(ncol)
+
+    def update_combo(self):
+        self.filename_widget.clear()
+        if self._session is not None:
+            self.filename_widget.addItems(
+                [str(x) for x in self._session._configs.keys()]
+            )
+            self.filename_widget.setCurrentText(self._session._main_config_name)
 
     @Slot()
     def save_changes(self):
-        target_filename = self.filename_widget.text()
-        if len(target_filename) > 0:
-            self.data_model.writeout_settings(target_filename)
+        self.data_model.writeout_settings()
 
 
 if __name__ == "__main__":
