@@ -114,6 +114,7 @@ class SettingsFile:
                     temp_values[inner_key] = table[inner_key]
                     temp_comments[inner_key] = table[inner_key].trivia.comment
                 group.populate(temp_values, temp_comments)
+                self._groups[key] = group
 
     def keys(self):
         return self._groups.keys()

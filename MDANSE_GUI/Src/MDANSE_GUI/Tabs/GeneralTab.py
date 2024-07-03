@@ -123,7 +123,7 @@ class GeneralTab(QObject):
         conversion_factor = 1.0
         target_unit = input_unit
         property = unit_lookup.get(input_unit, "unknown")
-        unit_group = self._session.group("units")
+        unit_group = self._settings.group("units").as_dict()
         if property in unit_group:
             target_unit = unit_group[property]
             conversion_factor = measure(1.0, input_unit, equivalent=True).toval(

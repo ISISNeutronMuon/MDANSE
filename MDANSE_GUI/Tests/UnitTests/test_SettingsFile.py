@@ -26,3 +26,15 @@ def test_loading(settings_file: 'SettingsFile'):
     loaded_value = loaded_group.get('blob')
     assert loaded_value == '000'
 
+def test_reloading():
+    temp_name = tempfile.mktemp()
+    path, name = os.path.split(temp_name)
+    settings_file = SettingsFile(name, path)
+    new_group = settings_file.group('blam')
+    new_group.add('blob', '000', 'useless test variable')
+    settings_file.save_values()
+    settings_file2 = SettingsFile(name, path)
+    settings_file2.load_from_file()
+    loaded_group = settings_file2.group('blam')
+    loaded_value = loaded_group.get('blob')
+    assert loaded_value == '000'
