@@ -226,7 +226,6 @@ class JobHolder(QStandardItemModel):
             command=job_vars[0], entry_number=entry_number, pause_event=pause_event
         )
         item_th.setFormatter(FMT)
-        item_th.setLevel("INFO")
 
         try:
             subprocess_ref = Subprocess(

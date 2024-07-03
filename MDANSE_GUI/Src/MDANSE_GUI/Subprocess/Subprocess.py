@@ -48,8 +48,8 @@ class Subprocess(Process):
         self._job_instance = job_instance
 
     def run(self):
-        LOG.setLevel("INFO")
         queue_handler = QueueHandler(self.log_queue)
         LOG.addHandler(queue_handler)
         LOG.info("Running job")
         self._job_instance.run(self._job_parameters)
+        LOG.removeHandler(queue_handler)

@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import logging
+from logging.handlers import QueueHandler
 
 import abc
 import glob
@@ -242,7 +243,14 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status.update()
             self.combine(idx, result)
 
-    def process_tasks_queue(self, tasks, outputs):
+    def process_tasks_queue(self, tasks, outputs, log_queues):
+
+        queue_handlers = []
+        for log_queue in log_queues:
+            queue_handler = QueueHandler(log_queue)
+            queue_handlers.append(queue_handler)
+            LOG.addHandler(queue_handler)
+
         while True:
             try:
                 index = tasks.get_nowait()
@@ -257,6 +265,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 output = self.run_step(index)
                 outputs.put(output)
 
+        for queue_handler in queue_handlers:
+            LOG.removeHandler(queue_handler)
+
         return True
 
     def _run_multicore(self):
@@ -267,6 +278,11 @@ class IJob(Configurable, metaclass=SubclassFactory):
         inputQueue = manager.Queue()
         outputQueue = manager.Queue()
 
+        log_queues = []
+        for handler in LOG.handlers:
+            if isinstance(handler, QueueHandler):
+                log_queues.append(handler.queue)
+
         self._processes = []
 
         for i in range(self.numberOfSteps):
@@ -274,7 +290,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         for i in range(self.configuration["running_mode"]["slots"]):
             p = multiprocessing.Process(
-                target=self.process_tasks_queue, args=(inputQueue, outputQueue)
+                target=self.process_tasks_queue, args=(inputQueue, outputQueue, log_queues)
             )
             self._processes.append(p)
             p.daemon = False
