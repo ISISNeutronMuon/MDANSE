@@ -57,7 +57,9 @@ class PlotTab(GeneralTab):
             model=PlottingContext(),
             view=PlotDetailsView(),
             visualiser=PlotHolder(),
-            layout=partial(MultiPanel, left_panels=[plt_settings], extra_visualiser=plt_settings),
+            layout=partial(
+                MultiPanel, left_panels=[plt_settings], extra_visualiser=plt_settings
+            ),
             label_text=label_text,
         )
         return the_tab
@@ -82,7 +84,9 @@ class PlotTab(GeneralTab):
             model=None,
             view=PlotDetailsView(),
             visualiser=PlotHolder(session=session),
-            layout=partial(MultiPanel, left_panels=[plt_settings], extra_visualiser=plt_settings),
+            layout=partial(
+                MultiPanel, left_panels=[plt_settings], extra_visualiser=plt_settings
+            ),
             label_text=label_text,
         )
         return the_tab

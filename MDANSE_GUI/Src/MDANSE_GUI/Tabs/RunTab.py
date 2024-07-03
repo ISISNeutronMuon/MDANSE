@@ -53,7 +53,8 @@ class RunTab(GeneralTab):
                 + "https://mdanse.readthedocs.io/en/protos/",
             ),
             layout=partial(
-                MultiPanel, right_panels=[JobLogInfo(header="MDANSE Logs")],
+                MultiPanel,
+                right_panels=[JobLogInfo(header="MDANSE Logs")],
             ),
             label_text=run_tab_label,
         )
@@ -84,7 +85,8 @@ class RunTab(GeneralTab):
                 + " page.",
             ),
             layout=partial(
-                MultiPanel, right_panels=[JobLogInfo(header="MDANSE Logs")],
+                MultiPanel,
+                right_panels=[JobLogInfo(header="MDANSE Logs")],
             ),
             label_text=run_tab_label,
         )

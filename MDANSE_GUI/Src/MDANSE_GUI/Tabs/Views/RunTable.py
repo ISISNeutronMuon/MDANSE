@@ -80,7 +80,7 @@ class RunTable(QTableView):
             model.existing_jobs[entry_number],
             model.existing_threads[entry_number],
             model.existing_processes[entry_number],
-            model.existing_listeners[entry_number]
+            model.existing_listeners[entry_number],
         )
         return job_entry, job_watcher_thread, job_process, log_listener
 

@@ -234,7 +234,7 @@ class JobHolder(QStandardItemModel):
                 pipe=child_pipe,
                 queue=main_queue,
                 pause_event=pause_event,
-                log_queue=log_queue
+                log_queue=log_queue,
             )
         except:
             ic(f"Failed to create Subprocess using {job_vars}")

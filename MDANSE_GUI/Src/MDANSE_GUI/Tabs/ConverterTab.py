@@ -63,11 +63,13 @@ class ConverterTab(GeneralTab):
             visualiser=action,
             layout=partial(
                 MultiPanel,
-                left_panels=[TextInfo(
-                    header="MDANSE Converter",
-                    footer="Look up our Read The Docs page:"
-                    + "https://mdanse.readthedocs.io/en/protos/",
-                )],
+                left_panels=[
+                    TextInfo(
+                        header="MDANSE Converter",
+                        footer="Look up our Read The Docs page:"
+                        + "https://mdanse.readthedocs.io/en/protos/",
+                    )
+                ],
             ),
             label_text=tab_label,
             action=action,
@@ -96,12 +98,14 @@ class ConverterTab(GeneralTab):
             visualiser=action,
             layout=partial(
                 MultiPanel,
-                left_panels=[TextInfo(
-                    header="MDANSE Converter",
-                    footer="Look up our "
-                    + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                    + " page.",
-                )],
+                left_panels=[
+                    TextInfo(
+                        header="MDANSE Converter",
+                        footer="Look up our "
+                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                        + " page.",
+                    )
+                ],
             ),
             label_text=tab_label,
             action=action,
@@ -125,12 +129,14 @@ if __name__ == "__main__":
         visualiser=action,
         layout=partial(
             MultiPanel,
-            left_panels=[TextInfo(
-                header="MDANSE Converters",
-                footer="Look up our "
-                + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                + " page.",
-            )],
+            left_panels=[
+                TextInfo(
+                    header="MDANSE Converters",
+                    footer="Look up our "
+                    + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                    + " page.",
+                )
+            ],
         ),
         label_text=tab_label,
         action=action,
