@@ -13,7 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
+from logging import Handler
+from logging.handlers import QueueListener
 from multiprocessing import Pipe, Queue, Event
 
 from icecream import ic
@@ -32,6 +34,10 @@ from MDANSE_GUI.Subprocess.JobState import (
     Aborted,
 )
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess, JobCommunicator
+from MDANSE.MLogging import FMT
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class JobThread(QThread):
@@ -77,12 +83,13 @@ class JobThread(QThread):
                 self._job_comm.status_update(status_update)
 
 
-class JobEntry(QObject):
+class JobEntry(Handler, QObject):
     """This coordinates all the objects that make up one line on the list
     of current jobs. It is used for reporting the task progress to the GUI."""
 
-    def __init__(self, *args, command=None, entry_number=0, pause_event=None):
-        super().__init__(*args)
+    def __init__(self, command=None, entry_number=0, pause_event=None):
+        super().__init__()
+        QObject.__init__(self)
         self._command = command
         self._parameters = {}
         self._pause_event = pause_event
@@ -104,6 +111,7 @@ class JobEntry(QObject):
             item.setData(entry_number)
         self._prog_item.setData(0, role=Qt.ItemDataRole.UserRole)
         self._prog_item.setData("progress", role=Qt.ItemDataRole.DisplayRole)
+        self.msgs = ""
 
     def text_summary(self) -> str:
         result = ""
@@ -174,6 +182,13 @@ class JobEntry(QObject):
         self._current_state.kill()
         self.update_fields()
 
+    def emit(self, record):
+        msg = self.format(record)
+        if self.msgs:
+            self.msgs += msg + "\n"
+        else:
+            self.msgs = msg + "\n"
+
 
 class JobHolder(QStandardItemModel):
     """All the job INSTANCES that are started by the GUI
@@ -185,6 +200,7 @@ class JobHolder(QStandardItemModel):
         self.existing_threads = {}
         self.existing_processes = {}
         self.existing_jobs = {}
+        self.existing_listeners = {}
         self._next_number = 0
 
     @Slot(str)
@@ -199,9 +215,19 @@ class JobHolder(QStandardItemModel):
 
     @Slot(list)
     def startProcess(self, job_vars: list):
+        log_queue = Queue()
+
         main_pipe, child_pipe = Pipe()
         main_queue = Queue()
         pause_event = Event()
+        entry_number = self.next_number
+
+        item_th = JobEntry(
+            command=job_vars[0], entry_number=entry_number, pause_event=pause_event
+        )
+        item_th.setFormatter(FMT)
+        item_th.setLevel("INFO")
+
         try:
             subprocess_ref = Subprocess(
                 job_name=job_vars[0],
@@ -209,23 +235,25 @@ class JobHolder(QStandardItemModel):
                 pipe=child_pipe,
                 queue=main_queue,
                 pause_event=pause_event,
+                log_queue=log_queue
             )
         except:
             ic(f"Failed to create Subprocess using {job_vars}")
             return
+
+        listener = QueueListener(log_queue, item_th, respect_handler_level=True)
+        listener.start()
+
         communicator = JobCommunicator()
         watcher_thread = JobThread(communicator, main_pipe, subprocess_ref)
         communicator.moveToThread(watcher_thread)
-        entry_number = self.next_number
-        item_th = JobEntry(
-            command=job_vars[0], entry_number=entry_number, pause_event=pause_event
-        )
+
         item_th.parameters = job_vars[1]
         communicator.target.connect(item_th.on_started)  # int
         communicator.progress.connect(item_th.on_update)  # int
         communicator.finished.connect(item_th.on_finished)  # bool
         communicator.oscillate.connect(item_th.on_oscillate)  # nothing
-        ic("Watcher thread ready to start!")
+        LOG.info("Watcher thread ready to start!")
         watcher_thread.start()
         try:
             task_name = str(job_vars[0])
@@ -246,5 +274,6 @@ class JobHolder(QStandardItemModel):
         self.existing_processes[entry_number] = subprocess_ref
         self.existing_threads[entry_number] = watcher_thread
         self.existing_jobs[entry_number] = item_th
-        ic("Subprocess ready to start!")
+        self.existing_listeners[entry_number] = listener
+        LOG.info("Subprocess ready to start!")
         subprocess_ref.start()

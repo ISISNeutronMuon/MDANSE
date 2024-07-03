@@ -20,10 +20,12 @@ from qtpy.QtWidgets import QMenu, QTableView, QAbstractItemView, QMessageBox
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
 
 
 class RunTable(QTableView):
     item_details = Signal(object)
+    jobs_logs = Signal(object)
     error = Signal(str)
 
     def __init__(self, *args, **kwargs):
@@ -50,7 +52,7 @@ class RunTable(QTableView):
         menu.exec_(event.globalPos())
 
     def populateMenu(self, menu: QMenu, item: QStandardItem):
-        entry, _, _ = self.getJobObjects()
+        entry, _, _, _ = self.getJobObjects()
         job_state = entry._current_state
         for action, method in [
             ("Delete", self.deleteNode),
@@ -74,18 +76,20 @@ class RunTable(QTableView):
         except ValueError:
             print(f"Could not use {entry_number} as int")
             return
-        job_entry, job_watcher_thread, job_process = (
+        job_entry, job_watcher_thread, job_process, log_listener = (
             model.existing_jobs[entry_number],
             model.existing_threads[entry_number],
             model.existing_processes[entry_number],
+            model.existing_listeners[entry_number]
         )
-        return job_entry, job_watcher_thread, job_process
+        return job_entry, job_watcher_thread, job_process, log_listener
 
     @Slot()
     def deleteNode(self):
-        entry, watcher, process = self.getJobObjects()
+        entry, watcher, process, listener = self.getJobObjects()
         try:
             process.close()
+            listener.stop()
         except ValueError:
             print("The process is still running!")
         else:
@@ -99,19 +103,20 @@ class RunTable(QTableView):
 
     @Slot()
     def pauseJob(self):
-        entry, _, _ = self.getJobObjects()
+        entry, _, _, _ = self.getJobObjects()
         entry.pause_job()
 
     @Slot()
     def unpauseJob(self):
-        entry, _, _ = self.getJobObjects()
+        entry, _, _, _ = self.getJobObjects()
         entry.unpause_job()
 
     @Slot()
     def killJob(self):
-        entry, _, process = self.getJobObjects()
+        entry, _, process, listener = self.getJobObjects()
         process.kill()
         entry.kill_job()
+        listener.stop()
 
     @Slot()
     def terminateJob(self):
@@ -125,9 +130,10 @@ class RunTable(QTableView):
         result = confirmation_box.exec()
         print(f"QMessageBox result = {result}")
         if result == QMessageBox.StandardButton.Yes.value:
-            entry, _, process = self.getJobObjects()
+            entry, _, process, listener = self.getJobObjects()
             process.terminate()
             entry.terminate_job()
+            listener.stop()
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
@@ -137,6 +143,7 @@ class RunTable(QTableView):
         node_number = model.index(item_row, 0).data(role=Qt.ItemDataRole.UserRole)
         job_entry = model.existing_jobs[node_number]
         self.item_details.emit(job_entry.text_summary())
+        self.jobs_logs.emit(job_entry.msgs)
 
     def connect_to_visualiser(self, visualiser: TextInfo) -> None:
         """Connect to a visualiser.
@@ -146,8 +153,10 @@ class RunTable(QTableView):
         visualiser : TextInfo
             A visualiser to connect to this view.
         """
-        if isinstance(visualiser, TextInfo):
+        if type(visualiser) is TextInfo:
             self.item_details.connect(visualiser.update_panel)
+        elif type(visualiser) is JobLogInfo:
+            self.jobs_logs.connect(visualiser.update_panel)
         else:
             raise NotImplementedError(
                 f"Unable to connect view {type(self)} to visualiser "
