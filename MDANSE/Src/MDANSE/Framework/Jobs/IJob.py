@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 
 import abc
 import glob
@@ -34,6 +35,9 @@ from MDANSE.Framework.Jobs.JobStatus import JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 
 from MDANSE.Core.SubclassFactory import SubclassFactory
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class JobError(Error):
@@ -228,7 +232,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status.update()
 
     def _run_singlecore(self):
-        print(f"Single-core run: expects {self.numberOfSteps} steps")
+        LOG.info(f"Single-core run: expects {self.numberOfSteps} steps")
         for index in range(self.numberOfSteps):
             if self._status is not None:
                 if hasattr(self._status, "_pause_event"):
