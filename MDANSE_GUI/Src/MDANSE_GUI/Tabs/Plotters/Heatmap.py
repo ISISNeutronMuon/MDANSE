@@ -130,14 +130,14 @@ class Heatmap(Plotter):
             return
         nplots = 0
         for databundle in plotting_context.datasets().values():
-            ds, _, _, _ = databundle
+            ds, _, _, _, _ = databundle
             if ds._n_dim == 1:
                 continue
             nplots += 1
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
         for num, databundle in enumerate(plotting_context.datasets().values()):
-            dataset, _, _, ds_num = databundle
+            dataset, _, _, _, ds_num = databundle
             if dataset._n_dim == 1:
                 continue
             axes = target.add_subplot(gridsize, gridsize, startnum)

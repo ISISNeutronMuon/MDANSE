@@ -23,12 +23,22 @@ if TYPE_CHECKING:
 
 import numpy as np
 from matplotlib.pyplot import style as mpl_style
+from matplotlib.markers import MarkerStyle
+from matplotlib.lines import lineStyles
 from matplotlib import rcParams
 
 from qtpy.QtCore import Slot, Signal, QObject, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 from MDANSE.Framework.Units import unit_lookup
+
+
+def get_mpl_markers():
+    return MarkerStyle.markers
+
+
+def get_mpl_lines():
+    return lineStyles
 
 
 def get_mpl_colours():
@@ -194,7 +204,16 @@ class PlottingContext(QStandardItemModel):
         else:
             self._unit_preference = unit_preference
         self.setHorizontalHeaderLabels(
-            ["Dataset", "Trajectory", "Size", "Unit", "Use it?", "Colour", "Line style"]
+            [
+                "Dataset",
+                "Trajectory",
+                "Size",
+                "Unit",
+                "Use it?",
+                "Colour",
+                "Line style",
+                "Marker",
+            ]
         )
 
     def generate_colour(self, number: int):
@@ -261,8 +280,9 @@ class PlottingContext(QStandardItemModel):
             )
             colour = self.itemFromIndex(self.index(row, 5)).text()
             style = self.itemFromIndex(self.index(row, 6)).text()
+            marker = self.itemFromIndex(self.index(row, 7)).text()
             if useit:
-                result[key] = (self._datasets[key], colour, style, ds_num)
+                result[key] = (self._datasets[key], colour, style, marker, ds_num)
         return result
 
     def add_dataset(self, new_dataset: SingleDataset):
@@ -282,6 +302,7 @@ class PlottingContext(QStandardItemModel):
                 "",
                 self.next_colour(),
                 "-",
+                "",
             ]
         ]
         for item in items:

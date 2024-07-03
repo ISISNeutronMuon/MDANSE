@@ -16,9 +16,43 @@
 from typing import Union
 
 from icecream import ic
-from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication
-from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
-from qtpy.QtGui import QMouseEvent, QDrag
+from qtpy.QtWidgets import QTreeView, QComboBox, QItemDelegate
+from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QObject
+
+from MDANSE_GUI.Tabs.Models.PlottingContext import get_mpl_lines, get_mpl_markers
+
+
+class MplStyleCombo(QItemDelegate):
+
+    def __init__(self, *args, mpl_items=None, **kwargs) -> None:
+        self._items = list([str(x) for x in mpl_items.keys()])
+        super().__init__(*args, **kwargs)
+
+    def setEditorData(self, editor, index):
+        editor.blockSignals(True)
+        text = index.model().data(index, Qt.DisplayRole)
+        try:
+            i = self._items.index(text)
+        except ValueError:
+            i = 0
+        editor.setCurrentIndex(i)
+        editor.blockSignals(False)
+
+    def setModelData(self, editor, model, index):
+        model.setData(index, editor.currentText())
+
+    def createEditor(self, parent, option, index):
+        combo = QComboBox(parent)
+        li = []
+        for item in self._items:
+            li.append(item)
+        combo.addItems(li)
+        combo.currentIndexChanged.connect(self.currentIndexChanged)
+        return combo
+
+    @Slot()
+    def currentIndexChanged(self):
+        self.commitData.emit(self.sender())
 
 
 class PlotDetailsView(QTreeView):
@@ -26,6 +60,12 @@ class PlotDetailsView(QTreeView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._delegates = {
+            "line": MplStyleCombo(mpl_items=get_mpl_lines()),
+            "marker": MplStyleCombo(mpl_items=get_mpl_markers()),
+        }
+        self.setItemDelegateForColumn(6, self._delegates["line"])
+        self.setItemDelegateForColumn(7, self._delegates["marker"])
 
     def connect_to_visualiser(self, visualiser) -> None:
         """Connect to a visualiser.
