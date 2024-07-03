@@ -1,3 +1,3 @@
 import logging
 
-FMT = logging.Formatter("%(asctime)s - %(levelname)s - %(module)s %(lineno)d - %(message)s")
+FMT = logging.Formatter("%(asctime)s - %(levelname)s - process[%(process)d] - %(module)s %(lineno)d - %(message)s")
