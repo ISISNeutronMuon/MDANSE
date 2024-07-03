@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+from PyQt6.QtWidgets import QWidget
 from qtpy.QtWidgets import (
     QDialog,
     QPushButton,
@@ -24,7 +25,7 @@ from qtpy.QtWidgets import (
     QTreeView,
 )
 from qtpy.QtCore import Signal, Slot, Qt, QSortFilterProxyModel, QModelIndex
-from qtpy.QtGui import QStandardItem, QStandardItemModel
+from qtpy.QtGui import QStandardItem, QStandardItemModel, QContextMenuEvent
 
 from MDANSE_GUI.Session.StructuredSession import (
     StructuredSession,
@@ -51,6 +52,27 @@ class UserSettingsModel(QStandardItemModel):
 
         self.dataChanged.connect(self.save_new_value)
         # self.scan_model()
+
+    @Slot()
+    def append_group(self):
+        self.appendRow(
+            [
+                QStandardItem("new group, please rename"),
+                QStandardItem(),
+                QStandardItem("# new section"),
+            ]
+        )
+
+    @Slot(int)
+    def append_child(self, parent_row_number: int):
+        parent_item = self.item(parent_row_number, 0)
+        parent_item.appendRow(
+            [
+                QStandardItem("item"),
+                QStandardItem("dummy_value"),
+                QStandardItem("# new item!"),
+            ]
+        )
 
     def populate_model(self):
         for number, groupname in enumerate(self._settings.keys()):
@@ -90,18 +112,64 @@ class UserSettingsModel(QStandardItemModel):
         item = self.itemFromIndex(item_index)
         row_number = item.row()
         new_value = item.data(role=Qt.ItemDataRole.DisplayRole)
-        key = item.parent().child(row_number, 0).data()
-        attribute = item.parent().data()
+        item_key = item.parent().child(row_number, 0).data()
+        group_key = item.parent().data()
         try:
-            group = getattr(self._session, attribute)
-            group[key] = new_value
-            setattr(self._session, attribute, group)
+            group = self._settings.group(group_key)
+            group.set(item_key, new_value)
         except:
-            print(f"Could not store {new_value} in session.{attribute}[{key}]")
+            print(f"Could not store {new_value} in group[{group_key}]->[{item_key}]")
 
     @Slot()
     def writeout_settings(self):
         self._settings.save_values()
+
+
+class SettingsView(QTreeView):
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
+        index = self.indexAt(event.pos())
+        clicked_on_node = True
+        if index.row() == -1:
+            clicked_on_node = False
+        model = self.model()
+        item = model.itemData(index)
+        menu = QMenu()
+        self.populateMenu(menu, clicked_on_node)
+        menu.exec_(event.globalPos())
+
+    def populateMenu(self, menu: QMenu, clicked_on_node: bool):
+        if clicked_on_node:
+            for action, method in [("Delete", self.delete_node)]:
+                temp_action = menu.addAction(action)
+                temp_action.triggered.connect(method)
+            menu.addSeparator()
+            for action, method in [("Add new entry", self.append_child)]:
+                temp_action = menu.addAction(action)
+                temp_action.triggered.connect(method)
+        for action, method in [("Add new group", self.append_group)]:
+            temp_action = menu.addAction(action)
+            temp_action.triggered.connect(method)
+
+    @Slot()
+    def delete_node(self):
+        model = self.model()
+        index = self.currentIndex()
+        model.removeRow(index.row())
+
+    @Slot()
+    def append_child(self):
+        model = self.model()
+        index = self.currentIndex()
+        model.append_child(index.row())
+
+    @Slot()
+    def append_group(self):
+        model = self.model()
+        model.append_group()
 
 
 class UserSettingsEditor(QDialog):
@@ -118,7 +186,7 @@ class UserSettingsEditor(QDialog):
         layout.addWidget(self.filename_widget)
         self._session = current_session
 
-        self.viewer = QTreeView(self)
+        self.viewer = SettingsView(self)
         self.viewer.setAnimated(True)
         layout.addWidget(self.viewer)
 
