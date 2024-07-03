@@ -290,7 +290,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         for i in range(self.configuration["running_mode"]["slots"]):
             p = multiprocessing.Process(
-                target=self.process_tasks_queue, args=(inputQueue, outputQueue, log_queues)
+                target=self.process_tasks_queue,
+                args=(inputQueue, outputQueue, log_queues),
             )
             self._processes.append(p)
             p.daemon = False
