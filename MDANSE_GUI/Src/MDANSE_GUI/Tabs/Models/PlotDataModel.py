@@ -111,8 +111,15 @@ class MDADataStructure:
 
         def put_into_dict(name, obj):
             try:
-                string = obj[:][0].decode()
-            except:
+                string = obj[:][0]
+            except TypeError:
+                try:
+                    string = obj[0]
+                except TypeError:
+                    return
+            try:
+                string = string.decode()
+            except KeyError:
                 print(f"Decode failed for {name}: {obj}")
                 meta_dict[name] = str(obj)
             else:
@@ -149,7 +156,7 @@ class PlotDataModel(QStandardItemModel):
         try:
             new_datafile = MDADataStructure(filename)
         except Exception as e:
-            print(f"Invalid: {str(e)}", role=Qt.ItemDataRole.DisplayRole)
+            print(f"Invalid: {str(e)}")
         else:
             self._nodes[self._next_number] = new_datafile
             new_item = DataFileItem()
