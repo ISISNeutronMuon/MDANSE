@@ -16,10 +16,31 @@
 from typing import Union
 
 from icecream import ic
-from qtpy.QtWidgets import QTreeView, QComboBox, QItemDelegate
+from qtpy.QtWidgets import QTreeView, QComboBox, QItemDelegate, QColorDialog
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QObject
+from qtpy.QtGui import QColor
 
 from MDANSE_GUI.Tabs.Models.PlottingContext import get_mpl_lines, get_mpl_markers
+
+
+class ColourPicker(QItemDelegate):
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    def createEditor(self, parent, option, index):
+        dialog = QColorDialog(parent)
+        return dialog
+
+    def setEditorData(self, editor, index):
+        colour_string = index.data()
+        color = QColor(colour_string)
+        editor.setCurrentColor(color)
+
+    def setModelData(self, editor, model, index):
+        color = editor.currentColor()
+        colour_string = color.toRgb()
+        model.setData(index, colour_string)
 
 
 class MplStyleCombo(QItemDelegate):
@@ -61,9 +82,11 @@ class PlotDetailsView(QTreeView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._delegates = {
+            "colour": ColourPicker(),
             "line": MplStyleCombo(mpl_items=get_mpl_lines()),
             "marker": MplStyleCombo(mpl_items=get_mpl_markers()),
         }
+        self.setItemDelegateForColumn(5, self._delegates["colour"])
         self.setItemDelegateForColumn(6, self._delegates["line"])
         self.setItemDelegateForColumn(7, self._delegates["marker"])
 
