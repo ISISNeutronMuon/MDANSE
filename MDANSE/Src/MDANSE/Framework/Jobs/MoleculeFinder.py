@@ -126,15 +126,10 @@ class MoleculeFinder(IJob):
         coords = conf.coordinates
 
         variables = {}
-        if (
-            "velocities"
-            in self.configuration["trajectory"]["instance"]
-            ._h5_file["configuration"]
-            .keys()
-        ):
+        if self.configuration["trajectory"]["instance"].has_variable("velocities"):
             variables = {
                 "velocities": self.configuration["trajectory"]["instance"]
-                ._h5_file["/configuration/velocities"][frameIndex, :, :]
+                .variable("velocities")[frameIndex, :, :]
                 .astype(np.float64)
             }
 
