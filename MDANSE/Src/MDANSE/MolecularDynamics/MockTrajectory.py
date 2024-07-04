@@ -72,7 +72,7 @@ class MockTrajectory:
         self._box_size = box_size * measure(1.0, "ang").toval("nm")
         self._real_length = 0
         self._num_atoms_in_box = len(atoms_in_box)
-        self._full_box_size = np.row_stack(
+        self._full_box_size = np.vstack(
             [
                 box_repetitions[0] * self._box_size[0, :],
                 box_repetitions[1] * self._box_size[1, :],
@@ -114,7 +114,7 @@ class MockTrajectory:
                 for nc in range(C):
                     shift = na * vA + nb * vB + nc * vC
                     copies.append(coords_nm + shift.reshape((1, 3)))
-        self._start_coordinates = np.row_stack(copies)
+        self._start_coordinates = np.vstack(copies)
 
     def modulate_structure(
         self,
@@ -149,7 +149,7 @@ class MockTrajectory:
             if the period of the new modulation is incommensurate with the number of frames
         """
         if len(polarisation) * self._multiplier == len(self._start_coordinates):
-            polarisation = np.row_stack(self._multiplier * [polarisation])
+            polarisation = np.vstack(self._multiplier * [polarisation])
         if len(polarisation) != len(self._start_coordinates):
             return False
         n_steps = period
@@ -168,7 +168,7 @@ class MockTrajectory:
             if current_steps < period:
                 step = math.gcd([current_steps, period])
                 while len(self._coordinates) < period:
-                    self._coordinates = np.row_stack(
+                    self._coordinates = np.vstack(
                         [self._coordinates, self._coordinates[-step:]]
                     )
         nm_amp = amplitude * measure(1.0, "ang").toval("nm")
