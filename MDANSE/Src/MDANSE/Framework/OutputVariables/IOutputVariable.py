@@ -117,9 +117,6 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
 
         self.units = getattr(obj, "units", "unitless")
 
-    def __array_wrap__(self, out_arr, context=None):
-        return np.ndarray.__array_wrap__(self, out_arr, context)
-
     def info(self):
         info = []
 
