@@ -39,7 +39,6 @@ class JobTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         self.action = kwargs.pop("action")
-        self.action._parent_tab = self
         cmodel = kwargs.pop("combo_model", None)
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""
@@ -50,6 +49,8 @@ class JobTab(GeneralTab):
         if cmodel is not None:
             self._trajectory_combo.setModel(cmodel)
         self._core.add_widget(self._trajectory_combo)
+        self.action._parent_tab = self
+        self._visualiser._parent_tab = self
 
     def set_job_starter(self, job_starter):
         self._job_starter = job_starter
@@ -102,6 +103,7 @@ class JobTab(GeneralTab):
             label_text=job_tab_label,
             action=action,
         )
+        action._parent_tab = the_tab
         return the_tab
 
     @classmethod

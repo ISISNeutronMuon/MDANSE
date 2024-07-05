@@ -43,6 +43,8 @@ class ConverterTab(GeneralTab):
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""
         self._job_starter = None
+        self.action._parent_tab = self
+        self._visualiser._parent_tab = self
 
     def set_job_starter(self, job_starter):
         self._job_starter = job_starter
