@@ -237,7 +237,8 @@ class JobHolder(QStandardItemModel):
             LOG.error(f"Failed to create Subprocess using {job_vars}")
             return
 
-        listener = QueueListener(log_queue, item_th, respect_handler_level=True)
+        handlers = [item_th] + LOG.handlers
+        listener = QueueListener(log_queue, *handlers, respect_handler_level=True)
         listener.start()
 
         communicator = JobCommunicator()

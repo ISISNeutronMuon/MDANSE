@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 import sys
 import os
 import time
@@ -22,11 +23,19 @@ from qtpy.QtCore import QSettings, Qt, QTimer
 from qtpy.QtGui import QPixmap, QIcon
 
 from MDANSE_GUI.TabbedWindow import TabbedWindow
+from MDANSE.MLogging import FMT
+
 
 os.environ["OMP_NUM_THREADS"] = "1"
 
 
 def startGUI(some_args):
+    logger = logging.getLogger("MDANSE")
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel("INFO")
+    stream_handler.setFormatter(FMT)
+    logger.addHandler(stream_handler)
+
     app = QApplication(some_args)
     app.setStyle(QStyleFactory.create("Fusion"))
 
