@@ -174,6 +174,9 @@ class StructuredSession(QObject):
         """Included for compatibility with LocalSession only.
         Now each component loads its own config separately."""
 
+    def main_settings(self):
+        return self._configs[self._main_config_name]
+
     def obtain_settings(self, gui_element):
         try:
             name = gui_element._name

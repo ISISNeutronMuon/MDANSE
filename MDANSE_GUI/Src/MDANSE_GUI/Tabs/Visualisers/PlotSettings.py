@@ -50,6 +50,11 @@ class PlotSettings(QWidget):
         self._settings = settings
         self._unit_fields = {}
         self.make_layout()
+        self.plot_settings_changed.connect(self.update_settings_file)
+
+    @Slot()
+    def update_settings_file(self):
+        self._settings.save_values()
 
     @Slot(str)
     def set_style(self, style_name: str):
@@ -210,3 +215,16 @@ class PlotSettings(QWidget):
         self._unit_fields["time"] = time_combo
         self._unit_fields["distance"] = distance_combo
         self._unit_fields["reciprocal"] = reciprocal_combo
+        try:
+            unit_group = self._settings.group("units")
+        except:
+            pass
+        else:
+            current_energy = unit_group.get("energy")
+            current_time = unit_group.get("time")
+            current_distance = unit_group.get("distance")
+            current_reciprocal = unit_group.get("reciprocal")
+            energy_combo.setCurrentText(current_energy)
+            time_combo.setCurrentText(current_time)
+            distance_combo.setCurrentText(current_distance)
+            reciprocal_combo.setCurrentText(current_reciprocal)

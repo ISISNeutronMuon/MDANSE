@@ -31,9 +31,10 @@ class DataPlotter(QWidget):
     data_for_new_plot = Signal(object)
     create_new_plot = Signal(str)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._unit_lookup = unit_lookup
         layout = QVBoxLayout(self)
         button_bar = QWidget(self)
         button_layout = QHBoxLayout(button_bar)
@@ -60,7 +61,7 @@ class DataPlotter(QWidget):
                 preferred_units = unit_group.as_dict()
             except:
                 preferred_units = None
-            self._model = PlottingContext(unit_preference=preferred_units)
+            self._model = PlottingContext(unit_lookup=self._unit_lookup)
             self._selection_viewer.setModel(self._model)
         self._model.add_dataset(dataset)
         self._selection_viewer.resizeColumnsToContents()

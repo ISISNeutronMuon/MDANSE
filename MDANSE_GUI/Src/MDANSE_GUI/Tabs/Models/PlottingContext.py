@@ -186,7 +186,7 @@ class PlottingContext(QStandardItemModel):
 
     needs_an_update = Signal()
 
-    def __init__(self, *args, unit_preference=None, **kwargs):
+    def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._datasets = {}
         self._current_axis = [None, None, None]
@@ -199,10 +199,7 @@ class PlottingContext(QStandardItemModel):
         self._last_colour_list = get_mpl_colours()
         self._colour_map = kwargs.get("colormap", "viridis")
         self._last_colour = 0
-        if unit_preference is None:
-            self._unit_preference = {}
-        else:
-            self._unit_preference = unit_preference
+        self._unit_lookup = unit_lookup
         self.setHorizontalHeaderLabels(
             [
                 "Dataset",
@@ -263,11 +260,7 @@ class PlottingContext(QStandardItemModel):
         self._colour_map = cmap
 
     def get_conversion_factor(self, unit):
-        quantity = unit_lookup.get(unit, "unknown")
-        if quantity in self._unit_preference:
-            new_unit = self._unit_preference[quantity]
-        else:
-            new_unit = unit
+        factor, new_unit = self._unit_lookup.conversion_factor(unit)
         return new_unit
 
     def datasets(self) -> Dict:

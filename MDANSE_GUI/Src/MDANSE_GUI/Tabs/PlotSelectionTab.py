@@ -41,6 +41,7 @@ class PlotSelectionTab(GeneralTab):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDA results", self.load_files)
         self._visualiser._settings = self._settings
+        self._visualiser._unit_lookup = self
 
     @Slot()
     def load_files(self):
@@ -97,6 +98,7 @@ class PlotSelectionTab(GeneralTab):
             layout=partial(TriplePanel, left_panel=PlotDataInfo()),
             label_text=label_text,
         )
+        the_tab._visualiser._unit_lookup = the_tab
         return the_tab
 
 

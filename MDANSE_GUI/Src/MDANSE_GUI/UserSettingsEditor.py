@@ -110,13 +110,18 @@ class UserSettingsModel(QStandardItemModel):
     @Slot(QModelIndex)
     def save_new_value(self, item_index: QModelIndex):
         item = self.itemFromIndex(item_index)
+        item_key = None
         row_number = item.row()
         new_value = item.data(role=Qt.ItemDataRole.DisplayRole)
-        item_key = item.parent().child(row_number, 0).data()
-        group_key = item.parent().data()
+        if item.parent() is not None:
+            item_key = item.parent().child(row_number, 0).data()
+            group_key = item.parent().data()
+        else:
+            group_key = new_value
         try:
             group = self._settings.group(group_key)
-            group.set(item_key, new_value)
+            if item_key is not None:
+                group.set(item_key, new_value)
         except:
             print(f"Could not store {new_value} in group[{group_key}]->[{item_key}]")
 
@@ -129,17 +134,6 @@ class SettingsView(QTreeView):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-
-    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
-        index = self.indexAt(event.pos())
-        clicked_on_node = True
-        if index.row() == -1:
-            clicked_on_node = False
-        model = self.model()
-        item = model.itemData(index)
-        menu = QMenu()
-        self.populateMenu(menu, clicked_on_node)
-        menu.exec_(event.globalPos())
 
     def populateMenu(self, menu: QMenu, clicked_on_node: bool):
         if clicked_on_node:
@@ -154,21 +148,29 @@ class SettingsView(QTreeView):
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
 
+    def inner_model(self):
+        model = self.model()
+        try:
+            model = model.sourceModel()
+        except AttributeError:
+            pass
+        return model
+
     @Slot()
     def delete_node(self):
-        model = self.model()
+        model = self.inner_model()
         index = self.currentIndex()
         model.removeRow(index.row())
 
     @Slot()
     def append_child(self):
-        model = self.model()
+        model = self.inner_model()
         index = self.currentIndex()
         model.append_child(index.row())
 
     @Slot()
     def append_group(self):
-        model = self.model()
+        model = self.inner_model()
         model.append_group()
 
 

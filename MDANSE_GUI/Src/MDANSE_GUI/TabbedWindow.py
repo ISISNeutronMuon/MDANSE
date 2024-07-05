@@ -319,6 +319,7 @@ class TabbedWindow(QMainWindow):
             self._settings,
             self._logger,
         )
+        plot_tab.connect_units()
         self.tabs.addTab(plot_tab._core, name)
         self._tabs[name] = plot_tab
 

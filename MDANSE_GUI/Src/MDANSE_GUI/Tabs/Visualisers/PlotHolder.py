@@ -30,7 +30,7 @@ class PlotHolder(QTabWidget):
 
     error = Signal(str)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._settings = None
@@ -38,6 +38,7 @@ class PlotHolder(QTabWidget):
         layout = QVBoxLayout(self)
         self._context = []
         self._plotter = []
+        self._unit_lookup = unit_lookup
         self._current_id = -1
         self.setLayout(layout)
         self._current_id = self.new_plot("Preview")
@@ -47,19 +48,10 @@ class PlotHolder(QTabWidget):
 
     @Slot(str)
     def new_plot(self, tab_name: str) -> int:
-        try:
-            unit_group = self._settings.group("units")
-        except:
-            preferred_units = None
-        else:
-            try:
-                preferred_units = unit_group.as_dict()
-            except:
-                preferred_units = None
         if not tab_name:
             tab_name = f"New plot {self._last_number}"
             self._last_number += 1
-        plotting_context = PlottingContext(unit_preference=preferred_units)
+        plotting_context = PlottingContext(unit_lookup=self._unit_lookup)
         plotting_context.needs_an_update.connect(self.update_plots)
         plotter = PlotWidget(self)
         plotter.set_context(plotting_context)
@@ -91,10 +83,13 @@ class PlotHolder(QTabWidget):
     def model(self):
         tab_id = self.currentIndex()
         try:
-            return self._context[tab_id]
+            pc = self._context[tab_id]
         except KeyError:
             print(f"Plotting context is missing for tab {tab_id}")
             print(self._context)
+        else:
+            pc._unit_lookup = self._unit_lookup
+            return pc
 
     @property
     def plotter(self):

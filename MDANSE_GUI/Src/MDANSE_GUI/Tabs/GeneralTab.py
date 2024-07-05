@@ -47,6 +47,7 @@ class GeneralTab(QObject):
         self._session = kwargs.pop("session", LocalSession())
         _ = kwargs.pop("settings", None)
         self._settings = self._session.obtain_settings(self)
+        self._global_settings = self._session.main_settings()
         self._model = kwargs.pop("model", None)
         self._visualiser = kwargs.pop("visualiser", TextInfo())
         self._view = kwargs.pop("view", QListView())
@@ -90,7 +91,7 @@ class GeneralTab(QObject):
         ]
         group2 = [
             "units",  # name of the group of settings
-            {"energy": "meV", "time": "fs", "distance": "ang", "reciprocal": "1/ang"},
+            {"energy": "", "time": "", "distance": "", "reciprocal": ""},
             {
                 "energy": "The unit of energy preferred by the user.",
                 "time": "The unit of time preferred by the user.",
@@ -99,6 +100,12 @@ class GeneralTab(QObject):
             },
         ]
         return [group1, group2]
+
+    def connect_units(self):
+        if self._visualiser is not None:
+            if self._visualiser._unit_lookup is None:
+                print(f"Visualiser {self._visualiser} has no unit lookup")
+                self._visualiser._unit_lookup = self
 
     def conversion_factor(self, input_unit: str) -> Tuple[float, str]:
         """Finds the conversion factor from an input unit
@@ -124,11 +131,15 @@ class GeneralTab(QObject):
         target_unit = input_unit
         property = unit_lookup.get(input_unit, "unknown")
         unit_group = self._settings.group("units").as_dict()
-        if property in unit_group:
+        backup_group = self._global_settings.group("units").as_dict()
+        if property not in unit_group:
+            if property not in backup_group:
+                return conversion_factor, target_unit
+            else:
+                target_unit = backup_group[property]
+        else:
             target_unit = unit_group[property]
-            conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
-                target_unit
-            )
+        conversion_factor = measure(1.0, input_unit, equivalent=True).toval(target_unit)
         return conversion_factor, target_unit
 
     def get_path(self, path_key: str):
