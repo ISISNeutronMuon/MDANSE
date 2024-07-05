@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import logging
 import sys
 
@@ -29,6 +28,9 @@ from MDANSE_GUI.Plotter.widgets.actions_widget import ActionsWidget
 from MDANSE_GUI.Plotter.widgets.plot_1d_widget import Plot1DWidget
 from MDANSE_GUI.Plotter.widgets.plot_nd_widget import PlotNDWidget
 from MDANSE_GUI.Plotter.widgets.preview_widget import PreviewWidget
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -126,9 +128,9 @@ class MainWindow(QtWidgets.QMainWindow):
             data_model = self._data_widget.model()
             data_model.add_data(filename)
         except DataTreeModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'{str(e)}, {["main", "popup"]}, {"error"}')
         else:
-            print(f"File {filename} successfully opened for reading", ["main"], "info")
+            LOG.info(f"File {filename} successfully opened for reading, {['main']}, {'info'}")
 
     def on_close_plot(self, index):
         """Callback called when a plot tab is closed.
@@ -166,18 +168,14 @@ class MainWindow(QtWidgets.QMainWindow):
         if not axis_dataset_info:
             for dinfo in axis_dataset_info:
                 if not dinfo["plottable"]:
-                    print(
-                        f"One or more dependent axis of the dataset is not plottable: {dinfo['status']}",
-                        ["main", "popup"],
-                        "error",
+                    LOG.error(
+                        f"One or more dependent axis of the dataset is not plottable: {dinfo['status']}, {['main', 'popup']}, {'error'}"
                     )
                     return
 
         if not selected_dataset_info["plottable"]:
-            print(
-                f"The dataset is not plottable: {selected_dataset_info['status']}",
-                ["main", "popup"],
-                "error",
+            LOG.error(
+                f"The dataset is not plottable: {selected_dataset_info['status']}, {['main', 'popup']}, {'error'}",
             )
             return
 
@@ -186,7 +184,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 plot_widget = Plot1DWidget(plot_type, axis_dataset_info[0], self)
                 plot_widget.add_line(selected_dataset_info)
             except Exception as e:
-                print(str(e), ["main", "popup"], "error")
+                LOG.error(f'{str(e)}, {["main", "popup"]}, {"error"}')
                 return
             else:
                 self._plots_tab_widget.addTab(
@@ -199,7 +197,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     plot_type, axis_dataset_info, selected_dataset_info, self
                 )
             except Exception as e:
-                print(str(e), ["main", "popup"], "error")
+                LOG.error(f'{str(e)}, {["main", "popup"]}, {"error"}')
                 return
             else:
                 self._plots_tab_widget.addTab(
@@ -212,7 +210,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     plot_type, axis_dataset_info, selected_dataset_info, self
                 )
             except Exception as e:
-                print(str(e), ["main", "popup"], "error")
+                LOG.error(f'{str(e)}, {["main", "popup"]}, {"error"}')
                 return
             else:
                 self._plots_tab_widget.addTab(
@@ -230,7 +228,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         if current_widget.get_plot_type() != plot_type:
-            print("Incompatible plot types", ["main", "popup"], "error")
+            LOG.error(f"Incompatible plot types, {['main', 'popup']}, {'error'}")
             return
 
         if plot_type != "Line":
@@ -241,7 +239,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             current_widget.add_line(selected_dataset_info)
         except Plot1DModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'{str(e)}, {["main", "popup"]}, {"error"}')
 
     def on_quit_application(self):
         """Quit the application."""

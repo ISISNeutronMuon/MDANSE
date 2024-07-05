@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 import collections
 import os
 
@@ -35,6 +36,9 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class ASETrajectoryFileError(Error):
@@ -108,7 +112,7 @@ class ASE(Converter):
         ).toval("ps")
 
         self.parse_first_step(self._atomicAliases)
-        print(f"isPeriodic after parse_first_step: {self._isPeriodic}")
+        LOG.info(f"isPeriodic after parse_first_step: {self._isPeriodic}")
         self._start = 0
 
         if self.numberOfSteps < 1:
@@ -127,7 +131,7 @@ class ASE(Converter):
             [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
         )
 
-        print(f"total steps: {self.numberOfSteps}")
+        LOG.info(f"total steps: {self.numberOfSteps}")
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -143,13 +147,13 @@ class ASE(Converter):
         except TypeError:
             frame = next(self._input)
         else:
-            print("ASE using the slower way")
+            LOG.info("ASE using the slower way")
             frame = read(self.configuration["trajectory_file"]["value"], index=index)
         time = self._timeaxis[index]
 
         if self._isPeriodic:
             unitCell = frame.cell.array
-            print(f"Unit cell from frame: {unitCell}")
+            LOG.info(f"Unit cell from frame: {unitCell}")
 
             unitCell *= measure(1.0, "ang").toval("nm")
             unitCell = UnitCell(unitCell)
@@ -223,7 +227,7 @@ class ASE(Converter):
 
         if self._isPeriodic is None:
             self._isPeriodic = np.all(first_frame.get_pbc())
-        print(f"PBC in first frame = {first_frame.get_pbc()}")
+        LOG.info(f"PBC in first frame = {first_frame.get_pbc()}")
 
         g = Graph()
 
@@ -248,10 +252,10 @@ class ASE(Converter):
                     element = get_element_from_mapping(mapping, node.element)
                     obj = Atom(element, name=node.atomName)
                 except TypeError:
-                    print("EXCEPTION in ASE loader")
-                    print(f"node.element = {node.element}")
-                    print(f"node.atomName = {node.atomName}")
-                    print(f"rankToName = {self._rankToName}")
+                    LOG.error("EXCEPTION in ASE loader")
+                    LOG.error(f"node.element = {node.element}")
+                    LOG.error(f"node.atomName = {node.atomName}")
+                    LOG.error(f"rankToName = {self._rankToName}")
                 obj.index = node.name
             else:
                 atList = []
@@ -473,10 +477,10 @@ class ASEInteractiveConverter(InteractiveConverter):
                 try:
                     obj = Atom(node.element, name=node.atomName)
                 except TypeError:
-                    print("EXCEPTION in LAMMPS loader")
-                    print(f"node.element = {node.element}")
-                    print(f"node.atomName = {node.atomName}")
-                    print(f"rankToName = {self._rankToName}")
+                    LOG.error("EXCEPTION in LAMMPS loader")
+                    LOG.error(f"node.element = {node.element}")
+                    LOG.error(f"node.atomName = {node.atomName}")
+                    LOG.error(f"rankToName = {self._rankToName}")
                 obj.index = node.name
             else:
                 atList = []
@@ -702,10 +706,10 @@ class ASEInteractiveConverter(InteractiveConverter):
                 try:
                     obj = Atom(node.element, name=node.atomName)
                 except TypeError:
-                    print("EXCEPTION in LAMMPS loader")
-                    print(f"node.element = {node.element}")
-                    print(f"node.atomName = {node.atomName}")
-                    print(f"rankToName = {self._rankToName}")
+                    LOG.error("EXCEPTION in LAMMPS loader")
+                    LOG.error(f"node.element = {node.element}")
+                    LOG.error(f"node.atomName = {node.atomName}")
+                    LOG.error(f"rankToName = {self._rankToName}")
                 obj.index = node.name
             else:
                 atList = []

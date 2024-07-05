@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 import glob
 import itertools
 import os
@@ -25,6 +25,9 @@ from qtpy.QtCore import Qt, Slot
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
+LOG = logging.getLogger("MDANSE")
+
+
 class OutputStructureWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,10 +37,10 @@ class OutputStructureWidget(WidgetBase):
             self.default_path = parent.default_path
         except KeyError:
             self.default_path = "."
-            print("KeyError in OutputTrajectoryWidget - can't get default path.")
+            LOG.error("KeyError in OutputTrajectoryWidget - can't get default path.")
         except AttributeError:
             self.default_path = "."
-            print("AttributeError in OutputTrajectoryWidget - can't get default path.")
+            LOG.error("AttributeError in OutputTrajectoryWidget - can't get default path.")
         self.file_association = ".*"
         self._value = default_value
         self._field = QLineEdit(default_value[0], self._base)

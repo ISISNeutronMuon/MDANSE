@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 import os
 from collections import defaultdict
 from importlib import metadata
@@ -30,8 +30,6 @@ from qtpy.QtWidgets import (
     QApplication,
     QAction,
 )
-
-import MDANSE
 
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
@@ -50,6 +48,9 @@ from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class TabbedWindow(QMainWindow):
@@ -190,7 +191,7 @@ class TabbedWindow(QMainWindow):
         for act in self._actions:
             self._toolBar.addAction(act)
         self.addToolBar(self._toolBar)
-        print(f"Icon size is {self._toolBar.iconSize()}")
+        LOG.info(f"Icon size is {self._toolBar.iconSize()}")
 
     @Slot()
     def launchPeriodicTable(self):
@@ -328,4 +329,4 @@ class TabbedWindow(QMainWindow):
         self.settings.endGroup()
 
     def reportError(self, text: str):
-        print(text)
+        LOG.error(text)

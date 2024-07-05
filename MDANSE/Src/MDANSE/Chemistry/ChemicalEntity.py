@@ -14,6 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+
+import logging
 import abc
 from ast import literal_eval
 import collections
@@ -41,6 +43,9 @@ if TYPE_CHECKING:
         ResiduesDatabase,
     )
     from MDANSE.MolecularDynamics.Configuration import _Configuration
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class UnknownAtomError(Exception):
@@ -2694,8 +2699,8 @@ class ChemicalSystem(_ChemicalEntity):
         if atom_names_before == atom_names_after:
             self._configuration = configuration_before
         else:
-            print("Atoms before:", atom_names_before)
-            print("Atoms after:", atom_names_after)
+            LOG.error(f"Atoms before: {atom_names_before}")
+            LOG.error(f"Atoms after: {atom_names_after}")
             raise RuntimeError(
                 "ChemicalSystem.rebuild() changed the order of atoms. This needs to be handled!"
             )

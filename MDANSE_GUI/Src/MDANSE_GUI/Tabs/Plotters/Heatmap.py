@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 from typing import TYPE_CHECKING, List
 import math
 
@@ -28,6 +28,9 @@ if TYPE_CHECKING:
     import h5py
     from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class Heatmap(Plotter):
@@ -67,7 +70,7 @@ class Heatmap(Plotter):
         else:
             target = figure
         if target is None:
-            print(f"PlottingContext can't plot to {target}")
+            LOG.error(f"PlottingContext can't plot to {target}")
             return
         target.clear()
         return target
@@ -126,7 +129,7 @@ class Heatmap(Plotter):
             self._last_axes_units = []
         self.apply_settings(plotting_context, colours)
         if plotting_context.set_axes() is None:
-            print("Axis check failed.")
+            LOG.error("Axis check failed.")
             return
         nplots = 0
         for databundle in plotting_context.datasets().values():

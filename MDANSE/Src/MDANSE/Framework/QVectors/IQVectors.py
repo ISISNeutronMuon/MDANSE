@@ -13,13 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 import abc
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
 
 from MDANSE.Core.SubclassFactory import SubclassFactory
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class QVectorsError(Error):
@@ -47,7 +50,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
             if self._status is not None:
                 self._status.finish()
         else:
-            print(
+            LOG.error(
                 f"Cannot generate vectors: q vector generator is not configured correctly."
             )
 

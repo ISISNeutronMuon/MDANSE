@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 import pickle
 import glob
 import optparse
@@ -27,6 +27,9 @@ from MDANSE import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.JobStatus import JobState
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class IndentedHelp(optparse.IndentedHelpFormatter):
@@ -141,9 +144,9 @@ class CommandLineParser(optparse.OptionParser):
             if not isinstance(info, JobState):
                 raise CommandLineParserError("Invalid contents for job %r." % basename)
 
-            print("Information about %s job:" % basename)
+            LOG.info("Information about %s job:" % basename)
             for k, v in info.iteritems():
-                print("%-20s [%s]" % (k, v))
+                LOG.info("%-20s [%s]" % (k, v))
 
     def display_element_info(self, option, opt_str, value, parser):
         if len(parser.rargs) != 1:
@@ -156,7 +159,7 @@ class CommandLineParser(optparse.OptionParser):
         from MDANSE.Chemistry import ATOMS_DATABASE
 
         try:
-            print(ATOMS_DATABASE.info(element))
+            LOG.info(ATOMS_DATABASE.info(element))
         except ValueError:
             raise CommandLineParserError(
                 "The entry %r is not registered in the database" % element
@@ -205,7 +208,7 @@ class CommandLineParser(optparse.OptionParser):
                 if not isinstance(info, JobState):
                     continue
 
-                print("%-20s [%s]" % (os.path.basename(j), info["state"]))
+                LOG.info("%-20s [%s]" % (os.path.basename(j), info["state"]))
 
     def display_trajectory_contents(self, option, opt_str, value, parser):
         """Displays trajectory contents
@@ -225,7 +228,7 @@ class CommandLineParser(optparse.OptionParser):
 
         trajName = parser.rargs[0]
         inputTraj = HDFTrajectoryInputData(trajName)
-        print(inputTraj.info())
+        LOG.info(inputTraj.info())
 
     def error(self, msg):
         """Called when an error occured in the command line.
@@ -235,7 +238,6 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         self.print_help(sys.stderr)
-        print("\n")
         self.exit(2, "Error: %s\n" % msg)
 
     def query_classes_registry(self, option, opt_str, value, parser):
@@ -252,12 +254,12 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         if len(parser.rargs) == 0:
-            print("Registered jobs:")
+            LOG.info("Registered jobs:")
             for interfaceName in IJob.indirect_subclasses():
-                print("\t- %s" % interfaceName)
+                LOG.info("\t- %s" % interfaceName)
         elif len(parser.rargs) == 1:
             val = parser.rargs[0]
-            print(IJob.create(val).info())
+            LOG.info(IJob.create(val).info())
         else:
             raise CommandLineParserError(
                 "Invalid number of arguments for %r option" % opt_str
@@ -335,7 +337,7 @@ class CommandLineParser(optparse.OptionParser):
             raise CommandLineParserError("The job %r is not a valid MDANSE job" % name)
         # Otherwise, print some information about the saved template.
         else:
-            print("Saved template for job %r as %r" % (name, filename))
+            LOG.info("Saved template for job %r as %r" % (name, filename))
 
     def save_job_template(self, option, opt_str, value, parser):
         """
@@ -359,7 +361,7 @@ class CommandLineParser(optparse.OptionParser):
         from MDANSE.Framework.Jobs.IJob import IJob
 
         if nargs != 2:
-            print(
+            LOG.error(
                 "Two arguments required resp. the name and the shortname of the class to be templated"
             )
             return

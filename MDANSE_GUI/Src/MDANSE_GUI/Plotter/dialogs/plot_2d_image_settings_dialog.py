@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 from qtpy import QtWidgets
 
 
@@ -21,6 +21,9 @@ from MDANSE_GUI.Plotter.models.plot_2d_model import (
     Plot2DModel,
     Plot2DModelError,
 )
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class Plot2DImageSettingsDialog(QtWidgets.QDialog):
@@ -142,7 +145,7 @@ class Plot2DImageSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_2d_model.set_x_unit(new_x_unit)
         except Plot2DModelError:
-            print("Incompatible X unit", ["main", "popup"], "error")
+            LOG.error(f"Incompatible X unit, {['main', 'popup']}, {'error'}")
             return
 
     def on_change_y_unit(self):
@@ -150,7 +153,7 @@ class Plot2DImageSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_2d_model.set_y_unit(new_y_unit)
         except Plot2DModelError:
-            print("Incompatible Y unit", ["main", "popup"], "error")
+            LOG.error(f"Incompatible Y unit, {['main', 'popup']}, {'error'}")
             return
 
     def on_change_z_unit(self):
@@ -158,7 +161,7 @@ class Plot2DImageSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_2d_model.set_z_unit(new_z_unit)
         except Plot2DModelError:
-            print("Incompatible Z unit", ["main", "popup"], "error")
+            LOG.error(f"Incompatible Z unit, {['main', 'popup']}, {'error'}")
             return
 
     def on_edit_x_label(self, label):

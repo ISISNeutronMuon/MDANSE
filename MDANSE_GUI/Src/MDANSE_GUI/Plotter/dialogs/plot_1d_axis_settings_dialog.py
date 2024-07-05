@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 import numpy as np
 
 from qtpy import QtWidgets
@@ -23,6 +23,9 @@ from MDANSE_GUI.Plotter.models.plot_1d_model import (
     Plot1DModel,
     Plot1DModelError,
 )
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class Plot1DAxisSettingsDialog(QtWidgets.QDialog):
@@ -187,7 +190,7 @@ class Plot1DAxisSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_1d_model.set_x_axis_unit(new_x_unit)
         except Plot1DModelError:
-            print("Incompatible X unit", ["main", "popup"], "error")
+            LOG.error(f"Incompatible X unit, {['main', 'popup']}, {'error'}")
             return
 
     def on_change_y_scale(self, index):
@@ -204,7 +207,7 @@ class Plot1DAxisSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_1d_model.set_y_axis_unit(new_y_unit)
         except Plot1DModelError:
-            print("Incompatible Y unit", ["main", "popup"], "error")
+            LOG.error(f"Incompatible Y unit, {['main', 'popup']}, {'error'}")
             return
 
     def on_edit_x_label(self, label):
@@ -230,7 +233,7 @@ class Plot1DAxisSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_1d_model.set_x_axis_range(x_min, x_max)
         except Plot1DModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'{str(e)}, {"main", "popup"}, {"error"}')
 
     def on_set_y_range(self):
         """Callback called when the Y axis range is modified."""
@@ -239,7 +242,7 @@ class Plot1DAxisSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_1d_model.set_y_axis_range(y_min, y_max)
         except Plot1DModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'{str(e)}, {"main", "popup"}, {"error"}')
 
     def on_update(self):
         """Update the widgets of the dialog."""

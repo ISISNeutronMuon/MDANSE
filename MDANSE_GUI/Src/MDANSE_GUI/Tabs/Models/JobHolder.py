@@ -147,7 +147,7 @@ class JobEntry(Handler, QObject):
 
     @Slot(int)
     def on_started(self, target_steps: int):
-        print(f"Item received on_started: {target_steps} total steps")
+        LOG.info(f"Item received on_started: {target_steps} total steps")
         self.total_steps = target_steps
         self._current_state.start()
         self.update_fields()

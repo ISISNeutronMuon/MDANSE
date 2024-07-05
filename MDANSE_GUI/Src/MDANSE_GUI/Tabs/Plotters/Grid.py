@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 from typing import TYPE_CHECKING, List
 import math
 
@@ -24,6 +24,9 @@ if TYPE_CHECKING:
     import h5py
     from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class Grid(Plotter):
@@ -57,7 +60,7 @@ class Grid(Plotter):
         if toolbar is not None:
             self._toolbar = toolbar
         if plotting_context.set_axes() is None:
-            print("Axis check failed.")
+            LOG.error("Axis check failed.")
             return
         self._axes = []
         self.apply_settings(plotting_context, colours)

@@ -13,11 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 
 from typing import Dict
 import collections
 
 from MDANSE.Core.Error import Error
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class ConfigurationError(Error):
@@ -161,7 +165,7 @@ class Configurable(object):
                     continue
 
                 if not conf.valid:
-                    print(conf.error_status)
+                    LOG.error(conf.error_status)
                     self._configured = False
                     return
 
@@ -186,7 +190,7 @@ class Configurable(object):
                     progress = True
 
                 if not conf.valid and not conf.optional:
-                    print(conf.error_status)
+                    LOG.error(conf.error_status)
                     self._configured = False
                     return
 

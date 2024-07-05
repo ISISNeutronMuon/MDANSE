@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 from qtpy.QtCore import QAbstractItemModel
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
 from qtpy.QtWidgets import QMenu, QTableView, QAbstractItemView, QMessageBox
@@ -21,6 +21,9 @@ from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class RunTable(QTableView):
@@ -74,7 +77,7 @@ class RunTable(QTableView):
         try:
             entry_number = int(entry_number)
         except ValueError:
-            print(f"Could not use {entry_number} as int")
+            LOG.error(f"Could not use {entry_number} as int")
             return
         job_entry, job_watcher_thread, job_process, log_listener = (
             model.existing_jobs[entry_number],
@@ -91,7 +94,7 @@ class RunTable(QTableView):
             process.close()
             listener.stop()
         except ValueError:
-            print("The process is still running!")
+            LOG.error("The process is still running!")
         else:
             model = self.model()
             index = self.currentIndex()
@@ -128,7 +131,7 @@ class RunTable(QTableView):
             parent=self,
         )
         result = confirmation_box.exec()
-        print(f"QMessageBox result = {result}")
+        LOG.info(f"QMessageBox result = {result}")
         if result == QMessageBox.StandardButton.Yes.value:
             entry, _, process, listener = self.getJobObjects()
             process.terminate()

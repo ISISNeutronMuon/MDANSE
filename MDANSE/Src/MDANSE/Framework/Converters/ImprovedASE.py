@@ -13,18 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 import collections
-import os
-import re
-from os.path import expanduser
 
 from ase.io import iread, read
-from ase.atoms import Atoms as ASEAtoms
 from ase.io.trajectory import Trajectory as ASETrajectory
 import numpy as np
 
-from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, AtomCluster, ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
@@ -37,6 +32,9 @@ from MDANSE.MolecularDynamics.Configuration import (
 from MDANSE.MolecularDynamics.TrajectoryUtils import elements_from_masses
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class ASETrajectoryFileError(Error):
@@ -145,7 +143,7 @@ class ImprovedASE(Converter):
             [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
         )
 
-        print(f"total steps: {self.numberOfSteps}")
+        LOG.info(f"total steps: {self.numberOfSteps}")
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -269,10 +267,10 @@ class ImprovedASE(Converter):
                         try:
                             obj = Atom(node.element, name=node.atomName)
                         except TypeError:
-                            print("EXCEPTION in ASE loader")
-                            print(f"node.element = {node.element}")
-                            print(f"node.atomName = {node.atomName}")
-                            print(f"rankToName = {self._rankToName}")
+                            LOG.error("EXCEPTION in ASE loader")
+                            LOG.error(f"node.element = {node.element}")
+                            LOG.error(f"node.atomName = {node.atomName}")
+                            LOG.error(f"rankToName = {self._rankToName}")
                         obj.index = node.name
                     else:
                         atList = []

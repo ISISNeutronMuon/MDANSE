@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 import collections
 import numpy as np
 
@@ -32,6 +33,9 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 
 
+LOG = logging.getLogger("MDANSE")
+
+
 class LAMMPSTrajectoryFileError(Error):
     pass
 
@@ -49,7 +53,7 @@ class LAMMPSReader:
         try:
             self._file.close()
         except:
-            print(f"Could not close file: {self._file}")
+            LOG.error(f"Could not close file: {self._file}")
 
     def set_output(self, output_trajectory):
         self._trajectory = output_trajectory
@@ -201,10 +205,10 @@ class LAMMPScustom(LAMMPSReader):
                             )
                             obj = Atom(symbol=element, name=node.atomName)
                         except TypeError:
-                            print("EXCEPTION in LAMMPS loader")
-                            print(f"node.element = {node.element}")
-                            print(f"node.atomName = {node.atomName}")
-                            print(f"rankToName = {self._rankToName}")
+                            LOG.error("EXCEPTION in LAMMPS loader")
+                            LOG.error(f"node.element = {node.element}")
+                            LOG.error(f"node.atomName = {node.atomName}")
+                            LOG.error(f"rankToName = {self._rankToName}")
                         obj.index = node.name
                     else:
                         atList = []
@@ -447,10 +451,10 @@ class LAMMPSxyz(LAMMPSReader):
                     )
                     obj = Atom(symbol=element, name=node.atomName)
                 except TypeError:
-                    print("EXCEPTION in LAMMPS loader")
-                    print(f"node.element = {node.element}")
-                    print(f"node.atomName = {node.atomName}")
-                    print(f"rankToName = {self._rankToName}")
+                    LOG.error("EXCEPTION in LAMMPS loader")
+                    LOG.error(f"node.element = {node.element}")
+                    LOG.error(f"node.atomName = {node.atomName}")
+                    LOG.error(f"rankToName = {self._rankToName}")
                 obj.index = node.name
             else:
                 atList = []
@@ -574,10 +578,10 @@ class LAMMPSh5md(LAMMPSReader):
                     )
                     obj = Atom(symbol=element, name=node.atomName)
                 except TypeError:
-                    print("EXCEPTION in LAMMPS loader")
-                    print(f"node.element = {node.element}")
-                    print(f"node.atomName = {node.atomName}")
-                    print(f"rankToName = {self._rankToName}")
+                    LOG.error("EXCEPTION in LAMMPS loader")
+                    LOG.error(f"node.element = {node.element}")
+                    LOG.error(f"node.atomName = {node.atomName}")
+                    LOG.error(f"rankToName = {self._rankToName}")
                 obj.index = node.name
             else:
                 atList = []

@@ -13,14 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from typing import TYPE_CHECKING
+import logging
 
 from qtpy.QtWidgets import QVBoxLayout, QTabWidget
 from qtpy.QtCore import Slot, Signal
 
 from MDANSE_GUI.Tabs.Visualisers.PlotWidget import PlotWidget
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class PlotHolder(QTabWidget):
@@ -61,7 +63,7 @@ class PlotHolder(QTabWidget):
         plotter = PlotWidget(self)
         plotter.set_context(plotting_context)
         tab_id = self.addTab(plotter, tab_name)
-        print(f"PlotHolder created tab: {tab_id}")
+        LOG.info(f"PlotHolder created tab: {tab_id}")
         self._context.append(plotting_context)
         self._plotter.append(plotter)
         self.setCurrentIndex(tab_id)
@@ -90,8 +92,8 @@ class PlotHolder(QTabWidget):
         try:
             return self._context[tab_id]
         except KeyError:
-            print(f"Plotting context is missing for tab {tab_id}")
-            print(self._context)
+            LOG.error(f"Plotting context is missing for tab {tab_id}")
+            LOG.error(self._context)
 
     @property
     def plotter(self):
@@ -99,8 +101,8 @@ class PlotHolder(QTabWidget):
         try:
             return self._plotter[tab_id]
         except KeyError:
-            print(f"PlotWidget is missing for tab {tab_id}")
-            print(self._plotter)
+            LOG.error(f"PlotWidget is missing for tab {tab_id}")
+            LOG.error(self._plotter)
 
     @Slot(object)
     def update_plot_details(self, input):

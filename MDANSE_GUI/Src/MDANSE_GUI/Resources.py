@@ -13,9 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 from qtpy.QtCore import QDir, QSize
 from qtpy.QtGui import QIcon, QPixmap
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class Resources:
@@ -30,7 +33,7 @@ class Resources:
         temp = files("MDANSE_GUI")
         # print(f"I got {temp} from the importlib.resources")
         res_dir = QDir(str(temp.joinpath("Icons")))
-        print(f"Resources are in {res_dir.absolutePath()}")
+        LOG.info(f"Resources are in {res_dir.absolutePath()}")
         # res_dir.addSearchPath('icons', 'Src/PyQtGUI/Icons/')
         res_dir.setNameFilters(["*.png"])
         files = res_dir.entryList()

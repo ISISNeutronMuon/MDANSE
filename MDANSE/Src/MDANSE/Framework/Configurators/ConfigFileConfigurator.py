@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 import re
 import numpy as np
 
@@ -20,6 +21,9 @@ from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class LAMMPSConfigFileError(Error):
@@ -151,7 +155,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                     np.concatenate([x_inputs, y_inputs, z_inputs])
                 )
             except:
-                print(f"LAMMPS ConfigFileConfigurator failed to find a unit cell")
+                LOG.error(f"LAMMPS ConfigFileConfigurator failed to find a unit cell")
 
     def get_atom_labels(self) -> list[AtomLabel]:
         """

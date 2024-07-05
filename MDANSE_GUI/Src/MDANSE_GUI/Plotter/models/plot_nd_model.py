@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 
 import numpy as np
 
@@ -25,6 +26,9 @@ from matplotlib.patches import Rectangle
 from MDANSE.Framework.Units import measure, UnitError
 
 from MDANSE_GUI.Plotter.utils.numeric import smart_round
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class PlotNDModelError(Exception):
@@ -778,7 +782,7 @@ class PlotNDModel(QtCore.QObject):
 
         data = self._image.get_array()
         if norm == "log" and data.min() <= 0.0:
-            print("Data contains negative value", ["main", "popup"], "error")
+            LOG.error(f"Data contains negative value, {['main', 'popup']}, {'error'}")
             return
 
         if norm == "none":

@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 import os
 from typing import TYPE_CHECKING, Dict
 from importlib import metadata
@@ -24,6 +25,9 @@ from MDANSE.Framework.Formats.IFormat import IFormat
 if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
     from MDANSE.Framework.Jobs.IJob import IJob
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class HDFFormat(IFormat):
@@ -96,7 +100,7 @@ class HDFFormat(IFormat):
             inputs = run_instance.output_configuration()
 
             if inputs is not None:
-                print(inputs)
+                LOG.info(inputs)
                 dgroup = meta.create_group("inputs")
                 for key, value in inputs.items():
                     dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)

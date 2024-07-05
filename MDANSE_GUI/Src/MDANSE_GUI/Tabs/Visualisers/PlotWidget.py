@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
@@ -42,6 +42,9 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Slot, Signal, QObject, Qt
 
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class SliderPack(QWidget):
@@ -188,7 +191,7 @@ class PlotWidget(QWidget):
 
     def plot_data(self, update_only=False):
         if self._plotter is None:
-            print("No plotter present in PlotWidget.")
+            LOG.info("No plotter present in PlotWidget.")
             return
         if self._plotting_context is None:
             return

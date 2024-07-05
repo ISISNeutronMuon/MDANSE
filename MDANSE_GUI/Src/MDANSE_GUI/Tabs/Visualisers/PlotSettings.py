@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
@@ -41,6 +41,9 @@ from MDANSE.Framework.Units import measure
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 
+LOG = logging.getLogger("MDANSE")
+
+
 class PlotSettings(QWidget):
 
     plot_settings_changed = Signal()
@@ -60,7 +63,7 @@ class PlotSettings(QWidget):
         try:
             mpl.style.use(style_name)
         except:
-            print(f"Could not set matplotlib style to {style_name}")
+            LOG.error(f"Could not set matplotlib style to {style_name}")
         else:
             self.plot_settings_changed.emit()
 
@@ -69,7 +72,7 @@ class PlotSettings(QWidget):
         try:
             self._session._colours["colormap"] = cmap_name
         except:
-            print(f"Could not set matplotlib style to {cmap_name}")
+            LOG.error(f"Could not set matplotlib style to {cmap_name}")
         else:
             self.cmap_changed.emit(cmap_name)
             self.plot_settings_changed.emit()

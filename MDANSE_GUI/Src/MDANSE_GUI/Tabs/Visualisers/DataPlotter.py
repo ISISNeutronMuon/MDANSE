@@ -13,13 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from typing import TYPE_CHECKING
+import logging
 
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QTableView, QPushButton, QHBoxLayout
 from qtpy.QtCore import Slot, Signal
 
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class DataPlotter(QWidget):
@@ -76,7 +78,7 @@ class DataPlotter(QWidget):
 
     @Slot(object)
     def accept_data(self, data_set):
-        print(f"Received {data_set}")
+        LOG.info(f"Received {data_set}")
         dataset = SingleDataset(data_set[0], data_set[1])
         self.add_dataset(dataset)
 
@@ -85,4 +87,4 @@ class DataPlotter(QWidget):
         if self._model is None:
             return
         self._model.clear()
-        print(f"Cleared the plot")
+        LOG.info(f"Cleared the plot")

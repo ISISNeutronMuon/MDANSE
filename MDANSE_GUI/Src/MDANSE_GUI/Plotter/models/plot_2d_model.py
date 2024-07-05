@@ -13,8 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-import numpy as np
+import logging
 
 from matplotlib.colors import CenteredNorm, LogNorm, Normalize, SymLogNorm
 from matplotlib import pyplot
@@ -24,6 +23,9 @@ from qtpy import QtCore
 
 from MDANSE.Framework.Units import measure, UnitError
 from MDANSE_GUI.Plotter.utils.numeric import smart_round
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class Plot2DModelError(Exception):
@@ -300,7 +302,7 @@ class Plot2DModel(QtCore.QObject):
 
         data = self._image.get_array()
         if norm == "log" and data.min() <= 0.0:
-            print("Data contains negative value", ["main", "popup"], "error")
+            LOG.error(f"Data contains negative value, {['main', 'popup']}, {'error'}")
             return
 
         if norm == "none":

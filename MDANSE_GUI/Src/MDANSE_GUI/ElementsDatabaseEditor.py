@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 from qtpy.QtWidgets import (
     QDialog,
     QPushButton,
@@ -28,6 +28,9 @@ from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE_GUI.Widgets.GeneralWidgets import InputVariable, InputDialog
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class ElementView(QTableView):
@@ -116,8 +119,8 @@ class ElementModel(QStandardItemModel):
         text = item.text()
         row = item.row()
         column = item.column()
-        print(f"data:{data}, text:{text},row:{row},column:{column}")
-        print(
+        LOG.info(f"data:{data}, text:{text},row:{row},column:{column}")
+        LOG.info(
             f"column name={self.all_column_names[column]}, row name={self.all_row_names[row]}"
         )
         self.database.set_value(
@@ -194,7 +197,7 @@ class ElementModel(QStandardItemModel):
             self.setVerticalHeaderItem(
                 self.rowCount() - 1, QStandardItem(str(new_label))
             )
-            print(f"self.all_row_names has length: {len(self.all_row_names)}")
+            LOG.info(f"self.all_row_names has length: {len(self.all_row_names)}")
 
     @Slot(dict)
     def add_new_column(self, input_variables: dict):
@@ -221,7 +224,7 @@ class ElementModel(QStandardItemModel):
             self.setHorizontalHeaderItem(
                 self.columnCount() - 1, QStandardItem(str(new_label))
             )
-            print(f"self.all_column_names has length: {len(self.all_column_names)}")
+            LOG.info(f"self.all_column_names has length: {len(self.all_column_names)}")
 
 
 class ElementsDatabaseEditor(QDialog):

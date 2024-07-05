@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 import glob
 import itertools
 import os
@@ -24,6 +24,9 @@ from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class CheckableComboBox(QComboBox):
@@ -61,7 +64,7 @@ class CheckableComboBox(QComboBox):
             item = model.itemFromIndex(index)
             if item.checkState() == Qt.Checked:
                 text = model.data(index)
-                print(text)
+                LOG.info(text)
                 result.append(text)
         return result
 
@@ -75,10 +78,10 @@ class OutputFilesWidget(WidgetBase):
             self.default_path = parent.default_path
         except KeyError:
             self.default_path = "."
-            print("KeyError in OutputFilesWidget - can't get default path.")
+            LOG.error("KeyError in OutputFilesWidget - can't get default path.")
         except AttributeError:
             self.default_path = "."
-            print("AttributeError in OutputFilesWidget - can't get default path.")
+            LOG.error("AttributeError in OutputFilesWidget - can't get default path.")
         self.file_association = ".*"
         self._value = default_value
         self._field = QLineEdit(default_value[0], self._base)

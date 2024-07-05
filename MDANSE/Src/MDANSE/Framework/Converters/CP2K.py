@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 import collections
 import numpy as np
 
@@ -24,6 +25,9 @@ from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class CellFileError(Error):
@@ -178,7 +182,7 @@ class CP2K(Converter):
         self._cellFile = CellFile(self.configuration["cell_file"]["filename"])
 
         if abs(self._cellFile["time_step"] - self._xyzFile["time_step"]) > 1.0e-09:
-            print((self._cellFile["time_step"], self._xyzFile["time_step"]))
+            LOG.error(f'{self._cellFile["time_step"]}, {self._xyzFile["time_step"]}')
             raise CP2KConverterError(
                 "Inconsistent time step between pos and cell files"
             )

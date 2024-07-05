@@ -33,6 +33,7 @@ Sorted list implementations:
 # pylint: disable=too-many-lines
 from __future__ import print_function
 
+import logging
 import sys
 import traceback
 
@@ -69,6 +70,9 @@ else:
         from _thread import get_ident
     except ImportError:
         from _dummy_thread import get_ident
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 def recursive_repr(fillvalue="..."):
@@ -1649,15 +1653,15 @@ class SortedList(MutableSequence):
                         assert child_sum == self._index[pos]
         except:
             traceback.print_exc(file=sys.stdout)
-            print("len", self._len)
-            print("load", self._load)
-            print("offset", self._offset)
-            print("len_index", len(self._index))
-            print("index", self._index)
-            print("len_maxes", len(self._maxes))
-            print("maxes", self._maxes)
-            print("len_lists", len(self._lists))
-            print("lists", self._lists)
+            LOG.error(f"len, {self._len}")
+            LOG.error(f"load, {self._load}")
+            LOG.error(f"offset, {self._offset}")
+            LOG.error(f"len_index, {len(self._index)}")
+            LOG.error(f"index, {self._index}")
+            LOG.error(f"len_maxes, {len(self._maxes)}")
+            LOG.error(f"maxes, {self._maxes}")
+            LOG.error(f"len_lists, {len(self._lists)}")
+            LOG.error(f"lists, {self._lists}")
             raise
 
 
@@ -2587,17 +2591,17 @@ class SortedKeyList(SortedList):
                         assert child_sum == self._index[pos]
         except:
             traceback.print_exc(file=sys.stdout)
-            print("len", self._len)
-            print("load", self._load)
-            print("offset", self._offset)
-            print("len_index", len(self._index))
-            print("index", self._index)
-            print("len_maxes", len(self._maxes))
-            print("maxes", self._maxes)
-            print("len_keys", len(self._keys))
-            print("keys", self._keys)
-            print("len_lists", len(self._lists))
-            print("lists", self._lists)
+            LOG.error(f"len, {self._len}")
+            LOG.error(f"load, {self._load}")
+            LOG.error(f"offset, {self._offset}")
+            LOG.error(f"len_index, {len(self._index)}")
+            LOG.error(f"index, {self._index}")
+            LOG.error(f"len_maxes, {len(self._maxes)}")
+            LOG.error(f"maxes, {self._maxes}")
+            LOG.error(f"len_keys, {len(self._keys)}")
+            LOG.error(f"keys, {self._keys}")
+            LOG.error(f"len_lists, {len(self._lists)}")
+            LOG.error(f"lists, {self._lists}")
             raise
 
 

@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 from typing import Union
 
 from icecream import ic
@@ -24,6 +25,9 @@ from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.DataViewModel.ActionsHolder import ActionsHolder
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class ActionsTree(QTreeView):
@@ -55,7 +59,7 @@ class ActionsTree(QTreeView):
         # print("Mouse Move Event!", event.button(), QtCore.Qt.MouseButton.LeftButton)
         if event.buttons() == Qt.MouseButton.LeftButton:
             # if event.button():
-            print("dragging")
+            LOG.info("dragging")
             new_position = event.position()
             distance = (self.click_position - new_position).manhattanLength()
             if distance > QApplication.startDragDistance():
@@ -72,7 +76,7 @@ class ActionsTree(QTreeView):
         model = self.model()
         item = model.itemFromIndex(index)
         text = item.text()
-        print("tree: clicked on ", text)
+        LOG.info(f"tree: clicked on {text}")
         self.jobname_selected.emit(text)
 
     def pop_action_dialog(self, index):

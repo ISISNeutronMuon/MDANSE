@@ -13,10 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import logging
 import glob
 import importlib
 import os
 
+LOG = logging.getLogger("MDANSE")
 current_path, _ = os.path.split(__file__)
 
 modnames = []
@@ -33,7 +35,7 @@ for name in modnames:
     try:
         tempmod = importlib.import_module("." + name, "MDANSE.Framework.Jobs")
     except ModuleNotFoundError:
-        print(f"Could not find {name} in MDANSE.Framework.Jobs")
+        LOG.error(f"Could not find {name} in MDANSE.Framework.Jobs")
     tempobject = getattr(tempmod, name)
     globdict[name] = tempobject
     del tempmod  # optionally delete the reference to the parent module

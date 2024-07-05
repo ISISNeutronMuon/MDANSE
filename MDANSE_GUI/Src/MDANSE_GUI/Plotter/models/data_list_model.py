@@ -13,12 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 import os
 
 from qtpy import QtCore
 
 from MDANSE_GUI.Plotter.models.data_tree_model import DATA_MODELS
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class DataListModel(QtCore.QAbstractListModel):
@@ -40,7 +43,7 @@ class DataListModel(QtCore.QAbstractListModel):
         try:
             data_model_class = DATA_MODELS[extension]
         except KeyError:
-            print("Unknown file extension")
+            LOG.error("Unknown file extension")
 
         self.beginInsertRows(QtCore.QModelIndex(), self.rowCount(), self.rowCount())
         data_model = data_model_class(filename, self)

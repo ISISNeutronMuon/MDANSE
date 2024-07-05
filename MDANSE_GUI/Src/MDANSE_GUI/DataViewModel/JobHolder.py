@@ -13,13 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 from icecream import ic
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
 
 from MDANSE_GUI.DataViewModel.JobStatusQt import JobStatusQt
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class JobThread(QThread):
@@ -94,7 +97,7 @@ class JobEntry(QObject):
 
     @Slot(bool)
     def on_finished(self, success: bool):
-        print("Item received on_finished!")
+        LOG.info("Item received on_finished!")
         self.success = success
         self.has_finished = True
         self._stat_item.setText("Stopped")
@@ -105,7 +108,7 @@ class JobEntry(QObject):
 
     @Slot(int)
     def on_started(self, target_steps: int):
-        print("Item received on_started!")
+        LOG.info("Item received on_started!")
         self.total_steps = target_steps
         self.has_started = True
         self._stat_item.setText("Starting")
@@ -113,7 +116,7 @@ class JobEntry(QObject):
 
     @Slot(int)
     def on_update(self, completed_steps: int):
-        print("Item received on_update!")
+        LOG.info("Item received on_update!")
         self.percent_complete = completed_steps / self.total_steps * 99
         self._stat_item.setText("Running")
         self.update_fields()

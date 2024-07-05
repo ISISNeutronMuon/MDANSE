@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 from qtpy import QtCore, QtWidgets
 
 from pylab import Figure
@@ -35,6 +35,9 @@ from MDANSE_GUI.Plotter.models.plot_1d_model import (
     Plot1DModel,
     Plot1DModelError,
 )
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class Plot1DWidget(QtWidgets.QWidget):
@@ -90,7 +93,7 @@ class Plot1DWidget(QtWidgets.QWidget):
         try:
             self._plot_1d_model.add_line(y_data_info)
         except Plot1DModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'{str(e)}, {"main", "popup"}, {"error"}')
             return
 
     def close(self):
