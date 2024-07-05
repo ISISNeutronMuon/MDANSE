@@ -33,6 +33,6 @@ class JobLogInfo(TextInfo):
             elif level == "ERROR" or level == "CRITICAL":
                 text += f'<span style="color:red;">{msg}</span>\n'
             else:
-                text += f'<span>{msg}</span>\n'
+                text += f"<span>{msg}</span>\n"
         filtered = self.filter(text)
         self.setHtml(filtered)

@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from MDANSE.Framework.Jobs.IJob import IJob
 
 
-
 class HDFFormat(IFormat):
     """
     This class handles the writing of output variables in HDF file format.
