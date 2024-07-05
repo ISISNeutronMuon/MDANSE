@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from typing import Union, Iterable
 
 import copy
@@ -37,6 +36,8 @@ from qtpy.QtGui import (
     QDoubleValidator,
 )
 
+from MDANSE.MLogging import LOG
+
 # I think that a Trajectory Converter should, in general,
 # create a Wizard and not a single Dialog.
 # This way LAMMPS could give the user a chance to verify which
@@ -53,9 +54,6 @@ from qtpy.QtGui import (
 # 4. The information gathered is shown to the user,
 # with a possibility of correcting the entries.
 # 5. The corrected parameters are passed to the converter, and the job is started.
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class GeneralInput(QObject):

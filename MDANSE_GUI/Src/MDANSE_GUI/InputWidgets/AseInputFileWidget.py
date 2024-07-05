@@ -13,19 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog, QComboBox
 from qtpy.QtCore import Slot
 from ase.io.formats import filetype
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Configurators.AseInputFileConfigurator import (
     AseInputFileConfigurator,
 )
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class AseInputFileWidget(WidgetBase):

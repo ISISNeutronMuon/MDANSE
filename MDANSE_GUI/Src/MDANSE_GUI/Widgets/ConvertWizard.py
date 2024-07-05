@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from collections import OrderedDict
 
 import qtpy
@@ -27,6 +26,8 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Signal, Slot
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Widgets.GeneralWidgets import InputFactory
 
 # I think that a Trajectory Converter should, in general,
@@ -45,9 +46,6 @@ from MDANSE_GUI.Widgets.GeneralWidgets import InputFactory
 # 4. The information gathered is shown to the user,
 # with a possibility of correcting the entries.
 # 5. The corrected parameters are passed to the converter, and the job is started.
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class ConvertWizard(QWizard):

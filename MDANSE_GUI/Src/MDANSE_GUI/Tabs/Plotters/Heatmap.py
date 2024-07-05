@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from typing import TYPE_CHECKING, List
 import math
 
@@ -22,15 +21,13 @@ from scipy.interpolate import interp1d
 from matplotlib.pyplot import colorbar as mpl_colorbar
 
 from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
-    import h5py
     from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class Heatmap(Plotter):

@@ -13,17 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from qtpy import QtWidgets
 
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Plotter.models.plot_2d_model import (
     Plot2DModel,
     Plot2DModelError,
 )
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class Plot2DImageSettingsDialog(QtWidgets.QDialog):

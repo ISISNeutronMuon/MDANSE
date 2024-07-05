@@ -13,12 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    import h5py
-    from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 import numpy as np
@@ -27,7 +24,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
-
 from qtpy.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -39,10 +35,9 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Slot, Signal, Qt
 
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class SliderPack(QWidget):

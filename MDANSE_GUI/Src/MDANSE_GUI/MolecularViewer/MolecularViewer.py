@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from typing import List
 
 import numpy as np
@@ -29,6 +28,7 @@ from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
 
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Chemistry import ATOMS_DATABASE as CHEMICAL_ELEMENTS
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.MolecularViewer.Dummy import PyConnectivity
@@ -189,7 +189,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._surface is not None:
             self.on_clear_atomic_trace()
 
-        logging.info("Computing isosurface ...")
+        LOG.info("Computing isosurface ...")
 
         initial_coords = self._reader.read_frame(0)
         coords, lower_bounds, upper_bounds = self._reader.read_atom_trajectory(index)
@@ -242,7 +242,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._iren.Render()
 
-        logging.info("... done")
+        LOG.info("... done")
 
     def create_all_actors(self):
         line_actor, ball_actor = self.create_traj_actors(self._polydata)
@@ -548,7 +548,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def on_show_atomic_trace(self):
         if self._previously_picked_atom is None:
-            logging.warning("No atom selected for computing atomic trace")
+            LOG.warning("No atom selected for computing atomic trace")
             return
 
         self._draw_isosurface(self._previously_picked_atom[0])

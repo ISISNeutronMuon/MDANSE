@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import os
 from typing import Tuple
 from multiprocessing import Queue
@@ -22,10 +21,8 @@ from multiprocessing.synchronize import Event
 
 from qtpy.QtCore import QObject, Slot, Signal
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Status import Status
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class JobCommunicator(QObject):

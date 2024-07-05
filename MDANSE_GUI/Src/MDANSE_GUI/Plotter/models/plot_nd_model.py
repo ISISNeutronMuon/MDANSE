@@ -13,22 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
-
 import numpy as np
-
 from qtpy import QtCore
-
 from matplotlib import pyplot
 from matplotlib.colors import LogNorm, Normalize, SymLogNorm
 from matplotlib.patches import Rectangle
 
 from MDANSE.Framework.Units import measure, UnitError
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Plotter.utils.numeric import smart_round
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class PlotNDModelError(Exception):

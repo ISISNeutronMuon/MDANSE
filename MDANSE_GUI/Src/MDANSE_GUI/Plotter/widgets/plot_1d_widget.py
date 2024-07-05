@@ -13,11 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from qtpy import QtCore, QtWidgets
 
 from pylab import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Plotter.dialogs.data_viewer_1d_dialog import (
     DataViewer1DDialog,
@@ -35,9 +36,6 @@ from MDANSE_GUI.Plotter.models.plot_1d_model import (
     Plot1DModel,
     Plot1DModelError,
 )
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class Plot1DWidget(QtWidgets.QWidget):

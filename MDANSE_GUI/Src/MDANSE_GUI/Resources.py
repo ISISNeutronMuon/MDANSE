@@ -13,12 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from qtpy.QtCore import QDir, QSize
 from qtpy.QtGui import QIcon, QPixmap
 
-
-LOG = logging.getLogger("MDANSE")
+from MDANSE.MLogging import LOG
 
 
 class Resources:

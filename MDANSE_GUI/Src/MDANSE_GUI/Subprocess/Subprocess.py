@@ -13,17 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from logging.handlers import QueueHandler
 from multiprocessing import Queue, Process, Event
 from multiprocessing.connection import Connection
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Jobs.IJob import IJob
 
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class Subprocess(Process):

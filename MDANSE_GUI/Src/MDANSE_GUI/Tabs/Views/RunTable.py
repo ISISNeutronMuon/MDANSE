@@ -13,17 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from qtpy.QtCore import QAbstractItemModel
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
 from qtpy.QtWidgets import QMenu, QTableView, QAbstractItemView, QMessageBox
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class RunTable(QTableView):

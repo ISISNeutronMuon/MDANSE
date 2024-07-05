@@ -13,15 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import os
 
 from qtpy import QtCore
 
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Plotter.models.data_tree_model import DATA_MODELS
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class DataListModel(QtCore.QAbstractListModel):

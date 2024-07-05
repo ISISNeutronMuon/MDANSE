@@ -46,11 +46,9 @@ Examples::
 
     '3.14159D+00    2.71828D+00'
 """
-import logging
 import string
 
-
-LOG = logging.getLogger("MDANSE")
+from MDANSE.MLogging import LOG
 
 
 #

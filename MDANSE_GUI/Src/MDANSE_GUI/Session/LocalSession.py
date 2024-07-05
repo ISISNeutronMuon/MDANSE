@@ -13,13 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import os
 import json
 from typing import Dict, List, Tuple
 
 from qtpy.QtCore import QObject, Signal, Slot
 
+from MDANSE.MLogging import LOG
 from MDANSE import PLATFORM
 from MDANSE.Framework.Units import measure
 
@@ -42,8 +42,6 @@ unit_lookup = {
     "1/ang": "reciprocal",
     "N/A": "arbitrary",
 }
-
-LOG = logging.getLogger("MDANSE")
 
 
 class LocalSession(QObject):

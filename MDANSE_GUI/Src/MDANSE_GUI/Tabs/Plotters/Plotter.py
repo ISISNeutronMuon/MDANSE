@@ -13,21 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from typing import TYPE_CHECKING, List
 
 from matplotlib.pyplot import style as mpl_style
 from matplotlib import rcParams
 
+from MDANSE.MLogging import LOG
 from MDANSE.Core.SubclassFactory import SubclassFactory
 
 if TYPE_CHECKING:
-    import h5py
     from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class Plotter(metaclass=SubclassFactory):

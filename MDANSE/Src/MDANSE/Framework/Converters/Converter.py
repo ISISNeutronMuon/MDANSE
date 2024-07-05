@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from abc import abstractmethod
 from importlib import metadata
 
@@ -21,9 +20,7 @@ import h5py
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Core.SubclassFactory import SubclassFactory
-
-
-LOG = logging.getLogger("MDANSE")
+from MDANSE.MLogging import LOG
 
 
 class InteractiveConverter(IJob):

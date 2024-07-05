@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import collections
 
 from ase.io import iread, read
@@ -32,9 +31,7 @@ from MDANSE.MolecularDynamics.Configuration import (
 from MDANSE.MolecularDynamics.TrajectoryUtils import elements_from_masses
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-
-
-LOG = logging.getLogger("MDANSE")
+from MDANSE.MLogging import LOG
 
 
 class ASETrajectoryFileError(Error):

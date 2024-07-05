@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import logging
 import abc
 from ast import literal_eval
 import collections
@@ -35,6 +34,7 @@ from MDANSE.Mathematics.Geometry import superposition_fit, center_of_mass
 from MDANSE.Chemistry.Databases import ResiduesDatabaseError, NucleotidesDatabaseError
 from MDANSE.Mathematics.LinearAlgebra import delta, Quaternion, Tensor, Vector
 from MDANSE.Mathematics.Transformation import Rotation, RotationTranslation, Translation
+from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
     from MDANSE.Chemistry.Databases import (
@@ -43,9 +43,6 @@ if TYPE_CHECKING:
         ResiduesDatabase,
     )
     from MDANSE.MolecularDynamics.Configuration import _Configuration
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class UnknownAtomError(Exception):

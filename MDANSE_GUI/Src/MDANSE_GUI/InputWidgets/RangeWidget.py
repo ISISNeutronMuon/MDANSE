@@ -13,14 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from qtpy.QtWidgets import QLineEdit, QLabel
 from qtpy.QtGui import QDoubleValidator, QIntValidator
 
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class RangeWidget(WidgetBase):

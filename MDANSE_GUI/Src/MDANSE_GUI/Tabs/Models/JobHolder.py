@@ -13,13 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from logging import Handler
 from logging.handlers import QueueListener
 from multiprocessing import Pipe, Queue, Event
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, QTimer, QThread, QMutex, Qt
+
+from MDANSE.MLogging import FMT, LOG
 
 from MDANSE_GUI.Subprocess.Subprocess import Subprocess, Connection
 from MDANSE_GUI.Subprocess.JobState import (
@@ -31,10 +32,6 @@ from MDANSE_GUI.Subprocess.JobState import (
     Aborted,
 )
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
-from MDANSE.MLogging import FMT
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class JobThread(QThread):

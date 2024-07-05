@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import re
 import numpy as np
 
@@ -21,9 +20,7 @@ from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
-
-
-LOG = logging.getLogger("MDANSE")
+from MDANSE.MLogging import LOG
 
 
 class LAMMPSConfigFileError(Error):

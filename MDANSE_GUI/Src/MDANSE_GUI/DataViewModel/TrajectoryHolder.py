@@ -13,12 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import hashlib
 import os
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot
+
+from MDANSE.MLogging import LOG
 
 from MDANSE.Framework.InputData import InputFileData
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
@@ -42,9 +43,6 @@ from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInput
 
 #     @Slot(object)
 #     def acceptNewTrajectory(self, new_trajectory):
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class FileObject:

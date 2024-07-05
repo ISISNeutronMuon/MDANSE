@@ -13,10 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from functools import partial
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget, QComboBox
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
@@ -25,9 +26,6 @@ from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 job_tab_label = """This is the list of jobs

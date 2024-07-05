@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from qtpy.QtWidgets import (
     QDialog,
     QPushButton,
@@ -23,11 +22,10 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Signal, Slot
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Jobs.IJob import IJob
+
 from MDANSE_GUI.Widgets.GeneralWidgets import InputFactory
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class ConverterDialog(QDialog):

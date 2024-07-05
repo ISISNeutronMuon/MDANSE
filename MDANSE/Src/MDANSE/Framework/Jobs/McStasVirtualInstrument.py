@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import collections
 import os
 import shutil
@@ -30,6 +29,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
+from MDANSE.MLogging import LOG
 
 MCSTAS_UNITS_LUT = {
     "rad/ps": measure(1, "rad/ps", equivalent=True).toval("meV"),
@@ -39,7 +39,6 @@ MCSTAS_UNITS_LUT = {
 }
 
 NAVOGADRO = 6.02214129e23
-LOG = logging.getLogger("MDANSE")
 
 
 class McStasError(Error):

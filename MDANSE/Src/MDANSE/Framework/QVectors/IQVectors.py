@@ -13,16 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import abc
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
-
 from MDANSE.Core.SubclassFactory import SubclassFactory
-
-
-LOG = logging.getLogger("MDANSE")
+from MDANSE.MLogging import LOG
 
 
 class QVectorsError(Error):

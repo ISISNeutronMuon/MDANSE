@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import os
 from typing import TYPE_CHECKING, Dict
 from importlib import metadata
@@ -21,13 +20,12 @@ from importlib import metadata
 import h5py
 
 from MDANSE.Framework.Formats.IFormat import IFormat
+from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
     from MDANSE.Framework.Jobs.IJob import IJob
 
-
-LOG = logging.getLogger("MDANSE")
 
 
 class HDFFormat(IFormat):

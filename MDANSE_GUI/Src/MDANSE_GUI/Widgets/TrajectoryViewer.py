@@ -12,17 +12,15 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import logging
 import typing
 
 from qtpy.QtWidgets import QTreeView, QWidget, QMenu
 from qtpy.QtCore import Signal, Slot, QModelIndex
 from qtpy.QtGui import QContextMenuEvent
 
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class TrajectoryViewer(QTreeView):

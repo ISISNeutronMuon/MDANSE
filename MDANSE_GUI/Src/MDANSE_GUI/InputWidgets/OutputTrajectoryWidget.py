@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import glob
 import itertools
 import os
@@ -22,11 +21,13 @@ import os.path
 from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog
 from qtpy.QtCore import Slot
 
+
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
-LOG = logging.getLogger("MDANSE")
 
 
 class OutputTrajectoryWidget(WidgetBase):

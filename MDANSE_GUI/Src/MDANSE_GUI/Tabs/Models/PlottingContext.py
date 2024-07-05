@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from typing import TYPE_CHECKING, Dict, List
 import os
 import itertools
@@ -22,16 +21,13 @@ if TYPE_CHECKING:
     import h5py
 
 import numpy as np
-from matplotlib.pyplot import style as mpl_style
 from matplotlib import rcParams
-
-from qtpy.QtCore import Slot, Signal, QObject, QModelIndex, Qt
+from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Session.LocalSession import unit_lookup
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 def get_mpl_colours():

@@ -13,15 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
-
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
 
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.DataViewModel.JobStatusQt import JobStatusQt
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class JobThread(QThread):

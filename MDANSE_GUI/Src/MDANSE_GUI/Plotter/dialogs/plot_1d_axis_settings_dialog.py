@@ -13,19 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import numpy as np
 
 from qtpy import QtWidgets
 
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Plotter.models.plot_1d_model import (
     Plot1DModel,
     Plot1DModelError,
 )
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class Plot1DAxisSettingsDialog(QtWidgets.QDialog):

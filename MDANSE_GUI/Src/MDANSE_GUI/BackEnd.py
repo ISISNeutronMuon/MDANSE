@@ -13,8 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
-
 from qtpy.QtCore import Slot, QObject, QMutex, Signal
 
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -29,14 +27,11 @@ from MDANSE.Framework.InputData.IInputData import IInputData
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from MDANSE.Framework.Projectors.IProjector import IProjector
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
-
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeModel
 from MDANSE_GUI.DataViewModel.JobHolder import JobHolder
 from MDANSE_GUI.DataViewModel.ActionsHolder import ActionsSuperModel
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class BackEnd(QObject):

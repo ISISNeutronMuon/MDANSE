@@ -26,7 +26,3 @@ from MDANSE.Core.Platform import PLATFORM
 import MDANSE.Framework
 
 PLATFORM.create_directory(PLATFORM.macros_directory())
-
-import logging
-
-logging.getLogger("MDANSE").setLevel("INFO")

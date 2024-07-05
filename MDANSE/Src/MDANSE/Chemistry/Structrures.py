@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from io import StringIO
 
 from rdkit.Chem.inchi import MolToInchi
@@ -24,9 +23,7 @@ from rdkit.Chem import rdDetermineBonds
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.IO.PDB import PDBFile
-
-
-LOG = logging.getLogger("MDANSE")
+from MDANSE.MLogging import LOG
 
 
 class DummyStringIO(StringIO):

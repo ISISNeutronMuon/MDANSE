@@ -13,21 +13,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import abc
 import os
 
 import numpy as np
-
 import h5py
 
 from qtpy import QtCore, QtGui
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Units import measure, UnitError
+
 from MDANSE_GUI.Session.LocalSession import json_decoder
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class DataItemError(Exception):

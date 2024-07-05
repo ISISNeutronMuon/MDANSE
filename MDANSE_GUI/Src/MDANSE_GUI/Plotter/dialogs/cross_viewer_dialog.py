@@ -13,17 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from qtpy import QtCore, QtGui, QtWidgets
 
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Plotter.models.plot_1d_model import Plot1DModelError
 from MDANSE_GUI.Plotter.utils.numeric import smart_round
 from MDANSE_GUI.Plotter.widgets.plot_1d_widget import Plot1DWidget
 from MDANSE_GUI.Plotter.widgets.range_slider import RangeSlider
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class CrossViewerDialog(QtWidgets.QDialog):

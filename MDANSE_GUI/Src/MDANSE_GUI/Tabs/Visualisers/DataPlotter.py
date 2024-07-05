@@ -13,15 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
-
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QTableView, QPushButton, QHBoxLayout
 from qtpy.QtCore import Slot, Signal
 
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class DataPlotter(QWidget):

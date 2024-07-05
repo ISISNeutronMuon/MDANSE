@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from qtpy.QtWidgets import (
     QDialog,
     QPushButton,
@@ -27,10 +26,9 @@ from qtpy.QtCore import Signal, Slot, Qt, QSortFilterProxyModel
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Widgets.GeneralWidgets import InputVariable, InputDialog
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class ElementView(QTableView):

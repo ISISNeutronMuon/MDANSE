@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 from abc import abstractmethod
 
 from qtpy.QtCore import QObject, Slot, Signal
@@ -26,8 +25,7 @@ from qtpy.QtWidgets import (
     QGridLayout,
 )
 
-
-LOG = logging.getLogger("MDANSE")
+from MDANSE.MLogging import LOG
 
 
 class WidgetBase(QObject):

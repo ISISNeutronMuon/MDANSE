@@ -33,7 +33,6 @@ Sorted list implementations:
 # pylint: disable=too-many-lines
 from __future__ import print_function
 
-import logging
 import sys
 import traceback
 
@@ -71,8 +70,7 @@ else:
     except ImportError:
         from _dummy_thread import get_ident
 
-
-LOG = logging.getLogger("MDANSE")
+from MDANSE.MLogging import LOG
 
 
 def recursive_repr(fillvalue="..."):

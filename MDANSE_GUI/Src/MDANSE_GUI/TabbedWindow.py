@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import os
 from collections import defaultdict
 from importlib import metadata
@@ -29,6 +28,8 @@ from qtpy.QtWidgets import (
     QApplication,
     QAction,
 )
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
@@ -47,9 +48,6 @@ from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class TabbedWindow(QMainWindow):

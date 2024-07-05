@@ -13,18 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import typing
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, QMutex
 from qtpy.QtWidgets import QTreeView
 
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class ActionsHolder(QStandardItemModel):

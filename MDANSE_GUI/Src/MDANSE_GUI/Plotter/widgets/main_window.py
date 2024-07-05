@@ -13,10 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import sys
 
 from qtpy import QtCore, QtWidgets
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Plotter.models.data_tree_model import (
     DATA_ITEMS,
@@ -28,9 +29,6 @@ from MDANSE_GUI.Plotter.widgets.actions_widget import ActionsWidget
 from MDANSE_GUI.Plotter.widgets.plot_1d_widget import Plot1DWidget
 from MDANSE_GUI.Plotter.widgets.plot_nd_widget import PlotNDWidget
 from MDANSE_GUI.Plotter.widgets.preview_widget import PreviewWidget
-
-
-LOG = logging.getLogger("MDANSE")
 
 
 class MainWindow(QtWidgets.QMainWindow):

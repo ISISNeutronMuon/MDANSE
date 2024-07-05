@@ -13,14 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import abc
 import collections
-import logging
-
-# import pandas as pd
 
 import numpy as np
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.MolecularViewer.database import (
     CHEMICAL_ELEMENTS,
@@ -227,7 +225,7 @@ class IReader(abc.ABC):
         # Retrieve the indexes of the atoms which belongs to each molecule of the selected type
         target_indexes = self.get_atom_indexes(residue_names, atom_names)
         if not target_indexes:
-            logging.warning(
+            LOG.warning(
                 "No atom found that matches {}@{}".format(atom_names, residue_names)
             )
             return None

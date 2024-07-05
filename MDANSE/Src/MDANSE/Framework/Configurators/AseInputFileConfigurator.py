@@ -13,16 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import os
 
 from ase.io.formats import all_formats
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
-
-
-LOG = logging.getLogger("MDANSE")
+from MDANSE.MLogging import LOG
 
 
 class AseInputFileConfigurator(InputFileConfigurator):

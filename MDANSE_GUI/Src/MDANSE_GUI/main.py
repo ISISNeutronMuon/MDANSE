@@ -22,19 +22,19 @@ from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory
 from qtpy.QtCore import QSettings, Qt, QTimer
 from qtpy.QtGui import QPixmap, QIcon
 
+from MDANSE.MLogging import LOG, FMT
+
 from MDANSE_GUI.TabbedWindow import TabbedWindow
-from MDANSE.MLogging import FMT
 
 
 os.environ["OMP_NUM_THREADS"] = "1"
 
 
 def startGUI(some_args):
-    logger = logging.getLogger("MDANSE")
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel("INFO")
     stream_handler.setFormatter(FMT)
-    logger.addHandler(stream_handler)
+    LOG.addHandler(stream_handler)
 
     app = QApplication(some_args)
     app.setStyle(QStyleFactory.create("Fusion"))

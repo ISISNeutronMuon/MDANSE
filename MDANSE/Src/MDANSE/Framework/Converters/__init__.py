@@ -13,13 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import logging
 import glob
 import importlib
 import os
 
+from MDANSE.MLogging import LOG
 
-LOG = logging.getLogger("MDANSE")
 current_path, _ = os.path.split(__file__)
 
 modnames = []
