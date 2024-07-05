@@ -16,7 +16,6 @@
 import logging
 from typing import Union
 
-from icecream import ic
 from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
 from qtpy.QtGui import QMouseEvent, QDrag
@@ -84,10 +83,10 @@ class ActionsTree(QTreeView):
         item = model.itemFromIndex(index)
         # debug
         text = item.text()
-        ic(f"About to execute action {text}")
+        LOG.info(f"About to execute action {text}")
         #
         number = item.data(Qt.ItemDataRole.UserRole)
-        ic(f"Node number is {number}")
+        LOG.info(f"Node number is {number}")
         if number is None:
             return
         action = model._values[number]
@@ -95,7 +94,7 @@ class ActionsTree(QTreeView):
 
     @Slot(DataTreeItem)
     def showValidActions(self, item: DataTreeItem):
-        ic("Creating model from", item)
+        LOG.info(f"Creating model from {item}")
         new_model = ActionsHolder(item)
         self.setModel(new_model)
 

@@ -13,8 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Converters.DCD import DCD
 
 

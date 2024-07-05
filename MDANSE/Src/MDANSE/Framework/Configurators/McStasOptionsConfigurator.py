@@ -20,10 +20,8 @@ import time
 from typing import Dict, Any
 
 from MDANSE import PLATFORM
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
 
 
 def parse_dictionary(input: str) -> Dict[str, Any]:

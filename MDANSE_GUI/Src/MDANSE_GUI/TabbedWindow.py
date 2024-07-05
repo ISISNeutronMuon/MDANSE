@@ -18,7 +18,6 @@ import os
 from collections import defaultdict
 from importlib import metadata
 
-from icecream import ic
 from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger
 from qtpy.QtWidgets import (
     QMainWindow,
@@ -227,7 +226,7 @@ class TabbedWindow(QMainWindow):
             self.workdir,
             "MDT files (*.mdt);;HDF5 files (*.h5 *.hdf);;All files (*)",
         )
-        ic(fname)
+        LOG.info(fname)
         if len(fname[0]) > 0:
             self.file_name_for_loading.emit(fname[0])
 

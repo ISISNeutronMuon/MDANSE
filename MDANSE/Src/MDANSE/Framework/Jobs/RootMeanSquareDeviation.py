@@ -19,7 +19,6 @@ import collections
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 

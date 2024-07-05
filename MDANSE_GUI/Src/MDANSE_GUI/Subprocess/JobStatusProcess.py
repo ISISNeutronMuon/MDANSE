@@ -20,7 +20,6 @@ from multiprocessing import Queue
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event
 
-from icecream import ic
 from qtpy.QtCore import QObject, Slot, Signal
 
 from MDANSE.Framework.Status import Status
@@ -87,11 +86,9 @@ class JobStatusProcess(Status):
         return self._state
 
     def finish_status(self):
-        ic()
         self._pipe.send(("FINISHED", True))
 
     def start_status(self):
-        ic()
         LOG.info(f"JobStatusProcess PID: {os.getpid()} started 'start_status")
         try:
             temp = int(self._nSteps)
@@ -102,7 +99,6 @@ class JobStatusProcess(Status):
         # self._updateStep = 1
 
     def stop_status(self):
-        ic()
         self._pipe.send(("FINISHED", False))
 
     def update_status(self):

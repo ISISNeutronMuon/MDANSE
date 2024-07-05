@@ -14,8 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import logging
-from qtpy.QtWidgets import QLineEdit, QSpinBox, QLabel
-from qtpy.QtCore import Slot, Signal
+from qtpy.QtWidgets import QLineEdit, QLabel
 from qtpy.QtGui import QDoubleValidator, QIntValidator
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase

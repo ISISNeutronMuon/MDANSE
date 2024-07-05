@@ -12,48 +12,22 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-from typing import Union, Iterable
+#
+import logging
 from collections import OrderedDict
-import copy
 
-from icecream import ic
 import qtpy
 from qtpy.QtWidgets import (
-    QDialog,
-    QPushButton,
-    QFileDialog,
-    QGridLayout,
     QVBoxLayout,
-    QWidget,
     QLabel,
-    QApplication,
-    QComboBox,
-    QMenu,
-    QLineEdit,
-    QTableView,
-    QFormLayout,
-    QHBoxLayout,
-    QCheckBox,
     QWizard,
     QWizardPage,
     QProgressBar,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel, QObject
-from qtpy.QtGui import (
-    QFont,
-    QEnterEvent,
-    QStandardItem,
-    QStandardItemModel,
-    QIntValidator,
-    QDoubleValidator,
-    QValidator,
-)
+from qtpy.QtCore import Signal, Slot
 
 from MDANSE.Framework.Jobs.IJob import IJob
-
-# from MDANSE.Framework.Jobs.Converter import InteractiveConverter
-from MDANSE_GUI.Widgets.GeneralWidgets import GeneralInput, InputFactory
+from MDANSE_GUI.Widgets.GeneralWidgets import InputFactory
 
 # I think that a Trajectory Converter should, in general,
 # create a Wizard and not a single Dialog.
@@ -71,6 +45,9 @@ from MDANSE_GUI.Widgets.GeneralWidgets import GeneralInput, InputFactory
 # 4. The information gathered is shown to the user,
 # with a possibility of correcting the entries.
 # 5. The corrected parameters are passed to the converter, and the job is started.
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class ConvertWizard(QWizard):
@@ -107,13 +84,13 @@ class ConvertWizard(QWizard):
     @Slot()
     def execute_converter(self):
         if self.converter_instance is None:
-            ic("No converter instance attached to the Dialog")
+            LOG.error("No converter instance attached to the Dialog")
             return False
         pardict = {}
-        ic(f"handlers: {self.handlers}")
+        LOG.info(f"handlers: {self.handlers}")
         for key, value in self.handlers.items():
             pardict[key] = value.returnValue()
-        ic(f"Passing {pardict} to the converter instance {self.converter_instance}")
+        LOG.info(f"Passing {pardict} to the converter instance {self.converter_instance}")
         self.converter_instance.setup(pardict)
         # when we are ready, we can consider running it
         self.converter_instance.run(pardict)
@@ -149,7 +126,7 @@ class ConverterPage(QWizardPage):
 
     def __init__(self, *args, parameter_dict: dict = {}, **kwargs):
         super().__init__(*args, **kwargs)
-        ic(dir(self))
+        LOG.info(dir(self))
         # ic(dir(self.wizard()))
         self.setTitle("The Input Files")
         layout = QVBoxLayout(self)
@@ -217,7 +194,7 @@ class ConverterFirstPage(QWizardPage):
 
     def __init__(self, *args, parameter_dict: dict = {}, **kwargs):
         super().__init__(*args, **kwargs)
-        ic(dir(self))
+        LOG.info(dir(self))
         # ic(dir(self.wizard()))
         self.setTitle("The Input Files")
         layout = QVBoxLayout(self)
@@ -431,13 +408,9 @@ class ConverterThirdPage(QWizardPage):
 import sys
 
 from qtpy.QtWidgets import QApplication, QMainWindow, QPushButton
-from qtpy.QtCore import QSettings, QThread, Qt
+from qtpy.QtCore import Qt
 
-from MDANSE_GUI.MainWindow import Main
-from MDANSE_GUI.BackEnd import BackEnd
 from MDANSE_GUI.Widgets.Generator import WidgetGenerator
-
-from MDANSE.Framework.Jobs.Converter import InteractiveConverter
 
 
 class DummyLauncher(QMainWindow):
@@ -472,7 +445,7 @@ class DummyLauncher(QMainWindow):
 
 
 def startGUI(some_args):
-    ic(qtpy.API)
+    LOG.info(qtpy.API)
     app = QApplication(some_args)
     root = DummyLauncher(parent=None, title="<b>dummy</b> window!")
     root.show()

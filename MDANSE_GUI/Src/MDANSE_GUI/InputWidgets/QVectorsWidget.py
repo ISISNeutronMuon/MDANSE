@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QSizePolicy, QComboBox, QLabel, QTableView
+from qtpy.QtWidgets import QSizePolicy, QComboBox, QTableView
 from qtpy.QtCore import Slot, Signal, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem, QBrush
 

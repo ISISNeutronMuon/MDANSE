@@ -13,8 +13,7 @@
 #
 # **************************************************************************
 
-from qtpy.QtWidgets import QLineEdit, QRadioButton, QButtonGroup, QLabel, QHBoxLayout
-from qtpy.QtCore import Slot, Signal
+from qtpy.QtWidgets import QLineEdit, QLabel
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

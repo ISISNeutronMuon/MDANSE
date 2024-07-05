@@ -2,12 +2,12 @@ import sys
 import tempfile
 import os
 from os import path
-from icecream import ic
+
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
 sys.setrecursionlimit(100000)
-ic.disable()
+
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",

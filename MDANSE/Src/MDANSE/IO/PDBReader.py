@@ -19,7 +19,6 @@ import string
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalEntity import (
-    Nucleotide,
     is_molecule,
     Atom,
     AtomCluster,
@@ -30,7 +29,6 @@ from MDANSE.Chemistry.ChemicalEntity import (
     Residue,
     PeptideChain,
     Protein,
-    UnknownAtomError,
 )
 from MDANSE.Chemistry import (
     ATOMS_DATABASE,
@@ -39,7 +37,6 @@ from MDANSE.Chemistry import (
     RESIDUES_DATABASE,
     RESIDUE_ALT_NAMES,
 )
-from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.IO.PDB import PDBMolecule, PDBNucleotideChain, PDBPeptideChain, Structure
 
 

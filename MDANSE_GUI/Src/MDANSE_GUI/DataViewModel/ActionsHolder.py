@@ -13,18 +13,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 import typing
 
-from icecream import ic
 from qtpy.QtGui import QStandardItemModel, QStandardItem
-from qtpy.QtCore import QObject, Slot, Qt, QMutex
+from qtpy.QtCore import QObject, Slot, QMutex
 from qtpy.QtWidgets import QTreeView
-
-from MDANSE.Framework.Jobs.IJob import IJob
 
 from MDANSE_GUI.SubclassViewer import JobTree
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class ActionsHolder(QStandardItemModel):
@@ -81,7 +81,7 @@ class ActionsSuperModel(QObject):
             ancestor -- name of the MDANSE object type
                         selected in the DataView.
         """
-        ic("received item:", item)
+        LOG.info(f"received item: {item}")
         ancestor = item.ancestors()[-1]
         try:
             current_model = self.models[ancestor]
@@ -104,7 +104,7 @@ class ActionsSuperModel(QObject):
             model = JobTree()
             model.populateTree(parent_class=parent_class)
             self.models[parent_class.__name__] = model
-        ic("Build the following models:", self.models.keys())
+        LOG.info(f"Build the following models: {self.models.keys()}")
         self.current_model = self.models["IJob"]
 
     def copyNodeIntoModel(self, thing: typing.Any, model: ActionsHolder):
@@ -125,7 +125,7 @@ class ActionsSuperModel(QObject):
                 rootnode = model._sections[name]
         node_text = thing.label
         node_number = model.append_object(thing)
-        ic(node_number)
+        LOG.info(node_number)
         newitem = QStandardItem()
         newitem.setText(node_text)
         newitem.setData(node_number)

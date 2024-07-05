@@ -27,7 +27,6 @@ import string
 import time
 import sys
 import traceback
-from concurrent.futures import ProcessPoolExecutor as PoolExecutor
 
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error

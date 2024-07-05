@@ -13,8 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import QObject, Slot, Signal
-from qtpy.QtWidgets import QPushButton, QTextBrowser, QWidget, QFileDialog
+from qtpy.QtCore import Slot, Signal
+from qtpy.QtWidgets import QTextBrowser
 
 
 class TextInfo(QTextBrowser):

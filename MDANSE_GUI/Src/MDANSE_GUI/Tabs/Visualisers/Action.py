@@ -23,7 +23,6 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
     QHBoxLayout,
-    QScrollArea,
     QTextEdit,
 )
 from qtpy.QtCore import Signal, Slot

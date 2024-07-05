@@ -13,11 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import logging
 import hashlib
 import os
 
-from icecream import ic
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot
 
@@ -43,6 +42,9 @@ from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInput
 
 #     @Slot(object)
 #     def acceptNewTrajectory(self, new_trajectory):
+
+
+LOG = logging.getLogger("MDANSE")
 
 
 class FileObject:
@@ -132,12 +134,11 @@ class DataTreeModel(QStandardItemModel):
 
     @Slot(str)
     def acceptNewTrajectory(self, fname: str):
-        ic(f"Received {fname}")
+        LOG.info(f"Received {fname}")
         data = HDFTrajectoryInputData(fname)
-        ic()
         item = TrajectoryItem(fname=fname, trajectory=data, mdanse_tag="hdf_trajectory")
-        ic("Created TrajectoryItem")
+        LOG.info("Created TrajectoryItem")
         self.appendRow(item)
         tkey = item.file_info.hash
         self._trajectory_objects[tkey] = data
-        ic("assigned new trajectory to the dictionary")
+        LOG.info("assigned new trajectory to the dictionary")

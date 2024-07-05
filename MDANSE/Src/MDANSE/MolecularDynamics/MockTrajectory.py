@@ -19,22 +19,15 @@ import json
 from typing import TypeVar
 
 import numpy as np
-from icecream import ic
-import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Units import measure
-from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem, _ChemicalEntity
-from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
+from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem
+from MDANSE.Extensions import atomic_trajectory, com_trajectory
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
     _Configuration,
-)
-from MDANSE.MolecularDynamics.TrajectoryUtils import (
-    build_connectivity,
-    resolve_undefined_molecules_name,
-    sorted_atoms,
 )
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 

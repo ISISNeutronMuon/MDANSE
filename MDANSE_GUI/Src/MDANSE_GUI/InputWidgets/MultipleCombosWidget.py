@@ -14,7 +14,6 @@
 # **************************************************************************
 
 from qtpy.QtWidgets import QComboBox
-from qtpy.QtCore import Slot
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

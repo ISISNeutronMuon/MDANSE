@@ -19,9 +19,9 @@ import itertools
 import os
 import os.path
 
-from qtpy.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton, QFileDialog
+from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog
 from qtpy.QtCore import Qt, Slot
-from qtpy.QtGui import QStandardItemModel, QStandardItem
+from qtpy.QtGui import QStandardItemModel
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

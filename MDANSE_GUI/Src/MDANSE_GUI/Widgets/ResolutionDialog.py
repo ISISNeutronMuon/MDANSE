@@ -13,11 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Union, Iterable, Optional, List
-from collections import OrderedDict
+from typing import List
 import math
 
-from icecream import ic
 import numpy as np
 
 from qtpy.QtWidgets import (
@@ -28,25 +26,12 @@ from qtpy.QtWidgets import (
     QWidget,
     QLabel,
     QComboBox,
-    QMenu,
     QLineEdit,
-    QTableView,
-    QFormLayout,
-    QHBoxLayout,
-    QCheckBox,
     QTextEdit,
     QApplication,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel, QObject
-from qtpy.QtGui import (
-    QFont,
-    QEnterEvent,
-    QStandardItem,
-    QStandardItemModel,
-    QIntValidator,
-    QDoubleValidator,
-    QValidator,
-)
+from qtpy.QtCore import Signal, Slot
+from qtpy.QtGui import QDoubleValidator
 
 import matplotlib.pyplot as mpl
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg

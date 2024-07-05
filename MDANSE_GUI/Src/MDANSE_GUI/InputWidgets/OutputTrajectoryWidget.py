@@ -20,9 +20,8 @@ import os
 import os.path
 
 from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog
-from qtpy.QtCore import Qt, Slot
+from qtpy.QtCore import Slot
 
-from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 

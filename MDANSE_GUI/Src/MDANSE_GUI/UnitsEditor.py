@@ -37,7 +37,7 @@ from qtpy.QtGui import (
     QDoubleValidator,
 )
 
-from MDANSE.Framework.Units import _UNAMES, UNITS_MANAGER
+from MDANSE.Framework.Units import UNITS_MANAGER
 
 from MDANSE_GUI.Widgets.GeneralWidgets import InputVariable, InputDialog
 

@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import logging
-from icecream import ic
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
@@ -34,35 +33,35 @@ class JobThread(QThread):
 
     def __init__(self, *args, command=None, parameters={}):
         super().__init__(*args)
-        ic("JobThread starts init")
+        LOG.info("JobThread starts init")
         self._command = command
         self._parameters = parameters
-        ic(f"JobThread.run will create a job instance of command {command}")
+        LOG.info(f"JobThread.run will create a job instance of command {command}")
         if isinstance(self._command, type):
             self._job = self._command()
         else:
             self._job = self._command
         self._job.build_configuration()
-        ic(f"JobThread._parameters: {self._parameters}")
+        LOG.info(f"JobThread._parameters: {self._parameters}")
         # here we try to create and connect a JobStatusQt
         status = JobStatusQt(parent=self)
         self._job._status = status
         self._status = status
-        ic("JobThread finished init")
+        LOG.info("JobThread finished init")
 
     def run(self):
         try:
             self._job.run(self._parameters)
         except Exception as inst:
-            ic("JobThread has entered exception handling!")
+            LOG.error("JobThread has entered exception handling!")
             error_message = ""
             error_message += str(type(inst))
             error_message += str(inst.args)  # arguments stored in .args
             error_message += str(inst)  # __str__ allows args to be printed directly,
-            ic("JobThread is about to emit the failure message")
+            LOG.error("JobThread is about to emit the failure message")
             self.job_failure.emit(error_message)
         else:
-            ic("JobThread.run did not raise an exception. JobThread.run will exit now")
+            LOG.info("JobThread.run did not raise an exception. JobThread.run will exit now")
         self.exec()  # this starts event handling - will it help?
 
 
@@ -138,7 +137,7 @@ class JobHolder(QStandardItemModel):
 
     @Slot(str)
     def reportError(self, err: str):
-        ic(err)
+        LOG.error(err)
 
     @Slot(object)
     def addItem(self, new_entry: QProcess):
@@ -150,7 +149,7 @@ class JobHolder(QStandardItemModel):
         try:
             th_ref = JobThread(command=job_vars[0], parameters=job_vars[1])
         except:
-            ic(f"Failed to create JobThread using {job_vars}")
+            LOG.error(f"Failed to create JobThread using {job_vars}")
             return
         th_ref.job_failure.connect(self.reportError)
         item_th = JobEntry(command=job_vars[0])
@@ -158,7 +157,7 @@ class JobHolder(QStandardItemModel):
         th_ref._status._communicator.progress.connect(item_th.on_update)  # int
         th_ref._status._communicator.finished.connect(item_th.on_finished)  # bool
         th_ref._status._communicator.oscillate.connect(item_th.on_oscillate)  # nothing
-        ic("Thread ready to start!")
+        LOG.info("Thread ready to start!")
         try:
             task_name = str(job_vars[0].__name__)
         except AttributeError:

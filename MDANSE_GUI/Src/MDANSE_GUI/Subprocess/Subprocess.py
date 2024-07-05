@@ -15,7 +15,7 @@
 #
 import logging
 from logging.handlers import QueueHandler
-from multiprocessing import Pipe, Queue, Process, Event
+from multiprocessing import Queue, Process, Event
 from multiprocessing.connection import Connection
 
 from MDANSE.Framework.Jobs.IJob import IJob

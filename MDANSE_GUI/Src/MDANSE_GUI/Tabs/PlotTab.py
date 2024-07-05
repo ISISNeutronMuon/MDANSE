@@ -13,11 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
 from functools import partial
 
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QWidget, QFileDialog
+from qtpy.QtWidgets import QWidget
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel

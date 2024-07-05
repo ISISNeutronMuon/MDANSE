@@ -19,7 +19,7 @@ import io
 import tarfile
 import codecs
 import time
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from importlib import metadata
 
 import numpy as np

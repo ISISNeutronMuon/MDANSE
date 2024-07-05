@@ -13,26 +13,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from ast import operator
 import os
-from typing import Collection
 
 import numpy as np
 import h5py
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem, _ChemicalEntity
-from MDANSE.Extensions import atomic_trajectory, com_trajectory, fold_coordinates
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
+from MDANSE.Extensions import atomic_trajectory, com_trajectory
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
 )
-from MDANSE.MolecularDynamics.TrajectoryUtils import (
-    build_connectivity,
-    resolve_undefined_molecules_name,
-    sorted_atoms,
-)
+from MDANSE.MolecularDynamics.TrajectoryUtils import resolve_undefined_molecules_name
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 

@@ -15,7 +15,7 @@
 #
 
 from qtpy.QtWidgets import QCheckBox
-from qtpy.QtCore import Slot, Qt
+from qtpy.QtCore import Qt
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

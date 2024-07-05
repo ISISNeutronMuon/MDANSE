@@ -13,10 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from icecream import ic
 from qtpy.QtWidgets import QLineEdit
-from qtpy.QtCore import Slot, Signal
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

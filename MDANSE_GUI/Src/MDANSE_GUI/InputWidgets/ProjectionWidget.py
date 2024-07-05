@@ -14,8 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QLineEdit, QRadioButton, QButtonGroup, QLabel, QHBoxLayout
-from qtpy.QtCore import Slot, Signal
+from qtpy.QtWidgets import QLineEdit, QRadioButton, QButtonGroup, QLabel
+from qtpy.QtCore import Slot
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

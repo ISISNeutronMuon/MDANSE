@@ -15,13 +15,9 @@
 #
 
 import os
-import tempfile
 
 from MDANSE import PLATFORM
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 

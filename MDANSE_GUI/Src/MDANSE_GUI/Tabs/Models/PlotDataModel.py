@@ -16,7 +16,6 @@
 import logging
 from abc import abstractmethod
 
-import numpy as np
 import h5py
 
 from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt

@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import copy
-from json.encoder import JSONEncoder
 import math
 import numbers
 import os

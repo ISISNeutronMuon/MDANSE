@@ -15,16 +15,11 @@
 #
 
 import os
-import tempfile
 
 from ase.io.formats import ioformats
 
 from MDANSE import PLATFORM
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
-from MDANSE.Framework.Formats.IFormat import IFormat
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class OutputStructureConfigurator(IConfigurator):

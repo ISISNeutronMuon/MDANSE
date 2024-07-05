@@ -18,12 +18,9 @@ from logging import Handler
 from logging.handlers import QueueListener
 from multiprocessing import Pipe, Queue, Event
 
-from icecream import ic
-
 from qtpy.QtGui import QStandardItemModel, QStandardItem
-from qtpy.QtCore import QObject, Slot, Signal, QTimer, QThread, QMutex, Qt
+from qtpy.QtCore import QObject, Slot, QTimer, QThread, QMutex, Qt
 
-from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE_GUI.Subprocess.Subprocess import Subprocess, Connection
 from MDANSE_GUI.Subprocess.JobState import (
     Starting,
@@ -33,7 +30,7 @@ from MDANSE_GUI.Subprocess.JobState import (
     Paused,
     Aborted,
 )
-from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess, JobCommunicator
+from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
 from MDANSE.MLogging import FMT
 
 
@@ -205,7 +202,7 @@ class JobHolder(QStandardItemModel):
 
     @Slot(str)
     def reportError(self, err: str):
-        ic(err)
+        LOG.error(err)
 
     @property
     def next_number(self):
@@ -237,7 +234,7 @@ class JobHolder(QStandardItemModel):
                 log_queue=log_queue,
             )
         except:
-            ic(f"Failed to create Subprocess using {job_vars}")
+            LOG.error(f"Failed to create Subprocess using {job_vars}")
             return
 
         listener = QueueListener(log_queue, item_th, respect_handler_level=True)

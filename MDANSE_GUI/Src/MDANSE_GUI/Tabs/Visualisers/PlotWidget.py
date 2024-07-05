@@ -35,11 +35,9 @@ from qtpy.QtWidgets import (
     QSlider,
     QLabel,
     QGridLayout,
-    QRadioButton,
-    QButtonGroup,
     QDoubleSpinBox,
 )
-from qtpy.QtCore import Slot, Signal, QObject, Qt
+from qtpy.QtCore import Slot, Signal, Qt
 
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 

@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import logging
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import h5py
@@ -22,23 +22,17 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 import matplotlib.pyplot as mpl
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qt5agg import (
-    NavigationToolbar2QT as NavigationToolbar2QTAgg,
-)
 
 from qtpy.QtWidgets import (
     QWidget,
     QFormLayout,
     QComboBox,
-    QLineEdit,
     QGroupBox,
     QVBoxLayout,
 )
-from qtpy.QtCore import Slot, Signal, QObject, Qt
+from qtpy.QtCore import Slot, Signal
 
 from MDANSE.Framework.Units import measure
-from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 
 LOG = logging.getLogger("MDANSE")

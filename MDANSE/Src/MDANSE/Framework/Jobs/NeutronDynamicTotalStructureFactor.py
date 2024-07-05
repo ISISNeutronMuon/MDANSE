@@ -13,17 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import collections
 import itertools
-import os
 
 import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Signal import correlation, get_spectrum
 
 
 class NeutronDynamicTotalStructureFactorError(Error):

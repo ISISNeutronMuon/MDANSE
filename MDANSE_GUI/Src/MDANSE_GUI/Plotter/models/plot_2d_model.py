@@ -15,7 +15,7 @@
 #
 import logging
 
-from matplotlib.colors import CenteredNorm, LogNorm, Normalize, SymLogNorm
+from matplotlib.colors import LogNorm, Normalize, SymLogNorm
 from matplotlib import pyplot
 
 from qtpy import QtCore
