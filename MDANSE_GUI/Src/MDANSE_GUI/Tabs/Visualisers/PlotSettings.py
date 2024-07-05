@@ -49,7 +49,6 @@ class PlotSettings(QWidget):
         super().__init__(*args, **kwargs)
         self._settings = settings
         self._unit_fields = {}
-        self.make_layout()
         self.plot_settings_changed.connect(self.update_settings_file)
 
     @Slot()
@@ -58,6 +57,13 @@ class PlotSettings(QWidget):
 
     @Slot(str)
     def set_style(self, style_name: str):
+        mpl_group = self._settings.group("matplotlib")
+        if not mpl_group.set("style", style_name):
+            mpl_group.add(
+                "style",
+                style_name,
+                "Name of the matplotlib style to be used for plotting.",
+            )
         try:
             mpl.style.use(style_name)
         except:
@@ -169,7 +175,11 @@ class PlotSettings(QWidget):
         style_selector = QComboBox(self)
         style_selector.addItem("default")
         style_selector.addItems(mpl.style.available)
-        style_selector.setCurrentText("default")
+        try:
+            style_string = self._settings.group("matplotlib").get("style")
+        except:
+            style_string = "default"
+        style_selector.setCurrentText(style_string)
         style_selector.currentTextChanged.connect(self.set_style)
         top_layout.addRow("Matplotlib style:", style_selector)
         try:
@@ -177,6 +187,7 @@ class PlotSettings(QWidget):
             try:
                 current_cmap = colour_group.get("colormap")
             except KeyError:
+                print(f"Could not get colormap from colours")
                 colour_group.add(
                     "colormap",
                     "viridis",
@@ -184,6 +195,7 @@ class PlotSettings(QWidget):
                 )
                 current_cmap = "viridis"
         except:
+            print(f"Could not get the colours group")
             current_cmap = "viridis"
         cmap_selector = QComboBox(self)
         cmap_selector.addItems(mpl.colormaps())

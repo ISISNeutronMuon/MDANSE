@@ -221,6 +221,14 @@ class PlottingContext(QStandardItemModel):
         self._last_colour += 1
         return colour
 
+    @property
+    def colormap(self):
+        try:
+            cmap = self._unit_lookup._settings.group("colours").get("colormap")
+        except:
+            cmap = "viridis"
+        return cmap
+
     @Slot()
     def regenerate_colours(self):
         self._colour_list = get_mpl_colours()
@@ -231,9 +239,9 @@ class PlottingContext(QStandardItemModel):
                 current_colour
                 != self._last_colour_list[row % len(self._last_colour_list)]
             ):
-                self.item(row, 5).setText(str(self.next_colour()))
-            else:
                 self._last_colour += 1
+            else:
+                self.item(row, 5).setText(str(self.next_colour()))
 
     @Slot(object)
     def accept_external_data(self, other: "PlottingContext"):
@@ -251,13 +259,6 @@ class PlottingContext(QStandardItemModel):
         into this slot."""
         self._unit_preference = units
         self.set_axes()
-
-    @Slot(str)
-    def accept_cmap(self, cmap: str):
-        """Crucial slot for transferring data
-        between tabs. DataPlotter will send the datasets
-        into this slot."""
-        self._colour_map = cmap
 
     def get_conversion_factor(self, unit):
         factor, new_unit = self._unit_lookup.conversion_factor(unit)

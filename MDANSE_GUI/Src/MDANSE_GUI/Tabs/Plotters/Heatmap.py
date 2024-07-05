@@ -166,7 +166,7 @@ class Heatmap(Plotter):
                 extent=limits,
                 aspect="auto",
                 interpolation=None,
-                cmap=plotting_context._colour_map,
+                cmap=plotting_context.colormap,
             )
             colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
             colorbar.set_label(dataset._data_unit)
