@@ -174,7 +174,9 @@ class Single(Plotter):
                                 self.length_max, temp.get_xdata().max()
                             )
                         except ValueError:
-                            LOG.error(f"Plotting failed for {plotlabel} using {best_axis}")
+                            LOG.error(
+                                f"Plotting failed for {plotlabel} using {best_axis}"
+                            )
                             LOG.error(f"x_axis={dataset._axes[best_axis]}")
                             LOG.error(f"values={value}")
                             return

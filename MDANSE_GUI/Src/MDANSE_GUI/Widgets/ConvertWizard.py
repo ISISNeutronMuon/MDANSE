@@ -90,7 +90,9 @@ class ConvertWizard(QWizard):
         LOG.info(f"handlers: {self.handlers}")
         for key, value in self.handlers.items():
             pardict[key] = value.returnValue()
-        LOG.info(f"Passing {pardict} to the converter instance {self.converter_instance}")
+        LOG.info(
+            f"Passing {pardict} to the converter instance {self.converter_instance}"
+        )
         self.converter_instance.setup(pardict)
         # when we are ready, we can consider running it
         self.converter_instance.run(pardict)

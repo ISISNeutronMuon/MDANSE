@@ -61,7 +61,9 @@ class JobThread(QThread):
             LOG.error("JobThread is about to emit the failure message")
             self.job_failure.emit(error_message)
         else:
-            LOG.info("JobThread.run did not raise an exception. JobThread.run will exit now")
+            LOG.info(
+                "JobThread.run did not raise an exception. JobThread.run will exit now"
+            )
         self.exec()  # this starts event handling - will it help?
 
 

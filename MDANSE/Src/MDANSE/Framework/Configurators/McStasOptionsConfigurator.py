@@ -23,7 +23,6 @@ from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
-
 def parse_dictionary(input: str) -> Dict[str, Any]:
     big_line = input.strip("\{\}[] \n")
     tokens = big_line.split(",")

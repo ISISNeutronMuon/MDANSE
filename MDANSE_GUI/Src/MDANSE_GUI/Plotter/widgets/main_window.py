@@ -130,7 +130,9 @@ class MainWindow(QtWidgets.QMainWindow):
         except DataTreeModelError as e:
             LOG.error(f'{str(e)}, {["main", "popup"]}, {"error"}')
         else:
-            LOG.info(f"File {filename} successfully opened for reading, {['main']}, {'info'}")
+            LOG.info(
+                f"File {filename} successfully opened for reading, {['main']}, {'info'}"
+            )
 
     def on_close_plot(self, index):
         """Callback called when a plot tab is closed.

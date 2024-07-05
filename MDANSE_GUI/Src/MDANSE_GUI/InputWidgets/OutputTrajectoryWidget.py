@@ -41,7 +41,9 @@ class OutputTrajectoryWidget(WidgetBase):
             LOG.error("KeyError in OutputTrajectoryWidget - can't get default path.")
         except AttributeError:
             self.default_path = "."
-            LOG.error("AttributeError in OutputTrajectoryWidget - can't get default path.")
+            LOG.error(
+                "AttributeError in OutputTrajectoryWidget - can't get default path."
+            )
         self.file_association = ".*"
         self._value = default_value
         self._field = QLineEdit(default_value[0], self._base)

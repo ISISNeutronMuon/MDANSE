@@ -94,5 +94,7 @@ class ConverterDialog(QDialog):
         LOG.info(f"handlers: {self.handlers}")
         for key, value in self.handlers.items():
             pardict[key] = value.returnValue()
-        LOG.info(f"Passing {pardict} to the converter instance {self.converter_instance}")
+        LOG.info(
+            f"Passing {pardict} to the converter instance {self.converter_instance}"
+        )
         self.new_thread_objects.emit([self.converter_constructor, pardict])
