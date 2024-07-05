@@ -20,7 +20,7 @@ from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, QMutex
 from qtpy.QtWidgets import QTreeView
 
-from MDANSE_GUI.SubclassViewer import JobTree
+from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 
 
