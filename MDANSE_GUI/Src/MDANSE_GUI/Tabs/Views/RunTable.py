@@ -144,7 +144,7 @@ class RunTable(QTableView):
         node_number = model.index(item_row, 0).data(role=Qt.ItemDataRole.UserRole)
         job_entry = model.existing_jobs[node_number]
         self.item_details.emit(job_entry.text_summary())
-        self.jobs_logs.emit(job_entry.msgs)
+        self.jobs_logs.emit(job_entry.msgs_and_levels())
 
     def connect_to_visualiser(self, visualiser: TextInfo) -> None:
         """Connect to a visualiser.

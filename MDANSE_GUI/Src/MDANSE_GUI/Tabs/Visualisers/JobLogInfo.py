@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from qtpy.QtCore import Slot
 from .TextInfo import TextInfo
 
 
@@ -21,3 +22,17 @@ class JobLogInfo(TextInfo):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setStyleSheet("font-family: Courier New;")
+
+    @Slot(object)
+    def update_panel(self, incoming: object):
+        msgs, levels = incoming
+        text = ""
+        for msg, level in zip(msgs, levels):
+            if level == "WARNING":
+                text += f'<span style="color:orange;">{msg}</span>\n'
+            elif level == "ERROR" or level == "CRITICAL":
+                text += f'<span style="color:red;">{msg}</span>\n'
+            else:
+                text += f'<span>{msg}</span>\n'
+        filtered = self.filter(text)
+        self.setHtml(filtered)

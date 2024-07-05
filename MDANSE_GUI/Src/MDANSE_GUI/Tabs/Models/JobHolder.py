@@ -105,7 +105,7 @@ class JobEntry(Handler, QObject):
             item.setData(entry_number)
         self._prog_item.setData(0, role=Qt.ItemDataRole.UserRole)
         self._prog_item.setData("progress", role=Qt.ItemDataRole.DisplayRole)
-        self.msgs = ""
+        self.records = []
 
     def text_summary(self) -> str:
         result = ""
@@ -176,12 +176,16 @@ class JobEntry(Handler, QObject):
         self._current_state.kill()
         self.update_fields()
 
+    def msgs_and_levels(self):
+        msgs = []
+        levels = []
+        for record in self.records:
+            msgs.append(self.format(record))
+            levels.append(record.levelname)
+        return msgs, levels
+
     def emit(self, record):
-        msg = self.format(record)
-        if self.msgs:
-            self.msgs += msg + "\n"
-        else:
-            self.msgs = msg + "\n"
+        self.records.append(record)
 
 
 class JobHolder(QStandardItemModel):
