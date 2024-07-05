@@ -38,6 +38,7 @@ from MDANSE.Chemistry import (
     RESIDUE_ALT_NAMES,
 )
 from MDANSE.IO.PDB import PDBMolecule, PDBNucleotideChain, PDBPeptideChain, Structure
+from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 
 
 class PDBReaderError(Exception):
@@ -643,8 +644,6 @@ if __name__ == "__main__":
     pdb_reader = PDBReader("/home/pellegrini/apoferritin.pdb")
     print("Building chemical system")
     cs = pdb_reader.build_chemical_system()
-
-    from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 
     conf = RealConfiguration(
         cs,
