@@ -7,7 +7,7 @@ Trajectory Converters Information
 | Type              | File Format                          | Default Extension | Output                               | Description                              | Improved Other Information                   |
 +===================+======================================+===================+======================================+==========================================+==============================================+
 | CASTEP Converter  | CASTEP trajectory format             | .md               | HDF format file containing trajectory| Converts CASTEP trajectory files to HDF  | Supports all CASTEP file versions with       |
-|                   |                                      |                   | data                                 | format, including velocities and forces. | comprehensive metadata integration.          |
+|                   |                                      |                   | data                                 | format, including velocities and forces. |  metadata integration.          |
 +-------------------+--------------------------------------+-------------------+--------------------------------------+------------------------------------------+----------------------------------------------+
 | CHARMM Converter  | CHARMM trajectory format             |  .pdb (PDB file), | HDF format file containing trajectory| Converts CHARMM trajectory files to HDF  | Integration with PDB file formats for        |
 |                   |                                      | other             | data                                 | format. Integration with PDB file        | enhanced CHARMM trajectory processing.       |
@@ -43,8 +43,8 @@ Trajectory Converters Information
 +-------------------+--------------------------------------+-------------------+--------------------------------------+------------------------------------------+----------------------------------------------+
 | Forcite Converter | Forcite module trajectory files      | .xtd, .trj        | HDF format file containing trajectory| Converts Forcite module trajectory to    | Accommodates both XTD and TRJ files          |
 |                   |                                      |                   | data                                 | HDF format. Accommodates both XTD and    | from the Forcite module for                  |
-|                   |                                      |                   |                                      | TRJ files from the Forcite module for    | comprehensive conversions.                   |
-|                   |                                      |                   |                                      | comprehensive conversions.               |                                              |
+|                   |                                      |                   |                                      | TRJ files from the Forcite module for    |  conversions.                   |
+|                   |                                      |                   |                                      |  conversions.               |                                              |
 +-------------------+--------------------------------------+-------------------+--------------------------------------+------------------------------------------+----------------------------------------------+
 | Generic Converter | ASCII trajectory files               | .gt               | HDF format file containing trajectory| Converts an ASCII trajectory to HDF      | Ideal for converting non-standard or         |
 |                   |                                      |                   | data                                 | format. Ideal for converting non-standard| unsupported trajectory file formats.         |

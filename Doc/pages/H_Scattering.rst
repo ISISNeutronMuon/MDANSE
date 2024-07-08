@@ -3,7 +3,6 @@ Running Scattering Calculations
 
 Current Correlation Function
 ''''''''''''''''''''''''''''
-**Index 1:** Current Correlation Function Analysis 
 
 **Purpose:**
 
@@ -51,7 +50,7 @@ of density fluctuations and propagating shear modes within the molecular system.
    - Define the output files based on the analysis requirements.
    - Select the appropriate running mode to obtain the desired output.
 
-8. **Initiate the Calculation:**
+8. **Start the Calculation:**
    - Start the Current Correlation Function analysis by clicking on the "Run" or
      "Calculate" button within the MDANSE interface.
 
@@ -71,7 +70,6 @@ of density fluctuations and propagating shear modes within the molecular system.
 
 Dynamic Coherent Structure Factor
 '''''''''''''''''''''''''''''''''
-**Index 2:** Dynamic Coherent Structure Factor Analysis
 
 **Purpose:**
 The Dynamic Incoherent Structure Factor (DISF) analysis is an essential tool for
@@ -104,7 +102,7 @@ dynamic structure factor within the system.
    - **Output Settings:** Configure output files and select the appropriate
      running mode for the analysis. (Default: Monoprocessor)
 
-5. **Initiate the Calculation:**
+5. **Start the Calculation:**
    - Start the Dynamic Incoherent Structure Factor analysis by clicking on the
      "Run" or "Calculate" button within the MDANSE interface.
 
@@ -128,7 +126,6 @@ following plotting suggestions for better visualization and interpretation:
 
 Dynamic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
-**Index 3:** Dynamic Incoherent Structure Factor Analysis
 
 **Purpose:**
 
@@ -161,7 +158,7 @@ system.
    - **Output Settings:** Configure output files and select the appropriate
      running mode for the analysis. (Default: Monoprocessor)
 
-5. **Initiate the Calculation:**
+5. **Start the Calculation:**
    - Start the Dynamic Incoherent Structure Factor analysis by clicking on the
      "Run" button within the MDANSE interface. This will generate
      the data needed for plotting.
@@ -189,7 +186,6 @@ system.
 
 Elastic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
-**Index 4:** Elastic Incoherent Structure Factor Analysis
 
 **Purpose:**
 
@@ -221,7 +217,7 @@ and the EISF within the system.
    - **Output Settings:** Configure output files and select the appropriate
      running mode for the analysis. (Default: Monoprocessor)
 
-5. **Initiate the Calculation:**
+5. **Start the Calculation:**
    - Start the Elastic Incoherent Structure Factor analysis by clicking on the
      "Run" button within the MDANSE interface.
 
@@ -245,12 +241,11 @@ and the EISF within the system.
 
 Gaussian Dynamic Incoherent Structure Factor
 ''''''''''''''''''''''''''''''''''''''''''''
-**Index 5:** Gaussian Dynamic Incoherent Structure Factor Analysis
 
 **Purpose:**
 
 The Neutron Dynamic Total Structure Factor (NDTSF) analysis provides a
-comprehensive evaluation of the coherent and incoherent contributions to the
+ evaluation of the coherent and incoherent contributions to the
 scattering behavior in the molecular system, making it an essential tool for
 neutron-specific studies.
 
@@ -278,7 +273,7 @@ neutron-specific studies.
    - **Output Settings:** Set the output files and select the appropriate running
      mode for the analysis. (Default: Monoprocessor)
 
-5. **Initiate the Calculation:**
+5. **Start the Calculation:**
    - Export the generated structure factor data to the desired output files for
      further analysis or visualization.
 
@@ -302,12 +297,11 @@ neutron-specific studies.
 
 Neutron Dynamic Total Structure Factor
 ''''''''''''''''''''''''''''''''''''''
-**Index 6:** Neutron Dynamic Total Structure Factor Analysis
 
 **Purpose:**
 
 The Neutron Dynamic Total Structure Factor (NDTSF) analysis provides a
-comprehensive evaluation of the coherent and incoherent contributions to the
+ evaluation of the coherent and incoherent contributions to the
 scattering behavior in the molecular system, making it an essential tool for
 neutron-specific studies.
 
@@ -329,7 +323,7 @@ neutron-specific studies.
      User-defined)
    - **Atom Selection:** Select the desired atom selection. (Default: All atoms)
 
-5. **Initiate the Calculation:**
+5. **Start the Calculation:**
    - Export the generated structure factor data to the desired output files for
      further analysis or visualization.
 

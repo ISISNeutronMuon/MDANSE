@@ -50,10 +50,10 @@ Starting Calculations
 With your analysis parameters configured, it's time to initiate the
 calculation:
 
-1. **Initiate Analysis:** Locate and click the "Run" button at the
+1. **Start Analysis:** Locate and click the "Run" button at the
    bottom of the analysis configuration window.
 
-   [Index: Initiate Analysis]
+   [Index: Start Analysis]
 
 2. **Confirmation:** You will likely receive a prompt asking if you want
    to proceed with the analysis. Confirm and proceed.
@@ -114,11 +114,11 @@ File Conversions
 
    *Figure 14: Configure Conversion Parameters*
 
-4. **Initiate Conversion:** Click the "Run" button to start the
+4. **Start Conversion:** Click the "Run" button to start the
    conversion process.
 
 
-   *Figure 15: Initiate Conversion*
+   *Figure 15: Start Conversion*
 
 Viewing Geometrical Structures
 -------------------------------

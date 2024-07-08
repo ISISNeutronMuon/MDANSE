@@ -43,7 +43,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
        <div class="grid-item">
            <h3>🧪 Tutorials</h3>
            <p>Detailed tutorials to help you get started with MDANSE.</p>
-           <a href="pages/T_Water_IR.html">Learn More</a>
+           <a href="pages/T_external.html">Learn More</a>
        </div>
        <div class="grid-item">
            <h3>📚 Technical References</h3>
@@ -91,7 +91,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
    :hidden:
    :caption: 🧪 Tutorials
 
-   pages/T_Water_IR
+   pages/T_external
    pages/T_sim
 
 .. toctree::

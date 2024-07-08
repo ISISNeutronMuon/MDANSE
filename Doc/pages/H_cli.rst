@@ -3,9 +3,10 @@ Using the MDANSE CLI
 
 MDANSE (Molecular Dynamics Analysis and Visualization) software offers a
 versatile and powerful command line interface (CLI) alongside its
-graphical user interface (GUI). While the GUI provides an interactive and
-user-friendly environment for analysis, the command line interface is a
-valuable alternative that offers distinct advantages. In this section of
+graphical user interface (GUI). While the GUI provides an interactive
+environment for analysis, the command line interface is a
+valuable alternative, when the GUI is not available or multiple
+jobs should be run in a batch. In this section of
 the user guide, we will explore why the MDANSE command line interface is
 useful and discuss its various features.
 
@@ -53,8 +54,8 @@ machine.
 **Reproducibility:** Using scripts with the CLI ensures analysis
 reproducibility. Scripted workflows document steps and parameters, making
 it easier to recreate results or share with collaborators. By employing
-scripts with the MDANSE CLI, you create a comprehensive workflow that
-meticulously documents each step of the analysis, encompassing parameter
+scripts with the MDANSE CLI, you create a  workflow that
+documents each step of the analysis, encompassing parameter
 settings and data processing. This practice guarantees that you can easily
 replicate the analysis, enhancing transparency and facilitating
 collaborative research efforts. For example, you have conducted an analysis

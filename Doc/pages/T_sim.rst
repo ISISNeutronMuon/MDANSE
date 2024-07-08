@@ -1,42 +1,54 @@
-2. Dynamic Coherent Structure Factor
-====================================
+Dynamic Coherent Structure Factor
+=================================
 
 This tutorial provides a guide on performing neutron scattering analysis using
 the MDANSE software. We will cover launching MDANSE, loading trajectory data in
 HDF format, configuring the analysis, troubleshooting common issues, and saving
 simulation data.
 
-**Step 1: Launching MDANSE and Loading HDF Trajectory**
+Launching MDANSE and Loading HDF Trajectory
+-------------------------------------------
 
-*1.1 Launch MDANSE:*
-- Begin by launching MDANSE, either by double-clicking its icon or running it
-  from the command line, if necessary.
+Launch MDANSE
+'''''''''''''
 
-*1.2 Load HDF Trajectory:*
-- Once MDANSE is running, ensure that you have your molecular dynamics
-  trajectory data in the HDF format loaded into the software, suitable for
-  neutron scattering analysis.
+Begin by launching MDANSE, either by double-clicking its icon or running it
+from the command line, if necessary.
 
-  - To load the HDF trajectory, follow these steps:
-    1. Go to the "File" menu at the top of the MDANSE window.
-    2. Select "Load Trajectory" from the dropdown menu.
-    3. Browse your file system and select the MDANSE HDF trajectory file you want
-       to analyze. Click "Open" to load it into MDANSE.
+Load HDF Trajectory
+'''''''''''''''''''
 
-**Step 2: Configuring Dynamic Coherent Structure Factor Analysis**
+Once MDANSE is running, ensure that you have your molecular dynamics
+trajectory data in the HDF format loaded into the software, suitable for
+neutron scattering analysis.
 
-*2.1 Access Analysis Menu:*
-- In the MDANSE GUI, navigate to the "Analysis" menu located at the top of the
-  window.
+To load the HDF trajectory, follow these steps:
 
-*2.2 Initiate Analysis:*
-- From the "Analysis" menu, choose "Dynamic Coherent Structure Factor" to
-  initiate the analysis. This opens a dialog for configuring the analysis
-  parameters.
+#. Go to the "File" menu at the top of the MDANSE window.
+#. Select "Load Trajectory" from the dropdown menu.
+#. Browse your file system and select the MDANSE HDF trajectory file you want to analyze. Click "Open" to load it into MDANSE.
 
-*2.3 **Configure Analysis Parameters:***
-- In the "Dynamic Coherent Structure Factor" dialog, configure the analysis
-  parameters as follows:
+Configuring Dynamic Coherent Structure Factor Analysis
+------------------------------------------------------
+
+Access Analysis Menu
+''''''''''''''''''''
+
+In the MDANSE GUI, navigate to the "Analysis" menu located at the top of the
+window.
+
+Pick Analysis Type
+''''''''''''''''''
+
+From the "Analysis" menu, choose "Dynamic Coherent Structure Factor" to
+initiate the analysis. This opens a dialog for configuring the analysis
+parameters.
+
+Configure Analysis Parameters
+'''''''''''''''''''''''''''''
+
+In the "Dynamic Coherent Structure Factor" dialog, configure the analysis
+parameters as follows:
   - **Frames:** For this analysis, we want to analyze all frames of the HDF
     trajectory. You can specify a range of frames if needed (Default: First: 0,
     Last: Entire trajectory, Step: 1).
@@ -56,59 +68,64 @@ simulation data.
     this example, we'll use the default settings, which typically include HDF
     as the format (Default: Format: HDF, Location: Default).
     
+Troubleshooting Tips
+''''''''''''''''''''
 
-*2.4 Troubleshooting Tips:*
-- **Issue:** If MDANSE encounters an error during the analysis setup, double-
-  check the configuration parameters, ensuring they are appropriate for your
+- **Issue:** If MDANSE encounters an error during the analysis setup,
+  double-check the configuration parameters, ensuring they are appropriate for your
   data and analysis. Pay special attention to the Q Vectors and Atom Selection.
+
 - **Issue:** If the analysis takes an unexpectedly long time to complete,
   review your system specifications and the number of frames in your trajectory.
   It may be beneficial to reduce the number of frames or use a more efficient
   workstation.
 
-**Step 3: Running the Analysis**
+Running the Analysis
+--------------------
 
-*3.1 Initiate Analysis Run:*
-- After configuring the analysis parameters in the "Dynamic Coherent Structure
-  Factor" dialog, click the "Run" button within the dialog to initiate the
-  analysis.
+Start the Analysis
+''''''''''''''''''
 
-*3.2 Monitor Progress:*
-- MDANSE will start performing the calculations, and you'll see progress
-  indicators or logs in the MDANSE interface.
+After configuring the analysis parameters in the "Dynamic Coherent Structure
+Factor" dialog, click the "Run" button within the dialog to initiate the
+analysis.
 
-*3.3 Review Results:*
-- Once the analysis is complete, MDANSE will generate the results, including the
-  total and partial dynamic coherent structure factors, and save them in the
-  default HDF file format, which you specified earlier. These HDF files will
-  typically be located in the default output location.
+Monitor Progress
+''''''''''''''''
 
-**Step 4: Saving Simulation Data**
+MDANSE will start performing the calculations, and you'll see progress
+indicators or logs in the MDANSE interface.
 
-*4.1 Save Project:*
-- In MDANSE, go to the "File" menu and select "Save" to save your project. This
-  will save your current analysis configuration and settings.
+Review Results
+''''''''''''''
 
-*4.2 Export Data:*
-- To save simulation trajectories, energy profiles, and other relevant data,
-  consult MDANSE's documentation or menu options specific to data export. You can
-  typically export data in various formats, including text, CSV, or specific file
-  formats for further analysis in external software.
+Once the analysis is complete, MDANSE will generate the results, including the
+total and partial dynamic coherent structure factors, and save them in the
+default HDF file format, which you specified earlier. These HDF files will
+typically be located in the default output location.
 
-**Step 5: Organizing and Storing Simulation Results**
+Saving Simulation Data
+----------------------
 
-- Organizing and storing simulation results effectively is crucial for easy
-  access and future analysis. Consider creating a dedicated folder or directory
-  structure for your simulation project and its associated data. You can organize
-  it as follows:
-  - Create a main project folder with a descriptive name.
-  - Within the project folder, create subfolders for specific types of data
-    (e.g., "Trajectories," "Energy Profiles," "Analysis Results").
-  - Save simulation trajectories, energy profiles, and other data in their
-    respective subfolders.
+Save Script
+'''''''''''
 
-- Additionally, consider using version control systems or documenting your work to
-  track changes and ensure reproducibility of your simulations.
+Instead of starting the analysis, you can use the "Save as script" button.
+It will save all the inputs of this analysis run into a Python script,
+which you can run outside the GUI. There should be no difference in the
+results between a job started using the 'Run' button and one started
+in a script.
+
+Analysis results
+''''''''''''''''
+
+Apart from an MDA file (which is a binary HDF5 file), you can also
+pick 'TextFormat' as output. This will create a TAR archive with
+every data array saved in a separate file. Depending on your
+plans for further data analysis, each format may have its own
+advantaged. MDA files are typically easy to load into the MDANSE
+GUI, while text files are easier to view using a text editor and
+to process using your own software.
 
 Access DCSF Analysis in MDANSE
 -------------------------------
@@ -126,7 +143,9 @@ characteristics and dynamic behavior.
 
 Here are the key components and steps to analyze the Total DCSF Plot:
 
-- **Scattering Vector (Q) Magnitude**:
+Scattering Vector (Q) Magnitude
+'''''''''''''''''''''''''''''''
+
   - The x-axis of the Total DCSF Plot represents the scattering vector magnitude
     (Q).
   - Scattering vector (Q) quantifies the spatial distribution of scatterers in
@@ -134,7 +153,9 @@ Here are the key components and steps to analyze the Total DCSF Plot:
   - Different Q values correspond to different structural features and scattering
     events in your system.
 
-- **Dynamic Coherent Structure Factor (DCSF) Value**:
+Dynamic Coherent Structure Factor (DCSF) Value
+''''''''''''''''''''''''''''''''''''''''''''''
+
   - The y-axis of the Total DCSF Plot represents the DCSF value.
   - The DCSF value reflects the intensity of scattering at a specific Q value.
   - High DCSF values indicate strong scattering, while low values indicate weak
@@ -142,7 +163,9 @@ Here are the key components and steps to analyze the Total DCSF Plot:
   - The DCSF value at a particular Q value represents the overall scattering
     contribution from all atoms or components in your system at that Q value.
 
-- **Analyzing Peaks**:
+Analyzing Peaks
+'''''''''''''''
+
   - Peaks in the Total DCSF Plot indicate significant scattering contributions at
     specific Q values.
   - The presence of peaks suggests the existence of structural features or
@@ -152,14 +175,18 @@ Here are the key components and steps to analyze the Total DCSF Plot:
   - The shape and width of a peak provide additional information about the
     characteristics of the scattering event.
 
-- **Peak Interpretation**:
+Peak Interpretation
+'''''''''''''''''''
+
   - Broad Peaks: Broad peaks in the Total DCSF Plot may suggest diffusive motion
     within your system. These motions can indicate disordered or liquid-like
     regions.
   - Sharp Peaks: Sharp and well-defined peaks suggest ordered structures or
     scattering events with distinct spatial arrangements of atoms or components.
 
-- **Comparative Analysis**:
+Comparative Analysis
+''''''''''''''''''''
+
   - Compare the Total DCSF Plot with other experimental data or simulations to
     validate your findings and gain a deeper understanding of your system's
     behavior.
@@ -170,34 +197,35 @@ Here are the key components and steps to analyze the Total DCSF Plot:
 To assist in your analysis, here's a Python code snippet that demonstrates how to
 analyze the Total DCSF Plot:
 
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.signal import find_peaks
+.. code-block:: python
 
-# Replace with your actual data
-q_values_total = np.linspace(0, 10, 100)
-dcsf_values_total = np.sin(q_values_total) + np.random.normal(0, 0.2, 100)
+  import numpy as np
+  import matplotlib.pyplot as plt
+  from scipy.signal import find_peaks
 
-# Analyze the Total DCSF Plot
-peak_indices_total, peak_heights_total = find_peaks(dcsf_values_total,
-                                                    height=0.5)
+  # Replace with your actual data
+  q_values_total = np.linspace(0, 10, 100)
+  dcsf_values_total = np.sin(q_values_total) + np.random.normal(0, 0.2, 100)
 
-# Print peak information for Total DCSF Plot
-print("Total DCSF Peaks:")
-for i, idx in enumerate(peak_indices_total):
-    print(f"Peak {i + 1}: Q = {q_values_total[idx]:.2f}, Height = {peak_heights_total[i]:.2f}")
+  # Analyze the Total DCSF Plot
+  peak_indices_total, peak_heights_total = find_peaks(dcsf_values_total,
+                                                      height=0.5)
 
-# Plot Total DCSF with peaks
-plt.figure(figsize=(10, 6))
-plt.plot(q_values_total, dcsf_values_total, label="Total DCSF")
-plt.scatter(q_values_total[peak_indices_total], peak_heights_total, color='red', marker='x', label='Peaks')
-plt.xlabel("Scattering Vector (Q)")
-plt.ylabel("DCSF Value")
-plt.title("Total DCSF Plot with Peaks")
-plt.legend()
-plt.grid(True)
-plt.show()
+  # Print peak information for Total DCSF Plot
+  print("Total DCSF Peaks:")
+  for i, idx in enumerate(peak_indices_total):
+      print(f"Peak {i + 1}: Q = {q_values_total[idx]:.2f}, Height = {peak_heights_total[i]:.2f}")
+
+  # Plot Total DCSF with peaks
+  plt.figure(figsize=(10, 6))
+  plt.plot(q_values_total, dcsf_values_total, label="Total DCSF")
+  plt.scatter(q_values_total[peak_indices_total], peak_heights_total, color='red', marker='x', label='Peaks')
+  plt.xlabel("Scattering Vector (Q)")
+  plt.ylabel("DCSF Value")
+  plt.title("Total DCSF Plot with Peaks")
+  plt.legend()
+  plt.grid(True)
+  plt.show()
 
 
 Analysis of the Partial DCSF Plot
@@ -208,7 +236,9 @@ Structure Factor (DCSF) analysis, a partial DCSF plot specific to that selection
 displayed. Analyzing this plot is essential for gaining insights into the scattering behavior
 of the chosen component. Here's how to analyze the Partial DCSF Plot effectively:
 
-- **Scattering Intensity**:
+Scattering Intensity
+''''''''''''''''''''
+
   - Examine the intensity of scattering at different Q values (scattering vectors) within the
     partial DCSF plot.
   - Peaks in the partial DCSF plot indicate significant scattering contributions from the
@@ -216,7 +246,9 @@ of the chosen component. Here's how to analyze the Partial DCSF Plot effectively
   - High peak values indicate pronounced scattering at specific Q values, signifying structural
     features or dynamic events associated with the chosen component.
 
-- **Peak Characteristics**:
+Peak Characteristics
+''''''''''''''''''''
+
   - Evaluate the height, shape, and width of the peaks in the partial DCSF plot.
   - These peak characteristics provide valuable insights into the scattering behavior of the
     selected component.
@@ -226,7 +258,9 @@ of the chosen component. Here's how to analyze the Partial DCSF Plot effectively
     scattering events. Broad peaks may suggest diffusive motion, while sharp, well-defined
     peaks indicate ordered structures or distinct scattering events.
 
-- **Interactions and Correlations**:
+Interactions and Correlations
+'''''''''''''''''''''''''''''
+
   - Consider any interactions or correlations between the selected atoms or groups within your
     molecular system.
   - Peaks in the partial DCSF plot can reveal how these components scatter X-rays or neutrons,
@@ -234,7 +268,9 @@ of the chosen component. Here's how to analyze the Partial DCSF Plot effectively
   - Identify scattering events that may result from interactions between the chosen component
     and its surroundings.
 
-- **Comparative Analysis**:
+Comparative Analysis
+''''''''''''''''''''
+
   - To better understand the relative contributions of different components to the overall
     scattering pattern, compare the partial DCSF plot for the selected component with the Total
     DCSF Plot.

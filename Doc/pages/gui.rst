@@ -79,9 +79,8 @@ Linux
 
      /usr/local/bin/mdanse_gui
 
-The MDANSE GUI serves as a versatile platform for performing a wide range
-of analyses and visualizations in a user-friendly manner, enhancing your
-research capabilities.
+The MDANSE GUI serves as a platform for performing a wide range
+of analyses and visualizations.
 
 The standalone GUI elements
 ---------------------------

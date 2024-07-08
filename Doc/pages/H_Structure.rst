@@ -166,7 +166,7 @@ Index : GUI Molecular Trace Analysis
 and examination of the trajectories of selected atoms or groups within the
 molecular system. By tracing the spatial paths of specific entities, researchers
 can gain valuable insights into the movement, behavior, and interactions of these
-molecular components, aiding in the comprehensive analysis of the system's dynamics.
+molecular components, aiding in the  analysis of the system's dynamics.
 
 
 .
@@ -195,7 +195,7 @@ molecular components, aiding in the comprehensive analysis of the system's dynam
      and the desired output.
 
 7. **Run the Calculation:**
-   - Initiate the Molecular Trace analysis by clicking on the "Run" within the
+   - Start the Molecular Trace analysis by clicking on the "Run" within the
      MDANSE interface.
 
 8. **Review and Interpret Results:**
@@ -391,7 +391,7 @@ interactions with solvent molecules.
      the radius of a water molecule.
 
 5. **Run the Calculation**:
-   - Initiate the Solvent Accessible Surface calculation by clicking the "Run" button.
+   - Start the Solvent Accessible Surface calculation by clicking the "Run" button.
 
 6. **Review Results**:
    - After the calculation, access and interpret the Solvent Accessible Surface

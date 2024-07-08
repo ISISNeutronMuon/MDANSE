@@ -1,10 +1,8 @@
 Configuring Parameters
 ======================
 
-**Index 1: Configuring Parameters and Running Analyses**
-
 **Purpose:**
-This comprehensive guide provides detailed instructions for configuring parameters
+This  guide provides detailed instructions for configuring parameters
 and running analyses within an MDANSE Analysis window. It covers the common
 structure of MDANSE Analysis windows and guides you through the process of
 customizing parameters for specific analyses.
@@ -50,7 +48,7 @@ customizing parameters for specific analyses.
      - **Save:** Use the "Save" button to preserve the current analysis, including
        your configured options, into a Python script. This script can be executed
        from the command line, promoting reproducibility and automation.
-     - **Run:** Initiate the analysis process by clicking the "Run" button. Upon
+     - **Run:** Start the analysis process by clicking the "Run" button. Upon
        completion, you'll be prompted to decide whether you want to close the
        window. Note that the status of the analysis can be monitored in the Jobs
        panel. Keep in mind that there is a known bug where successful analyses may
@@ -67,7 +65,8 @@ Q Shells in MDANSE are fundamental for scattering experiments and related analys
 They play a crucial role in defining the distribution of Q vectors in reciprocal space,
 which directly impacts the accuracy and scope of your analysis.
 
-**Step 1: Define Q Shell Parameters**
+Define Q Shell Parameters
+'''''''''''''''''''''''''
 
 To effectively configure Q Shells in your MDANSE analysis, follow these steps:
 
@@ -87,7 +86,8 @@ To effectively configure Q Shells in your MDANSE analysis, follow these steps:
        changing the step.
 
 
-**Step 2: Adjust for Specific Analysis**
+Adjust for Specific Analysis
+''''''''''''''''''''''''''''
 
 Customize the Q shell parameters based on the specific requirements of your analysis:
 
@@ -116,7 +116,8 @@ enabling you to precisely target specific data subsets or criteria. These
 selections offer various methods to modify your analysis, enhancing the precision
 and relevance of your results.
 
-**Step 1: Understand Selection Types**
+Understand Selection Types
+''''''''''''''''''''''''''
 
 MDANSE provides several types of selections, each designed for specific purposes:
 
@@ -131,23 +132,27 @@ MDANSE provides several types of selections, each designed for specific purposes
    - Q Vectors (explored separately in the next section): Defines the distribution
      of Q vectors in reciprocal space for scattering experiments.
 
-**Step 2: Access Selection Configuration**
+Access Selection Configuration
+''''''''''''''''''''''''''''''
 
    - Depending on your analysis needs, you can access selection configurations from
      within the MDANSE analysis window or the Molecular Viewer.
 
-**Step 3: Creating Selections Manually**
+Creating Selections Manually
+''''''''''''''''''''''''''''
 
    - By default, MDANSE does not save any selections, requiring you to create them
      manually. These selections are specific to a trajectory HDF file.
 
-**Step 4: Ensure Unique Naming**
+Ensure Unique Naming
+''''''''''''''''''''
 
    - To prevent conflicts, assign each selection a unique name, even if you're
      creating the same selection for multiple trajectories. This practice ensures
      proper organization and prevents the overwriting of selections.
 
-**Step 5: Utilize User Definition Viewer**
+Utilize User Definition Viewer
+''''''''''''''''''''''''''''''
 
    - The User Definition Viewer, accessible from the toolbar, simplifies
      selection management. It provides an overview of all saved selections,
