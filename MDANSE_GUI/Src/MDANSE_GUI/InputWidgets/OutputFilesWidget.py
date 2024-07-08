@@ -55,6 +55,7 @@ class OutputFilesWidget(WidgetBase):
         self._layout.addWidget(browse_button)
         self._default_value = default_value
         self._field.textChanged.connect(self.updateValue)
+        self.type_box.lineEdit().textChanged.connect(self.updateValue)
         self.default_labels()
         self.update_labels()
         self.updateValue()
