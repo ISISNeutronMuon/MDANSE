@@ -51,6 +51,10 @@ class PlotSelectionTab(GeneralTab):
             self.get_path("plot_selection"),
             "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
         )
+        if fnames is None:
+            return
+        if len(fnames[0]) < 1:
+            return
         for fname in fnames[0]:
             self.load_results(fname)
             last_path, _ = os.path.split(fname)

@@ -139,6 +139,7 @@ class JobTab(GeneralTab):
             label_text=job_tab_label,
             action=action,
         )
+        action.set_settings(the_tab._settings)
         return the_tab
 
 

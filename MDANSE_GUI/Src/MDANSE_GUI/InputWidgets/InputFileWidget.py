@@ -105,6 +105,9 @@ class InputFileWidget(WidgetBase):
                 self._field.setText(new_value[0])
                 self.updateValue()
             try:
+                print(
+                    f"Settings path of {self._job_name} to {os.path.split(new_value[0])[0]}"
+                )
                 paths_group.set(self._job_name, os.path.split(new_value[0])[0])
             except:
                 print(
