@@ -18,53 +18,13 @@ import itertools
 import os
 import os.path
 
-from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog
-from qtpy.QtCore import Qt, Slot
-from qtpy.QtGui import QStandardItemModel
+from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog
+from qtpy.QtCore import Slot
 
 from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-
-
-class CheckableComboBox(QComboBox):
-    def __init__(self, *args, **kwargs):
-        super(CheckableComboBox, self).__init__(*args, **kwargs)
-        self.view().pressed.connect(self.handleItemPressed)
-        self.setModel(QStandardItemModel(self))
-
-    def handleItemPressed(self, index):
-        item = self.model().itemFromIndex(index)
-        if item.checkState() == Qt.Checked:
-            item.setCheckState(Qt.Unchecked)
-        else:
-            item.setCheckState(Qt.Checked)
-
-    def configure_using_default(self):
-        """This is too specific to have a default value"""
-
-    def set_default(self, default: str):
-        model = self.model()
-        for row_number in range(model.rowCount()):
-            index = model.index(row_number, 0)
-            item = model.itemFromIndex(index)
-            text = model.data(index)
-            if text == default:
-                item.setCheckState(Qt.Checked)
-            else:
-                item.setCheckState(Qt.Unchecked)
-
-    def checked_values(self):
-        result = []
-        model = self.model()
-        for row_number in range(model.rowCount()):
-            index = model.index(row_number, 0)
-            item = model.itemFromIndex(index)
-            if item.checkState() == Qt.Checked:
-                text = model.data(index)
-                LOG.info(text)
-                result.append(text)
-        return result
+from .CheckableComboBox import CheckableComboBox
 
 
 class OutputFilesWidget(WidgetBase):
