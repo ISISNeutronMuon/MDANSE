@@ -156,7 +156,7 @@ class CheckableComboBox(QComboBox):
         else:
             self.lineEdit().setText(",".join(vals))
 
-    def set_default(self, default: str):
+    def set_default(self, default: str) -> None:
         """Checks the item with the text equal to the default parameter.
 
         Parameters
@@ -175,7 +175,7 @@ class CheckableComboBox(QComboBox):
                 item.setCheckState(Qt.Unchecked)
         self.update_line_edit()
 
-    def checked_values(self):
+    def checked_values(self) -> list[str]:
         """
         Returns
         -------
