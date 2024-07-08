@@ -75,7 +75,7 @@ class AseInputFileWidget(WidgetBase):
         """
         new_value = self._file_dialog(
             self.parent(),  # the parent of the dialog
-            "Load a file",  # the label of the window
+            "Load file",  # the label of the window
             self.default_path,  # the initial search path
             self._qt_file_association,  # text string specifying the file name filter.
         )

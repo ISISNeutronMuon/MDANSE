@@ -100,7 +100,7 @@ class OutputTrajectoryWidget(WidgetBase):
         """
         new_value = QFileDialog.getSaveFileName(
             self._base,  # the parent of the dialog
-            "Load a file",  # the label of the window
+            "Save file",  # the label of the window
             self.default_path,  # the initial search path
             self.file_association,  # text string specifying the file name filter.
         )
