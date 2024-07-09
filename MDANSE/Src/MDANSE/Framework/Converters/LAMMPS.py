@@ -717,6 +717,10 @@ class LAMMPS(Converter):
         """
         Initialize the job.
         """
+        if self.configuration["output_file"]["write_logs"]:
+            log_filename = self.configuration["output_file"]["root"] + ".log"
+            self.add_log_file_handler(log_filename)
+
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # The number of steps of the analysis.

@@ -41,7 +41,7 @@ def test_disf(trajectory):
     parameters["weights"] = "b_incoherent2"
     for resolution_generator in IInstrumentResolution.subclasses():
         temp_name = tempfile.mktemp()
-        parameters["output_files"] = (temp_name, ("MDAFormat",))
+        parameters["output_files"] = (temp_name, ("MDAFormat",), False)
         instance = IInstrumentResolution.create(resolution_generator)
         resolution_defaults = {
             name: value[1]["default"] for name, value in instance.settings.items()
@@ -77,7 +77,7 @@ def test_dos_text(trajectory, resolution_generator):
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
     temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, ("TextFormat",))
+    parameters["output_files"] = (temp_name, ("TextFormat",), False)
     instance = IInstrumentResolution.create(resolution_generator)
     resolution_defaults = {
         name: value[1]["default"] for name, value in instance.settings.items()

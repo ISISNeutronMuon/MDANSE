@@ -84,8 +84,9 @@ class RigidBodyTrajectory(IJob):
 
     def initialize(self):
         """ """
-
-        # self.numberOfSteps = self.configuration['frames']['number']
+        if self.configuration["output_file"]["write_logs"]:
+            log_filename = self.configuration["output_file"]["root"] + ".log"
+            self.add_log_file_handler(log_filename)
 
         if (
             self.configuration["reference"]["value"]
@@ -273,3 +274,4 @@ class RigidBodyTrajectory(IJob):
             fits[comp, :] = self._fits[comp, :]
 
         outputFile.close()
+        super().finalize()

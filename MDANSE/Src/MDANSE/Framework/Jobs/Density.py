@@ -57,6 +57,10 @@ class Density(IJob):
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
+        if self.configuration["output_files"]["write_logs"]:
+            log_filename = self.configuration["output_files"]["root"] + ".log"
+            self.add_log_file_handler(log_filename)
+
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         self._n_frames = self.numberOfSteps
@@ -179,3 +183,4 @@ class Density(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

@@ -27,7 +27,7 @@ def test_temperature(trajectory):
     parameters = {}
     parameters["frames"] = (0, 10, 1)
     parameters["interpolation_order"] = 3
-    parameters["output_files"] = (temp_name, ("TextFormat",))
+    parameters["output_files"] = (temp_name, ("TextFormat",), False)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     temp = IJob.create("Temperature")

@@ -34,7 +34,7 @@ def test_temperature_nonzero(trajectory, interp_order):
     parameters = {}
     parameters["frames"] = (0, 10, 1)
     parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     temp = IJob.create("Temperature")

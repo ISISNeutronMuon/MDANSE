@@ -60,6 +60,10 @@ class RadiusOfGyration(IJob):
         """
         Computes the pair distribution function for a set of atoms.
         """
+        if self.configuration["output_files"]["write_logs"]:
+            log_filename = self.configuration["output_files"]["root"] + ".log"
+            self.add_log_file_handler(log_filename)
+
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Will store the time.
@@ -139,3 +143,4 @@ class RadiusOfGyration(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

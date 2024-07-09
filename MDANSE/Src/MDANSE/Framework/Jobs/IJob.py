@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from logging import FileHandler
 from logging.handlers import QueueHandler
 
 import abc
@@ -33,7 +34,7 @@ from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.Core.SubclassFactory import SubclassFactory
-from MDANSE.MLogging import LOG
+from MDANSE.MLogging import LOG, FMT
 
 
 class JobError(Error):
@@ -133,6 +134,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         self._processes = []
 
+        self._ijob_log_file_handler = None
+
     def __getstate__(self):
         d = self.__dict__.copy()
         del d["_processes"]
@@ -146,9 +149,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
     def configuration(self):
         return self._configuration
 
-    @abc.abstractmethod
     def finalize(self):
-        pass
+        if self._ijob_log_file_handler is not None:
+            self.remove_log_file_handler()
 
     @abc.abstractmethod
     def initialize(self):
@@ -451,3 +454,19 @@ class %(classname)s(IJob):
         else:
             f.close()
             return templateFile
+
+    def add_log_file_handler(self, filename: str) -> None:
+        """Adds a file handle which is used to write the jobs logs.
+
+        Parameters
+        ----------
+        filename : str
+            The log's filename.
+        """
+        self._ijob_log_file_handler = FileHandler(filename, mode="w")
+        self._ijob_log_file_handler.setFormatter(FMT)
+        LOG.addHandler(self._ijob_log_file_handler)
+
+    def remove_log_file_handler(self) -> None:
+        """Removes the IJob file handle from the MDANSE logger."""
+        LOG.removeHandler(self._ijob_log_file_handler)

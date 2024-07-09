@@ -160,6 +160,9 @@ class CP2K(Converter):
         Initialize the job.
         Opens the input files and checks them for consistency.
         """
+        if self.configuration["output_file"]["write_logs"]:
+            log_filename = self.configuration["output_file"]["root"] + ".log"
+            self.add_log_file_handler(log_filename)
 
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
         self._xyzFile = self.configuration["pos_file"]

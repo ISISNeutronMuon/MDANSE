@@ -61,7 +61,7 @@ class OutputStructureConfigurator(IConfigurator):
         """
         self._original_input = value
 
-        root, format = value
+        root, format, logs = value
 
         if not root:
             self.error_status = "empty root name for the output file."
@@ -82,7 +82,7 @@ class OutputStructureConfigurator(IConfigurator):
         self["root"] = root
         self["format"] = format
         self["file"] = root
-
+        self["write_logs"] = logs
         self["value"] = self["file"]
         self.error_status = "OK"
 

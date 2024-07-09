@@ -55,6 +55,9 @@ class StructureFactorFromScatteringFunction(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        if self.configuration["output_files"]["write_logs"]:
+            log_filename = self.configuration["output_files"]["root"] + ".log"
+            self.add_log_file_handler(log_filename)
 
         # The number of steps is set to 1 as everything is performed in the finalize method
         self.numberOfSteps = 1
@@ -148,3 +151,4 @@ class StructureFactorFromScatteringFunction(IJob):
         )
 
         self.configuration["sample_inc"]["instance"].close()
+        super().finalize()

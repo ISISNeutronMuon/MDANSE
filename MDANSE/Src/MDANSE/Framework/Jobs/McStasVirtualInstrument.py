@@ -123,6 +123,9 @@ class McStasVirtualInstrument(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        if self.configuration["output_files"]["write_logs"]:
+            log_filename = self.configuration["output_files"]["root"] + ".log"
+            self.add_log_file_handler(log_filename)
 
         # The number of steps is set to 1 as the job is defined as single McStas run.
         self.numberOfSteps = 1
@@ -309,6 +312,7 @@ class McStasVirtualInstrument(IJob):
             self._info,
             self,
         )
+        super().finalize()
 
     def treat_str_var(self, s):
         return s.strip().replace(" ", "_")

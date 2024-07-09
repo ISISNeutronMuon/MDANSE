@@ -18,7 +18,13 @@ import itertools
 import os
 import os.path
 
-from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog
+from qtpy.QtWidgets import (
+    QComboBox,
+    QLineEdit,
+    QPushButton,
+    QFileDialog,
+    QCheckBox,
+)
 from qtpy.QtCore import Slot
 
 
@@ -31,8 +37,9 @@ dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
 
 
 class OutputTrajectoryWidget(WidgetBase):
+
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, layout_type="QGridLayout", **kwargs)
         default_value = self._configurator.default
         try:
             parent = kwargs.get("parent", None)
@@ -58,10 +65,12 @@ class OutputTrajectoryWidget(WidgetBase):
         # self.type_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)
-        self._layout.addWidget(self._field)
-        self._layout.addWidget(self.dtype_box)
-        self._layout.addWidget(self.compression_box)
-        self._layout.addWidget(browse_button)
+        self.logs_checkbox = QCheckBox("Save logs")
+        self._layout.addWidget(self._field, 0, 0)
+        self._layout.addWidget(self.dtype_box, 0, 1)
+        self._layout.addWidget(self.compression_box, 0, 2)
+        self._layout.addWidget(browse_button, 0, 3)
+        self._layout.addWidget(self.logs_checkbox, 1, 0)
         self._default_value = default_value
         self._field.textChanged.connect(self.updateValue)
         self.default_labels()
@@ -135,4 +144,5 @@ class OutputTrajectoryWidget(WidgetBase):
             filename = self._default_value[0]
         dtype = dtype_lookup[self.dtype_box.currentText()]
         compression = self.compression_box.currentText()
-        return (filename, dtype, compression)
+        logs = self.logs_checkbox.isChecked()
+        return (filename, dtype, compression, logs)

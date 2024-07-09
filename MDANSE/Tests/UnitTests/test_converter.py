@@ -47,7 +47,7 @@ def test_lammps_mdt_conversion_file_exists_and_loads_up_successfully(compression
     parameters["config_file"] = lammps_config
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, 64, compression)
+    parameters["output_file"] = (temp_name, 64, compression, False)
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = lammps_lammps
@@ -72,7 +72,7 @@ def test_lammps_mdt_conversion_unit_system(unit_system):
     parameters["config_file"] = lammps_config
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, 64, "gzip")
+    parameters["output_file"] = (temp_name, 64, "gzip", False)
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = lammps_lammps
@@ -99,7 +99,7 @@ def test_lammps_mdt_conversion_trajectory_format(trajectory_file, trajectory_for
     parameters["config_file"] = lammps_moly
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, 64, "gzip")
+    parameters["output_file"] = (temp_name, 64, "gzip", False)
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = trajectory_file
@@ -123,7 +123,7 @@ def test_lammps_mdt_conversion_raise_exception_with_incorrect_format():
     parameters["config_file"] = lammps_config
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, ["IncorrectFormat"])
+    parameters["output_file"] = (temp_name, ["IncorrectFormat"], False)
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = lammps_lammps
@@ -139,7 +139,7 @@ def test_vasp_mdt_conversion_file_exists_and_loads_up_successfully(compression):
 
     parameters = {
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
         "time_step": 1.0,
         "xdatcar_file": vasp_xdatcar,
     }
@@ -160,7 +160,7 @@ def test_discover_mdt_conversion_file_exists_and_loads_up_successfully(compressi
     parameters = {
         "fold": True,
         "his_file": discover_his,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
         "xtd_file": discover_xtd,
     }
 
@@ -182,7 +182,7 @@ def test_cp2k_mdt_conversion_file_exists_and_loads_up_successfully(velocity):
         "pos_file": cp2k_pos,
         "cell_file": cp2k_cell,
         "vel_file": velocity,
-        "output_file": (temp_name, 64, "gzip"),
+        "output_file": (temp_name, 64, "gzip", False),
     }
 
     vasp = Converter.create("cp2k")
@@ -202,7 +202,7 @@ def test_charmm_mdt_conversion_file_exists_and_loads_up_successfully(compression
     parameters = {
         "dcd_file": hem_cam_dcd,
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
         "pdb_file": hem_cam_pdb,
         "time_step": 1.0,
     }
@@ -224,7 +224,7 @@ def test_ase_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     parameters = {
         "trajectory_file": ase_traj,
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
         "n_steps": 0,
         "time_step": 50.0,
         "time_unit": "fs",
@@ -247,7 +247,7 @@ def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(trajec
     parameters = {
         "trajectory_file": trajectory,
         "fold": False,
-        "output_file": (temp_name, 64, "gzip"),
+        "output_file": (temp_name, 64, "gzip", False),
         "n_steps": 0,
         "time_step": 50.0,
         "time_unit": "fs",
@@ -270,7 +270,7 @@ def test_improvedase_lammps_two_files():
         "trajectory_file": (lammps_lammps, "lammps-dump-text"),
         "configuration_file": (lammps_config, "lammps-data"),
         "fold": False,
-        "output_file": (temp_name, 64, "gzip"),
+        "output_file": (temp_name, 64, "gzip", False),
         "n_steps": 0,
         "elements_from_mass": True,
         "time_step": 50.0,
@@ -294,7 +294,7 @@ def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     parameters = {
         "trajectory_file": xyz_traj,
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
         "n_steps": 0,
         "time_step": 50.0,
         "time_unit": "fs",
@@ -321,7 +321,7 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
         "field_file": dlp_field_v2,
         "fold": False,
         "history_file": dlp_history_v2,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
     }
     dl_poly = Converter.create("DL_POLY")
     dl_poly.run(parameters, status=True)
@@ -344,7 +344,7 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
         "field_file": dlp_field_v4,
         "fold": False,
         "history_file": dlp_history_v4,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
     }
     dl_poly = Converter.create("DL_POLY")
     dl_poly.run(parameters, status=True)
@@ -365,7 +365,7 @@ def test_namd_mdt_conversion_file_exists_and_loads_up_successfully_and_chemical_
     parameters = {
         "dcd_file": apoferritin_dcd,
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
         "pdb_file": apoferritin_pdb,
         "time_step": "1.0",
     }
@@ -390,7 +390,7 @@ def test_castep_md_conversion_file_exists_and_loads_up_successfully(compression)
         "atom_aliases": "{}",
         "castep_file": pbanew_md,
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
     }
 
     castep = Converter.create("CASTEP")
@@ -410,7 +410,7 @@ def test_dftb_conversion_file_exists_and_loads_up_successfully(compression):
     parameters = {
         "atom_aliases": "{}",
         "fold": True,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
         "trj_file": h2o_trj,
         "xtd_file": h2o_xtd,
     }
@@ -432,7 +432,7 @@ def test_forcite_conversion_file_exists_and_loads_up_successfully(compression):
     parameters = {
         "atom_aliases": "{}",
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
         "trj_file": h2o_trj,
         "xtd_file": h2o_xtd,
     }
@@ -453,7 +453,7 @@ def test_gromacs_conversion_file_exists_and_loads_up_successfully(compression):
 
     parameters = {
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_file": (temp_name, 64, compression, False),
         "pdb_file": md_pdb,
         "xtc_file": md_xtc,
     }

@@ -36,7 +36,7 @@ def test_temperature(trajectory, output_unit, output_format):
     parameters["frames"] = (0, 10, 1)
     parameters["output_units"] = output_unit
     parameters["fold"] = True
-    parameters["output_file"] = (temp_name, output_format)
+    parameters["output_file"] = (temp_name, output_format, False)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     temp = IJob.create("AverageStructure")

@@ -33,7 +33,7 @@ class OutputFilesConfigurator(IConfigurator):
     for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
-    _default = ("OUTPUT_FILENAME", ["HDFFormat"])
+    _default = ("OUTPUT_FILENAME", ["HDFFormat"], False)
     _label = "Output filename and formats (filename, [format, ...])"
 
     def __init__(self, name, formats=None, **kwargs):
@@ -62,7 +62,7 @@ class OutputFilesConfigurator(IConfigurator):
         """
         self._original_input = value
 
-        root, formats = value
+        root, formats, logs = value
 
         if not root:
             self.error_status = "empty root name for the output file."
@@ -96,6 +96,7 @@ class OutputFilesConfigurator(IConfigurator):
         self["files"] = ["%s%s" % (root, IFormat.create(f).extension) for f in formats]
 
         self["value"] = self["files"]
+        self["write_logs"] = logs
         self.error_status = "OK"
 
     @property

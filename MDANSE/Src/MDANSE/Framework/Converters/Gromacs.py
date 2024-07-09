@@ -72,6 +72,10 @@ class Gromacs(Converter):
         """
         Initialize the job.
         """
+        if self.configuration["output_file"]["write_logs"]:
+            log_filename = self.configuration["output_file"]["root"] + ".log"
+            self.add_log_file_handler(log_filename)
+
         data_to_be_written = ["configuration", "time"]
 
         # Create XTC or TRR object depending on which kind of trajectory was loaded

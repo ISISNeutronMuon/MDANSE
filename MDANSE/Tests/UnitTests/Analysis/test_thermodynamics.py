@@ -31,7 +31,7 @@ def test_temperature(trajectory, interp_order):
     parameters = {}
     parameters["frames"] = (0, 10, 1)
     parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     temp = IJob.create("Temperature")
@@ -47,7 +47,7 @@ def test_temperature_nonzero(trajectory, interp_order):
     parameters = {}
     parameters["frames"] = (0, 10, 1)
     parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     temp = IJob.create("Temperature")
@@ -64,7 +64,7 @@ def test_density(trajectory, output_format):
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name, (output_format,))
+    parameters["output_files"] = (temp_name, (output_format,), False)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     den = IJob.create("Density")

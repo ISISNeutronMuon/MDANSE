@@ -60,7 +60,7 @@ def parameters():
 )
 def test_structure_analysis(parameters, job_type):
     temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
     job = IJob.create(job_type)
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")

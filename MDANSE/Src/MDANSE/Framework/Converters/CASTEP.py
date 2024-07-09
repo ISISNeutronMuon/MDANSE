@@ -74,6 +74,10 @@ class CASTEP(Converter):
         """
         Initialize the input parameters and analysis self variables
         """
+        if self.configuration["output_file"]["write_logs"]:
+            log_filename = self.configuration["output_file"]["root"] + ".log"
+            self.add_log_file_handler(log_filename)
+
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # Create a representation of md file

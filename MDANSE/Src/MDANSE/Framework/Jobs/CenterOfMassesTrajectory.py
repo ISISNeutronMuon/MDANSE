@@ -76,6 +76,9 @@ class CenterOfMassesTrajectory(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        if self.configuration["output_file"]["write_logs"]:
+            log_filename = self.configuration["output_file"]["root"] + ".log"
+            self.add_log_file_handler(log_filename)
 
         self.numberOfSteps = self.configuration["frames"]["number"]
 
@@ -161,3 +164,4 @@ class CenterOfMassesTrajectory(IJob):
 
         # The output trajectory is closed.
         self._output_trajectory.close()
+        super().finalize()

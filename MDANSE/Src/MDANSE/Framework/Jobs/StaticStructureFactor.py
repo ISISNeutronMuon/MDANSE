@@ -205,3 +205,4 @@ class StaticStructureFactor(DistanceHistogram):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()
