@@ -122,8 +122,9 @@ class OutputFilesWidget(WidgetBase):
             filename = self._default_value[0]
 
         formats = self.type_box.checked_values()
+        logs = self.logs_checkbox.isChecked()
 
-        return (filename, formats)
+        return (filename, formats, logs)
 
     def set_data(self, datakey):
         basename = "%s_%s" % (
