@@ -13,8 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from multiprocessing import Queue
 from logging import FileHandler
-from logging.handlers import QueueHandler
+from logging.handlers import QueueHandler, QueueListener
 
 import abc
 import glob
@@ -275,11 +276,18 @@ class IJob(Configurable, metaclass=SubclassFactory):
         manager = ctx.Manager()
         inputQueue = manager.Queue()
         outputQueue = manager.Queue()
+        log_queue = Queue()
 
-        log_queues = []
+        log_queues = [log_queue]
+        handlers = []  # handlers that are not QueueHandlers
         for handler in LOG.handlers:
             if isinstance(handler, QueueHandler):
                 log_queues.append(handler.queue)
+            else:
+                handlers.append(handler)
+
+        listener = QueueListener(log_queue, *handlers, respect_handler_level=True)
+        listener.start()
 
         self._processes = []
 
@@ -313,6 +321,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         for p in self._processes:
             p.close()
+
+        listener.stop()
 
     def _run_remote(self):
         raise NotImplementedError(
@@ -465,6 +475,9 @@ class %(classname)s(IJob):
         """
         self._log_filename = filename
         fh = FileHandler(filename, mode="w")
+        # set the name so that we can track it and then close it later,
+        # tracking the fh by storing it in this object causes issues
+        # with multiprocessing jobs
         fh.set_name(filename)
         fh.setFormatter(FMT)
         LOG.addHandler(fh)

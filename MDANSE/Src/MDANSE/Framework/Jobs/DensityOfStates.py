@@ -21,6 +21,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
+from MDANSE.MLogging import LOG
 
 
 class DensityOfStates(IJob):
@@ -172,7 +173,7 @@ class DensityOfStates(IJob):
             #. atomicDOS (np.array): The calculated density of state for atom of index=index
             #. atomicVACF (np.array): The calculated velocity auto-correlation function for atom of index=index
         """
-
+        LOG.debug(f"Running job step: {index}")
         trajectory = self.configuration["trajectory"]["instance"]
 
         # get atom index
