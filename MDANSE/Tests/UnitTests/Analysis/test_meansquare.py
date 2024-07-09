@@ -33,7 +33,7 @@ def test_basic_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), True)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
@@ -41,6 +41,9 @@ def test_basic_meansquare():
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
     os.remove(temp_name + ".mda")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_parallel_meansquare():
@@ -77,7 +80,7 @@ def test_atom_selection():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), True)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
@@ -85,3 +88,6 @@ def test_atom_selection():
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
     os.remove(temp_name + ".mda")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

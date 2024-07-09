@@ -41,7 +41,7 @@ def test_disf(trajectory):
     parameters["weights"] = "b_incoherent2"
     for resolution_generator in IInstrumentResolution.subclasses():
         temp_name = tempfile.mktemp()
-        parameters["output_files"] = (temp_name, ("MDAFormat",), False)
+        parameters["output_files"] = (temp_name, ("MDAFormat",), True)
         instance = IInstrumentResolution.create(resolution_generator)
         resolution_defaults = {
             name: value[1]["default"] for name, value in instance.settings.items()
@@ -57,6 +57,9 @@ def test_disf(trajectory):
         assert path.exists(temp_name + ".mda")
         assert path.isfile(temp_name + ".mda")
         os.remove(temp_name + ".mda")
+        assert path.exists(temp_name + ".log")
+        assert path.isfile(temp_name + ".log")
+        os.remove(temp_name + ".log")
 
 
 list_of_resolutions = IInstrumentResolution.subclasses()
@@ -77,7 +80,7 @@ def test_dos_text(trajectory, resolution_generator):
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
     temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, ("TextFormat",), False)
+    parameters["output_files"] = (temp_name, ("TextFormat",), True)
     instance = IInstrumentResolution.create(resolution_generator)
     resolution_defaults = {
         name: value[1]["default"] for name, value in instance.settings.items()
@@ -93,3 +96,6 @@ def test_dos_text(trajectory, resolution_generator):
     assert path.exists(temp_name + "_text.tar")
     assert path.isfile(temp_name + "_text.tar")
     os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

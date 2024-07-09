@@ -65,41 +65,53 @@ def test_RigidBodyTrajectory(parameters):
 def test_GlobalMotionFilteredTrajectory(parameters):
     """We ignore the failure here to merge other changes."""
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip", False)
+    parameters["output_file"] = (temp_name, 64, "gzip", True)
     job = IJob.create("GlobalMotionFilteredTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
     assert path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_CroppedTrajectory(parameters):
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip", False)
+    parameters["output_file"] = (temp_name, 64, "gzip", True)
     job = IJob.create("CroppedTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
     assert path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_CenterOfMassesTrajectory(parameters):
     """This will need to detect molecules before it can
     find the centre of each one of them."""
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip", False)
+    parameters["output_file"] = (temp_name, 64, "gzip", True)
     job = IJob.create("CenterOfMassesTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
     assert path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_UnfoldedTrajectory(parameters):
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip", False)
+    parameters["output_file"] = (temp_name, 64, "gzip", True)
     job = IJob.create("UnfoldedTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
     assert path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

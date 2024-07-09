@@ -38,7 +38,7 @@ def test_vacf(interp_order, normalise):
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
     parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), True)
     parameters["running_mode"] = ("single-core",)
     parameters["normalize"] = normalise
     parameters["trajectory"] = mock_json
@@ -47,3 +47,6 @@ def test_vacf(interp_order, normalise):
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
     os.remove(temp_name + ".mda")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

@@ -82,7 +82,7 @@ def test_dcsf(trajectory, qvector_spherical_lattice):
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
     parameters["q_vectors"] = qvector_spherical_lattice
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -95,6 +95,9 @@ def test_dcsf(trajectory, qvector_spherical_lattice):
     assert path.exists(temp_name + "_text.tar")
     assert path.isfile(temp_name + "_text.tar")
     os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_output_axis_preview(qvector_spherical_lattice):
@@ -123,7 +126,7 @@ def test_disf(trajectory, qvector_spherical_lattice):
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
     parameters["q_vectors"] = qvector_spherical_lattice
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -136,6 +139,9 @@ def test_disf(trajectory, qvector_spherical_lattice):
     assert path.exists(temp_name + "_text.tar")
     assert path.isfile(temp_name + "_text.tar")
     os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_eisf(trajectory, qvector_spherical_lattice):
@@ -144,7 +150,7 @@ def test_eisf(trajectory, qvector_spherical_lattice):
     parameters["atom_selection"] = None
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
     parameters["q_vectors"] = qvector_spherical_lattice
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -157,6 +163,9 @@ def test_eisf(trajectory, qvector_spherical_lattice):
     assert path.exists(temp_name + "_text.tar")
     assert path.isfile(temp_name + "_text.tar")
     os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_gdisf(trajectory):
@@ -166,7 +175,7 @@ def test_gdisf(trajectory):
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
     parameters["q_shells"] = (2.0, 12.2, 2.0)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -179,6 +188,9 @@ def test_gdisf(trajectory):
     assert path.exists(temp_name + "_text.tar")
     assert path.isfile(temp_name + "_text.tar")
     os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
@@ -190,7 +202,7 @@ def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
     parameters["dcsf_input_file"] = dcsf
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
     ndtsf = IJob.create("NeutronDynamicTotalStructureFactor")
     ndtsf.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
@@ -199,6 +211,9 @@ def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
     assert path.exists(temp_name + "_text.tar")
     assert path.isfile(temp_name + "_text.tar")
     os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_ssfsf(disf):
@@ -207,7 +222,7 @@ def test_ssfsf(disf):
     parameters["sample_inc"] = disf
     parameters["running_mode"] = ("single-core",)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
     ndtsf = IJob.create("StructureFactorFromScatteringFunction")
     ndtsf.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
@@ -216,6 +231,9 @@ def test_ssfsf(disf):
     assert path.exists(temp_name + "_text.tar")
     assert path.isfile(temp_name + "_text.tar")
     os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.xfail(reason="see docstring")
@@ -230,7 +248,7 @@ def test_ccf(qvector_spherical_lattice):
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["interpolation_order"] = 3
     parameters["interpolation_mode"] = "automatic"
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
     parameters["q_vectors"] = qvector_spherical_lattice
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -243,3 +261,6 @@ def test_ccf(qvector_spherical_lattice):
     assert path.exists(temp_name + "_text.tar")
     assert path.isfile(temp_name + "_text.tar")
     os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

@@ -46,7 +46,7 @@ def test_vacf(trajectory, interp_order, normalise):
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
     parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), True)
     parameters["running_mode"] = ("single-core",)
     parameters["normalize"] = normalise
     parameters["trajectory"] = short_traj
@@ -55,6 +55,9 @@ def test_vacf(trajectory, interp_order, normalise):
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
     os.remove(temp_name + ".mda")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 ################################################################
@@ -112,7 +115,7 @@ def test_dynamics_analysis(parameters, traj_path, job_type, running_mode, output
     temp_name = tempfile.mktemp()
     parameters["trajectory"] = traj_path
     parameters["running_mode"] = running_mode
-    parameters["output_files"] = (temp_name, (output_format,), False)
+    parameters["output_files"] = (temp_name, (output_format,), True)
     job = IJob.create(job_type)
     job.run(parameters, status=True)
     if output_format == "MDAFormat":
@@ -123,6 +126,9 @@ def test_dynamics_analysis(parameters, traj_path, job_type, running_mode, output
         assert path.exists(temp_name + "_text.tar")
         assert path.isfile(temp_name + "_text.tar")
         os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_output_axis_preview(parameters):

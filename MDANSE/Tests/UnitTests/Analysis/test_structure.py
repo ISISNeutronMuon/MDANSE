@@ -79,7 +79,7 @@ def test_structure_analysis(parameters, traj_path, job_type, running_mode, outpu
     temp_name = tempfile.mktemp()
     parameters["trajectory"] = traj_path
     parameters["running_mode"] = running_mode
-    parameters["output_files"] = (temp_name, (output_format,), False)
+    parameters["output_files"] = (temp_name, (output_format,), True)
     job = IJob.create(job_type)
     job.run(parameters, status=True)
     if output_format == "MDAFormat":
@@ -90,3 +90,6 @@ def test_structure_analysis(parameters, traj_path, job_type, running_mode, outpu
         assert path.exists(temp_name + "_text.tar")
         assert path.isfile(temp_name + "_text.tar")
         os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

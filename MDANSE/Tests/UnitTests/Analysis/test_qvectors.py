@@ -31,7 +31,7 @@ def test_disf(trajectory):
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), True)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
@@ -50,3 +50,6 @@ def test_disf(trajectory):
         assert path.exists(temp_name + ".mda")
         assert path.isfile(temp_name + ".mda")
         os.remove(temp_name + ".mda")
+        assert path.exists(temp_name + ".log")
+        assert path.isfile(temp_name + ".log")
+        os.remove(temp_name + ".log")
