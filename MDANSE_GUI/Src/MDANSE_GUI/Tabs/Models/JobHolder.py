@@ -239,13 +239,17 @@ class JobHolder(QStandardItemModel):
         communicator.moveToThread(watcher_thread)
         entry_number = self.next_number
         item_th = JobEntry(
-            command=job_vars[0], entry_number=entry_number, pause_event=pause_event
+            command=job_vars[0],
+            entry_number=entry_number,
+            pause_event=pause_event,
+            load_afterwards=load_afterwards,
         )
         item_th.parameters = job_vars[1]
-        if "output_file" in job_vars[1]:
-            item_th.for_loading.connect(self.trajectory_for_loading)
-        elif "output_files" in job_vars[1]:
-            item_th.for_loading.connect(self.results_for_loading)
+        if load_afterwards:
+            if "output_file" in job_vars[1]:
+                item_th.for_loading.connect(self.trajectory_for_loading)
+            elif "output_files" in job_vars[1]:
+                item_th.for_loading.connect(self.results_for_loading)
         communicator.target.connect(item_th.on_started)  # int
         communicator.progress.connect(item_th.on_update)  # int
         communicator.finished.connect(item_th.on_finished)  # bool

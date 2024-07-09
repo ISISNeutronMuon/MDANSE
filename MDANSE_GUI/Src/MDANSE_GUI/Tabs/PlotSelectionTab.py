@@ -52,7 +52,7 @@ class PlotSelectionTab(GeneralTab):
         for fname in fnames[0]:
             self.load_results(fname)
 
-    @Slot()
+    @Slot(str)
     def load_results(self, fname: str):
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
