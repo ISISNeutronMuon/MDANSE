@@ -81,11 +81,21 @@ class JobEntry(QObject):
     """This coordinates all the objects that make up one line on the list
     of current jobs. It is used for reporting the task progress to the GUI."""
 
-    def __init__(self, *args, command=None, entry_number=0, pause_event=None):
+    for_loading = Signal(str)
+
+    def __init__(
+        self,
+        *args,
+        command=None,
+        entry_number=0,
+        pause_event=None,
+        load_afterwards=False,
+    ):
         super().__init__(*args)
         self._command = command
         self._parameters = {}
         self._pause_event = pause_event
+        self._load_afterwards = load_afterwards
         # state pattern
         self._current_state = Starting(self)
         self._Starting = Starting(self)
@@ -133,6 +143,14 @@ class JobEntry(QObject):
     def on_finished(self, success: bool):
         if success:
             self._current_state.finish()
+            if self._load_afterwards:
+                if "output_file" in self._parameters:  # job is a converter
+                    self.for_loading.emit(self._parameters["output_file"][0] + ".mdt")
+                if "output_files" in self._parameters:  # job is an analysis
+                    if "MDAFormat" in self._parameters["output_files"][1]:
+                        self.for_loading.emit(
+                            self._parameters["output_files"][0] + ".mda"
+                        )
         else:
             self._current_state.fail()
         self.update_fields()
@@ -179,6 +197,9 @@ class JobHolder(QStandardItemModel):
     """All the job INSTANCES that are started by the GUI
     are added to this model."""
 
+    trajectory_for_loading = Signal(str)
+    results_for_loading = Signal(str)
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
         self.lock = QMutex()
@@ -198,7 +219,7 @@ class JobHolder(QStandardItemModel):
         return retval
 
     @Slot(list)
-    def startProcess(self, job_vars: list):
+    def startProcess(self, job_vars: list, load_afterwards=False):
         main_pipe, child_pipe = Pipe()
         main_queue = Queue()
         pause_event = Event()
@@ -221,6 +242,10 @@ class JobHolder(QStandardItemModel):
             command=job_vars[0], entry_number=entry_number, pause_event=pause_event
         )
         item_th.parameters = job_vars[1]
+        if "output_file" in job_vars[1]:
+            item_th.for_loading.connect(self.trajectory_for_loading)
+        elif "output_files" in job_vars[1]:
+            item_th.for_loading.connect(self.results_for_loading)
         communicator.target.connect(item_th.on_started)  # int
         communicator.progress.connect(item_th.on_update)  # int
         communicator.finished.connect(item_th.on_finished)  # bool
@@ -248,3 +273,6 @@ class JobHolder(QStandardItemModel):
         self.existing_jobs[entry_number] = item_th
         ic("Subprocess ready to start!")
         subprocess_ref.start()
+
+    def startProcessAndLoad(self, job_vars: list):
+        self.startProcess(job_vars, load_afterwards=True)

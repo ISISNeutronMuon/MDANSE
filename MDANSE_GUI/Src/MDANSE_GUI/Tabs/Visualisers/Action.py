@@ -22,7 +22,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
     QHBoxLayout,
-    QScrollArea,
+    QCheckBox,
     QTextEdit,
 )
 from qtpy.QtCore import Signal, Slot
@@ -76,6 +76,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
 
 class Action(QWidget):
     new_thread_objects = Signal(list)
+    run_and_load = Signal(list)
     new_path = Signal(str)
 
     last_paths = {}
@@ -231,12 +232,14 @@ class Action(QWidget):
         self.save_button = QPushButton("Save as script", buttonbase)
         self.execute_button = QPushButton("RUN!", buttonbase)
         self.execute_button.setStyleSheet("font-weight: bold")
+        self.post_execute_checkbox = QCheckBox("Auto-load results", buttonbase)
 
         self.save_button.clicked.connect(self.save_dialog)
         self.execute_button.clicked.connect(self.execute_converter)
 
         buttonlayout.addWidget(self.save_button)
         buttonlayout.addWidget(self.execute_button)
+        buttonlayout.addWidget(self.post_execute_checkbox)
 
         self.layout.addWidget(buttonbase)
         self._widgets_in_layout.append(buttonbase)
@@ -323,4 +326,7 @@ class Action(QWidget):
         # self.converter_instance.run(pardict)
         # this would send the actual instance, which _may_ be wrong
         # self.new_thread_objects.emit([self.converter_instance, pardict])
-        self.new_thread_objects.emit([self._job_name, pardict])
+        if self.post_execute_checkbox.isChecked():
+            self.run_and_load.emit([self._job_name, pardict])
+        else:
+            self.new_thread_objects.emit([self._job_name, pardict])
