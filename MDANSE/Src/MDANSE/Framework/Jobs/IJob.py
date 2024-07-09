@@ -134,7 +134,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         self._processes = []
 
-        self._ijob_log_file_handler = None
+        self._log_filename = None
 
     def __getstate__(self):
         d = self.__dict__.copy()
@@ -150,7 +150,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         return self._configuration
 
     def finalize(self):
-        if self._ijob_log_file_handler is not None:
+        if self._log_filename is not None:
             self.remove_log_file_handler()
 
     @abc.abstractmethod
@@ -463,10 +463,15 @@ class %(classname)s(IJob):
         filename : str
             The log's filename.
         """
-        self._ijob_log_file_handler = FileHandler(filename, mode="w")
-        self._ijob_log_file_handler.setFormatter(FMT)
-        LOG.addHandler(self._ijob_log_file_handler)
+        self._log_filename = filename
+        fh = FileHandler(filename, mode="w")
+        fh.set_name(filename)
+        fh.setFormatter(FMT)
+        LOG.addHandler(fh)
 
     def remove_log_file_handler(self) -> None:
         """Removes the IJob file handle from the MDANSE logger."""
-        LOG.removeHandler(self._ijob_log_file_handler)
+        for handler in LOG.handlers:
+            if handler.name == self._log_filename:
+                handler.close()
+                LOG.removeHandler(handler)
