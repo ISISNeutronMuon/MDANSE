@@ -253,3 +253,5 @@ class Converter(IJob, metaclass=SubclassFactory):
                 output_file["gradients"].attrs["name"] = "gradients"
         finally:
             output_file.close()
+
+        super().finalize()
