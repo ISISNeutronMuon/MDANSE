@@ -91,7 +91,7 @@ class DensityOfStates(IJob):
         """
         if self.configuration["output_files"]["write_logs"]:
             log_filename = self.configuration["output_files"]["root"] + ".log"
-            self.add_log_file_handler(log_filename)
+            self.add_log_file_handler(log_filename, self.configuration["output_files"]["log_level"])
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
@@ -173,6 +173,7 @@ class DensityOfStates(IJob):
             #. atomicDOS (np.array): The calculated density of state for atom of index=index
             #. atomicVACF (np.array): The calculated velocity auto-correlation function for atom of index=index
         """
+        LOG.debug(f"Running step: {index}")
         trajectory = self.configuration["trajectory"]["instance"]
 
         # get atom index

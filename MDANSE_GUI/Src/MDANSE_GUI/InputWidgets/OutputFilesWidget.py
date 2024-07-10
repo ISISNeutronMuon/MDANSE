@@ -18,9 +18,10 @@ import itertools
 import os
 import os.path
 
-from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog, QCheckBox
-from qtpy.QtCore import Slot
+from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog, QLabel, QComboBox
+from qtpy.QtCore import Slot, Qt
 
+from MDANSE.Framework.Configurators.OutputFilesConfigurator import OutputFilesConfigurator
 from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
@@ -50,11 +51,15 @@ class OutputFilesWidget(WidgetBase):
         # self.type_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)
-        self.logs_checkbox = QCheckBox("Save logs")
+        label = QLabel("Log file output:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.logs_combo = QComboBox(self._base)
+        self.logs_combo.addItems(OutputFilesConfigurator.log_options)
         self._layout.addWidget(self._field, 0, 0)
         self._layout.addWidget(self.type_box, 0, 1)
         self._layout.addWidget(browse_button, 0, 2)
-        self._layout.addWidget(self.logs_checkbox, 1, 0)
+        self._layout.addWidget(label, 1, 0)
+        self._layout.addWidget(self.logs_combo, 1, 1)
         self._default_value = default_value
         self._field.textChanged.connect(self.updateValue)
         self.type_box.lineEdit().textChanged.connect(self.updateValue)
@@ -122,9 +127,9 @@ class OutputFilesWidget(WidgetBase):
             filename = self._default_value[0]
 
         formats = self.type_box.checked_values()
-        logs = self.logs_checkbox.isChecked()
+        log_level = self.logs_combo.currentText()
 
-        return (filename, formats, logs)
+        return (filename, formats, log_level)
 
     def set_data(self, datakey):
         basename = "%s_%s" % (

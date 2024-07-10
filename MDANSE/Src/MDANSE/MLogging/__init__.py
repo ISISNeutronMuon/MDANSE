@@ -5,4 +5,7 @@ FMT = logging.Formatter(
 )
 
 LOG = logging.getLogger("MDANSE")
-LOG.setLevel("INFO")
+# We need to set this to DEBUG so that when we start a multiprocessing
+# job these logs get sent out to the main process. The log levels should
+# be filtered at the handlers.
+LOG.setLevel("DEBUG")

@@ -83,7 +83,7 @@ class AverageStructure(IJob):
         """
         if self.configuration["output_file"]["write_logs"]:
             log_filename = self.configuration["output_file"]["root"] + ".log"
-            self.add_log_file_handler(log_filename)
+            self.add_log_file_handler(log_filename, self.configuration["output_file"]["log_level"])
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 

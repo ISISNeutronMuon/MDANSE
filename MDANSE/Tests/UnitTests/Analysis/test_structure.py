@@ -79,7 +79,7 @@ def test_structure_analysis(parameters, traj_path, job_type, running_mode, outpu
     temp_name = tempfile.mktemp()
     parameters["trajectory"] = traj_path
     parameters["running_mode"] = running_mode
-    parameters["output_files"] = (temp_name, (output_format,), True)
+    parameters["output_files"] = (temp_name, (output_format,), "INFO")
     job = IJob.create(job_type)
     job.run(parameters, status=True)
     if output_format == "MDAFormat":

@@ -56,7 +56,7 @@ def test_mcstas(parameters):
     On each platform we need a McStas instrument
     compiled for that specific platform."""
     temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, ("MDAFormat",), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     job = IJob.create("McStasVirtualInstrument")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")

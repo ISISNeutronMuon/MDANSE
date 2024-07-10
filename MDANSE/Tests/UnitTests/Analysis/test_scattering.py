@@ -39,7 +39,7 @@ def dcsf():
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["q_vectors"] = (
         "SphericalLatticeQVectors",
         {"seed": 0, "shells": (5.0, 36, 10.0), "n_vectors": 10, "width": 9.0},
@@ -61,7 +61,7 @@ def disf():
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["q_vectors"] = (
         "SphericalLatticeQVectors",
         {"seed": 0, "shells": (5.0, 36, 10.0), "n_vectors": 10, "width": 9.0},
@@ -82,7 +82,7 @@ def test_dcsf(trajectory, qvector_spherical_lattice):
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
     parameters["q_vectors"] = qvector_spherical_lattice
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -107,7 +107,7 @@ def test_output_axis_preview(qvector_spherical_lattice):
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
     parameters["q_vectors"] = qvector_spherical_lattice
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -126,7 +126,7 @@ def test_disf(trajectory, qvector_spherical_lattice):
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
     parameters["q_vectors"] = qvector_spherical_lattice
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -150,7 +150,7 @@ def test_eisf(trajectory, qvector_spherical_lattice):
     parameters["atom_selection"] = None
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
     parameters["q_vectors"] = qvector_spherical_lattice
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -175,7 +175,7 @@ def test_gdisf(trajectory):
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
     parameters["q_shells"] = (2.0, 12.2, 2.0)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
@@ -202,7 +202,7 @@ def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
     parameters["dcsf_input_file"] = dcsf
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
     ndtsf = IJob.create("NeutronDynamicTotalStructureFactor")
     ndtsf.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
@@ -222,7 +222,7 @@ def test_ssfsf(disf):
     parameters["sample_inc"] = disf
     parameters["running_mode"] = ("single-core",)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
     ndtsf = IJob.create("StructureFactorFromScatteringFunction")
     ndtsf.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
@@ -248,7 +248,7 @@ def test_ccf(qvector_spherical_lattice):
     parameters["instrument_resolution"] = ("Ideal", {})
     parameters["interpolation_order"] = 3
     parameters["interpolation_mode"] = "automatic"
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
     parameters["q_vectors"] = qvector_spherical_lattice
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj

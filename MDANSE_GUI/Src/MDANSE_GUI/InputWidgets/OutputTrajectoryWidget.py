@@ -23,11 +23,11 @@ from qtpy.QtWidgets import (
     QLineEdit,
     QPushButton,
     QFileDialog,
-    QCheckBox,
+    QLabel,
 )
-from qtpy.QtCore import Slot
+from qtpy.QtCore import Slot, Qt
 
-
+from MDANSE.Framework.Configurators.OutputTrajectoryConfigurator import OutputTrajectoryConfigurator
 from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
@@ -65,12 +65,16 @@ class OutputTrajectoryWidget(WidgetBase):
         # self.type_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)
-        self.logs_checkbox = QCheckBox("Save logs")
+        label = QLabel("Log file output:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.logs_combo = QComboBox(self._base)
+        self.logs_combo.addItems(OutputTrajectoryConfigurator.log_options)
         self._layout.addWidget(self._field, 0, 0)
         self._layout.addWidget(self.dtype_box, 0, 1)
         self._layout.addWidget(self.compression_box, 0, 2)
         self._layout.addWidget(browse_button, 0, 3)
-        self._layout.addWidget(self.logs_checkbox, 1, 0)
+        self._layout.addWidget(label, 1, 0)
+        self._layout.addWidget(self.logs_combo, 1, 1)
         self._default_value = default_value
         self._field.textChanged.connect(self.updateValue)
         self.default_labels()
@@ -144,5 +148,5 @@ class OutputTrajectoryWidget(WidgetBase):
             filename = self._default_value[0]
         dtype = dtype_lookup[self.dtype_box.currentText()]
         compression = self.compression_box.currentText()
-        logs = self.logs_checkbox.isChecked()
+        logs = self.logs_combo.currentText()
         return (filename, dtype, compression, logs)

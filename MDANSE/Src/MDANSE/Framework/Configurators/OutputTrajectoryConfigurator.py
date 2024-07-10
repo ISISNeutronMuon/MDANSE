@@ -36,7 +36,8 @@ class OutputTrajectoryConfigurator(IConfigurator):
     conversion, you must inherit from the MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
-    _default = ("OUTPUT_TRAJECTORY", 64, "none", False)
+    log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
+    _default = ("OUTPUT_TRAJECTORY", 64, "none", "no logs")
 
     def __init__(self, name, format=None, **kwargs):
         """
@@ -58,6 +59,9 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self._original_input = value
 
         root, dtype, compression, logs = value
+
+        if logs not in self.log_options:
+            self.error_status = "log level option not recognised"
 
         if not root:
             self.error_status = "empty root name for the output file."
@@ -92,7 +96,11 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self["file"] = temp_name
         self["dtype"] = self._dtype
         self["compression"] = self._compression
-        self["write_logs"] = logs
+        self["log_level"] = logs
+        if logs == "no logs":
+            self["write_logs"] = False
+        else:
+            self["write_logs"] = True
         self.error_status = "OK"
 
     @property

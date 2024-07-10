@@ -31,7 +31,7 @@ def test_disf(trajectory):
     parameters["atom_transmutation"] = None
     parameters["frames"] = (0, 10, 1, 5)
     parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat",), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"

@@ -78,7 +78,7 @@ class AreaPerMolecule(IJob):
         """
         if self.configuration["output_files"]["write_logs"]:
             log_filename = self.configuration["output_files"]["root"] + ".log"
-            self.add_log_file_handler(log_filename)
+            self.add_log_file_handler(log_filename, self.configuration["output_files"]["log_level"])
 
         # This will define the number of steps of the analysis. MUST be defined for all analysis.
         self.numberOfSteps = self.configuration["frames"]["number"]

@@ -53,7 +53,7 @@ def parameters():
 def test_RigidBodyTrajectory(parameters):
     """We ignore the failure to merge other changes."""
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip", False)
+    parameters["output_file"] = (temp_name, 64, "gzip", "INFO")
     job = IJob.create("RigidBodyTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
@@ -65,7 +65,7 @@ def test_RigidBodyTrajectory(parameters):
 def test_GlobalMotionFilteredTrajectory(parameters):
     """We ignore the failure here to merge other changes."""
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip", True)
+    parameters["output_file"] = (temp_name, 64, "gzip", "INFO")
     job = IJob.create("GlobalMotionFilteredTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
@@ -78,7 +78,7 @@ def test_GlobalMotionFilteredTrajectory(parameters):
 
 def test_CroppedTrajectory(parameters):
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip", True)
+    parameters["output_file"] = (temp_name, 64, "gzip", "INFO")
     job = IJob.create("CroppedTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
@@ -93,7 +93,7 @@ def test_CenterOfMassesTrajectory(parameters):
     """This will need to detect molecules before it can
     find the centre of each one of them."""
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip", True)
+    parameters["output_file"] = (temp_name, 64, "gzip", "INFO")
     job = IJob.create("CenterOfMassesTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
@@ -106,7 +106,7 @@ def test_CenterOfMassesTrajectory(parameters):
 
 def test_UnfoldedTrajectory(parameters):
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip", True)
+    parameters["output_file"] = (temp_name, 64, "gzip", "INFO")
     job = IJob.create("UnfoldedTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")

@@ -465,13 +465,15 @@ class %(classname)s(IJob):
             f.close()
             return templateFile
 
-    def add_log_file_handler(self, filename: str) -> None:
+    def add_log_file_handler(self, filename: str, level: str) -> None:
         """Adds a file handle which is used to write the jobs logs.
 
         Parameters
         ----------
         filename : str
             The log's filename.
+        level : str
+            The log level.
         """
         self._log_filename = filename
         fh = FileHandler(filename, mode="w")
@@ -480,6 +482,7 @@ class %(classname)s(IJob):
         # with multiprocessing jobs
         fh.set_name(filename)
         fh.setFormatter(FMT)
+        fh.setLevel(level)
         LOG.addHandler(fh)
 
     def remove_log_file_handler(self) -> None:

@@ -46,7 +46,7 @@ def test_vacf(trajectory, interp_order, normalise):
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
     parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("single-core",)
     parameters["normalize"] = normalise
     parameters["trajectory"] = short_traj
@@ -115,7 +115,7 @@ def test_dynamics_analysis(parameters, traj_path, job_type, running_mode, output
     temp_name = tempfile.mktemp()
     parameters["trajectory"] = traj_path
     parameters["running_mode"] = running_mode
-    parameters["output_files"] = (temp_name, (output_format,), True)
+    parameters["output_files"] = (temp_name, (output_format,), "INFO")
     job = IJob.create(job_type)
     job.run(parameters, status=True)
     if output_format == "MDAFormat":
@@ -134,7 +134,7 @@ def test_dynamics_analysis(parameters, traj_path, job_type, running_mode, output
 def test_output_axis_preview(parameters):
     temp_name = tempfile.mktemp()
     parameters["running_mode"] = ("single-core", 1)
-    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     job = IJob.create("DensityOfStates")
     job.setup(parameters)
     axes = job.preview_output_axis()

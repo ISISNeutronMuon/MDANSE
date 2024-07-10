@@ -33,7 +33,7 @@ def test_basic_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
@@ -50,7 +50,7 @@ def test_parallel_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",), False)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
@@ -58,7 +58,7 @@ def test_parallel_meansquare():
     temp_name2 = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name2, ("MDAFormat",), False)
+    parameters["output_files"] = (temp_name2, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("multicore", -4)
     parameters["trajectory"] = short_traj
     msd_par = IJob.create("MeanSquareDisplacement")
@@ -80,7 +80,7 @@ def test_atom_selection():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",), True)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
