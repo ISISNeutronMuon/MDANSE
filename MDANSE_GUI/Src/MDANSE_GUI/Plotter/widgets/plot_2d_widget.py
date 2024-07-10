@@ -13,13 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-import numpy as np
-
-from qtpy import QtCore, QtGui, QtWidgets
-
+from qtpy import QtCore, QtWidgets
 from pylab import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Plotter.dialogs.plot_2d_general_settings_dialog import (
     Plot2DGeneralSettingsDialog,
@@ -78,7 +76,7 @@ class Plot2DWidget(QtWidgets.QWidget):
                 self._figure, x_data_info, y_data_info, z_data_info
             )
         except Plot2DModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'{str(e)}, {"main", "popup"}, {"error"}')
             return
 
     def close(self):

@@ -13,11 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import collections
 
-
-from MDANSE.Chemistry.ChemicalEntity import AtomGroup
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
@@ -49,7 +46,7 @@ class CroppedTrajectory(IJob):
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {"format": "MDTFormat"},
     )
@@ -58,6 +55,7 @@ class CroppedTrajectory(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         self.numberOfSteps = self.configuration["frames"]["number"]
 
@@ -75,12 +73,12 @@ class CroppedTrajectory(IJob):
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selectedAtoms,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
     def run_step(self, index):
@@ -127,3 +125,4 @@ class CroppedTrajectory(IJob):
 
         # The output trajectory is closed.
         self._output_trajectory.close()
+        super().finalize()

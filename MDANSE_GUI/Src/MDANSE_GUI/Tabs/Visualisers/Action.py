@@ -22,12 +22,13 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
     QHBoxLayout,
-    QScrollArea,
     QTextEdit,
 )
 from qtpy.QtCore import Signal, Slot
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Jobs.IJob import IJob
+
 from MDANSE_GUI.InputWidgets import *
 
 
@@ -150,12 +151,12 @@ class Action(QWidget):
         try:
             job_instance = IJob.create(job_name)
         except ValueError as e:
-            print(f"Failed to create IJob {job_name}")
+            LOG.error(f"Failed to create IJob {job_name}")
             return
         job_instance.build_configuration()
         settings = job_instance.settings
         self._job_instance = job_instance
-        print(f"Configuration {job_instance.configuration}")
+        LOG.info(f"Configuration {job_instance.configuration}")
         if "trajectory" in settings.keys():
             if self._input_trajectory is None:
                 return
@@ -174,7 +175,7 @@ class Action(QWidget):
             self._widgets_in_layout.append(widget)
             self._widgets.append(input_widget)
             self._trajectory_configurator = input_widget._configurator
-            print("Set up input trajectory")
+            LOG.info("Set up input trajectory")
         for key, value in settings.items():
             if key == "trajectory":
                 continue
@@ -195,7 +196,7 @@ class Action(QWidget):
                 self.layout.addWidget(widget, stretch=placeholder._relative_size)
                 self._widgets_in_layout.append(widget)
                 self._widgets.append(placeholder)
-                print(f"Could not find the right widget for {key}")
+                LOG.warning(f"Could not find the right widget for {key}")
             else:
                 widget_class = widget_lookup[dtype]
                 # expected = {key: ddict[key] for key in widget_class.__init__.__code__.co_varnames}
@@ -207,7 +208,7 @@ class Action(QWidget):
                 input_widget.valid_changed.connect(self.allow_execution)
                 if self._use_preview:
                     input_widget.value_updated.connect(self.show_output_prediction)
-                print(f"Set up the right widget for {key}")
+                LOG.info(f"Set up the right widget for {key}")
             # self.handlers[key] = data_handler
             configured = False
             iterations = 0
@@ -246,11 +247,11 @@ class Action(QWidget):
     def show_output_prediction(self):
         if self._use_preview:
             self.allow_execution()
-            print("Show output prediction")
+            LOG.info("Show output prediction")
             pardict = self.set_parameters()
             self._job_instance.setup(pardict)
             axes = self._job_instance.preview_output_axis()
-            print(f"Axes = {axes.keys()}")
+            LOG.info(f"Axes = {axes.keys()}")
             text = "<p><b>The results will cover the following range:</b></p>"
             for unit, old_array in axes.items():
                 scale_factor, new_unit = self._session.conversion_factor(unit)
@@ -318,7 +319,7 @@ class Action(QWidget):
     @Slot()
     def execute_converter(self):
         pardict = self.set_parameters()
-        print(pardict)
+        LOG.info(pardict)
         # when we are ready, we can consider running it
         # self.converter_instance.run(pardict)
         # this would send the actual instance, which _may_ be wrong

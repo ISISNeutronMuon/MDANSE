@@ -13,12 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
-
-from icecream import ic
-from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication
-from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
-from qtpy.QtGui import QMouseEvent, QDrag
+from qtpy.QtWidgets import QTreeView
+from qtpy.QtCore import Signal
 
 
 class PlotDetailsView(QTreeView):

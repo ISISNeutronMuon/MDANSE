@@ -13,9 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-import copy
-from icecream import ic
 from qtpy.QtCore import Slot, QObject, QMutex, Signal
 
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -30,7 +27,7 @@ from MDANSE.Framework.InputData.IInputData import IInputData
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from MDANSE.Framework.Projectors.IProjector import IProjector
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
-
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeModel
 from MDANSE_GUI.DataViewModel.JobHolder import JobHolder
@@ -87,9 +84,9 @@ class BackEnd(QObject):
 
     @Slot(str)
     def loadFile(self, fname: str):
-        ic(f"LoadFile triggered in BackEnd. File name is {fname}.")
+        LOG.info(f"LoadFile triggered in BackEnd. File name is {fname}.")
         if len(fname) < 2:
-            ic(f"Strangely short file name - not proceeding.")
+            LOG.warning(f"Strangely short file name - not proceeding.")
             return None
         self.new_trajectory.emit(fname)
 
@@ -103,6 +100,6 @@ class BackEnd(QObject):
         Arguments:
             key -- a string specifying which converter is needed.
         """
-        ic("returnActions has been triggered in BackEnd")
+        LOG.info("returnActions has been triggered in BackEnd")
         thing = self._reverse_actions[str(key).split()[-1]]
         self.selected_action.emit(thing)

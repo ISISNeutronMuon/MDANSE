@@ -16,14 +16,12 @@
 
 
 from qtpy.QtWidgets import (
-    QHBoxLayout,
     QLabel,
     QLineEdit,
     QPushButton,
-    QWidget,
     QComboBox,
 )
-from qtpy.QtCore import Qt, Slot
+from qtpy.QtCore import Slot
 from qtpy.QtGui import QDoubleValidator
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase

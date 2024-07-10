@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from qtpy import QtCore, QtGui, QtWidgets
 
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Plotter.models.plot_1d_model import Plot1DModelError
 from MDANSE_GUI.Plotter.utils.numeric import smart_round
@@ -266,7 +266,7 @@ class CrossViewerDialog(QtWidgets.QDialog):
         try:
             x_axis_plot_1d_model.add_line(z_data_info)
         except Plot1DModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'{str(e)}, {["main", "popup"]}, {"error"}')
 
     def on_plot_y_slice(self):
         """Callback called when the Y slice plot button is clicked."""
@@ -284,7 +284,7 @@ class CrossViewerDialog(QtWidgets.QDialog):
         try:
             y_axis_plot_1d_model.add_line(z_data_info)
         except Plot1DModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'{str(e)}, {["main", "popup"]}, {"error"}')
 
     def on_select_max_x_range_by_spinbox(self, value):
         """Callback called when the maximum X value spinbox is modified.

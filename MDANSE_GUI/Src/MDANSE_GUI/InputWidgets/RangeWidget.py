@@ -13,10 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from qtpy.QtWidgets import QLineEdit, QSpinBox, QLabel
-from qtpy.QtCore import Slot, Signal
+from qtpy.QtWidgets import QLineEdit, QLabel
 from qtpy.QtGui import QDoubleValidator, QIntValidator
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
@@ -82,7 +82,7 @@ class RangeWidget(WidgetBase):
     def value_from_configurator(self):
         if self._configurator.check_dependencies():
             minval, maxval = self._configurator._mini, self._configurator._maxi
-            print(f"Configurator min/max: {minval}, {maxval}")
+            LOG.info(f"Configurator min/max: {minval}, {maxval}")
             if maxval is None:
                 return
             for val in self._validators:

@@ -75,6 +75,8 @@ class Voronoi(IJob):
     )
 
     def initialize(self):
+        super().initialize()
+
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Will store the time.
@@ -245,3 +247,4 @@ class Voronoi(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

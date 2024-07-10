@@ -61,7 +61,7 @@ class VASP(Converter):
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
@@ -74,6 +74,8 @@ class VASP(Converter):
         """
         Initialize the job.
         """
+        super().initialize()
+
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         self._xdatcarFile = self.configuration["xdatcar_file"]
@@ -92,11 +94,11 @@ class VASP(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             self._chemicalSystem,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
     def run_step(self, index):

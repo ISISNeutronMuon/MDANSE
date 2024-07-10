@@ -13,12 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from qtpy.QtWidgets import QLabel
 
-from qtpy.QtWidgets import QLineEdit, QSpinBox, QLabel
-from qtpy.QtCore import Slot, Signal
-from qtpy.QtGui import QIntValidator
-
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 

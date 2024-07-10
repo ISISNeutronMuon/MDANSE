@@ -63,6 +63,7 @@ class DipoleAutoCorrelationFunction(IJob):
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
+        super().initialize()
 
         ce_list = self.configuration["trajectory"][
             "instance"
@@ -151,3 +152,4 @@ class DipoleAutoCorrelationFunction(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

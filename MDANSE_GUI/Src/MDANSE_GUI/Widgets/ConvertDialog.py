@@ -12,41 +12,19 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-from typing import Union, Iterable
-from collections import OrderedDict
-import copy
-
-from icecream import ic
+#
 from qtpy.QtWidgets import (
     QDialog,
     QPushButton,
-    QFileDialog,
-    QGridLayout,
     QVBoxLayout,
     QWidget,
-    QLabel,
-    QApplication,
-    QComboBox,
-    QMenu,
-    QLineEdit,
-    QTableView,
-    QFormLayout,
     QHBoxLayout,
-    QCheckBox,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel, QObject
-from qtpy.QtGui import (
-    QFont,
-    QEnterEvent,
-    QStandardItem,
-    QStandardItemModel,
-    QIntValidator,
-    QDoubleValidator,
-    QValidator,
-)
+from qtpy.QtCore import Signal, Slot
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Jobs.IJob import IJob
+
 from MDANSE_GUI.Widgets.GeneralWidgets import InputFactory
 
 
@@ -108,11 +86,13 @@ class ConverterDialog(QDialog):
     @Slot()
     def execute_converter(self):
         if self.converter_instance is None:
-            ic("No converter instance attached to the Dialog")
+            LOG.warning("No converter instance attached to the Dialog")
             return False
         pardict = {}
-        ic(f"handlers: {self.handlers}")
+        LOG.info(f"handlers: {self.handlers}")
         for key, value in self.handlers.items():
             pardict[key] = value.returnValue()
-        ic(f"Passing {pardict} to the converter instance {self.converter_instance}")
+        LOG.info(
+            f"Passing {pardict} to the converter instance {self.converter_instance}"
+        )
         self.new_thread_objects.emit([self.converter_constructor, pardict])

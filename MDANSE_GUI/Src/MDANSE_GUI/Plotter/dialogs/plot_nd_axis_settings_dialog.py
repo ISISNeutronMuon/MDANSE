@@ -13,11 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import numpy as np
-
 from qtpy import QtWidgets
 
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Plotter.models.plot_nd_model import (
     PlotNDModel,
@@ -204,7 +203,7 @@ class PlotNDAxisSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_nd_model.set_x_axis_unit(new_x_unit)
         except PlotNDModelError:
-            print("Incompatible X unit", ["main", "popup"], "error")
+            LOG.error(f"Incompatible X unit, {'main', 'popup'}, {'error'}")
             return
 
     def on_change_y_unit(self):
@@ -213,7 +212,7 @@ class PlotNDAxisSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_nd_model.set_y_axis_unit(new_y_unit)
         except PlotNDModelError:
-            print("Incompatible Y unit", ["main", "popup"], "error")
+            LOG.error(f"Incompatible Y unit, {'main', 'popup'}, {'error'}")
             return
 
     def on_change_z_scale(self, index):
@@ -230,7 +229,7 @@ class PlotNDAxisSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_nd_model.set_data_current_unit(new_z_unit)
         except PlotNDModelError:
-            print("Incompatible Z unit", ["main", "popup"], "error")
+            LOG.error(f"Incompatible Z unit, {'main', 'popup'}, {'error'}")
             return
 
     def on_edit_x_label(self, label):
@@ -262,18 +261,18 @@ class PlotNDAxisSettingsDialog(QtWidgets.QDialog):
         min_x = self._new_min_x_doublespinbox.value()
         max_x = self._new_max_x_doublespinbox.value()
         if max_x <= min_x:
-            print("Invalid min/max values", ["main", "popup"], "error")
+            LOG.error(f"Invalid min/max values, {'main', 'popup'}, {'error'}")
             return
 
         new_unit = self._new_x_units_lineedit.text().strip()
         if not new_unit:
-            print("No unit defined", ["main", "popup"], "error")
+            LOG.error(f"No unit defined, {'main', 'popup'}, {'error'}")
             return
 
         try:
             self._plot_nd_model.reset_x_axis(min_x, max_x, new_unit)
         except PlotNDModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'str(e), {"main", "popup"}, {"error"}')
             return
         else:
             self._x_units_lineedit.setText(new_unit)
@@ -288,7 +287,7 @@ class PlotNDAxisSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_nd_model.reset_y_axis(min_y, max_y, new_unit)
         except PlotNDModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'str(e), {"main", "popup"}, {"error"}')
             return
         else:
             self._x_units_lineedit.setText(new_unit)
@@ -307,7 +306,7 @@ class PlotNDAxisSettingsDialog(QtWidgets.QDialog):
         try:
             self._plot_nd_model.set_data_range(min_z, max_z)
         except PlotNDModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'str(e), {"main", "popup"}, {"error"}')
 
     def on_update(self):
         """Update the widgets of the dialog."""

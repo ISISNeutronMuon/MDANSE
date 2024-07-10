@@ -17,10 +17,7 @@
 import numpy as np
 
 
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Mathematics.LinearAlgebra import Vector
 
 

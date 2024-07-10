@@ -24,6 +24,7 @@ from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
+from MDANSE.MLogging import LOG
 
 
 class CellFileError(Error):
@@ -145,7 +146,7 @@ class CP2K(Converter):
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
@@ -159,6 +160,7 @@ class CP2K(Converter):
         Initialize the job.
         Opens the input files and checks them for consistency.
         """
+        super().initialize()
 
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
         self._xyzFile = self.configuration["pos_file"]
@@ -178,7 +180,7 @@ class CP2K(Converter):
         self._cellFile = CellFile(self.configuration["cell_file"]["filename"])
 
         if abs(self._cellFile["time_step"] - self._xyzFile["time_step"]) > 1.0e-09:
-            print((self._cellFile["time_step"], self._xyzFile["time_step"]))
+            LOG.error(f'{self._cellFile["time_step"]}, {self._xyzFile["time_step"]}')
             raise CP2KConverterError(
                 "Inconsistent time step between pos and cell files"
             )
@@ -200,11 +202,11 @@ class CP2K(Converter):
             )
 
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             self._chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
         data_to_be_written = ["configuration", "time"]

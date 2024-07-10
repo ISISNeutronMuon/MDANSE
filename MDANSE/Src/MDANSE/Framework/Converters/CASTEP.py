@@ -61,7 +61,7 @@ class CASTEP(Converter):
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
@@ -74,6 +74,8 @@ class CASTEP(Converter):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
+
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # Create a representation of md file
@@ -95,11 +97,11 @@ class CASTEP(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             self._chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
     def run_step(self, index):

@@ -176,5 +176,4 @@ class PairDistributionFunction(DistanceHistogram):
         )
 
         self.configuration["trajectory"]["instance"].close()
-
-        super(PairDistributionFunction, self).finalize()
+        super().finalize()

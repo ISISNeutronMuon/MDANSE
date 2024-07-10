@@ -3,13 +3,12 @@ import tempfile
 import os
 from os import path
 import pytest
-from icecream import ic
+
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
 sys.setrecursionlimit(100000)
-ic.disable()
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
@@ -47,7 +46,7 @@ def test_vacf(trajectory, interp_order, normalise):
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
     parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("single-core",)
     parameters["normalize"] = normalise
     parameters["trajectory"] = short_traj
@@ -56,6 +55,9 @@ def test_vacf(trajectory, interp_order, normalise):
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
     os.remove(temp_name + ".mda")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 ################################################################
@@ -113,7 +115,7 @@ def test_dynamics_analysis(parameters, traj_path, job_type, running_mode, output
     temp_name = tempfile.mktemp()
     parameters["trajectory"] = traj_path
     parameters["running_mode"] = running_mode
-    parameters["output_files"] = (temp_name, (output_format,))
+    parameters["output_files"] = (temp_name, (output_format,), "INFO")
     job = IJob.create(job_type)
     job.run(parameters, status=True)
     if output_format == "MDAFormat":
@@ -124,12 +126,15 @@ def test_dynamics_analysis(parameters, traj_path, job_type, running_mode, output
         assert path.exists(temp_name + "_text.tar")
         assert path.isfile(temp_name + "_text.tar")
         os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_output_axis_preview(parameters):
     temp_name = tempfile.mktemp()
     parameters["running_mode"] = ("single-core", 1)
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     job = IJob.create("DensityOfStates")
     job.setup(parameters)
     axes = job.preview_output_axis()

@@ -46,8 +46,9 @@ Examples::
 
     '3.14159D+00    2.71828D+00'
 """
-
 import string
+
+from MDANSE.MLogging import LOG
 
 
 #
@@ -206,9 +207,9 @@ class FortranLine:
                     try:
                         self.text = self.text + (value + length * " ")[:length]
                     except:
-                        print(self.text)
-                        print(value)
-                        print(length)
+                        LOG.warning(self.text)
+                        LOG.warning(value)
+                        LOG.warning(length)
                 else:  # numeric fields
                     if value is None:
                         s = ""
