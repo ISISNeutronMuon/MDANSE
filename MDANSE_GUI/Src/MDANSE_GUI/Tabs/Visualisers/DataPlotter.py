@@ -65,7 +65,8 @@ class DataPlotter(QWidget):
             self._selection_viewer.setModel(self._model)
         self._model.add_dataset(dataset)
         self._selection_viewer.resizeColumnsToContents()
-        self._selection_viewer.hideColumn(4)
+        for col_num in range(4, 8):
+            self._selection_viewer.hideColumn(col_num)
 
     @Slot()
     def new_plot(self):

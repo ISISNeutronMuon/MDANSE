@@ -53,6 +53,8 @@ unit_lookup = {
     "meV": "energy",
     "1/cm": "energy",
     "THz": "energy",
+    "J_per_mole": "energy",
+    "cal_per_mole": "energy",
     "nm": "distance",
     "ang": "distance",
     "pm": "distance",
