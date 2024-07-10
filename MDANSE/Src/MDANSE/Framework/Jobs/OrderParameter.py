@@ -111,7 +111,9 @@ class OrderParameter(IJob):
         """
         if self.configuration["output_files"]["write_logs"]:
             log_filename = self.configuration["output_files"]["root"] + ".log"
-            self.add_log_file_handler(log_filename, self.configuration["output_files"]["log_level"])
+            self.add_log_file_handler(
+                log_filename, self.configuration["output_files"]["log_level"]
+            )
 
         self._nFrames = self.configuration["frames"]["number"]
         self._nAxis = self.configuration["axis_selection"]["n_values"]

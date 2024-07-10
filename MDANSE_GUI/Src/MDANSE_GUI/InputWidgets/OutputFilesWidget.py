@@ -21,7 +21,9 @@ import os.path
 from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog, QLabel, QComboBox
 from qtpy.QtCore import Slot, Qt
 
-from MDANSE.Framework.Configurators.OutputFilesConfigurator import OutputFilesConfigurator
+from MDANSE.Framework.Configurators.OutputFilesConfigurator import (
+    OutputFilesConfigurator,
+)
 from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase

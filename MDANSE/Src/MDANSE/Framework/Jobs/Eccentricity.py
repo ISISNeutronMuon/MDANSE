@@ -108,7 +108,9 @@ class Eccentricity(IJob):
         """
         if self.configuration["output_files"]["write_logs"]:
             log_filename = self.configuration["output_files"]["root"] + ".log"
-            self.add_log_file_handler(log_filename, self.configuration["output_files"]["log_level"])
+            self.add_log_file_handler(
+                log_filename, self.configuration["output_files"]["log_level"]
+            )
 
         self.numberOfSteps = self.configuration["frames"]["number"]
 

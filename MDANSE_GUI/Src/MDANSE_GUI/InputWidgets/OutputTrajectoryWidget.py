@@ -27,7 +27,9 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Slot, Qt
 
-from MDANSE.Framework.Configurators.OutputTrajectoryConfigurator import OutputTrajectoryConfigurator
+from MDANSE.Framework.Configurators.OutputTrajectoryConfigurator import (
+    OutputTrajectoryConfigurator,
+)
 from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
