@@ -15,10 +15,7 @@
 #
 
 
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Projectors.IProjector import IProjector
 from MDANSE.Framework.Projectors.IProjector import ProjectorError
 

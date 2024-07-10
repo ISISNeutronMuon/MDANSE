@@ -17,6 +17,8 @@ import glob
 import importlib
 import os
 
+from MDANSE.MLogging import LOG
+
 current_path, _ = os.path.split(__file__)
 
 modnames = []
@@ -33,7 +35,7 @@ for name in modnames:
     try:
         tempmod = importlib.import_module("." + name, "MDANSE.Framework.Jobs")
     except ModuleNotFoundError:
-        print(f"Could not find {name} in MDANSE.Framework.Jobs")
+        LOG.error(f"Could not find {name} in MDANSE.Framework.Jobs")
     tempobject = getattr(tempmod, name)
     globdict[name] = tempobject
     del tempmod  # optionally delete the reference to the parent module

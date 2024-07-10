@@ -13,17 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import collections
 import itertools
-import os
 
 import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Signal import correlation, get_spectrum
 
 
 class NeutronDynamicTotalStructureFactorError(Error):
@@ -77,6 +74,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         self.numberOfSteps = 1
 
@@ -461,3 +459,4 @@ class NeutronDynamicTotalStructureFactor(IJob):
             self,
         )
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

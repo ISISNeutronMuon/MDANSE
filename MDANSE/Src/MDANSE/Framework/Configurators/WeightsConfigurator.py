@@ -16,7 +16,6 @@
 
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Framework.Configurators.IConfigurator import ConfiguratorError
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
 )

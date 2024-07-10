@@ -17,10 +17,7 @@
 import os
 
 from MDANSE import PLATFORM
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class InputFileConfigurator(IConfigurator):

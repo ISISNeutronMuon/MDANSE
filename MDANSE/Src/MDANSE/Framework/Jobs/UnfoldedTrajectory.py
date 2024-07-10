@@ -47,7 +47,7 @@ class UnfoldedTrajectory(IJob):
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {"format": "MDTFormat"},
     )
@@ -56,6 +56,7 @@ class UnfoldedTrajectory(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         self.numberOfSteps = self.configuration["frames"]["number"]
 
@@ -73,12 +74,12 @@ class UnfoldedTrajectory(IJob):
 
         # The output trajectory is opened for writing.
         self._outputTraj = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selectedAtoms,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
     def run_step(self, index):
@@ -129,3 +130,4 @@ class UnfoldedTrajectory(IJob):
 
         # The output trajectory is closed.
         self._outputTraj.close()
+        super().finalize()

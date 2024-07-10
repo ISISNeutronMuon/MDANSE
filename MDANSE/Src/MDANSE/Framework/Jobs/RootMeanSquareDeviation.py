@@ -19,7 +19,6 @@ import collections
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Arithmetic import weight
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 
 
@@ -78,6 +77,8 @@ class RootMeanSquareDeviation(IJob):
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
+        super().initialize()
+
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
         self._referenceIndex = self.configuration["reference_frame"]["value"]
@@ -177,3 +178,4 @@ class RootMeanSquareDeviation(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

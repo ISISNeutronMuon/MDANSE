@@ -13,13 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import collections
 import os
 import shutil
 import subprocess
 import tempfile
-import sys
 import io
 
 import numpy as np
@@ -31,7 +29,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.MLogging import LOG
 
 MCSTAS_UNITS_LUT = {
     "rad/ps": measure(1, "rad/ps", equivalent=True).toval("meV"),
@@ -125,6 +123,7 @@ class McStasVirtualInstrument(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         # The number of steps is set to 1 as the job is defined as single McStas run.
         self.numberOfSteps = 1
@@ -217,13 +216,13 @@ class McStasVirtualInstrument(IJob):
                 fout.write("# %s\n" % var)
 
                 data = self.configuration[typ][var][:]
-                print(f"In {typ} the variable {var} has shape {data.shape}")
-                print(f"Values of {var}: min={data.min()}, max = {data.max()}")
+                LOG.info(f"In {typ} the variable {var} has shape {data.shape}")
+                LOG.info(f"Values of {var}: min={data.min()}, max = {data.max()}")
                 data_unit = self.configuration[typ]._units[var]
                 try:
                     data *= MCSTAS_UNITS_LUT[data_unit]
                 except KeyError:
-                    print(
+                    LOG.error(
                         f"Could not find the physical unit {data_unit} in the lookup table."
                     )
 
@@ -253,7 +252,7 @@ class McStasVirtualInstrument(IJob):
         cmdLine.append(trace)
         cmdLine.extend(parameters)
 
-        print(" ".join(cmdLine))
+        LOG.info(" ".join(cmdLine))
 
         s = subprocess.Popen(
             " ".join(cmdLine),
@@ -311,6 +310,7 @@ class McStasVirtualInstrument(IJob):
             self._info,
             self,
         )
+        super().finalize()
 
     def treat_str_var(self, s):
         return s.strip().replace(" ", "_")

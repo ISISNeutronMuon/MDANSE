@@ -20,6 +20,7 @@ from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
+from MDANSE.MLogging import LOG
 
 
 class LAMMPSConfigFileError(Error):
@@ -151,7 +152,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                     np.concatenate([x_inputs, y_inputs, z_inputs])
                 )
             except:
-                print(f"LAMMPS ConfigFileConfigurator failed to find a unit cell")
+                LOG.error(f"LAMMPS ConfigFileConfigurator failed to find a unit cell")
 
     def get_atom_labels(self) -> list[AtomLabel]:
         """

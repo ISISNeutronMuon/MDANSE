@@ -13,12 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-import logging
 import time
 
+from MDANSE.MLogging import LOG
+
 from qtpy.QtCore import QtMsgType
-from qtpy.QtCore import QMessageLogger
 from qtpy.QtCore import qInstallMessageHandler
 
 
@@ -33,20 +32,19 @@ def generate_timestamp() -> str:
 
 
 def qt_message_handler(mode, context, message):
-    logger = logging.getLogger()
     details = ",".join([str(x) for x in [context.line, context.function, context.file]])
     timest = generate_timestamp
     output = ":".join([timest, details, message])
     if mode == QtMsgType.QtInfoMsg:
-        logger.info(output)
+        LOG.info(output)
     elif mode == QtMsgType.QtWarningMsg:
-        logger.warning(output)
+        LOG.warning(output)
     elif mode == QtMsgType.QtCriticalMsg:
-        logger.critical(output)
+        LOG.critical(output)
     elif mode == QtMsgType.QtFatalMsg:
-        logger.fatal(output)
+        LOG.fatal(output)
     else:
-        logger.debug(output)
+        LOG.debug(output)
 
 
 qInstallMessageHandler(qt_message_handler)

@@ -69,6 +69,7 @@ class Temperature(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         self.numberOfSteps = self.configuration["trajectory"][
             "instance"
@@ -201,3 +202,4 @@ class Temperature(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

@@ -402,47 +402,6 @@ interactions with solvent molecules.
      solvent molecules within the system.
 
 
-Spatial Density (SD)
---------------------
-
-**Purpose:** The Spatial Density calculation helps in understanding the distribution
-of atoms or molecules in a material, revealing density variations across different
-regions. This information is key for insights into the material's structural and
-physical properties.
-
-2. **Load Atomic Data**:
-   - Click on the "File" menu.
-   - Select "Load Atomic Data" and choose your data file.
-
-3. **Access the "Spatial Density (SD)" Analysis**:
-   - In the MDANSE interface, navigate to the "Analysis" section.
-   - Locate and select "Spatial Density (SD)" from the available analysis options.
-
-4. **Configure Settings**:
-   - *Frames*: Specify the frames or time points for SD calculation.
-   - *Spatial Resolution*: Define the desired spatial resolution for the analysis
-     (Default: 0.1). This resolution determines how many grid points are used to
-     represent a unit of length.
-   - *Reference Basis*: Set up the reference basis if needed (Default: None). This
-     helps define the basis for the analysis.
-   - *Atom Selection*: Choose the atoms or particles to include.
-   - *Output Files (Optional)*: Configure output file settings as required.
-
-5. **Run the Calculation**:
-   - Click on the "Run" button to initiate the Spatial Density (SD) calculation.
-
-6. **Review Results**:
-   - After the calculation, access and interpret the Spatial Density (SD) results.
-
-7. **Suggested Plots**:
-   - *Spatial Density Map*: Create a 2D or 3D density map of atoms or particles to
-     visualize the local structure.
-   - *Density Profile Plot*: Plot the density profile along a specified axis within
-     the simulation box.
-   - *Voronoi Tessellation Plot*: Visualize the Voronoi cells or tessellation of
-     particles to understand their spatial arrangement.
-
-
 Static Structure Factor
 -----------------------
 Index : GUI Static Structure Factor (General)

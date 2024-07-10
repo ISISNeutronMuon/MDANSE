@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from typing import TYPE_CHECKING, Dict, List
 import os
 import itertools
@@ -22,11 +21,11 @@ if TYPE_CHECKING:
     import h5py
 
 import numpy as np
-from matplotlib.pyplot import style as mpl_style
 from matplotlib import rcParams
-
-from qtpy.QtCore import Slot, Signal, QObject, QModelIndex, Qt
+from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Session.LocalSession import unit_lookup
 
@@ -55,12 +54,12 @@ class SingleDataset:
         try:
             self._data = source[name][:]
         except KeyError:
-            print(f"{name} is not a data set in the file")
+            LOG.error(f"{name} is not a data set in the file")
             self._valid = False
             return
         except TypeError:
             self._valid = False
-            print(f"{name} is not plottable")
+            LOG.error(f"{name} is not plottable")
             return
         self._data_unit = source[name].attrs["units"]
         self._n_dim = len(self._data.shape)
@@ -297,7 +296,7 @@ class PlottingContext(QStandardItemModel):
                 items[0].appendRow(subitems)
                 counter += 1
         else:
-            print("No curves!")
+            LOG.error("No curves!")
         self.appendRow(items)
 
     def set_axes(self):

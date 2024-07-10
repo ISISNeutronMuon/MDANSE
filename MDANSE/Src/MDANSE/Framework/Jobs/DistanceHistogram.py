@@ -19,7 +19,6 @@ import itertools
 
 import numpy as np
 
-from MDANSE.Core.Error import Error
 from MDANSE.Extensions import distance_histogram
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
@@ -82,6 +81,7 @@ class DistanceHistogram(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         self.numberOfSteps = self.configuration["frames"]["number"]
 

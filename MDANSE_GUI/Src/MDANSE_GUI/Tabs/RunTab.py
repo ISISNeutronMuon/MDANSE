@@ -13,19 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from functools import partial
 
-
-from qtpy.QtCore import QObject, Slot, Signal
 from qtpy.QtWidgets import QWidget
 
-from MDANSE.Framework.Jobs.IJob import IJob
-
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
-from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
+from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
 from MDANSE_GUI.Tabs.Views.RunTable import RunTable
+from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
 
 
 run_tab_label = """This table shows the status of jobs
@@ -54,7 +52,10 @@ class RunTab(GeneralTab):
                 footer="Look up our Read The Docs page:"
                 + "https://mdanse.readthedocs.io/en/protos/",
             ),
-            layout=DoublePanel,
+            layout=partial(
+                MultiPanel,
+                right_panels=[JobLogInfo(header="MDANSE Logs")],
+            ),
             label_text=run_tab_label,
         )
         return the_tab
@@ -83,7 +84,10 @@ class RunTab(GeneralTab):
                 + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
                 + " page.",
             ),
-            layout=DoublePanel,
+            layout=partial(
+                MultiPanel,
+                right_panels=[JobLogInfo(header="MDANSE Logs")],
+            ),
             label_text=run_tab_label,
         )
         return the_tab
@@ -101,7 +105,7 @@ if __name__ == "__main__":
         model=JobHolder(),
         view=RunTable(),
         visualiser=TextInfo(),
-        layout=DoublePanel,
+        layout=partial(MultiPanel, right_panels=[JobLogInfo()]),
         label_text=run_tab_label,
     )
     window.setCentralWidget(the_tab._core)

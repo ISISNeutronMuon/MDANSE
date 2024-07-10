@@ -13,11 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from qtpy import QtCore, QtWidgets
 
 from pylab import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Plotter.dialogs.data_viewer_1d_dialog import (
     DataViewer1DDialog,
@@ -90,7 +91,7 @@ class Plot1DWidget(QtWidgets.QWidget):
         try:
             self._plot_1d_model.add_line(y_data_info)
         except Plot1DModelError as e:
-            print(str(e), ["main", "popup"], "error")
+            LOG.error(f'{str(e)}, {"main", "popup"}, {"error"}')
             return
 
     def close(self):

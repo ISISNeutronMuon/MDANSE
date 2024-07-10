@@ -20,7 +20,7 @@ from qtpy.QtWidgets import QWidget
 from MDANSE.Framework.Converters.Converter import Converter
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
-from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
+from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
@@ -63,12 +63,14 @@ class ConverterTab(GeneralTab):
             view=ActionsTree(),
             visualiser=action,
             layout=partial(
-                TriplePanel,
-                left_panel=TextInfo(
-                    header="MDANSE Converter",
-                    footer="Look up our Read The Docs page:"
-                    + "https://mdanse.readthedocs.io/en/protos/",
-                ),
+                MultiPanel,
+                left_panels=[
+                    TextInfo(
+                        header="MDANSE Converter",
+                        footer="Look up our Read The Docs page:"
+                        + "https://mdanse.readthedocs.io/en/protos/",
+                    )
+                ],
             ),
             label_text=tab_label,
             action=action,
@@ -96,13 +98,15 @@ class ConverterTab(GeneralTab):
             view=ActionsTree(),
             visualiser=action,
             layout=partial(
-                TriplePanel,
-                left_panel=TextInfo(
-                    header="MDANSE Converter",
-                    footer="Look up our "
-                    + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                    + " page.",
-                ),
+                MultiPanel,
+                left_panels=[
+                    TextInfo(
+                        header="MDANSE Converter",
+                        footer="Look up our "
+                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                        + " page.",
+                    )
+                ],
             ),
             label_text=tab_label,
             action=action,
@@ -125,13 +129,15 @@ if __name__ == "__main__":
         view=ActionsTree(),
         visualiser=action,
         layout=partial(
-            TriplePanel,
-            left_panel=TextInfo(
-                header="MDANSE Converters",
-                footer="Look up our "
-                + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                + " page.",
-            ),
+            MultiPanel,
+            left_panels=[
+                TextInfo(
+                    header="MDANSE Converters",
+                    footer="Look up our "
+                    + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                    + " page.",
+                )
+            ],
         ),
         label_text=tab_label,
         action=action,

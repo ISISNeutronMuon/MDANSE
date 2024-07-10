@@ -2,14 +2,13 @@ import sys
 import tempfile
 import os
 from os import path
-from icecream import ic
+
 import numpy as np
 import h5py
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
 sys.setrecursionlimit(100000)
-ic.disable()
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
@@ -34,7 +33,7 @@ def test_basic_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
@@ -42,13 +41,16 @@ def test_basic_meansquare():
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
     os.remove(temp_name + ".mda")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_parallel_meansquare():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
@@ -56,7 +58,7 @@ def test_parallel_meansquare():
     temp_name2 = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name2, ("MDAFormat",))
+    parameters["output_files"] = (temp_name2, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("multicore", -4)
     parameters["trajectory"] = short_traj
     msd_par = IJob.create("MeanSquareDisplacement")
@@ -78,7 +80,7 @@ def test_atom_selection():
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",))
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     msd = IJob.create("MeanSquareDisplacement")
@@ -86,3 +88,6 @@ def test_atom_selection():
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
     os.remove(temp_name + ".mda")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

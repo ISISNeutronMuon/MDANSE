@@ -15,10 +15,11 @@
 #
 from typing import Union
 
-from icecream import ic
 from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
 from qtpy.QtGui import QMouseEvent, QDrag
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.DataViewModel.ActionsHolder import ActionsHolder
@@ -55,7 +56,7 @@ class ActionsTree(QTreeView):
         # print("Mouse Move Event!", event.button(), QtCore.Qt.MouseButton.LeftButton)
         if event.buttons() == Qt.MouseButton.LeftButton:
             # if event.button():
-            print("dragging")
+            LOG.info("dragging")
             new_position = event.position()
             distance = (self.click_position - new_position).manhattanLength()
             if distance > QApplication.startDragDistance():
@@ -72,7 +73,7 @@ class ActionsTree(QTreeView):
         model = self.model()
         item = model.itemFromIndex(index)
         text = item.text()
-        print("tree: clicked on ", text)
+        LOG.info(f"tree: clicked on {text}")
         self.jobname_selected.emit(text)
 
     def pop_action_dialog(self, index):
@@ -80,10 +81,10 @@ class ActionsTree(QTreeView):
         item = model.itemFromIndex(index)
         # debug
         text = item.text()
-        ic(f"About to execute action {text}")
+        LOG.info(f"About to execute action {text}")
         #
         number = item.data(Qt.ItemDataRole.UserRole)
-        ic(f"Node number is {number}")
+        LOG.info(f"Node number is {number}")
         if number is None:
             return
         action = model._values[number]
@@ -91,7 +92,7 @@ class ActionsTree(QTreeView):
 
     @Slot(DataTreeItem)
     def showValidActions(self, item: DataTreeItem):
-        ic("Creating model from", item)
+        LOG.info(f"Creating model from {item}")
         new_model = ActionsHolder(item)
         self.setModel(new_model)
 

@@ -57,6 +57,8 @@ class Density(IJob):
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
+        super().initialize()
+
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         self._n_frames = self.numberOfSteps
@@ -179,3 +181,4 @@ class Density(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

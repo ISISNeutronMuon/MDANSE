@@ -15,7 +15,6 @@
 #
 
 import collections
-import os
 
 import numpy as np
 
@@ -60,7 +59,7 @@ class Gromacs(Converter):
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
@@ -73,6 +72,8 @@ class Gromacs(Converter):
         """
         Initialize the job.
         """
+        super().initialize()
+
         data_to_be_written = ["configuration", "time"]
 
         # Create XTC or TRR object depending on which kind of trajectory was loaded
@@ -125,11 +126,11 @@ class Gromacs(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
     def run_step(self, index):

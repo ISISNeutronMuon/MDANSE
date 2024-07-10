@@ -13,72 +13,36 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import glob
 import itertools
 import os
 import os.path
 
-from qtpy.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton, QFileDialog
-from qtpy.QtCore import Qt, Slot
-from qtpy.QtGui import QStandardItemModel, QStandardItem
+from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog, QLabel, QComboBox
+from qtpy.QtCore import Slot, Qt
+
+from MDANSE.Framework.Configurators.OutputFilesConfigurator import (
+    OutputFilesConfigurator,
+)
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-
-
-class CheckableComboBox(QComboBox):
-    def __init__(self, *args, **kwargs):
-        super(CheckableComboBox, self).__init__(*args, **kwargs)
-        self.view().pressed.connect(self.handleItemPressed)
-        self.setModel(QStandardItemModel(self))
-
-    def handleItemPressed(self, index):
-        item = self.model().itemFromIndex(index)
-        if item.checkState() == Qt.Checked:
-            item.setCheckState(Qt.Unchecked)
-        else:
-            item.setCheckState(Qt.Checked)
-
-    def configure_using_default(self):
-        """This is too specific to have a default value"""
-
-    def set_default(self, default: str):
-        model = self.model()
-        for row_number in range(model.rowCount()):
-            index = model.index(row_number, 0)
-            item = model.itemFromIndex(index)
-            text = model.data(index)
-            if text == default:
-                item.setCheckState(Qt.Checked)
-            else:
-                item.setCheckState(Qt.Unchecked)
-
-    def checked_values(self):
-        result = []
-        model = self.model()
-        for row_number in range(model.rowCount()):
-            index = model.index(row_number, 0)
-            item = model.itemFromIndex(index)
-            if item.checkState() == Qt.Checked:
-                text = model.data(index)
-                print(text)
-                result.append(text)
-        return result
+from .CheckableComboBox import CheckableComboBox
 
 
 class OutputFilesWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, layout_type="QGridLayout", **kwargs)
         default_value = self._configurator.default
         try:
             parent = kwargs.get("parent", None)
             self.default_path = parent.default_path
         except KeyError:
             self.default_path = "."
-            print("KeyError in OutputFilesWidget - can't get default path.")
+            LOG.error("KeyError in OutputFilesWidget - can't get default path.")
         except AttributeError:
             self.default_path = "."
-            print("AttributeError in OutputFilesWidget - can't get default path.")
+            LOG.error("AttributeError in OutputFilesWidget - can't get default path.")
         self.file_association = ".*"
         self._value = default_value
         self._field = QLineEdit(default_value[0], self._base)
@@ -89,11 +53,18 @@ class OutputFilesWidget(WidgetBase):
         # self.type_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)
-        self._layout.addWidget(self._field)
-        self._layout.addWidget(self.type_box)
-        self._layout.addWidget(browse_button)
+        label = QLabel("Log file output:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.logs_combo = QComboBox(self._base)
+        self.logs_combo.addItems(OutputFilesConfigurator.log_options)
+        self._layout.addWidget(self._field, 0, 0)
+        self._layout.addWidget(self.type_box, 0, 1)
+        self._layout.addWidget(browse_button, 0, 2)
+        self._layout.addWidget(label, 1, 0)
+        self._layout.addWidget(self.logs_combo, 1, 1)
         self._default_value = default_value
         self._field.textChanged.connect(self.updateValue)
+        self.type_box.lineEdit().textChanged.connect(self.updateValue)
         self.default_labels()
         self.update_labels()
         self.updateValue()
@@ -123,7 +94,7 @@ class OutputFilesWidget(WidgetBase):
         """
         new_value = QFileDialog.getSaveFileName(
             self._base,  # the parent of the dialog
-            "Load a file",  # the label of the window
+            "Save files",  # the label of the window
             self.default_path,  # the initial search path
             self.file_association,  # text string specifying the file name filter.
         )
@@ -158,8 +129,9 @@ class OutputFilesWidget(WidgetBase):
             filename = self._default_value[0]
 
         formats = self.type_box.checked_values()
+        log_level = self.logs_combo.currentText()
 
-        return (filename, formats)
+        return (filename, formats, log_level)
 
     def set_data(self, datakey):
         basename = "%s_%s" % (

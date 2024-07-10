@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from abc import abstractmethod
 
 from qtpy.QtCore import QObject, Slot, Signal
@@ -25,6 +24,8 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QGridLayout,
 )
+
+from MDANSE.MLogging import LOG
 
 
 class WidgetBase(QObject):
@@ -100,7 +101,7 @@ class WidgetBase(QObject):
         """Makes the configurator use its default value, and highlights it
         in the GUI"""
         default = self._configurator.default
-        print(f"Setting {default} as placeholder text")
+        LOG.info(f"Setting {default} as placeholder text")
         self._field.setPlaceholderText(str(default))
         self._configurator.configure(default)
 

@@ -13,15 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import QObject, Slot, Signal
-
-
-import os
-
-from qtpy.QtCore import QObject, Slot, Signal, QMessageLogger
+from qtpy.QtCore import QObject, Slot, QMessageLogger
 from qtpy.QtWidgets import QListView
-
-from MDANSE.Framework.Jobs.IJob import IJob
 
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession

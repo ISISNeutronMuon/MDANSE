@@ -13,9 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import argparse
 import sys
+
+from MDANSE.MLogging import LOG
 
 
 def parse_args():
@@ -47,12 +48,12 @@ def main():
     job = args.job[0]
 
     if job not in REGISTRY["job"]:
-        print("Unknown job: %s" % job)
+        LOG.error("Unknown job: %s" % job)
         sys.exit(1)
 
     for v in REGISTRY["job"][job].settings.values():
         if v[0] == "hdf_trajectory" and not trajectory:
-            print("A trajectory is needed")
+            LOG.error("A trajectory is needed")
             sys.exit(1)
 
     trajectory = trajectory[0] if trajectory else None

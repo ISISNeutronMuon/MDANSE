@@ -16,7 +16,7 @@
 from MDANSE.Framework.Jobs.IJob import IJob
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
-from qtpy.QtCore import QObject, Slot, Signal, QSortFilterProxyModel, QModelIndex
+from qtpy.QtCore import Signal
 from qtpy.QtCore import Qt
 
 

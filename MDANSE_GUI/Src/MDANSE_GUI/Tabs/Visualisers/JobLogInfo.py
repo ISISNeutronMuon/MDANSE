@@ -13,35 +13,26 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import Slot, Signal
-from qtpy.QtWidgets import QTextBrowser
+from qtpy.QtCore import Slot
+from .TextInfo import TextInfo
 
 
-class TextInfo(QTextBrowser):
-    error = Signal(str)
+class JobLogInfo(TextInfo):
 
     def __init__(self, *args, **kwargs):
-        self._header = kwargs.pop("header", "")
-        self._footer = kwargs.pop("footer", "")
         super().__init__(*args, **kwargs)
-        self.setOpenExternalLinks(True)
-        self.setHtml(self.filter(""))
+        self.setStyleSheet("font-family: Courier New;")
 
     @Slot(object)
     def update_panel(self, incoming: object):
-        filtered = self.filter(incoming)
+        msgs, levels = incoming
+        text = ""
+        for msg, level in zip(msgs, levels):
+            if level == "WARNING":
+                text += f'<span style="color:orange;">{msg}</span>\n'
+            elif level == "ERROR" or level == "CRITICAL":
+                text += f'<span style="color:red;">{msg}</span>\n'
+            else:
+                text += f"<span>{msg}</span>\n"
+        filtered = self.filter(text)
         self.setHtml(filtered)
-
-    @Slot(str)
-    def append_text(self, new_text: str):
-        self.append(new_text)
-
-    def filter(self, some_text: str, line_break="<br />"):
-        new_text = ""
-        if self._header:
-            new_text += self._header + line_break
-        if some_text is not None:
-            new_text += line_break.join([x.strip() for x in some_text.split("\n")])
-        if self._footer:
-            new_text += line_break + self._footer
-        return new_text

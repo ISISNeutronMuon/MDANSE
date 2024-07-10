@@ -15,10 +15,7 @@
 #
 
 
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class TrajectoryVariableConfigurator(IConfigurator):

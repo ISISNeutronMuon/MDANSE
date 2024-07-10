@@ -10,7 +10,6 @@ This section contains background theory for following plugins:
 
 -  :ref:`infrared`
 -  :ref:`dipole-autocorrelation-function`
--  :ref:`refolded-membrane-trajectory`
 -  :ref:`density`
 -  :ref:`temperature`
 -  :ref:`box-translated-trajectory`
@@ -56,21 +55,6 @@ of chemical compounds. Infrared spectroscopy is a fundamental technique
 in chemistry and material science, making this analysis essential for
 understanding molecular behavior and composition in simulations.
 
-Macromolecules
-^^^^^^^^^^^^^^
-
-^^^^^^^^^^^^^^
-
-.. _refolded-membrane-trajectory:
-
-Refolded Membrane Trajectory
-''''''''''''''''''''''''''''
-The Macromolecules focuses on the analysis of large molecular structures.
-Refolded Membrane Trajectory Analysis is instrumental in manipulating
-and examining complex membrane structures within macromolecules.
-Understanding and refining macromolecular structures are vital for
-various applications, including drug design, biomolecular research, and
-materials science.
 
 Thermodynamics
 ^^^^^^^^^^^^^^

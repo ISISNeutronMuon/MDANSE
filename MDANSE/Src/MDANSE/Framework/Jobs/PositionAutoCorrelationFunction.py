@@ -86,6 +86,8 @@ class PositionAutoCorrelationFunction(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
+
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
         # Will store the time.
@@ -197,3 +199,4 @@ class PositionAutoCorrelationFunction(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

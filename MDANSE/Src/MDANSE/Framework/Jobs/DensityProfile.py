@@ -82,6 +82,7 @@ class DensityProfile(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration["frames"]["number"]
@@ -198,3 +199,4 @@ class DensityProfile(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()
