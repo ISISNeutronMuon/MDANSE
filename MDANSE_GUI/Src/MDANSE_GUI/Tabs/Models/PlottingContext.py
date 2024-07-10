@@ -33,8 +33,10 @@ from MDANSE.MLogging import LOG
 def get_mpl_markers():
     return MarkerStyle.markers
 
+
 def get_mpl_lines():
     return lineStyles
+
 
 def get_mpl_colours():
     cycler = rcParams["axes.prop_cycle"]
