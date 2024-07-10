@@ -25,9 +25,7 @@ class SignalError(Error):
 
 INTERPOLATION_ORDER = {}
 
-INTERPOLATION_ORDER[1] = np.array(
-    [[-3.0, 4.0, -1.0], [-1.0, 0.0, 1.0], [1.0, -4.0, 3.0]], dtype=np.float64
-)
+INTERPOLATION_ORDER[1] = np.array([[-1.0, 1.0], [1.0, -1.0]], dtype=np.float64)
 
 
 INTERPOLATION_ORDER[2] = np.array(
@@ -153,13 +151,10 @@ def differentiate(a, dt=1.0, order=1):
     fact = 1.0 / dt
 
     if order == 1:
-        ts[0] = np.add.reduce(coefs[0, :] * a[:3])
-        ts[-1] = np.add.reduce(coefs[2, :] * a[-3:])
+        ts[-1] = np.add.reduce(coefs[1, :] * a[-2:])
 
         gj = a[1:] - a[:-1]
-        ts[1:-1] = gj[1:] + gj[:-1]
-
-        fact /= 2.0
+        ts[:-1] = gj
 
     # Case of the order 2
     elif order == 2:

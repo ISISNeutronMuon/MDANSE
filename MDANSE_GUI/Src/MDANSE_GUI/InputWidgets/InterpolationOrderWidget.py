@@ -44,11 +44,10 @@ class InterpolationOrderWidget(WidgetBase):
         ]["instance"]
         if not trajectory.has_variable("velocities"):
             self._field.setMinimum(1)
-            self._field.setValue(1)
+            self._field.setValue(3)
         label = QLabel("Interpolation order", self._base)
         self.numerator = QLabel("st order")
-
-        self._field.valueChanged.connect(self.adjust_numerator)
+        self.adjust_numerator(3)
 
         self._layout.addWidget(label)
         self._layout.addWidget(self._field)
@@ -62,6 +61,7 @@ class InterpolationOrderWidget(WidgetBase):
             tooltip_text = "The order of the polynomial function used for interpolating velocity values from atom positions. If zero, velocity values present in the trajectory will be used."
         self._field.setToolTip(tooltip_text)
         self.numerator.setToolTip(tooltip_text)
+        self._field.valueChanged.connect(self.adjust_numerator)
 
     def configure_using_default(self):
         """This is too simple to have a default value"""
