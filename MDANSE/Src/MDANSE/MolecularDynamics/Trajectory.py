@@ -18,7 +18,6 @@ from ast import operator
 from typing import Collection
 
 import numpy as np
-from icecream import ic
 import h5py
 
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory

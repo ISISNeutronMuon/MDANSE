@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+
 import abc
 from ast import literal_eval
 import collections
@@ -33,6 +34,7 @@ from MDANSE.Mathematics.Geometry import superposition_fit, center_of_mass
 from MDANSE.Chemistry.Databases import ResiduesDatabaseError, NucleotidesDatabaseError
 from MDANSE.Mathematics.LinearAlgebra import delta, Quaternion, Tensor, Vector
 from MDANSE.Mathematics.Transformation import Rotation, RotationTranslation, Translation
+from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
     from MDANSE.Chemistry.Databases import (
@@ -2694,8 +2696,8 @@ class ChemicalSystem(_ChemicalEntity):
         if atom_names_before == atom_names_after:
             self._configuration = configuration_before
         else:
-            print("Atoms before:", atom_names_before)
-            print("Atoms after:", atom_names_after)
+            LOG.error(f"Atoms before: {atom_names_before}")
+            LOG.error(f"Atoms after: {atom_names_after}")
             raise RuntimeError(
                 "ChemicalSystem.rebuild() changed the order of atoms. This needs to be handled!"
             )

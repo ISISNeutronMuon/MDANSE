@@ -13,15 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from typing import TYPE_CHECKING, List
-import math
 
 from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
-    import h5py
     from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
@@ -53,7 +52,7 @@ class Single(Plotter):
         else:
             target = figure
         if target is None:
-            print(f"PlottingContext can't plot to {target}")
+            LOG.error(f"PlottingContext can't plot to {target}")
             return
         target.clear()
         return target
@@ -122,7 +121,7 @@ class Single(Plotter):
         self.apply_settings(plotting_context, colours)
         self.height_max, self.length_max = 0.0, 0.0
         if plotting_context.set_axes() is None:
-            print("Axis check failed.")
+            LOG.error("Axis check failed.")
             return
         for name, databundle in plotting_context.datasets().items():
             dataset, colour, linestyle, marker, _ = databundle
@@ -179,9 +178,11 @@ class Single(Plotter):
                                 self.length_max, temp.get_xdata().max()
                             )
                         except ValueError:
-                            print(f"Plotting failed for {plotlabel} using {best_axis}")
-                            print(f"x_axis={dataset._axes[best_axis]}")
-                            print(f"values={value}")
+                            LOG.error(
+                                f"Plotting failed for {plotlabel} using {best_axis}"
+                            )
+                            LOG.error(f"x_axis={dataset._axes[best_axis]}")
+                            LOG.error(f"values={value}")
                             return
         if update_only:
             axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))

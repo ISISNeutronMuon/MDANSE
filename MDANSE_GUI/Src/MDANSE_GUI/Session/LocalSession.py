@@ -13,13 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import os
 import json
 from typing import Dict, List
 
 from qtpy.QtCore import QObject, Signal, Slot
 
+from MDANSE.MLogging import LOG
 from MDANSE import PLATFORM
 from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
 
@@ -122,7 +122,7 @@ class LocalSession(QObject):
             with open(fname, "r") as source:
                 all_items_text = source.readline()
         except:
-            print(f"Failed to read session settings from {fname}")
+            LOG.error(f"Failed to read session settings from {fname}")
         else:
             all_items = json_decoder.decode(all_items_text)
             self._paths = all_items["paths"]

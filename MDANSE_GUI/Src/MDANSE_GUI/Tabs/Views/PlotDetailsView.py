@@ -13,11 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
 
-from icecream import ic
 from qtpy.QtWidgets import QTreeView, QComboBox, QItemDelegate, QColorDialog
-from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QObject
+from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtGui import QColor
 
 from MDANSE_GUI.Tabs.Models.PlottingContext import get_mpl_lines, get_mpl_markers

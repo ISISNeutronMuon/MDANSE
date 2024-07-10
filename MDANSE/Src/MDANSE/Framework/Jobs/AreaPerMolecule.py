@@ -13,9 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import collections
-import os
 
 import numpy as np
 
@@ -78,6 +76,7 @@ class AreaPerMolecule(IJob):
         """
         Initialize the analysis (open trajectory, create output variables ...)
         """
+        super().initialize()
 
         # This will define the number of steps of the analysis. MUST be defined for all analysis.
         self.numberOfSteps = self.configuration["frames"]["number"]
@@ -174,3 +173,4 @@ class AreaPerMolecule(IJob):
             self,
         )
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

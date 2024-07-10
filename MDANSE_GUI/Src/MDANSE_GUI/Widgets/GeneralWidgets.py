@@ -12,45 +12,31 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+#
 from typing import Union, Iterable
-from collections import OrderedDict
-import copy
-import abc
-from qtpy.QtCore import QObject
 
-from icecream import ic
-import numpy as np
+import copy
+
 from qtpy.QtWidgets import (
     QDialog,
     QPushButton,
     QFileDialog,
-    QGridLayout,
     QVBoxLayout,
     QWidget,
     QLabel,
-    QApplication,
     QComboBox,
-    QMenu,
     QLineEdit,
-    QTableView,
     QFormLayout,
     QHBoxLayout,
     QCheckBox,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel, QObject
+from qtpy.QtCore import Signal, Slot, QObject
 from qtpy.QtGui import (
-    QFont,
-    QEnterEvent,
-    QStandardItem,
-    QStandardItemModel,
     QIntValidator,
     QDoubleValidator,
-    QValidator,
 )
 
-from MDANSE.Framework.Jobs.IJob import IJob
-
+from MDANSE.MLogging import LOG
 
 # I think that a Trajectory Converter should, in general,
 # create a Wizard and not a single Dialog.
@@ -106,7 +92,7 @@ class GeneralInput(QObject):
             self.file_dialog = QFileDialog.getSaveFileName
         else:
             self.file_dialog = None
-        ic(kwargs)
+        LOG.info(kwargs)
 
     @Slot(str)
     def updatePath(self, newpath: str):
@@ -140,10 +126,10 @@ class GeneralInput(QObject):
             converted = self.data_type(newone)
         except ValueError:
             converted = self.default_value
-            ic(f"ValueError converting {newone} using {self.data_type}")
+            LOG.error(f"ValueError converting {newone} using {self.data_type}")
         except TypeError:
             converted = self.default_value
-            ic(f"TypeError converting {newone} using {self.data_type}")
+            LOG.error(f"TypeError converting {newone} using {self.data_type}")
         self.current_value = converted
         self.value_changed.emit()
         if emit:
@@ -159,7 +145,7 @@ class GeneralInput(QObject):
             that was specified in the constructor.
         """
         if self.file_dialog is not None:
-            ic(f"File Field Return Value: {self.current_value}")
+            LOG.info(f"File Field Return Value: {self.current_value}")
         self.final_value.emit(self.current_value)
         return self.current_value
 
@@ -333,11 +319,11 @@ class InputFactory:
         default_value = kwargs.get("default", "")
         tooltip_text = kwargs.get("tooltip", "Specify a path to an existing file.")
         qt_file_association = file_association = kwargs.get("wildcard", "")
-        ic(kind)
-        ic(default_value)
-        ic(tooltip_text)
-        ic(file_association)
-        ic(kwargs)
+        LOG.info(kind)
+        LOG.info(default_value)
+        LOG.info(tooltip_text)
+        LOG.info(file_association)
+        LOG.info(kwargs)
         base, layout = InputFactory.createBase(*args, **kwargs)
         field = QLineEdit(base)
         data_handler = GeneralInput(
@@ -417,10 +403,10 @@ class InputFactory:
         kind = kwargs.get("kind", "Boolean")
         default_value = kwargs.get("default", False)
         tooltip_text = kwargs.get("tooltip", None)
-        ic(kind)
-        ic(default_value)
-        ic(tooltip_text)
-        ic(kwargs)
+        LOG.info(kind)
+        LOG.info(default_value)
+        LOG.info(tooltip_text)
+        LOG.info(kwargs)
         base, layout = InputFactory.createBase(*args, **kwargs)
         field = QCheckBox(base)
         field.setTristate(False)
@@ -441,10 +427,10 @@ class InputFactory:
         default_value = kwargs.get("default", None)
         tooltip_text = kwargs.get("tooltip", None)
         minval = kwargs.get("mini", None)
-        ic(kind)
-        ic(default_value)
-        ic(tooltip_text)
-        ic(kwargs)
+        LOG.info(kind)
+        LOG.info(default_value)
+        LOG.info(tooltip_text)
+        LOG.info(kwargs)
         base, layout = InputFactory.createBase(*args, **kwargs)
         field = QLineEdit(base)
         if "Integer" in kind:
@@ -480,10 +466,10 @@ class InputFactory:
         number_of_fields = kwargs.get("howmany", None)
         if number_of_fields is None:
             number_of_fields = len(default_value)
-        ic(kind)
-        ic(default_value)
-        ic(tooltip_text)
-        ic(kwargs)
+        LOG.info(kind)
+        LOG.info(default_value)
+        LOG.info(tooltip_text)
+        LOG.info(kwargs)
         base, layout = InputFactory.createBase(*args, **kwargs)
         main_handler = InputGroup(base)
         for nfield in range(number_of_fields):
@@ -515,10 +501,10 @@ class InputFactory:
         default_value = kwargs.get("default", False)
         tooltip_text = kwargs.get("tooltip", None)
         option_list = kwargs.get("choices", [])
-        ic(kind)
-        ic(default_value)
-        ic(tooltip_text)
-        ic(kwargs)
+        LOG.info(kind)
+        LOG.info(default_value)
+        LOG.info(tooltip_text)
+        LOG.info(kwargs)
         base, layout = InputFactory.createBase(*args, **kwargs)
         field = QComboBox(base)
         field.addItems(option_list)

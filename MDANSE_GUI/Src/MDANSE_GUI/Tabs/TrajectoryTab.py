@@ -22,7 +22,7 @@ from qtpy.QtWidgets import QWidget, QFileDialog
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
-from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
+from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
@@ -83,7 +83,7 @@ class TrajectoryTab(GeneralTab):
             model=GeneralModel(),
             view=TrajectoryView(),
             visualiser=View3D(MolecularViewer()),
-            layout=partial(TriplePanel, left_panel=TrajectoryInfo()),
+            layout=partial(MultiPanel, left_panels=[TrajectoryInfo()]),
             label_text=label_text,
         )
         return the_tab
@@ -107,7 +107,7 @@ class TrajectoryTab(GeneralTab):
             model=kwargs.get("model", GeneralModel()),
             view=TrajectoryView(),
             visualiser=View3D(MolecularViewer()),
-            layout=partial(TriplePanel, left_panel=TrajectoryInfo()),
+            layout=partial(MultiPanel, left_panels=[TrajectoryInfo()]),
             label_text=label_text,
         )
         return the_tab

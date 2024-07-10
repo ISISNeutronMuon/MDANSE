@@ -15,8 +15,7 @@
 #
 
 from qtpy.QtWidgets import QSpinBox, QLabel
-from qtpy.QtCore import Slot, Signal
-from qtpy.QtGui import QIntValidator
+from qtpy.QtCore import Slot
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

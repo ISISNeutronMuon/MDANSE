@@ -134,6 +134,7 @@ class CurrentCorrelationFunction(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         self.numberOfSteps = self.configuration["q_vectors"]["n_shells"]
 
@@ -601,3 +602,4 @@ class CurrentCorrelationFunction(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

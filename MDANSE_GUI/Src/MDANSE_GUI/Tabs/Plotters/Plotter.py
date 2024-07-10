@@ -13,16 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from typing import TYPE_CHECKING, List
 
 from matplotlib.pyplot import style as mpl_style
 from matplotlib import rcParams
 
+from MDANSE.MLogging import LOG
 from MDANSE.Core.SubclassFactory import SubclassFactory
 
 if TYPE_CHECKING:
-    import h5py
     from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
@@ -65,7 +64,7 @@ class Plotter(metaclass=SubclassFactory):
         else:
             target = figure
         if target is None:
-            print(f"PlottingContext can't plot to {target}")
+            LOG.error(f"PlottingContext can't plot to {target}")
             return
         target.clear()
         return target
@@ -74,7 +73,7 @@ class Plotter(metaclass=SubclassFactory):
         if colours is not None:
             self._current_colours = colours
         if plotting_context.set_axes() is None:
-            print("Axis check failed.")
+            LOG.error("Axis check failed.")
             return
         try:
             matplotlib_style = colours["style"]

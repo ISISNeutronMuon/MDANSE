@@ -13,32 +13,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from typing import TYPE_CHECKING, List
-
-if TYPE_CHECKING:
-    import h5py
-    from matplotlib.figure import Figure
-    from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
-
 import matplotlib.pyplot as mpl
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qt5agg import (
-    NavigationToolbar2QT as NavigationToolbar2QTAgg,
-)
-
 from qtpy.QtWidgets import (
     QWidget,
     QFormLayout,
     QComboBox,
-    QLineEdit,
     QGroupBox,
     QVBoxLayout,
 )
-from qtpy.QtCore import Slot, Signal, QObject, Qt
+from qtpy.QtCore import Slot, Signal
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Units import measure
-from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 
 class PlotSettings(QWidget):
@@ -67,7 +53,7 @@ class PlotSettings(QWidget):
         try:
             mpl.style.use(style_name)
         except:
-            print(f"Could not set matplotlib style to {style_name}")
+            LOG.error(f"Could not set matplotlib style to {style_name}")
         else:
             self.plot_settings_changed.emit()
 

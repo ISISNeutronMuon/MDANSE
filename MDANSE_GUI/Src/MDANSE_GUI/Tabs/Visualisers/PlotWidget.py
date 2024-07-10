@@ -13,12 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    import h5py
-    from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 import numpy as np
@@ -27,7 +24,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
-
 from qtpy.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -35,11 +31,11 @@ from qtpy.QtWidgets import (
     QSlider,
     QLabel,
     QGridLayout,
-    QRadioButton,
-    QButtonGroup,
     QDoubleSpinBox,
 )
-from qtpy.QtCore import Slot, Signal, QObject, Qt
+from qtpy.QtCore import Slot, Signal, Qt
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
@@ -190,7 +186,7 @@ class PlotWidget(QWidget):
 
     def plot_data(self, update_only=False):
         if self._plotter is None:
-            print("No plotter present in PlotWidget.")
+            LOG.info("No plotter present in PlotWidget.")
             return
         if self._plotting_context is None:
             return

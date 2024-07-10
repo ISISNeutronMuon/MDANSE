@@ -12,13 +12,13 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 import typing
 
-from icecream import ic
 from qtpy.QtWidgets import QTreeView, QWidget, QMenu
 from qtpy.QtCore import Signal, Slot, QModelIndex
 from qtpy.QtGui import QContextMenuEvent
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 
@@ -39,9 +39,9 @@ class TrajectoryViewer(QTreeView):
     def requestChildren(self, index: QModelIndex):
         # item = index.data()
         item = self.model().itemFromIndex(index)
-        ic("Emitting items ancestor. Item:", item)
+        LOG.info(f"Emitting items ancestor. Item: {item}")
         anc = item.ancestors()
-        ic("ancestor:", anc[-1])
+        LOG.info(f"ancestor: {anc[-1]}")
         # self.pickedAncestor.emit(anc[-1])
         self.itemPicked.emit(item)
 
@@ -50,8 +50,8 @@ class TrajectoryViewer(QTreeView):
         model = self.model()
         item = model.itemData(index)
         # item = index.data()
-        ic(index)
-        ic(item)
+        LOG.info(index)
+        LOG.info(item)
         menu = QMenu()
         self.populateMenu(menu, item)
         # picked = menu.exec(menu.)

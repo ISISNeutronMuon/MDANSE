@@ -201,4 +201,4 @@ class CoordinationNumber(DistanceHistogram):
 
         self.configuration["trajectory"]["instance"].close()
 
-        DistanceHistogram.finalize(self)
+        super().finalize()

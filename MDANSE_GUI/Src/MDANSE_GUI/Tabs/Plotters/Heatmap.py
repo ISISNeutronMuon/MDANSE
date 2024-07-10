@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from typing import TYPE_CHECKING, List
 import math
 
@@ -22,10 +21,11 @@ from scipy.interpolate import interp1d
 from matplotlib.pyplot import colorbar as mpl_colorbar
 
 from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
-    import h5py
     from matplotlib.figure import Figure
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
@@ -67,7 +67,7 @@ class Heatmap(Plotter):
         else:
             target = figure
         if target is None:
-            print(f"PlottingContext can't plot to {target}")
+            LOG.error(f"PlottingContext can't plot to {target}")
             return
         target.clear()
         return target
@@ -126,7 +126,7 @@ class Heatmap(Plotter):
             self._last_axes_units = []
         self.apply_settings(plotting_context, colours)
         if plotting_context.set_axes() is None:
-            print("Axis check failed.")
+            LOG.error("Axis check failed.")
             return
         nplots = 0
         for databundle in plotting_context.datasets().values():

@@ -13,14 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from abc import ABCMeta, abstractmethod, abstractclassmethod
+from abc import abstractmethod
 from importlib import metadata
 
 import h5py
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.MLogging import LOG
 
 
 class InteractiveConverter(IJob):
@@ -208,7 +208,7 @@ class Converter(IJob, metaclass=SubclassFactory):
         inputs = self.output_configuration()
 
         if inputs is not None:
-            print(inputs)
+            LOG.info(inputs)
             dgroup = meta.create_group("inputs")
             for key, value in inputs.items():
                 dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
@@ -218,10 +218,10 @@ class Converter(IJob, metaclass=SubclassFactory):
             return
 
         try:
-            output_file = h5py.File(self.configuration["output_file"]["file"], "a")
+            output_file = h5py.File(self.configuration["output_files"]["file"], "a")
             # f = netCDF4.Dataset(self._trajectory.filename,'a')
         except:
-            print("Skipping the finalize call in Converter")
+            LOG.warning("Skipping the finalize call in Converter")
             return
 
         self.write_metadata(output_file)
@@ -253,3 +253,5 @@ class Converter(IJob, metaclass=SubclassFactory):
                 output_file["gradients"].attrs["name"] = "gradients"
         finally:
             output_file.close()
+
+        super().finalize()

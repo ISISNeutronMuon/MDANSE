@@ -13,12 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import os
 from collections import defaultdict
 from importlib import metadata
 
-from icecream import ic
 from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger
 from qtpy.QtWidgets import (
     QMainWindow,
@@ -31,7 +29,7 @@ from qtpy.QtWidgets import (
     QAction,
 )
 
-import MDANSE
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Session.StructuredSession import StructuredSession
 from MDANSE_GUI.Widgets.Generator import WidgetGenerator
@@ -195,7 +193,7 @@ class TabbedWindow(QMainWindow):
         for act in self._actions:
             self._toolBar.addAction(act)
         self.addToolBar(self._toolBar)
-        print(f"Icon size is {self._toolBar.iconSize()}")
+        LOG.info(f"Icon size is {self._toolBar.iconSize()}")
 
     @Slot()
     def launchPeriodicTable(self):
@@ -236,7 +234,7 @@ class TabbedWindow(QMainWindow):
             self.workdir,
             "MDT files (*.mdt);;HDF5 files (*.h5 *.hdf);;All files (*)",
         )
-        ic(fname)
+        LOG.info(fname)
         if len(fname[0]) > 0:
             self.file_name_for_loading.emit(fname[0])
 
@@ -339,4 +337,4 @@ class TabbedWindow(QMainWindow):
         self.settings.endGroup()
 
     def reportError(self, text: str):
-        print(text)
+        LOG.error(text)

@@ -14,12 +14,11 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtCore import Signal, Slot, Qt, QTimer, QMutex
+from qtpy.QtCore import Slot, Qt, QTimer, QMutex
 from qtpy.QtWidgets import (
     QWidget,
     QGridLayout,
     QSlider,
-    QLineEdit,
     QHBoxLayout,
     QSpinBox,
     QVBoxLayout,
@@ -33,9 +32,6 @@ from qtpy.QtWidgets import (
     QCheckBox,
 )
 from qtpy.QtGui import (
-    QDoubleValidator,
-    QIntValidator,
-    QIcon,
     QPaintEvent,
     QPainter,
     QColor,

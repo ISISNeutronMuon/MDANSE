@@ -13,13 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import pickle
 import os
 
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
+from MDANSE.MLogging import LOG
 
 
 class UserDefinitionStoreError(Error):
@@ -62,8 +62,8 @@ class UserDefinitionStore(object, metaclass=Singleton):
 
         # If for whatever reason the pickle file loading failed do not even try to restore it
         except Exception as e:
-            print("Exception reading the User Definitions")
-            print(e)
+            LOG.error("Exception reading the User Definitions")
+            LOG.error(e)
             return
 
         else:

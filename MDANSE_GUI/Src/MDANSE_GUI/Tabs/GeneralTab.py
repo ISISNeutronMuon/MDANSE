@@ -16,12 +16,10 @@
 
 
 from typing import Dict, Tuple
-import os
 
-from qtpy.QtCore import QObject, Slot, Signal, QMessageLogger
+from qtpy.QtCore import QObject, Slot, QMessageLogger
 from qtpy.QtWidgets import QListView
 
-from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure, unit_lookup
 
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel

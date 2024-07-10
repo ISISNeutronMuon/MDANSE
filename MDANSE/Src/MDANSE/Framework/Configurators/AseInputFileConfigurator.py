@@ -13,13 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import os
 
 from ase.io.formats import all_formats
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
+from MDANSE.MLogging import LOG
 
 
 class AseInputFileConfigurator(InputFileConfigurator):
@@ -64,7 +64,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
         value = PLATFORM.get_path(value)
 
         if not os.path.exists(value):
-            print(f"FILE MISSING in {self._name}")
+            LOG.error(f"FILE MISSING in {self._name}")
             self.error_status = f"The file {value} does not exist"
             return
 
@@ -72,7 +72,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
             file_format = None
 
         if file_format is not None and not file_format in self._allowed_formats:
-            print(f"WRONG FORMAT in {self._name}")
+            LOG.error(f"WRONG FORMAT in {self._name}")
             self.error_status = f"The ASE file format {file_format} is not supported"
             return
 
@@ -102,6 +102,6 @@ class AseInputFileConfigurator(InputFileConfigurator):
         try:
             val = self["value"]
         except KeyError:
-            print(f"No VALUE in {self._name}")
+            LOG.error(f"No VALUE in {self._name}")
 
         return "Input file: %r\n" % self["value"]

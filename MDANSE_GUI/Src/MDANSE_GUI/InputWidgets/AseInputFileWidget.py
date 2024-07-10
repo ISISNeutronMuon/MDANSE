@@ -13,11 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog, QComboBox
 from qtpy.QtCore import Slot
 from ase.io.formats import filetype
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Configurators.AseInputFileConfigurator import (
     AseInputFileConfigurator,
 )
@@ -38,10 +38,10 @@ class AseInputFileWidget(WidgetBase):
             self.default_path = parent.default_path
         except KeyError:
             self.default_path = "."
-            print("KeyError in InputFileWidget - can't get default path.")
+            LOG.error("KeyError in InputFileWidget - can't get default path.")
         except AttributeError:
             self.default_path = "."
-            print("AttributeError in InputFileWidget - can't get default path.")
+            LOG.error("AttributeError in InputFileWidget - can't get default path.")
         default_value = kwargs.get("default", "")
         if self._tooltip:
             tooltip_text = self._tooltip
@@ -75,7 +75,7 @@ class AseInputFileWidget(WidgetBase):
         """
         new_value = self._file_dialog(
             self.parent(),  # the parent of the dialog
-            "Load a file",  # the label of the window
+            "Load file",  # the label of the window
             self.default_path,  # the initial search path
             self._qt_file_association,  # text string specifying the file name filter.
         )

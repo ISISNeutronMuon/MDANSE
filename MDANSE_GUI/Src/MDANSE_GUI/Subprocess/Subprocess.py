@@ -13,18 +13,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from multiprocessing import Pipe, Queue, Process, Event
+from logging.handlers import QueueHandler
+from multiprocessing import Queue, Process, Event
 from multiprocessing.connection import Connection
 
-from icecream import ic
-
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Jobs.IJob import IJob
 
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess
 
 
 class Subprocess(Process):
+
     def __init__(self, *args, **kwargs):
         super().__init__()
         job_name = kwargs.get("job_name")
@@ -32,6 +32,7 @@ class Subprocess(Process):
         sending_pipe = kwargs.get("pipe")
         receiving_queue = kwargs.get("queue")
         pause_event = kwargs.get("pause_event")
+        self.log_queue = kwargs.get("log_queue")
         self.construct_job(job_name, sending_pipe, receiving_queue, pause_event)
 
     def construct_job(
@@ -44,4 +45,8 @@ class Subprocess(Process):
         self._job_instance = job_instance
 
     def run(self):
+        queue_handler = QueueHandler(self.log_queue)
+        LOG.addHandler(queue_handler)
+        LOG.info("Running job")
         self._job_instance.run(self._job_parameters)
+        LOG.removeHandler(queue_handler)

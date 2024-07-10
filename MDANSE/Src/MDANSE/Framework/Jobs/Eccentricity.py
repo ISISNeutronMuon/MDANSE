@@ -106,6 +106,8 @@ class Eccentricity(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
+
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Will store the time.
@@ -301,3 +303,4 @@ class Eccentricity(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

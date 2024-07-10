@@ -13,14 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
 from functools import partial
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
-from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
+from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Views.PlotDetailsView import PlotDetailsView
 from MDANSE_GUI.Tabs.Visualisers.PlotHolder import PlotHolder
@@ -53,6 +52,7 @@ class PlotTab(GeneralTab):
 
     @classmethod
     def standard_instance(cls):
+        plt_settings = PlotSettings()
         the_tab = cls(
             window,
             name="Plotting",
@@ -60,7 +60,9 @@ class PlotTab(GeneralTab):
             model=PlottingContext(),
             view=PlotDetailsView(),
             visualiser=PlotHolder(),
-            layout=partial(TriplePanel, left_panel=PlotSettings()),
+            layout=partial(
+                MultiPanel, left_panels=[plt_settings], extra_visualiser=plt_settings
+            ),
             label_text=label_text,
         )
         return the_tab
@@ -75,6 +77,7 @@ class PlotTab(GeneralTab):
         logger,
         **kwargs,
     ):
+        plt_settings = PlotSettings(session=session)
         the_tab = cls(
             parent,
             name=name,
@@ -83,8 +86,10 @@ class PlotTab(GeneralTab):
             logger=logger,
             model=None,
             view=PlotDetailsView(),
-            visualiser=PlotHolder(),
-            layout=partial(TriplePanel, left_panel=PlotSettings()),
+            visualiser=PlotHolder(session=session),
+            layout=partial(
+                MultiPanel, left_panels=[plt_settings], extra_visualiser=plt_settings
+            ),
             label_text=label_text,
         )
         the_tab._visualiser._unit_lookup = the_tab

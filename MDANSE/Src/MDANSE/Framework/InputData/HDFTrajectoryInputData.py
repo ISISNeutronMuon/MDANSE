@@ -13,12 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import json
 
 from MDANSE.Framework.InputData.IInputData import InputDataError
 from MDANSE.Framework.InputData.InputFileData import InputFileData
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MLogging import LOG
 
 
 json_decoder = json.decoder.JSONDecoder()
@@ -101,7 +101,7 @@ class HDFTrajectoryInputData(InputFileData):
             try:
                 string = obj[:][0].decode()
             except:
-                print(f"Decode failed for {name}: {obj}")
+                LOG.warning(f"Decode failed for {name}: {obj}")
             else:
                 try:
                     meta_dict[name] = json_decoder.decode(string)

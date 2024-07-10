@@ -75,6 +75,7 @@ class GeneralAutoCorrelationFunction(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
@@ -179,3 +180,4 @@ class GeneralAutoCorrelationFunction(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

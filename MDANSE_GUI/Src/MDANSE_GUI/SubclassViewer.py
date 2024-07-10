@@ -23,7 +23,7 @@ MDANSE IJob interface.
 """
 
 
-from qtpy.QtCore import QObject, Slot, Signal, QSortFilterProxyModel, QModelIndex
+from qtpy.QtCore import Slot, QSortFilterProxyModel, QModelIndex
 from qtpy.QtWidgets import (
     QDialog,
     QTreeView,
@@ -33,8 +33,6 @@ from qtpy.QtWidgets import (
     QLineEdit,
     QTextEdit,
 )
-
-from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 
 # we check what attributes always exist in a Python object.
 # we will not include those in the tree view, since they

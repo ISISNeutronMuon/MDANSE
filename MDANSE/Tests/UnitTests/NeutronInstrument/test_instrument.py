@@ -1,7 +1,3 @@
-import pytest
-from icecream import ic
-import numpy as np
-
 from MDANSE.NeutronInstruments.NeutronInstrument import NeutronInstrument
 from MDANSE.NeutronInstruments.IdealInstrument import IdealInstrument
 

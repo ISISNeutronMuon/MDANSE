@@ -30,9 +30,7 @@ from qtpy.QtWidgets import (
 
 from MDANSE.Framework.AtomMapping import guess_element
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Framework.Configurators.FileWithAtomDataConfigurator import (
-    FileWithAtomDataConfigurator,
-)
+
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.InputWidgets.InputFileWidget import InputFileWidget
 

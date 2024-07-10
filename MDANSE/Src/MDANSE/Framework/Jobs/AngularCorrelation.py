@@ -82,6 +82,7 @@ class AngularCorrelation(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         ce_list = self.configuration["trajectory"][
             "instance"
@@ -216,3 +217,4 @@ class AngularCorrelation(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()
