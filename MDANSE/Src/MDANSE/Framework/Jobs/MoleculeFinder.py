@@ -65,7 +65,7 @@ class MoleculeFinder(IJob):
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {"format": "MDTFormat"},
     )
@@ -74,11 +74,7 @@ class MoleculeFinder(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
-        if self.configuration["output_file"]["write_logs"]:
-            log_filename = self.configuration["output_file"]["root"] + ".log"
-            self.add_log_file_handler(
-                log_filename, self.configuration["output_file"]["log_level"]
-            )
+        super().initialize()
 
         self.numberOfSteps = self.configuration["frames"]["number"]
         self._input_trajectory = self.configuration["trajectory"]["instance"]
@@ -102,11 +98,11 @@ class MoleculeFinder(IJob):
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
     def run_step(self, index):

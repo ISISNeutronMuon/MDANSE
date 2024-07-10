@@ -72,7 +72,7 @@ class AverageStructure(IJob):
             "default": "Angstrom",
         },
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputStructureConfigurator",
         {"format": "vasp"},
     )
@@ -81,11 +81,7 @@ class AverageStructure(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
-        if self.configuration["output_file"]["write_logs"]:
-            log_filename = self.configuration["output_file"]["root"] + ".log"
-            self.add_log_file_handler(
-                log_filename, self.configuration["output_file"]["log_level"]
-            )
+        super().initialize()
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
@@ -168,8 +164,8 @@ class AverageStructure(IJob):
             self._ase_atoms.set_scaled_positions(temp - correction)
 
         ase_write(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             self._ase_atoms,
-            self.configuration["output_file"]["format"],
+            self.configuration["output_files"]["format"],
         )
         super().finalize()

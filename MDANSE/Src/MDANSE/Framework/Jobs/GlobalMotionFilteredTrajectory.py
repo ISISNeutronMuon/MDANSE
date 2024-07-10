@@ -73,7 +73,7 @@ class GlobalMotionFilteredTrajectory(IJob):
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {"format": "MDTFormat"},
     )
@@ -82,11 +82,7 @@ class GlobalMotionFilteredTrajectory(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
-        if self.configuration["output_file"]["write_logs"]:
-            log_filename = self.configuration["output_file"]["root"] + ".log"
-            self.add_log_file_handler(
-                log_filename, self.configuration["output_file"]["log_level"]
-            )
+        super().initialize()
 
         self.numberOfSteps = self.configuration["frames"]["number"]
 
@@ -107,12 +103,12 @@ class GlobalMotionFilteredTrajectory(IJob):
         self._reference_atoms = AtomGroup(self._reference_atoms)
 
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selected_atoms.atom_list,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
         # This will store the configuration used as the reference for the following step.
@@ -208,7 +204,7 @@ class GlobalMotionFilteredTrajectory(IJob):
         # The output trajectory is closed.
         self._output_trajectory.close()
 
-        outputFile = h5py.File(self.configuration["output_file"]["file"], "r+")
+        outputFile = h5py.File(self.configuration["output_files"]["file"], "r+")
 
         outputFile.create_dataset("rms", data=self._rms, dtype=np.float64)
 

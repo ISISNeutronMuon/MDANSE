@@ -80,15 +80,11 @@ class RigidBodyTrajectory(IJob):
     )
     settings["reference"] = ("IntegerConfigurator", {"mini": 0})
     settings["remove_translation"] = ("BooleanConfigurator", {"default": False})
-    settings["output_file"] = ("OutputTrajectoryConfigurator", {"format": "MDTFormat"})
+    settings["output_files"] = ("OutputTrajectoryConfigurator", {"format": "MDTFormat"})
 
     def initialize(self):
         """ """
-        if self.configuration["output_file"]["write_logs"]:
-            log_filename = self.configuration["output_file"]["root"] + ".log"
-            self.add_log_file_handler(
-                log_filename, self.configuration["output_file"]["log_level"]
-            )
+        super().initialize()
 
         if (
             self.configuration["reference"]["value"]
@@ -152,12 +148,12 @@ class RigidBodyTrajectory(IJob):
 
         # Create trajectory
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             trajectory.chemical_system,
             self.configuration["frames"]["number"],
             selectedAtoms,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
         self._group_atoms = [group.atom_list for group in self._groups]
@@ -243,7 +239,7 @@ class RigidBodyTrajectory(IJob):
                 time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
             )
 
-        outputFile = h5py.File(self.configuration["output_file"]["file"], "r+")
+        outputFile = h5py.File(self.configuration["output_files"]["file"], "r+")
 
         n_groups = self.configuration["atom_selection"]["selection_length"]
         n_frames = self.configuration["frames"]["number"]

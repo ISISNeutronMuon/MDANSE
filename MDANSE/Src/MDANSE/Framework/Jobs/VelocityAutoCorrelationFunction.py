@@ -102,11 +102,7 @@ class VelocityAutoCorrelationFunction(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
-        if self.configuration["output_files"]["write_logs"]:
-            log_filename = self.configuration["output_files"]["root"] + ".log"
-            self.add_log_file_handler(
-                log_filename, self.configuration["output_files"]["log_level"]
-            )
+        super().initialize()
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 

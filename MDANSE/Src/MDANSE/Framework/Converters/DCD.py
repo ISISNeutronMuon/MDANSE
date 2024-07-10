@@ -300,7 +300,7 @@ class DCD(Converter):
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
@@ -313,11 +313,7 @@ class DCD(Converter):
         """
         Initialize the input parameters and analysis self variables
         """
-        if self.configuration["output_file"]["write_logs"]:
-            log_filename = self.configuration["output_file"]["root"] + ".log"
-            self.add_log_file_handler(
-                log_filename, self.configuration["output_file"]["log_level"]
-            )
+        super().initialize()
 
         self.configuration["dcd_file"]["instance"] = DCDFile(
             self.configuration["dcd_file"]["filename"]
@@ -334,11 +330,11 @@ class DCD(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             self._chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
     def run_step(self, index):

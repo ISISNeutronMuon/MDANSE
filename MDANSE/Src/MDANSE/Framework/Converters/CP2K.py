@@ -146,7 +146,7 @@ class CP2K(Converter):
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates into box"},
     )
-    settings["output_file"] = (
+    settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
@@ -160,11 +160,7 @@ class CP2K(Converter):
         Initialize the job.
         Opens the input files and checks them for consistency.
         """
-        if self.configuration["output_file"]["write_logs"]:
-            log_filename = self.configuration["output_file"]["root"] + ".log"
-            self.add_log_file_handler(
-                log_filename, self.configuration["output_file"]["log_level"]
-            )
+        super().initialize()
 
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
         self._xyzFile = self.configuration["pos_file"]
@@ -206,11 +202,11 @@ class CP2K(Converter):
             )
 
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_file"]["file"],
+            self.configuration["output_files"]["file"],
             self._chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_file"]["dtype"],
-            compression=self.configuration["output_file"]["compression"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
         data_to_be_written = ["configuration", "time"]

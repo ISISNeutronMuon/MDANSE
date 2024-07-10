@@ -154,9 +154,15 @@ class IJob(Configurable, metaclass=SubclassFactory):
         if self._log_filename is not None:
             self.remove_log_file_handler()
 
-    @abc.abstractmethod
     def initialize(self):
-        pass
+        if (
+            "output_files" in self.configuration
+            and self.configuration["output_files"]["write_logs"]
+        ):
+            log_filename = self.configuration["output_files"]["root"] + ".log"
+            self.add_log_file_handler(
+                log_filename, self.configuration["output_files"]["log_level"]
+            )
 
     @abc.abstractmethod
     def run_step(self, index):
