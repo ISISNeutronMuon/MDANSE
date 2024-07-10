@@ -130,8 +130,8 @@ to process using your own software.
 Access DCSF Analysis in MDANSE
 -------------------------------
 
-1. Navigate to the "Analysis" section within the MDANSE interface.
-2. Select "Dynamic Coherent Structure Factor" to access the DCSF analysis.
+#. Navigate to the "Analysis" section within the MDANSE interface.
+#. Select "Dynamic Coherent Structure Factor" to access the DCSF analysis.
 
 Analysis of the Total DCSF Plot
 -------------------------------

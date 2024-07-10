@@ -409,6 +409,8 @@ design of therapeutic compounds.
 Virtual Instruments
 ^^^^^^^^^^^^^^^^^^^
 
+^^^^^^^^^^^^^^^^^^^
+
 .. _mcstas-virtual-instrument:
 
 McStas Virtual Instrument
