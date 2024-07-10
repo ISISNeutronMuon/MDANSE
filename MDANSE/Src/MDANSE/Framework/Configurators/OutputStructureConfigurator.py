@@ -34,6 +34,7 @@ class OutputStructureConfigurator(IConfigurator):
     for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
+    log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
     _default = ("OUTPUT_FILENAME", "vasp")
     _label = "Output filename and format (filename, format)"
 
@@ -82,7 +83,11 @@ class OutputStructureConfigurator(IConfigurator):
         self["root"] = root
         self["format"] = format
         self["file"] = root
-        self["write_logs"] = logs
+        self["log_level"] = logs
+        if logs == "no logs":
+            self["write_logs"] = False
+        else:
+            self["write_logs"] = True
         self["value"] = self["file"]
         self.error_status = "OK"
 

@@ -18,17 +18,20 @@ import itertools
 import os
 import os.path
 
-from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog
-from qtpy.QtCore import Slot
+from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog, QLabel
+from qtpy.QtCore import Slot, Qt
 
 from MDANSE.MLogging import LOG
+from MDANSE.Framework.Configurators.OutputStructureConfigurator import (
+    OutputStructureConfigurator,
+)
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class OutputStructureWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, layout_type="QGridLayout", **kwargs)
         default_value = self._configurator.default
         try:
             parent = kwargs.get("parent", None)
@@ -50,9 +53,15 @@ class OutputStructureWidget(WidgetBase):
         self.format_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)
-        self._layout.addWidget(self._field)
-        self._layout.addWidget(self.format_box)
-        self._layout.addWidget(browse_button)
+        label = QLabel("Log file output:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.logs_combo = QComboBox(self._base)
+        self.logs_combo.addItems(OutputStructureConfigurator.log_options)
+        self._layout.addWidget(self._field, 0, 0)
+        self._layout.addWidget(self.format_box, 0, 1)
+        self._layout.addWidget(browse_button, 0, 2)
+        self._layout.addWidget(label, 1, 0)
+        self._layout.addWidget(self.logs_combo, 1, 1)
         self._default_value = default_value
         self._field.textChanged.connect(self.updateValue)
         self.default_labels()
@@ -125,4 +134,5 @@ class OutputStructureWidget(WidgetBase):
         if len(filename) < 1:
             filename = self._default_value[0]
         format = self.format_box.currentText()
-        return (filename, format)
+        log_level = self.logs_combo.currentText()
+        return (filename, format, log_level)

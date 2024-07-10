@@ -21,6 +21,7 @@ from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Signal, QTimer, QThread, QMutex, Qt
 
 from MDANSE.MLogging import FMT, LOG
+from MDANSE.Framework.Converters import Converter
 
 from MDANSE_GUI.Subprocess.Subprocess import Subprocess, Connection
 from MDANSE_GUI.Subprocess.JobState import (
@@ -146,9 +147,11 @@ class JobEntry(Handler, QObject):
         if success:
             self._current_state.finish()
             if self._load_afterwards:
-                if "output_file" in self._parameters:  # job is a converter
-                    self.for_loading.emit(self._parameters["output_file"][0] + ".mdt")
-                if "output_files" in self._parameters:  # job is an analysis
+                try:
+                    len(self._parameters["output_files"][1])
+                except TypeError:  # job is a converter
+                    self.for_loading.emit(self._parameters["output_files"][0] + ".mdt")
+                else:  # job is an analysis
                     if "MDAFormat" in self._parameters["output_files"][1]:
                         self.for_loading.emit(
                             self._parameters["output_files"][0] + ".mda"
@@ -276,9 +279,9 @@ class JobHolder(QStandardItemModel):
         )
         item_th.parameters = job_vars[1]
         if load_afterwards:
-            if "output_file" in job_vars[1]:
+            if job_vars[0] in Converter.subclasses():
                 item_th.for_loading.connect(self.trajectory_for_loading)
-            elif "output_files" in job_vars[1]:
+            else:
                 item_th.for_loading.connect(self.results_for_loading)
         communicator.target.connect(item_th.on_started)  # int
         communicator.progress.connect(item_th.on_update)  # int
