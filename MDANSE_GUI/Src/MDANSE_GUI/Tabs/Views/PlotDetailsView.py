@@ -38,9 +38,10 @@ class ColourPicker(QItemDelegate):
         editor.setCurrentColor(color)
 
     def setModelData(self, editor, model, index):
-        color = editor.currentColor()
-        colour_string = color.toRgb()
-        model.setData(index, colour_string)
+        if editor.result() == QColorDialog.DialogCode.Accepted:
+            color = editor.currentColor()
+            colour_string = color.toRgb()
+            model.setData(index, colour_string)
 
 
 class MplStyleCombo(QItemDelegate):
