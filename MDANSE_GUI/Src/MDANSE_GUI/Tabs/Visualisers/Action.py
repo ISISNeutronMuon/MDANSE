@@ -293,7 +293,7 @@ class Action(QWidget):
         result, ftype = QFileDialog.getSaveFileName(
             self, "Save job as a Python script", currentpath, "Python script (*.py)"
         )
-        if result is None:
+        if result == "":
             return None
         path, _ = os.path.split(result)
         try:
