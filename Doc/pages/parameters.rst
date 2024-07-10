@@ -145,9 +145,7 @@ from selection by clicking on it in the 'Selected atoms' list and
 hitting the Delete key on the keyboard.
 
 Axis selection is available for :ref:`analysis-angular-correlation`
-and :ref:`analysis-op` analyses, which both require 2 atoms to
-be selected, and the `Spatial Density <#_Spatial_Density>`__ analysis,
-which requires 3 atoms.
+and :ref:`analysis-op` analyses.
 
 
 
@@ -193,8 +191,7 @@ Atom selection is available for all the analyses for which
 Trace <#_Molecular_Trace>`__, `Root Mean Square
 Fluctuation, <#_Root_Mean_Square_1>`__ `Radius of
 Gyration <#_Radius_Of_Gyration>`__, `Solvent Accessible
-Surface <#_Solvent_Accessible_Surface>`__, and `Spatial
-Density <#_Spatial_Density>`__.
+Surface <#_Solvent_Accessible_Surface>`__.
 
 .. _param-atom-transmutation:
 
@@ -774,7 +771,6 @@ Function <#_Pair_Distribution_Function>`__, `Radius of
 Gyration <#_Radius_Of_Gyration>`__, `Rigid Body
 Trajectory <#_Rigid_Body_Trajectory>`__, `Root Mean Square
 Deviation <#_Root_Mean_Square>`__, `Root Mean Square
-Fluctuation <#_Root_Mean_Square_1>`__, `Spatial
-Density <#_Spatial_Density>`__, `Static Structure
+Fluctuation <#_Root_Mean_Square_1>`__, `Static Structure
 Factor <#_Static_Structure_Factor>`__, `Voronoi <#_Voronoi>`__, `X-Ray
 Static Structure Factor <#_Xray_Static_Structure>`__.
