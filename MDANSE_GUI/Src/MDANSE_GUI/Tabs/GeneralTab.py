@@ -91,7 +91,7 @@ class GeneralTab(QObject):
         ]
         group2 = [
             "units",  # name of the group of settings
-            {"energy": "", "time": "", "distance": "", "reciprocal": ""},
+            {"energy": "meV", "time": "fs", "distance": "ang", "reciprocal": "1/ang"},
             {
                 "energy": "The unit of energy preferred by the user.",
                 "time": "The unit of time preferred by the user.",
