@@ -259,6 +259,7 @@ class TabbedWindow(QMainWindow):
         )
         self.tabs.addTab(trajectory_tab._core, name)
         self._tabs[name] = trajectory_tab
+        self._job_holder.trajectory_for_loading.connect(trajectory_tab.load_trajectory)
 
     def createJobsViewer(self):
         name = "Running Jobs"
@@ -307,6 +308,7 @@ class TabbedWindow(QMainWindow):
         )
         self.tabs.addTab(plot_tab._core, name)
         self._tabs[name] = plot_tab
+        self._job_holder.results_for_loading.connect(plot_tab.load_results)
 
     def createPlotHolder(self):
         name = "Plot Holder"

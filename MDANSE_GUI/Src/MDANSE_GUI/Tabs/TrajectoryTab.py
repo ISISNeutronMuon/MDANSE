@@ -63,7 +63,7 @@ class TrajectoryTab(GeneralTab):
             self.set_path("trajectory", last_path)
             self._session.save()
 
-    @Slot()
+    @Slot(str)
     def load_trajectory(self, fname: str):
         if len(fname) > 0:
             _, short_name = os.path.split(fname)

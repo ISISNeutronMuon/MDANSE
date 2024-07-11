@@ -60,7 +60,7 @@ class PlotSelectionTab(GeneralTab):
             last_path, _ = os.path.split(fname)
         self.set_path("plot_selection", last_path)
 
-    @Slot()
+    @Slot(str)
     def load_results(self, fname: str):
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
