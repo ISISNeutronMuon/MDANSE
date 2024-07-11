@@ -338,7 +338,7 @@ smaller surface features and intricacies.
 
 **Probe Radius**: Measured in nanometers, the probe radius is a crucial
 parameter influencing the precision of the calculation. Smaller probe
-radii provide a more detailed and comprehensive assessment of the
+radii provide a more detailed and  assessment of the
 molecular surface area, often resulting in a larger reported surface
 area due to increased sensitivity to surface features.
 
@@ -356,7 +356,7 @@ insights into the ordered arrangements of particles within a material.
 This analysis serves as a valuable tool, especially in trajectory-based
 simulations, for assessing the ordered structures of particles in a material.
 It provides the flexibility to control both distance and :math:`q`-value ranges,
-facilitating a comprehensive exploration of the material's structural
+facilitating a  exploration of the material's structural
 properties.
 
 
