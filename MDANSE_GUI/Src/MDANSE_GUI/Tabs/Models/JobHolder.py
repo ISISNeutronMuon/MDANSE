@@ -245,7 +245,10 @@ class JobHolder(QStandardItemModel):
         entry_number = self.next_number
 
         item_th = JobEntry(
-            command=job_vars[0], entry_number=entry_number, pause_event=pause_event
+            command=job_vars[0],
+            entry_number=entry_number,
+            pause_event=pause_event,
+            load_afterwards=load_afterwards,
         )
         item_th.setFormatter(FMT)
         item_th.setLevel("INFO")
@@ -271,12 +274,6 @@ class JobHolder(QStandardItemModel):
         watcher_thread = JobThread(communicator, main_pipe, subprocess_ref)
         communicator.moveToThread(watcher_thread)
         entry_number = self.next_number
-        item_th = JobEntry(
-            command=job_vars[0],
-            entry_number=entry_number,
-            pause_event=pause_event,
-            load_afterwards=load_afterwards,
-        )
         item_th.parameters = job_vars[1]
         if load_afterwards:
             if job_vars[0] in Converter.subclasses():
