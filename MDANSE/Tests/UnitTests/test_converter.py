@@ -47,7 +47,7 @@ def test_lammps_mdt_conversion_file_exists_and_loads_up_successfully(compression
     parameters["config_file"] = lammps_config
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, 64, compression)
+    parameters["output_files"] = (temp_name, 64, compression, "INFO")
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = lammps_lammps
@@ -60,6 +60,9 @@ def test_lammps_mdt_conversion_file_exists_and_loads_up_successfully(compression
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize(
@@ -72,7 +75,7 @@ def test_lammps_mdt_conversion_unit_system(unit_system):
     parameters["config_file"] = lammps_config
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, 64, "gzip")
+    parameters["output_files"] = (temp_name, 64, "gzip", "INFO")
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = lammps_lammps
@@ -86,6 +89,9 @@ def test_lammps_mdt_conversion_unit_system(unit_system):
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize(
@@ -99,7 +105,7 @@ def test_lammps_mdt_conversion_trajectory_format(trajectory_file, trajectory_for
     parameters["config_file"] = lammps_moly
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, 64, "gzip")
+    parameters["output_files"] = (temp_name, 64, "gzip", "INFO")
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = trajectory_file
@@ -114,6 +120,9 @@ def test_lammps_mdt_conversion_trajectory_format(trajectory_file, trajectory_for
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_lammps_mdt_conversion_raise_exception_with_incorrect_format():
@@ -123,7 +132,7 @@ def test_lammps_mdt_conversion_raise_exception_with_incorrect_format():
     parameters["config_file"] = lammps_config
     parameters["mass_tolerance"] = 0.05
     parameters["n_steps"] = 0
-    parameters["output_file"] = (temp_name, ["IncorrectFormat"])
+    parameters["output_files"] = (temp_name, ["IncorrectFormat"], "INFO")
     parameters["smart_mass_association"] = True
     parameters["time_step"] = 1.0
     parameters["trajectory_file"] = lammps_lammps
@@ -139,7 +148,7 @@ def test_vasp_mdt_conversion_file_exists_and_loads_up_successfully(compression):
 
     parameters = {
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
         "time_step": 1.0,
         "xdatcar_file": vasp_xdatcar,
     }
@@ -151,6 +160,9 @@ def test_vasp_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -160,7 +172,7 @@ def test_discover_mdt_conversion_file_exists_and_loads_up_successfully(compressi
     parameters = {
         "fold": True,
         "his_file": discover_his,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
         "xtd_file": discover_xtd,
     }
 
@@ -172,6 +184,9 @@ def test_discover_mdt_conversion_file_exists_and_loads_up_successfully(compressi
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("velocity", [cp2k_vel, None])
@@ -182,7 +197,7 @@ def test_cp2k_mdt_conversion_file_exists_and_loads_up_successfully(velocity):
         "pos_file": cp2k_pos,
         "cell_file": cp2k_cell,
         "vel_file": velocity,
-        "output_file": (temp_name, 64, "gzip"),
+        "output_files": (temp_name, 64, "gzip", "INFO"),
     }
 
     vasp = Converter.create("cp2k")
@@ -193,6 +208,9 @@ def test_cp2k_mdt_conversion_file_exists_and_loads_up_successfully(velocity):
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -202,7 +220,7 @@ def test_charmm_mdt_conversion_file_exists_and_loads_up_successfully(compression
     parameters = {
         "dcd_file": hem_cam_dcd,
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
         "pdb_file": hem_cam_pdb,
         "time_step": 1.0,
     }
@@ -215,6 +233,9 @@ def test_charmm_mdt_conversion_file_exists_and_loads_up_successfully(compression
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -224,7 +245,7 @@ def test_ase_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     parameters = {
         "trajectory_file": ase_traj,
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
         "n_steps": 0,
         "time_step": 50.0,
         "time_unit": "fs",
@@ -238,6 +259,9 @@ def test_ase_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("trajectory", [ase_traj, xyz_traj, vasp_xdatcar])
@@ -247,7 +271,7 @@ def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(trajec
     parameters = {
         "trajectory_file": trajectory,
         "fold": False,
-        "output_file": (temp_name, 64, "gzip"),
+        "output_files": (temp_name, 64, "gzip", "INFO"),
         "n_steps": 0,
         "time_step": 50.0,
         "time_unit": "fs",
@@ -261,6 +285,9 @@ def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(trajec
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_improvedase_lammps_two_files():
@@ -270,7 +297,7 @@ def test_improvedase_lammps_two_files():
         "trajectory_file": (lammps_lammps, "lammps-dump-text"),
         "configuration_file": (lammps_config, "lammps-data"),
         "fold": False,
-        "output_file": (temp_name, 64, "gzip"),
+        "output_files": (temp_name, 64, "gzip", "INFO"),
         "n_steps": 0,
         "elements_from_mass": True,
         "time_step": 50.0,
@@ -285,6 +312,9 @@ def test_improvedase_lammps_two_files():
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -294,7 +324,7 @@ def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     parameters = {
         "trajectory_file": xyz_traj,
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
         "n_steps": 0,
         "time_step": 50.0,
         "time_unit": "fs",
@@ -308,6 +338,9 @@ def test_xyz_mdt_conversion_file_exists_and_loads_up_successfully(compression):
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -321,7 +354,7 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
         "field_file": dlp_field_v2,
         "fold": False,
         "history_file": dlp_history_v2,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
     }
     dl_poly = Converter.create("DL_POLY")
     dl_poly.run(parameters, status=True)
@@ -331,6 +364,9 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -344,7 +380,7 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
         "field_file": dlp_field_v4,
         "fold": False,
         "history_file": dlp_history_v4,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
     }
     dl_poly = Converter.create("DL_POLY")
     dl_poly.run(parameters, status=True)
@@ -354,6 +390,9 @@ def test_dlp_mdt_conversion_file_exists_and_loads_up_successfully_with_dlp_versi
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -365,7 +404,7 @@ def test_namd_mdt_conversion_file_exists_and_loads_up_successfully_and_chemical_
     parameters = {
         "dcd_file": apoferritin_dcd,
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
         "pdb_file": apoferritin_pdb,
         "time_step": "1.0",
     }
@@ -390,7 +429,7 @@ def test_castep_md_conversion_file_exists_and_loads_up_successfully(compression)
         "atom_aliases": "{}",
         "castep_file": pbanew_md,
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
     }
 
     castep = Converter.create("CASTEP")
@@ -401,6 +440,9 @@ def test_castep_md_conversion_file_exists_and_loads_up_successfully(compression)
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -410,7 +452,7 @@ def test_dftb_conversion_file_exists_and_loads_up_successfully(compression):
     parameters = {
         "atom_aliases": "{}",
         "fold": True,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
         "trj_file": h2o_trj,
         "xtd_file": h2o_xtd,
     }
@@ -423,6 +465,9 @@ def test_dftb_conversion_file_exists_and_loads_up_successfully(compression):
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -432,7 +477,7 @@ def test_forcite_conversion_file_exists_and_loads_up_successfully(compression):
     parameters = {
         "atom_aliases": "{}",
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
         "trj_file": h2o_trj,
         "xtd_file": h2o_xtd,
     }
@@ -445,6 +490,9 @@ def test_forcite_conversion_file_exists_and_loads_up_successfully(compression):
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
@@ -453,7 +501,7 @@ def test_gromacs_conversion_file_exists_and_loads_up_successfully(compression):
 
     parameters = {
         "fold": False,
-        "output_file": (temp_name, 64, compression),
+        "output_files": (temp_name, 64, compression, "INFO"),
         "pdb_file": md_pdb,
         "xtc_file": md_xtc,
     }
@@ -466,3 +514,6 @@ def test_gromacs_conversion_file_exists_and_loads_up_successfully(compression):
     assert os.path.exists(temp_name + ".mdt")
     assert os.path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert os.path.exists(temp_name + ".log")
+    assert os.path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

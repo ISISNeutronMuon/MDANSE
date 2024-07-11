@@ -20,7 +20,7 @@ from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget, QFileDialog
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
-from MDANSE_GUI.Tabs.Layouts.TriplePanel import TriplePanel
+from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Models.PlotDataModel import PlotDataModel
 from MDANSE_GUI.Tabs.Views.PlotDataView import PlotDataView
@@ -67,7 +67,7 @@ class PlotSelectionTab(GeneralTab):
             model=PlotDataModel(),
             view=PlotDataView(),
             visualiser=DataPlotter(),
-            layout=partial(TriplePanel, left_panel=PlotDataInfo()),
+            layout=partial(MultiPanel, left_panels=[PlotDataInfo()]),
             label_text=label_text,
         )
         return the_tab
@@ -91,7 +91,7 @@ class PlotSelectionTab(GeneralTab):
             model=kwargs.get("model", PlotDataModel()),
             view=PlotDataView(),
             visualiser=DataPlotter(),
-            layout=partial(TriplePanel, left_panel=PlotDataInfo()),
+            layout=partial(MultiPanel, left_panels=[PlotDataInfo()]),
             label_text=label_text,
         )
         return the_tab

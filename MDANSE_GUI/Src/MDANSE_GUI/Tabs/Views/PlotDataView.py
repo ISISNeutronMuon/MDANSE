@@ -15,14 +15,12 @@
 #
 from typing import Union
 
-from icecream import ic
 from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication, QMenu
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
 from qtpy.QtGui import QMouseEvent, QDrag, QContextMenuEvent, QStandardItem
 
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
-from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem
 
 
 class PlotDataView(QTreeView):

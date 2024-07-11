@@ -16,16 +16,24 @@
 from .DoublePanel import DoublePanel
 
 
-class TriplePanel(DoublePanel):
-    """The triple panel layout which adds an extra visualiser panel to
-    the left side of the layout"""
+class MultiPanel(DoublePanel):
+    """The multi-panel layout which adds an extra visualiser panels to
+    the left or right side of the layout"""
 
     def __init__(self, *args, **kwargs):
-        left_panel = kwargs.pop("left_panel", None)
+        left_panels = kwargs.pop("left_panels", [])
+        right_panels = kwargs.pop("right_panels", [])
+        extra_visualiser = kwargs.pop("extra_visualiser", None)
         super().__init__(*args, **kwargs)
 
-        if left_panel is not None:
+        for left_panel in left_panels:
             self._leftlayout.addWidget(left_panel)
             if self._view is not None:
                 self._view.connect_to_visualiser(left_panel)
-            self._extra_visualiser = left_panel
+
+        for right_panel in right_panels:
+            self._rightlayout.addWidget(right_panel)
+            if self._view is not None:
+                self._view.connect_to_visualiser(right_panel)
+
+        self._extra_visualiser = extra_visualiser

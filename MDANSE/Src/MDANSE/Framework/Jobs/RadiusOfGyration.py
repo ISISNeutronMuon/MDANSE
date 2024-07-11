@@ -60,6 +60,8 @@ class RadiusOfGyration(IJob):
         """
         Computes the pair distribution function for a set of atoms.
         """
+        super().initialize()
+
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Will store the time.
@@ -139,3 +141,4 @@ class RadiusOfGyration(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

@@ -13,9 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from icecream import ic
-from qtpy.QtCore import QObject, Slot, Signal, QProcess, QThread, QMutex
+from qtpy.QtCore import QObject, Signal, QMutex
 
 from MDANSE.Framework.Status import Status
 
@@ -41,11 +39,9 @@ class JobStatusQt(Status):
         return self._state
 
     def finish_status(self):
-        ic()
         self._communicator.finished.emit(True)
 
     def start_status(self):
-        ic()
         try:
             temp = int(self._nSteps)
         except:
@@ -54,7 +50,6 @@ class JobStatusQt(Status):
             self._communicator.target.emit(temp)
 
     def stop_status(self):
-        ic()
         self._communicator.finished.emit(False)
 
     def update_status(self):

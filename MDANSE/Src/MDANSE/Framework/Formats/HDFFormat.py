@@ -20,6 +20,7 @@ from importlib import metadata
 import h5py
 
 from MDANSE.Framework.Formats.IFormat import IFormat
+from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
@@ -96,7 +97,7 @@ class HDFFormat(IFormat):
             inputs = run_instance.output_configuration()
 
             if inputs is not None:
-                print(inputs)
+                LOG.info(inputs)
                 dgroup = meta.create_group("inputs")
                 for key, value in inputs.items():
                     dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)

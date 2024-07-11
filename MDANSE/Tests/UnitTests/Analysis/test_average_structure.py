@@ -3,15 +3,12 @@ import tempfile
 import os
 from os import path
 import pytest
-from icecream import ic
-import numpy as np
-import h5py
+
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
 sys.setrecursionlimit(100000)
-ic.disable()
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
@@ -39,7 +36,7 @@ def test_temperature(trajectory, output_unit, output_format):
     parameters["frames"] = (0, 10, 1)
     parameters["output_units"] = output_unit
     parameters["fold"] = True
-    parameters["output_file"] = (temp_name, output_format)
+    parameters["output_files"] = (temp_name, output_format, False)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     temp = IJob.create("AverageStructure")

@@ -37,39 +37,6 @@ molecular vibrations and infrared spectra using dipole auto-correlation.
    - Infrared Spectra Plot: Illustrates the infrared spectra obtained from the
      analysis, showing the vibrational modes of the system.
 
-Macromolecules: Refolded Membrane Trajectory
---------------------------------------------
-
-**Purpose**
-The Macromolecules: Refolded Membrane Trajectory analysis focuses on the
-manipulation and examination of membrane structures.
-
-#. **Load Trajectory Data:**
-   - Click on the "File" menu.
-   - Select "Load Trajectory Data" and choose your trajectory file.
-
-#. **Access the "Refolded Membrane Trajectory" Analysis:**
-   - In the MDANSE interface, navigate to the "Analysis" section.
-   - Expand the "Macromolecules" subsection.
-   - Select "Refolded Membrane Trajectory" from the available plugins.
-
-#. **Configure Settings:**
-   - **Membrane Axis:** Choose the axis for membrane manipulation.
-   - **Name of the Lipid (Upper Leaflet):** Specify the lipid name in the upper
-     leaflet.
-   - **Name of the Lipid (Lower Leaflet):** Specify the lipid name in the lower
-     leaflet.
-   - **Output Files:** Configure output file settings as needed.
-
-#. **Run the Calculation:**
-   - Click on the "Run" button.
-
-#. **Review Results:**
-   - Examine the modified membrane trajectory.
-
-#. **Recommended Plot:**
-   - Membrane Structure Plot: Visualizes the modified membrane structure,
-     showing the changes resulting from the analysis.
 
 Thermodynamics: Density
 -----------------------

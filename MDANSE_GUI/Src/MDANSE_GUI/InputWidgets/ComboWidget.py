@@ -13,9 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from qtpy.QtWidgets import QComboBox
-from qtpy.QtCore import Slot
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

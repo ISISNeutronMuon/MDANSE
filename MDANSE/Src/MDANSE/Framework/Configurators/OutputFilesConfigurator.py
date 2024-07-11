@@ -15,13 +15,9 @@
 #
 
 import os
-import tempfile
 
 from MDANSE import PLATFORM
-from MDANSE.Framework.Configurators.IConfigurator import (
-    IConfigurator,
-    ConfiguratorError,
-)
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 
@@ -37,7 +33,8 @@ class OutputFilesConfigurator(IConfigurator):
     for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
-    _default = ("OUTPUT_FILENAME", ["HDFFormat"])
+    log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
+    _default = ("OUTPUT_FILENAME", ["HDFFormat"], "no logs")
     _label = "Output filename and formats (filename, [format, ...])"
 
     def __init__(self, name, formats=None, **kwargs):
@@ -66,7 +63,10 @@ class OutputFilesConfigurator(IConfigurator):
         """
         self._original_input = value
 
-        root, formats = value
+        root, formats, logs = value
+
+        if logs not in self.log_options:
+            self.error_status = "log level option not recognised"
 
         if not root:
             self.error_status = "empty root name for the output file."
@@ -100,6 +100,11 @@ class OutputFilesConfigurator(IConfigurator):
         self["files"] = ["%s%s" % (root, IFormat.create(f).extension) for f in formats]
 
         self["value"] = self["files"]
+        self["log_level"] = logs
+        if logs == "no logs":
+            self["write_logs"] = False
+        else:
+            self["write_logs"] = True
         self.error_status = "OK"
 
     @property

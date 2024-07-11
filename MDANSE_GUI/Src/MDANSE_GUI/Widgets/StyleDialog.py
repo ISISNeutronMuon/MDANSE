@@ -13,42 +13,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Union, Iterable, Optional
-from collections import OrderedDict
-import copy
+from typing import Optional
 
-from icecream import ic
 from qtpy.QtWidgets import (
     QDialog,
     QPushButton,
-    QFileDialog,
-    QGridLayout,
     QVBoxLayout,
-    QWidget,
-    QLabel,
-    QApplication,
     QComboBox,
-    QMenu,
-    QLineEdit,
-    QTableView,
-    QFormLayout,
-    QHBoxLayout,
-    QCheckBox,
     QTextEdit,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QPoint, QSize, QSortFilterProxyModel, QObject
-from qtpy.QtGui import (
-    QFont,
-    QEnterEvent,
-    QStandardItem,
-    QStandardItemModel,
-    QIntValidator,
-    QDoubleValidator,
-    QValidator,
-)
+from qtpy.QtCore import Signal, Slot, QObject
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE_GUI.Widgets.GeneralWidgets import InputFactory
 
 
 sample_styles = {

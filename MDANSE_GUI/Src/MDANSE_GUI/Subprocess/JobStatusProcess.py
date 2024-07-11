@@ -13,16 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import os
 from typing import Tuple
 from multiprocessing import Queue
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event
 
-from icecream import ic
 from qtpy.QtCore import QObject, Slot, Signal
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Status import Status
 
 
@@ -45,13 +44,13 @@ class JobCommunicator(QObject):
             else:
                 self.oscillate.emit()
         elif key == "COMMUNICATION":
-            print(f"Communication with the subprocess is now {value}")
+            LOG.info(f"Communication with the subprocess is now {value}")
             self.finished.emit(value)
             self.terminate_the_process()
 
     @Slot()
     def terminate_the_process(self):
-        print(f"JobCommunicator PID: {os.getpid()} started 'terminate_the_process")
+        LOG.info(f"JobCommunicator PID: {os.getpid()} started 'terminate_the_process")
         try:
             self._process.terminate()
         except:
@@ -84,12 +83,10 @@ class JobStatusProcess(Status):
         return self._state
 
     def finish_status(self):
-        ic()
         self._pipe.send(("FINISHED", True))
 
     def start_status(self):
-        ic()
-        print(f"JobStatusProcess PID: {os.getpid()} started 'start_status")
+        LOG.info(f"JobStatusProcess PID: {os.getpid()} started 'start_status")
         try:
             temp = int(self._nSteps)
         except:
@@ -99,7 +96,6 @@ class JobStatusProcess(Status):
         # self._updateStep = 1
 
     def stop_status(self):
-        ic()
         self._pipe.send(("FINISHED", False))
 
     def update_status(self):

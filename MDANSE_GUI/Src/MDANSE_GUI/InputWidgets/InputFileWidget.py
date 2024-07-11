@@ -13,11 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import os
 
 from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog
 from qtpy.QtCore import Slot
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
@@ -41,10 +42,10 @@ class InputFileWidget(WidgetBase):
                 self.default_path = parent.default_path
             except KeyError:
                 self.default_path = "."
-                print("KeyError in InputFileWidget - can't get default path.")
+                LOG.error("KeyError in InputFileWidget - can't get default path.")
             except AttributeError:
                 self.default_path = "."
-                print("AttributeError in InputFileWidget - can't get default path.")
+                LOG.error("AttributeError in InputFileWidget - can't get default path.")
         default_value = kwargs.get("default", "")
         if self._tooltip:
             tooltip_text = self._tooltip
@@ -83,10 +84,10 @@ class InputFileWidget(WidgetBase):
         try:
             self.default_path = self._session.get_path(self._job_name)
         except:
-            print(f"session.get_path failed for {self._job_name}")
+            LOG.error(f"session.get_path failed for {self._job_name}")
         new_value = self._file_dialog(
             self.parent(),  # the parent of the dialog
-            "Load a file",  # the label of the window
+            "Load file",  # the label of the window
             self.default_path,  # the initial search path
             self._qt_file_association,  # text string specifying the file name filter.
         )
@@ -97,7 +98,7 @@ class InputFileWidget(WidgetBase):
             try:
                 self._session.set_path(self._job_name, os.path.split(new_value[0])[0])
             except:
-                print(
+                LOG.error(
                     f"session.set_path failed for {self._job_name}, {os.path.split(new_value[0])[0]}"
                 )
 

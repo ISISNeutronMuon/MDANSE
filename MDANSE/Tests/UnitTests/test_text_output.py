@@ -3,15 +3,12 @@ import tempfile
 import os
 from os import path
 import pytest
-from icecream import ic
-import numpy as np
-import h5py
+
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
 sys.setrecursionlimit(100000)
-ic.disable()
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "Data",
@@ -30,7 +27,7 @@ def test_temperature(trajectory):
     parameters = {}
     parameters["frames"] = (0, 10, 1)
     parameters["interpolation_order"] = 3
-    parameters["output_files"] = (temp_name, ("TextFormat",))
+    parameters["output_files"] = (temp_name, ("TextFormat",), False)
     parameters["running_mode"] = ("single-core",)
     parameters["trajectory"] = short_traj
     temp = IJob.create("Temperature")

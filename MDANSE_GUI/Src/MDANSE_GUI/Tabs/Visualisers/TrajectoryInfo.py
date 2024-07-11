@@ -15,10 +15,8 @@
 #
 from collections import defaultdict
 
-from qtpy.QtCore import QObject, Slot, Signal
-from qtpy.QtWidgets import QPushButton, QTextBrowser, QWidget, QFileDialog
-
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from qtpy.QtCore import Slot, Signal
+from qtpy.QtWidgets import QTextBrowser
 
 
 class TrajectoryInfo(QTextBrowser):

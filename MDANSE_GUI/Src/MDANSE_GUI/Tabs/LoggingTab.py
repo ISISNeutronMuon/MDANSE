@@ -13,19 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-
-from qtpy.QtCore import QObject, Slot, Signal, QMessageLogger, qInstallMessageHandler
+from qtpy.QtCore import qInstallMessageHandler
 from qtpy.QtWidgets import QWidget
-
-from MDANSE.Framework.Jobs.IJob import IJob
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.SinglePanel import SinglePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
-from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
-from MDANSE_GUI.Tabs.Views.RunTable import RunTable
 
 
 log_tab_label = """MDANSE_GUI message log.

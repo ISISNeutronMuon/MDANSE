@@ -3,7 +3,7 @@ import tempfile
 import os
 from os import path
 import pytest
-from icecream import ic
+
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
@@ -12,7 +12,6 @@ from MDANSE.Framework.Jobs.IJob import IJob
 
 
 sys.setrecursionlimit(100000)
-ic.disable()
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
@@ -42,7 +41,7 @@ def test_disf(trajectory):
     parameters["weights"] = "b_incoherent2"
     for resolution_generator in IInstrumentResolution.subclasses():
         temp_name = tempfile.mktemp()
-        parameters["output_files"] = (temp_name, ("MDAFormat",))
+        parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
         instance = IInstrumentResolution.create(resolution_generator)
         resolution_defaults = {
             name: value[1]["default"] for name, value in instance.settings.items()
@@ -58,6 +57,9 @@ def test_disf(trajectory):
         assert path.exists(temp_name + ".mda")
         assert path.isfile(temp_name + ".mda")
         os.remove(temp_name + ".mda")
+        assert path.exists(temp_name + ".log")
+        assert path.isfile(temp_name + ".log")
+        os.remove(temp_name + ".log")
 
 
 list_of_resolutions = IInstrumentResolution.subclasses()
@@ -78,7 +80,7 @@ def test_dos_text(trajectory, resolution_generator):
     parameters["trajectory"] = short_traj
     parameters["weights"] = "b_incoherent2"
     temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, ("TextFormat",))
+    parameters["output_files"] = (temp_name, ("TextFormat",), "INFO")
     instance = IInstrumentResolution.create(resolution_generator)
     resolution_defaults = {
         name: value[1]["default"] for name, value in instance.settings.items()
@@ -94,3 +96,6 @@ def test_dos_text(trajectory, resolution_generator):
     assert path.exists(temp_name + "_text.tar")
     assert path.isfile(temp_name + "_text.tar")
     os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

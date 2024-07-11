@@ -13,6 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from multiprocessing import Queue
+from logging import FileHandler
+from logging.handlers import QueueHandler, QueueListener
 
 import abc
 import glob
@@ -25,15 +28,14 @@ import string
 import time
 import sys
 import traceback
-from concurrent.futures import ProcessPoolExecutor as PoolExecutor
 
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
-
 from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.MLogging import LOG, FMT
 
 
 class JobError(Error):
@@ -133,6 +135,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         self._processes = []
 
+        self._log_filename = None
+
     def __getstate__(self):
         d = self.__dict__.copy()
         del d["_processes"]
@@ -146,13 +150,19 @@ class IJob(Configurable, metaclass=SubclassFactory):
     def configuration(self):
         return self._configuration
 
-    @abc.abstractmethod
     def finalize(self):
-        pass
+        if self._log_filename is not None:
+            self.remove_log_file_handler()
 
-    @abc.abstractmethod
     def initialize(self):
-        pass
+        if (
+            "output_files" in self.configuration
+            and self.configuration["output_files"]["write_logs"]
+        ):
+            log_filename = self.configuration["output_files"]["root"] + ".log"
+            self.add_log_file_handler(
+                log_filename, self.configuration["output_files"]["log_level"]
+            )
 
     @abc.abstractmethod
     def run_step(self, index):
@@ -228,7 +238,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status.update()
 
     def _run_singlecore(self):
-        print(f"Single-core run: expects {self.numberOfSteps} steps")
+        LOG.info(f"Single-core run: expects {self.numberOfSteps} steps")
         for index in range(self.numberOfSteps):
             if self._status is not None:
                 if hasattr(self._status, "_pause_event"):
@@ -238,7 +248,14 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status.update()
             self.combine(idx, result)
 
-    def process_tasks_queue(self, tasks, outputs):
+    def process_tasks_queue(self, tasks, outputs, log_queues):
+
+        queue_handlers = []
+        for log_queue in log_queues:
+            queue_handler = QueueHandler(log_queue)
+            queue_handlers.append(queue_handler)
+            LOG.addHandler(queue_handler)
+
         while True:
             try:
                 index = tasks.get_nowait()
@@ -253,6 +270,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 output = self.run_step(index)
                 outputs.put(output)
 
+        for queue_handler in queue_handlers:
+            LOG.removeHandler(queue_handler)
+
         return True
 
     def _run_multicore(self):
@@ -262,6 +282,18 @@ class IJob(Configurable, metaclass=SubclassFactory):
         manager = ctx.Manager()
         inputQueue = manager.Queue()
         outputQueue = manager.Queue()
+        log_queue = Queue()
+
+        log_queues = [log_queue]
+        handlers = []  # handlers that are not QueueHandlers
+        for handler in LOG.handlers:
+            if isinstance(handler, QueueHandler):
+                log_queues.append(handler.queue)
+            else:
+                handlers.append(handler)
+
+        listener = QueueListener(log_queue, *handlers, respect_handler_level=True)
+        listener.start()
 
         self._processes = []
 
@@ -270,7 +302,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         for i in range(self.configuration["running_mode"]["slots"]):
             p = multiprocessing.Process(
-                target=self.process_tasks_queue, args=(inputQueue, outputQueue)
+                target=self.process_tasks_queue,
+                args=(inputQueue, outputQueue, log_queues),
             )
             self._processes.append(p)
             p.daemon = False
@@ -294,6 +327,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         for p in self._processes:
             p.close()
+
+        listener.stop()
 
     def _run_remote(self):
         raise NotImplementedError(
@@ -435,3 +470,30 @@ class %(classname)s(IJob):
         else:
             f.close()
             return templateFile
+
+    def add_log_file_handler(self, filename: str, level: str) -> None:
+        """Adds a file handle which is used to write the jobs logs.
+
+        Parameters
+        ----------
+        filename : str
+            The log's filename.
+        level : str
+            The log level.
+        """
+        self._log_filename = filename
+        fh = FileHandler(filename, mode="w")
+        # set the name so that we can track it and then close it later,
+        # tracking the fh by storing it in this object causes issues
+        # with multiprocessing jobs
+        fh.set_name(filename)
+        fh.setFormatter(FMT)
+        fh.setLevel(level)
+        LOG.addHandler(fh)
+
+    def remove_log_file_handler(self) -> None:
+        """Removes the IJob file handle from the MDANSE logger."""
+        for handler in LOG.handlers:
+            if handler.name == self._log_filename:
+                handler.close()
+                LOG.removeHandler(handler)

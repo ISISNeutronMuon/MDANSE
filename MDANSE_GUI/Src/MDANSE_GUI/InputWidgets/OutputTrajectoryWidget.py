@@ -13,16 +13,25 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import glob
 import itertools
 import os
 import os.path
 
-from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog
-from qtpy.QtCore import Qt, Slot
+from qtpy.QtWidgets import (
+    QComboBox,
+    QLineEdit,
+    QPushButton,
+    QFileDialog,
+    QLabel,
+)
+from qtpy.QtCore import Slot, Qt
 
-from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.Framework.Configurators.OutputTrajectoryConfigurator import (
+    OutputTrajectoryConfigurator,
+)
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
@@ -30,18 +39,21 @@ dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
 
 
 class OutputTrajectoryWidget(WidgetBase):
+
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, layout_type="QGridLayout", **kwargs)
         default_value = self._configurator.default
         try:
             parent = kwargs.get("parent", None)
             self.default_path = parent.default_path
         except KeyError:
             self.default_path = "."
-            print("KeyError in OutputTrajectoryWidget - can't get default path.")
+            LOG.error("KeyError in OutputTrajectoryWidget - can't get default path.")
         except AttributeError:
             self.default_path = "."
-            print("AttributeError in OutputTrajectoryWidget - can't get default path.")
+            LOG.error(
+                "AttributeError in OutputTrajectoryWidget - can't get default path."
+            )
         self.file_association = ".*"
         self._value = default_value
         self._field = QLineEdit(default_value[0], self._base)
@@ -55,10 +67,16 @@ class OutputTrajectoryWidget(WidgetBase):
         # self.type_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)
-        self._layout.addWidget(self._field)
-        self._layout.addWidget(self.dtype_box)
-        self._layout.addWidget(self.compression_box)
-        self._layout.addWidget(browse_button)
+        label = QLabel("Log file output:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.logs_combo = QComboBox(self._base)
+        self.logs_combo.addItems(OutputTrajectoryConfigurator.log_options)
+        self._layout.addWidget(self._field, 0, 0)
+        self._layout.addWidget(self.dtype_box, 0, 1)
+        self._layout.addWidget(self.compression_box, 0, 2)
+        self._layout.addWidget(browse_button, 0, 3)
+        self._layout.addWidget(label, 1, 0)
+        self._layout.addWidget(self.logs_combo, 1, 1)
         self._default_value = default_value
         self._field.textChanged.connect(self.updateValue)
         self.default_labels()
@@ -97,7 +115,7 @@ class OutputTrajectoryWidget(WidgetBase):
         """
         new_value = QFileDialog.getSaveFileName(
             self._base,  # the parent of the dialog
-            "Load a file",  # the label of the window
+            "Save file",  # the label of the window
             self.default_path,  # the initial search path
             self.file_association,  # text string specifying the file name filter.
         )
@@ -132,4 +150,5 @@ class OutputTrajectoryWidget(WidgetBase):
             filename = self._default_value[0]
         dtype = dtype_lookup[self.dtype_box.currentText()]
         compression = self.compression_box.currentText()
-        return (filename, dtype, compression)
+        logs = self.logs_combo.currentText()
+        return (filename, dtype, compression, logs)

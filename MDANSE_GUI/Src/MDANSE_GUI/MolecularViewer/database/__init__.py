@@ -13,9 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import os
 import yaml
+
+
+from MDANSE.MLogging import LOG
 
 
 def load_database(database_path):
@@ -26,7 +28,7 @@ def load_database(database_path):
         try:
             database = yaml.safe_load(fin)
         except yaml.YAMLError as exc:
-            print(exc)
+            LOG.error(exc)
 
     return database
 

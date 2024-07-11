@@ -3,13 +3,11 @@ import tempfile
 import os
 from os import path
 import pytest
-from icecream import ic
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
 sys.setrecursionlimit(100000)
-ic.disable()
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
@@ -55,7 +53,7 @@ def parameters():
 def test_RigidBodyTrajectory(parameters):
     """We ignore the failure to merge other changes."""
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip")
+    parameters["output_files"] = (temp_name, 64, "gzip", "INFO")
     job = IJob.create("RigidBodyTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
@@ -67,41 +65,53 @@ def test_RigidBodyTrajectory(parameters):
 def test_GlobalMotionFilteredTrajectory(parameters):
     """We ignore the failure here to merge other changes."""
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip")
+    parameters["output_files"] = (temp_name, 64, "gzip", "INFO")
     job = IJob.create("GlobalMotionFilteredTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
     assert path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_CroppedTrajectory(parameters):
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip")
+    parameters["output_files"] = (temp_name, 64, "gzip", "INFO")
     job = IJob.create("CroppedTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
     assert path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_CenterOfMassesTrajectory(parameters):
     """This will need to detect molecules before it can
     find the centre of each one of them."""
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip")
+    parameters["output_files"] = (temp_name, 64, "gzip", "INFO")
     job = IJob.create("CenterOfMassesTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
     assert path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_UnfoldedTrajectory(parameters):
     temp_name = tempfile.mktemp()
-    parameters["output_file"] = (temp_name, 64, "gzip")
+    parameters["output_files"] = (temp_name, 64, "gzip", "INFO")
     job = IJob.create("UnfoldedTrajectory")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
     assert path.isfile(temp_name + ".mdt")
     os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

@@ -32,7 +32,6 @@ dependencies = [
     "numpy",
     "scipy",
     "h5py",
-    "icecream",
     "ase",
     "rdkit"
 ]

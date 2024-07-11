@@ -67,6 +67,8 @@ class RootMeanSquareFluctuation(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
+
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
         # Will store the indexes.
@@ -140,3 +142,4 @@ class RootMeanSquareFluctuation(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

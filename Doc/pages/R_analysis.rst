@@ -13,21 +13,6 @@ Dipole AutoCorrelation Function
 -  available for trajectories only
 
 
-Refolded Membrane Trajectory
-''''''''''''''''''''''''''''
-
-+-----------------------------+----------------+---------+------------------------------------------------------------------------------------+
-| Parameter                   | Format         | Default | Description                                                                        |
-+=============================+================+=========+====================================================================================+
-| Axis                        | Drop-down      | c       | Axis along which is used for trajectory manipulation, the normal to the membrane.  |
-+-----------------------------+----------------+---------+------------------------------------------------------------------------------------+
-| Name of the lipid of the    | str            | DMPC    | The name of the lipid positioned in the upper leaflet of the membrane.             |
-| upper leaflet               |                |         |                                                                                    |
-+-----------------------------+----------------+---------+------------------------------------------------------------------------------------+
-| Name of the lipid of the    | str            | DMPC    | The name of the lipid positioned in the lower leaflet of the membrane.             |
-| lower leaflet               |                |         |                                                                                    |
-+-----------------------------+----------------+---------+------------------------------------------------------------------------------------+
-
 
 -  :ref:`param-output-files`
 

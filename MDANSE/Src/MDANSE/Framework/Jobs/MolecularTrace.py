@@ -67,6 +67,8 @@ class MolecularTrace(IJob):
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
+        super().initialize()
+
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # Will store the time.
@@ -189,3 +191,4 @@ class MolecularTrace(IJob):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

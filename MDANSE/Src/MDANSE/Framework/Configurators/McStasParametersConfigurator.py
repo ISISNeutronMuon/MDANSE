@@ -13,14 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-import os
 import re
 import subprocess
 
-from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.McStasOptionsConfigurator import parse_dictionary
+from MDANSE.MLogging import LOG
 
 
 class McStasParametersConfigurator(IConfigurator):
@@ -95,8 +93,8 @@ class McStasParametersConfigurator(IConfigurator):
 
         val = {}
         parsed = parse_dictionary(value)
-        print(f"Parsed input: {parsed}")
-        print(f"Received from McStas: {instrParameters}")
+        LOG.info(f"Parsed input: {parsed}")
+        LOG.info(f"Received from McStas: {instrParameters}")
         for k, v in list(parsed.items()):
             if k not in instrParameters:
                 # instrParameters.pop(k)  # how was that supposed to work?

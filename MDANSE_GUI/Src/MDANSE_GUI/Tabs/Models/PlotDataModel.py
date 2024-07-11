@@ -13,14 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from abc import abstractmethod
 
-import numpy as np
 import h5py
-
 from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Session.LocalSession import json_decoder
 
@@ -49,7 +48,7 @@ class BasicPlotDataItem(QStandardItem):
             try:
                 file[key]
             except Exception as e:
-                print(f"error {e} when accessing file[{key}]")
+                LOG.error(f"error {e} when accessing file[{key}]")
             else:
                 child = DataSetItem()
                 child.setText(key)
@@ -120,7 +119,7 @@ class MDADataStructure:
             try:
                 string = string.decode()
             except KeyError:
-                print(f"Decode failed for {name}: {obj}")
+                LOG.error(f"Decode failed for {name}: {obj}")
                 meta_dict[name] = str(obj)
             else:
                 try:
@@ -156,7 +155,7 @@ class PlotDataModel(QStandardItemModel):
         try:
             new_datafile = MDADataStructure(filename)
         except Exception as e:
-            print(f"Invalid: {str(e)}")
+            LOG.error(f"Invalid: {str(e)}")
         else:
             self._nodes[self._next_number] = new_datafile
             new_item = DataFileItem()

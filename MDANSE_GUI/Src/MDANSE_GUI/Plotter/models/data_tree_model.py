@@ -13,18 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import abc
 import os
-import json
 
 import numpy as np
-
 import h5py
 
 from qtpy import QtCore, QtGui
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Units import measure, UnitError
+
 from MDANSE_GUI.Session.LocalSession import json_decoder
 
 
@@ -280,7 +279,7 @@ class HDFDataItem(DataItem):
             try:
                 string = obj[:][0].decode()
             except:
-                print(f"Decode failed for {name}: {obj}")
+                LOG.error(f"Decode failed for {name}: {obj}")
             else:
                 try:
                     meta_dict[name] = json_decoder.decode(string)

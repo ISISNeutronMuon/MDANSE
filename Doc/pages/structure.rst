@@ -18,7 +18,6 @@ This section contains the following plugins:
 -  :ref:`root-mean-square-fluctuation`
 -  :ref:`radius-of-gyration`
 -  :ref:`solvent-accessible-surface`
--  :ref:`spatial-density`
 -  :ref:`static-structure-factor`
 -  :ref:`voronoi`
 -  :ref:`xray-static-structure-factor`
@@ -342,68 +341,6 @@ parameter influencing the precision of the calculation. Smaller probe
 radii provide a more detailed and  assessment of the
 molecular surface area, often resulting in a larger reported surface
 area due to increased sensitivity to surface features.
-
-.. _spatial-density:
-
-Spatial Density
-'''''''''''''''
-                         
-The Spatial Density (*SD*) can be seen as a generalization of the pair
-distribution function. Pair distribution functions are defined
-as orientationally averaged distribution functions. Although these
-correlation functions reflect many key features of the short-range order
-in molecular systems, it should be realized that an average spatial
-assembly of non-spherical particles cannot be uniquely characterized
-from these one-dimensional functions. So, structural models postulated
-for the molecular ordering in non-simple systems based only on
-one-dimensional *PDF* will always be somewhat ambiguous. The goal of
-*SD* analysis is to provide greater clarity in the structural analysis
-of molecular systems by utilizing distribution function which span both
-the radial and angular coordinates of the separation vector. This can
-provide useful information about the average local structure in a
-complex system.
-
-*MDANSE* allows one to compute the *SD* in spherical coordinates on a
-set of concentric shells surrounding the centres of mass of selected
-triplets of atoms using the formula:
-
-.. math::
-   :label: pfx136
-   
-   {\mathrm{SD}\left( {r_{l},\theta_{m},\phi_{n}} \right)\doteq\frac{1}{N_{\mathrm{triplets}}N_{\mathrm{groups}}}{\sum\limits_{t = 1}^{N_{\mathrm{triplets}}}{\sum\limits_{g = 1}^{N_{\mathrm{groups}}}\left\langle {n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)} \right\rangle}},}
-
-where :math:`{l = 0}, \ldots, {N_{r} - 1}`; :math:`{m = 0}, \ldots, {N_{\theta} - 1}`; and :math:`{n = 0}, \ldots, {N_{\phi} - 1}`.
-:math:`N_{\mathrm{triplets}}` and :math:`N_{\mathrm{groups}}` are respectively the
-number of triplets and groups, :math:`r_{l}`, :math:`\theta_{m}` and :math:`\phi_{n}`
-are the spherical coordinates at which the *SD* is evaluated,
-:math:`N_{r}`, :math:`N_{\theta}` and :math:`N_{\phi}`
-are respectively the number of discrete :math:`r`, :math:`\theta` and :math:`\phi` values and
-:math:`n_{\mathit{tg}}\left( {r_{l},\theta_{m},\phi_{n}} \right)` is the number of
-group of atoms of type :math:`g` whose centres of mass is found to be in the
-volume element defined by :math:`[r, r + \mathrm{d}r]`, :math:`[\theta, \theta + \mathrm{d}\theta]`
-and :math:`[\phi, \phi + \mathrm{d}\phi]` in
-the spherical coordinates basis cantered on the centre of mass of
-triplet :math:`t`.
-
-So technically, *MDANSE* proceeds more or less in the following way:
-
-- defines the centre of mass :math:`c_{i}^{t}` where :math:`{i = 1}, 2, \ldots, N_{\mathrm{triplets}}` for each triplet of atoms
-
-- defines the centre of mass :math:`c_{i}^{g}` where :math:`{i = 1}, 2, \ldots, N_{\mathrm{groups}}` for each group of atoms
-
-- constructs an oriented orthonormal basis :math:`R_{i}^{t}` where :math:`{i = 1}, 2, \ldots,  N_{\mathrm{triplets}}` cantered on each :math:`c^t`, this basis is defined from the three vectors :math:`v_1`, :math:`v_2`, :math:`v_3`:
-
-    - :math:`v_{1} = (n_{1} + n_{2}) / \left| {n_{1} + n_{2}} \right|` where :math:`n_1` and :math:`n_2` are respectively the normalized vectors in (:math:`a_1`, :math:`a_2`) and (:math:`a_1`, :math:`a_3`) directions where (:math:`a_1`, :math:`a_2`, :math:`a_3`) are the three atoms of the triplet :math:`t`,
-    - :math:`v_2` is defined as the clockwise normal vector orthogonal to :math:`v_1` that belongs to the plane defined by :math:`a_1`, :math:`a_2` and :math:`a_3` atoms,
-    - :math:`v_{3} = v_{1} \times v_{2}`
-
--  expresses the cartesian coordinates of each :math:`c^g` in each :math:`R^t`
-
--  transforms these coordinates in spherical coordinates
-
--  discretizes the spherical coordinates in :math:`r_l`, :math:`\theta_m` and :math:`\phi_n`
-
--  does :math:`n_{\mathit{tg}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) = n_{\mathit{tg}}}{\left( {r_{l},\theta_{m},\phi_{n}} \right) + 1}`
 
 
 .. _static-structure-factor:

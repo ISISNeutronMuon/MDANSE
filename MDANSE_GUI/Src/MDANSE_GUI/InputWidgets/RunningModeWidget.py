@@ -17,7 +17,7 @@
 import multiprocessing
 
 from qtpy.QtWidgets import QComboBox, QSpinBox
-from qtpy.QtCore import Qt, Slot
+from qtpy.QtCore import Slot
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
@@ -35,6 +35,7 @@ class RunningModeWidget(WidgetBase):
         self._field = QSpinBox(self._base)
         self._field.setValue(1)
         self._field.setMinimum(1)
+        self._field.setEnabled(False)
         self._layout.addWidget(self.mode_box)
         self._layout.addWidget(self._field)
         self.mode_box.currentIndexChanged.connect(self.mode_changed)

@@ -216,3 +216,4 @@ class XRayStaticStructureFactor(DistanceHistogram):
         )
 
         self.configuration["trajectory"]["instance"].close()
+        super().finalize()

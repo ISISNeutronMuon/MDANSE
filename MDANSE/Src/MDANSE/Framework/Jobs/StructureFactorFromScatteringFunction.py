@@ -13,9 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import collections
-import os
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import get_spectrum
@@ -57,6 +55,7 @@ class StructureFactorFromScatteringFunction(IJob):
         """
         Initialize the input parameters and analysis self variables
         """
+        super().initialize()
 
         # The number of steps is set to 1 as everything is performed in the finalize method
         self.numberOfSteps = 1
@@ -150,3 +149,4 @@ class StructureFactorFromScatteringFunction(IJob):
         )
 
         self.configuration["sample_inc"]["instance"].close()
+        super().finalize()
