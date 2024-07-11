@@ -64,6 +64,10 @@ class OutputStructureConfigurator(IConfigurator):
 
         root, format, logs = value
 
+        if logs not in self.log_options:
+            self.error_status = "log level option not recognised"
+            return
+
         if not root:
             self.error_status = "empty root name for the output file."
             return
