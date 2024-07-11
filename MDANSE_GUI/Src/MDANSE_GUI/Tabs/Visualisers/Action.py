@@ -282,6 +282,10 @@ class Action(QWidget):
             self.execute_button.setEnabled(True)
         else:
             self.execute_button.setEnabled(False)
+        if self._job_name == "AverageStructure":
+            self.post_execute_checkbox.setEnabled(False)
+        else:
+            self.post_execute_checkbox.setEnabled(True)
 
     @Slot()
     def cancel_dialog(self):
@@ -328,7 +332,10 @@ class Action(QWidget):
         # self.converter_instance.run(pardict)
         # this would send the actual instance, which _may_ be wrong
         # self.new_thread_objects.emit([self.converter_instance, pardict])
-        if self.post_execute_checkbox.isChecked():
+        if (
+            self.post_execute_checkbox.isChecked()
+            and self._job_name != "AverageStructure"
+        ):
             self.run_and_load.emit([self._job_name, pardict])
         else:
             self.new_thread_objects.emit([self._job_name, pardict])

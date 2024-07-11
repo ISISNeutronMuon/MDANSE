@@ -279,7 +279,12 @@ class JobHolder(QStandardItemModel):
             if job_vars[0] in Converter.subclasses():
                 item_th.for_loading.connect(self.trajectory_for_loading)
             else:
-                item_th.for_loading.connect(self.results_for_loading)
+                try:
+                    int(job_vars[1]["output_files"][1])
+                except:
+                    item_th.for_loading.connect(self.results_for_loading)
+                else:
+                    item_th.for_loading.connect(self.trajectory_for_loading)
         communicator.target.connect(item_th.on_started)  # int
         communicator.progress.connect(item_th.on_update)  # int
         communicator.finished.connect(item_th.on_finished)  # bool
