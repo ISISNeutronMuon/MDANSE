@@ -241,6 +241,7 @@ class Action(QWidget):
 
         self.layout.addWidget(buttonbase)
         self._widgets_in_layout.append(buttonbase)
+        self.allow_execution()
         self.show_output_prediction()
 
     @Slot()
