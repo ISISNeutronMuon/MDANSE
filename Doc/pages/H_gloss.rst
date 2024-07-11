@@ -1,19 +1,17 @@
 Configuring Parameters
 ======================
 
-**Index 1: Configuring Parameters and Running Analyses**
-
 **Purpose:**
-This comprehensive guide provides detailed instructions for configuring parameters
+This  guide provides detailed instructions for configuring parameters
 and running analyses within an MDANSE Analysis window. It covers the common
 structure of MDANSE Analysis windows and guides you through the process of
 customizing parameters for specific analyses.
 
-1. **Access an Analysis Tool:**
+#. **Access an Analysis Tool:**
    - Access the desired analysis tool tailored to your specific research needs by
      navigating to the "Analysis" section in MDANSE.
 
-2. **Load Trajectory Data in HDF Format:**
+#. **Load Trajectory Data in HDF Format:**
    - In the trajectory box, specify the path to the trajectory data file in HDF
      (Hierarchical Data Format) format. This format is commonly used for efficient
      storage and retrieval of trajectory data. It serves as the data source for
@@ -23,7 +21,7 @@ customizing parameters for specific analyses.
         Trajectory data in HDF format is preferred due to its advantages in terms
         of data organization and access speed.
 
-3. **Configure Analysis Parameters:**
+#. **Configure Analysis Parameters:**
    - Explore and configure the parameters that are specific to the chosen analysis
      tool. These parameters may vary between analyses and are crucial for
      customizing your analysis.
@@ -39,18 +37,18 @@ customizing parameters for specific analyses.
          Higher values skip frames at defined intervals, optimizing the analysis
          duration.
 
-4. **Customize Parameters for Your Analysis:**
+#. **Customize Parameters for Your Analysis:**
    - Tailor the parameters to match the specifics of your analysis:
      - Explore and adjust analysis-specific parameters, such as axis selection,
        output settings, and configuration options. These parameters are essential
        for fine-tuning your analysis based on your research objectives.
 
-5. **Utilize the Buttons:**
+#. **Utilize the Buttons:**
    - At the bottom of the Analysis window, you'll find several buttons:
      - **Save:** Use the "Save" button to preserve the current analysis, including
        your configured options, into a Python script. This script can be executed
        from the command line, promoting reproducibility and automation.
-     - **Run:** Initiate the analysis process by clicking the "Run" button. Upon
+     - **Run:** Start the analysis process by clicking the "Run" button. Upon
        completion, you'll be prompted to decide whether you want to close the
        window. Note that the status of the analysis can be monitored in the Jobs
        panel. Keep in mind that there is a known bug where successful analyses may
@@ -67,7 +65,8 @@ Q Shells in MDANSE are fundamental for scattering experiments and related analys
 They play a crucial role in defining the distribution of Q vectors in reciprocal space,
 which directly impacts the accuracy and scope of your analysis.
 
-**Step 1: Define Q Shell Parameters**
+Define Q Shell Parameters
+'''''''''''''''''''''''''
 
 To effectively configure Q Shells in your MDANSE analysis, follow these steps:
 
@@ -87,7 +86,8 @@ To effectively configure Q Shells in your MDANSE analysis, follow these steps:
        changing the step.
 
 
-**Step 2: Adjust for Specific Analysis**
+Adjust for Specific Analysis
+''''''''''''''''''''''''''''
 
 Customize the Q shell parameters based on the specific requirements of your analysis:
 
@@ -116,7 +116,8 @@ enabling you to precisely target specific data subsets or criteria. These
 selections offer various methods to modify your analysis, enhancing the precision
 and relevance of your results.
 
-**Step 1: Understand Selection Types**
+Understand Selection Types
+''''''''''''''''''''''''''
 
 MDANSE provides several types of selections, each designed for specific purposes:
 
@@ -131,23 +132,27 @@ MDANSE provides several types of selections, each designed for specific purposes
    - Q Vectors (explored separately in the next section): Defines the distribution
      of Q vectors in reciprocal space for scattering experiments.
 
-**Step 2: Access Selection Configuration**
+Access Selection Configuration
+''''''''''''''''''''''''''''''
 
    - Depending on your analysis needs, you can access selection configurations from
      within the MDANSE analysis window or the Molecular Viewer.
 
-**Step 3: Creating Selections Manually**
+Creating Selections Manually
+''''''''''''''''''''''''''''
 
    - By default, MDANSE does not save any selections, requiring you to create them
      manually. These selections are specific to a trajectory HDF file.
 
-**Step 4: Ensure Unique Naming**
+Ensure Unique Naming
+''''''''''''''''''''
 
    - To prevent conflicts, assign each selection a unique name, even if you're
      creating the same selection for multiple trajectories. This practice ensures
      proper organization and prevents the overwriting of selections.
 
-**Step 5: Utilize User Definition Viewer**
+Utilize User Definition Viewer
+''''''''''''''''''''''''''''''
 
    - The User Definition Viewer, accessible from the toolbar, simplifies
      selection management. It provides an overview of all saved selections,
@@ -156,9 +161,9 @@ MDANSE provides several types of selections, each designed for specific purposes
 **Step 6: Save Your Selections**
 
    - To save a selection, follow these steps:
-     1. Enter a distinctive name for your selection in the provided field next to
+     #. Enter a distinctive name for your selection in the provided field next to
         the Save button.
-     2. Click the Save button to store the selection. This action saves the
+     #. Click the Save button to store the selection. This action saves the
         selection without closing the selection window.
 
 
@@ -399,29 +404,29 @@ Generate Linear Vectors
 Linear Vectors in the software allow you to generate vectors along a specific
 direction determined by an axis. Here's how to use this feature:
 
-1. **Access Linear Vectors Feature:**
+#. **Access Linear Vectors Feature:**
    - Open the software and locate the Linear Vectors tool. This tool is essential
      for generating linear vectors in a specified direction.
 
-2. **Set the Seed for Random Number Generation:**
+#. **Set the Seed for Random Number Generation:**
    - Look for the "Seed" parameter.
    - *Format*: int [Default: 0]
    - The RNG seed used to generate the vectors. Using the same seed ensures
      reproducibility, which is crucial for consistent results.
 
-3. **Specify the Number of hkl Vectors:**
+#. **Specify the Number of hkl Vectors:**
    - Configure the "n vectors" parameter.
    - *Format*: int [Default: 50]
    - This parameter defines the number of hkl vectors in each shell. Higher values
      result in higher accuracy but may require more computational time.
 
-4. **Set the Width Tolerance for Shells:**
+#. **Set the Width Tolerance for Shells:**
    - Adjust the "width" parameter.
    - *Format*: float [Default: 1.0]
    - The "width" parameter specifies the accepted tolerance for each shell, often
      identical to the step. It influences the distribution of vectors.
 
-5. **Define the Axis:**
+#. **Define the Axis:**
    - Configure the axis using the following parameters:
      - x-component: *Format*: int [Default: 1]
      - y-component: *Format*: int [Default: 0]
@@ -429,15 +434,15 @@ direction determined by an axis. Here's how to use this feature:
      - Specify the components of the desired axis that defines the vector
        direction.
 
-6. **Generate Linear Vectors:**
+#. **Generate Linear Vectors:**
    - Click the "Generate" button to create the hkl vectors based on the specified
      settings. This step initiates vector generation.
 
-7. **Name the Generated Vectors:**
+#. **Name the Generated Vectors:**
    - Enter a name for the generated vectors in the "Name" field. A descriptive
      name helps you identify them later when working with the vectors.
 
-8. **Save the Generated Vectors:**
+#. **Save the Generated Vectors:**
    - Click the "Save" button to save the vectors. The window won't close,
      allowing you to continue working with the vectors or make additional
      configurations.
@@ -450,17 +455,17 @@ Generate Grid Vectors
 Grid Vectors in the software allow you to generate hkl vectors within a specified
 range and group them according to a qstep. Follow these steps:
 
-1. **Access Grid Vectors Feature:**
+#. **Access Grid Vectors Feature:**
    - Open the software and locate the Grid Vectors tool. This tool is essential
      for generating grid vectors within a specified range.
 
-2. **Set the Seed for Random Number Generation:**
+#. **Set the Seed for Random Number Generation:**
    - Configure the "seed" parameter.
    - *Format*: int [Default: 0]
    - The "seed" parameter ensures reproducible random number generation for
      consistent results.
 
-3. **Define h-range, k-range, and l-range:**
+#. **Define h-range, k-range, and l-range:**
    - Set the following parameters for each range:
      - from: *Format*: int [Default: 0]
      - to: *Format*: int [Default: 0]
@@ -468,21 +473,21 @@ range and group them according to a qstep. Follow these steps:
      - Specify the range and step for h, k, and l vectors, which determine the
        grid's dimensions.
 
-4. **Set the qstep:**
+#. **Set the qstep:**
    - Adjust the "qstep" parameter.
    - *Format*: float [Default: 0.01]
    - The "qstep" parameter determines how the hkl vectors are grouped within the
      grid.
 
-5. **Generate Grid Vectors:**
+#. **Generate Grid Vectors:**
    - Click the "Generate" button to create the hkl vectors based on the specified
      settings. This step initiates grid vector generation.
 
-6. **Name the Generated Vectors:**
+#. **Name the Generated Vectors:**
    - Provide a name for the generated vectors in the "Name" field. A descriptive
      name helps you identify the grid vectors.
 
-7. **Save the Generated Vectors:**
+#. **Save the Generated Vectors:**
    - Click the "Save" button to save the vectors. The tool won't close, allowing
      further work or configurations with the generated grid vectors.
 
@@ -494,54 +499,54 @@ Generate Approximated Dispersion Vectors
 The Approximated Dispersion Vectors feature allows you to generate Q vectors along
 a line connecting two input Q points. Follow these steps:
 
-1. **Access Approximated Dispersion Vectors Feature:**
+#. **Access Approximated Dispersion Vectors Feature:**
    - Open the software and find the Approximated Dispersion Vectors tool. This
      feature is useful for creating Q vectors along a defined line.
 
-2. **Select the Generator Type:**
+#. **Select the Generator Type:**
    - Use the drop-down menu to choose the generator type, such as
      "circular_lattice."
      - This selection determines the type of Q Vectors you want to define.
 
-3. **Specify the First Q Point:**
+#. **Specify the First Q Point:**
    - Configure the following components:
      - x-component: *Format*: int [Default: 1]
      - y-component: *Format*: int [Default: 0]
      - z-component: *Format*: int [Default: 0]
      - Define the components of the first Q point along the line.
 
-4. **Specify the Second Q Point:**
+#. **Specify the Second Q Point:**
    - Set the components (x, y, z) for the second Q point similarly to the first
      one.
      - Define the components of the second Q point along the line.
 
-5. **Set the Q Step:**
+#. **Set the Q Step:**
    - Adjust the "Q step (nm^-1)" parameter.
    - *Format*: float [Default: 0.1]
      - The "Q step" parameter determines the increment by which Q is increased when
        tracing the line between the two points.
 
-6. **Generate Approximated Dispersion Vectors:**
+#. **Generate Approximated Dispersion Vectors:**
    - Click the "Generate" button to create the Q vectors based on the specified
      settings. This step initiates vector generation along the defined line.
 
-7. **Name the Generated Vectors:**
+#. **Name the Generated Vectors:**
    - Provide a name for the generated vectors in the "Name" field. A descriptive
      name helps you identify the dispersion vectors.
 
-8. **Save the Generated Vectors:**
+#. **Save the Generated Vectors:**
    - Click the "Save" button to save the vectors. The tool will not close
 
 Group Coordinates 
 ------------------
 
-1. **Accessing Group Coordinates:**
+#. **Accessing Group Coordinates:**
 
    To make use of group coordinates within MDANSE, you must access this feature
    during the setup of your analysis. Group coordinates allow you to group atoms
    based on specific criteria for customized calculations.
 
-2. **Default Setting (atom):**
+#. **Default Setting (atom):**
 
    By default, MDANSE uses the "atom" setting for group coordinates. In this
    default configuration:
@@ -550,7 +555,7 @@ Group Coordinates
      atoms in your system.
    - All individual atoms are considered independently in the analysis.
 
-3. **Changing the Group Setting:**
+#. **Changing the Group Setting:**
 
    If you find it necessary to modify the group setting according to your
    research requirements, you can do so by selecting an alternative option from
@@ -564,7 +569,7 @@ Group Coordinates
    Your choice among these options depends on the nature of your system and how
    MDANSE interpreted it during the conversion process from your input data.
 
-4. **Application of Group Coordinates:**
+#. **Application of Group Coordinates:**
 
    The primary objective of employing group coordinates is to amalgamate all
    atoms belonging to a particular group into a single representative position.
@@ -577,7 +582,7 @@ Group Coordinates
    - Analyzing the collective behavior of atoms within a specific group.
    - Simplifying complex systems for more focused analysis.
 
-5. **Analysis Availability:**
+#. **Analysis Availability:**
 
    The "Group coordinates" parameter is available in numerous analyses offered
    by MDANSE. These analyses include:
@@ -592,7 +597,7 @@ Group Coordinates
    coordinates" feature to tailor calculations based on the grouped atomic
    positions.
 
-6. **Default Settings for Group Coordinates:**
+#. **Default Settings for Group Coordinates:**
 
    - The default setting for group coordinates in MDANSE is "atom," where
      individual atoms are considered independently for analysis.
@@ -608,19 +613,19 @@ Instrument Resolution
    smoothing helps avoid numerical artifacts and ensures more accurate and reliable
    results in your analysis.
 
-1. **Accessing Instrument Resolution:**
+#. **Accessing Instrument Resolution:**
 
    To control the instrument resolution in MDANSE, navigate to the relevant section
    of the software interface that allows you to adjust this parameter.
 
-2. **Available Resolution Shapes:**
+#. **Available Resolution Shapes:**
 
    MDANSE supports various resolution shapes, each with specific mathematical
    characteristics. The default resolution shape is Gaussian, but you have the
    flexibility to choose from a range of options, including Lorentzian, Pseudo-
    Voigt, Square, Triangular, and Ideal.
 
-3. **Selecting a Resolution Shape:**
+#. **Selecting a Resolution Shape:**
 
    Depending on your analysis requirements, you can select the most suitable
    resolution shape. For instance:
@@ -644,14 +649,14 @@ Instrument Resolution
    - 'ideal': Expresses an ideal resolution as a Dirac function.
      Example: ('ideal', {})
 
-4. **Setting Parameters (μ and σ):**
+#. **Setting Parameters (μ and σ):**
 
    Each resolution shape may have specific parameters that can be adjusted.
    Commonly, you can set the center position (μ) and width (σ) of the resolution
    function. These parameters define the behavior of the resolution shape and can be
    tailored to your analysis needs.
 
-5. **Resolution in Frequency Units:**
+#. **Resolution in Frequency Units:**
 
    MDANSE operates in frequency units, so it may be necessary to convert resolution
    values into energy units (e.g., meV) for practical use. A typical conversion

@@ -3,7 +3,6 @@ Running Scattering Calculations
 
 Current Correlation Function
 ''''''''''''''''''''''''''''
-**Index 1:** Current Correlation Function Analysis 
 
 **Purpose:**
 
@@ -14,15 +13,15 @@ of density fluctuations and propagating shear modes within the molecular system.
 
 
 
-2. **Load Trajectory Data:**
+#. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.
 
-3. **Access the "Current Correlation Function" Analysis:**
+#. **Access the "Current Correlation Function" Analysis:**
    - Navigate to the "Analysis" section within the MDANSE interface.
    - Select the "Current Correlation Function" option from the list of available
      analysis tools.
 
-4. **Configure Analysis Parameters:**
+#. **Configure Analysis Parameters:**
    - Define the appropriate parameters for frames and instrument resolution.
    - Specify the interpolation order for precise calculations.
    - Select the interpolation mode based on the available hardware and memory
@@ -38,28 +37,28 @@ of density fluctuations and propagating shear modes within the molecular system.
      mode is selected. [Default: 50]. Adjust the value to optimize memory usage
      and analysis speed.
 
-5. **Configure Q Vectors and Atom Selection:**
+#. **Configure Q Vectors and Atom Selection:**
    - Define the Q vectors based on the requirements of the analysis.
    - Choose the relevant atom selection for the calculation.
 
-6. **Normalize, Atom Transmutation, and Weights:**
+#. **Normalize, Atom Transmutation, and Weights:**
    - Specify whether normalization is required for the analysis.
    - Set the necessary atom transmutation and weights as per the analysis
      requirements.
 
-7. **Configure Output Files and Running Mode:**
+#. **Configure Output Files and Running Mode:**
    - Define the output files based on the analysis requirements.
    - Select the appropriate running mode to obtain the desired output.
 
-8. **Initiate the Calculation:**
+#. **Start the Calculation:**
    - Start the Current Correlation Function analysis by clicking on the "Run" or
      "Calculate" button within the MDANSE interface.
 
-9. **Analyze and Interpret Results:**
+#. **Analyze and Interpret Results:**
    - Review the results to understand the dynamics of density fluctuations and
      propagating shear modes within the molecular system effectively.
 
-10. **Plotting Suggestions:**
+#. **Plotting Suggestions:**
     When reviewing the Current Correlation Function analysis results, consider the
     following for better visualization:
 
@@ -71,7 +70,6 @@ of density fluctuations and propagating shear modes within the molecular system.
 
 Dynamic Coherent Structure Factor
 '''''''''''''''''''''''''''''''''
-**Index 2:** Dynamic Coherent Structure Factor Analysis
 
 **Purpose:**
 The Dynamic Incoherent Structure Factor (DISF) analysis is an essential tool for
@@ -82,15 +80,15 @@ dynamic structure factor within the system.
 
 
 
-2. **Load Trajectory Data:**
+#. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.
 
-3. **Access the "Dynamic Incoherent Structure Factor" Analysis:**
+#. **Access the "Dynamic Incoherent Structure Factor" Analysis:**
    - Navigate to the "Analysis" section within the MDANSE interface.
    - Select the "Dynamic Incoherent Structure Factor" option from the list of
      available analysis tools.
 
-4. **Configure Analysis Parameters:**
+#. **Configure Analysis Parameters:**
    - **Frames:** Specify the range of frames for analysis. (Default: First: 0,
      Last: Entire trajectory, Step: 1)
    - **Q Vectors:** Define the wave vectors (Q) based on the dynamics of
@@ -104,18 +102,18 @@ dynamic structure factor within the system.
    - **Output Settings:** Configure output files and select the appropriate
      running mode for the analysis. (Default: Monoprocessor)
 
-5. **Initiate the Calculation:**
+#. **Start the Calculation:**
    - Start the Dynamic Incoherent Structure Factor analysis by clicking on the
      "Run" or "Calculate" button within the MDANSE interface.
 
-6. **Analyze and Interpret Results:**
+#. **Analyze and Interpret Results:**
    - Review the partial and total dynamic incoherent structure factor results to
      gain insights into the incoherent intermediate scattering functions and the
      dynamics of incoherent scattering in the molecular system.
    - Interpret the data to understand the propagation of excitations, density
      fluctuations, and other incoherent modes within the system effectively.
 
-7. **Plotting Suggestions:**
+#. **Plotting Suggestions:**
 When analyzing the Dynamic Incoherent Structure Factor results, consider the
 following plotting suggestions for better visualization and interpretation:
 
@@ -128,7 +126,6 @@ following plotting suggestions for better visualization and interpretation:
 
 Dynamic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
-**Index 3:** Dynamic Incoherent Structure Factor Analysis
 
 **Purpose:**
 
@@ -139,15 +136,15 @@ feature, enabling them to acquire insights into intermediate incoherent
 scattering functions and the resulting dynamic structure factor within the
 system.
 
-2. **Load Trajectory Data:**
+#. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.
 
-3. **Access the "Dynamic Incoherent Structure Factor" Analysis:**
+#. **Access the "Dynamic Incoherent Structure Factor" Analysis:**
    - Navigate to the "Analysis" section within the MDANSE interface. Select the
      "Dynamic Incoherent Structure Factor" option from the list of available
      analysis tools.
 
-4. **Configure Analysis Parameters:**
+#. **Configure Analysis Parameters:**
    - **Frames:** Specify the range of frames for analysis. (Default: First: 0,
      Last: Entire trajectory, Step: 1)
    - **Q Vectors:** Define the wave vectors (Q) based on the dynamics of
@@ -161,19 +158,19 @@ system.
    - **Output Settings:** Configure output files and select the appropriate
      running mode for the analysis. (Default: Monoprocessor)
 
-5. **Initiate the Calculation:**
+#. **Start the Calculation:**
    - Start the Dynamic Incoherent Structure Factor analysis by clicking on the
      "Run" button within the MDANSE interface. This will generate
      the data needed for plotting.
 
-6. **Analyze and Interpret Results:**
+#. **Analyze and Interpret Results:**
    - Review the partial and total dynamic incoherent structure factor results to
      gain insights into the incoherent intermediate scattering functions and the
      dynamics of incoherent scattering in the molecular system.
    - Interpret the data to understand the propagation of excitations, density
      fluctuations, and other incoherent modes within the system effectively.
 
-7. **Plotting Suggestions:**
+#. **Plotting Suggestions:**
    - When analyzing the Dynamic Incoherent Structure Factor results, consider
      the following plotting suggestions for better visualization and
      interpretation:
@@ -189,7 +186,6 @@ system.
 
 Elastic Incoherent Structure Factor
 '''''''''''''''''''''''''''''''''''
-**Index 4:** Elastic Incoherent Structure Factor Analysis
 
 **Purpose:**
 
@@ -200,18 +196,18 @@ effectively utilizing the Elastic Incoherent Structure Factor feature
 to gain insights into the incoherent intermediate scattering functions 
 and the EISF within the system.
 
-1. **Launch MDANSE:**
+#. **Launch MDANSE:**
    - Open the MDANSE software on your computer.
 
-2. **Load Trajectory Data:**
+#. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.
 
-3. **Access the "Elastic Incoherent Structure Factor" Analysis:**
+#. **Access the "Elastic Incoherent Structure Factor" Analysis:**
    - Navigate to the "Analysis" section within the MDANSE interface.
    - Select the "Elastic Incoherent Structure Factor" option from the list of
      available analysis tools.
 
-4. **Configure Analysis Parameters:**
+#. **Configure Analysis Parameters:**
    - **Frames:** Define the appropriate frames and Q vectors for precise
      calculations. (Default: All frames, User-defined Q vectors)
    - **Coordinates:** Specify the project coordinates, atom selection, and
@@ -221,18 +217,18 @@ and the EISF within the system.
    - **Output Settings:** Configure output files and select the appropriate
      running mode for the analysis. (Default: Monoprocessor)
 
-5. **Initiate the Calculation:**
+#. **Start the Calculation:**
    - Start the Elastic Incoherent Structure Factor analysis by clicking on the
      "Run" button within the MDANSE interface.
 
-6. **Analyze and Interpret Results:**
+#. **Analyze and Interpret Results:**
    - Review the EISF results to gain insights into the sampling distribution of
      points in space and the dynamics of incoherent scattering within the
      molecular system.
    - Interpret the data to understand the behavior of the elastic line in the
      neutron scattering spectrum and its implications for the system's dynamics.
 
-7. **Plotting Suggestions:**
+#. **Plotting Suggestions:**
      Incoherent Structure Factor (EISF) analysis results to enhance visualization
      and interpretation:
      - Plot the EISF as a function of wave vector (Q) to observe the incoherent
@@ -245,27 +241,26 @@ and the EISF within the system.
 
 Gaussian Dynamic Incoherent Structure Factor
 ''''''''''''''''''''''''''''''''''''''''''''
-**Index 5:** Gaussian Dynamic Incoherent Structure Factor Analysis
 
 **Purpose:**
 
 The Neutron Dynamic Total Structure Factor (NDTSF) analysis provides a
-comprehensive evaluation of the coherent and incoherent contributions to the
+ evaluation of the coherent and incoherent contributions to the
 scattering behavior in the molecular system, making it an essential tool for
 neutron-specific studies.
 
 **Guide Steps:**
 
 
-2. **Load Trajectory Data:**
+#. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.
 
-3. **Access the "Neutron Dynamic Total Structure Factor" Analysis:**
+#. **Access the "Neutron Dynamic Total Structure Factor" Analysis:**
    - Navigate to the "Analysis" section within the MDANSE interface.
    - Select the "Neutron Dynamic Total Structure Factor" option from the
      list of available analysis tools.
 
-4. **Configure Analysis Parameters:**
+#. **Configure Analysis Parameters:**
    - **Frames:** Define the appropriate frames for analysis. (Default: First: 0,
      Last: Entire trajectory, Step: 1)
    - **Instrument Resolution:** Specify the instrument resolution for accurate
@@ -278,16 +273,16 @@ neutron-specific studies.
    - **Output Settings:** Set the output files and select the appropriate running
      mode for the analysis. (Default: Monoprocessor)
 
-5. **Initiate the Calculation:**
+#. **Start the Calculation:**
    - Export the generated structure factor data to the desired output files for
      further analysis or visualization.
 
-6. **Analyze and Interpret Results:**
+#. **Analyze and Interpret Results:**
    - Analyze the structure factor data to gain insights into the molecular
      structure, including information on the arrangement, spacing, and
      distribution of atoms within the system.
 
-7. **Plotting Suggestions:**
+#. **Plotting Suggestions:**
    - Consider the following plotting suggestions for visualizing and interpreting
      the Neutron Dynamic Total Structure Factor (NDTSF) results:
      - Plot the NDTSF as a function of wave vector (Q) to observe the scattering
@@ -302,25 +297,24 @@ neutron-specific studies.
 
 Neutron Dynamic Total Structure Factor
 ''''''''''''''''''''''''''''''''''''''
-**Index 6:** Neutron Dynamic Total Structure Factor Analysis
 
 **Purpose:**
 
 The Neutron Dynamic Total Structure Factor (NDTSF) analysis provides a
-comprehensive evaluation of the coherent and incoherent contributions to the
+ evaluation of the coherent and incoherent contributions to the
 scattering behavior in the molecular system, making it an essential tool for
 neutron-specific studies.
 
 
-2. **Load Trajectory Data:**
+#. **Load Trajectory Data:**
    - Load the relevant trajectory data using the "File" menu.
 
-3. **Access the "Neutron Dynamic Total Structure Factor" Analysis:**
+#. **Access the "Neutron Dynamic Total Structure Factor" Analysis:**
    - Navigate to the "Analysis" section within the MDANSE interface.
    - Select the "Neutron Dynamic Total Structure Factor" option from the
      list of available analysis tools.
 
-4. **Configure Analysis Parameters:**
+#. **Configure Analysis Parameters:**
    - **Frames:** Define the appropriate frames for analysis. (Default: First: 0,
      Last: Entire trajectory, Step: 1)
    - **Resolution:** Specify the instrument resolution for accurate calculations.
@@ -329,16 +323,16 @@ neutron-specific studies.
      User-defined)
    - **Atom Selection:** Select the desired atom selection. (Default: All atoms)
 
-5. **Initiate the Calculation:**
+#. **Start the Calculation:**
    - Export the generated structure factor data to the desired output files for
      further analysis or visualization.
 
-6. **Analyze and Interpret Results:**
+#. **Analyze and Interpret Results:**
    - Analyze the structure factor data to gain insights into the molecular
      structure, including information on the arrangement, spacing, and
      distribution of atoms within the system.
 
-7. **Plotting Suggestions:**
+#. **Plotting Suggestions:**
    - Consider the following plotting suggestions for visualizing and interpreting
      the Neutron Dynamic Total Structure Factor (NDTSF) results:
      - Plot the NDTSF as a function of wave vector (Q) to observe the scattering
