@@ -59,7 +59,7 @@ class TrajectoryTab(GeneralTab):
         for fname in fnames[0]:
             self.load_trajectory(fname)
 
-    @Slot()
+    @Slot(str)
     def load_trajectory(self, fname: str):
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
