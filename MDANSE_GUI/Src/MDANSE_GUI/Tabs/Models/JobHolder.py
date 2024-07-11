@@ -65,7 +65,16 @@ class JobThread(QThread):
 
     @Slot()
     def check_if_alive(self):
-        if self._subprocess._closed or not self._subprocess.is_alive():
+        if self._subprocess._closed:
+            # The subprocess was closed probably by the user, don't need
+            # to keep checking that the subprocess is alive anymore.
+            # Also, no need to send out a status update since it should
+            # already have been updated already when it got terminated.
+            self._keep_running = False
+            self._timer.stop()
+            self.terminate()
+            return
+        if not self._subprocess.is_alive():
             self.fail()
 
     def run(self):

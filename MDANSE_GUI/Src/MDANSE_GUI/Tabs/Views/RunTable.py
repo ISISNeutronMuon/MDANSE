@@ -132,6 +132,7 @@ class RunTable(QTableView):
         if result == QMessageBox.StandardButton.Yes.value:
             entry, _, process, listener = self.getJobObjects()
             process.terminate()
+            process.join()
             entry.terminate_job()
             listener.stop()
 
