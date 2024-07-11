@@ -19,15 +19,12 @@ large data sets. It employs a hierarchical structure, akin to a file system,
 and supports n-dimensional arrays with associated metadata attributes. HDF5
 is widely adopted, and even `NetCDF version 4 <https://www.unidata.ucar.edu/software/netcdf/netcdf-4/>`_ 
 is built on top of HDF5. Using
-HDF5 ensures platform independence, efficient data storage, and comprehensive
+HDF5 ensures platform independence, efficient data storage, and 
 self-contained information within trajectory files.
 
-This transition to HDF5 as the primary storage format enhances data compatibility
-and accessibility within MDANSE. Furthermore, the integration of a graphical user
-interface (GUI) provides an intuitive and user-friendly interface for performing
-analyses and managing file conversions. Users can interact with MDANSE through
-the GUI to directly convert trajectories from different formats to the required
-HDF5 format using the Trajectory Converter tool.
+Furthermore, users can interact with MDANSE through
+the GUI to convert trajectories from different formats to the required
+HDF5 format, perform analysis and plot results.
 
 .. _text_output:
 

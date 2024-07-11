@@ -320,7 +320,7 @@ of the correlation function:
 Dynamic Coherent Structure Factor
 '''''''''''''''''''''''''''''''''
 In materials science and condensed matter physics, dynamic coherent structure
-factors are crucial. They enable a comprehensive understanding of complex
+factors are crucial. They enable a  understanding of complex
 particle or atom movements and interactions over time. These factors provide
 invaluable insights into the dynamic behavior of materials, aiding researchers in
 deciphering particle evolution and characterizing properties such as diffusion
