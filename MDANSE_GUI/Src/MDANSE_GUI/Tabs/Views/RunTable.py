@@ -90,7 +90,6 @@ class RunTable(QTableView):
         entry, watcher, process, listener = self.getJobObjects()
         try:
             process.close()
-            listener.stop()
         except ValueError:
             LOG.error("The process is still running!")
         else:

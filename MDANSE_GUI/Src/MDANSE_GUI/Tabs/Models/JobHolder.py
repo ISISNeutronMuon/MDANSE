@@ -65,7 +65,7 @@ class JobThread(QThread):
 
     @Slot()
     def check_if_alive(self):
-        if not self._subprocess.is_alive():
+        if self._subprocess._closed or not self._subprocess.is_alive():
             self.fail()
 
     def run(self):
