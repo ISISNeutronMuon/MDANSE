@@ -276,7 +276,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
         return True
 
     def _run_multicore(self):
-        self._status._queue_0.put("started")
+        if hasattr(self._status, "_queue_0"):
+            self._status._queue_0.put("started")
 
         inputQueue = Queue()
         outputQueue = Queue()
@@ -314,16 +315,12 @@ class IJob(Configurable, metaclass=SubclassFactory):
             if self._status is not None:
                 self._status.fixed_status(outputQueue.qsize())
 
+        for i in range(self.numberOfSteps):
+            index, result = outputQueue.get()
+            self.combine(index, result)
+
         for p in self._processes:
             p.join()
-
-        while True:
-            try:
-                index, result = outputQueue.get_nowait()
-            except queue.Empty:
-                break
-            else:
-                self.combine(index, result)
 
         for p in self._processes:
             p.close()
@@ -339,6 +336,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
         listener : QueueListener
             The log listener that we need to stop.
         """
+        if not (hasattr(self._status, "_queue_0") and hasattr(self._status, "_queue_1")):
+            return
         if self._status._queue_1.qsize() > 0:
             if self._status._queue_1.get() == "terminate":
                 for p in self._processes:
