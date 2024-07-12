@@ -59,6 +59,19 @@ class JobTab(GeneralTab):
         self.action.new_thread_objects.connect(self._job_starter.startProcess)
         self.action.run_and_load.connect(self._job_starter.startProcessAndLoad)
 
+    def grouped_settings(self):
+        results = super().grouped_settings()
+        results += [
+            [
+                "Execution",
+                {"auto-load": "True"},
+                {
+                    "auto-load": "Unless manually switched off, the GUI will try to load the job results when the job is finished."
+                },
+            ]
+        ]
+        return results
+
     @Slot(int)
     def set_current_trajectory(self, index: int) -> None:
         self._current_trajectory = self._trajectory_combo.currentText()

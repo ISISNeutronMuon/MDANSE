@@ -55,6 +55,19 @@ class ConverterTab(GeneralTab):
     def set_current_trajectory(self, new_name: str):
         self._current_trajectory = new_name
 
+    def grouped_settings(self):
+        results = super().grouped_settings()
+        results += [
+            [
+                "Execution",
+                {"auto-load": "True"},
+                {
+                    "auto-load": "Unless manually switched off, the GUI will try to load the job results when the job is finished."
+                },
+            ]
+        ]
+        return results
+
     @classmethod
     def standard_instance(cls):
         action = Action()

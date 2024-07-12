@@ -77,7 +77,7 @@ class PlotTab(GeneralTab):
         logger,
         **kwargs,
     ):
-        plt_settings = PlotSettings(session=session)
+        plt_settings = PlotSettings(settings=settings)
         the_tab = cls(
             parent,
             name=name,
@@ -86,7 +86,7 @@ class PlotTab(GeneralTab):
             logger=logger,
             model=None,
             view=PlotDetailsView(),
-            visualiser=PlotHolder(session=session),
+            visualiser=PlotHolder(),
             layout=partial(
                 MultiPanel, left_panels=[plt_settings], extra_visualiser=plt_settings
             ),

@@ -236,6 +236,15 @@ class Action(QWidget):
         self.execute_button = QPushButton("RUN!", buttonbase)
         self.execute_button.setStyleSheet("font-weight: bold")
         self.post_execute_checkbox = QCheckBox("Auto-load results", buttonbase)
+        try:
+            default_check_status = (
+                self._parent_tab._settings.group("Execution").get("auto-load") == "True"
+            )
+        except:
+            LOG.debug(f"Converter tab could not load auto-load settings")
+            default_check_status = False
+        if default_check_status:
+            self.post_execute_checkbox.setChecked(True)
 
         self.save_button.clicked.connect(self.save_dialog)
         self.execute_button.clicked.connect(self.execute_converter)
