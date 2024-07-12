@@ -32,17 +32,25 @@ class Subprocess(Process):
         job_name = kwargs.get("job_name")
         self._job_parameters = kwargs.get("job_parameters")
         sending_pipe = kwargs.get("pipe")
-        self.receiving_queue = Queue()
+        self.queue_0 = Queue()
+        self.queue_1 = Queue()
         pause_event = kwargs.get("pause_event")
         self.log_queue = kwargs.get("log_queue")
-        self.construct_job(job_name, sending_pipe, self.receiving_queue, pause_event)
+        self.construct_job(
+            job_name, sending_pipe, self.queue_0, self.queue_1, pause_event
+        )
 
     def construct_job(
-        self, job: str, pipe: Connection, queue: "Queue", pause_event: "Event"
+        self,
+        job: str,
+        pipe: Connection,
+        queue_0: "Queue",
+        queue_1: "Queue",
+        pause_event: "Event",
     ):
         job_instance = IJob.create(job)
         job_instance.build_configuration()
-        status = JobStatusProcess(pipe, queue, pause_event)
+        status = JobStatusProcess(pipe, queue_0, queue_1, pause_event)
         job_instance._status = status
         self._job_instance = job_instance
 
@@ -58,10 +66,20 @@ class Subprocess(Process):
         terminate and join its subprocesses. We need to do this
         before this subprocess terminates itself.
         """
-        self.receiving_queue.put("terminate")
-        # Wait until IJob has received the terminate message.
-        while self.receiving_queue.qsize() != 0:
-            time.sleep(0.1)
-        # give IJob some time to terminate and join the child processes
-        time.sleep(0.1)
+        mode = self._job_parameters["running_mode"][0]
+        if mode == "multicore":
+            if self.queue_0.get() != "started":
+                raise RuntimeError(
+                    "For some reason we received a messaged which wasn't "
+                    "'started' this is unexpected."
+                )
+            self.queue_1.put("terminate")
+            # Wait until IJob has received the terminate message.
+            while self.queue_1.qsize() != 0:
+                time.sleep(0.1)
+            if self.queue_0.get() != "terminated":
+                raise RuntimeError(
+                    "For some reason we received a messaged which wasn't "
+                    "'terminated' this is unexpected."
+                )
         super().terminate()

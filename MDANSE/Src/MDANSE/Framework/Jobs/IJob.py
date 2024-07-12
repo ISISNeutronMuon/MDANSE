@@ -276,6 +276,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         return True
 
     def _run_multicore(self):
+        self._status._queue_0.put("started")
 
         inputQueue = Queue()
         outputQueue = Queue()
@@ -298,6 +299,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             inputQueue.put(i)
 
         for i in range(self.configuration["running_mode"]["slots"]):
+            self._run_multicore_check_terminate(listener)
             p = multiprocessing.Process(
                 target=self.process_tasks_queue,
                 args=(inputQueue, outputQueue, log_queues),
@@ -307,17 +309,10 @@ class IJob(Configurable, metaclass=SubclassFactory):
             p.start()
 
         while inputQueue.qsize() > 0:
+            self._run_multicore_check_terminate(listener)
             time.sleep(0.1)
             if self._status is not None:
                 self._status.fixed_status(outputQueue.qsize())
-            if self._status._queue.qsize() > 0:
-                msg = self._status._queue.get()
-                if msg == "terminate":
-                    for p in self._processes:
-                        p.terminate()
-                        p.join()
-                    listener.stop()
-                    return
 
         for p in self._processes:
             p.join()
@@ -334,6 +329,29 @@ class IJob(Configurable, metaclass=SubclassFactory):
             p.close()
 
         listener.stop()
+
+    def _run_multicore_check_terminate(self, listener) -> None:
+        """Check if a terminate job was added to the queue. If it was
+        added we need to terminate and join all child processes.
+
+        Parameters
+        ----------
+        listener : QueueListener
+            The log listener that we need to stop.
+        """
+        if self._status._queue_1.qsize() > 0:
+            if self._status._queue_1.get() == "terminate":
+                for p in self._processes:
+                    p.terminate()
+                    p.join()
+                listener.stop()
+                self._status._queue_0.put("terminated")
+                # we've terminated the child processes, now we wait
+                # here as the whole subprocess will be terminated.
+                # We don't want IJob doing anything else from now
+                # onwards.
+                while True:
+                    time.sleep(10)
 
     def _run_remote(self):
         raise NotImplementedError(

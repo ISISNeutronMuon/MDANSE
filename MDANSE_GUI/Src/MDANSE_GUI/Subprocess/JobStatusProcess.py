@@ -66,13 +66,15 @@ class JobStatusProcess(Status):
     def __init__(
         self,
         pipe: "Connection",
-        queue: Queue,
+        queue_0: Queue,
+        queue_1: Queue,
         pause_event: "Event",
         **kwargs,
     ):
         super().__init__()
         self._pipe = pipe
-        self._queue = queue
+        self._queue_0 = queue_0
+        self._queue_1 = queue_1
         self._state = {}  # for compatibility with JobStatus
         self._progress_meter = 0
         self._pause_event = pause_event
