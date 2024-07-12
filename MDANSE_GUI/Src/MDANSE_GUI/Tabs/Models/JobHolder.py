@@ -249,7 +249,6 @@ class JobHolder(QStandardItemModel):
         log_queue = Queue()
 
         main_pipe, child_pipe = Pipe()
-        main_queue = Queue()
         pause_event = Event()
         entry_number = self.next_number
 
@@ -267,7 +266,6 @@ class JobHolder(QStandardItemModel):
                 job_name=job_vars[0],
                 job_parameters=job_vars[1],
                 pipe=child_pipe,
-                queue=main_queue,
                 pause_event=pause_event,
                 log_queue=log_queue,
             )

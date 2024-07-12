@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import time
+
 from logging.handlers import QueueHandler
 from multiprocessing import Queue, Process, Event
 from multiprocessing.connection import Connection
@@ -30,10 +32,10 @@ class Subprocess(Process):
         job_name = kwargs.get("job_name")
         self._job_parameters = kwargs.get("job_parameters")
         sending_pipe = kwargs.get("pipe")
-        receiving_queue = kwargs.get("queue")
+        self.receiving_queue = Queue()
         pause_event = kwargs.get("pause_event")
         self.log_queue = kwargs.get("log_queue")
-        self.construct_job(job_name, sending_pipe, receiving_queue, pause_event)
+        self.construct_job(job_name, sending_pipe, self.receiving_queue, pause_event)
 
     def construct_job(
         self, job: str, pipe: Connection, queue: "Queue", pause_event: "Event"
@@ -50,3 +52,16 @@ class Subprocess(Process):
         LOG.info("Running job")
         self._job_instance.run(self._job_parameters)
         LOG.removeHandler(queue_handler)
+
+    def terminate(self):
+        """Send out a terminate message to IJob so that it knows to
+        terminate and join its subprocesses. We need to do this
+        before this subprocess terminates itself.
+        """
+        self.receiving_queue.put("terminate")
+        # Wait until IJob has received the terminate message.
+        while self.receiving_queue.qsize() != 0:
+            time.sleep(0.1)
+        # give IJob some time to terminate and join the child processes
+        time.sleep(0.1)
+        super().terminate()

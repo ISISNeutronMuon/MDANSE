@@ -277,11 +277,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
     def _run_multicore(self):
 
-        ctx = multiprocessing.get_context("spawn")
-
-        manager = ctx.Manager()
-        inputQueue = manager.Queue()
-        outputQueue = manager.Queue()
+        inputQueue = Queue()
+        outputQueue = Queue()
         log_queue = Queue()
 
         log_queues = [log_queue]
@@ -313,6 +310,14 @@ class IJob(Configurable, metaclass=SubclassFactory):
             time.sleep(0.1)
             if self._status is not None:
                 self._status.fixed_status(outputQueue.qsize())
+            if self._status._queue.qsize() > 0:
+                msg = self._status._queue.get()
+                if msg == "terminate":
+                    for p in self._processes:
+                        p.terminate()
+                        p.join()
+                    listener.stop()
+                    return
 
         for p in self._processes:
             p.join()
