@@ -336,7 +336,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
         listener : QueueListener
             The log listener that we need to stop.
         """
-        if not (hasattr(self._status, "_queue_0") and hasattr(self._status, "_queue_1")):
+        if not (
+            hasattr(self._status, "_queue_0") and hasattr(self._status, "_queue_1")
+        ):
             return
         if self._status._queue_1.qsize() > 0:
             if self._status._queue_1.get() == "terminate":
