@@ -309,11 +309,11 @@ class IJob(Configurable, metaclass=SubclassFactory):
             p.daemon = False
             p.start()
 
-        while inputQueue.qsize() > 0:
+        while not inputQueue.empty():
             self._run_multicore_check_terminate(listener)
             time.sleep(0.1)
-            if self._status is not None:
-                self._status.fixed_status(outputQueue.qsize())
+            # if self._status is not None:
+            #     self._status.fixed_status(outputQueue.qsize())
 
         for i in range(self.numberOfSteps):
             index, result = outputQueue.get()
@@ -340,7 +340,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             hasattr(self._status, "_queue_0") and hasattr(self._status, "_queue_1")
         ):
             return
-        if self._status._queue_1.qsize() > 0:
+        if not self._status._queue_1.empty():
             if self._status._queue_1.get() == "terminate":
                 for p in self._processes:
                     p.terminate()

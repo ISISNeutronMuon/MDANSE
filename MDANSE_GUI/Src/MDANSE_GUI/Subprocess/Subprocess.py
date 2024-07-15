@@ -75,7 +75,7 @@ class Subprocess(Process):
                 )
             self.queue_1.put("terminate")
             # Wait until IJob has received the terminate message.
-            while self.queue_1.qsize() != 0:
+            while not self.queue_1.empty():
                 time.sleep(0.1)
             if self.queue_0.get() != "terminated":
                 raise RuntimeError(
