@@ -309,15 +309,19 @@ class IJob(Configurable, metaclass=SubclassFactory):
             p.daemon = False
             p.start()
 
-        while not inputQueue.empty():
+        n_results = 0
+        while n_results != self.numberOfSteps:
             self._run_multicore_check_terminate(listener)
-            time.sleep(0.1)
-            # if self._status is not None:
-            #     self._status.fixed_status(outputQueue.qsize())
-
-        for i in range(self.numberOfSteps):
-            index, result = outputQueue.get()
-            self.combine(index, result)
+            if self._status is not None:
+                self._status.fixed_status(n_results)
+            try:
+                index, result = outputQueue.get_nowait()
+            except queue.Empty:
+                time.sleep(0.1)
+                continue
+            else:
+                n_results += 1
+                self.combine(index, result)
 
         for p in self._processes:
             p.join()
