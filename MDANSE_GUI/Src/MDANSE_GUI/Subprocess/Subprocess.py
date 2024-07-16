@@ -66,8 +66,11 @@ class Subprocess(Process):
         terminate and join its subprocesses. We need to do this
         before this subprocess terminates itself.
         """
-        mode = self._job_parameters["running_mode"][0]
-        if mode == "multicore":
+        if "running_mode" not in self._job_parameters:
+            super().terminate()
+            return
+
+        if self._job_parameters["running_mode"][0] == "multicore":
             if self.queue_0.get() != "started":
                 raise RuntimeError(
                     "For some reason we received a messaged which wasn't "
