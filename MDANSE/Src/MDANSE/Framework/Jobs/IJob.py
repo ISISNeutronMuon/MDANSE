@@ -137,6 +137,10 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         self._log_filename = None
 
+        self.inputQueue = Queue()
+        self.outputQueue = Queue()
+        self.log_queue = Queue()
+
     def __getstate__(self):
         d = self.__dict__.copy()
         del d["_processes"]
@@ -279,9 +283,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
         if hasattr(self._status, "_queue_0"):
             self._status._queue_0.put("started")
 
-        inputQueue = Queue()
-        outputQueue = Queue()
-        log_queue = Queue()
+        inputQueue = self.inputQueue
+        outputQueue = self.outputQueue
+        log_queue = self.log_queue
 
         log_queues = [log_queue]
         handlers = []  # handlers that are not QueueHandlers
