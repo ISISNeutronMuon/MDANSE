@@ -36,7 +36,6 @@ dependencies = [
     "qtpy",
     "vtk",
     "PyQt6",
-    "pyqt6-tools",
     "PyYAML",
 ]
 
