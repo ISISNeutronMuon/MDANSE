@@ -123,6 +123,9 @@ class Single(Plotter):
         if plotting_context.set_axes() is None:
             LOG.error("Axis check failed.")
             return
+        if len(plotting_context.datasets()) == 0:
+            target.clear()
+            target.canvas.draw()
         for name, databundle in plotting_context.datasets().items():
             dataset, colour, linestyle, marker, _ = databundle
             best_unit, best_axis = dataset.longest_axis()
