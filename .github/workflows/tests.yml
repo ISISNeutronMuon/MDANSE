@@ -34,3 +34,35 @@ jobs:
         run: |
           cd MDANSE/Tests/UnitTests
           python -m pytest
+
+
+name: Test pip install MDANSE_GUI
+
+on:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  test:
+    name: Install MDANSE_GUI on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    if: |
+      !contains( github.ref, 'legacy' )
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install MDANSE
+        run: (cd MDANSE && python -m pip install .)
+
+      - name: install MDANSE_GUI
+        run: (cd MDANSE_GUI && python -m pip install .)
