@@ -1,4 +1,4 @@
-name: Test MDANSE
+name: Test pip install MDANSE_GUI
 
 on:
   pull_request:
@@ -7,14 +7,13 @@ on:
 
 jobs:
   test:
-    name: Build MDANSE and run tests on ${{ matrix.os }}
+    name: Install MDANSE_GUI on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
-        # os: [ubuntu-20.04, windows-2019, macOS-11, ubuntu-latest, windows-latest, macOS-latest]
     if: |
       !contains( github.ref, 'legacy' )
     steps:
@@ -24,13 +23,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install pytest
-        run: python -m pip install pytest
-
       - name: install MDANSE
         run: (cd MDANSE && python -m pip install .)
 
-      - name: run unit tests
-        run: |
-          cd MDANSE/Tests/UnitTests
-          python -m pytest
+      - name: install MDANSE_GUI
+        run: (cd MDANSE_GUI && python -m pip install .)
