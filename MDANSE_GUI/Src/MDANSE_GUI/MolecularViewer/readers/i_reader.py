@@ -22,6 +22,7 @@ from MDANSE.MLogging import LOG
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry import RESIDUES_DATABASE
 
+
 class InvalidFileError(Exception):
     """This class implements an exception for invalid file."""
 

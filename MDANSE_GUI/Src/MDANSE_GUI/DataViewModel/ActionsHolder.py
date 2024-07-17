@@ -93,10 +93,6 @@ class ActionsSuperModel(QObject):
         """Creates several subtrees out of the registry tree.
         Each tree will only contain nodes that share the same
         ancestor.
-
-        Arguments:
-            registry -- an existing RegistryTree instance
-            which has been used to scan the MDANSE registry
         """
         for parent_class in parent_classes:
             model = JobTree()
