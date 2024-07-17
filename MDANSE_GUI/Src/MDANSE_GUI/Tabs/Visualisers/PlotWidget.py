@@ -137,6 +137,7 @@ class SliderPack(QWidget):
         clicks = np.round((vals - self._minarray) / self._steparray).astype(int)
         for ns, slider in enumerate(self._sliders):
             slider.setValue(clicks[ns])
+        self.slider_to_box()
         self.blockSignals(False)
 
     @Slot()

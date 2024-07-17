@@ -54,6 +54,7 @@ class PlotSettings(QWidget):
             mpl.style.use(style_name)
         except:
             LOG.error(f"Could not set matplotlib style to {style_name}")
+            mpl.style.use("default")
         else:
             self.plot_settings_changed.emit()
 
@@ -160,7 +161,11 @@ class PlotSettings(QWidget):
         top_layout = QFormLayout()
         style_selector = QComboBox(self)
         style_selector.addItem("default")
-        style_selector.addItems(mpl.style.available)
+        style_list_mpl = mpl.style.available
+        style_list_filtered = [x for x in style_list_mpl if x[0] != "_"]
+        style_list_filtered = [x for x in style_list_filtered if "lorbli" not in x]
+        style_list_filtered = [x for x in style_list_filtered if x not in ["fast"]]
+        style_selector.addItems(style_list_filtered)
         try:
             style_string = self._settings.group("matplotlib").get("style")
         except:
