@@ -99,7 +99,15 @@ class Grid(Plotter):
                     new_limits = self._backup_limits[ds_num]
                 except IndexError:
                     while len(self._backup_limits) < (ds_num + 1):
-                        self._backup_limits.append([])
+                        self._backup_limits.append(
+                            [
+                                xlimits[0],
+                                xlimits[1],
+                                ylimits[0],
+                                ylimits[1],
+                            ]
+                        )
+                    new_limits = self._backup_limits[ds_num]
                 if not update_only:
                     self._backup_limits[ds_num] = [
                         xlimits[0],
