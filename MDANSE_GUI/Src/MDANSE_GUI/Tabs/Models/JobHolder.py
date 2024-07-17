@@ -65,6 +65,15 @@ class JobThread(QThread):
 
     @Slot()
     def check_if_alive(self):
+        if self._subprocess._closed:
+            # The subprocess was closed probably by the user, don't need
+            # to keep checking that the subprocess is alive anymore.
+            # Also, no need to send out a status update since it should
+            # already have been updated already when it got terminated.
+            self._keep_running = False
+            self._timer.stop()
+            self.terminate()
+            return
         if not self._subprocess.is_alive():
             self.fail()
 
@@ -240,7 +249,6 @@ class JobHolder(QStandardItemModel):
         log_queue = Queue()
 
         main_pipe, child_pipe = Pipe()
-        main_queue = Queue()
         pause_event = Event()
         entry_number = self.next_number
 
@@ -258,7 +266,6 @@ class JobHolder(QStandardItemModel):
                 job_name=job_vars[0],
                 job_parameters=job_vars[1],
                 pipe=child_pipe,
-                queue=main_queue,
                 pause_event=pause_event,
                 log_queue=log_queue,
             )

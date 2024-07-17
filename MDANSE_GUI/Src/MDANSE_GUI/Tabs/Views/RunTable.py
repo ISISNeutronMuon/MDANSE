@@ -90,7 +90,6 @@ class RunTable(QTableView):
         entry, watcher, process, listener = self.getJobObjects()
         try:
             process.close()
-            listener.stop()
         except ValueError:
             LOG.error("The process is still running!")
         else:
@@ -130,11 +129,14 @@ class RunTable(QTableView):
         )
         result = confirmation_box.exec()
         LOG.info(f"QMessageBox result = {result}")
-        if result == QMessageBox.StandardButton.Yes.value:
+        if result == QMessageBox.StandardButton.Yes:
             entry, _, process, listener = self.getJobObjects()
-            process.terminate()
-            entry.terminate_job()
-            listener.stop()
+            # process is not alive, the job probably finished already
+            if process.is_alive():
+                process.terminate()
+                process.join()
+                entry.terminate_job()
+                listener.stop()
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
