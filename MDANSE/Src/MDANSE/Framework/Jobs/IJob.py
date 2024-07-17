@@ -137,6 +137,10 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         self._log_filename = None
 
+        self.inputQueue = Queue()
+        self.outputQueue = Queue()
+        self.log_queue = Queue()
+
     def __getstate__(self):
         d = self.__dict__.copy()
         del d["_processes"]
@@ -276,13 +280,12 @@ class IJob(Configurable, metaclass=SubclassFactory):
         return True
 
     def _run_multicore(self):
+        if hasattr(self._status, "_queue_0"):
+            self._status._queue_0.put("started")
 
-        ctx = multiprocessing.get_context("spawn")
-
-        manager = ctx.Manager()
-        inputQueue = manager.Queue()
-        outputQueue = manager.Queue()
-        log_queue = Queue()
+        inputQueue = self.inputQueue
+        outputQueue = self.outputQueue
+        log_queue = self.log_queue
 
         log_queues = [log_queue]
         handlers = []  # handlers that are not QueueHandlers
@@ -301,6 +304,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             inputQueue.put(i)
 
         for i in range(self.configuration["running_mode"]["slots"]):
+            self._run_multicore_check_terminate(listener)
             p = multiprocessing.Process(
                 target=self.process_tasks_queue,
                 args=(inputQueue, outputQueue, log_queues),
@@ -309,26 +313,54 @@ class IJob(Configurable, metaclass=SubclassFactory):
             p.daemon = False
             p.start()
 
-        while inputQueue.qsize() > 0:
-            time.sleep(0.1)
+        n_results = 0
+        while n_results != self.numberOfSteps:
+            self._run_multicore_check_terminate(listener)
             if self._status is not None:
-                self._status.fixed_status(outputQueue.qsize())
-
-        for p in self._processes:
-            p.join()
-
-        while True:
+                self._status.fixed_status(n_results)
             try:
                 index, result = outputQueue.get_nowait()
             except queue.Empty:
-                break
+                time.sleep(0.1)
+                continue
             else:
+                n_results += 1
                 self.combine(index, result)
+
+        for p in self._processes:
+            p.join()
 
         for p in self._processes:
             p.close()
 
         listener.stop()
+
+    def _run_multicore_check_terminate(self, listener) -> None:
+        """Check if a terminate job was added to the queue. If it was
+        added we need to terminate and join all child processes.
+
+        Parameters
+        ----------
+        listener : QueueListener
+            The log listener that we need to stop.
+        """
+        if not (
+            hasattr(self._status, "_queue_0") and hasattr(self._status, "_queue_1")
+        ):
+            return
+        if not self._status._queue_1.empty():
+            if self._status._queue_1.get() == "terminate":
+                for p in self._processes:
+                    p.terminate()
+                    p.join()
+                listener.stop()
+                self._status._queue_0.put("terminated")
+                # we've terminated the child processes, now we wait
+                # here as the whole subprocess will be terminated.
+                # We don't want IJob doing anything else from now
+                # onwards.
+                while True:
+                    time.sleep(10)
 
     def _run_remote(self):
         raise NotImplementedError(
