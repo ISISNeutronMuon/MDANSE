@@ -33,7 +33,6 @@ from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
-from MDANSE_GUI.Widgets.Generator import WidgetGenerator
 from MDANSE_GUI.Resources import Resources
 from MDANSE_GUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
@@ -82,7 +81,6 @@ class TabbedWindow(QMainWindow):
         self._toolbar_buttons = []  # list of (widget, icon_key:str) pairs
         self._style_database = StyleDatabase(self)
         self.setWindowTitle(title)
-        self.wid_gen = WidgetGenerator()
         self.resources = Resources()
         self.current_object = None
         self.startSettings(settings)
