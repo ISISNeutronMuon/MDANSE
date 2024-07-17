@@ -24,6 +24,7 @@ import numpy as np
 from matplotlib.markers import MarkerStyle
 from matplotlib.lines import lineStyles
 from matplotlib import rcParams
+import matplotlib.pyplot as mpl
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
@@ -31,11 +32,20 @@ from MDANSE.MLogging import LOG
 
 
 def get_mpl_markers():
-    return MarkerStyle.markers
+    unique_keys = list(set(MarkerStyle.markers.keys()))
+    filtered_markers = {
+        key: MarkerStyle.markers[key]
+        for key in unique_keys
+        if key not in ["", " ", "none"] + [str(x) for x in range(10)]
+    }
+    return filtered_markers
 
 
 def get_mpl_lines():
-    return lineStyles
+    filtered_line_styles = {
+        key: value for key, value in lineStyles.items() if key not in ["", " "]
+    }
+    return filtered_line_styles
 
 
 def get_mpl_colours():
@@ -220,11 +230,16 @@ class PlottingContext(QStandardItemModel):
 
     @property
     def colormap(self):
+        backup_cmap = "viridis"
         try:
             cmap = self._unit_lookup._settings.group("colours").get("colormap")
         except:
-            cmap = "viridis"
-        return cmap
+            return backup_cmap
+        else:
+            if cmap in mpl.colormaps():
+                return cmap
+            else:
+                return backup_cmap
 
     @Slot()
     def regenerate_colours(self):

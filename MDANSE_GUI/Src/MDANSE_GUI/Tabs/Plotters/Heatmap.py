@@ -61,6 +61,9 @@ class Heatmap(Plotter):
     def slider_limits(self) -> List[str]:
         return self._number_of_sliders * [[0.0, 100.0, 0.1]]
 
+    def sliders_coupled(self) -> bool:
+        return True
+
     def get_figure(self, figure: "Figure" = None):
         if figure is None:
             target = self._figure
@@ -84,8 +87,9 @@ class Heatmap(Plotter):
                 while len(self._backup_minmax) < (num + 1):
                     self._backup_minmax.append([-1, -1])
                 last_minmax = [-1, -1]
-            array = self._backup_arrays[num]
             interpolator = self._backup_scale_interpolators[num]
+            if new_value[1] <= new_value[0]:
+                return
             newmax = interpolator(new_value[1])
             newmin = interpolator(new_value[0])
             if newmax < newmin:

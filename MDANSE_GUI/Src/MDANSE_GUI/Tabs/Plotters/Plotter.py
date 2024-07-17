@@ -53,6 +53,9 @@ class Plotter(metaclass=SubclassFactory):
     def slider_limits(self) -> List[str]:
         return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
 
+    def sliders_coupled(self) -> bool:
+        return False
+
     def get_mpl_colors(self):
         cycler = rcParams["axes.prop_cycle"]
         colours = cycler.by_key()["color"]

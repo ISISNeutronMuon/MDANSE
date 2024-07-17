@@ -180,6 +180,9 @@ class PlotSettings(QWidget):
                     "Name of the matplotlib colormap to be used in 2D plots.",
                 )
                 current_cmap = "viridis"
+            else:
+                if current_cmap not in mpl.colormaps():
+                    current_cmap = "viridis"
         except:
             print(f"Could not get the colours group")
             current_cmap = "viridis"
