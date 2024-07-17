@@ -239,7 +239,7 @@ class PlottingContext(QStandardItemModel):
             if cmap in mpl.colormaps():
                 return cmap
             else:
-                return backup_cmap
+                return self._unit_lookup._settings.default_value("colours", "colormap")
 
     @Slot()
     def regenerate_colours(self):

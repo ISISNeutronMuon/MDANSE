@@ -54,7 +54,13 @@ class PlotSettings(QWidget):
             mpl.style.use(style_name)
         except:
             LOG.error(f"Could not set matplotlib style to {style_name}")
-            mpl.style.use("default")
+            backup_style = self._unit_lookup._settings.default_value(
+                "matplotlib", "style"
+            )
+            if backup_style is None:
+                mpl.style.use("default")
+            else:
+                mpl.style.use(backup_style)
         else:
             self.plot_settings_changed.emit()
 
@@ -79,12 +85,12 @@ class PlotSettings(QWidget):
         try:
             energy = self._unit_fields["energy"].currentText()
         except:
-            pass
+            LOG.warning("Could not get the energy unit from GUI")
         else:
             try:
                 measure(1.0, "rad/ps", equivalent=True).toval(energy)
             except:
-                pass
+                energy = self._settings.default_value("units", "energy")
             else:
                 if not unit_group.set("energy", energy):
                     unit_group.add(
@@ -95,12 +101,12 @@ class PlotSettings(QWidget):
         try:
             time = self._unit_fields["time"].currentText()
         except:
-            pass
+            LOG.warning("Could not get the time unit from GUI")
         else:
             try:
                 measure(1.0, "ps").toval(time)
             except:
-                pass
+                time = self._settings.default_value("units", "time")
             else:
                 if not unit_group.set("time", time):
                     unit_group.add(
@@ -109,12 +115,12 @@ class PlotSettings(QWidget):
         try:
             distance = self._unit_fields["distance"].currentText()
         except:
-            pass
+            LOG.warning("Could not get the distance unit from GUI")
         else:
             try:
                 measure(1.0, "nm").toval(distance)
             except:
-                pass
+                distance = self._settings.default_value("units", "distance")
             else:
                 if not unit_group.set("distance", distance):
                     unit_group.add(
@@ -125,12 +131,12 @@ class PlotSettings(QWidget):
         try:
             reciprocal = self._unit_fields["reciprocal"].currentText()
         except:
-            pass
+            LOG.warning("Could not get the reciprocal space unit from GUI")
         else:
             try:
                 measure(1.0, "1/nm").toval(reciprocal)
             except:
-                pass
+                reciprocal = self._settings.default_value("units", "reciprocal")
             else:
                 if not unit_group.set("reciprocal", reciprocal):
                     unit_group.add(

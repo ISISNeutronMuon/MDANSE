@@ -43,6 +43,20 @@ class PlotSelectionTab(GeneralTab):
         self._visualiser._settings = self._settings
         self._visualiser._unit_lookup = self
 
+    def grouped_settings(self):
+        results = super().grouped_settings()
+        results += [
+            [
+                "dialogs",
+                {"new_plot": "True", "data_plotted": "True"},
+                {
+                    "new_plot": "Show a pop-up dialog EVERY TIME a new plot is created",
+                    "data_plotted": "Show a pop-up dialog EVERY TIME a data set is plotted",
+                },
+            ]
+        ]
+        return results
+
     @Slot()
     def load_files(self):
         fnames = QFileDialog.getOpenFileNames(

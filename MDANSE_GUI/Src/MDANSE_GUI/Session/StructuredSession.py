@@ -269,6 +269,7 @@ class SettingsFile:
         self._filename = os.path.join(settings_path, name + ".toml")
         self._file = TOMLFile(self._filename)
         self._groups = {}
+        self._defaults = {}
         self.load_from_file()
 
     def load_from_file(self) -> bool:
@@ -299,6 +300,16 @@ class SettingsFile:
     def groups(self):
         return self._groups
 
+    def default_value(self, group: str, key: str):
+        try:
+            result = self._defaults[(group, key)]
+        except KeyError:
+            result = None
+        LOG.warning(
+            f"Bad entry in {self._filename} for {group}->{key}? Default value {result} requested."
+        )
+        return result
+
     def group(self, group_name: str) -> "SettingsGroup":
         try:
             group = self._groups[group_name]
@@ -320,6 +331,8 @@ class SettingsFile:
     def extend_settings(self, group_name, values, comments):
         group = self.group(group_name)
         group.update(values, comments)
+        for key, value in values.items():
+            self._defaults[(group_name, key)] = value
 
     def check_settings(self, group_name, values, comments):
         group = self.group(group_name)

@@ -137,7 +137,15 @@ class GeneralTab(QObject):
                 target_unit = backup_group[property]
         else:
             target_unit = unit_group[property]
-        conversion_factor = measure(1.0, input_unit, equivalent=True).toval(target_unit)
+        try:
+            conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
+                target_unit
+            )
+        except:
+            target_unit = self._settings.default_value("units", property)
+            conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
+                target_unit
+            )
         return conversion_factor, target_unit
 
     def get_path(self, path_key: str):
