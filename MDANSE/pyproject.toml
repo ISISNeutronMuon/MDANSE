@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE"
-version = "2.0.0a1"
+version = "2.0.0a2"
 description = 'MDANSE Core package - Molecular Dynamics trajectory handling and analysis code'
 readme = "README.md"
 requires-python = ">=3.9"

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE_GUI"
-version = "0.1.0a2"
+version = "0.1.0a3"
 description = 'MDANSE GUI package - the graphical interface for MDANSE'
 readme = "README.md"
 requires-python = ">=3.9"
