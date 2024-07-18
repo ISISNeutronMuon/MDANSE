@@ -15,13 +15,11 @@
 #
 from typing import Optional
 
-from MDANSE.Framework.Configurators.IntegerConfigurator import \
-    IntegerConfigurator
+from MDANSE.Framework.Configurators.IntegerConfigurator import IntegerConfigurator
 
 
 class DerivativeOrderConfigurator(IntegerConfigurator):
-    """Configurator used when numerical derivatives are required.
-    """
+    """Configurator used when numerical derivatives are required."""
 
     _default = 3
 
