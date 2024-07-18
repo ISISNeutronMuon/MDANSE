@@ -190,7 +190,12 @@ class Heatmap(Plotter):
                             [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
                         )
                 else:
-                    previous_units = self._last_axes_units[num]
+                    try:
+                        previous_units = self._last_axes_units[num]
+                    except IndexError:
+                        while len(self._last_axes_units) < (ds_num + 1):
+                            self._last_axes_units.append([axis_units[0], axis_units[1]])
+                        previous_units = self._last_axes_units[num]
                     if axis_units[0] == previous_units[0]:
                         axes.set_xlim((last_limits[0], last_limits[1]))
                     else:
