@@ -57,12 +57,7 @@ class StaticStructureFactor(DistanceHistogram):
     )
     settings["q_values"] = (
         "RangeConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "default": (0, 500, 1)
-        },
+        {"valueType": float, "includeLast": True, "mini": 0.0, "default": (0, 500, 1)},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
