@@ -45,6 +45,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "VectorConfigurator": VectorWidget,
     "HDFInputFileConfigurator": InputFileWidget,
     "HDFTrajectoryConfigurator": HDFTrajectoryWidget,
+    "DerivativeOrderConfigurator": DerivativeOrderWidget,
     "InterpolationOrderConfigurator": InterpolationOrderWidget,
     "OutputFilesConfigurator": OutputFilesWidget,
     "ASEFileConfigurator": InputFileWidget,
