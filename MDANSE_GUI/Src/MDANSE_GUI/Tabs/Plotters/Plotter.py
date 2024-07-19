@@ -37,6 +37,12 @@ class Plotter(metaclass=SubclassFactory):
         self._number_of_sliders = 2
         self._value_reset_needed = True
         self._toolbar = None
+        self._slider_reference = None
+
+    def request_slider_values(self):
+        if self._slider_reference is None:
+            return
+        self._slider_reference.collect_values()
 
     def clear(self, figure: "Figure" = None):
         if figure is None:

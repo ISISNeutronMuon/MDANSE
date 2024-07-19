@@ -181,6 +181,7 @@ class PlotWidget(QWidget):
         self.change_slider_limits.emit(self._plotter.slider_limits())
         self.change_slider_coupling.emit(self._plotter.sliders_coupled())
         self.reset_slider_values.emit(self._plotter._value_reset_needed)
+        self._plotter._slider_reference = self._sliderpack
         self.plot_data()
 
     @Slot(object)
