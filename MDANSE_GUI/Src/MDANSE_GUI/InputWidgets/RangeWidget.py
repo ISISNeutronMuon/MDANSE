@@ -28,7 +28,7 @@ class RangeWidget(WidgetBase):
         self.setup_fields(*args, **kwargs)
 
     def setup_fields(self, *args, **kwargs):
-        start, end, step = kwargs.get("default", self._configurator._default)
+        start, end, step = kwargs.get("default", self._configurator.default)
         num_type = kwargs.get("valueType", int)
 
         labels = [

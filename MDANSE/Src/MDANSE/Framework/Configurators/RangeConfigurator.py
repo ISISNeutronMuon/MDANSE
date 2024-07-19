@@ -41,6 +41,7 @@ class RangeConfigurator(IConfigurator):
         toList=False,
         mini=None,
         maxi=None,
+        default=None,
         **kwargs,
     ):
         """
@@ -75,6 +76,8 @@ class RangeConfigurator(IConfigurator):
         self._mini = mini
 
         self._maxi = maxi
+
+        self._new_default = default
 
     def configure(self, value):
         """
@@ -228,3 +231,15 @@ class RangeConfigurator(IConfigurator):
 
         else:
             return "Invalid input parameters\n"
+
+    def default(self) -> tuple[float | int]:
+        """
+        Returns
+        -------
+        tuple[float]
+            The default values of the range.
+        """
+        if self._new_default:
+            return self._new_default
+        else:
+            return self._default
