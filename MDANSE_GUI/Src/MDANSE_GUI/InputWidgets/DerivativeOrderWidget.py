@@ -36,7 +36,7 @@ class DerivativeOrderWidget(WidgetBase):
         self._field.setMaximum(5)
         self._field.setMinimum(1)
         self._field.setValue(3)
-        label = QLabel("Derivative order", self._base)
+        label = QLabel("Interpolation order", self._base)
         self.numerator = QLabel("st order")
         self.adjust_numerator(3)
 

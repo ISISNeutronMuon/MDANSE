@@ -34,12 +34,12 @@ class DerivativeOrderConfigurator(IntegerConfigurator):
         IntegerConfigurator.__init__(self, name, **kwargs)
 
     def configure(self, value: Optional[int]) -> None:
-        """Configure the input derivative order.
+        """Configure the input interpolation order.
 
         Parameters
         ----------
         value : int or None
-            The numerical derivative order to use.
+            The interpolation order to use.
         """
         self._original_input = value
         if value is None:
@@ -49,7 +49,7 @@ class DerivativeOrderConfigurator(IntegerConfigurator):
 
         if value <= 0 or value > 5:
             self.error_status = (
-                f"Use an derivative order less than or equal to zero or "
+                f"Use an interpolation order less than or equal to zero or "
                 f"greater than 5 is not implemented."
             )
             return
