@@ -13,12 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+
+from typing import Dict, Tuple
+
 from qtpy.QtCore import QObject, Slot, QMessageLogger
 from qtpy.QtWidgets import QListView
 
+from MDANSE.Framework.Units import measure, unit_lookup
+
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 
@@ -38,7 +43,9 @@ class GeneralTab(QObject):
     def __init__(self, *args, **kwargs):
         self._name = kwargs.pop("name", "Unnamed GUI part")
         self._session = kwargs.pop("session", LocalSession())
-        self._settings = kwargs.pop("settings", LocalSettings())
+        _ = kwargs.pop("settings", None)
+        self._settings = self._session.obtain_settings(self)
+        self._global_settings = self._session.main_settings()
         self._model = kwargs.pop("model", None)
         self._visualiser = kwargs.pop("visualiser", TextInfo())
         self._view = kwargs.pop("view", QListView())
@@ -58,6 +65,106 @@ class GeneralTab(QObject):
         self._core.set_label_text(label_text)
         self._core.connect_logging
         self.propagate_session()
+
+    def grouped_settings(self):
+        """This method tells the Session object what settings
+        this Tab will store in its settings file,
+        and what each of the settings means.
+
+        This way each GUI component can have its own settings
+        without interfering with the others, and the user
+        does not risk breaking all the settings by
+        mangling a single file.
+
+        Returns
+        -------
+        List[str, Dict[str, str], Dict[str, str]]
+        """
+        group1 = [
+            "Generic settings",  # name of the group of settings
+            {"path": "."},  # a dictionary of settings
+            {
+                "path": "The path last used by this GUI element."
+            },  # a dictionary of comments
+        ]
+        group2 = [
+            "units",  # name of the group of settings
+            {"energy": "meV", "time": "fs", "distance": "ang", "reciprocal": "1/ang"},
+            {
+                "energy": "The unit of energy preferred by the user.",
+                "time": "The unit of time preferred by the user.",
+                "distance": "The unit of distance preferred by the user",
+                "reciprocal": "The momentum (transfer) unit preferred by the user",
+            },
+        ]
+        return [group1, group2]
+
+    def connect_units(self):
+        if self._visualiser is not None:
+            if self._visualiser._unit_lookup is None:
+                print(f"Visualiser {self._visualiser} has no unit lookup")
+                self._visualiser._unit_lookup = self
+
+    def conversion_factor(self, input_unit: str) -> Tuple[float, str]:
+        """Finds the conversion factor from an input unit
+        to the unit preferred by the user for a given
+        physical property.
+
+        Parameters
+        ----------
+        input_unit : str
+            Name/abbreviation of a physical unit
+
+        Returns
+        -------
+        Tuple[float, str]
+            factor F and text label str
+            Conversion factor F for converting from the input unit
+            to the unit saved by the LocalSession instance.
+            The conversion will be done outside of this
+            function, following the formula:
+            converted_value = F * input_value
+        """
+        conversion_factor = 1.0
+        target_unit = input_unit
+        property = unit_lookup.get(input_unit, "unknown")
+        unit_group = self._settings.group("units").as_dict()
+        backup_group = self._global_settings.group("units").as_dict()
+        if property not in unit_group:
+            if property not in backup_group:
+                return conversion_factor, target_unit
+            else:
+                target_unit = backup_group[property]
+        else:
+            target_unit = unit_group[property]
+        try:
+            conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
+                target_unit
+            )
+        except:
+            target_unit = self._settings.default_value("units", property)
+            conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
+                target_unit
+            )
+        return conversion_factor, target_unit
+
+    def get_path(self, path_key: str):
+        paths_group = self._settings.group("paths")
+        try:
+            path = paths_group.get(path_key)
+        except KeyError:
+            paths_group.add(
+                path_key, ".", f"Filesystem path recently used by {path_key}"
+            )
+            path = "."
+        return path
+
+    def set_path(self, path_key: str, path_value: str):
+        paths_group = self._settings.group("paths")
+        if not paths_group.set(path_key, path_value):
+            paths_group.add(
+                path_key, path_value, f"Filesystem path recently used by {path_key}"
+            )
 
     @Slot()
     def save_state(self):

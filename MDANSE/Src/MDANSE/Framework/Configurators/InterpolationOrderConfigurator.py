@@ -29,7 +29,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
 
-    _default = 1
+    _default = 3
 
     def __init__(self, name, **kwargs):
         """

@@ -51,11 +51,26 @@ class JobTab(GeneralTab):
         if cmodel is not None:
             self._trajectory_combo.setModel(cmodel)
         self._core.add_widget(self._trajectory_combo)
+        self.action._parent_tab = self
+        self._visualiser._parent_tab = self
 
     def set_job_starter(self, job_starter):
         self._job_starter = job_starter
         self.action.new_thread_objects.connect(self._job_starter.startProcess)
         self.action.run_and_load.connect(self._job_starter.startProcessAndLoad)
+
+    def grouped_settings(self):
+        results = super().grouped_settings()
+        results += [
+            [
+                "Execution",
+                {"auto-load": "True"},
+                {
+                    "auto-load": "Unless manually switched off, the GUI will try to load the job results when the job is finished."
+                },
+            ]
+        ]
+        return results
 
     @Slot(int)
     def set_current_trajectory(self, index: int) -> None:
@@ -106,6 +121,7 @@ class JobTab(GeneralTab):
             label_text=job_tab_label,
             action=action,
         )
+        action._parent_tab = the_tab
         return the_tab
 
     @classmethod
@@ -143,6 +159,7 @@ class JobTab(GeneralTab):
             label_text=job_tab_label,
             action=action,
         )
+        action.set_settings(the_tab._settings)
         return the_tab
 
 

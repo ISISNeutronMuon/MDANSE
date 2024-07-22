@@ -63,14 +63,14 @@ class Grid(Plotter):
         self.apply_settings(plotting_context, colours)
         nplots = 0
         for databundle in plotting_context.datasets().values():
-            ds, colour, style, _ = databundle
+            ds, colour, linestyle, marker, _ = databundle
             best_unit, best_axis = ds.longest_axis()
             curves = ds.curves_vs_axis(best_unit)
             nplots += len(curves)
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
         for name, databundle in plotting_context.datasets().items():
-            dataset, colour, style, ds_num = databundle
+            dataset, colour, linestyle, marker, ds_num = databundle
             best_unit, best_axis = dataset.longest_axis()
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)
             for key, curve in dataset._curves.items():
@@ -80,19 +80,34 @@ class Grid(Plotter):
                 conversion_factor = measure(1.0, best_unit, equivalent=True).toval(
                     xaxis_unit
                 )
-                axes.plot(
+                [temp_curve] = axes.plot(
                     dataset._axes[best_axis] * conversion_factor,
                     curve,
-                    style,
+                    linestyle=linestyle,
                     color=colour,
                     label=plotlabel + ":" + dataset._curve_labels[key],
                 )
+                try:
+                    temp_curve.set_marker(marker)
+                except ValueError:
+                    try:
+                        temp_curve.set_marker(int(marker))
+                    except:
+                        pass
                 xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
                 try:
                     new_limits = self._backup_limits[ds_num]
                 except IndexError:
                     while len(self._backup_limits) < (ds_num + 1):
-                        self._backup_limits.append([])
+                        self._backup_limits.append(
+                            [
+                                xlimits[0],
+                                xlimits[1],
+                                ylimits[0],
+                                ylimits[1],
+                            ]
+                        )
+                    new_limits = self._backup_limits[ds_num]
                 if not update_only:
                     self._backup_limits[ds_num] = [
                         xlimits[0],

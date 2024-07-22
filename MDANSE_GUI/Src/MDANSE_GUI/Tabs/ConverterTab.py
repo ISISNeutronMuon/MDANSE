@@ -43,6 +43,8 @@ class ConverterTab(GeneralTab):
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""
         self._job_starter = None
+        self.action._parent_tab = self
+        self._visualiser._parent_tab = self
 
     def set_job_starter(self, job_starter):
         self._job_starter = job_starter
@@ -52,6 +54,19 @@ class ConverterTab(GeneralTab):
     @Slot(str)
     def set_current_trajectory(self, new_name: str):
         self._current_trajectory = new_name
+
+    def grouped_settings(self):
+        results = super().grouped_settings()
+        results += [
+            [
+                "Execution",
+                {"auto-load": "True"},
+                {
+                    "auto-load": "Unless manually switched off, the GUI will try to load the job results when the job is finished."
+                },
+            ]
+        ]
+        return results
 
     @classmethod
     def standard_instance(cls):
@@ -111,7 +126,7 @@ class ConverterTab(GeneralTab):
             label_text=tab_label,
             action=action,
         )
-        action.set_session(the_tab._session)
+        action.set_settings(the_tab._settings)
         return the_tab
 
 

@@ -40,17 +40,39 @@ class PlotSelectionTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDA results", self.load_files)
+        self._visualiser._settings = self._settings
+        self._visualiser._unit_lookup = self
+
+    def grouped_settings(self):
+        results = super().grouped_settings()
+        results += [
+            [
+                "dialogs",
+                {"new_plot": "True", "data_plotted": "True"},
+                {
+                    "new_plot": "Show a pop-up dialog EVERY TIME a new plot is created",
+                    "data_plotted": "Show a pop-up dialog EVERY TIME a data set is plotted",
+                },
+            ]
+        ]
+        return results
 
     @Slot()
     def load_files(self):
         fnames = QFileDialog.getOpenFileNames(
             self._core,
             "Load an MDA file (MDANSE analysis results)",
-            self._session.get_path("root_directory"),
+            self.get_path("plot_selection"),
             "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
         )
+        if fnames is None:
+            return
+        if len(fnames[0]) < 1:
+            return
         for fname in fnames[0]:
             self.load_results(fname)
+            last_path, _ = os.path.split(fname)
+        self.set_path("plot_selection", last_path)
 
     @Slot(str)
     def load_results(self, fname: str):
@@ -94,6 +116,7 @@ class PlotSelectionTab(GeneralTab):
             layout=partial(MultiPanel, left_panels=[PlotDataInfo()]),
             label_text=label_text,
         )
+        the_tab._visualiser._unit_lookup = the_tab
         return the_tab
 
 

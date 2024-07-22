@@ -31,10 +31,10 @@ from qtpy.QtWidgets import (
 
 from MDANSE.MLogging import LOG
 
-from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
+from MDANSE_GUI.Session.StructuredSession import StructuredSession
 from MDANSE_GUI.Resources import Resources
 from MDANSE_GUI.UnitsEditor import UnitsEditor
+from MDANSE_GUI.UserSettingsEditor import UserSettingsEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
@@ -75,8 +75,8 @@ class TabbedWindow(QMainWindow):
         self._views = defaultdict(list)
         self._actions = []
         self._tabs = {}
-        self._settings = LocalSettings()
-        self._session = LocalSession()
+        self._session = StructuredSession()
+        self._settings = self._session.obtain_settings(self)
         self._logger = QMessageLogger()
         self._toolbar_buttons = []  # list of (widget, icon_key:str) pairs
         self._style_database = StyleDatabase(self)
@@ -97,8 +97,9 @@ class TabbedWindow(QMainWindow):
         self.style_selector.icon_swap.connect(self.invertToolbar)
 
         if app_instance is not None:
-            app_instance.aboutToQuit.connect(self._session.save_json)
-        self._session.load_json()
+            app_instance.aboutToQuit.connect(self._session.save)
+        self._session.load()
+        self.settings_editor = UserSettingsEditor(self, current_session=self._session)
 
         self._tabs["Plot Creator"]._visualiser.data_for_plotting.connect(
             self._tabs["Plot Holder"].accept_external_data
@@ -145,10 +146,14 @@ class TabbedWindow(QMainWindow):
         menubar.setObjectName("main menubar")
         menubar.setVisible(True)
         file_group = menubar.addMenu("File")
+        settings_group = menubar.addMenu("Settings")
         help_group = menubar.addMenu("Help")
         self.exitAct = QAction("Exit", parent=menubar)
         self.exitAct.triggered.connect(self.shut_down)
         file_group.addAction(self.exitAct)
+        self.settingsAct = QAction("User Settings", parent=menubar)
+        self.settingsAct.triggered.connect(self.launchSettingsEditor)
+        settings_group.addAction(self.settingsAct)
         self.aboutAct = QAction("About MDANSE", parent=menubar)
         self.aboutAct.triggered.connect(self.version_information)
         help_group.addAction(self.aboutAct)
@@ -199,6 +204,11 @@ class TabbedWindow(QMainWindow):
     @Slot()
     def launchStyleSelector(self):
         self.launch_dialog(self.style_selector)
+
+    @Slot()
+    def launchSettingsEditor(self):
+        self.settings_editor.update_combo()
+        self.launch_dialog(self.settings_editor)
 
     @Slot()
     def launchElementsEditor(self):
@@ -307,6 +317,7 @@ class TabbedWindow(QMainWindow):
             self._settings,
             self._logger,
         )
+        plot_tab.connect_units()
         self.tabs.addTab(plot_tab._core, name)
         self._tabs[name] = plot_tab
 

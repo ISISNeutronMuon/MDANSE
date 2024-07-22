@@ -37,6 +37,9 @@ class PlotTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._visualiser._unit_lookup = self
+        self._visualiser._settings = self._settings
+        self._core._extra_visualiser._settings = self._settings
         self._visualiser.currentChanged.connect(self.switch_model)
         self._view.setModel(self.model)
         self._core._extra_visualiser.plot_settings_changed.connect(
@@ -45,6 +48,7 @@ class PlotTab(GeneralTab):
         self._core._extra_visualiser.plot_settings_changed.connect(
             self.model.regenerate_colours
         )
+        self._core._extra_visualiser.make_layout()
 
     @classmethod
     def standard_instance(cls):
@@ -73,7 +77,7 @@ class PlotTab(GeneralTab):
         logger,
         **kwargs,
     ):
-        plt_settings = PlotSettings(session=session)
+        plt_settings = PlotSettings(settings=settings)
         the_tab = cls(
             parent,
             name=name,
@@ -82,12 +86,13 @@ class PlotTab(GeneralTab):
             logger=logger,
             model=None,
             view=PlotDetailsView(),
-            visualiser=PlotHolder(session=session),
+            visualiser=PlotHolder(),
             layout=partial(
                 MultiPanel, left_panels=[plt_settings], extra_visualiser=plt_settings
             ),
             label_text=label_text,
         )
+        the_tab._visualiser._unit_lookup = the_tab
         return the_tab
 
     @property

@@ -45,6 +45,10 @@ class Infrared(IJob):
         "InstrumentResolutionConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
+    settings["derivative_order"] = (
+        "DerivativeOrderConfigurator",
+        {"label": "d/dt dipole numerical derivative"},
+    )
     settings["molecule_name"] = (
         "MoleculeSelectionConfigurator",
         {
@@ -160,7 +164,7 @@ class Infrared(IJob):
         for axis in range(3):
             ddipole[:, axis] = differentiate(
                 ddipole[:, axis],
-                order=2,
+                order=self.configuration["derivative_order"]["value"],
                 dt=self.configuration["frames"]["time_step"],
             )
 

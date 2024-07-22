@@ -123,8 +123,11 @@ class Single(Plotter):
         if plotting_context.set_axes() is None:
             LOG.error("Axis check failed.")
             return
+        if len(plotting_context.datasets()) == 0:
+            target.clear()
+            target.canvas.draw()
         for name, databundle in plotting_context.datasets().items():
-            dataset, colour, style, _ = databundle
+            dataset, colour, linestyle, marker, _ = databundle
             best_unit, best_axis = dataset.longest_axis()
             plotlabel = dataset._labels["medium"]
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)
@@ -139,10 +142,17 @@ class Single(Plotter):
                     [temp] = axes.plot(
                         dataset._axes[best_axis] * conversion_factor,
                         dataset._data,
-                        style,
+                        linestyle=linestyle,
                         label=plotlabel,
                         color=colour,
                     )
+                    try:
+                        temp.set_marker(marker)
+                    except ValueError:
+                        try:
+                            temp.set_marker(int(marker))
+                        except:
+                            pass
                     self._active_curves.append(temp)
                     self._backup_curves.append([temp.get_xdata(), temp.get_ydata()])
                     self.height_max = max(self.height_max, temp.get_ydata().max())
