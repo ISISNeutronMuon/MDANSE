@@ -1,6 +1,7 @@
 name: Build MDANSE
 
 on:
+  workflow_dispatch:
   release:
     types: [created]
 
