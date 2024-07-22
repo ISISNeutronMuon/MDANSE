@@ -15,33 +15,16 @@
 #
 import os
 import json
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from qtpy.QtCore import QObject, Signal, Slot
 
 from MDANSE.MLogging import LOG
 from MDANSE import PLATFORM
-from MDANSE.Framework.Units import measure
+from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
 
 json_encoder = json.encoder.JSONEncoder()
 json_decoder = json.decoder.JSONDecoder()
-
-unit_lookup = {
-    "rad/ps": "energy",
-    "meV": "energy",
-    "1/cm": "energy",
-    "THz": "energy",
-    "nm": "distance",
-    "ang": "distance",
-    "pm": "distance",
-    "Bohr": "distance",
-    "ps": "time",
-    "fs": "time",
-    "ns": "time",
-    "1/nm": "reciprocal",
-    "1/ang": "reciprocal",
-    "N/A": "arbitrary",
-}
 
 
 class LocalSession(QObject):
@@ -66,6 +49,7 @@ class LocalSession(QObject):
         self._units = {}
         self._colours = {}
         self._state = None
+        self._filename = None
         self.populate_defaults()
 
     def populate_defaults(self):
@@ -88,36 +72,6 @@ class LocalSession(QObject):
         self._colours["colormap"] = input
         self.new_cmap.emit(self._colours["colormap"])
 
-    def conversion_factor(self, input_unit: str) -> Tuple[float, str]:
-        """Finds the conversion factor from an input unit
-        to the unit preferred by the user for a given
-        physical property.
-
-        Parameters
-        ----------
-        input_unit : str
-            Name/abbreviation of a physical unit
-
-        Returns
-        -------
-        Tuple[float, str]
-            factor F and text label str
-            Conversion factor F for converting from the input unit
-            to the unit saved by the LocalSession instance.
-            The conversion will be done outside of this
-            function, following the formula:
-            converted_value = F * input_value
-        """
-        conversion_factor = 1.0
-        target_unit = input_unit
-        property = unit_lookup.get(input_unit, "unknown")
-        if property in self._units:
-            target_unit = self._units[property]
-            conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
-                target_unit
-            )
-        return conversion_factor, target_unit
-
     def get_parameter(self, key: str) -> str:
         value = self._parameters.get(key, None)
         return value
@@ -133,22 +87,35 @@ class LocalSession(QObject):
         value = self._units.get(key, "1")
         return value
 
+    def obtain_settings(self, gui_element):
+        return LocalSettings()
+
     def sections(self) -> List[Dict[str, str]]:
         return [self._units, self._colours]
 
     @Slot()
-    def save_json(self, fname: str = None):
+    def save(self, fname: str = None):
         all_items = {}
         all_items["paths"] = self._paths
         all_items["units"] = self._units
         all_items["colours"] = self._colours
         output = json_encoder.encode(all_items)
         if fname is None:
-            fname = os.path.join(PLATFORM.application_directory(), "gui_session.json")
-        with open(fname, "w") as target:
-            target.write(output)
+            if self._filename is None:
+                fname = os.path.join(
+                    PLATFORM.application_directory(), "gui_session.json"
+                )
+            else:
+                fname = self._filename
+        try:
+            with open(fname, "w") as target:
+                target.write(output)
+        except:
+            return
+        else:
+            self._filename = fname
 
-    def load_json(self, fname: str = None):
+    def load(self, fname: str = None):
         if fname is None:
             fname = os.path.join(PLATFORM.application_directory(), "gui_session.json")
         try:
@@ -162,3 +129,4 @@ class LocalSession(QObject):
             self._units = all_items["units"]
             if "colours" in all_items:
                 self._colours = all_items["colours"]
+            self._filename = fname

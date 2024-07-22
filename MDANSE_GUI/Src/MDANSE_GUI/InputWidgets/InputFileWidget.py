@@ -34,9 +34,18 @@ class InputFileWidget(WidgetBase):
         parent = kwargs.get("parent", None)
         if parent is not None:
             self._job_name = parent._job_name
-            self._session = parent._session
+            self._settings = parent._settings
         try:
-            self.default_path = self._session.get_path(self._job_name)
+            paths_group = self._settings.group("paths")
+            try:
+                self.default_path = paths_group.get(self._job_name)
+            except KeyError:
+                paths_group.add(
+                    self._job_name,
+                    ".",
+                    f"The filesystem path recently used by {self._job_name}",
+                )
+                self.default_path = "."
         except AttributeError:
             try:
                 self.default_path = parent.default_path
@@ -81,8 +90,9 @@ class InputFileWidget(WidgetBase):
         This will start a FileDialog, take the resulting path,
         and emit a signal to update the value show by the GUI.
         """
+        paths_group = self._settings.group("paths")
         try:
-            self.default_path = self._session.get_path(self._job_name)
+            self.default_path = paths_group.get(self._job_name)
         except:
             LOG.error(f"session.get_path failed for {self._job_name}")
         new_value = self._file_dialog(
@@ -96,7 +106,10 @@ class InputFileWidget(WidgetBase):
                 self._field.setText(new_value[0])
                 self.updateValue()
             try:
-                self._session.set_path(self._job_name, os.path.split(new_value[0])[0])
+                print(
+                    f"Settings path of {self._job_name} to {os.path.split(new_value[0])[0]}"
+                )
+                paths_group.set(self._job_name, os.path.split(new_value[0])[0])
             except:
                 LOG.error(
                     f"session.set_path failed for {self._job_name}, {os.path.split(new_value[0])[0]}"

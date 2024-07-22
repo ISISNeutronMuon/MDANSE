@@ -28,7 +28,6 @@ from qtpy.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QComboBox,
-    QSlider,
     QLabel,
     QGridLayout,
     QDoubleSpinBox,
@@ -37,6 +36,7 @@ from qtpy.QtCore import Slot, Signal, Qt
 
 from MDANSE.MLogging import LOG
 
+from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 
@@ -59,7 +59,7 @@ class SliderPack(QWidget):
         current_row = 0
         for n in range(n_sliders):
             label = QLabel(self)
-            slider = QSlider(self)
+            slider = RestrictedSlider(self)
             slider.setOrientation(Qt.Orientation.Horizontal)
             box = QDoubleSpinBox(self)
             box.setSingleStep(self._steparray[n])
@@ -73,6 +73,15 @@ class SliderPack(QWidget):
             slider.valueChanged.connect(self.slider_to_box)
             box.valueChanged.connect(self.box_to_slider)
             box.valueChanged.connect(self.collect_values)
+        slider1 = self._sliders[0]
+        slider2 = self._sliders[1]
+        slider1.new_limit.connect(slider2.set_lower_limit)
+        slider2.new_limit.connect(slider1.set_upper_limit)
+
+    @Slot(bool)
+    def new_coupling(self, new_val: bool):
+        self._sliders[0]._coupled = new_val
+        self._sliders[1]._coupled = new_val
 
     @Slot(object)
     def new_slider_labels(self, input):
@@ -128,6 +137,7 @@ class SliderPack(QWidget):
         clicks = np.round((vals - self._minarray) / self._steparray).astype(int)
         for ns, slider in enumerate(self._sliders):
             slider.setValue(clicks[ns])
+        self.slider_to_box()
         self.blockSignals(False)
 
     @Slot()
@@ -143,13 +153,15 @@ class PlotWidget(QWidget):
     change_slider_labels = Signal(object)
     change_slider_limits = Signal(object)
     reset_slider_values = Signal(bool)
+    change_slider_coupling = Signal(bool)
 
-    def __init__(self, *args, colours=None, **kwargs) -> None:
+    def __init__(self, *args, colours=None, settings=None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None
         self._plotting_context = None
         self._colours = colours
+        self._settings = settings
         self._slider_max = 100
         self.make_canvas()
         self.set_plotter("Single")
@@ -164,9 +176,12 @@ class PlotWidget(QWidget):
             self._plotter = Plotter.create(plotter_option)
         except:
             self._plotter = Plotter()
+        self._plotter._settings = self._settings
         self.change_slider_labels.emit(self._plotter.slider_labels())
         self.change_slider_limits.emit(self._plotter.slider_limits())
+        self.change_slider_coupling.emit(self._plotter.sliders_coupled())
         self.reset_slider_values.emit(self._plotter._value_reset_needed)
+        self._plotter._slider_reference = self._sliderpack
         self.plot_data()
 
     @Slot(object)
@@ -225,6 +240,7 @@ class PlotWidget(QWidget):
         slider = SliderPack(self)
         self.change_slider_labels.connect(slider.new_slider_labels)
         self.change_slider_limits.connect(slider.new_limits)
+        self.change_slider_coupling.connect(slider.new_coupling)
         self.reset_slider_values.connect(self.set_slider_values)
         slider.new_values.connect(self.slider_change)
         self._sliderpack = slider

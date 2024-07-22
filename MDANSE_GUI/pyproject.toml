@@ -37,6 +37,7 @@ dependencies = [
     "vtk",
     "PyQt6",
     "PyYAML",
+    "tomlkit"
 ]
 
 # dynamic = ["version", "description"]

@@ -21,13 +21,31 @@ if TYPE_CHECKING:
     import h5py
 
 import numpy as np
+from matplotlib.markers import MarkerStyle
+from matplotlib.lines import lineStyles
 from matplotlib import rcParams
+import matplotlib.pyplot as mpl
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 from MDANSE.MLogging import LOG
 
-from MDANSE_GUI.Session.LocalSession import unit_lookup
+
+def get_mpl_markers():
+    unique_keys = list(set(MarkerStyle.markers.keys()))
+    filtered_markers = {
+        key: MarkerStyle.markers[key]
+        for key in unique_keys
+        if key not in ["", " ", "none"] + [str(x) for x in range(10)]
+    }
+    return filtered_markers
+
+
+def get_mpl_lines():
+    filtered_line_styles = {
+        key: value for key, value in lineStyles.items() if key not in ["", " "]
+    }
+    return filtered_line_styles
 
 
 def get_mpl_colours():
@@ -175,7 +193,7 @@ class PlottingContext(QStandardItemModel):
 
     needs_an_update = Signal()
 
-    def __init__(self, *args, unit_preference=None, **kwargs):
+    def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._datasets = {}
         self._current_axis = [None, None, None]
@@ -185,14 +203,21 @@ class PlottingContext(QStandardItemModel):
         self._all_xunits = []
         self._best_xunits = []
         self._colour_list = get_mpl_colours()
+        self._last_colour_list = get_mpl_colours()
         self._colour_map = kwargs.get("colormap", "viridis")
         self._last_colour = 0
-        if unit_preference is None:
-            self._unit_preference = {}
-        else:
-            self._unit_preference = unit_preference
+        self._unit_lookup = unit_lookup
         self.setHorizontalHeaderLabels(
-            ["Dataset", "Trajectory", "Size", "Unit", "Use it?", "Colour", "Line style"]
+            [
+                "Dataset",
+                "Trajectory",
+                "Size",
+                "Unit",
+                "Use it?",
+                "Colour",
+                "Line style",
+                "Marker",
+            ]
         )
 
     def generate_colour(self, number: int):
@@ -203,12 +228,32 @@ class PlottingContext(QStandardItemModel):
         self._last_colour += 1
         return colour
 
+    @property
+    def colormap(self):
+        backup_cmap = "viridis"
+        try:
+            cmap = self._unit_lookup._settings.group("colours").get("colormap")
+        except:
+            return backup_cmap
+        else:
+            if cmap in mpl.colormaps():
+                return cmap
+            else:
+                return self._unit_lookup._settings.default_value("colours", "colormap")
+
     @Slot()
     def regenerate_colours(self):
         self._colour_list = get_mpl_colours()
         self._last_colour = 0
         for row in range(self.rowCount()):
-            self.item(row, 5).setText(str(self.next_colour()))
+            current_colour = self.item(row, 5).text()
+            if (
+                current_colour
+                != self._last_colour_list[row % len(self._last_colour_list)]
+            ):
+                self._last_colour += 1
+            else:
+                self.item(row, 5).setText(str(self.next_colour()))
 
     @Slot(object)
     def accept_external_data(self, other: "PlottingContext"):
@@ -227,19 +272,8 @@ class PlottingContext(QStandardItemModel):
         self._unit_preference = units
         self.set_axes()
 
-    @Slot(str)
-    def accept_cmap(self, cmap: str):
-        """Crucial slot for transferring data
-        between tabs. DataPlotter will send the datasets
-        into this slot."""
-        self._colour_map = cmap
-
     def get_conversion_factor(self, unit):
-        quantity = unit_lookup.get(unit, "unknown")
-        if quantity in self._unit_preference:
-            new_unit = self._unit_preference[quantity]
-        else:
-            new_unit = unit
+        factor, new_unit = self._unit_lookup.conversion_factor(unit)
         return new_unit
 
     def datasets(self) -> Dict:
@@ -252,8 +286,9 @@ class PlottingContext(QStandardItemModel):
             )
             colour = self.itemFromIndex(self.index(row, 5)).text()
             style = self.itemFromIndex(self.index(row, 6)).text()
+            marker = self.itemFromIndex(self.index(row, 7)).text()
             if useit:
-                result[key] = (self._datasets[key], colour, style, ds_num)
+                result[key] = (self._datasets[key], colour, style, marker, ds_num)
         return result
 
     def add_dataset(self, new_dataset: SingleDataset):
@@ -273,10 +308,12 @@ class PlottingContext(QStandardItemModel):
                 "",
                 self.next_colour(),
                 "-",
+                "",
             ]
         ]
         for item in items:
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
+        for item in items[:5]:
             item.setEditable(False)
         temp = items[4]
         temp.setCheckable(True)

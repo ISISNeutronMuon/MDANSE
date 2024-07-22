@@ -37,6 +37,12 @@ class Plotter(metaclass=SubclassFactory):
         self._number_of_sliders = 2
         self._value_reset_needed = True
         self._toolbar = None
+        self._slider_reference = None
+
+    def request_slider_values(self):
+        if self._slider_reference is None:
+            return
+        self._slider_reference.collect_values()
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
@@ -52,6 +58,9 @@ class Plotter(metaclass=SubclassFactory):
 
     def slider_limits(self) -> List[str]:
         return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
+
+    def sliders_coupled(self) -> bool:
+        return False
 
     def get_mpl_colors(self):
         cycler = rcParams["axes.prop_cycle"]

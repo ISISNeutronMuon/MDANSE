@@ -87,8 +87,9 @@ class Action(QWidget):
     def __init__(self, *args, use_preview=False, **kwargs):
         self._default_path = None
         self._input_trajectory = None
+        self._parent_tab = None
         self._trajectory_configurator = None
-        self._session = None
+        self._settings = None
         self._use_preview = use_preview
         default_path = kwargs.pop("path", None)
         input_trajectory = kwargs.pop("trajectory", None)
@@ -100,8 +101,8 @@ class Action(QWidget):
         self._widgets = []
         self._widgets_in_layout = []
 
-    def set_session(self, session):
-        self._session = session
+    def set_settings(self, settings):
+        self._settings = settings
 
     def set_trajectory(self, path: Optional[str], trajectory: Optional[str]) -> None:
         """Set the trajectory path and filename.
@@ -150,7 +151,7 @@ class Action(QWidget):
         self.clear_panel()
 
         self._job_name = job_name
-        self.last_paths[job_name] = "."
+        self.last_paths[job_name] = self._parent_tab.get_path(job_name)
         try:
             job_instance = IJob.create(job_name)
         except ValueError as e:
@@ -236,6 +237,15 @@ class Action(QWidget):
         self.execute_button = QPushButton("RUN!", buttonbase)
         self.execute_button.setStyleSheet("font-weight: bold")
         self.post_execute_checkbox = QCheckBox("Auto-load results", buttonbase)
+        try:
+            default_check_status = (
+                self._parent_tab._settings.group("Execution").get("auto-load") == "True"
+            )
+        except:
+            LOG.debug(f"Converter tab could not load auto-load settings")
+            default_check_status = False
+        if default_check_status:
+            self.post_execute_checkbox.setChecked(True)
 
         self.save_button.clicked.connect(self.save_dialog)
         self.execute_button.clicked.connect(self.execute_converter)
@@ -260,7 +270,7 @@ class Action(QWidget):
             LOG.info(f"Axes = {axes.keys()}")
             text = "<p><b>The results will cover the following range:</b></p>"
             for unit, old_array in axes.items():
-                scale_factor, new_unit = self._session.conversion_factor(unit)
+                scale_factor, new_unit = self._parent_tab.conversion_factor(unit)
                 array = np.array(old_array) * scale_factor
                 if len(array) < 6:
                     text += f"<p>{array} ({new_unit})</p>"
@@ -300,7 +310,7 @@ class Action(QWidget):
         except:
             currentpath = "."
         else:
-            currentpath = self.last_paths[cname]
+            currentpath = self._parent_tab.get_path(self._job_name + "_script")
         result, ftype = QFileDialog.getSaveFileName(
             self, "Save job as a Python script", currentpath, "Python script (*.py)"
         )
@@ -313,6 +323,7 @@ class Action(QWidget):
             pass
         else:
             self.last_paths[cname] = path
+            self._parent_tab.set_path(self._job_name + "_script", path)
         pardict = self.set_parameters(labels=True)
         self._job_instance.save(result, pardict)
 
@@ -330,6 +341,7 @@ class Action(QWidget):
     def execute_converter(self):
         pardict = self.set_parameters()
         LOG.info(pardict)
+        self._parent_tab.set_path(self._job_name, self._default_path)
         # when we are ready, we can consider running it
         # self.converter_instance.run(pardict)
         # this would send the actual instance, which _may_ be wrong
