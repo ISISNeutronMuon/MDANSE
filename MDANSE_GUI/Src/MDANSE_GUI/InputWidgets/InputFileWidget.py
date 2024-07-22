@@ -105,15 +105,15 @@ class InputFileWidget(WidgetBase):
             if new_value[0]:
                 self._field.setText(new_value[0])
                 self.updateValue()
-            try:
-                print(
-                    f"Settings path of {self._job_name} to {os.path.split(new_value[0])[0]}"
-                )
-                paths_group.set(self._job_name, os.path.split(new_value[0])[0])
-            except:
-                LOG.error(
-                    f"session.set_path failed for {self._job_name}, {os.path.split(new_value[0])[0]}"
-                )
+                try:
+                    LOG.info(
+                        f"Settings path of {self._job_name} to {os.path.split(new_value[0])[0]}"
+                    )
+                    paths_group.set(self._job_name, os.path.split(new_value[0])[0])
+                except:
+                    LOG.error(
+                        f"session.set_path failed for {self._job_name}, {os.path.split(new_value[0])[0]}"
+                    )
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""

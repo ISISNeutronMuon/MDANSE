@@ -184,7 +184,7 @@ class PlotSettings(QWidget):
             try:
                 current_cmap = colour_group.get("colormap")
             except KeyError:
-                print(f"Could not get colormap from colours")
+                LOG.warning(f"Could not get colormap from colours")
                 colour_group.add(
                     "colormap",
                     "viridis",
@@ -195,7 +195,7 @@ class PlotSettings(QWidget):
                 if current_cmap not in mpl.colormaps():
                     current_cmap = "viridis"
         except:
-            print(f"Could not get the colours group")
+            LOG.warning(f"Could not get the colours group")
             current_cmap = "viridis"
         cmap_selector = QComboBox(self)
         cmap_selector.addItems(mpl.colormaps())
