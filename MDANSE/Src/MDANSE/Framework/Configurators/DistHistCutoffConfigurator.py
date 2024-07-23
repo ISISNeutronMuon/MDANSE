@@ -23,15 +23,6 @@ class DistHistCutoffConfigurator(RangeConfigurator):
 
         super().configure(value)
 
-    def get_coordinate_span(self) -> np.ndarray:
-        traj_config = self._configurable[self._dependencies["trajectory"]]["instance"]
-        min_span = np.array(3 * [1e11])
-        for frame in range(len(traj_config._trajectory)):
-            coords = traj_config._trajectory.coordinates(frame)
-            span = coords.max(axis=0) - coords.min(axis=0)
-            min_span = np.minimum(span, min_span)
-        return min_span
-
     def get_largest_cutoff(self) -> float:
         """Get the largest cutoff value for the given trajectories
         unit cells.
@@ -45,15 +36,15 @@ class DistHistCutoffConfigurator(RangeConfigurator):
         try:
             trajectory_array = np.array(
                 [
-                    traj_config._trajectory.unit_cell(frame)._unit_cell
-                    for frame in range(len(traj_config._trajectory))
+                    traj_config.unit_cell(frame)._unit_cell
+                    for frame in range(len(traj_config))
                 ]
             )
         except:
-            return np.linalg.norm(self.get_coordinate_span())
+            return np.linalg.norm(traj_config.min_span)
         else:
             if np.allclose(trajectory_array, 0.0):
-                return np.linalg.norm(self.get_coordinate_span())
+                return np.linalg.norm(traj_config.min_span)
             else:
                 min_d = np.min(trajectory_array, axis=0)
                 vec_a, vec_b, vec_c = min_d

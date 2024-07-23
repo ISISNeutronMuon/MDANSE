@@ -20,6 +20,7 @@ import itertools
 import numpy as np
 
 from MDANSE.Extensions import distance_histogram
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
 
@@ -162,10 +163,34 @@ class DistanceHistogram(IJob):
 
             cell_volume = conf.unit_cell.volume
         except:
-            direct_cell = np.eye(3)
-            inverse_cell = np.eye(3)
+            max_span = self.configuration["trajectory"]["instance"].max_span
+            start_cell = 2 * np.array(
+                [
+                    [max_span[0], 0.0, 0.0],
+                    [0.0, max_span[1], 0.0],
+                    [0.0, 0.0, max_span[2]],
+                ]
+            )
+            temp_cell = UnitCell(start_cell)
+            direct_cell = temp_cell.transposed_direct
+            inverse_cell = temp_cell.transposed_inverse
 
-            cell_volume = 1.0
+            cell_volume = temp_cell.volume
+        else:
+            if cell_volume < 1e-9:
+                max_span = self.configuration["trajectory"]["instance"].max_span
+                start_cell = 2 * np.array(
+                    [
+                        [max_span[0], 0.0, 0.0],
+                        [0.0, max_span[1], 0.0],
+                        [0.0, 0.0, max_span[2]],
+                    ]
+                )
+                temp_cell = UnitCell(start_cell)
+                direct_cell = temp_cell.transposed_direct
+                inverse_cell = temp_cell.transposed_inverse
+
+                cell_volume = temp_cell.volume
 
         coords = conf["coordinates"]
 
