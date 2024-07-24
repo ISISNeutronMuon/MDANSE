@@ -19,6 +19,7 @@ import itertools
 
 import numpy as np
 
+from MDANSE.MLogging import LOG
 from MDANSE.Extensions import distance_histogram
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -152,6 +153,12 @@ class DistanceHistogram(IJob):
             A tuple of direct unit cell vectors, inverse unit cell vectors,
             and unit cell volume
         """
+
+        LOG.warning(
+            "DistanceHistogram did not find a valid unit cell for this analysis. "
+            "The input trajectory most likely did not use periodic boundary conditions. "
+            "The qualitative results may still be useful, but the scaling will not be correct."
+        )
 
         max_span = self.configuration["trajectory"]["instance"].max_span
         max_distance = np.linalg.norm(max_span)
