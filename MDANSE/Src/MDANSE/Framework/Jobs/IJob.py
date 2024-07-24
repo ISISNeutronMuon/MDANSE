@@ -251,6 +251,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             if self._status is not None:
                 self._status.update()
             self.combine(idx, result)
+        LOG.info("Single-core job completed all the steps")
 
     def process_tasks_queue(self, tasks, outputs, log_queues):
 
@@ -330,6 +331,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
         for p in self._processes:
             p.join()
 
+        LOG.info("Multicore job finished: all subprocesses ended.")
+
         for p in self._processes:
             p.close()
 
@@ -350,6 +353,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             return
         if not self._status._queue_1.empty():
             if self._status._queue_1.get() == "terminate":
+                LOG.warning("Job received a request to terminate. Aborting the run.")
                 for p in self._processes:
                     p.terminate()
                     p.join()
@@ -408,6 +412,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status.finish()
         except:
             tb = traceback.format_exc()
+            LOG.critical(f"Job failed with traceback: {tb}")
             raise JobError(self, tb)
 
     @property
@@ -522,9 +527,11 @@ class %(classname)s(IJob):
         fh.setFormatter(FMT)
         fh.setLevel(level)
         LOG.addHandler(fh)
+        LOG.debug(f"Log handler added for filename {filename}")
 
     def remove_log_file_handler(self) -> None:
         """Removes the IJob file handle from the MDANSE logger."""
+        LOG.debug("Disconnecting log handlers")
         for handler in LOG.handlers:
             if handler.name == self._log_filename:
                 handler.close()
