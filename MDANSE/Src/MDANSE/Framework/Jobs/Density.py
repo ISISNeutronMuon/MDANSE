@@ -131,7 +131,7 @@ class Density(IJob):
             raise DensityError(
                 "Density cannot be computed for chemical system without a defined simulation box"
             )
-        if abs(cell_volume) < 1e-11:
+        if abs(cell_volume) < 1e-31:
             raise DensityError(
                 f"Non-physical cell volume: {cell_volume}. Density will not be calculated."
             )
