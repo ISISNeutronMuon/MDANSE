@@ -198,8 +198,18 @@ class Single(Plotter):
                             LOG.error(f"values={value}")
                             return
         if update_only:
-            axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
-            axes.set_ylim((self._backup_limits[2], self._backup_limits[3]))
+            try:
+                axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
+            except ValueError:
+                LOG.error(
+                    f"Matplotlib could not set x limits to {self._backup_limits[0]}, {self._backup_limits[1]}"
+                )
+            try:
+                axes.set_ylim((self._backup_limits[2], self._backup_limits[3]))
+            except ValueError:
+                LOG.error(
+                    f"Matplotlib could not set y limits to {self._backup_limits[2]}, {self._backup_limits[3]}"
+                )
         else:
             xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
             self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]

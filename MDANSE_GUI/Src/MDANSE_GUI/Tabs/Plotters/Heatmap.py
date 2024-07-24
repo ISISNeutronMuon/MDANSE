@@ -101,9 +101,15 @@ class Heatmap(Plotter):
             if newmin == last_minmax[0] and newmax == last_minmax[1]:
                 return
             if newmax >= newmin:
-                image.set_clim([newmin, newmax])
-                self._figure.canvas.draw_idle()
-                self._backup_minmax[ds_num] = [newmin, newmax]
+                try:
+                    image.set_clim([newmin, newmax])
+                except ValueError:
+                    LOG.error(
+                        f"Matplotlib could not set colorbar limits to {newmin}, {newmax}"
+                    )
+                else:
+                    self._figure.canvas.draw_idle()
+                    self._backup_minmax[ds_num] = [newmin, newmax]
         target.canvas.draw()
 
     def plot(
@@ -191,7 +197,12 @@ class Heatmap(Plotter):
                     interpolator(self._slider_values[0]),
                     interpolator(self._slider_values[1]),
                 ]
-                image.set_clim(last_minmax)
+                try:
+                    image.set_clim(last_minmax)
+                except ValueError:
+                    LOG.error(
+                        f"Matplotlib could not set colorbar limits to {last_minmax}"
+                    )
                 try:
                     last_limits = self._backup_limits[ds_num]
                 except KeyError:
@@ -248,7 +259,12 @@ class Heatmap(Plotter):
                     interpolator(self._slider_values[0]),
                     interpolator(self._slider_values[1]),
                 ]
-                image.set_clim(last_minmax)
+                try:
+                    image.set_clim(last_minmax)
+                except ValueError:
+                    LOG.error(
+                        f"Matplotlib could not set colorbar limits to {last_minmax}"
+                    )
                 self._backup_minmax[ds_num] = [dataset._data.min(), dataset._data.max()]
                 self._backup_limits[ds_num] = [
                     xlimits[0],
