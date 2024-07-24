@@ -37,6 +37,7 @@ from qtpy.QtGui import (
     QColor,
 )
 
+from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 
 button_lookup = {
@@ -117,6 +118,7 @@ class ViewerControls(QWidget):
         layout = QGridLayout(self)
         self._viewer = None
         self._buttons = {}
+        self._delegates = {}
         self._animation_timer = QTimer()
         self._animation_timer.timeout.connect(self.advance_frame)
         self._mutex = QMutex()
@@ -160,6 +162,8 @@ class ViewerControls(QWidget):
         # self._database.setViewer(viewer)
         # viewer.setDataModel(viewer._colour_manager)
         self._atom_details.setModel(viewer._colour_manager)
+        for column_number in range(3):
+            self._atom_details.resizeColumnToContents(column_number)
         viewer._colour_manager.new_atom_properties.connect(viewer.take_atom_properties)
 
     def createButtons(self, orientation: Qt.Orientation):
@@ -203,6 +207,10 @@ class ViewerControls(QWidget):
         self._atom_details.setSizePolicy(
             QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
         )
+        self._delegates["colour"] = ColourPicker()
+        self._delegates["radius"] = RadiusSpinBox()
+        self._atom_details.setItemDelegateForColumn(1, self._delegates["colour"])
+        self._atom_details.setItemDelegateForColumn(2, self._delegates["radius"])
         layout1.addWidget(self._atom_details)
         wrapper1.setLayout(layout1)
         layout.addWidget(wrapper1)
