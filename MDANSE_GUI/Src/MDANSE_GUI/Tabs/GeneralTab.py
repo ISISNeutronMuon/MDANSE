@@ -20,6 +20,7 @@ from typing import Dict, Tuple
 from qtpy.QtCore import QObject, Slot, QMessageLogger
 from qtpy.QtWidgets import QListView
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Units import measure, unit_lookup
 
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
@@ -63,7 +64,6 @@ class GeneralTab(QObject):
         if self._model is not None:
             self._core.set_model(self._model)
         self._core.set_label_text(label_text)
-        self._core.connect_logging
         self.propagate_session()
 
     def grouped_settings(self):
@@ -180,24 +180,24 @@ class GeneralTab(QObject):
 
     @Slot(str)
     def critical(self, message: str):
-        self._logger.critical(message)
+        LOG.critical(message)
 
     @Slot(str)
     def warning(self, message: str):
-        self._logger.warning(message)
+        LOG.warning(message)
 
     @Slot(str)
     def error(self, message: str):
-        self._logger.critical(message)
+        LOG.error(message)
 
     @Slot(str)
     def debug(self, message: str):
-        self._logger.debug(message)
+        LOG.debug(message)
 
     @Slot(str)
     def info(self, message: str):
-        self._logger.info(message)
+        LOG.info(message)
 
     @Slot(str)
     def fatal(self, message: str):
-        self._logger.fatal(message)
+        LOG.critical(message)

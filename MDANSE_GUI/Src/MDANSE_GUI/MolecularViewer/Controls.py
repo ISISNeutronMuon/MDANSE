@@ -93,25 +93,6 @@ QSpinBox::down-button  {
 """
 
 
-class ColourButton(QPushButton):
-    def __init__(self, *args, colour=(255, 255, 255), **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._current_colour = QColor(colour[0], colour[1], colour[2])
-
-    def paintEvent(self, a0: QPaintEvent) -> None:
-        painter = QPainter()
-        painter.setBrush(self._current_colour)
-        painter.fillRect(self.rect())
-        return super().paintEvent(a0)
-
-    @Slot()
-    def pickColour(self):
-        new_colour = QColorDialog.getColor(initial=self._current_colour)
-        if new_colour is not None:
-            self._current_colour = new_colour
-
-
 class ViewerControls(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
