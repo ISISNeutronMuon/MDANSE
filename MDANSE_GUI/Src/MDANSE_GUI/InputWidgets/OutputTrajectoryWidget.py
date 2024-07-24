@@ -54,7 +54,7 @@ class OutputTrajectoryWidget(WidgetBase):
             LOG.error(
                 "AttributeError in OutputTrajectoryWidget - can't get default path."
             )
-        self.file_association = ".*"
+        self.file_association = "MDT trajectory (*.mdt)"
         self._value = default_value
         self._field = QLineEdit(default_value[0], self._base)
         self._field.setPlaceholderText(default_value[0])
@@ -120,6 +120,7 @@ class OutputTrajectoryWidget(WidgetBase):
             self.file_association,  # text string specifying the file name filter.
         )
         if len(new_value[0]) > 0:
+            print(new_value)
             self._field.setText(new_value[0])
             self.updateValue()
 

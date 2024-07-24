@@ -43,7 +43,7 @@ class OutputFilesWidget(WidgetBase):
         except AttributeError:
             self.default_path = "."
             LOG.error("AttributeError in OutputFilesWidget - can't get default path.")
-        self.file_association = ".*"
+        self.file_association = "Output file name (*)"
         self._value = default_value
         self._field = QLineEdit(default_value[0], self._base)
         self._field.setPlaceholderText(default_value[0])
