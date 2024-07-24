@@ -149,6 +149,8 @@ class Trajectory:
             max_span = np.maximum(span, max_span)
         self._max_span = max_span
         self._min_span = min_span
+        print(f"MAx span: {max_span}")
+        print(f"Min span: {min_span}")
 
     @property
     def max_span(self):

@@ -116,8 +116,18 @@ class Grid(Plotter):
                         ylimits[1],
                     ]
                 else:
-                    axes.set_xlim((new_limits[0], new_limits[1]))
-                    axes.set_ylim((new_limits[2], new_limits[3]))
+                    try:
+                        axes.set_xlim((new_limits[0], new_limits[1]))
+                    except ValueError:
+                        LOG.error(
+                            f"Matplotlib could not set x limits to {new_limits[0]}, {new_limits[1]}"
+                        )
+                    try:
+                        axes.set_ylim((new_limits[2], new_limits[3]))
+                    except ValueError:
+                        LOG.error(
+                            f"Matplotlib could not set y limits to {new_limits[2]}, {new_limits[3]}"
+                        )
                 axes.grid(True)
                 axes.set_xlabel(xaxis_unit)
                 axes.legend(loc=0)

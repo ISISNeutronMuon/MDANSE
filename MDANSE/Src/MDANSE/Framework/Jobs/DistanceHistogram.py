@@ -139,6 +139,36 @@ class DistanceHistogram(IJob):
             itertools.combinations_with_replacement(self.selectedElements, 2)
         )
 
+    def define_backup_unit_cell(self):
+        """Creates a unit cell definition for the trajectories which
+        do not contain a unit cell definition, or contain an invalid one
+        (e.g. all cell vectors set to 0), which most likely means
+        that the periodic boundary conditions were not used by the
+        MD engine which created the trajectory.
+
+        Returns
+        -------
+        ndarray, ndarray, float
+            A tuple of direct unit cell vectors, inverse unit cell vectors,
+            and unit cell volume
+        """
+
+        max_span = self.configuration["trajectory"]["instance"].max_span
+        max_distance = np.linalg.norm(max_span)
+        start_cell = 2 * np.array(
+            [
+                [max_distance, 0.0, 0.0],
+                [0.0, max_distance, 0.0],
+                [0.0, 0.0, max_distance],
+            ]
+        )
+        temp_cell = UnitCell(start_cell)
+        direct_cell = temp_cell.transposed_direct
+        inverse_cell = temp_cell.transposed_inverse
+
+        cell_volume = temp_cell.volume
+        return direct_cell, inverse_cell, cell_volume
+
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -163,34 +193,10 @@ class DistanceHistogram(IJob):
 
             cell_volume = conf.unit_cell.volume
         except:
-            max_span = self.configuration["trajectory"]["instance"].max_span
-            start_cell = 2 * np.array(
-                [
-                    [max_span[0], 0.0, 0.0],
-                    [0.0, max_span[1], 0.0],
-                    [0.0, 0.0, max_span[2]],
-                ]
-            )
-            temp_cell = UnitCell(start_cell)
-            direct_cell = temp_cell.transposed_direct
-            inverse_cell = temp_cell.transposed_inverse
-
-            cell_volume = temp_cell.volume
+            direct_cell, inverse_cell, cell_volume = self.define_backup_unit_cell()
         else:
             if cell_volume < 1e-9:
-                max_span = self.configuration["trajectory"]["instance"].max_span
-                start_cell = 2 * np.array(
-                    [
-                        [max_span[0], 0.0, 0.0],
-                        [0.0, max_span[1], 0.0],
-                        [0.0, 0.0, max_span[2]],
-                    ]
-                )
-                temp_cell = UnitCell(start_cell)
-                direct_cell = temp_cell.transposed_direct
-                inverse_cell = temp_cell.transposed_inverse
-
-                cell_volume = temp_cell.volume
+                direct_cell, inverse_cell, cell_volume = self.define_backup_unit_cell()
 
         coords = conf["coordinates"]
 

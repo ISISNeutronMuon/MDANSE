@@ -94,8 +94,18 @@ class Single(Plotter):
         if self._toolbar is not None:
             self._toolbar.update()
             self._toolbar.push_current()
-        self._axes[0].set_xlim(saved_xmin, saved_xmax)
-        self._axes[0].set_ylim(saved_ymin, saved_ymax)
+        try:
+            self._axes[0].set_xlim(saved_xmin, saved_xmax)
+        except ValueError:
+            LOG.error(
+                f"Matplotlib could not set x limits to {saved_xmin}, {saved_xmax}"
+            )
+        try:
+            self._axes[0].set_ylim(saved_ymin, saved_ymax)
+        except ValueError:
+            LOG.error(
+                f"Matplotlib could not set y limits to {saved_ymin}, {saved_ymax}"
+            )
         target.canvas.draw()
 
     def plot(
