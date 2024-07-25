@@ -110,6 +110,8 @@ class ViewerControls(QWidget):
         self.createSlider()
         self.createButtons(Qt.Orientation.Horizontal)
         self.createSidePanel()
+        self._bkg_dialog = QColorDialog()
+        self._projection = True
 
     def createSlider(self):
         """This method creates a slider which illustrates the progress of the
@@ -181,6 +183,16 @@ class ViewerControls(QWidget):
         base = QWidget(self)
         layout = QVBoxLayout(base)
         base.setLayout(layout)
+        # colour changes
+        wrapper0 = QGroupBox("Colour settings", base)
+        layout0 = QHBoxLayout(wrapper0)
+        bkg_button = QPushButton("Background", wrapper0)
+        proj_button = QPushButton("Toggle projection", wrapper0)
+        bkg_button.clicked.connect(self.set_background_colour)
+        proj_button.clicked.connect(self.toggle_projection)
+        layout0.addWidget(bkg_button)
+        layout0.addWidget(proj_button)
+        layout.addWidget(wrapper0)
         # the table of chemical elements
         wrapper1 = QGroupBox("Atom properties", base)
         layout1 = QHBoxLayout(wrapper1)
@@ -253,6 +265,32 @@ class ViewerControls(QWidget):
         # the database of atom types
         # self._database = TrajectoryAtomData()
         self.layout().addWidget(base, 0, 2, 2, 1)  # row, column, rowSpan, columnSpan
+
+    @Slot()
+    def set_background_colour(self):
+        dialog = self._bkg_dialog
+        if dialog.isVisible():
+            if dialog.isMaximized():
+                dialog.showMaximized()
+            else:
+                dialog.showNormal()
+            dialog.activateWindow()
+        else:
+            dialog.show()
+        dialog.exec()
+        if dialog.result() == QColorDialog.DialogCode.Accepted:
+            colour = dialog.currentColor()
+            rgb = colour.red() / 255, colour.green() / 255, colour.blue() / 255
+            self._viewer._renderer.SetBackground(rgb)
+
+    @Slot()
+    def toggle_projection(self):
+        if self._projection:
+            self._viewer._camera.SetParallelProjection(255)
+        else:
+            self._viewer._camera.SetParallelProjection(0)
+        self._viewer.update_renderer()
+        self._projection = not self._projection
 
     @Slot()
     def setVisibility(self):
