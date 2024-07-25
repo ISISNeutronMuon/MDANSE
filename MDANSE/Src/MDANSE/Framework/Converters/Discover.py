@@ -309,7 +309,12 @@ class Discover(Converter):
         variables = {}
         variables["velocities"] = self._hisfile["initial_velocities"]
 
-        if self._chemicalSystem.configuration.is_periodic:
+        if np.all(self._hisfile["initial_cell"] < 0.11):
+            self._chemicalSystem.configuration.is_periodic = False
+            realConf = RealConfiguration(
+                self._chemicalSystem, self._hisfile["initial_coordinates"], **variables
+            )
+        elif self._chemicalSystem.configuration.is_periodic:
             unitCell = UnitCell(self._hisfile["initial_cell"])
             realConf = PeriodicRealConfiguration(
                 self._chemicalSystem,

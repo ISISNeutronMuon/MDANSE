@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE_GUI"
-version = "0.1.0a3"
+version = "0.1.0-dev"
 description = 'MDANSE GUI package - the graphical interface for MDANSE'
 readme = "README.md"
 requires-python = ">=3.9"
@@ -35,7 +35,7 @@ dependencies = [
     "matplotlib",
     "qtpy",
     "vtk",
-    "PyQt6",
+    "PyQt6<=6.7.0",
     "PyYAML",
     "tomlkit"
 ]

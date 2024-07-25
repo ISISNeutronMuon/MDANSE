@@ -46,12 +46,18 @@ class StaticStructureFactor(DistanceHistogram):
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["r_values"] = (
-        "RangeConfigurator",
-        {"valueType": float, "includeLast": True, "mini": 0.0},
+        "DistHistCutoffConfigurator",
+        {
+            "label": "r values (nm)",
+            "valueType": float,
+            "includeLast": True,
+            "mini": 0.0,
+            "dependencies": {"trajectory": "trajectory"},
+        },
     )
     settings["q_values"] = (
         "RangeConfigurator",
-        {"valueType": float, "includeLast": True, "mini": 0.0},
+        {"valueType": float, "includeLast": True, "mini": 0.0, "default": (0, 500, 1)},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
