@@ -159,12 +159,16 @@ class JobEntry(Handler, QObject):
                 try:
                     len(self._parameters["output_files"][1])
                 except TypeError:  # job is a converter
-                    self.for_loading.emit(self._parameters["output_files"][0] + ".mdt")
+                    file_name = self._parameters["output_files"][0]
+                    if ".mdt" not in file_name[-5:]:
+                        file_name += ".mdt"
+                    self.for_loading.emit(file_name)
                 else:  # job is an analysis
                     if "MDAFormat" in self._parameters["output_files"][1]:
-                        self.for_loading.emit(
-                            self._parameters["output_files"][0] + ".mda"
-                        )
+                        file_name = self._parameters["output_files"][0]
+                        if ".mda" not in file_name[-5:]:
+                            file_name += ".mda"
+                        self.for_loading.emit(file_name)
         else:
             self._current_state.fail()
         self.update_fields()
