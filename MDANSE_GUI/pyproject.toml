@@ -54,8 +54,6 @@ package-dir = {"" = "src"}
 mdanse_elements_database = "MDANSE_GUI.Scripts.mdanse_elements_database:main"
 mdanse_gui = "MDANSE_GUI.Scripts.mdanse_gui:main"
 mdanse_periodic_table = "MDANSE_GUI.Scripts.mdanse_periodic_table:main"
-mdanse_plotter = "MDANSE_GUI.Scripts.mdanse_plotter:main"
-mdanse_ud_editor = "MDANSE_GUI.Scripts.mdanse_ud_editor:main"
 mdanse_units_editor = "MDANSE_GUI.Scripts.mdanse_units_editor:main"
 
 # [tool.setuptools.packages.find]
