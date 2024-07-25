@@ -15,7 +15,7 @@
 #
 from functools import partial
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QWidget, QComboBox
+from qtpy.QtWidgets import QWidget, QComboBox, QLabel
 
 from MDANSE.MLogging import LOG
 
@@ -50,7 +50,13 @@ class JobTab(GeneralTab):
         self._trajectory_combo.currentIndexChanged.connect(self.set_current_trajectory)
         if cmodel is not None:
             self._trajectory_combo.setModel(cmodel)
+        self._instrument_combo = QComboBox()
+        self._instrument_combo.setEditable(False)
+        self._instrument_combo.currentIndexChanged.connect(self.set_current_instrument)
+        self._core.add_widget(QLabel("Trajectory:"))
         self._core.add_widget(self._trajectory_combo)
+        self._core.add_widget(QLabel("Instrument:"), upper=False)
+        self._core.add_widget(self._instrument_combo, upper=False)
         self.action._parent_tab = self
         self._visualiser._parent_tab = self
 
@@ -98,6 +104,10 @@ class JobTab(GeneralTab):
             # we only update the widget if a job is selected from the
             # actions tree
             self.action.update_panel(current_item.text())
+
+    @Slot(int)
+    def set_current_instrument(self, index: int):
+        LOG.debug(f"Switched instrument to {index}")
 
     @classmethod
     def standard_instance(cls):
