@@ -20,6 +20,7 @@ from typing import Collection
 import numpy as np
 import h5py
 
+from MDANSE.MLogging import LOG
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Chemistry import ATOMS_DATABASE
@@ -149,8 +150,6 @@ class Trajectory:
             max_span = np.maximum(span, max_span)
         self._max_span = max_span
         self._min_span = min_span
-        print(f"MAx span: {max_span}")
-        print(f"Min span: {min_span}")
 
     @property
     def max_span(self):
@@ -353,6 +352,9 @@ class TrajectoryWriter:
         else:
             for at in selected_atoms:
                 if at.root_chemical_system != chemical_system:
+                    LOG.error(
+                        f"atom.chemical_system={at.root_chemical_system} and traj.chemical_system={chemical_system}"
+                    )
                     raise TrajectoryWriterError(
                         "One or more atoms of the selection comes from a different chemical system"
                     )
