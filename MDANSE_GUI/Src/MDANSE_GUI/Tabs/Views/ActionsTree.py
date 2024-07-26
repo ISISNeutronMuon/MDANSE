@@ -36,9 +36,6 @@ class ActionsTree(QTreeView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setHeaderHidden(True)
-        self.setAcceptDrops(True)
-        self.setDragEnabled(True)
-        self.setDragDropMode(QAbstractItemView.DragDropMode.DragDrop)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.click_position = None
 
@@ -51,23 +48,6 @@ class ActionsTree(QTreeView):
         if self.model() is None:
             return None
         return super().mousePressEvent(e)
-
-    def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        # print("Mouse Move Event!", event.button(), QtCore.Qt.MouseButton.LeftButton)
-        if event.buttons() == Qt.MouseButton.LeftButton:
-            # if event.button():
-            LOG.info("dragging")
-            new_position = event.position()
-            distance = (self.click_position - new_position).manhattanLength()
-            if distance > QApplication.startDragDistance():
-                drag = QDrag(self)
-                mime_data = QMimeData()
-                text = self.model().data(
-                    self.currentIndex(), Qt.ItemDataRole.DisplayRole
-                )
-                mime_data.setText(text)
-                drag.setMimeData(mime_data)
-                drag.exec()
 
     def on_select_action(self, index):
         model = self.model()
