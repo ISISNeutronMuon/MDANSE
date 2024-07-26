@@ -93,7 +93,7 @@ def test_editor_unit_cell():
     parameters["output_files"] = (temp_name, 64, "gzip", "INFO")
     parameters["trajectory"] = short_traj
     parameters["frames"] = (0, 501, 1)
-    parameters["unit_cell"] = [[1,2,3], [4,5,6], [7,8,9]]
+    parameters["unit_cell"] = ([[1,2,3], [4,5,6], [7,8,9]], True)
     temp = IJob.create("TrajectoryEditor")
     temp.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")

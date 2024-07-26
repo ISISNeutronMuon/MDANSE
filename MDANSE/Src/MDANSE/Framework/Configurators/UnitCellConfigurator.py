@@ -27,7 +27,7 @@ class UnitCellConfigurator(IConfigurator):
     or change the existing cell definition
     """
 
-    _default = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+    _default = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], False
 
     def __init__(self, name, **kwargs):
         """
@@ -47,6 +47,7 @@ class UnitCellConfigurator(IConfigurator):
 
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
+        self["apply"] = False
 
     def update_trajectory_information(self):
         traj_config = self._configurable[self._dependencies["trajectory"]]["instance"]
@@ -88,14 +89,14 @@ class UnitCellConfigurator(IConfigurator):
         Configure the unit cell as a 3x3 array.
 
         :param value: the vector components.
-        :type value: sequence-like object
+        :type value: (np.ndarray, bool) tuple
         """
         self._original_input = value
 
         self.update_trajectory_information()
 
         try:
-            input_array = np.array(value, dtype=float)
+            input_array = np.array(value[0], dtype=float)
         except:
             self.error_status = (
                 "Could not convert the inputs into a floating point array"
@@ -107,6 +108,7 @@ class UnitCellConfigurator(IConfigurator):
                 return
 
         self["value"] = input_array
+        self["apply"] = value[1]
         self.error_status = "OK"
 
     def get_information(self):

@@ -53,7 +53,7 @@ class TrajectoryEditor(IJob):
     )
     settings["unit_cell"] = (
         "UnitCellConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "default": np.eye(3)},
+        {"dependencies": {"trajectory": "trajectory"}, "default": (np.eye(3), False)},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
@@ -93,10 +93,11 @@ class TrajectoryEditor(IJob):
         self.numberOfSteps = self.configuration["frames"]["number"]
         self._input_trajectory = self.configuration["trajectory"]["instance"]
 
-        self._new_unit_cell = UnitCell(self.configuration["unit_cell"]["value"])
-        self._input_trajectory._trajectory._unit_cells = [
-            self._new_unit_cell for _ in range(len(self._input_trajectory))
-        ]
+        if self.configuration["unit_cell"]["apply"]:
+            self._new_unit_cell = UnitCell(self.configuration["unit_cell"]["value"])
+            self._input_trajectory._trajectory._unit_cells = [
+                self._new_unit_cell for _ in range(len(self._input_trajectory))
+            ]
 
         atoms = sorted_atoms(
             self.configuration["trajectory"]["instance"].chemical_system.atom_list
@@ -137,8 +138,6 @@ class TrajectoryEditor(IJob):
 
         # get the Frame index
         frameIndex = self.configuration["frames"]["value"][index]
-
-        n_coms = self._output_trajectory.chemical_system.number_of_atoms
 
         conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
         conf = conf.contiguous_configuration()
