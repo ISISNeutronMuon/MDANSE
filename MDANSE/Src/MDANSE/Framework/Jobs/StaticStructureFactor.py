@@ -96,11 +96,13 @@ class StaticStructureFactor(DistanceHistogram):
             cell_volume = conf.unit_cell.volume
         except:
             raise ValueError(
-                "Static Structure Factor cannot be computed for chemical system without a defined simulation box"
+                "Static Structure Factor cannot be computed for chemical system without a defined simulation box. "
+                "You can add a box using TrajectoryEditor."
             )
         if abs(cell_volume) < 1e-11:
             raise ValueError(
-                f"Non-physical unit cell volume: {cell_volume}. Static Structure Factor will not be calculated."
+                f"Non-physical unit cell volume: {cell_volume}. Static Structure Factor will not be calculated. "
+                "You can add a box using TrajectoryEditor."
             )
         return super().initialize()
 

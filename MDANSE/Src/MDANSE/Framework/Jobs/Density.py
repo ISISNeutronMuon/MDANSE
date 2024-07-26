@@ -129,11 +129,13 @@ class Density(IJob):
             cell_volume = conf.unit_cell.volume * measure(1.0, "nm3").toval("cm3")
         except:
             raise DensityError(
-                "Density cannot be computed for chemical system without a defined simulation box"
+                "Density cannot be computed for chemical system without a defined simulation box. "
+                "You can add a box using TrajectoryEditor."
             )
         if abs(cell_volume) < 1e-31:
             raise DensityError(
                 f"Non-physical cell volume: {cell_volume}. Density will not be calculated."
+                "You can change the unit cell using TrajectoryEditor."
             )
 
         atomic_density = self._n_atoms / cell_volume

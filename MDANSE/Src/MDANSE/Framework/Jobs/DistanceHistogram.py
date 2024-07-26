@@ -21,8 +21,7 @@ import numpy as np
 
 from MDANSE.MLogging import LOG
 from MDANSE.Extensions import distance_histogram
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
 
 
@@ -140,41 +139,13 @@ class DistanceHistogram(IJob):
             itertools.combinations_with_replacement(self.selectedElements, 2)
         )
 
-    def define_backup_unit_cell(self):
-        """Creates a unit cell definition for the trajectories which
-        do not contain a unit cell definition, or contain an invalid one
-        (e.g. all cell vectors set to 0), which most likely means
-        that the periodic boundary conditions were not used by the
-        MD engine which created the trajectory.
-
-        Returns
-        -------
-        ndarray, ndarray, float
-            A tuple of direct unit cell vectors, inverse unit cell vectors,
-            and unit cell volume
-        """
-
-        LOG.warning(
-            "DistanceHistogram did not find a valid unit cell for this analysis. "
-            "The input trajectory most likely did not use periodic boundary conditions. "
-            "The qualitative results may still be useful, but the scaling will not be correct."
+    def detailed_unit_cell_error(self):
+        raise JobError(
+            "This analysis job requires a unit cell (simulation box) to be defined. "
+            "The box will be used for calculating density in the analysis. "
+            "You can add a simulation box to the trajectory using the TrajectoryEditor job. "
+            "Be careful adding the simulation box, as the wrong dimensions can render the results meaningless."
         )
-
-        max_span = self.configuration["trajectory"]["instance"].max_span
-        max_distance = np.linalg.norm(max_span)
-        start_cell = 2 * np.array(
-            [
-                [max_distance, 0.0, 0.0],
-                [0.0, max_distance, 0.0],
-                [0.0, 0.0, max_distance],
-            ]
-        )
-        temp_cell = UnitCell(start_cell)
-        direct_cell = temp_cell.transposed_direct
-        inverse_cell = temp_cell.transposed_inverse
-
-        cell_volume = temp_cell.volume
-        return direct_cell, inverse_cell, cell_volume
 
     def run_step(self, index):
         """
@@ -200,10 +171,10 @@ class DistanceHistogram(IJob):
 
             cell_volume = conf.unit_cell.volume
         except:
-            direct_cell, inverse_cell, cell_volume = self.define_backup_unit_cell()
+            self.detailed_unit_cell_error()
         else:
             if cell_volume < 1e-9:
-                direct_cell, inverse_cell, cell_volume = self.define_backup_unit_cell()
+                self.detailed_unit_cell_error()
 
         coords = conf["coordinates"]
 
