@@ -19,8 +19,7 @@ from qtpy.QtCore import Slot, Signal, QModelIndex
 from qtpy.QtWidgets import QMenu, QListView, QAbstractItemView
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
-from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
-from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
+from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import InstrumentDetails
 
 
 class InstrumentList(QListView):
@@ -33,22 +32,6 @@ class InstrumentList(QListView):
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
 
-    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
-        index = self.indexAt(event.pos())
-        if index.row() == -1:
-            # block right click when it's not on a trajectory
-            return
-        model = self.model()
-        item = model.itemData(index)
-        menu = QMenu()
-        self.populateMenu(menu, item)
-        menu.exec_(event.globalPos())
-
-    def populateMenu(self, menu: QMenu, item: QStandardItem):
-        for action, method in [("Delete", self.deleteNode)]:
-            temp_action = menu.addAction(action)
-            temp_action.triggered.connect(method)
-
     @Slot()
     def deleteNode(self):
         model = self.model()
@@ -60,10 +43,10 @@ class InstrumentList(QListView):
     def item_picked(self, index: QModelIndex):
         model = self.model()
         node_number = model.itemFromIndex(index).data()
-        trajectory = model._nodes[node_number]
-        self.item_details.emit(trajectory)
+        instrument = model._nodes[node_number]
+        self.item_details.emit(instrument)
 
-    def connect_to_visualiser(self, visualiser: Union[View3D, TrajectoryInfo]) -> None:
+    def connect_to_visualiser(self, visualiser: InstrumentDetails) -> None:
         """Connect to a visualiser.
 
         Parameters
@@ -71,7 +54,7 @@ class InstrumentList(QListView):
         visualiser : View3D or TrajectoryInfo
             A visualiser to connect to this view.
         """
-        if isinstance(visualiser, View3D) or isinstance(visualiser, TrajectoryInfo):
+        if isinstance(visualiser, InstrumentDetails):
             self.item_details.connect(visualiser.update_panel)
         else:
             raise NotImplementedError(
