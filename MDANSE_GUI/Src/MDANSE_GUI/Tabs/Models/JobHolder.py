@@ -156,15 +156,7 @@ class JobEntry(Handler, QObject):
         if success:
             self._current_state.finish()
             if self._load_afterwards:
-                try:
-                    len(self._parameters["output_files"][1])
-                except TypeError:  # job is a converter
-                    self.for_loading.emit(self._parameters["output_files"][0] + ".mdt")
-                else:  # job is an analysis
-                    if "MDAFormat" in self._parameters["output_files"][1]:
-                        self.for_loading.emit(
-                            self._parameters["output_files"][0] + ".mda"
-                        )
+                self.for_loading.emit(self._parameters["output_files"][0])
         else:
             self._current_state.fail()
         self.update_fields()
