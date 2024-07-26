@@ -37,6 +37,7 @@ from qtpy.QtGui import (
     QColor,
 )
 
+from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 
 button_lookup = {
@@ -92,31 +93,13 @@ QSpinBox::down-button  {
 """
 
 
-class ColourButton(QPushButton):
-    def __init__(self, *args, colour=(255, 255, 255), **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._current_colour = QColor(colour[0], colour[1], colour[2])
-
-    def paintEvent(self, a0: QPaintEvent) -> None:
-        painter = QPainter()
-        painter.setBrush(self._current_colour)
-        painter.fillRect(self.rect())
-        return super().paintEvent(a0)
-
-    @Slot()
-    def pickColour(self):
-        new_colour = QColorDialog.getColor(initial=self._current_colour)
-        if new_colour is not None:
-            self._current_colour = new_colour
-
-
 class ViewerControls(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         layout = QGridLayout(self)
         self._viewer = None
         self._buttons = {}
+        self._delegates = {}
         self._animation_timer = QTimer()
         self._animation_timer.timeout.connect(self.advance_frame)
         self._mutex = QMutex()
@@ -127,6 +110,8 @@ class ViewerControls(QWidget):
         self.createSlider()
         self.createButtons(Qt.Orientation.Horizontal)
         self.createSidePanel()
+        self._bkg_dialog = QColorDialog()
+        self._projection = True
 
     def createSlider(self):
         """This method creates a slider which illustrates the progress of the
@@ -160,6 +145,8 @@ class ViewerControls(QWidget):
         # self._database.setViewer(viewer)
         # viewer.setDataModel(viewer._colour_manager)
         self._atom_details.setModel(viewer._colour_manager)
+        for column_number in range(3):
+            self._atom_details.resizeColumnToContents(column_number)
         viewer._colour_manager.new_atom_properties.connect(viewer.take_atom_properties)
 
     def createButtons(self, orientation: Qt.Orientation):
@@ -196,6 +183,16 @@ class ViewerControls(QWidget):
         base = QWidget(self)
         layout = QVBoxLayout(base)
         base.setLayout(layout)
+        # colour changes
+        wrapper0 = QGroupBox("Colour settings", base)
+        layout0 = QHBoxLayout(wrapper0)
+        bkg_button = QPushButton("Background", wrapper0)
+        proj_button = QPushButton("Toggle projection", wrapper0)
+        bkg_button.clicked.connect(self.set_background_colour)
+        proj_button.clicked.connect(self.toggle_projection)
+        layout0.addWidget(bkg_button)
+        layout0.addWidget(proj_button)
+        layout.addWidget(wrapper0)
         # the table of chemical elements
         wrapper1 = QGroupBox("Atom properties", base)
         layout1 = QHBoxLayout(wrapper1)
@@ -203,6 +200,10 @@ class ViewerControls(QWidget):
         self._atom_details.setSizePolicy(
             QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
         )
+        self._delegates["colour"] = ColourPicker()
+        self._delegates["radius"] = RadiusSpinBox()
+        self._atom_details.setItemDelegateForColumn(1, self._delegates["colour"])
+        self._atom_details.setItemDelegateForColumn(2, self._delegates["radius"])
         layout1.addWidget(self._atom_details)
         wrapper1.setLayout(layout1)
         layout.addWidget(wrapper1)
@@ -264,6 +265,32 @@ class ViewerControls(QWidget):
         # the database of atom types
         # self._database = TrajectoryAtomData()
         self.layout().addWidget(base, 0, 2, 2, 1)  # row, column, rowSpan, columnSpan
+
+    @Slot()
+    def set_background_colour(self):
+        dialog = self._bkg_dialog
+        if dialog.isVisible():
+            if dialog.isMaximized():
+                dialog.showMaximized()
+            else:
+                dialog.showNormal()
+            dialog.activateWindow()
+        else:
+            dialog.show()
+        dialog.exec()
+        if dialog.result() == QColorDialog.DialogCode.Accepted:
+            colour = dialog.currentColor()
+            rgb = colour.red() / 255, colour.green() / 255, colour.blue() / 255
+            self._viewer._renderer.SetBackground(rgb)
+
+    @Slot()
+    def toggle_projection(self):
+        if self._projection:
+            self._viewer._camera.SetParallelProjection(255)
+        else:
+            self._viewer._camera.SetParallelProjection(0)
+        self._viewer.update_renderer()
+        self._projection = not self._projection
 
     @Slot()
     def setVisibility(self):
