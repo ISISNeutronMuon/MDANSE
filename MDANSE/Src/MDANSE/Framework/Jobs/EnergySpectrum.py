@@ -122,14 +122,14 @@ class EnergySpectrum(IJob):
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "vacf_%s" % element,
+                "pacf_%s" % element,
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2/ps2",
             )
             self._outputData.add(
-                "dos_%s" % element,
+                "es_%s" % element,
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
                 axis="romega",
@@ -138,14 +138,14 @@ class EnergySpectrum(IJob):
                 partial_result=True,
             )
         self._outputData.add(
-            "vacf_total",
+            "pacf_total",
             "LineOutputVariable",
             (self.configuration["frames"]["n_frames"],),
             axis="time",
             units="nm2/ps2",
         )
         self._outputData.add(
-            "dos_total",
+            "es_total",
             "LineOutputVariable",
             (instrResolution["n_romegas"],),
             axis="romega",
@@ -165,8 +165,8 @@ class EnergySpectrum(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step.
-            #. atomicDOS (np.array): The calculated density of state for atom of index=index
-            #. atomicVACF (np.array): The calculated velocity auto-correlation function for atom of index=index
+            #. atomicES (np.array): The calculated energy spectrum for atom of index=index
+            #. atomicPACF (np.array): The calculated position auto-correlation function for atom of index=index
         """
         LOG.debug(f"Running step: {index}")
         trajectory = self.configuration["trajectory"]["instance"]
@@ -201,10 +201,10 @@ class EnergySpectrum(IJob):
         series = self.configuration["projection"]["projector"](series)
 
         n_configs = self.configuration["frames"]["n_configs"]
-        atomicVACF = correlate(series, series[:n_configs], mode="valid") / (
+        atomicPACF = correlate(series, series[:n_configs], mode="valid") / (
             3 * n_configs
         )
-        return index, atomicVACF.T[0]
+        return index, atomicPACF.T[0]
 
     def combine(self, index, x):
         """
@@ -217,7 +217,7 @@ class EnergySpectrum(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData["vacf_%s" % element] += x
+        self._outputData["pacf_%s" % element] += x
 
     def finalize(self):
         """
@@ -226,9 +226,9 @@ class EnergySpectrum(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData["vacf_%s" % element][:] /= number
-            self._outputData["dos_%s" % element][:] = get_spectrum(
-                self._outputData["vacf_%s" % element],
+            self._outputData["pacf_%s" % element][:] /= number
+            self._outputData["es_%s" % element][:] = get_spectrum(
+                self._outputData["pacf_%s" % element],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 fft="rfft",
@@ -240,11 +240,11 @@ class EnergySpectrum(IJob):
             self._outputData,
             nAtomsPerElement,
             1,
-            "vacf_%s",
+            "pacf_%s",
             update_values=True,
         )
         weight(
-            weights, self._outputData, nAtomsPerElement, 1, "dos_%s", update_values=True
+            weights, self._outputData, nAtomsPerElement, 1, "es_%s", update_values=True
         )
 
         self._outputData.write(
