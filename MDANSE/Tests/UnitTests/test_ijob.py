@@ -20,6 +20,7 @@ ALL_JOBS = [
     "DynamicIncoherentStructureFactor",
     "Eccentricity",
     "ElasticIncoherentStructureFactor",
+    "EnergySpectrum",
     "GaussianDynamicIncoherentStructureFactor",
     "GeneralAutoCorrelationFunction",
     "GlobalMotionFilteredTrajectory",
