@@ -78,6 +78,10 @@ class LoggingTab(GeneralTab):
             self._extra_handler.setLevel(new_level)
         except:
             LOG.error(f"Could not set GuiLogHandler to log level {new_level}")
+        else:
+            self._visualiser.append_text(
+                f"<b>=== Log level changed to {new_level} ===</b>"
+            )
 
     def add_handler(self, new_handler):
         self._extra_handler = new_handler
