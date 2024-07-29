@@ -59,14 +59,12 @@ def test_vacf(trajectory, interp_order, normalise):
     assert path.isfile(temp_name + ".log")
     os.remove(temp_name + ".log")
 
-def test_es(trajectory, interp_order, normalise):
+def test_es(trajectory):
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1, 5)
-    parameters["interpolation_order"] = interp_order
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["running_mode"] = ("single-core",)
-    parameters["normalize"] = normalise
     parameters["trajectory"] = short_traj
     es = IJob.create("EnergySpectrum")
     es.run(parameters, status=True)
