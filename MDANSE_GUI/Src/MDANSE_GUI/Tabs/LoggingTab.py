@@ -16,8 +16,8 @@
 
 from logging import Handler, LogRecord
 
-from qtpy.QtCore import qInstallMessageHandler
-from qtpy.QtWidgets import QWidget
+from qtpy.QtCore import qInstallMessageHandler, Slot
+from qtpy.QtWidgets import QWidget, QComboBox
 
 from MDANSE.MLogging import LOG, FMT
 
@@ -28,6 +28,9 @@ from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 
 log_tab_label = """MDANSE_GUI message log.
+
+This tab will display the general logging messages of the graphical interface.
+You can adjust the logging level using the combo box below.
 """
 
 
@@ -58,8 +61,23 @@ class LoggingTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._extra_handler = None
         self._visualiser.toHtml()
         qInstallMessageHandler(self.log_qt_handler)
+        self._loglevel_combo = QComboBox(self._core)
+        self._loglevel_combo.addItems(["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"])
+        self._loglevel_combo.setCurrentText("INFO")
+        self._loglevel_combo.currentTextChanged.connect(self.change_log_level)
+        self._core._ub_layout.addWidget(self._loglevel_combo)
+
+    @Slot(str)
+    def change_log_level(self, new_level: str):
+        if self._extra_handler is None:
+            return
+        try:
+            self._extra_handler.setLevel(new_level)
+        except:
+            LOG.error(f"Could not set GuiLogHandler to log level {new_level}")
 
     def add_handler(self, new_handler):
         self._extra_handler = new_handler
