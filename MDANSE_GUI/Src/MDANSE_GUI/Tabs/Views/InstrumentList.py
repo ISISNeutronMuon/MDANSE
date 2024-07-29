@@ -19,11 +19,14 @@ from qtpy.QtCore import Slot, Signal, QModelIndex
 from qtpy.QtWidgets import QMenu, QListView, QAbstractItemView
 from qtpy.QtGui import QStandardItem, QContextMenuEvent
 
-from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import InstrumentDetails
+from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import (
+    InstrumentDetails,
+    SimpleInstrument,
+)
 
 
 class InstrumentList(QListView):
-    item_details = Signal(tuple)
+    item_details = Signal(object)
     item_name = Signal(str)
     error = Signal(str)
 
@@ -45,6 +48,11 @@ class InstrumentList(QListView):
         node_number = model.itemFromIndex(index).data()
         instrument = model._nodes[node_number]
         self.item_details.emit(instrument)
+
+    def add_instrument(self):
+        model = self.model()
+        new_instrument = SimpleInstrument()
+        model.append_object((new_instrument, "New Instrument"))
 
     def connect_to_visualiser(self, visualiser: InstrumentDetails) -> None:
         """Connect to a visualiser.

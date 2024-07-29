@@ -42,6 +42,7 @@ class JobTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         self.action = kwargs.pop("action")
         cmodel = kwargs.pop("combo_model", None)
+        imodel = kwargs.pop("instrument_model", None)
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""
         self._job_starter = None
@@ -53,6 +54,8 @@ class JobTab(GeneralTab):
         self._instrument_combo = QComboBox()
         self._instrument_combo.setEditable(False)
         self._instrument_combo.currentIndexChanged.connect(self.set_current_instrument)
+        if imodel is not None:
+            self._instrument_combo.setModel(imodel)
         self._core.add_widget(QLabel("Trajectory:"))
         self._core.add_widget(self._trajectory_combo)
         self._core.add_widget(QLabel("Instrument:"), upper=False)

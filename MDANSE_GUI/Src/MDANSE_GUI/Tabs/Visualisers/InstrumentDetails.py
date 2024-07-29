@@ -19,10 +19,11 @@ import numpy as np
 from qtpy.QtWidgets import (
     QPushButton,
     QFileDialog,
-    QVBoxLayout,
+    QLabel,
     QWidget,
-    QHBoxLayout,
-    QCheckBox,
+    QLineEdit,
+    QComboBox,
+    QGridLayout,
     QTextEdit,
 )
 from qtpy.QtCore import Signal, Slot
@@ -30,56 +31,17 @@ from qtpy.QtCore import Signal, Slot
 from MDANSE.MLogging import LOG
 from MDANSE.Framework.Jobs.IJob import IJob
 
-from MDANSE_GUI.InputWidgets import *
-
-
-widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
-    "FloatConfigurator": FloatWidget,
-    "BooleanConfigurator": BooleanWidget,
-    "StringConfigurator": StringWidget,
-    "IntegerConfigurator": IntegerWidget,
-    "CorrelationFramesConfigurator": CorrelationFramesWidget,
-    "FramesConfigurator": FramesWidget,
-    "RangeConfigurator": RangeWidget,
-    "DistHistCutoffConfigurator": DistHistCutoffWidget,
-    "VectorConfigurator": VectorWidget,
-    "HDFInputFileConfigurator": InputFileWidget,
-    "HDFTrajectoryConfigurator": HDFTrajectoryWidget,
-    "DerivativeOrderConfigurator": DerivativeOrderWidget,
-    "InterpolationOrderConfigurator": InterpolationOrderWidget,
-    "OutputFilesConfigurator": OutputFilesWidget,
-    "ASEFileConfigurator": InputFileWidget,
-    "AseInputFileConfigurator": AseInputFileWidget,
-    "ConfigFileConfigurator": InputFileWidget,
-    "InputFileConfigurator": InputFileWidget,
-    "MDFileConfigurator": InputFileWidget,
-    "FieldFileConfigurator": InputFileWidget,
-    "XDATCARFileConfigurator": InputFileWidget,
-    "XTDFileConfigurator": InputFileWidget,
-    "XYZFileConfigurator": InputFileWidget,
-    "RunningModeConfigurator": RunningModeWidget,
-    "WeightsConfigurator": ComboWidget,
-    "MultipleChoicesConfigurator": MultipleCombosWidget,
-    "MoleculeSelectionConfigurator": MoleculeWidget,
-    "GroupingLevelConfigurator": ComboWidget,
-    "SingleChoiceConfigurator": ComboWidget,
-    "QVectorsConfigurator": QVectorsWidget,
-    "InputDirectoryConfigurator": InputDirectoryWidget,
-    "OutputDirectoryConfigurator": OutputDirectoryWidget,
-    "OutputStructureConfigurator": OutputStructureWidget,
-    "OutputTrajectoryConfigurator": OutputTrajectoryWidget,
-    "ProjectionConfigurator": ProjectionWidget,
-    "AtomSelectionConfigurator": AtomSelectionWidget,
-    "AtomMappingConfigurator": AtomMappingWidget,
-    "AtomTransmutationConfigurator": AtomTransmutationWidget,
-    "InstrumentResolutionConfigurator": InstrumentResolutionWidget,
-    "PartialChargeConfigurator": PartialChargeWidget,
-}
-
 
 class SimpleInstrument:
 
+    sample_options = ["isotropic", "crystal"]
+    technique_options = ["QENS", "INS"]
+    resolution_options = ["Gaussian", "Lorentzian", "ideal"]
+    energy_units = ["meV", "1/cm", "THz"]
+    momentum_units = ["1/ang", "1/nm", "1/Bohr"]
+
     def __init__(self) -> None:
+        self._name = "Generic neutron instrument"
         self._sample = "isotropic"
         self._technique = "QENS"
         self._resolution_type = "Gaussian"
@@ -89,13 +51,92 @@ class SimpleInstrument:
         self._q_max = 10.0
         self._q_unit = "1/ang"
 
+    @classmethod
+    def inputs(cls):
+        input_list = [
+            ["_sample", "QComboBox", "sample_options"],
+            ["_technique", "QComboBox", "technique_options"],
+            ["_resolution_type", "QComboBox", "resolution_options"],
+            ["_resolution_fwhm", "QLineEdit", "float"],
+            ["_resolution_unit", "QComboBox", "energy_units"],
+            ["_q_min", "QLineEdit", "float"],
+            ["_q_max", "QLineEdit", "float"],
+            ["_q_unit", "QComboBox", "momentum_units"],
+        ]
+        return input_list
+
     def create_resolution_params(self):
+        pass
+
+    def create_q_vector_params(self):
         pass
 
 
 class InstrumentDetails(QWidget):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.setLayout(QGridLayout(self))
+        self._widgets = {}
+        self._values = {}
+        self._current_instrument = None
+        self.populate_panel(SimpleInstrument)
 
-        
+    def create_widget(self, entry):
+        layout = self.layout()
+        next_row = layout.rowCount()
+        attribute = entry[0]
+        widget = entry[1]
+        value = entry[2]
+        label = attribute.strip(" _")
+        if widget == "QComboBox":
+            instance = QComboBox(self)
+            instance.addItems(getattr(SimpleInstrument, value))
+            instance.currentTextChanged.connect(self.update_values)
+        elif widget == "QLineEdit":
+            instance = QLineEdit(self)
+            instance.setText("0")
+            instance.textChanged.connect(self.update_values)
+        qlabel = QLabel(label, self)
+        layout.addWidget(qlabel, next_row, 0)
+        layout.addWidget(instance, next_row, 1)
+        self._widgets[attribute] = instance
+
+    @Slot()
+    def update_values(self):
+        for key, value in self._widgets.items():
+            try:
+                new_val = value.text()
+            except AttributeError:
+                try:
+                    new_val = value.currentText()
+                except AttributeError:
+                    new_val = None
+            self._values[key] = new_val
+        self.commit_changes()
+
+    def commit_changes(self):
+        if self._current_instrument is None:
+            return
+        for key, value in self._values.items():
+            setattr(self._current_instrument, key, value)
+
+    def populate_panel(self, instrument: SimpleInstrument):
+        for entry in instrument.inputs():
+            self.create_widget(entry)
+
+    @Slot(object)
+    def update_panel(self, instrument_instance):
+        self._values = {}
+        self._current_instrument = None
+        for key, widget in self._widgets.items():
+            new_value = getattr(instrument_instance, key, "Nothing!")
+            try:
+                widget.setText(str(new_value))
+            except AttributeError:
+                try:
+                    widget.setCurrentText(str(new_value))
+                except Exception as e:
+                    LOG.error(f"In InstrumentDetails: {e}")
+        self._current_instrument = instrument_instance
+        self.update_values()

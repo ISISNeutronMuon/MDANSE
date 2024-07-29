@@ -45,22 +45,11 @@ class InstrumentTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._core.add_button("Load .MDT Trajectories", self.load_trajectories)
+        self._core.add_button("Create Instrument", self._view.add_instrument)
 
     @Slot()
     def load_trajectories(self):
-        fnames = QFileDialog.getOpenFileNames(
-            self._core,
-            "Load an MD trajectory",
-            self.get_path("trajectory"),
-            "HDF5 files, MDANSE or H5MD format (*.mdt *.h5);;H5MD files (*.h5);;All files (*)",
-        )
-        for fname in fnames[0]:
-            self.load_trajectory(fname)
-            last_path, _ = os.path.split(fname)
-        if fnames[0]:
-            self.set_path("trajectory", last_path)
-            self._session.save()
+        self._view.add_instrument()
 
     @Slot(str)
     def load_trajectory(self, fname: str):
@@ -77,7 +66,7 @@ class InstrumentTab(GeneralTab):
     def standard_instance(cls):
         the_tab = cls(
             window,
-            name="Trajectories",
+            name="Instruments",
             session=LocalSession(),
             model=GeneralModel(),
             view=InstrumentList(),
