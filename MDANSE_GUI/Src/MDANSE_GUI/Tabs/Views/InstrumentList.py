@@ -13,11 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
 
 from qtpy.QtCore import Slot, Signal, QModelIndex
-from qtpy.QtWidgets import QMenu, QListView, QAbstractItemView
-from qtpy.QtGui import QStandardItem, QContextMenuEvent
+from qtpy.QtWidgets import QListView, QAbstractItemView
+
+from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import (
     InstrumentDetails,
@@ -62,10 +62,7 @@ class InstrumentList(QListView):
         visualiser : View3D or TrajectoryInfo
             A visualiser to connect to this view.
         """
-        if isinstance(visualiser, InstrumentDetails):
+        try:
             self.item_details.connect(visualiser.update_panel)
-        else:
-            raise NotImplementedError(
-                f"Unable to connect view {type(self)} to visualiser "
-                f"{type(visualiser)}"
-            )
+        except Exception as e:
+            LOG.error(f"Failed to connect InstrumentList to visualiser: {e}")

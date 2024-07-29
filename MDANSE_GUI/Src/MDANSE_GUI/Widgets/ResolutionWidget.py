@@ -137,12 +137,126 @@ def revert_parameters(values: dict, peak_type: str) -> List[float]:
     return vals[0], vals[1]
 
 
+class ResolutionCalculator:
+
+    def __init__(self) -> None:
+        self._valid = False
+        self._fwhm_value = 1.0
+        self._centre_value = 0.0
+        self._unit_value = "meV"
+        self._eta_value = 0.0
+
+    def update_model(self, new_model: str):
+        """Activated on new value in the peak type combo box,
+        creates the new IInstrumentResolution subclass.
+
+        Parameters
+        ----------
+        new_model : str
+            Name of the resolution class to create.
+        """
+        self._resolution_name = new_model
+        self._resolution = IInstrumentResolution.create(widget_text_map[new_model])
+        self._resolution.build_configuration()
+        self.recalculate_peak(
+            self._fwhm_value, self._centre_value, self._eta_value, self._unit_value
+        )
+
+    def recalculate_peak(self, fwhm, centre, eta, unit):
+        """The main method of the dialog.
+        Collects the inputs from text fields and
+        calculates the peak function on an array
+        of points around the peak centre.
+        """
+        factor = measure(1.0, iunit=unit, equivalent=True).toval("rad/ps")
+        self._factor_value = factor
+        self._fwhm_value = float(fwhm)
+        self._centre_value = float(centre)
+        self._unit_value = unit
+        try:
+            self._eta_value = float(eta)
+        except TypeError:
+            self._eta_value = None
+        if "oigt" in self._resolution_name:
+            gauss_sigma, gauss_mu = convert_parameters(
+                self._fwhm_value, self._centre_value, "gaussian"
+            )
+            lorentz_sigma, lorentz_mu = convert_parameters(
+                self._fwhm_value, self._centre_value, "lorentzian"
+            )
+            self.set_peak_parameter(lorentz_mu * factor, "mu_lorentzian")
+            self.set_peak_parameter(gauss_mu * factor, "mu_gaussian")
+            self.set_peak_parameter(lorentz_sigma * factor, "sigma_lorentzian")
+            self.set_peak_parameter(gauss_sigma * factor, "sigma_gaussian")
+            self.set_peak_parameter(self._eta_value, "eta")
+        else:
+            temp_name = widget_text_map[self._resolution_name]
+            try:
+                sigma, mu = convert_parameters(
+                    self._fwhm_value, self._centre_value, temp_name
+                )
+            except ValueError:
+                self._fwhm_value = 0.0
+            else:
+                self.set_peak_parameter(mu * factor, "mu")
+                self.set_peak_parameter(sigma * factor, "sigma")
+        extra_width = abs(self._fwhm_value)
+        if extra_width <= 1e-14:
+            extra_width = 1
+        self._omega_axis = np.linspace(
+            factor * (centre - 3 * extra_width),
+            factor * (centre + 3 * extra_width),
+            501,  # odd number is needed for 'ideal' function to work
+        )
+        try:
+            self._resolution.set_kernel(self._omega_axis, 1.0)
+        except:
+            self._valid = False
+        else:
+            self._valid = True
+
+    def set_peak_parameter(self, value: float, key: str):
+        """A convenience method for passing an input value
+        to the IInstrumentResolution class instance.
+
+        Parameters
+        ----------
+        value : float
+            numerical value of the peak parameter
+        key : str
+            name of the parameter from the 'settings' dictionary
+        """
+        try:
+            self._resolution._configuration[key].configure(value)
+        except KeyError:
+            print(f"Could not find {key} in {self._resolution._configuration}")
+
+    def summarise_results(self, rounding_precision=3):
+        results = {"function": self._resolution_name}
+        text = ""
+        for key, value in self._resolution._configuration.items():
+            original_value = value["value"]
+            if abs(original_value) < 1e-12:
+                rounded_value = 0.0
+            else:
+                rounded_value = round(
+                    original_value,
+                    abs(math.floor(math.log10(abs(original_value))))
+                    + rounding_precision,
+                )
+            text += f"settings[{key}] = {rounded_value}\n"
+            results[key] = rounded_value
+        return text, results
+
+
 class ResolutionWidget(QWidget):
 
     parameters_changed = Signal(dict)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self._calculator = ResolutionCalculator()
 
         layout = QGridLayout(self)
         self.setWindowTitle("Resolution Helper for MDANSE")
@@ -159,7 +273,6 @@ class ResolutionWidget(QWidget):
         for ledit in [self._fwhm, self._centre, self._eta]:
             ledit.setValidator(QDoubleValidator(ledit))
             ledit.setPlaceholderText("N/A")
-        self._omega_axis = np.linspace(-1.0, 1.0, 500)
         self._output_field = QTextEdit(self)
         self._output_field.setReadOnly(True)
         self._apply_button = QPushButton("Apply", self)
@@ -227,8 +340,7 @@ class ResolutionWidget(QWidget):
             Name of the resolution class to create.
         """
         self._resolution_name = new_model
-        self._resolution = IInstrumentResolution.create(widget_text_map[new_model])
-        self._resolution.build_configuration()
+        self._calculator.update_model(new_model)
         if "oigt" in new_model:
             for field in [self._fwhm, self._centre, self._eta]:
                 field.setEnabled(True)
@@ -261,46 +373,17 @@ class ResolutionWidget(QWidget):
                 eta = float(self._eta.text())
             except:
                 return
+        else:
+            eta = None
         unit = self._unit_selector.currentText()
-        factor = measure(1.0, iunit=unit, equivalent=True).toval("rad/ps")
-        self._factor_value = factor
-        self._fwhm_value = fwhm
-        self._centre_value = centre
-        self._unit_value = unit
-        if "oigt" in self._resolution_name:
-            gauss_sigma, gauss_mu = convert_parameters(fwhm, centre, "gaussian")
-            lorentz_sigma, lorentz_mu = convert_parameters(fwhm, centre, "lorentzian")
-            self.set_peak_parameter(lorentz_mu * factor, "mu_lorentzian")
-            self.set_peak_parameter(gauss_mu * factor, "mu_gaussian")
-            self.set_peak_parameter(lorentz_sigma * factor, "sigma_lorentzian")
-            self.set_peak_parameter(gauss_sigma * factor, "sigma_gaussian")
-            self.set_peak_parameter(eta, "eta")
-        else:
-            temp_name = widget_text_map[self._resolution_name]
-            try:
-                sigma, mu = convert_parameters(fwhm, centre, temp_name)
-            except ValueError:
-                self._fwhm_value = 0.0
-            else:
-                self.set_peak_parameter(mu * factor, "mu")
-                self.set_peak_parameter(sigma * factor, "sigma")
-        extra_width = abs(fwhm)
-        if extra_width <= 1e-14:
-            extra_width = 1
-        self._omega_axis = np.linspace(
-            factor * (centre - 3 * extra_width),
-            factor * (centre + 3 * extra_width),
-            501,  # odd number is needed for 'ideal' function to work
-        )
-        try:
-            self._resolution.set_kernel(self._omega_axis, 1.0)
-        except:
-            self.update_text_output(error=True)
-            self._apply_button.setEnabled(False)
-        else:
+        self._calculator.recalculate_peak(fwhm, centre, eta, unit)
+        if self._calculator._valid:
             self._apply_button.setEnabled(True)
             self.update_text_output()
             self.update_plot()
+        else:
+            self.update_text_output(error=True)
+            self._apply_button.setEnabled(False)
 
     def update_fields(self, widget_values):
         """Method for passing the values from the main
@@ -334,7 +417,7 @@ class ResolutionWidget(QWidget):
         if abs(fwhm) < 1e-12:
             new_fwhm = 0.0
         else:
-            temp_value = fwhm / self._factor_value
+            temp_value = fwhm / self._calculator._factor_value
             new_fwhm = round(
                 temp_value,
                 abs(math.floor(math.log10(abs(temp_value)))) + 3,
@@ -342,7 +425,7 @@ class ResolutionWidget(QWidget):
         if abs(centre) < 1e-12:
             new_centre = 0.0
         else:
-            temp_value = centre / self._factor_value
+            temp_value = centre / self._calculator._factor_value
             new_centre = round(
                 temp_value,
                 abs(math.floor(math.log10(abs(temp_value)))) + 3,
@@ -352,19 +435,6 @@ class ResolutionWidget(QWidget):
         self._eta.setText(str(new_eta))
         self.blockSignals(False)
         self.recalculate_peak()
-
-    def set_peak_parameter(self, value: float, key: str):
-        """A convenience method for passing an input value
-        to the IInstrumentResolution class instance.
-
-        Parameters
-        ----------
-        value : float
-            numerical value of the peak parameter
-        key : str
-            name of the parameter from the 'settings' dictionary
-        """
-        self._resolution._configuration[key].configure(value)
 
     def update_text_output(self, rounding_precision=3, error=False):
         """Updates the text in the QTextEdit widget.
@@ -383,20 +453,10 @@ class ResolutionWidget(QWidget):
             self._output_field.setText(text)
             return
         text = "Parameters in MDANSE internal units\n"
-        results = {"function": self._resolution_name}
-        for key, value in self._resolution._configuration.items():
-            original_value = value["value"]
-            if abs(original_value) < 1e-12:
-                rounded_value = 0.0
-            else:
-                rounded_value = round(
-                    original_value,
-                    abs(math.floor(math.log10(abs(original_value))))
-                    + rounding_precision,
-                )
-            text += f"settings[{key}] = {rounded_value}\n"
-            results[key] = rounded_value
-        self._output_field.setText(text)
+        temp_text, results = self._calculator.summarise_results(
+            rounding_precision=rounding_precision
+        )
+        self._output_field.setText(text + temp_text)
         self._results = results
 
     def apply_changes(self):
@@ -412,27 +472,29 @@ class ResolutionWidget(QWidget):
         """
         self._figure.clear()
         axes = self._figure.add_axes(111)
-        axes.plot(self._omega_axis, self._resolution._omegaWindow)
-        hh = np.max(self._resolution._omegaWindow) / 2
+        axes.plot(
+            self._calculator._omega_axis, self._calculator._resolution._omegaWindow
+        )
+        hh = np.max(self._calculator._resolution._omegaWindow) / 2
         xs = (
             np.array(
                 [
-                    -self._fwhm_value / 2,
-                    -self._fwhm_value / 2,
-                    self._fwhm_value / 2,
-                    self._fwhm_value / 2,
+                    -self._calculator._fwhm_value / 2,
+                    -self._calculator._fwhm_value / 2,
+                    self._calculator._fwhm_value / 2,
+                    self._calculator._fwhm_value / 2,
                 ]
             )
-            + self._centre_value
+            + self._calculator._centre_value
         )
         ys = np.array([0.0, hh, hh, 0.0])
         if not "deal" in self._resolution_name:
-            axes.plot(xs * self._factor_value, ys, "r:")
+            axes.plot(xs * self._calculator._factor_value, ys, "r:")
         axes.grid(True)
-        scale = self._factor_value
+        scale = self._calculator._factor_value
         second_axis = axes.secondary_xaxis(
             "top", functions=(lambda x: x / scale, lambda x: x / scale)
         )
         axes.set_xlabel("Energy [rad/ps]")
-        second_axis.set_xlabel(f"Energy [{self._unit_value}]")
+        second_axis.set_xlabel(f"Energy [{self._calculator._unit_value}]")
         self._figure.canvas.draw()

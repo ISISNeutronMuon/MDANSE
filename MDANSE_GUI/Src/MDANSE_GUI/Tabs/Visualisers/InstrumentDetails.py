@@ -29,14 +29,15 @@ from qtpy.QtWidgets import (
 from qtpy.QtCore import Signal, Slot
 
 from MDANSE.MLogging import LOG
-from MDANSE.Framework.Jobs.IJob import IJob
+
+from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_text_map
 
 
 class SimpleInstrument:
 
     sample_options = ["isotropic", "crystal"]
     technique_options = ["QENS", "INS"]
-    resolution_options = ["Gaussian", "Lorentzian", "ideal"]
+    resolution_options = [str(x) for x in widget_text_map.keys()]
     energy_units = ["meV", "1/cm", "THz"]
     momentum_units = ["1/ang", "1/nm", "1/Bohr"]
 
@@ -54,6 +55,7 @@ class SimpleInstrument:
     @classmethod
     def inputs(cls):
         input_list = [
+            ["_name", "QLineEdit", "str"],
             ["_sample", "QComboBox", "sample_options"],
             ["_technique", "QComboBox", "technique_options"],
             ["_resolution_type", "QComboBox", "resolution_options"],
@@ -66,10 +68,23 @@ class SimpleInstrument:
         return input_list
 
     def create_resolution_params(self):
-        pass
+        calculator = ResolutionCalculator()
+        try:
+            calculator.update_model(self._resolution_type)
+        except Exception as e:
+            print(f"update_model failed: {e}")
+        try:
+            calculator.recalculate_peak(
+                self._resolution_fwhm, 0.0, 0.0, self._resolution_unit
+            )
+        except Exception as e:
+            print(f"recalculate_peak failed: {e}")
+        text, results = calculator.summarise_results()
+        self._resolution_results = results
+        return text
 
     def create_q_vector_params(self):
-        pass
+        return ""
 
 
 class InstrumentDetails(QWidget):
