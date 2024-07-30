@@ -111,6 +111,13 @@ class JobTab(GeneralTab):
     @Slot(int)
     def set_current_instrument(self, index: int):
         LOG.debug(f"Switched instrument to {index}")
+        instrument_model = self._instrument_combo.model()
+        self.action.set_instrument(instrument_model._nodes[index])
+        current_item = self._core.current_item()
+        if current_item is not None:
+            # we only update the widget if a job is selected from the
+            # actions tree
+            self.action.update_panel(current_item.text())
 
     @classmethod
     def standard_instance(cls):
@@ -156,6 +163,7 @@ class JobTab(GeneralTab):
             logger=logger,
             model=kwargs.get("model", JobTree(filter="Analysis")),
             combo_model=kwargs.get("combo_model", None),
+            instrument_model=kwargs.get("instrument_model", None),
             view=ActionsTree(),
             visualiser=action,
             layout=partial(

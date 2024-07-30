@@ -121,8 +121,11 @@ class InstrumentResolutionWidget(WidgetBase):
                 self._defaults[index] = 0.0
 
     @Slot(str)
-    def change_function(self, function: str):
-        new_params = init_parameters[function]
+    def change_function(self, function: str, optional_parameters: dict = None):
+        if optional_parameters is None:
+            new_params = init_parameters[function]
+        else:
+            new_params = optional_parameters
         self.set_field_values(new_params)
 
     def get_widget_value(self):

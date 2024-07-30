@@ -29,14 +29,13 @@ from MDANSE_GUI.Tabs.Views.InstrumentList import InstrumentList
 from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import InstrumentDetails
 
 
-label_text = """Here you can load the .mdt files.
-They are MD trajectories in HDF5 format
-created by one of the MDANSE converters.
-Any trajectory you select will be visualised
-in the 3D view window on the right side.
-The animation of the MD trajectory will
-allow you to verify if the contents 
-of the trajectory are what you expected.
+label_text = """Here you can browse, edit and add instrument profiles.
+If you are trying to reproduce the results of a neutron experiment,
+you will need to set at least the correct instrument resolution
+and q-vector coverage to be used in the analysis.
+The initial inputs of an analysis in the GUI will be affected
+by the instrument profile you chose. You can still change them
+before starting the analysis, if you had something else in mind.
 """
 
 

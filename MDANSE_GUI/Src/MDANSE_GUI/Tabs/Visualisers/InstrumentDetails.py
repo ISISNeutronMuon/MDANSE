@@ -47,6 +47,8 @@ class InstrumentDetails(QWidget):
         self._current_instrument = None
         self.populate_panel(SimpleInstrument)
         self.add_visualiser()
+        for attr in ["_sample", "_technique"]:
+            self._widgets[attr].currentTextChanged.connect(self.reset_qvector_combobox)
 
     def add_visualiser(self):
         layout = self.layout()
@@ -80,6 +82,24 @@ class InstrumentDetails(QWidget):
         layout.addWidget(qlabel, next_row, 0)
         layout.addWidget(instance, next_row, 1)
         self._widgets[attribute] = instance
+        for widg in self._widgets.values():
+            widg.setEnabled(False)
+
+    @Slot()
+    def reset_qvector_combobox(self):
+        if self._current_instrument is None:
+            return
+        qvec_combo = self._widgets["_qvector_type"]
+        last_option = qvec_combo.currentText()
+        new_options = self._current_instrument.filter_qvector_generator()
+        qvec_combo.clear()
+        if len(new_options) == 0:
+            return
+        qvec_combo.addItems(new_options)
+        if last_option in new_options:
+            qvec_combo.setCurrentText(last_option)
+        else:
+            qvec_combo.setCurrentText(new_options[0])
 
     @Slot()
     def update_values(self):
@@ -99,6 +119,7 @@ class InstrumentDetails(QWidget):
             return
         for key, value in self._values.items():
             setattr(self._current_instrument, key, value)
+        self._current_instrument._configured = True
         self._current_instrument.update_item()
         self._inner_visualiser.update_panel(self._current_instrument)
 
@@ -110,6 +131,8 @@ class InstrumentDetails(QWidget):
     def update_panel(self, instrument_instance):
         if instrument_instance is None:
             return
+        for widg in self._widgets.values():
+            widg.setEnabled(True)
         self._values = {}
         self._current_instrument = None
         for key, widget in self._widgets.items():

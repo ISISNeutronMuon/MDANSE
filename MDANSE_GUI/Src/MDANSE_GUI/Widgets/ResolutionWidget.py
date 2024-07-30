@@ -232,7 +232,7 @@ class ResolutionCalculator:
             print(f"Could not find {key} in {self._resolution._configuration}")
 
     def summarise_results(self, rounding_precision=3):
-        results = {"function": self._resolution_name}
+        results = {}
         text = ""
         for key, value in self._resolution._configuration.items():
             original_value = value["value"]

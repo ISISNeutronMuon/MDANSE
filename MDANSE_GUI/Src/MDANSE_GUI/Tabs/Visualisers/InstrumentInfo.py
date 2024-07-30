@@ -18,7 +18,8 @@ from qtpy.QtWidgets import QTextBrowser
 from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtGui import QStandardItem
 
-
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
+from MDANSE.Framework.Units import measure
 from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_text_map
 
 
@@ -27,6 +28,7 @@ class SimpleInstrument:
     sample_options = ["isotropic", "crystal"]
     technique_options = ["QENS", "INS"]
     resolution_options = [str(x) for x in widget_text_map.keys()]
+    qvector_options = [str(x) for x in IQVectors.indirect_subclasses()]
     energy_units = ["meV", "1/cm", "THz"]
     momentum_units = ["1/ang", "1/nm", "1/Bohr"]
 
@@ -38,9 +40,13 @@ class SimpleInstrument:
         self._resolution_type = "Gaussian"
         self._resolution_fwhm = 0.1
         self._resolution_unit = "meV"
+        self._qvector_type = "SphericalQVectors"
         self._q_min = 0.1
         self._q_max = 10.0
         self._q_unit = "1/ang"
+        self._q_step = 1.0
+        self._vectors_per_shell = 100
+        self._configured = False
 
     @classmethod
     def inputs(cls):
@@ -51,9 +57,12 @@ class SimpleInstrument:
             ["_resolution_type", "QComboBox", "resolution_options"],
             ["_resolution_fwhm", "QLineEdit", "float"],
             ["_resolution_unit", "QComboBox", "energy_units"],
+            ["_qvector_type", "QComboBox", "qvector_options"],
+            ["_q_unit", "QComboBox", "momentum_units"],
             ["_q_min", "QLineEdit", "float"],
             ["_q_max", "QLineEdit", "float"],
-            ["_q_unit", "QComboBox", "momentum_units"],
+            ["_q_step", "QLineEdit", "float"],
+            ["_vectors_per_shell", "QLineEdit", "int"],
         ]
         return input_list
 
@@ -63,6 +72,9 @@ class SimpleInstrument:
         self._list_item.setData(self._name, role=Qt.ItemDataRole.DisplayRole)
 
     def create_resolution_params(self):
+        if not self._configured:
+            return
+        general_resolution = ("gaussian", {"mu": 0.0, "sigma": 0.2})
         calculator = ResolutionCalculator()
         try:
             calculator.update_model(self._resolution_type)
@@ -74,12 +86,54 @@ class SimpleInstrument:
             )
         except Exception as e:
             print(f"recalculate_peak failed: {e}")
-        text, results = calculator.summarise_results()
-        self._resolution_results = results
-        return text
+        _, results = calculator.summarise_results()
+        mdanse_tuple = (widget_text_map[self._resolution_type], results)
+        self._resolution_results = mdanse_tuple
+        return mdanse_tuple
 
     def create_q_vector_params(self):
-        return ""
+        if not self._configured:
+            return
+        general_coverage = (
+            "SphericalQVectors",
+            {"seed": 0, "shells": [5.0, 30.0, 1.0], "n_vectors": 100, "width": 1.0},
+        )
+        cov_type = self._qvector_type
+        try:
+            conversion_factor = measure(1.0, iunit=self._q_unit).toval("1/nm")
+        except:
+            raise ValueError(f"Could not convert unit: {self._q_unit}")
+        else:
+            conversion_factor = float(conversion_factor)
+        q_step = conversion_factor * float(self._q_step)
+        q_min = conversion_factor * float(self._q_min)
+        q_max = conversion_factor * float(self._q_max)
+        width = q_step
+        num_vectors = int(self._vectors_per_shell)
+        mdanse_tuple = (
+            cov_type,
+            {
+                "seed": 0,
+                "shells": [q_min, q_max, q_step],
+                "n_vectors": num_vectors,
+                "width": width,
+            },
+        )
+        return mdanse_tuple
+
+    def filter_qvector_generator(self):
+        new_list = [str(x) for x in self.qvector_options]
+        if self._sample == "isotropic":
+            new_list = [str(x) for x in new_list if not "Lattice" in x]
+        if self._technique == "QENS":
+            new_list = [str(x) for x in new_list if "Spherical" in x]
+        return new_list
+
+    def pick_qvector_generator(self) -> str:
+        qgenerator = "SphericalQVectors"
+        if self._sample == "isotropic" and self._technique == "QENS":
+            qgenerator = "SphericalQVectors"
+        return qgenerator
 
 
 class InstrumentInfo(QTextBrowser):
@@ -122,11 +176,11 @@ class InstrumentInfo(QTextBrowser):
         new_text = ""
         if self._header:
             new_text += self._header + line_break
-        new_text += instrument_object._name + line_break
+        new_text += "<b>" + instrument_object._name + "</b>" + line_break + line_break
         new_text += "MDANSE resolution input" + line_break
-        new_text += instrument_object.create_resolution_params() + line_break
+        new_text += str(instrument_object.create_resolution_params()) + line_break
         new_text += "MDANSE q-vector generator input" + line_break
-        new_text += instrument_object.create_q_vector_params() + line_break
+        new_text += str(instrument_object.create_q_vector_params()) + line_break
         if self._footer:
             new_text += line_break + self._footer
         return new_text
