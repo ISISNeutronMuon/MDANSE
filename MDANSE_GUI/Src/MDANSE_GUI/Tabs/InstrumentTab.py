@@ -22,12 +22,11 @@ from qtpy.QtWidgets import QWidget
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
-from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
+from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Views.InstrumentList import InstrumentList
 from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import InstrumentDetails
-from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import InstrumentInfo
 
 
 label_text = """Here you can load the .mdt files.
@@ -71,10 +70,7 @@ class InstrumentTab(GeneralTab):
             model=GeneralModel(),
             view=InstrumentList(),
             visualiser=InstrumentDetails(),
-            layout=partial(
-                MultiPanel,
-                right_panels=[InstrumentInfo()],
-            ),
+            layout=DoublePanel,
             label_text=label_text,
         )
         return the_tab
@@ -98,10 +94,7 @@ class InstrumentTab(GeneralTab):
             model=kwargs.get("model", GeneralModel()),
             view=InstrumentList(),
             visualiser=InstrumentDetails(),
-            layout=partial(
-                MultiPanel,
-                right_panels=[InstrumentInfo()],
-            ),
+            layout=DoublePanel,
             label_text=label_text,
         )
         return the_tab

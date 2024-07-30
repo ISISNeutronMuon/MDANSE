@@ -26,68 +26,18 @@ from qtpy.QtWidgets import (
     QGridLayout,
     QTextEdit,
 )
-from qtpy.QtCore import Signal, Slot
+from qtpy.QtCore import Signal, Slot, Qt
+from qtpy.QtGui import QStandardItem, QDoubleValidator, QIntValidator
 
 from MDANSE.MLogging import LOG
 
-from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_text_map
-
-
-class SimpleInstrument:
-
-    sample_options = ["isotropic", "crystal"]
-    technique_options = ["QENS", "INS"]
-    resolution_options = [str(x) for x in widget_text_map.keys()]
-    energy_units = ["meV", "1/cm", "THz"]
-    momentum_units = ["1/ang", "1/nm", "1/Bohr"]
-
-    def __init__(self) -> None:
-        self._name = "Generic neutron instrument"
-        self._sample = "isotropic"
-        self._technique = "QENS"
-        self._resolution_type = "Gaussian"
-        self._resolution_fwhm = 0.1
-        self._resolution_unit = "meV"
-        self._q_min = 0.1
-        self._q_max = 10.0
-        self._q_unit = "1/ang"
-
-    @classmethod
-    def inputs(cls):
-        input_list = [
-            ["_name", "QLineEdit", "str"],
-            ["_sample", "QComboBox", "sample_options"],
-            ["_technique", "QComboBox", "technique_options"],
-            ["_resolution_type", "QComboBox", "resolution_options"],
-            ["_resolution_fwhm", "QLineEdit", "float"],
-            ["_resolution_unit", "QComboBox", "energy_units"],
-            ["_q_min", "QLineEdit", "float"],
-            ["_q_max", "QLineEdit", "float"],
-            ["_q_unit", "QComboBox", "momentum_units"],
-        ]
-        return input_list
-
-    def create_resolution_params(self):
-        calculator = ResolutionCalculator()
-        try:
-            calculator.update_model(self._resolution_type)
-        except Exception as e:
-            print(f"update_model failed: {e}")
-        try:
-            calculator.recalculate_peak(
-                self._resolution_fwhm, 0.0, 0.0, self._resolution_unit
-            )
-        except Exception as e:
-            print(f"recalculate_peak failed: {e}")
-        text, results = calculator.summarise_results()
-        self._resolution_results = results
-        return text
-
-    def create_q_vector_params(self):
-        return ""
+from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import InstrumentInfo
+from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 
 
 class InstrumentDetails(QWidget):
+
+    got_new_values = Signal()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -96,6 +46,13 @@ class InstrumentDetails(QWidget):
         self._values = {}
         self._current_instrument = None
         self.populate_panel(SimpleInstrument)
+        self.add_visualiser()
+
+    def add_visualiser(self):
+        layout = self.layout()
+        next_row = layout.rowCount()
+        self._inner_visualiser = InstrumentInfo(self)
+        layout.addWidget(self._inner_visualiser, next_row, 0, 1, 2)
 
     def create_widget(self, entry):
         layout = self.layout()
@@ -110,7 +67,14 @@ class InstrumentDetails(QWidget):
             instance.currentTextChanged.connect(self.update_values)
         elif widget == "QLineEdit":
             instance = QLineEdit(self)
-            instance.setText("0")
+            if value == "float":
+                instance.setValidator(QDoubleValidator())
+                instance.setText("0.0")
+            elif value == "int":
+                instance.setValidator(QIntValidator())
+                instance.setText("0")
+            else:
+                instance.setText("text")
             instance.textChanged.connect(self.update_values)
         qlabel = QLabel(label, self)
         layout.addWidget(qlabel, next_row, 0)
@@ -135,6 +99,8 @@ class InstrumentDetails(QWidget):
             return
         for key, value in self._values.items():
             setattr(self._current_instrument, key, value)
+        self._current_instrument.update_item()
+        self._inner_visualiser.update_panel(self._current_instrument)
 
     def populate_panel(self, instrument: SimpleInstrument):
         for entry in instrument.inputs():
@@ -142,6 +108,8 @@ class InstrumentDetails(QWidget):
 
     @Slot(object)
     def update_panel(self, instrument_instance):
+        if instrument_instance is None:
+            return
         self._values = {}
         self._current_instrument = None
         for key, widget in self._widgets.items():

@@ -15,8 +15,71 @@
 #
 from qtpy.QtCore import Slot, Signal
 from qtpy.QtWidgets import QTextBrowser
+from qtpy.QtCore import Signal, Slot, Qt
+from qtpy.QtGui import QStandardItem
 
-from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import SimpleInstrument
+
+from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_text_map
+
+
+class SimpleInstrument:
+
+    sample_options = ["isotropic", "crystal"]
+    technique_options = ["QENS", "INS"]
+    resolution_options = [str(x) for x in widget_text_map.keys()]
+    energy_units = ["meV", "1/cm", "THz"]
+    momentum_units = ["1/ang", "1/nm", "1/Bohr"]
+
+    def __init__(self, optional_qitem_reference: QStandardItem = None) -> None:
+        self._list_item = optional_qitem_reference
+        self._name = "Generic neutron instrument"
+        self._sample = "isotropic"
+        self._technique = "QENS"
+        self._resolution_type = "Gaussian"
+        self._resolution_fwhm = 0.1
+        self._resolution_unit = "meV"
+        self._q_min = 0.1
+        self._q_max = 10.0
+        self._q_unit = "1/ang"
+
+    @classmethod
+    def inputs(cls):
+        input_list = [
+            ["_name", "QLineEdit", "str"],
+            ["_sample", "QComboBox", "sample_options"],
+            ["_technique", "QComboBox", "technique_options"],
+            ["_resolution_type", "QComboBox", "resolution_options"],
+            ["_resolution_fwhm", "QLineEdit", "float"],
+            ["_resolution_unit", "QComboBox", "energy_units"],
+            ["_q_min", "QLineEdit", "float"],
+            ["_q_max", "QLineEdit", "float"],
+            ["_q_unit", "QComboBox", "momentum_units"],
+        ]
+        return input_list
+
+    def update_item(self):
+        if self._list_item is None:
+            return
+        self._list_item.setData(self._name, role=Qt.ItemDataRole.DisplayRole)
+
+    def create_resolution_params(self):
+        calculator = ResolutionCalculator()
+        try:
+            calculator.update_model(self._resolution_type)
+        except Exception as e:
+            print(f"update_model failed: {e}")
+        try:
+            calculator.recalculate_peak(
+                self._resolution_fwhm, 0.0, 0.0, self._resolution_unit
+            )
+        except Exception as e:
+            print(f"recalculate_peak failed: {e}")
+        text, results = calculator.summarise_results()
+        self._resolution_results = results
+        return text
+
+    def create_q_vector_params(self):
+        return ""
 
 
 class InstrumentInfo(QTextBrowser):
@@ -31,6 +94,8 @@ class InstrumentInfo(QTextBrowser):
 
     @Slot(object)
     def update_panel(self, incoming: SimpleInstrument):
+        if incoming is None:
+            return
         filtered = self.filter(incoming)
         self.setHtml(filtered)
 

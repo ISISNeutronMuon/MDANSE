@@ -47,6 +47,22 @@ class GeneralModel(QStandardItemModel):
         self.summarise_items()
         return retval
 
+    @Slot(tuple)
+    def append_object_and_embed(self, input: tuple):
+        thing, label = input
+        self.mutex.lock()
+        self._nodes[self._next_number] = thing
+        self._node_numbers.append(self._next_number)
+        retval = int(self._next_number)
+        self._next_number += 1
+        item = QStandardItem(label)
+        item.setData(retval)
+        thing._list_item = item
+        self.appendRow(item)
+        self.mutex.unlock()
+        self.summarise_items()
+        return retval
+
     def summarise_items(self):
         result = []
         self.mutex.lock()

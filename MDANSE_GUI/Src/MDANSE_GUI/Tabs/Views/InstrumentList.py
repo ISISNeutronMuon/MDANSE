@@ -34,6 +34,7 @@ class InstrumentList(QListView):
         super().__init__(*args, **kwargs)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
+        self._current_instrument = None
 
     @Slot()
     def deleteNode(self):
@@ -47,12 +48,17 @@ class InstrumentList(QListView):
         model = self.model()
         node_number = model.itemFromIndex(index).data()
         instrument = model._nodes[node_number]
+        self._current_instrument = instrument
         self.item_details.emit(instrument)
+
+    @Slot()
+    def resend_item(self):
+        self.item_details.emit(self._current_instrument)
 
     def add_instrument(self):
         model = self.model()
         new_instrument = SimpleInstrument()
-        model.append_object((new_instrument, "New Instrument"))
+        model.append_object_and_embed((new_instrument, "New Instrument"))
 
     def connect_to_visualiser(self, visualiser: InstrumentDetails) -> None:
         """Connect to a visualiser.
