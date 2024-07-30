@@ -31,6 +31,7 @@ from qtpy.QtGui import QStandardItem, QDoubleValidator, QIntValidator
 
 from MDANSE.MLogging import LOG
 
+from MDANSE_GUI.Widgets.VectorWidget import VectorWidget
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import InstrumentInfo
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 
@@ -78,6 +79,10 @@ class InstrumentDetails(QWidget):
             else:
                 instance.setText("text")
             instance.textChanged.connect(self.update_values)
+        elif widget == "VectorWidget":
+            instance = VectorWidget(self)
+            instance.set_value([0, 0, 0])
+            instance.value_changed.connect(self.update_values)
         qlabel = QLabel(label, self)
         layout.addWidget(qlabel, next_row, 0)
         layout.addWidget(instance, next_row, 1)
@@ -113,6 +118,7 @@ class InstrumentDetails(QWidget):
                     new_val = None
             self._values[key] = new_val
         self.commit_changes()
+        self.toggle_axis_fields()
 
     def commit_changes(self):
         if self._current_instrument is None:
@@ -126,6 +132,24 @@ class InstrumentDetails(QWidget):
     def populate_panel(self, instrument: SimpleInstrument):
         for entry in instrument.inputs():
             self.create_widget(entry)
+
+    def toggle_axis_fields(self):
+        if self._current_instrument is None:
+            return
+        for name, widget in self._widgets.items():
+            if "axis_1" in name:
+                if not (
+                    "Linear" in self._current_instrument._qvector_type
+                    or "Circular" in self._current_instrument._qvector_type
+                ):
+                    widget.setEnabled(False)
+                else:
+                    widget.setEnabled(True)
+            if "axis_2" in name:
+                if not "Circular" in self._current_instrument._qvector_type:
+                    widget.setEnabled(False)
+                else:
+                    widget.setEnabled(True)
 
     @Slot(object)
     def update_panel(self, instrument_instance):

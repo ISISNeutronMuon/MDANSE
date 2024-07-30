@@ -45,6 +45,8 @@ class SimpleInstrument:
         self._q_max = 10.0
         self._q_unit = "1/ang"
         self._q_step = 1.0
+        self._axis_1 = [1, 0, 0]
+        self._axis_2 = [0, 1, 0]
         self._vectors_per_shell = 100
         self._configured = False
 
@@ -63,6 +65,8 @@ class SimpleInstrument:
             ["_q_max", "QLineEdit", "float"],
             ["_q_step", "QLineEdit", "float"],
             ["_vectors_per_shell", "QLineEdit", "int"],
+            ["_axis_1", "VectorWidget", "float"],
+            ["_axis_2", "VectorWidget", "float"],
         ]
         return input_list
 
@@ -94,30 +98,39 @@ class SimpleInstrument:
     def create_q_vector_params(self):
         if not self._configured:
             return
-        general_coverage = (
-            "SphericalQVectors",
-            {"seed": 0, "shells": [5.0, 30.0, 1.0], "n_vectors": 100, "width": 1.0},
-        )
         cov_type = self._qvector_type
+        qvec_generator = IQVectors.create(cov_type, None)
+        qvec_generator.build_configuration()
+        param_dictionary = {}
         try:
             conversion_factor = measure(1.0, iunit=self._q_unit).toval("1/nm")
         except:
             raise ValueError(f"Could not convert unit: {self._q_unit}")
         else:
             conversion_factor = float(conversion_factor)
-        q_step = conversion_factor * float(self._q_step)
-        q_min = conversion_factor * float(self._q_min)
-        q_max = conversion_factor * float(self._q_max)
-        width = q_step
-        num_vectors = int(self._vectors_per_shell)
+        if "shells" in qvec_generator._configuration:
+            q_step = conversion_factor * float(self._q_step)
+            q_min = conversion_factor * float(self._q_min)
+            q_max = conversion_factor * float(self._q_max)
+            param_dictionary["shells"] = [q_min, q_max, q_step]
+        if "width" in qvec_generator._configuration:
+            width = conversion_factor * float(self._q_step)
+            param_dictionary["width"] = width
+        if "n_vectors" in qvec_generator._configuration:
+            num_vectors = int(self._vectors_per_shell)
+            param_dictionary["n_vectors"] = num_vectors
+        if "axis" in qvec_generator._configuration:
+            ax_vector = [float(x) for x in self._axis_1.split(",")]
+            param_dictionary["axis"] = ax_vector
+        if "axis_1" in qvec_generator._configuration:
+            ax_vector = [float(x) for x in self._axis_1.split(",")]
+            param_dictionary["axis_1"] = ax_vector
+        if "axis_2" in qvec_generator._configuration:
+            ax_vector = [float(x) for x in self._axis_2.split(",")]
+            param_dictionary["axis_2"] = ax_vector
         mdanse_tuple = (
             cov_type,
-            {
-                "seed": 0,
-                "shells": [q_min, q_max, q_step],
-                "n_vectors": num_vectors,
-                "width": width,
-            },
+            param_dictionary,
         )
         return mdanse_tuple
 
