@@ -18,7 +18,7 @@ import tomlkit
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
 
-from qtpy.QtCore import Slot, Signal, QModelIndex
+from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
 from qtpy.QtWidgets import QListView, QAbstractItemView
 
 from MDANSE import PLATFORM
@@ -125,7 +125,7 @@ class InstrumentList(QListView):
             filename = os.path.join(
                 PLATFORM.application_directory(), "InstrumentDefinitions.toml"
             )
-        print(f"save to file: {filename}")
+        LOG.debug(f"save to file: {filename}")
         target_file = TOMLFile(filename)
         newdoc = tomlkit.document()
         model = self.model()

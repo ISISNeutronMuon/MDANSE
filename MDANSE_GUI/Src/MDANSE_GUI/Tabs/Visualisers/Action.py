@@ -269,8 +269,12 @@ class Action(QWidget):
             resolution_tuple = self._current_instrument.create_resolution_params()
             for widget in self._widgets:
                 if isinstance(widget, InstrumentResolutionWidget):
+                    if resolution_tuple is None:
+                        continue
                     widget.change_function(resolution_tuple[0], resolution_tuple[1])
                 if isinstance(widget, QVectorsWidget):
+                    if q_vector_tuple is None:
+                        continue
                     widget._selector.setCurrentText(q_vector_tuple[0])
                     widget._model.switch_qvector_type(
                         q_vector_tuple[0], q_vector_tuple[1]

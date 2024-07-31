@@ -18,6 +18,7 @@ from qtpy.QtWidgets import QTextBrowser
 from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtGui import QStandardItem
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.Units import measure
 from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_text_map
@@ -74,6 +75,7 @@ class SimpleInstrument:
         if self._list_item is None:
             return
         self._list_item.setData(self._name, role=Qt.ItemDataRole.DisplayRole)
+        self._list_item.setText(self._name)
 
     def create_resolution_params(self):
         if not self._configured:
@@ -83,13 +85,13 @@ class SimpleInstrument:
         try:
             calculator.update_model(self._resolution_type)
         except Exception as e:
-            print(f"update_model failed: {e}")
+            LOG.error(f"update_model failed: {e}")
         try:
             calculator.recalculate_peak(
                 self._resolution_fwhm, 0.0, 0.0, self._resolution_unit
             )
         except Exception as e:
-            print(f"recalculate_peak failed: {e}")
+            LOG.error(f"recalculate_peak failed: {e}")
         _, results = calculator.summarise_results()
         mdanse_tuple = (widget_text_map[self._resolution_type], results)
         self._resolution_results = mdanse_tuple

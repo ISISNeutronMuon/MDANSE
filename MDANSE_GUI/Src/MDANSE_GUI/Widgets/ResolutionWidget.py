@@ -39,6 +39,7 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Units import measure
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
@@ -229,7 +230,7 @@ class ResolutionCalculator:
         try:
             self._resolution._configuration[key].configure(value)
         except KeyError:
-            print(f"Could not find {key} in {self._resolution._configuration}")
+            LOG.warning(f"Could not find {key} in {self._resolution._configuration}")
 
     def summarise_results(self, rounding_precision=3):
         results = {}

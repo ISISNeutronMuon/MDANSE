@@ -65,6 +65,7 @@ class InstrumentTab(GeneralTab):
         for instrument in self._model._nodes.values():
             print(f"Instrument name: {instrument._name}")
             instrument.update_item()
+            instrument._configured = True  # instruments loaded from file are configured
 
     @Slot()
     def load_trajectories(self):
