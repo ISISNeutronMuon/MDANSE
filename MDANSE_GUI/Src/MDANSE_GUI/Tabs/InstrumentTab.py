@@ -19,6 +19,8 @@ from functools import partial
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget
 
+from MDANSE import PLATFORM
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
@@ -44,6 +46,25 @@ class InstrumentTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Create Instrument", self._view.add_instrument)
+        self._core.add_button("Save Instruments", self._view.save_to_file, upper=False)
+        current_path = os.path.dirname(os.path.abspath(__file__))
+        builtin_file = os.path.join(
+            current_path, "..", "Resources", "InstrumentDefinitions.toml"
+        )
+        try:
+            self._view.load_from_file(builtin_file)
+        except Exception as e:
+            LOG.error(f"Could not load instruments from {builtin_file}: {e}")
+        filename = os.path.join(
+            PLATFORM.application_directory(), "InstrumentDefinitions.toml"
+        )
+        try:
+            self._view.load_from_file(filename)
+        except Exception as e:
+            LOG.error(f"Could not load instruments from {filename}: {e}")
+        for instrument in self._model._nodes.values():
+            print(f"Instrument name: {instrument._name}")
+            instrument.update_item()
 
     @Slot()
     def load_trajectories(self):

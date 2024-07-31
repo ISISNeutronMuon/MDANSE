@@ -109,12 +109,12 @@ class SimpleInstrument:
         else:
             conversion_factor = float(conversion_factor)
         if "shells" in qvec_generator._configuration:
-            q_step = conversion_factor * float(self._q_step)
-            q_min = conversion_factor * float(self._q_min)
-            q_max = conversion_factor * float(self._q_max)
+            q_step = round(conversion_factor * float(self._q_step), 6)
+            q_min = round(conversion_factor * float(self._q_min), 6)
+            q_max = round(conversion_factor * float(self._q_max), 6)
             param_dictionary["shells"] = [q_min, q_max, q_step]
         if "width" in qvec_generator._configuration:
-            width = conversion_factor * float(self._q_step)
+            width = round(conversion_factor * float(self._q_step), 6)
             param_dictionary["width"] = width
         if "n_vectors" in qvec_generator._configuration:
             num_vectors = int(self._vectors_per_shell)
