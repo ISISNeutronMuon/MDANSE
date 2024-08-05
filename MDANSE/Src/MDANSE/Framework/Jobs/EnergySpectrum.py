@@ -15,6 +15,7 @@
 #
 import collections
 
+import numpy as np
 from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -173,30 +174,16 @@ class EnergySpectrum(IJob):
 
         # get atom index
         indexes = self.configuration["atom_selection"]["indexes"][index]
+        atoms = [self._atoms[idx] for idx in indexes]
 
-        if self.configuration["interpolation_order"]["value"] == 0:
-            series = trajectory.read_configuration_trajectory(
-                indexes[0],
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
-                variable="velocities",
-            )
-        else:
-            series = trajectory.read_atomic_trajectory(
-                indexes[0],
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
-            )
+        series = trajectory.read_com_trajectory(
+            atoms,
+            first=self.configuration["frames"]["first"],
+            last=self.configuration["frames"]["last"] + 1,
+            step=self.configuration["frames"]["step"],
+        )
 
-            order = self.configuration["interpolation_order"]["value"]
-            for axis in range(3):
-                series[:, axis] = differentiate(
-                    series[:, axis],
-                    order=order,
-                    dt=self.configuration["frames"]["time_step"],
-                )
+        series = series - np.average(series, axis=0)
 
         series = self.configuration["projection"]["projector"](series)
 
