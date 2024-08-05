@@ -27,7 +27,7 @@ from MDANSE.MLogging import LOG
 
 class EnergySpectrum(IJob):
     """
-    Energy spectrum (using Fast Fourier Transform) calculated from the Positional Autocorrelation Function (PACF)
+    Energy spectrum (using Fast Fourier Transform) of atomic trajectories calculated from the Positional Autocorrelation Function (PACF)
     """
 
     label = "EnergySpectrum"
