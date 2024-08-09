@@ -135,6 +135,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self._colour_manager = AtomProperties()
         self.dummy_size = 0.0
 
+        self.reset_camera = False
+
     def setDataModel(self, datamodel: TrajectoryAtomData):
         self._datamodel = datamodel
 
@@ -602,6 +604,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if (self._reader is not None) and (reader.filename == self._reader.filename):
             return
 
+        self.reset_camera = True
         self.clear_trajectory()
 
         self._reader = reader
@@ -666,6 +669,11 @@ class MolecularViewer(QtWidgets.QWidget):
         self._renderer.AddActor(self._actors)
 
         # rendering
+        if self.reset_camera:
+            self._renderer.ResetCamera()
+            self._renderer.ResetCameraClippingRange()
+            self.reset_camera = False
+
         self._iren.Render()
 
 
