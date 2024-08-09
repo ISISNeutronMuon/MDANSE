@@ -671,7 +671,6 @@ class MolecularViewer(QtWidgets.QWidget):
         # rendering
         if self.reset_camera:
             self._renderer.ResetCamera()
-            self._renderer.ResetCameraClippingRange()
             self.reset_camera = False
 
         self._iren.Render()
