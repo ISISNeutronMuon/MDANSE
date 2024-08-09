@@ -301,10 +301,12 @@ class ViewerControls(QWidget):
     @Slot(int)
     def setTimeStep(self, new_value: int):
         self._time_per_frame = new_value
+        self.animate()
 
     @Slot(int)
     def setFrameSkip(self, new_value: int):
         self._frame_factor = new_value
+        self.animate()
 
     @Slot(float)
     def setAtomSize(self, new_value: float):
