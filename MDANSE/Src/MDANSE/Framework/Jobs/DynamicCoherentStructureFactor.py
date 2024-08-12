@@ -260,26 +260,23 @@ class DynamicCoherentStructureFactor(IJob):
                 axis=1,
             )
 
-        fqtTotal = weight(
+        self._outputData["f(q,t)_total"][:] = weight(
             self.configuration["weights"].get_weights(),
             self._outputData,
             nAtomsPerElement,
             2,
             "f(q,t)_%s%s",
-            update_values=True,
+            update_partials=True,
         )
 
-        self._outputData["f(q,t)_total"][:] = fqtTotal
-
-        sqfTotal = weight(
+        self._outputData["s(q,f)_total"][:] = weight(
             self.configuration["weights"].get_weights(),
             self._outputData,
             nAtomsPerElement,
             2,
             "s(q,f)_%s%s",
-            update_values=True,
+            update_partials=True,
         )
-        self._outputData["s(q,f)_total"][:] = sqfTotal
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

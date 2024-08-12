@@ -204,7 +204,7 @@ class ElasticIncoherentStructureFactor(IJob):
             nAtomsPerElement,
             1,
             "eisf_%s",
-            update_values=True,
+            update_partials=True,
         )
 
         self._outputData.write(
