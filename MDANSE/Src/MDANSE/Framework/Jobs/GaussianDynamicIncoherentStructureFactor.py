@@ -252,11 +252,21 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         weights = self.configuration["weights"].get_weights()
 
         self._outputData["f(q,t)_total"][:] = weight(
-            weights, self._outputData, nAtomsPerElement, 1, "f(q,t)_%s"
+            weights,
+            self._outputData,
+            nAtomsPerElement,
+            1,
+            "f(q,t)_%s",
+            update_values=True,
         )
 
         self._outputData["s(q,f)_total"][:] = weight(
-            weights, self._outputData, nAtomsPerElement, 1, "s(q,f)_%s"
+            weights,
+            self._outputData,
+            nAtomsPerElement,
+            1,
+            "s(q,f)_%s",
+            update_values=True,
         )
 
         self._outputData.write(

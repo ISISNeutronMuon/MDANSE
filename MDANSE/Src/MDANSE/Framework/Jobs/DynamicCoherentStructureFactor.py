@@ -266,6 +266,7 @@ class DynamicCoherentStructureFactor(IJob):
             nAtomsPerElement,
             2,
             "f(q,t)_%s%s",
+            update_values=True,
         )
 
         self._outputData["f(q,t)_total"][:] = fqtTotal
@@ -276,6 +277,7 @@ class DynamicCoherentStructureFactor(IJob):
             nAtomsPerElement,
             2,
             "s(q,f)_%s%s",
+            update_values=True,
         )
         self._outputData["s(q,f)_total"][:] = sqfTotal
 
