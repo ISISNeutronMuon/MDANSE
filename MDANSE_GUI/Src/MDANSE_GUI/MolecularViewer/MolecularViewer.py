@@ -245,8 +245,11 @@ class MolecularViewer(QtWidgets.QWidget):
         LOG.info("... done")
 
     def create_all_actors(self):
-        line_actor, ball_actor = self.create_traj_actors(self._polydata)
         actors = []
+        if self._polydata is None:
+            return actors
+
+        line_actor, ball_actor = self.create_traj_actors(self._polydata)
         if self._cell_visible:
             uc_actor = self.create_uc_actor()
             actors.append(uc_actor)
@@ -801,6 +804,10 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.update_picked_polydata()
 
     def create_all_actors(self):
+        actors = []
+        if self._polydata is None or self._picked_polydata is None:
+            return actors
+
         line_actor, ball_actor = self.create_traj_actors(
             self._polydata,
             line_opacity=self._polydata_opacity,
@@ -809,7 +816,6 @@ class MolecularViewerWithPicking(MolecularViewer):
         picked_line_actor, picked_ball_actor = self.create_traj_actors(
             self._picked_polydata
         )
-        actors = []
         if self._cell_visible:
             uc_actor = self.create_uc_actor()
             actors.append(uc_actor)
