@@ -127,7 +127,7 @@ class EnergySpectrum(IJob):
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
                 axis="time",
-                units="nm2/ps2",
+                units="nm2",
             )
             self._outputData.add(
                 "es_%s" % element,
@@ -143,7 +143,7 @@ class EnergySpectrum(IJob):
             "LineOutputVariable",
             (self.configuration["frames"]["n_frames"],),
             axis="time",
-            units="nm2/ps2",
+            units="nm2",
         )
         self._outputData.add(
             "es_total",
