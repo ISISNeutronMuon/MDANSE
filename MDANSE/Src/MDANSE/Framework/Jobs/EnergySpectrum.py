@@ -49,10 +49,6 @@ class EnergySpectrum(IJob):
         "InstrumentResolutionConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
-    settings["interpolation_order"] = (
-        "InterpolationOrderConfigurator",
-        {"label": "velocities", "dependencies": {"trajectory": "trajectory"}},
-    )
     settings["projection"] = (
         "ProjectionConfigurator",
         {"label": "project coordinates"},
