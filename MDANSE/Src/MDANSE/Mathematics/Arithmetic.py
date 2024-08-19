@@ -13,12 +13,39 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+from typing import Dict
 import itertools
 
 import numpy as np
 
 
-def get_weights(props, contents, dim):
+def get_weights(props: Dict[str, float], contents: Dict[str, int], dim: int):
+    """Combines the information about the elements present in the system
+    and the numerical values of their properties into weight factors
+    which can be used to scale the partial results of analysis.
+
+    Parameters
+    ----------
+    props : Dict[str, float]
+        a dictionary of "element": value pairs, specifying the
+        property of each element that will be used for weighting
+    contents : Dict[str, int]
+        a dictionary of "element": number_of_atoms pairs, specifying
+        the number of atoms of each elements in the system
+    dim : int
+        number of elements of the output tuple, specifying how
+        many atom types have to be combined into a single partial
+        result key
+
+    Returns
+    -------
+    Dict[Tuple(str, ...), float], float
+        The dictionary keys are tuples composed of chemical element symbols (str)
+        and the values are weights attributed to the specific combination of elements.
+        The float number is the normalisation factor which was used to make
+        all the weights add up to 1.
+    """
     normFactor = None
 
     weights = {}
