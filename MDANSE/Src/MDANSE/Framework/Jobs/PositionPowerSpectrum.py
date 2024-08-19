@@ -25,9 +25,10 @@ from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 from MDANSE.MLogging import LOG
 
 
-class EnergySpectrum(IJob):
+class PositionPowerSpectrum(IJob):
     """
-    Energy spectrum (using Fast Fourier Transform) of atomic trajectories calculated from the Positional Autocorrelation Function (PACF)
+    Power spectrum (using Fast Fourier Transform) of atomic trajectories calculated from the Positional Autocorrelation Function (PACF).
+    This method provides a frequency-domain function for a filter (i.e. lowpass) to operate on, so that a desired range of atomic vibrational modes can be isolated.
     """
 
     label = "EnergySpectrum"
