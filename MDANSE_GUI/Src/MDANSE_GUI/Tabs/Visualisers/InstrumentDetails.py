@@ -170,3 +170,4 @@ class InstrumentDetails(QWidget):
                     LOG.error(f"In InstrumentDetails: {e}")
         self._current_instrument = instrument_instance
         self.update_values()
+        self.reset_qvector_combobox()

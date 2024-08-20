@@ -97,13 +97,33 @@ class SimpleInstrument:
         self._resolution_results = mdanse_tuple
         return mdanse_tuple
 
+    def sanitize_numbers(self):
+        results = []
+        for entry in [self._q_step, self._q_min, self._q_max]:
+            try:
+                new_entry = float(entry)
+            except ValueError:
+                if "e" in entry:
+                    try:
+                        new_entry = float(entry.split("e")[0])
+                    except ValueError:
+                        new_entry = 1.0
+            results.append(new_entry)
+        return results
+
     def create_q_vector_params(self):
         if not self._configured:
             return
         cov_type = self._qvector_type
-        qvec_generator = IQVectors.create(cov_type, None)
+        try:
+            qvec_generator = IQVectors.create(cov_type, None)
+        except ValueError:
+            return ("No qvectors", {})
+        except AttributeError:
+            return (cov_type, {})
         qvec_generator.build_configuration()
         param_dictionary = {}
+        _q_step, _q_min, _q_max = self.sanitize_numbers()
         try:
             conversion_factor = measure(1.0, iunit=self._q_unit).toval("1/nm")
         except:
@@ -111,12 +131,12 @@ class SimpleInstrument:
         else:
             conversion_factor = float(conversion_factor)
         if "shells" in qvec_generator._configuration:
-            q_step = round(conversion_factor * float(self._q_step), 6)
-            q_min = round(conversion_factor * float(self._q_min), 6)
-            q_max = round(conversion_factor * float(self._q_max), 6)
+            q_step = round(conversion_factor * float(_q_step), 6)
+            q_min = round(conversion_factor * float(_q_min), 6)
+            q_max = round(conversion_factor * float(_q_max), 6)
             param_dictionary["shells"] = [q_min, q_max, q_step]
         if "width" in qvec_generator._configuration:
-            width = round(conversion_factor * float(self._q_step), 6)
+            width = round(conversion_factor * float(_q_step), 6)
             param_dictionary["width"] = width
         if "n_vectors" in qvec_generator._configuration:
             num_vectors = int(self._vectors_per_shell)
