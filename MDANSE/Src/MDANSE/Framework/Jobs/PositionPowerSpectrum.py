@@ -31,7 +31,7 @@ class PositionPowerSpectrum(IJob):
     This method provides a frequency-domain function for a filter (i.e. lowpass) to operate on, so that a desired range of atomic vibrational modes can be isolated.
     """
 
-    label = "EnergySpectrum"
+    label = "PositionPowerSpectrum"
 
     category = (
         "Analysis",
