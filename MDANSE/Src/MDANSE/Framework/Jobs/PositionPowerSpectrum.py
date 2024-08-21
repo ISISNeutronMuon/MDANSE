@@ -127,7 +127,7 @@ class PositionPowerSpectrum(IJob):
                 units="nm2",
             )
             self._outputData.add(
-                "es_%s" % element,
+                "pps_%s" % element,
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
                 axis="romega",
@@ -211,7 +211,7 @@ class PositionPowerSpectrum(IJob):
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
             self._outputData["pacf_%s" % element][:] /= number
-            self._outputData["es_%s" % element][:] = get_spectrum(
+            self._outputData["pps_%s" % element][:] = get_spectrum(
                 self._outputData["pacf_%s" % element],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
@@ -228,7 +228,7 @@ class PositionPowerSpectrum(IJob):
             update_values=True,
         )
         weight(
-            weights, self._outputData, nAtomsPerElement, 1, "es_%s", update_values=True
+            weights, self._outputData, nAtomsPerElement, 1, "pps_%s", update_values=True
         )
 
         self._outputData.write(
