@@ -143,7 +143,7 @@ class PositionPowerSpectrum(IJob):
             units="nm2",
         )
         self._outputData.add(
-            "es_total",
+            "pps_total",
             "LineOutputVariable",
             (instrResolution["n_romegas"],),
             axis="romega",
