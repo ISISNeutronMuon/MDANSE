@@ -36,7 +36,7 @@ class PlotDataView(QTreeView):
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.click_position = None
         self.clicked.connect(self.on_select_dataset)
-        self.data_dialog = DataDialog(self)
+        # self.data_dialog = DataDialog(self)
         self._data_packet = None
 
     def mousePressEvent(self, e: QMouseEvent) -> None:
