@@ -43,7 +43,7 @@ def get_weights(props, contents, dim):
     return weights, normFactor
 
 
-def weight(props, values, contents, dim, key, symmetric=True, update_values=False):
+def weight(props, values, contents, dim, key, symmetric=True, update_partials=False):
     weights = get_weights(props, contents, dim)[0]
     weightedSum = None
     matches = dict([(key % k, k) for k in list(weights.keys())])
@@ -63,8 +63,7 @@ def weight(props, values, contents, dim, key, symmetric=True, update_values=Fals
         else:
             weightedSum += w * val
 
-        if update_values:
-            values[key % "total"] += w * val
+        if update_partials:
             values[k][:] = w * val
 
     return weightedSum
