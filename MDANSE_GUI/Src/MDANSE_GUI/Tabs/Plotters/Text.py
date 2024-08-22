@@ -40,6 +40,7 @@ class Text(Plotter):
         self.height_max, self.length_max = 0.0, 0.0
 
     def clear(self, figure: "QTextBrowser" = None):
+        LOG.debug("Text.clear stared")
         if figure is None:
             target = self._figure
         else:
@@ -47,8 +48,10 @@ class Text(Plotter):
         if target is None:
             return
         target.clear()
+        LOG.debug("Text.clear finished")
 
     def get_figure(self, figure: "QTextBrowser" = None):
+        LOG.debug("Text.get_figure stared")
         if figure is None:
             target = self._figure
         else:
@@ -57,7 +60,16 @@ class Text(Plotter):
             LOG.error(f"PlottingContext can't plot to {target}")
             return
         target.clear()
+        LOG.debug("Text.get_figure finished")
         return target
+
+    def apply_settings(self, plotting_context: "PlottingContext", colours=None):
+        LOG.debug("Text.apply_settings stared")
+        if colours is not None:
+            self._current_colours = colours
+        if plotting_context.set_axes() is None:
+            LOG.error("Axis check failed.")
+            return
 
     def plot(
         self,
@@ -67,6 +79,7 @@ class Text(Plotter):
         update_only=False,
         toolbar=None,
     ):
+        LOG.debug("Text.plot stared")
         target = self.get_figure(figure)
         if target is None:
             return

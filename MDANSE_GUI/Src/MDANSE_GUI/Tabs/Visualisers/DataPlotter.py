@@ -37,7 +37,7 @@ class DataPlotter(QWidget):
     data_for_plotting = Signal(object)
     data_for_new_plot = Signal(object)
     create_new_plot = Signal(str)
-    create_new_text = Signal(object)
+    create_new_text = Signal(str)
 
     def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -53,7 +53,7 @@ class DataPlotter(QWidget):
             ("Plot Data", self.plot_data),
             ("Clear", self.clear),
             ("New Plot", self.new_plot),
-            ("Show as Text", self.new_text),
+            ("New Data View (Text)", self.new_text),
         ]
         for name, function in buttons:
             button = QPushButton(name, button_bar)
@@ -95,9 +95,7 @@ class DataPlotter(QWidget):
 
     @Slot()
     def new_text(self):
-        if self._model is None:
-            return
-        self.create_new_text.emit(self._model)
+        self.create_new_text.emit("Text view")
         group = self._settings.group("dialogs")
         try:
             show_it = group.get("new_text")
@@ -119,9 +117,9 @@ class DataPlotter(QWidget):
     @Slot()
     def plot_data(self):
         if self._model is not None:
-            self.data_for_plotting.emit(self._model)
             if len(self._model.datasets()) == 0:
                 return
+            self.data_for_plotting.emit(self._model)
             group = self._settings.group("dialogs")
             try:
                 show_it = group.get("data_plotted")

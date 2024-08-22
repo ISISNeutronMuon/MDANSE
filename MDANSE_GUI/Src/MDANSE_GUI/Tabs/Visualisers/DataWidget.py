@@ -44,7 +44,15 @@ class DataWidget(QWidget):
         self._settings = settings
         self._slider_max = 100
         self.make_canvas()
-        # self.set_plotter("Text")
+        self.set_plotter("Text")
+
+    @Slot(object)
+    def slider_change(self, new_values: object):
+        """Not used for text output."""
+
+    @Slot(bool)
+    def set_slider_values(self, reset_needed: bool):
+        """Not used for text output."""
 
     def set_context(self, new_context: "PlottingContext"):
         self._plotting_context = new_context
@@ -54,10 +62,12 @@ class DataWidget(QWidget):
     def set_plotter(self, plotter_option: str):
         try:
             self._plotter = Plotter.create(plotter_option)
-        except:
-            self._plotter = Plotter()
-        self._plotter._settings = self._settings
-        self.plot_data()
+        except Exception as e:
+            LOG.error(f"DataWidget failed to create Text plotter: {e.with_traceback()}")
+        else:
+            LOG.debug(f"DataWidget created plotter {plotter_option}: {self._plotter}")
+            self._plotter._settings = self._settings
+            self.plot_data()
 
     @Slot(object)
     def slider_change(self, new_values: object):
@@ -70,21 +80,28 @@ class DataWidget(QWidget):
             self._sliderpack.set_values(values)
 
     def available_plotters(self) -> List[str]:
-        return [str(x) for x in Plotter.indirect_subclasses()]
+        return ["Text"]
 
     def plot_data(self, update_only=False):
         if self._plotter is None:
-            LOG.info("No plotter present in PlotWidget.")
+            LOG.info("No plotter present in DataWidget.")
             return
         if self._plotting_context is None:
+            LOG.info("No plotting context present in DataWidget.")
             return
-        self._plotter.plot(
-            self._plotting_context,
-            self._figure,
-            colours=self._colours,
-            update_only=update_only,
-            toolbar=self._toolbar,
-        )
+        try:
+            LOG.debug(
+                f"DataWidget will plot {self._plotting_context} in {self._figure}."
+            )
+            self._plotter.plot(
+                self._plotting_context,
+                self._figure,
+                colours=None,
+                update_only=None,
+                toolbar=None,
+            )
+        except Exception as e:
+            LOG.error(f"DataWidget error: {e.with_traceback()}")
 
     def make_canvas(self):
         """Creates a matplotlib figure for plotting
@@ -101,7 +118,7 @@ class DataWidget(QWidget):
         Returns
         -------
         QWidget
-            a widget containing both the figure and a toolbar below
+            a widget containing just a QTextBrowser
         """
         layout = QVBoxLayout(self)
         self.setLayout(layout)

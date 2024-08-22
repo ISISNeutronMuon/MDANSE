@@ -332,6 +332,8 @@ class PlottingContext(QStandardItemModel):
                 subitems = temp.standard_items(newkey + f":{counter}")
                 items[0].appendRow(subitems)
                 counter += 1
+        elif len(curves) == 1:
+            LOG.debug("A single curve output from PlottingContext.")
         else:
             LOG.error("No curves!")
         self.appendRow(items)

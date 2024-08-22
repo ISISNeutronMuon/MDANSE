@@ -18,6 +18,8 @@ from functools import partial
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget
 
+from MDANSE.MLogging import LOG
+
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
@@ -101,8 +103,16 @@ class PlotTab(GeneralTab):
 
     @Slot(object)
     def accept_external_data(self, data_model):
-        self._visualiser.model.accept_external_data(data_model)
-        self._visualiser.plotter.plot_data()
+        LOG.debug(f"accept_external_data received {data_model}")
+        try:
+            self._visualiser.model.accept_external_data(data_model)
+        except Exception as e:
+            LOG.error(f"Visualiser failed to pass data model: {e.with_traceback()}")
+        else:
+            try:
+                self._visualiser.plotter.plot_data()
+            except Exception as e2:
+                LOG.error(f"Visualiser failed to plot data: {e2.with_traceback()}")
 
     @Slot(int)
     def switch_model(self, tab_id):

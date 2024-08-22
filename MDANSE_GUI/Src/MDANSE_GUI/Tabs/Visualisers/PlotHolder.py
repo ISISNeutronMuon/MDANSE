@@ -62,8 +62,8 @@ class PlotHolder(QTabWidget):
         self.setCurrentIndex(tab_id)
         return tab_id
 
-    @Slot(object)
-    def new_text(self, data_model) -> int:
+    @Slot(str)
+    def new_text(self, ignored_name: str) -> int:
         tab_name = f"New text view {self._last_number}"
         self._last_number += 1
         plotting_context = PlottingContext(unit_lookup=self._unit_lookup)
@@ -125,4 +125,7 @@ class PlotHolder(QTabWidget):
         """This will change the line colour, thickness, etc.
         At the moment it doesn't do anything."""
         for plotter in self._plotter:
-            plotter.plot_data(update_only=True)
+            try:
+                plotter.plot_data(update_only=True)
+            except Exception as e:
+                LOG.error(f"Plotting failed: {e.with_traceback()}")
