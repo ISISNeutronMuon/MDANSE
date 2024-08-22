@@ -19,14 +19,7 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 import numpy as np
-from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QComboBox,
-    QLabel,
-    QGridLayout,
-    QDoubleSpinBox,
-)
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QTextBrowser
 from qtpy.QtCore import Slot, Signal, Qt
 
 from MDANSE.MLogging import LOG
@@ -51,7 +44,7 @@ class DataWidget(QWidget):
         self._settings = settings
         self._slider_max = 100
         self.make_canvas()
-        self.set_plotter("Text")
+        # self.set_plotter("Text")
 
     def set_context(self, new_context: "PlottingContext"):
         self._plotting_context = new_context
@@ -64,11 +57,6 @@ class DataWidget(QWidget):
         except:
             self._plotter = Plotter()
         self._plotter._settings = self._settings
-        self.change_slider_labels.emit(self._plotter.slider_labels())
-        self.change_slider_limits.emit(self._plotter.slider_limits())
-        self.change_slider_coupling.emit(self._plotter.sliders_coupled())
-        self.reset_slider_values.emit(self._plotter._value_reset_needed)
-        self._plotter._slider_reference = self._sliderpack
         self.plot_data()
 
     @Slot(object)
@@ -98,7 +86,7 @@ class DataWidget(QWidget):
             toolbar=self._toolbar,
         )
 
-    def make_canvas(self, width=12.0, height=9.0, dpi=100):
+    def make_canvas(self):
         """Creates a matplotlib figure for plotting
 
         Parameters
@@ -115,29 +103,7 @@ class DataWidget(QWidget):
         QWidget
             a widget containing both the figure and a toolbar below
         """
-        canvas = self
-        layout = QVBoxLayout(canvas)
-        figure = mpl.figure(figsize=[width, height], dpi=dpi, frameon=True)
-        figAgg = FigureCanvasQTAgg(figure)
-        figAgg.setParent(canvas)
-        figAgg.updateGeometry()
-        toolbar = NavigationToolbar2QTAgg(figAgg, canvas)
-        toolbar.update()
-        layout.addWidget(figAgg)
-        slider = SliderPack(self)
-        self.change_slider_labels.connect(slider.new_slider_labels)
-        self.change_slider_limits.connect(slider.new_limits)
-        self.change_slider_coupling.connect(slider.new_coupling)
-        self.reset_slider_values.connect(self.set_slider_values)
-        slider.new_values.connect(self.slider_change)
-        self._sliderpack = slider
-        layout.addWidget(slider)
-        layout.addWidget(toolbar)
-        self._figure = figure
-        self._toolbar = toolbar
-        plot_selector = QComboBox(self)
-        layout.addWidget(plot_selector)
-        plot_selector.addItems(self.available_plotters())
-        plot_selector.setCurrentText("Single")
-        plot_selector.currentTextChanged.connect(self.set_plotter)
-        self.set_plotter(plot_selector.currentText())
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        self._figure = QTextBrowser(self)
+        layout.addWidget(self._figure)

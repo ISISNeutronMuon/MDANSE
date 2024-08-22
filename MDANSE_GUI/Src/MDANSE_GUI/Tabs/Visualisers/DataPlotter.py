@@ -37,6 +37,7 @@ class DataPlotter(QWidget):
     data_for_plotting = Signal(object)
     data_for_new_plot = Signal(object)
     create_new_plot = Signal(str)
+    create_new_text = Signal(object)
 
     def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,6 +53,7 @@ class DataPlotter(QWidget):
             ("Plot Data", self.plot_data),
             ("Clear", self.clear),
             ("New Plot", self.new_plot),
+            ("Show as Text", self.new_text),
         ]
         for name, function in buttons:
             button = QPushButton(name, button_bar)
@@ -90,6 +92,29 @@ class DataPlotter(QWidget):
             if plot_added_box == QMessageBox.StandardButton.No:
                 group = self._settings.group("dialogs")
                 group.set("new_plot", "False")
+
+    @Slot()
+    def new_text(self):
+        if self._model is None:
+            return
+        self.create_new_text.emit(self._model)
+        group = self._settings.group("dialogs")
+        try:
+            show_it = group.get("new_text")
+        except KeyError:
+            show_it = group.get_default("dialogs", "new_text")
+        if show_it != "False":
+            plot_added_box = QMessageBox.information(
+                self,
+                "Plot created",
+                "A new text view has been created in the next tab (called 'Plot Holder').\n"
+                "Should this message be shown every time this happens?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.Yes,
+            )
+            if plot_added_box == QMessageBox.StandardButton.No:
+                group = self._settings.group("dialogs")
+                group.set("new_text", "False")
 
     @Slot()
     def plot_data(self):
