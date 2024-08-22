@@ -219,7 +219,7 @@ class PositionPowerSpectrum(IJob):
             )
 
         weights = self.configuration["weights"].get_weights()
-        weight(
+        self._outputData["pacf_total"][:] = weight(
             weights,
             self._outputData,
             nAtomsPerElement,
@@ -227,7 +227,7 @@ class PositionPowerSpectrum(IJob):
             "pacf_%s",
             update_partials=True,
         )
-        weight(
+        self._outputData["pps_total"][:] = weight(
             weights,
             self._outputData,
             nAtomsPerElement,
