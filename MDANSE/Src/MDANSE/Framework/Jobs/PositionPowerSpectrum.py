@@ -225,10 +225,15 @@ class PositionPowerSpectrum(IJob):
             nAtomsPerElement,
             1,
             "pacf_%s",
-            update_values=True,
+            update_partials=True,
         )
         weight(
-            weights, self._outputData, nAtomsPerElement, 1, "pps_%s", update_values=True
+            weights,
+            self._outputData,
+            nAtomsPerElement,
+            1,
+            "pps_%s",
+            update_partials=True,
         )
 
         self._outputData.write(
