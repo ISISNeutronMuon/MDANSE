@@ -28,16 +28,35 @@ if TYPE_CHECKING:
 
 
 class DatasetFormatter:
+    """Independent of the GUI component, DatasetFormatter
+    takes a PlottingContext and converts each of its
+    datasets into text.
+    The text can then be displayed by the plotter,
+    outside of this class.
+    """
 
     def __init__(self):
         self._plotting_context = None
         self._new_header = "# MDANSE Data \n"
         self._new_text = []
-        top_line = []
-        left_column = [""]
-        all_fields = []
 
     def take_new_input(self, pc: "PlottingContext"):
+        """The plotting context is passed from the GUI and
+        contains datasets that have been selected by the user.
+        This method converts each one of them to text and
+        makes the result available to any GUI widget that
+        may be used to display it.
+
+        Parameters
+        ----------
+        pc : PlottingContext
+            Data model containing the datasets for plotting
+
+        Returns
+        -------
+        List[str]
+            A list of (multi-line) text strings, one per dataset
+        """
         self._plotting_context = pc
         self._new_text = []
         if self._plotting_context is None:
@@ -52,19 +71,50 @@ class DatasetFormatter:
                 self._new_text.append(self.process_ND_data(dataset, name))
         return self._new_text
 
-    def make_dataset_header(self, dataset: "SingleDataset"):
+    def make_dataset_header(self, dataset: "SingleDataset", comment_character="#"):
+        """Extracts information related to the input dataset, and converts them
+        into text. Returns a list of strings.
+
+        Parameters
+        ----------
+        dataset : SingleDataset
+            A dataset from MDANSE analysis results.
+        comment_character : str, optional
+            character used as prefix of the text header, by default '#'
+
+        Returns
+        -------
+        List[str]
+            list of header lines
+        """
         lines = []
-        lines.append(f"# Dataset name: {dataset._name}")
-        lines.append(f"# from file {dataset._filename}")
+        lines.append(f"{comment_character} Dataset name: {dataset._name}")
+        lines.append(f"{comment_character} from file {dataset._filename}")
         lines.append(
-            f"# Contains axes: "
+            f"{comment_character} Contains axes: "
             + ", ".join([str(axis) for axis in dataset.available_x_axes()])
         )
-        lines.append(f"# data unit is {dataset._data_unit}")
-        return lines
+        lines.append(f"{comment_character} data unit is {dataset._data_unit}")
+        return lines, comment_character
 
-    def process_1D_data(self, dataset: "SingleDataset"):
-        header_lines = self.make_dataset_header(dataset)
+    def process_1D_data(self, dataset: "SingleDataset", separator=" "):
+        """Formats a 1D array as a 2-column table with a commented header.
+        The first column is determined using the information stored
+        in the PlottingContext.
+
+        Parameters
+        ----------
+        dataset : SingleDataset
+            A SingleDataset read from an .MDA file (HDF5)
+        separator : str, optional
+            character(s) separating numbers in the output table, by default " "
+
+        Returns
+        -------
+        str
+            a data table with 2 columns in text format
+        """
+        header_lines, _ = self.make_dataset_header(dataset)
         best_unit, best_axis = dataset.longest_axis()
         xaxis_unit = self._plotting_context.get_conversion_factor(best_unit)
         try:
@@ -81,25 +131,66 @@ class DatasetFormatter:
             temp = np.vstack(
                 [dataset._axes[best_axis] * conversion_factor, dataset._data]
             ).T
-            text_data = "\n".join([" ".join([str(x) for x in line]) for line in temp])
+            text_data = "\n".join(
+                [separator.join([str(x) for x in line]) for line in temp]
+            )
             new_header = "\n".join(header_lines)
             return new_header + "\n" + text_data
 
-    def process_2D_data(self, dataset: "SingleDataset", name: str):
-        header_lines = self.make_dataset_header(dataset)
-        temp = []
+    def process_2D_data(self, dataset: "SingleDataset", name: str, separator=" "):
+        header_lines, comment_char = self.make_dataset_header(dataset)
+        print(header_lines)
+        new_axes = {}
+        new_axes_units = {}
+        axis_numbers = {}
+        for n, ax_key in enumerate(dataset.available_x_axes()):
+            axis = dataset._axes[ax_key]
+            axis_unit = dataset._axes_units[ax_key]
+            new_unit = self._plotting_context.get_conversion_factor(axis_unit)
+            conv_factor = measure(1.0, axis_unit, equivalent=True).toval(new_unit)
+            new_axes[ax_key] = conv_factor * axis
+            new_axes_units[ax_key] = new_unit
+            axis_numbers[n] = ax_key
+            LOG.debug(f"process_2D_data: axis {ax_key} has length {len(axis)}")
+            if n == 0:
+                header_lines.append(
+                    f"{comment_char} first column is {ax_key} in units {new_unit}"
+                )
+            else:
+                header_lines.append(
+                    f"{comment_char} first row is {ax_key} in units {new_unit}"
+                )
+        LOG.debug(f"Data shape: {dataset._data.shape}")
+        temp = np.hstack(
+            [
+                new_axes[axis_numbers[0]].reshape((dataset._data.shape[0], 1)),
+                dataset._data,
+            ]
+        )
+        temp = np.vstack(
+            [
+                np.concatenate([[0], new_axes[axis_numbers[1]]]).reshape(
+                    (1, dataset._data.shape[1] + 1)
+                ),
+                temp,
+            ]
+        )
         if len(temp) > 0:
-            text_data = "\n".join([" ".join([str(x) for x in line]) for line in temp])
+            text_data = "\n".join(
+                [separator.join([str(x) for x in line]) for line in temp]
+            )
         else:
             text_data = ""
         new_header = "\n".join(header_lines)
         return new_header + "\n" + text_data
 
-    def process_ND_data(self, dataset: "SingleDataset", name: str):
-        header_lines = self.make_dataset_header(dataset)
+    def process_ND_data(self, dataset: "SingleDataset", name: str, separator=" "):
+        header_lines, comment_char = self.make_dataset_header(dataset)
         temp = []
         if len(temp) > 0:
-            text_data = "\n".join([" ".join([str(x) for x in line]) for line in temp])
+            text_data = "\n".join(
+                [separator.join([str(x) for x in line]) for line in temp]
+            )
         else:
             text_data = ""
         new_header = "\n".join(header_lines)
@@ -107,6 +198,14 @@ class DatasetFormatter:
 
 
 class Text(Plotter):
+    """The Text plotter is technically not a plotter, since
+    it outputs text. The main advantage of imitating a plotter
+    is that Text can use the GUI settings of units.
+    In the end, PlottingContext matches the dataset to
+    the x (y and z, optionally) axes in the data file,
+    and the plotting interface supplies the user selection
+    of physical units.
+    """
 
     def __init__(self) -> None:
         super().__init__()
@@ -120,6 +219,15 @@ class Text(Plotter):
         self.height_max, self.length_max = 0.0, 0.0
 
     def clear(self, figure: "QTextBrowser" = None):
+        """Optionally sets the input to be the new
+        text output widget, and then clears the
+        currently stored text widget instance.
+
+        Parameters
+        ----------
+        figure : QTextBrowser, optional
+            optionally, new QTextBrowser to be used
+        """
         LOG.debug("Text.clear stared")
         if figure is None:
             target = self._figure
@@ -131,6 +239,22 @@ class Text(Plotter):
         LOG.debug("Text.clear finished")
 
     def get_figure(self, figure: "QTextBrowser" = None):
+        """Used for both updating and getting the output widget
+        which will be used for displaying the output text.
+
+        Parameters
+        ----------
+        figure : QTextBrowser, optional
+            New widget to be used for displaying text.
+            If None, the currently stored widget will be used.
+
+        Returns
+        -------
+        QTextBrowser or None
+            If no widget reference can be used, returns None.
+            Otherwise, returns a widget instance that should be used
+            for displaying text.
+        """
         LOG.debug("Text.get_figure stared")
         if figure is None:
             target = self._figure
@@ -144,12 +268,16 @@ class Text(Plotter):
         return target
 
     def apply_settings(self, plotting_context: "PlottingContext", colours=None):
-        LOG.debug("Text.apply_settings stared")
-        if colours is not None:
-            self._current_colours = colours
-        if plotting_context.set_axes() is None:
-            LOG.error("Axis check failed.")
-            return
+        """Not relevant to the Text plotter, added for compatibility
+
+        Parameters
+        ----------
+        plotting_context : PlottingContext
+            ignored
+        colours : _type_, optional
+            ignored
+        """
+        LOG.debug("Text.apply_settings called. Doing nothing")
 
     def plot(
         self,
@@ -169,7 +297,7 @@ class Text(Plotter):
         figure : QTextBrowser, optional
             Target widget, an instance of QTextBrowser
         colours : _type_, optional
-            colours of datasets, ignored here
+            ignored here
         update_only : bool, optional
             ignored
         toolbar : _type_, optional

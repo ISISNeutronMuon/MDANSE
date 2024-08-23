@@ -94,7 +94,7 @@ class SingleDataset:
                 self._axes_units[aname] = source[aname].attrs["units"]
 
     def available_x_axes(self) -> List[str]:
-        return list(self._axes_units.values())
+        return list(self._axes_units.keys())
 
     def longest_axis(self) -> str:
         length = -1
