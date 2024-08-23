@@ -148,7 +148,7 @@ class TrajectoryEditor(IJob):
         if self.configuration["trajectory"]["instance"].has_variable("velocities"):
             variables = {
                 "velocities": self.configuration["trajectory"]["instance"]
-                .variable("velocities")[frameIndex, :, :]
+                .variable("velocities")[frameIndex, self._indices, :]
                 .astype(np.float64)
             }
 
