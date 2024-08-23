@@ -42,7 +42,7 @@ from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
 from MDANSE_GUI.Tabs.TrajectoryTab import TrajectoryTab
 from MDANSE_GUI.Tabs.JobTab import JobTab
 from MDANSE_GUI.Tabs.RunTab import RunTab
-from MDANSE_GUI.Tabs.LoggingTab import LoggingTab
+from MDANSE_GUI.Tabs.LoggingTab import LoggingTab, GuiLogHandler
 from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
@@ -111,6 +111,7 @@ class TabbedWindow(QMainWindow):
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
         self._job_holder = JobHolder()
+        self._gui_log_handler = GuiLogHandler()
 
     def makeBasicLayout(self):
         self.createConverterViewer()
@@ -119,7 +120,7 @@ class TabbedWindow(QMainWindow):
         self.createJobsViewer()
         self.createPlotSelection()
         self.createPlotHolder()
-        # self.createLogViewer()
+        self.createLogViewer()
         self.setupMenubar()
         self.setupToolbar()
 
@@ -323,9 +324,11 @@ class TabbedWindow(QMainWindow):
 
     def createLogViewer(self):
         name = "Logger"
+        LOG.addHandler(self._gui_log_handler)
         log_tab = LoggingTab.gui_instance(
             self.tabs, name, self._session, self._settings, self._logger
         )
+        log_tab.add_handler(self._gui_log_handler)
         self.tabs.addTab(log_tab._core, name)
         self._tabs[name] = log_tab
 

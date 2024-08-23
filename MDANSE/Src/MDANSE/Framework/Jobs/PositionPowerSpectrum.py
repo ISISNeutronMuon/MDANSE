@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 import collections
 
 import numpy as np
@@ -21,21 +20,22 @@ from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import get_spectrum
+from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
+from MDANSE.MLogging import LOG
 
 
-class DynamicIncoherentStructureFactor(IJob):
+class PositionPowerSpectrum(IJob):
     """
-    Computes the dynamic incoherent structure factor S_inc(Q,w) for a set of atoms.
-        It can be compared to experimental data e.g. the quasielastic scattering due to diffusion processes.
+    Power spectrum (using Fast Fourier Transform) of atomic trajectories calculated from the Positional Autocorrelation Function (PACF).
+    This method provides a frequency-domain function for a filter (i.e. lowpass) to operate on, so that a desired range of atomic vibrational modes can be isolated.
     """
 
-    label = "Dynamic Incoherent Structure Factor"
+    label = "PositionPowerSpectrum"
 
     category = (
         "Analysis",
-        "Scattering",
+        "Dynamics",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
@@ -50,23 +50,13 @@ class DynamicIncoherentStructureFactor(IJob):
         "InstrumentResolutionConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
-    settings["q_vectors"] = (
-        "QVectorsConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            }
-        },
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",
@@ -77,19 +67,11 @@ class DynamicIncoherentStructureFactor(IJob):
             }
         },
     )
-    settings["projection"] = (
-        "ProjectionConfigurator",
-        {"label": "project coordinates"},
-    )
     settings["weights"] = (
         "WeightsConfigurator",
         {
-            "default": "b_incoherent2",
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            },
+            "default": "atomic_weight",
+            "dependencies": {"atom_selection": "atom_selection"},
         },
     )
     settings["output_files"] = (
@@ -106,24 +88,7 @@ class DynamicIncoherentStructureFactor(IJob):
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
-        self._nQShells = self.configuration["q_vectors"]["n_shells"]
-
-        self._nFrames = self.configuration["frames"]["n_frames"]
-
-        self._instrResolution = self.configuration["instrument_resolution"]
-
-        self._atoms = sorted_atoms(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_list
-        )
-
-        self._nOmegas = self._instrResolution["n_omegas"]
-
-        self._outputData.add(
-            "q",
-            "LineOutputVariable",
-            self.configuration["q_vectors"]["shells"],
-            units="1/nm",
-        )
+        instrResolution = self.configuration["instrument_resolution"]
 
         self._outputData.add(
             "time",
@@ -134,56 +99,60 @@ class DynamicIncoherentStructureFactor(IJob):
         self._outputData.add(
             "time_window",
             "LineOutputVariable",
-            self._instrResolution["time_window"],
+            instrResolution["time_window_positive"],
+            axis="time",
             units="au",
         )
 
         self._outputData.add(
-            "omega",
-            "LineOutputVariable",
-            self._instrResolution["omega"],
-            units="rad/ps",
+            "omega", "LineOutputVariable", instrResolution["omega"], units="rad/ps"
+        )
+        self._outputData.add(
+            "romega", "LineOutputVariable", instrResolution["romega"], units="rad/ps"
         )
         self._outputData.add(
             "omega_window",
             "LineOutputVariable",
-            self._instrResolution["omega_window"],
+            instrResolution["omega_window"],
             axis="omega",
             units="au",
         )
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "f(q,t)_%s" % element,
-                "SurfaceOutputVariable",
-                (self._nQShells, self._nFrames),
-                axis="q|time",
-                units="au",
+                "pacf_%s" % element,
+                "LineOutputVariable",
+                (self.configuration["frames"]["n_frames"],),
+                axis="time",
+                units="nm2",
             )
             self._outputData.add(
-                "s(q,f)_%s" % element,
-                "SurfaceOutputVariable",
-                (self._nQShells, self._nOmegas),
-                axis="q|omega",
-                units="nm2/ps",
+                "pps_%s" % element,
+                "LineOutputVariable",
+                (instrResolution["n_romegas"],),
+                axis="romega",
+                units="au",
                 main_result=True,
                 partial_result=True,
             )
-
         self._outputData.add(
-            "f(q,t)_total",
-            "SurfaceOutputVariable",
-            (self._nQShells, self._nFrames),
-            axis="q|time",
-            units="au",
+            "pacf_total",
+            "LineOutputVariable",
+            (self.configuration["frames"]["n_frames"],),
+            axis="time",
+            units="nm2",
         )
         self._outputData.add(
-            "s(q,f)_total",
-            "SurfaceOutputVariable",
-            (self._nQShells, self._nOmegas),
-            axis="q|omega",
-            units="nm2/ps",
+            "pps_total",
+            "LineOutputVariable",
+            (instrResolution["n_romegas"],),
+            axis="romega",
+            units="au",
             main_result=True,
+        )
+
+        self._atoms = sorted_atoms(
+            self.configuration["trajectory"]["instance"].chemical_system.atom_list
         )
 
     def run_step(self, index):
@@ -194,50 +163,34 @@ class DynamicIncoherentStructureFactor(IJob):
             #. index (int): The index of the step.
         :Returns:
             #. index (int): The index of the step.
-            #. atomicSF (np.array): The atomic structure factor
+            #. atomicES (np.array): The calculated energy spectrum for atom of index=index
+            #. atomicPACF (np.array): The calculated position auto-correlation function for atom of index=index
         """
+        LOG.debug(f"Running step: {index}")
+        trajectory = self.configuration["trajectory"]["instance"]
 
+        # get atom index
         indexes = self.configuration["atom_selection"]["indexes"][index]
+        atoms = [self._atoms[idx] for idx in indexes]
 
-        if len(indexes) == 1:
-            series = self.configuration["trajectory"][
-                "instance"
-            ].read_atomic_trajectory(
-                indexes[0],
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
-            )
+        series = trajectory.read_com_trajectory(
+            atoms,
+            first=self.configuration["frames"]["first"],
+            last=self.configuration["frames"]["last"] + 1,
+            step=self.configuration["frames"]["step"],
+        )
 
-        else:
-            selected_atoms = [self._atoms[idx] for idx in indexes]
-            series = self.configuration["trajectory"]["instance"].read_com_trajectory(
-                selected_atoms,
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
-            )
+        series = series - np.average(series, axis=0)
 
         series = self.configuration["projection"]["projector"](series)
 
-        disf_per_q_shell = collections.OrderedDict()
-        for q in self.configuration["q_vectors"]["shells"]:
-            disf_per_q_shell[q] = np.zeros((self._nFrames,), dtype=np.float64)
-
         n_configs = self.configuration["frames"]["n_configs"]
-        for q in self.configuration["q_vectors"]["shells"]:
-            qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
+        atomicPACF = correlate(series, series[:n_configs], mode="valid") / (
+            3 * n_configs
+        )
+        return index, atomicPACF.T[0]
 
-            rho = np.exp(1j * np.dot(series, qVectors))
-            res = correlate(rho, rho[:n_configs], mode="valid").T[0] / (
-                n_configs * qVectors.shape[1]
-            )
-
-            disf_per_q_shell[q] += res.real
-
-        return index, disf_per_q_shell
-
-    def combine(self, index, disf_per_q_shell):
+    def combine(self, index, x):
         """
         Combines returned results of run_step.\n
         :Parameters:
@@ -245,42 +198,41 @@ class DynamicIncoherentStructureFactor(IJob):
             #. x (any): The returned result(s) of run_step
         """
 
+        # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
-        for i, v in enumerate(disf_per_q_shell.values()):
-            self._outputData["f(q,t)_{}".format(element)][i, :] += v
+
+        self._outputData["pacf_%s" % element] += x
 
     def finalize(self):
         """
-        Finalizes the calculations (e.g. averaging the total term, output files creations ...)
+        Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        for element, number in list(nAtomsPerElement.items()):
-            self._outputData["f(q,t)_%s" % element][:] /= number
-            self._outputData["s(q,f)_%s" % element][:] = get_spectrum(
-                self._outputData["f(q,t)_%s" % element],
+        for element, number in nAtomsPerElement.items():
+            self._outputData["pacf_%s" % element][:] /= number
+            self._outputData["pps_%s" % element][:] = get_spectrum(
+                self._outputData["pacf_%s" % element],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
-                axis=1,
+                fft="rfft",
             )
 
         weights = self.configuration["weights"].get_weights()
-
-        self._outputData["f(q,t)_total"][:] = weight(
+        self._outputData["pacf_total"][:] = weight(
             weights,
             self._outputData,
             nAtomsPerElement,
             1,
-            "f(q,t)_%s",
+            "pacf_%s",
             update_partials=True,
         )
-
-        self._outputData["s(q,f)_total"][:] = weight(
+        self._outputData["pps_total"][:] = weight(
             weights,
             self._outputData,
             nAtomsPerElement,
             1,
-            "s(q,f)_%s",
+            "pps_%s",
             update_partials=True,
         )
 

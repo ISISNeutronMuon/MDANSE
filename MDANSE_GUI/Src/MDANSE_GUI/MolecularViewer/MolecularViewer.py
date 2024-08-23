@@ -135,6 +135,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self._colour_manager = AtomProperties()
         self.dummy_size = 0.0
 
+        self.reset_camera = False
+
     def setDataModel(self, datamodel: TrajectoryAtomData):
         self._datamodel = datamodel
 
@@ -245,8 +247,11 @@ class MolecularViewer(QtWidgets.QWidget):
         LOG.info("... done")
 
     def create_all_actors(self):
-        line_actor, ball_actor = self.create_traj_actors(self._polydata)
         actors = []
+        if self._polydata is None:
+            return actors
+
+        line_actor, ball_actor = self.create_traj_actors(self._polydata)
         if self._cell_visible:
             uc_actor = self.create_uc_actor()
             actors.append(uc_actor)
@@ -602,6 +607,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if (self._reader is not None) and (reader.filename == self._reader.filename):
             return
 
+        self.reset_camera = True
         self.clear_trajectory()
 
         self._reader = reader
@@ -666,6 +672,10 @@ class MolecularViewer(QtWidgets.QWidget):
         self._renderer.AddActor(self._actors)
 
         # rendering
+        if self.reset_camera:
+            self._renderer.ResetCamera()
+            self.reset_camera = False
+
         self._iren.Render()
 
 
@@ -801,6 +811,10 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.update_picked_polydata()
 
     def create_all_actors(self):
+        actors = []
+        if self._polydata is None or self._picked_polydata is None:
+            return actors
+
         line_actor, ball_actor = self.create_traj_actors(
             self._polydata,
             line_opacity=self._polydata_opacity,
@@ -809,7 +823,6 @@ class MolecularViewerWithPicking(MolecularViewer):
         picked_line_actor, picked_ball_actor = self.create_traj_actors(
             self._picked_polydata
         )
-        actors = []
         if self._cell_visible:
             uc_actor = self.create_uc_actor()
             actors.append(uc_actor)

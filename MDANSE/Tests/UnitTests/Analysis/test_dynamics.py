@@ -59,6 +59,21 @@ def test_vacf(trajectory, interp_order, normalise):
     assert path.isfile(temp_name + ".log")
     os.remove(temp_name + ".log")
 
+def test_pps(trajectory):
+    temp_name = tempfile.mktemp()
+    parameters = {}
+    parameters["frames"] = (0, 10, 1, 5)
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
+    parameters["running_mode"] = ("single-core",)
+    parameters["trajectory"] = short_traj
+    pps = IJob.create("PositionPowerSpectrum")
+    pps.run(parameters, status=True)
+    assert path.exists(temp_name + ".mda")
+    assert path.isfile(temp_name + ".mda")
+    os.remove(temp_name + ".mda")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 ################################################################
 # Job parameters                                               #

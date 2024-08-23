@@ -238,16 +238,21 @@ class DensityOfStates(IJob):
             )
 
         weights = self.configuration["weights"].get_weights()
-        weight(
+        self._outputData["vacf_total"][:] = weight(
             weights,
             self._outputData,
             nAtomsPerElement,
             1,
             "vacf_%s",
-            update_values=True,
+            update_partials=True,
         )
-        weight(
-            weights, self._outputData, nAtomsPerElement, 1, "dos_%s", update_values=True
+        self._outputData["dos_total"][:] = weight(
+            weights,
+            self._outputData,
+            nAtomsPerElement,
+            1,
+            "dos_%s",
+            update_partials=True,
         )
 
         self._outputData.write(

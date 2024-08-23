@@ -13,8 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import qInstallMessageHandler
-from qtpy.QtWidgets import QWidget
+
+from logging import Handler, LogRecord
+
+from qtpy.QtCore import qInstallMessageHandler, Slot
+from qtpy.QtWidgets import QWidget, QComboBox
+
+from MDANSE.MLogging import LOG, FMT
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.SinglePanel import SinglePanel
@@ -23,7 +28,32 @@ from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 
 log_tab_label = """MDANSE_GUI message log.
+
+This tab will display the general logging messages of the graphical interface.
+You can adjust the logging level using the combo box below.
 """
+
+
+class GuiLogHandler(Handler):
+
+    def __init__(self, *args, **kwargs):
+        self._visualiser = None
+        super().__init__(*args, **kwargs)
+        self.setFormatter(FMT)
+
+    def add_visualiser(self, new_visualiser):
+        self._visualiser = new_visualiser
+
+    def emit(self, record: LogRecord):
+        if self._visualiser is not None:
+            message = self.formatter.format(record)
+            if "WARNING" in message:
+                message = f'<span style="color:orange;">{message}</span>'
+            elif "ERROR" in message or "CRITICAL" in message:
+                message = f'<span style="color:red;">{message}</span>'
+            else:
+                message = f"<span>{message}</span>"
+            self._visualiser.append_text(message)
 
 
 class LoggingTab(GeneralTab):
@@ -31,10 +61,34 @@ class LoggingTab(GeneralTab):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        qInstallMessageHandler(self.log_handler)
+        self._extra_handler = None
+        self._visualiser.toHtml()
+        qInstallMessageHandler(self.log_qt_handler)
+        self._loglevel_combo = QComboBox(self._core)
+        self._loglevel_combo.addItems(["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"])
+        self._loglevel_combo.setCurrentText("INFO")
+        self._loglevel_combo.currentTextChanged.connect(self.change_log_level)
+        self._core._ub_layout.addWidget(self._loglevel_combo)
 
-    def log_handler(self, m_type, m_context, m_text):
-        self._visualiser.append_text(m_text)
+    @Slot(str)
+    def change_log_level(self, new_level: str):
+        if self._extra_handler is None:
+            return
+        try:
+            self._extra_handler.setLevel(new_level)
+        except:
+            LOG.error(f"Could not set GuiLogHandler to log level {new_level}")
+        else:
+            self._visualiser.append_text(
+                f"<b>=== Log level changed to {new_level} ===</b>"
+            )
+
+    def add_handler(self, new_handler):
+        self._extra_handler = new_handler
+        self._extra_handler.add_visualiser(self._visualiser)
+
+    def log_qt_handler(self, m_type, m_context, m_text):
+        self._visualiser.append_text(f"Qt log message (type={m_type})=" + m_text)
 
     @classmethod
     def standard_instance(cls):
