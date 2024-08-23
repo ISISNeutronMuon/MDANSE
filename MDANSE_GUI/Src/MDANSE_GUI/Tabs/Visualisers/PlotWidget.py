@@ -195,7 +195,7 @@ class PlotWidget(QWidget):
             self._sliderpack.set_values(values)
 
     def available_plotters(self) -> List[str]:
-        return [str(x) for x in Plotter.indirect_subclasses()]
+        return [str(x) for x in Plotter.indirect_subclasses() if str(x) != "Text"]
 
     def plot_data(self, update_only=False):
         if self._plotter is None:

@@ -87,11 +87,23 @@ class DatasetFormatter:
 
     def process_2D_data(self, dataset: "SingleDataset", name: str):
         header_lines = self.make_dataset_header(dataset)
-        return header_lines
+        temp = []
+        if len(temp) > 0:
+            text_data = "\n".join([" ".join([str(x) for x in line]) for line in temp])
+        else:
+            text_data = ""
+        new_header = "\n".join(header_lines)
+        return new_header + "\n" + text_data
 
     def process_ND_data(self, dataset: "SingleDataset", name: str):
         header_lines = self.make_dataset_header(dataset)
-        return header_lines
+        temp = []
+        if len(temp) > 0:
+            text_data = "\n".join([" ".join([str(x) for x in line]) for line in temp])
+        else:
+            text_data = ""
+        new_header = "\n".join(header_lines)
+        return new_header + "\n" + text_data
 
 
 class Text(Plotter):
