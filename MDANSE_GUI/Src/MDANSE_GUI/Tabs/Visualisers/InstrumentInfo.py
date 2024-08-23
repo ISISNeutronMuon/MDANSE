@@ -185,8 +185,13 @@ class InstrumentInfo(QTextBrowser):
     def update_panel(self, incoming: SimpleInstrument):
         if incoming is None:
             return
-        filtered = self.filter(incoming)
-        self.setHtml(filtered)
+        try:
+            filtered = self.filter(incoming)
+        except Exception as e:
+            LOG.error(f"Error in InstrumentInfo: {e}")
+            self.setHtml("")
+        else:
+            self.setHtml(filtered)
 
     @Slot(str)
     def append_text(self, new_text: str):

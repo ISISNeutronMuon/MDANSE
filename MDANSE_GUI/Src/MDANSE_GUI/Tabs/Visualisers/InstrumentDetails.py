@@ -151,9 +151,15 @@ class InstrumentDetails(QWidget):
                 else:
                     widget.setEnabled(True)
 
+    def clear_panel(self):
+        for widget in self._widgets.values():
+            widget.setEnabled(False)
+
     @Slot(object)
     def update_panel(self, instrument_instance):
         if instrument_instance is None:
+            self._current_instrument = None
+            self.clear_panel()
             return
         for widg in self._widgets.values():
             widg.setEnabled(True)

@@ -15,11 +15,13 @@
 #
 import os
 import tomlkit
+import copy
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
 
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
-from qtpy.QtWidgets import QListView, QAbstractItemView
+from qtpy.QtWidgets import QListView, QAbstractItemView, QMenu
+from qtpy.QtGui import QContextMenuEvent, QStandardItem
 
 from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
@@ -42,12 +44,56 @@ class InstrumentList(QListView):
         self._current_instrument = None
         self._all_instruments = set()
 
+    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
+        index = self.indexAt(event.pos())
+        if index.row() == -1:
+            # block right click when it's not on a trajectory
+            return
+        model = self.model()
+        item = model.itemData(index)
+        menu = QMenu()
+        self.populateMenu(menu, item)
+        menu.exec_(event.globalPos())
+
+    def populateMenu(self, menu: QMenu, item: QStandardItem):
+        for action, method in [
+            ("Delete instrument", self.deleteNode),
+            ("Duplicate instrument", self.duplicateNode),
+            ("Restore original parameters", self.restoreNode),
+        ]:
+            temp_action = menu.addAction(action)
+            temp_action.triggered.connect(method)
+
     @Slot()
     def deleteNode(self):
         model = self.model()
         index = self.currentIndex()
         model.removeRow(index.row())
-        self.item_details.emit(("", None))
+        self.item_details.emit(None)
+
+    @Slot()
+    def duplicateNode(self):
+        model = self.model()
+        index = self.currentIndex()
+        node_number = model.itemFromIndex(index).data()
+        instrument = model._nodes[node_number]
+        new_instrument_name = instrument._name + " (Copy)"
+        new_instrument = self.add_instrument(new_instrument_name)
+        for line in new_instrument.inputs():
+            attr_name = line[0]
+            setattr(new_instrument, attr_name, getattr(instrument, attr_name, None))
+        new_instrument._name = instrument._name + " (Copy)"
+        if new_instrument._list_item is not None:
+            new_instrument._list_item.setText(new_instrument_name)
+
+    @Slot()
+    def restoreNode(self):
+        model = self.model()
+        index = self.currentIndex()
+        node_number = model.itemFromIndex(index).data()
+        instrument = model._nodes[node_number]
+        name = instrument._name
+        # TBC
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):

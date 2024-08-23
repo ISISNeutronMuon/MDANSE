@@ -72,7 +72,12 @@ class VectorWidget(QWidget):
             converter = int
         elif self._dtype == "float":
             converter = float
-        self.set_value([converter(x) for x in input_string.strip("[]()").split(",")])
+        try:
+            self.set_value(
+                [converter(x) for x in input_string.strip("[]()").split(",")]
+            )
+        except:
+            self.set_value([0, 0, 0])
 
     def text(self):
         return ",".join([field.text() for field in self._fields])
