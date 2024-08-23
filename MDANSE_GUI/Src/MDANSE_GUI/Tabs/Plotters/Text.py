@@ -24,7 +24,74 @@ from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
     from qtpy.QtWidgets import QTextBrowser
-    from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
+    from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
+
+
+class DatasetFormatter:
+
+    def __init__(self):
+        self._plotting_context = None
+        self._new_header = "# MDANSE Data \n"
+        self._new_text = []
+        top_line = []
+        left_column = [""]
+        all_fields = []
+
+    def take_new_input(self, pc: "PlottingContext"):
+        self._plotting_context = pc
+        self._new_text = []
+        if self._plotting_context is None:
+            return ["No data selected"]
+        for name, databundle in self._plotting_context.datasets().items():
+            dataset, _, _, _, _ = databundle
+            if dataset._n_dim == 1:
+                self._new_text.append(self.process_1D_data(dataset))
+            elif dataset._n_dim == 2:
+                self._new_text.append(self.process_2D_data(dataset, name))
+            else:
+                self._new_text.append(self.process_ND_data(dataset, name))
+        return self._new_text
+
+    def make_dataset_header(self, dataset: "SingleDataset"):
+        lines = []
+        lines.append(f"# Dataset name: {dataset._name}")
+        lines.append(f"# from file {dataset._filename}")
+        lines.append(
+            f"# Contains axes: "
+            + ", ".join([str(axis) for axis in dataset.available_x_axes()])
+        )
+        lines.append(f"# data unit is {dataset._data_unit}")
+        return lines
+
+    def process_1D_data(self, dataset: "SingleDataset"):
+        header_lines = self.make_dataset_header(dataset)
+        best_unit, best_axis = dataset.longest_axis()
+        xaxis_unit = self._plotting_context.get_conversion_factor(best_unit)
+        try:
+            conversion_factor = measure(1.0, best_unit, equivalent=True).toval(
+                xaxis_unit
+            )
+        except:
+            return f"Could not convert {best_unit} to {xaxis_unit}."
+        else:
+            header_lines.append(f"# units of x axis here: {xaxis_unit}")
+            header_lines.append(
+                f"# col1:{best_axis}:{xaxis_unit} col2:data:{dataset._data_unit}"
+            )
+            temp = np.vstack(
+                [dataset._axes[best_axis] * conversion_factor, dataset._data]
+            ).T
+            text_data = "\n".join([" ".join([str(x) for x in line]) for line in temp])
+            new_header = "\n".join(header_lines)
+            return new_header + "\n" + text_data
+
+    def process_2D_data(self, dataset: "SingleDataset", name: str):
+        header_lines = self.make_dataset_header(dataset)
+        return header_lines
+
+    def process_ND_data(self, dataset: "SingleDataset", name: str):
+        header_lines = self.make_dataset_header(dataset)
+        return header_lines
 
 
 class Text(Plotter):
@@ -36,6 +103,7 @@ class Text(Plotter):
         self._active_curves = []
         self._backup_curves = []
         self._backup_limits = []
+        self._formatter = DatasetFormatter()
         self._curve_limit_per_dataset = 12
         self.height_max, self.length_max = 0.0, 0.0
 
@@ -79,6 +147,22 @@ class Text(Plotter):
         update_only=False,
         toolbar=None,
     ):
+        """In the Text plotter, the plot method displays the data as text.
+        Many arguments are included just for compatibility with the plotter.
+
+        Parameters
+        ----------
+        plotting_context : PlottingContext
+            Data model containing the data sets to be shown
+        figure : QTextBrowser, optional
+            Target widget, an instance of QTextBrowser
+        colours : _type_, optional
+            colours of datasets, ignored here
+        update_only : bool, optional
+            ignored
+        toolbar : _type_, optional
+            ignored
+        """
         LOG.debug("Text.plot stared")
         target = self.get_figure(figure)
         if target is None:
@@ -96,52 +180,6 @@ class Text(Plotter):
             return
         if len(plotting_context.datasets()) == 0:
             target.clear()
-        new_header = "# MDANSE Data \n"
-        new_text = ""
-        top_line = []
-        left_column = [""]
-        all_fields = []
-        for name, databundle in plotting_context.datasets().items():
-            dataset, _, _, _, _ = databundle
-            best_unit, best_axis = dataset.longest_axis()
-            other_axes = {}
-            xaxis_unit = plotting_context.get_conversion_factor(best_unit)
-            try:
-                conversion_factor = measure(1.0, best_unit, equivalent=True).toval(
-                    xaxis_unit
-                )
-            except:
-                continue
-            else:
-                if dataset._n_dim == 1:
-                    temp = np.vstack(
-                        [dataset._axes[best_axis] * conversion_factor, dataset._data]
-                    ).T
-                elif dataset._n_dim == 2:
-                    shape = list(dataset._data.shape)
-                    for name, axis in dataset._axes.items():
-                        if name == best_axis:
-                            continue
-                        axis_unit = dataset._axes_units[name]
-                        new_axis_unit = plotting_context.get_conversion_factor(
-                            axis_unit
-                        )
-                        conv_factor = measure(1.0, axis_unit, equivalent=True).toval(
-                            new_axis_unit
-                        )
-                        other_axes[name] = axis * conv_factor
-                    for key, value in other_axes.items():
-                        if len(value) in shape:
-                            otheraxis = other_axes[key]
-                            break
-                    temp = np.hstack(
-                        [dataset._axes[best_axis] * conversion_factor, dataset._data]
-                    )
-                    temp = np.vstack([np.concatenate([[0.0], otheraxis]), temp])
-                else:
-                    return
-                text_data = "\n".join(
-                    [" ".join([str(x) for x in line]) for line in temp]
-                )
-                new_text = "\n".join([new_header, text_data])
-        target.setText(new_text)
+            return
+        self._formatter.take_new_input(plotting_context)
+        target.setText("\n".join(self._formatter._new_text))

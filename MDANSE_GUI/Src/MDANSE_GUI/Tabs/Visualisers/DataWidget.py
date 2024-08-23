@@ -63,7 +63,7 @@ class DataWidget(QWidget):
         try:
             self._plotter = Plotter.create(plotter_option)
         except Exception as e:
-            LOG.error(f"DataWidget failed to create Text plotter: {e.with_traceback()}")
+            LOG.error(f"DataWidget failed to create Text plotter: {e}")
         else:
             LOG.debug(f"DataWidget created plotter {plotter_option}: {self._plotter}")
             self._plotter._settings = self._settings
@@ -101,7 +101,7 @@ class DataWidget(QWidget):
                 toolbar=None,
             )
         except Exception as e:
-            LOG.error(f"DataWidget error: {e.with_traceback()}")
+            LOG.error(f"DataWidget error: {e}")
 
     def make_canvas(self):
         """Creates a matplotlib figure for plotting

@@ -107,12 +107,12 @@ class PlotTab(GeneralTab):
         try:
             self._visualiser.model.accept_external_data(data_model)
         except Exception as e:
-            LOG.error(f"Visualiser failed to pass data model: {e.with_traceback()}")
+            LOG.error(f"Visualiser failed to pass data model: {e}")
         else:
             try:
                 self._visualiser.plotter.plot_data()
             except Exception as e2:
-                LOG.error(f"Visualiser failed to plot data: {e2.with_traceback()}")
+                LOG.error(f"Visualiser failed to plot data: {e2}")
 
     @Slot(int)
     def switch_model(self, tab_id):

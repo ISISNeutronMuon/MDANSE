@@ -128,4 +128,4 @@ class PlotHolder(QTabWidget):
             try:
                 plotter.plot_data(update_only=True)
             except Exception as e:
-                LOG.error(f"Plotting failed: {e.with_traceback()}")
+                LOG.error(f"Plotting failed: {e}")
