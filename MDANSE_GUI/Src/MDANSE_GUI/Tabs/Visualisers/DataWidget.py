@@ -19,12 +19,21 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 import numpy as np
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QTextBrowser
+from qtpy.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QTextBrowser,
+    QGridLayout,
+    QLabel,
+    QSpinBox,
+    QDoubleSpinBox,
+    QLineEdit,
+    QCheckBox,
+)
 from qtpy.QtCore import Slot, Signal, Qt
 
 from MDANSE.MLogging import LOG
 
-from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 
@@ -43,8 +52,46 @@ class DataWidget(QWidget):
         self._colours = colours
         self._settings = settings
         self._slider_max = 100
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        self.make_toolbar()
         self.make_canvas()
         self.set_plotter("Text")
+        self.update_plotter_params()
+
+    def make_toolbar(self, line_length=6):
+        layout = QGridLayout()
+        self.layout().addLayout(layout)
+        self._preview_widget = QCheckBox(self)
+        self._preview_widget.setChecked(True)
+        self._preview_widget.checkStateChanged.connect(self.update_plotter_params)
+        self._separator_widget = QLineEdit(" ", self)
+        self._separator_widget.textChanged.connect(self.update_plotter_params)
+        self._comment_widget = QLineEdit("#", self)
+        self._comment_widget.textChanged.connect(self.update_plotter_params)
+        self._precision_widget = QSpinBox(self)
+        self._precision_widget.setValue(5)
+        self._precision_widget.valueChanged.connect(self.update_plotter_params)
+        self._lines_widget = QSpinBox(self)
+        self._lines_widget.setValue(10)
+        self._lines_widget.valueChanged.connect(self.update_plotter_params)
+        # populate the layout
+        column = 0
+        row = 0
+        for label_text, widget in [
+            ("Preview only (truncate)", self._preview_widget),
+            ("Preview lines:", self._lines_widget),
+            ("Rounding precision", self._precision_widget),
+            ("Separator character", self._separator_widget),
+            ("Comment character", self._comment_widget),
+        ]:
+            layout.addWidget(QLabel(label_text, self), row, column)
+            column += 1
+            layout.addWidget(widget, row, column)
+            column += 1
+            if column >= line_length:
+                row += 1
+                column = 0
 
     @Slot(object)
     def slider_change(self, new_values: object):
@@ -68,6 +115,23 @@ class DataWidget(QWidget):
             LOG.debug(f"DataWidget created plotter {plotter_option}: {self._plotter}")
             self._plotter._settings = self._settings
             self.plot_data()
+
+    @Slot()
+    def update_plotter_params(self):
+        if self._plotter is None:
+            return
+        is_preview = self._preview_widget.isChecked()
+        rounding_precision = self._precision_widget.value()
+        comment_char = self._comment_widget.text()
+        separator_char = self._separator_widget.text()
+        preview_lines = self._lines_widget.value()
+        self._plotter.adjust_formatter(
+            preview=is_preview,
+            preview_lines=preview_lines,
+            rounding=rounding_precision,
+            separator=separator_char,
+            comment=comment_char,
+        )
 
     @Slot(object)
     def slider_change(self, new_values: object):
@@ -120,7 +184,6 @@ class DataWidget(QWidget):
         QWidget
             a widget containing just a QTextBrowser
         """
-        layout = QVBoxLayout(self)
-        self.setLayout(layout)
+        layout = self.layout()
         self._figure = QTextBrowser(self)
         layout.addWidget(self._figure)

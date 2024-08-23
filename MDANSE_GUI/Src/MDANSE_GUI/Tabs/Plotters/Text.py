@@ -39,6 +39,11 @@ class DatasetFormatter:
         self._plotting_context = None
         self._new_header = "# MDANSE Data \n"
         self._new_text = []
+        self._is_preview = True
+        self._preview_lines = 10
+        self._rounding_prec = 5
+        self._comment = "#"
+        self._separator = " "
 
     def take_new_input(self, pc: "PlottingContext"):
         """The plotting context is passed from the GUI and
@@ -64,11 +69,17 @@ class DatasetFormatter:
         for name, databundle in self._plotting_context.datasets().items():
             dataset, _, _, _, _ = databundle
             if dataset._n_dim == 1:
-                self._new_text.append(self.process_1D_data(dataset))
+                self._new_text.append(
+                    self.process_1D_data(dataset, separator=self._separator)
+                )
             elif dataset._n_dim == 2:
-                self._new_text.append(self.process_2D_data(dataset, name))
+                self._new_text.append(
+                    self.process_2D_data(dataset, name, separator=self._separator)
+                )
             else:
-                self._new_text.append(self.process_ND_data(dataset, name))
+                self._new_text.append(
+                    self.process_ND_data(dataset, name, separator=self._separator)
+                )
         return self._new_text
 
     def make_dataset_header(self, dataset: "SingleDataset", comment_character="#"):
@@ -114,7 +125,9 @@ class DatasetFormatter:
         str
             a data table with 2 columns in text format
         """
-        header_lines, _ = self.make_dataset_header(dataset)
+        header_lines, _ = self.make_dataset_header(
+            dataset, comment_character=self._comment
+        )
         best_unit, best_axis = dataset.longest_axis()
         xaxis_unit = self._plotting_context.get_conversion_factor(best_unit)
         try:
@@ -124,21 +137,37 @@ class DatasetFormatter:
         except:
             return f"Could not convert {best_unit} to {xaxis_unit}."
         else:
-            header_lines.append(f"# units of x axis here: {xaxis_unit}")
+            header_lines.append(f"{self._comment} units of x axis here: {xaxis_unit}")
             header_lines.append(
-                f"# col1:{best_axis}:{xaxis_unit} col2:data:{dataset._data_unit}"
+                f"{self._comment} col1:{best_axis}:{xaxis_unit} col2:data:{dataset._data_unit}"
             )
-            temp = np.vstack(
-                [dataset._axes[best_axis] * conversion_factor, dataset._data]
-            ).T
+            if self._is_preview:
+                temp = np.vstack(
+                    [
+                        dataset._axes[best_axis][: self._preview_lines]
+                        * conversion_factor,
+                        dataset._data[: self._preview_lines],
+                    ]
+                ).T
+            else:
+                temp = np.vstack(
+                    [dataset._axes[best_axis] * conversion_factor, dataset._data]
+                ).T
             text_data = "\n".join(
-                [separator.join([str(x) for x in line]) for line in temp]
+                [
+                    separator.join([str(round(x, self._rounding_prec)) for x in line])
+                    for line in temp
+                ]
             )
+            if self._is_preview:
+                text_data += "\n..."
             new_header = "\n".join(header_lines)
             return new_header + "\n" + text_data
 
     def process_2D_data(self, dataset: "SingleDataset", name: str, separator=" "):
-        header_lines, comment_char = self.make_dataset_header(dataset)
+        header_lines, comment_char = self.make_dataset_header(
+            dataset, comment_character=self._comment
+        )
         print(header_lines)
         new_axes = {}
         new_axes_units = {}
@@ -161,35 +190,63 @@ class DatasetFormatter:
                     f"{comment_char} first row is {ax_key} in units {new_unit}"
                 )
         LOG.debug(f"Data shape: {dataset._data.shape}")
-        temp = np.hstack(
-            [
-                new_axes[axis_numbers[0]].reshape((dataset._data.shape[0], 1)),
-                dataset._data,
-            ]
-        )
-        temp = np.vstack(
-            [
-                np.concatenate([[0], new_axes[axis_numbers[1]]]).reshape(
-                    (1, dataset._data.shape[1] + 1)
-                ),
-                temp,
-            ]
-        )
+        if self._is_preview:
+            nlines = self._preview_lines
+            nlines = min(nlines, len(new_axes[axis_numbers[0]]))
+            temp = np.hstack(
+                [
+                    new_axes[axis_numbers[0]][:nlines].reshape((nlines, 1)),
+                    dataset._data,
+                ]
+            )
+            temp = np.vstack(
+                [
+                    np.concatenate([[0], new_axes[axis_numbers[1]]]).reshape(
+                        (1, dataset._data.shape[1] + 1)
+                    ),
+                    temp,
+                ]
+            )
+        else:
+            temp = np.hstack(
+                [
+                    new_axes[axis_numbers[0]].reshape((dataset._data.shape[0], 1)),
+                    dataset._data,
+                ]
+            )
+            temp = np.vstack(
+                [
+                    np.concatenate([[0], new_axes[axis_numbers[1]]]).reshape(
+                        (1, dataset._data.shape[1] + 1)
+                    ),
+                    temp,
+                ]
+            )
         if len(temp) > 0:
             text_data = "\n".join(
-                [separator.join([str(x) for x in line]) for line in temp]
+                [
+                    separator.join([str(round(x, self._rounding_prec)) for x in line])
+                    for line in temp
+                ]
             )
         else:
             text_data = ""
+        if self._is_preview:
+            text_data += "\n..."
         new_header = "\n".join(header_lines)
         return new_header + "\n" + text_data
 
     def process_ND_data(self, dataset: "SingleDataset", name: str, separator=" "):
-        header_lines, comment_char = self.make_dataset_header(dataset)
+        header_lines, comment_char = self.make_dataset_header(
+            dataset, comment_character=self._comment
+        )
         temp = []
         if len(temp) > 0:
             text_data = "\n".join(
-                [separator.join([str(x) for x in line]) for line in temp]
+                [
+                    separator.join([str(round(x, self._rounding_prec)) for x in line])
+                    for line in temp
+                ]
             )
         else:
             text_data = ""
@@ -216,6 +273,7 @@ class Text(Plotter):
         self._backup_limits = []
         self._formatter = DatasetFormatter()
         self._curve_limit_per_dataset = 12
+        self._pc_backup = None
         self.height_max, self.length_max = 0.0, 0.0
 
     def clear(self, figure: "QTextBrowser" = None):
@@ -237,6 +295,18 @@ class Text(Plotter):
             return
         target.clear()
         LOG.debug("Text.clear finished")
+
+    def adjust_formatter(
+        self, preview=False, preview_lines=10, rounding=15, separator=" ", comment="#"
+    ):
+        if self._formatter is None or self._pc_backup is None or self._figure is None:
+            return
+        self._formatter._is_preview = preview
+        self._formatter._preview_lines = preview_lines
+        self._formatter._rounding_prec = rounding
+        self._formatter._separator = separator
+        self._formatter._comment = comment
+        self.plot(self._pc_backup, self._figure)
 
     def get_figure(self, figure: "QTextBrowser" = None):
         """Used for both updating and getting the output widget
@@ -309,6 +379,7 @@ class Text(Plotter):
             return
         if toolbar is not None:
             self._toolbar = toolbar
+        self._pc_backup = plotting_context
         self._figure = target
         xaxis_unit = None
         self._active_curves = []
