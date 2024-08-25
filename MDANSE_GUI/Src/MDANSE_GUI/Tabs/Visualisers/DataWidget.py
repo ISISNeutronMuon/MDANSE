@@ -75,12 +75,16 @@ class DataWidget(QWidget):
         self._lines_widget = QSpinBox(self)
         self._lines_widget.setValue(10)
         self._lines_widget.valueChanged.connect(self.update_plotter_params)
+        self._columns_widget = QSpinBox(self)
+        self._columns_widget.setValue(10)
+        self._columns_widget.valueChanged.connect(self.update_plotter_params)
         # populate the layout
         column = 0
         row = 0
         for label_text, widget in [
             ("Preview only (truncate)", self._preview_widget),
             ("Preview lines:", self._lines_widget),
+            ("Preview columns:", self._columns_widget),
             ("Rounding precision", self._precision_widget),
             ("Separator character", self._separator_widget),
             ("Comment character", self._comment_widget),
@@ -125,9 +129,11 @@ class DataWidget(QWidget):
         comment_char = self._comment_widget.text()
         separator_char = self._separator_widget.text()
         preview_lines = self._lines_widget.value()
+        preview_columns = self._columns_widget.value()
         self._plotter.adjust_formatter(
             preview=is_preview,
             preview_lines=preview_lines,
+            preview_columns=preview_columns,
             rounding=rounding_precision,
             separator=separator_char,
             comment=comment_char,

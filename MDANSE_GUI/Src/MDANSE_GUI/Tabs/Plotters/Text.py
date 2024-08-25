@@ -41,6 +41,7 @@ class DatasetFormatter:
         self._new_text = []
         self._is_preview = True
         self._preview_lines = 10
+        self._preview_columns = 10
         self._rounding_prec = 5
         self._comment = "#"
         self._separator = " "
@@ -192,17 +193,19 @@ class DatasetFormatter:
         LOG.debug(f"Data shape: {dataset._data.shape}")
         if self._is_preview:
             nlines = self._preview_lines
+            ncols = self._preview_columns
             nlines = min(nlines, len(new_axes[axis_numbers[0]]))
+            ncols = min(ncols, len(new_axes[axis_numbers[1]]))
             temp = np.hstack(
                 [
                     new_axes[axis_numbers[0]][:nlines].reshape((nlines, 1)),
-                    dataset._data,
+                    dataset._data[:nlines, :ncols],
                 ]
             )
             temp = np.vstack(
                 [
-                    np.concatenate([[0], new_axes[axis_numbers[1]]]).reshape(
-                        (1, dataset._data.shape[1] + 1)
+                    np.concatenate([[0], new_axes[axis_numbers[1]][:ncols]]).reshape(
+                        (1, ncols + 1)
                     ),
                     temp,
                 ]
@@ -297,12 +300,19 @@ class Text(Plotter):
         LOG.debug("Text.clear finished")
 
     def adjust_formatter(
-        self, preview=False, preview_lines=10, rounding=15, separator=" ", comment="#"
+        self,
+        preview=False,
+        preview_lines=10,
+        preview_columns=10,
+        rounding=15,
+        separator=" ",
+        comment="#",
     ):
         if self._formatter is None or self._pc_backup is None or self._figure is None:
             return
         self._formatter._is_preview = preview
         self._formatter._preview_lines = preview_lines
+        self._formatter._preview_columns = preview_columns
         self._formatter._rounding_prec = rounding
         self._formatter._separator = separator
         self._formatter._comment = comment
