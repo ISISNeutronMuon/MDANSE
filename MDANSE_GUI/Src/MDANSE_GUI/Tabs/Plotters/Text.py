@@ -70,16 +70,23 @@ class DatasetFormatter:
         for name, databundle in self._plotting_context.datasets().items():
             dataset, _, _, _, _ = databundle
             if dataset._n_dim == 1:
+                header, data = self.process_1D_data(dataset, separator=self._separator)
                 self._new_text.append(
-                    self.process_1D_data(dataset, separator=self._separator)
+                    self.join_for_gui(header, data, separator=self._separator)
                 )
             elif dataset._n_dim == 2:
+                header, data = self.process_2D_data(
+                    dataset, name, separator=self._separator
+                )
                 self._new_text.append(
-                    self.process_2D_data(dataset, name, separator=self._separator)
+                    self.join_for_gui(header, data, separator=self._separator)
                 )
             else:
+                header, data = self.process_ND_data(
+                    dataset, name, separator=self._separator
+                )
                 self._new_text.append(
-                    self.process_ND_data(dataset, name, separator=self._separator)
+                    self.join_for_gui(header, data, separator=self._separator)
                 )
         return self._new_text
 
@@ -108,6 +115,20 @@ class DatasetFormatter:
         )
         lines.append(f"{comment_character} data unit is {dataset._data_unit}")
         return lines, comment_character
+
+    def join_for_gui(
+        self, header_lines: List[str], data_array: np.ndarray, separator=" "
+    ):
+        text_data = "\n".join(
+            [
+                separator.join([str(round(x, self._rounding_prec)) for x in line])
+                for line in data_array
+            ]
+        )
+        if self._is_preview:
+            text_data += "\n..."
+        new_header = "\n".join(header_lines)
+        return new_header + "\n" + text_data
 
     def process_1D_data(self, dataset: "SingleDataset", separator=" "):
         """Formats a 1D array as a 2-column table with a commented header.
@@ -154,16 +175,7 @@ class DatasetFormatter:
                 temp = np.vstack(
                     [dataset._axes[best_axis] * conversion_factor, dataset._data]
                 ).T
-            text_data = "\n".join(
-                [
-                    separator.join([str(round(x, self._rounding_prec)) for x in line])
-                    for line in temp
-                ]
-            )
-            if self._is_preview:
-                text_data += "\n..."
-            new_header = "\n".join(header_lines)
-            return new_header + "\n" + text_data
+            return header_lines, temp
 
     def process_2D_data(self, dataset: "SingleDataset", name: str, separator=" "):
         header_lines, comment_char = self.make_dataset_header(
@@ -225,36 +237,14 @@ class DatasetFormatter:
                     temp,
                 ]
             )
-        if len(temp) > 0:
-            text_data = "\n".join(
-                [
-                    separator.join([str(round(x, self._rounding_prec)) for x in line])
-                    for line in temp
-                ]
-            )
-        else:
-            text_data = ""
-        if self._is_preview:
-            text_data += "\n..."
-        new_header = "\n".join(header_lines)
-        return new_header + "\n" + text_data
+        return header_lines, temp
 
     def process_ND_data(self, dataset: "SingleDataset", name: str, separator=" "):
         header_lines, comment_char = self.make_dataset_header(
             dataset, comment_character=self._comment
         )
         temp = []
-        if len(temp) > 0:
-            text_data = "\n".join(
-                [
-                    separator.join([str(round(x, self._rounding_prec)) for x in line])
-                    for line in temp
-                ]
-            )
-        else:
-            text_data = ""
-        new_header = "\n".join(header_lines)
-        return new_header + "\n" + text_data
+        return header_lines, temp
 
 
 class Text(Plotter):

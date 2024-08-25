@@ -14,6 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from typing import TYPE_CHECKING, List
+import csv
+import os
 
 if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
@@ -22,13 +24,16 @@ import numpy as np
 from qtpy.QtWidgets import (
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QTextBrowser,
     QGridLayout,
     QLabel,
     QSpinBox,
-    QDoubleSpinBox,
     QLineEdit,
     QCheckBox,
+    QPushButton,
+    QComboBox,
+    QFileDialog,
 )
 from qtpy.QtCore import Slot, Signal, Qt
 
@@ -52,10 +57,12 @@ class DataWidget(QWidget):
         self._colours = colours
         self._settings = settings
         self._slider_max = 100
+        self._current_path = "."
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         self.make_toolbar()
         self.make_canvas()
+        self.make_bottom_bar()
         self.set_plotter("Text")
         self.update_plotter_params()
 
@@ -96,6 +103,37 @@ class DataWidget(QWidget):
             if column >= line_length:
                 row += 1
                 column = 0
+
+    def make_bottom_bar(self):
+        layout = QHBoxLayout()
+        self.layout().addLayout(layout)
+        self._output_widget = QLineEdit("", self)
+        layout.addWidget(self._output_widget)
+        self._browse_button = QPushButton("Browse", self)
+        self._browse_button.clicked.connect(self.output_file_dialog)
+        layout.addWidget(self._browse_button)
+        self._dialect_combo = QComboBox(self)
+        self._dialect_combo.addItems(csv.list_dialects())
+        layout.addWidget(self._dialect_combo)
+        self._output_button = QPushButton("Save file", self)
+        self._output_button.clicked.connect(self.save_to_file)
+        layout.addWidget(self._output_button)
+
+    @Slot()
+    def output_file_dialog(self):
+        new_value = QFileDialog.getSaveFileName(
+            self,  # the parent of the dialog
+            "Save data to a CSV file",  # the label of the window
+            self._current_path,  # the initial search path
+            "Output file name (*)",  # text string specifying the file name filter.
+        )
+        if len(new_value[0]) > 0:
+            self._output_widget.setText(new_value[0])
+            self._current_path = os.path.split(new_value[0])[0]
+
+    @Slot()
+    def save_to_file():
+        pass
 
     @Slot(object)
     def slider_change(self, new_values: object):
@@ -170,6 +208,11 @@ class DataWidget(QWidget):
                 update_only=None,
                 toolbar=None,
             )
+            temp = self._plotting_context.datasets().values()
+            if len(temp) > 0:
+                self._current_path = os.path.split(temp[0]._filename)[0]
+            else:
+                self._current_path = "."
         except Exception as e:
             LOG.error(f"DataWidget error: {e}")
 
