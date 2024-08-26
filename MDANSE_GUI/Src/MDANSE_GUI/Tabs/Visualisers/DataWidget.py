@@ -132,8 +132,23 @@ class DataWidget(QWidget):
             self._current_path = os.path.split(new_value[0])[0]
 
     @Slot()
-    def save_to_file():
-        pass
+    def save_to_file(self):
+        target_path = self._output_widget.text()
+        try:
+            target = open(target_path, "w")
+        except:
+            LOG.error(f"Could not open file for writing: {target_path}")
+        else:
+            writer = csv.writer(
+                target,
+                dialect=self._dialect_combo.currentText,
+            )
+            for header, data in self._plotter._formatter.datasets_for_csv():
+                for line in header:
+                    target.write(line + "\n")
+                for row in data:
+                    writer.writerow(row)
+            target.close()
 
     @Slot(object)
     def slider_change(self, new_values: object):
@@ -208,11 +223,10 @@ class DataWidget(QWidget):
                 update_only=None,
                 toolbar=None,
             )
-            temp = self._plotting_context.datasets().values()
-            if len(temp) > 0:
-                self._current_path = os.path.split(temp[0]._filename)[0]
-            else:
-                self._current_path = "."
+            for _, databundle in self._plotting_context.datasets().items():
+                dataset, _, _, _, _ = databundle
+                self._current_path = os.path.split(dataset._filename)[0]
+                break
         except Exception as e:
             LOG.error(f"DataWidget error: {e}")
 

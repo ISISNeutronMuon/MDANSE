@@ -70,25 +70,50 @@ class DatasetFormatter:
         for name, databundle in self._plotting_context.datasets().items():
             dataset, _, _, _, _ = databundle
             if dataset._n_dim == 1:
-                header, data = self.process_1D_data(dataset, separator=self._separator)
+                header, data = self.process_1D_data(
+                    dataset, separator=self._separator, is_preview=self._is_preview
+                )
                 self._new_text.append(
                     self.join_for_gui(header, data, separator=self._separator)
                 )
             elif dataset._n_dim == 2:
                 header, data = self.process_2D_data(
-                    dataset, name, separator=self._separator
+                    dataset,
+                    name,
+                    separator=self._separator,
+                    is_preview=self._is_preview,
                 )
                 self._new_text.append(
                     self.join_for_gui(header, data, separator=self._separator)
                 )
             else:
                 header, data = self.process_ND_data(
-                    dataset, name, separator=self._separator
+                    dataset,
+                    name,
+                    separator=self._separator,
+                    is_preview=self._is_preview,
                 )
                 self._new_text.append(
                     self.join_for_gui(header, data, separator=self._separator)
                 )
         return self._new_text
+
+    def datasets_for_csv(self):
+        if self._plotting_context is None:
+            return ["No data selected"]
+        for name, databundle in self._plotting_context.datasets().items():
+            dataset, _, _, _, _ = databundle
+            if dataset._n_dim == 1:
+                header, data = self.process_1D_data(dataset, separator=self._separator)
+            elif dataset._n_dim == 2:
+                header, data = self.process_2D_data(
+                    dataset, name, separator=self._separator
+                )
+            else:
+                header, data = self.process_ND_data(
+                    dataset, name, separator=self._separator
+                )
+            yield header, data
 
     def make_dataset_header(self, dataset: "SingleDataset", comment_character="#"):
         """Extracts information related to the input dataset, and converts them
@@ -130,7 +155,9 @@ class DatasetFormatter:
         new_header = "\n".join(header_lines)
         return new_header + "\n" + text_data
 
-    def process_1D_data(self, dataset: "SingleDataset", separator=" "):
+    def process_1D_data(
+        self, dataset: "SingleDataset", separator=" ", is_preview=False
+    ):
         """Formats a 1D array as a 2-column table with a commented header.
         The first column is determined using the information stored
         in the PlottingContext.
@@ -163,7 +190,7 @@ class DatasetFormatter:
             header_lines.append(
                 f"{self._comment} col1:{best_axis}:{xaxis_unit} col2:data:{dataset._data_unit}"
             )
-            if self._is_preview:
+            if is_preview:
                 temp = np.vstack(
                     [
                         dataset._axes[best_axis][: self._preview_lines]
@@ -177,7 +204,9 @@ class DatasetFormatter:
                 ).T
             return header_lines, temp
 
-    def process_2D_data(self, dataset: "SingleDataset", name: str, separator=" "):
+    def process_2D_data(
+        self, dataset: "SingleDataset", name: str, separator=" ", is_preview=False
+    ):
         header_lines, comment_char = self.make_dataset_header(
             dataset, comment_character=self._comment
         )
@@ -203,7 +232,7 @@ class DatasetFormatter:
                     f"{comment_char} first row is {ax_key} in units {new_unit}"
                 )
         LOG.debug(f"Data shape: {dataset._data.shape}")
-        if self._is_preview:
+        if is_preview:
             nlines = self._preview_lines
             ncols = self._preview_columns
             nlines = min(nlines, len(new_axes[axis_numbers[0]]))
@@ -239,7 +268,9 @@ class DatasetFormatter:
             )
         return header_lines, temp
 
-    def process_ND_data(self, dataset: "SingleDataset", name: str, separator=" "):
+    def process_ND_data(
+        self, dataset: "SingleDataset", name: str, separator=" ", is_preview=False
+    ):
         header_lines, comment_char = self.make_dataset_header(
             dataset, comment_character=self._comment
         )
