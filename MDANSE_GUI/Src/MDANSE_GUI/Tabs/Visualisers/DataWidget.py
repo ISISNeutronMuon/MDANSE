@@ -125,7 +125,7 @@ class DataWidget(QWidget):
             self,  # the parent of the dialog
             "Save data to a CSV file",  # the label of the window
             self._current_path,  # the initial search path
-            "Output file name (*)",  # text string specifying the file name filter.
+            "Comma-separated values (*.csv);;Output file name (*)",  # text string specifying the file name filter.
         )
         if len(new_value[0]) > 0:
             self._output_widget.setText(new_value[0])
@@ -134,6 +134,15 @@ class DataWidget(QWidget):
     @Slot()
     def save_to_file(self):
         target_path = self._output_widget.text()
+        try:
+            nsets = len(self._plotter._pc_backup.datasets())
+        except AttributeError:
+            return
+        except:
+            LOG.warning("DataWidget could not determine the number of datasets.")
+        else:
+            if nsets == 0:  # do not create a file if there are no data
+                return
         try:
             target = open(target_path, "w")
         except:

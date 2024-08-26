@@ -418,7 +418,7 @@ class Text(Plotter):
         self.apply_settings(plotting_context, colours)
         self.height_max, self.length_max = 0.0, 0.0
         if plotting_context.set_axes() is None:
-            LOG.error("Axis check failed.")
+            LOG.debug("Axis check failed.")
             return
         if len(plotting_context.datasets()) == 0:
             target.clear()
