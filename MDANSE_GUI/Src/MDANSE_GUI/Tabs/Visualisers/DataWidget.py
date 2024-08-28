@@ -107,13 +107,23 @@ class DataWidget(QWidget):
     def make_bottom_bar(self):
         layout = QHBoxLayout()
         self.layout().addLayout(layout)
+        layout.addWidget(QLabel("Output file:"))
         self._output_widget = QLineEdit("", self)
         layout.addWidget(self._output_widget)
         self._browse_button = QPushButton("Browse", self)
         self._browse_button.clicked.connect(self.output_file_dialog)
         layout.addWidget(self._browse_button)
+        tooltip = (
+            "CSV dialect option, as implemented by the Python CSV module. "
+            "It should mainly affect delimiters and newline characters. "
+            "Most of the time there is no need to change it."
+        )
+        templabel = QLabel("CSV dialect:", self)
+        templabel.setToolTip(tooltip)
+        layout.addWidget(templabel)
         self._dialect_combo = QComboBox(self)
         self._dialect_combo.addItems(csv.list_dialects())
+        self._dialect_combo.setToolTip(tooltip)
         layout.addWidget(self._dialect_combo)
         self._output_button = QPushButton("Save file", self)
         self._output_button.clicked.connect(self.save_to_file)
@@ -144,7 +154,7 @@ class DataWidget(QWidget):
             if nsets == 0:  # do not create a file if there are no data
                 return
         try:
-            target = open(target_path, "w")
+            target = open(target_path, "w", newline="")
         except:
             LOG.error(f"Could not open file for writing: {target_path}")
         else:
