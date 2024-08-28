@@ -47,6 +47,7 @@ class SimpleInstrument:
         self._q_max = 10.0
         self._q_unit = "1/ang"
         self._q_step = 1.0
+        self._q_width = 1.0
         self._axis_1 = [1, 0, 0]
         self._axis_2 = [0, 1, 0]
         self._vectors_per_shell = 100
@@ -66,6 +67,7 @@ class SimpleInstrument:
             ["_q_min", "QLineEdit", "float"],
             ["_q_max", "QLineEdit", "float"],
             ["_q_step", "QLineEdit", "float"],
+            ["_q_width", "QLineEdit", "float"],
             ["_vectors_per_shell", "QLineEdit", "int"],
             ["_axis_1", "VectorWidget", "float"],
             ["_axis_2", "VectorWidget", "float"],
@@ -100,7 +102,7 @@ class SimpleInstrument:
 
     def sanitize_numbers(self):
         results = []
-        for entry in [self._q_step, self._q_min, self._q_max]:
+        for entry in [self._q_step, self._q_min, self._q_max, self._q_width]:
             try:
                 new_entry = float(entry)
             except ValueError:
@@ -124,7 +126,7 @@ class SimpleInstrument:
             return (cov_type, {})
         qvec_generator.build_configuration()
         param_dictionary = {}
-        _q_step, _q_min, _q_max = self.sanitize_numbers()
+        _q_step, _q_min, _q_max, _q_width = self.sanitize_numbers()
         try:
             conversion_factor = measure(1.0, iunit=self._q_unit).toval("1/nm")
         except:
@@ -137,7 +139,7 @@ class SimpleInstrument:
             q_max = round(conversion_factor * float(_q_max), 6)
             param_dictionary["shells"] = [q_min, q_max, q_step]
         if "width" in qvec_generator._configuration:
-            width = round(conversion_factor * float(_q_step), 6)
+            width = round(conversion_factor * float(_q_width), 6)
             param_dictionary["width"] = width
         if "n_vectors" in qvec_generator._configuration:
             num_vectors = int(self._vectors_per_shell)
