@@ -43,6 +43,7 @@ class InstrumentList(QListView):
         self.clicked.connect(self.item_picked)
         self._current_instrument = None
         self._all_instruments = set()
+        self._backup_instruments = {}
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
@@ -56,13 +57,29 @@ class InstrumentList(QListView):
         menu.exec_(event.globalPos())
 
     def populateMenu(self, menu: QMenu, item: QStandardItem):
+        has_backup = False
+        instrument = self.model()._nodes[item[257]]
+        if instrument._name in self._backup_instruments.keys():
+            has_backup = True
         for action, method in [
             ("Delete instrument", self.deleteNode),
+        ]:
+            temp_action = menu.addAction(action)
+            temp_action.triggered.connect(method)
+            if has_backup:
+                temp_action.setEnabled(False)
+        for action, method in [
             ("Duplicate instrument", self.duplicateNode),
+        ]:
+            temp_action = menu.addAction(action)
+            temp_action.triggered.connect(method)
+        for action, method in [
             ("Restore original parameters", self.restoreNode),
         ]:
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
+            if not has_backup:
+                temp_action.setEnabled(False)
 
     @Slot()
     def deleteNode(self):
@@ -94,6 +111,15 @@ class InstrumentList(QListView):
         instrument = model._nodes[node_number]
         name = instrument._name
         # TBC
+        try:
+            backup = self._backup_instruments[name]
+        except KeyError:
+            LOG.error(f"Backup instrument not found: {name}")
+        else:
+            for line in instrument.inputs():
+                attr_name = line[0]
+                setattr(instrument, attr_name, getattr(backup, attr_name, None))
+            self.item_details.emit(instrument)
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
@@ -135,7 +161,7 @@ class InstrumentList(QListView):
         except Exception as e:
             LOG.error(f"Failed to connect InstrumentList to visualiser: {e}")
 
-    def load_from_file(self, filename: str):
+    def load_from_file(self, filename: str, keep_backups=False):
         source_file = TOMLFile(filename)
         try:
             tomldoc = source_file.read()
@@ -155,6 +181,8 @@ class InstrumentList(QListView):
                 new_instrument = self.add_instrument(str(key))
             if new_instrument is None:
                 return
+            if keep_backups:
+                backup_instrument = SimpleInstrument()
             instrument_params = tomldoc[key]
             for input in SimpleInstrument.inputs():
                 param_key = input[0]
@@ -164,6 +192,11 @@ class InstrumentList(QListView):
                     continue
                 else:
                     setattr(new_instrument, param_key, new_value)
+                    if keep_backups:
+                        setattr(backup_instrument, param_key, new_value)
+            if keep_backups:
+                self._backup_instruments[str(key)] = backup_instrument
+                new_instrument._name_is_fixed = True
 
     @Slot()
     def save_to_file(self, filename: str = None):

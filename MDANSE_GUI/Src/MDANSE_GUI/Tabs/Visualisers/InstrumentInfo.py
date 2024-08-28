@@ -36,6 +36,7 @@ class SimpleInstrument:
     def __init__(self, optional_qitem_reference: QStandardItem = None) -> None:
         self._list_item = optional_qitem_reference
         self._name = "Generic neutron instrument"
+        self._name_is_fixed = False
         self._sample = "isotropic"
         self._technique = "QENS"
         self._resolution_type = "Gaussian"

@@ -177,3 +177,7 @@ class InstrumentDetails(QWidget):
         self._current_instrument = instrument_instance
         self.update_values()
         self.reset_qvector_combobox()
+        if instrument_instance._name_is_fixed:
+            self._widgets["_name"].setEnabled(False)
+        else:
+            self._widgets["_name"].setEnabled(True)

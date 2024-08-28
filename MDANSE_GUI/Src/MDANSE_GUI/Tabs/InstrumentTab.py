@@ -52,7 +52,7 @@ class InstrumentTab(GeneralTab):
             current_path, "..", "Resources", "InstrumentDefinitions.toml"
         )
         try:
-            self._view.load_from_file(builtin_file)
+            self._view.load_from_file(builtin_file, keep_backups=True)
         except Exception as e:
             LOG.error(f"Could not load instruments from {builtin_file}: {e}")
         filename = os.path.join(
