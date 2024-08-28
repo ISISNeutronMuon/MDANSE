@@ -19,6 +19,7 @@ from qtpy.QtCore import Slot, Signal
 from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Tabs.Visualisers.PlotWidget import PlotWidget
+from MDANSE_GUI.Tabs.Visualisers.DataWidget import DataWidget
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
@@ -53,6 +54,21 @@ class PlotHolder(QTabWidget):
         plotting_context = PlottingContext(unit_lookup=self._unit_lookup)
         plotting_context.needs_an_update.connect(self.update_plots)
         plotter = PlotWidget(self)
+        plotter.set_context(plotting_context)
+        tab_id = self.addTab(plotter, tab_name)
+        LOG.info(f"PlotHolder created tab: {tab_id}")
+        self._context.append(plotting_context)
+        self._plotter.append(plotter)
+        self.setCurrentIndex(tab_id)
+        return tab_id
+
+    @Slot(str)
+    def new_text(self, ignored_name: str) -> int:
+        tab_name = f"New text view {self._last_number}"
+        self._last_number += 1
+        plotting_context = PlottingContext(unit_lookup=self._unit_lookup)
+        plotting_context.needs_an_update.connect(self.update_plots)
+        plotter = DataWidget(self)
         plotter.set_context(plotting_context)
         tab_id = self.addTab(plotter, tab_name)
         LOG.info(f"PlotHolder created tab: {tab_id}")
@@ -109,4 +125,7 @@ class PlotHolder(QTabWidget):
         """This will change the line colour, thickness, etc.
         At the moment it doesn't do anything."""
         for plotter in self._plotter:
-            plotter.plot_data(update_only=True)
+            try:
+                plotter.plot_data(update_only=True)
+            except Exception as e:
+                LOG.error(f"Plotting failed: {e}")

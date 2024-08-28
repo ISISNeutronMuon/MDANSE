@@ -114,6 +114,7 @@ class Heatmap(Plotter):
         update_only=False,
         toolbar=None,
     ):
+        self.enable_slider(True)
         target = self.get_figure(figure)
         if target is None:
             return
@@ -131,7 +132,7 @@ class Heatmap(Plotter):
             self._last_axes_units = {}
         self.apply_settings(plotting_context, colours)
         if plotting_context.set_axes() is None:
-            LOG.error("Axis check failed.")
+            LOG.debug("Axis check failed.")
             return
         nplots = 0
         for databundle in plotting_context.datasets().values():

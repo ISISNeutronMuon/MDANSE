@@ -30,6 +30,17 @@ from MDANSE_GUI.TabbedWindow import TabbedWindow
 os.environ["OMP_NUM_THREADS"] = "1"
 
 
+# an additonal section which will pass exception information to the logger
+def catch_exceptions(t, val, tb):
+    LOG.error(f"EXCEPTION:\n{t}\n{val}\n{tb}")
+    old_hook(t, val, tb)
+
+
+old_hook = sys.excepthook
+sys.excepthook = catch_exceptions
+# end of exception handling part.
+
+
 def startGUI(some_args):
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel("INFO")

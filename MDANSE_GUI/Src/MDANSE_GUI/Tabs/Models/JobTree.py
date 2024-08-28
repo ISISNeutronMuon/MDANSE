@@ -21,7 +21,7 @@ from qtpy.QtCore import Qt
 
 
 class JobTree(QStandardItemModel):
-    """RegistryTree creates a tree structure
+    """Creates a tree structure
     of QStandardItem objects, and stores information
     about the names and docstrings of different
     classes contained in the IJob object.

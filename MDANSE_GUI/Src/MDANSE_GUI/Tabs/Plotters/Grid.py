@@ -47,6 +47,7 @@ class Grid(Plotter):
         update_only=False,
         toolbar=None,
     ):
+        self.enable_slider(False)
         target = self.get_figure(figure)
         self.get_mpl_colors()
         if colours is not None:
@@ -57,7 +58,7 @@ class Grid(Plotter):
         if toolbar is not None:
             self._toolbar = toolbar
         if plotting_context.set_axes() is None:
-            LOG.error("Axis check failed.")
+            LOG.debug("Axis check failed.")
             return
         self._axes = []
         self.apply_settings(plotting_context, colours)

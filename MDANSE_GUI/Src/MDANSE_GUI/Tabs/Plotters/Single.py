@@ -106,6 +106,7 @@ class Single(Plotter):
         update_only=False,
         toolbar=None,
     ):
+        self.enable_slider(False)
         target = self.get_figure(figure)
         if target is None:
             return
@@ -121,7 +122,7 @@ class Single(Plotter):
         self.apply_settings(plotting_context, colours)
         self.height_max, self.length_max = 0.0, 0.0
         if plotting_context.set_axes() is None:
-            LOG.error("Axis check failed.")
+            LOG.debug("Axis check failed.")
             return
         if len(plotting_context.datasets()) == 0:
             target.clear()
@@ -187,6 +188,8 @@ class Single(Plotter):
                             LOG.error(f"x_axis={dataset._axes[best_axis]}")
                             LOG.error(f"values={value}")
                             return
+        if len(self._backup_curves) > 1:
+            self.enable_slider(True)
         if update_only:
             axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
             axes.set_ylim((self._backup_limits[2], self._backup_limits[3]))

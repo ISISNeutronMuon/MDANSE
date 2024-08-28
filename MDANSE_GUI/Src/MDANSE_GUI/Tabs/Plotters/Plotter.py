@@ -82,7 +82,7 @@ class Plotter(metaclass=SubclassFactory):
         if colours is not None:
             self._current_colours = colours
         if plotting_context.set_axes() is None:
-            LOG.error("Axis check failed.")
+            LOG.debug("Axis check failed.")
             return
         try:
             matplotlib_style = colours["style"]
@@ -107,6 +107,14 @@ class Plotter(metaclass=SubclassFactory):
             if col_seq is not None:
                 for axes in self._axes:
                     axes.set_prop_cycle("color", col_seq)
+
+    def enable_slider(self, allow_slider: bool = True):
+        if allow_slider:
+            self._slider_reference.setEnabled(True)
+            self._slider_reference.blockSignals(False)
+        else:
+            self._slider_reference.setEnabled(False)
+            self._slider_reference.blockSignals(True)
 
     def handle_slider(self, new_value: List[float]):
         self._slider_values = new_value

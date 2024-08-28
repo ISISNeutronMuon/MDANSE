@@ -199,7 +199,12 @@ class ElasticIncoherentStructureFactor(IJob):
 
         weights = self.configuration["weights"].get_weights()
         self._outputData["eisf_total"][:] = weight(
-            weights, self._outputData, nAtomsPerElement, 1, "eisf_%s"
+            weights,
+            self._outputData,
+            nAtomsPerElement,
+            1,
+            "eisf_%s",
+            update_partials=True,
         )
 
         self._outputData.write(

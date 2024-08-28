@@ -21,6 +21,7 @@ from qtpy.QtGui import QMouseEvent, QDrag, QContextMenuEvent, QStandardItem
 
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
+from MDANSE_GUI.Widgets.DataDialog import DataDialog
 
 
 class PlotDataView(QTreeView):
@@ -32,33 +33,17 @@ class PlotDataView(QTreeView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setHeaderHidden(True)
-        self.setAcceptDrops(True)
-        self.setDragEnabled(True)
-        self.setDragDropMode(QAbstractItemView.DragDropMode.DragDrop)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.click_position = None
         self.clicked.connect(self.on_select_dataset)
+        # self.data_dialog = DataDialog(self)
+        self._data_packet = None
 
     def mousePressEvent(self, e: QMouseEvent) -> None:
         self.click_position = e.position()
         if self.model() is None:
             return None
         return super().mousePressEvent(e)
-
-    def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        if event.buttons() == Qt.MouseButton.LeftButton:
-            # if event.button():
-            new_position = event.position()
-            distance = (self.click_position - new_position).manhattanLength()
-            if distance > QApplication.startDragDistance():
-                drag = QDrag(self)
-                mime_data = QMimeData()
-                text = self.model().data(
-                    self.currentIndex(), Qt.ItemDataRole.DisplayRole
-                )
-                mime_data.setText(text)
-                drag.setMimeData(mime_data)
-                drag.exec()
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
@@ -68,7 +53,15 @@ class PlotDataView(QTreeView):
         model = self.model()
         qitem = model.itemFromIndex(index)
         if qitem.parent() is not None:
-            return
+            model = self.model()
+            item = model.itemFromIndex(index)
+            text = item.text()
+            mda_data_structure = model.inner_object(index)
+            try:
+                packet = text, mda_data_structure._file
+            except AttributeError:
+                packet = text, mda_data_structure.file
+            self._data_packet = packet
         menu = QMenu()
         item = model.itemData(index)
         self.populateMenu(menu, item)
