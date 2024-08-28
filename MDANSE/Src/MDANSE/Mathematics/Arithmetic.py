@@ -37,8 +37,9 @@ def get_weights(props, contents, dim):
         else:
             normFactor += fact
 
-    for k in list(weights.keys()):
-        weights[k] /= np.float64(normFactor)
+    if abs(normFactor) > 0.0:  # if normFactor is 0, all weights are 0 too.
+        for k in list(weights.keys()):
+            weights[k] /= np.float64(normFactor)
 
     return weights, normFactor
 
