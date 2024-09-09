@@ -33,7 +33,7 @@ jobs:
         # env:
         #   CIBW_SOME_OPTION: value
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}_python${{ matrix.python-version }}_wheel
           path: ./MDANSE/dist/*.whl
@@ -58,7 +58,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.os }}_python${{ matrix.python-version }}_wheel
 
@@ -79,7 +79,7 @@ jobs:
         # env:
         #   CIBW_SOME_OPTION: value
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}_python${{ matrix.python-version }}_GUI_wheel
           path: ./MDANSE_GUI/dist/*.whl
