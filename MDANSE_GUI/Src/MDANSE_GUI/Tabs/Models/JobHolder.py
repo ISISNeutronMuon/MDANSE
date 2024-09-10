@@ -16,6 +16,7 @@
 from logging import Handler
 from logging.handlers import QueueListener
 from multiprocessing import Pipe, Queue, Event
+import traceback
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot, Signal, QTimer, QThread, QMutex, Qt
@@ -273,8 +274,12 @@ class JobHolder(QStandardItemModel):
                 pause_event=pause_event,
                 log_queue=log_queue,
             )
-        except:
-            LOG.error(f"Failed to create Subprocess using {job_vars}")
+        except Exception as e:
+            LOG.error(
+                f"Failed to create Subprocess using {job_vars};\n"
+                f"error {e};\n"
+                f"traceback {traceback.format_exc()}"
+            )
             return
 
         handlers = [item_th] + LOG.handlers

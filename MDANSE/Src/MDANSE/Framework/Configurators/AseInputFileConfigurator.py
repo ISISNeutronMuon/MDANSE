@@ -102,6 +102,8 @@ class AseInputFileConfigurator(InputFileConfigurator):
         try:
             val = self["value"]
         except KeyError:
-            LOG.error(f"No VALUE in {self._name}")
-
-        return "Input file: %r\n" % self["value"]
+            result = f"No VALUE in {self._name}"
+            LOG.error(result)
+            return result
+        else:
+            return "Input file: %r\n" % self["value"]

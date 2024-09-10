@@ -122,7 +122,7 @@ class LocalSession(QObject):
             with open(fname, "r") as source:
                 all_items_text = source.readline()
         except:
-            LOG.error(f"Failed to read session settings from {fname}")
+            LOG.warning(f"Failed to read session settings from {fname}")
         else:
             all_items = json_decoder.decode(all_items_text)
             self._paths = all_items["paths"]
