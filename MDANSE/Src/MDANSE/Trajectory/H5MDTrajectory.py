@@ -19,6 +19,7 @@ import os
 import numpy as np
 import h5py
 
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.Units import measure
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
@@ -157,6 +158,32 @@ class H5MDTrajectory:
     def __setstate__(self, state):
         self.__dict__ = state
         self._h5_file = h5py.File(state["_h5_filename"], "r")
+
+    def charges(self, frame):
+        """Return the electrical charge of atoms at a given frame.
+
+        :param frame: the frame
+        :type frame: int
+
+        :return: the coordinates
+        :rtype: ndarray
+        """
+
+        if frame < 0 or frame >= len(self):
+            raise IndexError(f"Invalid frame number: {frame}")
+        try:
+            charge = self._h5_file["/particles/all/charge/value"][frame]
+        except KeyError:
+            LOG.debug(f"No charge information in trajectory {self._h5_filename}")
+            charge = np.zeros(self._chemical_system.number_of_atoms)
+        except:
+            try:
+                charge = self._h5_file["/particles/all/charge"][:]
+            except KeyError:
+                LOG.debug(f"No charge information in trajectory {self._h5_filename}")
+                charge = np.zeros(self._chemical_system.number_of_atoms)
+
+        return charge.astype(np.float64)
 
     def coordinates(self, frame):
         """Return the coordinates at a given frame.

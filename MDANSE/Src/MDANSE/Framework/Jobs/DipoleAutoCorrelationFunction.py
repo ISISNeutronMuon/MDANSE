@@ -120,12 +120,15 @@ class DipoleAutoCorrelationFunction(IJob):
             configuration = self.configuration["trajectory"]["instance"].configuration(
                 frame_index
             )
+            charges = self.configuration["trajectory"]["instance"].charges(frame_index)
             contiguous_configuration = configuration.contiguous_configuration()
             com = molecule.center_of_mass(contiguous_configuration)
 
             for atm in molecule.atom_list:
                 idx = atm.index
                 q = self.configuration["atom_charges"]["charges"][idx]
+                if q is None:
+                    q = charges[idx]
                 dipoles[i] = q * (contiguous_configuration["coordinates"][idx, :] - com)
 
         n_configs = self.configuration["frames"]["n_configs"]

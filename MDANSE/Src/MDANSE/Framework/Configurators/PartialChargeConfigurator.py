@@ -150,7 +150,7 @@ class PartialChargeConfigurator(IConfigurator):
             if str(idx) in value:
                 self["charges"][idx] = value[str(idx)]
             else:
-                self["charges"][idx] = 0.0
+                self["charges"][idx] = None
 
         self.error_status = "OK"
 

@@ -94,6 +94,18 @@ class Trajectory:
     def __len__(self):
         return len(self._trajectory)
 
+    def charges(self, frame):
+        """Return the coordinates at a given frame.
+
+        :param frame: the frame
+        :type frame: int
+
+        :return: the coordinates
+        :rtype: ndarray
+        """
+
+        return self._trajectory.charges(frame)
+
     def coordinates(self, frame):
         """Return the coordinates at a given frame.
 
