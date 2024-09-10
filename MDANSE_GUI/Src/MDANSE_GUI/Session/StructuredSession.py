@@ -278,10 +278,10 @@ class SettingsFile:
         try:
             self._tomldoc = file.read()
         except FileNotFoundError:
-            LOG.error(f"File {self._filename} does not exists.")
+            LOG.warning(f"File {self._filename} does not exists.")
             return False
         except ParseError:
-            LOG.error(f"File {self._filename} could not be parsed.")
+            LOG.warning(f"File {self._filename} could not be parsed.")
             return False
         else:
             for key in self._tomldoc.keys():

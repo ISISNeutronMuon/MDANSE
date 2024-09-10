@@ -119,7 +119,7 @@ class MDADataStructure:
             try:
                 string = string.decode()
             except KeyError:
-                LOG.error(f"Decode failed for {name}: {obj}")
+                LOG.debug(f"Decode failed for {name}: {obj}")
                 meta_dict[name] = str(obj)
             else:
                 try:
