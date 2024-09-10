@@ -267,14 +267,16 @@ class SettingsFile:
             settings_path = PLATFORM.application_directory()
         self._top_name = name
         self._filename = os.path.join(settings_path, name + ".toml")
+        self._tomldoc = None
         self._file = TOMLFile(self._filename)
         self._groups = {}
         self._defaults = {}
         self.load_from_file()
 
     def load_from_file(self) -> bool:
+        file = TOMLFile(self._filename)
         try:
-            tomldoc = self._file.read()
+            self._tomldoc = file.read()
         except FileNotFoundError:
             LOG.error(f"File {self._filename} does not exists.")
             return False
@@ -282,8 +284,8 @@ class SettingsFile:
             LOG.error(f"File {self._filename} could not be parsed.")
             return False
         else:
-            for key in tomldoc.keys():
-                table = tomldoc[key]
+            for key in self._tomldoc.keys():
+                table = self._tomldoc[key]
                 group = self._groups.get(key, SettingsGroup(key))
                 temp_values, temp_comments = {}, {}
                 for inner_key in table.keys():
@@ -322,7 +324,8 @@ class SettingsFile:
         newdoc = tomlkit.document()
         for gr in self._groups.values():
             newdoc[gr._name] = gr.as_toml()
-        self._file.write(newdoc)
+        file = TOMLFile(self._filename)
+        file.write(newdoc)
 
     def overwrite_settings(self, group_name, values, comments):
         group = self.group(group_name)
