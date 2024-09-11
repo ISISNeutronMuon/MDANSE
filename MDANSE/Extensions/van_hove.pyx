@@ -1,4 +1,3 @@
-
 #    This file is part of MDANSE.
 #
 #    MDANSE is free software: you can redistribute it and/or modify
@@ -21,61 +20,40 @@ from numpy cimport ndarray
 
 
 cdef extern from "math.h":
-
     double floor(double x)
     double ceil(double x)
     double sqrt(double x)
 
+
 cdef inline double round(double r):
     return floor(r + 0.5) if (r > 0.0) else ceil(r - 0.5)
 
-def van_hove(ndarray[np.float64_t, ndim=2]  config_t0 not None,
-                       ndarray[np.float64_t, ndim=2]  config_t1 not None,
-                       ndarray[np.float64_t, ndim=2]  cell not None,
-                       ndarray[np.float64_t, ndim=2]  rcell not None,
-                       ndarray[np.float64_t, ndim=1] bins not None,
-                       ndarray[np.float64_t, ndim=2] scaleconfig_t0 not None,
-                       ndarray[np.float64_t, ndim=2] scaleconfig_t1 not None,
-                       float rmin,
-                       float dr):
 
-    # This computes the intra and intermolecular distances histogram.
-    # The algorithm is a Pyrex adaptation of the FORTRAN implementation
-    # made by Miguel Angel Gonzalez (Institut Laue Langevin).
-
+def van_hove(
+    double[:,:] config_t0,
+    double[:,:] config_t1,
+    double[:,:] cell,
+    int[:] indexes,
+    int[:] molindex,
+    int[:] symbolindex,
+    double[:,:,:] intra,
+    double[:,:,:] inter,
+    double[:,:] scaleconfig_t0,
+    double[:,:] scaleconfig_t1,
+    double rmin,
+    double dr
+):
     cdef double x, y, z, sdx, sdy, sdz, rx, ry, rz, r
-
     cdef int i, j, bin, nbins
+    nbins = intra.shape[2]
 
-    nbins = bins.shape[0]
-
-    for i in range(scaleconfig_t0.shape[0]):
-
-        x = config_t0[i,0]
-        y = config_t0[i,1]
-        z = config_t0[i,2]
-
-        scaleconfig_t0[i,0] = x*rcell[0,0] + y*rcell[0,1] + z*rcell[0,2]
-        scaleconfig_t0[i,1] = x*rcell[1,0] + y*rcell[1,1] + z*rcell[1,2]
-        scaleconfig_t0[i,2] = x*rcell[2,0] + y*rcell[2,1] + z*rcell[2,2]
-
-    for i in range(scaleconfig_t0.shape[0]):
-
-        x = config_t1[i,0]
-        y = config_t1[i,1]
-        z = config_t1[i,2]
-
-        scaleconfig_t1[i,0] = x*rcell[0,0] + y*rcell[0,1] + z*rcell[0,2]
-        scaleconfig_t1[i,1] = x*rcell[1,0] + y*rcell[1,1] + z*rcell[1,2]
-        scaleconfig_t1[i,2] = x*rcell[2,0] + y*rcell[2,1] + z*rcell[2,2]
-
-    for 0 <= i < config_t0.shape[0] - 1:
+    for i in range(config_t0.shape[0] - 1):
 
         sx = scaleconfig_t0[i,0]
         sy = scaleconfig_t0[i,1]
         sz = scaleconfig_t0[i,2]
 
-        for i + 1 <= j < config_t0.shape[0]:
+        for j in range(i + 1, config_t0.shape[0]):
 
             sdx = scaleconfig_t1[j,0] - sx
             sdy = scaleconfig_t1[j,1] - sy
@@ -96,4 +74,7 @@ def van_hove(ndarray[np.float64_t, ndim=2]  config_t0 not None,
             if ( (bin < 0) or (bin >= nbins)):
                 continue
 
-            bins[bin] += 1.0
+            if molindex[i] == molindex[j]:
+                intra[symbolindex[i],symbolindex[j],bin] += 1.0
+            else:
+                inter[symbolindex[i],symbolindex[j],bin] += 1.0
