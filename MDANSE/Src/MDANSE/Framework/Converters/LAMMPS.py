@@ -33,6 +33,9 @@ from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.MLogging import LOG
 
 
+ELECTRON_CHARGE = 1.6021765e-19
+
+
 class LAMMPSTrajectoryFileError(Error):
     pass
 
@@ -61,48 +64,56 @@ class LAMMPSReader:
         self._length_unit = ""
         self._velocity_unit = ""
         self._mass_unit = ""
+        self._charge_conversion_factor = 1.0
         if lammps_units == "real":
             self._energy_unit = "kcal_per_mole"
             self._time_unit = "fs"
             self._length_unit = "ang"
             self._velocity_unit = "ang/fs"
             self._mass_unit = "uma"
+            self._charge_conversion_factor = 1.0
         elif lammps_units == "metal":
             self._energy_unit = "eV"
             self._time_unit = "ps"
             self._length_unit = "ang"
             self._velocity_unit = "ang/ps"
             self._mass_unit = "uma"
+            self._charge_conversion_factor = 1.0
         elif lammps_units == "si":
             self._energy_unit = "J"
             self._time_unit = "s"
             self._length_unit = "m"
             self._velocity_unit = "m/s"
             self._mass_unit = "kg"
+            self._charge_conversion_factor = 1.0 / ELECTRON_CHARGE
         elif lammps_units == "cgs":
             self._energy_unit = "erg"  # this will fail
             self._time_unit = "s"
             self._length_unit = "cm"
             self._velocity_unit = "cm/s"
             self._mass_unit = "g"
+            self._charge_conversion_factor = 1.0 / 4.8032044e-10
         elif lammps_units == "electron":
             self._energy_unit = "Ha"
             self._time_unit = "fs"
             self._length_unit = "Bohr"
             self._velocity_unit = "ang/fs"
             self._mass_unit = "uma"
+            self._charge_conversion_factor = 1.0
         elif lammps_units == "micro":
             self._energy_unit = "pg*m/s"
             self._time_unit = "us"
             self._length_unit = "um"
             self._velocity_unit = "m/s"
             self._mass_unit = "pg"
+            self._charge_conversion_factor = 1.0 / (ELECTRON_CHARGE * 1e12)
         elif lammps_units == "nano":
             self._energy_unit = "ag*m/s"
             self._time_unit = "ns"
             self._length_unit = "nm"
             self._velocity_unit = "m/s"
             self._mass_unit = "ag"
+            self._charge_conversion_factor = 1.0
 
 
 class LAMMPScustom(LAMMPSReader):
@@ -746,7 +757,9 @@ class LAMMPS(Converter):
             self.numberOfSteps,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
+            initial_charges=self._lammpsConfig["charges"],
         )
+        print(f"init_charges: {self._lammpsConfig['charges']}")
 
         self._reader._nameToIndex = dict(
             [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]

@@ -124,6 +124,7 @@ class ASE(Converter):
             self.numberOfSteps,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
+            initial_charges=self._initial_charges,
         )
 
         self._nameToIndex = dict(
@@ -179,6 +180,12 @@ class ASE(Converter):
             time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
         )
 
+        try:
+            charges = frame.get_charges()
+            self._trajectory.write_charges(charges, index)
+        except RuntimeError:
+            pass
+
         return index, None
 
     def combine(self, index, x):
@@ -227,6 +234,12 @@ class ASE(Converter):
         if self._isPeriodic is None:
             self._isPeriodic = np.all(first_frame.get_pbc())
         LOG.info(f"PBC in first frame = {first_frame.get_pbc()}")
+
+        try:
+            self._initial_charges = first_frame.get_charges()
+        except RuntimeError:
+            LOG.warning("ASE converter could not read partial charges from file.")
+            self._initial_charges = None
 
         g = Graph()
 
