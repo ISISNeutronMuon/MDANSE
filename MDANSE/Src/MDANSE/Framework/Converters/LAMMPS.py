@@ -161,6 +161,10 @@ class LAMMPScustom(LAMMPSReader):
 
                 self._id = keywords.index("id")
                 self._type = keywords.index("type")
+                try:
+                    self._charge = keywords.index("q")
+                except ValueError:
+                    self._charge = None
 
                 # Field name is <x,y,z> or cd ..<x,y,z>u if real coordinates and <x,y,z>s if fractional ones
                 self._fractionalCoordinates = False
@@ -322,6 +326,11 @@ class LAMMPScustom(LAMMPSReader):
             (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
         )
 
+        if self._charge is not None:
+            charges = np.empty(
+                self._trajectory.chemical_system.number_of_atoms, dtype=np.float64
+            )
+
         for i, _ in enumerate(
             range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])
         ):
@@ -330,6 +339,8 @@ class LAMMPScustom(LAMMPSReader):
             coords[idx, :] = np.array(
                 [temp[self._x], temp[self._y], temp[self._z]], dtype=np.float64
             )
+            if self._charge is not None:
+                charges[idx] = float(temp[self._charge])
 
         if self._fractionalCoordinates:
             conf = PeriodicBoxConfiguration(
@@ -352,6 +363,10 @@ class LAMMPScustom(LAMMPSReader):
         self._trajectory.dump_configuration(
             time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
         )
+        if self._charge is not None:
+            self._trajectory.write_charges(
+                charges * self._charge_conversion_factor, index
+            )
 
         self._start += self._last
 
@@ -526,6 +541,8 @@ class LAMMPSh5md(LAMMPSReader):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._charges_fixed = None
+        self._charges_variable = None
 
     def get_time_steps(self, filename: str) -> int:
         number_of_steps = 0
@@ -554,6 +571,10 @@ class LAMMPSh5md(LAMMPSReader):
         full_cell = np.array(
             [[cell_edges[0], 0, 0], [0, cell_edges[1], 0], [0, 0, cell_edges[2]]]
         )
+        try:
+            self._charges_fixed = self._file["/particles/all/charge"][:]
+        except:
+            pass
 
         full_cell *= measure(1.0, self._length_unit).toval("nm")
 
@@ -643,6 +664,15 @@ class LAMMPSh5md(LAMMPSReader):
         self._trajectory.dump_configuration(
             time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
         )
+        if self._charges_fixed is None:
+            try:
+                charge = self._file["/particles/all/charge/value"][index]
+            except:
+                pass
+            else:
+                self._trajectory.write_charges(
+                    charge * self._charge_conversion_factor, index
+                )
 
         return index, 0
 
@@ -750,6 +780,17 @@ class LAMMPS(Converter):
                 self.configuration["trajectory_file"]["value"]
             )
 
+        charges_single_cell = (
+            np.array(self._lammpsConfig["charges"])
+            * self._reader._charge_conversion_factor
+        )
+        if len(charges_single_cell) < self._chemicalSystem.number_of_atoms:
+            charges = list(charges_single_cell) * int(
+                self._chemicalSystem.number_of_atoms // len(charges_single_cell)
+            )
+        else:
+            charges = list(charges_single_cell)
+
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
@@ -757,9 +798,8 @@ class LAMMPS(Converter):
             self.numberOfSteps,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
-            initial_charges=self._lammpsConfig["charges"],
+            initial_charges=charges,
         )
-        print(f"init_charges: {self._lammpsConfig['charges']}")
 
         self._reader._nameToIndex = dict(
             [(at.name, at.index) for at in self._trajectory.chemical_system.atom_list]
