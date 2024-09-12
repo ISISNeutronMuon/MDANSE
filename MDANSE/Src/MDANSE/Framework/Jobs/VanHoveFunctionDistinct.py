@@ -176,7 +176,7 @@ class VanHoveFunctionDistinct(IJob):
             (self.nElements, self.nElements, self.n_min_points, self.numberOfSteps)
         )
 
-    def run_step(self, time) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
+    def run_step(self, time: int) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
         """Calculates the distance histogram between the configurations
         at the inputted time difference. The distance histograms are
         then used to calculate the distinct part of the Van Hove function.
@@ -213,8 +213,6 @@ class VanHoveFunctionDistinct(IJob):
             intra = np.zeros_like(bins_inter)
 
             van_hove.van_hove_distinct(
-                coords_t0,
-                coords_t1,
                 direct_cell,
                 self.indexToMolecule,
                 self.indexToSymbol,

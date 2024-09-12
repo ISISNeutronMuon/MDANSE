@@ -30,8 +30,6 @@ cdef inline double round(double r):
 
 
 def van_hove_distinct(
-    double[:,:] config_t0,
-    double[:,:] config_t1,
     double[:,:] cell,
     int[:] molindex,
     int[:] symbolindex,
@@ -55,10 +53,6 @@ def van_hove_distinct(
 
     Parameters
     ----------
-    config_t0 : np.ndarray
-        An array of the coordinates of the configuration at time t0.
-    config_t1 : np.ndarray
-        An array of the coordinates of the configuration at time t1.
     cell : np.ndarray
         The transpose of the direct matrix of the configuration at
         time t1.
@@ -84,17 +78,17 @@ def van_hove_distinct(
         The distances between histogram bins.
     """
 
-    cdef double x, y, z, sdx, sdy, sdz, rx, ry, rz, r
+    cdef double sdx, sdy, sdz, rx, ry, rz, r
     cdef int i, j, bin, nbins
     nbins = intra.shape[2]
 
-    for i in range(config_t0.shape[0] - 1):
+    for i in range(scaleconfig_t0.shape[0] - 1):
 
         sx = scaleconfig_t0[i,0]
         sy = scaleconfig_t0[i,1]
         sz = scaleconfig_t0[i,2]
 
-        for j in range(i + 1, config_t0.shape[0]):
+        for j in range(i + 1, scaleconfig_t0.shape[0]):
 
             sdx = scaleconfig_t1[j,0] - sx
             sdy = scaleconfig_t1[j,1] - sy
