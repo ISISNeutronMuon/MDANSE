@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from PyQt6.QtWidgets import QAbstractSlider
+
 from qtpy.QtCore import Slot, Signal, QObject, QTimer
 from qtpy.QtWidgets import QSlider
 
