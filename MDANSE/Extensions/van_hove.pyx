@@ -29,11 +29,10 @@ cdef inline double round(double r):
     return floor(r + 0.5) if (r > 0.0) else ceil(r - 0.5)
 
 
-def van_hove(
+def van_hove_distinct(
     double[:,:] config_t0,
     double[:,:] config_t1,
     double[:,:] cell,
-    int[:] indexes,
     int[:] molindex,
     int[:] symbolindex,
     double[:,:,:] intra,
@@ -43,6 +42,48 @@ def van_hove(
     double rmin,
     double dr
 ):
+    """Calculates the distance histogram between the configurations at
+    times t0 and t1. Distances are calculated using the minimum image
+    convention which are all worked out using the fractional coordinates
+    with the unit cell of the configuration at time t1. The function can
+    be used to calculate the distinct part of the Van Hove function.
+
+    This function was an generalization of a Pyrex adaptation of a
+    FORTRAN implementation made by Miguel Angel Gonzalez (Institut Laue
+    Langevin) for the calculation of intra and intermolecular distance
+    histograms.
+
+    Parameters
+    ----------
+    config_t0 : np.ndarray
+        An array of the coordinates of the configuration at time t0.
+    config_t1 : np.ndarray
+        An array of the coordinates of the configuration at time t1.
+    cell : np.ndarray
+        The transpose of the direct matrix of the configuration at
+        time t1.
+    molindex : np.ndarray
+        An array which maps atom indexes to molecule indexes.
+    symbolindex : np.ndarray
+        An array which maps atom indexes to symbol indexes.
+    intra : np.ndarray
+        An output array to save the distance histogram results of
+        intramolecular atom differences.
+    inter : np.ndarray
+        An output array to save the distance histogram results of
+        intermolecular atom differences.
+    scaleconfig_t0 : np.ndarray
+        The coordinates of the configuration at t0 in fractional
+        coordinate in the unit cell of the configuration at time t1.
+    scaleconfig_t1 : np.ndarray
+        The coordinates of the configuration at t1 in fractional
+        coordinate in the unit cell of the configuration at time t1.
+    rmin : float
+        The minimum distance of the histogram.
+    dr : float
+        The distances between histogram bins.
+    """
+
     cdef double x, y, z, sdx, sdy, sdz, rx, ry, rz, r
     cdef int i, j, bin, nbins
     nbins = intra.shape[2]
@@ -71,7 +112,7 @@ def van_hove(
 
             bin = <int>((r-rmin)/dr)
 
-            if ( (bin < 0) or (bin >= nbins)):
+            if ((bin < 0) or (bin >= nbins)):
                 continue
 
             if molindex[i] == molindex[j]:

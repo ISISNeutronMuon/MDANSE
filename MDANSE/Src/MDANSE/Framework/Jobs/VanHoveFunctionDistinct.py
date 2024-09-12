@@ -158,15 +158,16 @@ class VanHoveFunctionDistinct(IJob):
         # unlike the PDF, g(r, t) may not be zero around r=0 we will use
         # the actual shell volume instead.
         self.shell_volumes = []
-        for i in range( self.n_min_points):
+        for i in range(self.n_min_points):
             self.shell_volumes.append(
-                (4 / 3) * np.pi * (
-                        (self.configuration["r_values"]["value"][i] +
-                         self.configuration["r_values"]["step"]) ** 3
-                        - self.configuration["r_values"]["value"][i] ** 3
+                (
+                    self.configuration["r_values"]["value"][i]
+                    + self.configuration["r_values"]["step"]
                 )
+                ** 3
+                - self.configuration["r_values"]["value"][i] ** 3
             )
-        self.shell_volumes = np.array(self.shell_volumes)
+        self.shell_volumes = (4 / 3) * np.pi * np.array(self.shell_volumes)
 
         self.h_intra = np.zeros(
             (self.nElements, self.nElements, self.n_min_points, self.numberOfSteps)
@@ -175,17 +176,32 @@ class VanHoveFunctionDistinct(IJob):
             (self.nElements, self.nElements, self.n_min_points, self.numberOfSteps)
         )
 
-    def run_step(self, index):
+    def run_step(self, time) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
+        """Calculates the distance histogram between the configurations
+        at the inputted time difference. The distance histograms are
+        then used to calculate the distinct part of the Van Hove function.
+
+        Parameters
+        ----------
+        time : int
+            The time difference.
+        """
         bins_intra = np.zeros((self.nElements, self.nElements, self.n_min_points))
         bins_inter = np.zeros((self.nElements, self.nElements, self.n_min_points))
 
+        # average the distance histograms at the inputted time
+        # difference over a number of configuration
         for i in range(self.configuration["frames"]["n_configs"]):
             frame_index_t0 = self.configuration["frames"]["value"][i]
-            conf_t0 = self.configuration["trajectory"]["instance"].configuration(frame_index_t0)
+            conf_t0 = self.configuration["trajectory"]["instance"].configuration(
+                frame_index_t0
+            )
             coords_t0 = conf_t0["coordinates"]
 
-            frame_index_t1 = self.configuration["frames"]["value"][i + index]
-            conf_t1 = self.configuration["trajectory"]["instance"].configuration(frame_index_t1)
+            frame_index_t1 = self.configuration["frames"]["value"][i + time]
+            conf_t1 = self.configuration["trajectory"]["instance"].configuration(
+                frame_index_t1
+            )
             coords_t1 = conf_t1["coordinates"]
             direct_cell = conf_t1.unit_cell.transposed_direct
             inverse_cell = conf_t1.unit_cell.transposed_inverse
@@ -196,11 +212,10 @@ class VanHoveFunctionDistinct(IJob):
             inter = np.zeros_like(bins_inter)
             intra = np.zeros_like(bins_inter)
 
-            van_hove.van_hove(
+            van_hove.van_hove_distinct(
                 coords_t0,
                 coords_t1,
                 direct_cell,
-                self._indexes,
                 self.indexToMolecule,
                 self.indexToSymbol,
                 intra,
@@ -211,16 +226,33 @@ class VanHoveFunctionDistinct(IJob):
                 self.configuration["r_values"]["step"],
             )
 
+            # The Van Hove function will be divided by the density,
+            # we multiply my the volume here and divide by the number
+            # of atoms in finalize.
             bins_intra += conf_t1.unit_cell.volume * intra
             bins_inter += conf_t1.unit_cell.volume * inter
 
-        return index, (bins_intra, bins_inter)
+        return time, (bins_intra, bins_inter)
 
-    def combine(self, index, x):
-        self.h_intra[..., index] += x[0]
-        self.h_inter[..., index] += x[1]
+    def combine(self, time: int, x: tuple[np.ndarray, np.ndarray]):
+        """Add the results into the histograms for the inputted time
+        difference.
+
+        Parameters
+        ----------
+        time : int
+            The time difference.
+        x : tuple[np.ndarray, np.ndarray]
+            A tuple containing a histogram of the distances between
+            configurations at the inputted time difference.
+        """
+        self.h_intra[..., time] += x[0]
+        self.h_inter[..., time] += x[1]
 
     def finalize(self):
+        """Using the distance histograms calculate, normalize and save the
+        distinct part of the Van Hove function.
+        """
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
 
         for pair in self._elementsPairs:
@@ -243,9 +275,12 @@ class VanHoveFunctionDistinct(IJob):
             van_hove_total = van_hove_intra + van_hove_inter
 
             for i, van_hove in zip(
-                ["intra", "inter", "total"], [van_hove_intra, van_hove_inter, van_hove_total]
+                ["intra", "inter", "total"],
+                [van_hove_intra, van_hove_inter, van_hove_total],
             ):
-                self._outputData["g(r,t)_%s_%s%s" % (i, pair[0], pair[1])][...] = van_hove
+                self._outputData["g(r,t)_%s_%s%s" % (i, pair[0], pair[1])][
+                    ...
+                ] = van_hove
 
         weights = self.configuration["weights"].get_weights()
         for i in ["_intra", "_inter", ""]:
