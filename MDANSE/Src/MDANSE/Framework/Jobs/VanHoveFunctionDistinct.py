@@ -69,6 +69,7 @@ class VanHoveFunctionDistinct(IJob):
         super().initialize()
 
         self.numberOfSteps = self.configuration["frames"]["n_frames"]
+        self.n_configs = self.configuration["frames"]["n_configs"]
 
         self._nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         self.selectedElements = self.configuration["atom_selection"]["unique_names"]
@@ -191,7 +192,7 @@ class VanHoveFunctionDistinct(IJob):
 
         # average the distance histograms at the inputted time
         # difference over a number of configuration
-        for i in range(self.configuration["frames"]["n_configs"]):
+        for i in range(self.n_configs):
             frame_index_t0 = self.configuration["frames"]["value"][i]
             conf_t0 = self.configuration["trajectory"]["instance"].configuration(
                 frame_index_t0
@@ -267,7 +268,7 @@ class VanHoveFunctionDistinct(IJob):
                 self.h_intra[idi, idj] += self.h_intra[idj, idi]
                 self.h_inter[idi, idj] += self.h_inter[idj, idi]
 
-            fact = nij * self.numberOfSteps * self.shell_volumes
+            fact = nij * self.n_configs * self.shell_volumes
             van_hove_intra = self.h_intra[idi, idj, ...] / fact[:, np.newaxis]
             van_hove_inter = self.h_inter[idi, idj, ...] / fact[:, np.newaxis]
             van_hove_total = van_hove_intra + van_hove_inter
