@@ -39,6 +39,7 @@ ALL_JOBS = [
     "StructureFactorFromScatteringFunction",
     "Temperature",
     "UnfoldedTrajectory",
+    "VanHoveFunctionDistinct",
     "VelocityAutoCorrelationFunction",
     "Voronoi",
     "Converter",
