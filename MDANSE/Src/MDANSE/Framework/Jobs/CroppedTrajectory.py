@@ -70,6 +70,7 @@ class CroppedTrajectory(IJob):
             for idx in idxs
         ]
         self._selectedAtoms = [atoms[ind] for ind in indexes]
+        self._selected_indices = indexes
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
@@ -79,6 +80,10 @@ class CroppedTrajectory(IJob):
             self._selectedAtoms,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
+            initial_charges=[
+                self.configuration["trajectory"]["instance"].charges(0)[ind]
+                for ind in indexes
+            ],
         )
 
     def run_step(self, index):
@@ -103,7 +108,13 @@ class CroppedTrajectory(IJob):
 
         time = self.configuration["frames"]["time"][index]
 
+        charge = self.configuration["trajectory"]["instance"].charges(index)[
+            self._selected_indices
+        ]
+
         self._output_trajectory.dump_configuration(time)
+
+        self._output_trajectory.write_charges(charge, index)
 
         return index, None
 

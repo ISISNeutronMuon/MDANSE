@@ -71,6 +71,7 @@ class UnfoldedTrajectory(IJob):
             for idx in idxs
         ]
         self._selectedAtoms = [atoms[ind] for ind in indexes]
+        self._selection_indices = indexes
 
         # The output trajectory is opened for writing.
         self._outputTraj = TrajectoryWriter(
@@ -80,6 +81,10 @@ class UnfoldedTrajectory(IJob):
             self._selectedAtoms,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
+            initial_charges=[
+                self.configuration["trajectory"]["instance"].charges(0)[ind]
+                for ind in indexes
+            ],
         )
 
     def run_step(self, index):
@@ -107,8 +112,13 @@ class UnfoldedTrajectory(IJob):
         # The time corresponding to the running index.
         time = self.configuration["frames"]["time"][index]
 
+        charge = self.configuration["trajectory"]["instance"].charges(index)[
+            self._selection_indices
+        ]
         # Write the step.
         self._outputTraj.dump_configuration(time)
+
+        self._outputTraj.write_charges(charge, index)
 
         return index, None
 
