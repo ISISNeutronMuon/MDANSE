@@ -413,7 +413,7 @@ class TrajectoryWriter:
         if variable_charge_dset is None:
             charge_is_constant = True
             new_charge = self._initial_charges
-        elif np.std(variable_charge_dset, axis=0) < 1e-15:
+        elif np.allclose(np.std(variable_charge_dset, axis=0), 0.0):
             charge_is_constant = True
             new_charge = np.mean(variable_charge_dset, axis=0)
         if charge_is_constant:

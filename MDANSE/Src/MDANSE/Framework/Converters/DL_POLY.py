@@ -172,12 +172,16 @@ class HistoryFile(dict):
         data = np.array(self["instance"].read(self._configSize).split())
 
         mask = np.ones((len(data),), dtype=bool)
-        mask[0 :: self._maskStep] = False
-        mask[1 :: self._maskStep] = False
-        mask[2 :: self._maskStep] = False
-        mask[3 :: self._maskStep] = False
+        mask[0 :: self._maskStep] = False  # atom label
+        mask[1 :: self._maskStep] = False  # atom index
+        mask[2 :: self._maskStep] = False  # atom mass
+        mask[3 :: self._maskStep] = False  # charge on atom
         if (self["version"] == "3") or (self["version"] == "4"):
             mask[4 :: self._maskStep] = False
+
+        charge_mask = np.zeros((len(data),), dtype=bool)
+        charge_mask[3 :: self._maskStep] = True
+        charge = np.array(np.compress(charge_mask, data), dtype=np.float64)
 
         config = np.array(np.compress(mask, data), dtype=np.float64)
 
@@ -194,7 +198,7 @@ class HistoryFile(dict):
             config[:, 3:6] *= measure(1.0, "ang/ps").toval("nm/ps")
             config[:, 6:9] *= measure(1.0, "uma ang / ps2").toval("uma nm / ps2")
 
-        return timeStep, cell, config
+        return timeStep, cell, config, charge
 
     def close(self):
         self["instance"].close()
@@ -299,6 +303,7 @@ class DL_POLY(Converter):
             self.numberOfSteps,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
+            initial_charges=self._fieldFile.get_atom_charges(),
         )
 
         self._velocities = None
@@ -315,7 +320,7 @@ class DL_POLY(Converter):
         """
 
         # The x, y and z values of the current frame.
-        time, unitCell, config = self._historyFile.read_step(index)
+        time, unitCell, config, charge = self._historyFile.read_step(index)
 
         unitCell = UnitCell(unitCell)
 
@@ -347,6 +352,8 @@ class DL_POLY(Converter):
                 "gradients": "uma nm/ps2",
             },
         )
+
+        self._trajectory.write_charges(charge, index)
 
         return index, None
 
