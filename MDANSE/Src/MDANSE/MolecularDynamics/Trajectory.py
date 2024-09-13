@@ -399,12 +399,21 @@ class TrajectoryWriter:
         """
         variable_charge_dset = self._h5_file.get("/configuration/charges", None)
         if variable_charge_dset is None:
-            variable_charge_dset = self._h5_file.create_dataset(
-                "/configuration/charges",
-                shape=(self._n_steps, self._n_atoms),
-                chunks=(1, self._n_atoms),
-                dtype=np.float64,
-            )
+            if self._compression in TrajectoryWriter.allowed_compression:
+                variable_charge_dset = self._h5_file.create_dataset(
+                    "/configuration/charges",
+                    shape=(self._n_steps, self._n_atoms),
+                    chunks=(1, self._n_atoms),
+                    dtype=self._dtype,
+                    compression=self._compression,
+                )
+            else:
+                variable_charge_dset = self._h5_file.create_dataset(
+                    "/configuration/charges",
+                    shape=(self._n_steps, self._n_atoms),
+                    chunks=(1, self._n_atoms),
+                    dtype=self._dtype,
+                )
         variable_charge_dset[index] = charges
 
     def validate_charges(self):
@@ -420,7 +429,7 @@ class TrajectoryWriter:
             constant_charge_dset = self._h5_file.create_dataset(
                 "/charge",
                 shape=(self._n_atoms,),
-                dtype=np.float64,
+                dtype=self._dtype,
             )
             constant_charge_dset[:] = new_charge
             if variable_charge_dset is not None:

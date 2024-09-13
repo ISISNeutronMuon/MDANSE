@@ -183,6 +183,8 @@ class MdanseTrajectory:
 
         variables = {}
         for k, v in self._h5_file["configuration"].items():
+            if k == "charges":
+                continue
             variables[k] = v[frame, :, :].astype(np.float64)
 
         coordinates = variables.pop("coordinates")
