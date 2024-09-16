@@ -14,7 +14,15 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QDoubleSpinBox, QComboBox, QItemDelegate, QColorDialog
+from qtpy.QtWidgets import (
+    QDoubleSpinBox,
+    QComboBox,
+    QItemDelegate,
+    QColorDialog,
+    QApplication,
+    QStyle,
+    QStyleOptionProgressBar,
+)
 from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtGui import QColor
 
@@ -99,3 +107,23 @@ class RadiusSpinBox(QItemDelegate):
     @Slot()
     def valueChanged(self):
         self.commitData.emit(self.sender())
+
+
+class ProgressDelegate(QItemDelegate):
+
+    progress_role = Qt.UserRole + 1000
+
+    def paint(self, painter, option, index):
+        progress = index.data(self.progress_role)
+        try:
+            int(progress)
+        except:
+            progress = 0
+        opt = QStyleOptionProgressBar()
+        opt.rect = option.rect
+        opt.minimum = 0
+        opt.maximum = 100
+        opt.progress = progress
+        opt.text = "{}%".format(progress)
+        opt.textVisible = True
+        QApplication.style().drawControl(QStyle.CE_ProgressBar, opt, painter)

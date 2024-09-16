@@ -22,6 +22,7 @@ from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
+from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 
 
 class RunTable(QTableView):
@@ -33,6 +34,8 @@ class RunTable(QTableView):
         super().__init__(*args, **kwargs)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
+        self._progbar = ProgressDelegate()
+        self.setItemDelegateForColumn(1, self._progbar)
         vh = self.verticalHeader()
         vh.setVisible(False)
 

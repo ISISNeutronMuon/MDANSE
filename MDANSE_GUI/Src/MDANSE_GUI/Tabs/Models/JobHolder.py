@@ -33,6 +33,7 @@ from MDANSE_GUI.Subprocess.JobState import (
     Aborted,
 )
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
+from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 
 
 class JobThread(QThread):
@@ -125,6 +126,7 @@ class JobEntry(Handler, QObject):
             item.setData(entry_number)
         self._prog_item.setData(0, role=Qt.ItemDataRole.UserRole)
         self._prog_item.setData("progress", role=Qt.ItemDataRole.DisplayRole)
+        self._prog_item.setData(0, role=ProgressDelegate.progress_role)
         self.records = []
 
     def text_summary(self) -> str:
@@ -149,6 +151,9 @@ class JobEntry(Handler, QObject):
     def update_fields(self):
         self._prog_item.setText(f"{self.percent_complete} percent complete")
         self._prog_item.setData(self.percent_complete, role=Qt.ItemDataRole.UserRole)
+        self._prog_item.setData(
+            int(self.percent_complete), role=ProgressDelegate.progress_role
+        )
         self._stat_item.setText(self._current_state._label)
 
     @Slot(bool)
