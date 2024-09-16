@@ -24,6 +24,7 @@ import numpy as np
 from matplotlib.markers import MarkerStyle
 from matplotlib.lines import lineStyles
 from matplotlib import rcParams
+from matplotlib.colors import to_hex as mpl_to_hex
 import matplotlib.pyplot as mpl
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem, QColor
@@ -51,7 +52,7 @@ def get_mpl_lines():
 def get_mpl_colours():
     cycler = rcParams["axes.prop_cycle"]
     colours = cycler.by_key()["color"]
-    return colours
+    return [mpl_to_hex(col) for col in colours]
 
 
 class SingleDataset:
@@ -251,13 +252,17 @@ class PlottingContext(QStandardItemModel):
                 current_colour
                 != self._last_colour_list[row % len(self._last_colour_list)]
             ):
+                LOG.debug(
+                    f"colours not equal: {current_colour} vs {self._last_colour_list[row % len(self._last_colour_list)]}"
+                )
                 self._last_colour += 1
             else:
                 next_colour = self.next_colour()
                 self.item(row, 5).setText(str(next_colour))
                 self.item(row, 5).setData(
-                    str(next_colour), role=Qt.ItemDataRole.BackgroundRole
+                    QColor(str(next_colour)), role=Qt.ItemDataRole.BackgroundRole
                 )
+        self._last_colour_list = list(self._colour_list)
 
     @Slot(object)
     def accept_external_data(self, other: "PlottingContext"):
