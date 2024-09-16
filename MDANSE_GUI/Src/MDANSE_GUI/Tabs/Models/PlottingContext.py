@@ -26,7 +26,7 @@ from matplotlib.lines import lineStyles
 from matplotlib import rcParams
 import matplotlib.pyplot as mpl
 from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
-from qtpy.QtGui import QStandardItemModel, QStandardItem
+from qtpy.QtGui import QStandardItemModel, QStandardItem, QColor
 
 from MDANSE.MLogging import LOG
 
@@ -253,7 +253,11 @@ class PlottingContext(QStandardItemModel):
             ):
                 self._last_colour += 1
             else:
-                self.item(row, 5).setText(str(self.next_colour()))
+                next_colour = self.next_colour()
+                self.item(row, 5).setText(str(next_colour))
+                self.item(row, 5).setData(
+                    str(next_colour), role=Qt.ItemDataRole.BackgroundRole
+                )
 
     @Slot(object)
     def accept_external_data(self, other: "PlottingContext"):
@@ -319,6 +323,8 @@ class PlottingContext(QStandardItemModel):
         temp.setCheckable(True)
         temp.setCheckState(Qt.CheckState.Checked)
         self.itemChanged.connect(self.needs_an_update)
+        temp = items[5]
+        temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
         # test for possible nested items
         best_axis = new_dataset.longest_axis()
         curves = new_dataset.curves_vs_axis(best_axis[0])

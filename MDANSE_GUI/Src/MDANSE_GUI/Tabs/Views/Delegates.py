@@ -14,10 +14,14 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+from PyQt6.QtCore import QModelIndex
+from PyQt6.QtGui import QPainter
+from PyQt6.QtWidgets import QStyleOptionViewItem
 from qtpy.QtWidgets import (
     QDoubleSpinBox,
     QComboBox,
     QItemDelegate,
+    QStyledItemDelegate,
     QColorDialog,
     QApplication,
     QStyle,
@@ -29,7 +33,7 @@ from qtpy.QtGui import QColor
 from MDANSE_GUI.Tabs.Models.PlottingContext import get_mpl_lines, get_mpl_markers
 
 
-class ColourPicker(QItemDelegate):
+class ColourPicker(QStyledItemDelegate):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -48,6 +52,7 @@ class ColourPicker(QItemDelegate):
             color = editor.currentColor()
             colour_string = color.toRgb()
             model.setData(index, colour_string)
+            model.setData(index, color, role=Qt.ItemDataRole.BackgroundRole)
 
 
 class MplStyleCombo(QItemDelegate):
