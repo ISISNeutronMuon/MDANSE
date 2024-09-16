@@ -25,6 +25,18 @@ from MDANSE.Mathematics.Arithmetic import weight
 
 
 class VanHoveFunctionDistinct(IJob):
+    """The van Hove function is related to the intermediate scattering
+    function via a Fourier transform and the dynamic structure factor
+    via a double Fourier transform. The van Hove function describes the
+    probability of finding a particle (j) at a distance r at time t from
+    a particle (i) at a time t_0. The van Hove function can be split
+    into self and distinct parts. The self part includes only the
+    contributions from only the same particles (i=j) while the distinct
+    part includes only the contributions between different particles
+    (i≠j). This job calculates a distinct part of the van Hove function,
+    spherically averaged and normalised so that G(r,t)=1 as r→∞ or t→∞
+    for liquid or gaseous systems and G(r,0)=PDF(r).
+    """
 
     label = "Van Hove Function Distinct"
 
@@ -32,7 +44,7 @@ class VanHoveFunctionDistinct(IJob):
 
     category = (
         "Analysis",
-        "Scattering",
+        "Dynamics",
     )
 
     settings = collections.OrderedDict()
