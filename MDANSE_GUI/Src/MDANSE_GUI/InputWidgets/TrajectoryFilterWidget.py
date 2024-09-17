@@ -98,7 +98,7 @@ class FilterDesigner(QDialog):
 
             setting_layout.addWidget(label)
 
-            setting_widget = self.setting_to_widget(updater=self._configurator.update_settings, val_name=key, val_group=value, setting=default)
+            setting_widget = self.setting_to_widget(updater=self._configurator.add_setting, val_name=key, val_group=value, setting=default)
 
             self.setting_connector(setting_widget, value=default)
 

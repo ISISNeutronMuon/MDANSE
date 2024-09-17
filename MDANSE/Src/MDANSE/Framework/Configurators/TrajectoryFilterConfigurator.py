@@ -50,7 +50,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
             The selection setting in a json readable format.
         """
 
-    def update_settings(self, key: str, value: str) -> None:
+    def add_setting(self, key: str, value: str) -> None:
         """Configure an input value.
 
         Parameters
