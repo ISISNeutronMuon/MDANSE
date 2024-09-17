@@ -192,12 +192,18 @@ class VanHoveFunctionDistinct(IJob):
     def run_step(self, time: int) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
         """Calculates the distance histogram between the configurations
         at the inputted time difference. The distance histograms are
-        then used to calculate the distinct part of the Van Hove function.
+        then used to calculate the distinct part of the van Hove function.
 
         Parameters
         ----------
         time : int
             The time difference.
+
+        Returns
+        -------
+        tuple
+            A tuple containing the time difference and a tuple of the
+            inter and intramolecular distance histograms.
         """
         bins_intra = np.zeros((self.nElements, self.nElements, self.n_mid_points))
         bins_inter = np.zeros((self.nElements, self.nElements, self.n_mid_points))
@@ -237,7 +243,7 @@ class VanHoveFunctionDistinct(IJob):
                 self.configuration["r_values"]["step"],
             )
 
-            # The Van Hove function will be divided by the density,
+            # The van Hove function will be divided by the density,
             # we multiply my the volume here and divide by the number
             # of atoms in finalize.
             bins_intra += conf_t1.unit_cell.volume * intra
@@ -262,7 +268,7 @@ class VanHoveFunctionDistinct(IJob):
 
     def finalize(self):
         """Using the distance histograms calculate, normalize and save the
-        distinct part of the Van Hove function.
+        distinct part of the van Hove function.
         """
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
 
