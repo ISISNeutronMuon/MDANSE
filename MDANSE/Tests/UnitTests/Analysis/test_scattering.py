@@ -31,30 +31,6 @@ def qvector_spherical_lattice(trajectory):
     )
 
 
-
-@pytest.fixture(scope="module")
-def test_vhfd(trajectory):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
-    parameters["weights"] = "equal"
-    vhfd = IJob.create("VanHoveFunctionDistinct")
-    vhfd.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
-
-
 @pytest.fixture(scope="module")
 def dcsf():
     temp_name = tempfile.mktemp()
