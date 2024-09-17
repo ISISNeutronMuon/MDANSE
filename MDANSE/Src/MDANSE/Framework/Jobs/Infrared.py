@@ -162,7 +162,9 @@ class Infrared(IJob):
                     q = self.configuration["atom_charges"]["charges"][idx]
                 except KeyError:
                     q = charges[idx]
-                ddipole[i] = q * (contiguous_configuration["coordinates"][idx, :] - com)
+                ddipole[i] += q * (
+                    contiguous_configuration["coordinates"][idx, :] - com
+                )
 
         for axis in range(3):
             ddipole[:, axis] = differentiate(

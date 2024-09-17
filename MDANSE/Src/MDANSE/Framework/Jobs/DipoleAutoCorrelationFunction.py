@@ -130,7 +130,9 @@ class DipoleAutoCorrelationFunction(IJob):
                     q = self.configuration["atom_charges"]["charges"][idx]
                 except KeyError:
                     q = charges[idx]
-                dipoles[i] = q * (contiguous_configuration["coordinates"][idx, :] - com)
+                dipoles[i] += q * (
+                    contiguous_configuration["coordinates"][idx, :] - com
+                )
 
         n_configs = self.configuration["frames"]["n_configs"]
         mol_dacf = correlate(dipoles, dipoles[:n_configs], mode="valid") / (
