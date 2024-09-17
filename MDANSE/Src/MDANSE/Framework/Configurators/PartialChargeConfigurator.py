@@ -19,6 +19,7 @@ import json
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.AtomSelector import Selector
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class PartialChargeMapper:
@@ -26,17 +27,22 @@ class PartialChargeMapper:
     with applications of the update_charges method with a selection
     setting and partial charge."""
 
-    def __init__(self, system: ChemicalSystem) -> None:
+    def __init__(self, trajectory: Trajectory) -> None:
         """
         Parameters
         ----------
         system : ChemicalSystem
             The chemical system object.
         """
+        system = trajectory.chemical_system
+        charges = trajectory.charges(0)
         self.selector = Selector(system)
         self._original_map = {}
-        for at in system.atom_list:
-            self._original_map[at.index] = 0.0
+        for at_num, at in enumerate(system.atom_list):
+            try:
+                self._original_map[at.index] = charges[at_num]
+            except:
+                self._original_map[at.index] = 0.0
         self._new_map = {}
 
     def update_charges(
@@ -149,8 +155,6 @@ class PartialChargeConfigurator(IConfigurator):
         for idx in idxs:
             if str(idx) in value:
                 self["charges"][idx] = value[str(idx)]
-            else:
-                self["charges"][idx] = None
 
         self.error_status = "OK"
 
@@ -178,5 +182,5 @@ class PartialChargeConfigurator(IConfigurator):
             trajectories chemical system.
         """
         traj_config = self._configurable[self._dependencies["trajectory"]]
-        mapper = PartialChargeMapper(traj_config["instance"].chemical_system)
+        mapper = PartialChargeMapper(traj_config["instance"])
         return mapper

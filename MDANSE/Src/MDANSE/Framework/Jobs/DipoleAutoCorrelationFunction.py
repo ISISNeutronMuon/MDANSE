@@ -126,8 +126,9 @@ class DipoleAutoCorrelationFunction(IJob):
 
             for atm in molecule.atom_list:
                 idx = atm.index
-                q = self.configuration["atom_charges"]["charges"][idx]
-                if q is None:
+                try:
+                    q = self.configuration["atom_charges"]["charges"][idx]
+                except KeyError:
                     q = charges[idx]
                 dipoles[i] = q * (contiguous_configuration["coordinates"][idx, :] - com)
 
