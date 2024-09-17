@@ -294,8 +294,8 @@ class TrajectoryFilter(IJob):
             self,
         )
 
-        filter_class = self.configuration["trajectory_filter"]["filter"]
-        filter_attributes = self.configuration["trajectory_filter"]["attributes"]
+        filter_class = self.configuration["trajectory_filter"].filter()
+        filter_attributes = self.configuration["trajectory_filter"].attributes()
 
         trajectory_filter = filter_class(filter_attributes)
 

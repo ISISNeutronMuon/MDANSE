@@ -18,26 +18,19 @@ from qtpy.QtWidgets import (
     QLineEdit,
     QPushButton,
     QDialog,
+    QComboBox,
     QCheckBox,
     QVBoxLayout,
     QHBoxLayout,
     QGroupBox,
     QLabel,
+    QSpinBox,
     QTextEdit,
     QWidget,
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
-from MDANSE.Mathematics.Signal import Butterworth, ChebyshevTypeI, ChebyshevTypeII, Elliptical, Bessel, Notch, Peak, Comb
-
-DEFAULT_FILTER = Butterworth
-
-def filter_default_settings(filter=DEFAULT_FILTER):
-    filter.set_defaults()
-    settings_dict = dict()
-    for setting, values in filter.default_settings():
-        settings_dict.update({setting: values["value"]})
-    return settings_dict
+from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import TrajectoryFilterConfigurator, FILTERS
 
 class FilterDesigner(QDialog):
     """Generates a string that specifies the filter.
@@ -49,28 +42,94 @@ class FilterDesigner(QDialog):
     _types_cbox_map : dict
         The dictionary that maps the filter designer type string to the corresponding filter class
     """
-    _defaults = filter_default_settings()
-    _helper_title = "Filter desginer"
-    _types_cbox_map = {
-        filter.__class__.__name__:filter for filter in (
-            Butterworth,
-            ChebyshevTypeI,
-            ChebyshevTypeII,
-            Elliptical,
-            Bessel,
-            Notch,
-            Peak,
-            Comb
-        )
-    }
 
+    _helper_title = "Filter desginer"
+    _types_cbox_map = {filter.__class__.__name__: filter for filter in FILTERS}
+
+    def __init__(self, field: QLineEdit, parent, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        field : QLineEdit
+            The QLineEdit field that will need to be updated when
+            applying the setting.
+        """
+        super().__init__(parent, *args, **kwargs)
+        self.setWindowTitle(self._helper_title)
+        self._field = field
+
+        self.panels = [QVBoxLayout()]*2
+        graph_view, settings_view = self.panels
+
+        #self.create_graph(graph_view)
+
+        self.create_settings(settings_view)
+
+    def create_settings(self, widget_area: QVBoxLayout):
+        """
+        """
+        filter = self._configurator.filter
+
+        # Filter type combobox
+        type_cbox = QComboBox()
+        for type in FILTERS:
+            type_cbox.addItem(type.__name__)
+
+        type_label = QLabel("Filter type")
+        type_cbox.setCurrentText(filter.__name__)
+
+        filter_type_layout = QHBoxLayout()
+        filter_type_layout.addWidget(type_label)
+        filter_type_layout.addWidget(type_cbox)
+
+        widget_area.addLayout(filter_type_layout)
+
+        # Fiter settings
+        for key, value in filter.default_settings.items():
+            setting_layout = QHBoxLayout()
+
+            default_setting = value["value"]
+            label = QLabel(key)
+
+            setting_layout.addWidget(label)
+
+            setting_layout.addWidget(self.setting_to_widget(value, default_setting))
+
+            widget_area.addLayout(setting_layout)
+
+    @staticmethod
+    def setting_to_widget(val_group: dict, setting):
+        if isinstance(setting, int):
+            widget = QSpinBox()
+            widget.setValue(setting)
+            widget.setMinimum(0)
+            widget.singleStep(1)
+            widget.valueChanged.connect(lambda x: widget.setValue(round(x)))
+
+        if isinstance(setting, float):
+            widget = QSpinBox()
+            widget.setValue(setting)
+
+        if isinstance(setting, bool):
+            widget = QCheckBox()
+            widget.setChecked(False)
+
+        elif isinstance(setting, str):
+            if val_group.get("values", None):
+                widget = QComboBox()
+                {widget.addItem(i) for i in val_group["values"]}
+                widget.setCurrentText(setting)
+                return widget
+            widget = QLineEdit(setting)
+
+        return widget
 
 
 class TrajectoryFilterWidget(WidgetBase):
     """Trajectory filter designer widget."""
 
     _push_button_text = "Filter designer"
-    _default_value = '{ "filter": "' + f'{DEFAULT_FILTER.__name__}"' + f'{filter_default_settings()}' + '}'
+    _default_value = '{ "filter": "' + f'{TrajectoryFilterConfigurator.filter}"' + f'{TrajectoryFilterConfigurator.settings()}' + '}'
     _tooltip_text = "Design a trajectory filter. The input is a JSON string, and can be created using the helper dialog."
 
     def __init__(self, *args, **kwargs):
