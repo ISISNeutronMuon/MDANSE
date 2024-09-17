@@ -28,9 +28,11 @@ from qtpy.QtWidgets import (
     QTextEdit,
     QWidget,
 )
+from MDANSE_GUI.Tabs.Visualisers import DataPlotter
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import TrajectoryFilterConfigurator, FILTERS
+
 
 class FilterDesigner(QDialog):
     """Generates a string that specifies the filter.
@@ -44,9 +46,9 @@ class FilterDesigner(QDialog):
     """
 
     _helper_title = "Filter desginer"
-    _types_cbox_map = {filter.__class__.__name__: filter for filter in FILTERS}
+    _visualiser = DataPlotter()
 
-    def __init__(self, field: QLineEdit, parent, *args, **kwargs):
+    def __init__(self, field: QLineEdit, configurator: TrajectoryFilterConfigurator, parent, *args, **kwargs):
         """
         Parameters
         ----------
@@ -57,12 +59,15 @@ class FilterDesigner(QDialog):
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle(self._helper_title)
         self._field = field
+        self._configurator = configurator
 
         self.panels = [QVBoxLayout()]*2
         graph_view, settings_view = self.panels
 
-        #self.create_graph(graph_view)
+        # Produce the filter designer graphical interface
+        self.create_graph(graph_view)
 
+        # Produce the filter designer settings interface
         self.create_settings(settings_view)
 
     def create_settings(self, widget_area: QVBoxLayout):
@@ -88,23 +93,28 @@ class FilterDesigner(QDialog):
         for key, value in filter.default_settings.items():
             setting_layout = QHBoxLayout()
 
-            default_setting = value["value"]
+            default = value["value"]
             label = QLabel(key)
 
             setting_layout.addWidget(label)
 
-            setting_layout.addWidget(self.setting_to_widget(value, default_setting))
+            setting_widget = self.setting_to_widget(updater=self._configurator.update_settings, val_name=key, val_group=value, setting=default)
+
+            self.setting_connector(setting_widget, value=default)
+
+            # TODO: Connect settings widgets to configurator dictionary
+
+            setting_layout.addWidget()
 
             widget_area.addLayout(setting_layout)
 
     @staticmethod
-    def setting_to_widget(val_group: dict, setting):
+    def setting_to_widget(updater: callable, val_name: str, val_group: dict, setting):
         if isinstance(setting, int):
             widget = QSpinBox()
             widget.setValue(setting)
             widget.setMinimum(0)
             widget.singleStep(1)
-            widget.valueChanged.connect(lambda x: widget.setValue(round(x)))
 
         if isinstance(setting, float):
             widget = QSpinBox()
@@ -117,7 +127,7 @@ class FilterDesigner(QDialog):
         elif isinstance(setting, str):
             if val_group.get("values", None):
                 widget = QComboBox()
-                {widget.addItem(i) for i in val_group["values"]}
+                { widget.addItem(i) for i in val_group["values"] }
                 widget.setCurrentText(setting)
                 return widget
             widget = QLineEdit(setting)
@@ -155,7 +165,7 @@ class TrajectoryFilterWidget(WidgetBase):
         FilterDesigner
             Create and return the filter designer QDialog.
         """
-        return FilterDesigner(self._field, self._base)
+        return FilterDesigner(self._field, self._configurator, self._base)
 
     @Slot()
     def helper_dialog(self) -> None:
