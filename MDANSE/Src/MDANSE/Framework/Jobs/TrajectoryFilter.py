@@ -20,7 +20,7 @@ from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import get_spectrum, Filter1DType, Filter1D
+from MDANSE.Mathematics.Signal import get_spectrum, Filter1D
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
 from MDANSE.MLogging import LOG
 
@@ -294,11 +294,15 @@ class TrajectoryFilter(IJob):
             self,
         )
 
-        # --> get filter inputs dict from filter designer (i.e. self.configuration["trajectory_filter"]["type"], self.configuration["trajectory_filter"]["inputs"])
-        # --> create Filter1D object and write frequency response to output data
-        trajFilter = Filter1D()
+        filter_class = self.configuration["trajectory_filter"]["filter"]
+        filter_attributes = self.configuration["trajectory_filter"]["attributes"]
+
+        trajectory_filter = filter_class(filter_attributes)
+
         # --> write filtered trajectory using filter.apply()
         # --> apply filter to power spectrum multiplicatively, ifft filtered power spectrum to pacf
+
+        # --> finally, write these to the output data
 
         self.configuration["trajectory"]["instance"].close()
         super().finalize()
