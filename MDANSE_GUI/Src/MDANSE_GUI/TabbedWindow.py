@@ -107,6 +107,9 @@ class TabbedWindow(QMainWindow):
         self._tabs["Plot Creator"]._visualiser.create_new_plot.connect(
             self._tabs["Plot Holder"]._visualiser.new_plot
         )
+        self._tabs["Plot Creator"]._visualiser.create_new_text.connect(
+            self._tabs["Plot Holder"]._visualiser.new_text
+        )
 
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()

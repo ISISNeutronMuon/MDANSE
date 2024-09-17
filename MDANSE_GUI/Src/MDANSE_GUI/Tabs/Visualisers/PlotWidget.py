@@ -182,6 +182,7 @@ class PlotWidget(QWidget):
         self.change_slider_coupling.emit(self._plotter.sliders_coupled())
         self.reset_slider_values.emit(self._plotter._value_reset_needed)
         self._plotter._slider_reference = self._sliderpack
+        self._sliderpack.setEnabled(False)
         self.plot_data()
 
     @Slot(object)
@@ -195,7 +196,7 @@ class PlotWidget(QWidget):
             self._sliderpack.set_values(values)
 
     def available_plotters(self) -> List[str]:
-        return [str(x) for x in Plotter.indirect_subclasses()]
+        return [str(x) for x in Plotter.indirect_subclasses() if str(x) != "Text"]
 
     def plot_data(self, update_only=False):
         if self._plotter is None:

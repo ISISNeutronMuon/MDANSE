@@ -40,6 +40,7 @@ ALL_JOBS = [
     "Temperature",
     "TrajectoryEditor",
     "UnfoldedTrajectory",
+    "VanHoveFunctionDistinct",
     "VelocityAutoCorrelationFunction",
     "Voronoi",
     "Converter",

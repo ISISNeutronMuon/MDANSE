@@ -84,8 +84,13 @@ class LoggingTab(GeneralTab):
             )
 
     def add_handler(self, new_handler):
+        try:
+            current_level = self._loglevel_combo.currentText()
+        except:
+            current_level = "INFO"
         self._extra_handler = new_handler
         self._extra_handler.add_visualiser(self._visualiser)
+        self.change_log_level(current_level)
 
     def log_qt_handler(self, m_type, m_context, m_text):
         self._visualiser.append_text(f"Qt log message (type={m_type})=" + m_text)
