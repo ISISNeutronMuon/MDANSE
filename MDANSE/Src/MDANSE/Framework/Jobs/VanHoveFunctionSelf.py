@@ -31,8 +31,7 @@ class VanHoveFunctionSelf(IJob):
     into self and distinct parts. The self part includes only the
     contributions from only the same particles (i=j) while the distinct
     part includes only the contributions between different particles
-    (i≠j). This job calculates a self part of the van Hove function
-    multiplied by 4πr^2.
+    (i≠j). This job calculates a self part of the van Hove function.
     """
 
     label = "Van Hove Function Self"
@@ -171,13 +170,10 @@ class VanHoveFunctionSelf(IJob):
         """Using the distance histograms calculate, normalize and save the
         self part of the Van Hove function.
         """
-        shellSurfaces = 4.0 * np.pi * self.configuration["r_values"]["mid_points"] ** 2
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in list(nAtomsPerElement.items()):
-            self._outputData["g(r,t)_%s" % element][:] *= shellSurfaces[
-                :, np.newaxis
-            ] / (number * self.n_configs)
+            self._outputData["g(r,t)_%s" % element][:] /= number * self.n_configs
 
         weights = self.configuration["weights"].get_weights()
         self._outputData["g(r,t)_total"][:] = weight(
