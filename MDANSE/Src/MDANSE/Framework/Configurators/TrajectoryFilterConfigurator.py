@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import json
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Mathematics.Signal import Butterworth, ChebyshevTypeI, ChebyshevTypeII, Elliptical, Bessel, Notch, Peak, Comb
 
@@ -28,6 +29,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
     """
 
     _filter = FILTERS[0]
+    _dict = dict()
 
     @classmethod
     def settings(cls, filter=_filter):
@@ -37,7 +39,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
             settings_dict.update({setting: values["value"]})
         return settings_dict
 
-    _default = '{ "filter": "' + f'{_filter.__name__}"' + f'{settings.__func__(object())}' + '}'
+    _default = '{ "filter": "' + f'{_filter.__name__}"' + f'{json.dumps(settings.__func__(object()))}' + '}'
 
     def configure(self, value: str) -> None:
         """Configure an input value.
@@ -47,6 +49,19 @@ class TrajectoryFilterConfigurator(IConfigurator):
         value : str
             The selection setting in a json readable format.
         """
+
+    def update_settings(self, key: str, value: str) -> None:
+        """Configure an input value.
+
+        Parameters
+        ----------
+        value : str
+            The selection setting in a json readable format.
+
+        value : str
+            The selection setting in a json readable format.
+        """
+        self._dict.update({key: value})
 
     @property
     def filter(self):
