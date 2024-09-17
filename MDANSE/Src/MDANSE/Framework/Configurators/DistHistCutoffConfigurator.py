@@ -37,7 +37,7 @@ class DistHistCutoffConfigurator(RangeConfigurator):
             The maximum cutoff for the distance histogram job.
         """
         traj_config = self._configurable[self._dependencies["trajectory"]]["instance"]
-        min_d = np.min(traj_config._trajectory._h5_file["unit_cell"], axis=0)
+        min_d = np.min([uc.direct for uc in traj_config._trajectory._unit_cells], axis=0)
         vec_a, vec_b, vec_c = min_d
         a = np.linalg.norm(vec_a)
         b = np.linalg.norm(vec_b)
