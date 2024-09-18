@@ -15,6 +15,8 @@
 #
 import re
 
+import numpy as np
+
 from MDANSE.Chemistry.ChemicalEntity import (
     Atom,
     AtomCluster,
@@ -84,6 +86,7 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
 
                     atoms = []
                     masses = []
+                    charges = []
 
                     while sumAtoms < nAtoms:
                         sitnam = lines[comp][:8].strip()
@@ -96,13 +99,16 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
                             nrept = 1
 
                         masses.extend([float(vals[0])] * nrept)
+                        charges.extend([float(vals[1])] * nrept)
                         atoms.extend([sitnam] * nrept)
 
                         sumAtoms += nrept
 
                         comp += 1
 
-                    self["molecules"].append([moleculeName, nMolecules, atoms, masses])
+                    self["molecules"].append(
+                        [moleculeName, nMolecules, atoms, masses, charges]
+                    )
 
                     break
 
@@ -116,17 +122,30 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
             An ordered list of atom labels.
         """
         labels = []
-        for mol_name, _, atomic_contents, masses in self["molecules"]:
+        for mol_name, _, atomic_contents, masses, _ in self["molecules"]:
             for atm_label, mass in zip(atomic_contents, masses):
                 label = AtomLabel(atm_label, molecule=mol_name, mass=mass)
                 if label not in labels:
                     labels.append(label)
         return labels
 
+    def get_atom_charges(self) -> np.ndarray:
+        """Returns an array of partial electric charges
+
+        Returns
+        -------
+        np.ndarray
+            array of floats, one value per atom
+        """
+        charge_groups = []
+        for _, num_molecules, _, _, charges in self["molecules"]:
+            charge_groups.append(np.array(num_molecules * list(charges)))
+        return np.concatenate(charge_groups)
+
     def build_chemical_system(self, chemicalSystem, aliases):
         chemicalEntities = []
 
-        for db_name, nMolecules, atomic_contents, masses in self["molecules"]:
+        for db_name, nMolecules, atomic_contents, masses, _ in self["molecules"]:
             # Loops over the number of molecules of the current type.
             for i in range(nMolecules):
                 # This list will contains the instances of the atoms of the molecule.
