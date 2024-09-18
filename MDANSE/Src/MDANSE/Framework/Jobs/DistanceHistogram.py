@@ -19,7 +19,7 @@ import itertools
 
 import numpy as np
 
-from MDANSE.Extensions import distance_histogram
+from MDANSE.Extensions import van_hove
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
 
@@ -168,20 +168,19 @@ class DistanceHistogram(IJob):
             cell_volume = 1.0
 
         coords = conf["coordinates"]
+        scaleconfig = coords @ inverse_cell
 
         hIntraTemp = np.zeros(self.hIntra.shape, dtype=np.float64)
         hInterTemp = np.zeros(self.hInter.shape, dtype=np.float64)
 
-        distance_histogram.distance_histogram(
-            coords[self._indexes, :],
+        van_hove.van_hove_distinct(
             direct_cell,
-            inverse_cell,
-            self._indexes,
             self.indexToMolecule,
             self.indexToSymbol,
             hIntraTemp,
             hInterTemp,
-            self.scaleconfig,
+            scaleconfig,
+            scaleconfig,
             self.configuration["r_values"]["first"],
             self.configuration["r_values"]["step"],
         )

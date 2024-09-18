@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from typing import Optional
+import traceback
 
 import numpy as np
 from qtpy.QtWidgets import (
@@ -160,7 +161,11 @@ class Action(QWidget):
         try:
             job_instance = IJob.create(job_name)
         except ValueError as e:
-            LOG.error(f"Failed to create IJob {job_name}")
+            LOG.error(
+                f"Failed to create IJob {job_name};\n"
+                f"error {e};\n"
+                f"traceback {traceback.format_exc()}"
+            )
             return
         job_instance.build_configuration()
         settings = job_instance.settings

@@ -274,9 +274,9 @@ EXTENSIONS = [
         sources=[os.path.join("Extensions", "contiguous_coordinates.pyx")],
     ),
     Extension(
-        "MDANSE.Extensions.distance_histogram",
+        "MDANSE.Extensions.van_hove",
         include_dirs=INCLUDE_DIR,
-        sources=[os.path.join("Extensions", "distance_histogram.pyx")],
+        sources=[os.path.join("Extensions", "van_hove.pyx")],
     ),
     Extension(
         "MDANSE.Extensions.fast_calculation",

@@ -71,7 +71,6 @@ class Infrared(IJob):
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
-        """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
         ce_list = self.configuration["trajectory"][
@@ -125,13 +124,13 @@ class Infrared(IJob):
             main_result=True,
         )
 
-    def run_step(self, index) -> tuple[int, np.ndarray]:
+    def run_step(self, index: int) -> tuple[int, np.ndarray]:
         """Runs a single step of the job.
 
         Parameters
         ----------
         index : int
-            The index of the step.
+            The index of the molecule.
 
         Returns
         -------
@@ -174,13 +173,23 @@ class Infrared(IJob):
         )
         return index, mol_ddacf.T[0]
 
-    def combine(self, index, x):
-        """Combines returned results of run_step."""
+    def combine(self, index: int, x: np.ndarray):
+        """Add the d/dt dipole auto-correlation function of molecule
+        to the results.
+
+        Parameters
+        ----------
+        index : int
+            The index of the molecule.
+        x : np.ndarray
+            d/dt dipole auto-correlation function for a molecule
+        """
         self._outputData["ddacf"] += x
 
     def finalize(self):
-        """Finalizes the calculations (e.g. averaging the total term,
-        output files creations ...).
+        """Average the d/dt dipole auto-correlation function over the
+        number of molecules in the trajectory, fourier transform to
+        get the IR spectrum and save the results.
         """
         self._outputData["ddacf"] /= self.numberOfSteps
         self._outputData["ir"][:] = get_spectrum(
