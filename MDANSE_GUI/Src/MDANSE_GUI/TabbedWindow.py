@@ -112,6 +112,10 @@ class TabbedWindow(QMainWindow):
             self._tabs["Plot Holder"]._visualiser.new_text
         )
 
+        self._tabs["Instruments"]._visualiser.instrument_details_changed.connect(
+            self._tabs["Actions"].update_action_after_instrument_change
+        )
+
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
         self._instrument_model = GeneralModel()

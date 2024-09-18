@@ -46,6 +46,7 @@ class JobTab(GeneralTab):
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""
         self._job_starter = None
+        self._instrument_index = -1
         self._trajectory_combo = QComboBox()
         self._trajectory_combo.setEditable(False)
         self._trajectory_combo.currentIndexChanged.connect(self.set_current_trajectory)
@@ -113,10 +114,19 @@ class JobTab(GeneralTab):
         LOG.debug(f"Switched instrument to {index}")
         instrument_model = self._instrument_combo.model()
         self.action.set_instrument(instrument_model._nodes[index])
+        self._instrument_index = index
         current_item = self._core.current_item()
         if current_item is not None:
             # we only update the widget if a job is selected from the
             # actions tree
+            self.action.update_panel(current_item.text())
+
+    @Slot(int)
+    def update_action_after_instrument_change(self, index: int):
+        if index != self._instrument_index:
+            return
+        current_item = self._core.current_item()
+        if current_item is not None:
             self.action.update_panel(current_item.text())
 
     @classmethod

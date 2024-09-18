@@ -38,7 +38,7 @@ from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 
 class InstrumentDetails(QWidget):
 
-    got_new_values = Signal()
+    instrument_details_changed = Signal(int)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -128,6 +128,7 @@ class InstrumentDetails(QWidget):
         self._current_instrument._configured = True
         self._current_instrument.update_item()
         self._inner_visualiser.update_panel(self._current_instrument)
+        self.instrument_details_changed.emit(self._current_instrument._model_index)
 
     def populate_panel(self, instrument: SimpleInstrument):
         for entry in instrument.inputs():

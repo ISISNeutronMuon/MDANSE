@@ -58,6 +58,7 @@ class GeneralModel(QStandardItemModel):
         item = QStandardItem(label)
         item.setData(retval)
         thing._list_item = item
+        thing._model_index = retval
         self.appendRow(item)
         self.mutex.unlock()
         self.summarise_items()

@@ -52,6 +52,7 @@ class SimpleInstrument:
         self._axis_2 = [0, 1, 0]
         self._vectors_per_shell = 100
         self._configured = False
+        self._model_index = -1
 
     @classmethod
     def inputs(cls):
