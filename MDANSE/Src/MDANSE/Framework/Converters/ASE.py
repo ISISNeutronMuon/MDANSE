@@ -101,6 +101,8 @@ class ASE(Converter):
         super().initialize()
 
         self._isPeriodic = None
+        self._backup_cell = None
+        self._keep_running = True
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # The number of steps of the analysis.
@@ -141,6 +143,9 @@ class ASE(Converter):
 
         @note: the argument index is the index of the loop note the index of the frame.
         """
+        if not self._keep_running:
+            LOG.warning(f"Skipping frame {index}")
+            return index, None
 
         try:
             frame = self._input[index]
@@ -151,27 +156,45 @@ class ASE(Converter):
             frame = read(self.configuration["trajectory_file"]["value"], index=index)
         time = self._timeaxis[index]
 
+        unit_conversion_factor = measure(1.0, "ang").toval("nm")
         if self._isPeriodic:
             unitCell = frame.cell.array
-            LOG.info(f"Unit cell from frame: {unitCell}")
-
-            unitCell *= measure(1.0, "ang").toval("nm")
+            if np.allclose(unitCell, 0.0):
+                LOG.warning(f"Using initial unit cell: {self._backup_cell}")
+                unitCell = self._backup_cell * unit_conversion_factor
+            else:
+                LOG.info(f"Unit cell from frame: {unitCell}")
+                unitCell *= unit_conversion_factor
             unitCell = UnitCell(unitCell)
 
         coords = frame.get_positions()
-        coords *= measure(1.0, "ang").toval("nm")
+        coords *= unit_conversion_factor
 
         if self._isPeriodic:
-            realConf = PeriodicRealConfiguration(
-                self._trajectory.chemical_system, coords, unitCell
-            )
+            try:
+                realConf = PeriodicRealConfiguration(
+                    self._trajectory.chemical_system, coords, unitCell
+                )
+            except ValueError:
+                self._keep_running = False
+                LOG.warning(
+                    f"Could not create configuration for frame {index}. Will skip the rest"
+                )
+                return index, None
             if self._configuration["fold"]["value"]:
                 realConf.fold_coordinates()
         else:
-            realConf = RealConfiguration(
-                self._trajectory.chemical_system,
-                coords,
-            )
+            try:
+                realConf = RealConfiguration(
+                    self._trajectory.chemical_system,
+                    coords,
+                )
+            except ValueError:
+                self._keep_running = False
+                LOG.warning(
+                    f"Could not create configuration for frame {index}. Will skip the rest"
+                )
+                return index, None
 
         self._trajectory.chemical_system.configuration = realConf
 
@@ -225,15 +248,21 @@ class ASE(Converter):
                 self.configuration["trajectory_file"]["value"]  # , index="[:]"
             )
             self._total_number_of_steps = last_iterator
+            LOG.debug(f"Length found using last_iterator={self._total_number_of_steps}")
         else:
             first_frame = self._input[0]
             self._total_number_of_steps = len(self._input)
+            LOG.debug(
+                f"Length found using len(self._input)={self._total_number_of_steps}"
+            )
 
         self._timeaxis = self._timestep * np.arange(self._total_number_of_steps)
 
         if self._isPeriodic is None:
             self._isPeriodic = np.all(first_frame.get_pbc())
         LOG.info(f"PBC in first frame = {first_frame.get_pbc()}")
+        if self._isPeriodic:
+            self._backup_cell = first_frame.cell.array
 
         try:
             self._initial_charges = first_frame.get_charges()

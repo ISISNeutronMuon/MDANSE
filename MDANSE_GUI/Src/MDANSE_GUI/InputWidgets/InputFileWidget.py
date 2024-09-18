@@ -94,7 +94,7 @@ class InputFileWidget(WidgetBase):
         try:
             self.default_path = paths_group.get(self._job_name)
         except:
-            LOG.error(f"session.get_path failed for {self._job_name}")
+            LOG.warning(f"session.get_path failed for {self._job_name}")
         new_value = self._file_dialog(
             self.parent(),  # the parent of the dialog
             "Load file",  # the label of the window
