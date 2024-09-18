@@ -19,7 +19,7 @@ import itertools as it
 import numpy as np
 
 from MDANSE.Extensions import van_hove
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
 from MDANSE.Mathematics.Arithmetic import weight
 
@@ -76,6 +76,14 @@ class VanHoveFunctionDistinct(IJob):
         {"formats": ["MDAFormat", "TextFormat"]},
     )
     settings["running_mode"] = ("RunningModeConfigurator", {})
+
+    def detailed_unit_cell_error(self):
+        raise JobError(
+            "This analysis job requires a unit cell (simulation box) to be defined. "
+            "The box will be used for calculating density in the analysis. "
+            "You can add a simulation box to the trajectory using the TrajectoryEditor job. "
+            "Be careful adding the simulation box, as the wrong dimensions can render the results meaningless."
+        )
 
     def initialize(self):
         super().initialize()
@@ -147,6 +155,17 @@ class VanHoveFunctionDistinct(IJob):
                 axis="r|time",
                 units="au",
             )
+
+        conf = self.configuration["trajectory"]["instance"].configuration(
+            self.configuration["frames"]["first"]
+        )
+        try:
+            cell_volume = conf.unit_cell.volume
+        except:
+            self.detailed_unit_cell_error()
+        else:
+            if cell_volume < 1e-9:
+                self.detailed_unit_cell_error()
 
         lut = atom_index_to_molecule_index(
             self.configuration["trajectory"]["instance"].chemical_system
