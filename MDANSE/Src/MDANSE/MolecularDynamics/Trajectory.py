@@ -391,7 +391,21 @@ class TrajectoryWriter:
 
     def close(self):
         """Close the trajectory file"""
-
+        configuration = self._chemical_system.configuration
+        n_atoms = self._chemical_system.total_number_of_atoms
+        if configuration is not None:
+            configuration_grp = self._h5_file["/configuration"]
+            for k, v in configuration.variables.items():
+                dset = configuration_grp.get(k, None)
+                dset.resize((self._current_index, n_atoms, 3))
+            try:
+                unit_cell_dataset = self._h5_file["/unit_cell"]
+            except KeyError:
+                pass
+            else:
+                unit_cell_dataset.resize((self._current_index, 3, 3))
+            time_dataset = self._h5_file["/time"]
+            time_dataset.resize((self._current_index,))
         self._h5_file.close()
 
     def dump_configuration(self, time, units=None):
@@ -467,7 +481,7 @@ class TrajectoryWriter:
         time_dset = self._h5_file.get("time", None)
         if time_dset is None:
             time_dset = self._h5_file.create_dataset(
-                "time", shape=(self._n_steps,), dtype=np.float64
+                "time", shape=(self._n_steps,), chunks=(1,), dtype=np.float64
             )
             time_dset.attrs["units"] = units.get("time", "")
         time_dset[self._current_index] = time

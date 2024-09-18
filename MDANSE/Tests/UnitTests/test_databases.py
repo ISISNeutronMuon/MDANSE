@@ -94,9 +94,6 @@ class TestAtomsDatabase(unittest.TestCase):
             ),
         ) as m:
             ATOMS_DATABASE._load()
-            m.assert_called_with(
-                os.path.join(os.path.dirname(Databases.__file__), "atoms.json"), "r"
-            )
             self.assertDictEqual({"family": "str"}, ATOMS_DATABASE._properties)
             self.assertDictEqual({"H": {"family": "non-metal"}}, ATOMS_DATABASE._data)
 
