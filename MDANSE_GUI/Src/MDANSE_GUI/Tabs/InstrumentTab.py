@@ -47,6 +47,7 @@ class InstrumentTab(GeneralTab):
         super().__init__(*args, **kwargs)
         self._core.add_button("Create Instrument", self._view.add_instrument)
         self._core.add_button("Save Instruments", self._view.save_to_file, upper=False)
+        self._view.introduce_empty_instrument()
         current_path = os.path.dirname(os.path.abspath(__file__))
         builtin_file = os.path.join(
             current_path, "..", "Resources", "InstrumentDefinitions.toml"
@@ -63,9 +64,11 @@ class InstrumentTab(GeneralTab):
         except Exception as e:
             LOG.error(f"Could not load instruments from {filename}: {e}")
         for instrument in self._model._nodes.values():
-            print(f"Instrument name: {instrument._name}")
-            instrument.update_item()
-            instrument._configured = True  # instruments loaded from file are configured
+            if instrument is not None:
+                instrument.update_item()
+                instrument._configured = (
+                    True  # instruments loaded from file are configured
+                )
 
     @Slot()
     def load_trajectories(self):

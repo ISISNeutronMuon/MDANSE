@@ -59,6 +59,8 @@ class InstrumentList(QListView):
     def populateMenu(self, menu: QMenu, item: QStandardItem):
         has_backup = False
         instrument = self.model()._nodes[item[257]]
+        if instrument is None:
+            return
         if instrument._name in self._backup_instruments.keys():
             has_backup = True
         for action, method in [
@@ -161,6 +163,9 @@ class InstrumentList(QListView):
         except Exception as e:
             LOG.error(f"Failed to connect InstrumentList to visualiser: {e}")
 
+    def introduce_empty_instrument(self):
+        self.model().append_object((None, "No instrument (default settings)"))
+
     def load_from_file(self, filename: str, keep_backups=False):
         source_file = TOMLFile(filename)
         try:
@@ -209,6 +214,8 @@ class InstrumentList(QListView):
         newdoc = tomlkit.document()
         model = self.model()
         for instrument in model._nodes.values():
+            if instrument is None:
+                continue
             table = tomlkit.table()
             for input in SimpleInstrument.inputs():
                 param_key = input[0]
