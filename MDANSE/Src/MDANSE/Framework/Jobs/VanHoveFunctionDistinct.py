@@ -78,7 +78,7 @@ class VanHoveFunctionDistinct(IJob):
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def detailed_unit_cell_error(self):
-        raise JobError(
+        raise ValueError(
             "This analysis job requires a unit cell (simulation box) to be defined. "
             "The box will be used for calculating density in the analysis. "
             "You can add a simulation box to the trajectory using the TrajectoryEditor job. "
@@ -99,6 +99,17 @@ class VanHoveFunctionDistinct(IJob):
         )
 
         self.n_min_points = len(self.configuration["r_values"]["mid_points"])
+
+        conf = self.configuration["trajectory"]["instance"].configuration(
+            self.configuration["frames"]["first"]
+        )
+        try:
+            cell_volume = conf.unit_cell.volume
+        except:
+            self.detailed_unit_cell_error()
+        else:
+            if cell_volume < 1e-9:
+                self.detailed_unit_cell_error()
 
         self._outputData.add(
             "r",
@@ -156,17 +167,6 @@ class VanHoveFunctionDistinct(IJob):
                 units="au",
             )
 
-        conf = self.configuration["trajectory"]["instance"].configuration(
-            self.configuration["frames"]["first"]
-        )
-        try:
-            cell_volume = conf.unit_cell.volume
-        except:
-            self.detailed_unit_cell_error()
-        else:
-            if cell_volume < 1e-9:
-                self.detailed_unit_cell_error()
-
         lut = atom_index_to_molecule_index(
             self.configuration["trajectory"]["instance"].chemical_system
         )
@@ -218,6 +218,7 @@ class VanHoveFunctionDistinct(IJob):
         time : int
             The time difference.
         """
+
         bins_intra = np.zeros((self.nElements, self.nElements, self.n_min_points))
         bins_inter = np.zeros((self.nElements, self.nElements, self.n_min_points))
 

@@ -139,7 +139,7 @@ class DistanceHistogram(IJob):
         )
 
     def detailed_unit_cell_error(self):
-        raise JobError(
+        raise ValueError(
             "This analysis job requires a unit cell (simulation box) to be defined. "
             "The box will be used for calculating density in the analysis. "
             "You can add a simulation box to the trajectory using the TrajectoryEditor job. "
