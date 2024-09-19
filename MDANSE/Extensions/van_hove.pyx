@@ -44,7 +44,7 @@ def van_hove_distinct(
     times t0 and t1. Distances are calculated using the minimum image
     convention which are all worked out using the fractional coordinates
     with the unit cell of the configuration at time t1. The function can
-    be used to calculate the distinct part of the Van Hove function.
+    be used to calculate the distinct part of the van Hove function.
 
     This function was an generalization of a Pyrex adaptation of a
     FORTRAN implementation made by Miguel Angel Gonzalez (Institut Laue
@@ -103,9 +103,7 @@ def van_hove_distinct(
             rz = sdx*cell[2,0] + sdy*cell[2,1] + sdz*cell[2,2]
 
             r = sqrt(rx*rx + ry*ry + rz*rz)
-
             bin = <int>((r-rmin)/dr)
-
             if ((bin < 0) or (bin >= nbins)):
                 continue
 
@@ -113,3 +111,52 @@ def van_hove_distinct(
                 intra[symbolindex[i],symbolindex[j],bin] += 1.0
             else:
                 inter[symbolindex[i],symbolindex[j],bin] += 1.0
+
+
+def van_hove_self(
+    double[:,:] xyz,
+    double[:,:] histograms,
+    double rmin,
+    double dr,
+    int n_configs,
+    int n_frames
+):
+    """Calculates the distance histogram between an atom at time t0
+    and the same atom at a time t0 + t. The results from this function
+    can be used to calculate the self part of the van Hove function.
+
+    Parameters
+    ----------
+    xyz : np.ndarray
+        The trajectory of an atom.
+    histograms : np.ndarray
+        The histograms to be updated.
+    rmin : float
+        The minimum distance of the histogram.
+    dr : float
+        The distances between histogram bins.
+    n_configs : int
+        Number of configs to be averaged over.
+    n_frames : int
+        Number of correlation frames.
+    """
+    cdef int i, j, bin, nbins
+    cdef double x0, y0, z0, x1, y1, z1, r
+    nbins = histograms.shape[0]
+
+    for i in range(n_configs):
+        x0 = xyz[i,0]
+        y0 = xyz[i,1]
+        z0 = xyz[i,2]
+
+        for j in range(n_frames):
+            rx = xyz[i+j,0] - x0
+            ry = xyz[i+j,1] - y0
+            rz = xyz[i+j,2] - z0
+
+            r = sqrt(rx*rx + ry*ry + rz*rz)
+            bin = <int>((r-rmin)/dr)
+            if ((bin < 0) or (bin >= nbins)):
+                continue
+
+            histograms[bin, j] += 1.0

@@ -7,6 +7,10 @@ from .RangeConfigurator import RangeConfigurator
 
 class DistHistCutoffConfigurator(RangeConfigurator):
 
+    def __init__(self, name, **kwargs):
+        super().__init__(name, **kwargs)
+        self._max_value = kwargs.get("max_value", True)
+
     def configure(self, value):
         """Configure the distance histogram cutoff configurator.
 
@@ -15,7 +19,7 @@ class DistHistCutoffConfigurator(RangeConfigurator):
         value : tuple
             A tuple of the range parameters.
         """
-        if value[1] > floor(self.get_largest_cutoff() * 100) / 100:
+        if self._max_value and value[1] > floor(self.get_largest_cutoff() * 100) / 100:
             self.error_status = (
                 "The cutoff distance goes into the simulation box periodic images."
             )
@@ -33,7 +37,9 @@ class DistHistCutoffConfigurator(RangeConfigurator):
             The maximum cutoff for the distance histogram job.
         """
         traj_config = self._configurable[self._dependencies["trajectory"]]["instance"]
-        min_d = np.min(traj_config._trajectory._h5_file["unit_cell"], axis=0)
+        min_d = np.min(
+            [uc.direct for uc in traj_config._trajectory._unit_cells], axis=0
+        )
         vec_a, vec_b, vec_c = min_d
         a = np.linalg.norm(vec_a)
         b = np.linalg.norm(vec_b)

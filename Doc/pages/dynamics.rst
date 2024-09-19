@@ -13,6 +13,7 @@ This section contains background theory for following plugins:
 -  :ref:`analysis-msd`
 -  :ref:`analysis-op`
 -  :ref:`analysis-pacf`
+-  :ref:`analysis-vhf`
 -  :ref:`analysis-vacf`
 
 .. _analysis-angular-correlation:
@@ -333,6 +334,50 @@ where
    \Delta R_{\alpha}\left( t \right) = R_{\alpha}\left( t \right) - \langle R_{\alpha}\left( t \right) \rangle_{t}
 
 so that the origin dependence of the PACF function is removed.
+
+.. _analysis-vhf:
+
+Van Hove Function
+'''''''''''''''''
+The van Hove function describes the probability of finding a particle
+:math:`j` at a distance :math:`R` at time :math:`t_0 + \Delta t` from a
+particle :math:`i` at a time :math:`t_0`
+
+.. math::
+    G(R,\Delta t) = \frac{1}{N} \left\langle  \sum_{i}^{N}\sum_{j}^{N} \delta [R - R_{j}(t_0 + \Delta t) + R_{i}(t_0)] \right\rangle
+
+and can be rewritten so that
+
+.. math::
+    G(R,\Delta t) &= \frac{1}{N} \left\langle  \int  \sum_{i}^{N}\sum_{j}^{N} \delta [R' + R - R_{j}(t_0 + \Delta t)]\delta [R' - R_{i}(t_0)] \, \mathrm{d} R' \right\rangle \\
+     &= \frac{1}{\rho} \left\langle  \rho (R, t_0 + \Delta t) \rho (0, t_0) \right\rangle
+
+so that the van Hove function is a density-density time-correlation
+function. The van Hove function is related to the intermediate scattering
+function via a Fourier transform and the dynamic structure factor
+via a double Fourier transform
+
+.. math::
+    F(q,\Delta t) &= \int G(R,t) \exp(i q \cdot R) \, \mathrm{d}R \\
+    S(q,\omega) &= \int\int G(R,t) \exp(i q \cdot R - i \omega t) \, \mathrm{d}R\mathrm{d}t
+
+and can be split into distinct and self parts where
+
+.. math::
+    G_{\mathrm{d}}(R,\Delta t) &= \left\langle \frac{1}{N} \sum_{i}^{N}\sum_{j \neq i}^{N} \delta [R - R_{j}(t_0 + \Delta t) + R_{i}(t_0)] \right\rangle \\
+    G_{\mathrm{s}}(R,\Delta t) &= \left\langle \frac{1}{N} \sum_{i} \delta [R - R_{i}(t_0 + \Delta t) + R_{i}(t_0)] \right\rangle
+
+In *MDANSE* the distinct part of the van Hove function is spherically
+averaged and normalised so that for liquid or gaseous systems
+
+.. math::
+    \lim_{r \rightarrow \infty } G_{\mathrm{d}}(r,\Delta t) = \lim_{\Delta t \rightarrow \infty } G_{\mathrm{d}}(r,\Delta t) = 1
+
+and the self part of the van Hove function in *MDANSE* is summed do
+that it only depends on the distance :math:`r`
+
+.. math::
+    G_{\mathrm{s}}(r,\Delta t) = \left\langle \frac{1}{N} \sum_{i} \delta \left[r - \vert R_{i}(t_0 + \Delta t) + R_{i}(t_0) \vert \right] \right\rangle
 
 .. _analysis-vacf:
 
