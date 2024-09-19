@@ -140,7 +140,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         system = traj_config["instance"].chemical_system
         idxs = [at.index for at in system.atom_list]
 
-        self._nTransmutatedAtoms = 0
+        self._nTransmutedAtoms = 0
         for idx, element in value.items():
 
             try:
@@ -159,7 +159,7 @@ class AtomTransmutationConfigurator(IConfigurator):
                 )
                 return
 
-            self.transmutate(idx, element)
+            self.transmute(idx, element)
 
         atomSelConfigurator = self._configurable[self._dependencies["atom_selection"]]
         atomSelConfigurator["unique_names"] = sorted(set(atomSelConfigurator["names"]))
@@ -169,7 +169,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         ]
         self.error_status = "OK"
 
-    def transmutate(self, idx: int, element: str) -> None:
+    def transmute(self, idx: int, element: str) -> None:
         """Transmute the atom index to the chosen element.
 
         Parameters
@@ -188,7 +188,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         else:
             atomSelConfigurator["names"][idxInSelection] = element
             atomSelConfigurator["elements"][idxInSelection] = [element]
-            self._nTransmutatedAtoms += 1
+            self._nTransmutedAtoms += 1
 
     def get_information(self) -> str:
         """
@@ -203,7 +203,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         if self["value"] is None:
             return "No atoms selected for transmutation\n"
 
-        return "Number of transmuted atoms:%d\n" % self._nTransmutatedAtoms
+        return "Number of transmuted atoms:%d\n" % self._nTransmutedAtoms
 
     def get_transmuter(self) -> AtomTransmuter:
         """

@@ -38,6 +38,7 @@ ALL_JOBS = [
     "SolventAccessibleSurface",
     "StructureFactorFromScatteringFunction",
     "Temperature",
+    "TrajectoryEditor",
     "UnfoldedTrajectory",
     "VanHoveFunctionDistinct",
     "VanHoveFunctionSelf",

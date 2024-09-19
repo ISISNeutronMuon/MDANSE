@@ -94,8 +94,18 @@ class Single(Plotter):
         if self._toolbar is not None:
             self._toolbar.update()
             self._toolbar.push_current()
-        self._axes[0].set_xlim(saved_xmin, saved_xmax)
-        self._axes[0].set_ylim(saved_ymin, saved_ymax)
+        try:
+            self._axes[0].set_xlim(saved_xmin, saved_xmax)
+        except ValueError:
+            LOG.error(
+                f"Matplotlib could not set x limits to {saved_xmin}, {saved_xmax}"
+            )
+        try:
+            self._axes[0].set_ylim(saved_ymin, saved_ymax)
+        except ValueError:
+            LOG.error(
+                f"Matplotlib could not set y limits to {saved_ymin}, {saved_ymax}"
+            )
         target.canvas.draw()
 
     def plot(
@@ -191,8 +201,18 @@ class Single(Plotter):
         if len(self._backup_curves) > 1:
             self.enable_slider(True)
         if update_only:
-            axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
-            axes.set_ylim((self._backup_limits[2], self._backup_limits[3]))
+            try:
+                axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
+            except ValueError:
+                LOG.error(
+                    f"Matplotlib could not set x limits to {self._backup_limits[0]}, {self._backup_limits[1]}"
+                )
+            try:
+                axes.set_ylim((self._backup_limits[2], self._backup_limits[3]))
+            except ValueError:
+                LOG.error(
+                    f"Matplotlib could not set y limits to {self._backup_limits[2]}, {self._backup_limits[3]}"
+                )
         else:
             xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
             self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]

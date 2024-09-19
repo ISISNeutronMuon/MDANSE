@@ -37,17 +37,30 @@ class DistHistCutoffConfigurator(RangeConfigurator):
             The maximum cutoff for the distance histogram job.
         """
         traj_config = self._configurable[self._dependencies["trajectory"]]["instance"]
-        min_d = np.min(
-            [uc.direct for uc in traj_config._trajectory._unit_cells], axis=0
-        )
-        vec_a, vec_b, vec_c = min_d
-        a = np.linalg.norm(vec_a)
-        b = np.linalg.norm(vec_b)
-        c = np.linalg.norm(vec_c)
+        try:
+            trajectory_array = np.array(
+                [
+                    traj_config.unit_cell(frame)._unit_cell
+                    for frame in range(len(traj_config))
+                ]
+            )
+        except:
+            return np.linalg.norm(traj_config.min_span)
+        else:
+            if np.allclose(trajectory_array, 0.0):
+                return np.linalg.norm(traj_config.min_span)
+            else:
+                min_d = np.min(trajectory_array, axis=0)
+                vec_a, vec_b, vec_c = min_d
+                a = np.linalg.norm(vec_a)
+                b = np.linalg.norm(vec_b)
+                c = np.linalg.norm(vec_c)
 
-        i, j, k = reversed(np.argsort([a, b, c]))
-        vecs = [vec_a, vec_b, vec_c]
+                i, j, k = reversed(np.argsort([a, b, c]))
+                vecs = [vec_a, vec_b, vec_c]
 
-        cross_ij = np.cross(vecs[i], vecs[j])
-        proj = cross_ij * (vecs[k] @ cross_ij) / (cross_ij @ cross_ij)
-        return np.linalg.norm(proj) / 2
+                cross_ij = np.cross(vecs[i], vecs[j])
+                if np.allclose(cross_ij, 0.0):
+                    raise ValueError("Trajectory contains invalid unit cell.")
+                proj = cross_ij * (vecs[k] @ cross_ij) / (cross_ij @ cross_ij)
+                return np.linalg.norm(proj) / 2

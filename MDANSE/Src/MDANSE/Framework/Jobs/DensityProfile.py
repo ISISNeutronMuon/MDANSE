@@ -99,7 +99,8 @@ class DensityProfile(IJob):
             axis = first_conf.unit_cell.direct[axis_index, :]
         except:
             raise DensityProfileError(
-                "Density profile cannot be computed without a simulation box"
+                "Density profile cannot be computed without a simulation box. "
+                "You can add a box using TrajectoryEditor."
             )
 
         axis_length = np.sqrt(np.sum(axis**2))

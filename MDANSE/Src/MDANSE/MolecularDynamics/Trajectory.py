@@ -21,6 +21,7 @@ import math
 import numpy as np
 import h5py
 
+from MDANSE.MLogging import LOG
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Chemistry import ATOMS_DATABASE
@@ -53,6 +54,8 @@ class Trajectory:
         if self._format is None:
             self.guess_correct_format()
         self._trajectory = self.open_trajectory(self._format)
+        self._min_span = np.zeros(3)
+        self._max_span = np.zeros(3)
 
     def guess_correct_format(self):
         """This is a placeholder for now. As the number of
@@ -149,6 +152,29 @@ class Trajectory:
         """
 
         return self._trajectory.unit_cell(frame)
+
+    def calculate_coordinate_span(self) -> np.ndarray:
+        min_span = np.array(3 * [1e11])
+        max_span = np.zeros(3)
+        for frame in range(len(self)):
+            coords = self.coordinates(frame)
+            span = coords.max(axis=0) - coords.min(axis=0)
+            min_span = np.minimum(span, min_span)
+            max_span = np.maximum(span, max_span)
+        self._max_span = max_span
+        self._min_span = min_span
+
+    @property
+    def max_span(self):
+        if np.allclose(self._max_span, 0.0):
+            self.calculate_coordinate_span()
+        return self._max_span
+
+    @property
+    def min_span(self):
+        if np.allclose(self._min_span, 0.0):
+            self.calculate_coordinate_span()
+        return self._min_span
 
     def read_com_trajectory(
         self, atoms, first=0, last=None, step=1, box_coordinates=False
@@ -340,6 +366,9 @@ class TrajectoryWriter:
         else:
             for at in selected_atoms:
                 if at.root_chemical_system != chemical_system:
+                    LOG.error(
+                        f"atom.chemical_system={at.root_chemical_system} and traj.chemical_system={chemical_system}"
+                    )
                     raise TrajectoryWriterError(
                         "One or more atoms of the selection comes from a different chemical system"
                     )
