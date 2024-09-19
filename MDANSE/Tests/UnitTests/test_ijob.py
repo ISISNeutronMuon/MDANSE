@@ -41,6 +41,7 @@ ALL_JOBS = [
     "TrajectoryEditor",
     "UnfoldedTrajectory",
     "VanHoveFunctionDistinct",
+    "VanHoveFunctionSelf",
     "VelocityAutoCorrelationFunction",
     "Voronoi",
     "Converter",

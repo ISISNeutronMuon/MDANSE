@@ -33,6 +33,9 @@ from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.MLogging import LOG
 
 
+ELECTRON_CHARGE = 1.6021765e-19
+
+
 class LAMMPSTrajectoryFileError(Error):
     pass
 
@@ -61,48 +64,56 @@ class LAMMPSReader:
         self._length_unit = ""
         self._velocity_unit = ""
         self._mass_unit = ""
+        self._charge_conversion_factor = 1.0
         if lammps_units == "real":
             self._energy_unit = "kcal_per_mole"
             self._time_unit = "fs"
             self._length_unit = "ang"
             self._velocity_unit = "ang/fs"
             self._mass_unit = "uma"
+            self._charge_conversion_factor = 1.0
         elif lammps_units == "metal":
             self._energy_unit = "eV"
             self._time_unit = "ps"
             self._length_unit = "ang"
             self._velocity_unit = "ang/ps"
             self._mass_unit = "uma"
+            self._charge_conversion_factor = 1.0
         elif lammps_units == "si":
             self._energy_unit = "J"
             self._time_unit = "s"
             self._length_unit = "m"
             self._velocity_unit = "m/s"
             self._mass_unit = "kg"
+            self._charge_conversion_factor = 1.0 / ELECTRON_CHARGE
         elif lammps_units == "cgs":
             self._energy_unit = "erg"  # this will fail
             self._time_unit = "s"
             self._length_unit = "cm"
             self._velocity_unit = "cm/s"
             self._mass_unit = "g"
+            self._charge_conversion_factor = 1.0 / 4.8032044e-10
         elif lammps_units == "electron":
             self._energy_unit = "Ha"
             self._time_unit = "fs"
             self._length_unit = "Bohr"
             self._velocity_unit = "ang/fs"
             self._mass_unit = "uma"
+            self._charge_conversion_factor = 1.0
         elif lammps_units == "micro":
             self._energy_unit = "pg*m/s"
             self._time_unit = "us"
             self._length_unit = "um"
             self._velocity_unit = "m/s"
             self._mass_unit = "pg"
+            self._charge_conversion_factor = 1.0 / (ELECTRON_CHARGE * 1e12)
         elif lammps_units == "nano":
             self._energy_unit = "ag*m/s"
             self._time_unit = "ns"
             self._length_unit = "nm"
             self._velocity_unit = "m/s"
             self._mass_unit = "ag"
+            self._charge_conversion_factor = 1.0
 
 
 class LAMMPScustom(LAMMPSReader):
@@ -150,6 +161,10 @@ class LAMMPScustom(LAMMPSReader):
 
                 self._id = keywords.index("id")
                 self._type = keywords.index("type")
+                try:
+                    self._charge = keywords.index("q")
+                except ValueError:
+                    self._charge = None
 
                 # Field name is <x,y,z> or cd ..<x,y,z>u if real coordinates and <x,y,z>s if fractional ones
                 self._fractionalCoordinates = False
@@ -311,6 +326,11 @@ class LAMMPScustom(LAMMPSReader):
             (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
         )
 
+        if self._charge is not None:
+            charges = np.empty(
+                self._trajectory.chemical_system.number_of_atoms, dtype=np.float64
+            )
+
         for i, _ in enumerate(
             range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])
         ):
@@ -319,6 +339,8 @@ class LAMMPScustom(LAMMPSReader):
             coords[idx, :] = np.array(
                 [temp[self._x], temp[self._y], temp[self._z]], dtype=np.float64
             )
+            if self._charge is not None:
+                charges[idx] = float(temp[self._charge])
 
         if self._fractionalCoordinates:
             conf = PeriodicBoxConfiguration(
@@ -341,6 +363,10 @@ class LAMMPScustom(LAMMPSReader):
         self._trajectory.dump_configuration(
             time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
         )
+        if self._charge is not None:
+            self._trajectory.write_charges(
+                charges * self._charge_conversion_factor, index
+            )
 
         self._start += self._last
 
@@ -515,6 +541,8 @@ class LAMMPSh5md(LAMMPSReader):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._charges_fixed = None
+        self._charges_variable = None
 
     def get_time_steps(self, filename: str) -> int:
         number_of_steps = 0
@@ -543,6 +571,10 @@ class LAMMPSh5md(LAMMPSReader):
         full_cell = np.array(
             [[cell_edges[0], 0, 0], [0, cell_edges[1], 0], [0, 0, cell_edges[2]]]
         )
+        try:
+            self._charges_fixed = self._file["/particles/all/charge"][:]
+        except:
+            pass
 
         full_cell *= measure(1.0, self._length_unit).toval("nm")
 
@@ -632,6 +664,15 @@ class LAMMPSh5md(LAMMPSReader):
         self._trajectory.dump_configuration(
             time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
         )
+        if self._charges_fixed is None:
+            try:
+                charge = self._file["/particles/all/charge/value"][index]
+            except:
+                pass
+            else:
+                self._trajectory.write_charges(
+                    charge * self._charge_conversion_factor, index
+                )
 
         return index, 0
 
@@ -739,6 +780,17 @@ class LAMMPS(Converter):
                 self.configuration["trajectory_file"]["value"]
             )
 
+        charges_single_cell = (
+            np.array(self._lammpsConfig["charges"])
+            * self._reader._charge_conversion_factor
+        )
+        if len(charges_single_cell) < self._chemicalSystem.number_of_atoms:
+            charges = list(charges_single_cell) * int(
+                self._chemicalSystem.number_of_atoms // len(charges_single_cell)
+            )
+        else:
+            charges = list(charges_single_cell)
+
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
@@ -746,6 +798,7 @@ class LAMMPS(Converter):
             self.numberOfSteps,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
+            initial_charges=charges,
         )
 
         self._reader._nameToIndex = dict(

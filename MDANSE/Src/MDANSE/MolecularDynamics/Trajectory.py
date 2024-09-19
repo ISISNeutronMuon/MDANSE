@@ -16,6 +16,7 @@
 
 from ast import operator
 from typing import Collection
+import math
 
 import numpy as np
 import h5py
@@ -96,6 +97,18 @@ class Trajectory:
 
     def __len__(self):
         return len(self._trajectory)
+
+    def charges(self, frame):
+        """Return the coordinates at a given frame.
+
+        :param frame: the frame
+        :type frame: int
+
+        :return: the coordinates
+        :rtype: ndarray
+        """
+
+        return self._trajectory.charges(frame)
 
     def coordinates(self, frame):
         """Return the coordinates at a given frame.
@@ -328,6 +341,7 @@ class TrajectoryWriter:
         positions_dtype=np.float64,
         chunking_axis=1,
         compression="none",
+        initial_charges=None,
     ):
         """Constructor.
 
@@ -372,6 +386,8 @@ class TrajectoryWriter:
 
         self._n_steps = n_steps
 
+        self._n_atoms = self._chemical_system.total_number_of_atoms
+
         self._current_index = 0
 
         self._dtype = positions_dtype
@@ -379,6 +395,11 @@ class TrajectoryWriter:
         self._chunking_axis = chunking_axis
 
         self._compression = compression
+
+        if initial_charges is None:
+            self._initial_charges = np.zeros(self._n_atoms)
+        else:
+            self._initial_charges = initial_charges
 
     def _dump_chemical_system(self):
         """Dump the chemical system to the trajectory file."""
@@ -391,6 +412,8 @@ class TrajectoryWriter:
 
     def close(self):
         """Close the trajectory file"""
+        self.validate_charges()
+
         configuration = self._chemical_system.configuration
         n_atoms = self._chemical_system.total_number_of_atoms
         if configuration is not None:
@@ -407,6 +430,54 @@ class TrajectoryWriter:
             time_dataset = self._h5_file["/time"]
             time_dataset.resize((self._current_index,))
         self._h5_file.close()
+
+    def write_charges(self, charges: np.ndarray, index: int):
+        """Writes atom charges into their dataset at the specified index.
+
+        Parameters
+        ----------
+        charges : np.ndarray
+            array of float values: atomic charges in proton charge units
+        index : int
+            number of the simulation frame
+        """
+        variable_charge_dset = self._h5_file.get("/configuration/charges", None)
+        if variable_charge_dset is None:
+            if self._compression in TrajectoryWriter.allowed_compression:
+                variable_charge_dset = self._h5_file.create_dataset(
+                    "/configuration/charges",
+                    shape=(self._n_steps, self._n_atoms),
+                    chunks=(1, self._n_atoms),
+                    dtype=self._dtype,
+                    compression=self._compression,
+                )
+            else:
+                variable_charge_dset = self._h5_file.create_dataset(
+                    "/configuration/charges",
+                    shape=(self._n_steps, self._n_atoms),
+                    chunks=(1, self._n_atoms),
+                    dtype=self._dtype,
+                )
+        variable_charge_dset[index] = charges
+
+    def validate_charges(self):
+        charge_is_constant = False
+        variable_charge_dset = self._h5_file.get("/configuration/charges", None)
+        if variable_charge_dset is None:
+            charge_is_constant = True
+            new_charge = self._initial_charges
+        elif np.allclose(np.std(variable_charge_dset, axis=0), 0.0):
+            charge_is_constant = True
+            new_charge = np.mean(variable_charge_dset, axis=0)
+        if charge_is_constant:
+            constant_charge_dset = self._h5_file.create_dataset(
+                "/charge",
+                shape=(self._n_atoms,),
+                dtype=self._dtype,
+            )
+            constant_charge_dset[:] = new_charge
+            if variable_charge_dset is not None:
+                del self._h5_file[variable_charge_dset.name]
 
     def dump_configuration(self, time, units=None):
         """Dump the chemical system configuration at a given time.
@@ -430,12 +501,16 @@ class TrajectoryWriter:
         if units is None:
             units = {}
 
-        n_atoms = self._chemical_system.total_number_of_atoms
-
-        if self._chunking_axis == 1:
-            chunk_tuple = (1, n_atoms, 3)
-        else:
+        if self._chunking_axis == 0:
             chunk_tuple = (self._n_steps, 1, 3)
+        if self._chunking_axis == 1:
+            chunk_tuple = (1, self._n_atoms, 3)
+        else:
+            chunk_tuple = (
+                self._chunking_axis,
+                math.gcd(self._n_atoms, self._n_atoms // self._chunking_axis),
+                3,
+            )
 
         # Write the configuration variables
         configuration_grp = self._h5_file["/configuration"]
@@ -448,16 +523,16 @@ class TrajectoryWriter:
                 if self._compression in TrajectoryWriter.allowed_compression:
                     dset = configuration_grp.create_dataset(
                         k,
-                        shape=(self._n_steps, n_atoms, 3),
-                        chunks=(1, n_atoms, 3),
+                        shape=(self._n_steps, self._n_atoms, 3),
+                        chunks=chunk_tuple,
                         dtype=self._dtype,
                         compression=self._compression,
                     )
                 else:
                     dset = configuration_grp.create_dataset(
                         k,
-                        shape=(self._n_steps, n_atoms, 3),
-                        chunks=(1, n_atoms, 3),
+                        shape=(self._n_steps, self._n_atoms, 3),
+                        chunks=chunk_tuple,
                         dtype=self._dtype,
                     )
                 dset.attrs["units"] = units.get(k, "")

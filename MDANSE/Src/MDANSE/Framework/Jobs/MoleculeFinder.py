@@ -103,6 +103,7 @@ class MoleculeFinder(IJob):
             self.numberOfSteps,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
+            initial_charges=self.configuration["trajectory"]["instance"].charges(0),
         )
 
     def run_step(self, index):
@@ -151,7 +152,11 @@ class MoleculeFinder(IJob):
         # The times corresponding to the running index.
         time = self.configuration["frames"]["time"][index]
 
+        charge = self.configuration["trajectory"]["instance"].charges(index)
+
         self._output_trajectory.dump_configuration(time)
+
+        self._output_trajectory.write_charges(charge, index)
 
         return index, None
 
