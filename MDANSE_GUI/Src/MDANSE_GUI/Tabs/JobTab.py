@@ -40,6 +40,7 @@ class JobTab(GeneralTab):
     """The tab for choosing and starting a new job."""
 
     def __init__(self, *args, **kwargs):
+        self._needs_updating = False
         self.action = kwargs.pop("action")
         cmodel = kwargs.pop("combo_model", None)
         imodel = kwargs.pop("instrument_model", None)
@@ -125,9 +126,15 @@ class JobTab(GeneralTab):
     def update_action_after_instrument_change(self, index: int):
         if index != self._instrument_index:
             return
-        current_item = self._core.current_item()
-        if current_item is not None:
-            self.action.update_panel(current_item.text())
+        self._needs_updating = True
+
+    @Slot()
+    def update_action_on_tab_activation(self):
+        if self._needs_updating:
+            current_item = self._core.current_item()
+            if current_item is not None:
+                self.action.update_panel(current_item.text())
+            self._needs_updating = False
 
     @classmethod
     def standard_instance(cls):
