@@ -266,9 +266,9 @@ class Action(QWidget):
 
         self.layout.addWidget(buttonbase)
         self._widgets_in_layout.append(buttonbase)
-        self.allow_execution()
-        self.show_output_prediction()
+        self.apply_instrument()
 
+    def apply_instrument(self):
         if self._current_instrument is not None:
             q_vector_tuple = self._current_instrument.create_q_vector_params()
             resolution_tuple = self._current_instrument.create_resolution_params()
@@ -284,6 +284,8 @@ class Action(QWidget):
                     widget._model.switch_qvector_type(
                         q_vector_tuple[0], q_vector_tuple[1]
                     )
+        self.allow_execution()
+        self.show_output_prediction()
 
     @Slot()
     def show_output_prediction(self):

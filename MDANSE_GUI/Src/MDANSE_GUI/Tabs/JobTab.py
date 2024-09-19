@@ -120,7 +120,7 @@ class JobTab(GeneralTab):
         if current_item is not None:
             # we only update the widget if a job is selected from the
             # actions tree
-            self.action.update_panel(current_item.text())
+            self.action.apply_instrument()
 
     @Slot(int)
     def update_action_after_instrument_change(self, index: int):
@@ -133,7 +133,7 @@ class JobTab(GeneralTab):
         if self._needs_updating:
             current_item = self._core.current_item()
             if current_item is not None:
-                self.action.update_panel(current_item.text())
+                self.action.apply_instrument()
             self._needs_updating = False
 
     @classmethod
