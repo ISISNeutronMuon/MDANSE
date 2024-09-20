@@ -207,18 +207,21 @@ class PlottingContext(QStandardItemModel):
         self._colour_map = kwargs.get("colormap", "viridis")
         self._last_colour = 0
         self._unit_lookup = unit_lookup
-        self.setHorizontalHeaderLabels(
-            [
-                "Dataset",
-                "Trajectory",
-                "Size",
-                "Unit",
-                "Use it?",
-                "Colour",
-                "Line style",
-                "Marker",
-            ]
-        )
+        column_labels = [
+            "Dataset",
+            "Trajectory",
+            "Size",
+            "Unit",
+            "Main axis",
+            "Use it?",
+            "Colour",
+            "Line style",
+            "Marker",
+        ]
+        self.setHorizontalHeaderLabels(column_labels)
+        self._column_index = {
+            label: number for number, label in enumerate(column_labels)
+        }
 
     def generate_colour(self, number: int):
         return self._colour_list[number % len(self._colour_list)]
@@ -246,14 +249,16 @@ class PlottingContext(QStandardItemModel):
         self._colour_list = get_mpl_colours()
         self._last_colour = 0
         for row in range(self.rowCount()):
-            current_colour = self.item(row, 5).text()
+            current_colour = self.item(row, self._column_index["Colour"]).text()
             if (
                 current_colour
                 != self._last_colour_list[row % len(self._last_colour_list)]
             ):
                 self._last_colour += 1
             else:
-                self.item(row, 5).setText(str(self.next_colour()))
+                self.item(row, self._column_index["Colour"]).setText(
+                    str(self.next_colour())
+                )
 
     @Slot(object)
     def accept_external_data(self, other: "PlottingContext"):
@@ -279,14 +284,24 @@ class PlottingContext(QStandardItemModel):
     def datasets(self) -> Dict:
         result = {}
         for ds_num, row in enumerate(range(self.rowCount())):
-            key = self.index(row, 0).data(role=Qt.ItemDataRole.UserRole)
+            key = self.index(row, self._column_index["Dataset"]).data(
+                role=Qt.ItemDataRole.UserRole
+            )
             useit = (
-                self.itemFromIndex(self.index(row, 4)).checkState()
+                self.itemFromIndex(
+                    self.index(row, self._column_index["Use it?"])
+                ).checkState()
                 == Qt.CheckState.Checked
             )
-            colour = self.itemFromIndex(self.index(row, 5)).text()
-            style = self.itemFromIndex(self.index(row, 6)).text()
-            marker = self.itemFromIndex(self.index(row, 7)).text()
+            colour = self.itemFromIndex(
+                self.index(row, self._column_index["Colour"])
+            ).text()
+            style = self.itemFromIndex(
+                self.index(row, self._column_index["Line style"])
+            ).text()
+            marker = self.itemFromIndex(
+                self.index(row, self._column_index["Marker"])
+            ).text()
             if useit:
                 result[key] = (self._datasets[key], colour, style, marker, ds_num)
         return result
@@ -305,6 +320,7 @@ class PlottingContext(QStandardItemModel):
                 new_dataset._filename,
                 new_dataset._data.shape,
                 new_dataset._data_unit,
+                "0",
                 "",
                 self.next_colour(),
                 "-",
@@ -313,9 +329,9 @@ class PlottingContext(QStandardItemModel):
         ]
         for item in items:
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
-        for item in items[:5]:
+        for item in items[:3] + items[4:5]:
             item.setEditable(False)
-        temp = items[4]
+        temp = items[self._column_index["Use it?"]]
         temp.setCheckable(True)
         temp.setCheckState(Qt.CheckState.Checked)
         self.itemChanged.connect(self.needs_an_update)
