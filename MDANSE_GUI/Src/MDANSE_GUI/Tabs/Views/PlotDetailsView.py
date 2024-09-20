@@ -19,7 +19,11 @@ from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtGui import QColor
 
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, MplStyleCombo
-from MDANSE_GUI.Tabs.Models.PlottingContext import get_mpl_lines, get_mpl_markers
+from MDANSE_GUI.Tabs.Models.PlottingContext import (
+    get_mpl_lines,
+    get_mpl_markers,
+    plotting_column_index,
+)
 
 
 class PlotDetailsView(QTreeView):
@@ -32,9 +36,15 @@ class PlotDetailsView(QTreeView):
             "line": MplStyleCombo(mpl_items=get_mpl_lines()),
             "marker": MplStyleCombo(mpl_items=get_mpl_markers()),
         }
-        self.setItemDelegateForColumn(5, self._delegates["colour"])
-        self.setItemDelegateForColumn(6, self._delegates["line"])
-        self.setItemDelegateForColumn(7, self._delegates["marker"])
+        self.setItemDelegateForColumn(
+            plotting_column_index["Colour"], self._delegates["colour"]
+        )
+        self.setItemDelegateForColumn(
+            plotting_column_index["Line style"], self._delegates["line"]
+        )
+        self.setItemDelegateForColumn(
+            plotting_column_index["Marker"], self._delegates["marker"]
+        )
 
     def connect_to_visualiser(self, visualiser) -> None:
         """Connect to a visualiser.
