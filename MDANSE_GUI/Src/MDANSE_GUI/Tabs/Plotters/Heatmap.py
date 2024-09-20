@@ -35,7 +35,6 @@ class Heatmap(Plotter):
     def __init__(self) -> None:
         super().__init__()
         self._figure = None
-        self._current_colours = []
         self._backup_images = {}
         self._backup_arrays = {}
         self._backup_minmax = {}
@@ -116,7 +115,6 @@ class Heatmap(Plotter):
         self,
         plotting_context: "PlottingContext",
         figure: "Figure" = None,
-        colours=None,
         update_only=False,
         toolbar=None,
     ):
@@ -132,11 +130,10 @@ class Heatmap(Plotter):
         self._backup_scale_interpolators = {}
         xaxis_unit = None
         yaxis_unit = None
-        self.get_mpl_colors()
         self._axes = []
         if not update_only:
             self._last_axes_units = {}
-        self.apply_settings(plotting_context, colours)
+        self.apply_settings(plotting_context)
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return

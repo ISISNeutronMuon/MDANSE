@@ -43,16 +43,11 @@ class Grid(Plotter):
         self,
         plotting_context: "PlottingContext",
         figure: "Figure" = None,
-        colours=None,
         update_only=False,
         toolbar=None,
     ):
         self.enable_slider(False)
         target = self.get_figure(figure)
-        self.get_mpl_colors()
-        if colours is not None:
-            self._current_colours = colours
-        number_of_colours = len(self._current_colours)
         if target is None:
             return
         if toolbar is not None:
@@ -61,7 +56,7 @@ class Grid(Plotter):
             LOG.debug("Axis check failed.")
             return
         self._axes = []
-        self.apply_settings(plotting_context, colours)
+        self.apply_settings(plotting_context)
         nplots = 0
         for databundle in plotting_context.datasets().values():
             ds, colour, linestyle, marker, _ = databundle
@@ -133,5 +128,5 @@ class Grid(Plotter):
                 axes.set_xlabel(xaxis_unit)
                 axes.legend(loc=0)
                 startnum += 1
-        self.apply_settings(plotting_context, colours)
+        self.apply_settings(plotting_context)
         target.canvas.draw()
