@@ -32,6 +32,7 @@ class Eccentricity(IJob):
     eccentricity will be 1. This job follows the equations used in rdkit
     which was itself taken from https://doi.org/10.1002/9783527618279.ch37.
     """
+
     label = "Eccentricity"
 
     category = (
@@ -78,16 +79,20 @@ class Eccentricity(IJob):
         self._atoms = sorted_atoms(
             self.configuration["trajectory"]["instance"].chemical_system.atom_list
         )
-        self._indexes = np.array([
-            idx
-            for idxs in self._configuration["atom_selection"]["indexes"]
-            for idx in idxs
-        ])
-        self._selectionMasses = np.array([
-            m
-            for masses in self._configuration["atom_selection"]["masses"]
-            for m in masses
-        ])
+        self._indexes = np.array(
+            [
+                idx
+                for idxs in self._configuration["atom_selection"]["indexes"]
+                for idx in idxs
+            ]
+        )
+        self._selectionMasses = np.array(
+            [
+                m
+                for masses in self._configuration["atom_selection"]["masses"]
+                for m in masses
+            ]
+        )
 
     def run_step(self, index: int):
         """Calculate the eccentricity for the selected atoms at the
