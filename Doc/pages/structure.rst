@@ -137,8 +137,8 @@ The eccentricity of a selection of atom is calculated using the equation
 
 where :math:`\lambda_{1}` and :math:`\lambda_{3}` are its smallest and
 largest principal moments of inertia. A spherically symmetric
-selection of atoms will have an eccentricity of 0 and an aspherical
-selection of atoms will have a eccentricity of 1.
+selection of atoms will have an eccentricity approaching 0 and an
+aspherical selection of atoms will have a eccentricity approaching 1.
 
 .. _molecular-trace:
 
