@@ -135,8 +135,11 @@ class Single(Plotter):
             target.clear()
             target.canvas.draw()
         for name, databundle in plotting_context.datasets().items():
-            dataset, colour, linestyle, marker, _ = databundle
-            best_unit, best_axis = dataset.longest_axis()
+            dataset, colour, linestyle, marker, _, axis_label = databundle
+            try:
+                best_unit, best_axis = (dataset._axes_units[axis_label], axis_label)
+            except KeyError:
+                best_unit, best_axis = dataset.longest_axis()
             plotlabel = dataset._labels["medium"]
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)
             try:

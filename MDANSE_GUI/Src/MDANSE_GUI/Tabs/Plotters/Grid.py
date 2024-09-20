@@ -59,15 +59,21 @@ class Grid(Plotter):
         self.apply_settings(plotting_context)
         nplots = 0
         for databundle in plotting_context.datasets().values():
-            ds, colour, linestyle, marker, _ = databundle
-            best_unit, best_axis = ds.longest_axis()
+            ds, colour, linestyle, marker, _, axis_label = databundle
+            try:
+                best_unit, best_axis = ds._axes_units[axis_label], axis_label
+            except KeyError:
+                best_unit, best_axis = ds.longest_axis()
             curves = ds.curves_vs_axis(best_unit)
             nplots += len(curves)
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
         for name, databundle in plotting_context.datasets().items():
-            dataset, colour, linestyle, marker, ds_num = databundle
-            best_unit, best_axis = dataset.longest_axis()
+            dataset, colour, linestyle, marker, ds_num, axis_label = databundle
+            try:
+                best_unit, best_axis = ds._axes_units[axis_label], axis_label
+            except KeyError:
+                best_unit, best_axis = ds.longest_axis()
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)
             for key, curve in dataset._curves.items():
                 axes = target.add_subplot(gridsize, gridsize, startnum)

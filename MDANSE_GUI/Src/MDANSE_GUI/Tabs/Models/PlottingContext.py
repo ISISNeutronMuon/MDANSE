@@ -304,8 +304,11 @@ class PlottingContext(QStandardItemModel):
             marker = self.itemFromIndex(
                 self.index(row, plotting_column_index["Marker"])
             ).text()
+            axis = self.itemFromIndex(
+                self.index(row, plotting_column_index["Main axis"])
+            ).text()
             if useit:
-                result[key] = (self._datasets[key], colour, style, marker, ds_num)
+                result[key] = (self._datasets[key], colour, style, marker, ds_num, axis)
         return result
 
     def add_dataset(self, new_dataset: SingleDataset):
@@ -322,7 +325,7 @@ class PlottingContext(QStandardItemModel):
                 new_dataset._filename,
                 new_dataset._data.shape,
                 new_dataset._data_unit,
-                "0",
+                "",
                 "",
                 self.next_colour(),
                 "-",
@@ -331,7 +334,7 @@ class PlottingContext(QStandardItemModel):
         ]
         for item in items:
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
-        for item in items[:3] + items[4:5]:
+        for item in items[:4]:
             item.setEditable(False)
         temp = items[plotting_column_index["Use it?"]]
         temp.setCheckable(True)

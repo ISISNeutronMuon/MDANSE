@@ -18,7 +18,7 @@ from qtpy.QtWidgets import QTreeView, QComboBox, QItemDelegate, QColorDialog
 from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtGui import QColor
 
-from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, MplStyleCombo
+from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, MplStyleCombo, MainAxisCombo
 from MDANSE_GUI.Tabs.Models.PlottingContext import (
     get_mpl_lines,
     get_mpl_markers,
@@ -33,6 +33,7 @@ class PlotDetailsView(QTreeView):
         super().__init__(*args, **kwargs)
         self._delegates = {
             "colour": ColourPicker(),
+            "axis": MainAxisCombo(),
             "line": MplStyleCombo(mpl_items=get_mpl_lines()),
             "marker": MplStyleCombo(mpl_items=get_mpl_markers()),
         }
@@ -44,6 +45,9 @@ class PlotDetailsView(QTreeView):
         )
         self.setItemDelegateForColumn(
             plotting_column_index["Marker"], self._delegates["marker"]
+        )
+        self.setItemDelegateForColumn(
+            plotting_column_index["Main axis"], self._delegates["axis"]
         )
 
     def connect_to_visualiser(self, visualiser) -> None:
