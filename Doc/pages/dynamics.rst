@@ -373,7 +373,7 @@ averaged and normalised so that for liquid or gaseous systems
 .. math::
     \lim_{r \rightarrow \infty } G_{\mathrm{d}}(r,\Delta t) = \lim_{\Delta t \rightarrow \infty } G_{\mathrm{d}}(r,\Delta t) = 1
 
-and the self part of the van Hove function in *MDANSE* is summed do
+and the self part of the van Hove function in *MDANSE* is summed so
 that it only depends on the distance :math:`r`
 
 .. math::
