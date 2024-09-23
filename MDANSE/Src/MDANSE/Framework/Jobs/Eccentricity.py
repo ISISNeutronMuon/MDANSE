@@ -106,7 +106,7 @@ class Eccentricity(IJob):
         frameIndex = self.configuration["frames"]["value"][index]
 
         conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
-        conf = conf.continuous_configuration()
+        conf = conf.contiguous_configuration()
         series = conf["coordinates"][self._indexes, :]
 
         com = center_of_mass(series, masses=self._selectionMasses)
