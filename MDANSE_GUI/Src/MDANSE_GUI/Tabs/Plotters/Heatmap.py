@@ -101,9 +101,15 @@ class Heatmap(Plotter):
             if newmin == last_minmax[0] and newmax == last_minmax[1]:
                 return
             if newmax >= newmin:
-                image.set_clim([newmin, newmax])
-                self._figure.canvas.draw_idle()
-                self._backup_minmax[ds_num] = [newmin, newmax]
+                try:
+                    image.set_clim([newmin, newmax])
+                except ValueError:
+                    LOG.error(
+                        f"Matplotlib could not set colorbar limits to {newmin}, {newmax}"
+                    )
+                else:
+                    self._figure.canvas.draw_idle()
+                    self._backup_minmax[ds_num] = [newmin, newmax]
         target.canvas.draw()
 
     def plot(
@@ -192,7 +198,12 @@ class Heatmap(Plotter):
                     interpolator(self._slider_values[0]),
                     interpolator(self._slider_values[1]),
                 ]
-                image.set_clim(last_minmax)
+                try:
+                    image.set_clim(last_minmax)
+                except ValueError:
+                    LOG.error(
+                        f"Matplotlib could not set colorbar limits to {last_minmax}"
+                    )
                 try:
                     last_limits = self._backup_limits[ds_num]
                 except KeyError:
@@ -210,14 +221,24 @@ class Heatmap(Plotter):
                         self._last_axes_units[ds_num] = [axis_units[0], axis_units[1]]
                         previous_units = self._last_axes_units[ds_num]
                     if axis_units[0] == previous_units[0]:
-                        axes.set_xlim((last_limits[0], last_limits[1]))
+                        try:
+                            axes.set_xlim((last_limits[0], last_limits[1]))
+                        except ValueError:
+                            LOG.error(
+                                f"Matplotlib could not set x limits to {last_limits[0]}, {last_limits[1]}"
+                            )
                     else:
                         self._last_axes_units[ds_num][0] = axis_units[0]
                         xlim = axes.get_xlim()
                         self._backup_limits[ds_num][0] = xlim[0]
                         self._backup_limits[ds_num][1] = xlim[1]
                     if axis_units[1] == previous_units[1]:
-                        axes.set_ylim((last_limits[2], last_limits[3]))
+                        try:
+                            axes.set_ylim((last_limits[2], last_limits[3]))
+                        except ValueError:
+                            LOG.error(
+                                f"Matplotlib could not set x limits to {last_limits[2]}, {last_limits[3]}"
+                            )
                     else:
                         self._last_axes_units[ds_num][1] = axis_units[1]
                         ylim = axes.get_ylim()
@@ -239,7 +260,12 @@ class Heatmap(Plotter):
                     interpolator(self._slider_values[0]),
                     interpolator(self._slider_values[1]),
                 ]
-                image.set_clim(last_minmax)
+                try:
+                    image.set_clim(last_minmax)
+                except ValueError:
+                    LOG.error(
+                        f"Matplotlib could not set colorbar limits to {last_minmax}"
+                    )
                 self._backup_minmax[ds_num] = [dataset._data.min(), dataset._data.max()]
                 self._backup_limits[ds_num] = [
                     xlimits[0],

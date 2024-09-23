@@ -197,12 +197,7 @@ class Platform(object, metaclass=abc.ABCMeta):
         :return: the normalized and absolute version of the input path
         :rtype: str
         """
-
-        path = str(path).encode("unicode-escape")
-
-        path = os.path.abspath(os.path.expanduser(path)).decode("utf-8")
-
-        return path
+        return os.path.abspath(os.path.expanduser(path))
 
     def database_default_path(self):
         """

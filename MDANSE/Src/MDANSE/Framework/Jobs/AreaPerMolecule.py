@@ -147,7 +147,8 @@ class AreaPerMolecule(IJob):
             )
         except:
             raise AreaPerMoleculeError(
-                "The unit cell must be defined for AreaPerMolecule"
+                "The unit cell must be defined for AreaPerMolecule. "
+                "You can add a box using TrajectoryEditor."
             )
 
         apm = np.sqrt(np.sum(normalVect**2)) / self._nMolecules

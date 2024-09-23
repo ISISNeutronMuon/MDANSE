@@ -7,6 +7,10 @@ from .RangeConfigurator import RangeConfigurator
 
 class DistHistCutoffConfigurator(RangeConfigurator):
 
+    def __init__(self, name, **kwargs):
+        super().__init__(name, **kwargs)
+        self._max_value = kwargs.get("max_value", True)
+
     def configure(self, value):
         """Configure the distance histogram cutoff configurator.
 
@@ -15,7 +19,7 @@ class DistHistCutoffConfigurator(RangeConfigurator):
         value : tuple
             A tuple of the range parameters.
         """
-        if value[1] > floor(self.get_largest_cutoff() * 100) / 100:
+        if self._max_value and value[1] > floor(self.get_largest_cutoff() * 100) / 100:
             self.error_status = (
                 "The cutoff distance goes into the simulation box periodic images."
             )
@@ -33,15 +37,30 @@ class DistHistCutoffConfigurator(RangeConfigurator):
             The maximum cutoff for the distance histogram job.
         """
         traj_config = self._configurable[self._dependencies["trajectory"]]["instance"]
-        min_d = np.min(traj_config._trajectory._h5_file["unit_cell"], axis=0)
-        vec_a, vec_b, vec_c = min_d
-        a = np.linalg.norm(vec_a)
-        b = np.linalg.norm(vec_b)
-        c = np.linalg.norm(vec_c)
+        try:
+            trajectory_array = np.array(
+                [
+                    traj_config.unit_cell(frame)._unit_cell
+                    for frame in range(len(traj_config))
+                ]
+            )
+        except:
+            return np.linalg.norm(traj_config.min_span)
+        else:
+            if np.allclose(trajectory_array, 0.0):
+                return np.linalg.norm(traj_config.min_span)
+            else:
+                min_d = np.min(trajectory_array, axis=0)
+                vec_a, vec_b, vec_c = min_d
+                a = np.linalg.norm(vec_a)
+                b = np.linalg.norm(vec_b)
+                c = np.linalg.norm(vec_c)
 
-        i, j, k = reversed(np.argsort([a, b, c]))
-        vecs = [vec_a, vec_b, vec_c]
+                i, j, k = reversed(np.argsort([a, b, c]))
+                vecs = [vec_a, vec_b, vec_c]
 
-        cross_ij = np.cross(vecs[i], vecs[j])
-        proj = cross_ij * (vecs[k] @ cross_ij) / (cross_ij @ cross_ij)
-        return np.linalg.norm(proj) / 2
+                cross_ij = np.cross(vecs[i], vecs[j])
+                if np.allclose(cross_ij, 0.0):
+                    raise ValueError("Trajectory contains invalid unit cell.")
+                proj = cross_ij * (vecs[k] @ cross_ij) / (cross_ij @ cross_ij)
+                return np.linalg.norm(proj) / 2

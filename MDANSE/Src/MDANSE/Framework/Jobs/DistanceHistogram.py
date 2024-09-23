@@ -19,8 +19,8 @@ import itertools
 
 import numpy as np
 
-from MDANSE.Extensions import distance_histogram
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Extensions import van_hove
+from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
 
 
@@ -138,6 +138,14 @@ class DistanceHistogram(IJob):
             itertools.combinations_with_replacement(self.selectedElements, 2)
         )
 
+    def detailed_unit_cell_error(self):
+        raise ValueError(
+            "This analysis job requires a unit cell (simulation box) to be defined. "
+            "The box will be used for calculating density in the analysis. "
+            "You can add a simulation box to the trajectory using the TrajectoryEditor job. "
+            "Be careful adding the simulation box, as the wrong dimensions can render the results meaningless."
+        )
+
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -162,26 +170,25 @@ class DistanceHistogram(IJob):
 
             cell_volume = conf.unit_cell.volume
         except:
-            direct_cell = np.eye(3)
-            inverse_cell = np.eye(3)
-
-            cell_volume = 1.0
+            self.detailed_unit_cell_error()
+        else:
+            if cell_volume < 1e-9:
+                self.detailed_unit_cell_error()
 
         coords = conf["coordinates"]
+        scaleconfig = coords @ inverse_cell
 
         hIntraTemp = np.zeros(self.hIntra.shape, dtype=np.float64)
         hInterTemp = np.zeros(self.hInter.shape, dtype=np.float64)
 
-        distance_histogram.distance_histogram(
-            coords[self._indexes, :],
+        van_hove.van_hove_distinct(
             direct_cell,
-            inverse_cell,
-            self._indexes,
             self.indexToMolecule,
             self.indexToSymbol,
             hIntraTemp,
             hInterTemp,
-            self.scaleconfig,
+            scaleconfig,
+            scaleconfig,
             self.configuration["r_values"]["first"],
             self.configuration["r_values"]["step"],
         )

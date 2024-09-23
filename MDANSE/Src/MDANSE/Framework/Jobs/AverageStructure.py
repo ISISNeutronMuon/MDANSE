@@ -152,7 +152,15 @@ class AverageStructure(IJob):
             self.configuration["frames"]["step"],
         )
 
-        unit_cells = [trajectory.unit_cell(frame)._unit_cell for frame in frame_range]
+        try:
+            unit_cells = [
+                trajectory.unit_cell(frame)._unit_cell for frame in frame_range
+            ]
+        except:
+            raise ValueError(
+                "Unit cell needs to be defined for the AverageStructure analysis. "
+                "You can add a unit cell using TrajectoryEditor."
+            )
 
         average_unit_cell = np.mean(unit_cells, axis=0) * self._conversion_factor
 

@@ -353,6 +353,7 @@ class Forcite(Converter):
             self.numberOfSteps,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
+            initial_charges=self.configuration["xtd_file"].get_atom_charges(),
         )
 
     def run_step(self, index):

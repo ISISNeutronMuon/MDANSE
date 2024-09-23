@@ -101,6 +101,10 @@ class XTDFileConfigurator(FileWithAtomDataConfigurator):
                 info["bonded_to"] = set()
                 info["element"] = node.attrib["Components"].split(",")[0].strip()
                 info["xyz"] = np.array(node.attrib["XYZ"].split(","), dtype=np.float64)
+                try:
+                    info["charge"] = float(node.attrib["Charge"])
+                except KeyError:
+                    info["charge"] = 0.0
 
                 name = node.attrib.get("Name", "").strip()
                 if name:
@@ -195,3 +199,14 @@ class XTDFileConfigurator(FileWithAtomDataConfigurator):
             if label not in labels:
                 labels.append(label)
         return labels
+
+    def get_atom_charges(self) -> np.ndarray:
+        """Returns an array of partial electric charges
+
+        Returns
+        -------
+        np.ndarray
+            array of floats, one value per atom
+        """
+        charges = np.array([info["charge"] for info in self._atoms.values()])
+        return charges

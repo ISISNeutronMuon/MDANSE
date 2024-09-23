@@ -16,19 +16,27 @@
 
 import collections
 
+import numpy as np
+
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
-from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
+from MDANSE.MolecularDynamics.Trajectory import sorted_atoms
+from MDANSE.MolecularDynamics.Configuration import (
+    PeriodicRealConfiguration,
+    RealConfiguration,
+)
 
 
-class UnfoldedTrajectory(IJob):
+class TrajectoryEditor(IJob):
     """
-    Tries to make a contiguous trajectory for a whole molecule e.g. a protein.
-
-    The routine may fail if the molecule is bigger than half of the box side (L/2) and or the initial structure is not in itself contiguous.
+    This job will gradually gain more features. The main intent
+    is to allow the users to modify an existing trajectory, in case
+    some of the information was missing or needed correcting.
     """
 
-    label = "Unfolded Trajectory"
+    label = "Trajectory Editor"
 
     category = (
         "Analysis",
@@ -41,12 +49,36 @@ class UnfoldedTrajectory(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
+    )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}, "default": (np.eye(3), False)},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
+    settings["atom_transmutation"] = (
+        "AtomTransmutationConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
+    # settings["atom_charges"] = (
+    #     "PartialChargeConfigurator",
+    #     {
+    #         "dependencies": {"trajectory": "trajectory"},
+    #         "default": {},
+    #     },
+    # )
+    # settings["molecule_tolerance"] = (
+    #     "FloatConfigurator",
+    #     {"default": 0.25},
+    # )
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {"format": "MDTFormat"},
@@ -59,6 +91,13 @@ class UnfoldedTrajectory(IJob):
         super().initialize()
 
         self.numberOfSteps = self.configuration["frames"]["number"]
+        self._input_trajectory = self.configuration["trajectory"]["instance"]
+
+        if self.configuration["unit_cell"]["apply"]:
+            self._new_unit_cell = UnitCell(self.configuration["unit_cell"]["value"])
+            self._input_trajectory._trajectory._unit_cells = [
+                self._new_unit_cell for _ in range(len(self._input_trajectory))
+            ]
 
         atoms = sorted_atoms(
             self.configuration["trajectory"]["instance"].chemical_system.atom_list
@@ -70,21 +109,20 @@ class UnfoldedTrajectory(IJob):
             for idxs in self.configuration["atom_selection"]["indexes"]
             for idx in idxs
         ]
+        self._indices = indexes
         self._selectedAtoms = [atoms[ind] for ind in indexes]
-        self._selection_indices = indexes
+        elements = self.configuration["atom_selection"]["elements"]
+
+        new_chemical_system = ChemicalSystem("Edited system")
+        new_chemical_system.from_element_list([entry[0] for entry in elements])
 
         # The output trajectory is opened for writing.
-        self._outputTraj = TrajectoryWriter(
+        self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
-            self.configuration["trajectory"]["instance"].chemical_system,
+            new_chemical_system,
             self.numberOfSteps,
-            self._selectedAtoms,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
-            initial_charges=[
-                self.configuration["trajectory"]["instance"].charges(0)[ind]
-                for ind in indexes
-            ],
         )
 
     def run_step(self, index):
@@ -102,23 +140,36 @@ class UnfoldedTrajectory(IJob):
         frameIndex = self.configuration["frames"]["value"][index]
 
         conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
+        conf = conf.contiguous_configuration()
 
-        conf = conf.continuous_configuration()
+        coords = conf.coordinates
 
-        cloned_conf = conf.clone(self._outputTraj.chemical_system)
+        variables = {}
+        if self.configuration["trajectory"]["instance"].has_variable("velocities"):
+            variables = {
+                "velocities": self.configuration["trajectory"]["instance"]
+                .variable("velocities")[frameIndex, self._indices, :]
+                .astype(np.float64)
+            }
 
-        self._outputTraj.chemical_system.configuration = cloned_conf
+        if conf.is_periodic:
+            com_conf = PeriodicRealConfiguration(
+                self._output_trajectory.chemical_system,
+                coords[self._indices],
+                conf.unit_cell,
+                **variables,
+            )
+        else:
+            com_conf = RealConfiguration(
+                self._output_trajectory.chemical_system, coords, **variables
+            )
 
-        # The time corresponding to the running index.
+        self._output_trajectory.chemical_system.configuration = com_conf
+
+        # The times corresponding to the running index.
         time = self.configuration["frames"]["time"][index]
 
-        charge = self.configuration["trajectory"]["instance"].charges(index)[
-            self._selection_indices
-        ]
-        # Write the step.
-        self._outputTraj.dump_configuration(time)
-
-        self._outputTraj.write_charges(charge, index)
+        self._output_trajectory.dump_configuration(time)
 
         return index, None
 
@@ -135,9 +186,10 @@ class UnfoldedTrajectory(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
+
         # The input trajectory is closed.
         self.configuration["trajectory"]["instance"].close()
 
         # The output trajectory is closed.
-        self._outputTraj.close()
+        self._output_trajectory.close()
         super().finalize()

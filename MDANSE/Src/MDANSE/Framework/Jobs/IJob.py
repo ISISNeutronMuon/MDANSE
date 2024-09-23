@@ -159,14 +159,17 @@ class IJob(Configurable, metaclass=SubclassFactory):
             self.remove_log_file_handler()
 
     def initialize(self):
-        if (
-            "output_files" in self.configuration
-            and self.configuration["output_files"]["write_logs"]
-        ):
-            log_filename = self.configuration["output_files"]["root"] + ".log"
-            self.add_log_file_handler(
-                log_filename, self.configuration["output_files"]["log_level"]
-            )
+        try:
+            if (
+                "output_files" in self.configuration
+                and self.configuration["output_files"]["write_logs"]
+            ):
+                log_filename = self.configuration["output_files"]["root"] + ".log"
+                self.add_log_file_handler(
+                    log_filename, self.configuration["output_files"]["log_level"]
+                )
+        except KeyError:
+            LOG.error("IJob did not find 'write_logs' in output_files")
 
     @abc.abstractmethod
     def run_step(self, index):
