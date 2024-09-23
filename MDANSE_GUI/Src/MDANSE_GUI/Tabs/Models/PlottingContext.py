@@ -194,6 +194,16 @@ class PlottingContext(QStandardItemModel):
     needs_an_update = Signal()
 
     def __init__(self, *args, unit_lookup=None, **kwargs):
+        self.headers = kwargs.pop("header_labels", [
+                "Dataset",
+                "Trajectory",
+                "Size",
+                "Unit",
+                "Use it?",
+                "Colour",
+                "Line style",
+                "Marker"
+        ])
         super().__init__(*args, **kwargs)
         self._datasets = {}
         self._current_axis = [None, None, None]
@@ -207,18 +217,7 @@ class PlottingContext(QStandardItemModel):
         self._colour_map = kwargs.get("colormap", "viridis")
         self._last_colour = 0
         self._unit_lookup = unit_lookup
-        self.setHorizontalHeaderLabels(
-            [
-                "Dataset",
-                "Trajectory",
-                "Size",
-                "Unit",
-                "Use it?",
-                "Colour",
-                "Line style",
-                "Marker",
-            ]
-        )
+        self.setHorizontalHeaderLabels(self.headers)
 
     def generate_colour(self, number: int):
         return self._colour_list[number % len(self._colour_list)]
@@ -369,6 +368,7 @@ class PlottingContext(QStandardItemModel):
     def clear(self) -> None:
         result = super().clear()
         self._datasets = {}
+        self.setHorizontalHeaderLabels(self.headers)
         return result
 
     @Slot(QModelIndex)
