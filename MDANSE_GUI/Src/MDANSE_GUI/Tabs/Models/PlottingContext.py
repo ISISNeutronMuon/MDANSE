@@ -194,7 +194,9 @@ class PlottingContext(QStandardItemModel):
     needs_an_update = Signal()
 
     def __init__(self, *args, unit_lookup=None, **kwargs):
-        self.headers = kwargs.pop("header_labels", [
+        self.headers = kwargs.pop(
+            "header_labels",
+            [
                 "Dataset",
                 "Trajectory",
                 "Size",
@@ -202,8 +204,9 @@ class PlottingContext(QStandardItemModel):
                 "Use it?",
                 "Colour",
                 "Line style",
-                "Marker"
-        ])
+                "Marker",
+            ],
+        )
         super().__init__(*args, **kwargs)
         self._datasets = {}
         self._current_axis = [None, None, None]

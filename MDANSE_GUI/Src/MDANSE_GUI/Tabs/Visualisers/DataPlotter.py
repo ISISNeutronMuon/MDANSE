@@ -61,12 +61,9 @@ class DataPlotter(QWidget):
             if function is not None:
                 button.clicked.connect(function)
         self._model = PlottingContext(
-            unit_lookup=self._unit_lookup, header_labels=[
-                "Dataset",
-                "Trajectory",
-                "Size",
-                "Unit"
-            ])
+            unit_lookup=self._unit_lookup,
+            header_labels=["Dataset", "Trajectory", "Size", "Unit"],
+        )
         self._selection_viewer.setModel(self._model)
 
     @Slot(object)
