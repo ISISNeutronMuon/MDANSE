@@ -259,11 +259,6 @@ EXTENSIONS = [
         sources=[os.path.join("Extensions", "atomic_trajectory.pyx")],
     ),
     Extension(
-        "MDANSE.Extensions.fold_coordinates",
-        include_dirs=INCLUDE_DIR,
-        sources=[os.path.join("Extensions", "fold_coordinates.pyx")],
-    ),
-    Extension(
         "MDANSE.Extensions.com_trajectory",
         include_dirs=INCLUDE_DIR,
         sources=[os.path.join("Extensions", "com_trajectory.pyx")],
