@@ -251,7 +251,7 @@ class _PeriodicConfiguration(_Configuration):
 
         return self.__class__(chemical_system, coords, unit_cell, **variables)
 
-    def fold_coordinates(self):
+    def fold_coordinates(self) -> np.ndarray:
         """Fold the coordinates into simulation box."""
         coords = self._variables["coordinates"]
 
