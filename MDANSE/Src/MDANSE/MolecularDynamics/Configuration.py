@@ -455,18 +455,13 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         from MDANSE.Extensions import fold_coordinates
 
         coords = self._variables["coordinates"]
-        coords = coords[np.newaxis, :, :]
 
-        unit_cell = self._unit_cell.transposed_direct
-        inverse_unit_cell = self._unit_cell.transposed_inverse
+        unit_cell = self._unit_cell.direct
+        inverse_unit_cell = self._unit_cell.inverse
 
-        unit_cells = unit_cell[np.newaxis, :, :]
-        inverse_unit_cells = inverse_unit_cell[np.newaxis, :, :]
+        coords = coords @ inverse_unit_cell % 1
 
-        coords = fold_coordinates.fold_coordinates(
-            coords, unit_cells, inverse_unit_cells, False
-        )
-        coords = np.squeeze(coords)
+        coords = coords @ unit_cell
 
         self._variables["coordinates"] = coords
 
