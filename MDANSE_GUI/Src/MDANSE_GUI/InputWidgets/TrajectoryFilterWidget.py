@@ -25,12 +25,12 @@ from qtpy.QtWidgets import (
     QGroupBox,
     QLabel,
     QSpinBox,
+    QDoubleSpinBox,
     QTextEdit,
     QWidget,
 )
 from MDANSE_GUI.Tabs.Visualisers import DataPlotter
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import TrajectoryFilterConfigurator, FILTERS
 
 
@@ -41,12 +41,18 @@ class FilterDesigner(QDialog):
     ----------
     _helper_title : str
         The title of the helper dialog window.
-    _types_cbox_map : dict
+    _visualiser: DataPlotter
+        The data visualisation class for the filter graph
+    _settings: dict
+        Dictionary to hold current filter settings
+    _filter_map : dict
         The dictionary that maps the filter designer type string to the corresponding filter class
     """
 
-    _helper_title = "Filter desginer"
-    _visualiser = DataPlotter()
+    _helper_title = "Filter designer"
+    _visualiser = DataPlotter
+    _settings = dict()
+    _filter_map = {filter.__name__: filter for filter in FILTERS}
 
     def __init__(self, field: QLineEdit, configurator: TrajectoryFilterConfigurator, parent, *args, **kwargs):
         """
@@ -56,26 +62,79 @@ class FilterDesigner(QDialog):
             The QLineEdit field that will need to be updated when
             applying the setting.
         """
+
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle(self._helper_title)
         self._field = field
         self._configurator = configurator
 
-        self.panels = [QVBoxLayout()]*2
-        graph_view, settings_view = self.panels
+        self.layouts = QHBoxLayout()
 
-        # Produce the filter designer graphical interface
-        self.create_graph(graph_view)
+        self.update_type(self._configurator.filter.__name__)
+        self.create_designer()
 
-        # Produce the filter designer settings interface
-        self.create_settings(settings_view)
+    def update_type(self, filter_type: str):
+        self._settings.update({"filter": filter_type})
+        self.create_designer()
 
-    def create_settings(self, widget_area: QVBoxLayout):
+    def create_designer(self):
+        """
+        """
+
+        graph_layout = QVBoxLayout()
+        settings_layout = QVBoxLayout()
+
+        # Produce the filter designer settings UI component
+        self.create_settings_layout(settings_layout)
+
+        # Produce the filter designer frequency-domain graph UI component
+        self.create_graph_layout(graph_layout)
+
+        self.layouts = QHBoxLayout()
+        self.layouts.addLayout(graph_layout)
+        self.layouts.addLayout(settings_layout)
+        self.setLayout(self.layouts)
+
+    def edit(self, key: str, value: str):
+        self.render_graph()
+        self._settings["attributes"].update({key: value})
+
+    def setting_to_widget(self, name: str, val_group: dict, setting: any):
+        widget = None
+        if isinstance(setting, int) and not val_group.get("values", None):
+            widget = QSpinBox()
+            widget.setValue(setting)
+            widget.setMinimum(0)
+            widget.setSingleStep(1)
+            signal = widget.valueChanged
+
+        if isinstance(setting, float):
+            widget = QDoubleSpinBox()
+            widget.setValue(setting)
+            widget.setMinimum(0)
+            widget.setSingleStep(0.1)
+            signal = widget.valueChanged
+
+        if isinstance(setting, bool):
+            widget = QCheckBox()
+            widget.setChecked(False)
+            signal = widget.stateChanged
+
+        if isinstance(setting, str) and val_group.get("values", None):
+            widget = QComboBox()
+            {widget.addItem(i) for i in val_group["values"]}
+            widget.setCurrentText(setting)
+            signal = widget.currentTextChanged
+
+        signal.connect(lambda x: self.edit(name, x))
+        return widget
+
+    def create_settings_layout(self, widget_area: QVBoxLayout):
         """
         """
         filter = self._configurator.filter
 
-        # Filter type combobox
+        # Add filter type combobox
         type_cbox = QComboBox()
         for type in FILTERS:
             type_cbox.addItem(type.__name__)
@@ -83,64 +142,88 @@ class FilterDesigner(QDialog):
         type_label = QLabel("Filter type")
         type_cbox.setCurrentText(filter.__name__)
 
+        type_cbox.currentTextChanged.connect(lambda type: self.update_type(type))
+
         filter_type_layout = QHBoxLayout()
         filter_type_layout.addWidget(type_label)
         filter_type_layout.addWidget(type_cbox)
 
         widget_area.addLayout(filter_type_layout)
 
-        # Fiter settings
-        for key, value in filter.default_settings.items():
+        filter_defaults = filter.default_settings
+
+        # Preserve existing common filter settings
+        self._settings["attributes"] = {
+            key: value for key, value in self._settings.items() if key in set(filter_defaults.keys())
+        }
+
+        # Add filter settings
+        for key, value in filter_defaults.items():
             setting_layout = QHBoxLayout()
 
-            default = value["value"]
+            setting = self._settings["attributes"].get(key, value["value"])
             label = QLabel(key)
 
             setting_layout.addWidget(label)
 
-            setting_widget = self.setting_to_widget(updater=self._configurator.add_setting, val_name=key, val_group=value, setting=default)
+            setting_widget = self.setting_to_widget(name=key, val_group=value, setting=setting)
 
-            self.setting_connector(setting_widget, value=default)
-
-            # TODO: Connect settings widgets to configurator dictionary
-
-            setting_layout.addWidget()
+            setting_layout.addWidget(setting_widget)
 
             widget_area.addLayout(setting_layout)
 
-    @staticmethod
-    def setting_to_widget(updater: callable, val_name: str, val_group: dict, setting):
-        if isinstance(setting, int):
-            widget = QSpinBox()
-            widget.setValue(setting)
-            widget.setMinimum(0)
-            widget.singleStep(1)
+        # Add buttons
+        buttons_layout = QHBoxLayout()
+        for button in self.create_buttons():
+            buttons_layout.addWidget(button)
 
-        if isinstance(setting, float):
-            widget = QSpinBox()
-            widget.setValue(setting)
+        widget_area.addLayout(buttons_layout)
 
-        if isinstance(setting, bool):
-            widget = QCheckBox()
-            widget.setChecked(False)
+    def render_graph(self):
+        """
+        """
+        pass
 
-        elif isinstance(setting, str):
-            if val_group.get("values", None):
-                widget = QComboBox()
-                { widget.addItem(i) for i in val_group["values"] }
-                widget.setCurrentText(setting)
-                return widget
-            widget = QLineEdit(setting)
+    def create_graph_layout(self, widget_area: QVBoxLayout):
+        """
+        """
 
-        return widget
+        widget_area.addWidget(QPushButton("Pushez moi"))
+
+    def apply(self) -> None:
+        """Set the field of the TrajectoryFilterWidget to the currently
+        chosen setting in this widget.
+        """
+        self._configurator.configure(self._settings)
+
+        # update widget field text to reflect filter designer
+        field = self._configurator.filter_description_string(
+            self._filter_map[self._settings['filter']],
+            self._settings
+        )
+        self._field.setText(field)
+
+    def create_buttons(self) -> list[QPushButton]:
+        """
+        Returns
+        -------
+        list[QPushButton]
+            List of push buttons to add to the last layout from
+            create_layouts.
+        """
+        apply = QPushButton("Use Setting")
+        close = QPushButton("Close")
+        apply.clicked.connect(self.apply)
+        close.clicked.connect(self.close)
+        return [apply, close]
 
 
 class TrajectoryFilterWidget(WidgetBase):
     """Trajectory filter designer widget."""
 
     _push_button_text = "Filter designer"
-    _default_value = '{ "filter": "' + f'{TrajectoryFilterConfigurator.filter}"' + f'{TrajectoryFilterConfigurator.settings()}' + '}'
-    _tooltip_text = "Design a trajectory filter. The input is a JSON string, and can be created using the helper dialog."
+    _default_value = TrajectoryFilterConfigurator.get_json_string()
+    _tooltip_text = "Design a trajectory filter. The input is a JSON string, and filter setting can be edited using the filter designer."
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

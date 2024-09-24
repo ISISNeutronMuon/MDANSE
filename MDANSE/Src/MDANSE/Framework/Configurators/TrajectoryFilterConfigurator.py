@@ -29,39 +29,67 @@ class TrajectoryFilterConfigurator(IConfigurator):
     """
 
     _filter = FILTERS[0]
-    _dict = dict()
+    _settings = dict()
 
     @classmethod
     def settings(cls, filter=_filter):
+        """Get the filter-specific settings dictionary for a filter class.
+
+        Parameters
+        ----------
+        filter :
+            The filter class.
+
+        Returns
+        -------
+
+            The filter settings dictionary
+        """
         filter.set_defaults()
         settings_dict = dict()
         for setting, values in filter.default_settings.items():
             settings_dict.update({setting: values["value"]})
         return settings_dict
 
-    _default = '{ "filter": "' + f'{_filter.__name__}"' + f'{json.dumps(settings.__func__(object()))}' + '}'
+    @classmethod
+    def get_json_string(cls) -> str:
+        """Return the default filter string.
 
-    def configure(self, value: str) -> None:
-        """Configure an input value.
+        Returns
+        -------
+
+            A string representation of the default filter settings dictionary
+        """
+        return cls._json_string
+
+    @staticmethod
+    def filter_description_string(filter=_filter, settings=settings.__func__(object())) -> str:
+        """Convert a filter class and filter settings dictionary to a string.
 
         Parameters
         ----------
-        value : str
-            The selection setting in a json readable format.
+        filter : str
+            The filter class
+
+        settings : dict
+            Dictionary containing the filter settings
+
+        Returns
+        -------
+
+            A string representation of the filter settings dictionary
         """
+        return '{ "filter": "' + f'{filter.__name__}"' + ', ' + '"attributes": ' + f'{json.dumps(settings)}' + '}'
 
-    def add_setting(self, key: str, value: str) -> None:
-        """Configure an input value.
+    _json_string = filter_description_string()
 
-        Parameters
-        ----------
-        value : str
-            The selection setting in a json readable format.
+    @property
+    def settings(self):
+        return self._settings
 
-        value : str
-            The selection setting in a json readable format.
-        """
-        self._dict.update({key: value})
+    @settings.setter
+    def settings(self, settings: dict):
+        self._settings = settings
 
     @property
     def filter(self):
@@ -70,4 +98,14 @@ class TrajectoryFilterConfigurator(IConfigurator):
     @filter.setter
     def filter(self, name):
         self._filter = name
+
+    def configure(self, value: dict) -> None:
+        """Configure an input value.
+
+        Parameters
+        ----------
+        value : str
+            The selection setting in a json readable format.
+        """
+        settings = value
 

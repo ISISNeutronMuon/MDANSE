@@ -394,6 +394,33 @@ class Filter1D:
                 }
             )
 
+    @staticmethod
+    def rational_polynomial_string(coeffs: TransferFunction, unit) -> str:
+        """
+
+        """
+        if not coeffs.any():
+            return ''
+        order = len(coeffs) - 1
+        expr = ''
+
+        for idx, coeff in enumerate(coeffs):
+            power = order - idx
+            if coeff != 0:
+                if idx > 0 and coeff > 0:
+                    expr += '+ '
+                elif coeff < 0:
+                    expr += '- '
+
+                abs_coeff = abs(coeff)
+                if power == 0:
+                    expr += f'{abs_coeff:.3f}'
+                elif power == 0:
+                    expr += f'{abs_coeff:.3f}{unit}'
+                else:
+                    expr += f'{abs_coeff:.3f}{unit}^{power}'
+        return expr
+
 
 class Butterworth(Filter1D):
     """Interface for the butterworth filter.
@@ -411,11 +438,11 @@ class Butterworth(Filter1D):
                 "value": 4
             },
             "critical_freq": {
-                "value": []
+                "value": 1.0
             },
             "type": {
                 "values": {"lowpass", "highpass", "bandpass", "bandstop"},
-                "value": "low"
+                "value": "lowpass"
             },
             "analog": {
                 "values": {True, False},
@@ -453,11 +480,11 @@ class ChebyshevTypeI(Filter1D):
                 "value": 4
             },
             "critical_freq": {
-                "value": []
+                "value": 1.0
             },
             "type": {
                 "values": {"lowpass", "highpass", "bandpass", "bandstop"},
-                "value": "low"
+                "value": "lowpass"
             },
             "analog": {
                 "values": {True, False},
@@ -498,11 +525,11 @@ class ChebyshevTypeII(Filter1D):
                 "value": 4
             },
             "critical_freq": {
-                "value": []
+                "value": 1.0
             },
             "type": {
                 "values": {"lowpass", "highpass", "bandpass", "bandstop"},
-                "value": "low"
+                "value": "lowpass"
             },
             "analog": {
                 "values": {True, False},
@@ -543,11 +570,11 @@ class Elliptical(Filter1D):
                 "value": 4
             },
             "critical_freq": {
-                "value": []
+                "value": 1.0
             },
             "type": {
                 "values": {"lowpass", "highpass", "bandpass", "bandstop"},
-                "value": "low"
+                "value": "lowpass"
             },
             "analog": {
                 "values": {True, False},
@@ -585,11 +612,11 @@ class Bessel(Filter1D):
                 "value": 4
             },
             "critical_freq": {
-                "value": []
+                "value": 1.0
             },
             "type": {
                 "values": {"lowpass", "highpass", "bandpass", "bandstop"},
-                "value": "low"
+                "value": "lowpass"
             },
             "analog": {
                 "values": {True, False},
