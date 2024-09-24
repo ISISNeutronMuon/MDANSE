@@ -156,10 +156,10 @@ class MolecularTrace(IJob):
         resolution = self.configuration["spatial_resolution"]["value"]
 
         indices = np.floor(
-            (conf["coordinates"][self._indexes, :] - self.min.reshape((3, 1)))
+            (conf["coordinates"][self._indexes, :] - self.min.reshape((1, 3)))
             / resolution
         ).astype(int)
-        grid[tuple(indices)] += 1
+        grid[tuple(indices.T)] += 1
 
         return index, grid
 
