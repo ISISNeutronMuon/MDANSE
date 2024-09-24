@@ -26,7 +26,6 @@ from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import Atom, ChemicalSystem, _ChemicalEntity
-from MDANSE.Extensions import fold_coordinates
 from MDANSE.MolecularDynamics.Configuration import (
     RealConfiguration,
 )
