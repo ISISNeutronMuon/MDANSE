@@ -96,10 +96,8 @@ class RunTable(QTableView):
             model = self.model()
             index = self.currentIndex()
             model.removeRow(index.row())
-            if model.rowCount() == 0:
-                for i in reversed(range(model.columnCount())):
-                    model.removeColumn(i)
             self.item_details.emit("")
+            self.jobs_logs.emit(([], []))
 
     @Slot()
     def pauseJob(self):
