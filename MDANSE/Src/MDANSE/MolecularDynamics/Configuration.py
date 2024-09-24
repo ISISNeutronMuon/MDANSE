@@ -258,7 +258,7 @@ class _PeriodicConfiguration(_Configuration):
         unit_cell = self._unit_cell.direct
         inverse_unit_cell = self._unit_cell.inverse
 
-        return (coords @ inverse_unit_cell % 1) @ unit_cell
+        self._variables["coordinates"] = (coords @ inverse_unit_cell % 1) @ unit_cell
 
     @abc.abstractmethod
     def to_box_coordinates(self):
