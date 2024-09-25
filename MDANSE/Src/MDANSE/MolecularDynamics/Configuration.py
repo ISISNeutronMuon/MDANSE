@@ -251,10 +251,14 @@ class _PeriodicConfiguration(_Configuration):
 
         return self.__class__(chemical_system, coords, unit_cell, **variables)
 
-    @abc.abstractmethod
-    def fold_coordinates(self):
+    def fold_coordinates(self) -> np.ndarray:
         """Fold the coordinates into simulation box."""
-        pass
+        coords = self._variables["coordinates"]
+
+        unit_cell = self._unit_cell.direct
+        inverse_unit_cell = self._unit_cell.inverse
+
+        self._variables["coordinates"] = (coords @ inverse_unit_cell % 1) @ unit_cell
 
     @abc.abstractmethod
     def to_box_coordinates(self):
@@ -290,26 +294,6 @@ class _PeriodicConfiguration(_Configuration):
 
 class PeriodicBoxConfiguration(_PeriodicConfiguration):
     is_periodic = True
-
-    def fold_coordinates(self) -> None:
-        """Folds the coordinates into simulation box."""
-
-        from MDANSE.Extensions import fold_coordinates
-
-        coords = self._variables["coordinates"]
-        coords = coords[np.newaxis, :, :]
-
-        unit_cell = self._unit_cell.transposed_direct
-        inverse_unit_cell = self._unit_cell.transposed_inverse
-
-        unit_cells = unit_cell[np.newaxis, :, :]
-        inverse_unit_cells = inverse_unit_cell[np.newaxis, :, :]
-
-        coords = fold_coordinates.fold_coordinates(
-            coords, unit_cells, inverse_unit_cells, True
-        )
-        coords = np.squeeze(coords)
-        self._variables["coordinates"] = coords
 
     def to_box_coordinates(self) -> np.ndarray:
         """
@@ -448,27 +432,6 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
 
 class PeriodicRealConfiguration(_PeriodicConfiguration):
     is_periodic = True
-
-    def fold_coordinates(self) -> None:
-        """Fold the coordinates into simulation box."""
-
-        from MDANSE.Extensions import fold_coordinates
-
-        coords = self._variables["coordinates"]
-        coords = coords[np.newaxis, :, :]
-
-        unit_cell = self._unit_cell.transposed_direct
-        inverse_unit_cell = self._unit_cell.transposed_inverse
-
-        unit_cells = unit_cell[np.newaxis, :, :]
-        inverse_unit_cells = inverse_unit_cell[np.newaxis, :, :]
-
-        coords = fold_coordinates.fold_coordinates(
-            coords, unit_cells, inverse_unit_cells, False
-        )
-        coords = np.squeeze(coords)
-
-        self._variables["coordinates"] = coords
 
     def to_box_coordinates(self) -> np.ndarray:
         """

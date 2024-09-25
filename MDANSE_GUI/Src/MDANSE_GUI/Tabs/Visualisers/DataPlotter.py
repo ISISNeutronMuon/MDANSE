@@ -26,7 +26,7 @@ from qtpy.QtCore import Slot, Signal
 
 from MDANSE.MLogging import LOG
 
-from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
+from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset, plotting_column_labels
 
 
 class DataPlotter(QWidget):
@@ -60,13 +60,15 @@ class DataPlotter(QWidget):
             button_layout.addWidget(button)
             if function is not None:
                 button.clicked.connect(function)
-        self._model = None
+        self._model = PlottingContext(
+            unit_lookup=self._unit_lookup,
+        )
+        self._selection_viewer.setModel(self._model)
 
     @Slot(object)
     def add_dataset(self, dataset: SingleDataset):
-        if self._model is None:
-            self._model = PlottingContext(unit_lookup=self._unit_lookup)
-            self._selection_viewer.setModel(self._model)
+        if not dataset._valid:
+            return
         self._model.add_dataset(dataset)
         self._selection_viewer.resizeColumnsToContents()
         for col_num in range(4, 9):
@@ -116,27 +118,26 @@ class DataPlotter(QWidget):
 
     @Slot()
     def plot_data(self):
-        if self._model is not None:
-            if len(self._model.datasets()) == 0:
-                return
-            self.data_for_plotting.emit(self._model)
-            group = self._settings.group("dialogs")
-            try:
-                show_it = group.get("data_plotted")
-            except KeyError:
-                show_it = group.get_default("dialogs", "data_plotted")
-            if show_it != "False":
-                data_plotted_box = QMessageBox.information(
-                    self,
-                    "Datasets plotted!",
-                    "Your results have been plotted in the currently active plot in the next tab (called 'Plot Holder').\n"
-                    "Should this message be shown every time this happens?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                    QMessageBox.StandardButton.Yes,
-                )
-                if data_plotted_box == QMessageBox.StandardButton.No:
-                    group = self._settings.group("dialogs")
-                    group.set("data_plotted", "False")
+        if len(self._model.datasets()) == 0:
+            return
+        self.data_for_plotting.emit(self._model)
+        group = self._settings.group("dialogs")
+        try:
+            show_it = group.get("data_plotted")
+        except KeyError:
+            show_it = group.get_default("dialogs", "data_plotted")
+        if show_it != "False":
+            data_plotted_box = QMessageBox.information(
+                self,
+                "Datasets plotted!",
+                "Your results have been plotted in the currently active plot in the next tab (called 'Plot Holder').\n"
+                "Should this message be shown every time this happens?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.Yes,
+            )
+            if data_plotted_box == QMessageBox.StandardButton.No:
+                group = self._settings.group("dialogs")
+                group.set("data_plotted", "False")
 
     @Slot(object)
     def accept_data(self, data_set):

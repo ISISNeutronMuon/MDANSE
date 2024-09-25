@@ -390,6 +390,7 @@ class PlottingContext(QStandardItemModel):
     def clear(self) -> None:
         result = super().clear()
         self._datasets = {}
+        self.setHorizontalHeaderLabels(plotting_column_labels)
         return result
 
     @Slot(QModelIndex)

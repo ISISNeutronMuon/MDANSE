@@ -128,12 +128,17 @@ regions of interest and tracking changes over time in molecular simulations.
 Eccentricity
 ''''''''''''
 
-Eccentricity analysis in MDANSE quantifies how elongated or
-flattened molecules are, revealing valuable insights into their shape and
-structure. Researchers use it to understand molecular geometry and
-conformation, aiding the differentiation of molecules by shape. This analysis is
-vital for studying structural properties in complex molecular systems and
-characterizing molecular shape and morphology.
+Eccentricity analysis in *MDANSE* quantifies how spherical a system is and
+can be used to observe how the geometry of the system changes over time.
+The eccentricity of a selection of atom is calculated using the equation
+
+.. math::
+    e = \frac{\sqrt{\lambda_{3}^2 - \lambda_{1}^2}}{\lambda_{3}}
+
+where :math:`\lambda_{1}` and :math:`\lambda_{3}` are its smallest and
+largest principal moments of inertia. A spherically symmetric
+selection of atoms will have an eccentricity approaching 0 and an
+aspherical selection of atoms will have a eccentricity approaching 1.
 
 .. _molecular-trace:
 

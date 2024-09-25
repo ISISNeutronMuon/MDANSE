@@ -238,6 +238,7 @@ class JobHolder(QStandardItemModel):
         self.existing_jobs = {}
         self.existing_listeners = {}
         self._next_number = 0
+        self.setHorizontalHeaderLabels(["Job", "Progress", "Status"])
 
     @Slot(str)
     def reportError(self, err: str):
