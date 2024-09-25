@@ -20,6 +20,7 @@ from matplotlib import rcParams
 
 from MDANSE.MLogging import LOG
 from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Framework.Units import measure
 
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
@@ -37,6 +38,42 @@ class PlotterTemplate(metaclass=SubclassFactory):
         self._value_reset_needed = True
         self._toolbar = None
         self._slider_reference = None
+        self._plotting_context = None
+
+    def collect_arrays(self):
+        (
+            self._datasets,
+            self._colours,
+            self._linestyles,
+            self._markers,
+            self._labels,
+            self._names,
+        ) = ({}, {}, {}, {}, {}, {})
+        for name, databundle in self._plotting_context.datasets().items():
+            dataset, colour, linestyle, marker, dataset_number, axis_label = databundle
+            self._datasets[dataset_number] = dataset
+            self._colours[dataset_number] = colour
+            self._linestyles[dataset_number] = linestyle
+            self._markers[dataset_number] = marker
+            self._labels[dataset_number] = axis_label
+            self._names[dataset_number] = name
+
+    def convert_units(self):
+        for dataset_number, dataset in self._datasets.items():
+            axis_label = self._labels[dataset_number]
+            try:
+                best_unit, best_axis = (dataset._axes_units[axis_label], axis_label)
+            except KeyError:
+                best_unit, best_axis = dataset.longest_axis()
+            plotlabel = dataset._labels["medium"]
+            xaxis_unit = self._plotting_context.get_conversion_factor(best_unit)
+            try:
+                conversion_factor = measure(1.0, best_unit, equivalent=True).toval(
+                    xaxis_unit
+                )
+            except:
+                LOG.warning(f"Could not convert {best_unit} to {xaxis_unit}")
+                conversion_factor = 1.0
 
     def plotting_workflow(self):
         self.collect_arrays()

@@ -26,7 +26,11 @@ from qtpy.QtCore import Slot, Signal
 
 from MDANSE.MLogging import LOG
 
-from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset, plotting_column_labels
+from MDANSE_GUI.Tabs.Models.PlottingContext import (
+    PlottingContext,
+    SingleDataset,
+    plotting_column_labels,
+)
 
 
 class DataPlotter(QWidget):
