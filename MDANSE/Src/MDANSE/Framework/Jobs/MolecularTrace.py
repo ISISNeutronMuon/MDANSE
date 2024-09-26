@@ -19,7 +19,6 @@ import collections
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Extensions import mt_fast_calc
 
 
 class MolecularTrace(IJob):
@@ -154,13 +153,14 @@ class MolecularTrace(IJob):
 
         grid = np.zeros(self.gdim, dtype=np.int32)
 
-        # Loop over the indexes of the selected atoms for the molecular trace calculation.
-        mt_fast_calc.mt(
-            conf["coordinates"][self._indexes, :],
-            grid,
-            self.configuration["spatial_resolution"]["value"],
-            self.min,
-        )
+        resolution = self.configuration["spatial_resolution"]["value"]
+
+        indices = np.floor(
+            (conf["coordinates"][self._indexes, :] - self.min.reshape((1, 3)))
+            / resolution
+        ).astype(int)
+        unique_indices, counts = np.unique(indices, return_counts=True, axis=0)
+        grid[tuple(unique_indices.T)] += counts
 
         return index, grid
 
