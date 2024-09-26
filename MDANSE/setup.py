@@ -249,11 +249,6 @@ EXTENSIONS = [
         sources=[os.path.join("Extensions", "atoms_in_shell.pyx")],
     ),
     Extension(
-        "MDANSE.Extensions.change_coordinates",
-        include_dirs=INCLUDE_DIR,
-        sources=[os.path.join("Extensions", "change_coordinates.pyx")],
-    ),
-    Extension(
         "MDANSE.Extensions.atomic_trajectory",
         include_dirs=INCLUDE_DIR,
         sources=[os.path.join("Extensions", "atomic_trajectory.pyx")],
@@ -282,16 +277,6 @@ EXTENSIONS = [
         "MDANSE.Extensions.sas_fast_calc",
         include_dirs=INCLUDE_DIR,
         sources=[os.path.join("Extensions", "sas_fast_calc.pyx")],
-    ),
-    Extension(
-        "MDANSE.Extensions.mt_fast_calc",
-        include_dirs=INCLUDE_DIR,
-        sources=[os.path.join("Extensions", "mt_fast_calc.pyx")],
-    ),
-    Extension(
-        "MDANSE.Extensions.sd_fast_calc",
-        include_dirs=INCLUDE_DIR,
-        sources=[os.path.join("Extensions", "sd_fast_calc.pyx")],
     ),
     Extension(
         "MDANSE.Extensions.mic_fast_calc",
