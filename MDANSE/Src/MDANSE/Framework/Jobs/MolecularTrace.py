@@ -159,7 +159,8 @@ class MolecularTrace(IJob):
             (conf["coordinates"][self._indexes, :] - self.min.reshape((1, 3)))
             / resolution
         ).astype(int)
-        grid[tuple(indices.T)] += 1
+        unique_indices, counts = np.unique(indices, return_counts=True, axis=0)
+        grid[tuple(unique_indices.T)] += counts
 
         return index, grid
 
