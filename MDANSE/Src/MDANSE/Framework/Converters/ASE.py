@@ -44,7 +44,10 @@ class ASETrajectoryFileError(Error):
 
 class ASE(Converter):
     """
-    Converts any trajectory to a HDF trajectory using the ASE io module.
+    Attempts to convert a trajectory file to MDANSE .mdt format (HDF5).
+    The conversion is done using the ase.io module.
+    Please help the ASE format detection mechanism by using
+    standard input file names.
     """
 
     label = "ASE"
@@ -53,8 +56,8 @@ class ASE(Converter):
     settings["trajectory_file"] = (
         "ASEFileConfigurator",
         {
-            "label": "Any MD trajectory file",
-            "default": "INPUT_FILENAME.traj",
+            "label": "An MD trajectory file supported by ASE",
+            "default": "INPUT_FILENAME",
         },
     )
     settings["atom_aliases"] = (
@@ -103,6 +106,7 @@ class ASE(Converter):
         self._isPeriodic = None
         self._backup_cell = None
         self._keep_running = True
+        self._initial_masses = None
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # The number of steps of the analysis.
@@ -147,6 +151,8 @@ class ASE(Converter):
             LOG.warning(f"Skipping frame {index}")
             return index, None
 
+        variables = {}
+
         try:
             frame = self._input[index]
         except TypeError:
@@ -170,10 +176,23 @@ class ASE(Converter):
         coords = frame.get_positions()
         coords *= unit_conversion_factor
 
+        try:
+            momenta = frame.arrays["momenta"]
+        except KeyError:
+            pass
+        else:
+            if self._initial_masses is not None:
+                velocities = momenta / self._initial_masses.reshape((len(momenta), 1))
+            else:
+                velocities = momenta / np.array(self._chemicalSystem.masses).reshape(
+                    (len(momenta), 1)
+                )
+            variables["velocities"] = velocities * measure(1.0, "ang/fs").toval("nm/ps")
+
         if self._isPeriodic:
             try:
                 realConf = PeriodicRealConfiguration(
-                    self._trajectory.chemical_system, coords, unitCell
+                    self._trajectory.chemical_system, coords, unitCell, **variables
                 )
             except ValueError:
                 self._keep_running = False
@@ -186,8 +205,7 @@ class ASE(Converter):
         else:
             try:
                 realConf = RealConfiguration(
-                    self._trajectory.chemical_system,
-                    coords,
+                    self._trajectory.chemical_system, coords, **variables
                 )
             except ValueError:
                 self._keep_running = False
@@ -204,10 +222,11 @@ class ASE(Converter):
         )
 
         try:
-            charges = frame.get_charges()
-            self._trajectory.write_charges(charges, index)
-        except RuntimeError:
+            charges = frame.arrays["charges"]
+        except KeyError:
             pass
+        else:
+            self._trajectory.write_charges(charges, index)
 
         return index, None
 
@@ -264,9 +283,18 @@ class ASE(Converter):
         if self._isPeriodic:
             self._backup_cell = first_frame.cell.array
 
+        LOG.info(
+            f"The following arrays were found in the trajectory: {list(first_frame.arrays.keys())}"
+        )
+
+        if "masses" in first_frame.arrays.keys():
+            self._initial_masses = first_frame.arrays["masses"]
+        else:
+            self._initial_masses = None
+
         try:
-            self._initial_charges = first_frame.get_charges()
-        except RuntimeError:
+            self._initial_charges = first_frame.arrays["charges"]
+        except KeyError:
             LOG.warning("ASE converter could not read partial charges from file.")
             self._initial_charges = None
 
