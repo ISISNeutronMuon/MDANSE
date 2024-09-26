@@ -51,6 +51,7 @@ class SliderPack(QWidget):
         self._labels = []
         self._sliders = []
         self._spinboxes = []
+        self._current_values = []
         self._minarray = np.zeros(n_sliders)
         self._maxarray = np.ones(n_sliders)
         self._valarray = np.ones(n_sliders) * 0.5
@@ -73,6 +74,7 @@ class SliderPack(QWidget):
             slider.valueChanged.connect(self.slider_to_box)
             box.valueChanged.connect(self.box_to_slider)
             box.valueChanged.connect(self.collect_values)
+            self._current_values.append(0)
         slider1 = self._sliders[0]
         slider2 = self._sliders[1]
         slider1.new_limit.connect(slider2.set_lower_limit)
@@ -145,6 +147,7 @@ class SliderPack(QWidget):
         result = []
         for box in self._spinboxes:
             result.append(box.value())
+        self._current_values = result
         self.new_values.emit(result)
 
 
