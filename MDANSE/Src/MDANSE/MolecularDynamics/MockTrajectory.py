@@ -474,7 +474,7 @@ class MockTrajectory:
             )
             atomic_traj = atomic_trajectory(
                 coords, direct_cells, inverse_cells, box_coordinates
-            ) 
+            )
             return atomic_traj
         else:
             return coords
