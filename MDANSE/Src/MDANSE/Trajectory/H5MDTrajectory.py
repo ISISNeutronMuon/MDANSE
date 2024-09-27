@@ -23,7 +23,8 @@ from MDANSE.MLogging import LOG
 from MDANSE.Framework.Units import measure
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
-from MDANSE.Extensions import atomic_trajectory, com_trajectory
+from MDANSE.Extensions import com_trajectory
+from MDANSE.Trajectory.AtomicTrajectory import atomic_trajectory
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
@@ -493,7 +494,7 @@ class H5MDTrajectory:
                     for nf in range(first, last, step)
                 ]
             )
-            atomic_traj = atomic_trajectory.atomic_trajectory(
+            atomic_traj = atomic_trajectory(
                 coords, direct_cells, inverse_cells, box_coordinates
             )
             return atomic_traj
