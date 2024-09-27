@@ -25,8 +25,10 @@ from qtpy.QtCore import Slot
 from qtpy.QtGui import QDoubleValidator
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-from MDANSE_GUI.Widgets.ResolutionDialog import ResolutionDialog, widget_text_map
+from MDANSE_GUI.Widgets.ResolutionDialog import ResolutionDialog
+from MDANSE_GUI.Widgets.ResolutionWidget import widget_text_map
 
+reverse_lookup = {value: key for key, value in widget_text_map.items()}
 
 init_parameters = {
     "ideal": {},
@@ -54,7 +56,7 @@ class InstrumentResolutionWidget(WidgetBase):
         self._dialog_button.clicked.connect(self.helper_dialog)
         self._dialog_button.setEnabled(True)
         self.helper = ResolutionDialog(self._base)
-        self.helper.parameters_changed.connect(self.set_parameters_from_dialog)
+        self.helper._panel.parameters_changed.connect(self.set_parameters_from_dialog)
         self._layout.addWidget(self._type_combo, 0, 1)
         self._layout.addWidget(self._dialog_button, 0, 0)
         self._labels = []
@@ -120,8 +122,14 @@ class InstrumentResolutionWidget(WidgetBase):
                 self._defaults[index] = 0.0
 
     @Slot(str)
-    def change_function(self, function: str):
-        new_params = init_parameters[function]
+    def change_function(self, function: str, optional_parameters: dict = None):
+        if optional_parameters is None:
+            new_params = init_parameters[function]
+        else:
+            new_params = optional_parameters
+        self._type_combo.blockSignals(True)
+        self._type_combo.setCurrentText(reverse_lookup[function])
+        self._type_combo.blockSignals(False)
         self.set_field_values(new_params)
 
     def get_widget_value(self):
@@ -137,7 +145,7 @@ class InstrumentResolutionWidget(WidgetBase):
                 else:
                     self._fields[index].setStyleSheet("")
                 params[key] = value
-        self.helper.update_fields((function, params))
+        self.helper._panel.update_fields((function, params))
         return (function, params)
 
     @Slot(dict)
