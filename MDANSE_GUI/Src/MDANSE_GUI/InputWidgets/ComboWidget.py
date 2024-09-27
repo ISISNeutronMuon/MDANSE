@@ -28,7 +28,7 @@ class ComboWidget(WidgetBase):
             option_list = configurator.choices
             default_option = configurator.default
         field = QComboBox(self._base)
-        field.addItems(option_list)
+        field.addItems(sorted(option_list))
         field.setCurrentText(default_option)
         field.currentTextChanged.connect(self.updateValue)
         if self._tooltip:
@@ -38,6 +38,14 @@ class ComboWidget(WidgetBase):
                 "A single option can be picked out of all the options listed."
             )
         field.setToolTip(tooltip_text)
+        # some convenience improvements
+        model = field.model()
+        row = field.currentIndex()
+        item = model.item(row, 0)
+        newfont = item.font()
+        newfont.setBold(True)
+        item.setFont(newfont)
+        #
         self._field = field
         self._layout.addWidget(field)
         self._configurator = configurator
