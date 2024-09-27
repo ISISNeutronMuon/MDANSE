@@ -32,6 +32,7 @@ from MDANSE.MLogging import LOG
 from MDANSE.Framework.Jobs.IJob import IJob
 
 from MDANSE_GUI.InputWidgets import *
+from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 
 
 widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
@@ -93,6 +94,7 @@ class Action(QWidget):
         self._trajectory_configurator = None
         self._settings = None
         self._use_preview = use_preview
+        self._current_instrument = None
         default_path = kwargs.pop("path", None)
         input_trajectory = kwargs.pop("trajectory", None)
         self.set_trajectory(default_path, input_trajectory)
@@ -126,6 +128,9 @@ class Action(QWidget):
                 self._default_path = "."
             else:
                 self._default_path = path
+
+    def set_instrument(self, instrument: SimpleInstrument) -> None:
+        self._current_instrument = instrument
 
     def clear_panel(self) -> None:
         """Clear the widgets so that it leaves an empty layout"""
@@ -262,6 +267,24 @@ class Action(QWidget):
 
         self.layout.addWidget(buttonbase)
         self._widgets_in_layout.append(buttonbase)
+        self.apply_instrument()
+
+    def apply_instrument(self):
+        if self._current_instrument is not None:
+            q_vector_tuple = self._current_instrument.create_q_vector_params()
+            resolution_tuple = self._current_instrument.create_resolution_params()
+            for widget in self._widgets:
+                if isinstance(widget, InstrumentResolutionWidget):
+                    if resolution_tuple is None:
+                        continue
+                    widget.change_function(resolution_tuple[0], resolution_tuple[1])
+                if isinstance(widget, QVectorsWidget):
+                    if q_vector_tuple is None:
+                        continue
+                    widget._selector.setCurrentText(q_vector_tuple[0])
+                    widget._model.switch_qvector_type(
+                        q_vector_tuple[0], q_vector_tuple[1]
+                    )
         self.allow_execution()
         self.show_output_prediction()
 

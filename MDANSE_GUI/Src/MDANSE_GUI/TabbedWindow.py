@@ -46,6 +46,7 @@ from MDANSE_GUI.Tabs.LoggingTab import LoggingTab, GuiLogHandler
 from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
+from MDANSE_GUI.Tabs.InstrumentTab import InstrumentTab
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
 
 
@@ -111,8 +112,13 @@ class TabbedWindow(QMainWindow):
             self._tabs["Plot Holder"]._visualiser.new_text
         )
 
+        self._tabs["Instruments"]._visualiser.instrument_details_changed.connect(
+            self._tabs["Actions"].update_action_after_instrument_change
+        )
+
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
+        self._instrument_model = GeneralModel()
         self._job_holder = JobHolder()
         self._gui_log_handler = GuiLogHandler()
 
@@ -123,6 +129,7 @@ class TabbedWindow(QMainWindow):
         self.createJobsViewer()
         self.createPlotSelection()
         self.createPlotHolder()
+        self.createInstrumentSelector()
         self.createLogViewer()
         self.setupMenubar()
         self.setupToolbar()
@@ -263,6 +270,19 @@ class TabbedWindow(QMainWindow):
         self._tabs[name] = trajectory_tab
         self._job_holder.trajectory_for_loading.connect(trajectory_tab.load_trajectory)
 
+    def createInstrumentSelector(self):
+        name = "Instruments"
+        instrument_tab = InstrumentTab.gui_instance(
+            self.tabs,
+            name,
+            self._session,
+            self._settings,
+            self._logger,
+            model=self._instrument_model,
+        )
+        self.tabs.addTab(instrument_tab._core, name)
+        self._tabs[name] = instrument_tab
+
     def createJobsViewer(self):
         name = "Running Jobs"
         run_tab = RunTab.gui_instance(
@@ -294,10 +314,14 @@ class TabbedWindow(QMainWindow):
             self._settings,
             self._logger,
             combo_model=self._trajectory_model,
+            instrument_model=self._instrument_model,
         )
         job_tab.set_job_starter(self._job_holder)
         self.tabs.addTab(job_tab._core, name)
         self._tabs[name] = job_tab
+        self.tabs.tabBar().tabBarClicked.connect(
+            job_tab.update_action_on_tab_activation
+        )
 
     def createPlotSelection(self):
         name = "Plot Creator"
