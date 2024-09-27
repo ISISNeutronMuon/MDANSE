@@ -75,7 +75,9 @@ for tp in (short_traj, mdmc_traj):
 
 
 @pytest.mark.parametrize("traj_path,job_type,running_mode,output_format", total_list)
-def test_structure_analysis(parameters, traj_path, job_type, running_mode, output_format):
+def test_structure_analysis(
+    parameters, traj_path, job_type, running_mode, output_format
+):
     temp_name = tempfile.mktemp()
     parameters["trajectory"] = traj_path
     parameters["running_mode"] = running_mode
