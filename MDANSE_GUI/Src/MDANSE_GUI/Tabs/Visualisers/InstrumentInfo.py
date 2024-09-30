@@ -97,6 +97,7 @@ class SimpleInstrument:
         except Exception as e:
             LOG.error(f"recalculate_peak failed: {e}")
         _, results = calculator.summarise_results()
+        results.pop("function", None)
         mdanse_tuple = (widget_text_map[self._resolution_type], results)
         self._resolution_results = mdanse_tuple
         return mdanse_tuple

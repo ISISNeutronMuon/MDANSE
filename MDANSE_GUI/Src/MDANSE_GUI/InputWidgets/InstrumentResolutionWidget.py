@@ -28,7 +28,6 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.Widgets.ResolutionDialog import ResolutionDialog
 from MDANSE_GUI.Widgets.ResolutionWidget import widget_text_map
 
-reverse_lookup = {value: key for key, value in widget_text_map.items()}
 
 init_parameters = {
     "ideal": {},
@@ -128,7 +127,7 @@ class InstrumentResolutionWidget(WidgetBase):
         else:
             new_params = optional_parameters
         self._type_combo.blockSignals(True)
-        self._type_combo.setCurrentText(reverse_lookup[function])
+        self._type_combo.setCurrentText(widget_text_map[function])
         self._type_combo.blockSignals(False)
         self.set_field_values(new_params)
 
