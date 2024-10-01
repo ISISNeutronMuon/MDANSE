@@ -119,7 +119,7 @@ class CurrentCorrelationFunction(IJob):
 
         self._instrResolution = self.configuration["instrument_resolution"]
 
-        self._nOmegas = self._instrResolution["n_omegas"]
+        self._nOmegas = self._instrResolution["n_romegas"]
 
         self._outputData.add(
             "q",
@@ -142,16 +142,16 @@ class CurrentCorrelationFunction(IJob):
         )
 
         self._outputData.add(
-            "omega",
+            "romega",
             "LineOutputVariable",
-            self._instrResolution["omega"],
+            self._instrResolution["romega"],
             units="rad/ps",
         )
         self._outputData.add(
             "omega_window",
             "LineOutputVariable",
             self._instrResolution["omega_window"],
-            axis="omega",
+            axis="romega",
             units="au",
         )
 
@@ -182,7 +182,7 @@ class CurrentCorrelationFunction(IJob):
                 "J(q,f)_long_%s%s" % pair,
                 "SurfaceOutputVariable",
                 (nQShells, self._nOmegas),
-                axis="q|omega",
+                axis="q|romega",
                 units="au",
                 main_result=True,
                 partial_result=True,
@@ -191,7 +191,7 @@ class CurrentCorrelationFunction(IJob):
                 "J(q,f)_trans_%s%s" % pair,
                 "SurfaceOutputVariable",
                 (nQShells, self._nOmegas),
-                axis="q|omega",
+                axis="q|romega",
                 units="au",
                 main_result=True,
                 partial_result=True,
@@ -208,7 +208,7 @@ class CurrentCorrelationFunction(IJob):
             "J(q,f)_long_total",
             "SurfaceOutputVariable",
             (nQShells, self._nOmegas),
-            axis="q|omega",
+            axis="q|romega",
             units="au",
             main_result=True,
         )
@@ -223,7 +223,7 @@ class CurrentCorrelationFunction(IJob):
             "J(q,f)_trans_total",
             "SurfaceOutputVariable",
             (nQShells, self._nOmegas),
-            axis="q|omega",
+            axis="q|romega",
             units="au",
             main_result=True,
         )
@@ -341,12 +341,14 @@ class CurrentCorrelationFunction(IJob):
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 axis=1,
+                fft="rfft",
             )
             self._outputData["J(q,f)_trans_%s%s" % pair][:] = get_spectrum(
                 self._outputData["j(q,t)_trans_%s%s" % pair],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 axis=1,
+                fft="rfft",
             )
 
         jqtLongTotal = weight(
