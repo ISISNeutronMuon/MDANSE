@@ -317,11 +317,11 @@ class CurrentCorrelationFunction(IJob):
         for at1, at2 in self._elementsPairs:
             corr_l = correlate(rho_l[at1], rho_l[at2][:n_configs], mode="valid")[
                 :, 0, 0
-            ] / (n_configs * rho_l[at1].shape[2])
+            ] / (3 * n_configs * rho_l[at1].shape[2])
             self._outputData["j(q,t)_long_%s%s" % (at1, at2)][index, :] += corr_l.real
             corr_t = correlate(rho_t[at1], rho_t[at2][:n_configs], mode="valid")[
                 :, 0, 0
-            ] / (n_configs * rho_t[at1].shape[2])
+            ] / (3 * n_configs * rho_t[at1].shape[2])
             self._outputData["j(q,t)_trans_%s%s" % (at1, at2)][index, :] += corr_t.real
 
     def finalize(self):
