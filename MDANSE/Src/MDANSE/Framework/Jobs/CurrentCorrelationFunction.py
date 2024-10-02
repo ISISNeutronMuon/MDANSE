@@ -289,11 +289,10 @@ class CurrentCorrelationFunction(IJob):
                     "ik,ij->ikj", veloc, np.exp(1j * np.dot(coords, qVectors))
                 )
                 long = np.einsum(
-                    "lj,kj,ik,ij->ilj",
+                    "lj,kj,ikj->ilj",
                     qVectors,
                     qVectors / qVectors2,
-                    veloc,
-                    np.exp(1j * np.dot(coords, qVectors)),
+                    curr,
                 )
                 trans = curr - long
 
