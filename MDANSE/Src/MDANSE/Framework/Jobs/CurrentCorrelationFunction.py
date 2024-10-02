@@ -50,7 +50,7 @@ class CurrentCorrelationFunction(IJob):
 
     category = (
         "Analysis",
-        "Scattering",
+        "Dynamics",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
