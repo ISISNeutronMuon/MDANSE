@@ -16,6 +16,7 @@
 from qtpy.QtWidgets import QComboBox
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.Widgets.DefaultCombobox import highlight_default_value
 
 
 class ComboWidget(WidgetBase):
@@ -28,7 +29,7 @@ class ComboWidget(WidgetBase):
             option_list = configurator.choices
             default_option = configurator.default
         field = QComboBox(self._base)
-        field.addItems(option_list)
+        field.addItems(sorted(option_list))
         field.setCurrentText(default_option)
         field.currentTextChanged.connect(self.updateValue)
         if self._tooltip:
@@ -38,6 +39,7 @@ class ComboWidget(WidgetBase):
                 "A single option can be picked out of all the options listed."
             )
         field.setToolTip(tooltip_text)
+        highlight_default_value(field)
         self._field = field
         self._layout.addWidget(field)
         self._configurator = configurator
