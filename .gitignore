@@ -9,6 +9,7 @@
 .vscode
 *.pyc
 mdanse_env/
+.venv/
 sandbox/
 
 # Distribution / packaging

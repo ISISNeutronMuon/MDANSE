@@ -365,8 +365,18 @@ class MdanseTrajectory:
         coords = grp["coordinates"][first:last:step, index, :].astype(np.float64)
 
         if self._unit_cells is not None:
-            direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
-            inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
+            direct_cells = np.array(
+                [
+                    self._unit_cells[nf].transposed_direct
+                    for nf in range(first, last, step)
+                ]
+            )
+            inverse_cells = np.array(
+                [
+                    self._unit_cells[nf].transposed_inverse
+                    for nf in range(first, last, step)
+                ]
+            )
             atomic_traj = atomic_trajectory(
                 coords, direct_cells, inverse_cells, box_coordinates
             )
