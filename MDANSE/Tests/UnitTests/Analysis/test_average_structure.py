@@ -22,14 +22,16 @@ def trajectory():
     trajectory = HDFTrajectoryInputData(short_traj)
     yield trajectory
 
-units = ['Angstrom', 'Bohr', 'nm', 'pm']
-formats = ['vasp', 'xyz', 'turbomole', 'abinit-in']
+
+units = ["Angstrom", "Bohr", "nm", "pm"]
+formats = ["vasp", "xyz", "turbomole", "abinit-in"]
 inputs = []
 for u in units:
     for f in formats:
-        inputs.append((u,f))
+        inputs.append((u, f))
 
-@pytest.mark.parametrize('output_unit,output_format', inputs)
+
+@pytest.mark.parametrize("output_unit,output_format", inputs)
 def test_temperature(trajectory, output_unit, output_format):
     temp_name = tempfile.mktemp()
     parameters = {}
@@ -44,5 +46,3 @@ def test_temperature(trajectory, output_unit, output_format):
     assert path.exists(temp_name)
     assert path.isfile(temp_name)
     os.remove(temp_name)
-
-

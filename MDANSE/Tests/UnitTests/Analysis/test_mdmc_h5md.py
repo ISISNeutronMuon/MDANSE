@@ -44,4 +44,3 @@ def test_temperature_nonzero(trajectory, interp_order):
         temperature = np.array(results["/temperature"])
     os.remove(temp_name + ".mda")
     assert np.all(temperature > 0.0)
-
