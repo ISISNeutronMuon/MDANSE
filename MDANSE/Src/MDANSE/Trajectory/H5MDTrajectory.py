@@ -24,13 +24,13 @@ from MDANSE.Framework.Units import measure
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 from MDANSE.Extensions import com_trajectory
-from MDANSE.Trajectory.AtomicTrajectory import atomic_trajectory
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
 )
 from MDANSE.MolecularDynamics.TrajectoryUtils import (
     resolve_undefined_molecules_name,
+    atomic_trajectory,
 )
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 

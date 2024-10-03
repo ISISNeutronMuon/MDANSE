@@ -1,9 +1,9 @@
 import numpy as np
-import pytest
-from MDANSE.Trajectory.AtomicTrajectory import atomic_trajectory
-# from MDANSE.Extensions import atomic_trajectory
+from MDANSE.MolecularDynamics.TrajectoryUtils import atomic_trajectory
+
 
 cells = np.array([np.eye(3)]*5)
+
 
 def test_constant():
     coords = np.zeros((5, 3)) + 0.5
@@ -19,8 +19,3 @@ def test_one_big_jump():
     result[0, 0] = 0.1
     result[1:, 0] = 0.2
     assert np.allclose(atomic_traj, result)
-
-
-
-
-
