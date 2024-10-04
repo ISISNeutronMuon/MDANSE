@@ -84,11 +84,11 @@ class SingleDataset:
         self._axes_tag = source[name].attrs["axis"]
         self._axes = {}
         self._axes_units = {}
-        for axis_name in self._axes_tag.split("|"):
+        for ax_number, axis_name in enumerate(self._axes_tag.split("|")):
             aname = axis_name.strip()
             if aname == "index":
-                self._axes[aname] = np.arange(len(self._data))
-                self._axes_units[aname] = "N/A"
+                self._axes[aname + str(ax_number)] = np.arange(len(self._data))
+                self._axes_units[aname + str(ax_number)] = "N/A"
             else:
                 self._axes[aname] = source[aname][:]
                 self._axes_units[aname] = source[aname].attrs["units"]

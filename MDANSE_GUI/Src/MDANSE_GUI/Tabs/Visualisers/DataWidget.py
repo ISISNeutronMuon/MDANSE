@@ -16,6 +16,7 @@
 from typing import TYPE_CHECKING, List
 import csv
 import os
+from traceback import format_exc
 
 if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
@@ -247,7 +248,7 @@ class DataWidget(QWidget):
                 self._current_path = os.path.split(dataset._filename)[0]
                 break
         except Exception as e:
-            LOG.error(f"DataWidget error: {e}")
+            LOG.error(f"DataWidget error: {e}" f"traceback {format_exc()}")
 
     def make_canvas(self):
         """Creates a matplotlib figure for plotting
