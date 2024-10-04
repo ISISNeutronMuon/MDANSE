@@ -32,6 +32,7 @@ class Grid(Plotter):
         super().__init__()
         self._figure = None
         self._backup_limits = []
+        self._plot_limit = 8
 
     def slider_labels(self) -> List[str]:
         return ["Inactive", "Inactive"]
@@ -68,13 +69,21 @@ class Grid(Plotter):
             best_unit, best_axis = ds.longest_axis()
             curves = ds.curves_vs_axis(best_unit)
             nplots += len(curves)
+        if nplots > self._plot_limit:
+            nplots = self._plot_limit
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
+        counter = 0
         for name, databundle in plotting_context.datasets().items():
+            if counter > self._plot_limit:
+                break
             dataset, colour, linestyle, marker, ds_num = databundle
             best_unit, best_axis = dataset.longest_axis()
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)
             for key, curve in dataset._curves.items():
+                if counter > self._plot_limit:
+                    break
+                counter += 1
                 axes = target.add_subplot(gridsize, gridsize, startnum)
                 self._axes.append(axes)
                 plotlabel = dataset._labels["medium"]

@@ -62,6 +62,7 @@ class SingleDataset:
         self._curves = {}
         self._curve_labels = {}
         self._planes = {}
+        self._plane_labels = {}
         bare_name = os.path.split(self._filename)[-1]
         self._labels = {
             "minimal": name,
@@ -142,6 +143,34 @@ class SingleDataset:
         #     if len(line) != xlen:
         #         print("Wrong data length in the curves_vs_axis method of PlottingContext")
         # return temp
+
+    def planes_vs_axis(self, axis_number: int) -> List[np.ndarray]:
+        found = -1
+        total_ndim = len(self._data.shape)
+        if total_ndim == 1:
+            return
+        elif total_ndim == 2:
+            return self._data
+        data_shape = self._data.shape
+        number_of_planes = data_shape[axis_number]
+        perpendicular_axis = None
+        perpendicular_axis_name = ""
+        slice_def = []
+        for number, (axis_name, axis_array) in enumerate(self._axes.items()):
+            if number == axis_number:
+                slice_def.append(0)
+                perpendicular_axis = axis_array
+                perpendicular_axis_name = axis_name
+            else:
+                slice_def.append(slice(None))
+        for plane_number in range(number_of_planes):
+            fixed_argument = perpendicular_axis[plane_number]
+            slice_def[axis_number] = plane_number
+            data = self._data[*slice_def]
+            self._planes[plane_number] = data
+            self._plane_labels[plane_number] = (
+                f"{perpendicular_axis_name}={fixed_argument}"
+            )
 
 
 class SingleCurve:

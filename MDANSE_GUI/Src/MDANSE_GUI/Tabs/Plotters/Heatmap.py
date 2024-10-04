@@ -45,6 +45,8 @@ class Heatmap(Plotter):
         self._initial_values = [0.0, 100.0]
         self._slider_values = [0.0, 100.0]
         self._last_minmax = [-1, -1]
+        self._slice_axis = 2
+        self._plot_limit = 8
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
@@ -145,7 +147,11 @@ class Heatmap(Plotter):
             ds, _, _, _, ds_num = databundle
             if ds._n_dim == 1:
                 continue
-            nplots += 1
+            elif ds._n_dim == 3:
+                ds.planes_vs_axis(self._slice_axis)
+                nplots += len(ds._planes)
+            else:
+                nplots += 1
             try:
                 self._backup_scale_interpolators[ds_num](51.2)
             except:
@@ -154,15 +160,24 @@ class Heatmap(Plotter):
                 self._backup_scale_interpolators[ds_num] = interp1d(
                     percentiles, results
                 )
+        if nplots > self._plot_limit:
+            nplots = self._plot_limit
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
         for num, databundle in enumerate(plotting_context.datasets().values()):
             dataset, _, _, _, ds_num = databundle
             if dataset._n_dim == 1:
                 continue
-            axes = target.add_subplot(gridsize, gridsize, startnum)
-            startnum += 1
-            self._axes.append(axes)
+            if dataset._n_dim == 3:
+                all_numbers, all_datasets = (
+                    list(dataset._planes.keys()),
+                    list(dataset._planes.values()),
+                )
+                all_labels = [dataset._plane_labels[number] for number in all_numbers]
+            else:
+                all_numbers = [0]
+                all_datasets = [dataset._data]
+                all_labels = [dataset._name]
             limits = []
             axis_units = []
             for key, value in dataset._axes_units.items():
@@ -181,16 +196,23 @@ class Heatmap(Plotter):
                         axis_array[-1] * conversion_factor,
                     ]
                     axis_units.append(target_unit)
-            image = axes.imshow(
-                dataset._data.T[::-1, :],
-                extent=limits,
-                aspect="auto",
-                interpolation=None,
-                cmap=plotting_context.colormap,
-            )
-            colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
-            colorbar.set_label(dataset._data_unit)
-            xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
+            for xnum in range(len(all_datasets)):
+                if startnum > self._plot_limit:
+                    break
+                axes = target.add_subplot(gridsize, gridsize, startnum)
+                startnum += 1
+                self._axes.append(axes)
+                image = axes.imshow(
+                    all_datasets[xnum][::-1, :],
+                    extent=limits,
+                    aspect="auto",
+                    interpolation=None,
+                    cmap=plotting_context.colormap,
+                )
+                axes.set_title(all_labels[xnum])
+                colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
+                colorbar.set_label(dataset._data_unit)
+                xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
             self._backup_arrays[ds_num] = np.nan_to_num(dataset._data)
             if update_only:
                 interpolator = self._backup_scale_interpolators[ds_num]
