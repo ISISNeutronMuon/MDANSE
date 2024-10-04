@@ -15,6 +15,7 @@
 #
 from typing import TYPE_CHECKING, List
 from functools import reduce
+from itertools import product
 
 import numpy as np
 
@@ -301,17 +302,15 @@ class DatasetFormatter:
         else:
             counter = 0
             nlines = total_lines
+        all_indices = product(*[range(ax_lengths[n]) for n in axis_numbers.keys()])
         while counter < nlines:
-            array_index = tuple([counter % ax_lengths[n] for n in axis_numbers.keys()])
-            print(f"array_index: {array_index}")
+            array_index = all_indices.__next__()
             xvals = [
-                new_axes[name][counter % ax_lengths[number]]
-                for number, name in axis_numbers.items()
+                new_axes[axis_numbers[axis_number]][index]
+                for axis_number, index in enumerate(array_index)
             ]
             yval = dataset._data[array_index]
             temp.append(xvals + [yval])
-            print(f"xvals: {xvals}")
-            print(f"yval: {yval}")
             counter += 1
         return header_lines, np.vstack(temp)
 
