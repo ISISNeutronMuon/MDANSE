@@ -233,7 +233,7 @@ class ResolutionCalculator:
             LOG.warning(f"Could not find {key} in {self._resolution._configuration}")
 
     def summarise_results(self, rounding_precision=3):
-        results = {}
+        results = {"function": self._resolution_name}
         text = ""
         for key, value in self._resolution._configuration.items():
             original_value = value["value"]
@@ -460,6 +460,7 @@ class ResolutionWidget(QWidget):
         self._output_field.setText(text + temp_text)
         self._results = results
 
+    @Slot()
     def apply_changes(self):
         self.parameters_changed.emit(self._results)
 

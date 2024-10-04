@@ -59,6 +59,7 @@ def test_vacf(trajectory, interp_order, normalise):
     assert path.isfile(temp_name + ".log")
     os.remove(temp_name + ".log")
 
+
 def test_pps(trajectory):
     temp_name = tempfile.mktemp()
     parameters = {}
@@ -74,6 +75,7 @@ def test_pps(trajectory):
     assert path.exists(temp_name + ".log")
     assert path.isfile(temp_name + ".log")
     os.remove(temp_name + ".log")
+
 
 ################################################################
 # Job parameters                                               #
@@ -124,11 +126,13 @@ for tp in [short_traj, mdmc_traj]:
     ]:
         for rm in [("single-core", 1), ("multicore", -4)]:
             for of in ["MDAFormat", "TextFormat"]:
-                total_list.append((tp,jt, rm, of))
+                total_list.append((tp, jt, rm, of))
 
 
 @pytest.mark.parametrize("traj_path,job_type,running_mode,output_format", total_list)
-def test_dynamics_analysis(parameters, traj_path, job_type, running_mode, output_format):
+def test_dynamics_analysis(
+    parameters, traj_path, job_type, running_mode, output_format
+):
     temp_name = tempfile.mktemp()
     parameters["trajectory"] = traj_path
     parameters["running_mode"] = running_mode

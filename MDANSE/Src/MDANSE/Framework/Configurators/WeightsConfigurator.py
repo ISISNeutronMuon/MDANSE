@@ -39,9 +39,44 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :type name: str
         """
 
+        self._optional_grouping = {}
+        self._aliases = {"mass": "atomic_weight"}
+
+        filtered_choices = self.filter_choices()
         SingleChoiceConfigurator.__init__(
-            self, name, choices=ATOMS_DATABASE.numeric_properties, **kwargs
+            self, name, choices=filtered_choices, **kwargs
         )
+
+    def filter_choices(self):
+        full_choices = ATOMS_DATABASE.numeric_properties + list(self._aliases.keys())
+        to_discard = [x for x in full_choices if "energy" in x]
+        to_discard += [
+            "abundance",
+            "alternatives",
+            "block",
+            "charge",
+            "color",
+            "configuration",
+            "element",
+            "family",
+            "group",
+            "serie",
+            "state",
+        ]
+        limited_choices = [x for x in full_choices if x not in to_discard]
+        self._optional_grouping["xray_group"] = [
+            x for x in limited_choices if "xray" in x
+        ]
+        self._optional_grouping["neutron_group"] = [
+            x for x in limited_choices if "b_" in x
+        ]
+        self._optional_grouping["atomic_group"] = [
+            "mass",
+            "nucleon",
+            "neutron",
+            "proton",
+        ] + [x for x in limited_choices if "atomic" in x or "radius" in x]
+        return limited_choices
 
     def configure(self, value):
         """
@@ -57,6 +92,9 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             return
 
         value = value.lower()
+
+        if value in self._aliases.keys():
+            value = self._aliases[value]
 
         if not value in ATOMS_DATABASE.numeric_properties:
             self.error_status = (

@@ -487,3 +487,32 @@ def sorted_atoms(
         return atoms
     else:
         return [getattr(at, attribute) for at in atoms]
+
+
+def atomic_trajectory(config, cell, rcell, box_coordinates=False):
+    """For the coordinates of a specific atom, remove all unit cell
+    jumps.
+
+    Parameters
+    ----------
+    config : np.ndarray
+        The coordinates for a specific atoms.
+    cell : np.ndarray
+        The direct matrices.
+    rcell : np.ndarray
+        The inverse matrices.
+    box_coordinates : bool
+        Returns the coordinates in fractional coordinates if true.
+
+    Returns
+    -------
+    np.ndarray
+        The input config but the unit cell jumps removed.
+    """
+    trajectory = np.einsum("ij,ikj->ik", config, rcell)
+    sdxyz = trajectory[1:, :] - trajectory[:-1, :]
+    sdxyz -= np.cumsum(np.round(sdxyz), axis=0)
+    trajectory[1:, :] = trajectory[:-1, :] + sdxyz
+    if not box_coordinates:
+        trajectory = np.einsum("ij,ikj->ik", trajectory, cell)
+    return trajectory
