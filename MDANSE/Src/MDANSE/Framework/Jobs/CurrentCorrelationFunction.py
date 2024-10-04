@@ -93,7 +93,7 @@ class CurrentCorrelationFunction(IJob):
     settings["weights"] = (
         "WeightsConfigurator",
         {
-            "default": "b_coherent",
+            "default": "equal",
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
@@ -137,10 +137,16 @@ class CurrentCorrelationFunction(IJob):
         self._outputData.add(
             "time_window",
             "LineOutputVariable",
-            self._instrResolution["time_window"],
+            self._instrResolution["time_window_positive"],
             units="au",
         )
 
+        self._outputData.add(
+            "omega",
+            "LineOutputVariable",
+            self._instrResolution["omega"],
+            units="rad/ps",
+        )
         self._outputData.add(
             "romega",
             "LineOutputVariable",
@@ -151,7 +157,7 @@ class CurrentCorrelationFunction(IJob):
             "omega_window",
             "LineOutputVariable",
             self._instrResolution["omega_window"],
-            axis="romega",
+            axis="omega",
             units="au",
         )
 
