@@ -45,7 +45,7 @@ class Heatmap(Plotter):
         self._slider_values = [0.0, 100.0]
         self._last_minmax = [-1, -1]
         self._slice_axis = 2
-        self._plot_limit = 8
+        self._plot_limit = 1
 
     def clear(self, figure: "Figure" = None):
         if figure is None:
@@ -141,11 +141,18 @@ class Heatmap(Plotter):
             return
         nplots = 0
         for databundle in plotting_context.datasets().values():
-            ds, _, _, _, ds_num, _ = databundle
+            ds, _, _, _, ds_num, axis_label = databundle
             if ds._n_dim == 1:
                 continue
             elif ds._n_dim == 3:
-                ds.planes_vs_axis(self._slice_axis)
+                replacement_axis_number = None
+                for number, axis_name in enumerate(ds._axes.keys()):
+                    if axis_name == axis_label:
+                        replacement_axis_number = number
+                if replacement_axis_number is None:
+                    ds.planes_vs_axis(self._slice_axis)
+                else:
+                    ds.planes_vs_axis(replacement_axis_number)
                 nplots += len(ds._planes)
             else:
                 nplots += 1

@@ -99,18 +99,34 @@ class SingleDataset:
         complete_subset_list = []
         for token in limit_string.split(";"):
             if ":" in token:
-                slice_parts = [int(x) for x in token.split(":")]
+                try:
+                    slice_parts = [int(x) for x in token.split(":")]
+                except:
+                    continue
                 if len(slice_parts) < 4:
                     complete_subset_list += list(range(*slice_parts))
             elif "-" in token:
-                slice_parts = [int(x) for x in token.split("-")]
+                try:
+                    slice_parts = [int(x) for x in token.split("-")]
+                except:
+                    continue
                 if len(slice_parts) == 2:
                     complete_subset_list += list(range(slice_parts[0], slice_parts[1]))
             elif "," in token:
-                slice_parts = [int(x) for x in token.split(",")]
+                try:
+                    slice_parts = [int(x) for x in token.split(",")]
+                except:
+                    continue
                 complete_subset_list += list(slice_parts)
             else:
-                complete_subset_list += int(token)
+                try:
+                    complete_subset_list += [int(token)]
+                except:
+                    continue
+        if len(complete_subset_list) == 0:
+            self._data_limits = None
+        else:
+            self._data_limits = np.unique(complete_subset_list).astype(int)
 
     def available_x_axes(self) -> List[str]:
         return list(self._axes_units.keys())
@@ -129,6 +145,8 @@ class SingleDataset:
         return best_unit, best_axis
 
     def curves_vs_axis(self, axis_unit: str) -> List[np.ndarray]:
+        self._curves = {}
+        self._curve_labels = {}
         found = -1
         total_ndim = len(self._data.shape)
         data_shape = self._data.shape
@@ -152,8 +170,13 @@ class SingleDataset:
         indices = list(itertools.product(*indexer))
         slicers = list(itertools.product(*slicer))
         for n in range(len(indices)):
-            self._curves[tuple(indices[n])] = self._data[slicers[n]].squeeze()
-            self._curve_labels[tuple(indices[n])] = str(tuple(indices[n]))
+            if self._data_limits is not None:
+                if n in self._data_limits:
+                    self._curves[tuple(indices[n])] = self._data[slicers[n]].squeeze()
+                    self._curve_labels[tuple(indices[n])] = str(tuple(indices[n]))
+            else:
+                self._curves[tuple(indices[n])] = self._data[slicers[n]].squeeze()
+                self._curve_labels[tuple(indices[n])] = str(tuple(indices[n]))
         return self._curves
         # slicer = tuple(slicer)
         # temp = self._data[slicer].squeeze()
@@ -163,6 +186,8 @@ class SingleDataset:
         # return temp
 
     def planes_vs_axis(self, axis_number: int) -> List[np.ndarray]:
+        self._planes = {}
+        self._plane_labels = {}
         found = -1
         total_ndim = len(self._data.shape)
         if total_ndim == 1:
@@ -182,13 +207,23 @@ class SingleDataset:
             else:
                 slice_def.append(slice(None))
         for plane_number in range(number_of_planes):
-            fixed_argument = perpendicular_axis[plane_number]
-            slice_def[axis_number] = plane_number
-            data = self._data[*slice_def]
-            self._planes[plane_number] = data
-            self._plane_labels[plane_number] = (
-                f"{perpendicular_axis_name}={fixed_argument}"
-            )
+            if self._data_limits is not None:
+                if plane_number in self._data_limits:
+                    fixed_argument = perpendicular_axis[plane_number]
+                    slice_def[axis_number] = plane_number
+                    data = self._data[*slice_def]
+                    self._planes[plane_number] = data
+                    self._plane_labels[plane_number] = (
+                        f"{perpendicular_axis_name}={fixed_argument}"
+                    )
+            else:
+                fixed_argument = perpendicular_axis[plane_number]
+                slice_def[axis_number] = plane_number
+                data = self._data[*slice_def]
+                self._planes[plane_number] = data
+                self._plane_labels[plane_number] = (
+                    f"{perpendicular_axis_name}={fixed_argument}"
+                )
 
 
 class SingleCurve:
@@ -342,6 +377,9 @@ class PlottingContext(QStandardItemModel):
                 ).checkState()
                 == Qt.CheckState.Checked
             )
+            data_number_string = self.itemFromIndex(
+                self.index(row, plotting_column_index["Use it?"])
+            ).text()
             colour = self.itemFromIndex(
                 self.index(row, plotting_column_index["Colour"])
             ).text()
@@ -355,7 +393,10 @@ class PlottingContext(QStandardItemModel):
                 self.index(row, plotting_column_index["Main axis"])
             ).text()
             if useit:
+                self._datasets[key].set_data_limits(data_number_string)
                 result[key] = (self._datasets[key], colour, style, marker, ds_num, axis)
+            else:
+                self._datasets[key]._data_limits = None
         return result
 
     def add_dataset(self, new_dataset: SingleDataset):
