@@ -345,7 +345,9 @@ class PlottingContext(QStandardItemModel):
                 self._last_colour += 1
             else:
                 next_colour = self.next_colour()
-                self.item(row, plotting_column_index["Colour"]).setText(str(next_colour))
+                self.item(row, plotting_column_index["Colour"]).setText(
+                    str(next_colour)
+                )
                 self.item(row, plotting_column_index["Colour"]).setData(
                     QColor(str(next_colour)), role=Qt.ItemDataRole.BackgroundRole
                 )
@@ -435,7 +437,7 @@ class PlottingContext(QStandardItemModel):
         temp.setCheckable(True)
         temp.setCheckState(Qt.CheckState.Checked)
         self.itemChanged.connect(self.needs_an_update)
-        temp = items[5]
+        temp = items[plotting_column_index["Colour"]]
         temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
         # test for possible nested items
         best_axis = new_dataset.longest_axis()
