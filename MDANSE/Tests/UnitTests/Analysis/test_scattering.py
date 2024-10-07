@@ -50,6 +50,7 @@ def dcsf():
     dcsf = IJob.create("DynamicCoherentStructureFactor")
     dcsf.run(parameters, status=True)
     yield temp_name + ".mda"
+    os.remove(temp_name + ".mda")
 
 
 @pytest.fixture(scope="module")
@@ -71,6 +72,50 @@ def disf():
     disf = IJob.create("DynamicIncoherentStructureFactor")
     disf.run(parameters, status=True)
     yield temp_name + ".mda"
+    os.remove(temp_name + ".mda")
+
+
+def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
+    temp_name = tempfile.mktemp()
+    parameters = {}
+    parameters["atom_selection"] = None
+    parameters["atom_transmutation"] = None
+    parameters["disf_input_file"] = disf
+    parameters["dcsf_input_file"] = dcsf
+    parameters["running_mode"] = ("single-core",)
+    parameters["trajectory"] = short_traj
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
+    ndtsf = IJob.create("NeutronDynamicTotalStructureFactor")
+    ndtsf.run(parameters, status=True)
+    assert path.exists(temp_name + ".mda")
+    assert path.isfile(temp_name + ".mda")
+    os.remove(temp_name + ".mda")
+    assert path.exists(temp_name + "_text.tar")
+    assert path.isfile(temp_name + "_text.tar")
+    os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
+
+
+def test_ssfsf(disf):
+    temp_name = tempfile.mktemp()
+    parameters = {}
+    parameters["sample_inc"] = disf
+    parameters["running_mode"] = ("single-core",)
+    parameters["instrument_resolution"] = ("Ideal", {})
+    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
+    ndtsf = IJob.create("StructureFactorFromScatteringFunction")
+    ndtsf.run(parameters, status=True)
+    assert path.exists(temp_name + ".mda")
+    assert path.isfile(temp_name + ".mda")
+    os.remove(temp_name + ".mda")
+    assert path.exists(temp_name + "_text.tar")
+    assert path.isfile(temp_name + "_text.tar")
+    os.remove(temp_name + "_text.tar")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
 
 
 def test_dcsf(trajectory, qvector_spherical_lattice):
@@ -180,49 +225,6 @@ def test_gdisf(trajectory):
     parameters["weights"] = "b_incoherent2"
     gdisf = IJob.create("GaussianDynamicIncoherentStructureFactor")
     gdisf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
-
-
-def test_ndtsf(disf, dcsf, qvector_spherical_lattice):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["disf_input_file"] = disf
-    parameters["dcsf_input_file"] = dcsf
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
-    ndtsf = IJob.create("NeutronDynamicTotalStructureFactor")
-    ndtsf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
-
-
-def test_ssfsf(disf):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["sample_inc"] = disf
-    parameters["running_mode"] = ("single-core",)
-    parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
-    ndtsf = IJob.create("StructureFactorFromScatteringFunction")
-    ndtsf.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
     os.remove(temp_name + ".mda")
