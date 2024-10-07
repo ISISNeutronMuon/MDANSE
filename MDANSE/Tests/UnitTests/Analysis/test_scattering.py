@@ -50,7 +50,6 @@ def dcsf():
     dcsf = IJob.create("DynamicCoherentStructureFactor")
     dcsf.run(parameters, status=True)
     yield temp_name + ".mda"
-    os.remove(temp_name + ".mda")
 
 
 @pytest.fixture(scope="module")
@@ -72,7 +71,6 @@ def disf():
     disf = IJob.create("DynamicIncoherentStructureFactor")
     disf.run(parameters, status=True)
     yield temp_name + ".mda"
-    os.remove(temp_name + ".mda")
 
 
 def test_dcsf(trajectory, qvector_spherical_lattice):
