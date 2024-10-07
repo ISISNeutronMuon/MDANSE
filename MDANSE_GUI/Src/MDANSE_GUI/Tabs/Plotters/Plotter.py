@@ -30,7 +30,6 @@ class Plotter(metaclass=SubclassFactory):
 
     def __init__(self) -> None:
         self._figure = None
-        self._current_colours = []
         self._axes = []
         self._initial_values = [0.0, 0.0]
         self._slider_values = [0.0, 0.0]
@@ -62,11 +61,6 @@ class Plotter(metaclass=SubclassFactory):
     def sliders_coupled(self) -> bool:
         return False
 
-    def get_mpl_colors(self):
-        cycler = rcParams["axes.prop_cycle"]
-        colours = cycler.by_key()["color"]
-        self._current_colours = colours
-
     def get_figure(self, figure: "Figure" = None):
         if figure is None:
             target = self._figure
@@ -78,35 +72,10 @@ class Plotter(metaclass=SubclassFactory):
         target.clear()
         return target
 
-    def apply_settings(self, plotting_context: "PlottingContext", colours=None):
-        if colours is not None:
-            self._current_colours = colours
+    def apply_settings(self, plotting_context: "PlottingContext"):
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
-        try:
-            matplotlib_style = colours["style"]
-        except:
-            pass
-        else:
-            if matplotlib_style is not None:
-                mpl_style.use(matplotlib_style)
-        try:
-            bkg_col = colours["background"]
-        except:
-            pass
-        else:
-            if bkg_col is not None:
-                for axes in self._axes:
-                    axes.set_facecolor(bkg_col)
-        try:
-            col_seq = colours["curves"]
-        except:
-            pass
-        else:
-            if col_seq is not None:
-                for axes in self._axes:
-                    axes.set_prop_cycle("color", col_seq)
 
     def enable_slider(self, allow_slider: bool = True):
         if allow_slider:
@@ -132,7 +101,6 @@ class Plotter(metaclass=SubclassFactory):
             return
         if toolbar is not None:
             self._toolbar = toolbar
-        self.get_mpl_colors()
         axes = target.add_subplot(111)
         self._axes = [axes]
         self.apply_settings(plotting_context, colours)

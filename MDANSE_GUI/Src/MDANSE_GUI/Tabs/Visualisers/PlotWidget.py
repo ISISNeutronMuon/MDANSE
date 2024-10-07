@@ -51,6 +51,7 @@ class SliderPack(QWidget):
         self._labels = []
         self._sliders = []
         self._spinboxes = []
+        self._current_values = []
         self._minarray = np.zeros(n_sliders)
         self._maxarray = np.ones(n_sliders)
         self._valarray = np.ones(n_sliders) * 0.5
@@ -73,6 +74,7 @@ class SliderPack(QWidget):
             slider.valueChanged.connect(self.slider_to_box)
             box.valueChanged.connect(self.box_to_slider)
             box.valueChanged.connect(self.collect_values)
+            self._current_values.append(0)
         slider1 = self._sliders[0]
         slider2 = self._sliders[1]
         slider1.new_limit.connect(slider2.set_lower_limit)
@@ -145,6 +147,7 @@ class SliderPack(QWidget):
         result = []
         for box in self._spinboxes:
             result.append(box.value())
+        self._current_values = result
         self.new_values.emit(result)
 
 
@@ -155,13 +158,11 @@ class PlotWidget(QWidget):
     reset_slider_values = Signal(bool)
     change_slider_coupling = Signal(bool)
 
-    def __init__(self, *args, colours=None, settings=None, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None
         self._plotting_context = None
-        self._colours = colours
-        self._settings = settings
         self._slider_max = 100
         self.make_canvas()
         self.set_plotter("Single")
@@ -176,7 +177,6 @@ class PlotWidget(QWidget):
             self._plotter = Plotter.create(plotter_option)
         except:
             self._plotter = Plotter()
-        self._plotter._settings = self._settings
         self.change_slider_labels.emit(self._plotter.slider_labels())
         self.change_slider_limits.emit(self._plotter.slider_limits())
         self.change_slider_coupling.emit(self._plotter.sliders_coupled())
@@ -207,7 +207,6 @@ class PlotWidget(QWidget):
         self._plotter.plot(
             self._plotting_context,
             self._figure,
-            colours=self._colours,
             update_only=update_only,
             toolbar=self._toolbar,
         )
