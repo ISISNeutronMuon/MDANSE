@@ -25,6 +25,7 @@ from MDANSE.Mathematics.Signal import (
     differentiate,
     get_spectrum,
 )
+from MDANSE.MLogging import LOG
 
 
 class CurrentCorrelationFunctionError(Exception):
@@ -251,6 +252,29 @@ class CurrentCorrelationFunction(IJob):
 
         qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
         qVectors2 = np.sum(qVectors**2, axis=0)
+
+        zero = qVectors2 == 0
+        non_zero = qVectors2 != 0
+        if all(zero):
+            LOG.warning(
+                "All q-vectors for this shell have a magnitude "
+                "of zero, longitudinal and transverse currents "
+                "are not well-defined. The current correlation "
+                "for this shell will be set to zero."
+            )
+            # if they are all zero we can skip this shell, the
+            # results for the longitudinal and transverse current
+            # correlation for this shell will be zero
+            return index, None
+        elif any(zero):
+            LOG.warning(
+                "q-vectors with a magnitude of zero were used, "
+                "longitudinal and transverse currents are "
+                "not well-defined. Skipping these q-vectors."
+            )
+
+        qVectors = qVectors[:, non_zero]
+        qVectors2 = qVectors2[non_zero]
         nQVectors = qVectors.shape[1]
 
         rho_l = {}
@@ -307,7 +331,7 @@ class CurrentCorrelationFunction(IJob):
 
         return index, (rho_l, rho_t)
 
-    def combine(self, index: int, x: tuple[np.ndarray, np.ndarray]):
+    def combine(self, index: int, x: tuple[np.ndarray, np.ndarray] | None):
         """Calculate the correlation functions of the current densities.
 
         Parameters
@@ -318,6 +342,16 @@ class CurrentCorrelationFunction(IJob):
             A tuple of numpy arrays of the longitudinal and transverse
             currents.
         """
+        if x is None:
+            for at1, at2 in self._elementsPairs:
+                self._outputData["j(q,t)_long_%s%s" % (at1, at2)][index, :] = np.zeros(
+                    self._nFrames
+                )
+                self._outputData["j(q,t)_trans_%s%s" % (at1, at2)][index, :] = np.zeros(
+                    self._nFrames
+                )
+            return
+
         rho_l, rho_t = x
         n_configs = self.configuration["frames"]["n_configs"]
         for at1, at2 in self._elementsPairs:
