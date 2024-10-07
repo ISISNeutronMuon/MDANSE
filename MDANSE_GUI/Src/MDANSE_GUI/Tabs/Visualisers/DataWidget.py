@@ -240,7 +240,7 @@ class DataWidget(QWidget):
                 toolbar=None,
             )
             for _, databundle in self._plotting_context.datasets().items():
-                dataset, _, _, _, _ = databundle
+                dataset, _, _, _, _, _ = databundle
                 self._current_path = os.path.split(dataset._filename)[0]
                 break
         except Exception as e:

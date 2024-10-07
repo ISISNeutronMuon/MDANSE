@@ -70,7 +70,7 @@ class DatasetFormatter:
         if self._plotting_context is None:
             return ["No data selected"]
         for name, databundle in self._plotting_context.datasets().items():
-            dataset, _, _, _, _ = databundle
+            dataset, _, _, _, _, _ = databundle
             if dataset._n_dim == 1:
                 header, data = self.process_1D_data(
                     dataset, separator=self._separator, is_preview=self._is_preview
@@ -104,7 +104,7 @@ class DatasetFormatter:
         if self._plotting_context is None:
             return ["No data selected"]
         for name, databundle in self._plotting_context.datasets().items():
-            dataset, _, _, _, _ = databundle
+            dataset, _, _, _, _, _ = databundle
             if dataset._n_dim == 1:
                 header, data = self.process_1D_data(dataset, separator=self._separator)
             elif dataset._n_dim == 2:
