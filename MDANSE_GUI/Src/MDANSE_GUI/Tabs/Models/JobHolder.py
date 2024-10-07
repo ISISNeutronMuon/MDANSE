@@ -34,6 +34,7 @@ from MDANSE_GUI.Subprocess.JobState import (
     Aborted,
 )
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
+from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 
 
 class JobThread(QThread):
@@ -118,6 +119,7 @@ class JobEntry(Handler, QObject):
         self._Paused = Paused(self)
         # other variables
         self.percent_complete = 0
+        self.steps_complete = 0
         self._entry_number = entry_number
         self.total_steps = 99
         self._prog_item = QStandardItem()
@@ -126,6 +128,8 @@ class JobEntry(Handler, QObject):
             item.setData(entry_number)
         self._prog_item.setData(0, role=Qt.ItemDataRole.UserRole)
         self._prog_item.setData("progress", role=Qt.ItemDataRole.DisplayRole)
+        self._prog_item.setData(0, role=ProgressDelegate.progress_role)
+        self._prog_item.setData(100, role=ProgressDelegate.progress_role + 1)
         self.records = []
 
     def text_summary(self) -> str:
@@ -150,6 +154,9 @@ class JobEntry(Handler, QObject):
     def update_fields(self):
         self._prog_item.setText(f"{self.percent_complete} percent complete")
         self._prog_item.setData(self.percent_complete, role=Qt.ItemDataRole.UserRole)
+        self._prog_item.setData(
+            int(self.steps_complete), role=ProgressDelegate.progress_role
+        )
         self._stat_item.setText(self._current_state._label)
 
     @Slot(bool)
@@ -178,6 +185,7 @@ class JobEntry(Handler, QObject):
     def on_started(self, target_steps: int):
         LOG.info(f"Item received on_started: {target_steps} total steps")
         self.total_steps = target_steps
+        self._prog_item.setData(target_steps, role=ProgressDelegate.progress_role + 1)
         self._current_state.start()
         self.update_fields()
 
@@ -185,6 +193,7 @@ class JobEntry(Handler, QObject):
     def on_update(self, completed_steps: int):
         # print(f"completed {completed_steps} out of {self.total_steps} steps")
         if self.total_steps > 0:
+            self.steps_complete = completed_steps
             self.percent_complete = round(99 * completed_steps / self.total_steps, 1)
         else:
             self.percent_complete = 0
