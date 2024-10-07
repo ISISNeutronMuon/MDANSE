@@ -14,9 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QTreeView, QComboBox, QItemDelegate, QColorDialog
-from qtpy.QtCore import Signal, Slot, Qt
-from qtpy.QtGui import QColor
+from qtpy.QtWidgets import QTreeView
+from qtpy.QtCore import Signal
 
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, MplStyleCombo, MainAxisCombo
 from MDANSE_GUI.Tabs.Models.PlottingContext import (

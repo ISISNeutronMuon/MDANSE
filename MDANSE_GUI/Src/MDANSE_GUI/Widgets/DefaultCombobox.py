@@ -12,34 +12,27 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
 
-from typing import List
-import math
+from typing import TYPE_CHECKING
 
-import numpy as np
-
-from qtpy.QtWidgets import QDialog, QVBoxLayout, QApplication
-from qtpy.QtCore import Qt, Slot, Signal
-
-from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionWidget
+if TYPE_CHECKING:
+    from qtpy.QtWidgets import QComboBox
 
 
-class ResolutionDialog(QDialog):
+def highlight_default_value(field: "QComboBox") -> None:
+    """Takes the input QComboBox widget and changes the font of the currently
+    selected item to bold typeface. This is meant to indicate to the users
+    which option was originally selected.
 
-    parameters_changed = Signal(dict)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.setLayout(QVBoxLayout(self))
-        self._panel = ResolutionWidget()
-        self.layout().addWidget(self._panel)
-
-
-if __name__ == "__main__":
-    import sys
-
-    app = QApplication(sys.argv)
-    root = ResolutionDialog()
-    root.show()
-    app.exec()
+    Parameters
+    ----------
+    field : QComboBox
+        The changes will be applied to the data model of this input widget
+    """
+    model = field.model()
+    row = field.currentIndex()
+    item = model.item(row, 0)
+    newfont = item.font()
+    newfont.setBold(True)
+    item.setFont(newfont)

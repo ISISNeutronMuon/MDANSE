@@ -15,7 +15,7 @@
 #
 from functools import partial
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QWidget, QComboBox
+from qtpy.QtWidgets import QWidget, QComboBox, QLabel
 
 from MDANSE.MLogging import LOG
 
@@ -40,17 +40,28 @@ class JobTab(GeneralTab):
     """The tab for choosing and starting a new job."""
 
     def __init__(self, *args, **kwargs):
+        self._needs_updating = False
         self.action = kwargs.pop("action")
         cmodel = kwargs.pop("combo_model", None)
+        imodel = kwargs.pop("instrument_model", None)
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""
         self._job_starter = None
+        self._instrument_index = -1
         self._trajectory_combo = QComboBox()
         self._trajectory_combo.setEditable(False)
         self._trajectory_combo.currentIndexChanged.connect(self.set_current_trajectory)
         if cmodel is not None:
             self._trajectory_combo.setModel(cmodel)
+        self._instrument_combo = QComboBox()
+        self._instrument_combo.setEditable(False)
+        self._instrument_combo.currentIndexChanged.connect(self.set_current_instrument)
+        if imodel is not None:
+            self._instrument_combo.setModel(imodel)
+        self._core.add_widget(QLabel("Trajectory:"))
         self._core.add_widget(self._trajectory_combo)
+        self._core.add_widget(QLabel("Instrument:"), upper=False)
+        self._core.add_widget(self._instrument_combo, upper=False)
         self.action._parent_tab = self
         self._visualiser._parent_tab = self
 
@@ -99,6 +110,32 @@ class JobTab(GeneralTab):
             # actions tree
             self.action.update_panel(current_item.text())
 
+    @Slot(int)
+    def set_current_instrument(self, index: int):
+        LOG.debug(f"Switched instrument to {index}")
+        instrument_model = self._instrument_combo.model()
+        self.action.set_instrument(instrument_model._nodes[index])
+        self._instrument_index = index
+        current_item = self._core.current_item()
+        if current_item is not None:
+            # we only update the widget if a job is selected from the
+            # actions tree
+            self.action.apply_instrument()
+
+    @Slot(int)
+    def update_action_after_instrument_change(self, index: int):
+        if index != self._instrument_index:
+            return
+        self._needs_updating = True
+
+    @Slot()
+    def update_action_on_tab_activation(self):
+        if self._needs_updating:
+            current_item = self._core.current_item()
+            if current_item is not None:
+                self.action.apply_instrument()
+            self._needs_updating = False
+
     @classmethod
     def standard_instance(cls):
         action = Action()
@@ -143,6 +180,7 @@ class JobTab(GeneralTab):
             logger=logger,
             model=kwargs.get("model", JobTree(filter="Analysis")),
             combo_model=kwargs.get("combo_model", None),
+            instrument_model=kwargs.get("instrument_model", None),
             view=ActionsTree(),
             visualiser=action,
             layout=partial(

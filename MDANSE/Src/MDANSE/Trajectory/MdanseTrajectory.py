@@ -21,12 +21,15 @@ import h5py
 from MDANSE.MLogging import LOG
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
-from MDANSE.Extensions import atomic_trajectory, com_trajectory
+from MDANSE.Extensions import com_trajectory
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
 )
-from MDANSE.MolecularDynamics.TrajectoryUtils import resolve_undefined_molecules_name
+from MDANSE.MolecularDynamics.TrajectoryUtils import (
+    resolve_undefined_molecules_name,
+    atomic_trajectory,
+)
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
@@ -364,9 +367,19 @@ class MdanseTrajectory:
         coords = grp["coordinates"][first:last:step, index, :].astype(np.float64)
 
         if self._unit_cells is not None:
-            direct_cells = np.array([uc.transposed_direct for uc in self._unit_cells])
-            inverse_cells = np.array([uc.transposed_inverse for uc in self._unit_cells])
-            atomic_traj = atomic_trajectory.atomic_trajectory(
+            direct_cells = np.array(
+                [
+                    self._unit_cells[nf].transposed_direct
+                    for nf in range(first, last, step)
+                ]
+            )
+            inverse_cells = np.array(
+                [
+                    self._unit_cells[nf].transposed_inverse
+                    for nf in range(first, last, step)
+                ]
+            )
+            atomic_traj = atomic_trajectory(
                 coords, direct_cells, inverse_cells, box_coordinates
             )
             return atomic_traj

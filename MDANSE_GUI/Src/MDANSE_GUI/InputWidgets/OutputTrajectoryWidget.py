@@ -120,7 +120,6 @@ class OutputTrajectoryWidget(WidgetBase):
             self.file_association,  # text string specifying the file name filter.
         )
         if len(new_value[0]) > 0:
-            print(new_value)
             self._field.setText(new_value[0])
             self.updateValue()
 

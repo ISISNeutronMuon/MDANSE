@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex
+from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
 
@@ -42,6 +42,23 @@ class GeneralModel(QStandardItemModel):
         self._next_number += 1
         item = QStandardItem(label)
         item.setData(retval)
+        self.appendRow(item)
+        self.mutex.unlock()
+        self.summarise_items()
+        return retval
+
+    @Slot(tuple)
+    def append_object_and_embed(self, input: tuple):
+        thing, label = input
+        self.mutex.lock()
+        self._nodes[self._next_number] = thing
+        self._node_numbers.append(self._next_number)
+        retval = int(self._next_number)
+        self._next_number += 1
+        item = QStandardItem(label)
+        item.setData(retval)
+        thing._list_item = item
+        thing._model_index = retval
         self.appendRow(item)
         self.mutex.unlock()
         self.summarise_items()

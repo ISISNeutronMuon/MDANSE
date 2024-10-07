@@ -25,6 +25,7 @@ from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.SinglePanel import SinglePanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+from MDANSE_GUI.Widgets.DefaultCombobox import highlight_default_value
 
 
 log_tab_label = """MDANSE_GUI message log.
@@ -68,6 +69,7 @@ class LoggingTab(GeneralTab):
         self._loglevel_combo.addItems(["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"])
         self._loglevel_combo.setCurrentText("INFO")
         self._loglevel_combo.currentTextChanged.connect(self.change_log_level)
+        highlight_default_value(self._loglevel_combo)
         self._core._ub_layout.addWidget(self._loglevel_combo)
 
     @Slot(str)
