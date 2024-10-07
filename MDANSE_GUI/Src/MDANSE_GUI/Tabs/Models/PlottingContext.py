@@ -63,6 +63,7 @@ class SingleDataset:
         self._curve_labels = {}
         self._planes = {}
         self._plane_labels = {}
+        self._data_limits = None
         bare_name = os.path.split(self._filename)[-1]
         self._labels = {
             "minimal": name,
@@ -93,6 +94,23 @@ class SingleDataset:
             else:
                 self._axes[aname] = source[aname][:]
                 self._axes_units[aname] = source[aname].attrs["units"]
+
+    def set_data_limits(self, limit_string: str):
+        complete_subset_list = []
+        for token in limit_string.split(";"):
+            if ":" in token:
+                slice_parts = [int(x) for x in token.split(":")]
+                if len(slice_parts) < 4:
+                    complete_subset_list += list(range(*slice_parts))
+            elif "-" in token:
+                slice_parts = [int(x) for x in token.split("-")]
+                if len(slice_parts) == 2:
+                    complete_subset_list += list(range(slice_parts[0], slice_parts[1]))
+            elif "," in token:
+                slice_parts = [int(x) for x in token.split(",")]
+                complete_subset_list += list(slice_parts)
+            else:
+                complete_subset_list += int(token)
 
     def available_x_axes(self) -> List[str]:
         return list(self._axes_units.keys())
