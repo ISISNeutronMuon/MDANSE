@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from typing import Optional
 import collections
 import itertools
 
@@ -331,7 +332,7 @@ class CurrentCorrelationFunction(IJob):
 
         return index, (rho_l, rho_t)
 
-    def combine(self, index: int, x: tuple[np.ndarray, np.ndarray] | None):
+    def combine(self, index: int, x: Optional[tuple[np.ndarray, np.ndarray]]):
         """Calculate the correlation functions of the current densities.
 
         Parameters
