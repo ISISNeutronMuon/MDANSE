@@ -14,14 +14,26 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QDoubleSpinBox, QComboBox, QItemDelegate, QColorDialog
+from PyQt6.QtCore import QModelIndex
+from PyQt6.QtGui import QPainter
+from PyQt6.QtWidgets import QStyleOptionViewItem
+from qtpy.QtWidgets import (
+    QDoubleSpinBox,
+    QComboBox,
+    QItemDelegate,
+    QStyledItemDelegate,
+    QColorDialog,
+    QApplication,
+    QStyle,
+    QStyleOptionProgressBar,
+)
 from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtGui import QColor
 
 from MDANSE_GUI.Tabs.Models.PlottingContext import get_mpl_lines, get_mpl_markers
 
 
-class ColourPicker(QItemDelegate):
+class ColourPicker(QStyledItemDelegate):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -40,6 +52,7 @@ class ColourPicker(QItemDelegate):
             color = editor.currentColor()
             colour_string = color.toRgb()
             model.setData(index, colour_string)
+            model.setData(index, color, role=Qt.ItemDataRole.BackgroundRole)
 
 
 class MplStyleCombo(QItemDelegate):
@@ -99,3 +112,24 @@ class RadiusSpinBox(QItemDelegate):
     @Slot()
     def valueChanged(self):
         self.commitData.emit(self.sender())
+
+
+class ProgressDelegate(QItemDelegate):
+
+    progress_role = Qt.UserRole + 1000
+
+    def paint(self, painter, option, index):
+        progress = index.data(self.progress_role)
+        progress_max = max(index.data(self.progress_role + 1), 1)
+        try:
+            int(progress)
+        except:
+            progress = 0
+        opt = QStyleOptionProgressBar()
+        opt.rect = option.rect
+        opt.minimum = 0
+        opt.maximum = progress_max
+        opt.progress = progress
+        opt.text = "{}%".format(round(100 * progress / progress_max, 2))
+        opt.textVisible = True
+        QApplication.style().drawControl(QStyle.CE_ProgressBar, opt, painter)

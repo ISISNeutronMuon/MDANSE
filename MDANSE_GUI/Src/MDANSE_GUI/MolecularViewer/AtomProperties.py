@@ -20,7 +20,7 @@ import numpy as np
 from vtk.util.numpy_support import numpy_to_vtk
 import vtk
 from qtpy.QtGui import QStandardItemModel, QStandardItem, QColor
-from qtpy.QtCore import Signal, Slot, QObject
+from qtpy.QtCore import Signal, Slot, QObject, Qt
 
 from MDANSE.Chemistry.Databases import AtomsDatabase
 
@@ -73,6 +73,7 @@ class AtomEntry(QObject):
         name_item = QStandardItem(str(name))
         name_item.setEditable(False)
         colour_item = QStandardItem(str(colour))
+        colour_item.setData(QColor(colour), role=Qt.ItemDataRole.BackgroundRole)
         size_item = QStandardItem(str(size))
         self._items = [name_item, colour_item, size_item]
         return self._items
