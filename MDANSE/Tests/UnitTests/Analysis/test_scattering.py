@@ -234,33 +234,3 @@ def test_ssfsf(disf):
     assert path.exists(temp_name + ".log")
     assert path.isfile(temp_name + ".log")
     os.remove(temp_name + ".log")
-
-
-@pytest.mark.xfail(reason="see docstring")
-def test_ccf(qvector_spherical_lattice):
-    """Another known problem, which we ignore for the moment,
-    just to merge other changes."""
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1)
-    parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["interpolation_order"] = 3
-    parameters["interpolation_mode"] = "automatic"
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
-    parameters["q_vectors"] = qvector_spherical_lattice
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
-    parameters["weights"] = "b_coherent"
-    ndtsf = IJob.create("CurrentCorrelationFunction")
-    ndtsf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")

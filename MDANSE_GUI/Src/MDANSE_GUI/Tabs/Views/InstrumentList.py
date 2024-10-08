@@ -180,6 +180,8 @@ class InstrumentList(QListView):
                 )
                 for node in self.model()._nodes.values():
                     new_instrument = node
+                    if new_instrument is None:
+                        continue
                     if new_instrument._name == key:
                         break
             else:

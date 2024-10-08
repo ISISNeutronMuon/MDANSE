@@ -116,6 +116,7 @@ for tp in [short_traj, mdmc_traj]:
     for jt in [
         # "AngularCorrelation",
         # "GeneralAutoCorrelationFunction",
+        "CurrentCorrelationFunction",
         "DensityOfStates",
         "MeanSquareDisplacement",
         "VelocityAutoCorrelationFunction",
