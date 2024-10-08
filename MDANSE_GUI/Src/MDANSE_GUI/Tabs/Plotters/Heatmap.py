@@ -170,6 +170,7 @@ class Heatmap(Plotter):
         startnum = 1
         for num, databundle in enumerate(plotting_context.datasets().values()):
             dataset, _, _, _, ds_num, _ = databundle
+            transposed = False
             if dataset._n_dim == 1:
                 continue
             if dataset._n_dim == 3:
@@ -179,8 +180,16 @@ class Heatmap(Plotter):
                 )
                 all_labels = [dataset._plane_labels[number] for number in all_numbers]
             else:
+                primary_axis_number = 0
+                for number, axis_name in enumerate(ds._axes.keys()):
+                    if axis_name == axis_label:
+                        primary_axis_number = number
                 all_numbers = [0]
-                all_datasets = [dataset._data]
+                if primary_axis_number == 0:
+                    all_datasets = [dataset._data]
+                else:
+                    all_datasets = [dataset._data.T]
+                    transposed = True
                 all_labels = [dataset._name]
             limits = []
             axis_units = []
@@ -200,6 +209,9 @@ class Heatmap(Plotter):
                         axis_array[-1] * conversion_factor,
                     ]
                     axis_units.append(target_unit)
+            if transposed:
+                axis_units = axis_units[::-1]
+                limits = limits[2:] + limits[:2]
             for xnum in range(len(all_datasets)):
                 if startnum > self._plot_limit:
                     break
