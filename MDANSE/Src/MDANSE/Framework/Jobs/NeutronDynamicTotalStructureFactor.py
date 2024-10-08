@@ -459,4 +459,6 @@ class NeutronDynamicTotalStructureFactor(IJob):
             self,
         )
         self.configuration["trajectory"]["instance"].close()
+        self.configuration["disf_input_file"]["instance"].close()
+        self.configuration["dcsf_input_file"]["instance"].close()
         super().finalize()
