@@ -29,6 +29,9 @@ from MDANSE_GUI.Widgets.ResolutionDialog import ResolutionDialog
 from MDANSE_GUI.Widgets.ResolutionWidget import widget_text_map
 
 
+reverse_text_map = {value: key for key, value in widget_text_map.items()}
+
+
 init_parameters = {
     "ideal": {},
     "Gaussian": {"mu": 0.0, "sigma": 1.0},
@@ -123,11 +126,19 @@ class InstrumentResolutionWidget(WidgetBase):
     @Slot(str)
     def change_function(self, function: str, optional_parameters: dict = None):
         if optional_parameters is None:
-            new_params = init_parameters[function]
+            if function in init_parameters.keys():
+                new_params = init_parameters[function]
+            else:
+                new_params = init_parameters[widget_text_map[function]]
         else:
             new_params = optional_parameters
         self._type_combo.blockSignals(True)
-        self._type_combo.setCurrentText(widget_text_map[function])
+        if function in widget_text_map.keys():
+            self._type_combo.setCurrentText(widget_text_map[function])
+        elif function in reverse_text_map.keys():
+            self._type_combo.setCurrentText(reverse_text_map[function])
+        else:
+            self._type_combo.setCurrentText(function)
         self._type_combo.blockSignals(False)
         self.set_field_values(new_params)
 
