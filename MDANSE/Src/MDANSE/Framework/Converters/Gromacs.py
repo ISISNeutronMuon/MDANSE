@@ -148,8 +148,11 @@ class Gromacs(Converter):
         if self._xtc:
             coords, times, steps, box = self._xdr_file.read(1)
         else:
-            coords, times, steps, box, __, velocities, forces = self._xdr_file.read(
-                1, get_velocities=self._read_velocities, get_forces=self._read_forces
+            coords, times, steps, box, __, velocities, forces = self._xdr_file._read(
+                1,
+                None,
+                get_velocities=self._read_velocities,
+                get_forces=self._read_forces,
             )
 
             if self._read_velocities:
