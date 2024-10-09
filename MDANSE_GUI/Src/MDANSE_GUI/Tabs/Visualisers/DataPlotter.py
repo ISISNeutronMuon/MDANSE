@@ -26,7 +26,11 @@ from qtpy.QtCore import Slot, Signal
 
 from MDANSE.MLogging import LOG
 
-from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
+from MDANSE_GUI.Tabs.Models.PlottingContext import (
+    PlottingContext,
+    SingleDataset,
+    plotting_column_labels,
+)
 
 
 class DataPlotter(QWidget):
@@ -62,7 +66,6 @@ class DataPlotter(QWidget):
                 button.clicked.connect(function)
         self._model = PlottingContext(
             unit_lookup=self._unit_lookup,
-            header_labels=["Dataset", "Trajectory", "Size", "Unit"],
         )
         self._selection_viewer.setModel(self._model)
 
@@ -72,7 +75,7 @@ class DataPlotter(QWidget):
             return
         self._model.add_dataset(dataset)
         self._selection_viewer.resizeColumnsToContents()
-        for col_num in range(4, 8):
+        for col_num in range(4, 9):
             self._selection_viewer.hideColumn(col_num)
 
     @Slot()

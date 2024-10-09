@@ -63,6 +63,8 @@ class SingleDataset:
         self._curves = {}
         self._curve_labels = {}
         self._planes = {}
+        self._plane_labels = {}
+        self._data_limits = None
         bare_name = os.path.split(self._filename)[-1]
         self._labels = {
             "minimal": name,
@@ -85,14 +87,47 @@ class SingleDataset:
         self._axes_tag = source[name].attrs["axis"]
         self._axes = {}
         self._axes_units = {}
-        for axis_name in self._axes_tag.split("|"):
+        for ax_number, axis_name in enumerate(self._axes_tag.split("|")):
             aname = axis_name.strip()
             if aname == "index":
-                self._axes[aname] = np.arange(len(self._data))
-                self._axes_units[aname] = "N/A"
+                self._axes[aname + str(ax_number)] = np.arange(len(self._data))
+                self._axes_units[aname + str(ax_number)] = "N/A"
             else:
                 self._axes[aname] = source[aname][:]
                 self._axes_units[aname] = source[aname].attrs["units"]
+
+    def set_data_limits(self, limit_string: str):
+        complete_subset_list = []
+        for token in limit_string.split(";"):
+            if ":" in token:
+                try:
+                    slice_parts = [int(x) for x in token.split(":")]
+                except:
+                    continue
+                if len(slice_parts) < 4:
+                    complete_subset_list += list(range(*slice_parts))
+            elif "-" in token:
+                try:
+                    slice_parts = [int(x) for x in token.split("-")]
+                except:
+                    continue
+                if len(slice_parts) == 2:
+                    complete_subset_list += list(range(slice_parts[0], slice_parts[1]))
+            elif "," in token:
+                try:
+                    slice_parts = [int(x) for x in token.split(",")]
+                except:
+                    continue
+                complete_subset_list += list(slice_parts)
+            else:
+                try:
+                    complete_subset_list += [int(token)]
+                except:
+                    continue
+        if len(complete_subset_list) == 0:
+            self._data_limits = None
+        else:
+            self._data_limits = np.unique(complete_subset_list).astype(int)
 
     def available_x_axes(self) -> List[str]:
         return list(self._axes_units.keys())
@@ -111,6 +146,8 @@ class SingleDataset:
         return best_unit, best_axis
 
     def curves_vs_axis(self, axis_unit: str) -> List[np.ndarray]:
+        self._curves = {}
+        self._curve_labels = {}
         found = -1
         total_ndim = len(self._data.shape)
         data_shape = self._data.shape
@@ -134,8 +171,13 @@ class SingleDataset:
         indices = list(itertools.product(*indexer))
         slicers = list(itertools.product(*slicer))
         for n in range(len(indices)):
-            self._curves[tuple(indices[n])] = self._data[slicers[n]].squeeze()
-            self._curve_labels[tuple(indices[n])] = str(tuple(indices[n]))
+            if self._data_limits is not None:
+                if n in self._data_limits:
+                    self._curves[tuple(indices[n])] = self._data[slicers[n]].squeeze()
+                    self._curve_labels[tuple(indices[n])] = str(tuple(indices[n]))
+            else:
+                self._curves[tuple(indices[n])] = self._data[slicers[n]].squeeze()
+                self._curve_labels[tuple(indices[n])] = str(tuple(indices[n]))
         return self._curves
         # slicer = tuple(slicer)
         # temp = self._data[slicer].squeeze()
@@ -143,6 +185,46 @@ class SingleDataset:
         #     if len(line) != xlen:
         #         print("Wrong data length in the curves_vs_axis method of PlottingContext")
         # return temp
+
+    def planes_vs_axis(self, axis_number: int) -> List[np.ndarray]:
+        self._planes = {}
+        self._plane_labels = {}
+        found = -1
+        total_ndim = len(self._data.shape)
+        if total_ndim == 1:
+            return
+        elif total_ndim == 2:
+            return self._data
+        data_shape = self._data.shape
+        number_of_planes = data_shape[axis_number]
+        perpendicular_axis = None
+        perpendicular_axis_name = ""
+        slice_def = []
+        for number, (axis_name, axis_array) in enumerate(self._axes.items()):
+            if number == axis_number:
+                slice_def.append(0)
+                perpendicular_axis = axis_array
+                perpendicular_axis_name = axis_name
+            else:
+                slice_def.append(slice(None))
+        for plane_number in range(number_of_planes):
+            if self._data_limits is not None:
+                if plane_number in self._data_limits:
+                    fixed_argument = perpendicular_axis[plane_number]
+                    slice_def[axis_number] = plane_number
+                    data = self._data[*slice_def]
+                    self._planes[plane_number] = data
+                    self._plane_labels[plane_number] = (
+                        f"{perpendicular_axis_name}={fixed_argument}"
+                    )
+            else:
+                fixed_argument = perpendicular_axis[plane_number]
+                slice_def[axis_number] = plane_number
+                data = self._data[*slice_def]
+                self._planes[plane_number] = data
+                self._plane_labels[plane_number] = (
+                    f"{perpendicular_axis_name}={fixed_argument}"
+                )
 
 
 class SingleCurve:
@@ -190,24 +272,27 @@ class SingleCurve:
         return result
 
 
+plotting_column_labels = [
+    "Dataset",
+    "Trajectory",
+    "Size",
+    "Unit",
+    "Main axis",
+    "Use it?",
+    "Colour",
+    "Line style",
+    "Marker",
+]
+plotting_column_index = {
+    label: number for number, label in enumerate(plotting_column_labels)
+}
+
+
 class PlottingContext(QStandardItemModel):
 
     needs_an_update = Signal()
 
     def __init__(self, *args, unit_lookup=None, **kwargs):
-        self.headers = kwargs.pop(
-            "header_labels",
-            [
-                "Dataset",
-                "Trajectory",
-                "Size",
-                "Unit",
-                "Use it?",
-                "Colour",
-                "Line style",
-                "Marker",
-            ],
-        )
         super().__init__(*args, **kwargs)
         self._datasets = {}
         self._current_axis = [None, None, None]
@@ -221,7 +306,7 @@ class PlottingContext(QStandardItemModel):
         self._colour_map = kwargs.get("colormap", "viridis")
         self._last_colour = 0
         self._unit_lookup = unit_lookup
-        self.setHorizontalHeaderLabels(self.headers)
+        self.setHorizontalHeaderLabels(plotting_column_labels)
 
     def generate_colour(self, number: int):
         return self._colour_list[number % len(self._colour_list)]
@@ -249,7 +334,7 @@ class PlottingContext(QStandardItemModel):
         self._colour_list = get_mpl_colours()
         self._last_colour = 0
         for row in range(self.rowCount()):
-            current_colour = self.item(row, 5).text()
+            current_colour = self.item(row, plotting_column_index["Colour"]).text()
             if (
                 current_colour
                 != self._last_colour_list[row % len(self._last_colour_list)]
@@ -260,8 +345,10 @@ class PlottingContext(QStandardItemModel):
                 self._last_colour += 1
             else:
                 next_colour = self.next_colour()
-                self.item(row, 5).setText(str(next_colour))
-                self.item(row, 5).setData(
+                self.item(row, plotting_column_index["Colour"]).setText(
+                    str(next_colour)
+                )
+                self.item(row, plotting_column_index["Colour"]).setData(
                     QColor(str(next_colour)), role=Qt.ItemDataRole.BackgroundRole
                 )
         self._last_colour_list = list(self._colour_list)
@@ -290,16 +377,35 @@ class PlottingContext(QStandardItemModel):
     def datasets(self) -> Dict:
         result = {}
         for ds_num, row in enumerate(range(self.rowCount())):
-            key = self.index(row, 0).data(role=Qt.ItemDataRole.UserRole)
+            key = self.index(row, plotting_column_index["Dataset"]).data(
+                role=Qt.ItemDataRole.UserRole
+            )
             useit = (
-                self.itemFromIndex(self.index(row, 4)).checkState()
+                self.itemFromIndex(
+                    self.index(row, plotting_column_index["Use it?"])
+                ).checkState()
                 == Qt.CheckState.Checked
             )
-            colour = self.itemFromIndex(self.index(row, 5)).text()
-            style = self.itemFromIndex(self.index(row, 6)).text()
-            marker = self.itemFromIndex(self.index(row, 7)).text()
+            data_number_string = self.itemFromIndex(
+                self.index(row, plotting_column_index["Use it?"])
+            ).text()
+            colour = self.itemFromIndex(
+                self.index(row, plotting_column_index["Colour"])
+            ).text()
+            style = self.itemFromIndex(
+                self.index(row, plotting_column_index["Line style"])
+            ).text()
+            marker = self.itemFromIndex(
+                self.index(row, plotting_column_index["Marker"])
+            ).text()
+            axis = self.itemFromIndex(
+                self.index(row, plotting_column_index["Main axis"])
+            ).text()
             if useit:
-                result[key] = (self._datasets[key], colour, style, marker, ds_num)
+                self._datasets[key].set_data_limits(data_number_string)
+                result[key] = (self._datasets[key], colour, style, marker, ds_num, axis)
+            else:
+                self._datasets[key]._data_limits = None
         return result
 
     def add_dataset(self, new_dataset: SingleDataset):
@@ -317,6 +423,7 @@ class PlottingContext(QStandardItemModel):
                 new_dataset._data.shape,
                 new_dataset._data_unit,
                 "",
+                "",
                 self.next_colour(),
                 "-",
                 "",
@@ -324,13 +431,13 @@ class PlottingContext(QStandardItemModel):
         ]
         for item in items:
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
-        for item in items[:5]:
+        for item in items[:4]:
             item.setEditable(False)
-        temp = items[4]
+        temp = items[plotting_column_index["Use it?"]]
         temp.setCheckable(True)
         temp.setCheckState(Qt.CheckState.Checked)
         self.itemChanged.connect(self.needs_an_update)
-        temp = items[5]
+        temp = items[plotting_column_index["Colour"]]
         temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
         # test for possible nested items
         best_axis = new_dataset.longest_axis()
@@ -382,7 +489,7 @@ class PlottingContext(QStandardItemModel):
     def clear(self) -> None:
         result = super().clear()
         self._datasets = {}
-        self.setHorizontalHeaderLabels(self.headers)
+        self.setHorizontalHeaderLabels(plotting_column_labels)
         return result
 
     @Slot(QModelIndex)

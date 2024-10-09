@@ -55,6 +55,40 @@ class ColourPicker(QStyledItemDelegate):
             model.setData(index, color, role=Qt.ItemDataRole.BackgroundRole)
 
 
+class MainAxisCombo(QItemDelegate):
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._items = []
+        super().__init__(*args, **kwargs)
+
+    def setEditorData(self, editor, index):
+        editor.blockSignals(True)
+        text = index.model().data(index, Qt.DisplayRole)
+        try:
+            i = self._items.index(text)
+        except ValueError:
+            i = 0
+        editor.setCurrentIndex(i)
+        editor.blockSignals(False)
+
+    def setModelData(self, editor, model, index):
+        model.setData(index, editor.currentText())
+
+    def createEditor(self, parent, option, index):
+        combo = QComboBox(parent)
+        model = index.model()
+        key = index.model().data(index, Qt.ItemDataRole.UserRole)
+        dataset = model._datasets[key]
+        self._items = [str(x) for x in dataset._axes.keys()]
+        combo.addItems(self._items)
+        combo.currentIndexChanged.connect(self.currentIndexChanged)
+        return combo
+
+    @Slot()
+    def currentIndexChanged(self):
+        self.commitData.emit(self.sender())
+
+
 class MplStyleCombo(QItemDelegate):
 
     def __init__(self, *args, mpl_items=None, **kwargs) -> None:

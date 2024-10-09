@@ -70,14 +70,6 @@ class MolecularTrace(IJob):
 
         self.numberOfSteps = self.configuration["frames"]["number"]
 
-        # Will store the time.
-        self._outputData.add(
-            "time",
-            "LineOutputVariable",
-            self.configuration["frames"]["time"],
-            units="ps",
-        )
-
         # Generate the grids that will be used to quantify the presence of atoms in an area.
         self.resolution = self.configuration["spatial_resolution"]["value"]
 
@@ -124,10 +116,20 @@ class MolecularTrace(IJob):
         )
         self.grid = np.zeros(self.gdim, dtype=np.int32)
 
+        labels = ["x_position", "y_position", "z_position"]
+        for naxis in range(3):
+            self._outputData.add(
+                labels[naxis],
+                "LineOutputVariable",
+                np.arange(0, self.gdim[naxis], 1) * self.resolution + self.min[naxis],
+                units="nm",
+            )
+
         self._outputData.add(
             "molecular_trace",
             "VolumeOutputVariable",
             tuple(np.ceil(np.array([dimx, dimy, dimz]) / self.resolution).astype(int)),
+            axis="|".join(labels),
             main_result=True,
         )
 

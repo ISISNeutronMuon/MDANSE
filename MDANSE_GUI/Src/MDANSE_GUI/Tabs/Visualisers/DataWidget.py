@@ -16,6 +16,7 @@
 from typing import TYPE_CHECKING, List
 import csv
 import os
+from traceback import format_exc
 
 if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
@@ -49,13 +50,11 @@ class DataWidget(QWidget):
     reset_slider_values = Signal(bool)
     change_slider_coupling = Signal(bool)
 
-    def __init__(self, *args, colours=None, settings=None, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None
         self._plotting_context = None
-        self._colours = colours
-        self._settings = settings
         self._slider_max = 100
         self._current_path = "."
         layout = QVBoxLayout(self)
@@ -189,7 +188,6 @@ class DataWidget(QWidget):
             LOG.error(f"DataWidget failed to create Text plotter: {e}")
         else:
             LOG.debug(f"DataWidget created plotter {plotter_option}: {self._plotter}")
-            self._plotter._settings = self._settings
             self.plot_data()
 
     @Slot()
@@ -238,16 +236,15 @@ class DataWidget(QWidget):
             self._plotter.plot(
                 self._plotting_context,
                 self._figure,
-                colours=None,
                 update_only=None,
                 toolbar=None,
             )
             for _, databundle in self._plotting_context.datasets().items():
-                dataset, _, _, _, _ = databundle
+                dataset, _, _, _, _, _ = databundle
                 self._current_path = os.path.split(dataset._filename)[0]
                 break
         except Exception as e:
-            LOG.error(f"DataWidget error: {e}")
+            LOG.error(f"DataWidget error: {e}" f"traceback {format_exc()}")
 
     def make_canvas(self):
         """Creates a matplotlib figure for plotting

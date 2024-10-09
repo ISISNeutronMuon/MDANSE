@@ -30,7 +30,6 @@ class Single(Plotter):
     def __init__(self) -> None:
         super().__init__()
         self._figure = None
-        self._current_colours = []
         self._active_curves = []
         self._backup_curves = []
         self._backup_limits = []
@@ -112,7 +111,6 @@ class Single(Plotter):
         self,
         plotting_context: "PlottingContext",
         figure: "Figure" = None,
-        colours=None,
         update_only=False,
         toolbar=None,
     ):
@@ -126,10 +124,9 @@ class Single(Plotter):
         xaxis_unit = None
         self._active_curves = []
         self._backup_curves = []
-        self.get_mpl_colors()
         axes = target.add_subplot(111)
         self._axes = [axes]
-        self.apply_settings(plotting_context, colours)
+        self.apply_settings(plotting_context)
         self.height_max, self.length_max = 0.0, 0.0
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
@@ -138,8 +135,11 @@ class Single(Plotter):
             target.clear()
             target.canvas.draw()
         for name, databundle in plotting_context.datasets().items():
-            dataset, colour, linestyle, marker, _ = databundle
-            best_unit, best_axis = dataset.longest_axis()
+            dataset, colour, linestyle, marker, _, axis_label = databundle
+            try:
+                best_unit, best_axis = (dataset._axes_units[axis_label], axis_label)
+            except KeyError:
+                best_unit, best_axis = dataset.longest_axis()
             plotlabel = dataset._labels["medium"]
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)
             try:

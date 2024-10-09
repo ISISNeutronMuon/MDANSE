@@ -14,6 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from typing import TYPE_CHECKING, List
+from functools import reduce
+from itertools import product
 
 import numpy as np
 
@@ -68,7 +70,7 @@ class DatasetFormatter:
         if self._plotting_context is None:
             return ["No data selected"]
         for name, databundle in self._plotting_context.datasets().items():
-            dataset, _, _, _, _ = databundle
+            dataset, _, _, _, _, _ = databundle
             if dataset._n_dim == 1:
                 header, data = self.process_1D_data(
                     dataset, separator=self._separator, is_preview=self._is_preview
@@ -102,7 +104,7 @@ class DatasetFormatter:
         if self._plotting_context is None:
             return ["No data selected"]
         for name, databundle in self._plotting_context.datasets().items():
-            dataset, _, _, _, _ = databundle
+            dataset, _, _, _, _, _ = databundle
             if dataset._n_dim == 1:
                 header, data = self.process_1D_data(dataset, separator=self._separator)
             elif dataset._n_dim == 2:
@@ -210,7 +212,6 @@ class DatasetFormatter:
         header_lines, comment_char = self.make_dataset_header(
             dataset, comment_character=self._comment
         )
-        print(header_lines)
         new_axes = {}
         new_axes_units = {}
         axis_numbers = {}
@@ -274,8 +275,44 @@ class DatasetFormatter:
         header_lines, comment_char = self.make_dataset_header(
             dataset, comment_character=self._comment
         )
+        new_axes = {}
+        new_axes_units = {}
+        axis_numbers = {}
+        for n, ax_key in enumerate(dataset.available_x_axes()):
+            axis = dataset._axes[ax_key]
+            axis_unit = dataset._axes_units[ax_key]
+            new_unit = self._plotting_context.get_conversion_factor(axis_unit)
+            conv_factor = measure(1.0, axis_unit, equivalent=True).toval(new_unit)
+            new_axes[ax_key] = conv_factor * axis
+            new_axes_units[ax_key] = new_unit
+            axis_numbers[n] = ax_key
+            LOG.debug(f"process_ND_data: axis {ax_key} has length {len(axis)}")
+        for ax_num, ax_key in enumerate(new_axes.keys()):
+            header_lines.append(
+                f"{comment_char} {ax_num} column is {ax_key} in units {new_axes_units[ax_key]}"
+            )
+        LOG.debug(f"Data shape: {dataset._data.shape}")
         temp = []
-        return header_lines, temp
+        ncols = len(new_axes) + 1
+        ax_lengths = [len(new_axes[ax_num]) for ax_num in axis_numbers.values()]
+        total_lines = reduce(lambda x, y: x * y, ax_lengths)
+        if is_preview:
+            counter = 0
+            nlines = self._preview_lines
+        else:
+            counter = 0
+            nlines = total_lines
+        all_indices = product(*[range(ax_lengths[n]) for n in axis_numbers.keys()])
+        while counter < nlines:
+            array_index = all_indices.__next__()
+            xvals = [
+                new_axes[axis_numbers[axis_number]][index]
+                for axis_number, index in enumerate(array_index)
+            ]
+            yval = dataset._data[array_index]
+            temp.append(xvals + [yval])
+            counter += 1
+        return header_lines, np.vstack(temp)
 
 
 class Text(Plotter):

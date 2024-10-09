@@ -32,6 +32,7 @@ class Grid(Plotter):
         super().__init__()
         self._figure = None
         self._backup_limits = []
+        self._plot_limit = 8
 
     def slider_labels(self) -> List[str]:
         return ["Inactive", "Inactive"]
@@ -43,16 +44,11 @@ class Grid(Plotter):
         self,
         plotting_context: "PlottingContext",
         figure: "Figure" = None,
-        colours=None,
         update_only=False,
         toolbar=None,
     ):
         self.enable_slider(False)
         target = self.get_figure(figure)
-        self.get_mpl_colors()
-        if colours is not None:
-            self._current_colours = colours
-        number_of_colours = len(self._current_colours)
         if target is None:
             return
         if toolbar is not None:
@@ -61,20 +57,34 @@ class Grid(Plotter):
             LOG.debug("Axis check failed.")
             return
         self._axes = []
-        self.apply_settings(plotting_context, colours)
+        self.apply_settings(plotting_context)
         nplots = 0
         for databundle in plotting_context.datasets().values():
-            ds, colour, linestyle, marker, _ = databundle
-            best_unit, best_axis = ds.longest_axis()
+            ds, colour, linestyle, marker, _, axis_label = databundle
+            try:
+                best_unit, best_axis = ds._axes_units[axis_label], axis_label
+            except KeyError:
+                best_unit, best_axis = ds.longest_axis()
             curves = ds.curves_vs_axis(best_unit)
             nplots += len(curves)
+        if nplots > self._plot_limit:
+            nplots = self._plot_limit
         gridsize = int(math.ceil(nplots**0.5))
         startnum = 1
+        counter = 0
         for name, databundle in plotting_context.datasets().items():
-            dataset, colour, linestyle, marker, ds_num = databundle
-            best_unit, best_axis = dataset.longest_axis()
+            if counter > self._plot_limit:
+                break
+            dataset, colour, linestyle, marker, ds_num, axis_label = databundle
+            try:
+                best_unit, best_axis = ds._axes_units[axis_label], axis_label
+            except KeyError:
+                best_unit, best_axis = ds.longest_axis()
             xaxis_unit = plotting_context.get_conversion_factor(best_unit)
             for key, curve in dataset._curves.items():
+                if counter > self._plot_limit:
+                    break
+                counter += 1
                 axes = target.add_subplot(gridsize, gridsize, startnum)
                 self._axes.append(axes)
                 plotlabel = dataset._labels["medium"]
@@ -133,5 +143,5 @@ class Grid(Plotter):
                 axes.set_xlabel(xaxis_unit)
                 axes.legend(loc=0)
                 startnum += 1
-        self.apply_settings(plotting_context, colours)
+        self.apply_settings(plotting_context)
         target.canvas.draw()
