@@ -21,7 +21,7 @@ import numpy as np
 from MDANSE.Core.Error import Error
 from MDANSE.Extensions import xtc, trr
 from MDANSE.Framework.Converters.Converter import Converter
-from MDANSE.IO.PDBReader import PDBReader
+from MDANSE.IO.MinimalPDBReader import MinimalPDBReader
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -121,8 +121,8 @@ class Gromacs(Converter):
         self.numberOfSteps = len(self._xdr_file)
 
         # Create all chemical entities from the PDB file.
-        pdb_reader = PDBReader(self.configuration["pdb_file"]["filename"])
-        chemical_system = pdb_reader.build_chemical_system()
+        pdb_reader = MinimalPDBReader(self.configuration["pdb_file"]["filename"])
+        chemical_system = pdb_reader._chemical_system
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
