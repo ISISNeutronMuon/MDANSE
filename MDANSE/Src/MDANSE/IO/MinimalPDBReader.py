@@ -131,12 +131,26 @@ class MinimalPDBReader:
 
         for atom_line in atom_lines:
             chemical_element = atom_line[element_slice].strip()
-            atom_name = atom_line[name_slice].strip()
-            if chemical_element in ATOMS_DATABASE.atoms:
+            atom_name = atom_line[name_slice]
+            backup_element = atom_line.split()[-1]
+            backup_element2 = atom_line.split()[-2]
+            if atom_name[-2:].isnumeric():
+                backup_element3 = atom_name[0]
+            if backup_element in ATOMS_DATABASE.atoms:
+                atom = Atom(symbol=backup_element, name=atom_name)
+            elif atom_name[:2].strip() in ATOMS_DATABASE.atoms:
+                atom = Atom(symbol=atom_name[:2].strip(), name=atom_name)
+            elif backup_element2 in ATOMS_DATABASE.atoms:
+                atom = Atom(symbol=backup_element2, name=atom_name)
+            elif backup_element3 in ATOMS_DATABASE.atoms:
+                atom = Atom(symbol=backup_element3, name=atom_name)
+            elif chemical_element in ATOMS_DATABASE.atoms:
                 atom = Atom(symbol=chemical_element, name=atom_name)
-            elif atom_name[:2] in ATOMS_DATABASE.atoms:
-                atom = Atom(symbol=atom_name[:2], name=atom_name)
             else:
+                print(atom_line)
+                print(f"Chemical symbol = {chemical_element}")
+                print(f"backup symbol = {backup_element}")
+                raise ValueError()
                 atom = Atom(symbol="Du", name=atom_name)
             self._chemical_system.add_chemical_entity(atom)
             x, y, z = (
