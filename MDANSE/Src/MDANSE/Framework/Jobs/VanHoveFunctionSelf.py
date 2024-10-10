@@ -172,11 +172,14 @@ class VanHoveFunctionSelf(IJob):
             last=last,
             step=step,
         )
-        cell_vols = np.array([
-            self.configuration["trajectory"]["instance"].configuration(
-                i
-            ).unit_cell.volume for i in range(first, last, step)
-        ])
+        cell_vols = np.array(
+            [
+                self.configuration["trajectory"]["instance"]
+                .configuration(i)
+                .unit_cell.volume
+                for i in range(first, last, step)
+            ]
+        )
 
         van_hove.van_hove_self(
             series,
