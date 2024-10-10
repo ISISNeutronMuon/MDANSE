@@ -41,7 +41,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # project = 'MDANSE'
 # copyright = '2015-2022, Eric Pellegrini'
 author = 'Eric Pellegrini'
-release = '2.0.0a1'
+release = '2.0.0b1'
 version = '2.0'
 
 # -- General configuration ---------------------------------------------------

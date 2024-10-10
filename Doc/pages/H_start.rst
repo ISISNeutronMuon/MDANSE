@@ -57,6 +57,9 @@ Use `pip` to install the MDANSE package from the specified GitHub repository:
 
    pip install MDANSE
 
+The MDANSE package contains all the code needed to perform trajectory conversion
+and analysis using MDANSE, but none of the visualisation tools.
+
 Install MDANSE_GUI Package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -66,14 +69,9 @@ Similarly, install the MDANSE_GUI package using `pip`:
 
    pip install MDANSE_GUI
 
-Run MDANSE
-~~~~~~~~~~
-
-You can now start using MDANSE by running the following command:
-
-.. code-block:: bash
-
-   mdanse_gui
+From now on, the `mdanse_gui` command will be available to start
+the graphical interface of MDANSE, which makes it easier to create
+valid inputs for different analysis types.
 
 Run MDANSE
 ~~~~~~~~~~
@@ -84,13 +82,20 @@ You can now start using MDANSE by running the following command:
 
    mdanse_gui
 
-This will launch the MDANSE Graphical User Interface (GUI), and you can start using MDANSE for your
-analysis.
+This will launch the MDANSE Graphical User Interface (GUI),
+and you can start using MDANSE for your analysis.
 
-Note for Windows Users: On Windows, the command to run MDANSE may need to be:
+MDANSE Scripts
+~~~~~~~~~~~~~~
 
-.. code-block:: bash
-
-   python3 mdanse_gui
-
-That's it! You have successfully installed MDANSE and are ready to use it for your data analysis needs.
+If you intend to run your analysis on a remote platform
+(e.g. a cluster), most likely you will have limited options
+of using the GUI there. However, you can still prepare
+a script using MDANSE_GUI on your own computer, save it
+and transfer it to the other computer to run the analysis
+there. You will need to change the file paths in the script,
+but all the other parameters should be transferable. One 
+of the design principles of MDANSE 2 is that the scripts
+should not depend on any settings stored locally on
+a specific computer, but should instead contain all the
+information needed to run a specific analysis type.
