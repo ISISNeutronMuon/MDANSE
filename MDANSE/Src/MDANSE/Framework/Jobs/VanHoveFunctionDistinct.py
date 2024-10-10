@@ -185,21 +185,12 @@ class VanHoveFunctionDistinct(IJob):
             dtype=np.int32,
         )
 
-        # usually the normalization is 4 * pi * r^2 * dr which is
-        # correct for small values of dr or large values of r.
-        # unlike the PDF, g(r, t) may not be zero around r=0 we will use
-        # the actual shell volume instead.
-        self.shell_volumes = []
-        for i in range(self.n_mid_points):
-            self.shell_volumes.append(
-                (
-                    self.configuration["r_values"]["value"][i]
-                    + self.configuration["r_values"]["step"]
-                )
-                ** 3
-                - self.configuration["r_values"]["value"][i] ** 3
-            )
-        self.shell_volumes = (4 / 3) * np.pi * np.array(self.shell_volumes)
+        self.shell_volumes = (
+            4
+            * np.pi
+            * np.array(self.configuration["r_values"]["mid_points"]) ** 2
+            * self.configuration["r_values"]["step"]
+        )
 
         self.h_intra = np.zeros(
             (self.nElements, self.nElements, self.n_mid_points, self.numberOfSteps)
