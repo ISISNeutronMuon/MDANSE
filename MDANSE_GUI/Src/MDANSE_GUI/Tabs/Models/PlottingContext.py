@@ -422,7 +422,7 @@ class PlottingContext(QStandardItemModel):
                 new_dataset._filename,
                 new_dataset._data.shape,
                 new_dataset._data_unit,
-                "",
+                new_dataset.longest_axis()[-1],
                 "",
                 self.next_colour(),
                 "-",
