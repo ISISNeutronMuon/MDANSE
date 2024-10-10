@@ -105,6 +105,13 @@ class VanHoveFunctionSelf(IJob):
             axis="r|time",
             units="au",
         )
+        self._outputData.add(
+            "4_pi_r2_g(r,t)_total",
+            "SurfaceOutputVariable",
+            (self.n_mid_points, self.n_frames),
+            axis="r|time",
+            units="au",
+        )
         for element in self.selectedElements:
             self._outputData.add(
                 "g(r,t)_%s" % element,
@@ -113,6 +120,29 @@ class VanHoveFunctionSelf(IJob):
                 axis="r|time",
                 units="au",
             )
+            self._outputData.add(
+                "4_pi_r2_g(r,t)_%s" % element,
+                "SurfaceOutputVariable",
+                (self.n_mid_points, self.n_frames),
+                axis="r|time",
+                units="au",
+            )
+
+        # usually the normalization is 4 * pi * r^2 * dr which is
+        # correct for small values of dr or large values of r.
+        # unlike the PDF, g(r, t) may not be zero around r=0 we will use
+        # the actual shell volume instead.
+        self.shell_volumes = []
+        for i in range(self.n_mid_points):
+            self.shell_volumes.append(
+                (
+                    self.configuration["r_values"]["value"][i]
+                    + self.configuration["r_values"]["step"]
+                )
+                ** 3
+                - self.configuration["r_values"]["value"][i] ** 3
+            )
+        self.shell_volumes = (4 / 3) * np.pi * np.array(self.shell_volumes)
 
     def run_step(self, atm_index: int) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
         """Calculates a distance histograms of an atoms displacement.
@@ -131,18 +161,30 @@ class VanHoveFunctionSelf(IJob):
             A tuple containing the atom index and distance histograms.
         """
         histograms = np.zeros((self.n_mid_points, self.n_frames))
+        first = self.configuration["frames"]["first"]
+        last = self.configuration["frames"]["last"] + 1
+        step = self.configuration["frames"]["step"]
 
         idx = self.configuration["atom_selection"]["indexes"][atm_index][0]
         series = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
             idx,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
+            first=first,
+            last=last,
+            step=step,
+        )
+        cell_vols = np.array(
+            [
+                self.configuration["trajectory"]["instance"]
+                .configuration(i)
+                .unit_cell.volume
+                for i in range(first, last, step)
+            ]
         )
 
         van_hove.van_hove_self(
             series,
             histograms,
+            cell_vols,
             self.configuration["r_values"]["first"],
             self.configuration["r_values"]["step"],
             self.n_configs,
@@ -165,6 +207,7 @@ class VanHoveFunctionSelf(IJob):
         """
         element = self.configuration["atom_selection"]["names"][atm_index]
         self._outputData["g(r,t)_{}".format(element)][:] += histogram
+        self._outputData["4_pi_r2_g(r,t)_{}".format(element)][:] += histogram
 
     def finalize(self):
         """Using the distance histograms calculate, normalize and save the
@@ -173,7 +216,12 @@ class VanHoveFunctionSelf(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in list(nAtomsPerElement.items()):
-            self._outputData["g(r,t)_%s" % element][:] /= number * self.n_configs
+            self._outputData["g(r,t)_%s" % element][:] /= (
+                self.shell_volumes[:, np.newaxis] * number**2 * self.n_configs
+            )
+            self._outputData["4_pi_r2_g(r,t)_%s" % element][:] /= (
+                number**2 * self.n_configs * self.configuration["r_values"]["step"]
+            )
 
         weights = self.configuration["weights"].get_weights()
         self._outputData["g(r,t)_total"][:] = weight(
@@ -182,6 +230,14 @@ class VanHoveFunctionSelf(IJob):
             nAtomsPerElement,
             1,
             "g(r,t)_%s",
+            update_partials=True,
+        )
+        self._outputData["4_pi_r2_g(r,t)_total"][:] = weight(
+            weights,
+            self._outputData,
+            nAtomsPerElement,
+            1,
+            "4_pi_r2_g(r,t)_%s",
             update_partials=True,
         )
 
