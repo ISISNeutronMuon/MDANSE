@@ -107,7 +107,7 @@ class HDFTrajectoryInputData(InputFileData):
             try:
                 string = obj[:][0].decode()
             except:
-                LOG.warning(f"Decode failed for {name}: {obj}")
+                LOG.debug(f"Decode failed for {name}: {obj}")
             else:
                 try:
                     meta_dict[name] = json_decoder.decode(string)
