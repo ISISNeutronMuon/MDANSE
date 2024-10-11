@@ -116,6 +116,7 @@ def van_hove_distinct(
 def van_hove_self(
     double[:,:] xyz,
     double[:,:] histograms,
+    double[:] cell_vols,
     double rmin,
     double dr,
     int n_configs,
@@ -131,6 +132,8 @@ def van_hove_self(
         The trajectory of an atom.
     histograms : np.ndarray
         The histograms to be updated.
+    cell_vols : np.ndarray
+        The cell volumes.
     rmin : float
         The minimum distance of the histogram.
     dr : float
@@ -159,4 +162,4 @@ def van_hove_self(
             if ((bin < 0) or (bin >= nbins)):
                 continue
 
-            histograms[bin, j] += 1.0
+            histograms[bin, j] += cell_vols[i+j]
