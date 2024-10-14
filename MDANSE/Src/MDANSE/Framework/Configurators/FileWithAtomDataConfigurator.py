@@ -36,7 +36,7 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
         try:
             self.parse()
         except Exception as e:
-            self.error_status = f"File parsing error {e}: {traceback.format_tb()}"
+            self.error_status = f"File parsing error {e}: {traceback.format_exc()}"
 
     @abstractmethod
     def parse(self) -> None:

@@ -145,6 +145,10 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                     type_index = 1
                     charge_index = 2
                     line_limit = 6
+                elif "atomic" in line.split("#")[-1]:
+                    type_index = 1
+                    charge_index = None
+                    line_limit = 6
                 else:
                     type_index = 2
                     charge_index = 3
@@ -155,7 +159,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                     for j in range(self["n_atoms"]):
                         atoks = lines[i + j + 1].split()
                         self["atom_types"][j] = int(atoks[type_index])
-                        if len(atoks) >= line_limit:
+                        if len(atoks) >= line_limit and charge_index is not None:
                             self["charges"][j] = float(atoks[charge_index])
 
         if np.trace(np.abs(self["unit_cell"])) < 1e-8:
