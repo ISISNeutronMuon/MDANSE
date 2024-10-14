@@ -14,9 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from PyQt6.QtCore import QModelIndex
-from PyQt6.QtGui import QPainter
-from PyQt6.QtWidgets import QStyleOptionViewItem
 from qtpy.QtWidgets import (
     QDoubleSpinBox,
     QComboBox,
@@ -29,8 +26,6 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtGui import QColor
-
-from MDANSE_GUI.Tabs.Models.PlottingContext import get_mpl_lines, get_mpl_markers
 
 
 class ColourPicker(QStyledItemDelegate):

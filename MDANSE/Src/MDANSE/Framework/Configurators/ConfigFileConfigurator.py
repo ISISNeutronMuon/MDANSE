@@ -141,7 +141,6 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                 self["bonds"] = np.array(self["bonds"], dtype=np.int32)
 
             if re.match("^\s*Atoms\s*$", line.split("#")[0]):
-                print(f"Found Atoms, looking for {self['n_atoms']} atoms")
                 if "charge" in line.split("#")[-1]:
                     type_index = 1
                     charge_index = 2

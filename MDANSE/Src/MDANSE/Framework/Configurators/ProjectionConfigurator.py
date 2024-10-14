@@ -53,8 +53,6 @@ class ProjectionConfigurator(IConfigurator):
             self.error_status = "Failed to unpack input" + str(e)
             return
 
-        print(f"projector axis: {axis}")
-
         if not isinstance(mode, str):
             self.error_status = "invalid type for projection mode: must be a string"
             return

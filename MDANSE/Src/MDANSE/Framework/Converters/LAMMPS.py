@@ -214,7 +214,7 @@ class LAMMPScustom(LAMMPSReader):
                         try:
                             ty = int(config["atom_types"][i]) - 1
                         except IndexError:
-                            print(
+                            LOG.error(
                                 f"Failed to find index [{i}] in list of len {len(config['atom_types'])}"
                             )
                     label = str(config["elements"][ty][0])
