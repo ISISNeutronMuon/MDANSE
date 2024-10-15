@@ -72,10 +72,12 @@ class InstrumentDetails(QWidget):
             instance = QLineEdit(self)
             if value == "float":
                 instance.setValidator(QDoubleValidator())
-                instance.setText("0.0")
+                instance.setText("1.0")
+                instance.setPlaceholderText("1.0")
             elif value == "int":
                 instance.setValidator(QIntValidator())
-                instance.setText("0")
+                instance.setText("1")
+                instance.setPlaceholderText("1")
             else:
                 instance.setText("text")
             instance.textChanged.connect(self.update_values)
@@ -116,6 +118,11 @@ class InstrumentDetails(QWidget):
                     new_val = value.currentText()
                 except AttributeError:
                     new_val = None
+            if len(new_val) == 0:
+                try:
+                    new_val = value.placeholderText()
+                except AttributeError:
+                    new_val = ""
             self._values[key] = new_val
         self.commit_changes()
         self.toggle_axis_fields()
