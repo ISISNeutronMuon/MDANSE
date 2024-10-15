@@ -69,7 +69,7 @@ class VectorModel(QStandardItemModel):
             try:
                 params[name] = self.parse_vtype(vtype, value, name)
             except ValueError:
-                params[name] = self._defaults[rownum]
+                params[name] = "failed"
                 self.item(rownum, 1).setData(
                     QBrush(Qt.GlobalColor.red), role=Qt.ItemDataRole.BackgroundRole
                 )
