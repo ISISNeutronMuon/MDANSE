@@ -77,7 +77,14 @@ class RootMeanSquareFluctuation(IJob):
             for idxs in self.configuration["atom_selection"]["indexes"]
             for idx in idxs
         ]
-        self._outputData.add("indexes", "LineOutputVariable", indexes)
+        if self.configuration["grouping_level"]["value"] == "atom":
+            self._outputData.add("indexes", "LineOutputVariable", indexes)
+        else:
+            self._outputData.add(
+                "indexes",
+                "LineOutputVariable",
+                self.configuration["grouping_level"]["group_indices"],
+            )
 
         # Will store the mean square fluctuation evolution.
         self._outputData.add(
