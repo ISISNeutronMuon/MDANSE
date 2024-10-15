@@ -30,6 +30,8 @@ class UnfoldedTrajectory(IJob):
 
     label = "Unfolded Trajectory"
 
+    enabled = False
+
     category = (
         "Analysis",
         "Trajectory",

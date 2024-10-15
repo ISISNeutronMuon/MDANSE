@@ -155,7 +155,10 @@ class AverageStructure(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        the_atom = Atom(element, x)
+        try:
+            the_atom = Atom(element, x)
+        except KeyError:
+            the_atom = Atom(str(element).strip("0123456789"), x)
 
         self._ase_atoms.append(the_atom)
 
