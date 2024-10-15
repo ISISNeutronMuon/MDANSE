@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtWidgets import QVBoxLayout, QTabWidget
+from qtpy.QtWidgets import QVBoxLayout, QTabWidget, QTabBar
 from qtpy.QtCore import Slot, Signal
 
 from MDANSE.MLogging import LOG
@@ -45,6 +45,13 @@ class PlotHolder(QTabWidget):
         self._protected_id = int(self._current_id)
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(self.clean_up_closed_tab)
+        # remove the close button on the protected tab
+        tabbar = self.tabBar()
+        close_button = tabbar.tabButton(
+            self._protected_id, QTabBar.ButtonPosition.RightSide
+        )
+        close_button.deleteLater()
+        tabbar.setTabButton(self._protected_id, QTabBar.ButtonPosition.RightSide, None)
 
     @Slot(str)
     def new_plot(self, tab_name: str) -> int:
