@@ -1,3 +1,15 @@
+version 2.0.0b1 - 2024-10-15
+--------------------------
+* ADDED van Hove functions (self function and distinct function)
+* FIXED Eccentricity analysis to give correct results
+* ADDED Infrared analysis (only for molecules at the moment)
+* FIXED MolecularTrace analysis data axes to make data plottable
+* CHANGED the plotting interface to allow overplotting curves
+* ADDED instrument profiles for storing user parameters
+* ADDED logging in the code and a logger tab in the GUI
+* ADDED charge information to the stored trajectory data
+* ADDED support for H5MD trajectories
+
 version 2.0.0 - 2024-02-15
 --------------------------
 * CHANGED programming language to Python 3
