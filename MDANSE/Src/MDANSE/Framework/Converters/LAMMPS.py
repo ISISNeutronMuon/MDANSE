@@ -159,8 +159,18 @@ class LAMMPScustom(LAMMPSReader):
             elif line.startswith("ITEM: ATOMS"):
                 keywords = line.split()[2:]
 
-                self._id = keywords.index("id")
-                self._type = keywords.index("type")
+                if "id" in keywords:
+                    self._id = keywords.index("id")
+                else:
+                    self._id = None
+                if "type" in keywords:
+                    self._type = keywords.index("type")
+                else:
+                    self._type = None
+                if "element" in keywords:
+                    self._element = keywords.index("element")
+                else:
+                    self._element = None
                 try:
                     self._charge = keywords.index("q")
                 except ValueError:
@@ -194,12 +204,28 @@ class LAMMPScustom(LAMMPSReader):
                 self._itemsPosition["ATOMS"] = [comp + 1, comp + self._nAtoms + 1]
                 for i in range(self._nAtoms):
                     temp = self._file.readline().split()
-                    idx = int(temp[self._id]) - 1
-                    ty = int(temp[self._type]) - 1
+                    if self._id is not None:
+                        idx = int(temp[self._id]) - 1
+                    else:
+                        idx = int(i)
+                    if self._type is not None:
+                        ty = int(temp[self._type]) - 1
+                    else:
+                        try:
+                            ty = int(config["atom_types"][i]) - 1
+                        except IndexError:
+                            LOG.error(
+                                f"Failed to find index [{i}] in list of len {len(config['atom_types'])}"
+                            )
                     label = str(config["elements"][ty][0])
                     mass = str(config["elements"][ty][1])
                     name = "{:s}_{:d}".format(str(config["elements"][ty][0]), idx)
-                    self._rankToName[int(temp[0]) - 1] = name
+                    try:
+                        temp_index = int(temp[0])
+                    except ValueError:
+                        self._rankToName[i] = name
+                    else:
+                        self._rankToName[temp_index - 1] = name
                     g.add_node(idx, label=label, mass=mass, atomName=name)
 
                 if config["n_bonds"] is not None:
@@ -335,7 +361,12 @@ class LAMMPScustom(LAMMPSReader):
             range(self._itemsPosition["ATOMS"][0], self._itemsPosition["ATOMS"][1])
         ):
             temp = self._file.readline().split()
-            idx = self._nameToIndex[self._rankToName[int(temp[0]) - 1]]
+            try:
+                temp_index = int(temp[0])
+            except ValueError:
+                idx = i
+            else:
+                idx = self._nameToIndex[self._rankToName[temp_index - 1]]
             coords[idx, :] = np.array(
                 [temp[self._x], temp[self._y], temp[self._z]], dtype=np.float64
             )

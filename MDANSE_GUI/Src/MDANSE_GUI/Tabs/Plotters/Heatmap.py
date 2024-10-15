@@ -186,9 +186,9 @@ class Heatmap(Plotter):
                         primary_axis_number = number
                 all_numbers = [0]
                 if primary_axis_number == 0:
-                    all_datasets = [dataset._data]
-                else:
                     all_datasets = [dataset._data.T]
+                else:
+                    all_datasets = [dataset._data]
                     transposed = True
                 all_labels = [dataset._name]
             limits = []

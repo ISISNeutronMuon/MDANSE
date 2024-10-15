@@ -97,6 +97,26 @@ class AverageStructure(IJob):
 
         self._ase_atoms = Atoms()
 
+        trajectory = self.configuration["trajectory"]["instance"]
+
+        frame_range = range(
+            self.configuration["frames"]["first"],
+            self.configuration["frames"]["last"] + 1,
+            self.configuration["frames"]["step"],
+        )
+
+        try:
+            unit_cells = [
+                trajectory.unit_cell(frame)._unit_cell for frame in frame_range
+            ]
+        except:
+            raise ValueError(
+                "Unit cell needs to be defined for the AverageStructure analysis. "
+                "You can add a unit cell using TrajectoryEditor."
+            )
+        else:
+            self._unit_cells = unit_cells
+
     def run_step(self, index):
         """
         Runs a single step of the job.
@@ -135,7 +155,10 @@ class AverageStructure(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        the_atom = Atom(element, x)
+        try:
+            the_atom = Atom(element, x)
+        except KeyError:
+            the_atom = Atom(str(element).strip("0123456789"), x)
 
         self._ase_atoms.append(the_atom)
 
@@ -152,17 +175,7 @@ class AverageStructure(IJob):
             self.configuration["frames"]["step"],
         )
 
-        try:
-            unit_cells = [
-                trajectory.unit_cell(frame)._unit_cell for frame in frame_range
-            ]
-        except:
-            raise ValueError(
-                "Unit cell needs to be defined for the AverageStructure analysis. "
-                "You can add a unit cell using TrajectoryEditor."
-            )
-
-        average_unit_cell = np.mean(unit_cells, axis=0) * self._conversion_factor
+        average_unit_cell = np.mean(self._unit_cells, axis=0) * self._conversion_factor
 
         self._ase_atoms.set_cell(average_unit_cell)
 

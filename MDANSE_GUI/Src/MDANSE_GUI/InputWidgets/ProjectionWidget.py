@@ -51,6 +51,10 @@ class ProjectionWidget(WidgetBase):
             wid.setToolTip(tooltip_text)
         for wid in self._button_group.buttons():
             wid.setToolTip(tooltip_text)
+        self.button_switched(0)
+        self._button_group.buttonClicked.connect(self.updateValue)
+        for vfield in self._vector_fields:
+            vfield.textChanged.connect(self.updateValue)
 
     def configure_using_default(self):
         """This is too complex to have a default value"""
@@ -76,7 +80,7 @@ class ProjectionWidget(WidgetBase):
         """Collect the results from the input widgets and return the value."""
         if self._mode == 0:
             return ("NullProjector", [])
-        vector = [float(x.text()) for x in self._vector_fields]
+        vector = [x.text() for x in self._vector_fields]
         if self._mode == 1:
             return ("AxialProjector", vector)
         else:

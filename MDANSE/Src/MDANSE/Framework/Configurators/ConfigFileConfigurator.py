@@ -140,15 +140,42 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                     self["bonds"].append([at1, at2])
                 self["bonds"] = np.array(self["bonds"], dtype=np.int32)
 
-            if re.match("^\s*Atoms\s*$", line):
+            if re.match("^\s*Atoms\s*$", line.split("#")[0]):
+                if not "#" in line:
+                    num_of_columns = len(lines[i + 2].split())
+                    if num_of_columns <= 5:
+                        type_index = 1
+                        charge_index = None
+                        line_limit = 6
+                    else:
+                        type_index = 2
+                        charge_index = 3
+                        line_limit = 7
+                else:
+                    if "charge" in line.split("#")[-1]:
+                        type_index = 1
+                        charge_index = 2
+                        line_limit = 6
+                    elif "atomic" in line.split("#")[-1]:
+                        type_index = 1
+                        charge_index = None
+                        line_limit = 6
+                    elif "full" in line.split("#")[-1]:
+                        type_index = 2
+                        charge_index = 3
+                        line_limit = 7
+                    else:
+                        type_index = 2
+                        charge_index = 3
+                        line_limit = 7
                 if self["n_atoms"] is not None:
                     self["atom_types"] = self["n_atoms"] * [0]
                     self["charges"] = self["n_atoms"] * [0.0]
                     for j in range(self["n_atoms"]):
                         atoks = lines[i + j + 1].split()
-                        self["atom_types"][j] = int(atoks[2])
-                        if len(atoks) >= 7:
-                            self["charges"][j] = float(atoks[3])
+                        self["atom_types"][j] = int(atoks[type_index])
+                        if len(atoks) >= line_limit and charge_index is not None:
+                            self["charges"][j] = float(atoks[charge_index])
 
         if np.trace(np.abs(self["unit_cell"])) < 1e-8:
             # print(f"Concatenated: {np.concatenate([x_inputs, y_inputs, z_inputs])}")

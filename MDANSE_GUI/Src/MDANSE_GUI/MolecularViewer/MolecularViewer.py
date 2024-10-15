@@ -76,6 +76,11 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._iren = QVTKRenderWindowInteractor(self)
 
+        def dummy_method(self, ev=None):
+            pass
+
+        setattr(self._iren, "keyPressEvent", dummy_method)
+
         self._renderer = vtk.vtkRenderer()
 
         self._iren.GetRenderWindow().AddRenderer(self._renderer)

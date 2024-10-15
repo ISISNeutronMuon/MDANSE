@@ -162,9 +162,9 @@ class Action(QWidget):
         try:
             job_instance = IJob.create(job_name)
         except ValueError as e:
-            LOG.error(
+            LOG.debug(
                 f"Failed to create IJob {job_name};\n"
-                f"error {e};\n"
+                f"reason {e};\n"
                 f"traceback {traceback.format_exc()}"
             )
             return

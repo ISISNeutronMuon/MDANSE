@@ -131,11 +131,13 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         elements = []
         masses = []
         names = []
+        group_indices = []
         for i, v in enumerate(groups.values()):
             names.append("group_%d" % i)
             elements.append(v["elements"])
             indexes.append(v["indexes"])
             masses.append(v["masses"])
+            group_indices.append(i)
 
         atomSelectionConfig["indexes"] = indexes
         atomSelectionConfig["elements"] = elements
@@ -145,6 +147,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         atomSelectionConfig["unique_names"] = sorted(set(atomSelectionConfig["names"]))
 
         self["level"] = value
+        self["group_indices"] = group_indices
 
     @staticmethod
     def find_parent(atom, level):

@@ -14,9 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from PyQt6.QtCore import QModelIndex
-from PyQt6.QtGui import QPainter
-from PyQt6.QtWidgets import QStyleOptionViewItem
 from qtpy.QtWidgets import (
     QDoubleSpinBox,
     QComboBox,
@@ -29,8 +26,6 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtGui import QColor
-
-from MDANSE_GUI.Tabs.Models.PlottingContext import get_mpl_lines, get_mpl_markers
 
 
 class ColourPicker(QStyledItemDelegate):
@@ -154,7 +149,7 @@ class ProgressDelegate(QItemDelegate):
 
     def paint(self, painter, option, index):
         progress = index.data(self.progress_role)
-        progress_max = max(index.data(self.progress_role + 1), 1)
+        progress_max = max(index.data(self.progress_role + 1) - 1, 1)
         try:
             int(progress)
         except:
@@ -164,6 +159,7 @@ class ProgressDelegate(QItemDelegate):
         opt.minimum = 0
         opt.maximum = progress_max
         opt.progress = progress
-        opt.text = "{}%".format(round(100 * progress / progress_max, 2))
+        percentage = min(round(100 * progress / progress_max, 2), 100.0)
+        opt.text = "{}%".format(percentage)
         opt.textVisible = True
         QApplication.style().drawControl(QStyle.CE_ProgressBar, opt, painter)

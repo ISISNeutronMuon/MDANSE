@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE_GUI"
-version = "0.1.0-dev"
+version = "0.1.0b1"
 description = 'MDANSE GUI package - the graphical interface for MDANSE'
 readme = "README.md"
 requires-python = ">=3.9"
@@ -18,7 +18,7 @@ maintainers = [
   {name = "Sanghamitra Mukhopadhyay", email = "sanghamitra.mukhopadhyay@stfc.ac.uk"}
 ]
 classifiers = [
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry',

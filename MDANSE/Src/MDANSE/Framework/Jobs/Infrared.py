@@ -100,7 +100,10 @@ class Infrared(IJob):
         )
 
         self._outputData.add(
-            "omega", "LineOutputVariable", instrResolution["romega"], units="rad/ps"
+            "omega", "LineOutputVariable", instrResolution["omega"], units="rad/ps"
+        )
+        self._outputData.add(
+            "romega", "LineOutputVariable", instrResolution["romega"], units="rad/ps"
         )
         self._outputData.add(
             "omega_window",
@@ -120,7 +123,7 @@ class Infrared(IJob):
             "ir",
             "LineOutputVariable",
             (instrResolution["n_romegas"],),
-            axis="omega",
+            axis="romega",
             main_result=True,
         )
 

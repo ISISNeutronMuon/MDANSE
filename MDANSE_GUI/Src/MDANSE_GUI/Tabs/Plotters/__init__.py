@@ -30,12 +30,13 @@ for fname in fnames:
 globdict = globals()
 
 for name in modnames:
-    if name in ["__init__"]:
+    if name in ["__init__", "PlotterTemplate"]:
         continue
     try:
         tempmod = importlib.import_module("." + name, "MDANSE_GUI.Tabs.Plotters")
     except ModuleNotFoundError:
         LOG.error(f"Could not find {name} in MDANSE_GUI.Tabs.Plotters")
-    tempobject = getattr(tempmod, name)
-    globdict[name] = tempobject
-    del tempmod  # optionally delete the reference to the parent module
+    else:
+        tempobject = getattr(tempmod, name)
+        globdict[name] = tempobject
+        del tempmod  # optionally delete the reference to the parent module

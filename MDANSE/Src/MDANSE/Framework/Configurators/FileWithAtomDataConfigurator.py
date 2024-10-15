@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from abc import abstractmethod
+import traceback
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from .InputFileConfigurator import InputFileConfigurator
@@ -35,7 +36,7 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
         try:
             self.parse()
         except Exception as e:
-            self.error_status = "File parsing error"
+            self.error_status = f"File parsing error {e}: {traceback.format_exc()}"
 
     @abstractmethod
     def parse(self) -> None:

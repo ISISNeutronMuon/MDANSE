@@ -9,6 +9,7 @@ Welcome to MDANSE's documentation!
 .. note::
    This is the documentation of the MDANSE 2.0 release.
    The documentation, just like the code itself, is still under development.
+   MDANSE 2 has currently (October 2024) just reached the first beta release.
 
 **Useful links**: `MDANSE Project Website <https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx>`_ | `MDANSE GitHub Page <https://github.com/ISISNeutronMuon/MDANSE>`_
 

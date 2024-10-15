@@ -69,7 +69,8 @@ class VectorModel(QStandardItemModel):
             try:
                 params[name] = self.parse_vtype(vtype, value, name)
             except ValueError:
-                params[name] = self._defaults[rownum]
+                params[name] = "failed"
+            if params[name] == "failed":
                 self.item(rownum, 1).setData(
                     QBrush(Qt.GlobalColor.red), role=Qt.ItemDataRole.BackgroundRole
                 )
@@ -83,11 +84,19 @@ class VectorModel(QStandardItemModel):
         if vtype == "RangeConfigurator":
             inner_type = self._generator.settings[vname][1]["valueType"]
             tempstring = value.strip("()[] ")
-            return [inner_type(x) for x in tempstring.split(",")]
+            result = [inner_type(x) for x in tempstring.split(",")]
+            if len(result) == 3:
+                return result
+            else:
+                return "failed"
         elif vtype == "VectorConfigurator":
             inner_type = self._generator.settings[vname][1]["valueType"]
             tempstring = value.strip("()[] ")
-            return [inner_type(x) for x in tempstring.split(",")]
+            result = [inner_type(x) for x in tempstring.split(",")]
+            if len(result) == 3:
+                return result
+            else:
+                return "failed"
         elif vtype == "FloatConfigurator":
             return float(value)
         elif vtype == "IntegerConfigurator":

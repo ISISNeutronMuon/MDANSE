@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import numpy as np
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Projectors.IProjector import IProjector
@@ -62,13 +63,26 @@ class ProjectionConfigurator(IConfigurator):
             self.error_status = f"the projector {mode} is unknown"
             return
         else:
+            if mode == "NullProjector":
+                self.error_status = "OK"
+                return
             try:
-                self["projector"].set_axis(axis)
+                vector = [float(x) for x in axis]
+            except ValueError:
+                self.error_status = f"Could not convert {axis} to numbers"
+                return
+            else:
+                if np.allclose(vector, 0):
+                    self.error_status = f"Vector of 0 length does not define projection"
+                    return
+            try:
+                self["projector"].set_axis(vector)
             except ProjectorError:
-                self.error_status = f"Axis {axis} is wrong for this projector"
+                self.error_status = f"Axis {vector} is wrong for this projector"
                 return
             else:
                 self["axis"] = self["projector"].axis
+
         self.error_status = "OK"
 
     def get_information(self):

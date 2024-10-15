@@ -75,12 +75,12 @@ class SingleDataset:
         try:
             self._data = source[name][:]
         except KeyError:
-            LOG.error(f"{name} is not a data set in the file")
+            LOG.debug(f"{name} is not a data set in the file")
             self._valid = False
             return
         except TypeError:
             self._valid = False
-            LOG.error(f"{name} is not plottable")
+            LOG.debug(f"{name} is not plottable")
             return
         self._data_unit = source[name].attrs["units"]
         self._n_dim = len(self._data.shape)
@@ -422,7 +422,7 @@ class PlottingContext(QStandardItemModel):
                 new_dataset._filename,
                 new_dataset._data.shape,
                 new_dataset._data_unit,
-                "",
+                new_dataset.longest_axis()[-1],
                 "",
                 self.next_colour(),
                 "-",
@@ -455,7 +455,7 @@ class PlottingContext(QStandardItemModel):
         elif len(curves) == 1:
             LOG.debug("A single curve output from PlottingContext.")
         else:
-            LOG.error("No curves!")
+            LOG.debug("No curves!")
         self.appendRow(items)
 
     def set_axes(self):

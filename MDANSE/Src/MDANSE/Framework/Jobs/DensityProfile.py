@@ -137,6 +137,7 @@ class DensityProfile(IJob):
         conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
 
         box_coords = conf.to_box_coordinates()
+        box_coords = box_coords - np.floor(box_coords)
 
         axis_index = self.configuration["axis"]["index"]
         axis = conf.unit_cell.direct[axis_index, :]
@@ -146,7 +147,7 @@ class DensityProfile(IJob):
 
         for k, v in self._indexes_per_element.items():
             h = np.histogram(
-                box_coords[v, axis_index], bins=self._n_bins, range=[-0.5, 0.5]
+                box_coords[v, axis_index], bins=self._n_bins, range=[0.0, 1.0]
             )
             dp_per_frame[k] = h[0]
 

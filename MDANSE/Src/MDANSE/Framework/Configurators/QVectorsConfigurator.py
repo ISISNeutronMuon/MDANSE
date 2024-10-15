@@ -72,10 +72,14 @@ class QVectorsConfigurator(IConfigurator):
                 return
 
             try:
-                generator.generate()
+                generator_success = generator.generate()
             except:
                 self.error_status = "Q Vector parameters were parsed correctly, but caused an error. Invalid values?"
                 return
+            else:
+                if not generator_success:
+                    self.error_status = "Q Vector parameters were parsed correctly, but caused an error. Invalid values?"
+                    return
 
             if not "q_vectors" in generator.configuration:
                 self.error_status = "Wrong inputs for q-vector generation. At the moment there are no valid Q points."

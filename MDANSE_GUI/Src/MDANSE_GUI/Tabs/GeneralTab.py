@@ -105,7 +105,7 @@ class GeneralTab(QObject):
     def connect_units(self):
         if self._visualiser is not None:
             if self._visualiser._unit_lookup is None:
-                print(f"Visualiser {self._visualiser} has no unit lookup")
+                LOG.debug(f"Visualiser {self._visualiser} has no unit lookup")
                 self._visualiser._unit_lookup = self
 
     def conversion_factor(self, input_unit: str) -> Tuple[float, str]:
