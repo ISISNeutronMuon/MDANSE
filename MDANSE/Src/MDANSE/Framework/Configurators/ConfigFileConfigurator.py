@@ -141,18 +141,33 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                 self["bonds"] = np.array(self["bonds"], dtype=np.int32)
 
             if re.match("^\s*Atoms\s*$", line.split("#")[0]):
-                if "charge" in line.split("#")[-1]:
-                    type_index = 1
-                    charge_index = 2
-                    line_limit = 6
-                elif "atomic" in line.split("#")[-1]:
-                    type_index = 1
-                    charge_index = None
-                    line_limit = 6
+                if not "#" in line:
+                    num_of_columns = len(lines[i + 2].split())
+                    if num_of_columns <= 5:
+                        type_index = 1
+                        charge_index = None
+                        line_limit = 6
+                    else:
+                        type_index = 2
+                        charge_index = 3
+                        line_limit = 7
                 else:
-                    type_index = 2
-                    charge_index = 3
-                    line_limit = 7
+                    if "charge" in line.split("#")[-1]:
+                        type_index = 1
+                        charge_index = 2
+                        line_limit = 6
+                    elif "atomic" in line.split("#")[-1]:
+                        type_index = 1
+                        charge_index = None
+                        line_limit = 6
+                    elif "full" in line.split("#")[-1]:
+                        type_index = 2
+                        charge_index = 3
+                        line_limit = 7
+                    else:
+                        type_index = 2
+                        charge_index = 3
+                        line_limit = 7
                 if self["n_atoms"] is not None:
                     self["atom_types"] = self["n_atoms"] * [0]
                     self["charges"] = self["n_atoms"] * [0.0]
