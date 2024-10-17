@@ -191,9 +191,8 @@ Didcot, UK
 
 ## Software Inquiries
 
-For questions or contributions related to the software, please contact:
-
->Dr. Maciej Bartkowiak (maciej.bartkowiak@stfc.ac.uk)\
-ISIS Neutron and Muon Source \
-Rutherford Appleton Laboratory \
-Didcot, UK
+You are welcome to use the issue tracker to submit ideas for
+extending the MDANSE code or to report problems you encountered.
+However, if you prefer to contact the MDANSE developers directly,
+you can send us a message:
+>MDANSE Help (MDANSE-help@stfc.ac.uk)
