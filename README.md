@@ -96,9 +96,11 @@ experimental data, or used as a prediction of results of a potential experiment.
 <li>Angular correlation</li>
 <li>Density of states</li>
 <li>Mean Square Displacement</li>
-<li>Order parameter</li>
 <li>Position Autocorrelation Function</li>
 <li>Velocity Autocorrelation Function</li>
+<li>Current Correlation Function</li>
+<li>van Hove function (self)</li>
+<li>van Hove function (distinct)</li>
 </ul></details>
 
 <details><summary>Infrared</summary><ul>
@@ -107,7 +109,6 @@ experimental data, or used as a prediction of results of a potential experiment.
 </ul></details>
 
 <details><summary>Scattering</summary><ul>
-<li>Current correlation function</li>
 <li>Dynamic Coherent Structure Factor</li>
 <li>Dynamic Incoherent Structure Factor</li>
 <li>Elastic Incoherent Structure Factor</li>
@@ -126,7 +127,6 @@ experimental data, or used as a prediction of results of a potential experiment.
 <li>Root Mean Square Fluctuation</li>
 <li>Radius of Gyration</li>
 <li>Solvent Accessible Surface</li>
-<li>Spatial Density</li>
 <li>Static Structure Factor</li>
 <li>Voronoi (volume per atom)</li>
 <li>X-Ray Static Structure Factor</li>
@@ -191,9 +191,8 @@ Didcot, UK
 
 ## Software Inquiries
 
-For questions or contributions related to the software, please contact:
-
->Dr. Maciej Bartkowiak (maciej.bartkowiak@stfc.ac.uk)\
-ISIS Neutron and Muon Source \
-Rutherford Appleton Laboratory \
-Didcot, UK
+You are welcome to use the issue tracker to submit ideas for
+extending the MDANSE code or to report problems you encountered.
+However, if you prefer to contact the MDANSE developers directly,
+you can send us a message:
+>MDANSE Help (MDANSE-help@stfc.ac.uk)
