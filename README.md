@@ -96,9 +96,11 @@ experimental data, or used as a prediction of results of a potential experiment.
 <li>Angular correlation</li>
 <li>Density of states</li>
 <li>Mean Square Displacement</li>
-<li>Order parameter</li>
 <li>Position Autocorrelation Function</li>
 <li>Velocity Autocorrelation Function</li>
+<li>Current Correlation Function</li>
+<li>van Hove function (self)</li>
+<li>van Hove function (distinct)</li>
 </ul></details>
 
 <details><summary>Infrared</summary><ul>
@@ -107,7 +109,6 @@ experimental data, or used as a prediction of results of a potential experiment.
 </ul></details>
 
 <details><summary>Scattering</summary><ul>
-<li>Current correlation function</li>
 <li>Dynamic Coherent Structure Factor</li>
 <li>Dynamic Incoherent Structure Factor</li>
 <li>Elastic Incoherent Structure Factor</li>
@@ -126,7 +127,6 @@ experimental data, or used as a prediction of results of a potential experiment.
 <li>Root Mean Square Fluctuation</li>
 <li>Radius of Gyration</li>
 <li>Solvent Accessible Surface</li>
-<li>Spatial Density</li>
 <li>Static Structure Factor</li>
 <li>Voronoi (volume per atom)</li>
 <li>X-Ray Static Structure Factor</li>
