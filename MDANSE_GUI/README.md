@@ -9,7 +9,8 @@ The GUI depends on the [MDANSE package](https://www.isis.stfc.ac.uk/Pages/MDANSE
 
 ## Version information
 
-This is the alpha release of MDANSE_GUI 0.1.0. The GUI has been re-written completely using Qt.
+This is the beta release of MDANSE_GUI 0.1.0. Since the 1.5.x MDANSE versions,
+the GUI has been re-written completely using Qt.
 Please help us develop MDANSE_GUI by reporting any problems you experience when using the code.
 The preferred way of reporting problems is by adding them to the [GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
 
@@ -93,9 +94,10 @@ Didcot, UK
 
 ## Software Inquiries
 
-For questions or contributions related to the software, please contact:
-
->Dr. Maciej Bartkowiak (maciej.bartkowiak@stfc.ac.uk)\
-ISIS Neutron and Muon Source \
-Rutherford Appleton Laboratory \
-Didcot, UK
+You are welcome to use the
+[issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues)
+to submit ideas for
+extending the MDANSE code or to report problems you encountered.
+However, if you prefer to contact the MDANSE developers directly,
+you can send us a message:
+>MDANSE Help (MDANSE-help@stfc.ac.uk)
