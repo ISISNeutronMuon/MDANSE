@@ -21,7 +21,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
 
 ## Version information
 
-This is the alpha release of MDANSE 2.0.0. It is the first release since MDANSE has been ported to Python 3.
+This is the beta release of MDANSE 2.0.0.
 Please help us develop MDANSE by reporting any problems you experience when using the code.
 The preferred way of reporting problems is by adding them to the [GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
 
@@ -101,6 +101,14 @@ experimental data, or used as a prediction of results of a potential experiment.
 <li>Mean Square Displacement</li>
 <li>Position Autocorrelation Function</li>
 <li>Velocity Autocorrelation Function</li>
+<li>Current Correlation Function</li>
+<li>van Hove function (self)</li>
+<li>van Hove function (distinct)</li>
+</ul></details>
+
+<details><summary>Infrared</summary><ul>
+<li>Dipole Autocorrelation Function</li>
+<li>Infrared</li>
 </ul></details>
 
 <details><summary>Scattering</summary><ul>
@@ -186,9 +194,10 @@ Didcot, UK
 
 ## Software Inquiries
 
-For questions or contributions related to the software, please contact:
-
->Dr. Maciej Bartkowiak (maciej.bartkowiak@stfc.ac.uk)\
-ISIS Neutron and Muon Source \
-Rutherford Appleton Laboratory \
-Didcot, UK
+You are welcome to use the
+[issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues)
+to submit ideas for
+extending the MDANSE code or to report problems you encountered.
+However, if you prefer to contact the MDANSE developers directly,
+you can send us a message:
+>MDANSE Help (MDANSE-help@stfc.ac.uk)
