@@ -70,7 +70,7 @@ class DatasetFormatter:
         if self._plotting_context is None:
             return ["No data selected"]
         for name, databundle in self._plotting_context.datasets().items():
-            dataset, _, _, _, _, _ = databundle
+            dataset, _, _, _, _, axis_label = databundle
             if dataset._n_dim == 1:
                 header, data = self.process_1D_data(
                     dataset, separator=self._separator, is_preview=self._is_preview
@@ -84,6 +84,7 @@ class DatasetFormatter:
                     name,
                     separator=self._separator,
                     is_preview=self._is_preview,
+                    main_axis=axis_label,
                 )
                 self._new_text.append(
                     self.join_for_gui(header, data, separator=self._separator)
@@ -207,7 +208,12 @@ class DatasetFormatter:
             return header_lines, temp
 
     def process_2D_data(
-        self, dataset: "SingleDataset", name: str, separator=" ", is_preview=False
+        self,
+        dataset: "SingleDataset",
+        name: str,
+        separator=" ",
+        is_preview=False,
+        main_axis=None,
     ):
         header_lines, comment_char = self.make_dataset_header(
             dataset, comment_character=self._comment
@@ -215,6 +221,11 @@ class DatasetFormatter:
         new_axes = {}
         new_axes_units = {}
         axis_numbers = {}
+        flip_array = False
+        for n, ax_key in enumerate(dataset.available_x_axes()):
+            if main_axis is not None:
+                if n > 0 and ax_key == main_axis:
+                    flip_array = True
         for n, ax_key in enumerate(dataset.available_x_axes()):
             axis = dataset._axes[ax_key]
             axis_unit = dataset._axes_units[ax_key]
@@ -224,14 +235,24 @@ class DatasetFormatter:
             new_axes_units[ax_key] = new_unit
             axis_numbers[n] = ax_key
             LOG.debug(f"process_2D_data: axis {ax_key} has length {len(axis)}")
-            if n == 0:
-                header_lines.append(
-                    f"{comment_char} first column is {ax_key} in units {new_unit}"
-                )
+            if not flip_array:
+                if n == 0:
+                    header_lines.append(
+                        f"{comment_char} first column is {ax_key} in units {new_unit}"
+                    )
+                else:
+                    header_lines.append(
+                        f"{comment_char} first row is {ax_key} in units {new_unit}"
+                    )
             else:
-                header_lines.append(
-                    f"{comment_char} first row is {ax_key} in units {new_unit}"
-                )
+                if n == 0:
+                    header_lines.append(
+                        f"{comment_char} first row is {ax_key} in units {new_unit}"
+                    )
+                else:
+                    header_lines.append(
+                        f"{comment_char} first column is {ax_key} in units {new_unit}"
+                    )
         LOG.debug(f"Data shape: {dataset._data.shape}")
         if is_preview:
             nlines = self._preview_lines
@@ -267,7 +288,9 @@ class DatasetFormatter:
                     temp,
                 ]
             )
-        return header_lines, temp
+        if not flip_array:
+            return header_lines, temp
+        return header_lines, temp.T
 
     def process_ND_data(
         self, dataset: "SingleDataset", name: str, separator=" ", is_preview=False
