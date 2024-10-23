@@ -307,8 +307,12 @@ class DL_POLY(Converter):
         )
 
         self._velocities = None
-
         self._gradients = None
+
+        if self._historyFile["keytrj"] > 0:
+            self._velocities = True
+        if self._historyFile["keytrj"] > 1:
+            self._gradients = True
 
     def run_step(self, index):
         """Runs a single step of the job.
