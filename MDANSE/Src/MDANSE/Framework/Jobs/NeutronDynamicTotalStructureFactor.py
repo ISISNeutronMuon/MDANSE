@@ -32,6 +32,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
     Computes the dynamic total structure factor for a set of atoms as the sum of the incoherent and coherent structure factors
     """
 
+    enabled = False
+
     label = "Neutron Dynamic Total Structure Factor"
 
     category = (
