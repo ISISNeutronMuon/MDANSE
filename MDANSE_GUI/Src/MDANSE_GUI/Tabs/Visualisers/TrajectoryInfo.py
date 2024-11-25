@@ -13,10 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from typing import TYPE_CHECKING
 from collections import defaultdict
 
 from qtpy.QtCore import Slot, Signal
 from qtpy.QtWidgets import QTextBrowser
+
+if TYPE_CHECKING:
+    from MDANSE.Chemistry.ChemicalEntity import ChemicalSystem
 
 
 class TrajectoryInfo(QTextBrowser):
@@ -46,8 +50,9 @@ class TrajectoryInfo(QTextBrowser):
         filtered = self.filter(text)
         self.setHtml(filtered)
 
-    def summarise_chemical_system(self, cs):
+    def summarise_chemical_system(self, cs: "ChemicalSystem"):
         text = "\n ==== Chemical System summary ==== \n"
+        text += f"Rdkit information: {cs.rdkit_mol.GetNumAtoms()} atoms, {cs.rdkit_mol.GetNumBonds()} bonds\n"
         counter = defaultdict(int)
         for atom in cs.atom_list:
             counter[(atom.full_name, atom.symbol)] += 1

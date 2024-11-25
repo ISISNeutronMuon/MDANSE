@@ -494,6 +494,7 @@ class Atom(_ChemicalEntity):
         self._ghost = ghost
 
         self._index = kwargs.pop("index", None)
+        self._rdkit_index = -1
 
         self._parent = None
 
@@ -2490,7 +2491,7 @@ class ChemicalSystem(_ChemicalEntity):
             rdkit_atm.SetNumExplicitHs(0)
             rdkit_atm.SetNoImplicit(True)
 
-            self.rdkit_mol.AddAtom(rdkit_atm)
+            at._rdkit_index = self.rdkit_mol.AddAtom(rdkit_atm)
 
         self._total_number_of_atoms += chemical_entity.total_number_of_atoms
 
@@ -2509,9 +2510,9 @@ class ChemicalSystem(_ChemicalEntity):
         # there could be issues
         bonds_added = []
         for at_i in chemical_entity.atom_list:
-            i = at_i.index
+            i = at_i._rdkit_index
             for at_j in at_i.bonds:
-                j = at_j.index
+                j = at_j._rdkit_index
                 if i == j:
                     continue
                 bond_idxs = sorted([i, j])
@@ -2658,6 +2659,7 @@ class ChemicalSystem(_ChemicalEntity):
         :type List[Tuple[int]]: each element is a tuple of atom indices (int)
         """
 
+        self.rdkit_mol = Chem.RWMol()
         atom_names_before = [atom.name for atom in self.atoms]
         clusters = []
 
@@ -2700,6 +2702,11 @@ class ChemicalSystem(_ChemicalEntity):
             LOG.error(f"Atoms after: {atom_names_after}")
             raise RuntimeError(
                 "ChemicalSystem.rebuild() changed the order of atoms. This needs to be handled!"
+            )
+
+        if self.rdkit_mol.GetNumAtoms() != self._number_of_atoms:
+            LOG.error(
+                f"Chemical system has {self._number_of_atoms}, but {self.rdkit_mol.GetNumAtoms()} in the rdkit molecule."
             )
 
     def unique_molecules(self) -> List[str]:
@@ -2872,6 +2879,13 @@ class ChemicalSystem(_ChemicalEntity):
             self.add_chemical_entity(ce)
 
         self._bonds = list(bonds)
+        atom_list = self.atom_list
+        for bond in self._bonds:
+            self.rdkit_mol.AddBond(
+                atom_list[bond[0]]._rdkit_index,
+                atom_list[bond[1]]._rdkit_index,
+                Chem.BondType.UNSPECIFIED,
+            )
 
         if close_file:
             h5_file.close()
