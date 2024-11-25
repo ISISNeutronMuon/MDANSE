@@ -2453,6 +2453,8 @@ class ChemicalSystem(_ChemicalEntity):
 
         self.rdkit_mol = Chem.RWMol()
 
+        self._sorted_atom_list = None
+
     def __repr__(self):
         contents = []
         for key, value in self.__dict__.items():
@@ -2477,6 +2479,8 @@ class ChemicalSystem(_ChemicalEntity):
         """
         if not isinstance(chemical_entity, _ChemicalEntity):
             raise InvalidChemicalEntityError("Invalid type")
+
+        self._sorted_atom_list = None
 
         for at in chemical_entity.atom_list:
             at.index = self._number_of_atoms
@@ -2574,11 +2578,17 @@ class ChemicalSystem(_ChemicalEntity):
     @property
     def atom_list(self) -> list[Atom]:
         """List of all non-ghost atoms in the ChemicalSystem."""
+        if self._sorted_atom_list is not None:
+            return self._sorted_atom_list
         atom_list = []
         for ce in self._chemical_entities:
             atom_list.extend(ce.atom_list)
-
-        return atom_list
+        atom_indices = [at.index for at in atom_list]
+        sequence = np.argsort(atom_indices)
+        self._sorted_atom_list = [
+            atom_list[sorting_index] for sorting_index in sequence
+        ]
+        return self._sorted_atom_list
 
     @property
     def atoms(self) -> list[Atom]:
@@ -2658,6 +2668,8 @@ class ChemicalSystem(_ChemicalEntity):
         :param cluster_list: list of tuples of atom indices, one per cluster
         :type List[Tuple[int]]: each element is a tuple of atom indices (int)
         """
+
+        self._sorted_atom_list = None
 
         self.rdkit_mol = Chem.RWMol()
         atom_names_before = [atom.name for atom in self.atoms]
