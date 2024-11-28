@@ -14,14 +14,18 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
+import json
 
 import numpy as np
-from scipy.signal import correlate
+from copy import deepcopy
 
+import h5py
+
+from MDANSE.Chemistry.ChemicalEntity import AtomGroup
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Arithmetic import weight
-from MDANSE.Mathematics.Signal import get_spectrum, Filter1D
+from MDANSE.Mathematics.Signal import filter_map
 from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
+from MDANSE.MolecularDynamics.Trajectory import sorted_atoms, TrajectoryWriter
 from MDANSE.MLogging import LOG
 
 
@@ -30,7 +34,7 @@ class TrajectoryFilter(IJob):
     Design and apply a filter for the atomic trajectories.
     """
 
-    label = "TrajectoryFilter"
+    label = "Trajectory Filter"
 
     category = (
         "Analysis",
@@ -78,8 +82,8 @@ class TrajectoryFilter(IJob):
         },
     )
     settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
+        "OutputTrajectoryConfigurator",
+        {"format": "MDTFormat"},
     )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
@@ -91,115 +95,20 @@ class TrajectoryFilter(IJob):
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
-        instrResolution = self.configuration["instrument_resolution"]
-
-        self._outputData.add(
-            "time",
-            "LineOutputVariable",
-            self.configuration["frames"]["duration"],
-            units="ps",
-        )
-        self._outputData.add(
-            "time_window",
-            "LineOutputVariable",
-            instrResolution["time_window_positive"],
-            axis="time",
-            units="au",
-        )
-
-        self._outputData.add(
-            "omega", "LineOutputVariable", instrResolution["omega"], units="rad/ps"
-        )
-        self._outputData.add(
-            "romega", "LineOutputVariable", instrResolution["romega"], units="rad/ps"
-        )
-        self._outputData.add(
-            "omega_window",
-            "LineOutputVariable",
-            instrResolution["omega_window"],
-            axis="omega",
-            units="au",
-        )
-
-        for element in self.configuration["atom_selection"]["unique_names"]:
-            self._outputData.add(
-                "pacf_%s" % element,
-                "LineOutputVariable",
-                (self.configuration["frames"]["n_frames"],),
-                axis="time",
-                units="nm2",
-            )
-            self._outputData.add(
-                "filtpacf_%s" % element,
-                "LineOutputVariable",
-                (self.configuration["frames"]["n_frames"],),
-                axis="time",
-                units="nm2",
-            )
-            self._outputData.add(
-                "pps_%s" % element,
-                "LineOutputVariable",
-                (instrResolution["n_romegas"],),
-                axis="romega",
-                units="au",
-                main_result=True,
-                partial_result=True,
-            )
-            self._outputData.add(
-                "filtpps_%s" % element,
-                "LineOutputVariable",
-                (self.configuration["frames"]["n_frames"],),
-                axis="time",
-                units="nm2",
-            )
-        self._outputData.add(
-            "pacf_total",
-            "LineOutputVariable",
-            (self.configuration["frames"]["n_frames"],),
-            axis="time",
-            units="nm2",
-        )
-        self._outputData.add(
-            "filtpacf_total",
-            "LineOutputVariable",
-            (self.configuration["frames"]["n_frames"],),
-            axis="time",
-            units="nm2",
-        )
-        self._outputData.add(
-            "pps_total",
-            "LineOutputVariable",
-            (instrResolution["n_romegas"],),
-            axis="romega",
-            units="au"
-        )
-        self._outputData.add(
-            "filtpps_total",
-            "LineOutputVariable",
-            (self.configuration["frames"]["n_frames"],),
-            axis="time",
-            units="nm2",
-        )
-
-        # Trajectory filter
-        self._outputData.add(
-            "filter",
-            "LineOutputVariable",
-            (instrResolution["n_romegas"],),
-            axis="romega",
-            units="au",
-            main_result=True,
-        )
-
         self._atoms = sorted_atoms(
             self.configuration["trajectory"]["instance"].chemical_system.atom_list
         )
+        self._selected_atoms = []
+        for indexes in self.configuration["atom_selection"]["indexes"]:
+            for idx in indexes:
+                self._selected_atoms.append(self._atoms[idx])
+        self._selected_atoms = AtomGroup(self._selected_atoms)
 
-        self._trajectoryComponents = np.zeros_like(
+        self._trajectories = np.zeros_like(
             np.zeros(3*len(self._atoms)*len(self.configuration["frames"]["value"])).reshape((
                 len(self._atoms),
                 3,
-                len(self.configuration["frames"]["values"])
+                len(self.configuration["frames"]["value"])
             ))
         )
 
@@ -209,11 +118,6 @@ class TrajectoryFilter(IJob):
 
         :Parameters:
             #. index (int): The index of the step.
-        :Returns:
-            #. index (int): The index of the step.
-            #. atomicPPS (np.array): The calculated position power spectrum for atom of index=index
-            #. atomicPACF (np.array): The calculated position auto-correlation function for atom of index=index
-            #. filteredAtomicPACF (np.array): The position auto-correlation function for atom of index after application of the filter=index
         """
         LOG.debug(f"Running step: {index}")
         trajectory = self.configuration["trajectory"]["instance"]
@@ -229,17 +133,8 @@ class TrajectoryFilter(IJob):
             step=self.configuration["frames"]["step"],
         )
 
-        self._trajectoryComponents[index] = series.T
-
-        series = series - np.average(series, axis=0)
-
-        series = self.configuration["projection"]["projector"](series)
-
-        n_configs = self.configuration["frames"]["n_configs"]
-        atomicPACF = correlate(series, series[:n_configs], mode="valid") / (
-            3 * n_configs
-        )
-        return index, atomicPACF.T[0]
+        self._trajectories[index] = series.T
+        return index, None
 
     def combine(self, index, x):
         """
@@ -248,61 +143,61 @@ class TrajectoryFilter(IJob):
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """
-
-        # The symbol of the atom.
-        element = self.configuration["atom_selection"]["names"][index]
-
-        self._outputData["pacf_%s" % element] += x
+        pass
 
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        for element, number in nAtomsPerElement.items():
-            self._outputData["pacf_%s" % element][:] /= number
-            self._outputData["pps_%s" % element][:] = get_spectrum(
-                self._outputData["pacf_%s" % element],
-                self.configuration["instrument_resolution"]["time_window"],
-                self.configuration["instrument_resolution"]["time_step"],
-                fft="rfft",
-            )
+        # Get filter class and instantiate filter object
+        filter_config = json.loads(self.configuration["trajectory_filter"]['value'])
+        filter_class, filter_attributes = filter_map[filter_config["filter"]], filter_config["attributes"]
 
-        weights = self.configuration["weights"].get_weights()
-        self._outputData["pacf_total"][:] = weight(
-            weights,
-            self._outputData,
-            nAtomsPerElement,
-            1,
-            "pacf_%s",
-            update_partials=True,
-        )
-        self._outputData["pps_total"][:] = weight(
-            weights,
-            self._outputData,
-            nAtomsPerElement,
-            1,
-            "pps_%s",
-            update_partials=True,
+        filter = filter_class(**filter_attributes)
+
+        # Get trajectories from current instance chemical system
+        filtered_chemical_system = deepcopy(self.configuration["trajectory"]["instance"].chemical_system)
+
+        # Apply filter
+        filtered_coords = apply(filter, self._trajectories)
+
+        ### filtered_chemical_system._configuration.variables["coordinates"] = coords
+
+        # Create trajectory writer object
+        self._output_trajectory = TrajectoryWriter(
+            self.configuration["output_files"]["file"],
+            filtered_chemical_system,
+            self.numberOfSteps,
+            self._selected_atoms.atom_list,
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
-        self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
-            self._info,
-            self,
-        )
+        for t in range(filter_attributes["n_steps"]):
+            self._output_trajectory.dump_configuration(t, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"})
 
-        filter_class = self.configuration["trajectory_filter"].filter()
-        filter_attributes = self.configuration["trajectory_filter"].attributes()
-
-        trajectory_filter = filter_class(filter_attributes)
-
-        # --> write filtered trajectory using filter.apply()
-        # --> apply filter to power spectrum multiplicatively, ifft filtered power spectrum to pacf
-
-        # --> finally, write these to the output data
-
+        # The input trajectory is closed.
         self.configuration["trajectory"]["instance"].close()
+
+        # The output trajectory is closed.
+        self._output_trajectory.close()
+
+        outputFile = h5py.File(self.configuration["output_files"]["file"], "r+")
+
+        # Write filter attributes to output data
+        #outputFile.create_dataset("rms", data=self._rms, dtype=np.float64)
+
+        outputFile.close()
         super().finalize()
+
+def apply(filter, trajectories):
+    """
+
+    """
+    for atom in trajectories:
+        x, y, z = atom
+        for component in zip(x, y, z):
+            component = filter.apply(component)
+    return trajectories
+

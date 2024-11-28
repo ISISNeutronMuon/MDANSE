@@ -15,9 +15,7 @@
 #
 import json
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Mathematics.Signal import Butterworth, ChebyshevTypeI, ChebyshevTypeII, Elliptical, Bessel, Notch, Peak, Comb
-
-FILTERS = (Butterworth, ChebyshevTypeI, ChebyshevTypeII, Elliptical, Bessel, Notch, Peak, Comb)
+from MDANSE.Mathematics.Signal import filter_map
 
 class TrajectoryFilterConfigurator(IConfigurator):
     """This configurator allows the application of a filter to the trajectory of atoms in the simulation.
@@ -27,12 +25,10 @@ class TrajectoryFilterConfigurator(IConfigurator):
     _default : str
         The defaults selection setting.
     """
-
-    _filter = FILTERS[0]
-    _settings = dict()
+    _filter = tuple(filter_map.values())[0]
 
     @classmethod
-    def settings(cls, filter=_filter):
+    def filter_default_attributes(cls, filter=_filter):
         """Get the filter-specific settings dictionary for a filter class.
 
         Parameters
@@ -51,8 +47,10 @@ class TrajectoryFilterConfigurator(IConfigurator):
             settings_dict.update({setting: values["value"]})
         return settings_dict
 
+    _settings = filter_default_attributes.__func__(object())
+
     @classmethod
-    def get_json_string(cls) -> str:
+    def get_default(cls) -> str:
         """Return the default filter string.
 
         Returns
@@ -60,10 +58,10 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
             A string representation of the default filter settings dictionary
         """
-        return cls._json_string
+        return cls._default
 
     @staticmethod
-    def filter_description_string(filter=_filter, settings=settings.__func__(object())) -> str:
+    def filter_description_string(filter=_filter, settings=_settings) -> str:
         """Convert a filter class and filter settings dictionary to a string.
 
         Parameters
@@ -81,7 +79,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
         """
         return '{ "filter": "' + f'{filter.__name__}"' + ', ' + '"attributes": ' + f'{json.dumps(settings)}' + '}'
 
-    _json_string = filter_description_string()
+    _default = filter_description_string()
 
     @property
     def settings(self):
@@ -99,7 +97,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
     def filter(self, name):
         self._filter = name
 
-    def configure(self, value: dict) -> None:
+    def configure(self, value: str):
         """Configure an input value.
 
         Parameters
@@ -107,5 +105,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
         value : str
             The selection setting in a json readable format.
         """
-        settings = value
+        print(f"Configuring {value}")
+        self.settings = value
+        self["value"] = self.settings
 
