@@ -1,3 +1,15 @@
+version 2.0.0b3 - 2024-12-06
+--------------------------
+* ADDED output blocking for open files in the GUI
+* ADDED MDAnalysis trajectory converter
+* ADDED GUI notifications from tabs with new contents
+* FIXED several GUI performance issues
+* FIXED VASP converter for alternative XDATCAR formats
+* ADDED setting atom charges using TrajectoryEditor
+* FIXED system locale interfering with floating point number input
+* ADDED trajectory chunking input for improved time correlation performance
+* FIXED frame number updating on trajectory change in 3D view
+
 version 2.0.0b1 - 2024-10-15
 --------------------------
 * ADDED van Hove functions (self function and distinct function)
