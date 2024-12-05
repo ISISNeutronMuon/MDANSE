@@ -27,7 +27,7 @@ source mdanse_env/bin/activate
 ```
 in a bash console, or
 ```
-mdanse_end/Scripts/activate.bat
+mdanse_env\Scripts\activate.bat
 ```
 if you are using cmd.exe on Windows.
 

@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE"
-version = "2.0.0b2"
+version = "2.0.0b3"
 description = 'MDANSE Core package - Molecular Dynamics trajectory handling and analysis code'
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.13"
 license = {file = "LICENSE"}
 keywords = ["molecular dynamics", "science", "simulation", "analysis"]
 authors = [
