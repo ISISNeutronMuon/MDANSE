@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
-from functools import partial
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget
@@ -55,14 +54,14 @@ class InstrumentTab(GeneralTab):
         try:
             self._view.load_from_file(builtin_file, keep_backups=True)
         except Exception as e:
-            LOG.error(f"Could not load instruments from {builtin_file}: {e}")
+            LOG.warning(f"Could not load instruments from {builtin_file}: {e}")
         filename = os.path.join(
             PLATFORM.application_directory(), "InstrumentDefinitions.toml"
         )
         try:
             self._view.load_from_file(filename)
         except Exception as e:
-            LOG.error(f"Could not load instruments from {filename}: {e}")
+            LOG.warning(f"Could not load instruments from {filename}: {e}")
         for instrument in self._model._nodes.values():
             if instrument is not None:
                 instrument.update_item()
