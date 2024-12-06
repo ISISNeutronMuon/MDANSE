@@ -64,6 +64,7 @@ class MolecularViewer(QtWidgets.QWidget):
     """This class implements a molecular viewer."""
 
     new_max_frames = Signal(int)
+    new_current_frames = Signal(int)
 
     def __init__(self):
         super(MolecularViewer, self).__init__()
@@ -148,6 +149,8 @@ class MolecularViewer(QtWidgets.QWidget):
         )
         self.reset_camera = True
         self.clear_trajectory()
+
+        self.new_current_frames.emit(self._datamodel._current_frame)
 
         self._n_atoms = self._datamodel._num_atoms
         self._n_frames = self._datamodel._max_frame + 1

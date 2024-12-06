@@ -31,11 +31,6 @@ from qtpy.QtWidgets import (
     QGroupBox,
     QCheckBox,
 )
-from qtpy.QtGui import (
-    QPaintEvent,
-    QPainter,
-    QColor,
-)
 
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
@@ -96,7 +91,7 @@ QSpinBox::down-button  {
 class ViewerControls(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
-        layout = QGridLayout(self)
+        _ = QGridLayout(self)
         self._viewer = None
         self._buttons = {}
         self._delegates = {}
@@ -142,6 +137,7 @@ class ViewerControls(QWidget):
         viewer.new_max_frames.connect(self._frame_slider.setMaximum)
         viewer.new_max_frames.connect(self._frame_selector.setMaximum)
         viewer.new_max_frames.connect(self.stop_animation)
+        viewer.new_current_frames.connect(self._frame_slider.setValue)
         viewer._atom_details_widget = self._atom_details
         for column_number in range(3):
             self._atom_details.resizeColumnToContents(column_number)
