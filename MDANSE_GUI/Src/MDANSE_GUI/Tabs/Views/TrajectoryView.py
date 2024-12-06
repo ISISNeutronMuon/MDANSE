@@ -26,6 +26,7 @@ from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 class TrajectoryView(QListView):
     item_details = Signal(tuple)
     item_name = Signal(str)
+    trajectory_state = Signal(object)
     error = Signal(str)
 
     def __init__(self, *args, **kwargs):
@@ -62,6 +63,8 @@ class TrajectoryView(QListView):
         node_number = model.itemFromIndex(index).data()
         trajectory = model._nodes[node_number]
         self.item_details.emit(trajectory)
+        trajectory_state = model._extra_nodes[node_number]
+        self.trajectory_state.emit(trajectory_state)
 
     def connect_to_visualiser(self, visualiser: Union[View3D, TrajectoryInfo]) -> None:
         """Connect to a visualiser.

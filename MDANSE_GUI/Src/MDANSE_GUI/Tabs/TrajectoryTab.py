@@ -24,7 +24,7 @@ from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInput
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
+from MDANSE_GUI.Tabs.Models.TrajectoryHolder import TrajectoryHolder
 from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
@@ -80,7 +80,7 @@ class TrajectoryTab(GeneralTab):
             window,
             name="Trajectories",
             session=LocalSession(),
-            model=GeneralModel(),
+            model=TrajectoryHolder(),
             view=TrajectoryView(),
             visualiser=View3D(MolecularViewer()),
             layout=partial(MultiPanel, left_panels=[TrajectoryInfo()]),
@@ -104,12 +104,13 @@ class TrajectoryTab(GeneralTab):
             session=session,
             settings=settings,
             logger=logger,
-            model=kwargs.get("model", GeneralModel()),
+            model=kwargs.get("model", TrajectoryHolder()),
             view=TrajectoryView(),
             visualiser=View3D(MolecularViewer()),
             layout=partial(MultiPanel, left_panels=[TrajectoryInfo()]),
             label_text=label_text,
         )
+        the_tab._view.trajectory_state.connect(the_tab._visualiser.set_data_model)
         return the_tab
 
 

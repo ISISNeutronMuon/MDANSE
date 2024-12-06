@@ -88,3 +88,4 @@ class GeneralModel(QStandardItemModel):
             super().removeRow(row, parent)
         self.mutex.unlock()
         self.summarise_items()
+        return node_number

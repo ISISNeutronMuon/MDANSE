@@ -27,13 +27,10 @@ from vtk.util import numpy_support
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
 
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
-from MDANSE.Chemistry import ATOMS_DATABASE as CHEMICAL_ELEMENTS
 from MDANSE.MLogging import LOG
 
-from MDANSE_GUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.MolecularViewer.Dummy import PyConnectivity
-from MDANSE_GUI.MolecularViewer.Contents import TrajectoryAtomData
+from MDANSE_GUI.MolecularViewer.Contents import TrajectoryState
 from MDANSE_GUI.MolecularViewer.AtomProperties import (
     AtomProperties,
     ndarray_to_vtkarray,
@@ -134,8 +131,6 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._surface = None
 
-        self._reader = None
-
         self._current_frame = 0
 
         self._colour_manager = AtomProperties()
@@ -143,18 +138,32 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.reset_camera = False
 
-    def setDataModel(self, datamodel: TrajectoryAtomData):
+    @Slot(object)
+    def set_data_model(self, datamodel: TrajectoryState):
+        if self._datamodel is not None:
+            if datamodel._identifier == self._datamodel._identifier:
+                return
         self._datamodel = datamodel
+        self.reset_camera = True
+        self.clear_trajectory()
 
-    def _new_trajectory_object(self, fname: str, data: HDFTrajectoryInputData):
-        reader = hdf5wrapper.HDF5Wrapper(fname, data.trajectory, data.chemical_system)
-        self.set_reader(reader)
+        self._n_atoms = self._datamodel._num_atoms
+        self._n_frames = self._datamodel._max_frame + 1
+        self._current_frame = self._datamodel._current_frame
 
-    @Slot(str)
-    def _new_trajectory(self, fname: str):
-        data = HDFTrajectoryInputData(fname)
-        reader = hdf5wrapper.HDF5Wrapper(fname, data.trajectory, data.chemical_system)
-        self.set_reader(reader)
+        self._atoms = self._datamodel.atom_types
+
+        # Hack for reducing objects resolution when the system is big
+        self._resolution = int(np.sqrt(3000000.0 / self._n_atoms))
+        self._resolution = 10 if self._resolution > 10 else self._resolution
+        self._resolution = 4 if self._resolution < 4 else self._resolution
+
+        scalars = self._datamodel.scalars_for_vtk()
+
+        self.reset_all_polydata()
+        self._polydata.GetPointData().SetScalars(scalars)
+
+        self.new_max_frames.emit(self._n_frames - 1)
 
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
@@ -176,14 +185,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._polydata is None or self._datamodel is None:
             return
 
-        # we need to add the new colours to LUT
-        # then assign new colour NUMBERS to _atom_colours
-
-        # we also need to assign new atom radii to _atom_scales
-
-        scalars = ndarray_to_vtkarray(
-            self._atom_colours, self._atom_scales, self._n_atoms
-        )
+        scalars = self._datamodel.scalars_for_vtk()
 
         self._polydata.GetPointData().SetScalars(scalars)
 
@@ -199,8 +201,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
         LOG.info("Computing isosurface ...")
 
-        initial_coords = self._reader.read_frame(0)
-        coords, lower_bounds, upper_bounds = self._reader.read_atom_trajectory(index)
+        initial_coords = self._datamodel.read_frame(0)
+        coords, lower_bounds, upper_bounds = self._datamodel.read_atom_trajectory(index)
         spacing, self._atomic_trace_histogram = histogram_3d(
             coords, lower_bounds, upper_bounds, 100, 100, 100
         )
@@ -348,7 +350,7 @@ class MolecularViewer(QtWidgets.QWidget):
         """Clears the Molecular Viewer panel"""
         self.clear_trajectory()
 
-        self._reader = None
+        self._datamodel = None
 
         # set everything to some empty/zero value
         self._n_atoms = 0
@@ -373,7 +375,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_uc_polydata()
 
     def update_polydata(self):
-        coords = self._reader.read_frame(self._current_frame)
+        coords = self._datamodel.get_coordinates(self._current_frame)
 
         if self._atoms_visible or self._bonds_visible:
             atoms = vtk.vtkPoints()
@@ -433,7 +435,7 @@ class MolecularViewer(QtWidgets.QWidget):
         return bonds, len(ls) > 0
 
     def update_uc_polydata(self):
-        uc = self._reader.read_pbc(self._current_frame)
+        uc = self._datamodel.get_unit_cell(self._current_frame)
         if self._cell_visible and uc is not None:
             # update the unit cell
             a = uc.a_vector
@@ -592,10 +594,10 @@ class MolecularViewer(QtWidgets.QWidget):
         @param frame: the configuration number
         @type frame: integer
         """
-        if self._reader is None:
+        if self._datamodel is None:
             return False
 
-        self._current_frame = frame % self._reader.n_frames
+        self._current_frame = frame
 
         # update the atoms
         self.update_all_polydata()
@@ -603,82 +605,16 @@ class MolecularViewer(QtWidgets.QWidget):
         # Update the view.
         self.update_renderer()
 
-    def set_reader(self, reader):
-        """Set the trajectory at a given frame
-
-        Args:
-            reader (IReader): the trajectory object
-        """
-
-        if (self._reader is not None) and (reader.filename == self._reader.filename):
-            return
-
-        self.reset_camera = True
-        self.clear_trajectory()
-
-        self._reader = reader
-
-        self._n_atoms = self._reader.n_atoms
-        self._n_frames = self._reader.n_frames
-        self._current_frame = min(self._current_frame, self._n_frames - 1)
-
-        self._atoms = self._reader.atom_types
-
-        # Hack for reducing objects resolution when the system is big
-        self._resolution = int(np.sqrt(3000000.0 / self._n_atoms))
-        self._resolution = 10 if self._resolution > 10 else self._resolution
-        self._resolution = 4 if self._resolution < 4 else self._resolution
-
-        self._atom_colours = self._colour_manager.reinitialise_from_database(
-            self._atoms, CHEMICAL_ELEMENTS, self.dummy_size
-        )
-        # this returns a list of indices, mapping colours to atoms
-
-        self._atom_scales = np.array(
-            [
-                CHEMICAL_ELEMENTS.get_atom_property(at, "vdw_radius")
-                for at in self._atoms
-            ]
-        ).astype(np.float32)
-        self.du_log = np.array(
-            [
-                CHEMICAL_ELEMENTS.get_atom_property(at, "element") != "dummy"
-                for at in self._reader.atom_types
-            ]
-        )
-        self.not_du = np.array(
-            [
-                i
-                for i, at in enumerate(self._reader.atom_types)
-                if CHEMICAL_ELEMENTS.get_atom_property(at, "element") != "dummy"
-            ]
-        )
-        self.covs = np.array(
-            [
-                CHEMICAL_ELEMENTS.get_atom_property(at, "covalent_radius")
-                for at in self._reader.atom_types
-            ]
-        )
-
-        scalars = ndarray_to_vtkarray(
-            self._atom_colours, self._atom_scales, self._n_atoms
-        )
-
-        self.reset_all_polydata()
-        self._polydata.GetPointData().SetScalars(scalars)
-
-        self._colour_manager.onNewValues()
-        self.new_max_frames.emit(self._n_frames - 1)
-
     @Slot(object)
     def take_atom_properties(self, data):
-        colours, radii, numbers = data
-        scalars = ndarray_to_vtkarray(colours, radii, numbers)
+        if self._datamodel is None:
+            return
+        self._datamodel.take_atom_properties(data)
+        scalars = self._datamodel.scalars_for_vtk()
         self._polydata = vtk.vtkPolyData()
         self._polydata.GetPointData().SetScalars(scalars)
         self.update_all_polydata()
         self.update_renderer()
-        # self._datamodel.setReader(reader)
 
     def update_renderer(self):
         """
@@ -727,7 +663,7 @@ class MolecularViewerWithPicking(MolecularViewer):
     def on_pick(self, obj, event=None):
         """Event handler when an atom is mouse-picked with the left mouse button"""
 
-        if not self._reader:
+        if not self._datamodel:
             return
 
         if self._picking_domain is None:
@@ -746,13 +682,13 @@ class MolecularViewerWithPicking(MolecularViewer):
             return
 
         picked_pos = np.array(picker.GetPickPosition())
-        coords = self._reader.read_frame(self._current_frame)
+        coords = self._datamodel.read_frame(self._current_frame)
         _, idx = KDTree(coords).query(picked_pos)
         self.on_pick_atom(idx)
 
     def on_pick_atom(self, picked_atom):
         """Change the color of a selected atom"""
-        if self._reader is None:
+        if self._datamodel is None:
             return
 
         if picked_atom < 0 or picked_atom >= self._n_atoms:
@@ -780,7 +716,7 @@ class MolecularViewerWithPicking(MolecularViewer):
             return
 
         picked = np.array(sorted(list(self.picked_atoms)))
-        coords = self._reader.read_frame(self._current_frame)
+        coords = self._datamodel.read_frame(self._current_frame)
         atoms.SetData(numpy_support.numpy_to_vtk(coords[picked]))
         self._picked_polydata.SetPoints(atoms)
 
