@@ -56,6 +56,7 @@ class TrajectoryView(QListView):
         index = self.currentIndex()
         model.removeRow(index.row())
         self.item_details.emit(("", None))
+        self.trajectory_state.emit(None)
 
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):

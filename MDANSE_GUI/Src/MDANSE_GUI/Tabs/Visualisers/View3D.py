@@ -38,6 +38,7 @@ class View3D(QWidget):
 
     @Slot(tuple)
     def update_panel(self, data: tuple):
+        return
         fullpath, incoming = data
         if fullpath == "" or data is None:
             self._viewer.clear_panel()

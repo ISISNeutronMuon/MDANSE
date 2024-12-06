@@ -142,10 +142,9 @@ class ViewerControls(QWidget):
         viewer.new_max_frames.connect(self._frame_slider.setMaximum)
         viewer.new_max_frames.connect(self._frame_selector.setMaximum)
         viewer.new_max_frames.connect(self.stop_animation)
-        self._atom_details.setModel(viewer._colour_manager)
+        viewer._atom_details_widget = self._atom_details
         for column_number in range(3):
             self._atom_details.resizeColumnToContents(column_number)
-        viewer._colour_manager.new_atom_properties.connect(viewer.take_atom_properties)
 
     def createButtons(self, orientation: Qt.Orientation):
         """Create a bar with video player buttons for controlling the

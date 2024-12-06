@@ -72,14 +72,14 @@ class TrajectoryState:
         self.not_du = np.array(
             [
                 i
-                for i, at in enumerate(self._reader.atom_types)
+                for i, at in enumerate(self._atoms)
                 if CHEMICAL_ELEMENTS.get_atom_property(at, "element") != "dummy"
             ]
         )
         self.covs = np.array(
             [
                 CHEMICAL_ELEMENTS.get_atom_property(at, "covalent_radius")
-                for at in self._reader.atom_types
+                for at in self._atoms
             ]
         )
 

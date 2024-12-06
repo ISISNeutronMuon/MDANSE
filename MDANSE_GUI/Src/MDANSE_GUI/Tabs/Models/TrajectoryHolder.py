@@ -16,7 +16,7 @@
 
 from qtpy.QtCore import Slot, Signal, QModelIndex
 
-from MDANSE_GUI.Tabs.Models import GeneralModel
+from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.MolecularViewer.Contents import TrajectoryState
 
 
@@ -25,14 +25,14 @@ class TrajectoryHolder(GeneralModel):
     trajectory_state = Signal(object)
 
     def __init__(self, *args, **kwargs):
-        super().init(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._extra_nodes = {}
 
     @Slot(tuple)
     def append_object(self, input: tuple):
         thing, label = input
-        retval = super().append_object(tuple)
-        self._extra_nodes[retval] = TrajectoryState(thing)
+        retval = super().append_object(input)
+        self._extra_nodes[retval] = TrajectoryState(filename=thing[0])
         return retval
 
     def removeRow(self, row: int, parent: QModelIndex = None):

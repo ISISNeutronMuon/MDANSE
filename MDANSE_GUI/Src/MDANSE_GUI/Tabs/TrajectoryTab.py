@@ -110,7 +110,9 @@ class TrajectoryTab(GeneralTab):
             layout=partial(MultiPanel, left_panels=[TrajectoryInfo()]),
             label_text=label_text,
         )
-        the_tab._view.trajectory_state.connect(the_tab._visualiser.set_data_model)
+        the_tab._view.trajectory_state.connect(
+            the_tab._visualiser._viewer.set_data_model
+        )
         return the_tab
 
 

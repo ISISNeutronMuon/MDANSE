@@ -122,8 +122,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._cell_visible = True
 
         self._iren.Initialize()
-
-        self._atoms = []
+        self._atom_details_widget = None
 
         self._polydata = None
         self._polydata_bonds_exist = False
@@ -133,7 +132,6 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._current_frame = 0
 
-        self._colour_manager = AtomProperties()
         self.dummy_size = 0.0
 
         self.reset_camera = False
@@ -144,14 +142,16 @@ class MolecularViewer(QtWidgets.QWidget):
             if datamodel._identifier == self._datamodel._identifier:
                 return
         self._datamodel = datamodel
+        self._atom_details_widget.setModel(self._datamodel._atom_properties)
+        self._datamodel._atom_properties.new_atom_properties.connect(
+            self.take_atom_properties
+        )
         self.reset_camera = True
         self.clear_trajectory()
 
         self._n_atoms = self._datamodel._num_atoms
         self._n_frames = self._datamodel._max_frame + 1
         self._current_frame = self._datamodel._current_frame
-
-        self._atoms = self._datamodel.atom_types
 
         # Hack for reducing objects resolution when the system is big
         self._resolution = int(np.sqrt(3000000.0 / self._n_atoms))
@@ -288,7 +288,7 @@ class MolecularViewer(QtWidgets.QWidget):
         else:
             line_mapper.SetInputData(polydata)
 
-        line_mapper.SetLookupTable(self._colour_manager._lut)
+        line_mapper.SetLookupTable(self._datamodel._atom_properties._lut)
         line_mapper.ScalarVisibilityOn()
         line_mapper.ColorByArrayComponent("scalars", 1)
         line_actor = vtk.vtkLODActor()
@@ -318,7 +318,7 @@ class MolecularViewer(QtWidgets.QWidget):
         glyph.SetSourceConnection(sphere.GetOutputPort())
         glyph.SetIndexModeToScalar()
         sphere_mapper = vtk.vtkPolyDataMapper()
-        sphere_mapper.SetLookupTable(self._colour_manager._lut)
+        sphere_mapper.SetLookupTable(self._datamodel._atom_properties._lut)
         sphere_mapper.SetScalarRange(polydata.GetScalarRange())
         sphere_mapper.SetInputConnection(glyph.GetOutputPort())
         sphere_mapper.ScalarVisibilityOn()
@@ -356,15 +356,15 @@ class MolecularViewer(QtWidgets.QWidget):
         self._n_atoms = 0
         self._n_frames = 0
         self.new_max_frames.emit(0)
-        self._atoms = []
-        self._atom_colours = []
         self._current_frame = 0
         self.reset_all_polydata()
 
         self.update_renderer()
 
         # clear the atom properties table
-        self._colour_manager.removeRows(0, self._colour_manager.rowCount())
+        self._datamodel._atom_properties.removeRows(
+            0, self._datamodel._atom_properties.rowCount()
+        )
 
     def reset_all_polydata(self):
         self._polydata = vtk.vtkPolyData()
@@ -384,9 +384,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
         if self._bonds_visible:
             # do not bond atoms to dummy atoms
-            rs = coords[self.not_du]
+            rs = coords[self._datamodel.not_du]
             bonds, bonds_exist = self.create_bond_cell_array(
-                rs, self.covs[self.not_du], self.not_du
+                rs, self._datamodel.covs[self._datamodel.not_du], self._datamodel.not_du
             )
             if bonds_exist:
                 self._polydata.SetLines(bonds)
@@ -721,17 +721,17 @@ class MolecularViewerWithPicking(MolecularViewer):
         self._picked_polydata.SetPoints(atoms)
 
         scalars = ndarray_to_vtkarray(
-            self._colour_manager.colours[picked],
-            self._colour_manager.radii[picked],
+            self._datamodel._atom_properties.colours[picked],
+            self._datamodel._atom_properties.radii[picked],
             np.arange(len(self.picked_atoms)),
         )
         self._picked_polydata.GetPointData().SetScalars(scalars)
 
-        not_du = np.arange(len(self.picked_atoms))[self.du_log[picked]]
+        not_du = np.arange(len(self.picked_atoms))[self._datamodel.du_log[picked]]
         if self._bonds_visible and len(not_du) >= 1:
             # do not bond atoms to dummy atoms
             rs = coords[picked][not_du]
-            covs = self.covs[picked][not_du]
+            covs = self._datamodel.covs[picked][not_du]
 
             bonds, bonds_exist = self.create_bond_cell_array(rs, covs, not_du)
             if bonds_exist:
