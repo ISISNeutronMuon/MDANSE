@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import numpy
 import numpy as np
 from enum import Enum
 from collections import namedtuple
@@ -496,33 +496,34 @@ class Filter:
         denominator_str = Filter.polynomial_string(denominator, cls.Z)
         return {"unit": 'Z', "numerator": numerator_str, "denominator": denominator_str}
 
-    @staticmethod
-    def seconds_to_picoseconds(s: float | np.ndarray) -> float | np.ndarray:
-        """Convert picohertz to hertz
+    def attributes_to_string(self, description):
+        """
 
         """
-        return s * 1e12
+        settings = self.__class__.__dict__["default_settings"]
+        for setting in settings.keys():
+            description.append(f"  # {setting}\n  {settings[setting]["description"]}\n      {self.__dict__[setting]}\n\n")
 
-    @staticmethod
-    def picoseconds_to_seconds(ps: float | np.ndarray) -> float | np.ndarray:
-        """Convert picohertz to hertz
+    def __str__(self):
+        """
 
         """
-        return ps * 1e-12
+        string_representation = [
+            f"Trajectory filter of type {self.__class__.__name__} implemented with the following parameters:\n\n",
+            f"  # sample_freq\n  Reciprocal of the molecular dynamics time step, in picohertz\n      {self.__dict__["_sample_freq"]}\n\n",
+            f"  # freq_response (analog)\n  N coefficients of analog filter transfer function, numerator and denominator (multiples of {Filter.S}^(N-n))\n      {tuple(self.__dict__["_coeffs"].numerator), tuple(self.__dict__["_coeffs"].denominator)}\n\n",
+            f"  # freq_response (digital)\n  M coefficients of digital filter transfer function, numerator and denominator (multiples of {Filter.Z}^(-m))\n      {tuple(self.__dict__["_coeffs"].numerator), tuple(self.__dict__["_coeffs"].denominator)}\n\n",
+        ]
 
-    @staticmethod
-    def hertz_to_picohertz(pHz: float | np.ndarray) -> float | np.ndarray:
-        """Convert picohertz to hertz
+        self.attributes_to_string(string_representation)
+
+        return "".join(string_representation)
+
+    def to_json(self):
+        """
 
         """
-        return pHz * 1e12
-
-    @staticmethod
-    def picohertz_to_hertz(hz: float | np.ndarray) -> float | np.ndarray:
-        """Convert picohertz to hertz
-
-        """
-        return hz * 1e-12
+        return {"Filter": self.__class__.__name__} | {k:v for k, v in self.__dict__.items() if k != "_freq_response"}
 
     @classmethod
     def freq_to_energy(cls, freq: float | np.ndarray) -> float | np.ndarray:
@@ -550,13 +551,16 @@ class Butterworth(Filter):
         """
         cls.default_settings = {
             "order": {
+                "description": "The order of the filter",
                 "value": 1
             },
             "attenuation_type": {
+                "description": "Filter attenuation type",
                 "values": {"lowpass", "highpass", "bandpass", "bandstop"},
                 "value": "lowpass"
             },
             "cutoff_freq": {
+                "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
                 "value": DEFAULT_FILTER_CUTOFF
             }
         }
@@ -581,16 +585,20 @@ class ChebyshevTypeI(Filter):
         """
         cls.default_settings = {
             "order": {
+                "description": "The order of the filter",
                 "value": 1
             },
             "max_ripple": {
+                "description": "Decibel measure of maximum ripple allowed below unit gain in the passband",
                 "value": 5.0
             },
             "attenuation_type": {
+                "description": "Filter attenuation type",
                 "values": {"lowpass", "highpass", "bandpass", "bandstop"},
                 "value": "lowpass"
             },
             "cutoff_freq": {
+                "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
                 "value": DEFAULT_FILTER_CUTOFF
             }
         }
@@ -615,16 +623,20 @@ class ChebyshevTypeII(Filter):
         """
         cls.default_settings = {
             "order": {
+                "description": "The order of the filter",
                 "value": 1
             },
             "min_attenuation": {
+                "description": "Decibel measure of minimum attenuation required in the stopband",
                 "value": 20.0
             },
             "attenuation_type": {
+                "description": "Filter attenuation type",
                 "values": {"lowpass", "highpass", "bandpass", "bandstop"},
                 "value": "lowpass"
             },
             "cutoff_freq": {
+                "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
                 "value": DEFAULT_FILTER_CUTOFF
             }
         }
@@ -649,19 +661,24 @@ class Elliptical(Filter):
         """
         cls.default_settings = {
             "order": {
+                "description": "The order of the filter",
                 "value": 1
             },
             "max_ripple": {
+                "description": "Decibel measure of maximum ripple allowed below unit gain in the passband",
                 "value": 5.0
             },
             "min_attenuation": {
+                "description": "Decibel measure of minimum attenuation required in the stopband",
                 "value": 20.0
             },
             "attenuation_type": {
+                "description": "Filter attenuation type",
                 "values": {"lowpass", "highpass", "bandpass", "bandstop"},
                 "value": "lowpass"
             },
             "cutoff_freq": {
+                "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
                 "value": DEFAULT_FILTER_CUTOFF
             }
         }
@@ -686,17 +703,21 @@ class Bessel(Filter):
         """
         cls.default_settings = {
             "order": {
+                "description": "The order of the filter",
                 "value": 1
             },
             "norm": {
+                "description": "Filter normalization results in the following behaviour at cutoff - phase: phase response obtains midpoint - delay: group delay in passband is the reciprocal of cutoff - mag: gain magnitude is -3 dB",
                 "values": {"phase", "delay", "mag"},
                 "value": "phase"
             },
             "attenuation_type": {
+                "description": "Filter attenuation type",
                 "values": {"lowpass", "highpass", "bandpass", "bandstop"},
                 "value": "lowpass"
             },
             "cutoff_freq": {
+                "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
                 "value": DEFAULT_FILTER_CUTOFF
             }
         }
@@ -720,9 +741,11 @@ class Notch(Filter):
         """
         cls.default_settings = {
             "fundamental_freq": {
+                "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
                 "value": DEFAULT_FILTER_CUTOFF
             },
             "quality_factor": {
+                "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
                 "value": 1.0
             }
         }
@@ -746,9 +769,11 @@ class Peak(Filter):
         """
         cls.default_settings = {
             "fundamental_freq": {
+                "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
                 "value": DEFAULT_FILTER_CUTOFF
             },
             "quality_factor": {
+                "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
                 "value": 1.0
             }
         }
@@ -772,16 +797,20 @@ class Comb(Filter):
         """
         cls.default_settings = {
             "fundamental_freq": {
+                "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
                 "value": DEFAULT_FILTER_CUTOFF
             },
             "quality_factor": {
+                "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
                 "value": 1.0
             },
             "comb_type": {
+                "description": "Determines whether quality factor applies to notches or peaks",
                 "values": {"peak", "notch"},
                 "value": "notch"
             },
             "pass_zero": {
+                "description": "Determines whether notches or peaks centered on integer multiples of fundamental frequency",
                 "values": {True, False},
                 "value":  False
             }
@@ -800,26 +829,123 @@ FILTERS = (Butterworth, ChebyshevTypeI, ChebyshevTypeII, Elliptical, Bessel, Not
 filter_map = {filter_class.__name__: filter_class for filter_class in FILTERS}
 
 if __name__=="__main__":
-    filter_class = filter_map["Butterworth"]
+    filter_class = filter_map["ChebyshevTypeI"]
+    filter_class.set_defaults()
 
-    w0 = 2 * np.pi * 1.5
-    a0 = 20.0
+    import os
+    os.chdir('..\\..\\..\\')
 
-    w1 = 2 * np.pi * 60.0
-    a1 = 5.0
+    data = numpy.loadtxt("Tests\\UnitTests\\TrajectoryFilter\\methane_hydrogen_position.csv")
 
-    t = np.linspace(0, 20, 10000)
-    x = a0 * np.sin(w0*t) + a1 * np.sin(w1*t)
+    N = 10000
+    fs = 200.0
+
+    pre_filter_freqs = {
+         "h": fftpack.fft(data),
+         "w": fftpack.fftfreq(N, d=1/fs)
+    }
+
+    pre_w = pre_filter_freqs["w"][:np.int32(N/2)]
+    dw = pre_w[1] - pre_w[0]
+    pre_amplitudes = (2 * (np.abs(pre_filter_freqs["h"])) / N)[:np.int32(N/2)]
+
+    import matplotlib.pyplot as plt
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(pre_w, pre_amplitudes, label="pre-filter")
+    plt.show()
+
+    f = filter_class(**{
+        "n_steps": 10000,
+        "time_step_ps": 0.005,
+        "order": 2,
+        "attenuation_type": "highpass",
+        "cutoff_freq": 25.0,
+        "max_ripple": 1.0
+    })
+
+    data1 = f.apply(data)
+
+    post_filter_freqs = {
+        "h": fftpack.fft(data1),
+        "w": fftpack.fftfreq(N, d=1/fs)
+    }
+
+    post_w = post_filter_freqs["w"][:np.int32(N/2)]
+    post_amplitudes = (2 * (np.abs(post_filter_freqs["h"])) / N)[:np.int32(N/2)]
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(post_w, post_amplitudes, label="post-filter")
+    plt.show()
+
+    # w0 = 2 * np.pi * 1.5
+    # a0 = 20.0
+    #
+    # w1 = 2 * np.pi * 60.0
+    # a1 = 5.0
+    #
+    # N = 10000
+    # t = np.linspace(0, 20, N)
+    # fs = (t[1] - t[0])**(-1)
+    # x0 = a0 * np.sin(w0*t) + a1 * np.sin(w1*t)
+    #
+    # pre_filter_freqs = {
+    #     "h": fftpack.fft(x0),
+    #     "w": fftpack.fftfreq(N, d=1/fs)
+    # }
+    #
+    # pre_w = pre_filter_freqs["w"][:np.int32(N/2)]
+    # dw = pre_w[1] - pre_w[0]
+    # pre_amplitudes = (2 * (np.abs(pre_filter_freqs["h"])) / N)[:np.int32(N/2)]
 
     import matplotlib.pyplot as plt
     plt.figure(figsize=(10, 6))
-    plt.plot(t, x, label="pre-filter")
+    # plt.plot(pre_w, pre_amplitudes, label="pre-filter")
     plt.show()
 
-    f = filter_class(**{"attenuation_type": "highpass", "order": 1, "cutoff_freq": 0.5*w1, "time_step_ps": 0.002, "n_steps": len(t)})
+    #import matplotlib.pyplot as plt
+    #plt.figure(figsize=(10, 6))
+    #plt.plot(t, x, label="pre-filter")
+    #plt.show()
 
+    #f = filter_class(**{
+    #    "attenuation_type": "lowpass",
+    #    "order": 1,
+    #    "cutoff_freq": 60.0,
+    #    "time_step_ps": 1/fs,
+    #    "n_steps": N}
+    #)
+
+    #x1 = f.apply(x0)
+
+    #post_filter_freqs = {
+    #    "h": fftpack.fft(x1),
+    #    "w": fftpack.fftfreq(N, d=1/fs)
+    #}
+
+#    post_w = post_filter_freqs["w"][:np.int32(N/2)]
+#    post_amplitudes = (2 * (np.abs(post_filter_freqs["h"])) / N)[:np.int32(N/2)]
+
+    import matplotlib.pyplot as plt
     plt.figure(figsize=(10, 6))
-    plt.plot(t, f.apply(x), label="post-filter")
+    #plt.plot(post_w, post_amplitudes, label="post-filter")
     plt.show()
 
+    #s = f.__str__()
+    #r = f.__repr__()
 
+
+
+    #plt.figure(figsize=(10, 6))
+    #plt.plot(t, f.apply(x), label="post-filter")
+    #plt.show()
+
+    #string_representation = [
+    #    f"Trajectory filter of type {1.0} implemented with the following parameters:\n\n",
+    #    f"  # sample_freq\n  Reciprocal of the molecular dynamics time step, in picohertz\n      {2.0}\n\n",
+    #    f"  # Sample frequency\n  Reciprocal of the molecular dynamics time step in picohertz\n      {3.0}\n\n",
+    #]
+
+    #string_representation.append(f"  # Cutoff frequency\n  Reciprocal of the molecular dynamics time step in picohertz\n      {4.0}\n\n")
+
+    #print("".join(string_representation))

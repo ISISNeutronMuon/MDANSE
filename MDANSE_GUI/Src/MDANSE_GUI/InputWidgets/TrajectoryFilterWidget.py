@@ -203,6 +203,7 @@ class FilterDesigner(QDialog):
         widget = None
         setting = val_group["value"]
         setting_group = val_group.get("values", None)
+        tooltip = val_group.get("description", "")
         if isinstance(setting, int) and not setting_group:
             widget = QSpinBox()
             widget.setValue(setting)
@@ -234,6 +235,7 @@ class FilterDesigner(QDialog):
         if setting_key == "cutoff_freq":
             widget.setValue(DEFAULT_FILTER_CUTOFF)
         signal.connect(lambda val: self.edit_current_filter(setting_key, val))
+        widget.setToolTip(tooltip)
         return widget
 
     @staticmethod
