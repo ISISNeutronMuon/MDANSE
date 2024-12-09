@@ -17,14 +17,14 @@ import collections
 import json
 
 import numpy as np
-from copy import deepcopy
 
 import h5py
+from MDANSE.Framework.Formats import HDFFormat
 
 from MDANSE.Chemistry.ChemicalEntity import AtomGroup
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import filter_map
-from MDANSE.MolecularDynamics.TrajectoryUtils import sorted_atoms
+from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import sorted_atoms, TrajectoryWriter
 from MDANSE.MLogging import LOG
 
@@ -104,7 +104,7 @@ class TrajectoryFilter(IJob):
                 self._selected_atoms.append(self._atoms[idx])
         self._selected_atoms = AtomGroup(self._selected_atoms)
 
-        self._trajectories = np.zeros_like(
+        self.atomic_trajectory_array = np.zeros_like(
             np.zeros(3*len(self._atoms)*len(self.configuration["frames"]["value"])).reshape((
                 len(self._atoms),
                 3,
@@ -133,7 +133,7 @@ class TrajectoryFilter(IJob):
             step=self.configuration["frames"]["step"],
         )
 
-        self._trajectories[index] = series.T
+        self.atomic_trajectory_array[index] = series.T
         return index, None
 
     def combine(self, index, x):
@@ -156,26 +156,26 @@ class TrajectoryFilter(IJob):
 
         filter = filter_class(**filter_attributes)
 
-        # Get trajectories from current instance chemical system
-        filtered_chemical_system = deepcopy(self.configuration["trajectory"]["instance"].chemical_system)
-
         # Apply filter
-        filtered_coords = apply(filter, self._trajectories)
-
-        ### filtered_chemical_system._configuration.variables["coordinates"] = coords
+        filtered_coords = apply(filter, self.atomic_trajectory_array)
 
         # Create trajectory writer object
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
-            filtered_chemical_system,
+            self.configuration["trajectory"]["instance"].chemical_system,
             self.numberOfSteps,
             self._selected_atoms.atom_list,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
         )
 
-        for t in range(filter_attributes["n_steps"]):
-            self._output_trajectory.dump_configuration(t, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"})
+        # Write trajectory
+        write_filtered_trajectory(
+            parent_configuration=self.configuration,
+            nsteps=filter_attributes["n_steps"],
+            filtered_coordinates=filtered_coords,
+            output_trajectory=self._output_trajectory
+        )
 
         # The input trajectory is closed.
         self.configuration["trajectory"]["instance"].close()
@@ -183,21 +183,39 @@ class TrajectoryFilter(IJob):
         # The output trajectory is closed.
         self._output_trajectory.close()
 
-        outputFile = h5py.File(self.configuration["output_files"]["file"], "r+")
+        # Write the filter metadata to output
+        HDFFormat.HDFFormat.write(
+            self.configuration["output_files"]["file"],
+            filter.__repr__()
+        )
 
-        # Write filter attributes to output data
-        #outputFile.create_dataset("rms", data=self._rms, dtype=np.float64)
-
-        outputFile.close()
         super().finalize()
 
-def apply(filter, trajectories):
+def apply(filter, trajectories) -> np.ndarray:
     """
 
     """
     for atom in trajectories:
         x, y, z = atom
-        for component in zip(x, y, z):
+        for component in (x, y, z):
             component = filter.apply(component)
     return trajectories
 
+def write_filtered_trajectory(parent_configuration, nsteps: int, filtered_coordinates: np.ndarray, output_trajectory: TrajectoryWriter) -> None:
+    """
+
+    """
+    time = parent_configuration["frames"]["time"]
+    dt = time[1] - time[0]
+    for index in range(nsteps):
+        frame_coordinates = list()
+        for atom in filtered_coordinates:
+            frame_coordinates.append((atom[0][index], atom[1][index], atom[2][index]))
+
+        # The filtered configuration coordinates at the current frame index
+        filtered_configuration_coordinates = np.array(frame_coordinates)
+
+        filtered_configuration = RealConfiguration(output_trajectory.chemical_system, filtered_configuration_coordinates)
+        output_trajectory.chemical_system.configuration = filtered_configuration
+
+        output_trajectory.dump_configuration(dt*index, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"})
