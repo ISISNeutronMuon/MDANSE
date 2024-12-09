@@ -63,8 +63,9 @@ def array_to_3d_imagedata(data, spacing):
 class MolecularViewer(QtWidgets.QWidget):
     """This class implements a molecular viewer."""
 
-    new_max_frames = Signal(int)
+    new_max_frames = Signal(tuple)
     new_current_frames = Signal(int)
+    visibility_changed = Signal(object)
 
     def __init__(self):
         super(MolecularViewer, self).__init__()
@@ -138,19 +139,34 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._datamodel is not None:
             self._datamodel._camera_position = list(self._camera.GetPosition())
             self._datamodel._camera_focus = list(self._camera.GetFocalPoint())
-            if datamodel._identifier == self._datamodel._identifier:
-                return
+            self._datamodel._camera_clipping = self._camera.GetClippingRange()
+            self._datamodel._camera_distance = self._camera.GetDistance()
+            self._datamodel._camera_focal_distance = self._camera.GetFocalDistance()
+            self._datamodel._viewport = self._renderer.GetViewport()
+            self._datamodel._viewpoint = self._renderer.GetViewPoint()
+            if datamodel is not None:
+                if datamodel._identifier == self._datamodel._identifier:
+                    return
+        self.clear_trajectory()
         self._datamodel = datamodel
+        if datamodel is None:
+            self.clear_panel()
+            self.update_renderer()
+            return
+        (
+            self._atoms_visible,
+            self._bonds_visible,
+            self._axes_visible,
+            self._cell_visible,
+        ) = self._datamodel._visibility
+        self.visibility_changed.emit(self._datamodel._visibility)
         self._atom_details_widget.setModel(self._datamodel._atom_properties)
         self._datamodel._atom_properties.new_atom_properties.connect(
             self.take_atom_properties
         )
-        self.clear_trajectory()
-
-        self.new_current_frames.emit(self._datamodel._current_frame)
 
         self._n_atoms = self._datamodel._num_atoms
-        self._n_frames = self._datamodel._max_frame + 1
+        self._n_frames = self._datamodel._max_frame
         self._current_frame = self._datamodel._current_frame
 
         # Hack for reducing objects resolution when the system is big
@@ -161,6 +177,16 @@ class MolecularViewer(QtWidgets.QWidget):
         self._renderer.ResetCamera()
         self._camera.SetFocalPoint(self._datamodel._camera_focus)
         self._camera.SetPosition(self._datamodel._camera_position)
+        if self._datamodel._camera_clipping is not None:
+            self._camera.SetClippingRange(self._datamodel._camera_clipping)
+        if self._datamodel._camera_distance is not None:
+            self._camera.SetDistance(self._datamodel._camera_distance)
+        if self._datamodel._camera_focal_distance is not None:
+            self._camera.SetFocalDistance(self._datamodel._camera_focal_distance)
+        if self._datamodel._viewport is not None:
+            self._renderer.SetViewport(self._datamodel._viewport)
+        if self._datamodel._viewpoint is not None:
+            self._renderer.SetViewPoint(self._datamodel._viewpoint)
         self._renderer.SetBackground(self._datamodel._bkg_colour)
         self._camera.SetParallelProjection(self._datamodel._projection)
 
@@ -169,10 +195,11 @@ class MolecularViewer(QtWidgets.QWidget):
         self.reset_all_polydata()
         self._polydata.GetPointData().SetScalars(scalars)
 
-        self.new_max_frames.emit(self._n_frames - 1)
+        self.new_max_frames.emit((self._n_frames - 1, self._current_frame))
         self._datamodel._atom_properties.onNewValues()
         self.set_coordinates(self._current_frame)
-        self._iren.Render()
+        self.new_current_frames.emit(self._datamodel._current_frame)
+        self.update_renderer()
 
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
@@ -194,14 +221,20 @@ class MolecularViewer(QtWidgets.QWidget):
         else:
             self._datamodel._projection = 255
         self._camera.SetParallelProjection(self._datamodel._projection)
+        self.update_renderer()
 
     def _new_visibility(self, flags: List[bool]):
-        self._atoms_visible = flags[0]
-        self._bonds_visible = flags[1]
-        self._axes_visible = flags[2]
-        self._cell_visible = flags[3]
+        if self._datamodel is None:
+            return
+        self._datamodel._visibility = flags
+        (
+            self._atoms_visible,
+            self._bonds_visible,
+            self._axes_visible,
+            self._cell_visible,
+        ) = self._datamodel._visibility
         self.axes_widget.SetEnabled(self._axes_visible)
-        result = self.set_coordinates(self._current_frame)
+        result = self.set_coordinates(self._datamodel._current_frame)
         if result is False:
             self.update_renderer()
 
@@ -281,7 +314,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def create_all_actors(self):
         actors = []
-        if self._polydata is None:
+        if self._polydata is None or self._datamodel is None:
             return actors
 
         line_actor, ball_actor = self.create_traj_actors(self._polydata)
@@ -307,6 +340,8 @@ class MolecularViewer(QtWidgets.QWidget):
         return uc_actor
 
     def create_traj_actors(self, polydata, line_opacity=1.0, ball_opacity=1.0):
+        if self._polydata is None or self._datamodel is None:
+            return
         line_mapper = vtk.vtkPolyDataMapper()
         if vtk.vtkVersion.GetVTKMajorVersion() < 6:
             line_mapper.SetInput(polydata)
@@ -375,21 +410,22 @@ class MolecularViewer(QtWidgets.QWidget):
         """Clears the Molecular Viewer panel"""
         self.clear_trajectory()
 
-        self._datamodel = None
+        if self._datamodel is not None:
+            self._datamodel._atom_properties.removeRows(
+                0, self._datamodel._atom_properties.rowCount()
+            )
+            self._datamodel = None
 
         # set everything to some empty/zero value
         self._n_atoms = 0
         self._n_frames = 0
-        self.new_max_frames.emit(0)
+        self.new_max_frames.emit((0, 0))
         self._current_frame = 0
         self.reset_all_polydata()
 
         self.update_renderer()
 
         # clear the atom properties table
-        self._datamodel._atom_properties.removeRows(
-            0, self._datamodel._atom_properties.rowCount()
-        )
 
     def reset_all_polydata(self):
         self._polydata = vtk.vtkPolyData()
@@ -400,6 +436,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_uc_polydata()
 
     def update_polydata(self):
+        if self._datamodel is None:
+            return
         coords = self._datamodel.get_coordinates(self._current_frame)
 
         if self._atoms_visible or self._bonds_visible:
@@ -460,6 +498,8 @@ class MolecularViewer(QtWidgets.QWidget):
         return bonds, len(ls) > 0
 
     def update_uc_polydata(self):
+        if self._datamodel is None:
+            return
         uc = self._datamodel.get_unit_cell(self._current_frame)
         if self._cell_visible and uc is not None:
             # update the unit cell
@@ -731,6 +771,8 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.update_renderer()
 
     def update_picked_polydata(self):
+        if self._polydata is None or self._datamodel is None:
+            return
         atoms = vtk.vtkPoints()
 
         if len(self.picked_atoms) == 0:

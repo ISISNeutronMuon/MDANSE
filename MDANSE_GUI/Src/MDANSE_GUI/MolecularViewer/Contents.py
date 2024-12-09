@@ -49,8 +49,14 @@ class TrajectoryState:
         ]
         self._camera_focus = [0.0, 0.0, 0.0]
         self._camera_position = [20.0, 0.0, 0.0]
+        self._camera_clipping = None
+        self._camera_distance = None
+        self._camera_focal_distance = None
+        self._viewport = None
+        self._viewpoint = None
         self._bkg_colour = (0, 0, 0)
         self._projection = 0
+        self._visibility = [True, False, True, True]
         self._unique_atoms = np.unique(self._atoms)
         self._atom_properties = AtomProperties()
         self.create_atom_details()

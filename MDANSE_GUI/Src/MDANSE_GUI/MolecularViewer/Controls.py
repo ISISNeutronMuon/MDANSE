@@ -14,6 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+from typing import Tuple
+
 from qtpy.QtCore import Slot, Qt, QTimer, QMutex
 from qtpy.QtWidgets import (
     QWidget,
@@ -134,13 +136,18 @@ class ViewerControls(QWidget):
         self._viewer = viewer
         self.layout().addWidget(viewer, 0, 0, 2, 2)  # row, column, rowSpan, columnSpan
         self._frame_slider.valueChanged.connect(viewer.set_coordinates)
-        viewer.new_max_frames.connect(self._frame_slider.setMaximum)
-        viewer.new_max_frames.connect(self._frame_selector.setMaximum)
-        viewer.new_max_frames.connect(self.stop_animation)
+        viewer.new_max_frames.connect(self.handle_max_frames)
         viewer.new_current_frames.connect(self._frame_slider.setValue)
         viewer._atom_details_widget = self._atom_details
         for column_number in range(3):
             self._atom_details.resizeColumnToContents(column_number)
+        self._viewer.visibility_changed.connect(self.initVisibility)
+
+    def handle_max_frames(self, frame_tuple: Tuple[int]):
+        self.stop_animation()
+        self._frame_slider.setMaximum(frame_tuple[0])
+        self._frame_selector.setMaximum(frame_tuple[0])
+        self._frame_slider.setValue(frame_tuple[1])
 
     def createButtons(self, orientation: Qt.Orientation):
         """Create a bar with video player buttons for controlling the
@@ -285,6 +292,13 @@ class ViewerControls(QWidget):
         for nw, box in enumerate(self._visibility_checkboxes):
             self._visibility[nw] = box.isChecked()
         self._viewer._new_visibility(self._visibility)
+
+    @Slot(object)
+    def initVisibility(self, visibility):
+        for nw, box in enumerate(self._visibility_checkboxes):
+            box.blockSignals(True)
+            box.setChecked(visibility[nw])
+            box.blockSignals(False)
 
     @Slot(int)
     def setTimeStep(self, new_value: int):
