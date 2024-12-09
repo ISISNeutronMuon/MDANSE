@@ -104,8 +104,6 @@ class AtomProperties(QStandardItemModel):
         self.itemChanged.connect(self.onNewValues)
         self._groups = []
         self._total_length = 0
-        self.colours = np.array([], dtype=int)
-        self.radii = np.array([], dtype=float)
 
     def clear_table(self):
         """This was meant to be used for cleaning up,

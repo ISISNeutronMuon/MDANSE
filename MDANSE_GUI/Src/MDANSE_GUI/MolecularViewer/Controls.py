@@ -274,16 +274,11 @@ class ViewerControls(QWidget):
         if dialog.result() == QColorDialog.DialogCode.Accepted:
             colour = dialog.currentColor()
             rgb = colour.red() / 255, colour.green() / 255, colour.blue() / 255
-            self._viewer._renderer.SetBackground(rgb)
+            self._viewer.set_background(rgb)
 
     @Slot()
     def toggle_projection(self):
-        if self._projection:
-            self._viewer._camera.SetParallelProjection(255)
-        else:
-            self._viewer._camera.SetParallelProjection(0)
-        self._viewer.update_renderer()
-        self._projection = not self._projection
+        self._viewer.toggle_projection()
 
     @Slot()
     def setVisibility(self):

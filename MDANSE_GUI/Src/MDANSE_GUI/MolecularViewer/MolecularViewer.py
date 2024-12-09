@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 from scipy.spatial import cKDTree as KDTree
@@ -110,8 +110,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._camera = vtk.vtkCamera()
         # associate camera to renderer
         self._renderer.SetActiveCamera(self._camera)
-        self._camera.SetFocalPoint(0, 0, 0)
-        self._camera.SetPosition(0, 0, 20)
 
         self._n_atoms = 0
         self._n_frames = 0
@@ -135,11 +133,11 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.dummy_size = 0.0
 
-        self.reset_camera = False
-
     @Slot(object)
     def set_data_model(self, datamodel: TrajectoryState):
         if self._datamodel is not None:
+            self._datamodel._camera_position = list(self._camera.GetPosition())
+            self._datamodel._camera_focus = list(self._camera.GetFocalPoint())
             if datamodel._identifier == self._datamodel._identifier:
                 return
         self._datamodel = datamodel
@@ -147,7 +145,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._datamodel._atom_properties.new_atom_properties.connect(
             self.take_atom_properties
         )
-        self.reset_camera = True
         self.clear_trajectory()
 
         self.new_current_frames.emit(self._datamodel._current_frame)
@@ -161,17 +158,42 @@ class MolecularViewer(QtWidgets.QWidget):
         self._resolution = 10 if self._resolution > 10 else self._resolution
         self._resolution = 4 if self._resolution < 4 else self._resolution
 
+        self._renderer.ResetCamera()
+        self._camera.SetFocalPoint(self._datamodel._camera_focus)
+        self._camera.SetPosition(self._datamodel._camera_position)
+        self._renderer.SetBackground(self._datamodel._bkg_colour)
+        self._camera.SetParallelProjection(self._datamodel._projection)
+
         scalars = self._datamodel.scalars_for_vtk()
 
         self.reset_all_polydata()
         self._polydata.GetPointData().SetScalars(scalars)
 
         self.new_max_frames.emit(self._n_frames - 1)
+        self._datamodel._atom_properties.onNewValues()
+        self.set_coordinates(self._current_frame)
+        self._iren.Render()
 
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
         self._scale_factor = scale_factor
         self.update_renderer()
+
+    def set_background(self, rgb: Tuple[int]):
+        if self._datamodel is not None:
+            self._datamodel._bkg_colour = rgb
+            self._renderer.SetBackground(self._datamodel._bkg_colour)
+        else:
+            self._renderer.SetBackground(rgb)
+
+    def toggle_projection(self):
+        if self._datamodel is None:
+            return
+        if self._datamodel._projection:
+            self._datamodel._projection = 0
+        else:
+            self._datamodel._projection = 255
+        self._camera.SetParallelProjection(self._datamodel._projection)
 
     def _new_visibility(self, flags: List[bool]):
         self._atoms_visible = flags[0]
@@ -635,9 +657,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._renderer.AddActor(self._actors)
 
         # rendering
-        if self.reset_camera:
-            self._renderer.ResetCamera()
-            self.reset_camera = False
 
         self._iren.Render()
 

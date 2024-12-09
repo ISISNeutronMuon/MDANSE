@@ -47,6 +47,10 @@ class TrajectoryState:
         self._atoms = [
             atom.symbol for atom in self._trajectory.chemical_system.atom_list
         ]
+        self._camera_focus = [0.0, 0.0, 0.0]
+        self._camera_position = [20.0, 0.0, 0.0]
+        self._bkg_colour = (0, 0, 0)
+        self._projection = 0
         self._unique_atoms = np.unique(self._atoms)
         self._atom_properties = AtomProperties()
         self.create_atom_details()
