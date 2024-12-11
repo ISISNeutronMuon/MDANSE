@@ -13,10 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import glob
-import itertools
 import os
 import os.path
+from pathlib import PurePath
 
 from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog, QLabel
 from qtpy.QtCore import Slot, Qt
@@ -35,19 +34,27 @@ class OutputStructureWidget(WidgetBase):
         default_value = self._configurator.default
         try:
             parent = kwargs.get("parent", None)
-            self.default_path = parent.default_path
+            self.default_path = PurePath(parent.default_path)
         except KeyError:
-            self.default_path = "."
+            self.default_path = PurePath(os.path.abspath("."))
             LOG.error("KeyError in OutputTrajectoryWidget - can't get default path.")
         except AttributeError:
-            self.default_path = "."
+            self.default_path = PurePath(os.path.abspath("."))
             LOG.error(
                 "AttributeError in OutputTrajectoryWidget - can't get default path."
             )
+        try:
+            parent = kwargs.get("parent", None)
+            guess_name = str(PurePath(os.path.join(self.default_path, "POSCAR")))
+        except:
+            guess_name = str(PurePath(default_value[0]))
+            LOG.error("It was not possible to get the job name from the parent")
+        else:
+            self._session = parent._parent_tab._session
         self.file_association = "Output file name (*)"
         self._value = default_value
-        self._field = QLineEdit(default_value[0], self._base)
-        self._field.setPlaceholderText(default_value[0])
+        self._field = QLineEdit(str(guess_name), self._base)
+        self._field.setPlaceholderText(str(guess_name))
         self.format_box = QComboBox(self._base)
         self.format_box.addItems(self._configurator._formats)
         self.format_box.setCurrentText(default_value[1])
@@ -101,38 +108,18 @@ class OutputStructureWidget(WidgetBase):
         new_value = QFileDialog.getSaveFileName(
             self._base,  # the parent of the dialog
             "Load a file",  # the label of the window
-            self.default_path,  # the initial search path
+            str(self.default_path),  # the initial search path
             self.file_association,  # text string specifying the file name filter.
         )
         if len(new_value[0]) > 0:
-            self._field.setText(new_value[0])
+            self._field.setText(str(PurePath(new_value[0])))
             self.updateValue()
 
-    @staticmethod
-    def _get_unique_filename(directory, basename):
-        filesInDirectory = [
-            os.path.join(directory, e)
-            for e in itertools.chain(
-                glob.iglob(os.path.join(directory, "*")),
-                glob.iglob(os.path.join(directory, ".*")),
-            )
-            if os.path.isfile(os.path.join(directory, e))
-        ]
-        basenames = [os.path.splitext(f)[0] for f in filesInDirectory]
-
-        initialPath = path = os.path.join(directory, basename)
-        comp = 1
-        while True:
-            if path in basenames:
-                path = "%s(%d)" % (initialPath, comp)
-                comp += 1
-                continue
-            return path
-
     def get_widget_value(self):
+        self._configurator._forbidden_files = self._session.reserved_filenames()
         filename = self._field.text()
         if len(filename) < 1:
             filename = self._default_value[0]
         format = self.format_box.currentText()
         log_level = self.logs_combo.currentText()
-        return (filename, format, log_level)
+        return (os.path.abspath(filename), format, log_level)

@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
+from pathlib import PurePath
 from collections import defaultdict
 from importlib import metadata
 
@@ -57,9 +58,6 @@ class TabbedWindow(QMainWindow):
     Args:
         QMainWindow - the base class.
     """
-
-    file_name_for_loading = Signal(str)
-    converter_name_for_dialog = Signal(str)
 
     def __init__(
         self,
@@ -186,8 +184,6 @@ class TabbedWindow(QMainWindow):
         # self._toolBar.setMovable(True)
         self._toolBar.setObjectName("main toolbar")
         valid_keys = [
-            # ('load', self.loadTrajectory),
-            # ('plus', self.loadTrajectory),
             ("periodic_table", self.launchPeriodicTable),
             ("element", self.launchElementsEditor),
             ("units", self.launchUnitsEditor),
@@ -235,18 +231,6 @@ class TabbedWindow(QMainWindow):
             dialog.activateWindow()
         else:
             dialog.show()
-
-    @Slot()
-    def loadTrajectory(self):
-        fname = QFileDialog.getOpenFileName(
-            self,
-            "Load an MD trajectory",
-            self.workdir,
-            "MDT files (*.mdt);;HDF5 files (*.h5 *.hdf);;All files (*)",
-        )
-        LOG.info(fname)
-        if len(fname[0]) > 0:
-            self.file_name_for_loading.emit(fname[0])
 
     @Slot(bool)
     def invertToolbar(self, dark=False):
@@ -306,6 +290,9 @@ class TabbedWindow(QMainWindow):
         job_tab.set_job_starter(self._job_holder)
         self.tabs.addTab(job_tab._core, name)
         self._tabs[name] = job_tab
+        self.tabs.tabBar().tabBarClicked.connect(
+            job_tab.update_action_on_tab_activation
+        )
 
     def createActionsViewer(self):
         name = "Actions"
@@ -319,7 +306,8 @@ class TabbedWindow(QMainWindow):
             instrument_model=self._instrument_model,
         )
         job_tab.set_job_starter(self._job_holder)
-        self.tabs.addTab(job_tab._core, name)
+        jobtab_index = self.tabs.addTab(job_tab._core, name)
+        job_tab.set_own_index(jobtab_index)
         self._tabs[name] = job_tab
         self.tabs.tabBar().tabBarClicked.connect(
             job_tab.update_action_on_tab_activation

@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from typing import Union, Iterable
-
+from pathlib import PurePath
 import copy
 
 from qtpy.QtWidgets import (
@@ -159,11 +159,11 @@ class GeneralInput(QObject):
         new_value = self.file_dialog(
             self.parent(),  # the parent of the dialog
             "Load a file",  # the label of the window
-            self.default_path,  # the initial search path
+            str(self.default_path),  # the initial search path
             self.file_association,  # text string specifying the file name filter.
         )
         if new_value is not None:
-            self.updateValue(new_value[0], emit=True)
+            self.updateValue(str(PurePath(new_value[0])), emit=True)
 
 
 # class MultipleInput(GeneralInput):
@@ -598,7 +598,7 @@ class InputDialog(QDialog):
                 widget_instance = widget(var_base)
                 widget_instance.setText(str(values[ni]))
                 widget_instance.setToolTip(tooltip)
-                widget_instance.setPlaceholderText(placeholder)
+                widget_instance.setPlaceholderText(str(placeholder))
                 if validator is not None:
                     widget_instance.setValidator(validator)
                 temp_layout.addWidget(widget_instance)

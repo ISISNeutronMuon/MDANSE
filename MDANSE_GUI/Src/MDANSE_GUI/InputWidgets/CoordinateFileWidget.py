@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
+from pathlib import PurePath
 
 import MDAnalysis as mda
 from qtpy.QtWidgets import QFileDialog
@@ -51,19 +52,21 @@ class CoordinateFileWidget(TopologyFileWidget):
         new_value = self._file_dialog(
             self.parent(),
             "Load file",
-            self.default_path,
+            str(self.default_path),
             self._qt_file_association,
         )
 
         if new_value is not None and new_value[0]:
-            values = ['"' + value + '"' for value in new_value[0]]
+            values = ['"' + str(PurePath(value)) + '"' for value in new_value[0]]
             self._field.setText("[" + ", ".join(values) + "]")
             self.updateValue()
             try:
                 LOG.info(
                     f"Settings path of {self._job_name} to {os.path.split(new_value[0][0])[0]}"
                 )
-                paths_group.set(self._job_name, os.path.split(new_value[0][0])[0])
+                paths_group.set(
+                    self._job_name, str(PurePath(os.path.split(new_value[0][0])[0]))
+                )
             except:
                 LOG.error(
                     f"session.set_path failed for {self._job_name}, {os.path.split(new_value[0][0])[0]}"

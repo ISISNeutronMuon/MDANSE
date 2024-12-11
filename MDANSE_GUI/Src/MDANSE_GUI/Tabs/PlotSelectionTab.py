@@ -15,6 +15,7 @@
 #
 import os
 from functools import partial
+from pathlib import PurePath
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget, QFileDialog
@@ -63,7 +64,7 @@ class PlotSelectionTab(GeneralTab):
         fnames = QFileDialog.getOpenFileNames(
             self._core,
             "Load an MDA file (MDANSE analysis results)",
-            self.get_path("plot_selection"),
+            str(self.get_path("plot_selection")),
             "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
         )
         if fnames is None:
@@ -71,15 +72,17 @@ class PlotSelectionTab(GeneralTab):
         if len(fnames[0]) < 1:
             return
         for fname in fnames[0]:
-            self.load_results(fname)
-            last_path, _ = os.path.split(fname)
+            self.load_results(str(PurePath(fname)))
+            last_path = str(PurePath(os.path.split(fname)[0]))
         self.set_path("plot_selection", last_path)
 
     @Slot(str)
-    def load_results(self, fname: str):
-        if len(fname) > 0:
-            _, short_name = os.path.split(fname)
-            self._model.add_file(fname)
+    def load_results(self, some_fname: str):
+        fname = PurePath(some_fname)
+        if len(str(fname)) > 0:
+            fname = os.path.abspath(fname)
+            self._model.add_file(str(fname))
+            self._session.protect_filename(fname)
 
     @classmethod
     def standard_instance(cls):
@@ -118,6 +121,7 @@ class PlotSelectionTab(GeneralTab):
             label_text=label_text,
         )
         the_tab._visualiser._unit_lookup = the_tab
+        the_tab._view.free_name.connect(session.free_filename)
         return the_tab
 
 

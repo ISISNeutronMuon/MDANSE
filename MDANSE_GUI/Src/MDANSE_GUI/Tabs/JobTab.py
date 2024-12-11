@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import os
+from pathlib import PurePath
 from functools import partial
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget, QComboBox, QLabel
@@ -47,6 +49,7 @@ class JobTab(GeneralTab):
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""
         self._job_starter = None
+        self._own_index = -1
         self._instrument_index = -1
         self._trajectory_combo = QComboBox()
         self._trajectory_combo.setEditable(False)
@@ -64,6 +67,9 @@ class JobTab(GeneralTab):
         self._core.add_widget(self._instrument_combo, upper=False)
         self.action._parent_tab = self
         self._visualiser._parent_tab = self
+
+    def set_own_index(self, index: int):
+        self._own_index = index
 
     def set_job_starter(self, job_starter):
         self._job_starter = job_starter
@@ -91,7 +97,7 @@ class JobTab(GeneralTab):
         if traj_model.rowCount() < 1:
             # the combobox changed and there are no trajectories, they
             # were probably deleted lets clear the action widgets
-            self.action.set_trajectory(path=None, trajectory=None)
+            self.action.set_trajectory(trajectory=None)
             self.action.clear_panel()
             return
 
@@ -102,7 +108,7 @@ class JobTab(GeneralTab):
         # The combobox was changed we need to update the action
         # widgets with the new trajectory
         self.action.set_trajectory(
-            path=None, trajectory=traj_model._nodes[node_number][0]
+            trajectory=str(PurePath(os.path.abspath(traj_model._nodes[node_number][0])))
         )
         current_item = self._core.current_item()
         if current_item is not None:
@@ -128,8 +134,11 @@ class JobTab(GeneralTab):
             return
         self._needs_updating = True
 
-    @Slot()
-    def update_action_on_tab_activation(self):
+    @Slot(int)
+    def update_action_on_tab_activation(self, current_index: int):
+        if current_index != self._own_index:
+            return
+        self.action.test_file_outputs()
         if self._needs_updating:
             current_item = self._core.current_item()
             if current_item is not None:

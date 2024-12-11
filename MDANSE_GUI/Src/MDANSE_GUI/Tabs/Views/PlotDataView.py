@@ -29,6 +29,7 @@ class PlotDataView(QTreeView):
     execute_action = Signal(object)
     item_details = Signal(object)
     error = Signal(str)
+    free_name = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -76,6 +77,12 @@ class PlotDataView(QTreeView):
     def deleteNode(self):
         model = self.model()
         index = self.currentIndex()
+        mda_data_structure = model.inner_object(index)
+        try:
+            filename = mda_data_structure._file.filename
+        except AttributeError:
+            filename = mda_data_structure.file
+        self.free_name.emit(str(filename))
         model.removeRow(index.row())
         self.item_details.emit("")
 

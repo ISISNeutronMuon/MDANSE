@@ -15,6 +15,7 @@
 #
 import hashlib
 import os
+from pathlib import PurePath
 
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot
@@ -22,27 +23,6 @@ from qtpy.QtCore import QObject, Slot
 from MDANSE.MLogging import LOG
 
 from MDANSE.Framework.InputData import InputFileData
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
-
-# class TrajectoryItem(QStandardItem):
-
-#     def __init__(self, *args, trajectory = None):
-#         super().__init__(*args)
-#         self._trajectory = trajectory
-
-
-# class TrajectoryHolder(QStandardItemModel):
-
-#     def __init__(self, parent: QObject = None):
-#         super().__init__(parent=parent)
-
-#     @Slot(object)
-#     def addItem(self, new_entry: InputFileData):
-#         traj = TrajectoryItem(new_entry.basename, trajectory = new_entry)
-#         self.appendRow([traj])
-
-#     @Slot(object)
-#     def acceptNewTrajectory(self, new_trajectory):
 
 
 class FileObject:
@@ -54,11 +34,12 @@ class FileObject:
         self.hash_function = hash_function
         self.hash = -1
 
-    def setFilename(self, fname: str):
+    def setFilename(self, some_fname: str):
+        fname = str(some_fname)
         abspath, filename = os.path.split(fname)
         self.extension = str(filename).split(".")[-1]
         self.filename = filename
-        self.absolute_path = abspath
+        self.absolute_path = PurePath(abspath)
         self.hash = self.calculateHash(fname)
 
     def calculateHash(self, fname, chunk_size=1024 * 512):
@@ -111,7 +92,7 @@ class TrajectoryItem(DataTreeItem):
         self.file_info = FileObject()
 
         if self.filename != "NULL":
-            self.file_info.setFilename(self.filename)
+            self.file_info.setFilename(PurePath(self.filename))
         self.setText(os.path.split(self.filename)[1])
 
 
@@ -129,14 +110,3 @@ class DataTreeModel(QStandardItemModel):
     def addItem(self, new_entry: InputFileData):
         traj = TrajectoryItem(new_entry.basename, trajectory=new_entry)
         self.appendRow([traj])
-
-    @Slot(str)
-    def acceptNewTrajectory(self, fname: str):
-        LOG.info(f"Received {fname}")
-        data = HDFTrajectoryInputData(fname)
-        item = TrajectoryItem(fname=fname, trajectory=data, mdanse_tag="hdf_trajectory")
-        LOG.info("Created TrajectoryItem")
-        self.appendRow(item)
-        tkey = item.file_info.hash
-        self._trajectory_objects[tkey] = data
-        LOG.info("assigned new trajectory to the dictionary")

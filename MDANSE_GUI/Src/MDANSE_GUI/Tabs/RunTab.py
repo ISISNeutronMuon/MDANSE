@@ -90,6 +90,8 @@ class RunTab(GeneralTab):
             ),
             label_text=run_tab_label,
         )
+        the_tab._model.protect_filename.connect(session.protect_filename)
+        the_tab._model.unprotect_filename.connect(session.free_filename)
         the_tab._model.new_job_started.connect(the_tab.tab_notification)
         return the_tab
 

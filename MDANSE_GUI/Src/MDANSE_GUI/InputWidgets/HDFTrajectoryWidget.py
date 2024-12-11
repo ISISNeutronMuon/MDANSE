@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
+from pathlib import PurePath
 
 from qtpy.QtWidgets import QLabel
 
@@ -30,11 +31,11 @@ class HDFTrajectoryWidget(WidgetBase):
         except AttributeError:
             filename = None
         if filename is not None:
-            self._configurator.configure(filename)
-            label = QLabel(filename, self._base)
+            self._configurator.configure(str(filename))
+            label = QLabel(str(filename), self._base)
             self._layout.addWidget(label)
             trajectory_path, _ = os.path.split(filename)
-            self.default_path = trajectory_path
+            self.default_path = PurePath(trajectory_path)
         else:
             label = QLabel("No Trajectory available", self._base)
             self._layout.addWidget(label)

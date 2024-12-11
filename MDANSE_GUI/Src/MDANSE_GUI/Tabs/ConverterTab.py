@@ -55,6 +55,10 @@ class ConverterTab(GeneralTab):
     def set_current_trajectory(self, new_name: str):
         self._current_trajectory = new_name
 
+    @Slot()
+    def update_action_on_tab_activation(self):
+        self.action.test_file_outputs()
+
     def grouped_settings(self):
         results = super().grouped_settings()
         results += [

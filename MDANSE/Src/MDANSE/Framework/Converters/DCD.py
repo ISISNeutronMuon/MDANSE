@@ -275,6 +275,8 @@ class DCD(Converter):
     Converts a DCD trajectory to a HDF trajectory.
     """
 
+    label = "DCD"
+
     settings = collections.OrderedDict()
     settings["pdb_file"] = (
         "InputFileConfigurator",

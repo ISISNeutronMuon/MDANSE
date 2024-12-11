@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
+from pathlib import PurePath
 
 from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog
 from qtpy.QtCore import Slot
@@ -33,29 +34,19 @@ class InputFileWidget(WidgetBase):
         else:
             default_value = ""
         parent = kwargs.get("parent", None)
+        self._parent = parent
         if parent is not None:
             self._job_name = parent._job_name
             self._settings = parent._settings
         try:
-            paths_group = self._settings.group("paths")
-            try:
-                self.default_path = paths_group.get(self._job_name)
-            except KeyError:
-                paths_group.add(
-                    self._job_name,
-                    ".",
-                    f"The filesystem path recently used by {self._job_name}",
-                )
-                self.default_path = "."
+            parent = kwargs.get("parent", None)
+            self.default_path = PurePath(parent._default_path)
+        except KeyError:
+            self.default_path = PurePath(os.path.abspath("."))
+            LOG.error("KeyError in OutputFilesWidget - can't get default path.")
         except AttributeError:
-            try:
-                self.default_path = parent.default_path
-            except KeyError:
-                self.default_path = "."
-                LOG.error("KeyError in InputFileWidget - can't get default path.")
-            except AttributeError:
-                self.default_path = "."
-                LOG.error("AttributeError in InputFileWidget - can't get default path.")
+            self.default_path = PurePath(os.path.abspath("."))
+            LOG.error("AttributeError in OutputFilesWidget - can't get default path.")
         default_value = kwargs.get("default", "")
         if self._tooltip:
             self._tooltip_text = self._tooltip
@@ -95,25 +86,23 @@ class InputFileWidget(WidgetBase):
         This will start a FileDialog, take the resulting path,
         and emit a signal to update the value show by the GUI.
         """
-        paths_group = self._settings.group("paths")
-        try:
-            self.default_path = paths_group.get(self._job_name)
-        except:
-            LOG.warning(f"session.get_path failed for {self._job_name}")
         new_value = self._file_dialog(
             self.parent(),  # the parent of the dialog
             "Load file",  # the label of the window
-            self.default_path,  # the initial search path
+            str(self._parent._default_path),  # the initial search path
             self._qt_file_association,  # text string specifying the file name filter.
         )
         if new_value is not None and new_value[0]:
-            self._field.setText(new_value[0])
+            self._field.setText(str(PurePath(new_value[0])))
             self.updateValue()
             try:
                 LOG.info(
                     f"Settings path of {self._job_name} to {os.path.split(new_value[0])[0]}"
                 )
-                paths_group.set(self._job_name, os.path.split(new_value[0])[0])
+                if self._parent is not None:
+                    self._parent._default_path = str(
+                        PurePath(os.path.split(new_value[0])[0])
+                    )
             except:
                 LOG.error(
                     f"session.set_path failed for {self._job_name}, {os.path.split(new_value[0])[0]}"

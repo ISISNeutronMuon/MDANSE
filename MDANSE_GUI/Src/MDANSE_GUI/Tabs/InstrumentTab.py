@@ -74,7 +74,8 @@ class InstrumentTab(GeneralTab):
         self._view.add_instrument()
 
     @Slot(str)
-    def load_trajectory(self, fname: str):
+    def load_trajectory(self, some_fname: str):
+        fname = str(some_fname)
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
             try:

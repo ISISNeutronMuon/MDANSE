@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-
+import os
 from typing import Dict, Tuple
+from pathlib import PurePath
 
 from qtpy.QtCore import QObject, Slot, Signal, QMessageLogger
 from qtpy.QtWidgets import QListView
@@ -95,7 +95,7 @@ class GeneralTab(QObject):
         """
         group1 = [
             "Generic settings",  # name of the group of settings
-            {"path": "."},  # a dictionary of settings
+            {"path": os.path.abspath(".")},  # a dictionary of settings
             {
                 "path": "The path last used by this GUI element."
             },  # a dictionary of comments
@@ -167,10 +167,12 @@ class GeneralTab(QObject):
             path = paths_group.get(path_key)
         except KeyError:
             paths_group.add(
-                path_key, ".", f"Filesystem path recently used by {path_key}"
+                path_key,
+                os.path.abspath("."),
+                f"Filesystem path recently used by {path_key}",
             )
-            path = "."
-        return path
+            path = os.path.abspath(".")
+        return str(PurePath(path))
 
     def set_path(self, path_key: str, path_value: str):
         paths_group = self._settings.group("paths")
@@ -178,6 +180,7 @@ class GeneralTab(QObject):
             paths_group.add(
                 path_key, path_value, f"Filesystem path recently used by {path_key}"
             )
+        self._session.save()
 
     @Slot()
     def save_state(self):

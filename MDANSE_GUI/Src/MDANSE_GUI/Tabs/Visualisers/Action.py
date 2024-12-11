@@ -13,7 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Optional
+import os
+from pathlib import PurePath
 import traceback
 
 import numpy as np
@@ -90,19 +91,20 @@ class Action(QWidget):
     run_and_load = Signal(list)
     new_path = Signal(str)
 
-    last_paths = {}
-
     def __init__(self, *args, use_preview=False, **kwargs):
         self._default_path = None
         self._input_trajectory = None
         self._parent_tab = None
         self._trajectory_configurator = None
         self._settings = None
+        self._job_name = None
         self._use_preview = use_preview
         self._current_instrument = None
-        default_path = kwargs.pop("path", None)
+        self._has_been_initialised = False
+        self.execute_button = None
+        self.post_execute_checkbox = None
         input_trajectory = kwargs.pop("trajectory", None)
-        self.set_trajectory(default_path, input_trajectory)
+        self.set_trajectory(input_trajectory)
         super().__init__(*args, **kwargs)
 
         self.layout = QVBoxLayout(self)
@@ -113,7 +115,7 @@ class Action(QWidget):
     def set_settings(self, settings):
         self._settings = settings
 
-    def set_trajectory(self, path: Optional[str], trajectory: Optional[str]) -> None:
+    def set_trajectory(self, trajectory: str) -> None:
         """Set the trajectory path and filename.
 
         Parameters
@@ -123,16 +125,13 @@ class Action(QWidget):
         trajectory : str or None
             The path and filename of the trajectory
         """
-        self._default_path = path
         self._input_trajectory = trajectory
-        path = None
         if self._input_trajectory is not None:
-            path, filename = os.path.split(self._input_trajectory)
-        if self._default_path is None:
-            if path is None:
-                self._default_path = "."
-            else:
-                self._default_path = path
+            self._default_path = PurePath(os.path.split(self._input_trajectory)[0])
+        else:
+            self._default_path = PurePath(os.path.abspath("."))
+        if self._job_name is not None:
+            self._parent_tab.set_path(self._job_name, str(self._default_path))
 
     def set_instrument(self, instrument: SimpleInstrument) -> None:
         self._current_instrument = instrument
@@ -161,9 +160,13 @@ class Action(QWidget):
             The job name.
         """
         self.clear_panel()
+        self._has_been_initialised = False
 
         self._job_name = job_name
-        self.last_paths[job_name] = self._parent_tab.get_path(job_name)
+        if self._default_path is None or PurePath(self._default_path) == PurePath(
+            os.path.abspath(".")
+        ):
+            self._default_path = str(PurePath(self._parent_tab.get_path(job_name)))
         try:
             job_instance = IJob.create(job_name)
         except ValueError as e:
@@ -233,16 +236,8 @@ class Action(QWidget):
                     input_widget.value_updated.connect(self.show_output_prediction)
                 LOG.info(f"Set up the right widget for {key}")
             # self.handlers[key] = data_handler
-            configured = False
-            iterations = 0
-            while not configured:
-                configured = True
-                for widget in self._widgets:
-                    widget.value_from_configurator()
-                    configured = configured and widget._configurator.is_configured()
-                iterations += 1
-                if iterations > 5:
-                    break
+            self._has_been_initialised = True
+            self.check_inputs()
 
         if self._use_preview:
             self._preview_box = QTextEdit(self)
@@ -277,6 +272,27 @@ class Action(QWidget):
         self.layout.addWidget(buttonbase)
         self._widgets_in_layout.append(buttonbase)
         self.apply_instrument()
+
+    def check_inputs(self):
+        configured = False
+        iterations = 0
+        while not configured:
+            configured = True
+            for widget in self._widgets:
+                widget.value_from_configurator()
+                configured = configured and widget._configurator.is_configured()
+            iterations += 1
+            if iterations > 5:
+                break
+
+    @Slot()
+    def test_file_outputs(self):
+        if not self._has_been_initialised:
+            return
+        self.check_inputs()
+        for widget in self._widgets:
+            widget.updateValue()
+        self.allow_execution()
 
     def apply_instrument(self):
         if self._current_instrument is not None:
@@ -329,26 +345,22 @@ class Action(QWidget):
                     text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({new_unit})</p>"
             self._preview_box.setHtml(text)
 
-    @Slot(dict)
-    def parse_updated_params(self, new_params: dict):
-        if "path" in new_params.keys():
-            self.default_path = new_params["path"]
-            self.new_path.emit(self.default_path)
-
     @Slot()
     def allow_execution(self):
         allow = True
         for widget in self._widgets:
             if not widget._configurator.valid:
                 allow = False
-        if allow:
-            self.execute_button.setEnabled(True)
-        else:
-            self.execute_button.setEnabled(False)
-        if self._job_name == "AverageStructure":
-            self.post_execute_checkbox.setEnabled(False)
-        else:
-            self.post_execute_checkbox.setEnabled(True)
+        if self.execute_button is not None:
+            if allow:
+                self.execute_button.setEnabled(True)
+            else:
+                self.execute_button.setEnabled(False)
+        if self.post_execute_checkbox is not None:
+            if self._job_name == "AverageStructure":
+                self.post_execute_checkbox.setEnabled(False)
+            else:
+                self.post_execute_checkbox.setEnabled(True)
 
     @Slot()
     def cancel_dialog(self):
@@ -359,22 +371,26 @@ class Action(QWidget):
         try:
             cname = self._job_name
         except:
-            currentpath = "."
+            currentpath = PurePath(os.path.abspath("."))
         else:
-            currentpath = self._parent_tab.get_path(self._job_name + "_script")
+            currentpath = PurePath(
+                self._parent_tab.get_path(self._job_name + "_script")
+            )
         result, ftype = QFileDialog.getSaveFileName(
-            self, "Save job as a Python script", currentpath, "Python script (*.py)"
+            self,
+            "Save job as a Python script",
+            str(currentpath),
+            "Python script (*.py)",
         )
         if result == "":
             return None
-        path, _ = os.path.split(result)
+        path = PurePath(os.path.split(result)[0])
         try:
             cname = self._job_name
         except:
             pass
         else:
-            self.last_paths[cname] = path
-            self._parent_tab.set_path(self._job_name + "_script", path)
+            self._parent_tab.set_path(self._job_name + "_script", str(path))
         pardict = self.set_parameters(labels=True)
         self._job_instance.save(result, pardict)
 
@@ -392,7 +408,8 @@ class Action(QWidget):
     def execute_converter(self):
         pardict = self.set_parameters()
         LOG.info(pardict)
-        self._parent_tab.set_path(self._job_name, self._default_path)
+        self._parent_tab.set_path(self._job_name, str(self._default_path))
+        self._parent_tab._session.save()
         # when we are ready, we can consider running it
         # self.converter_instance.run(pardict)
         # this would send the actual instance, which _may_ be wrong
@@ -404,3 +421,7 @@ class Action(QWidget):
             self.run_and_load.emit([self._job_name, pardict])
         else:
             self.new_thread_objects.emit([self._job_name, pardict])
+        self.check_inputs()
+        for widget in self._widgets:
+            widget.updateValue()
+        self.allow_execution()

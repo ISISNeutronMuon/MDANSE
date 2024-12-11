@@ -16,6 +16,7 @@
 from typing import TYPE_CHECKING, List
 import csv
 import os
+from pathlib import PurePath
 from traceback import format_exc
 
 if TYPE_CHECKING:
@@ -56,7 +57,7 @@ class DataWidget(QWidget):
         self._sliderpack = None
         self._plotting_context = None
         self._slider_max = 100
-        self._current_path = "."
+        self._current_path = PurePath(os.path.abspath("."))
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         self.make_toolbar()
@@ -133,16 +134,16 @@ class DataWidget(QWidget):
         new_value = QFileDialog.getSaveFileName(
             self,  # the parent of the dialog
             "Save data to a CSV file",  # the label of the window
-            self._current_path,  # the initial search path
+            str(self._current_path),  # the initial search path
             "Comma-separated values (*.csv);;Output file name (*)",  # text string specifying the file name filter.
         )
         if len(new_value[0]) > 0:
-            self._output_widget.setText(new_value[0])
-            self._current_path = os.path.split(new_value[0])[0]
+            self._output_widget.setText(str(PurePath(new_value[0])))
+            self._current_path = PurePath(os.path.split(new_value[0])[0])
 
     @Slot()
     def save_to_file(self):
-        target_path = self._output_widget.text()
+        target_path = PurePath(self._output_widget.text())
         try:
             nsets = len(self._plotter._pc_backup.datasets())
         except AttributeError:
@@ -241,7 +242,7 @@ class DataWidget(QWidget):
             )
             for _, databundle in self._plotting_context.datasets().items():
                 dataset, _, _, _, _, _ = databundle
-                self._current_path = os.path.split(dataset._filename)[0]
+                self._current_path = PurePath(os.path.split(dataset._filename)[0])
                 break
         except Exception as e:
             LOG.error(f"DataWidget error: {e}" f"traceback {format_exc()}")

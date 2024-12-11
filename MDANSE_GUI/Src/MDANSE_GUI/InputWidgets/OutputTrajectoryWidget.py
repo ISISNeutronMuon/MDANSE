@@ -13,10 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import glob
-import itertools
 import os
 import os.path
+from pathlib import PurePath
 
 from qtpy.QtWidgets import (
     QComboBox,
@@ -45,20 +44,34 @@ class OutputTrajectoryWidget(WidgetBase):
         super().__init__(*args, layout_type="QGridLayout", **kwargs)
         default_value = self._configurator.default
         try:
-            parent = kwargs.get("parent", None)
-            self.default_path = parent.default_path
+            self._parent = kwargs.get("parent", None)
+            self.default_path = PurePath(self._parent._default_path)
         except KeyError:
-            self.default_path = "."
+            self.default_path = PurePath(os.path.abspath("."))
             LOG.error("KeyError in OutputTrajectoryWidget - can't get default path.")
         except AttributeError:
-            self.default_path = "."
+            self.default_path = PurePath(os.path.abspath("."))
             LOG.error(
                 "AttributeError in OutputTrajectoryWidget - can't get default path."
             )
+        else:
+            self._session = self._parent._parent_tab._session
+        try:
+            self._parent = kwargs.get("parent", None)
+            jobname = str(self._parent._job_instance.label).replace(" ", "")
+            guess_name = str(
+                PurePath(os.path.join(self.default_path, jobname + "_trajectory1"))
+            )
+        except:
+            guess_name = str(PurePath(default_value[0]))
+            LOG.error("It was not possible to get the job name from the parent")
+        while os.path.exists(guess_name + ".mdt"):
+            prefix, number = guess_name.split("_trajectory")
+            guess_name = str(PurePath(prefix + "_trajectory" + str(1 + int(number))))
         self.file_association = "MDT trajectory (*.mdt)"
         self._value = default_value
-        self._field = QLineEdit(default_value[0], self._base)
-        self._field.setPlaceholderText(default_value[0])
+        self._field = QLineEdit(str(guess_name), self._base)
+        self._field.setPlaceholderText(str(guess_name))
         self.dtype_box = QComboBox(self._base)
         self.dtype_box.addItems(["float16", "float32", "float64"])
         self.dtype_box.setCurrentText("float64")
@@ -131,41 +144,24 @@ class OutputTrajectoryWidget(WidgetBase):
         This will start a FileDialog, take the resulting path,
         and emit a signal to update the value show by the GUI.
         """
+        self.default_path = self._parent._default_path
         new_value = QFileDialog.getSaveFileName(
             self._base,  # the parent of the dialog
             "Save file",  # the label of the window
-            self.default_path,  # the initial search path
+            str(self.default_path),  # the initial search path
             self.file_association,  # text string specifying the file name filter.
         )
         if len(new_value[0]) > 0:
-            self._field.setText(new_value[0])
+            self._field.setText(str(PurePath(new_value[0])))
             self.updateValue()
 
-    @staticmethod
-    def _get_unique_filename(directory, basename):
-        filesInDirectory = [
-            os.path.join(directory, e)
-            for e in itertools.chain(
-                glob.iglob(os.path.join(directory, "*")),
-                glob.iglob(os.path.join(directory, ".*")),
-            )
-            if os.path.isfile(os.path.join(directory, e))
-        ]
-        basenames = [os.path.splitext(f)[0] for f in filesInDirectory]
-
-        initialPath = path = os.path.join(directory, basename)
-        comp = 1
-        while True:
-            if path in basenames:
-                path = "%s(%d)" % (initialPath, comp)
-                comp += 1
-                continue
-            return path
-
     def get_widget_value(self):
+        self._configurator._forbidden_files = self._session.reserved_filenames()
         filename = self._field.text()
         if len(filename) < 1:
             filename = self._default_value[0]
+        else:
+            self._parent.set_trajectory(os.path.abspath(filename))
         dtype = dtype_lookup[self.dtype_box.currentText()]
         chunk_size = self.chunk_box.value()
         compression = self.compression_box.currentText()

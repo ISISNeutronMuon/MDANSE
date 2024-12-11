@@ -15,7 +15,8 @@
 #
 
 import os
-from typing import Dict
+from typing import Dict, List
+from pathlib import PurePath
 
 from qtpy.QtCore import QObject, Signal, Slot, Qt, QModelIndex
 from qtpy.QtGui import QStandardItem, QStandardItemModel
@@ -25,7 +26,6 @@ from tomlkit.toml_file import TOMLFile
 
 from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
-from MDANSE.Framework.Units import measure, unit_lookup
 
 
 class UserSettingsModel(QStandardItemModel):
@@ -38,7 +38,7 @@ class UserSettingsModel(QStandardItemModel):
             self._settings = SettingsFile(settings_filename)
             self._settings.load_from_file()
         else:
-            LOG.warning(f"Called UserSettingsModel without settings_filename")
+            LOG.warning("Called UserSettingsModel without settings_filename")
             return
         self._entries_present = {}
         self._groups_present = {}
@@ -51,7 +51,7 @@ class UserSettingsModel(QStandardItemModel):
         # self.scan_model()
 
     def refresh(self):
-        self._settings.load_from_file()
+        # self._settings.load_from_file()
         self.populate_model()
         return
 
@@ -166,6 +166,7 @@ class UserSettingsModel(QStandardItemModel):
 
     @Slot("QStandardItem*")
     def on_value_changed(self, item: "QStandardItem"):
+        item_key = item.text()
         index = item.index()
         column = index.column()
         row = index.row()
@@ -202,7 +203,7 @@ class SettingsGroup:
             self._comments[varname] = comment
 
     def set(self, varname: str, value: str):
-        if not varname in self._settings:
+        if varname not in self._settings:
             LOG.warning(
                 f"Group {self._name} has no entry {varname}. Add it first using add()."
             )
@@ -211,7 +212,7 @@ class SettingsGroup:
         return True
 
     def set_comment(self, varname: str, value: str):
-        if not varname in self._settings:
+        if varname not in self._settings:
             LOG.warning(
                 f"Group {self._name} has no entry {varname}. Add it first using add()."
             )
@@ -353,6 +354,7 @@ class StructuredSession(QObject):
         super().__init__(*args, **kwargs)
         self._models = {}
         self._configs = {}
+        self._reserved_filenames = []
         self._state = None
         self._main_config_name = "mdanse_general_settings"
         self._filename = kwargs.get("filename", self._main_config_name)
@@ -373,6 +375,21 @@ class StructuredSession(QObject):
     def load(self, fname: str = None):
         """Included for compatibility with LocalSession only.
         Now each component loads its own config separately."""
+
+    def reserved_filenames(self) -> List[str]:
+        return self._reserved_filenames
+
+    @Slot(str)
+    def protect_filename(self, some_filename: str):
+        new_filename = PurePath(os.path.abspath(some_filename))
+        self._reserved_filenames.append(new_filename)
+
+    @Slot(str)
+    def free_filename(self, some_filename: str):
+        filename = PurePath(os.path.abspath(some_filename))
+        if filename in self._reserved_filenames:
+            index = self._reserved_filenames.index(filename)
+            self._reserved_filenames.pop(index)
 
     def main_settings(self):
         return self._configs[self._main_config_name]
@@ -438,7 +455,7 @@ class StructuredSession(QObject):
     def get_path(self, key: str) -> str:
         settings = self._configs[self._main_config_name]
         group = settings["paths"]
-        value = group.get(key, ".")
+        value = group.get(key, os.path.abspath("."))
         return value
 
     def set_path(self, key: str, value: str):

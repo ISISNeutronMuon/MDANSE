@@ -13,21 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Optional
 
-import numpy as np
 from qtpy.QtWidgets import (
-    QPushButton,
-    QFileDialog,
     QLabel,
     QWidget,
     QLineEdit,
     QComboBox,
     QGridLayout,
-    QTextEdit,
 )
-from qtpy.QtCore import Signal, Slot, Qt
-from qtpy.QtGui import QStandardItem, QDoubleValidator, QIntValidator
+from qtpy.QtCore import Signal, Slot
+from qtpy.QtGui import QDoubleValidator, QIntValidator
 
 from MDANSE.MLogging import LOG
 

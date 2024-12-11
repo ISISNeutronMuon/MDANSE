@@ -2,7 +2,7 @@ import numpy as np
 from MDANSE.MolecularDynamics.TrajectoryUtils import atomic_trajectory
 
 
-cells = np.array([np.eye(3)]*5)
+cells = np.array([np.eye(3)] * 5)
 
 
 def test_constant():

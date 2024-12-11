@@ -13,6 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import os
+from pathlib import PurePath
+
 from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog, QComboBox
 from qtpy.QtCore import Slot
 from ase.io.formats import filetype
@@ -35,12 +38,12 @@ class AseInputFileWidget(WidgetBase):
             default_value = ""
         try:
             parent = kwargs.get("parent", None)
-            self.default_path = parent.default_path
+            self.default_path = PurePath(parent.default_path)
         except KeyError:
-            self.default_path = "."
+            self.default_path = PurePath(os.path.abspath("."))
             LOG.error("KeyError in InputFileWidget - can't get default path.")
         except AttributeError:
-            self.default_path = "."
+            self.default_path = PurePath(os.path.abspath("."))
             LOG.error("AttributeError in InputFileWidget - can't get default path.")
         default_value = kwargs.get("default", "")
         if self._tooltip:
@@ -76,11 +79,11 @@ class AseInputFileWidget(WidgetBase):
         new_value = self._file_dialog(
             self.parent(),  # the parent of the dialog
             "Load file",  # the label of the window
-            self.default_path,  # the initial search path
+            str(self.default_path),  # the initial search path
             self._qt_file_association,  # text string specifying the file name filter.
         )
         if new_value is not None:
-            self._field.setText(new_value[0])
+            self._field.setText(str(PurePath(new_value[0])))
             self.updateValue()
             try:
                 type_guess = filetype(new_value[0])

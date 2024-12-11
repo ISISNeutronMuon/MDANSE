@@ -15,6 +15,7 @@
 #
 import os
 from functools import partial
+from pathlib import PurePath
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget, QFileDialog
@@ -53,18 +54,19 @@ class TrajectoryTab(GeneralTab):
         fnames = QFileDialog.getOpenFileNames(
             self._core,
             "Load an MD trajectory",
-            self.get_path("trajectory"),
+            str(self.get_path("trajectory")),
             "HDF5 files, MDANSE or H5MD format (*.mdt *.h5);;H5MD files (*.h5);;All files (*)",
         )
         for fname in fnames[0]:
-            self.load_trajectory(fname)
-            last_path, _ = os.path.split(fname)
+            self.load_trajectory(PurePath(fname))
+            last_path = str(PurePath(os.path.split(fname)[0]))
         if fnames[0]:
-            self.set_path("trajectory", last_path)
+            self.set_path("trajectory", str(PurePath(last_path)))
             self._session.save()
 
     @Slot(str)
-    def load_trajectory(self, fname: str):
+    def load_trajectory(self, some_fname: str):
+        fname = str(PurePath(some_fname))
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
             try:
@@ -73,6 +75,7 @@ class TrajectoryTab(GeneralTab):
                 self._core.error.emit(repr(e))
             else:
                 self._core._model.append_object(((fname, data), short_name))
+                self._session.protect_filename(fname)
 
     @classmethod
     def standard_instance(cls):
@@ -110,6 +113,7 @@ class TrajectoryTab(GeneralTab):
             layout=partial(MultiPanel, left_panels=[TrajectoryInfo()]),
             label_text=label_text,
         )
+        the_tab._view.free_name.connect(session.free_filename)
         return the_tab
 
 

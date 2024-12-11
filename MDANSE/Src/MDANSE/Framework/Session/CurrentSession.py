@@ -35,7 +35,7 @@ class AbstractSession(ABC):
 class SessionSettings(AbstractSession):
     def __init__(self):
         super().__init__()
-        self.main_path = "."
+        self.main_path = os.path.abspath(".")
 
     def create_structured_project(self):
         self.relative_paths = {

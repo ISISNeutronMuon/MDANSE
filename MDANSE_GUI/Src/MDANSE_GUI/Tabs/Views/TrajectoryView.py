@@ -27,6 +27,7 @@ class TrajectoryView(QListView):
     item_details = Signal(tuple)
     item_name = Signal(str)
     error = Signal(str)
+    free_name = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -53,6 +54,9 @@ class TrajectoryView(QListView):
     def deleteNode(self):
         model = self.model()
         index = self.currentIndex()
+        node_number = model.itemFromIndex(index).data()
+        trajectory = model._nodes[node_number][0]
+        self.free_name.emit(str(trajectory))
         model.removeRow(index.row())
         self.item_details.emit(("", None))
 

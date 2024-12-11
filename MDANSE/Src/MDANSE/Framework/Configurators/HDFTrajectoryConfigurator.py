@@ -48,8 +48,11 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         self._original_input = value
 
         InputFileConfigurator.configure(self, value)
-
-        inputTraj = IInputData.create("HDFTrajectoryInputData", self["value"])
+        try:
+            inputTraj = IInputData.create("HDFTrajectoryInputData", self["value"])
+        except KeyError:
+            self.error_status = f"Could not use {value} as input trajectory"
+            return
 
         self["hdf_trajectory"] = inputTraj
 
