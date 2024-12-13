@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
+import copy
 import json
 
 import numpy as np
@@ -162,8 +163,17 @@ class TrajectoryFilter(IJob):
 
         filter = filter_class(**filter_attributes)
 
+        trajectories = copy.deepcopy(self.atomic_trajectory_array)
+
         # Apply filter
-        filtered_coords = apply(filter, self.atomic_trajectory_array)
+        filtered_coords = apply(filter, trajectories)
+
+        compare_fft(
+            self.atomic_trajectory_array,
+            filtered_coords,
+            N=filter_attributes["n_steps"],
+            fs=(filter_attributes["time_step_ps"])**(-1)
+        )
 
         # Create trajectory writer object
         self._output_trajectory = TrajectoryWriter(
@@ -201,11 +211,13 @@ def apply(filter, trajectories) -> np.ndarray:
     """
 
     """
-    for atom in trajectories:
+    output_trajectory_array = np.zeros(trajectories.shape)
+
+    for at, atom in enumerate(trajectories):
         x, y, z = atom
-        for component in (x, y, z):
-            component = filter.apply(component)
-    return trajectories
+        for i, component in ((0, x), (1, y), (2, z)):
+            output_trajectory_array[at][i] = filter.apply(component)
+    return output_trajectory_array
 
 def write_filtered_trajectory(parent_configuration, nsteps: int, filtered_coordinates: np.ndarray, output_trajectory: TrajectoryWriter) -> None:
     """

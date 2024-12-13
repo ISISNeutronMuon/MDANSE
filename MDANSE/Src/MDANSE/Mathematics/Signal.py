@@ -530,6 +530,9 @@ class Filter:
         """
         frequency (pHz) to energy (meV)
         """
+        if isinstance(freq, list):
+            return (np.array(freq) * 1e12) * cls._freq_to_mev
+
         return (freq * 1e12) * cls._freq_to_mev
 
     @classmethod
@@ -827,6 +830,7 @@ class Comb(Filter):
 FILTERS = (Butterworth, ChebyshevTypeI, ChebyshevTypeII, Elliptical, Bessel, Notch, Peak, Comb)
 
 filter_map = {filter_class.__name__: filter_class for filter_class in FILTERS}
+
 
 if __name__=="__main__":
     filter_class = filter_map["ChebyshevTypeI"]
