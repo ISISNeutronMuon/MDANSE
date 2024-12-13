@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import numpy as np
-import scipy.signal
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
     QLineEdit,
@@ -32,7 +31,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import TrajectoryFilterConfigurator#, FILTERS
+from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import TrajectoryFilterConfigurator
 from MDANSE.Mathematics.Signal import Filter, filter_map, DEFAULT_FILTER_CUTOFF
 import matplotlib.pyplot as mpl
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -152,7 +151,7 @@ class FilterDesigner(QDialog):
                 [self.cutoff_freq_widget.value(),
                  self.bound_freq_widget.value()]
             )
-        )
+        ).tolist()
 
     def edit_current_filter(self, key: str, value: any) -> None:
         """Re-renders the filter graph preview and updates the current filter settings when a setting is edited.
