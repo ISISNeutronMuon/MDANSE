@@ -168,13 +168,6 @@ class TrajectoryFilter(IJob):
         # Apply filter
         filtered_coords = apply(filter, trajectories)
 
-        compare_fft(
-            self.atomic_trajectory_array,
-            filtered_coords,
-            N=filter_attributes["n_steps"],
-            fs=(filter_attributes["time_step_ps"])**(-1)
-        )
-
         # Create trajectory writer object
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
