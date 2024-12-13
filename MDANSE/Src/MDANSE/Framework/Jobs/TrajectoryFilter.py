@@ -154,6 +154,12 @@ class TrajectoryFilter(IJob):
         filter_config = json.loads(self.configuration["trajectory_filter"]['value'])
         filter_class, filter_attributes = filter_map[filter_config["filter"]], filter_config["attributes"]
 
+        if {"n_steps", "time_step_ps"} not in set(filter_attributes.keys()):
+            filter_attributes.update({
+                "n_steps": self.configuration["trajectory"]["length"],
+                "time_step_ps": self.configuration["trajectory"]["md_time_step"],
+            })
+
         filter = filter_class(**filter_attributes)
 
         # Apply filter
@@ -184,10 +190,10 @@ class TrajectoryFilter(IJob):
         self._output_trajectory.close()
 
         # Write the filter metadata to output
-        HDFFormat.HDFFormat.write(
-            self.configuration["output_files"]["file"],
-            filter.__repr__()
-        )
+        #HDFFormat.HDFFormat.write(
+        #    self.configuration["output_files"]["file"],
+        #    filter.__repr__()
+        #)
 
         super().finalize()
 
