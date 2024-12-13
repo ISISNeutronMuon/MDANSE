@@ -97,12 +97,12 @@ class FilterDesigner(QDialog):
             }
         }
 
-    def clear_settings_grid(self) -> None:
+    def clear_settings_grid(self, grid: QGridLayout) -> None:
         """Clear all widgets contained in the settings grid layout.
 
         """
-        for i in reversed(range(self._setting_grid_layout.count())):
-            widget = self._setting_grid_layout.itemAt(i).widget()
+        for i in reversed(range(grid.count())):
+            widget = grid.itemAt(i).widget()
             if widget:
                 widget.deleteLater()
 
@@ -132,12 +132,16 @@ class FilterDesigner(QDialog):
         filter_type : str
             The name of the filter class.
         """
-        self.clear_settings_grid()
+        self.clear_settings_grid(self._setting_grid_layout)
         self.set_filter(filter_type)
         self.make_settings_grid(
-            filter_map[self._settings["filter"]]
+            filter_map[self._settings["filter"]],
+            self._setting_grid_layout
         )
-        self.render_canvas_assets()
+
+        # Check figure attribute exists before attempting to render
+        if hasattr(self, "_figure"):
+            self.render_canvas_assets()
 
     def get_frequency_bounds(self):
         """
@@ -251,7 +255,7 @@ class FilterDesigner(QDialog):
         for i in range(n):
             yield ((i, 0), (i, 1))
 
-    def make_settings_grid(self, filter: Filter) -> None:
+    def make_settings_grid(self, filter: Filter, grid: QGridLayout) -> None:
         """Creates the filter settings grid layout.
 
         Parameters
@@ -267,31 +271,38 @@ class FilterDesigner(QDialog):
             self.generate_grid_indices(len(setting_items))
         )
 
-        item_count = 0
-        for key, value in setting_items:
-            grid_pos = indices.pop(0)
-            label = QLabel(key.replace('_', ' ').capitalize())
-            self._setting_grid_layout.addWidget(label, grid_pos[0][0], grid_pos[0][1])
-            setting_widget = self.setting_to_widget(setting_key=key, val_group=value)
-            # Store widget in object
-            self.__dict__.update({f'{key}_label': label})
-            self.__dict__.update({f'{key}_widget': setting_widget})
-            self._setting_grid_layout.addWidget(setting_widget, grid_pos[1][0], grid_pos[1][1])
-            item_count += 1
+        try:
+            item_count = 0
+            for key, value in setting_items:
+                grid_pos = indices.pop(0)
+                label = QLabel(key.replace('_', ' ').capitalize())
+                grid.addWidget(label, grid_pos[0][0], grid_pos[0][1])
+                setting_widget = self.setting_to_widget(setting_key=key, val_group=value)
+                # Store widget in object
+                self.__dict__.update({f'{key}_label': label})
+                self.__dict__.update({f'{key}_widget': setting_widget})
+                grid.addWidget(setting_widget, grid_pos[1][0], grid_pos[1][1])
+                item_count += 1
 
-        # For non-IIR filters, add frequency bound spinbox in case designed filter is bandpass/stop
-        if filter.__name__ not in {'Notch', 'Peaks', 'Comb'}:
-            self.bound_freq_widget = QDoubleSpinBox()
-            step = 1.0
-            widget = self.bound_freq_widget
-            widget.setMaximum(1000)
-            widget.setMinimum(step)
-            widget.setSingleStep(step)
-            widget.setValue(DEFAULT_FILTER_CUTOFF*0.5)
-            widget.setEnabled(False)
-            widget.valueChanged.connect(lambda val: self.edit_current_filter('cutoff_freq', val))
-            self._setting_grid_layout.addWidget(self.bound_freq_widget, grid_pos[1][0]+1, grid_pos[1][1])
-            item_count += 1
+            # For non-IIR filters, add frequency bound spinbox in case designed filter is bandpass/stop
+            if filter.__name__ not in {'Notch', 'Peaks', 'Comb'}:
+                self.bound_freq_widget = QDoubleSpinBox()
+                step = 1.0
+                widget = self.bound_freq_widget
+                widget.setMaximum(1000)
+                widget.setMinimum(step)
+                widget.setSingleStep(step)
+                widget.setValue(DEFAULT_FILTER_CUTOFF*0.5)
+                widget.setEnabled(False)
+                widget.valueChanged.connect(lambda val: self.edit_current_filter('cutoff_freq', val))
+                grid.addWidget(self.bound_freq_widget, grid_pos[1][0]+1, grid_pos[1][1])
+                item_count += 1
+
+        except RuntimeError:
+            # C++ object wrapping grid layout may have been deleted - recreate grid layout and try again
+            self._setting_grid_layout = QGridLayout()
+            self.update_filter(filter.__name__)
+
 
     def toggle_bound_frequencies(self, on: bool=True):
         """
@@ -314,36 +325,42 @@ class FilterDesigner(QDialog):
         self._preferences.update({key: widget.currentText()})
         return widget
 
-    def make_preferences_grid(self) -> None:
+    def make_preferences_grid(self, grid: QGridLayout) -> None:
         """
 
         """
-        # Y-axis in amplitude or decibels
-        self._preferences_grid_layout.addWidget(QLabel("Response units"), 0, 0)
-        key_0 = "response_units"
-        widget_0 = self.add_preference_combobox(key_0, ("amplitude", "dB"))
-        widget_0.currentTextChanged.connect(lambda val: self.edit_preferences(key_0, val))
-        self._preferences_grid_layout.addWidget(widget_0, 0, 1)
+        try:
+            # Y-axis in amplitude or decibels
+            grid.addWidget(QLabel("Response units"), 0, 0)
+            key_0 = "response_units"
+            widget_0 = self.add_preference_combobox(key_0, ("amplitude", "dB"))
+            widget_0.currentTextChanged.connect(lambda val: self.edit_preferences(key_0, val))
+            grid.addWidget(widget_0, 0, 1)
 
-        # X-axis in angular frequency or energy (meV)
-        self._preferences_grid_layout.addWidget(QLabel("X-axis units"), 1, 0)
-        key_1 = "xaxis_units"
-        widget_1 = self.add_preference_combobox(key_1, ("pHz", "meV"))
-        widget_1.currentTextChanged.connect(lambda val: self.edit_preferences(key_1, val))
-        self._preferences_grid_layout.addWidget(widget_1, 1, 1)
+            # X-axis in angular frequency or energy (meV)
+            grid.addWidget(QLabel("X-axis units"), 1, 0)
+            key_1 = "xaxis_units"
+            widget_1 = self.add_preference_combobox(key_1, ("pHz", "meV"))
+            widget_1.currentTextChanged.connect(lambda val: self.edit_preferences(key_1, val))
+            grid.addWidget(widget_1, 1, 1)
 
-        # Display filter transfer function in terms of analogue or digital filter coefficients
-        self._preferences_grid_layout.addWidget(QLabel("Filter coefficients"), 2, 0)
-        key_2 = "coeff_type"
-        widget_2 = self.add_preference_combobox(key_2, ("analog", "digital"))
-        widget_2.currentTextChanged.connect(lambda val: self.edit_preferences(key_2, val))
-        self._preferences_grid_layout.addWidget(widget_2, 2, 1)
+            # Display filter transfer function in terms of analogue or digital filter coefficients
+            grid.addWidget(QLabel("Filter coefficients"), 2, 0)
+            key_2 = "coeff_type"
+            widget_2 = self.add_preference_combobox(key_2, ("analog", "digital"))
+            widget_2.currentTextChanged.connect(lambda val: self.edit_preferences(key_2, val))
+            grid.addWidget(widget_2, 2, 1)
 
-        # Display trajectory position power spectral attentuation for comparison
-        self._preferences_grid_layout.addWidget(QLabel("Show trajectory attenuation"), 3, 0)
-        attenuation_checkbox = QCheckBox()
-        self._preferences_grid_layout.addWidget(attenuation_checkbox, 3, 1)
-        attenuation_checkbox.setEnabled(False)
+            # Display trajectory position power spectral attentuation for comparison
+            grid.addWidget(QLabel("Show trajectory attenuation"), 3, 0)
+            attenuation_checkbox = QCheckBox()
+            grid.addWidget(attenuation_checkbox, 3, 1)
+            attenuation_checkbox.setEnabled(False)
+
+        except RuntimeError:
+            # C++ object wrapping grid layout may have been deleted - recreate grid layout and try again
+            self._preferences_grid_layout = QGridLayout()
+            self.make_preferences_grid(self._preferences_grid_layout)
 
 
     def create_settings_layout(self, widget_area: QVBoxLayout) -> None:
@@ -372,12 +389,12 @@ class FilterDesigner(QDialog):
 
         # Add the filter settings grid layout
         filter_class = filter_map[self._settings["filter"]]
-        self.make_settings_grid(filter_class)
+        self.make_settings_grid(filter_class, self._setting_grid_layout)
 
         widget_area.addLayout(self._setting_grid_layout)
 
         # Add the filter designer preferences grid layout
-        self.make_preferences_grid()
+        self.make_preferences_grid(self._preferences_grid_layout)
         widget_area.addLayout(self._preferences_grid_layout)
 
         # Add buttons
