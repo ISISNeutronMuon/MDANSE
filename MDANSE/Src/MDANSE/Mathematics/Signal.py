@@ -347,6 +347,17 @@ class Filter:
     # Frequency response of filter
     _freq_response = None
 
+    # Stores a custom frequency range as a linear series
+    _custom_freq_range = None
+
+    class FrequencyRangeMethod(Enum):
+        """
+
+        """
+        Auto: int = 0,
+        FFT: int = 1,
+        Custom: int = 2
+
     def __init__(self, **kwargs):
         if not hasattr(self, 'default_settings'):
             self.__class__.set_defaults()
@@ -400,13 +411,17 @@ class Filter:
         return self._freq_response
 
     @freq_response.setter
-    def freq_response(self, expr: TransferFunction) -> None:
+    def freq_response(self, expr: TransferFunction, custom_range: np.ndarray=None) -> None:
         """Calculates the frequency response of the filter from the filter's transfer function numerator and denominator coefficients.
 
         :Parameters:
             #. expr (np.array): the rational polynomial expression for the filter transfer function, in terms of its numerator and denominator coefficients
         """
-        freqs = signal.freqs(*expr, worN=np.abs(self.frequency_range(self.n_steps, self.sample_freq**(-1))))
+        if (custom_range and isinstance(custom_range, np.ndarray)):
+            range = custom_range
+        else:
+            range = self.frequency_range(self.n_steps, self.sample_freq**(-1))
+        freqs = signal.freqs(*expr, worN=np.abs(range))
         self._freq_response = self.FrequencyDomain(*freqs)
 
     @property
@@ -431,6 +446,20 @@ class Filter:
 
         """
         return self.sample_freq/2
+
+    @property
+    def custom_freq_range(self) -> np.ndarray:
+        """
+
+        """
+        return self._custom_freq_range
+
+    @custom_freq_range.setter
+    def custom_freq_range(self, range: np.ndarray) -> None:
+        """
+
+        """
+        self._custom_freq_range = range
 
     @staticmethod
     def frequency_range(N: int, timestep: float, resize_to: float=1000, symmetric: bool=False) -> np.ndarray:
@@ -532,16 +561,19 @@ class Filter:
         frequency (pHz) to energy (meV)
         """
         if isinstance(freq, list):
-            return (np.array(freq) * 1e12) * cls._freq_to_mev
+            return (2*np.pi)**(-1) * (np.array(freq) * 1e12) * cls._freq_to_mev
 
-        return (freq * 1e12) * cls._freq_to_mev
+        return (2*np.pi)**(-1) * (freq * 1e12) * cls._freq_to_mev
 
     @classmethod
     def energy_to_freq(cls, energy: float | np.ndarray) -> float | np.ndarray:
         """
         energy (meV) to frequency (pHz)
         """
-        return (energy * 1/cls._freq_to_mev) * 1e-12
+        if isinstance(energy, list):
+            return (np.array(energy) * 1/((2*np.pi)**(-1) * cls._freq_to_mev)) * 1e-12
+
+        return (energy * 1/((2*np.pi)**(-1) * cls._freq_to_mev)) * 1e-12
 
 
 class Butterworth(Filter):
@@ -849,8 +881,6 @@ def power_spectrum(
 
     output = dict()
     output["romega"] = instrument_resolution["romega"]
-
-
 
     for element in atom_selection["unique_names"]:
         output["pacf_%s" % element] = np.zeros(np.array(range(frames["n_frames"])).shape)

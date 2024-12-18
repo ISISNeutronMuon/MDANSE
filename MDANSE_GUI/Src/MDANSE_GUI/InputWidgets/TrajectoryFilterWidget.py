@@ -13,8 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import copy
+
 import numpy as np
-from qtpy.QtCore import Qt, Slot
+from scipy import signal
+from qtpy.QtCore import Qt, Slot, QTimer, QCoreApplication
 from qtpy.QtWidgets import (
     QLineEdit,
     QPushButton,
@@ -29,10 +32,11 @@ from qtpy.QtWidgets import (
     QDoubleSpinBox,
     QTextEdit,
     QWidget,
+    QMessageBox
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import TrajectoryFilterConfigurator
-from MDANSE.Mathematics.Signal import Filter, filter_map, DEFAULT_FILTER_CUTOFF
+from MDANSE.Mathematics.Signal import Filter, filter_map, DEFAULT_FILTER_CUTOFF, power_spectrum
 import matplotlib.pyplot as mpl
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
@@ -58,6 +62,7 @@ class FilterDesigner(QDialog):
     _setting_grid_layout = QGridLayout()
     _preferences_grid_layout = QGridLayout()
     _preferences = dict()
+    _trajectory_attenuation = None
 
     def __init__(self, field: QLineEdit, configurator: TrajectoryFilterConfigurator, parent, *args, **kwargs):
         """
@@ -77,6 +82,13 @@ class FilterDesigner(QDialog):
 
         self.set_filter(self._configurator.filter.__name__)
         self.create_designer()
+
+    def find_configuration_property(self, key):
+        """
+
+        """
+        config = self._configurator._configurable._configuration
+        return config.get(key, None)
 
     def set_filter(self, filter_type: str) -> None:
         """Set up a new filter settings dictionary.
@@ -190,6 +202,19 @@ class FilterDesigner(QDialog):
             The value of the edited preference.
         """
         self._preferences.update({key: value})
+
+        # Load trajectory attenuation
+        if key == "show_attenuation" and not self._trajectory_attenuation:
+            self._trajectory_attenuation = power_spectrum(
+                self.find_configuration_property("trajectory"),
+                self.find_configuration_property("frames"),
+                self.find_configuration_property("projection"),
+                self.find_configuration_property("atom_selection"),
+                self.find_configuration_property("weights"),
+                self.find_configuration_property("instrument_resolution"),
+                self._settings["attributes"]["n_steps"]
+            )
+
         self.render_canvas_assets()
 
     def setting_to_widget(self, setting_key: str, val_group: dict) -> QWidget:
@@ -352,9 +377,12 @@ class FilterDesigner(QDialog):
 
             # Display trajectory position power spectral attentuation for comparison
             grid.addWidget(QLabel("Show trajectory attenuation"), 3, 0)
+            key_4 = "show_attenuation"
             attenuation_checkbox = QCheckBox()
+            self._preferences.update({key_4: attenuation_checkbox.isChecked()})
+            attenuation_checkbox.stateChanged.connect(lambda val: self.edit_preferences(key_4, val))
             grid.addWidget(attenuation_checkbox, 3, 1)
-            attenuation_checkbox.setEnabled(False)
+            attenuation_checkbox.setEnabled(True)
 
         except RuntimeError:
             # C++ object wrapping grid layout may have been deleted - recreate grid layout and try again
@@ -407,7 +435,8 @@ class FilterDesigner(QDialog):
     def render_graph(self,
                      freqs: Filter.FrequencyDomain=TrajectoryFilterConfigurator._filter.freq_response,
                      db_response: bool=False,
-                     energies: bool=False) -> None:
+                     energies: bool=False,
+                     show_attenuation: bool=False) -> None:
         """Renders the graph of the designed filter frequency response.
 
         Parameters
@@ -420,6 +449,24 @@ class FilterDesigner(QDialog):
         self._figure.clear()
 
         x = freqs.frequencies
+
+        # Check if we are displaying trajectory power spectral attenuation alongside filter response
+        if show_attenuation:
+            values = lambda v, new_len: signal.resample(v, new_len) * (v.max()**(-1))
+            raw_power_spectrum = copy.deepcopy(self._trajectory_attenuation)
+            raw_power_spectrum_energies, raw_power_spectrum_values = raw_power_spectrum
+
+            # Resample trajectory power spectrum energies (x-axis)
+            power_spectrum_energies = np.linspace(raw_power_spectrum_energies.min(), raw_power_spectrum_energies.max(), len(x))
+
+            # Resample trajectory power spectrum (y-axis)
+            ps = values(raw_power_spectrum_values, len(x))
+
+            # Compute power spectral attenuation due to filter (multiplicative)
+            attenuated_ps = ps * freqs.magnitudes
+
+            power_spectrum_values = 20 * np.log10(abs(ps)) if db_response else ps
+            attenuation_values = 20 * np.log10(abs(attenuated_ps)) if db_response else attenuated_ps
 
         axes = self._figure.add_axes([0.1, 0.1, 0.8, 0.8])
         axes.plot(
@@ -471,9 +518,11 @@ class FilterDesigner(QDialog):
         """
 
         """
+        # Set preferences
         analog_filter = self._preferences["coeff_type"] == "analog"
         db_response = self._preferences["response_units"] == "dB"
         energies = self._preferences["xaxis_units"] == "meV"
+        show_attenuation = self._preferences.get("show_attenuation", False)
 
         # Preview instantiation of the selected filter
         filter_class = filter_map[self._settings["filter"]]
@@ -482,7 +531,7 @@ class FilterDesigner(QDialog):
         numerator, denominator = filter_preview.to_digital_coeffs() if not analog_filter else filter_preview.coeffs
 
         # Render the filter graph and text
-        self.render_graph(filter_preview.freq_response, db_response=db_response, energies=energies)
+        self.render_graph(filter_preview.freq_response, db_response=db_response, energies=energies, show_attenuation=show_attenuation)
         self.render_graph_text(
             filter_class.rational_polynomial_string(numerator, denominator, analog=analog_filter),
             self._settings["attributes"].get("cutoff_freq", DEFAULT_FILTER_CUTOFF),
