@@ -105,13 +105,7 @@ class TrajectoryFilter(IJob):
                 self._selected_atoms.append(self._atoms[idx])
         self._selected_atoms = AtomGroup(self._selected_atoms)
 
-        self.atomic_trajectory_array = np.zeros_like(
-            np.zeros(3*len(self._atoms)*len(self.configuration["frames"]["value"])).reshape((
-                len(self._atoms),
-                3,
-                len(self.configuration["frames"]["value"])
-            ))
-        )
+        self.atomic_trajectory_array = np.zeros((len(self._atoms), 3, len(self.configuration["frames"]["value"])))
 
     def run_step(self, index):
         """
