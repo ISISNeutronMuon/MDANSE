@@ -172,7 +172,7 @@ class TrajectoryFilter(IJob):
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
             self.configuration["trajectory"]["instance"].chemical_system,
-            self.numberOfSteps,
+            filter_attributes["n_steps"],
             self._selected_atoms.atom_list,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
