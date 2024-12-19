@@ -578,7 +578,7 @@ class Filter:
         energy (meV) to frequency (pHz)
         """
         if isinstance(energy, list):
-            return (np.array(energy) * 1/(cls._freq_to_mev)) * 1e-12
+            return (np.array(energy) * 1/((2*np.pi)**(-1) * cls._freq_to_mev)) * 1e-12
 
         return (energy * 1/((2*np.pi)**(-1) * cls._freq_to_mev)) * 1e-12
 

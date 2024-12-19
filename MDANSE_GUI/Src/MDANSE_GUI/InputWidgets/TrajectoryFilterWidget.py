@@ -231,18 +231,19 @@ class FilterDesigner(QDialog):
         raw_power_spectrum = copy.deepcopy(self._trajectory_power_spectrum)
         raw_power_spectrum_energies, raw_power_spectrum_values = raw_power_spectrum
 
-        # Resample trajectory power spectrum energies (x-axis)
+        # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain
         power_spectrum_energies = np.linspace(raw_power_spectrum_energies.min(), raw_power_spectrum_energies.max(), len(response.frequencies))
+        power_spectrum_freqs = Filter.energy_to_freq(power_spectrum_energies)
+
+        # Set custom frequency range on filter object
+        filter.custom_freq_range = power_spectrum_freqs
+        filter.freq_response = (filter.coeffs, Filter.FrequencyRangeMethod.Custom)
 
         # Resample and normalise trajectory power spectrum (y-axis)
         ps = values(raw_power_spectrum_values, len(response.frequencies))
 
         # Compute power spectral attenuation due to filter (multiplicative)
-        attenuated_ps = ps * response.magnitudes
-
-        # Set custom frequency range on filter object
-        filter.custom_freq_range = Filter.energy_to_freq(power_spectrum_energies)
-        filter.freq_response = (filter.coeffs, Filter.FrequencyRangeMethod.Custom)
+        attenuated_ps = ps * filter.freq_response.magnitudes
 
         return (ps, attenuated_ps)
 
