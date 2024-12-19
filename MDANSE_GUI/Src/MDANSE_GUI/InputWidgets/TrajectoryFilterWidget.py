@@ -465,8 +465,8 @@ class FilterDesigner(QDialog):
                      freqs: Filter.FrequencyDomain=TrajectoryFilterConfigurator._filter.freq_response,
                      db_response: bool=False,
                      energies: bool=False,
-                     trajectory_power_spectrum: Tuple[np.ndarray, np.ndarray]=None,
-                     show_attenuation: bool=False) -> None:
+                     trajectory_power_spectrum: Tuple[np.ndarray, np.ndarray]=None
+        ) -> None:
         """Renders the graph of the designed filter frequency response.
 
         Parameters
