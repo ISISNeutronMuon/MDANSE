@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import copy
+from typing import Tuple
 
 import numpy as np
 from scipy import signal
@@ -62,7 +63,7 @@ class FilterDesigner(QDialog):
     _setting_grid_layout = QGridLayout()
     _preferences_grid_layout = QGridLayout()
     _preferences = dict()
-    _trajectory_attenuation = None
+    _trajectory_power_spectrum = None
 
     def __init__(self, field: QLineEdit, configurator: TrajectoryFilterConfigurator, parent, *args, **kwargs):
         """
@@ -204,8 +205,8 @@ class FilterDesigner(QDialog):
         self._preferences.update({key: value})
 
         # Load trajectory attenuation
-        if key == "show_attenuation" and not self._trajectory_attenuation:
-            self._trajectory_attenuation = power_spectrum(
+        if key == "show_attenuation" and not self._trajectory_power_spectrum:
+            self._trajectory_power_spectrum = power_spectrum(
                 self.find_configuration_property("trajectory"),
                 self.find_configuration_property("frames"),
                 self.find_configuration_property("projection"),
@@ -216,6 +217,34 @@ class FilterDesigner(QDialog):
             )
 
         self.render_canvas_assets()
+
+    def set_trajectory_power_spectrum(self, filter: Filter) -> Tuple[np.ndarray, np.ndarray]:
+        """
+
+        """
+        response = filter.freq_response
+
+        # Lambda to resample and normalise input values
+        values = lambda a, new_len: signal.resample(a, new_len) * (a.max() ** (-1))
+
+        # Trajectory power spectrum data
+        raw_power_spectrum = copy.deepcopy(self._trajectory_power_spectrum)
+        raw_power_spectrum_energies, raw_power_spectrum_values = raw_power_spectrum
+
+        # Resample trajectory power spectrum energies (x-axis)
+        power_spectrum_energies = np.linspace(raw_power_spectrum_energies.min(), raw_power_spectrum_energies.max(), len(response.frequencies))
+
+        # Resample and normalise trajectory power spectrum (y-axis)
+        ps = values(raw_power_spectrum_values, len(response.frequencies))
+
+        # Compute power spectral attenuation due to filter (multiplicative)
+        attenuated_ps = ps * response.magnitudes
+
+        # Set custom frequency range on filter object
+        filter.custom_freq_range = Filter.energy_to_freq(power_spectrum_energies)
+        filter.freq_response = (filter.coeffs, Filter.FrequencyRangeMethod.Custom)
+
+        return (ps, attenuated_ps)
 
     def setting_to_widget(self, setting_key: str, val_group: dict) -> QWidget:
         """Converts the setting dictionary to the corresponding setting widget and sets up connections.
@@ -327,7 +356,6 @@ class FilterDesigner(QDialog):
             self._setting_grid_layout = QGridLayout()
             self.update_filter(filter.__name__)
 
-
     def toggle_bound_frequencies(self, on: bool=True):
         """
 
@@ -436,6 +464,7 @@ class FilterDesigner(QDialog):
                      freqs: Filter.FrequencyDomain=TrajectoryFilterConfigurator._filter.freq_response,
                      db_response: bool=False,
                      energies: bool=False,
+                     trajectory_power_spectrum: Tuple[np.ndarray, np.ndarray]=None,
                      show_attenuation: bool=False) -> None:
         """Renders the graph of the designed filter frequency response.
 
@@ -450,30 +479,14 @@ class FilterDesigner(QDialog):
 
         x = freqs.frequencies
 
-        # Check if we are displaying trajectory power spectral attenuation alongside filter response
-        if show_attenuation:
-            values = lambda v, new_len: signal.resample(v, new_len) * (v.max()**(-1))
-            raw_power_spectrum = copy.deepcopy(self._trajectory_attenuation)
-            raw_power_spectrum_energies, raw_power_spectrum_values = raw_power_spectrum
-
-            # Resample trajectory power spectrum energies (x-axis)
-            power_spectrum_energies = np.linspace(raw_power_spectrum_energies.min(), raw_power_spectrum_energies.max(), len(x))
-
-            # Resample trajectory power spectrum (y-axis)
-            ps = values(raw_power_spectrum_values, len(x))
-
-            # Compute power spectral attenuation due to filter (multiplicative)
-            attenuated_ps = ps * freqs.magnitudes
-
-            power_spectrum_values = 20 * np.log10(abs(ps)) if db_response else ps
-            attenuation_values = 20 * np.log10(abs(attenuated_ps)) if db_response else attenuated_ps
-
         axes = self._figure.add_axes([0.1, 0.1, 0.8, 0.8])
-        axes.plot(
-            x,
-            20 * np.log10(abs(freqs.magnitudes)) if db_response else freqs.magnitudes,
-            label="Filter response"
-        )
+        axes.plot(x, 20 * np.log10(abs(freqs.magnitudes)) if db_response else freqs.magnitudes, label="Filter response")
+
+        # Conditionally display trajectory power spectral attenuation
+        if trajectory_power_spectrum:
+            ps, attenuated_ps = trajectory_power_spectrum
+            axes.plot(x, 20 * np.log10(abs(ps)) if db_response else ps, label="Trajectory response", color="grey")
+            axes.plot(x, 20 * np.log10(abs(attenuated_ps)) if db_response else attenuated_ps, label="Attenuation", color="black")
 
         # Conditionally convert frequencies (pHz) to energies (meV)
         if energies:
@@ -483,6 +496,7 @@ class FilterDesigner(QDialog):
         axes.set_xlabel("Energy (meV)" if energies else "Frequency (pHz)")
         axes.set_ylabel("Magnitude (dB)" if db_response else "Amplitude")
 
+        axes.legend(loc="best")
         axes.grid(True)
 
         self._figure.canvas.draw()
@@ -528,10 +542,14 @@ class FilterDesigner(QDialog):
         filter_class = filter_map[self._settings["filter"]]
         filter_preview = filter_class(**self._settings["attributes"])
 
+        # Check if we are displaying trajectory power spectral attenuation alongside filter response
+        if show_attenuation:
+            ps, attenuated_ps = self.set_trajectory_power_spectrum(filter_preview)
+
         numerator, denominator = filter_preview.to_digital_coeffs() if not analog_filter else filter_preview.coeffs
 
         # Render the filter graph and text
-        self.render_graph(filter_preview.freq_response, db_response=db_response, energies=energies, show_attenuation=show_attenuation)
+        self.render_graph(filter_preview.freq_response, db_response=db_response, energies=energies, trajectory_power_spectrum=(ps, attenuated_ps) if show_attenuation else None)#, show_attenuation=show_attenuation)
         self.render_graph_text(
             filter_class.rational_polynomial_string(numerator, denominator, analog=analog_filter),
             self._settings["attributes"].get("cutoff_freq", DEFAULT_FILTER_CUTOFF),

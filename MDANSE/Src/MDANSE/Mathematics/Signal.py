@@ -18,6 +18,7 @@ import numpy as np
 from enum import Enum
 from collections import namedtuple
 from functools import partial
+from typing import Tuple
 
 import scipy.signal
 from MDANSE.Mathematics.Arithmetic import weight
@@ -347,16 +348,15 @@ class Filter:
     # Frequency response of filter
     _freq_response = None
 
-    # Stores a custom frequency range as a linear series
+    # Stores a custom frequency range around which to compute the filter frequency response, as a linear series
     _custom_freq_range = None
 
     class FrequencyRangeMethod(Enum):
         """
 
         """
-        Auto: int = 0,
+        Custom: int = 0,
         FFT: int = 1,
-        Custom: int = 2
 
     def __init__(self, **kwargs):
         if not hasattr(self, 'default_settings'):
@@ -411,17 +411,24 @@ class Filter:
         return self._freq_response
 
     @freq_response.setter
-    def freq_response(self, expr: TransferFunction, custom_range: np.ndarray=None) -> None:
+    def freq_response(self, params: Tuple[TransferFunction, FrequencyRangeMethod]) -> None:
         """Calculates the frequency response of the filter from the filter's transfer function numerator and denominator coefficients.
 
         :Parameters:
             #. expr (np.array): the rational polynomial expression for the filter transfer function, in terms of its numerator and denominator coefficients
         """
-        if (custom_range and isinstance(custom_range, np.ndarray)):
-            range = custom_range
+        expr, method = params
+        methods = self.__class__.FrequencyRangeMethod
+
+        if method is methods.FFT:
+            freq_range = self.frequency_range(self.n_steps, self.sample_freq**(-1))
+        elif (self.custom_freq_range.any() and method is methods.Custom):
+            #
+            freq_range = self.custom_freq_range
         else:
-            range = self.frequency_range(self.n_steps, self.sample_freq**(-1))
-        freqs = signal.freqs(*expr, worN=np.abs(range))
+            RuntimeError(f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' property on the instance of {self.__class__}")
+
+        freqs = signal.freqs(*expr, worN=np.abs(freq_range))
         self._freq_response = self.FrequencyDomain(*freqs)
 
     @property
@@ -571,7 +578,7 @@ class Filter:
         energy (meV) to frequency (pHz)
         """
         if isinstance(energy, list):
-            return (np.array(energy) * 1/((2*np.pi)**(-1) * cls._freq_to_mev)) * 1e-12
+            return (np.array(energy) * 1/(cls._freq_to_mev)) * 1e-12
 
         return (energy * 1/((2*np.pi)**(-1) * cls._freq_to_mev)) * 1e-12
 
@@ -607,7 +614,7 @@ class Butterworth(Filter):
         self.coeffs = self.TransferFunction(
             *signal.butter(self.order,  self.cutoff_freq, btype=self.attenuation_type, analog=True, output='ba')
         )
-        self.freq_response = self.coeffs
+        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class ChebyshevTypeI(Filter):
@@ -645,7 +652,7 @@ class ChebyshevTypeI(Filter):
         self.coeffs = self.TransferFunction(
             *signal.cheby1(self.order, self.max_ripple,  self.cutoff_freq, btype=self.attenuation_type, analog=True, output='ba')
         )
-        self.freq_response = self.coeffs
+        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class ChebyshevTypeII(Filter):
@@ -683,7 +690,7 @@ class ChebyshevTypeII(Filter):
         self.coeffs = self.TransferFunction(
             *signal.cheby2(self.order, self.min_attenuation,  self.cutoff_freq, btype=self.attenuation_type,  analog=True, output='ba')
         )
-        self.freq_response = self.coeffs
+        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class Elliptical(Filter):
@@ -725,7 +732,7 @@ class Elliptical(Filter):
         self.coeffs = self.TransferFunction(
             *signal.ellip(self.order, self.max_ripple, self.min_attenuation, self.cutoff_freq, btype=self.attenuation_type,  analog=True, output='ba')
         )
-        self.freq_response = self.coeffs
+        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class Bessel(Filter):
@@ -764,7 +771,7 @@ class Bessel(Filter):
         self.coeffs = self.TransferFunction(
             *signal.bessel(self.order,  self.cutoff_freq, btype=self.attenuation_type, analog=True, output='ba', norm=self.norm)
         )
-        self.freq_response = self.coeffs
+        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class Notch(Filter):
@@ -792,7 +799,7 @@ class Notch(Filter):
         self.coeffs = self.TransferFunction(
             *signal.iirnotch(self.fundamental_freq, self.quality_factor)
         )
-        self.freq_response = self.coeffs
+        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class Peak(Filter):
@@ -820,7 +827,7 @@ class Peak(Filter):
         self.coeffs = self.TransferFunction(
             *signal.iirpeak(self.fundamental_freq, self.quality_factor)
         )
-        self.freq_response = self.coeffs
+        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class Comb(Filter):
@@ -858,7 +865,7 @@ class Comb(Filter):
         self.coeffs = self.TransferFunction(
             *signal.iircomb(self.fundamental_freq, self.quality_factor, ftype=self.comb_type, pass_zero=self.pass_zero)
         )
-        self.freq_response = self.coeffs
+        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 FILTERS = (Butterworth, ChebyshevTypeI, ChebyshevTypeII, Elliptical, Bessel, Notch, Peak, Comb)
 
@@ -949,6 +956,8 @@ if __name__=="__main__":
     os.chdir('..\\..\\..\\')
 
     data = numpy.loadtxt("Tests\\UnitTests\\TrajectoryFilter\\methane_hydrogen_position.csv")
+    ps = ()
+    ps_raw = ()
 
     N = 10000
     fs = 200.0
@@ -964,8 +973,11 @@ if __name__=="__main__":
 
     import matplotlib.pyplot as plt
 
+    x_raw = np.linspace(0, 646, 160)
+    x = np.linspace(0, 646, 1000)
+
     plt.figure(figsize=(10, 6))
-    plt.plot(pre_w, pre_amplitudes, label="pre-filter")
+    plt.plot(x_raw, ps_raw, label="RAW POWER SPECTRUM")
     plt.show()
 
     f = filter_class(**{
@@ -988,7 +1000,7 @@ if __name__=="__main__":
     post_amplitudes = (2 * (np.abs(post_filter_freqs["h"])) / N)[:np.int32(N/2)]
 
     plt.figure(figsize=(10, 6))
-    plt.plot(post_w, post_amplitudes, label="post-filter")
+    plt.plot(x, ps, label="UPSAMPLED POWER SPECTRUM")
     plt.show()
 
     # w0 = 2 * np.pi * 1.5
@@ -1013,7 +1025,7 @@ if __name__=="__main__":
 
     import matplotlib.pyplot as plt
     plt.figure(figsize=(10, 6))
-    # plt.plot(pre_w, pre_amplitudes, label="pre-filter")
+    #plt.plot(pre_w, pre_amplitudes, label="pre-filter")
     plt.show()
 
     #import matplotlib.pyplot as plt
