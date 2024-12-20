@@ -494,6 +494,8 @@ class FilterDesigner(QDialog):
             energy_ticks = np.int32(np.floor(Filter.freq_to_energy(axes.get_xticks())))
             axes.set_xticks(axes.get_xticks(), labels=energy_ticks)
 
+        axes.set_xlim(0.0, x.max())
+
         axes.set_xlabel("Energy (meV)" if energies else "Frequency (pHz)")
         axes.set_ylabel("Magnitude (dB)" if db_response else "Amplitude")
 
