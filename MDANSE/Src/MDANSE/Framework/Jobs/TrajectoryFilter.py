@@ -46,7 +46,7 @@ class TrajectoryFilter(IJob):
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "CorrelationFramesConfigurator",
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["instrument_resolution"] = (
