@@ -187,10 +187,15 @@ class TrajectoryFilter(IJob):
         self._output_trajectory.close()
 
         # Write the filter metadata to output
-        #HDFFormat.HDFFormat.write(
-        #    self.configuration["output_files"]["file"],
-        #    filter.__repr__()
-        #)
+        outputFile = h5py.File(self.configuration["output_files"]["file"], "r+")
+        outputFile.create_group("metadata").create_dataset(
+                "trajectory_filter",
+                (1,),
+                data=filter.__str__(),
+                dtype=h5py.string_dtype(),
+        )
+
+        outputFile.close()
 
         super().finalize()
 
