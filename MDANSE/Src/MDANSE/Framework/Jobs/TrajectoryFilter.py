@@ -38,7 +38,8 @@ class TrajectoryFilter(IJob):
     label = "Trajectory Filter"
 
     category = (
-        "Trajectory",
+        "Analysis",
+        "Dynamics",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
