@@ -352,7 +352,7 @@ class Filter:
     _custom_freq_range = None
 
     class FrequencyRangeMethod(Enum):
-        """
+        """Enumeration for custom (externally provided) and FFT-derived frequency ranges for plotting the filter response
 
         """
         Custom: int = 0,
@@ -380,8 +380,10 @@ class Filter:
         return signal.filtfilt(digital_coeffs.numerator, digital_coeffs.denominator, input)
 
     def to_digital_coeffs(self) -> TransferFunction:
-        """
+        """Returns the filter instance digital coefficients converted from analog, by performing a bilinear transform
 
+        :Returns:
+            #. TransferFunction: Transfer function for filter with digital coefficients
         """
         return self.TransferFunction(
             *signal.bilinear(self.coeffs.numerator, self.coeffs.denominator, self.sample_freq)
@@ -391,6 +393,8 @@ class Filter:
     def sample_freq(self) -> float:
         """Sample frequency in hertz.
 
+        :Returns:
+            #. float: Sample frequency
         """
         return self._sample_freq
 
@@ -423,7 +427,6 @@ class Filter:
         if method is methods.FFT:
             freq_range = self.frequency_range(self.n_steps, self.sample_freq**(-1))
         elif (self.custom_freq_range.any() and method is methods.Custom):
-            #
             freq_range = self.custom_freq_range
         else:
             RuntimeError(f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' property on the instance of {self.__class__}")
@@ -435,6 +438,8 @@ class Filter:
     def coeffs(self) -> TransferFunction:
         """Returns the filter's transfer function numerator and denominator coefficients.
 
+        :Returns:
+            #. TransferFunction: Coefficients for the filter transfer function
         """
         return self._coeffs
 
@@ -451,49 +456,65 @@ class Filter:
     def nyquist(self) -> float:
         """Returns the nyquist limit for the filter sample frequency.
 
+        :Returns:
+            #. float: Nyquist limit
         """
         return self.sample_freq/2
 
     @property
     def custom_freq_range(self) -> np.ndarray:
-        """
+        """Returns the custom frequency range for use with filter plotting
 
+        :Returns:
+            #. np.ndarray: Coefficients for the filter transfer function
         """
         return self._custom_freq_range
 
     @custom_freq_range.setter
     def custom_freq_range(self, range: np.ndarray) -> None:
-        """
+        """Set the custom frequency range for use with filter plotting
 
+        :Parameters:
+            #. range (np.ndarray): Array of values specifying the frequency range
         """
         self._custom_freq_range = range
 
     @staticmethod
-    def frequency_range(N: int, timestep: float, resize_to: float=1000, symmetric: bool=False) -> np.ndarray:
-        """
+    def frequency_range(N: int, timestep: float, resize_to: int=1000, symmetric: bool=False) -> np.ndarray:
+        """Obtain an FFT-based frequency range for the frequency domain of a discrete time signal with a given number of elements and a constant time step.
 
+        :Parameters:
+            #. N (int): Number of samples in input signal (to which filter will be applied to)
+            #. timestep (float): Input signal timestep in picoseconds
+            #. resize_to (int): Up- or down- sample the frequency range array to a given length
+            #. symmetric (bool): If true, retain symmetric property of frequencies, else take only one half of the frequencies
+        :Returns:
+            #. np.ndarray: Symbolic polynomial string
         """
         axis_frequencies = fftpack.fftfreq(N, timestep)
         limit = np.int32(np.floor(len(axis_frequencies)/2)) if not symmetric else -1
         return np.linspace(axis_frequencies[0], axis_frequencies[limit], resize_to)
 
     def set_filter_attributes(self, attributes: dict) -> None:
-        """
+        """Update filter instance attributes
 
+        :Parameters:
+            #. attributes (dict): Dictionary containing filter attributes
         """
         settings = self.default_settings
 
         for attr in settings.keys():
-            self.__dict__.update(
-                {
-                    attr: attributes.get(attr, settings[attr]['value'])
-                }
-            )
+            self.__dict__.update({attr: attributes.get(attr, settings[attr]['value'])})
 
     @staticmethod
     def polynomial_string(coeffs, unit) -> str:
-        """
+        """Formats a polynomial into a string that has a symbolic mathematical appearance.
 
+        :Parameters:
+            #. coeffs (np.ndarray): Array of polynomial coefficients
+            #. unit (str): String representation of the mathematical symbol corresponding to the S or Z planes
+        :Returns:
+            #. str: Symbolic polynomial string
         """
         if not coeffs.any():
             return ''
@@ -519,8 +540,14 @@ class Filter:
 
     @classmethod
     def rational_polynomial_string(cls, numerator, denominator, analog=True) -> dict[str, str]:
-        """
+        """Formats a transfer function rational polynomial into a pair of strings.
 
+        :Parameters:
+            #. numerator (np.ndarray): Array of coefficients representing the numerator of the transfer function
+            #. denominator (np.ndarray): Array of coefficients representing the denominator of the transfer function
+            #. analog (bool): The filter is analog (Laplace/S-domain) or digital (Z-domain)
+        :Returns:
+            #. dict[str, str]: Dictionary of string coefficients representing the transfer function rational polynomial
         """
         if analog:
             # Analogue (Laplace-domain) transfer function
@@ -533,17 +560,21 @@ class Filter:
         denominator_str = Filter.polynomial_string(denominator, cls.Z)
         return {"unit": 'Z', "numerator": numerator_str, "denominator": denominator_str}
 
-    def attributes_to_string(self, description):
-        """
+    def attributes_to_string(self, description) -> None:
+        """Formats the given filter attribute into a description string.
 
+        :Parameters:
+            #. str: The description of the attribute as a multiline string
         """
         settings = self.__class__.__dict__["default_settings"]
         for setting in settings.keys():
             description.append(f"  # {setting}\n  {settings[setting]["description"]}\n      {self.__dict__[setting]}\n\n")
 
     def __str__(self):
-        """
+        """Returns a string representation of the filter.
 
+        :Returns:
+            #. str: string representation of the filter
         """
         string_representation = [
             f"Trajectory filter of type {self.__class__.__name__} implemented with the following parameters:\n\n",
@@ -556,16 +587,22 @@ class Filter:
 
         return "".join(string_representation)
 
-    def to_json(self):
-        """
+    def to_json(self) -> dict:
+        """Returns a concise dictionary (json) representation of the filter.
 
+        :Returns:
+            #. dict: dictionary containing filter attributes
         """
         return {"Filter": self.__class__.__name__} | {k:v for k, v in self.__dict__.items() if k != "_freq_response"}
 
     @classmethod
     def freq_to_energy(cls, freq: float | np.ndarray) -> float | np.ndarray:
-        """
-        frequency (pHz) to energy (meV)
+        """Returns the energy value (or values) in millielectronvolts (meV), converted from frequency value (or values) in picohertz (pHz).
+
+        :Parameters:
+            #. freq (float | np.ndarray): frequency
+        :Returns:
+            #. float | np.ndarray: energy
         """
         if isinstance(freq, list):
             return (2*np.pi)**(-1) * (np.array(freq) * 1e12) * cls._freq_to_mev
@@ -574,8 +611,12 @@ class Filter:
 
     @classmethod
     def energy_to_freq(cls, energy: float | np.ndarray) -> float | np.ndarray:
-        """
-        energy (meV) to frequency (pHz)
+        """Returns the frequency value (or values) in millielectronvolts (meV), converted from energy value (or values) in millielectronvolts (meV).
+
+        :Parameters:
+            #. energy (float | np.ndarray): energy
+        :Returns:
+            #. float | np.ndarray: frequency
         """
         if isinstance(energy, list):
             return (np.array(energy) * 1/((2*np.pi)**(-1) * cls._freq_to_mev)) * 1e-12
@@ -589,7 +630,7 @@ class Butterworth(Filter):
     """
 
     @classmethod
-    def set_defaults(cls):
+    def set_defaults(cls) -> None:
         """Set up the default filter settings.
         """
         cls.default_settings = {
@@ -623,7 +664,7 @@ class ChebyshevTypeI(Filter):
     """
 
     @classmethod
-    def set_defaults(cls):
+    def set_defaults(cls) -> None:
         """Set up the default filter settings.
         """
         cls.default_settings = {
@@ -661,7 +702,7 @@ class ChebyshevTypeII(Filter):
     """
 
     @classmethod
-    def set_defaults(cls):
+    def set_defaults(cls) -> None:
         """Set up the default filter settings.
         """
         cls.default_settings = {
@@ -699,7 +740,7 @@ class Elliptical(Filter):
     """
 
     @classmethod
-    def set_defaults(cls):
+    def set_defaults(cls) -> None:
         """Set up the default filter settings.
         """
         cls.default_settings = {
@@ -741,7 +782,7 @@ class Bessel(Filter):
     """
 
     @classmethod
-    def set_defaults(cls):
+    def set_defaults(cls) -> None:
         """Set up the default filter settings.
         """
         cls.default_settings = {
@@ -779,7 +820,7 @@ class Notch(Filter):
     """
 
     @classmethod
-    def set_defaults(cls):
+    def set_defaults(cls) -> None:
         """Set up the default filter settings.
         """
         cls.default_settings = {
@@ -807,7 +848,7 @@ class Peak(Filter):
     """
 
     @classmethod
-    def set_defaults(cls):
+    def set_defaults(cls) -> None:
         """Set up the default filter settings.
         """
         cls.default_settings = {
@@ -835,7 +876,7 @@ class Comb(Filter):
     """
 
     @classmethod
-    def set_defaults(cls):
+    def set_defaults(cls) -> None:
         """Set up the default filter settings.
         """
         cls.default_settings = {
@@ -879,9 +920,19 @@ def power_spectrum(
         weights,
         instrument_resolution,
         n_steps
-):
-    """
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Returns the position power spectrum of a configuration's constituent atomic trajectories.
 
+    :Parameters:
+        #. trajectory ( ): atomic trajectory object
+        #. frames ( ):
+        #. projection ( ):
+        #. atom_selection ( ):
+        #. weights ( ):
+        #. instrument_resolution ( ):
+        #. n_steps (int): number of time steps in simulation
+    :Returns:
+        #. Tuple[np.ndarray, np.ndarray]: tuple containing the omegas (frequency range) and the corresponding power spectrum of the atomic trajectories
     """
     trajectory = trajectory["instance"]
     sorted_atoms = trajectory.chemical_system.atom_list
