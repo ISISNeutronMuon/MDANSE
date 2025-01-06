@@ -507,7 +507,7 @@ class Filter:
             self.__dict__.update({attr: attributes.get(attr, settings[attr]['value'])})
 
     @staticmethod
-    def polynomial_string(coeffs, unit) -> str:
+    def polynomial_string(coeffs, unit, analog: bool=True) -> str:
         """Formats a polynomial into a string that has a symbolic mathematical appearance.
 
         :Parameters:
@@ -522,11 +522,11 @@ class Filter:
         expr = ''
 
         for idx, coeff in enumerate(coeffs):
-            power = order - idx
+            power = order - idx if analog else -idx
             if coeff != 0:
-                if idx > 0:
+                if idx > 0 and coeff > 0:
                     expr += ' + '
-                elif coeff < 0:
+                elif idx > 0 and coeff < 0:
                     expr += ' - '
 
                 abs_coeff = abs(coeff)
@@ -556,8 +556,8 @@ class Filter:
             return {"unit": 'S', "numerator": numerator_str, "denominator": denominator_str}
 
         # Digital (Z-domain) transfer function
-        numerator_str = Filter.polynomial_string(numerator, cls.Z)
-        denominator_str = Filter.polynomial_string(denominator, cls.Z)
+        numerator_str = Filter.polynomial_string(numerator, cls.Z, False)
+        denominator_str = Filter.polynomial_string(denominator, cls.Z, False)
         return {"unit": 'Z', "numerator": numerator_str, "denominator": denominator_str}
 
     def attributes_to_string(self, description) -> None:
