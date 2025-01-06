@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import copy
-from typing import Tuple
+from typing import Tuple, Any
 
 import numpy as np
 from scipy import signal
@@ -84,9 +84,18 @@ class FilterDesigner(QDialog):
         self.set_filter(self._configurator.filter.__name__)
         self.create_designer()
 
-    def find_configuration_property(self, key):
-        """
+    def find_configuration_property(self, key) -> Any:
+        """Find a configurator value from a key string
 
+        Parameters
+        -------
+        key: str
+            Configuration key to get.
+
+        Returns
+        -------
+        Any
+            Configuration value.
         """
         config = self._configurator._configurable._configuration
         return config.get(key, None)
@@ -155,9 +164,13 @@ class FilterDesigner(QDialog):
         if hasattr(self, "_figure"):
             self.render_canvas_assets()
 
-    def get_frequency_bounds(self):
-        """
+    def get_frequency_bounds(self) -> list:
+        """Create a list representing the upper and lower bounds of the filter critical frequencies
 
+        Returns
+        -------
+        list :
+            List of length 2 containing the critical frequency bounds.
         """
         return np.array(
             sorted(
@@ -219,8 +232,18 @@ class FilterDesigner(QDialog):
         self.render_canvas_assets()
 
     def set_trajectory_power_spectrum(self, filter: Filter) -> Tuple[np.ndarray, np.ndarray]:
-        """
+        """Generate an appropriately resampled power spectrum for the input trajectory,
+        as well as the multiplicative attenuation effect of the designed filter.
 
+        Parameters:
+        ----------
+        filter: Filter
+            The Filter class for the designed filter
+
+        Returns:
+        -------
+        Tuple[np.ndarray, np.ndarray]
+            Trajectory power spectrum and the attenuated power spectrum due to the designed filter response
         """
         response = filter.freq_response
 
@@ -257,6 +280,11 @@ class FilterDesigner(QDialog):
         val_group : dict
             A dictionary containing the default value ("value" field) for the setting
             and the range of accepted values ("values" field) if applicable.
+
+        Returns
+        -------
+        QWidget:
+            Setting widget with tooltip
         """
         widget = None
         setting = val_group["value"]
@@ -358,8 +386,12 @@ class FilterDesigner(QDialog):
             self.update_filter(filter.__name__)
 
     def toggle_bound_frequencies(self, on: bool=True):
-        """
+        """Toggle the pair of critical frequency inputs on/off.
 
+        Parameters
+        --------
+        on : bool
+            If true, both inputs for upper and lower frequency bounds are enabled, else only one input is enabled
         """
         if on:
             self.bound_freq_widget.setEnabled(True)
@@ -367,8 +399,21 @@ class FilterDesigner(QDialog):
         self.bound_freq_widget.setEnabled(False)
 
     def add_preference_combobox(self, key: str, items: tuple=tuple(), enabled: bool=True) -> QWidget:
-        """
+        """Produce a combobox for a filter designer preference
 
+        Parameters
+        --------
+        on : bool
+            If true, both inputs for upper and lower frequency bounds are enabled, else only one input is enabled
+
+        Returns
+        -------
+        key : str
+            The preference name
+        items : tuple
+            Items representing the available preference settings
+        enabled : enabled
+            Preference is enabled by default
         """
         widget = QComboBox()
         for i in items:
@@ -379,8 +424,12 @@ class FilterDesigner(QDialog):
         return widget
 
     def make_preferences_grid(self, grid: QGridLayout) -> None:
-        """
+        """Populate the preferences grid layout with the filter designer preference widgets
 
+        Parameters
+        ---------
+        grid : QGridLayout
+            The grid layout to which preference widgets will be added
         """
         try:
             # Y-axis in amplitude or decibels
@@ -474,7 +523,11 @@ class FilterDesigner(QDialog):
         freqs : Filter.FrequencyDomain
             Named tuple containing the magnitudes and frequencies of the filter frequency response.
         db_response : bool
-
+            Display response (y-axis) in decibels, else magnitude
+        energies : bool
+            Display response domain (x-axis) in meV, else frequency in picohertz
+        trajectory_power_spectrum : Tuple[np.ndarray, np.ndarray]
+            Tuple containing trajectory power spectrum and attenuation due to filter
         """
         self._figure.clear()
 
@@ -532,7 +585,7 @@ class FilterDesigner(QDialog):
         self._figure_info.append(f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 1)} meV, Sample frequency: {sample_freq} pHz")
 
     def render_canvas_assets(self) -> None:
-        """
+        """Render all elements of the filter designer graphing area, including data text
 
         """
         # Set preferences
@@ -560,8 +613,21 @@ class FilterDesigner(QDialog):
         )
 
     def create_graph_canvas(self, fig_width=10.0, fig_height=10.0, dpi=100) -> QWidget:
-        """
+        """Create the canvas for the graphing area of the filter designer
 
+        Parameters
+        ----------
+        fig_width: float
+            The figure width
+        fig_height: float
+            The figure height
+        dpi: int
+            Figure dpi
+
+        Returns
+        -------
+        QWidget
+            Canvas for the filter designer graph
         """
         canvas = QWidget(self)
         layout = QVBoxLayout(canvas)
@@ -580,17 +646,32 @@ class FilterDesigner(QDialog):
         return canvas
 
     def create_graph_layout(self, widget_area: QVBoxLayout) -> None:
-        """
+        """Create the canvas for the graphing area of the filter designer
 
+        Parameters
+        ----------
+        widget_area: QVBoxLayout
+            The layout within the filter designer into which the filter graph will be positioned
         """
         canvas = self.create_graph_canvas()
         widget_area.addWidget(canvas)
         self.render_canvas_assets()
 
     @staticmethod
-    def combine_attributes(filter: Filter, attributes: dict):
-        """
+    def combine_attributes(filter: Filter, attributes: dict) -> dict:
+        """Update the filter attributes with missing attributes, using default values
 
+        Parameters
+        ----------
+        filter: Filter
+            The filter class for the designed filter
+        attributes: dict
+            Dictionary of filter attributes
+
+        Returns
+        -------
+        dict
+            Combined attributes
         """
         defaults = filter.default_settings
         missing = set(attributes) ^ set(defaults)
