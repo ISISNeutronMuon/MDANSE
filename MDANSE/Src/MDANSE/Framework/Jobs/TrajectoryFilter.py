@@ -50,6 +50,14 @@ class TrajectoryFilter(IJob):
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
+    settings["instrument_resolution"] = (
+        "InstrumentResolutionConfigurator",
+        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
+    )
+    settings["projection"] = (
+        "ProjectionConfigurator",
+        {"label": "project coordinates"},
+    )
     settings["trajectory_filter"] = (
         "TrajectoryFilterConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -57,6 +65,13 @@ class TrajectoryFilter(IJob):
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["weights"] = (
+        "WeightsConfigurator",
+        {
+            "default": "atomic_weight",
+            "dependencies": {"atom_selection": "atom_selection"},
+        },
     )
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
