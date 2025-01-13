@@ -541,7 +541,6 @@ class FilterDesigner(QDialog):
             ps, attenuated_ps = trajectory_power_spectrum
             axes.plot(x, 20 * np.log10(abs(ps)) if db_response else ps, label="Trajectory response", color="grey")
             axes.plot(x, 20 * np.log10(abs(attenuated_ps)) if db_response else attenuated_ps, label="Attenuation", color="black")
-            x_max /= 2
 
         # Conditionally convert frequencies (pHz) to energies (meV)
         if energies:
