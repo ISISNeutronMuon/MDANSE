@@ -114,6 +114,5 @@ def test_simple_filter_methane():
             and w[np.min(np.argsort(post_amplitudes)[-100:])] > 25.0 # and the frequency at which the lowest of the 100 lowest frequency peaks is above the cutoff frequency
     )
 
-
-
-
+def test_filter_job_methane():
+    pass
