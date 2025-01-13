@@ -960,7 +960,7 @@ def power_spectrum(
         series = series - np.average(series, axis=0)
         series = projection["projector"](series)
 
-        n_configs = frames["n_frames"]
+        n_configs = frames["n_configs"]
         atomicPACF = signal.correlate(series, series[:n_configs], mode="valid") / (
             3 * n_configs
         )
