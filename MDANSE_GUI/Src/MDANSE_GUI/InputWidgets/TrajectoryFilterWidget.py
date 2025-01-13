@@ -532,6 +532,7 @@ class FilterDesigner(QDialog):
         self._figure.clear()
 
         x = freqs.frequencies
+        x_max = x.max()
 
         axes = self._figure.add_axes([0.1, 0.1, 0.8, 0.8])
         axes.plot(x, 20 * np.log10(abs(freqs.magnitudes)) if db_response else freqs.magnitudes, label="Filter response")
@@ -541,13 +542,14 @@ class FilterDesigner(QDialog):
             ps, attenuated_ps = trajectory_power_spectrum
             axes.plot(x, 20 * np.log10(abs(ps)) if db_response else ps, label="Trajectory response", color="grey")
             axes.plot(x, 20 * np.log10(abs(attenuated_ps)) if db_response else attenuated_ps, label="Attenuation", color="black")
+            x_max /= 2
 
         # Conditionally convert frequencies (pHz) to energies (meV)
         if energies:
             energy_ticks = np.int32(np.floor(Filter.freq_to_energy(axes.get_xticks())))
             axes.set_xticks(axes.get_xticks(), labels=energy_ticks)
 
-        axes.set_xlim(0.0, x.max())
+        axes.set_xlim(0.0, x_max)
 
         axes.set_xlabel("Energy (meV)" if energies else "Frequency (pHz)")
         axes.set_ylabel("Magnitude (dB)" if db_response else "Amplitude")
