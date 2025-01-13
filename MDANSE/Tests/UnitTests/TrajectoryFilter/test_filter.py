@@ -6,7 +6,7 @@ import pytest
 
 from MDANSE.Mathematics.Signal import Filter, filter_map
 
-SIMPLE_HYDROGEN_PATH = 'methane_hydrogen_position.csv'
+SIMPLE_HYDROGEN_PATH = '../Data/methane_hydrogen_position.csv'
 
 def test_freq_to_energy_conversion():
     """
