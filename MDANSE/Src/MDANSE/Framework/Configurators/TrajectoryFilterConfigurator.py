@@ -105,7 +105,19 @@ class TrajectoryFilterConfigurator(IConfigurator):
         value : str
             The selection setting in a json readable format.
         """
-        print(f"Configuring {value}")
         self.settings = value
+
+        try:
+            dict_value = json.loads(value)
+
+            try:
+                {"filter", "attributes"} in set(dict_value.keys())
+            except (TypeError, ValueError) as e:
+                self.error_status = f"The dictionary \n{dict_value}\n does not contain the expected keys"
+
+        except (TypeError, ValueError) as e:
+            self.error_status = f"Value \n{value}\n in {self} is not of correct format (expected JSON string)"
+
+        self.error_status = "OK"
         self["value"] = self.settings
 
