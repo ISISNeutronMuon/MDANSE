@@ -918,8 +918,7 @@ def power_spectrum(
         projection,
         atom_selection,
         weights,
-        instrument_resolution,
-        n_steps
+        instrument_resolution
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Returns the position power spectrum of a configuration's constituent atomic trajectories.
 
@@ -930,10 +929,10 @@ def power_spectrum(
         #. atom_selection ( ):
         #. weights ( ):
         #. instrument_resolution ( ):
-        #. n_steps (int): number of time steps in simulation
     :Returns:
         #. Tuple[np.ndarray, np.ndarray]: tuple containing the omegas (frequency range) and the corresponding power spectrum of the atomic trajectories
     """
+    num_atoms = len(atom_selection["indexes"])
     trajectory = trajectory["instance"]
     sorted_atoms = trajectory.chemical_system.atom_list
 
@@ -947,7 +946,7 @@ def power_spectrum(
     output["pacf_total"] = np.zeros(np.array(range(frames["n_frames"])).shape)
     output["pps_total"] = np.zeros(output["romega"].shape)
 
-    for index in range(n_steps):
+    for index in range(num_atoms):
         indexes = atom_selection["indexes"][index]
         atoms = [sorted_atoms[idx] for idx in indexes]
         series = trajectory.read_com_trajectory(

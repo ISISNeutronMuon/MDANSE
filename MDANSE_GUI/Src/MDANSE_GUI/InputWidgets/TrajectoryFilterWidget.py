@@ -225,8 +225,7 @@ class FilterDesigner(QDialog):
                 self.find_configuration_property("projection"),
                 self.find_configuration_property("atom_selection"),
                 self.find_configuration_property("weights"),
-                self.find_configuration_property("instrument_resolution"),
-                self._settings["attributes"]["n_steps"]
+                self.find_configuration_property("instrument_resolution")
             )
 
         self.render_canvas_assets()
