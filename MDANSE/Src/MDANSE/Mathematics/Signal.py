@@ -431,7 +431,7 @@ class Filter:
         else:
             RuntimeError(f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' property on the instance of {self.__class__}")
 
-        freqs = signal.freqs(*expr, worN=np.abs(freq_range))
+        freqs = signal.freqs(*expr, worN=np.abs(((np.pi/2)**(-1))*freq_range))
         self._freq_response = self.FrequencyDomain(*freqs)
 
     @property
