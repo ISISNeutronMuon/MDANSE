@@ -108,6 +108,7 @@ class FilterDesigner(QDialog):
         filter_type : str
             The name of the filter class.
         """
+
         self._settings = {
             "filter": filter_type,
             "attributes": {
@@ -454,10 +455,10 @@ class FilterDesigner(QDialog):
 
             # Display trajectory position power spectral attentuation for comparison
             grid.addWidget(QLabel("Show trajectory attenuation"), 3, 0)
-            key_4 = "show_attenuation"
+            key_3 = "show_attenuation"
             attenuation_checkbox = QCheckBox()
-            self._preferences.update({key_4: attenuation_checkbox.isChecked()})
-            attenuation_checkbox.stateChanged.connect(lambda val: self.edit_preferences(key_4, val))
+            self._preferences.update({key_3: attenuation_checkbox.isChecked()})
+            attenuation_checkbox.stateChanged.connect(lambda val: self.edit_preferences(key_3, val))
             grid.addWidget(attenuation_checkbox, 3, 1)
             attenuation_checkbox.setEnabled(True)
 

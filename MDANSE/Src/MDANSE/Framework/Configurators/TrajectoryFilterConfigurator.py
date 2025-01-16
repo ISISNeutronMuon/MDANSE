@@ -120,4 +120,3 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
         self.error_status = "OK"
         self["value"] = self.settings
-

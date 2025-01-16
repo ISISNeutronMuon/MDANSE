@@ -96,7 +96,11 @@ class TrajectoryFilter(IJob):
                 self._selected_atoms.append(self._atoms[idx])
         self._selected_atoms = AtomGroup(self._selected_atoms)
 
+        # This stores the trajectory (position array) of atoms by x, y, z component, to be filtered
         self.atomic_trajectory_array = np.zeros((len(self._atoms), 3, len(self.configuration["frames"]["value"])))
+
+        # This stores the initial positions of the atoms if needed
+        self.initial_pos_array = np.zeros((len(self._atoms), 3))
 
     def run_step(self, index):
         """
@@ -120,6 +124,12 @@ class TrajectoryFilter(IJob):
         )
 
         self.atomic_trajectory_array[index] = series.T
+
+        # Record atomic initial positions
+        self.initial_pos_array[index][0] = self.atomic_trajectory_array[index][0][0]
+        self.initial_pos_array[index][1] = self.atomic_trajectory_array[index][1][0]
+        self.initial_pos_array[index][2] = self.atomic_trajectory_array[index][2][0]
+
         return index, None
 
     def combine(self, index, x):
@@ -138,6 +148,7 @@ class TrajectoryFilter(IJob):
 
         # Get filter class and instantiate filter object
         filter_config = json.loads(self.configuration["trajectory_filter"]['value'])
+
         filter_class, filter_attributes = filter_map[filter_config["filter"]], filter_config["attributes"]
 
         if {"n_steps", "time_step_ps"} not in set(filter_attributes.keys()):
@@ -150,8 +161,8 @@ class TrajectoryFilter(IJob):
 
         trajectories = copy.deepcopy(self.atomic_trajectory_array)
 
-        # Apply filter
-        filtered_coords = apply(filter, trajectories)
+        # Apply filter (only apply initial position offset to atoms if filter is not lowpass and setting has been applied)
+        filtered_coords = apply(filter, trajectories, offsets=self.initial_pos_array if filter.attenuation_type is not "lowpass" else np.array([]))
 
         # Create trajectory writer object
         self._output_trajectory = TrajectoryWriter(
@@ -190,7 +201,7 @@ class TrajectoryFilter(IJob):
 
         super().finalize()
 
-def apply(filter, trajectories) -> np.ndarray:
+def apply(filter, trajectories, offsets) -> np.ndarray:
     """
 
     """
@@ -199,7 +210,11 @@ def apply(filter, trajectories) -> np.ndarray:
     for at, atom in enumerate(trajectories):
         x, y, z = atom
         for i, component in ((0, x), (1, y), (2, z)):
-            output_trajectory_array[at][i] = filter.apply(component)
+            output = filter.apply(component)
+            if offsets.any():
+                output += offsets[at][i]
+            output_trajectory_array[at][i] = output
+
     return output_trajectory_array
 
 def write_filtered_trajectory(parent_configuration, nsteps: int, filtered_coordinates: np.ndarray, output_trajectory: TrajectoryWriter) -> None:
