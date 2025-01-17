@@ -113,3 +113,15 @@ def test_UnfoldedTrajectory(parameters):
     assert path.exists(temp_name + ".log")
     assert path.isfile(temp_name + ".log")
     os.remove(temp_name + ".log")
+
+def test_TrajectoryFilter(parameters):
+    temp_name = tempfile.mktemp()
+    parameters["output_files"] = (temp_name, 64, "gzip", "INFO")
+    job = IJob.create("TrajectoryFilter")
+    job.run(parameters, status=True)
+    assert path.exists(temp_name + ".mdt")
+    assert path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
