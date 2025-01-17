@@ -99,9 +99,6 @@ class TrajectoryFilter(IJob):
         # This stores the trajectory (position array) of atoms by x, y, z component, to be filtered
         self.atomic_trajectory_array = np.zeros((len(self._atoms), 3, len(self.configuration["frames"]["value"])))
 
-        # This stores the initial positions of the atoms if needed
-        self.initial_pos_array = np.zeros((len(self._atoms), 3))
-
     def run_step(self, index):
         """
         Runs a single step of the job.\n
@@ -124,11 +121,6 @@ class TrajectoryFilter(IJob):
         )
 
         self.atomic_trajectory_array[index] = series.T
-
-        # Record atomic initial positions
-        self.initial_pos_array[index][0] = self.atomic_trajectory_array[index][0][0]
-        self.initial_pos_array[index][1] = self.atomic_trajectory_array[index][1][0]
-        self.initial_pos_array[index][2] = self.atomic_trajectory_array[index][2][0]
 
         return index, None
 
@@ -162,7 +154,7 @@ class TrajectoryFilter(IJob):
         trajectories = copy.deepcopy(self.atomic_trajectory_array)
 
         # Apply filter (only apply initial position offset to atoms if filter is not lowpass and setting has been applied)
-        filtered_coords = apply(filter, trajectories, offsets=self.initial_pos_array if filter.attenuation_type is not "lowpass" else np.array([]))
+        filtered_coords = apply(filter, trajectories, apply_offsets=filter.attenuation_type is not "lowpass")
 
         # Create trajectory writer object
         self._output_trajectory = TrajectoryWriter(
@@ -201,7 +193,7 @@ class TrajectoryFilter(IJob):
 
         super().finalize()
 
-def apply(filter, trajectories, offsets) -> np.ndarray:
+def apply(filter, trajectories, apply_offsets: bool) -> np.ndarray:
     """
 
     """
@@ -209,10 +201,15 @@ def apply(filter, trajectories, offsets) -> np.ndarray:
 
     for at, atom in enumerate(trajectories):
         x, y, z = atom
+
+        # Store initial positions
+        offsets = np.array([x[0], y[0], z[0]])
+
         for i, component in ((0, x), (1, y), (2, z)):
             output = filter.apply(component)
-            if offsets.any():
-                output += offsets[at][i]
+
+            if apply_offsets:
+                output += offsets[i]
             output_trajectory_array[at][i] = output
 
     return output_trajectory_array
