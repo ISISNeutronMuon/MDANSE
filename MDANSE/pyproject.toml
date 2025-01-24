@@ -57,3 +57,46 @@ MDANSE = ["Chemistry/*.json",
 
 [project.scripts]
 mdanse = "MDANSE.Scripts.mdanse:main"
+
+[tool.ruff]
+line-length = 100
+indent-width = 4
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E4", "E7", "E9", "F",  # Defaults
+    # "PL",  # Pylint errors
+    # "E",   # Pycodestyle
+    # "W",   # Pycodestyle warnings
+    # "F",   # Pyflakes
+    # "B",   # Flake8 bugbear
+    # "SIM", # Flake8 Simplify
+    # "A",   # Flake8 builtins
+    # "COM", # Flake8 commas
+    # "ISC", # Flake8 implicit string concat
+    # "RSE", # Flake8 raise
+    # "FA",  # Flake8 future
+    # "FBT", # Flake8 boolean trap
+    # "C4",  # Flake8 comprehensions
+    # "Q",   # Flake8 Quotes
+    # "RET", # Flake8 return
+    # "ARG", # Flake8 unused args
+    # "PTH", # Flake8 use pathlib
+    # "I",   # Isort
+    # "RUF", # Ruff specific
+    # "FURB",# Refurb
+    # "PERF",# Perflint
+    # "D",   # Pydocstyle
+    # "UP",  # Pyupgrade
+]
+ignore = [
+    "F401",     # Unused import in init
+    "E402",     # Import not at top
+    "PLR0913",  # Too many arguments
+    "PLR0912",  # Too many branches
+    "PLR0915",  # Too many statements
+]
+
+# [tool.setuptools.packages.find]
+# where = ["src"]
