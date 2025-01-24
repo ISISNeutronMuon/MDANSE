@@ -28,7 +28,6 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 
 
 class ChemicalSystem:
-
     def __init__(self, name: str = "", trajectory=None):
         """
 

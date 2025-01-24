@@ -77,7 +77,6 @@ def find_atoms_in_molecule(
     atom_names: list[str],
     indices: bool = False,
 ) -> list[list[int]]:
-
     if entity_name not in chemical_system._clusters:
         return []
 

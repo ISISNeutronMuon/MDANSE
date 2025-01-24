@@ -202,7 +202,6 @@ class Selector:
         idxs = set([])
 
         for k, v in self.settings.items():
-
             if isinstance(v, dict):
                 args = [{self._kwarg_keys[k]: i} for i in v.keys()]
                 switches = v.values()
@@ -234,7 +233,6 @@ class Selector:
 
         added = set([])
         for k, v in self.settings.items():
-
             if k == "index":
                 continue
 
@@ -338,7 +336,6 @@ class Selector:
         setting_keys = self._default.keys()
         dict_setting_keys = self._kwarg_keys.keys()
         for k0, v0 in settings.items():
-
             if k0 not in setting_keys:
                 return False
 

@@ -95,7 +95,6 @@ def contiguous_coordinates_real(
     scaleconfig = np.matmul(coords, rcell)
 
     for idxs in indices:
-
         if len(idxs) < 2:
             continue
         if bring_to_centre:
@@ -146,7 +145,6 @@ def contiguous_coordinates_box(
     contiguous_coords = frac_coords.copy()
 
     for tupleidxs in indices:
-
         if len(tupleidxs) < 2:
             continue
 

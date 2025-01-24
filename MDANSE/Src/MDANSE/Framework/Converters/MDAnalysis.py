@@ -108,7 +108,7 @@ class MDAnalysis(Converter):
                 *coord_files,
                 continuous=self.configuration["continuous"]["value"],
                 format=coord_format,
-                topology_format=self.configuration["topology_file"]["format"]
+                topology_format=self.configuration["topology_file"]["format"],
             )
         else:
             coord_files = [(i, coord_format) for i in coord_files]
@@ -176,7 +176,7 @@ class MDAnalysis(Converter):
             self.configuration["output_files"]["file"],
             self._chemical_system,
             self.numberOfSteps,
-            **kwargs
+            **kwargs,
         )
         super().initialize()
 

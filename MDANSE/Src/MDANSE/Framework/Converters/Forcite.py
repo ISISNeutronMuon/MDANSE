@@ -55,7 +55,7 @@ class TrjFile(dict):
         rec = "!i"
         recSize = struct.calcsize(rec)
         (NTRJTI,) = struct.unpack(rec, trjfile.read(recSize))
-        rec = f"!{80*NTRJTI}s8x"
+        rec = f"!{80 * NTRJTI}s8x"
         recSize = struct.calcsize(rec)
         self["title"] = struct.unpack(rec, trjfile.read(recSize))
         self["title"] = "\n".join([t.decode("utf-8") for t in self["title"]])
@@ -82,7 +82,7 @@ class TrjFile(dict):
         recSize = struct.calcsize(rec)
         NFLUSD = struct.unpack(rec, trjfile.read(recSize))[0]
 
-        rec = f"!{NFLUSD}i{NFLUSD}i{8*NFLUSD}s8x"
+        rec = f"!{NFLUSD}i{NFLUSD}i{8 * NFLUSD}s8x"
         recSize = struct.calcsize(rec)
         trjfile.read(recSize)
 

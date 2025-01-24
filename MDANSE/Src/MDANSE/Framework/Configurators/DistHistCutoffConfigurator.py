@@ -6,7 +6,6 @@ from .RangeConfigurator import RangeConfigurator
 
 
 class DistHistCutoffConfigurator(RangeConfigurator):
-
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self._max_value = kwargs.get("max_value", True)

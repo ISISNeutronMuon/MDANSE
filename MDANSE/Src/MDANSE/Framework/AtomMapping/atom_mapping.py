@@ -21,7 +21,6 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 
 
 class AtomLabel:
-
     def __init__(self, atm_label: str, **kwargs):
         """Creates an atom label object which is used for atom mapping
         and atom type guessing.

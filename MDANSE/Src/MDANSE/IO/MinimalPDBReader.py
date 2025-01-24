@@ -58,9 +58,7 @@ def atom_line_slice(keyword: str) -> slice:
 
 
 class MinimalPDBReader:
-
     def __init__(self, filename: str):
-
         self._unit_cell = None
         cell_params = self.find_unit_cell(filename)
         if len(cell_params) == 0:

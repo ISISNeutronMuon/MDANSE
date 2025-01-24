@@ -25,7 +25,6 @@ from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 
 class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
-
     def configure(self, value: Optional[str]):
         """
         Parameters

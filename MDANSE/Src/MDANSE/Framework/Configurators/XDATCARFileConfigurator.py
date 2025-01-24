@@ -74,7 +74,6 @@ def check_trajectory(filename: str):
 
 
 class XDATCARFileConfigurator(FileWithAtomDataConfigurator):
-
     def parse(self):
         filename = self["filename"]
         with open(filename, "r") as source:
@@ -107,7 +106,6 @@ class XDATCARFileConfigurator(FileWithAtomDataConfigurator):
         self._coordinates = np.empty((self["n_atoms"], 3))
 
     def read_step(self, step):
-
         if step > 0 and not self._has_fixed_cell:
             unit_cell, atoms, atom_numbers, system_name = read_modern_header(
                 self["instance"]

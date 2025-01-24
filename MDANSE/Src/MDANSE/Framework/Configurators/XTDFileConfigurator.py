@@ -33,7 +33,6 @@ from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
 
 
 class XTDFileConfigurator(FileWithAtomDataConfigurator):
-
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self._atoms = None

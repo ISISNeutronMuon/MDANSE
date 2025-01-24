@@ -23,7 +23,6 @@ from MDANSE.Framework.Jobs.IJob import IJob
 
 
 class DipoleAutoCorrelationFunction(IJob):
-
     enabled = True
 
     label = "Dipole AutoCorrelation Function"

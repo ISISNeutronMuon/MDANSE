@@ -142,7 +142,6 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         self._nTransmutedAtoms = 0
         for idx, element in value.items():
-
             try:
                 idx = int(idx)
             except ValueError:

@@ -29,7 +29,6 @@ class LAMMPSConfigFileError(Error):
 
 
 def parse_unit_cell(inputs):
-
     unit_cell = np.zeros(9)
 
     xlo, xhi, xy = inputs[0], inputs[1], inputs[2]
@@ -53,7 +52,6 @@ def parse_unit_cell(inputs):
 
 
 class ConfigFileConfigurator(FileWithAtomDataConfigurator):
-
     def parse(self):
         self._filename = self["filename"]
 

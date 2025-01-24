@@ -25,7 +25,6 @@ in a different set of equations depending on the type of an experiment
 performed. Initially, the plan is to start with time-of-flight diffraction,
 direct and indirect spectrometry."""
 
-
 import importlib
 from pathlib import Path
 

@@ -24,7 +24,6 @@ from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 
 
 class Infrared(IJob):
-
     enabled = True
 
     label = "Infrared Spectrum"

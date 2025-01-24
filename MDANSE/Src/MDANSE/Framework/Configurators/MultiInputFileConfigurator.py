@@ -21,7 +21,6 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class MultiInputFileConfigurator(IConfigurator):
-
     _default = ""
 
     def __init__(self, name, wildcard="All files (*)", **kwargs):

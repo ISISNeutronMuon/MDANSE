@@ -22,7 +22,6 @@ from .MultiInputFileConfigurator import MultiInputFileConfigurator
 
 
 class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
-
     _default = ("", "AUTO")
 
     def __init__(self, name, wildcard="All files (*)", **kwargs):

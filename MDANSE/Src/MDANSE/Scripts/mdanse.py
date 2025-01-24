@@ -74,7 +74,9 @@ class IndentedHelp(optparse.IndentedHelpFormatter):
             # Everything is the same after here
             result += f"{indent_first}{help_lines[0]}\n"
             result += (
-                "\n".join(f"{' '*self.help_position}{line}" for line in help_lines[1:])
+                "\n".join(
+                    f"{' ' * self.help_position}{line}" for line in help_lines[1:]
+                )
                 + "\n"
             )
         elif not opts.endswith("\n"):

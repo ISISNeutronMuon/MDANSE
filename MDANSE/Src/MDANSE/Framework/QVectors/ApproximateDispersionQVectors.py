@@ -59,9 +59,9 @@ class ApproximateDispersionQVectors(LatticeQVectors):
         try:
             n = (qEnd - qStart).normal()
         except ZeroDivisionError:
-            self._configuration["q_end"].error_status = (
-                "Zero-length vector cannot be used here"
-            )
+            self._configuration[
+                "q_end"
+            ].error_status = "Zero-length vector cannot be used here"
             return
         nSteps = int(d / qStep) + 1
 

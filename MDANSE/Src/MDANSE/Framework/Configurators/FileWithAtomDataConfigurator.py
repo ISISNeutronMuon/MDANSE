@@ -22,7 +22,6 @@ from .InputFileConfigurator import InputFileConfigurator
 
 
 class FileWithAtomDataConfigurator(InputFileConfigurator):
-
     def configure(self, filepath: str) -> None:
         """
         Parameters

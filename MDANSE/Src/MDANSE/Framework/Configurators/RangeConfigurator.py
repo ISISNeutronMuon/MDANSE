@@ -211,7 +211,6 @@ class RangeConfigurator(IConfigurator):
         """
 
         if self._valid:
-
             info = f"{self['number']:d} values from {self['first']} to {self['last']}"
 
             if self._includeLast:

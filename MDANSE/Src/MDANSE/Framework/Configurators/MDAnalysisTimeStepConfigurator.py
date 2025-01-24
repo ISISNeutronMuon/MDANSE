@@ -19,7 +19,6 @@ from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
 
 
 class MDAnalysisTimeStepConfigurator(FloatConfigurator):
-
     _default = 0.0
 
     def configure(self, value):

@@ -21,7 +21,6 @@ from .MultiInputFileConfigurator import MultiInputFileConfigurator
 
 
 class MDTrajTrajectoryFileConfigurator(MultiInputFileConfigurator):
-
     def configure(self, value):
         super().configure(value)
 

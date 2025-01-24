@@ -40,7 +40,6 @@ class LAMMPSTrajectoryFileError(Error):
 
 
 class LAMMPSReader:
-
     def __init__(self, *args, **kwargs):
         self._units = kwargs.get("lammps_units", "real")
         self._timestep = kwargs.get("timestep", 1.0)
@@ -116,7 +115,6 @@ class LAMMPSReader:
 
 
 class LAMMPScustom(LAMMPSReader):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -135,7 +133,6 @@ class LAMMPScustom(LAMMPSReader):
         self._start = 0
 
     def parse_first_step(self, aliases, config):
-
         self._itemsPosition = collections.OrderedDict()
 
         comp = -1
@@ -387,7 +384,6 @@ class LAMMPScustom(LAMMPSReader):
 
 
 class LAMMPSxyz(LAMMPSReader):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._full_cell = None
@@ -406,7 +402,6 @@ class LAMMPSxyz(LAMMPSReader):
         self._file = open(filename, "r")
 
     def read_any_step(self):
-
         line = self._file.readline()
         number_of_atoms = int(line)
         line = self._file.readline()
@@ -416,7 +411,6 @@ class LAMMPSxyz(LAMMPSReader):
         atom_types = np.empty(number_of_atoms, dtype=int)
 
         for at_num in range(number_of_atoms):
-
             line = self._file.readline()
 
             if not line:
@@ -433,7 +427,6 @@ class LAMMPSxyz(LAMMPSReader):
         return timestep, atom_types, positions
 
     def parse_first_step(self, aliases, config):
-
         _, atom_types, positions = self.read_any_step()
 
         self._nAtoms = len(atom_types)
@@ -527,7 +520,6 @@ class LAMMPSxyz(LAMMPSReader):
 
 
 class LAMMPSh5md(LAMMPSReader):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._charges_fixed = None
@@ -544,7 +536,6 @@ class LAMMPSh5md(LAMMPSReader):
         self._file = h5py.File(filename, "r")
 
     def parse_first_step(self, aliases, config):
-
         try:
             atom_types = self._file["/particles/all/species/value"][0]
         except KeyError:

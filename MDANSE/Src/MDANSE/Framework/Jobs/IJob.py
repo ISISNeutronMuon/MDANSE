@@ -257,7 +257,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
         LOG.info("Single-core job completed all the steps")
 
     def process_tasks_queue(self, tasks, outputs, log_queues):
-
         queue_handlers = []
         for log_queue in log_queues:
             queue_handler = QueueHandler(log_queue)

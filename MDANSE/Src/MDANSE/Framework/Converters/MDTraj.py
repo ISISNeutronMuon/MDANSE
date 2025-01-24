@@ -156,7 +156,7 @@ class MDTraj(Converter):
             self.configuration["output_files"]["file"],
             self._chemical_system,
             self.numberOfSteps,
-            **kwargs
+            **kwargs,
         )
         super().initialize()
 

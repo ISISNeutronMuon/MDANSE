@@ -32,7 +32,6 @@ def solvent_accessible_surface(
     sphere_points: np.ndarray,
     probe_radius_value: float,
 ):
-
     # Computes the Solvent Accessible Surface Based on the algorithm published by Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
 
     sas = 0.0
@@ -161,9 +160,7 @@ class SolventAccessibleSurface(IJob):
         # A mapping between the atom indices and covalent_radius radius for the whole universe.
         self.vdwRadii = self.configuration["trajectory"][
             "instance"
-        ].chemical_system.atom_property(
-            "vdw_radius"
-        )  # should it be covalent?
+        ].chemical_system.atom_property("vdw_radius")  # should it be covalent?
 
         self._indices = [
             idx

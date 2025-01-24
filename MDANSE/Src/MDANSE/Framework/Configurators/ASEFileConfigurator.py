@@ -28,7 +28,6 @@ class ASEFileConfigurator(FileWithAtomDataConfigurator):
     """
 
     def parse(self):
-
         try:
             self._input = ASETrajectory(self["filename"])
         except Exception:

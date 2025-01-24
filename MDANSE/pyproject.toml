@@ -59,7 +59,7 @@ MDANSE = ["Chemistry/*.json",
 mdanse = "MDANSE.Scripts.mdanse:main"
 
 [tool.ruff]
-line-length = 100
+line-length = 88
 indent-width = 4
 target-version = "py39"
 extend-exclude = [

@@ -22,7 +22,6 @@ from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 
 class MDAnalysisTopologyFileConfigurator(FileWithAtomDataConfigurator):
-
     _default = ("", "AUTO")
 
     def configure(self, setting: str) -> None:

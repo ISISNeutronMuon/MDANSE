@@ -19,7 +19,6 @@ from .FramesConfigurator import FramesConfigurator
 
 
 class CorrelationFramesConfigurator(FramesConfigurator):
-
     def configure(self, value: tuple[int, int, int, int]):
         """Configure the correlation and set the number of correlation
         frames to use.
@@ -50,8 +49,7 @@ class CorrelationFramesConfigurator(FramesConfigurator):
 
         if c_frames < 2:
             self.error_status = (
-                "Number of frames used for the correlation "
-                "should be greater then zero."
+                "Number of frames used for the correlation should be greater then zero."
             )
             return
 

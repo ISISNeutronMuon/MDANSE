@@ -37,7 +37,6 @@ class DL_POLYConverterError(Error):
 
 
 class HistoryFile(dict):
-
     def __init__(self, filename):
         super().__init__()
         self._dist_conversion = measure(1.0, "ang").toval("nm")

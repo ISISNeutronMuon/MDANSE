@@ -102,9 +102,10 @@ class Gromacs(Converter):
                     )
 
             # The TRRTrajectoryFile object returns ints for these values, so turn them into bools
-            self._read_velocities, self._read_forces = bool(
-                self._read_velocities
-            ), bool(self._read_forces)
+            self._read_velocities, self._read_forces = (
+                bool(self._read_velocities),
+                bool(self._read_forces),
+            )
 
             if self._read_velocities:
                 data_to_be_written.append("velocities")
