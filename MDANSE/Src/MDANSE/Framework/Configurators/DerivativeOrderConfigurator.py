@@ -43,7 +43,7 @@ class DerivativeOrderConfigurator(IntegerConfigurator):
         """
         frames_configurator = self._configurable[self._dependencies["frames"]]
         if not frames_configurator._valid:
-            self.error_status = f"Frames configurator is not valid."
+            self.error_status = "Frames configurator is not valid."
             return
 
         self._original_input = value
@@ -54,8 +54,8 @@ class DerivativeOrderConfigurator(IntegerConfigurator):
 
         if value <= 0 or value > 5:
             self.error_status = (
-                f"Use an interpolation order less than or equal to zero or "
-                f"greater than 5 is not implemented."
+                "Use an interpolation order less than or equal to zero or "
+                "greater than 5 is not implemented."
             )
             return
 

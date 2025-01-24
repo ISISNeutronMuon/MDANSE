@@ -73,7 +73,7 @@ class ProjectionConfigurator(IConfigurator):
                 return
             else:
                 if np.allclose(vector, 0):
-                    self.error_status = f"Vector of 0 length does not define projection"
+                    self.error_status = "Vector of 0 length does not define projection"
                     return
             try:
                 self["projector"].set_axis(vector)

@@ -80,11 +80,11 @@ class OutputFilesConfigurator(IConfigurator):
             return
 
         if not formats:
-            self.error_status = f"no output formats specified"
+            self.error_status = "no output formats specified"
             return
 
         for fmt in formats:
-            if not fmt in self._formats:
+            if fmt not in self._formats:
                 self.error_status = (
                     f"the output file format {fmt} is not a valid output format"
                 )
@@ -127,7 +127,7 @@ class OutputFilesConfigurator(IConfigurator):
         :return: the information about this configurator.
         :rtype: str
         """
-        if not "files" in self:
+        if "files" not in self:
             return "Output Files have not been defined"
 
         info = ["Input files:\n"]

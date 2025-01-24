@@ -93,7 +93,7 @@ class Configurable(object):
                     typ, name, configurable=self, **kwds
                 )
             # Any kind of error has to be caught
-            except:
+            except Exception:
                 raise ConfigurationError(f"Could not set {name!r} configuration item")
 
     def set_settings(self, settings):

@@ -131,7 +131,7 @@ class CommandLineParser(optparse.OptionParser):
             f.close()
 
         # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint
-        except:
+        except Exception:
             raise CommandLineParserError(
                 f"The job {basename!r} could not be opened properly."
             )
@@ -193,7 +193,7 @@ class CommandLineParser(optparse.OptionParser):
                     info = pickle.load(f)
 
             # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint
-            except:
+            except Exception:
                 continue
 
             # The job file could be opened and unpickled properly
@@ -364,7 +364,7 @@ class CommandLineParser(optparse.OptionParser):
 
         try:
             IJob.save_template(shortname, classname)
-        except (IOError, KeyError) as e:
+        except (IOError, KeyError):
             return
 
 

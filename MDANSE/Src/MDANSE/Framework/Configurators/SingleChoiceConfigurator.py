@@ -17,7 +17,6 @@
 
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
-    ConfiguratorError,
 )
 
 

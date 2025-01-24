@@ -165,7 +165,7 @@ class GeneralAutoCorrelationFunction(IJob):
 
         if self.configuration["normalize"]["value"]:
             for element in nAtomsPerElement.keys():
-                if self._outputData[f"gacf_{element}}}"][0] == 0:
+                if self._outputData[f"gacf_{element}"][0] == 0:
                     raise ValueError("The normalization factor is equal to zero")
                 else:
                     self._outputData[f"gacf_{element}"] = normalize(

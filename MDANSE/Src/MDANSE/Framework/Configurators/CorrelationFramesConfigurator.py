@@ -42,16 +42,16 @@ class CorrelationFramesConfigurator(FramesConfigurator):
 
         if c_frames > self["n_frames"]:
             self.error_status = (
-                f"Number of frames used for the correlation "
-                f"greater than the total number of frames of "
-                f"the trajectory."
+                "Number of frames used for the correlation "
+                "greater than the total number of frames of "
+                "the trajectory."
             )
             return
 
         if c_frames < 2:
             self.error_status = (
-                f"Number of frames used for the correlation "
-                f"should be greater then zero."
+                "Number of frames used for the correlation "
+                "should be greater then zero."
             )
             return
 

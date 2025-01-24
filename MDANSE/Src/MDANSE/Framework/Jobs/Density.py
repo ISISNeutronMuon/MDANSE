@@ -124,7 +124,7 @@ class Density(IJob):
 
         try:
             cell_volume = conf.unit_cell.volume * measure(1.0, "nm3").toval("cm3")
-        except:
+        except Exception:
             raise DensityError(
                 "Density cannot be computed for chemical system without a defined simulation box. "
                 "You can add a box using TrajectoryEditor."

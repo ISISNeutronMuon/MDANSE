@@ -294,7 +294,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         :rtype: bool
         """
 
-        if configured == None:
+        if configured is None:
             names = [str(key) for key in self._configurable._configuration.keys()]
             configured = [
                 name

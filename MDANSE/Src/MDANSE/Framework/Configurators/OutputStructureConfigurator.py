@@ -78,8 +78,8 @@ class OutputStructureConfigurator(IConfigurator):
             self.error_status = f"the file {root} is not writable"
             return
 
-        if not format in self.formats:
-            self.error_status = f"Output format is not supported"
+        if format not in self.formats:
+            self.error_status = "Output format is not supported"
             return
 
         self["root"] = root
@@ -110,7 +110,7 @@ class OutputStructureConfigurator(IConfigurator):
         :return: the information about this configurator.
         :rtype: str
         """
-        if not "file" in self:
+        if "file" not in self:
             return "Output File have not been defined"
 
         info = f"Output file: {self['file']}\n"

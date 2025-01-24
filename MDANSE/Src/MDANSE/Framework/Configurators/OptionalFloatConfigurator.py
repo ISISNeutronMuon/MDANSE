@@ -66,12 +66,12 @@ class OptionalFloatConfigurator(IConfigurator):
 
         try:
             value[1] = float(value[1])
-        except (TypeError, ValueError) as e:
+        except (TypeError, ValueError):
             self.error_status = f"Wrong value {value[1]} in {self}"
             return
 
         if self._choices:
-            if not value[1] in self._choices:
+            if value[1] not in self._choices:
                 self.error_status = "the input value is not a valid choice."
                 return
 

@@ -149,7 +149,7 @@ class Trajectory:
 
         return self._trajectory.unit_cell(frame)
 
-    def calculate_coordinate_span(self) -> np.ndarray:
+    def calculate_coordinate_span(self) -> None:
         min_span = np.array(3 * [1e11])
         max_span = np.zeros(3)
         for frame in range(len(self)):
@@ -873,9 +873,10 @@ class RigidBodyTrajectoryGenerator:
             r = r - rcms
 
             r = r[:, np.newaxis, :]
-            r = fold_coordinates.fold_coordinates(
-                r, unit_cells, inverse_unit_cells, True
-            )
+            # Fold coordinates doesn't exist?
+            # r = fold_coordinates.fold_coordinates(
+            #     r, unit_cells, inverse_unit_cells, True
+            # )
             r = np.squeeze(r)
 
             r = self._trajectory.to_real_coordinates(r, first, last, step)
@@ -959,9 +960,9 @@ def read_atoms_trajectory(
     if last is None:
         last = len(trajectory)
 
-    nFrames = len(list(range(first, last, step)))
+    # nFrames = len(range(first, last, step))
 
-    serie = np.zeros((nFrames, 3), dtype=dtype)
+    # serie = np.zeros((nFrames, 3), dtype=dtype)
 
     if weights is None or len(atoms) == 1:
         weights = [1.0] * len(atoms)

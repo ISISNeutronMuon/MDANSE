@@ -114,7 +114,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             # Followed by 4 random letters.
             name = key_generator(6, prefix=prefix)
 
-            if not name in registeredJobs:
+            if name not in registeredJobs:
                 break
 
         return name
@@ -413,7 +413,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
             if self._status is not None:
                 self._status.finish()
-        except:
+        except Exception:
             tb = traceback.format_exc()
             LOG.critical(f"Job failed with traceback: {tb}")
             raise JobError(self, tb)

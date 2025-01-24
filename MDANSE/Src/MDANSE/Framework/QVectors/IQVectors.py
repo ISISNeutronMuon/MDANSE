@@ -48,7 +48,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
             return True
         else:
             LOG.error(
-                f"Cannot generate vectors: q vector generator is not configured correctly."
+                "Cannot generate vectors: q vector generator is not configured correctly."
             )
             return False
 

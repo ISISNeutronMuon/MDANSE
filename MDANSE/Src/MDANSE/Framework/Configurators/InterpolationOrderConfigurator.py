@@ -20,11 +20,11 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
     """
     This configurator allows to input the interpolation order to be applied when deriving velocities from atomic coordinates.
 
-    The allowed value are *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*, the 
+    The allowed value are *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*, the
     former one will not interpolate the velocities from atomic coordinates but will directly use the velocities stored in the trajectory file.
-    
+
     :attention: it is of paramount importance for the trajectory to be sampled with a very low time \
-    step to get accurate velocities interpolated from atomic coordinates. 
+    step to get accurate velocities interpolated from atomic coordinates.
 
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
@@ -50,7 +50,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
         """
         frames_configurator = self._configurable[self._dependencies["frames"]]
         if not frames_configurator._valid:
-            self.error_status = f"Frames configurator is not valid."
+            self.error_status = "Frames configurator is not valid."
             return
 
         self._original_input = value
@@ -62,15 +62,15 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
         if value == 0:
             trajConfig = self._configurable[self._dependencies["trajectory"]]
 
-            if not "velocities" in trajConfig["instance"].variables():
-                self.error_status = f"the trajectory does not contain any velocities. Use an interpolation order higher than 0"
+            if "velocities" not in trajConfig["instance"].variables():
+                self.error_status = "the trajectory does not contain any velocities. Use an interpolation order higher than 0"
                 return
 
             self["variable"] = "velocities"
 
         elif value > 5:
             self.error_status = (
-                f"Use an interpolation order greater than 5 is not implemented."
+                "Use an interpolation order greater than 5 is not implemented."
             )
             return
 

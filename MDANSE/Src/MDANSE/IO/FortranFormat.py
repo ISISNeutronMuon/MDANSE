@@ -92,13 +92,13 @@ class FortranLine:
                        extended by spaces to have the indicated length.
                        The default value of 80 is almost always correct.
         """
-        if type(line) == type(""):
+        if isinstance(line, str):
             self.text = line
             self.data = None
         else:
             self.text = None
             self.data = line
-        if type(format) == type(""):
+        if isinstance(format, str):
             self.format = FortranFormat(format)
         else:
             self.format = format
@@ -153,9 +153,9 @@ class FortranLine:
             text = text + (self.length - len(text)) * " "
         self.data = []
         for field in self.format:
-            l = field[1]
-            s = text[:l]
-            text = text[l:]
+            w = field[1]
+            s = text[:w]
+            text = text[w:]
             type = field[0]
             value = None
             if type == "A":
@@ -171,7 +171,7 @@ class FortranLine:
                     # catch this and set value to None
                     try:
                         value = int(s)
-                    except:
+                    except Exception:
                         value = None
             elif type == "D" or type == "E" or type == "F" or type == "G":
                 s = s.strip().lower()
@@ -183,7 +183,7 @@ class FortranLine:
                 else:
                     try:
                         value = float(s)
-                    except:
+                    except Exception:
                         value = None
             if value is not None:
                 self.data.append(value)
@@ -206,7 +206,7 @@ class FortranLine:
                 if type == "A":
                     try:
                         self.text = self.text + (value + length * " ")[:length]
-                    except:
+                    except Exception:
                         LOG.warning(self.text)
                         LOG.warning(value)
                         LOG.warning(length)
@@ -319,8 +319,8 @@ class FortranFormat:
 
 if __name__ == "__main__":
     f = FortranFormat("'!!',D10.3,F10.3,G10.3,'!!'")
-    l = FortranLine([1.5707963, 3.14159265358, 2.71828], f)
-    print(str(l))
+    w = FortranLine([1.5707963, 3.14159265358, 2.71828], f)
+    print(str(w))
     f = FortranFormat("F12.0")
-    l = FortranLine("2.1D2", f)
-    print(l[0])
+    w = FortranLine("2.1D2", f)
+    print(w[0])

@@ -34,10 +34,10 @@ def parse_dictionary(input: str) -> Dict[str, Any]:
         value = value.strip(" '")
         try:
             value = int(value)
-        except:
+        except Exception:
             try:
                 value = float(value)
-            except:
+            except Exception:
                 pass
         result[key] = value
     return result
@@ -90,7 +90,7 @@ class McStasOptionsConfigurator(IConfigurator):
 
         try:
             PLATFORM.create_directory(dirname)
-        except:
+        except Exception:
             self.error_status = f"The directory {dirname} is not writable"
             return
 

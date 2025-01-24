@@ -15,9 +15,6 @@
 #
 
 import collections
-import pickle
-import os
-import threading
 import time
 
 from MDANSE import PLATFORM

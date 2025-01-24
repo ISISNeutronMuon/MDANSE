@@ -110,7 +110,7 @@ class Voronoi(IJob):
             self.cell_param = np.array(
                 [cell[0, 0], cell[1, 1], cell[2, 2]], dtype=np.float64
             )
-        except:
+        except Exception:
             raise VoronoiError(
                 "Voronoi analysis cannot be computed if simulation box is not defined. "
                 "You can add a box using TrajectoryEditor."

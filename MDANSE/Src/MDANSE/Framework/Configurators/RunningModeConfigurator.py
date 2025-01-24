@@ -45,7 +45,7 @@ class RunningModeConfigurator(IConfigurator):
         else:
             mode = value[0].lower()
 
-        if not mode in self.availablesModes:
+        if mode not in self.availablesModes:
             self.error_status = f"{mode} is not a valid running mode."
             return
 

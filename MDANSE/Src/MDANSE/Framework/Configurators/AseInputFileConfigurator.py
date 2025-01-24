@@ -70,7 +70,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
         if file_format == "guess":
             file_format = None
 
-        if file_format is not None and not file_format in self._allowed_formats:
+        if file_format is not None and file_format not in self._allowed_formats:
             LOG.error(f"WRONG FORMAT in {self._name}")
             self.error_status = f"The ASE file format {file_format} is not supported"
             return
@@ -99,7 +99,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
         :rtype: str
         """
         try:
-            val = self["value"]
+            self["value"]
         except KeyError:
             result = f"No VALUE in {self._name}"
             LOG.error(result)

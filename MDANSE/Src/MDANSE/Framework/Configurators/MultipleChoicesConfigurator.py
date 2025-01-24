@@ -58,7 +58,7 @@ class MultipleChoicesConfigurator(IConfigurator):
 
         if self._nChoices is not None:
             if len(value) != self._nChoices:
-                self.error_status = f"invalid number of choices."
+                self.error_status = "invalid number of choices."
                 return
 
         indices = []

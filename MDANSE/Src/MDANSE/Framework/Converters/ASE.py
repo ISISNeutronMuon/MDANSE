@@ -14,13 +14,10 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
-import os
 
 from ase.io import iread, read
-from ase.atoms import Atoms as ASEAtoms
 from ase.io.trajectory import Trajectory as ASETrajectory
 import numpy as np
-import h5py
 
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
@@ -221,7 +218,7 @@ class ASE(Converter):
         except KeyError:
             try:
                 charges = frame.get_initial_charges()
-            except:
+            except Exception:
                 pass
             else:
                 self._trajectory.write_charges(charges, index)
@@ -257,7 +254,7 @@ class ASE(Converter):
     def parse_first_step(self, mapping):
         try:
             self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
-        except:
+        except Exception:
             first_frame = read(self.configuration["trajectory_file"]["value"], index=0)
             last_iterator = 0
             generator = iread(self.configuration["trajectory_file"]["value"])

@@ -62,6 +62,10 @@ mdanse = "MDANSE.Scripts.mdanse:main"
 line-length = 100
 indent-width = 4
 target-version = "py39"
+extend-exclude = [
+    "Src/MDANSE/Framework/Jobs/RigidBodyTrajectory.py",
+    "Src/MDANSE/MolecularDynamics/Trajectory.py",
+]
 
 [tool.ruff.lint]
 select = [

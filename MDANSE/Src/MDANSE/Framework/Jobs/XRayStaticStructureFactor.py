@@ -210,12 +210,12 @@ class XRayStaticStructureFactor(DistanceHistogram):
         )
 
         xssfIntra = weight(
-            asf, self._outputData, nAtomsPerElement, 2, f"xssf_intra_%s%s"
+            asf, self._outputData, nAtomsPerElement, 2, "xssf_intra_%s%s"
         )
         self._outputData["xssf_intra"][:] = xssfIntra
 
         xssfInter = weight(
-            asf, self._outputData, nAtomsPerElement, 2, f"xssf_inter_%s%s"
+            asf, self._outputData, nAtomsPerElement, 2, "xssf_inter_%s%s"
         )
         self._outputData["xssf_inter"][:] = xssfInter
 

@@ -488,7 +488,7 @@ class Tensor:
 
     def __getitem__(self, index):
         elements = self.array[index]
-        if type(elements) == type(self.array):
+        if type(elements) is type(self.array):
             return Tensor(elements)
         else:
             return elements

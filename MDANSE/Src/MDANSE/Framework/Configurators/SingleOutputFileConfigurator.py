@@ -74,7 +74,7 @@ class SingleOutputFileConfigurator(IConfigurator):
 
         try:
             PLATFORM.create_directory(dirname)
-        except:
+        except Exception:
             self.error_status = f"the directory {dirname} is not writable"
             return
 
@@ -97,7 +97,7 @@ class SingleOutputFileConfigurator(IConfigurator):
         self["extension"] = IFormat.create(format).extension
         temp_name = root
         if self["extension"] != root.suffix:
-            temp_name = temp_name.with_suffix(temp_name.suffix + self["extension"])
+            temp_name = root.with_suffix(root.suffix + self["extension"])
         self["file"] = temp_name
         self.error_status = "OK"
 

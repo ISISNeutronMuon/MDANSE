@@ -710,7 +710,7 @@ class UnitsManager(metaclass=Singleton):
         try:
             with open(UnitsManager._USER_DATABASE, "r") as fin:
                 d.update(json.load(fin))
-        except:
+        except Exception:
             self.save()
         finally:
             for uname, udict in list(d.items()):

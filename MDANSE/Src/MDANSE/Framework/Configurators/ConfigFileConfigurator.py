@@ -75,10 +75,10 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
         with open(self._filename, "r") as source_file:
             lines = []
-            for l in source_file.readlines():
-                l = l.strip()
-                if l:
-                    lines.append(l)
+            for line in source_file.readlines():
+                line = line.strip()
+                if line:
+                    lines.append(line)
 
         for i, line in enumerate(lines):
             toks = line.split()
@@ -86,19 +86,19 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
             if "xlo" in line and "xhi" in line:
                 try:
                     x_inputs = [float(x) for x in toks[0:3]]
-                except:
+                except Exception:
                     xspan = float(toks[1]) - float(toks[0])
                     self["unit_cell"][0, 0] = xspan
             elif "ylo" in line and "yhi" in line:
                 try:
                     y_inputs = [float(x) for x in toks[0:3]]
-                except:
+                except Exception:
                     yspan = float(toks[1]) - float(toks[0])
                     self["unit_cell"][1, 1] = yspan
             elif "zlo" in line and "zhi" in line:
                 try:
                     z_inputs = [float(x) for x in toks[0:3]]
-                except:
+                except Exception:
                     zspan = float(toks[1]) - float(toks[0])
                     self["unit_cell"][2, 2] = zspan
 
@@ -142,7 +142,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                 self["bonds"] = np.array(self["bonds"], dtype=np.int32)
 
             if re.match("^\s*Atoms\s*$", line.split("#")[0]):
-                if not "#" in line:
+                if "#" not in line:
                     num_of_columns = len(lines[i + 2].split())
                     if num_of_columns <= 5:
                         type_index = 1
@@ -184,8 +184,8 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                 self["unit_cell"] = parse_unit_cell(
                     np.concatenate([x_inputs, y_inputs, z_inputs])
                 )
-            except:
-                LOG.error(f"LAMMPS ConfigFileConfigurator failed to find a unit cell")
+            except Exception:
+                LOG.error("LAMMPS ConfigFileConfigurator failed to find a unit cell")
 
     def atom_labels(self) -> Iterable[AtomLabel]:
         """

@@ -195,7 +195,7 @@ class DynamicCoherentStructureFactor(IJob):
 
         shell = self.configuration["q_vectors"]["shells"][index]
 
-        if not shell in self.configuration["q_vectors"]["value"]:
+        if shell not in self.configuration["q_vectors"]["value"]:
             return index, None
 
         else:

@@ -42,7 +42,7 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
 
         self.labels = self.unique_labels()
         if len(self.labels) == 0:
-            self.error_status = f"Unable to generate atom labels"
+            self.error_status = "Unable to generate atom labels"
             return
 
     @abstractmethod

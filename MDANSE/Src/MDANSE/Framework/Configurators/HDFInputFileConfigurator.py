@@ -76,7 +76,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
                 self[v] = self["instance"][v][:]
                 try:
                     self._units[v] = self["instance"][v].attrs["units"]
-                except:
+                except Exception:
                     self._units[v] = "unitless"
             else:
                 self.error_status = (

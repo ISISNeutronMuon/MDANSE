@@ -17,7 +17,6 @@
 
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
-    ConfiguratorError,
 )
 
 
@@ -72,7 +71,7 @@ class IntegerConfigurator(IConfigurator):
             return
 
         if self._choices:
-            if not value in self._choices:
+            if value not in self._choices:
                 self.error_status = "the input value is not a valid choice."
                 return
 

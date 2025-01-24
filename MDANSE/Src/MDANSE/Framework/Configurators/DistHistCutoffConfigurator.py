@@ -44,7 +44,7 @@ class DistHistCutoffConfigurator(RangeConfigurator):
                     for frame in range(len(traj_config))
                 ]
             )
-        except:
+        except Exception:
             return np.linalg.norm(traj_config.min_span)
         else:
             if np.allclose(trajectory_array, 0.0):

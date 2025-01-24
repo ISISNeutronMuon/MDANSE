@@ -40,7 +40,7 @@ class PartialChargeMapper:
         for at_num, at in enumerate(system.atom_list):
             try:
                 self._original_map[at_num] = charges[at_num]
-            except:
+            except Exception:
                 self._original_map[at_num] = 0.0
         self._new_map = {}
 

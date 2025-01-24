@@ -20,8 +20,8 @@ import numpy as np
 
 import h5py
 
-from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
+from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Mathematics.LinearAlgebra import Quaternion, Vector
 from MDANSE.Mathematics.Transformation import Translation
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration

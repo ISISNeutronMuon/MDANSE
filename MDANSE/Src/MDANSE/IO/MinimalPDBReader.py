@@ -69,7 +69,7 @@ class MinimalPDBReader:
             try:
                 ase_atoms = ase_read(filename, format="pdb", index=0)
                 cell = ase_atoms.get_cell()
-            except:
+            except Exception:
                 self.periodic = False
             else:
                 self.periodic = True

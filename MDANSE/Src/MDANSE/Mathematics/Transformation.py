@@ -161,11 +161,11 @@ class Translation(RigidBodyTransformation):
         return Translation(-self.vector)
 
     def screwMotion(self):
-        l = self.vector.length()
-        if l == 0.0:
+        length = self.vector.length()
+        if length == 0.0:
             return Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0), 0.0, 0.0
         else:
-            return Vector(0.0, 0.0, 0.0), self.vector / l, 0.0, l
+            return Vector(0.0, 0.0, 0.0), self.vector / length, 0.0, length
 
 
 #

@@ -21,18 +21,17 @@ Text files with line iteration and transparent compression
 import os
 import sys
 from pathlib import Path
+from contextlib import suppress
 
 # Use the gzip module for Python version 1.5.2 or higher
-try:
-    _version = [int(c) for c in sys.version.split()[0].split(".")]
-
-    if _version >= [1, 5, 2]:
+with suppress(Exception):
+    if sys.version_info >= (1, 5, 2):
         try:
             import gzip
         except ImportError:
             gzip = None
-except:
-    gzip = None
+    else:
+        gzip = None
 
 
 class TextFile:

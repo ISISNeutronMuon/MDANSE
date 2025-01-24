@@ -52,7 +52,7 @@ class MDTrajTimeStepConfigurator(FloatConfigurator):
                     )
                     return
             else:
-                self.error_status = f"Unable to determine a time step from MDTraj"
+                self.error_status = "Unable to determine a time step from MDTraj"
                 return
 
         super().configure(value)

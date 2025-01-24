@@ -18,7 +18,6 @@ import numpy as np
 
 from MDANSE.MLogging import LOG
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Mathematics.LinearAlgebra import Vector
 
 
 class UnitCellConfigurator(IConfigurator):
@@ -56,7 +55,7 @@ class UnitCellConfigurator(IConfigurator):
         try:
             first_cell = traj_config.unit_cell(0)._unit_cell
             last_cell = traj_config.unit_cell(len(traj_config) - 1)._unit_cell
-        except:
+        except Exception:
             has_valid_cell = False
         else:
             if first_cell is None:
@@ -98,7 +97,7 @@ class UnitCellConfigurator(IConfigurator):
 
             try:
                 input_array = np.array(value[0], dtype=float)
-            except:
+            except Exception:
                 self.error_status = (
                     "Could not convert the inputs into a floating point array"
                 )

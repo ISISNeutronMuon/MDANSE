@@ -178,7 +178,7 @@ class DistanceHistogram(IJob):
             inverse_cell = conf.unit_cell.transposed_inverse
 
             cell_volume = conf.unit_cell.volume
-        except:
+        except Exception:
             self.detailed_unit_cell_error()
         else:
             if cell_volume < 1e-9:

@@ -20,6 +20,7 @@ import tempfile
 import io
 from pathlib import Path
 from typing import Union
+from functools import partial
 
 import numpy as np
 
@@ -38,6 +39,10 @@ MCSTAS_UNITS_LUT = {
 }
 
 NAVOGADRO = 6.02214129e23
+
+
+def _startswith(key: str, line: str) -> bool:
+    return line.strip().startswith(key)
 
 
 class McStasError(Error):
@@ -358,8 +363,8 @@ class McStasVirtualInstrument(IJob):
         if not sim_file:
             raise Exception(f"Dataset {sim_file} does not exist!")
 
-        isBegin = lambda line: line.strip().startswith("begin")
-        isCompFilename = lambda line: line.strip().startswith("filename:")
+        isBegin = partial(_startswith, "begin")
+        isCompFilename = partial(_startswith, "filename:")
         # First, determine if this is single or overview plot...
         SimFile = list(filter(isBegin, open(sim_file).readlines()))
         Datfile = 0
@@ -379,7 +384,7 @@ class McStasVirtualInstrument(IJob):
         if L == 0:
             """Scan view"""
             if Datfile == 0:
-                isFilename = lambda line: line.strip().startswith("filename")
+                isFilename = partial(_startswith, "filename")
 
                 Scanfile = list(filter(isFilename, open(sim_file).readlines()))
                 Scanfile = Scanfile[0].split(": ")
@@ -437,9 +442,9 @@ class McStasVirtualInstrument(IJob):
             # 2D data set
             mysize = FileStruct["data"].shape
 
-            I = FileStruct["data"]
-            mysize = I.shape
-            I = I.T
+            data = FileStruct["data"]
+            mysize = data.shape
+            data = data.T
 
             Xmin = eval(FileStruct["xylimits"].split()[0])
             Xmax = eval(FileStruct["xylimits"].split()[1])
@@ -464,7 +469,7 @@ class McStasVirtualInstrument(IJob):
             self._outputData.add(
                 title,
                 "SurfaceOutputVariable",
-                I,
+                data,
                 axis=f"{xlabel}|{ylabel}",
                 units="au",
                 main_result=True,
@@ -485,7 +490,7 @@ class McStasVirtualInstrument(IJob):
         """
 
         # Read header
-        isHeader = lambda line: line.startswith("#")
+        isHeader = partial(_startswith, "#")
         f = open(simFile)
         Lines = f.readlines()
         Header = list(filter(isHeader, Lines))
@@ -514,8 +519,8 @@ class McStasVirtualInstrument(IJob):
         f.close()
 
         header = True
-        for l in lines:
-            if l.startswith("#"):
+        for line in lines:
+            if line.startswith("#"):
                 if header:
                     continue
                 else:
@@ -523,7 +528,7 @@ class McStasVirtualInstrument(IJob):
             else:
                 if header:
                     header = False
-                data.append(l)
+                data.append(line)
 
         Filestruct["data"] = np.genfromtxt(io.StringIO(" ".join(data)))
         Filestruct["fullpath"] = simFile

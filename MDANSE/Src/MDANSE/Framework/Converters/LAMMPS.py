@@ -51,7 +51,7 @@ class LAMMPSReader:
     def close(self):
         try:
             self._file.close()
-        except:
+        except Exception:
             LOG.error(f"Could not close file: {self._file}")
 
     def set_output(self, output_trajectory):
@@ -562,7 +562,7 @@ class LAMMPSh5md(LAMMPSReader):
         )
         try:
             self._charges_fixed = self._file["/particles/all/charge"][:]
-        except:
+        except Exception:
             pass
 
         full_cell *= measure(1.0, self._length_unit).toval("nm")
@@ -632,7 +632,7 @@ class LAMMPSh5md(LAMMPSReader):
         if self._charges_fixed is None:
             try:
                 charge = self._file["/particles/all/charge/value"][index]
-            except:
+            except Exception:
                 pass
             else:
                 self._trajectory.write_charges(

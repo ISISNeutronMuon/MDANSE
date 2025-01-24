@@ -31,7 +31,7 @@ class ASEFileConfigurator(FileWithAtomDataConfigurator):
 
         try:
             self._input = ASETrajectory(self["filename"])
-        except:
+        except Exception:
             self._input = iread(self["filename"], index="[:]")
             first_frame = read(self["filename"], index=0)
         else:

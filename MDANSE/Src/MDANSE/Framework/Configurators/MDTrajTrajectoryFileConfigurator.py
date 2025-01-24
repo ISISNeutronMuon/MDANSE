@@ -27,7 +27,7 @@ class MDTrajTrajectoryFileConfigurator(MultiInputFileConfigurator):
 
         extensions = {"".join(Path(value).suffixes)[1:] for value in self["values"]}
         if len(extensions) != 1:
-            self.error_status = f"Files should be of a single format."
+            self.error_status = "Files should be of a single format."
             return
         self.extension = next(iter(extensions))
 

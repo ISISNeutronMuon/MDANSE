@@ -90,7 +90,7 @@ def recursive_keys(parent_class: type) -> list:
     """
     try:
         results = parent_class.subclasses()
-    except:
+    except Exception:
         return []
     else:
         for child in parent_class.subclasses():
@@ -117,7 +117,7 @@ def recursive_dict(parent_class: type) -> dict:
             ckey: parent_class._registered_subclasses[ckey]
             for ckey in parent_class.subclasses()
         }
-    except:
+    except Exception:
         return {}
     else:
         for child in parent_class.subclasses():

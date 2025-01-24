@@ -204,7 +204,7 @@ class ImprovedASE(Converter):
         self._input.close()
         try:
             self._extra_input.close()
-        except:
+        except Exception:
             pass
         # Close the output trajectory.
         self._trajectory.write_standard_atom_database()
@@ -218,13 +218,13 @@ class ImprovedASE(Converter):
         if self._fractionalCoordinates is None:
             try:
                 self._fractionalCoordinates = np.all(ase_object.get_pbc())
-            except:
+            except Exception:
                 pass
 
         if self._masses is None:
             try:
                 self._masses = ase_object.get_masses()
-            except:
+            except Exception:
                 pass
 
         if self.configuration["elements_from_mass"]["value"]:
@@ -236,7 +236,7 @@ class ImprovedASE(Converter):
         else:
             try:
                 element_list = ase_object.get_chemical_symbols()
-            except:
+            except Exception:
                 pass
         if element_list is None:
             return
@@ -256,7 +256,7 @@ class ImprovedASE(Converter):
             )
         except FileNotFoundError:
             return
-        except:
+        except Exception:
             for file_format in self.configuration[
                 "configuration_file"
             ]._allowed_formats:
@@ -265,7 +265,7 @@ class ImprovedASE(Converter):
                         self.configuration["configuration_file"]["value"],
                         format=file_format,
                     )
-                except:
+                except Exception:
                     continue
                 else:
                     break
@@ -276,7 +276,7 @@ class ImprovedASE(Converter):
         self.parse_optional_config()
         try:
             self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
-        except:
+        except Exception:
             self._input = iread(
                 self.configuration["trajectory_file"]["value"],
                 index="[:]",

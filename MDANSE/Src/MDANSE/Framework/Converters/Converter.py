@@ -60,7 +60,7 @@ class Converter(IJob, metaclass=SubclassFactory):
         try:
             output_file = h5py.File(self.configuration["output_files"]["file"], "a")
             # f = netCDF4.Dataset(self._trajectory.filename,'a')
-        except:
+        except Exception:
             LOG.warning("Skipping the finalize call in Converter")
             return
 

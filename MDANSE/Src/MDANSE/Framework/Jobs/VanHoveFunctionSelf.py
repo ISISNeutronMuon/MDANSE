@@ -148,7 +148,7 @@ class VanHoveFunctionSelf(IJob):
         )
         try:
             cell_volume = conf.unit_cell.volume
-        except:
+        except Exception:
             self.detailed_unit_cell_error()
         else:
             if cell_volume < 1e-9:

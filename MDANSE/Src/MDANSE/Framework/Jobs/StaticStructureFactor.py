@@ -95,7 +95,7 @@ class StaticStructureFactor(DistanceHistogram):
         conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
         try:
             cell_volume = conf.unit_cell.volume
-        except:
+        except Exception:
             raise ValueError(
                 "Static Structure Factor cannot be computed for chemical system without a defined simulation box. "
                 "You can add a box using TrajectoryEditor."

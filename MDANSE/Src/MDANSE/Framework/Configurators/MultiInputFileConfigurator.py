@@ -54,7 +54,7 @@ class MultiInputFileConfigurator(IConfigurator):
                     return
                 if type(values) is not list:
                     self.error_status = (
-                        f"Input values should be able to be evaluated as a list"
+                        "Input values should be able to be evaluated as a list"
                     )
                     return
             else:
@@ -62,10 +62,10 @@ class MultiInputFileConfigurator(IConfigurator):
 
         if type(values) is list:
             if not all([type(value) is str for value in values]):
-                self.error_status = f"Input values should be a list of str"
+                self.error_status = "Input values should be a list of str"
                 return
         else:
-            self.error_status = f"Input values should be able to be evaluated as a list"
+            self.error_status = "Input values should be able to be evaluated as a list"
             return
 
         values = [PLATFORM.get_path(value) for value in values]

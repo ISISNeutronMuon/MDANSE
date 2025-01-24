@@ -13,15 +13,31 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import json
 import copy
+import json
 from typing import Union
+
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.Framework.AtomSelector.all_selector import select_all
-from MDANSE.Framework.AtomSelector.atom_selectors import *
-from MDANSE.Framework.AtomSelector.group_selectors import *
-from MDANSE.Framework.AtomSelector.molecule_selectors import *
+from MDANSE.Framework.AtomSelector.atom_selectors import (
+    select_atom_fullname,
+    select_atom_name,
+    select_dummy,
+    select_element,
+    select_hs_on_element,
+    select_hs_on_heteroatom,
+    select_index,
+)
+from MDANSE.Framework.AtomSelector.group_selectors import (
+    select_hydroxy,
+    select_methyl,
+    select_phosphate,
+    select_primary_amine,
+    select_sulphate,
+    select_thiol,
+)
+from MDANSE.Framework.AtomSelector.molecule_selectors import select_water
 
 
 class Selector:

@@ -100,7 +100,7 @@ class DensityProfile(IJob):
 
         try:
             axis = first_conf.unit_cell.direct[axis_index, :]
-        except:
+        except Exception:
             raise DensityProfileError(
                 "Density profile cannot be computed without a simulation box. "
                 "You can add a box using TrajectoryEditor."
