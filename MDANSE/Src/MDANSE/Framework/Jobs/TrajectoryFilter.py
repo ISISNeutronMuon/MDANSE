@@ -154,7 +154,7 @@ class TrajectoryFilter(IJob):
         trajectories = copy.deepcopy(self.atomic_trajectory_array)
 
         # Apply filter (only apply initial position offset to atoms if filter is not lowpass and setting has been applied)
-        filtered_coords = apply(filter, trajectories, apply_offsets=filter.attenuation_type is not "lowpass")
+        filtered_coords = apply(filter, trajectories, apply_offsets=filter_attributes.get('attenuation_type', "bandpass") is not "lowpass")
 
         # Create trajectory writer object
         self._output_trajectory = TrajectoryWriter(
