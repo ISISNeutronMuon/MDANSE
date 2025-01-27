@@ -165,6 +165,10 @@ class FilterDesigner(QDialog):
         if hasattr(self, "_figure"):
             self.render_canvas_assets()
 
+        # Delete bound frequency spinbox if not relevant to filter type
+        if hasattr(self, "bound_freq_widget") and self._settings["filter"] in {'Notch', 'Peak', 'Comb'}:
+            self.bound_freq_widget.deleteLater()
+
     def get_frequency_bounds(self) -> list:
         """Create a list representing the upper and lower bounds of the filter critical frequencies
 
@@ -194,14 +198,15 @@ class FilterDesigner(QDialog):
         self._settings["attributes"].update({key: value})
 
         # Check if attribute invokes change in how frequencies are passed to filter (single cutoff value or array of critical frequencies)
-        if value in {"bandpass", "bandstop"}:
-            self.toggle_bound_frequencies()
-            self._settings["attributes"]["cutoff_freq"] = self.get_frequency_bounds()
-        elif value in {"lowpass", "highpass"}:
-            self.toggle_bound_frequencies(False)
-            self._settings["attributes"]["cutoff_freq"] = self.cutoff_freq_widget.value()
-        elif self.attenuation_type_widget.currentText() in {"bandpass", "bandstop"}:
-            self._settings["attributes"]["cutoff_freq"] = self.get_frequency_bounds()
+        if self._settings["filter"] not in {'Notch', 'Peak', 'Comb'}:
+            if value in {"bandpass", "bandstop"}:
+                self.toggle_bound_frequencies()
+                self._settings["attributes"]["cutoff_freq"] = self.get_frequency_bounds()
+            elif value in {"lowpass", "highpass"}:
+                self.toggle_bound_frequencies(False)
+                self._settings["attributes"]["cutoff_freq"] = self.cutoff_freq_widget.value()
+            elif self.attenuation_type_widget.currentText() in {"bandpass", "bandstop"}:
+                self._settings["attributes"]["cutoff_freq"] = self.get_frequency_bounds()
 
         # Re-render filter graph
         self.render_canvas_assets()
@@ -367,7 +372,7 @@ class FilterDesigner(QDialog):
                 item_count += 1
 
             # For non-IIR filters, add frequency bound spinbox in case designed filter is bandpass/stop
-            if filter.__name__ not in {'Notch', 'Peaks', 'Comb'}:
+            if filter.__name__ not in {'Notch', 'Peak', 'Comb'}:
                 self.bound_freq_widget = QDoubleSpinBox()
                 step = 1.0
                 widget = self.bound_freq_widget
