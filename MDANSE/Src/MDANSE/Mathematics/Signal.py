@@ -329,6 +329,8 @@ class Filter:
     # Symbolic variable for digital filter transfer function (Z-plane)
     Z = 'e^iw'
 
+    digital_only = False
+
     # Useful physical constants (from [pwtools](https://github.com/elcorto/pwtools)
     Ry_to_Hz = 3289841960777247.0
     Ry_to_eV = 13.60569193
@@ -368,6 +370,12 @@ class Filter:
         self.sample_freq = 1/kwargs.pop("time_step_ps")
         self.set_filter_attributes(kwargs)
 
+    def compute_frequencies(self, transfer_function: TransferFunction, range: np.ndarray):
+        """
+
+        """
+        return signal.freqs(*transfer_function, worN=range)
+
     def apply(self, input: np.array) -> np.ndarray:
         """Returns the convolution of the digital designed filter with an input signal.
 
@@ -376,8 +384,8 @@ class Filter:
         :Returns:
             #. np.array: the resulting signal due to convolution with the filter instance
         """
-        digital_coeffs = self.to_digital_coeffs()
-        return signal.filtfilt(digital_coeffs.numerator, digital_coeffs.denominator, input)
+        coeffs = self.to_digital_coeffs() if not self.digital_only else self.coeffs
+        return signal.filtfilt(coeffs.numerator, coeffs.denominator, input)
 
     def to_digital_coeffs(self) -> TransferFunction:
         """Returns the filter instance digital coefficients converted from analog, by performing a bilinear transform
@@ -431,8 +439,9 @@ class Filter:
         else:
             RuntimeError(f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' property on the instance of {self.__class__}")
 
-        freqs = signal.freqs(*expr, worN=np.abs(((np.pi/2)**(-1))*freq_range))
-        self._freq_response = self.FrequencyDomain(*freqs)
+        # Get frequency response from transfer function expression and specify frequency range around which to compute response
+        response = self.compute_frequencies(transfer_function=expr, range=np.abs(((np.pi / 2) ** (-1)) * freq_range))
+        self._freq_response = self.FrequencyDomain(*response)
 
     @property
     def coeffs(self) -> TransferFunction:
@@ -817,7 +826,9 @@ class Bessel(Filter):
 
 class Notch(Filter):
     """
+
     """
+    digital_only = True
 
     @classmethod
     def set_defaults(cls) -> None:
@@ -838,14 +849,22 @@ class Notch(Filter):
         super().__init__(**kwargs)
 
         self.coeffs = self.TransferFunction(
-            *signal.iirnotch(self.fundamental_freq, self.quality_factor)
+            *signal.iirnotch(self.fundamental_freq, self.quality_factor, fs=self.sample_freq)
         )
         self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+
+    def compute_frequencies(self, transfer_function: Filter.TransferFunction, range: np.ndarray):
+        """
+
+        """
+        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
 
 
 class Peak(Filter):
     """
+
     """
+    digital_only = True
 
     @classmethod
     def set_defaults(cls) -> None:
@@ -866,14 +885,22 @@ class Peak(Filter):
         super().__init__(**kwargs)
 
         self.coeffs = self.TransferFunction(
-            *signal.iirpeak(self.fundamental_freq, self.quality_factor)
+            *signal.iirpeak(self.fundamental_freq, self.quality_factor, fs=self.sample_freq)
         )
         self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+
+    def compute_frequencies(self, transfer_function: Filter.TransferFunction, range: np.ndarray):
+        """
+
+        """
+        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
 
 
 class Comb(Filter):
     """
+
     """
+    digital_only = True
 
     @classmethod
     def set_defaults(cls) -> None:
@@ -904,9 +931,15 @@ class Comb(Filter):
         super().__init__(**kwargs)
 
         self.coeffs = self.TransferFunction(
-            *signal.iircomb(self.fundamental_freq, self.quality_factor, ftype=self.comb_type, pass_zero=self.pass_zero)
+            *signal.iircomb(self.fundamental_freq, self.quality_factor, ftype=self.comb_type, pass_zero=self.pass_zero, fs=self.sample_freq)
         )
         self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+
+    def compute_frequencies(self, transfer_function: Filter.TransferFunction, range: np.ndarray):
+        """
+
+        """
+        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
 
 FILTERS = (Butterworth, ChebyshevTypeI, ChebyshevTypeII, Elliptical, Bessel, Notch, Peak, Comb)
 
