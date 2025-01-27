@@ -42,43 +42,40 @@ class IndentedHelp(optparse.IndentedHelpFormatter):
             return ""
         desc_width = self.width - self.current_indent
         indent = " " * self.current_indent
-        bits = description.split("\n")
-        formatted_bits = [
+        bits = description.splitlines()
+        formatted_bits = (
             textwrap.fill(
                 bit, desc_width, initial_indent=indent, subsequent_indent=indent
             )
             for bit in bits
-        ]
+        )
         result = "\n".join(formatted_bits) + "\n"
 
         return result
 
     def format_option(self, option):
-        result = []
+        indent = " " * self.current_indent
+        result = ""
         opts = self.option_strings[option]
         opt_width = self.help_position - self.current_indent - 2
         if len(opts) > opt_width:
-            opts = "%*s%s\n" % (self.current_indent, "", opts)
+            opts = f"{indent}{opts}\n"
             indent_first = self.help_position
         else:  # start help on same line as opts
-            opts = "%*s%-*s  " % (self.current_indent, "", opt_width, opts)
+            opts = f"{indent}{opts}  "
             indent_first = 0
-        result.append(opts)
+        result += opts
         if option.help:
             help_text = self.expand_default(option)
             # Everything is the same up through here
-            help_lines = []
-            for para in help_text.split("\n"):
-                help_lines.extend(textwrap.wrap(para, self.help_width))
+            help_lines = [textwrap.wrap(para, self.help_width) for para in help_text.splitlines()]
             # Everything is the same after here
-            result.append("%*s%s\n" % (indent_first, "", help_lines[0]))
-            result.extend(
-                ["%*s%s\n" % (self.help_position, "", line) for line in help_lines[1:]]
-            )
-        elif opts[-1] != "\n":
-            result.append("\n")
+            result += f"{indent_first}{help_lines[0]}\n"
+            result += "\n".join(f"{' '*self.help_position}{line}" for line in help_lines[1:]) + "\n"
+        elif not opts.endswith("\n"):
+            result += "\n"
 
-        return "".join(result)
+        return result
 
 
 class CommandLineParserError(Error):
@@ -111,9 +108,7 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         if len(parser.rargs) != 1:
-            raise CommandLineParserError(
-                "Invalid number of arguments for %r option" % opt_str
-            )
+            raise CommandLineParserError(f"Invalid number of arguments for {opt_str!r} option")
 
         basename = parser.rargs[0]
 
@@ -130,24 +125,22 @@ class CommandLineParser(optparse.OptionParser):
 
         # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint
         except:
-            raise CommandLineParserError(
-                "The job %r could not be opened properly." % basename
-            )
+            raise CommandLineParserError(f"The job {basename!r} could not be opened properly.")
 
         # The job file could be opened and unpickled properly
         else:
             # Check that the unpickled object is a JobStatus object
             if not isinstance(info, JobState):
-                raise CommandLineParserError("Invalid contents for job %r." % basename)
+                raise CommandLineParserError(f"Invalid contents for job {basename!r}.")
 
-            LOG.info("Information about %s job:" % basename)
-            for k, v in info.iteritems():
-                LOG.info("%-20s [%s]" % (k, v))
+            LOG.info("Information about %s job:", basename)
+            for k, v in info.items():
+                LOG.info("%-20s [%s]", k, v)
 
     def display_element_info(self, option, opt_str, value, parser):
         if len(parser.rargs) != 1:
             raise CommandLineParserError(
-                "Invalid number of arguments for %r option" % opt_str
+                f"Invalid number of arguments for {opt_str!r} option"
             )
 
         element = parser.rargs[0]
@@ -158,7 +151,7 @@ class CommandLineParser(optparse.OptionParser):
             LOG.info(ATOMS_DATABASE.info(element))
         except ValueError:
             raise CommandLineParserError(
-                "The entry %r is not registered in the database" % element
+                f"The entry {element!r} is not registered in the database"
             )
 
     def display_jobs_list(self, option, opt_str, value, parser):
@@ -178,9 +171,7 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         if len(parser.rargs) != 0:
-            raise CommandLineParserError(
-                "Invalid number of arguments for %r option" % opt_str
-            )
+            raise CommandLineParserError(f"Invalid number of arguments for {opt_str!r} option")
 
         jobs = PLATFORM.temporary_files_directory().glob("*")
 
@@ -230,7 +221,7 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         self.print_help(sys.stderr)
-        self.exit(2, "Error: %s\n" % msg)
+        self.exit(2, f"Error: {msg}\n")
 
     def query_classes_registry(self, option, opt_str, value, parser):
         """
@@ -248,14 +239,12 @@ class CommandLineParser(optparse.OptionParser):
         if len(parser.rargs) == 0:
             LOG.info("Registered jobs:")
             for interfaceName in IJob.indirect_subclasses():
-                LOG.info("\t- %s" % interfaceName)
+                LOG.info("\t- %s", interfaceName)
         elif len(parser.rargs) == 1:
             val = parser.rargs[0]
             LOG.info(IJob.create(val).info())
         else:
-            raise CommandLineParserError(
-                "Invalid number of arguments for %r option" % opt_str
-            )
+            raise CommandLineParserError(f"Invalid number of arguments for {opt_str!r} option")
 
     def run_job(self, option, opt_str, value, parser):
         """Run job file(s).
@@ -274,16 +263,12 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         if len(parser.rargs) != 1:
-            raise CommandLineParserError(
-                "Invalid number of arguments for %r option" % opt_str
-            )
+            raise CommandLineParserError(f"Invalid number of arguments for {opt_str!r} option")
 
         filename = Path(parser.rargs[0])
 
         if not filename.exists():
-            raise CommandLineParserError(
-                "The job file %r could not be executed" % filename
-            )
+            raise CommandLineParserError(f"The job file {filename!r} could not be executed")
 
         subprocess.Popen([sys.executable, filename])
 
@@ -305,9 +290,7 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         if len(parser.rargs) != 1:
-            raise CommandLineParserError(
-                "Invalid number of arguments for %r option" % opt_str
-            )
+            raise CommandLineParserError(f"Invalid number of arguments for {opt_str!r} option")
 
         jobs = IJob
 
@@ -321,15 +304,13 @@ class CommandLineParser(optparse.OptionParser):
             jobs.create(name).save(filename)
         # Case where an error occured when writing the template.
         except IOError:
-            raise CommandLineParserError(
-                "Could not write the job template as %r" % filename
-            )
+            raise CommandLineParserError(f"Could not write the job template as {filename!r}")
         # If the job class has no save method, thisis not a valid MDANSE job.
         except KeyError:
-            raise CommandLineParserError("The job %r is not a valid MDANSE job" % name)
+            raise CommandLineParserError(f"The job {name!r} is not a valid MDANSE job")
         # Otherwise, print some information about the saved template.
         else:
-            LOG.info("Saved template for job %r as %r" % (name, filename))
+            LOG.info("Saved template for job %r as %r", name, filename)
 
     def save_job_template(self, option, opt_str, value, parser):
         """
@@ -371,7 +352,7 @@ def main():
 
     # Creates the option parser.
     parser = CommandLineParser(
-        formatter=IndentedHelp(), version="MDANSE %s " % MDANSE.__version__
+        formatter=IndentedHelp(), version=f"MDANSE {MDANSE.__version__} "
     )
 
     # Creates a first the group of general options.

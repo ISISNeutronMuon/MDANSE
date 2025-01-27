@@ -182,14 +182,14 @@ class VanHoveFunctionSelf(IJob):
         )
         for element in self.selectedElements:
             self._outputData.add(
-                "g(r,t)_%s" % element,
+                f"g(r,t)_{element}",
                 "SurfaceOutputVariable",
                 (self.n_mid_points, self.n_frames),
                 axis="r|time",
                 units="au",
             )
             self._outputData.add(
-                "4_pi_r2_g(r,t)_%s" % element,
+                f"4_pi_r2_g(r,t)_{element}",
                 "SurfaceOutputVariable",
                 (self.n_mid_points, self.n_frames),
                 axis="r|time",
@@ -284,10 +284,10 @@ class VanHoveFunctionSelf(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in list(nAtomsPerElement.items()):
-            self._outputData["g(r,t)_%s" % element][:] /= (
+            self._outputData[f"g(r,t)_{element}"][:] /= (
                 self.shell_volumes[:, np.newaxis] * number**2 * self.n_configs
             )
-            self._outputData["4_pi_r2_g(r,t)_%s" % element][:] /= (
+            self._outputData[f"4_pi_r2_g(r,t)_{element}"][:] /= (
                 number**2 * self.n_configs * self.configuration["r_values"]["step"]
             )
 

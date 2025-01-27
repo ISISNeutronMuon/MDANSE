@@ -45,8 +45,8 @@ class QVectorsConfigurator(IConfigurator):
 
     def configure(self, value):
         """
-        Configure a Q vectors generator. 
-                
+        Configure a Q vectors generator.
+
         :param configuration: the current configuration.
         :type configuration: a MDANSE.Framework.Configurable.Configurable object
         :param value: the Q vectors generator definition. It can be a 2-tuple, whose 1st element is the name of the Q vector generator \
@@ -117,13 +117,13 @@ class QVectorsConfigurator(IConfigurator):
         """
 
         try:
-            info = ["%d Q shells generated\n" % self["n_shells"]]
+            info = [f"{self['n_shells']} Q shells generated\n"]
         except KeyError:
             return "QVectors could not be configured correctly"
         else:
-            for qValue, qVectors in list(self["q_vectors"].items()):
+            for qValue, qVectors in self["q_vectors"].items():
                 info.append(
-                    "Shell %s: %d Q vectors generated\n" % (qValue, len(qVectors))
+                    f"Shell {qValue}: {len(qVectors)} Q vectors generated\n"
                 )
 
             return "".join(info)

@@ -56,4 +56,4 @@ class InputDirectoryConfigurator(IConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return "Input directory: %r\n" % self["value"]
+        return f"Input directory: {self['value']!r}\n"

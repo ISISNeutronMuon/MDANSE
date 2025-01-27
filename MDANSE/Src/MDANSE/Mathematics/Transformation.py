@@ -309,8 +309,7 @@ class Rotation(RigidBodyTransformation):
             raise ValueError("FAILURE 1, norm = 0")
         if abs(_c / _norm) > 1 + tolerance:
             raise ValueError(
-                "FAILURE 2"
-                + "malformed rotation Tensor (non orthogonal?) %.8f" % (_c / _norm)
+                f"FAILURE 2 malformed rotation Tensor (non orthogonal?) {_c / _norm:.8f}"
             )
         # if _c/_norm > 1: raise ValueError('Step1: No solution')
         _th = angleFromSineAndCosine(_b / _norm, _a / _norm)

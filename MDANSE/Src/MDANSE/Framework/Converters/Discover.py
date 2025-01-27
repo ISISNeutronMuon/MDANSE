@@ -61,7 +61,7 @@ class HisFile(dict):
         rec = "!i"
         recSize = struct.calcsize(rec)
         N_ATTYP = struct.unpack(rec, hisfile.read(recSize))[0]
-        rec = "!" + "%ds" % (4 * N_ATTYP) + "%dd" % N_ATTYP + "8x"
+        rec = f"!{4 * N_ATTYP}s{N_ATTYP}d8x"
         recSize = struct.calcsize(rec)
         hisfile.read(recSize)
 
@@ -69,7 +69,7 @@ class HisFile(dict):
         rec = "!i"
         recSize = struct.calcsize(rec)
         N_NMRES = struct.unpack(rec, hisfile.read(recSize))[0]
-        rec = "!" + "%ds" % (4 * N_NMRES) + "8x"
+        rec = f"!{4 * N_NMRES}s8x"
         recSize = struct.calcsize(rec)
         hisfile.read(recSize)
 
@@ -77,12 +77,7 @@ class HisFile(dict):
         rec = "!i"
         recSize = struct.calcsize(rec)
         self["n_atoms"] = N_ATOMS = struct.unpack(rec, hisfile.read(recSize))[0]
-        rec = "!" + "%di" % N_ATOMS
-        if VERSION < 2.9:
-            rec += "%ds" % (4 * N_ATOMS)
-        else:
-            rec += "%ds" % (5 * N_ATOMS)
-        rec += "8x"
+        rec = f"!{N_ATOMS}i{N_ATOMS * (4 if VERSION < 2.9 else 5)}s8x"
         recSize = struct.calcsize(rec)
         hisfile.read(recSize)
 
@@ -91,7 +86,7 @@ class HisFile(dict):
         recSize = struct.calcsize(rec)
         _, N_MOVAT = struct.unpack(rec, hisfile.read(recSize))
         if VERSION >= 2.6:
-            rec = "!" + "%di" % N_MOVAT
+            rec = f"!{N_MOVAT}i"
             recSize = struct.calcsize(rec)
             self["movable_atoms"] = (
                 np.array(struct.unpack(rec, hisfile.read(recSize)), dtype=np.int32) - 1
@@ -106,7 +101,7 @@ class HisFile(dict):
         rec = "!i"
         recSize = struct.calcsize(rec)
         N_MOL = struct.unpack(rec, hisfile.read(recSize))[0]
-        rec = "!" + "%di" % N_MOL + "%di" % N_MOL + "8x"
+        rec = f"!{N_MOL}i{N_MOL}i8x"
         recSize = struct.calcsize(rec)
         hisfile.read(recSize)
 
@@ -114,7 +109,7 @@ class HisFile(dict):
         rec = "!i"
         recSize = struct.calcsize(rec)
         N_RES = struct.unpack(rec, hisfile.read(recSize))[0]
-        rec = "!" + "%di" % (2 * N_RES) + "%di" % N_RES + "8x"
+        rec = f"!{2 * N_RES}i{N_RES}i8x"
         recSize = struct.calcsize(rec)
         hisfile.read(recSize)
 
@@ -123,7 +118,7 @@ class HisFile(dict):
         recSize = struct.calcsize(rec)
         N_BONDS = struct.unpack(rec, hisfile.read(recSize))[0]
         if N_BONDS > 0:
-            rec = "!" + "%di" % (2 * N_BONDS)
+            rec = f"!{2 * N_BONDS}i"
             recSize = struct.calcsize(rec)
             _ = struct.unpack(rec, hisfile.read(recSize))
         rec = "!8x"
@@ -152,19 +147,12 @@ class HisFile(dict):
         self["time_step"] = TIME_STEP * measure(1.0, "fs").toval("ps")
 
         # Record 14
-        rec = (
-            "!3d"
-            + "%dd" % N_ENER
-            + "%dd" % N_MOL
-            + "%dd" % (N_MOL * N_ENER)
-            + "%dd" % (4 * N_MOL + 2 + 54)
-            + "8x"
-        )
+        rec = f"!3d{N_ENER}d{N_MOL}d{N_MOL * N_ENER}d{4 * N_MOL + 2 + 54}d8x"
         self._rec14Size = struct.calcsize(rec)
         hisfile.read(self._rec14Size)
 
         # Record 15
-        rec = "!" + "%df" % (3 * N_ATOMS) + "8x"
+        rec = f"!{3 * N_ATOMS}f8x"
         recSize = struct.calcsize(rec)
         self["initial_coordinates"] = np.reshape(
             struct.unpack(rec, hisfile.read(recSize)), (N_ATOMS, 3)
@@ -172,7 +160,7 @@ class HisFile(dict):
         self["initial_coordinates"] *= measure(1.0, "ang").toval("nm")
 
         # Record 16
-        rec = "!" + "%df" % (3 * N_ATOMS) + "8x"
+        rec = f"!{3 * N_ATOMS}f8x"
         recSize = struct.calcsize(rec)
         self["initial_velocities"] = np.reshape(
             struct.unpack(rec, hisfile.read(recSize)), (N_ATOMS, 3)
@@ -188,9 +176,9 @@ class HisFile(dict):
             self["n_movable_atoms"] = N_ATOMS
         else:
             self["n_movable_atoms"] = N_MOVAT
-        self._recCoord = "!" + "%df" % (3 * self["n_movable_atoms"]) + "8x"
+        self._recCoord = f"!{3 * self['n_movable_atoms']}f8x"
         self._recCoordSize = struct.calcsize(self._recCoord)
-        self._recVel = "!" + "%df" % (3 * self["n_movable_atoms"]) + "8x"
+        self._recVel = f"!{3 * self['n_movable_atoms']}f8x"
         self._recVelSize = struct.calcsize(self._recVel)
 
         self._frameSize = (

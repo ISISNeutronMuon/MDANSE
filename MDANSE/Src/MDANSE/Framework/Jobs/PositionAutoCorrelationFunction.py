@@ -105,7 +105,7 @@ class PositionAutoCorrelationFunction(IJob):
         # Will store the mean square displacement evolution.
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "pacf_%s" % element,
+                f"pacf_{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
                 axis="time",
@@ -160,7 +160,7 @@ class PositionAutoCorrelationFunction(IJob):
         element = self.configuration["atom_selection"]["names"][index]
 
         # The MSD for element |symbol| is updated.
-        self._outputData["pacf_%s" % element] += x
+        self._outputData[f"pacf_{element}"] += x
 
     def finalize(self):
         """
@@ -171,15 +171,15 @@ class PositionAutoCorrelationFunction(IJob):
         self.configuration["atom_selection"]["n_atoms_per_element"] = nAtomsPerElement
 
         for element, number in list(nAtomsPerElement.items()):
-            self._outputData["pacf_%s" % element] /= number
+            self._outputData[f"pacf_{element}"] /= number
 
         if self.configuration["normalize"]["value"]:
             for element in list(nAtomsPerElement.keys()):
-                if self._outputData["pacf_%s" % element][0] == 0:
+                if self._outputData[f"pacf_{element}"][0] == 0:
                     raise ValueError("The normalization factor is equal to zero !!!")
                 else:
-                    self._outputData["pacf_%s" % element] = normalize(
-                        self._outputData["pacf_%s" % element], axis=0
+                    self._outputData[f"pacf_{element}"] = normalize(
+                        self._outputData[f"pacf_{element}"], axis=0
                     )
 
         weights = self.configuration["weights"].get_weights()

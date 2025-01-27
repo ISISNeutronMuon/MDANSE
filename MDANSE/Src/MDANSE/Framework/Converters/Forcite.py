@@ -55,7 +55,7 @@ class TrjFile(dict):
         rec = "!i"
         recSize = struct.calcsize(rec)
         (NTRJTI,) = struct.unpack(rec, trjfile.read(recSize))
-        rec = "!%ds8x" % (80 * NTRJTI)
+        rec = f"!{80*NTRJTI}s8x"
         recSize = struct.calcsize(rec)
         self["title"] = struct.unpack(rec, trjfile.read(recSize))
         self["title"] = "\n".join([t.decode("utf-8") for t in self["title"]])
@@ -64,7 +64,7 @@ class TrjFile(dict):
         rec = "!i"
         recSize = struct.calcsize(rec)
         NEEXTI = struct.unpack(rec, trjfile.read(recSize))[0]
-        rec = "!" + "%ds" % (80 * NEEXTI) + "8x"
+        rec = f"!{80 * NEEXTI}s8x"
         recSize = struct.calcsize(rec)
         trjfile.read(recSize)
 
@@ -82,7 +82,7 @@ class TrjFile(dict):
         recSize = struct.calcsize(rec)
         NFLUSD = struct.unpack(rec, trjfile.read(recSize))[0]
 
-        rec = "!%di%di%ds8x" % (NFLUSD, NFLUSD, 8 * NFLUSD)
+        rec = f"!{NFLUSD}i{NFLUSD}i{8*NFLUSD}s8x"
         recSize = struct.calcsize(rec)
         trjfile.read(recSize)
 
@@ -90,7 +90,7 @@ class TrjFile(dict):
         recSize = struct.calcsize(rec)
         self["totmov"] = struct.unpack(rec, trjfile.read(recSize))[0]
 
-        rec = "!%di8x" % self["totmov"]
+        rec = f"!{self['totmov']}i8x"
         recSize = struct.calcsize(rec)
         self["mvofst"] = (
             np.array(struct.unpack(rec, trjfile.read(recSize)), dtype=np.int32) - 1
@@ -100,7 +100,7 @@ class TrjFile(dict):
         rec = "!i"
         recSize = struct.calcsize(rec)
         (LEEXTI,) = struct.unpack(rec, trjfile.read(recSize))
-        rec = "!%ds8x" % LEEXTI
+        rec = f"!{LEEXTI}s8x"
         recSize = struct.calcsize(rec)
         trjfile.read(recSize)
 
@@ -108,7 +108,7 @@ class TrjFile(dict):
         rec = "!i"
         recSize = struct.calcsize(rec)
         (LPARTI,) = struct.unpack(rec, trjfile.read(recSize))
-        rec = "!%ds8x" % LPARTI
+        rec = f"!{LPARTI}s8x"
         recSize = struct.calcsize(rec)
         trjfile.read(recSize)
 
@@ -116,11 +116,11 @@ class TrjFile(dict):
 
         # Frame record 1
         if VERSION == 2000:
-            rec1 = "!%si33%s5i8x" % (self._fp, self._fp)
+            rec1 = f"!{self._fp}i33{self.fp}5i8x"
         elif VERSION == 2010:
-            rec1 = "!%si57%s6i8x" % (self._fp, self._fp)
+            rec1 = f"!{self._fp}i57{self._fp}6i8x"
         else:
-            rec1 = "!%si58%s6i8x" % (self._fp, self._fp)
+            rec1 = f"!{self._fp}i58{self._fp}6i8x"
 
         recSize = struct.calcsize(rec1)
         DATA = struct.unpack(rec1, trjfile.read(recSize))
@@ -133,38 +133,38 @@ class TrjFile(dict):
             self["gradients_written"] = DATA[-3]
 
         # Frame record 2
-        rec = "!12%s8x" % self._fp
+        rec = f"!12{self._fp}8x"
         recSize = struct.calcsize(rec)
         trjfile.read(recSize)
 
         # Frame record 3
         if LCANON:
-            rec = "!4%s8x" % self._fp
+            rec = f"!4{self._fp}8x"
             recSize = struct.calcsize(rec)
             trjfile.read(recSize)
 
         if PERTYPE > 0:
             # Frame record 4
             self._defCellRecPos = trjfile.tell() - self._headerSize
-            self._defCellRec = "!22%s8x" % self._fp
+            self._defCellRec = f"!22{self._fp}8x"
             self._defCellRecSize = struct.calcsize(self._defCellRec)
             trjfile.read(self._defCellRecSize)
 
         if PERTYPE > 0:
             # Frame record 5
-            rec = "!i14%s8x" % self._fp
+            rec = f"!i14{self._fp}8x"
             recSize = struct.calcsize(rec)
             trjfile.read(recSize)
 
         if LNPECAN:
             # Frame record 6
-            rec = "!3%s8x" % self._fp
+            rec = f"!3{self._fp}8x"
             recSize = struct.calcsize(rec)
             trjfile.read(recSize)
 
         if LTMPDAMP:
             # Frame record 7
-            rec = "!%s8x" % self._fp
+            rec = f"!{self._fp}8x"
             recSize = struct.calcsize(rec)
             trjfile.read(recSize)
 
@@ -173,25 +173,17 @@ class TrjFile(dict):
         if self["velocities_written"]:
             if self["gradients_written"]:
                 # Frame record 8,9,10,11,12,13,14,15,16
-                self._configRec = "!" + ("%d%s8x" * 9) % (
-                    (self["totmov"], self._fp) * 9
-                )
+                self._configRec = "!" + (f"{self['totmov']}{self._fp}8x" * 9)
             else:
                 # Frame record 8,9,10,11,12,13
-                self._configRec = "!" + ("%d%s8x" * 6) % (
-                    (self["totmov"], self._fp) * 6
-                )
+                self._configRec = "!" + (f"{self['totmov']}{self._fp}8x" * 6)
         else:
             if self["gradients_written"]:
                 # Frame record 8,9,10,14,15,16
-                self._configRec = "!" + ("%d%s8x" * 6) % (
-                    (self["totmov"], self._fp) * 6
-                )
+                self._configRec = "!" + (f"{self['totmov']}{self._fp}8x" * 6)
             else:
                 # Frame record 8,9,10
-                self._configRec = "!" + ("%d%s8x" * 3) % (
-                    (self["totmov"], self._fp) * 3
-                )
+                self._configRec = "!" + (f"{self['totmov']}{self._fp}8x" * 3)
 
         self._configRecSize = struct.calcsize(self._configRec)
         trjfile.read(self._configRecSize)
@@ -211,7 +203,7 @@ class TrjFile(dict):
 
         trjfile.seek(pos, 0)
 
-        rec = "!%s" % self._fp
+        rec = f"!{self._fp}"
         recSize = struct.calcsize(rec)
         (timeStep,) = struct.unpack(rec, trjfile.read(recSize))
 

@@ -52,7 +52,7 @@ def get_weights(props, contents, dim):
 def weight(props, values, contents, dim, key, symmetric=True, update_partials=False):
     weights = get_weights(props, contents, dim)[0]
     weightedSum = None
-    matches = dict([(key % k, k) for k in list(weights.keys())])
+    matches = {key % k: k for k in weights}
 
     for k, val in values.items():
         if k not in matches:

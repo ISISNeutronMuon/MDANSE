@@ -101,7 +101,7 @@ class McStasParametersConfigurator(IConfigurator):
                 continue
             val[k] = self._mcStasTypes[instrParameters[k][0]](v)
 
-        self["value"] = ["%s=%s" % (k, v) for k, v in list(val.items())]
+        self["value"] = [f"{k}={v}" for k, v in val.items()]
 
     @property
     def exclude(self):
@@ -124,4 +124,4 @@ class McStasParametersConfigurator(IConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return "McStas command line parameters:%s\n" % self["value"]
+        return f"McStas command line parameters:{self['value']}\n"

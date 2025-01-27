@@ -122,14 +122,14 @@ class PositionPowerSpectrum(IJob):
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "pacf_%s" % element,
+                f"pacf_{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2",
             )
             self._outputData.add(
-                "pps_%s" % element,
+                f"pps_{element}",
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
                 axis="romega",
@@ -202,7 +202,7 @@ class PositionPowerSpectrum(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData["pacf_%s" % element] += x
+        self._outputData[f"pacf_{element}"] += x
 
     def finalize(self):
         """
@@ -211,9 +211,9 @@ class PositionPowerSpectrum(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData["pacf_%s" % element][:] /= number
-            self._outputData["pps_%s" % element][:] = get_spectrum(
-                self._outputData["pacf_%s" % element],
+            self._outputData[f"pacf_{element}"][:] /= number
+            self._outputData[f"pps_{element}"][:] = get_spectrum(
+                self._outputData[f"pacf_{element}"],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 fft="rfft",

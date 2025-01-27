@@ -480,18 +480,19 @@ class AtomsDatabase(_Database):
 
         # A delimiter line.
         delimiter = "-" * 70
+        tab_fmt = "{:<20}{:>50}"
 
         info = [
             delimiter,
-            "%s" % atom.center(70),
-            "%s" % " {0:<20}{1:>50}".format("property", "value"),
+            f"{atom:^70}",
+            tab_fmt.format("property", "value"),
             delimiter,
         ]
 
         # The values for all element's properties
         for pname in sorted(self._properties):
             info.append(
-                " {0:<20}{1:>50}".format(pname, str(self._data[atom].get(pname, None)))
+                tab_fmt.format(pname, self._data[atom].get(pname, None))
             )
 
         info.append(delimiter)

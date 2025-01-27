@@ -102,7 +102,7 @@ class MultipleChoicesConfigurator(IConfigurator):
 
     def get_information(self):
         try:
-            info = "Selected items: %r\n" % self["choices"]
+            info = f"Selected items: {self['choices']!r}\n"
         except KeyError:
             info = "MultipleChoicesConfigurator could not be set up"
         return info

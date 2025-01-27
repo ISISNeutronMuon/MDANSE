@@ -108,7 +108,7 @@ class TextFormat(IFormat):
             cls.write_data(tempStr, var, data)
             real_buffer.seek(0)
 
-            info = tarfile.TarInfo(name="%s%s" % (var.varname, cls.extensions[0]))
+            info = tarfile.TarInfo(name=f"{var.varname}{cls.extensions[0]}")
             info.size = length_stringio(real_buffer)
             info.mtime = time.time()
             tf.addfile(tarinfo=info, fileobj=real_buffer)
@@ -138,22 +138,20 @@ class TextFormat(IFormat):
 
             if xData == "index":
                 xValues = np.arange(data.shape[0])
-                fileobject.write("# 1st column: %s (%s)\n" % (xData, "au"))
+                fileobject.write(f"# 1st column: {xData} (au)\n")
             else:
                 xValues = allData[xData]
                 fileobject.write(
-                    "# 1st column: %s (%s)\n"
-                    % (allData[xData].varname, allData[xData].units)
+                    f"# 1st column: {xValues.varname} ({xValues.units})\n"
                 )
 
             if yData == "index":
                 yValues = np.arange(data.shape[1])
-                fileobject.write("# 1st row: %s (%s)\n\n" % (yData, "au"))
+                fileobject.write(f"# 1st row: {yData} (au)\n\n")
             else:
                 yValues = allData[yData]
                 fileobject.write(
-                    "# 1st row: %s (%s)\n\n"
-                    % (allData[yData].varname, allData[yData].units)
+                    f"# 1st row: {yValues.varname} ({yValues.units})\n\n"
                 )
 
             zData = np.zeros((data.shape[0] + 1, data.shape[1] + 1), dtype=np.float64)
@@ -169,15 +167,14 @@ class TextFormat(IFormat):
 
             if xData == "index":
                 xValues = np.arange(data.size)
-                fileobject.write("# 1st column: %s (%s)\n" % (xData, "au"))
+                fileobject.write(f"# 1st column: {xData} (au)\n")
             else:
                 xValues = allData[xData]
                 fileobject.write(
-                    "# 1st column: %s (%s)\n"
-                    % (allData[xData].varname, allData[xData].units)
+                    f"# 1st column: {xValues.varname} ({xValues.units})\n"
                 )
 
-            fileobject.write("# 2nd column: %s (%s)\n\n" % (data.varname, data.units))
+            fileobject.write(f"# 2nd column: {data.varname} ({data.units})\n\n")
 
             np.savetxt(fileobject, np.column_stack([xValues, data]))
             fileobject.write("\n")

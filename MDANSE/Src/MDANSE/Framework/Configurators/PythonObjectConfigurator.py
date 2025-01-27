@@ -59,4 +59,4 @@ class PythonObjectConfigurator(IConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return "Python object: %r\n" % self["value"]
+        return f"Python object: {self['value']}\n"

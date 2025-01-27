@@ -142,22 +142,23 @@ class StaticStructureFactor(DistanceHistogram):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for pair in self._elementsPairs:
+            pair_str = ''.join(map(str, pair))
             self._outputData.add(
-                "ssf_intra_%s%s" % pair,
+                f"ssf_intra_{pair_str}",
                 "LineOutputVariable",
                 (nq,),
                 axis="q",
                 units="au",
             )
             self._outputData.add(
-                "ssf_inter_%s%s" % pair,
+                f"ssf_inter_{pair_str}",
                 "LineOutputVariable",
                 (nq,),
                 axis="q",
                 units="au",
             )
             self._outputData.add(
-                "ssf_total_%s%s" % pair,
+                f"ssf_total_{pair_str}",
                 "LineOutputVariable",
                 (nq,),
                 axis="q",
@@ -182,15 +183,15 @@ class StaticStructureFactor(DistanceHistogram):
             pdfIntra = self.hIntra[idi, idj, :] / fact
             pdfInter = self.hInter[idi, idj, :] / fact
 
-            self._outputData["ssf_intra_%s%s" % pair][:] = (
+            self._outputData[f"ssf_intra_{pair_str}"][:] = (
                 fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr
             )
-            self._outputData["ssf_inter_%s%s" % pair][:] = (
+            self._outputData[f"ssf_inter_{pair_str}"][:] = (
                 1.0 + fact1 * np.sum((r**2) * (pdfInter - 1.0) * sincqr, axis=1) * dr
             )
-            self._outputData["ssf_total_%s%s" % pair][:] = (
-                self._outputData["ssf_intra_%s%s" % pair][:]
-                + self._outputData["ssf_inter_%s%s" % pair][:]
+            self._outputData[f"ssf_total_{pair_str}"][:] = (
+                self._outputData[f"ssf_intra_{pair_str}"][:]
+                + self._outputData[f"ssf_inter_{pair_str}"][:]
             )
 
         self._outputData.add(

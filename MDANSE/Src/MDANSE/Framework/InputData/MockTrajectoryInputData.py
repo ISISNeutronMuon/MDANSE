@@ -43,16 +43,17 @@ class MockTrajectoryInputData(InputFileData):
         val = []
 
         val.append("Path:")
-        val.append("%s\n" % self._name)
+        val.append(f"{self._name}\n")
         val.append("Number of steps:")
-        val.append("%s\n" % len(self._data))
+        val.append(f"{self._data}\n")
+
         mol_types = {}
         val.append("\nMolecular types found:")
         for name, list in self._data.chemical_system._clusters.items():
             mol_types[name] = len(list)
 
         for k, v in mol_types.items():
-            val.append("\t- {:d} {}".format(v, k))
+            val.append(f"\t- {v:d} {k}")
 
         val = "\n".join(val)
 

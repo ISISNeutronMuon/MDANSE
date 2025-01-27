@@ -82,8 +82,7 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
 
         if value.ndim != cls._nDimensions:
             raise OutputVariableError(
-                "Invalid number of dimensions for an output variable of type %r"
-                % cls.name
+                f"Invalid number of dimensions for an output variable of type {cls.name!r}"
             )
 
         # Input array is an already formed ndarray instance
@@ -118,13 +117,8 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         self.units = getattr(obj, "units", "unitless")
 
     def info(self):
-        info = []
-
-        info.append("# variable name: %s" % self.varname)
-        info.append("# \ttype: %s" % self.__class__.__name__)
-        info.append("# \taxis: %s" % str(self.axis))
-        info.append("# \tunits: %s" % self.units)
-
-        info = "\n".join(info)
-
-        return info
+        return f"""\
+# variable name: {self.varname}
+# \ttype: {self.__class__.__name__}
+# \taxis: {self.axis!s}
+# \tunits: {self.units}"""

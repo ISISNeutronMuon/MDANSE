@@ -75,10 +75,9 @@ class MockTrajectoryConfigurator(IConfigurator):
         """
 
         info = ["Mock trajectory used as input"]
-        info.append("Number of steps: %d\n" % self["length"])
+        info.append(f"Number of steps: {self['length']:d}\n")
         info.append(
-            "Size of the chemical system: %d\n"
-            % self["instance"].chemical_system.number_of_atoms
+            f"Size of the chemical system: {self['instance'].chemical_system.number_of_atoms}\n"
         )
         if self["has_velocities"]:
             info.append("The trajectory contains atomic velocities\n")

@@ -70,7 +70,7 @@ def get_byte_order(filename):
 
         if byteOrder is None:
             raise ByteOrderError(
-                "Invalid byte order. %s is not a valid DCD file" % filename
+                f"Invalid byte order. {filename} not a valid DCD file"
             )
 
     return byteOrder
@@ -237,7 +237,7 @@ class DCDFile(FortranBinaryFile, dict):
         else:
             unitCell = None
 
-        fmt = "%df" % self["natoms"]
+        fmt = f"{self['natoms']}f"
         config = np.empty((self["natoms"], 3), dtype=np.float64)
         config[:, 0] = np.array(self.get_record(fmt), dtype=np.float64)
         config[:, 1] = np.array(self.get_record(fmt), dtype=np.float64)

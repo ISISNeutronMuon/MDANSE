@@ -231,15 +231,15 @@ class McStasVirtualInstrument(IJob):
 
             fout.write("# Physical parameters:\n")
             for k, v in list(self._mcStasPhysicalParameters.items()):
-                fout.write("# %s %s \n" % (k, v))
+                fout.write(f"# {k} {v} \n")
 
             fout.write(
-                "# Temperature %s \n" % self.configuration["temperature"]["value"]
+                f"# Temperature {self.configuration['temperature']['value']} \n"
             )
             fout.write("#\n")
 
             for var in self.configuration[typ].variables:
-                fout.write("# %s\n" % var)
+                fout.write(f"# {var}\n")
 
                 data = self.configuration[typ][var][:]
                 LOG.info(f"In {typ} the variable {var} has shape {data.shape}")
@@ -261,7 +261,7 @@ class McStasVirtualInstrument(IJob):
             #     + typ
             #     + ".sqw"
             # )
-            sqwInput += "%s=%s " % (typ, fout.name)
+            sqwInput += f"{typ}={fout.name} "
 
         # sys.exit(0)
 
@@ -290,7 +290,7 @@ class McStasVirtualInstrument(IJob):
 
         for line in out.splitlines():
             if "ERROR" in line.decode(encoding="utf-8"):
-                raise McStasError("An error occured during McStas run: %s" % out)
+                raise McStasError(f"An error occured during McStas run: {out}")
 
         out_file = self.mcstas_output_dir / "mcstas_mdanse.mvi"
         with out_file.open("w") as f:
@@ -340,7 +340,7 @@ class McStasVirtualInstrument(IJob):
                 if np.allclose(v, value):
                     return k
         while key in d:
-            key = skey + "_%d" % i
+            key = f"{skey}_{i:d}"
             i += 1
         return key
 
@@ -432,7 +432,7 @@ class McStasVirtualInstrument(IJob):
                 "LineOutputVariable", x, xlabel, units="au"
             )
             self._outputData[Title] = IOutputVariable.create(
-                "LineOutputVariable", y, Title, axis="%s" % xlabel, units="au"
+                "LineOutputVariable", y, Title, axis=str(xlabel), units="au"
             )
 
         elif typ == "array_2d":
@@ -467,7 +467,7 @@ class McStasVirtualInstrument(IJob):
                 title,
                 "SurfaceOutputVariable",
                 I,
-                axis="%s|%s" % (xlabel, ylabel),
+                axis=f"{xlabel}|{ylabel}",
                 units="au",
                 main_result=True,
                 partial_result=True,

@@ -216,15 +216,15 @@ class FortranLine:
                     elif type == "I":
                         s = repr(value)
                     elif type == "D":
-                        s = ("%" + repr(length) + "." + repr(fraction) + "e") % value
+                        s = f"{value:{length!r}.{fraction!r}e}"
                         n = s.find("e")
                         s = s[:n] + "D" + s[n + 1 :]
                     elif type == "E":
-                        s = ("%" + repr(length) + "." + repr(fraction) + "e") % value
+                        s = f"{value:{length!r}.{fraction!r}e}"
                     elif type == "F":
-                        s = ("%" + repr(length) + "." + repr(fraction) + "f") % value
+                        s = f"{value:{length!r}.{fraction!r}f}"
                     elif type == "G":
-                        s = ("%" + repr(length) + "." + repr(fraction) + "g") % value
+                        s = f"{value:{length!r}.{fraction!r}g}"
                     else:
                         raise ValueError("Not yet implemented")
                     s = s.upper()

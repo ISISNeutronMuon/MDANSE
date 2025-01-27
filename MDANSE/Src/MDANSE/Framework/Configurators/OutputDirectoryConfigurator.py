@@ -72,4 +72,4 @@ class OutputDirectoryConfigurator(IConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return "Output directory: %r\n" % self["value"]
+        return f"Output directory: {self['value']!r}\n"

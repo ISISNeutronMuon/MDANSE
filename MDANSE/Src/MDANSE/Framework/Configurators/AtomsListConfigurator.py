@@ -64,10 +64,10 @@ class AtomsListConfigurator(IConfigurator):
         traj_configurator = self._configurable[self._dependencies["trajectory"]]
 
         if UD_STORE.has_definition(
-            traj_configurator["basename"], "%d_atoms_list" % self._nAtoms, value
+            traj_configurator["basename"], f"{self._nAtoms:d}_atoms_list", value
         ):
             molecule, atoms = UD_STORE.get_definition(
-                traj_configurator["basename"], "%d_atoms_list" % self._nAtoms, value
+                traj_configurator["basename"], f"{self._nAtoms:d}_atoms_list", value
             )
         elif UD_STORE.has_definition(
             traj_configurator["basename"], "AtomsListConfigurator", value
@@ -78,11 +78,8 @@ class AtomsListConfigurator(IConfigurator):
             natoms = tempdict["natoms"]
             if not natoms == self._nAtoms:
                 raise ValueError(
-                    "The atom list must have "
-                    + str(self._nAtoms)
-                    + " atoms per molecule, but "
-                    + str(natoms)
-                    + " were found."
+                    f"The atom list must have {self._nAtoms} "
+                    f"atoms per molecule, but {natoms} were found."
                 )
             atoms = tempdict["indices"]
             self["value"] = value
@@ -111,9 +108,6 @@ class AtomsListConfigurator(IConfigurator):
         if "atoms" not in self:
             return "No configured yet"
 
-        info = []
-        info.append(
-            "Number of selected %d-tuplets:%d" % (self._nAtoms, self["n_values"])
-        )
+        info = [f"Number of selected {self._nAtoms:d}-tuplets:{self['n_values']:d}"]
 
         return "\n".join(info) + "\n"

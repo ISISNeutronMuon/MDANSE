@@ -142,4 +142,4 @@ class VectorConfigurator(IConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return "Value: %r\n" % self["value"]
+        return f"Value: {self['value']!r}\n"

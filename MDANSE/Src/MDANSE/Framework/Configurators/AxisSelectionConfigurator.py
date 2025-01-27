@@ -33,19 +33,19 @@ class AxisSelectionConfigurator(IConfigurator):
 
     def configure(self, value):
         """
-        Configure an input value. 
-        
+        Configure an input value.
+
         The value can be:
-        
+
         #. a dict with *'molecule'*, *'endpoint1'* and *'endpoint2'* keys. *'molecule'* key \
         is the name of the molecule for which the axis selection will be performed and *'endpoint1'* \
-        and *'endpoint2'* keys are the names of two atoms of the molecule along which the axis will be defined  
+        and *'endpoint2'* keys are the names of two atoms of the molecule along which the axis will be defined
         #. str: the axis selection will be performed by reading the corresponding user definition.
-        
+
         :param configuration: the current configuration
         :type configuration: MDANSE.Framework.Configurable.Configurable
         :param value: the input value
-        :type value: tuple or str 
+        :type value: tuple or str
         """
         self._original_input = value
 
@@ -88,4 +88,4 @@ class AxisSelectionConfigurator(IConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return "Axis vector:%s\n" % self["value"]
+        return f"Axis vector:{self['value']}\n"

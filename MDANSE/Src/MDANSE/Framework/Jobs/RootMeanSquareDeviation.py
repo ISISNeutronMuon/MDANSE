@@ -146,7 +146,7 @@ class RootMeanSquareDeviation(IJob):
 
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData["rmsd_%s" % element] += x
+        self._outputData[f"rmsd_{element}"] += x
         self._outputData["rmsd_all"] += x
 
     def finalize(self):

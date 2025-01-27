@@ -98,8 +98,8 @@ class AreaPerMolecule(IJob):
         )
         if self._nMolecules == 0:
             raise AreaPerMoleculeError(
-                "No molecule matches %r name."
-                % self.configuration["molecule_name"]["value"]
+                "No molecule matches "
+                f"{self.configuration['molecule_name']['value']!r} name."
             )
 
         self._outputData.add(

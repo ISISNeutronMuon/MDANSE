@@ -99,8 +99,8 @@ class UserDefinitionStore(object, metaclass=Singleton):
     def set_definition(self, target, section, name, value):
         if self.has_definition(target, section, name):
             raise UserDefinitionStoreError(
-                "Item %s is already registered as an user definition. You must delete it before setting it."
-                % (target, section, name)
+                f"Item {(target, section, name)} is already registered as an user definition. "
+                "You must delete it before setting it."
             )
 
         self._definitions.setdefault(target, {}).setdefault(section, {})[name] = value

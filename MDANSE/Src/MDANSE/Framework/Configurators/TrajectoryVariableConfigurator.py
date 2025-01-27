@@ -57,4 +57,4 @@ class TrajectoryVariableConfigurator(IConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return "Selected variable: %r\n" % self["value"]
+        return f"Selected variable: {self['value']!r}\n"

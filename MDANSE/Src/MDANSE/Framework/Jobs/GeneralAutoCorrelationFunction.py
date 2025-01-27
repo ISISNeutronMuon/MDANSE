@@ -150,7 +150,7 @@ class GeneralAutoCorrelationFunction(IJob):
 
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData["gacf_%s" % element] += x
+        self._outputData[f"gacf_{element}"] += x
 
     def finalize(self):
         """
@@ -169,7 +169,7 @@ class GeneralAutoCorrelationFunction(IJob):
                     raise ValueError("The normalization factor is equal to zero")
                 else:
                     self._outputData["gacf_{}".format(element)] = normalize(
-                        self._outputData["gacf_%s" % element], axis=0
+                        self._outputData[f"gacf_{element}"], axis=0
                     )
 
         weights = self.configuration["weights"].get_weights()

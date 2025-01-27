@@ -115,7 +115,7 @@ class DensityProfile(IJob):
 
         for element in self._indices_per_element.keys():
             self._outputData.add(
-                "dp_%s" % element,
+                f"dp_{element}",
                 "LineOutputVariable",
                 (self._n_bins,),
                 axis="r",
@@ -168,7 +168,7 @@ class DensityProfile(IJob):
         self._extent += x[0]
 
         for element, hist in list(x[1].items()):
-            self._outputData["dp_%s" % element] += hist
+            self._outputData[f"dp_{element}"] += hist
 
     def finalize(self):
         """
@@ -177,7 +177,7 @@ class DensityProfile(IJob):
 
         n_atoms_per_element = self.configuration["atom_selection"].get_natoms()
         for element in n_atoms_per_element.keys():
-            self._outputData["dp_%s" % element] += self.numberOfSteps
+            self._outputData[f"dp_{element}"] += self.numberOfSteps
 
         dp_total = weight(
             self.configuration["weights"].get_weights(),

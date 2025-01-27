@@ -134,7 +134,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :rtype: str
         """
         try:
-            info = "selected weight: %s\n" % self["property"]
+            info = f"selected weight: {self['property']}\n"
         except KeyError:
             info = "Weights have not been configured"
 

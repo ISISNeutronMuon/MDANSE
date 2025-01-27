@@ -70,12 +70,12 @@ class SVGFormat(IFormat):
 
             if var.axis in data:
                 axis = data[var.axis]
-                xtitle = "%s (%s)" % (axis.name, format_unit_string(axis.units))
+                xtitle = f"{axis.name} ({format_unit_string(axis.units)})"
             else:
                 axis = np.arange(len(var))
                 xtitle = "index"
 
-            ytitle = "%s (%s)" % (var.varname, format_unit_string(var.units))
+            ytitle = f"{var.varname} ({format_unit_string(var.units)})"
 
             pl = Poly(list(zip(axis, var)), stroke="blue")
 
@@ -91,7 +91,7 @@ class SVGFormat(IFormat):
                 ytitle=ytitle,
             ).SVG().save(svgfilename)
 
-            tf.add(svgfilename, arcname="%s%s" % (var.varname, cls.extensions[0]))
+            tf.add(svgfilename, arcname=f"{var.varname}{cls.extensions[0]}")
 
             svgfilename.unlink()
 

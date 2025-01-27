@@ -19,9 +19,9 @@ from MDANSE.Framework.Configurators.RangeConfigurator import RangeConfigurator
 class FramesConfigurator(RangeConfigurator):
     """
     This configurator allows to input a frame selection for the analysis.
-    
+
     The frame selection can be input as:
-    
+
     #. a 3-tuple where the 1st, 2nd will correspond respectively to the indices of the first and \
     last (excluded) frames to be selected while the 3rd element will correspond to the step number between two frames. For example (1,11,3) will give 1,4,7,10
     #. *'all'* keyword, in such case, all the frames of the trajectory are selected
@@ -123,13 +123,8 @@ class FramesConfigurator(RangeConfigurator):
 
         try:
             result = (
-                "%d frames selected (first=%.3f ; last = %.3f ; time step = %.3f)\n"
-                % (
-                    self["n_frames"],
-                    self["time"][0],
-                    self["time"][-1],
-                    self["time_step"],
-                )
+                f"{self['n_frames']} frames selected "
+                f"(first={self['time'][0]:.3f} ; last = {self['time'][-1]:.3f} ; time step = {self['time_step']:.3f})\n"
             )
         except KeyError:
             result = "FramesConfigurator could not be configured!"

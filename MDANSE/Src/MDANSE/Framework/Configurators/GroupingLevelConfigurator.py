@@ -149,4 +149,4 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return "Grouping level: %r\n" % self["value"]
+        return f"Grouping level: {self['value']!r}\n"

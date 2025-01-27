@@ -123,7 +123,7 @@ class MeanSquareDisplacement(IJob):
         # Will store the mean square displacement evolution.
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "msd_%s" % element,
+                f"msd_{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
                 axis="time",
@@ -186,7 +186,7 @@ class MeanSquareDisplacement(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData["msd_%s" % element] += result
+        self._outputData[f"msd_{element}"] += result
 
     def finalize(self):
         """
@@ -196,7 +196,7 @@ class MeanSquareDisplacement(IJob):
         # The MSDs per element are averaged.
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in list(nAtomsPerElement.items()):
-            self._outputData["msd_%s" % element] /= number
+            self._outputData[f"msd_{element}"] /= number
 
         weights = self.configuration["weights"].get_weights()
         msdTotal = weight(weights, self._outputData, nAtomsPerElement, 1, "msd_%s")

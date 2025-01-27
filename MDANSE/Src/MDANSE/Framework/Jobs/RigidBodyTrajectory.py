@@ -90,8 +90,8 @@ class RigidBodyTrajectory(IJob):
         ):
             raise JobError(
                 self,
-                "Invalid reference frame. Must be an integer in [%d,%d["
-                % (0, self.configuration["trajectory"]["length"]),
+                "Invalid reference frame. Must be an integer in "
+                f"[{0},{self.configuration['trajectory']['length']}["
             )
 
         self._quaternions = np.zeros(
@@ -260,10 +260,7 @@ class RigidBodyTrajectory(IJob):
         for comp in range(self.configuration["atom_selection"]["selection_length"]):
             aIndexes = self.configuration["atom_selection"]["indices"][comp]
 
-            outputFile.attrs["info"] += "Group %s: %s\n" % (
-                comp,
-                [index for index in aIndexes],
-            )
+            outputFile.attrs["info"] += f"Group {comp}: {list(aIndexes)}\n"
 
             quaternions[comp, :, :] = self._quaternions[comp, :, :]
             coms[comp, :, :] = self._coms[comp, :, :]

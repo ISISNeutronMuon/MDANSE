@@ -53,7 +53,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
     def configure(self, value):
         """
         Configure the instrument resolution.
-                
+
         :param value: the instrument resolution. It must a 2-tuple where the 1st element is the \
         is a string representing one of the supported instrument resolution and the 2nd element \
         is a dictionary that stores the parameters for this kernel.
@@ -122,11 +122,11 @@ class InstrumentResolutionConfigurator(IConfigurator):
         if "kernel" not in self:
             return "No configured yet"
 
-        info = ["Instrument resolution kernel: %s" % self["kernel"]]
+        info = [f"Instrument resolution kernel: {self['kernel']}"]
         if self["parameters"]:
             info.append("Parameters:")
-            for k, v in list(self["parameters"].items()):
-                info.append("%s = %s" % (k, v))
+            for k, v in self["parameters"].items():
+                info.append(f"{k} = {v}")
 
         info = "\n".join(info)
 

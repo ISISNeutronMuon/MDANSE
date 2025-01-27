@@ -81,4 +81,4 @@ class SingleChoiceConfigurator(IConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return "Selected item: %r\n" % self["value"]
+        return f"Selected item: {self['value']!r}\n"

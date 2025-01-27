@@ -116,7 +116,7 @@ class ElasticIncoherentStructureFactor(IJob):
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "eisf_%s" % element,
+                f"eisf_{element}",
                 "LineOutputVariable",
                 (self._nQShells,),
                 axis="q",
@@ -187,7 +187,7 @@ class ElasticIncoherentStructureFactor(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData["eisf_%s" % element] += x
+        self._outputData[f"eisf_{element}"] += x
 
     def finalize(self):
         """
@@ -196,7 +196,7 @@ class ElasticIncoherentStructureFactor(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in list(nAtomsPerElement.items()):
-            self._outputData["eisf_%s" % element][:] /= number
+            self._outputData[f"eisf_{element}"][:] /= number
 
         weights = self.configuration["weights"].get_weights()
         self._outputData["eisf_total"][:] = weight(

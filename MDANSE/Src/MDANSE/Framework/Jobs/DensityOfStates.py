@@ -130,14 +130,14 @@ class DensityOfStates(IJob):
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "vacf_%s" % element,
+                f"vacf_{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
                 axis="time",
                 units="nm2/ps2",
             )
             self._outputData.add(
-                "dos_%s" % element,
+                f"dos_{element}",
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
                 axis="romega",
@@ -225,7 +225,7 @@ class DensityOfStates(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData["vacf_%s" % element] += x
+        self._outputData[f"vacf_{element}"] += x
 
     def finalize(self):
         """
@@ -234,9 +234,9 @@ class DensityOfStates(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData["vacf_%s" % element][:] /= number
-            self._outputData["dos_%s" % element][:] = get_spectrum(
-                self._outputData["vacf_%s" % element],
+            self._outputData[f"vacf_{element}"][:] /= number
+            self._outputData[f"dos_{element}"][:] = get_spectrum(
+                self._outputData[f"vacf_{element}"],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 fft="rfft",

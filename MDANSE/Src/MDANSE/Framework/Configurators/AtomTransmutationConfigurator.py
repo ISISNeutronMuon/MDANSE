@@ -203,7 +203,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         if self["value"] is None:
             return "No atoms selected for transmutation\n"
 
-        return "Number of transmuted atoms:%d\n" % self._nTransmutedAtoms
+        return f"Number of transmuted atoms:{self._nTransmutedAtoms:d}\n"
 
     def get_transmuter(self) -> AtomTransmuter:
         """

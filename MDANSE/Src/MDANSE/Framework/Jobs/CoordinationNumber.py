@@ -90,43 +90,45 @@ class CoordinationNumber(DistanceHistogram):
 
         for pair in self._elementsPairs:
             invPair = pair[::-1]
+            pair_str = "".join(map(str, pair))
+            inv_pair_str = "".join(map(str, invPair))
             self._outputData.add(
-                "cn_intra_%s%s" % pair,
+                f"cn_intra_{pair_str}",
                 "LineOutputVariable",
                 (npoints,),
                 axis="r",
                 units="au",
             )
             self._outputData.add(
-                "cn_inter_%s%s" % pair,
+                f"cn_inter_{pair_str}",
                 "LineOutputVariable",
                 (npoints,),
                 axis="r",
                 units="au",
             )
             self._outputData.add(
-                "cn_total_%s%s" % pair,
+                f"cn_total_{pair_str}",
                 "LineOutputVariable",
                 (npoints,),
                 axis="r",
                 units="au",
             )
             self._outputData.add(
-                "cn_intra_%s%s" % invPair,
+                f"cn_intra_{inv_pair_str}",
                 "LineOutputVariable",
                 (npoints,),
                 axis="r",
                 units="au",
             )
             self._outputData.add(
-                "cn_inter_%s%s" % invPair,
+                f"cn_inter_{inv_pair_str}",
                 "LineOutputVariable",
                 (npoints,),
                 axis="r",
                 units="au",
             )
             self._outputData.add(
-                "cn_total_%s%s" % invPair,
+                f"cn_total_{inv_pair_str}",
                 "LineOutputVariable",
                 (npoints,),
                 axis="r",
@@ -179,22 +181,22 @@ class CoordinationNumber(DistanceHistogram):
 
             invPair = pair[::-1]
 
-            self._outputData["cn_intra_%s%s" % pair][:] = (
+            self._outputData[f"cn_intra_{pair_str}"][:] = (
                 self.averageDensity * cBeta * cnIntra
             )
-            self._outputData["cn_inter_%s%s" % pair][:] = (
+            self._outputData[f"cn_inter_{pair_str}"][:] = (
                 self.averageDensity * cBeta * cnInter
             )
-            self._outputData["cn_total_%s%s" % pair][:] = (
+            self._outputData[f"cn_total_{pair_str}"][:] = (
                 self.averageDensity * cBeta * cnTotal
             )
-            self._outputData["cn_intra_%s%s" % invPair][:] = (
+            self._outputData[f"cn_intra_{inv_pair_str}"][:] = (
                 self.averageDensity * cAlpha * cnIntra
             )
-            self._outputData["cn_inter_%s%s" % invPair][:] = (
+            self._outputData[f"cn_inter_{inv_pair_str}"][:] = (
                 self.averageDensity * cAlpha * cnInter
             )
-            self._outputData["cn_total_%s%s" % invPair][:] = (
+            self._outputData[f"cn_total_{inv_pair_str}"][:] = (
                 self.averageDensity * cAlpha * cnTotal
             )
 

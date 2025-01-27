@@ -80,14 +80,13 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         :rtype: str
         """
         try:
-            info = ["HDF input trajectory: %r\n" % self["filename"]]
-            info.append("Number of steps: %d\n" % self["length"])
+            info = [f"HDF input trajectory: {self['filename']!r}\n"]
+            info.append(f"Number of steps: {self['length']:d}\n")
         except KeyError:
             info = "Input trajectory has not been configured"
         else:
             info.append(
-                "Size of the chemical system: %d\n"
-                % self["instance"].chemical_system.number_of_atoms
+                f"Size of the chemical system: {self['instance'].chemical_system.number_of_atoms:d}\n"
             )
 
             if self["has_velocities"]:

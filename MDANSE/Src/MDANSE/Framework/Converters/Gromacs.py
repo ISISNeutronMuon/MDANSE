@@ -113,7 +113,7 @@ class Gromacs(Converter):
         else:
             raise GromacsConverterError(
                 "Invalid file format: Gromacs converter can only convert XTC and TRR files, "
-                "but %s was provided." % self.configuration["xtc_file"]["filename"][-4:]
+                f"but {self.configuration['xtc_file']['filename'][-4:]} was provided."
             )
 
         # The number of steps of the analysis.

@@ -31,14 +31,14 @@ class ConfigurationError(Error):
 class Configurable(object):
     """
     This class allows any object that derives from it to be configurable within the MDANSE framework.
-    
+
     Within that framework, to be configurable, a class must:
         #. derive from this class
         #. implement the "configurators"  class attribute as a list of 3-tuple whose:
             #.. 0-value is the type of the configurator that will be used to fetch the corresponding \
             MDANSE.Framework.Configurators.IConfigurator.IConfigurator derived class from the configurators registry
             #.. 1-value is the name of the configurator that will be used as the key of the _configuration attribute.
-            #.. 2-value is the dictionary of the keywords used when initializing the configurator.  
+            #.. 2-value is the dictionary of the keywords used when initializing the configurator.
     """
 
     enabled = True
@@ -94,7 +94,7 @@ class Configurable(object):
                 )
             # Any kind of error has to be caught
             except:
-                raise ConfigurationError("Could not set %r configuration item" % name)
+                raise ConfigurationError(f"Could not set {name!r} configuration item")
 
     def set_settings(self, settings):
         self.settings = settings
@@ -228,10 +228,10 @@ class Configurable(object):
         docstring += ">>> \n"
         docstring += ">>> \n"
         docstring += ">>> parameters = {}\n"
-        for k, v in list(cls.get_default_parameters().items()):
-            docstring += ">>> parameters[%r]=%r\n" % (k, v)
+        for k, v in cls.get_default_parameters().items():
+            docstring += f">>> parameters[{k!r}]={v!r}\n"
         docstring += ">>> \n"
-        docstring += ">>> job = IJob.create(%r)\n" % cls.__name__
+        docstring += f">>> job = IJob.create({cls.__name__!r})\n"
         docstring += ">>> job.setup(parameters)\n"
         docstring += ">>> job.run()\n"
         return docstring
@@ -249,53 +249,23 @@ class Configurable(object):
             sizes[1] = max(sizes[1], len(v["Default value"]))
             # Case of Description field: has to be splitted and parsed for inserting sphinx "|" keyword for multiline
             v["Description"] = v["Description"].strip()
-            v["Description"] = v["Description"].split("\n")
+            v["Description"] = v["Description"].splitlines()
             v["Description"] = ["| " + vv.strip() for vv in v["Description"]]
-            sizes[2] = max(sizes[2], max([len(d) for d in v["Description"]]))
+            sizes[2] = max(sizes[2], max(v["Description"], key=len))
 
-        docstring += "+%s+%s+%s+\n" % (
-            "-" * (sizes[0] + 1),
-            "-" * (sizes[1] + 1),
-            "-" * (sizes[2] + 1),
-        )
-        docstring += "| %-*s| %-*s| %-*s|\n" % (
-            sizes[0],
-            columns[0],
-            sizes[1],
-            columns[1],
-            sizes[2],
-            columns[2],
-        )
-        docstring += "+%s+%s+%s+\n" % (
-            "=" * (sizes[0] + 1),
-            "=" * (sizes[1] + 1),
-            "=" * (sizes[2] + 1),
-        )
+        data_line = "| " + "| ".join(f"{{}}:<{size}" for size in sizes) + "|\n"
+        sep_line = "+" + "+".join("-" * (size+1) for size in sizes) + "+\n"
+
+        docstring += sep_line
+        docstring += data_line.format(*columns)
+        docstring += sep_line.replace("-", "=")
 
         for v in doclist:
-            docstring += "| %-*s| %-*s| %-*s|\n" % (
-                sizes[0],
-                v["Configurator"],
-                sizes[1],
-                v["Default value"],
-                sizes[2],
-                v["Description"][0],
-            )
+            docstring += data_line.format(v["Configurator"], v["Default value"], v["Description"][0])
             if len(v["Description"]) > 1:
                 for descr in v["Description"][1:]:
-                    docstring += "| %-*s| %-*s| %-*s|\n" % (
-                        sizes[0],
-                        "",
-                        sizes[1],
-                        "",
-                        sizes[2],
-                        descr,
-                    )
-            docstring += "+%s+%s+%s+\n" % (
-                "-" * (sizes[0] + 1),
-                "-" * (sizes[1] + 1),
-                "-" * (sizes[2] + 1),
-            )
+                    data_line.format("", "", descr)
+            docstring += sep_line
 
         docstring += "\n"
         return docstring

@@ -100,7 +100,7 @@ class StructureFactorFromScatteringFunction(IJob):
                 )
                 suffix = k[7:]
                 self._outputData.add(
-                    "s(q,f)_%s" % suffix,
+                    f"s(q,f)_{suffix}",
                     "SurfaceOutputVariable",
                     (nQVectors, nOmegas),
                     axis="q|omega",
@@ -108,7 +108,7 @@ class StructureFactorFromScatteringFunction(IJob):
                     main_result=True,
                     partial_result=True,
                 )
-                self._outputData["s(q,f)_%s" % suffix][:] = get_spectrum(
+                self._outputData[f"s(q,f)_{suffix}"][:] = get_spectrum(
                     v[:],
                     self.configuration["instrument_resolution"]["time_window"],
                     self.configuration["instrument_resolution"]["time_step"],

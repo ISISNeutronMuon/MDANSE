@@ -315,21 +315,21 @@ class VanHoveFunctionDistinct(IJob):
         )
         for x, y in self._elementsPairs:
             self._outputData.add(
-                "g(r,t)_intra_%s%s" % (x, y),
+                f"g(r,t)_intra_{x}{y}",
                 "SurfaceOutputVariable",
                 (self.n_mid_points, self.numberOfSteps),
                 axis="r|time",
                 units="au",
             )
             self._outputData.add(
-                "g(r,t)_inter_%s%s" % (x, y),
+                f"g(r,t)_inter_{x}{y}",
                 "SurfaceOutputVariable",
                 (self.n_mid_points, self.numberOfSteps),
                 axis="r|time",
                 units="au",
             )
             self._outputData.add(
-                "g(r,t)_total_%s%s" % (x, y),
+                f"g(r,t)_total_{x}{y}",
                 "SurfaceOutputVariable",
                 (self.n_mid_points, self.numberOfSteps),
                 axis="r|time",
@@ -484,7 +484,7 @@ class VanHoveFunctionDistinct(IJob):
                 ["intra", "inter", "total"],
                 [van_hove_intra, van_hove_inter, van_hove_total],
             ):
-                self._outputData["g(r,t)_%s_%s%s" % (i, pair[0], pair[1])][
+                self._outputData[f"g(r,t)_{i}_{pair[0]}{pair[1]}"][
                     ...
                 ] = van_hove
 
@@ -495,9 +495,9 @@ class VanHoveFunctionDistinct(IJob):
                 self._outputData,
                 nAtomsPerElement,
                 2,
-                "g(r,t){}_%s%s".format(i if i else "_total"),
+                f"g(r,t){i if i else '_total'}_%s%s",
             )
-            self._outputData["g(r,t)%s_total" % i][...] = pdf
+            self._outputData[f"g(r,t){i}_total"][...] = pdf
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

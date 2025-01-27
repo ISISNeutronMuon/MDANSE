@@ -127,8 +127,8 @@ class AtomSelectionConfigurator(IConfigurator):
             return "Not configured yet\n"
 
         info = []
-        info.append("Number of selected atoms:%d" % self["selection_length"])
-        info.append("Selected elements:%s" % self["unique_names"])
+        info.append(f"Number of selected atoms:{self['selection_length']:d}")
+        info.append(f"Selected elements:{self['unique_names']}")
 
         return "\n".join(info) + "\n"
 

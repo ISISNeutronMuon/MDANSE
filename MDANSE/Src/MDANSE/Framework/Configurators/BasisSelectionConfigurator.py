@@ -33,17 +33,17 @@ class BasisSelectionConfigurator(IConfigurator):
 
     def configure(self, value):
         """
-        Configure an input value. 
-        
+        Configure an input value.
+
         The value can be:
-        
+
         #. a dict with *'molecule'*, *'origin'*, *'x_axis'* and *'y_axis'* keys. *'molecule'* key is \
         the name of the molecule for which the axis selection will be performed and *'origin'*, *'x_axis'* and *'y_axis'* \
-        keys are the names of three atoms of the molecule that will be used to define respectively the origin, the X and Y axis of the basis  
+        keys are the names of three atoms of the molecule that will be used to define respectively the origin, the X and Y axis of the basis
         #. str: the axis selection will be performed by reading the corresponding user definition.
-        
+
         :param value: the input value
-        :type value: tuple or str 
+        :type value: tuple or str
 
         :note: this configurator depends on 'trajectory' configurator to be configured
         """
@@ -85,4 +85,4 @@ class BasisSelectionConfigurator(IConfigurator):
         if "value" not in self:
             return "Not configured yet\n"
 
-        return "Basis vector:%s\n" % self["value"]
+        return f"Basis vector:{self['value']}\n"

@@ -151,14 +151,14 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "f(q,t)_%s" % element,
+                f"f(q,t)_{element}",
                 "SurfaceOutputVariable",
                 (self._nQShells, self._nFrames),
                 axis="q|time",
                 units="au",
             )
             self._outputData.add(
-                "s(q,f)_%s" % element,
+                f"s(q,f)_{element}",
                 "SurfaceOutputVariable",
                 (self._nQShells, self._nOmegas),
                 axis="q|omega",
@@ -234,7 +234,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData["f(q,t)_%s" % element] += x
+        self._outputData[f"f(q,t)_{element}"] += x
 
     def finalize(self):
         """
@@ -243,9 +243,9 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData["f(q,t)_%s" % element][:] /= number
-            self._outputData["s(q,f)_%s" % element][:] = get_spectrum(
-                self._outputData["f(q,t)_%s" % element],
+            self._outputData[f"f(q,t)_{element}"][:] /= number
+            self._outputData[f"s(q,f)_{element}"][:] = get_spectrum(
+                self._outputData[f"f(q,t)_{element}"],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 axis=1,

@@ -59,10 +59,7 @@ class ConfiguratorError(Error):
         """
 
         if self._configurator is not None:
-            self._message = "Configurator: %r --> %s" % (
-                self._configurator.name,
-                self._message,
-            )
+            self._message = f"Configurator: {self._configurator.name!r} --> {self._message}"
 
         return self._message
 

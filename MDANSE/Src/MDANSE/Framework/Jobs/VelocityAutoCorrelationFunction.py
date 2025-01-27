@@ -123,7 +123,7 @@ class VelocityAutoCorrelationFunction(IJob):
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "vacf_%s" % element,
+                f"vacf_{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
                 axis="time",
@@ -205,7 +205,7 @@ class VelocityAutoCorrelationFunction(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData["vacf_%s" % element] += x
+        self._outputData[f"vacf_{element}"] += x
 
     def finalize(self):
         """
@@ -214,7 +214,7 @@ class VelocityAutoCorrelationFunction(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData["vacf_%s" % element] /= number
+            self._outputData[f"vacf_{element}"] /= number
 
         weights = self.configuration["weights"].get_weights()
 
@@ -223,8 +223,8 @@ class VelocityAutoCorrelationFunction(IJob):
 
         if self.configuration["normalize"]["value"]:
             for element in nAtomsPerElement.keys():
-                self._outputData["vacf_%s" % element] = normalize(
-                    self._outputData["vacf_%s" % element], axis=0
+                self._outputData[f"vacf_{element}"] = normalize(
+                    self._outputData[f"vacf_{element}"], axis=0
                 )
             self._outputData["vacf_total"] = normalize(
                 self._outputData["vacf_total"], axis=0

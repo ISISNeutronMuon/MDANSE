@@ -33,7 +33,7 @@ class RunningModeConfigurator(IConfigurator):
     def configure(self, value):
         """
         Configure the running mode.
-     
+
         :param value: the running mode specification. It can be *'single-core'* or a 2-tuple whose first element \
         must be *'multicore'* and 2nd element the number of slots allocated for running the analysis.
         :type value: *'single-core'* or 2-tuple
@@ -81,7 +81,7 @@ class RunningModeConfigurator(IConfigurator):
         :rtype: str
         """
         try:
-            info = "Run in %s mode (%d slots)\n" % (self["mode"], self["slots"])
+            info = f"Run in {self['mode']} mode ({self['slots']:d} slots)\n"
         except KeyError:
             info = "Running mode has not been configured"
 

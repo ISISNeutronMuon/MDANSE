@@ -63,21 +63,21 @@ class PairDistributionFunction(DistanceHistogram):
         for x, y in self._elementsPairs:
             for i in ["pdf", "rdf", "tcf"]:
                 self._outputData.add(
-                    "%s_intra_%s%s" % (i, x, y),
+                    f"{i}_intra_{x}{y}",
                     "LineOutputVariable",
                     (npoints,),
                     axis="r",
                     units="au",
                 )
                 self._outputData.add(
-                    "%s_inter_%s%s" % (i, x, y),
+                    f"{i}_inter_{x}{y}",
                     "LineOutputVariable",
                     (npoints,),
                     axis="r",
                     units="au",
                 )
                 self._outputData.add(
-                    "%s_total_%s%s" % (i, x, y),
+                    f"{i}_total_{x}{y}",
                     "LineOutputVariable",
                     (npoints,),
                     axis="r",
@@ -86,21 +86,21 @@ class PairDistributionFunction(DistanceHistogram):
 
         for i in ["pdf", "rdf", "tcf"]:
             self._outputData.add(
-                "%s_intra_total" % i,
+                f"{i}_intra_total",
                 "LineOutputVariable",
                 (npoints,),
                 axis="r",
                 units="au",
             )
             self._outputData.add(
-                "%s_inter_total" % i,
+                f"{i}_inter_total",
                 "LineOutputVariable",
                 (npoints,),
                 axis="r",
                 units="au",
             )
             self._outputData.add(
-                "%s_total" % i, "LineOutputVariable", (npoints,), axis="r", units="au"
+                f"{i}_total", "LineOutputVariable", (npoints,), axis="r", units="au"
             )
 
         nFrames = self.configuration["frames"]["number"]
@@ -138,11 +138,11 @@ class PairDistributionFunction(DistanceHistogram):
             for i, pdf in zip(
                 ["intra", "inter", "total"], [pdf_intra, pdf_inter, pdf_total]
             ):
-                self._outputData["pdf_%s_%s%s" % (i, pair[0], pair[1])][:] = pdf
-                self._outputData["rdf_%s_%s%s" % (i, pair[0], pair[1])][:] = (
+                self._outputData[f"pdf_{i}_{pair[0]}{pair[1]}")][:] = pdf
+                self._outputData[f"rdf_{i}_{pair[0]}{pair[1]}")][:] = (
                     shellSurfaces * self.averageDensity * pdf
                 )
-                self._outputData["tcf_%s_%s%s" % (i, pair[0], pair[1])][:] = (
+                self._outputData[f"tcf_{i}_{pair[0]}{pair[1]}")][:] = (
                     densityFactor
                     * self.averageDensity
                     * (pdf if i == "intra" else pdf - 1)
@@ -156,13 +156,13 @@ class PairDistributionFunction(DistanceHistogram):
                 self._outputData,
                 nAtomsPerElement,
                 2,
-                "pdf{}_%s%s".format(i if i else "_total"),
+                f"pdf{i if i else "_total"}_%s%s",
             )
-            self._outputData["pdf%s_total" % i][:] = pdf
-            self._outputData["rdf%s_total" % i][:] = (
+            self._outputData[f"pdf{i}_total"][:] = pdf
+            self._outputData[f"rdf{i}_total"][:] = (
                 shellSurfaces * self.averageDensity * pdf
             )
-            self._outputData["tcf%s_total" % i][:] = (
+            self._outputData[f"tcf{i}_total"][:] = (
                 densityFactor
                 * self.averageDensity
                 * (pdf if i == "_intra" else pdf - 1)

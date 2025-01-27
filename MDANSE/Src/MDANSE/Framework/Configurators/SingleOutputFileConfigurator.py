@@ -119,7 +119,7 @@ class SingleOutputFileConfigurator(IConfigurator):
         :rtype: str
         """
         try:
-            info = "Output file: %s\n" % self["file"]
+            info = f"Output file: {self['file']}\n"
         except KeyError:
             info = "Output file has not been configured"
 

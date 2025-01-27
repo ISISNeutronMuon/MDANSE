@@ -63,7 +63,7 @@ class JobError(Error):
 
         self._message = str(message)
 
-        trace.append("\n%s" % self._message)
+        trace.append(f"\n{self._message}")
 
         trace = "\n".join(trace)
 
@@ -83,7 +83,7 @@ def key_generator(keySize, chars=None, prefix=""):
 
     key = "".join(random.choice(chars) for _ in range(keySize))
     if prefix:
-        key = "%s_%s" % (prefix, key)
+        key = f"{prefix}_{key}"
 
     return key
 
@@ -103,7 +103,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         Sets a name for the job that is not already in use by another running job.
         """
 
-        prefix = "%s_%d" % (PLATFORM.username()[:4], PLATFORM.pid())
+        prefix = f"{PLATFORM.username()[:4]}_{PLATFORM.pid():d}"
 
         # The list of the registered jobs.
         registeredJobs = [
@@ -197,7 +197,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         # The first line contains the call to the python executable. This is necessary for the file to
         # be autostartable.
-        f.write("#!%s\n\n" % sys.executable)
+        f.write(f"#!{sys.executable}\n\n")
 
         # Writes the input file header.
         f.write("########################################################\n")
@@ -230,8 +230,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
         f.write("\n")
 
         f.write('if __name__ == "__main__":\n')
-        f.write("    %s = IJob.create(%r)\n" % (cls.__name__.lower(), cls.__name__))
-        f.write("    %s.run(parameters, status=True)\n" % (cls.__name__.lower()))
+        f.write(f"    {cls.__name__.lower()} = IJob.create({cls.__name__!r})\n")
+        f.write(f"    {cls.__name__.lower()}.run(parameters, status=True)\n")
 
         f.close()
 
@@ -386,7 +386,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         """
 
         try:
-            self._name = "%s_%s" % (self.__class__.__name__, IJob.define_unique_name())
+            self._name = f"{self.__class__.__name__}_{IJob.define_unique_name()}"
 
             if status and self._status is None:
                 self._status = self._status_constructor(self)
@@ -400,7 +400,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status.state["info"] = str(self)
 
             if getattr(self, "numberOfSteps", 0) <= 0:
-                raise JobError(self, "Invalid number of steps for job %s" % self._name)
+                raise JobError(self, f"Invalid number of steps for job {self._name}")
 
             if "running_mode" in self.configuration:
                 mode = self.configuration["running_mode"]["mode"]
@@ -426,26 +426,26 @@ class IJob(Configurable, metaclass=SubclassFactory):
     def save_template(cls, shortname, classname):
         if shortname in IJob.subclasses():
             raise KeyError(
-                "A job with %r name is already stored in the registry" % shortname
+                f"A job with {shortname!r} name is already stored in the registry"
             )
 
         templateFile = PLATFORM.macros_directory() / f"{classname}.py"
 
         try:
+            label = "label of the class"
             with templateFile.open("w") as f:
-
                 f.write(
-                    '''import collections
+                    f'''import collections
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
-class %(classname)s(IJob):
+class {classname}s(IJob):
     """
     You should enter the description of your job here ...
     """
 
     # You should enter the label under which your job will be viewed from the gui.
-    label = %(label)r
+    label = {label!r}
 
     # You should enter the category under which your job will be references.
     category = ('My jobs',)
@@ -455,9 +455,9 @@ class %(classname)s(IJob):
     # You should enter the configuration of your job here
     # Here a basic example of a job that will use a HDF trajectory, a frame selection and an output file in HDF5 and Text file formats
     settings = collections.OrderedDict()
-    settings['trajectory']=('hdf_trajectory',{})
-    settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
-    settings['output_files']=('output_files', {"formats":["HDFFormat","netcdf","TextFormat"]})
+    settings['trajectory']=('hdf_trajectory',{{}})
+    settings['frames']=('frames', {{"dependencies":{{'trajectory':'trajectory'}}}})
+    settings['output_files']=('output_files', {{"formats":["HDFFormat","netcdf","TextFormat"]}})
 
     def initialize(self):
         """
@@ -497,13 +497,8 @@ class %(classname)s(IJob):
         # The trajectory is closed
         self.configuration['trajectory']['instance'].close()
 
-    '''
-                    % {
-                        "classname": classname,
-                        "label": "label of the class",
-                        "shortname": shortname,
-                    }
-                )
+'''
+            )
 
         except IOError:
             return None

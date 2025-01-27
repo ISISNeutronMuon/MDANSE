@@ -105,4 +105,4 @@ class AseInputFileConfigurator(InputFileConfigurator):
             LOG.error(result)
             return result
         else:
-            return "Input file: %r\n" % self["value"]
+            return f"Input file: {self['value']!r}\n"
