@@ -13,8 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
-from typing import TYPE_CHECKING, Dict
+from pathlib import Path
+from typing import TYPE_CHECKING, Dict, Union
 from importlib import metadata
 
 import h5py
@@ -46,7 +46,7 @@ class HDFFormat(IFormat):
     @classmethod
     def write(
         cls,
-        filename: str,
+        filename: Union[Path, str],
         data: Dict[str, "IOutputVariable"],
         header: str = "",
         run_instance: "IJob" = None,
@@ -67,12 +67,10 @@ class HDFFormat(IFormat):
         """
         string_dt = h5py.special_dtype(vlen=str)
 
-        filename = os.path.splitext(filename)[0]
-
-        filename = "%s%s" % (filename, extension)
+        filename = Path(filename).with_suffix(extension)
 
         # The HDF output file is opened for writing.
-        PLATFORM.create_directory(os.path.dirname(filename))
+        PLATFORM.create_directory(filename.parent)
         outputFile = h5py.File(filename, "w")
 
         if header:

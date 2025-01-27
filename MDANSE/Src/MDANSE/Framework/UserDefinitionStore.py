@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import pickle
-import os
 
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
@@ -36,7 +35,7 @@ class UserDefinitionStore(object, metaclass=Singleton):
     user definitions are loaded when MDANSE starts through a cPickle file that will store these definitions.
     """
 
-    UD_PATH = os.path.join(PLATFORM.application_directory(), "user_definitions_md3.ud")
+    UD_PATH = PLATFORM.application_directory() / "user_definitions_md3.ud"
 
     def __init__(self):
         self._definitions = {}
@@ -52,12 +51,12 @@ class UserDefinitionStore(object, metaclass=Singleton):
         Load the user definitions.
         """
 
-        if not os.path.exists(UserDefinitionStore.UD_PATH):
+        if not UserDefinitionStore.UD_PATH.exists():
             return
 
         # Try to open the UD file.
         try:
-            f = open(UserDefinitionStore.UD_PATH, "rb")
+            f = UserDefinitionStore.UD_PATH.open("rb")
             UD = pickle.load(f)
 
         # If for whatever reason the pickle file loading failed do not even try to restore it

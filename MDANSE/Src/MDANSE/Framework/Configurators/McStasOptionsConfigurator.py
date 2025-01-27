@@ -14,10 +14,10 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import os
 import tempfile
 import time
 from typing import Dict, Any
+from pathlib import Path
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
@@ -50,10 +50,10 @@ class McStasOptionsConfigurator(IConfigurator):
 
     _default = {
         "ncount": 10000,
-        "dir": os.path.join(
-            tempfile.gettempdir(),
-            "mcstas_output",
-            time.strftime("%d.%m.%Y-%H:%M:%S", time.localtime()),
+        "dir": (
+            Path(tempfile.gettempdir())
+            / "mcstas_output"
+            / time.strftime("%d.%m.%Y-%H:%M:%S", time.localtime())
         ),
     }
 
@@ -81,12 +81,12 @@ class McStasOptionsConfigurator(IConfigurator):
         for k, v in list(options.items()):
             if k == "dir":
                 # If the output directory already exists, defines a 'unique' output directory name because otherwise McStas throws.
-                if os.path.exists(v):
+                if Path(v).exists():
                     v = self._default["dir"]
-                self["mcstas_output_directory"] = v
+                self["mcstas_output_directory"] = Path(v)
             tmp.append("--%s=%s" % (k, v))
 
-        dirname = os.path.dirname(self["mcstas_output_directory"])
+        dirname = self["mcstas_output_directory"].parent
 
         try:
             PLATFORM.create_directory(dirname)

@@ -13,7 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
+
+from typing import Tuple
+from pathlib import Path
+
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Formats.IFormat import IFormat
@@ -49,23 +52,25 @@ class SingleOutputFileConfigurator(IConfigurator):
             format if format is not None else SingleOutputFileConfigurator._default[-1]
         )
 
-    def configure(self, value):
+    def configure(self, value: Tuple[str, str]):
         """
         Configure a set of output files for an analysis.
 
-        :param value: the output files specifications. Must be a 3-tuple whose 1st element \
-        is the output directory, 2nd element the basename and 3rd element a list of file formats.
-        :type value: 3-tuple
+        :param value: the output files specifications.
+            Must be a 2-tuple whose 1st element is
+            the file and 2nd element a list of file formats.
+        :type value: 2-tuple
         """
         self._original_input = value
 
         root, format = value
+        root = Path(root)
 
         if not root:
             self.error_status = "empty root name for the output file."
             return
 
-        dirname = os.path.dirname(root)
+        dirname = root.parent
 
         try:
             PLATFORM.create_directory(dirname)
@@ -91,8 +96,8 @@ class SingleOutputFileConfigurator(IConfigurator):
         self["format"] = format
         self["extension"] = IFormat.create(format).extension
         temp_name = root
-        if not self["extension"] in temp_name[-5:]:  # capture most extension lengths
-            temp_name += self["extension"]
+        if self["extension"] != root.suffix:
+            temp_name = temp_name.with_suffix(temp_name.suffix + self["extension"])
         self["file"] = temp_name
         self.error_status = "OK"
 

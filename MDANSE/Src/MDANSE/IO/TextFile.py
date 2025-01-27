@@ -18,12 +18,13 @@
 Text files with line iteration and transparent compression
 """
 
-import os, string, sys
+import os
+import sys
+from pathlib import Path
 
 # Use the gzip module for Python version 1.5.2 or higher
-gzip = None
 try:
-    _version = [int(c) for c in string.split(string.split(sys.version)[0], ".")]
+    _version = [int(c) for c in sys.version.split()[0].split(".")]
 
     if _version >= [1, 5, 2]:
         try:
@@ -31,7 +32,7 @@ try:
         except ImportError:
             gzip = None
 except:
-    pass
+    gzip = None
 
 
 class TextFile:
@@ -63,57 +64,67 @@ class TextFile:
         if filename.find(":/") > 1:  # URL
             if mode != "r":
                 raise IOError("can't write to a URL")
-            import urllib.request, urllib.parse, urllib.error
+            import urllib
 
             self.file = urllib.request.urlopen(filename)
         else:
-            filename = os.path.expanduser(filename)
+            filename = Path(filename).expanduser()
             if mode in ["r", "rt"]:
-                if not os.path.exists(filename):
-                    raise IOError((2, "No such file or directory: " + filename))
-                if filename[-2:] == ".Z":
-                    self.file = os.popen("uncompress -c " + filename, mode)
-                elif filename[-3:] == ".gz":
+                if not filename.exists():
+                    raise IOError((2, f"No such file or directory: {filename}"))
+
+                if filename.suffix == ".Z":
+                    self.file = os.popen(f"uncompress -c {filename}", mode)
+
+                elif filename.suffix == ".gz":
                     if gzip is None:
-                        self.file = os.popen("gunzip -c " + filename, mode)
+                        self.file = os.popen(f"gunzip -c {filename}", mode)
                     else:
                         self.file = gzip.GzipFile(filename, "rb")
-                elif filename[-4:] == ".bz2":
-                    self.file = os.popen("bzip2 -dc " + filename, mode)
+
+                elif filename.suffix == ".bz2":
+                    self.file = os.popen(f"bzip2 -dc {filename}", mode)
+
                 else:
                     try:
                         self.file = open(filename, mode)
                     except IOError as details:
-                        if type(details) == type(()):
+                        if isinstance(details, tuple):
                             details = details + (filename,)
                         raise IOError(details)
+
             elif mode == "w":
-                if filename[-2:] == ".Z":
-                    self.file = os.popen("compress > " + filename, mode)
-                elif filename[-3:] == ".gz":
+                if filename.suffix == ".Z":
+                    self.file = os.popen(f"compress > {filename}", mode)
+
+                elif filename.suffix == ".gz":
                     if gzip is None:
-                        self.file = os.popen("gzip > " + filename, mode)
+                        self.file = os.popen(f"gzip > {filename}", mode)
                     else:
                         self.file = gzip.GzipFile(filename, "wb")
-                elif filename[-4:] == ".bz2":
-                    self.file = os.popen("bzip2 > " + filename, mode)
+
+                elif filename.suffix == ".bz2":
+                    self.file = os.popen(f"bzip2 > {filename}", mode)
+
                 else:
                     try:
                         self.file = open(filename, mode)
                     except IOError as details:
-                        if type(details) == type(()):
+                        if isinstance(details, tuple):
                             details = details + (filename,)
                         raise IOError(details)
+
             elif mode == "a":
-                if filename[-2:] == ".Z":
+                if filename.suffix == ".Z":
                     raise IOError((0, "Can't append to .Z files"))
-                elif filename[-3:] == ".gz":
+                elif filename.suffix == ".gz":
                     if gzip is None:
-                        self.file = os.popen("gzip >> " + filename, "w")
+                        self.file = os.popen(f"gzip >> {filename}", "w")
                     else:
                         self.file = gzip.GzipFile(filename, "ab")
                 else:
                     self.file = open(filename, mode)
+
             else:
                 raise IOError((0, "Illegal mode: " + repr(mode)))
 

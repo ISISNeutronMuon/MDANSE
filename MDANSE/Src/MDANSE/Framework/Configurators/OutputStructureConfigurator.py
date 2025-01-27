@@ -14,8 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import os
-from pathlib import PurePath
+from pathlib import Path
 
 from ase.io.formats import ioformats
 
@@ -65,6 +64,7 @@ class OutputStructureConfigurator(IConfigurator):
         self._original_input = value
 
         root, format, logs = value
+        root = Path(root)
 
         if logs not in self.log_options:
             self.error_status = "log level option not recognised"
@@ -85,14 +85,11 @@ class OutputStructureConfigurator(IConfigurator):
         self["root"] = root
         self["format"] = format
         self["file"] = root
-        if PurePath(os.path.abspath(self["file"])) in self._forbidden_files:
+        if self["file"].absolute() in self._forbidden_files:
             self.error_status = f"File {self['file']} is either open or being written into. Please pick another name."
             return
         self["log_level"] = logs
-        if logs == "no logs":
-            self["write_logs"] = False
-        else:
-            self["write_logs"] = True
+        self["write_logs"] = logs != "no logs"
         self["value"] = self["file"]
         self.error_status = "OK"
 

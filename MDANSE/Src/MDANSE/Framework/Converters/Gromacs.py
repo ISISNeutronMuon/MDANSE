@@ -78,12 +78,12 @@ class Gromacs(Converter):
         data_to_be_written = ["configuration", "time"]
 
         # Create XTC or TRR object depending on which kind of trajectory was loaded
-        if self.configuration["xtc_file"]["filename"][-4:] == ".xtc":
+        if self.configuration["xtc_file"]["filename"].suffix == ".xtc":
             self._xdr_file = XTCTrajectoryFile(
                 self.configuration["xtc_file"]["filename"], "r"
             )
             self._xtc = True
-        elif self.configuration["xtc_file"]["filename"][-4:] == ".trr":
+        elif self.configuration["xtc_file"]["filename"].suffix == ".trr":
             self._xdr_file = TRRTrajectoryFile(
                 self.configuration["xtc_file"]["filename"], "r"
             )

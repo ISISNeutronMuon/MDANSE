@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import json
-import os
 import unittest
 from unittest.mock import patch, mock_open, ANY
 
@@ -86,7 +85,7 @@ class TestAtomsDatabase(unittest.TestCase):
                     "atoms": {"H": {"family": "non-metal"}},
                 }
             ),
-        ) as m:
+        ) as _m:
             ATOMS_DATABASE._load()
             self.assertDictEqual({"family": "str"}, ATOMS_DATABASE._properties)
             self.assertDictEqual({"H": {"family": "non-metal"}}, ATOMS_DATABASE._data)
@@ -102,7 +101,7 @@ class TestAtomsDatabase(unittest.TestCase):
                 }
             ),
         ) as m:
-            with patch("os.path.exists", spec=True):
+            with patch("Path.exists", spec=True):
                 ATOMS_DATABASE._load("user.json")
                 m.assert_called_with("user.json", "r")
                 self.assertDictEqual({"family": "str"}, ATOMS_DATABASE._properties)
@@ -126,7 +125,7 @@ class TestAtomsDatabase(unittest.TestCase):
             ATOMS_DATABASE["H"],
         )
         with self.assertRaises(AtomsDatabaseError):
-            a = ATOMS_DATABASE["INVALID"]
+            _a = ATOMS_DATABASE["INVALID"]
 
     def test___iter__(self):
         generator = iter(ATOMS_DATABASE)

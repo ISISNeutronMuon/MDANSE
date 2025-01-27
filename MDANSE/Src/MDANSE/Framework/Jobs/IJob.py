@@ -18,7 +18,6 @@ from logging import FileHandler
 from logging.handlers import QueueHandler, QueueListener
 
 import abc
-import glob
 import os
 import multiprocessing
 import queue
@@ -28,6 +27,7 @@ import string
 import time
 import sys
 import traceback
+from pathlib import Path
 
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
@@ -107,8 +107,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         # The list of the registered jobs.
         registeredJobs = [
-            os.path.basename(f)
-            for f in glob.glob(os.path.join(PLATFORM.temporary_files_directory(), "*"))
+            f.name for f in PLATFORM.temporary_files_directory().glob("*")
         ]
 
         while True:
@@ -164,7 +163,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 "output_files" in self.configuration
                 and self.configuration["output_files"]["write_logs"]
             ):
-                log_filename = self.configuration["output_files"]["root"] + ".log"
+                log_filename = str(self.configuration["output_files"]["root"]) + ".log"
                 self.add_log_file_handler(
                     log_filename, self.configuration["output_files"]["log_level"]
                 )
@@ -430,13 +429,13 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 "A job with %r name is already stored in the registry" % shortname
             )
 
-        templateFile = os.path.join(PLATFORM.macros_directory(), "%s.py" % classname)
+        templateFile = PLATFORM.macros_directory() / f"{classname}.py"
 
         try:
-            f = open(templateFile, "w")
+            with templateFile.open("w") as f:
 
-            f.write(
-                '''import collections
+                f.write(
+                    '''import collections
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -444,13 +443,13 @@ class %(classname)s(IJob):
     """
     You should enter the description of your job here ...
     """
-        
+
     # You should enter the label under which your job will be viewed from the gui.
     label = %(label)r
 
     # You should enter the category under which your job will be references.
     category = ('My jobs',)
-    
+
     ancestor = ["hdf_trajectory"]
 
     # You should enter the configuration of your job here
@@ -459,7 +458,7 @@ class %(classname)s(IJob):
     settings['trajectory']=('hdf_trajectory',{})
     settings['frames']=('frames', {"dependencies":{'trajectory':'trajectory'}})
     settings['output_files']=('output_files', {"formats":["HDFFormat","netcdf","TextFormat"]})
-            
+
     def initialize(self):
         """
         Initialize the input parameters and analysis self variables
@@ -468,7 +467,7 @@ class %(classname)s(IJob):
         # Compulsory. You must enter the number of steps of your job.
         # Here for example the number of selected frames
         self.numberOfSteps = self.configuration['frames']['number']
-                        
+
         # Create an output data for the selected frames.
         self._outputData.add("time", "LineOutputVariable", self.configuration['frames']['time'], units='ps')
 
@@ -477,40 +476,38 @@ class %(classname)s(IJob):
         """
         Runs a single step of the job.
         """
-                                
+
         return index, None
-    
-    
+
+
     def combine(self, index, x):
         """
         Synchronize the output of each individual run_step output.
-        """     
-                    
+        """
+
     def finalize(self):
         """
         Finalizes the job (e.g. averaging the total term, output files creations ...).
-        """ 
+        """
 
         # The output data are written
         self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info,
             self.output_configuration())
-        
-        # The trajectory is closed
-        self.configuration['trajectory']['instance'].close()        
 
-'''
-                % {
-                    "classname": classname,
-                    "label": "label of the class",
-                    "shortname": shortname,
-                }
-            )
+        # The trajectory is closed
+        self.configuration['trajectory']['instance'].close()
+
+    '''
+                    % {
+                        "classname": classname,
+                        "label": "label of the class",
+                        "shortname": shortname,
+                    }
+                )
 
         except IOError:
             return None
-        else:
-            f.close()
-            return templateFile
+        return templateFile
 
     def add_log_file_handler(self, filename: str, level: str) -> None:
         """Adds a file handle which is used to write the jobs logs.
@@ -523,8 +520,8 @@ class %(classname)s(IJob):
             The log level.
         """
         self._log_filename = filename
-        PLATFORM.create_directory(os.path.dirname(filename))
-        fh = FileHandler(filename, mode="w")
+        PLATFORM.create_directory(Path(self._log_filename).parent)
+        fh = FileHandler(self._log_filename, mode="w")
         # set the name so that we can track it and then close it later,
         # tracking the fh by storing it in this object causes issues
         # with multiprocessing jobs

@@ -14,12 +14,11 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import pickle
-import glob
 import optparse
-import os
 import subprocess
 import sys
 import textwrap
+from pathlib import Path
 
 from MDANSE.Core.Error import Error
 from MDANSE import PLATFORM
@@ -118,9 +117,9 @@ class CommandLineParser(optparse.OptionParser):
 
         basename = parser.rargs[0]
 
-        filename = os.path.join(PLATFORM.temporary_files_directory(), basename)
+        filename = PLATFORM.temporary_files_directory() / basename
 
-        if not os.path.exists(filename):
+        if not filename.exists():
             raise CommandLineParserError("Invalid job name")
 
         # Open the job temporary file
@@ -183,17 +182,13 @@ class CommandLineParser(optparse.OptionParser):
                 "Invalid number of arguments for %r option" % opt_str
             )
 
-        jobs = [
-            f
-            for f in glob.glob(os.path.join(PLATFORM.temporary_files_directory(), "*"))
-        ]
+        jobs = PLATFORM.temporary_files_directory().glob("*")
 
         for j in jobs:
             # Open the job temporary file
             try:
-                f = open(j, "rb")
-                info = pickle.load(f)
-                f.close()
+                with j.open("rb") as f:
+                    info = pickle.load(f)
 
             # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint
             except:
@@ -205,7 +200,7 @@ class CommandLineParser(optparse.OptionParser):
                 if not isinstance(info, JobState):
                     continue
 
-                LOG.info("%-20s [%s]" % (os.path.basename(j), info["state"]))
+                LOG.info("%-20s [%s]", j.stem, info["state"])
 
     def display_trajectory_contents(self, option, opt_str, value, parser):
         """Displays trajectory contents
@@ -283,9 +278,9 @@ class CommandLineParser(optparse.OptionParser):
                 "Invalid number of arguments for %r option" % opt_str
             )
 
-        filename = parser.rargs[0]
+        filename = Path(parser.rargs[0])
 
-        if not os.path.exists(filename):
+        if not filename.exists():
             raise CommandLineParserError(
                 "The job file %r could not be executed" % filename
             )
@@ -319,7 +314,7 @@ class CommandLineParser(optparse.OptionParser):
         name = parser.rargs[0]
 
         # A name for the template is built.
-        filename = os.path.abspath("template_%s.py" % name.lower())
+        filename = Path(f"template_{name.lower()}.py").absolute()
 
         # Try to save the template for the job.
         try:
