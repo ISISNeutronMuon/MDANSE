@@ -47,9 +47,7 @@ class XYZFileConfigurator(FileWithAtomDataConfigurator):
         try:
             self["n_atoms"] = int(self["instance"].readline().strip())
         except ValueError:
-            raise XYZFileError(
-                f"Could not read the number of atoms in {filename} file"
-            )
+            raise XYZFileError(f"Could not read the number of atoms in {filename} file")
 
         self._nAtomsLineSize = self["instance"].tell()
         self["instance"].readline()

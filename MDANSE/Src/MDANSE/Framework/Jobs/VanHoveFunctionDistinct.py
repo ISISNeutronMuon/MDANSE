@@ -484,9 +484,7 @@ class VanHoveFunctionDistinct(IJob):
                 ["intra", "inter", "total"],
                 [van_hove_intra, van_hove_inter, van_hove_total],
             ):
-                self._outputData[f"g(r,t)_{i}_{pair[0]}{pair[1]}"][
-                    ...
-                ] = van_hove
+                self._outputData[f"g(r,t)_{i}_{pair[0]}{pair[1]}"][...] = van_hove
 
         weights = self.configuration["weights"].get_weights()
         for i in ["_intra", "_inter", ""]:

@@ -516,9 +516,7 @@ class H5MDTrajectory:
             last = len(self)
 
         if not self.has_variable(variable):
-            raise KeyError(
-                "The variable {} is not stored in the trajectory".format(variable)
-            )
+            raise KeyError(f"The variable {variable} is not stored in the trajectory")
 
         grp = self._h5_file["/particles/all"]
         variable = grp[variable]["value"][first:last:step, index, :].astype(np.float64)

@@ -274,8 +274,8 @@ class VanHoveFunctionSelf(IJob):
             time t0 and t0 + t.
         """
         element = self.configuration["atom_selection"]["names"][atm_index]
-        self._outputData["g(r,t)_{}".format(element)][:] += histogram
-        self._outputData["4_pi_r2_g(r,t)_{}".format(element)][:] += histogram
+        self._outputData[f"g(r,t)_{element}"][:] += histogram
+        self._outputData[f"4_pi_r2_g(r,t)_{element}"][:] += histogram
 
     def finalize(self):
         """Using the distance histograms calculate, normalize and save the

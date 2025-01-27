@@ -439,7 +439,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
-class {classname}s(IJob):
+class {classname}(IJob):
     """
     You should enter the description of your job here ...
     """
@@ -498,7 +498,7 @@ class {classname}s(IJob):
         self.configuration['trajectory']['instance'].close()
 
 '''
-            )
+                )
 
         except IOError:
             return None

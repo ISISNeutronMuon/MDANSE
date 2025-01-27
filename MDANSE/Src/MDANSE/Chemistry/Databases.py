@@ -215,7 +215,7 @@ class AtomsDatabase(_Database):
             return copy.deepcopy(self._data[item])
         except KeyError:
             raise AtomsDatabaseError(
-                "The element {} is not registered in the database.".format(item)
+                f"The element {item} is not registered in the database."
             )
 
     def _load(self, user_database: str = None, default_database: str = None) -> None:
@@ -253,7 +253,7 @@ class AtomsDatabase(_Database):
 
         if atom in self._data:
             raise AtomsDatabaseError(
-                "The atom {} is already stored in the database".format(atom)
+                f"The atom {atom} is already stored in the database"
             )
 
         self._data[atom] = {}
@@ -272,11 +272,11 @@ class AtomsDatabase(_Database):
 
         if pname in self._properties:
             raise AtomsDatabaseError(
-                "The property {} is already registered in the database.".format(pname)
+                f"The property {pname} is already registered in the database."
             )
 
         if ptype not in AtomsDatabase._TYPES:
-            raise AtomsDatabaseError("The property type {} is unknown".format(ptype))
+            raise AtomsDatabaseError(f"The property type {ptype} is unknown")
 
         self._properties[pname] = ptype
         ptype = AtomsDatabase._TYPES[ptype]
@@ -307,7 +307,7 @@ class AtomsDatabase(_Database):
         """
 
         if atom not in self._data:
-            raise AtomsDatabaseError("The atom {} is unknown".format(atom))
+            raise AtomsDatabaseError(f"The atom {atom} is unknown")
 
         # The isotopes are searched according to |symbol| property
         symbol = self._data[atom]["symbol"]
@@ -340,7 +340,7 @@ class AtomsDatabase(_Database):
 
         if pname not in self._properties:
             raise AtomsDatabaseError(
-                "The property {} is not registered in the database".format(pname)
+                f"The property {pname} is not registered in the database"
             )
 
         ptype = AtomsDatabase._TYPES[self._properties[pname]]
@@ -365,11 +365,11 @@ class AtomsDatabase(_Database):
         """
 
         if atom not in self._data:
-            raise AtomsDatabaseError("The atom {} is unknown".format(atom))
+            raise AtomsDatabaseError(f"The atom {atom} is unknown")
 
         if pname not in self._properties:
             raise AtomsDatabaseError(
-                "The property {} is not registered in the database".format(pname)
+                f"The property {pname} is not registered in the database"
             )
 
         ptype = self._properties[pname]
@@ -397,12 +397,12 @@ class AtomsDatabase(_Database):
 
         if not all(atom in self._data for atom in atoms):
             raise AtomsDatabaseError(
-                "One or more of the provided atoms {} are unknown".format(atoms)
+                f"One or more of the provided atoms {atoms} are unknown"
             )
 
         if prop not in self._properties:
             raise AtomsDatabaseError(
-                "The property {} is not registered in the database".format(prop)
+                f"The property {prop} is not registered in the database"
             )
 
         values = {name: self._data[name][prop] for name in unique_atoms}
@@ -425,11 +425,11 @@ class AtomsDatabase(_Database):
         """
 
         if atom not in self._data:
-            raise AtomsDatabaseError("The element {} is unknown".format(atom))
+            raise AtomsDatabaseError(f"The element {atom} is unknown")
 
         if pname not in self._properties:
             raise AtomsDatabaseError(
-                "The property {} is not registered in the database".format(pname)
+                f"The property {pname} is not registered in the database"
             )
 
         try:
@@ -438,7 +438,7 @@ class AtomsDatabase(_Database):
             )
         except ValueError:
             raise AtomsDatabaseError(
-                "Can not coerce {} to {} type".format(value, self._properties[pname])
+                f"Can not coerce {value} to {self._properties[pname]} type"
             )
 
     def has_atom(self, atom: str) -> bool:
@@ -480,7 +480,7 @@ class AtomsDatabase(_Database):
 
         # A delimiter line.
         delimiter = "-" * 70
-        tab_fmt = "{:<20}{:>50}"
+        tab_fmt = " {:<20}{!s:>50}"
 
         info = [
             delimiter,
@@ -491,9 +491,7 @@ class AtomsDatabase(_Database):
 
         # The values for all element's properties
         for pname in sorted(self._properties):
-            info.append(
-                tab_fmt.format(pname, self._data[atom].get(pname, None))
-            )
+            info.append(tab_fmt.format(pname, self._data[atom].get(pname, None)))
 
         info.append(delimiter)
         info = "\n".join(info)
@@ -526,7 +524,7 @@ class AtomsDatabase(_Database):
                 )
         except KeyError:
             raise AtomsDatabaseError(
-                "The property {} is not registered in the database".format(pname)
+                f"The property {pname} is not registered in the database"
             )
 
         tolerance = abs(tolerance)

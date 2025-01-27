@@ -251,17 +251,19 @@ class Configurable(object):
             v["Description"] = v["Description"].strip()
             v["Description"] = v["Description"].splitlines()
             v["Description"] = ["| " + vv.strip() for vv in v["Description"]]
-            sizes[2] = max(sizes[2], max(v["Description"], key=len))
+            sizes[2] = max(sizes[2], max(map(len, v["Description"])))
 
         data_line = "| " + "| ".join(f"{{}}:<{size}" for size in sizes) + "|\n"
-        sep_line = "+" + "+".join("-" * (size+1) for size in sizes) + "+\n"
+        sep_line = "+" + "+".join("-" * (size + 1) for size in sizes) + "+\n"
 
         docstring += sep_line
         docstring += data_line.format(*columns)
         docstring += sep_line.replace("-", "=")
 
         for v in doclist:
-            docstring += data_line.format(v["Configurator"], v["Default value"], v["Description"][0])
+            docstring += data_line.format(
+                v["Configurator"], v["Default value"], v["Description"][0]
+            )
             if len(v["Description"]) > 1:
                 for descr in v["Description"][1:]:
                     data_line.format("", "", descr)

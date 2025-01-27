@@ -245,7 +245,7 @@ class DynamicIncoherentStructureFactor(IJob):
 
         element = self.configuration["atom_selection"]["names"][index]
         for i, v in enumerate(disf_per_q_shell.values()):
-            self._outputData["f(q,t)_{}".format(element)][i, :] += v
+            self._outputData[f"f(q,t)_{element}"][i, :] += v
 
     def finalize(self):
         """

@@ -122,8 +122,6 @@ class QVectorsConfigurator(IConfigurator):
             return "QVectors could not be configured correctly"
         else:
             for qValue, qVectors in self["q_vectors"].items():
-                info.append(
-                    f"Shell {qValue}: {len(qVectors)} Q vectors generated\n"
-                )
+                info.append(f"Shell {qValue}: {len(qVectors)} Q vectors generated\n")
 
             return "".join(info)

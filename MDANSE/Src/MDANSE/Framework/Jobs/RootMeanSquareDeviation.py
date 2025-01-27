@@ -93,7 +93,7 @@ class RootMeanSquareDeviation(IJob):
         # Will initially store the mean square deviation before appling the root
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "rmsd_{}".format(element),
+                f"rmsd_{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["number"],),
                 axis="time",
@@ -156,11 +156,11 @@ class RootMeanSquareDeviation(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData["rmsd_{}".format(element)] /= number
+            self._outputData[f"rmsd_{element}"] /= number
 
         for element, number in nAtomsPerElement.items():
-            self._outputData["rmsd_{}".format(element)] = np.sqrt(
-                self._outputData["rmsd_{}".format(element)]
+            self._outputData[f"rmsd_{element}"] = np.sqrt(
+                self._outputData[f"rmsd_{element}"]
             )
 
         self._outputData["rmsd_all"] /= self.configuration[

@@ -198,15 +198,16 @@ class NeutronDynamicTotalStructureFactor(IJob):
             )
         )
         for pair in self._elementsPairs:
+            pair_str = "".join(map(str, pair))
             if (
-                "f(q,t)_{}{}".format(*pair)
+                f"f(q,t)_{pair_str}"
                 not in self.configuration["dcsf_input_file"]["instance"]
             ):
                 raise NeutronDynamicTotalStructureFactorError(
                     "Missing f(q,t) in dcsf input file"
                 )
             if (
-                "s(q,f)_{}{}".format(*pair)
+                f"s(q,f)_{pair_str}"
                 not in self.configuration["dcsf_input_file"]["instance"]
             ):
                 raise NeutronDynamicTotalStructureFactorError(
@@ -215,14 +216,14 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             if (
-                "f(q,t)_{}".format(element)
+                f"f(q,t)_{element}"
                 not in self.configuration["disf_input_file"]["instance"]
             ):
                 raise NeutronDynamicTotalStructureFactorError(
                     "Missing f(q,t) in disf input file"
                 )
             if (
-                "s(q,f)_{}".format(element)
+                f"s(q,f)_{element}"
                 not in self.configuration["disf_input_file"]["instance"]
             ):
                 raise NeutronDynamicTotalStructureFactorError(
@@ -230,12 +231,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 )
 
         for element in self.configuration["atom_selection"]["unique_names"]:
-            fqt = self.configuration["disf_input_file"]["instance"][
-                "f(q,t)_{}".format(element)
-            ]
-            sqf = self.configuration["disf_input_file"]["instance"][
-                "s(q,f)_{}".format(element)
-            ]
+            fqt = self.configuration["disf_input_file"]["instance"][f"f(q,t)_{element}"]
+            sqf = self.configuration["disf_input_file"]["instance"][f"s(q,f)_{element}"]
             self._outputData.add(
                 f"f(q,t)_inc_{element}",
                 "SurfaceOutputVariable",
@@ -266,7 +263,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             )
 
         for pair in self._elementsPairs:
-            pair_str = ''.join(map(str, pair))
+            pair_str = "".join(map(str, pair))
             fqt = self.configuration["dcsf_input_file"]["instance"][
                 f"f(q,t)_{pair_str}"
             ]
@@ -390,6 +387,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
         # Compute coherent functions and structure factor
         for pair in self._elementsPairs:
+            pair_str = "".join(map(str, pair))
             bi = self.configuration["trajectory"]["instance"].get_atom_property(
                 pair[0], "b_coherent"
             )

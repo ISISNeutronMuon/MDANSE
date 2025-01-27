@@ -68,10 +68,15 @@ class IndentedHelp(optparse.IndentedHelpFormatter):
         if option.help:
             help_text = self.expand_default(option)
             # Everything is the same up through here
-            help_lines = [textwrap.wrap(para, self.help_width) for para in help_text.splitlines()]
+            help_lines = [
+                textwrap.wrap(para, self.help_width) for para in help_text.splitlines()
+            ]
             # Everything is the same after here
             result += f"{indent_first}{help_lines[0]}\n"
-            result += "\n".join(f"{' '*self.help_position}{line}" for line in help_lines[1:]) + "\n"
+            result += (
+                "\n".join(f"{' '*self.help_position}{line}" for line in help_lines[1:])
+                + "\n"
+            )
         elif not opts.endswith("\n"):
             result += "\n"
 
@@ -108,7 +113,9 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         if len(parser.rargs) != 1:
-            raise CommandLineParserError(f"Invalid number of arguments for {opt_str!r} option")
+            raise CommandLineParserError(
+                f"Invalid number of arguments for {opt_str!r} option"
+            )
 
         basename = parser.rargs[0]
 
@@ -125,7 +132,9 @@ class CommandLineParser(optparse.OptionParser):
 
         # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint
         except:
-            raise CommandLineParserError(f"The job {basename!r} could not be opened properly.")
+            raise CommandLineParserError(
+                f"The job {basename!r} could not be opened properly."
+            )
 
         # The job file could be opened and unpickled properly
         else:
@@ -171,7 +180,9 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         if len(parser.rargs) != 0:
-            raise CommandLineParserError(f"Invalid number of arguments for {opt_str!r} option")
+            raise CommandLineParserError(
+                f"Invalid number of arguments for {opt_str!r} option"
+            )
 
         jobs = PLATFORM.temporary_files_directory().glob("*")
 
@@ -244,7 +255,9 @@ class CommandLineParser(optparse.OptionParser):
             val = parser.rargs[0]
             LOG.info(IJob.create(val).info())
         else:
-            raise CommandLineParserError(f"Invalid number of arguments for {opt_str!r} option")
+            raise CommandLineParserError(
+                f"Invalid number of arguments for {opt_str!r} option"
+            )
 
     def run_job(self, option, opt_str, value, parser):
         """Run job file(s).
@@ -263,12 +276,16 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         if len(parser.rargs) != 1:
-            raise CommandLineParserError(f"Invalid number of arguments for {opt_str!r} option")
+            raise CommandLineParserError(
+                f"Invalid number of arguments for {opt_str!r} option"
+            )
 
         filename = Path(parser.rargs[0])
 
         if not filename.exists():
-            raise CommandLineParserError(f"The job file {filename!r} could not be executed")
+            raise CommandLineParserError(
+                f"The job file {filename!r} could not be executed"
+            )
 
         subprocess.Popen([sys.executable, filename])
 
@@ -290,7 +307,9 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         if len(parser.rargs) != 1:
-            raise CommandLineParserError(f"Invalid number of arguments for {opt_str!r} option")
+            raise CommandLineParserError(
+                f"Invalid number of arguments for {opt_str!r} option"
+            )
 
         jobs = IJob
 
@@ -304,7 +323,9 @@ class CommandLineParser(optparse.OptionParser):
             jobs.create(name).save(filename)
         # Case where an error occured when writing the template.
         except IOError:
-            raise CommandLineParserError(f"Could not write the job template as {filename!r}")
+            raise CommandLineParserError(
+                f"Could not write the job template as {filename!r}"
+            )
         # If the job class has no save method, thisis not a valid MDANSE job.
         except KeyError:
             raise CommandLineParserError(f"The job {name!r} is not a valid MDANSE job")

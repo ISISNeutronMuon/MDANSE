@@ -233,9 +233,7 @@ class McStasVirtualInstrument(IJob):
             for k, v in list(self._mcStasPhysicalParameters.items()):
                 fout.write(f"# {k} {v} \n")
 
-            fout.write(
-                f"# Temperature {self.configuration['temperature']['value']} \n"
-            )
+            fout.write(f"# Temperature {self.configuration['temperature']['value']} \n")
             fout.write("#\n")
 
             for var in self.configuration[typ].variables:

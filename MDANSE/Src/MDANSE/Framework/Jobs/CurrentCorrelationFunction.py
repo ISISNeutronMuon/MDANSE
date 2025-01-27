@@ -378,7 +378,7 @@ class CurrentCorrelationFunction(IJob):
             self._outputData[f"j(q,t)_long_{pair_str}"][:] /= ni * nj
             self._outputData[f"j(q,t)_trans_{pair_str}"][:] /= ni * nj
             self._outputData[f"J(q,f)_long_{pair_str}"][:] = get_spectrum(
-                self._outputData["j(q,t)_long_{pair_str}"],
+                self._outputData[f"j(q,t)_long_{pair_str}"],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 axis=1,

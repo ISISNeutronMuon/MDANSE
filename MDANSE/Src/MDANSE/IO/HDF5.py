@@ -56,9 +56,9 @@ def find_numeric_variables(var_dict, group):
             find_numeric_variables(var_dict, var)
         else:
             if var.parent.name == "/":
-                path = "/{}".format(var_key)
+                path = f"/{var_key}"
             else:
-                path = "{}/{}".format(var.parent.name, var_key)
+                path = f"{var.parent.name}/{var_key}"
 
             # Non-numeric variables are not supported by the plotter
             if not np.issubdtype(var.dtype, np.number):
@@ -70,7 +70,7 @@ def find_numeric_variables(var_dict, group):
 
             comp = 1
             while var_key in var_dict:
-                var_key = "{:s}_{:d}".format(var_key, comp)
+                var_key = f"{var_key:s}_{comp:d}"
                 comp += 1
 
             var_dict[var_key] = (path, HDFFileVariable(var))

@@ -95,7 +95,7 @@ class GeneralAutoCorrelationFunction(IJob):
         # Will store the mean square displacement evolution.
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                "gacf_{}".format(element),
+                f"gacf_{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["number"],),
                 axis="time",
@@ -161,14 +161,14 @@ class GeneralAutoCorrelationFunction(IJob):
         self.configuration["atom_selection"]["n_atoms_per_element"] = nAtomsPerElement
 
         for element, number in nAtomsPerElement.items():
-            self._outputData["gacf_{}".format(element)] /= number
+            self._outputData[f"gacf_{element}"] /= number
 
         if self.configuration["normalize"]["value"]:
             for element in nAtomsPerElement.keys():
-                if self._outputData["gacf_{}}".format(element)][0] == 0:
+                if self._outputData[f"gacf_{element}}}"][0] == 0:
                     raise ValueError("The normalization factor is equal to zero")
                 else:
-                    self._outputData["gacf_{}".format(element)] = normalize(
+                    self._outputData[f"gacf_{element}"] = normalize(
                         self._outputData[f"gacf_{element}"], axis=0
                     )
 

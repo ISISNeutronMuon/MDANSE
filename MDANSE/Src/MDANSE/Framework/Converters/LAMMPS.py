@@ -222,7 +222,7 @@ class LAMMPScustom(LAMMPSReader):
                             )
                     label = str(config["elements"][ty][0])
                     mass = str(config["elements"][ty][1])
-                    name = "{:s}_{:d}".format(str(config["elements"][ty][0]), idx)
+                    name = f"{label}_{idx:d}"
                     try:
                         temp_index = int(temp[0])
                     except ValueError:
@@ -470,7 +470,7 @@ class LAMMPSxyz(LAMMPSReader):
             ty = atom_types[i] - 1
             label = str(config["elements"][ty][0])
             mass = str(config["elements"][ty][1])
-            name = "{:s}_{:d}".format(str(config["elements"][ty][0]), idx)
+            name = f"{label}_{idx:d}"
             self._rankToName[idx] = name
             element_list.append(get_element_from_mapping(aliases, label, mass=mass))
             name_list.append(str(ty + 1))
@@ -579,7 +579,7 @@ class LAMMPSh5md(LAMMPSReader):
             ty = atom_types[i] - 1
             label = str(config["elements"][ty][0])
             mass = str(config["elements"][ty][1])
-            name = "{:s}_{:d}".format(str(config["elements"][ty][0]), idx)
+            name = f"{label}_{idx:d}"
             self._rankToName[idx] = name
             element_list.append(get_element_from_mapping(aliases, label, mass=mass))
             name_list.append(str(ty + 1))

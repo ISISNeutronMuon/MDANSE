@@ -69,9 +69,7 @@ def get_byte_order(filename):
             break
 
         if byteOrder is None:
-            raise ByteOrderError(
-                f"Invalid byte order. {filename} not a valid DCD file"
-            )
+            raise ByteOrderError(f"Invalid byte order. {filename} not a valid DCD file")
 
     return byteOrder
 

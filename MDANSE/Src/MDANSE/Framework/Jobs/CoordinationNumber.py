@@ -154,6 +154,10 @@ class CoordinationNumber(DistanceHistogram):
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for pair in self._elementsPairs:
             at1, at2 = pair
+            invPair = pair[::-1]
+            pair_str = "".join(map(str, pair))
+            inv_pair_str = "".join(map(str, invPair))
+
             ni = nAtomsPerElement[at1]
             nj = nAtomsPerElement[at2]
 
@@ -178,8 +182,6 @@ class CoordinationNumber(DistanceHistogram):
 
             cAlpha = self._concentrations[pair[0]]
             cBeta = self._concentrations[pair[1]]
-
-            invPair = pair[::-1]
 
             self._outputData[f"cn_intra_{pair_str}"][:] = (
                 self.averageDensity * cBeta * cnIntra

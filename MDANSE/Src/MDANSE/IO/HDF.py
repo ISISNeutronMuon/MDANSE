@@ -29,9 +29,9 @@ def find_numeric_variables(variables, group):
             find_numeric_variables(variables, var)
         else:
             if var.parent.name == "/":
-                path = "/{}".format(var_key)
+                path = f"/{var_key}"
             else:
-                path = "{}/{}".format(var.parent.name, var_key)
+                path = f"{var.parent.name}/{var_key}"
 
             if not np.issubdtype(var.dtype, np.number):
                 continue

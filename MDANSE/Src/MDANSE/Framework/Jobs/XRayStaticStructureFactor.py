@@ -135,7 +135,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for pair in self._elementsPairs:
-            pair_str = ''.join(map(str, pair))
+            pair_str = "".join(map(str, pair))
             self._outputData.add(
                 f"xssf_intra_{pair_str}",
                 "LineOutputVariable",
@@ -210,12 +210,12 @@ class XRayStaticStructureFactor(DistanceHistogram):
         )
 
         xssfIntra = weight(
-            asf, self._outputData, nAtomsPerElement, 2, f"xssf_intra_{pair_str}"
+            asf, self._outputData, nAtomsPerElement, 2, f"xssf_intra_%s%s"
         )
         self._outputData["xssf_intra"][:] = xssfIntra
 
         xssfInter = weight(
-            asf, self._outputData, nAtomsPerElement, 2, f"xssf_inter_{pair_str}"
+            asf, self._outputData, nAtomsPerElement, 2, f"xssf_inter_%s%s"
         )
         self._outputData["xssf_inter"][:] = xssfInter
 

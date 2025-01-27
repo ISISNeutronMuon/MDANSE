@@ -138,11 +138,11 @@ class PairDistributionFunction(DistanceHistogram):
             for i, pdf in zip(
                 ["intra", "inter", "total"], [pdf_intra, pdf_inter, pdf_total]
             ):
-                self._outputData[f"pdf_{i}_{pair[0]}{pair[1]}")][:] = pdf
-                self._outputData[f"rdf_{i}_{pair[0]}{pair[1]}")][:] = (
+                self._outputData[f"pdf_{i}_{pair[0]}{pair[1]}"][:] = pdf
+                self._outputData[f"rdf_{i}_{pair[0]}{pair[1]}"][:] = (
                     shellSurfaces * self.averageDensity * pdf
                 )
-                self._outputData[f"tcf_{i}_{pair[0]}{pair[1]}")][:] = (
+                self._outputData[f"tcf_{i}_{pair[0]}{pair[1]}"][:] = (
                     densityFactor
                     * self.averageDensity
                     * (pdf if i == "intra" else pdf - 1)
@@ -156,7 +156,7 @@ class PairDistributionFunction(DistanceHistogram):
                 self._outputData,
                 nAtomsPerElement,
                 2,
-                f"pdf{i if i else "_total"}_%s%s",
+                f"pdf{i if i else '_total'}_%s%s",
             )
             self._outputData[f"pdf{i}_total"][:] = pdf
             self._outputData[f"rdf{i}_total"][:] = (

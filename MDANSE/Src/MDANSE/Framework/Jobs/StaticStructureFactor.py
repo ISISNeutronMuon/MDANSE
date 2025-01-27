@@ -142,7 +142,7 @@ class StaticStructureFactor(DistanceHistogram):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for pair in self._elementsPairs:
-            pair_str = ''.join(map(str, pair))
+            pair_str = "".join(map(str, pair))
             self._outputData.add(
                 f"ssf_intra_{pair_str}",
                 "LineOutputVariable",

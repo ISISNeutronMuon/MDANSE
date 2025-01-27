@@ -502,9 +502,7 @@ class MockTrajectory:
         grp = self._variables
 
         if variable not in grp:
-            raise KeyError(
-                "The variable {} is not stored in the trajectory".format(variable)
-            )
+            raise KeyError(f"The variable {variable} is not stored in the trajectory")
 
         variable = grp[variable][first:last:step, index, :].astype(np.float64)
 

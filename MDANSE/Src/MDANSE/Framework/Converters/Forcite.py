@@ -173,7 +173,7 @@ class TrjFile(dict):
         if self["velocities_written"]:
             if self["gradients_written"]:
                 # Frame record 8,9,10,11,12,13,14,15,16
-                self._configRec = "!" + (f"{self['totmov']}{self._fp}8x" * 9)
+                self._configRec = "!" + (f"!{self['totmov']}{self._fp}8x" * 9)
             else:
                 # Frame record 8,9,10,11,12,13
                 self._configRec = "!" + (f"{self['totmov']}{self._fp}8x" * 6)

@@ -95,11 +95,11 @@ def _parse_unit(iunit):
             iunit = iunit[i:]
             break
     else:
-        raise UnitError("The unit {} is unknown".format(iunit))
+        raise UnitError(f"The unit {iunit} is unknown")
 
     if prefix:
         if prefix not in _PREFIXES:
-            raise UnitError("The prefix {} is unknown".format(prefix))
+            raise UnitError(f"The prefix {prefix} is unknown")
         prefix = _PREFIXES[prefix]
     else:
         prefix = 1.0
@@ -150,7 +150,7 @@ def _str_to_unit(s):
             return unit
 
         else:
-            raise UnitError("Invalid unit: {}".format(s))
+            raise UnitError(f"Invalid unit: {s}")
 
 
 class _Unit(object):
@@ -399,7 +399,9 @@ class _Unit(object):
                     continue
 
                 ref = positive_units if uval > 0 else negative_units
-                unit = str(uname) + (format(abs(uval), "d") if isinstance(uval, int) else str(uval))
+                unit = str(uname) + (
+                    format(abs(uval), "d") if isinstance(uval, int) else str(uval)
+                )
                 ref.append(unit)
 
             positive_units_str = " ".join(positive_units)

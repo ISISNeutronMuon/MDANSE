@@ -61,11 +61,9 @@ class HDFTrajectoryInputData(InputFileData):
         val.append("Number of steps:")
         val.append(f"{self._data}\n")
         val.append("Configuration:")
-        val.append(f"\tIs periodic: {"unit_cell" in self._data.file}\n")
+        val.append(f"\tIs periodic: {'unit_cell' in self._data.file}\n")
         try:
-            val.append(
-                f"First unit cell (nm):\n{self._data.unit_cell(0)._unit_cell}\n"
-            )
+            val.append(f"First unit cell (nm):\n{self._data.unit_cell(0)._unit_cell}\n")
         except:
             val.append("No unit cell information\n")
         val.append("Frame times (1st, 2nd, ..., last) in ps:")

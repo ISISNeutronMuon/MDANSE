@@ -91,7 +91,7 @@ class RigidBodyTrajectory(IJob):
             raise JobError(
                 self,
                 "Invalid reference frame. Must be an integer in "
-                f"[{0},{self.configuration['trajectory']['length']}["
+                f"[{0},{self.configuration['trajectory']['length']}[",
             )
 
         self._quaternions = np.zeros(
