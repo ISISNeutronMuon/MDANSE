@@ -13,16 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import TYPE_CHECKING, Any, Dict, List
+import operator
+from typing import TYPE_CHECKING, Any, Collection, Dict, List, Union
 
 if TYPE_CHECKING:
     from MDANSE.Chemistry.Databases import AtomsDatabase
 
 import math
-import operator
-from collections.abc import Collection
 from pathlib import Path
-from typing import Union
 
 import h5py
 import numpy as np
@@ -30,6 +28,8 @@ from MDANSE import PLATFORM
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
+from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 
 available_formats = {
     "MDANSE": MdanseTrajectory,

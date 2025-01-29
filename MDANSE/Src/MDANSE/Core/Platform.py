@@ -465,7 +465,7 @@ class PlatformWin(Platform):
         basedir = Path(os.environ["APPDATA"]) / "mdanse"
 
         # If the application directory does not exist, create it.
-        os.makedirs(basedir)
+        basedir.mkdir(parents=True, exist_ok=True)
 
         return basedir
 

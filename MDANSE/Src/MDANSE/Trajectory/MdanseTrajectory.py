@@ -53,7 +53,7 @@ class MdanseTrajectory:
 
         # Load the chemical system
         self._chemical_system = ChemicalSystem(self._h5_filename.stem, self)
-        self._chemical_system.load(self._h5_filename)
+        self._chemical_system.load(self._h5_file)
 
         # Load all the unit cells
         self._load_unit_cells()
@@ -69,7 +69,7 @@ class MdanseTrajectory:
         else:
             try:
                 temp_cs = ChemicalSystem(filename.stem)
-                temp_cs.load(filename)
+                temp_cs.load(file_object)
             except Exception:
                 LOG.warning(
                     f"Could not load ChemicalSystem from {filename}. MDANSE will try to read it as H5MD next."

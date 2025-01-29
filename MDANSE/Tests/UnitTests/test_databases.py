@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import json
+from pathlib import Path
 import unittest
 from unittest.mock import patch, mock_open, ANY
 
@@ -101,9 +102,9 @@ class TestAtomsDatabase(unittest.TestCase):
                 }
             ),
         ) as m:
-            with patch("Path.exists", spec=True):
+            with patch("pathlib.Path.exists", spec=True):
                 ATOMS_DATABASE._load("user.json")
-                m.assert_called_with("user.json", "r")
+                m.assert_called_with(Path("user.json"), "r")
                 self.assertDictEqual({"family": "str"}, ATOMS_DATABASE._properties)
                 self.assertDictEqual(
                     {"H": {"family": "non-metal"}}, ATOMS_DATABASE._data

@@ -67,7 +67,8 @@ class TextFormat(IFormat):
         :type header: str
         """
 
-        filename = Path(filename).with_suffix(".tar")
+        filename = Path(filename)
+        filename = filename.parent / (filename.stem + "_text.tar")
 
         PLATFORM.create_directory(filename.parent)
         tf = tarfile.open(filename, "w")

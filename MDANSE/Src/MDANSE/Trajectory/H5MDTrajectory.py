@@ -61,7 +61,7 @@ class H5MDTrajectory:
         except KeyError:
             chemical_elements = self._h5_file["/particles/all/species"]
         self._chemical_system = ChemicalSystem(self._h5_filename.stem)
-        self._chemical_system.from_element_list(chemical_elements)
+        self._chemical_system.initialise_atoms(chemical_elements)
 
         # Load all the unit cells
         self._load_unit_cells()
