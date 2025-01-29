@@ -440,38 +440,34 @@ class FilterDesigner(QDialog):
             # Y-axis in amplitude or decibels
             grid.addWidget(QLabel("Response units"), 0, 0)
             key_0 = "response_units"
-            tooltip_0 = "View y-axis in amplitude or decibels"
             widget_0 = self.add_preference_combobox(key_0, ("amplitude", "dB"))
             widget_0.currentTextChanged.connect(lambda val: self.edit_preferences(key_0, val))
-            widget_0.setToolTip(tooltip_0)
+            widget_0.setToolTip("View y-axis in amplitude or decibels")
             grid.addWidget(widget_0, 0, 1)
 
             # X-axis in angular frequency or energy (meV)
             grid.addWidget(QLabel("X-axis units"), 1, 0)
             key_1 = "xaxis_units"
-            tooltip_1 = "View x-axis as frequency (pHz) or energy (meV)"
             widget_1 = self.add_preference_combobox(key_1, ("pHz", "meV"))
             widget_1.currentTextChanged.connect(lambda val: self.edit_preferences(key_1, val))
-            widget_1.setToolTip(tooltip_1)
+            widget_1.setToolTip("View x-axis as frequency (pHz) or energy (meV)")
             grid.addWidget(widget_1, 1, 1)
 
             # Display filter transfer function in terms of analogue or digital filter coefficients
             grid.addWidget(QLabel("Filter coefficients"), 2, 0)
             key_2 = "coeff_type"
-            tooltip_2 = "View filter transfer function in terms of analogue (S-domain/continuous time) or digital (Z-domain/discrete time) coefficients"
             widget_2 = self.add_preference_combobox(key_2, ("analog", "digital"))
             widget_2.currentTextChanged.connect(lambda val: self.edit_preferences(key_2, val))
-            widget_2.setToolTip(tooltip_2)
+            widget_2.setToolTip("View filter transfer function in terms of analogue (S-domain/continuous time) or digital (Z-domain/discrete time) coefficients")
             grid.addWidget(widget_2, 2, 1)
 
             # Display trajectory position power spectral attentuation for comparison
             grid.addWidget(QLabel("Show trajectory attenuation"), 3, 0)
             key_3 = "show_attenuation"
-            tooltip_3 = "Display trajectory power spectrum for comparison"
             attenuation_checkbox = QCheckBox()
             self._preferences.update({key_3: attenuation_checkbox.isChecked()})
             attenuation_checkbox.stateChanged.connect(lambda val: self.edit_preferences(key_3, val))
-            attenuation_checkbox.setToolTip(tooltip_3)
+            attenuation_checkbox.setToolTip("Display trajectory power spectrum for comparison")
             grid.addWidget(attenuation_checkbox, 3, 1)
             attenuation_checkbox.setEnabled(True)
 
