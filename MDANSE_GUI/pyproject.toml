@@ -49,13 +49,16 @@ documentation = "https://mdanse.readthedocs.io/en/protos/"
 repository = "https://github.com/ISISNeutronMuon/MDANSE"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = {"" = "Src"}
+include-package-data = true
 
-[project.scripts]
+[tool.setuptools.package-data]
+MDANSE_GUI = ["Icons/*.png", "Icons/*.ico",
+              "MolecularViewer/database/*.yml",
+              "Resources/*.toml", "Resources/*.png"]
+
+[project.gui-scripts]
 mdanse_elements_database = "MDANSE_GUI.Scripts.mdanse_elements_database:main"
 mdanse_gui = "MDANSE_GUI.Scripts.mdanse_gui:main"
 mdanse_periodic_table = "MDANSE_GUI.Scripts.mdanse_periodic_table:main"
 mdanse_units_editor = "MDANSE_GUI.Scripts.mdanse_units_editor:main"
-
-# [tool.setuptools.packages.find]
-# where = ["src"]
