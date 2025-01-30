@@ -1,9 +1,0 @@
-include LICENSE
-
-recursive-include Src/MDANSE/Chemistry *.json
-recursive-include Src/MDANSE/Framework *.json
-
-graft Tests/UnitTests/Data
-graft Doc
-
-recursive-include Tests *.py

@@ -48,10 +48,12 @@ documentation = "https://mdanse.readthedocs.io/en/protos/"
 repository = "https://github.com/ISISNeutronMuon/MDANSE"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = {"" = "Src"}
+include-package-data = true
+
+[tool.setuptools.package-data]
+MDANSE = ["Chemistry/*.json",
+          "Framework/*.json"]
 
 [project.scripts]
 mdanse = "MDANSE.Scripts.mdanse:main"
-
-# [tool.setuptools.packages.find]
-# where = ["src"]
