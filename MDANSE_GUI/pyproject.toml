@@ -54,7 +54,6 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 MDANSE_GUI = ["Icons/*.png", "Icons/*.ico",
-              "MolecularViewer/database/*.yml",
               "Resources/*.toml", "Resources/*.png"]
 
 [project.gui-scripts]
