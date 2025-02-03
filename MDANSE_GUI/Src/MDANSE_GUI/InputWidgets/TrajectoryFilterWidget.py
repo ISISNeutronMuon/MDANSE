@@ -644,7 +644,7 @@ class FilterDesigner(QDialog):
         denominator = polynomial["denominator"]
 
         if (
-            self._settings["filter"] not in {"Notch", "Peaks", "Comb"}
+            self._settings["filter"] not in {"Notch", "Peak", "Comb"}
             and self._settings["attributes"].get("order", 1) < 6
         ):
             self._figure_info.append(f"           {numerator}")
