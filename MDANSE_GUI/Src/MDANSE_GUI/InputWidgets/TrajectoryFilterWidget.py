@@ -33,13 +33,21 @@ from qtpy.QtWidgets import (
     QDoubleSpinBox,
     QTextEdit,
     QWidget,
-    QMessageBox
+    QMessageBox,
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import TrajectoryFilterConfigurator
-from MDANSE.Mathematics.Signal import Filter, filter_map, DEFAULT_FILTER_CUTOFF, power_spectrum
+from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
+    TrajectoryFilterConfigurator,
+)
+from MDANSE.Mathematics.Signal import (
+    Filter,
+    filter_map,
+    DEFAULT_FILTER_CUTOFF,
+    power_spectrum,
+)
 import matplotlib.pyplot as mpl
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+
 
 class FilterDesigner(QDialog):
     """Graphical interface for the trajectory filter.
@@ -56,16 +64,20 @@ class FilterDesigner(QDialog):
     """
 
     _helper_title = "Filter designer"
-    _canvas_dimensions = {
-        "width": 600,
-        "height": 500
-    }
+    _canvas_dimensions = {"width": 600, "height": 500}
     _setting_grid_layout = QGridLayout()
     _preferences_grid_layout = QGridLayout()
     _preferences = dict()
     _trajectory_power_spectrum = None
 
-    def __init__(self, field: QLineEdit, configurator: TrajectoryFilterConfigurator, parent, *args, **kwargs):
+    def __init__(
+        self,
+        field: QLineEdit,
+        configurator: TrajectoryFilterConfigurator,
+        parent,
+        *args,
+        **kwargs,
+    ):
         """
         Parameters
         ----------
@@ -113,25 +125,25 @@ class FilterDesigner(QDialog):
             "filter": filter_type,
             "attributes": {
                 # Number of simulation steps
-                "n_steps": self._configurator.configurable.settings["trajectory"][1]["configurator"]["length"],
+                "n_steps": self._configurator.configurable.settings["trajectory"][1][
+                    "configurator"
+                ]["length"],
                 # Simulation time step in picoseconds
-                "time_step_ps": self._configurator.configurable.settings["trajectory"][1]["configurator"]["md_time_step"]
-            }
+                "time_step_ps": self._configurator.configurable.settings["trajectory"][
+                    1
+                ]["configurator"]["md_time_step"],
+            },
         }
 
     def clear_settings_grid(self, grid: QGridLayout) -> None:
-        """Clear all widgets contained in the settings grid layout.
-
-        """
+        """Clear all widgets contained in the settings grid layout."""
         for i in reversed(range(grid.count())):
             widget = grid.itemAt(i).widget()
             if widget:
                 widget.deleteLater()
 
     def create_designer(self) -> None:
-        """Create filter designer elements.
-
-        """
+        """Create filter designer elements."""
         graph_layout = QVBoxLayout()
         settings_layout = QVBoxLayout()
 
@@ -157,8 +169,7 @@ class FilterDesigner(QDialog):
         self.clear_settings_grid(self._setting_grid_layout)
         self.set_filter(filter_type)
         self.make_settings_grid(
-            filter_map[self._settings["filter"]],
-            self._setting_grid_layout
+            filter_map[self._settings["filter"]], self._setting_grid_layout
         )
 
         # Check figure attribute exists before attempting to render
@@ -166,7 +177,11 @@ class FilterDesigner(QDialog):
             self.render_canvas_assets()
 
         # Delete bound frequency spinbox if not relevant to filter type
-        if hasattr(self, "bound_freq_widget") and self._settings["filter"] in {'Notch', 'Peak', 'Comb'}:
+        if hasattr(self, "bound_freq_widget") and self._settings["filter"] in {
+            "Notch",
+            "Peak",
+            "Comb",
+        }:
             self.bound_freq_widget.deleteLater()
 
     def get_frequency_bounds(self) -> list:
@@ -178,10 +193,7 @@ class FilterDesigner(QDialog):
             List of length 2 containing the critical frequency bounds.
         """
         return np.array(
-            sorted(
-                [self.cutoff_freq_widget.value(),
-                 self.bound_freq_widget.value()]
-            )
+            sorted([self.cutoff_freq_widget.value(), self.bound_freq_widget.value()])
         ).tolist()
 
     def edit_current_filter(self, key: str, value: any) -> None:
@@ -198,15 +210,21 @@ class FilterDesigner(QDialog):
         self._settings["attributes"].update({key: value})
 
         # Check if attribute invokes change in how frequencies are passed to filter (single cutoff value or array of critical frequencies)
-        if self._settings["filter"] not in {'Notch', 'Peak', 'Comb'}:
+        if self._settings["filter"] not in {"Notch", "Peak", "Comb"}:
             if value in {"bandpass", "bandstop"}:
                 self.toggle_bound_frequencies()
-                self._settings["attributes"]["cutoff_freq"] = self.get_frequency_bounds()
+                self._settings["attributes"][
+                    "cutoff_freq"
+                ] = self.get_frequency_bounds()
             elif value in {"lowpass", "highpass"}:
                 self.toggle_bound_frequencies(False)
-                self._settings["attributes"]["cutoff_freq"] = self.cutoff_freq_widget.value()
+                self._settings["attributes"][
+                    "cutoff_freq"
+                ] = self.cutoff_freq_widget.value()
             elif self.attenuation_type_widget.currentText() in {"bandpass", "bandstop"}:
-                self._settings["attributes"]["cutoff_freq"] = self.get_frequency_bounds()
+                self._settings["attributes"][
+                    "cutoff_freq"
+                ] = self.get_frequency_bounds()
 
         # Re-render filter graph
         self.render_canvas_assets()
@@ -231,12 +249,14 @@ class FilterDesigner(QDialog):
                 self.find_configuration_property("projection"),
                 self.find_configuration_property("atom_selection"),
                 self.find_configuration_property("weights"),
-                self.find_configuration_property("instrument_resolution")
+                self.find_configuration_property("instrument_resolution"),
             )
 
         self.render_canvas_assets()
 
-    def set_trajectory_power_spectrum(self, filter: Filter) -> Tuple[np.ndarray, np.ndarray]:
+    def set_trajectory_power_spectrum(
+        self, filter: Filter
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Generate an appropriately resampled power spectrum for the input trajectory,
         as well as the multiplicative attenuation effect of the designed filter.
 
@@ -260,7 +280,11 @@ class FilterDesigner(QDialog):
         raw_power_spectrum_energies, raw_power_spectrum_values = raw_power_spectrum
 
         # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain
-        power_spectrum_energies = np.linspace(raw_power_spectrum_energies.min(), raw_power_spectrum_energies.max(), len(response.frequencies))
+        power_spectrum_energies = np.linspace(
+            raw_power_spectrum_energies.min(),
+            raw_power_spectrum_energies.max(),
+            len(response.frequencies),
+        )
         power_spectrum_freqs = Filter.energy_to_freq(power_spectrum_energies)
 
         # Set custom frequency range on filter object
@@ -354,35 +378,39 @@ class FilterDesigner(QDialog):
         setting_items = filter.default_settings.items()
 
         # Add filter settings to grid layout
-        indices = list(
-            self.generate_grid_indices(len(setting_items))
-        )
+        indices = list(self.generate_grid_indices(len(setting_items)))
 
         try:
             item_count = 0
             for key, value in setting_items:
                 grid_pos = indices.pop(0)
-                label = QLabel(key.replace('_', ' ').capitalize())
+                label = QLabel(key.replace("_", " ").capitalize())
                 grid.addWidget(label, grid_pos[0][0], grid_pos[0][1])
-                setting_widget = self.setting_to_widget(setting_key=key, val_group=value)
+                setting_widget = self.setting_to_widget(
+                    setting_key=key, val_group=value
+                )
                 # Store widget in object
-                self.__dict__.update({f'{key}_label': label})
-                self.__dict__.update({f'{key}_widget': setting_widget})
+                self.__dict__.update({f"{key}_label": label})
+                self.__dict__.update({f"{key}_widget": setting_widget})
                 grid.addWidget(setting_widget, grid_pos[1][0], grid_pos[1][1])
                 item_count += 1
 
             # For non-IIR filters, add frequency bound spinbox in case designed filter is bandpass/stop
-            if filter.__name__ not in {'Notch', 'Peak', 'Comb'}:
+            if filter.__name__ not in {"Notch", "Peak", "Comb"}:
                 self.bound_freq_widget = QDoubleSpinBox()
                 step = 1.0
                 widget = self.bound_freq_widget
                 widget.setMaximum(1000)
                 widget.setMinimum(step)
                 widget.setSingleStep(step)
-                widget.setValue(DEFAULT_FILTER_CUTOFF*0.5)
+                widget.setValue(DEFAULT_FILTER_CUTOFF * 0.5)
                 widget.setEnabled(False)
-                widget.valueChanged.connect(lambda val: self.edit_current_filter('cutoff_freq', val))
-                grid.addWidget(self.bound_freq_widget, grid_pos[1][0]+1, grid_pos[1][1])
+                widget.valueChanged.connect(
+                    lambda val: self.edit_current_filter("cutoff_freq", val)
+                )
+                grid.addWidget(
+                    self.bound_freq_widget, grid_pos[1][0] + 1, grid_pos[1][1]
+                )
                 item_count += 1
 
         except RuntimeError:
@@ -390,7 +418,7 @@ class FilterDesigner(QDialog):
             self._setting_grid_layout = QGridLayout()
             self.update_filter(filter.__name__)
 
-    def toggle_bound_frequencies(self, on: bool=True):
+    def toggle_bound_frequencies(self, on: bool = True):
         """Toggle the pair of critical frequency inputs on/off.
 
         Parameters
@@ -403,7 +431,9 @@ class FilterDesigner(QDialog):
             return
         self.bound_freq_widget.setEnabled(False)
 
-    def add_preference_combobox(self, key: str, items: tuple=tuple(), enabled: bool=True) -> QWidget:
+    def add_preference_combobox(
+        self, key: str, items: tuple = tuple(), enabled: bool = True
+    ) -> QWidget:
         """Produce a combobox for a filter designer preference
 
         Parameters
@@ -441,7 +471,9 @@ class FilterDesigner(QDialog):
             grid.addWidget(QLabel("Response units"), 0, 0)
             key_0 = "response_units"
             widget_0 = self.add_preference_combobox(key_0, ("amplitude", "dB"))
-            widget_0.currentTextChanged.connect(lambda val: self.edit_preferences(key_0, val))
+            widget_0.currentTextChanged.connect(
+                lambda val: self.edit_preferences(key_0, val)
+            )
             widget_0.setToolTip("View y-axis in amplitude or decibels")
             grid.addWidget(widget_0, 0, 1)
 
@@ -449,7 +481,9 @@ class FilterDesigner(QDialog):
             grid.addWidget(QLabel("X-axis units"), 1, 0)
             key_1 = "xaxis_units"
             widget_1 = self.add_preference_combobox(key_1, ("pHz", "meV"))
-            widget_1.currentTextChanged.connect(lambda val: self.edit_preferences(key_1, val))
+            widget_1.currentTextChanged.connect(
+                lambda val: self.edit_preferences(key_1, val)
+            )
             widget_1.setToolTip("View x-axis as frequency (pHz) or energy (meV)")
             grid.addWidget(widget_1, 1, 1)
 
@@ -457,8 +491,12 @@ class FilterDesigner(QDialog):
             grid.addWidget(QLabel("Filter coefficients"), 2, 0)
             key_2 = "coeff_type"
             widget_2 = self.add_preference_combobox(key_2, ("analog", "digital"))
-            widget_2.currentTextChanged.connect(lambda val: self.edit_preferences(key_2, val))
-            widget_2.setToolTip("View filter transfer function in terms of analogue (S-domain/continuous time) or digital (Z-domain/discrete time) coefficients")
+            widget_2.currentTextChanged.connect(
+                lambda val: self.edit_preferences(key_2, val)
+            )
+            widget_2.setToolTip(
+                "View filter transfer function in terms of analogue (S-domain/continuous time) or digital (Z-domain/discrete time) coefficients"
+            )
             grid.addWidget(widget_2, 2, 1)
 
             # Display trajectory position power spectral attentuation for comparison
@@ -466,8 +504,12 @@ class FilterDesigner(QDialog):
             key_3 = "show_attenuation"
             attenuation_checkbox = QCheckBox()
             self._preferences.update({key_3: attenuation_checkbox.isChecked()})
-            attenuation_checkbox.stateChanged.connect(lambda val: self.edit_preferences(key_3, val))
-            attenuation_checkbox.setToolTip("Display trajectory power spectrum for comparison")
+            attenuation_checkbox.stateChanged.connect(
+                lambda val: self.edit_preferences(key_3, val)
+            )
+            attenuation_checkbox.setToolTip(
+                "Display trajectory power spectrum for comparison"
+            )
             grid.addWidget(attenuation_checkbox, 3, 1)
             attenuation_checkbox.setEnabled(True)
 
@@ -475,7 +517,6 @@ class FilterDesigner(QDialog):
             # C++ object wrapping grid layout may have been deleted - recreate grid layout and try again
             self._preferences_grid_layout = QGridLayout()
             self.make_preferences_grid(self._preferences_grid_layout)
-
 
     def create_settings_layout(self, widget_area: QVBoxLayout) -> None:
         """Creates the filter settings vertical layout.
@@ -493,7 +534,9 @@ class FilterDesigner(QDialog):
         type_label = QLabel("Filter type")
         type_cbox.setCurrentText(self._settings["filter"])
 
-        type_cbox.currentTextChanged.connect(lambda filter_type: self.update_filter(filter_type))
+        type_cbox.currentTextChanged.connect(
+            lambda filter_type: self.update_filter(filter_type)
+        )
 
         filter_type_layout = QHBoxLayout()
         filter_type_layout.addWidget(type_label)
@@ -519,12 +562,13 @@ class FilterDesigner(QDialog):
         buttons_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         widget_area.addLayout(buttons_layout)
 
-    def render_graph(self,
-                     freqs: Filter.FrequencyDomain=TrajectoryFilterConfigurator._filter.freq_response,
-                     db_response: bool=False,
-                     energies: bool=False,
-                     trajectory_power_spectrum: Tuple[np.ndarray, np.ndarray]=None
-        ) -> None:
+    def render_graph(
+        self,
+        freqs: Filter.FrequencyDomain = TrajectoryFilterConfigurator._filter.freq_response,
+        db_response: bool = False,
+        energies: bool = False,
+        trajectory_power_spectrum: Tuple[np.ndarray, np.ndarray] = None,
+    ) -> None:
         """Renders the graph of the designed filter frequency response.
 
         Parameters
@@ -544,13 +588,27 @@ class FilterDesigner(QDialog):
         x_max = x.max()
 
         axes = self._figure.add_axes([0.1, 0.1, 0.8, 0.8])
-        axes.plot(x, 20 * np.log10(abs(freqs.magnitudes)) if db_response else freqs.magnitudes, label="Filter response")
+        axes.plot(
+            x,
+            20 * np.log10(abs(freqs.magnitudes)) if db_response else freqs.magnitudes,
+            label="Filter response",
+        )
 
         # Conditionally display trajectory power spectral attenuation
         if trajectory_power_spectrum:
             ps, attenuated_ps = trajectory_power_spectrum
-            axes.plot(x, 20 * np.log10(abs(ps)) if db_response else ps, label="Trajectory response", color="grey")
-            axes.plot(x, 20 * np.log10(abs(attenuated_ps)) if db_response else attenuated_ps, label="Attenuation", color="black")
+            axes.plot(
+                x,
+                20 * np.log10(abs(ps)) if db_response else ps,
+                label="Trajectory response",
+                color="grey",
+            )
+            axes.plot(
+                x,
+                20 * np.log10(abs(attenuated_ps)) if db_response else attenuated_ps,
+                label="Attenuation",
+                color="black",
+            )
 
         # Conditionally convert frequencies (pHz) to energies (meV)
         if energies:
@@ -567,7 +625,9 @@ class FilterDesigner(QDialog):
 
         self._figure.canvas.draw()
 
-    def render_graph_text(self, polynomial: str, cutoff: float, sample_freq: float) -> None:
+    def render_graph_text(
+        self, polynomial: str, cutoff: float, sample_freq: float
+    ) -> None:
         """Renders the text containing the filter transfer function polynomial, cutoff energy, and simulation sample frequency.
 
         Parameters
@@ -583,21 +643,26 @@ class FilterDesigner(QDialog):
         numerator = polynomial["numerator"]
         denominator = polynomial["denominator"]
 
-        if self._settings["filter"] not in {"Notch", "Peaks", "Comb"} and self._settings["attributes"].get("order", 1) < 6:
+        if (
+            self._settings["filter"] not in {"Notch", "Peaks", "Comb"}
+            and self._settings["attributes"].get("order", 1) < 6
+        ):
             self._figure_info.append(f"           {numerator}")
             self._figure_info.append(f"H({unit})=    {'-'*len(denominator)}")
             self._figure_info.append(f"           {denominator}")
         else:
-            self._figure_info.append(f"Number of filter coefficients exceeds available display area")
+            self._figure_info.append(
+                f"Number of filter coefficients exceeds available display area"
+            )
             self._figure_info.append(f" ")
             self._figure_info.append(f" ")
 
-        self._figure_info.append(f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 1)} meV, Sample frequency: {sample_freq} pHz")
+        self._figure_info.append(
+            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 1)} meV, Sample frequency: {sample_freq} pHz"
+        )
 
     def render_canvas_assets(self) -> None:
-        """Render all elements of the filter designer graphing area, including data text
-
-        """
+        """Render all elements of the filter designer graphing area, including data text"""
         # Set preferences
         analog_filter = self._preferences["coeff_type"] == "analog"
         db_response = self._preferences["response_units"] == "dB"
@@ -612,14 +677,25 @@ class FilterDesigner(QDialog):
         if show_attenuation:
             ps, attenuated_ps = self.set_trajectory_power_spectrum(filter_preview)
 
-        numerator, denominator = filter_preview.to_digital_coeffs() if not analog_filter else filter_preview.coeffs
+        numerator, denominator = (
+            filter_preview.to_digital_coeffs()
+            if not analog_filter
+            else filter_preview.coeffs
+        )
 
         # Render the filter graph and text
-        self.render_graph(filter_preview.freq_response, db_response=db_response, energies=energies, trajectory_power_spectrum=(ps, attenuated_ps) if show_attenuation else None)#, show_attenuation=show_attenuation)
+        self.render_graph(
+            filter_preview.freq_response,
+            db_response=db_response,
+            energies=energies,
+            trajectory_power_spectrum=(ps, attenuated_ps) if show_attenuation else None,
+        )  # , show_attenuation=show_attenuation)
         self.render_graph_text(
-            filter_class.rational_polynomial_string(numerator, denominator, analog=analog_filter),
+            filter_class.rational_polynomial_string(
+                numerator, denominator, analog=analog_filter
+            ),
             self._settings["attributes"].get("cutoff_freq", DEFAULT_FILTER_CUTOFF),
-            filter_preview.sample_freq
+            filter_preview.sample_freq,
         )
 
     def create_graph_canvas(self, fig_width=10.0, fig_height=10.0, dpi=100) -> QWidget:
@@ -686,7 +762,11 @@ class FilterDesigner(QDialog):
         defaults = filter.default_settings
         missing = set(attributes) ^ set(defaults)
         attributes.update(
-            {key: filter.default_settings[key]['value'] for key in missing if key in defaults.keys()}
+            {
+                key: filter.default_settings[key]["value"]
+                for key in missing
+                if key in defaults.keys()
+            }
         )
         return attributes
 
@@ -696,12 +776,12 @@ class FilterDesigner(QDialog):
         """
         self._configurator.configure(self._settings)
 
-        filter_class = filter_map[self._settings['filter']]
+        filter_class = filter_map[self._settings["filter"]]
 
         # update widget field text to reflect filter designer
         field = self._configurator.filter_description_string(
             filter_class,
-            self.combine_attributes(filter_class, self._settings["attributes"])
+            self.combine_attributes(filter_class, self._settings["attributes"]),
         )
         self._field.setText(field)
         self.close()

@@ -97,7 +97,9 @@ class TrajectoryFilter(IJob):
         self._selected_atoms = AtomGroup(self._selected_atoms)
 
         # This stores the trajectory (position array) of atoms by x, y, z component, to be filtered
-        self.atomic_trajectory_array = np.zeros((len(self._atoms), 3, len(self.configuration["frames"]["value"])))
+        self.atomic_trajectory_array = np.zeros(
+            (len(self._atoms), 3, len(self.configuration["frames"]["value"]))
+        )
 
     def run_step(self, index):
         """
@@ -139,22 +141,32 @@ class TrajectoryFilter(IJob):
         """
 
         # Get filter class and instantiate filter object
-        filter_config = json.loads(self.configuration["trajectory_filter"]['value'])
+        filter_config = json.loads(self.configuration["trajectory_filter"]["value"])
 
-        filter_class, filter_attributes = filter_map[filter_config["filter"]], filter_config["attributes"]
+        filter_class, filter_attributes = (
+            filter_map[filter_config["filter"]],
+            filter_config["attributes"],
+        )
 
         if {"n_steps", "time_step_ps"} not in set(filter_attributes.keys()):
-            filter_attributes.update({
-                "n_steps": self.configuration["trajectory"]["length"],
-                "time_step_ps": self.configuration["trajectory"]["md_time_step"],
-            })
+            filter_attributes.update(
+                {
+                    "n_steps": self.configuration["trajectory"]["length"],
+                    "time_step_ps": self.configuration["trajectory"]["md_time_step"],
+                }
+            )
 
         filter = filter_class(**filter_attributes)
 
         trajectories = copy.deepcopy(self.atomic_trajectory_array)
 
         # Apply filter (only apply initial position offset to atoms if filter is not lowpass and setting has been applied)
-        filtered_coords = apply(filter, trajectories, apply_offsets=filter_attributes.get('attenuation_type', "bandpass") is not "lowpass")
+        filtered_coords = apply(
+            filter,
+            trajectories,
+            apply_offsets=filter_attributes.get("attenuation_type", "bandpass")
+            is not "lowpass",
+        )
 
         # Create trajectory writer object
         self._output_trajectory = TrajectoryWriter(
@@ -171,7 +183,7 @@ class TrajectoryFilter(IJob):
             parent_configuration=self.configuration,
             nsteps=filter_attributes["n_steps"],
             filtered_coordinates=filtered_coords,
-            output_trajectory=self._output_trajectory
+            output_trajectory=self._output_trajectory,
         )
 
         # The input trajectory is closed.
@@ -183,20 +195,19 @@ class TrajectoryFilter(IJob):
         # Write the filter metadata to output
         outputFile = h5py.File(self.configuration["output_files"]["file"], "r+")
         outputFile.create_group("metadata").create_dataset(
-                "trajectory_filter",
-                (1,),
-                data=filter.__str__(),
-                dtype=h5py.string_dtype(),
+            "trajectory_filter",
+            (1,),
+            data=filter.__str__(),
+            dtype=h5py.string_dtype(),
         )
 
         outputFile.close()
 
         super().finalize()
 
-def apply(filter, trajectories, apply_offsets: bool) -> np.ndarray:
-    """
 
-    """
+def apply(filter, trajectories, apply_offsets: bool) -> np.ndarray:
+    """ """
     output_trajectory_array = np.zeros(trajectories.shape)
 
     for at, atom in enumerate(trajectories):
@@ -214,10 +225,14 @@ def apply(filter, trajectories, apply_offsets: bool) -> np.ndarray:
 
     return output_trajectory_array
 
-def write_filtered_trajectory(parent_configuration, nsteps: int, filtered_coordinates: np.ndarray, output_trajectory: TrajectoryWriter) -> None:
-    """
 
-    """
+def write_filtered_trajectory(
+    parent_configuration,
+    nsteps: int,
+    filtered_coordinates: np.ndarray,
+    output_trajectory: TrajectoryWriter,
+) -> None:
+    """ """
     time = parent_configuration["frames"]["time"]
     dt = time[1] - time[0]
     for index in range(nsteps):
@@ -228,7 +243,11 @@ def write_filtered_trajectory(parent_configuration, nsteps: int, filtered_coordi
         # The filtered configuration coordinates at the current frame index
         filtered_configuration_coordinates = np.array(frame_coordinates)
 
-        filtered_configuration = RealConfiguration(output_trajectory.chemical_system, filtered_configuration_coordinates)
+        filtered_configuration = RealConfiguration(
+            output_trajectory.chemical_system, filtered_configuration_coordinates
+        )
         output_trajectory.chemical_system.configuration = filtered_configuration
 
-        output_trajectory.dump_configuration(dt*index, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"})
+        output_trajectory.dump_configuration(
+            dt * index, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
+        )

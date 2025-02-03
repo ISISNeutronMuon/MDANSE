@@ -17,6 +17,7 @@ import json
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Mathematics.Signal import filter_map
 
+
 class TrajectoryFilterConfigurator(IConfigurator):
     """This configurator allows the application of a filter to the trajectory of atoms in the simulation.
 
@@ -25,6 +26,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
     _default : str
         The defaults selection setting.
     """
+
     _filter = tuple(filter_map.values())[0]
 
     @classmethod
@@ -77,7 +79,14 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
             A string representation of the filter settings dictionary
         """
-        return '{ "filter": "' + f'{filter.__name__}"' + ', ' + '"attributes": ' + f'{json.dumps(settings)}' + '}'
+        return (
+            '{ "filter": "'
+            + f'{filter.__name__}"'
+            + ", "
+            + '"attributes": '
+            + f"{json.dumps(settings)}"
+            + "}"
+        )
 
     _default = filter_description_string()
 
