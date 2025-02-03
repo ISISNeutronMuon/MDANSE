@@ -18,9 +18,11 @@ from qtpy.QtGui import QDoubleValidator
 from qtpy.QtCore import Slot, Qt
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE.MLogging import LOG
 
 
 class OptionalFloatWidget(WidgetBase):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         try:
@@ -92,5 +94,13 @@ class OptionalFloatWidget(WidgetBase):
             return [False, self._default_value]
         strval = self._field.text().strip()
         if len(strval) < 1:
-            self._empty = True
+            strval = self._default_value
         return [True, strval]
+
+    def configure_using_default(self):
+        """Makes the configurator use its default value, and highlights it
+        in the GUI"""
+        default = self._configurator.default
+        LOG.info(f"Setting {default} as placeholder text")
+        self._field.setPlaceholderText(str(self._default_value))
+        self._configurator.configure(default)

@@ -1,4 +1,3 @@
-import sys
 import tempfile
 import os
 from os import path
@@ -8,14 +7,17 @@ import h5py
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
-sys.setrecursionlimit(100000)
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
-    "Data",
+    "Converted",
     "short_trajectory_after_changes.mdt",
 )
-
+result_dir = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    "..",
+    "Results",
+)
 
 # Mean Square Displacements can accept many parameters, most of them optional
 # settings['trajectory']=('hdf_trajectory',{})
@@ -40,6 +42,14 @@ def test_basic_meansquare():
     msd.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
+    result_file = os.path.join(result_dir, "basic_meansquare.mda")
+
+    with h5py.File(temp_name + ".mda") as actual,  h5py.File(result_file) as desired:
+        np.testing.assert_array_almost_equal(actual["/msd_Cu"], desired["/msd_Cu"])
+        np.testing.assert_array_almost_equal(actual["/msd_S"], desired["/msd_S"])
+        np.testing.assert_array_almost_equal(actual["/msd_Sb"], desired["/msd_Sb"])
+        np.testing.assert_array_almost_equal(actual["/msd_total"], desired["/msd_total"])
+
     os.remove(temp_name + ".mda")
     assert path.exists(temp_name + ".log")
     assert path.isfile(temp_name + ".log")
@@ -69,25 +79,8 @@ def test_parallel_meansquare():
     ):
         for kk in single.keys():
             if not "metadata" in kk:
-                assert np.allclose(
-                    np.array(single[kk]), np.array(parallel[kk]), 1e-5, 1e-4
+                np.testing.assert_array_almost_equal(
+                    np.array(single[kk]), np.array(parallel[kk])
                 )
     os.remove(temp_name + ".mda")
     os.remove(temp_name2 + ".mda")
-
-
-def test_atom_selection():
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
-    msd = IJob.create("MeanSquareDisplacement")
-    msd.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")

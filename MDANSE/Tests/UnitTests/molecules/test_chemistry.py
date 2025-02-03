@@ -4,7 +4,7 @@ from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInput
 
 
 short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "co2gas_md3.mdt"
+    os.path.dirname(os.path.realpath(__file__)), "..", "Converted", "co2gas_md3.mdt"
 )
 
 

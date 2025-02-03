@@ -15,7 +15,7 @@
 #
 
 from itertools import product
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from numpy.typing import NDArray
@@ -145,27 +145,29 @@ class Connectivity:
             tree2 = KDTree(coordinates + offset.reshape((1, 3)))
             yield num, tree1.sparse_distance_matrix(tree2, max_distance=max_distance)
 
-    def find_bonds(self, frames: List[int] = None, tolerance: float = 0.2):
+    def find_bonds(self, frames: Optional[List[int]] = None, tolerance: float = 0.04):
         """Checks several frames of the trajectory for the presence of atom pairs
         close enough to each other to form chemical bonds. The detected bonds
         are stored internally.
 
-        Keyword Arguments:
-            frames -- a list of specific trajectory frames at which to check the bond
-                length. Optional (default: {None})
-            tolerance -- A float constant specifying the tolerance of bond length used
-                in bond detection. 0.2 means that distance between atoms may be
-                up to 20% larger than the nominal length of the bond (default: {0.2})
+        Parameters
+        ----------
+        frames : Optional[List[int]]
+            A list of specific trajectory frames at which to check the bond
+            length. Optional (default: {None})
+        tolerance : float
+            A float constant specifying the tolerance of bond length used
+            in bond detection. A bond between two atoms is defined as the
+            sum of their covalent radii plus the tolerance in nm.
         """
         if frames is None:
             samples = [len(self._frames) // denom for denom in [2, 3, 4, 5, 6, 7]]
         else:
             samples = frames
         samples = list(np.unique(samples))
-        bonds = []
         pairs = product(self._unique_elements, repeat=2)
         maxbonds = {
-            pair: (self._radii[pair[0]] + self._radii[pair[1]]) * (1.0 + tolerance)
+            pair: (self._radii[pair[0]] + self._radii[pair[1]]) + tolerance
             for pair in pairs
         }
         total_max_length = np.max([x for x in maxbonds.values()])

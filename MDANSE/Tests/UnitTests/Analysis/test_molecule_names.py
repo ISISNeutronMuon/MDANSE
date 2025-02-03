@@ -1,18 +1,24 @@
-import sys
 import tempfile
 import os
 from os import path
+
 import pytest
+import numpy as np
+import h5py
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
-sys.setrecursionlimit(100000)
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
-    "Data",
+    "Converted",
     "named_molecules.mdt",
+)
+result_dir = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    "..",
+    "Results",
 )
 
 
@@ -52,19 +58,25 @@ def parameters():
 
 
 @pytest.mark.parametrize(
-    "job_type",
+    "job_info",
     [
-        "AreaPerMolecule",
-        "AngularCorrelation",
+        ("AreaPerMolecule", ["area_per_molecule"]),
+        ("AngularCorrelation", ["ac"]),
     ],
 )
-def test_structure_analysis(parameters, job_type):
+def test_structure_analysis(parameters, job_info):
     temp_name = tempfile.mktemp()
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-    job = IJob.create(job_type)
+    job = IJob.create(job_info[0])
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
+    result_file = os.path.join(result_dir, f"structure_analysis_{job_info[0]}.mda")
+
+    with h5py.File(temp_name + ".mda") as actual,  h5py.File(result_file) as desired:
+        for key in job_info[1]:
+            np.testing.assert_array_almost_equal(actual[f"/{key}"], desired[f"/{key}"])
+
     os.remove(temp_name + ".mda")
     assert path.exists(temp_name + ".log")
     assert path.isfile(temp_name + ".log")

@@ -1,25 +1,21 @@
-import sys
 import tempfile
 import os
 from os import path
 
+import h5py
+import numpy as np
 import pytest
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
-sys.setrecursionlimit(100000)
-
-short_traj = os.path.join(
+file_wd = os.path.dirname(os.path.realpath(__file__))
+mock_json = os.path.join(file_wd, "..", "Data", "mock.json")
+result_dir = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
-    "Data",
-    "short_trajectory_after_changes.mdt",
+    "Results",
 )
-
-file_wd = os.path.dirname(os.path.realpath(__file__))
-
-mock_json = os.path.join(file_wd, "..", "Data", "mock.json")
 
 
 @pytest.mark.parametrize(
@@ -46,6 +42,20 @@ def test_vacf(interp_order, normalise):
     vacf.run(parameters, status=True)
     assert path.exists(temp_name + ".mda")
     assert path.isfile(temp_name + ".mda")
+
+    if normalise:
+        fname = f"mock_traj_vacf_{interp_order}_normalised.mda"
+    else:
+        fname = f"mock_traj_vacf_{interp_order}.mda"
+
+    result_file = os.path.join(result_dir, fname)
+
+    with h5py.File(temp_name + ".mda") as actual,  h5py.File(result_file) as desired:
+        np.testing.assert_array_almost_equal(actual["/vacf_H"], desired["/vacf_H"])
+        np.testing.assert_array_almost_equal(actual["/vacf_O"], desired["/vacf_O"])
+        np.testing.assert_array_almost_equal(actual["/vacf_Si"], desired["/vacf_Si"])
+        np.testing.assert_array_almost_equal(actual["/vacf_total"], desired["/vacf_total"])
+
     os.remove(temp_name + ".mda")
     assert path.exists(temp_name + ".log")
     assert path.isfile(temp_name + ".log")

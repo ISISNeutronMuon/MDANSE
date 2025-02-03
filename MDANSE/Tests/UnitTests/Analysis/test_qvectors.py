@@ -1,4 +1,3 @@
-import sys
 import tempfile
 import os
 from os import path
@@ -9,11 +8,10 @@ from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
-sys.setrecursionlimit(100000)
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
-    "Data",
+    "Converted",
     "short_trajectory_after_changes.mdt",
 )
 

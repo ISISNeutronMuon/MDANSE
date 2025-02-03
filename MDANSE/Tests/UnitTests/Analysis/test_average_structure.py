@@ -1,4 +1,3 @@
-import sys
 import tempfile
 import os
 from os import path
@@ -8,11 +7,10 @@ from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInput
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
-sys.setrecursionlimit(100000)
 short_traj = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     "..",
-    "Data",
+    "Converted",
     "short_trajectory_after_changes.mdt",
 )
 
@@ -32,7 +30,7 @@ for u in units:
 
 
 @pytest.mark.parametrize("output_unit,output_format", inputs)
-def test_temperature(trajectory, output_unit, output_format):
+def test_avg_structure(trajectory, output_unit, output_format):
     temp_name = tempfile.mktemp()
     parameters = {}
     parameters["frames"] = (0, 10, 1)

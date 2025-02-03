@@ -10,7 +10,7 @@ from MDANSE.Framework.AtomSelector.atom_selectors import (
 
 
 traj_2vb1 = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "2vb1.mdt"
+    os.path.dirname(os.path.realpath(__file__)), "..", "Converted", "2vb1.mdt"
 )
 
 

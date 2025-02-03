@@ -360,7 +360,7 @@ class DCD(Converter):
             conf.fold_coordinates()
 
         # The current time.
-        time = (index + 1) * self.configuration["time_step"]["value"]
+        time = index * self.configuration["time_step"]["value"]
 
         # Store a snapshot of the current configuration in the output trajectory.
         self._trajectory.dump_configuration(

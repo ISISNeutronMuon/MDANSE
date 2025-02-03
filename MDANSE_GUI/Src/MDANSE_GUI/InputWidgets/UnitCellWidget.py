@@ -22,6 +22,7 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class UnitCellWidget(WidgetBase):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, layout_type="grid", **kwargs)
         self._changing_label = QLabel("Unit cell", parent=self._base)
@@ -36,14 +37,17 @@ class UnitCellWidget(WidgetBase):
         self._array_fields = {}
         self._configurator.update_trajectory_information()
         try:
-            start_values = self._configurator._recommended_cell
+            self.start_values = self._configurator._recommended_cell
         except AttributeError:
-            start_values = self._configurator._default
+            self.start_values = self._configurator._default
         for row in range(3):
             for column in range(3):
-                temp = QLineEdit(str(round(start_values[row][column], 5)), self._base)
+                temp = QLineEdit(
+                    str(round(self.start_values[row][column], 5)), self._base
+                )
                 temp.setValidator(QDoubleValidator())
                 temp.setEnabled(False)
+                temp.setPlaceholderText(str(round(self.start_values[row][column], 5)))
                 self._layout.addWidget(temp, row, column + 1)
                 self._array_fields[(row, column)] = temp
         self._mode = 0
@@ -71,7 +75,7 @@ class UnitCellWidget(WidgetBase):
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        array = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        array = self.start_values
         apply = self._apply_box.checkState() == Qt.CheckState.Checked
         if apply:
             for key, value in self._array_fields.items():

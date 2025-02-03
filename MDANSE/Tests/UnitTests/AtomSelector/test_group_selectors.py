@@ -12,10 +12,10 @@ from MDANSE.Framework.AtomSelector.group_selectors import (
 
 
 traj_2vb1 = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "2vb1.mdt"
+    os.path.dirname(os.path.realpath(__file__)), "..", "Converted", "2vb1.mdt"
 )
 traj_1gip = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "1gip.mdt"
+    os.path.dirname(os.path.realpath(__file__)), "..", "Converted", "1gip.mdt"
 )
 
 
