@@ -623,7 +623,7 @@ class Filter:
         }
 
     @classmethod
-    def freq_to_energy(cls, freq: float | np.ndarray) -> float | np.ndarray:
+    def freq_to_energy(cls, freq):
         """Returns the energy value (or values) in millielectronvolts (meV), converted from frequency value (or values) in picohertz (pHz).
 
         :Parameters:
@@ -637,7 +637,7 @@ class Filter:
         return (2 * np.pi) ** (-1) * (freq * 1e12) * cls._freq_to_mev
 
     @classmethod
-    def energy_to_freq(cls, energy: float | np.ndarray) -> float | np.ndarray:
+    def energy_to_freq(cls, energy):
         """Returns the frequency value (or values) in millielectronvolts (meV), converted from energy value (or values) in millielectronvolts (meV).
 
         :Parameters:
