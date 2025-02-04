@@ -88,7 +88,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
             + "}"
         )
 
-    _default = filter_description_string()
+    _default = filter_description_string.__func__()
 
     @property
     def settings(self):
