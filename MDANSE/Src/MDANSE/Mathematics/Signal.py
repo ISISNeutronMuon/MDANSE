@@ -592,7 +592,7 @@ class Filter:
         settings = self.__class__.__dict__["default_settings"]
         for setting in settings.keys():
             description.append(
-                f"  # {setting}\n  {settings[setting]["description"]}\n      {self.__dict__[setting]}\n\n"
+                f"  # {setting}\n  {settings[setting]['description']}\n      {self.__dict__[setting]}\n\n"
             )
 
     def __str__(self):

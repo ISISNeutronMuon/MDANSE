@@ -71,7 +71,7 @@ class TrajectoryFilter(IJob):
             "default": "atomic_weight",
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection"
+                "atom_selection": "atom_selection",
             },
         },
     )
@@ -89,7 +89,9 @@ class TrajectoryFilter(IJob):
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
-        self._atoms = self.configuration["trajectory"]["instance"].chemical_system.atom_list
+        self._atoms = self.configuration["trajectory"][
+            "instance"
+        ].chemical_system.atom_list
         self._selected_atoms = []
         for indexes in self.configuration["atom_selection"]["indices"]:
             for idx in indexes:
@@ -248,5 +250,7 @@ def write_filtered_trajectory(
         output_trajectory.chemical_system.configuration = filtered_configuration
 
         output_trajectory.dump_configuration(
-            filtered_configuration, dt * index, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
+            filtered_configuration,
+            dt * index,
+            units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"},
         )
