@@ -16,10 +16,20 @@
 
 import abc
 import json
+from pathlib import Path
 
 from MDANSE.Core.Error import Error
 
 from MDANSE.Core.SubclassFactory import SubclassFactory
+
+
+class CustomEncoder(json.JSONEncoder):
+    """Custom JSON encoder to encode paths as strings."""
+
+    def default(self, obj):
+        if isinstance(obj, Path):
+            return str(obj)
+        return super().default(obj)
 
 
 class ConfiguratorError(Error):
@@ -82,7 +92,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
     _default = None
 
-    _encoder = json.encoder.JSONEncoder()
+    _encoder = CustomEncoder()
     _decoder = json.decoder.JSONDecoder()
 
     _doc_ = "undocumented"
@@ -90,12 +100,12 @@ class IConfigurator(dict, metaclass=SubclassFactory):
     def __init__(self, name, **kwargs):
         """
         Initializes a configurator object.
-        
+
         :param name: the name of this configurator.
         :type name: str
         :param dependencies: the other configurators on which this configurator depends on to be configured. \
         This has to be input as a dictionary that maps the name under which the dependency will be used within \
-        the configurator implementation to the actual name of the configurator on which this configurator is depending on.  
+        the configurator implementation to the actual name of the configurator on which this configurator is depending on.
         :type dependencies: (str,str)-dict
         :param default: the default value of this configurator.
         :type default: any python object
