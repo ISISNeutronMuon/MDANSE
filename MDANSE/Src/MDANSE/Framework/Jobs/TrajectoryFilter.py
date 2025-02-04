@@ -22,11 +22,10 @@ import numpy as np
 import h5py
 from MDANSE.Framework.Formats import HDFFormat
 
-from MDANSE.Chemistry.ChemicalEntity import AtomGroup
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import filter_map
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
-from MDANSE.MolecularDynamics.Trajectory import sorted_atoms, TrajectoryWriter
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MLogging import LOG
 
 
@@ -70,7 +69,10 @@ class TrajectoryFilter(IJob):
         "WeightsConfigurator",
         {
             "default": "atomic_weight",
-            "dependencies": {"atom_selection": "atom_selection"},
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection"
+            },
         },
     )
     settings["output_files"] = (
@@ -87,14 +89,11 @@ class TrajectoryFilter(IJob):
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
-        self._atoms = sorted_atoms(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_list
-        )
+        self._atoms = self.configuration["trajectory"]["instance"].chemical_system.atom_list
         self._selected_atoms = []
-        for indexes in self.configuration["atom_selection"]["indexes"]:
+        for indexes in self.configuration["atom_selection"]["indices"]:
             for idx in indexes:
                 self._selected_atoms.append(self._atoms[idx])
-        self._selected_atoms = AtomGroup(self._selected_atoms)
 
         # This stores the trajectory (position array) of atoms by x, y, z component, to be filtered
         self.atomic_trajectory_array = np.zeros(
@@ -112,11 +111,11 @@ class TrajectoryFilter(IJob):
         trajectory = self.configuration["trajectory"]["instance"]
 
         # get atom index
-        indexes = self.configuration["atom_selection"]["indexes"][index]
+        indexes = self.configuration["atom_selection"]["indices"][index]
         atoms = [self._atoms[idx] for idx in indexes]
 
         series = trajectory.read_com_trajectory(
-            atoms,
+            indexes,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -173,7 +172,7 @@ class TrajectoryFilter(IJob):
             self.configuration["output_files"]["file"],
             self.configuration["trajectory"]["instance"].chemical_system,
             filter_attributes["n_steps"],
-            self._selected_atoms.atom_list,
+            None,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
         )
@@ -249,5 +248,5 @@ def write_filtered_trajectory(
         output_trajectory.chemical_system.configuration = filtered_configuration
 
         output_trajectory.dump_configuration(
-            dt * index, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
+            filtered_configuration, dt * index, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
         )
