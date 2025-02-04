@@ -1000,7 +1000,7 @@ def power_spectrum(
     :Returns:
         #. Tuple[np.ndarray, np.ndarray]: tuple containing the omegas (frequency range) and the corresponding power spectrum of the atomic trajectories
     """
-    num_atoms = len(atom_selection["indexes"])
+    num_atoms = len(atom_selection["indices"])
     trajectory = trajectory["instance"]
     sorted_atoms = trajectory.chemical_system.atom_list
 
@@ -1017,10 +1017,10 @@ def power_spectrum(
     output["pps_total"] = np.zeros(output["romega"].shape)
 
     for index in range(num_atoms):
-        indexes = atom_selection["indexes"][index]
+        indexes = atom_selection["indices"][index]
         atoms = [sorted_atoms[idx] for idx in indexes]
         series = trajectory.read_com_trajectory(
-            atoms,
+            indexes,
             first=frames["first"],
             last=frames["last"] + 1,
             step=frames["step"],
