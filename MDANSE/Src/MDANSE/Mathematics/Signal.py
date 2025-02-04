@@ -603,9 +603,9 @@ class Filter:
         """
         string_representation = [
             f"Trajectory filter of type {self.__class__.__name__} implemented with the following parameters:\n\n",
-            f"  # sample_freq\n  Reciprocal of the molecular dynamics time step, in picohertz\n      {self.__dict__["_sample_freq"]}\n\n",
-            f"  # freq_response (analog)\n  N coefficients of analog filter transfer function, numerator and denominator (multiples of {Filter.S}^(N-n))\n      {tuple(self.__dict__["_coeffs"].numerator), tuple(self.__dict__["_coeffs"].denominator)}\n\n",
-            f"  # freq_response (digital)\n  M coefficients of digital filter transfer function, numerator and denominator (multiples of {Filter.Z}^(-m))\n      {tuple(self.__dict__["_coeffs"].numerator), tuple(self.__dict__["_coeffs"].denominator)}\n\n",
+            f"  # sample_freq\n  Reciprocal of the molecular dynamics time step, in picohertz\n      {self.__dict__['_sample_freq']}\n\n",
+            f"  # freq_response (analog)\n  N coefficients of analog filter transfer function, numerator and denominator (multiples of {Filter.S}^(N-n))\n      {tuple(self.__dict__['_coeffs'].numerator), tuple(self.__dict__['_coeffs'].denominator)}\n\n",
+            f"  # freq_response (digital)\n  M coefficients of digital filter transfer function, numerator and denominator (multiples of {Filter.Z}^(-m))\n      {tuple(self.__dict__['_coeffs'].numerator), tuple(self.__dict__['_coeffs'].denominator)}\n\n",
         ]
 
         self.attributes_to_string(string_representation)
