@@ -14,8 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import os
-
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
@@ -54,7 +52,7 @@ class InputFileConfigurator(IConfigurator):
 
         value = PLATFORM.get_path(value)
 
-        if not os.path.exists(value):
+        if not value.exists():
             self.error_status = f"The file {value} does not exist"
             return
 

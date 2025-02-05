@@ -20,12 +20,15 @@ import datetime
 import getpass
 import inspect
 import os
+import platform
 import re
 import subprocess
-import tempfile
-
+from pathlib import Path
+from typing import Optional, Union
 
 from MDANSE.Core.Error import Error
+
+PathLike = Union[Path, str]
 
 
 class PlatformError(Error):
@@ -58,28 +61,28 @@ class Platform(object, metaclass=abc.ABCMeta):
         return cls.__instance
 
     @abc.abstractmethod
-    def application_directory(self):
+    def application_directory(self) -> Path:
         """
         Returns the path for MDANSE application directory.
 
         The directory data used by MDANSE for storing preferences, databses, jobs temporary files ...
 
         :return: the path for MDANSE application directory.
-        :rtype: str
+        :rtype: Path
         """
         pass
 
-    def doc_path(self):
+    def doc_path(self) -> Path:
         """
         Returns the path for MDANSE documentation root directory.
 
         :return: the path for MDANSE documentation root directory
-        :rtype: str
+        :rtype: Path
         """
 
-        return os.path.join(self.package_directory(), "Doc")
+        return self.package_directory() / "Doc"
 
-    def jobs_launch_delay(self):
+    def jobs_launch_delay(self) -> float:
         """
         Returns the delay (in seconds) for a job to launch.
         This is used to determine the delay before updating the GUI and suppressing a job status file
@@ -89,27 +92,27 @@ class Platform(object, metaclass=abc.ABCMeta):
         """
         return 2.0
 
-    def api_path(self):
+    def api_path(self) -> Path:
         """
         Returns the path for MDANSE HTML API.
 
         :return: the path for MDANSE HTML documentation
-        :rtype: str
+        :rtype: Path
         """
 
-        return os.path.join(self.package_directory(), "Doc", "api", "html")
+        return self.package_directory() / "Doc" / "api" / "html"
 
-    def help_path(self):
+    def help_path(self) -> Path:
         """
         Returns the path for MDANSE HTML help.
 
         :return: the path for MDANSE HTML documentation
-        :rtype: str
+        :rtype: Path
         """
 
-        return os.path.join(self.package_directory(), "Doc", "help", "html")
+        return self.package_directory() / "Doc" / "help" / "html"
 
-    def full_dotted_module(self, obj):
+    def full_dotted_module(self, obj) -> Optional[str]:
         """
         Returns the fully dotted name of a module given the module object itself or a class stored in this module.
 
@@ -121,25 +124,22 @@ class Platform(object, metaclass=abc.ABCMeta):
         """
 
         if inspect.ismodule(obj):
-            path = obj.__file__
+            path = Path(obj.__file__)
         elif inspect.isclass(obj):
-            path = inspect.getmodule(obj).__file__
+            path = Path(inspect.getmodule(obj).__file__)
         else:
             raise PlatformError("Invalid query object type.")
 
-        basepath = os.path.join(os.path.dirname(self.package_directory()), "")
+        basepath = self.package_directory().parent
 
-        s = path.split(basepath)
-        if len(s) != 2:
+        try:
+            relativePath = path.relative_to(basepath)
+        except ValueError:
             return None
 
-        _, relativePath = path.split(basepath)
+        return ".".join(relativePath.with_suffix("").parts)
 
-        relativePath = os.path.splitext(relativePath)[0]
-
-        return ".".join(relativePath.split(os.path.sep))
-
-    def change_directory(self, directory):
+    def change_directory(self, directory: PathLike) -> None:
         """
         Change the current directory to a new directory.
 
@@ -150,7 +150,7 @@ class Platform(object, metaclass=abc.ABCMeta):
         os.chdir(directory)
 
     @classmethod
-    def is_file_writable(cls, filepath: str) -> bool:
+    def is_file_writable(cls, filepath: PathLike) -> bool:
         """Check if the directories can be created and a file can be
         written into it.
 
@@ -164,39 +164,15 @@ class Platform(object, metaclass=abc.ABCMeta):
         bool
             True if a file can be written.
         """
-        dirname = cls.get_path(os.path.dirname(filepath))
+        filepath = cls.get_path(filepath)
 
-        def recursive_check(head_0: str) -> bool:
-            """Builds the directories up and tests if the file can be
-            written and then removes everything so that no changes are
-            made to the filesystem.
-            """
-            if os.path.exists(dirname):
-                try:
-                    open(filepath, "w").close()
-                    os.remove(filepath)
-                except OSError:
-                    return False
-                return True
+        for direc in filepath.parents:
+            if direc.exists():
+                return os.access(direc, os.W_OK)
 
-            head, tail = os.path.split(head_0)
-            if os.path.exists(head):
-                try:
-                    os.mkdir(head_0)
-                except OSError:
-                    return False
-                writable = recursive_check(dirname)
-                os.rmdir(head_0)
-                return writable
-            else:
-                return recursive_check(head)
+        return False
 
-        if os.path.isfile(filepath):
-            return os.access(filepath, os.W_OK)
-        else:
-            return recursive_check(dirname)
-
-    def create_directory(self, path):
+    def create_directory(self, path: PathLike) -> None:
         """
         Creates a directory.
 
@@ -206,32 +182,26 @@ class Platform(object, metaclass=abc.ABCMeta):
 
         path = self.get_path(path)
 
-        if os.path.exists(path):
-            return
-
-        # Try to make the directory.
         try:
-            os.makedirs(path)
-
+            path.mkdir(parents=True, exist_ok=True)
         # An error occured.
-        except OSError as e:
+        except OSError as err:
             raise PlatformError(
-                "The following exception was raised while trying to create a directory at "
-                "{0}: /n {1}".format(str(path), e)
-            )
+                f"Problem trying to create a directory at {path}"
+            ) from err
 
     @classmethod
-    def get_path(cls, path):
+    def get_path(cls, path: PathLike) -> Path:
         """
         Return a normalized and absolute version of a given path
 
         :param path: the path of the file to be normalized and made absolute
-        :type path: str
+        :type path: Path
 
         :return: the normalized and absolute version of the input path
-        :rtype: str
+        :rtype: Path
         """
-        return os.path.abspath(os.path.expanduser(path))
+        return Path(path).expanduser().absolute()
 
     def database_default_path(self):
         """
@@ -241,7 +211,7 @@ class Platform(object, metaclass=abc.ABCMeta):
         :rtype: string
         """
 
-        return os.path.join(self.package_directory(), "Data", "elements_database.csv")
+        return self.package_directory() / "Data" / "elements_database.csv"
 
     def database_user_path(self):
         """
@@ -251,7 +221,7 @@ class Platform(object, metaclass=abc.ABCMeta):
         :rtype: string
         """
 
-        return os.path.join(self.application_directory(), "elements_database.csv")
+        return self.application_directory() / "elements_database.csv"
 
     @abc.abstractmethod
     def get_processes_info(self):
@@ -291,7 +261,7 @@ class Platform(object, metaclass=abc.ABCMeta):
         :rtype: str
         """
 
-        return os.path.join(os.path.dirname(self.package_directory()), "Data")
+        return self.package_directory().parent / "Data"
 
     def base_directory(self):
         """
@@ -301,59 +271,57 @@ class Platform(object, metaclass=abc.ABCMeta):
         @rtype: str
         """
 
-        return os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        return Path(__file__).parents[2]
 
-    def package_directory(self):
+    def package_directory(self) -> Path:
         """
         Returns the path for MDANSE package.
 
         @return: the path for MDANSE package.
-        @rtype: str
+        @rtype: Path
         """
 
-        return os.path.dirname(os.path.dirname(__file__))
+        return Path(__file__).parent.parent
 
-    def macros_directory(self):
+    def macros_directory(self) -> Path:
         """
         Returns the path of the directory where the MDANSE macros will be searched.
 
         :return: the path of the directory where the MDANSE macros will be searched.
-        :rtype: str
+        :rtype: Path
         """
 
-        macrosDir = os.path.join(self.application_directory(), "macros")
+        return self.application_directory() / "macros"
 
-        return macrosDir
-
-    def logfiles_directory(self):
+    def logfiles_directory(self) -> Path:
         """
         Returns the path of the directory where the MDANSE job logfiles are stored.
 
         :return: the path of the directory where the MDANSE job logfiles are stored.
-        :rtype: str
+        :rtype: Path
         """
 
-        path = os.path.join(self.application_directory(), "logfiles")
+        path = self.application_directory() / "logfiles"
 
         self.create_directory(path)
 
         return path
 
-    def temporary_files_directory(self):
+    def temporary_files_directory(self) -> Path:
         """
         Returns the path of the directory where the temporary MDANSE job status files are stored.
 
         :return: the path of the directory where the temporary MDANSE job status files are stored
-        :rtype: str
+        :rtype: Path
         """
 
-        path = os.path.join(self.application_directory(), "temporary_files")
+        path = self.application_directory() / "temporary_files"
 
         self.create_directory(path)
 
         return path
 
-    def username(self):
+    def username(self) -> str:
         """
         Returns the name of the user that run MDANSE.
 
@@ -411,11 +379,10 @@ class PlatformPosix(Platform):
         :rtype: str
         """
 
-        basedir = os.path.join(os.environ["HOME"], ".mdanse")
+        basedir = Path(os.environ["HOME"]) / ".mdanse"
 
         # If the application directory does not exist, create it.
-        if not os.path.exists(basedir):
-            os.makedirs(basedir)
+        basedir.mkdir(exist_ok=True, parents=True)
 
         return basedir
 
@@ -449,18 +416,15 @@ class PlatformPosix(Platform):
         """
 
         # Get all the active processes using the Unix ps command
-        procs = subprocess.Popen(["ps", "-eo", "pid,etime"], stdout=subprocess.PIPE)
-
-        # The output of the ps command is splitted according to line feeds.
-        procs = procs.communicate()[0].decode("utf-8").split("\n")[1:]
-
-        # The list of (pid,executable).
-        procs = [p.split() for p in procs if p]
-
-        # A mapping between the active processes pid and their corresponding exectuable.
-        procs = dict(
-            [(int(p[0].strip()), self.etime_to_ctime(p[1].strip())) for p in procs]
+        process = subprocess.run(
+            ["ps", "-eo", "pid,etime"],
+            capture_output=True,
+            check=True,
+            text=True,
+            shell=True,
         )
+        procs = map(str.split, filter(None, process.stdout.splitlines()))
+        procs = {int(pid): self.etime_to_ctime(etime.strip()) for pid, etime in procs}
 
         return procs
 
@@ -488,25 +452,24 @@ class PlatformWin(Platform):
 
     name = "windows"
 
-    def application_directory(self):
+    def application_directory(self) -> Path:
         """
         Returns the path for MDANSE application directory.
 
         The directory data used by MDANSE for storing preferences, databses, jobs temporary files ...
 
         :return: the path for MDANSE application directory.
-        :rtype: str
+        :rtype: Path
         """
 
-        basedir = os.path.join(os.environ["APPDATA"], "mdanse")
+        basedir = Path(os.environ["APPDATA"]) / "mdanse"
 
         # If the application directory does not exist, create it.
-        if not os.path.exists(basedir):
-            os.makedirs(basedir)
+        basedir.mkdir(parents=True, exist_ok=True)
 
         return basedir
 
-    def get_process_creation_time(self, process):
+    def get_process_creation_time(self, process) -> int:
         """
         Return the creation time of a given process.
 
@@ -521,7 +484,7 @@ class PlatformWin(Platform):
         exittime = ctypes.c_ulonglong()
         kerneltime = ctypes.c_ulonglong()
         usertime = ctypes.c_ulonglong()
-        rc = ctypes.windll.kernel32.GetProcessTimes(
+        ctypes.windll.kernel32.GetProcessTimes(
             process,
             ctypes.byref(creationtime),
             ctypes.byref(exittime),
@@ -534,7 +497,7 @@ class PlatformWin(Platform):
 
         return creationtime.value
 
-    def get_processes_info(self):
+    def get_processes_info(self) -> dict:
         """
         Returns the current active processes.
 
@@ -563,7 +526,7 @@ class PlatformWin(Platform):
         # Number of processes returned
         nReturned = cbNeeded.value // ctypes.sizeof(ctypes.c_ulong())
 
-        pidProcess = [i for i in aProcesses][:nReturned]
+        pidProcess = list(aProcesses)[:nReturned]
 
         for pid in pidProcess:
             # Get handle to the process based on PID
@@ -593,15 +556,15 @@ class PlatformWin(Platform):
 
         return processes
 
-    def home_directory(self):
+    def home_directory(self) -> Path:
         """
         Returns the home directory of the user that runs MDANSE.
 
         @return: the home directory
-        @rtype: str
+        @rtype: Path
         """
 
-        return os.environ["USERPROFILE"]
+        return Path(os.environ["USERPROFILE"])
 
     def kill_process(self, pid):
         """
@@ -623,9 +586,8 @@ class PlatformWin(Platform):
         ctypes.windll.kernel32.CloseHandle(handle)
 
 
-import platform
-
 system = platform.system()
+PLATFORM: Platform
 
 # Instantiate the proper platform class depending on the OS on which MDANSE runs
 if system == "Linux":

@@ -14,8 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import List
-import os
+from pathlib import Path
+from typing import Union, List
 
 import numpy as np
 import h5py
@@ -42,14 +42,14 @@ class H5MDTrajectory:
     H5MD files created by MDMC.
     """
 
-    def __init__(self, h5_filename):
+    def __init__(self, h5_filename: Union[Path, str]):
         """Constructor.
 
         :param h5_filename: the trajectory filename
         :type h5_filename: str
         """
 
-        self._h5_filename = h5_filename
+        self._h5_filename = Path(h5_filename)
 
         self._h5_file = h5py.File(self._h5_filename, "r")
 
@@ -60,9 +60,7 @@ class H5MDTrajectory:
             ]
         except KeyError:
             chemical_elements = self._h5_file["/particles/all/species"]
-        self._chemical_system = ChemicalSystem(
-            os.path.splitext(os.path.basename(self._h5_filename))[0]
-        )
+        self._chemical_system = ChemicalSystem(self._h5_filename.stem)
         self._chemical_system.initialise_atoms(chemical_elements)
 
         # Load all the unit cells

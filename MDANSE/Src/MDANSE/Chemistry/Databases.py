@@ -15,8 +15,8 @@
 #
 
 import copy
-import os
 from typing import Union, ItemsView, Dict, Any
+from pathlib import Path
 
 import json
 
@@ -30,8 +30,8 @@ class _Database(metaclass=Singleton):
     Base class for all the databases.
     """
 
-    _DEFAULT_DATABASE: str
-    _USER_DATABASE: str
+    _DEFAULT_DATABASE: Path
+    _USER_DATABASE: Path
 
     def __init__(self):
         """
@@ -65,7 +65,11 @@ class _Database(metaclass=Singleton):
         for v in self._data.values():
             yield copy.deepcopy(v)
 
-    def _load(self, user_database: str = None, default_database: str = None) -> None:
+    def _load(
+        self,
+        user_database: Union[Path, str, None] = None,
+        default_database: Union[Path, str, None] = None,
+    ) -> None:
         """
         Load the database. This method should never be called elsewhere than __init__ or unit testing.
 
@@ -77,10 +81,14 @@ class _Database(metaclass=Singleton):
         """
         if user_database is None:
             user_database = self._USER_DATABASE
+        else:
+            user_database = Path(user_database)
         if default_database is None:
             default_database = self._DEFAULT_DATABASE
+        else:
+            default_database = Path(default_database)
 
-        if os.path.exists(user_database):
+        if user_database.exists():
             database_path = user_database
         else:
             database_path = default_database
@@ -164,10 +172,10 @@ class AtomsDatabase(_Database):
     >>> atoms = ATOMS_DATABASE.atoms()
     """
 
-    _DEFAULT_DATABASE = os.path.join(os.path.dirname(__file__), "atoms.json")
+    _DEFAULT_DATABASE = Path(__file__).parent / "atoms.json"
 
     # The user path
-    _USER_DATABASE = os.path.join(PLATFORM.application_directory(), "atoms.json")
+    _USER_DATABASE = PLATFORM.application_directory() / "atoms.json"
 
     # The python types supported by the database
     _TYPES = {"str": str, "int": int, "float": float, "list": list}

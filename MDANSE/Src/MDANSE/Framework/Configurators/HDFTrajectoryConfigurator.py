@@ -14,8 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import os
-
 from MDANSE import PLATFORM
 
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
@@ -60,7 +58,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
 
         self["filename"] = PLATFORM.get_path(inputTraj.filename)
 
-        self["basename"] = os.path.basename(self["filename"])
+        self["basename"] = self["filename"].name
 
         self["length"] = len(self["instance"])
 

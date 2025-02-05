@@ -13,27 +13,23 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
-from ast import operator
-from typing import Collection, List, Dict, TYPE_CHECKING, Any
+import operator
+from typing import TYPE_CHECKING, Any, Collection, Dict, List, Union
 
 if TYPE_CHECKING:
     from MDANSE.Chemistry.Databases import AtomsDatabase
+
 import math
+from pathlib import Path
 
-import numpy as np
 import h5py
-
-from MDANSE.MLogging import LOG
-from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
-from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
+import numpy as np
+from MDANSE import PLATFORM
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.MolecularDynamics.Configuration import (
-    RealConfiguration,
-)
-from MDANSE import PLATFORM
-
+from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
+from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 
 available_formats = {
     "MDANSE": MdanseTrajectory,
@@ -461,7 +457,7 @@ class TrajectoryWriter:
 
     def __init__(
         self,
-        h5_filename,
+        h5_filename: Union[Path, str],
         chemical_system: ChemicalSystem,
         n_steps,
         selected_atoms=None,
@@ -482,8 +478,8 @@ class TrajectoryWriter:
         :type selected_atoms: list of MDANSE.Chemistry.ChemicalSystem.Atom
         """
 
-        self._h5_filename = h5_filename
-        PLATFORM.create_directory(os.path.dirname(h5_filename))
+        self._h5_filename = Path(h5_filename)
+        PLATFORM.create_directory(self._h5_filename.parent)
         self._h5_file = h5py.File(self._h5_filename, "w")
 
         self._chemical_system = chemical_system
@@ -1007,6 +1003,7 @@ def read_atoms_trajectory(
 
 
 if __name__ == "__main__":
+    from MDANSE.Chemistry.ChemicalEntity import Atom
     from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 
     cs = ChemicalSystem()

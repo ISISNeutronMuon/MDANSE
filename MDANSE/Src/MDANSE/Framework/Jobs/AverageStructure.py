@@ -13,8 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
 import collections
+from pathlib import Path
 
 import numpy as np
 from ase.io import write as ase_write
@@ -184,7 +184,7 @@ class AverageStructure(IJob):
             self._ase_atoms.set_scaled_positions(temp - correction)
 
         PLATFORM.create_directory(
-            os.path.dirname(self.configuration["output_files"]["file"])
+            Path(self.configuration["output_files"]["file"]).parent
         )
         ase_write(
             self.configuration["output_files"]["file"],

@@ -16,7 +16,6 @@
 import copy
 import math
 import numbers
-import os
 
 import json
 
@@ -694,11 +693,11 @@ class UnitsManagerEncoder(json.JSONEncoder):
 class UnitsManager(metaclass=Singleton):
     _UNITS = {}
 
-    _DEFAULT_DATABASE = os.path.join(
-        PLATFORM.base_directory(), "MDANSE", "Framework", "units.json"
+    _DEFAULT_DATABASE = (
+        PLATFORM.base_directory() / "MDANSE" / "Framework" / "units.json"
     )
 
-    _USER_DATABASE = os.path.join(PLATFORM.application_directory(), "units.json")
+    _USER_DATABASE = PLATFORM.application_directory() / "units.json"
 
     def __init__(self):
         self.load()

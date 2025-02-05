@@ -13,9 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
-from typing import List
-import traceback
+from pathlib import Path
+from typing import List, Union
 
 import numpy as np
 import h5py
@@ -41,28 +40,27 @@ class MdanseTrajectory:
     is the original implementation of the Mdanse HDF5 format.
     """
 
-    def __init__(self, h5_filename):
+    def __init__(self, h5_filename: Union[Path, str]):
         """Constructor.
 
         :param h5_filename: the trajectory filename
         :type h5_filename: str
         """
 
-        self._h5_filename = h5_filename
+        self._h5_filename = Path(h5_filename)
 
         self._h5_file = h5py.File(self._h5_filename, "r")
 
         # Load the chemical system
-        self._chemical_system = ChemicalSystem(
-            os.path.splitext(os.path.basename(self._h5_filename))[0], self
-        )
+        self._chemical_system = ChemicalSystem(self._h5_filename.stem, self)
         self._chemical_system.load(self._h5_file)
 
         # Load all the unit cells
         self._load_unit_cells()
 
     @classmethod
-    def file_is_right(self, filename):
+    def file_is_right(self, filename: Union[Path, str]):
+        filename = Path(filename)
         result = True
         try:
             file_object = h5py.File(filename)
@@ -70,9 +68,7 @@ class MdanseTrajectory:
             result = False
         else:
             try:
-                temp_cs = ChemicalSystem(
-                    os.path.splitext(os.path.basename(filename))[0]
-                )
+                temp_cs = ChemicalSystem(filename.stem)
                 temp_cs.load(file_object)
             except Exception:
                 LOG.warning(

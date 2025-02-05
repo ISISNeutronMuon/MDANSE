@@ -14,9 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import os
-from os.path import expanduser
 import json
+from pathlib import Path
 from abc import ABC, abstractmethod
 
 
@@ -35,7 +34,7 @@ class AbstractSession(ABC):
 class SessionSettings(AbstractSession):
     def __init__(self):
         super().__init__()
-        self.main_path = os.path.abspath(".")
+        self.main_path = Path(".").absolute()
 
     def create_structured_project(self):
         self.relative_paths = {
@@ -47,7 +46,7 @@ class SessionSettings(AbstractSession):
 
 class CurrentSession:
     def __init__(self, fname=None):
-        self.settings_dir = os.path.join(expanduser("~"), ".MDANSE")
+        self.settings_dir = Path("~").expanduser() / ".MDANSE"
         if fname is not None:
             self.loadSettings(fname)
 

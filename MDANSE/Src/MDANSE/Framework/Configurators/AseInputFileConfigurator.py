@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
 
 from ase.io.formats import all_formats
 
@@ -63,7 +62,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
 
         value = PLATFORM.get_path(value)
 
-        if not os.path.exists(value):
+        if not value.exists():
             LOG.error(f"FILE MISSING in {self._name}")
             self.error_status = f"The file {value} does not exist"
             return

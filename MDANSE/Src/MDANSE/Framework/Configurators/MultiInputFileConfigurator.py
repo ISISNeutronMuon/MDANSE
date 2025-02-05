@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import ast
-import os
 from typing import Union
 
 from MDANSE import PLATFORM
@@ -73,7 +72,7 @@ class MultiInputFileConfigurator(IConfigurator):
 
         none_exist = []
         for value in values:
-            if not os.path.isfile(value):
+            if not value.is_file():
                 none_exist.append(value)
 
         if none_exist:

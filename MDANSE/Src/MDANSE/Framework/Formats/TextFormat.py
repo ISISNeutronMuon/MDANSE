@@ -14,12 +14,12 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import os
 import io
 import tarfile
 import codecs
 import time
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, Union
 from importlib import metadata
 
 import numpy as np
@@ -47,7 +47,13 @@ class TextFormat(IFormat):
     extensions = [".dat", ".txt"]
 
     @classmethod
-    def write(cls, filename, data, header: str = "", run_instance: "IJob" = None):
+    def write(
+        cls,
+        filename: Union[Path, str],
+        data,
+        header: str = "",
+        run_instance: "IJob" = None,
+    ):
         """
         Write a set of output variables into a set of Text files.
 
@@ -61,10 +67,10 @@ class TextFormat(IFormat):
         :type header: str
         """
 
-        filename = os.path.splitext(filename)[0]
-        filename = "%s_text.tar" % filename
+        filename = Path(filename)
+        filename = filename.parent / (filename.stem + "_text.tar")
 
-        PLATFORM.create_directory(os.path.dirname(filename))
+        PLATFORM.create_directory(filename.parent)
         tf = tarfile.open(filename, "w")
 
         if header:

@@ -14,10 +14,11 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import os
 import re
 import io
 import tarfile
+from pathlib import Path
+from typing import Union
 
 import numpy as np
 
@@ -45,7 +46,7 @@ class SVGFormat(IFormat):
     extensions = [".svg"]
 
     @classmethod
-    def write(cls, filename, data, header=""):
+    def write(cls, filename: Union[Path, str], data, header=""):
         """
         Write a set of output variables into a set of SVG files.
 
@@ -59,8 +60,7 @@ class SVGFormat(IFormat):
         :type header: str
         """
 
-        filename = os.path.splitext(filename)[0]
-        filename = "%s.tar" % filename
+        filename = Path(filename).with_suffix(".tar")
 
         tf = tarfile.open(filename, "w")
 
@@ -79,9 +79,7 @@ class SVGFormat(IFormat):
 
             pl = Poly(list(zip(axis, var)), stroke="blue")
 
-            svgfilename = os.path.join(
-                os.path.dirname(filename), "%s%s" % (var.varname, cls.extensions[0])
-            )
+            svgfilename = filename.parent / f"{var.varname}{cls.extensions[0]}"
 
             Frame(
                 min(axis),
@@ -95,7 +93,7 @@ class SVGFormat(IFormat):
 
             tf.add(svgfilename, arcname="%s%s" % (var.varname, cls.extensions[0]))
 
-            os.remove(svgfilename)
+            svgfilename.unlink()
 
         if header:
             tempStr = io.StringIO()

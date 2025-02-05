@@ -14,11 +14,12 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
-import os
 import shutil
 import subprocess
 import tempfile
 import io
+from pathlib import Path
+from typing import Union
 
 import numpy as np
 
@@ -116,6 +117,13 @@ class McStasVirtualInstrument(IJob):
         "OutputFilesConfigurator",
         {"formats": ["MDAFormat", "TextFormat"]},
     )
+
+    @property
+    def mcstas_output_dir(self) -> Path:
+        """
+        Output directory as path.
+        """
+        return Path(self.configuration["options"]["mcstas_output_directory"])
 
     def initialize(self):
         """
@@ -284,13 +292,8 @@ class McStasVirtualInstrument(IJob):
             if "ERROR" in line.decode(encoding="utf-8"):
                 raise McStasError("An error occured during McStas run: %s" % out)
 
-        with open(
-            os.path.join(
-                self.configuration["options"]["mcstas_output_directory"],
-                "mcstas_mdanse.mvi",
-            ),
-            "w",
-        ) as f:
+        out_file = self.mcstas_output_dir / "mcstas_mdanse.mvi"
+        with out_file.open("w") as f:
             f.write(out.decode(encoding="utf-8"))
 
         return index, None
@@ -310,14 +313,8 @@ class McStasVirtualInstrument(IJob):
         """
 
         # Rename and move to the result dir the SQW file input
-        for typ, fname in list(self.outFile.items()):
-            shutil.move(
-                fname,
-                os.path.join(
-                    self.configuration["options"]["mcstas_output_directory"],
-                    typ + ".sqw",
-                ),
-            )
+        for typ, fname in self.outFile.items():
+            shutil.move(fname, self.mcstas_output_dir / f"{typ}.sqw")
 
         # Convert McStas output files into NetCDF format
         self.convert(self.configuration["options"]["mcstas_output_directory"])
@@ -347,20 +344,21 @@ class McStasVirtualInstrument(IJob):
             i += 1
         return key
 
-    def convert(self, sim_dir):
+    def convert(self, sim_dir: Union[Path, str]):
         """
         Convert McStas data set to netCDF File Format
         """
 
+        sim_dir = Path(sim_dir)
         typique_sim_fnames = ["mccode.sim", "mcstas.sim"]
-        sim_file = ""
+
         for sim_fname in typique_sim_fnames:
-            sim_file = os.path.join(sim_dir, sim_fname)
-            if os.path.isfile(sim_file):
+            sim_file = sim_dir / sim_fname
+            if sim_file.is_file():
                 break
 
         if not sim_file:
-            raise Exception("Dataset " + sim_file + " does not exist!")
+            raise Exception(f"Dataset {sim_file} does not exist!")
 
         isBegin = lambda line: line.strip().startswith("begin")
         isCompFilename = lambda line: line.strip().startswith("filename:")
@@ -387,7 +385,7 @@ class McStasVirtualInstrument(IJob):
 
                 Scanfile = list(filter(isFilename, open(sim_file).readlines()))
                 Scanfile = Scanfile[0].split(": ")
-                Scanfile = os.path.join(sim_dir, Scanfile[1].strip())
+                Scanfile = sim_dir / Scanfile[1].strip()
                 # Proceed to load scan datafile
                 FS = self.read_monitor(Scanfile)
                 L = (len(FS["variables"].split()) - 1) / 2
@@ -402,7 +400,7 @@ class McStasVirtualInstrument(IJob):
             for j in range(0, L):
                 MonFile = MonFiles[j].split(":")
                 MonFile = MonFile[1].strip()
-                MonFile = os.path.join(sim_dir, MonFile)
+                MonFile = sim_dir / MonFile
                 FS = self.read_monitor(MonFile)
                 FSlist[len(FSlist) :] = [FS]
                 FSlist[j] = self.save_single(FS)

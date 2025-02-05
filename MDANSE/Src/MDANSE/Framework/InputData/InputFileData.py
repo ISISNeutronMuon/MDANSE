@@ -15,7 +15,7 @@
 #
 
 import abc
-import os
+from pathlib import Path
 
 from MDANSE.Framework.InputData.IInputData import IInputData
 
@@ -23,9 +23,9 @@ from MDANSE.Framework.InputData.IInputData import IInputData
 class InputFileData(IInputData):
     def __init__(self, filename, load=True):
         IInputData.__init__(self, filename)
-
-        self._basename = os.path.basename(filename)
-        self._dirname = os.path.dirname(filename)
+        filename = Path(filename)
+        self._basename = filename.name
+        self._dirname = filename.parent
 
         if load:
             self.load()

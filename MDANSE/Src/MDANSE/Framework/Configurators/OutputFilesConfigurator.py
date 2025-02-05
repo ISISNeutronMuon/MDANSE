@@ -14,8 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import os
-from pathlib import PurePath
+from pathlib import Path
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
@@ -66,6 +65,7 @@ class OutputFilesConfigurator(IConfigurator):
         self._original_input = value
 
         root, formats, logs = value
+        root = Path(root)
 
         if logs not in self.log_options:
             self.error_status = "log level option not recognised"
@@ -96,23 +96,18 @@ class OutputFilesConfigurator(IConfigurator):
 
         self["root"] = root
         self["formats"] = formats
-        self["files"] = []
-        for extension in [IFormat.create(f).extension for f in formats]:
-            if extension in root[-len(extension) :]:
-                self["files"].append(root)
-            else:
-                self["files"].append(root + extension)
+        self["files"] = [
+            root if root.suffix == ext else root.with_suffix(root.suffix + ext)
+            for ext in (IFormat.create(f).extension for f in formats)
+        ]
         for file in self["files"]:
-            if PurePath(os.path.abspath(file)) in self._forbidden_files:
+            if file.absolute() in self._forbidden_files:
                 self.error_status = f"File {file} is either open or being written into. Please pick another name."
                 return
 
         self["value"] = self["files"]
         self["log_level"] = logs
-        if logs == "no logs":
-            self["write_logs"] = False
-        else:
-            self["write_logs"] = True
+        self["write_logs"] = logs != "no logs"
         self.error_status = "OK"
 
     @property
@@ -137,7 +132,7 @@ class OutputFilesConfigurator(IConfigurator):
 
         info = ["Input files:\n"]
         for f in self["files"]:
-            info.append(f)
+            info.append(str(f))
             info.append("\n")
 
         return "".join(info)
