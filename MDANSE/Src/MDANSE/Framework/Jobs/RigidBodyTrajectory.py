@@ -76,9 +76,7 @@ class RigidBodyTrajectory(IJob):
             },
         },
     )
-    settings["save_details"] = (
-        "BooleanConfigurator", {"default": False}
-    )
+    settings["save_details"] = ("BooleanConfigurator", {"default": False})
     settings["reference"] = ("IntegerConfigurator", {"mini": 0})
     settings["remove_translation"] = ("BooleanConfigurator", {"default": False})
     settings["output_files"] = ("OutputTrajectoryConfigurator", {"format": "MDTFormat"})
