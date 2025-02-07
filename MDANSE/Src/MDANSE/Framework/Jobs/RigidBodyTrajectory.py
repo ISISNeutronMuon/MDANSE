@@ -69,12 +69,15 @@ class RigidBodyTrajectory(IJob):
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
         {
-            "default": "atom",
+            "default": "molecule",
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
             },
         },
+    )
+    settings["save_details"] = (
+        "BooleanConfigurator", {"default": False}
     )
     settings["reference"] = ("IntegerConfigurator", {"mini": 0})
     settings["remove_translation"] = ("BooleanConfigurator", {"default": False})
@@ -117,8 +120,6 @@ class RigidBodyTrajectory(IJob):
             ),
             dtype=np.float64,
         )
-
-        atoms = self.configuration["trajectory"]["instance"].chemical_system.atom_list
 
         self._groups = [
             self.configuration["atom_selection"]["indices"][i]
@@ -230,37 +231,39 @@ class RigidBodyTrajectory(IJob):
                 units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"},
             )
 
-        outputFile = h5py.File(self.configuration["output_files"]["file"], "r+")
+        if self.configuration["save_details"]["value"]:
 
-        n_groups = self.configuration["atom_selection"]["selection_length"]
-        n_frames = self.configuration["frames"]["number"]
+            outputFile = h5py.File(self.configuration["output_files"]["file"], "r+")
 
-        quaternions = outputFile.create_dataset(
-            "quaternions", shape=(n_groups, n_frames, 4), dtype=np.float64
-        )
+            n_groups = self.configuration["atom_selection"]["selection_length"]
+            n_frames = self.configuration["frames"]["number"]
 
-        coms = outputFile.create_dataset(
-            "coms", shape=(n_groups, n_frames, 3), dtype=np.float64
-        )
-
-        fits = outputFile.create_dataset(
-            "fits", shape=(n_groups, n_frames), dtype=np.float64
-        )
-
-        outputFile.attrs["info"] = str(self)
-
-        # Loop over the groups.
-        for comp in range(self.configuration["atom_selection"]["selection_length"]):
-            aIndexes = self.configuration["atom_selection"]["indices"][comp]
-
-            outputFile.attrs["info"] += "Group %s: %s\n" % (
-                comp,
-                [index for index in aIndexes],
+            quaternions = outputFile.create_dataset(
+                "quaternions", shape=(n_groups, n_frames, 4), dtype=np.float64
             )
 
-            quaternions[comp, :, :] = self._quaternions[comp, :, :]
-            coms[comp, :, :] = self._coms[comp, :, :]
-            fits[comp, :] = self._fits[comp, :]
+            coms = outputFile.create_dataset(
+                "coms", shape=(n_groups, n_frames, 3), dtype=np.float64
+            )
 
-        outputFile.close()
+            fits = outputFile.create_dataset(
+                "fits", shape=(n_groups, n_frames), dtype=np.float64
+            )
+
+            outputFile.attrs["info"] = str(self)
+
+            # Loop over the groups.
+            for comp in range(self.configuration["atom_selection"]["selection_length"]):
+                aIndexes = self.configuration["atom_selection"]["indices"][comp]
+
+                outputFile.attrs["info"] += "Group %s: %s\n" % (
+                    comp,
+                    [index for index in aIndexes],
+                )
+
+                quaternions[comp, :, :] = self._quaternions[comp, :, :]
+                coms[comp, :, :] = self._coms[comp, :, :]
+                fits[comp, :] = self._fits[comp, :]
+
+            outputFile.close()
         super().finalize()
