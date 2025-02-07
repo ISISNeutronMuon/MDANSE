@@ -25,6 +25,7 @@ from pathlib import Path
 import h5py
 import numpy as np
 from MDANSE import PLATFORM
+from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
@@ -814,8 +815,7 @@ class RigidBodyTrajectoryGenerator:
     def __init__(
         self,
         trajectory,
-        chemical_entity: List[int],
-        reference,
+        cluster: List[int],
         first=0,
         last=None,
         step=1,
@@ -824,7 +824,7 @@ class RigidBodyTrajectoryGenerator:
 
         :param trajectory: the input trajectory
         :type trajectory: MDANSE.Trajectory.Trajectory
-        :param chemical_entity: the chemical enitty for which the Rigig-Body trajectory should be computed
+        :param chemical_entity: the chemical entity for which the Rigig-Body trajectory should be computed
         :type chemical_entity: MDANSE.Chemistry.ChemicalSystem.ChemicalEntity
         :param reference: the reference configuration. Must be continuous.
         :type reference: MDANSE.MolecularDynamics.Configuration.Configuration
@@ -841,50 +841,63 @@ class RigidBodyTrajectoryGenerator:
         if last is None:
             last = len(self._trajectory)
 
-        atoms = chemical_entity.atom_list
-
-        masses = [ATOMS_DATABASE.get_atom_property(at, "atomic_weight") for at in atoms]
+        elements = [
+            self._trajectory.chemical_system.atom_list[index] for index in cluster
+        ]
+        coords = self._trajectory.coordinates(first)[cluster]
+        masses = [trajectory.get_atom_property(at, "atomic_weight") for at in elements]
 
         mass = sum(masses)
 
-        ref_com = chemical_entity.center_of_mass(reference)
+        ref_com = center_of_mass(coords, masses)
 
         n_steps = len(range(first, last, step))
 
         possq = np.zeros((n_steps,), np.float64)
         cross = np.zeros((n_steps, 3, 3), np.float64)
 
-        rcms = self._trajectory.read_com_trajectory(
-            atoms, first, last, step, box_coordinates=True
+        cluster_com_trajectory = self._trajectory.read_com_trajectory(
+            cluster, first, last, step, box_coordinates=True
         )
 
         # relative coords of the CONTIGUOUS reference
-        r_ref = np.zeros((len(atoms), 3), np.float64)
-        for i, at in enumerate(atoms):
-            r_ref[i] = reference["coordinates"][i, :] - ref_com
+        r_ref = coords - ref_com
 
-        unit_cells, inverse_unit_cells = self._trajectory.get_unit_cells()
-        if unit_cells is not None:
-            unit_cells = unit_cells[first:last:step, :, :]
-            inverse_unit_cells = inverse_unit_cells[first:last:step, :, :]
+        unit_cell_instances = [
+            self._trajectory.unit_cell(frame) for frame in range(first, last, step)
+        ]
+        unit_cells = [uc.direct for uc in unit_cell_instances]
 
-        for i, at in enumerate(atoms):
-            r = self._trajectory.read_atomic_trajectory(i, first, last, step, True)
-            r = r - rcms
-
-            r = r[:, np.newaxis, :]
-            r = fold_coordinates.fold_coordinates(
-                r, unit_cells, inverse_unit_cells, True
+        for atom_count, abs_index in enumerate(cluster):
+            atom_trajectory = self._trajectory.read_atomic_trajectory(
+                abs_index, first, last, step, True
             )
-            r = np.squeeze(r)
+            atom_trajectory -= cluster_com_trajectory
 
-            r = self._trajectory.to_real_coordinates(r, first, last, step)
-            w = masses[i] / mass
-            np.add(possq, w * np.add.reduce(r * r, -1), possq)
-            np.add(possq, w * np.add.reduce(r_ref[i] * r_ref[i], -1), possq)
-            np.add(cross, w * r[:, :, np.newaxis] * r_ref[np.newaxis, i, :], cross)
+            folded_atom_trajectory = np.vstack(
+                [
+                    (atom_trajectory[frame] % 1) @ unit_cells[frame]
+                    for frame in range(len(atom_trajectory))
+                ]
+            )
 
-        rcms = self._trajectory.to_real_coordinates(rcms, first, last, step)
+            w = masses[atom_count] / mass
+            np.add(possq, w * np.sum(folded_atom_trajectory**2, axis=1), possq)
+            np.add(possq, w * np.sum(r_ref[atom_count] * 2), possq)
+            np.add(
+                cross,
+                w
+                * folded_atom_trajectory[:, :, np.newaxis]
+                * r_ref[np.newaxis, atom_count, :],
+                cross,
+            )
+
+        rcms = np.vstack(
+            [
+                cluster_com_trajectory[frame] @ unit_cells[frame]
+                for frame in range(len(cluster_com_trajectory))
+            ]
+        )
 
         # filling matrix M
         k = np.zeros((n_steps, 4, 4), np.float64)
@@ -933,14 +946,6 @@ class RigidBodyTrajectoryGenerator:
         from MDANSE.Mathematics.LinearAlgebra import Quaternion
 
         return Vector(self.cms[index]), Quaternion(self.quaternions[index])
-
-
-def partition_universe(universe, groups):
-    atoms = sorted(universe.atomList(), key=operator.attrgetter("index"))
-
-    coll = [Collection([atoms[index] for index in gr]) for gr in groups]
-
-    return coll
 
 
 def read_atoms_trajectory(

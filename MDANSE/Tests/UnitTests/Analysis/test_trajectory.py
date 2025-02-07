@@ -47,9 +47,7 @@ def parameters():
     return parameters
 
 
-@pytest.mark.xfail(reason="see docstring")
 def test_RigidBodyTrajectory(parameters):
-    """We ignore the failure to merge other changes."""
     temp_name = tempfile.mktemp()
     parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
     job = IJob.create("RigidBodyTrajectory")

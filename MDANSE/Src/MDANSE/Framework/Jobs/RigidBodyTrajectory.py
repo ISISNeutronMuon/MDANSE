@@ -24,7 +24,7 @@ from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.Mathematics.LinearAlgebra import Quaternion, Vector
 from MDANSE.Mathematics.Transformation import Translation
-from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import (
     RigidBodyTrajectoryGenerator,
     TrajectoryWriter,
@@ -120,13 +120,10 @@ class RigidBodyTrajectory(IJob):
 
         atoms = self.configuration["trajectory"]["instance"].chemical_system.atom_list
 
-        self._groups = []
-
-        for i in range(self.configuration["atom_selection"]["selection_length"]):
-            indices = self.configuration["atom_selection"]["indices"][i]
-            self._groups.append(
-                AtomCluster("", [atoms[idx] for idx in indices], parentless=True)
-            )
+        self._groups = [
+            self.configuration["atom_selection"]["indices"][i]
+            for i in range(self.configuration["atom_selection"]["selection_length"])
+        ]
 
         self.numberOfSteps = len(self._groups)
 
@@ -137,10 +134,9 @@ class RigidBodyTrajectory(IJob):
         coords = trajectory.coordinates(self.referenceFrame)
         unitCell = trajectory.unit_cell(self.referenceFrame)
 
-        selectedAtoms = []
-        for indices in self.configuration["atom_selection"]["indices"]:
-            for idx in indices:
-                selectedAtoms.append(atoms[idx])
+        selectedAtoms = list(
+            np.concatenate(self.configuration["atom_selection"]["indices"])
+        )
 
         # Create trajectory
         self._output_trajectory = TrajectoryWriter(
@@ -153,9 +149,7 @@ class RigidBodyTrajectory(IJob):
             compression=self.configuration["output_files"]["compression"],
         )
 
-        self._group_atoms = [group.atom_list for group in self._groups]
-
-        conf = RealConfiguration(
+        conf = PeriodicRealConfiguration(
             self._output_trajectory.chemical_system, coords, unitCell
         )
 
@@ -169,7 +163,6 @@ class RigidBodyTrajectory(IJob):
         rbt = RigidBodyTrajectoryGenerator(
             trajectory,
             self._groups[index],
-            self._reference_configuration,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -190,7 +183,7 @@ class RigidBodyTrajectory(IJob):
         """ """
 
         group_coms = [
-            center_of_mass(self._reference_configuration[group])
+            center_of_mass(self._reference_configuration.coordinates[group])
             for group in self._groups
         ]
 
@@ -205,14 +198,14 @@ class RigidBodyTrajectory(IJob):
             )
 
             for group_id in range(self._quaternions.shape[0]):
-                center_of_mass = group_coms[group_id]
+                single_com = group_coms[group_id]
 
                 # The rotation matrix corresponding to the selected frame in the RBT.
                 transfo = Quaternion(self._quaternions[group_id, i, :]).asRotation()
 
                 if self.configuration["remove_translation"]["value"]:
                     # The transformation matrix corresponding to the selected frame in the RBT.
-                    transfo = Translation(Vector(*center_of_mass)) * transfo
+                    transfo = Translation(Vector(*single_com)) * transfo
 
                 # Compose with the CMS translation if the removeTranslation flag is set off.
                 else:
@@ -220,14 +213,14 @@ class RigidBodyTrajectory(IJob):
                     transfo = Translation(Vector(self._coms[group_id, i, :])) * transfo
 
                 # Loop over the atoms of the group to set the RBT trajectory.
-                for atom in self._group_atoms[group_id]:
+                for atom_index in self._groups[group_id]:
                     # The coordinates of the atoms are centered around the center of mass of the group.
                     xyz = (
-                        self._reference_configuration["coordinates"][atom.index, :]
-                        - center_of_mass
+                        self._reference_configuration.coordinates[atom_index, :]
+                        - single_com
                     )
 
-                    real_configuration["coordinates"][atom.index, :] = transfo(
+                    real_configuration.coordinates[atom_index, :] = transfo(
                         Vector(*xyz)
                     )
 
