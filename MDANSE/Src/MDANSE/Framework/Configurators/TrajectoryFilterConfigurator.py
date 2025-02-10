@@ -77,7 +77,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
             A string representation of the filter settings dictionary
         """
-        return repr({"filter": filter.__name__, "attributes": settings})
+        return f'{{ "filter": "{filter.__name__}", "attributes": {json.dumps(settings)}}}'
 
     _default = filter_description_string.__func__()
 
@@ -111,7 +111,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
             dict_value = json.loads(value)
 
             try:
-                {"filter", "attributes"} in dict_value.keys()
+                {"filter", "attributes"} in set(dict_value.keys())
             except (TypeError, ValueError) as e:
                 self.error_status = f"The dictionary \n{dict_value}\n does not contain the expected keys"
 
