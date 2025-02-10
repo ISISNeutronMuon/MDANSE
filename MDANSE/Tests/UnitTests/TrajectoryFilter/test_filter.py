@@ -47,12 +47,12 @@ class TrajectoryFilterTest(unittest.TestCase):
         x = a0 * np.sin(w0 * t) + a1 * np.sin(w1 * t)
 
         # Instantiate filter
-        f = filter_class(**{
-            "attenuation_type": "highpass",
-            "order": 1,
-            "cutoff_freq": 0.5 * w1,
-            "time_step_ps": 1/fs,
-            "n_steps": N}
+        f = filter_class(
+            attenuation_type = "highpass",
+            order = 1,
+            cutoff_freq = 0.5 * w1,
+            time_step_ps = 1/fs,
+            n_steps = N
         )
 
         # Apply filter to signal
