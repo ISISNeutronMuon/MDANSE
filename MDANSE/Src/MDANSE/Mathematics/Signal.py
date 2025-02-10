@@ -1004,8 +1004,7 @@ def power_spectrum(
     trajectory = trajectory["instance"]
     sorted_atoms = trajectory.chemical_system.atom_list
 
-    output = dict()
-    output["romega"] = instrument_resolution["romega"]
+    output = {"romega": instrument_resolution["romega"]}
 
     for element in atom_selection["unique_names"]:
         output["pacf_%s" % element] = np.zeros(
