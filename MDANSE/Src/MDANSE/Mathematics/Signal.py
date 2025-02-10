@@ -435,7 +435,7 @@ class Filter:
 
         if method is methods.FFT:
             freq_range = self.frequency_range(self.n_steps, self.sample_freq ** (-1))
-        elif self.custom_freq_range.any() and method is methods.Custom:
+        elif self.custom_freq_range.any() and method is methods.CUSTOM:
             freq_range = self.custom_freq_range
         else:
             RuntimeError(
