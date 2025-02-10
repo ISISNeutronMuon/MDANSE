@@ -445,7 +445,7 @@ class Filter:
 
         # Get frequency response from transfer function expression and specify frequency range around which to compute response
         response = self.compute_frequencies(
-            transfer_function=expr, range=np.abs(((np.pi / 2) ** (-1)) * freq_range)
+            transfer_function=expr, range=np.abs(2/np.pi * freq_range)
         )
         self._freq_response = self.FrequencyDomain(*response)
 
