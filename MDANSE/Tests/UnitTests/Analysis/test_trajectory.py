@@ -114,9 +114,19 @@ def test_UnfoldedTrajectory(parameters):
     assert path.isfile(temp_name + ".log")
     os.remove(temp_name + ".log")
 
-def test_TrajectoryFilter(parameters):
+def test_TrajectoryFilter():
+    parameters = {
+        'atom_selection': '{"all": true}',
+        'frames': [0, 10, 1, 5],
+        'instrument_resolution': ('ideal', {}),
+        'projection': None,
+        'running_mode': ('single-core',),
+        'trajectory_filter': '{ "filter": "Butterworth", "attributes": { "order": 1, "attenuation_type": "lowpass", "cutoff_freq": 25.0 } }',
+        'weights': 'atomic_weight'
+    }
+    parameters["trajectory"] = short_traj
     temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, 64, "gzip", "INFO")
+    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
     job = IJob.create("TrajectoryFilter")
     job.run(parameters, status=True)
     assert path.exists(temp_name + ".mdt")
