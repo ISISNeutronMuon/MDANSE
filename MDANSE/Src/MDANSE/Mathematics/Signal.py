@@ -520,8 +520,8 @@ class Filter:
         """
         settings = self.default_settings
 
-        for attr in settings:
-            self.__dict__.update({attr: attributes.get(attr, settings[attr]["value"])})
+        for key, default in settings:
+            setattr(self, key, attributes.get(key, default["value"]))
 
     @staticmethod
     def polynomial_string(coeffs, unit, analog: bool = True) -> str:
