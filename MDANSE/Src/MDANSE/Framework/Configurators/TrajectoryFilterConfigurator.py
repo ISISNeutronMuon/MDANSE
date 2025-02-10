@@ -77,14 +77,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
             A string representation of the filter settings dictionary
         """
-        return (
-            '{ "filter": "'
-            + f'{filter.__name__}"'
-            + ", "
-            + '"attributes": '
-            + f"{json.dumps(settings)}"
-            + "}"
-        )
+        return repr({"filter": filter.__name__, "attributes": settings})
 
     _default = filter_description_string.__func__()
 
