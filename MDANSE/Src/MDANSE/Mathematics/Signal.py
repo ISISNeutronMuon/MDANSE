@@ -519,7 +519,7 @@ class Filter:
         """
         settings = self.default_settings
 
-        for key, default in settings:
+        for key, default in settings.items():
             setattr(self, key, attributes.get(key, default["value"]))
 
     @staticmethod
