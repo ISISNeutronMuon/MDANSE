@@ -23,7 +23,7 @@ import h5py
 from MDANSE.Framework.Formats import HDFFormat
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Signal import filter_map
+from MDANSE.Mathematics.Signal import FILTER_MAP
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MLogging import LOG
@@ -145,7 +145,7 @@ class TrajectoryFilter(IJob):
         filter_config = json.loads(self.configuration["trajectory_filter"]["value"])
 
         filter_class, filter_attributes = (
-            filter_map[filter_config["filter"]],
+            FILTER_MAP[filter_config["filter"]],
             filter_config["attributes"],
         )
 

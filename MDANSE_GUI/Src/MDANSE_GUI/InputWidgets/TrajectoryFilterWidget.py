@@ -41,7 +41,7 @@ from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
 )
 from MDANSE.Mathematics.Signal import (
     Filter,
-    filter_map,
+    FILTER_MAP,
     DEFAULT_FILTER_CUTOFF,
     power_spectrum,
 )
@@ -169,7 +169,7 @@ class FilterDesigner(QDialog):
         self.clear_settings_grid(self._setting_grid_layout)
         self.set_filter(filter_type)
         self.make_settings_grid(
-            filter_map[self._settings["filter"]], self._setting_grid_layout
+            FILTER_MAP[self._settings["filter"]], self._setting_grid_layout
         )
 
         # Check figure attribute exists before attempting to render
@@ -528,7 +528,7 @@ class FilterDesigner(QDialog):
         """
         # Add filter type combobox
         type_cbox = QComboBox()
-        for filter_name in filter_map.keys():
+        for filter_name in FILTER_MAP.keys():
             type_cbox.addItem(filter_name)
 
         type_label = QLabel("Filter type")
@@ -545,7 +545,7 @@ class FilterDesigner(QDialog):
         widget_area.addLayout(filter_type_layout)
 
         # Add the filter settings grid layout
-        filter_class = filter_map[self._settings["filter"]]
+        filter_class = FILTER_MAP[self._settings["filter"]]
         self.make_settings_grid(filter_class, self._setting_grid_layout)
 
         widget_area.addLayout(self._setting_grid_layout)
@@ -670,7 +670,7 @@ class FilterDesigner(QDialog):
         show_attenuation = self._preferences.get("show_attenuation", False)
 
         # Preview instantiation of the selected filter
-        filter_class = filter_map[self._settings["filter"]]
+        filter_class = FILTER_MAP[self._settings["filter"]]
         filter_preview = filter_class(**self._settings["attributes"])
 
         # Check if we are displaying trajectory power spectral attenuation alongside filter response
@@ -776,7 +776,7 @@ class FilterDesigner(QDialog):
         """
         self._configurator.configure(self._settings)
 
-        filter_class = filter_map[self._settings["filter"]]
+        filter_class = FILTER_MAP[self._settings["filter"]]
 
         # update widget field text to reflect filter designer
         field = self._configurator.filter_description_string(

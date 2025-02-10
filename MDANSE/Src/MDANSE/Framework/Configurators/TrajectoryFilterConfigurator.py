@@ -15,7 +15,7 @@
 #
 import json
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Mathematics.Signal import filter_map
+from MDANSE.Mathematics.Signal import FILTER_MAP
 
 
 class TrajectoryFilterConfigurator(IConfigurator):
@@ -27,7 +27,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
         The defaults selection setting.
     """
 
-    _filter = tuple(filter_map.values())[0]
+    _filter = tuple(FILTER_MAP.values())[0]
 
     @classmethod
     def filter_default_attributes(cls, filter=_filter):

@@ -982,7 +982,7 @@ FILTERS = (
     Comb,
 )
 
-filter_map = {filter_class.__name__: filter_class for filter_class in FILTERS}
+FILTER_MAP = {filter_class.__name__: filter_class for filter_class in FILTERS}
 
 
 def power_spectrum(
