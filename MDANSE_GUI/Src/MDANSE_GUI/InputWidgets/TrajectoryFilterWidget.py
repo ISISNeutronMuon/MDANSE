@@ -67,7 +67,7 @@ class FilterDesigner(QDialog):
     _canvas_dimensions = {"width": 600, "height": 500}
     _setting_grid_layout = QGridLayout()
     _preferences_grid_layout = QGridLayout()
-    _preferences = dict()
+    _preferences = {}
     _trajectory_power_spectrum = None
 
     def __init__(
