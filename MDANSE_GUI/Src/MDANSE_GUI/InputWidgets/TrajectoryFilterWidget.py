@@ -289,7 +289,7 @@ class FilterDesigner(QDialog):
 
         # Set custom frequency range on filter object
         filter.custom_freq_range = power_spectrum_freqs
-        filter.freq_response = (filter.coeffs, Filter.FrequencyRangeMethod.Custom)
+        filter.freq_response = (filter.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
 
         # Resample and normalise trajectory power spectrum (y-axis)
         ps = values(raw_power_spectrum_values, len(response.frequencies))

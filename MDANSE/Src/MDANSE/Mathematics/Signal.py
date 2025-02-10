@@ -357,8 +357,8 @@ class Filter:
     class FrequencyRangeMethod(Enum):
         """Enumeration for custom (externally provided) and FFT-derived frequency ranges for plotting the filter response"""
 
-        Custom: int = (0,)
-        FFT: int = (1,)
+        CUSTOM: int = 0
+        FFT: int = 1
 
     def __init__(self, **kwargs):
         if not hasattr(self, "default_settings"):
