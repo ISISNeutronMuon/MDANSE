@@ -765,7 +765,7 @@ class FilterDesigner(QDialog):
             {
                 key: filter.default_settings[key]["value"]
                 for key in missing
-                if key in defaults.keys()
+                if key in defaults
             }
         )
         return attributes
