@@ -110,9 +110,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
         try:
             dict_value = json.loads(value)
 
-            try:
-                {"filter", "attributes"} in set(dict_value.keys())
-            except (TypeError, ValueError) as e:
+            if not {"filter", "attributes"} <= dict_value.keys():
                 self.error_status = f"The dictionary \n{dict_value}\n does not contain the expected keys"
 
         except (TypeError, ValueError) as e:
