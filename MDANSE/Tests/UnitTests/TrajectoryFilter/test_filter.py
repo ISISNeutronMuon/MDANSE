@@ -5,7 +5,7 @@ import math
 import pytest
 import unittest
 
-from MDANSE.Mathematics.Signal import Filter, filter_map
+from MDANSE.Mathematics.Signal import Filter, FILTER_MAP
 
 class TrajectoryFilterTest(unittest.TestCase):
     SIMPLE_HYDROGEN_PATH = '../Data/methane_hydrogen_position.csv'
@@ -27,7 +27,7 @@ class TrajectoryFilterTest(unittest.TestCase):
         Apply 1st order Butterworth filter to a sinusoid consisting of two frequencies,
         attentuating the higher of the two.
         """
-        filter_class = filter_map["Butterworth"]
+        filter_class = FILTER_MAP["Butterworth"]
         filter_class.set_defaults()
 
         # Angular frequency and amplitude of lower frequency component
