@@ -110,7 +110,7 @@ class FilterDesigner(QDialog):
             Configuration value.
         """
         config = self._configurator._configurable._configuration
-        return config.get(key, None)
+        return config.get(key)
 
     def set_filter(self, filter_type: str) -> None:
         """Set up a new filter settings dictionary.
