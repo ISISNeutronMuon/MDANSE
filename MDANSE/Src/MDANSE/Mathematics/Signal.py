@@ -520,7 +520,7 @@ class Filter:
         """
         settings = self.default_settings
 
-        for attr in settings.keys():
+        for attr in settings:
             self.__dict__.update({attr: attributes.get(attr, settings[attr]["value"])})
 
     @staticmethod
