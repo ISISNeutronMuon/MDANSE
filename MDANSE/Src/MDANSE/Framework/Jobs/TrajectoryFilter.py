@@ -217,7 +217,7 @@ def apply(filter, trajectories, apply_offsets: bool) -> np.ndarray:
         # Store initial positions
         offsets = np.array([x[0], y[0], z[0]])
 
-        for i, component in ((0, x), (1, y), (2, z)):
+        for i, component in enumerate((x, y, z)):
             output = filter.apply(component)
 
             if apply_offsets:
