@@ -1040,9 +1040,9 @@ def power_spectrum(
 
     nAtomsPerElement = atom_selection.get_natoms()
     for element, number in nAtomsPerElement.items():
-        output["pacf_%s" % element][:] /= number
-        output["pps_%s" % element][:] = get_spectrum(
-            output["pacf_%s" % element],
+        output[f"pacf_{element}"][:] /= number
+        output[f"pps_{element}"][:] = get_spectrum(
+            output[f"pacf_{element}"],
             instrument_resolution["time_window"],
             instrument_resolution["time_step"],
             fft="rfft",
