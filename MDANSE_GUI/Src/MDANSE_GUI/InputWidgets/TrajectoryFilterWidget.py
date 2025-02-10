@@ -654,8 +654,8 @@ class FilterDesigner(QDialog):
             self._figure_info.append(
                 f"Number of filter coefficients exceeds available display area"
             )
-            self._figure_info.append(f" ")
-            self._figure_info.append(f" ")
+            self._figure_info.append(" ")
+            self._figure_info.append(" ")
 
         self._figure_info.append(
             f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 1)} meV, Sample frequency: {sample_freq} pHz"
