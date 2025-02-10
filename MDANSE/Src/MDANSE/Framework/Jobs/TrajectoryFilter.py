@@ -211,8 +211,7 @@ def apply(filter, trajectories, apply_offsets: bool) -> np.ndarray:
     """ """
     output_trajectory_array = np.zeros(trajectories.shape)
 
-    for at, atom in enumerate(trajectories):
-        x, y, z = atom
+    for at, (x, y, z) in enumerate(trajectories):
 
         # Store initial positions
         offsets = np.array([x[0], y[0], z[0]])
