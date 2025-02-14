@@ -46,7 +46,7 @@ md_xtc = DATA_DIR / "md.xtc"
 gromacs_nvt = (DATA_DIR / "gromacs-nvt.pdb", DATA_DIR / "gromacs-nvt.xtc")
 
 
-def _converter_test(tmp_path, typ, result, compare, parameters, compression):
+def _converter_test(tmp_path, converter_type, result, compare, parameters, compression):
     temp_name = tmp_path / "output"
     out_name = temp_name.with_suffix(".mdt")
     log_name = temp_name.with_suffix(".log")
@@ -54,7 +54,7 @@ def _converter_test(tmp_path, typ, result, compare, parameters, compression):
 
     parameters["output_files"] = (temp_name, 64, 128, compression, "INFO")
 
-    converter = Converter.create(typ)
+    converter = Converter.create(converter_type)
     converter.run(parameters, status=True)
 
     traj_conf = HDFTrajectoryConfigurator("trajectory")
@@ -69,7 +69,7 @@ def _converter_test(tmp_path, typ, result, compare, parameters, compression):
     assert out_name.is_file()
     assert log_name.is_file()
 
-@pytest.mark.parametrize("typ,result,compare,parameters", (
+@pytest.mark.parametrize("converter_type,result,compare,parameters", (
     ("LAMMPS", "lammps.mdt",
      ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
      {"config_file": lammps_config,
@@ -191,8 +191,8 @@ def _converter_test(tmp_path, typ, result, compare, parameters, compression):
       "time_step": 1.0}),
 ))
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
-def test_build_mdt_file_and_load(tmp_path, typ, result, compare, parameters, compression):
-    _converter_test(tmp_path, typ, result, compare, parameters, compression)
+def test_build_mdt_file_and_load(tmp_path, converter_type, result, compare, parameters, compression):
+    _converter_test(tmp_path, converter_type, result, compare, parameters, compression)
 
 @pytest.mark.parametrize(
     "unit_system", ["real", "metal", "si", "cgs", "electron", "micro", "nano"]
