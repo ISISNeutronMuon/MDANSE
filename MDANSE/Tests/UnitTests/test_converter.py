@@ -43,6 +43,8 @@ h2o_trj = DATA_DIR / "H2O.trj"
 h2o_xtd = DATA_DIR / "H2O.xtd"
 md_pdb = DATA_DIR / "md.pdb"
 md_xtc = DATA_DIR / "md.xtc"
+gromacs_nvt = (DATA_DIR / "gromacs-nvt.pdb", DATA_DIR / "gromacs-nvt.xtc")
+
 
 def _converter_test(tmp_path, typ, result, compare, parameters, compression):
     temp_name = tmp_path / "output"
@@ -173,6 +175,11 @@ def _converter_test(tmp_path, typ, result, compare, parameters, compression):
      {"fold": False,
       "pdb_file": md_pdb,
       "xtc_file": md_xtc}),
+    ("Gromacs", "gromacs-nvt.mdt",
+     ("/configuration/coordinates", "/unit_cell", "/time"),
+     {"fold": False,
+      "pdb_file": gromacs_nvt[0],
+      "xtc_file": gromacs_nvt[1]}),
     ("MDAnalysis", "md.mdt",
      ("/configuration/coordinates", "/unit_cell", "/time"),
      {"topology_file": (md_pdb, "AUTO"),
