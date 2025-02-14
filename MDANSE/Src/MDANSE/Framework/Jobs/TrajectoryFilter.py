@@ -163,8 +163,7 @@ class TrajectoryFilter(IJob):
         filtered_coords = apply(
             filter,
             trajectories,
-            apply_offsets=filter_attributes.get("attenuation_type", "bandpass")
-            is not "lowpass",
+            apply_offsets=filter_attributes.get("attenuation_type", "bandpass") != "lowpass",
         )
 
         # Create trajectory writer object
