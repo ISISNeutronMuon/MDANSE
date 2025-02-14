@@ -20,6 +20,7 @@ from functools import partial
 from typing import Tuple
 
 import scipy.signal
+from abc import ABC, abstractmethod
 from MDANSE.Mathematics.Arithmetic import weight
 from scipy import signal, fftpack
 
@@ -320,7 +321,7 @@ def get_spectrum(signal, window=None, timeStep=1.0, axis=0, fft="fft"):
 DEFAULT_FILTER_CUTOFF = 25.0
 
 
-class Filter:
+class Filter(ABC):
     """Base class for a filter operating on a signal."""
 
     # Symbolic variable for analog filter transfer function (Laplace plane)
@@ -359,6 +360,7 @@ class Filter:
         CUSTOM: int = 0
         FFT: int = 1
 
+    @abstractmethod
     def __init__(self, **kwargs):
         if not hasattr(self, "default_settings"):
             self.__class__.set_defaults()
