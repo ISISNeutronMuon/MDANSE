@@ -24,7 +24,7 @@ from MDANSE.Framework.Formats import HDFFormat
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import FILTER_MAP
-from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Configuration import RealConfiguration, PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MLogging import LOG
 
@@ -205,7 +205,9 @@ class TrajectoryFilter(IJob):
 
 
 def apply(filter, trajectories, apply_offsets: bool) -> np.ndarray:
-    """ """
+    """
+
+    """
     output_trajectory_array = np.zeros(trajectories.shape)
 
     for at, (x, y, z) in enumerate(trajectories):
@@ -229,7 +231,9 @@ def write_filtered_trajectory(
     filtered_coordinates: np.ndarray,
     output_trajectory: TrajectoryWriter,
 ) -> None:
-    """ """
+    """
+
+    """
     time = parent_configuration["frames"]["time"]
     dt = time[1] - time[0]
     for index in range(nsteps):
@@ -240,9 +244,14 @@ def write_filtered_trajectory(
         # The filtered configuration coordinates at the current frame index
         filtered_configuration_coordinates = np.array(frame_coordinates)
 
-        filtered_configuration = RealConfiguration(
-            output_trajectory.chemical_system, filtered_configuration_coordinates
+        filtered_configuration = get_output_configuration(
+            parent=parent_configuration["trajectory"]["instance"].configuration(
+                parent_configuration["frames"]["value"][0]
+            ),
+            output_chemical_system=output_trajectory.chemical_system,
+            output_coordinates=filtered_configuration_coordinates
         )
+
         output_trajectory.chemical_system.configuration = filtered_configuration
 
         output_trajectory.dump_configuration(
@@ -250,3 +259,16 @@ def write_filtered_trajectory(
             dt * index,
             units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"},
         )
+
+def get_output_configuration(parent, output_chemical_system, output_coordinates):
+    """
+
+    """
+    if parent.is_periodic:
+        return PeriodicRealConfiguration(
+            output_chemical_system,
+            output_coordinates,
+            parent.unit_cell
+        )
+
+    return RealConfiguration(output_chemical_system, output_coordinates)
