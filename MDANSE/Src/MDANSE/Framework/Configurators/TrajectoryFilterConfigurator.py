@@ -43,8 +43,6 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
             The filter settings dictionary
         """
-        filter.set_defaults()
-
         return {setting: values["value"] for setting, values in filter.default_settings.items()}
 
     _settings = filter_default_attributes.__func__(object())

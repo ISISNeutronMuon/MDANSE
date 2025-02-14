@@ -362,9 +362,6 @@ class Filter(ABC):
 
     @abstractmethod
     def __init__(self, **kwargs):
-        if not hasattr(self, "default_settings"):
-            self.__class__.set_defaults()
-
         # Number of simulation steps
         self.n_steps = kwargs.pop("n_steps")
         # Simulation sample frequency in pHz
@@ -657,21 +654,18 @@ class Filter(ABC):
 class Butterworth(Filter):
     """Interface for the butterworth filter."""
 
-    @classmethod
-    def set_defaults(cls) -> None:
-        """Set up the default filter settings."""
-        cls.default_settings = {
-            "order": {"description": "The order of the filter", "value": 1},
-            "attenuation_type": {
-                "description": "Filter attenuation type",
-                "values": {"lowpass", "highpass", "bandpass", "bandstop"},
-                "value": "lowpass",
-            },
-            "cutoff_freq": {
-                "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
-                "value": DEFAULT_FILTER_CUTOFF,
-            },
-        }
+    default_settings = {
+        "order": {"description": "The order of the filter", "value": 1},
+        "attenuation_type": {
+            "description": "Filter attenuation type",
+            "values": {"lowpass", "highpass", "bandpass", "bandstop"},
+            "value": "lowpass",
+        },
+        "cutoff_freq": {
+            "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -690,26 +684,22 @@ class Butterworth(Filter):
 
 class ChebyshevTypeI(Filter):
     """ """
-
-    @classmethod
-    def set_defaults(cls) -> None:
-        """Set up the default filter settings."""
-        cls.default_settings = {
-            "order": {"description": "The order of the filter", "value": 1},
-            "max_ripple": {
-                "description": "Decibel measure of maximum ripple allowed below unit gain in the passband",
-                "value": 5.0,
-            },
-            "attenuation_type": {
-                "description": "Filter attenuation type",
-                "values": {"lowpass", "highpass", "bandpass", "bandstop"},
-                "value": "lowpass",
-            },
-            "cutoff_freq": {
-                "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
-                "value": DEFAULT_FILTER_CUTOFF,
-            },
-        }
+    default_settings = {
+        "order": {"description": "The order of the filter", "value": 1},
+        "max_ripple": {
+            "description": "Decibel measure of maximum ripple allowed below unit gain in the passband",
+            "value": 5.0,
+        },
+        "attenuation_type": {
+            "description": "Filter attenuation type",
+            "values": {"lowpass", "highpass", "bandpass", "bandstop"},
+            "value": "lowpass",
+        },
+        "cutoff_freq": {
+            "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -729,26 +719,22 @@ class ChebyshevTypeI(Filter):
 
 class ChebyshevTypeII(Filter):
     """ """
-
-    @classmethod
-    def set_defaults(cls) -> None:
-        """Set up the default filter settings."""
-        cls.default_settings = {
-            "order": {"description": "The order of the filter", "value": 1},
-            "min_attenuation": {
-                "description": "Decibel measure of minimum attenuation required in the stopband",
-                "value": 20.0,
-            },
-            "attenuation_type": {
-                "description": "Filter attenuation type",
-                "values": {"lowpass", "highpass", "bandpass", "bandstop"},
-                "value": "lowpass",
-            },
-            "cutoff_freq": {
-                "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
-                "value": DEFAULT_FILTER_CUTOFF,
-            },
-        }
+    default_settings = {
+        "order": {"description": "The order of the filter", "value": 1},
+        "min_attenuation": {
+            "description": "Decibel measure of minimum attenuation required in the stopband",
+            "value": 20.0,
+        },
+        "attenuation_type": {
+            "description": "Filter attenuation type",
+            "values": {"lowpass", "highpass", "bandpass", "bandstop"},
+            "value": "lowpass",
+        },
+        "cutoff_freq": {
+            "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -768,30 +754,26 @@ class ChebyshevTypeII(Filter):
 
 class Elliptical(Filter):
     """ """
-
-    @classmethod
-    def set_defaults(cls) -> None:
-        """Set up the default filter settings."""
-        cls.default_settings = {
-            "order": {"description": "The order of the filter", "value": 1},
-            "max_ripple": {
-                "description": "Decibel measure of maximum ripple allowed below unit gain in the passband",
-                "value": 5.0,
-            },
-            "min_attenuation": {
-                "description": "Decibel measure of minimum attenuation required in the stopband",
-                "value": 20.0,
-            },
-            "attenuation_type": {
-                "description": "Filter attenuation type",
-                "values": {"lowpass", "highpass", "bandpass", "bandstop"},
-                "value": "lowpass",
-            },
-            "cutoff_freq": {
-                "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
-                "value": DEFAULT_FILTER_CUTOFF,
-            },
-        }
+    default_settings = {
+        "order": {"description": "The order of the filter", "value": 1},
+        "max_ripple": {
+            "description": "Decibel measure of maximum ripple allowed below unit gain in the passband",
+            "value": 5.0,
+        },
+        "min_attenuation": {
+            "description": "Decibel measure of minimum attenuation required in the stopband",
+            "value": 20.0,
+        },
+        "attenuation_type": {
+            "description": "Filter attenuation type",
+            "values": {"lowpass", "highpass", "bandpass", "bandstop"},
+            "value": "lowpass",
+        },
+        "cutoff_freq": {
+            "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -812,27 +794,23 @@ class Elliptical(Filter):
 
 class Bessel(Filter):
     """ """
-
-    @classmethod
-    def set_defaults(cls) -> None:
-        """Set up the default filter settings."""
-        cls.default_settings = {
-            "order": {"description": "The order of the filter", "value": 1},
-            "norm": {
-                "description": "Filter normalization results in the following behaviour at cutoff - phase: phase response obtains midpoint - delay: group delay in passband is the reciprocal of cutoff - mag: gain magnitude is -3 dB",
-                "values": {"phase", "delay", "mag"},
-                "value": "phase",
-            },
-            "attenuation_type": {
-                "description": "Filter attenuation type",
-                "values": {"lowpass", "highpass", "bandpass", "bandstop"},
-                "value": "lowpass",
-            },
-            "cutoff_freq": {
-                "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
-                "value": DEFAULT_FILTER_CUTOFF,
-            },
-        }
+    default_settings = {
+        "order": {"description": "The order of the filter", "value": 1},
+        "norm": {
+            "description": "Filter normalization results in the following behaviour at cutoff - phase: phase response obtains midpoint - delay: group delay in passband is the reciprocal of cutoff - mag: gain magnitude is -3 dB",
+            "values": {"phase", "delay", "mag"},
+            "value": "phase",
+        },
+        "attenuation_type": {
+            "description": "Filter attenuation type",
+            "values": {"lowpass", "highpass", "bandpass", "bandstop"},
+            "value": "lowpass",
+        },
+        "cutoff_freq": {
+            "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -852,22 +830,18 @@ class Bessel(Filter):
 
 class Notch(Filter):
     """ """
+    default_settings = {
+        "fundamental_freq": {
+            "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+        "quality_factor": {
+            "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
+            "value": 1.0,
+        },
+    }
 
     digital_only = True
-
-    @classmethod
-    def set_defaults(cls) -> None:
-        """Set up the default filter settings."""
-        cls.default_settings = {
-            "fundamental_freq": {
-                "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
-                "value": DEFAULT_FILTER_CUTOFF,
-            },
-            "quality_factor": {
-                "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
-                "value": 1.0,
-            },
-        }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -888,22 +862,18 @@ class Notch(Filter):
 
 class Peak(Filter):
     """ """
+    default_settings = {
+        "fundamental_freq": {
+            "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+        "quality_factor": {
+            "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
+            "value": 1.0,
+        },
+    }
 
     digital_only = True
-
-    @classmethod
-    def set_defaults(cls) -> None:
-        """Set up the default filter settings."""
-        cls.default_settings = {
-            "fundamental_freq": {
-                "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
-                "value": DEFAULT_FILTER_CUTOFF,
-            },
-            "quality_factor": {
-                "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
-                "value": 1.0,
-            },
-        }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -924,32 +894,28 @@ class Peak(Filter):
 
 class Comb(Filter):
     """ """
+    default_settings = {
+        "fundamental_freq": {
+            "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+        "quality_factor": {
+            "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
+            "value": 1.0,
+        },
+        "comb_type": {
+            "description": "Determines whether quality factor applies to notches or peaks",
+            "values": {"peak", "notch"},
+            "value": "notch",
+        },
+        "pass_zero": {
+            "description": "Determines whether notches or peaks centered on integer multiples of fundamental frequency",
+            "values": {True, False},
+            "value": False,
+        },
+    }
 
     digital_only = True
-
-    @classmethod
-    def set_defaults(cls) -> None:
-        """Set up the default filter settings."""
-        cls.default_settings = {
-            "fundamental_freq": {
-                "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
-                "value": DEFAULT_FILTER_CUTOFF,
-            },
-            "quality_factor": {
-                "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
-                "value": 1.0,
-            },
-            "comb_type": {
-                "description": "Determines whether quality factor applies to notches or peaks",
-                "values": {"peak", "notch"},
-                "value": "notch",
-            },
-            "pass_zero": {
-                "description": "Determines whether notches or peaks centered on integer multiples of fundamental frequency",
-                "values": {True, False},
-                "value": False,
-            },
-        }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

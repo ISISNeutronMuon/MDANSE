@@ -374,7 +374,6 @@ class FilterDesigner(QDialog):
         filter : Filter
             Selected filter class (one of [Butterworth, ChebyshevTypeI, ChebyshevTypeII, Elliptical, Bessel, Notch, Peak, Comb])
         """
-        filter.set_defaults()
         setting_items = filter.default_settings.items()
 
         # Add filter settings to grid layout
