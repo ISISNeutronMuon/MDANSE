@@ -254,6 +254,12 @@ class FilterDesigner(QDialog):
 
         self.render_canvas_assets()
 
+    def resample_and_normalise(self, signal, to_len):
+        """
+
+        """
+        return signal.resample(signal, to_len) * (signal.max() ** (-1))
+
     def set_trajectory_power_spectrum(
         self, filter: Filter
     ) -> Tuple[np.ndarray, np.ndarray]:
@@ -272,9 +278,6 @@ class FilterDesigner(QDialog):
         """
         response = filter.freq_response
 
-        # Lambda to resample and normalise input values
-        values = lambda a, new_len: signal.resample(a, new_len) * (a.max() ** (-1))
-
         # Trajectory power spectrum data
         raw_power_spectrum = copy.deepcopy(self._trajectory_power_spectrum)
         raw_power_spectrum_energies, raw_power_spectrum_values = raw_power_spectrum
@@ -292,7 +295,7 @@ class FilterDesigner(QDialog):
         filter.freq_response = (filter.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
 
         # Resample and normalise trajectory power spectrum (y-axis)
-        ps = values(raw_power_spectrum_values, len(response.frequencies))
+        ps = self.resample_and_normalise(signal=raw_power_spectrum_values, to_len=len(response.frequencies))
 
         # Compute power spectral attenuation due to filter (multiplicative)
         attenuated_ps = ps * filter.freq_response.magnitudes
