@@ -568,7 +568,7 @@ class Filter(ABC):
         """
         if analog:
             # Analogue (Laplace-domain) transfer function
-            numerator_str = Filter.polynomial_string(numerator, cls.S)
+            numerator_str = cls.polynomial_string(numerator, cls.S)
             denominator_str = Filter.polynomial_string(denominator, cls.S)
             return {
                 "unit": "S",
