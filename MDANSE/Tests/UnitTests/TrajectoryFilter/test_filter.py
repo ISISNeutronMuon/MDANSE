@@ -28,7 +28,6 @@ class TrajectoryFilterTest(unittest.TestCase):
         attentuating the higher of the two.
         """
         filter_class = FILTER_MAP["Butterworth"]
-        filter_class.set_defaults()
 
         # Angular frequency and amplitude of lower frequency component
         cycles_per_second_0 = 1.5
