@@ -589,9 +589,14 @@ class Filter(ABC):
         """
         settings = self.__class__.__dict__["default_settings"]
         for setting in settings.keys():
-            description.append(
-                f"  # {setting}\n  {settings[setting]['description']}\n      {self.__dict__[setting]}\n\n"
-            )
+            description += f"""
+  # {setting}
+  {settings[setting]['description']}
+      {self.__dict__[setting]}
+            """
+            #description.append(
+            #    f"  # {setting}\n  {settings[setting]['description']}\n      {self.__dict__[setting]}\n\n"
+            #)
 
     def __str__(self):
         """Returns a string representation of the filter.
@@ -599,16 +604,24 @@ class Filter(ABC):
         :Returns:
             #. str: string representation of the filter
         """
-        string_representation = [
-            f"Trajectory filter of type {self.__class__.__name__} implemented with the following parameters:\n\n",
-            f"  # sample_freq\n  Reciprocal of the molecular dynamics time step, in picohertz\n      {self.__dict__['_sample_freq']}\n\n",
-            f"  # freq_response (analog)\n  N coefficients of analog filter transfer function, numerator and denominator (multiples of {Filter.S}^(N-n))\n      {tuple(self.__dict__['_coeffs'].numerator), tuple(self.__dict__['_coeffs'].denominator)}\n\n",
-            f"  # freq_response (digital)\n  M coefficients of digital filter transfer function, numerator and denominator (multiples of {Filter.Z}^(-m))\n      {tuple(self.__dict__['_coeffs'].numerator), tuple(self.__dict__['_coeffs'].denominator)}\n\n",
-        ]
+        string_representation = f"""Trajectory filter of type {self.__class__.__name__} implemented with the following parameters:
+
+  # sample_freq
+  Reciprocal of the molecular dynamics time step, in picohertz
+      {self.__dict__['_sample_freq']}
+
+  # freq_response (analog)
+  N coefficients of analog filter transfer function, numerator and denominator (multiples of {Filter.S}^(N-n))
+      {tuple(self.__dict__['_coeffs'].numerator), tuple(self.__dict__['_coeffs'].denominator)}
+
+  # freq_response (digital)
+  M coefficients of digital filter transfer function, numerator and denominator (multiples of {Filter.Z}^(-m))
+      {tuple(self.__dict__['_coeffs'].numerator), tuple(self.__dict__['_coeffs'].denominator)}
+        """
 
         self.attributes_to_string(string_representation)
 
-        return "".join(string_representation)
+        return string_representation
 
     def to_json(self) -> dict:
         """Returns a concise dictionary (json) representation of the filter.
@@ -622,7 +635,7 @@ class Filter(ABC):
 
     @classmethod
     def freq_to_energy(cls, freq):
-        """Returns the energy value (or values) in millielectronvolts (meV), converted from frequency value (or values) in picohertz (pHz).
+        """Returns the energy value (or values) in millielectronvolts (meV), converted from frequency value (or values) in terahertz (THz).
 
         :Parameters:
             #. freq (float | np.ndarray): frequency
