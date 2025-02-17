@@ -266,12 +266,12 @@ class FilterDesigner(QDialog):
         """Generate an appropriately resampled power spectrum for the input trajectory,
         as well as the multiplicative attenuation effect of the designed filter.
 
-        Parameters:
+        Parameters
         ----------
-        filter: Filter
+        filter : Filter
             The Filter class for the designed filter
 
-        Returns:
+        Returns
         -------
         Tuple[np.ndarray, np.ndarray]
             Trajectory power spectrum and the attenuated power spectrum due to the designed filter response
@@ -750,7 +750,7 @@ class FilterDesigner(QDialog):
 
         Parameters
         ----------
-        filter: Filter
+        filter : Filter
             The filter class for the designed filter
         attributes: dict
             Dictionary of filter attributes
