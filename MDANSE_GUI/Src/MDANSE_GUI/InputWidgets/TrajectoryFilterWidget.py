@@ -745,8 +745,7 @@ class FilterDesigner(QDialog):
         widget_area.addWidget(canvas)
         self.render_canvas_assets()
 
-    @staticmethod
-    def combine_attributes(filter: Filter, attributes: dict) -> dict:
+    def combine_attributes(self, filter: Filter, attributes: dict) -> dict:
         """Update the filter attributes with missing attributes, using default values
 
         Parameters
