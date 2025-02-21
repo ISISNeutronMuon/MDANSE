@@ -987,13 +987,11 @@ def power_spectrum(
     output = {"romega": instrument_resolution["romega"]}
 
     for element in atom_selection["unique_names"]:
-        output["pacf_%s" % element] = np.zeros(
-            np.array(range(frames["n_frames"])).shape
-        )
-        output["pps_%s" % element] = np.zeros(output["romega"].shape)
+        output[f"pacf_{element}"] = np.zeros(frames["n_frames"])
+        output[f"pps_{element}"] = np.zeros_like(output["romega"])
 
-    output["pacf_total"] = np.zeros(np.array(range(frames["n_frames"])).shape)
-    output["pps_total"] = np.zeros(output["romega"].shape)
+    output["pacf_total"] = np.zeros(frames["n_frames"])
+    output["pps_total"] = np.zeros_like(output["romega"])
 
     for index in range(num_atoms):
         indexes = atom_selection["indices"][index]
