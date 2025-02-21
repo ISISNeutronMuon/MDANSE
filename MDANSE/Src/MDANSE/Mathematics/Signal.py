@@ -993,11 +993,9 @@ def power_spectrum(
     output["pacf_total"] = np.zeros(frames["n_frames"])
     output["pps_total"] = np.zeros_like(output["romega"])
 
-    for index in range(num_atoms):
-        indexes = atom_selection["indices"][index]
-        atoms = [sorted_atoms[idx] for idx in indexes]
+    for indices, name in zip(atom_selection["indices"], atom_selection["names"]):
         series = trajectory.read_com_trajectory(
-            indexes,
+            indices,
             first=frames["first"],
             last=frames["last"] + 1,
             step=frames["step"],
@@ -1011,9 +1009,7 @@ def power_spectrum(
             3 * n_configs
         )
 
-        output["pacf_%s" % atom_selection["names"][index]] += np.array(
-            [x[0] for x in atomicPACF]
-        )
+        output[f"pacf_{name}"] += np.array([x[0] for x in atomicPACF])
 
     nAtomsPerElement = atom_selection.get_natoms()
     for element, number in nAtomsPerElement.items():
