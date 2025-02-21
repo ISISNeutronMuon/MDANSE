@@ -2,6 +2,8 @@ import os
 import tempfile
 from pathlib import Path
 
+from compare_mdt import compare_mdt
+
 import h5py
 import numpy as np
 import pytest
@@ -66,9 +68,7 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
     traj_conf.get_information()
     traj_conf["hdf_trajectory"].close()
 
-    with h5py.File(out_name) as actual, h5py.File(result_name) as desired:
-        for prop in compare:
-            np.testing.assert_array_almost_equal(actual[prop], desired[prop])
+    compare_mdt(out_name, result_name, compare)
 
     assert out_name.is_file()
     assert log_name.is_file()
