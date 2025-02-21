@@ -237,9 +237,7 @@ def write_filtered_trajectory(
     time = parent_configuration["frames"]["time"]
     dt = time[1] - time[0]
     for index in range(nsteps):
-        frame_coordinates = list()
-        for atom in filtered_coordinates:
-            frame_coordinates.append((atom[0][index], atom[1][index], atom[2][index]))
+        frame_coordinates = [(x[index], y[index], z[index]) for (x, y, z) in filtered_coordinates]
 
         # The filtered configuration coordinates at the current frame index
         filtered_configuration_coordinates = np.array(frame_coordinates)
