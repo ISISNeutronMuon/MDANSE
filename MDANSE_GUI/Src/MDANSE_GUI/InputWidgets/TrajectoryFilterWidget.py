@@ -213,18 +213,18 @@ class FilterDesigner(QDialog):
         if self._settings["filter"] not in {"Notch", "Peak", "Comb"}:
             if value in {"bandpass", "bandstop"}:
                 self.toggle_bound_frequencies()
-                self._settings["attributes"][
-                    "cutoff_freq"
-                ] = self.get_frequency_bounds()
+                self._settings["attributes"]["cutoff_freq"] = (
+                    self.get_frequency_bounds()
+                )
             elif value in {"lowpass", "highpass"}:
                 self.toggle_bound_frequencies(False)
-                self._settings["attributes"][
-                    "cutoff_freq"
-                ] = self.cutoff_freq_widget.value()
+                self._settings["attributes"]["cutoff_freq"] = (
+                    self.cutoff_freq_widget.value()
+                )
             elif self.attenuation_type_widget.currentText() in {"bandpass", "bandstop"}:
-                self._settings["attributes"][
-                    "cutoff_freq"
-                ] = self.get_frequency_bounds()
+                self._settings["attributes"]["cutoff_freq"] = (
+                    self.get_frequency_bounds()
+                )
 
         # Re-render filter graph
         self.render_canvas_assets()
@@ -650,7 +650,7 @@ class FilterDesigner(QDialog):
             and self._settings["attributes"].get("order", 1) < 6
         ):
             self._figure_info.append(f"           {numerator}")
-            self._figure_info.append(f"H({unit})=    {'-'*len(denominator)}")
+            self._figure_info.append(f"H({unit})=    {'-' * len(denominator)}")
             self._figure_info.append(f"           {denominator}")
         else:
             self._figure_info.append(

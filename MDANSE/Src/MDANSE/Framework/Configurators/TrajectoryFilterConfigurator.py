@@ -43,10 +43,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
             The filter settings dictionary
         """
-        return {
-            setting: values["value"]
-            for setting, values in filter.default_settings.items()
-        }
+        return {setting: values["value"] for setting, values in filter.default_settings.items()}
 
     _settings = filter_default_attributes.__func__(object())
 
@@ -78,9 +75,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
             A string representation of the filter settings dictionary
         """
-        return (
-            f'{{ "filter": "{filter.__name__}", "attributes": {json.dumps(settings)}}}'
-        )
+        return f'{{ "filter": "{filter.__name__}", "attributes": {json.dumps(settings)}}}'
 
     _default = filter_description_string.__func__()
 
@@ -98,10 +93,14 @@ class TrajectoryFilterConfigurator(IConfigurator):
             dict_value = json.loads(value)
 
             if not {"filter", "attributes"} <= dict_value.keys():
-                self.error_status = f"The dictionary \n{dict_value}\n does not contain the expected keys"
+                self.error_status = (
+                    f"The dictionary \n{dict_value}\n does not contain the expected keys"
+                )
 
         except (TypeError, ValueError) as e:
-            self.error_status = f"Value \n{value}\n in {self} is not of correct format (expected JSON string)"
+            self.error_status = (
+                f"Value \n{value}\n in {self} is not of correct format (expected JSON string)"
+            )
 
         self.error_status = "OK"
         self["value"] = self._settings

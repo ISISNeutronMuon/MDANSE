@@ -92,9 +92,7 @@ class TrajectoryFilter(IJob):
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.configuration["trajectory"]["instance"].chemical_system.atom_list
 
         self._selected_atoms = [
             self._atoms[i]
@@ -169,8 +167,7 @@ class TrajectoryFilter(IJob):
         filtered_coords = apply(
             filter,
             trajectories,
-            apply_offsets=filter_attributes.get("attenuation_type", "bandpass")
-            != "lowpass",
+            apply_offsets=filter_attributes.get("attenuation_type", "bandpass") != "lowpass",
         )
 
         # Create trajectory writer object
@@ -216,7 +213,6 @@ def apply(filter, trajectories, apply_offsets: bool) -> np.ndarray:
     output_trajectory_array = np.zeros(trajectories.shape)
 
     for at, (x, y, z) in enumerate(trajectories):
-
         # Store initial positions
         offsets = np.array([x[0], y[0], z[0]])
 
@@ -240,9 +236,7 @@ def write_filtered_trajectory(
     time = parent_configuration["frames"]["time"]
     dt = time[1] - time[0]
     for index in range(nsteps):
-        frame_coordinates = [
-            (x[index], y[index], z[index]) for (x, y, z) in filtered_coordinates
-        ]
+        frame_coordinates = [(x[index], y[index], z[index]) for (x, y, z) in filtered_coordinates]
 
         # The filtered configuration coordinates at the current frame index
         filtered_configuration_coordinates = np.array(frame_coordinates)
