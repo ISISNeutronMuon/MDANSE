@@ -24,7 +24,10 @@ from MDANSE.Framework.Formats import HDFFormat
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import FILTER_MAP
-from MDANSE.MolecularDynamics.Configuration import RealConfiguration, PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Configuration import (
+    RealConfiguration,
+    PeriodicRealConfiguration,
+)
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MLogging import LOG
 
@@ -93,7 +96,10 @@ class TrajectoryFilter(IJob):
             "instance"
         ].chemical_system.atom_list
 
-        self._selected_atoms = [self._atoms[i] for i in np.array(self.configuration["atom_selection"]["indices"]).flatten()]
+        self._selected_atoms = [
+            self._atoms[i]
+            for i in np.array(self.configuration["atom_selection"]["indices"]).flatten()
+        ]
 
         # This stores the trajectory (position array) of atoms by x, y, z component, to be filtered
         self.atomic_trajectory_array = np.zeros(
@@ -163,7 +169,8 @@ class TrajectoryFilter(IJob):
         filtered_coords = apply(
             filter,
             trajectories,
-            apply_offsets=filter_attributes.get("attenuation_type", "bandpass") != "lowpass",
+            apply_offsets=filter_attributes.get("attenuation_type", "bandpass")
+            != "lowpass",
         )
 
         # Create trajectory writer object
@@ -205,9 +212,7 @@ class TrajectoryFilter(IJob):
 
 
 def apply(filter, trajectories, apply_offsets: bool) -> np.ndarray:
-    """
-
-    """
+    """ """
     output_trajectory_array = np.zeros(trajectories.shape)
 
     for at, (x, y, z) in enumerate(trajectories):
@@ -231,13 +236,13 @@ def write_filtered_trajectory(
     filtered_coordinates: np.ndarray,
     output_trajectory: TrajectoryWriter,
 ) -> None:
-    """
-
-    """
+    """ """
     time = parent_configuration["frames"]["time"]
     dt = time[1] - time[0]
     for index in range(nsteps):
-        frame_coordinates = [(x[index], y[index], z[index]) for (x, y, z) in filtered_coordinates]
+        frame_coordinates = [
+            (x[index], y[index], z[index]) for (x, y, z) in filtered_coordinates
+        ]
 
         # The filtered configuration coordinates at the current frame index
         filtered_configuration_coordinates = np.array(frame_coordinates)
@@ -247,7 +252,7 @@ def write_filtered_trajectory(
                 parent_configuration["frames"]["value"][0]
             ),
             output_chemical_system=output_trajectory.chemical_system,
-            output_coordinates=filtered_configuration_coordinates
+            output_coordinates=filtered_configuration_coordinates,
         )
 
         output_trajectory.chemical_system.configuration = filtered_configuration
@@ -258,15 +263,12 @@ def write_filtered_trajectory(
             units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"},
         )
 
-def get_output_configuration(parent, output_chemical_system, output_coordinates):
-    """
 
-    """
+def get_output_configuration(parent, output_chemical_system, output_coordinates):
+    """ """
     if parent.is_periodic:
         return PeriodicRealConfiguration(
-            output_chemical_system,
-            output_coordinates,
-            parent.unit_cell
+            output_chemical_system, output_coordinates, parent.unit_cell
         )
 
     return RealConfiguration(output_chemical_system, output_coordinates)

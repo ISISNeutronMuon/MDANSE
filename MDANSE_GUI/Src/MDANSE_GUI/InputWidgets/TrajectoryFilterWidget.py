@@ -255,9 +255,7 @@ class FilterDesigner(QDialog):
         self.render_canvas_assets()
 
     def resample_and_normalise(self, values, to_len):
-        """
-
-        """
+        """ """
         return signal.resample(values, to_len) * (values.max() ** (-1))
 
     def set_trajectory_power_spectrum(
@@ -295,7 +293,9 @@ class FilterDesigner(QDialog):
         filter.freq_response = (filter._coeffs, Filter.FrequencyRangeMethod.CUSTOM)
 
         # Resample and normalise trajectory power spectrum (y-axis)
-        ps = self.resample_and_normalise(values=raw_power_spectrum_values, to_len=len(response.frequencies))
+        ps = self.resample_and_normalise(
+            values=raw_power_spectrum_values, to_len=len(response.frequencies)
+        )
 
         # Compute power spectral attenuation due to filter (multiplicative)
         attenuated_ps = ps * filter.freq_response.magnitudes

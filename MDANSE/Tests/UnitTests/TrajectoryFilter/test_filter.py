@@ -7,19 +7,16 @@ import unittest
 
 from MDANSE.Mathematics.Signal import Filter, FILTER_MAP
 
+
 class TrajectoryFilterTest(unittest.TestCase):
-    SIMPLE_HYDROGEN_PATH = '../Data/methane_hydrogen_position.csv'
+    SIMPLE_HYDROGEN_PATH = "../Data/methane_hydrogen_position.csv"
 
     def test_freq_to_energy_conversion(self):
-        """60.0 pHz to meV
-
-        """
+        """60.0 pHz to meV"""
         self.assertAlmostEqual(Filter.freq_to_energy(59.0), 39.0, 0)
 
     def test_energy_to_freq_conversion(self):
-        """39.0 meV to pHz
-
-        """
+        """39.0 meV to pHz"""
         self.assertAlmostEqual(Filter.energy_to_freq(39.0), 59.0, 0)
 
     def test_simple_filter_sinusoidal(self):
@@ -42,16 +39,16 @@ class TrajectoryFilterTest(unittest.TestCase):
         # Generate signal from summation of components
         N = 10000
         t = np.linspace(0, 20, N)
-        fs = (t[1] - t[0])**(-1)
+        fs = (t[1] - t[0]) ** (-1)
         x = a0 * np.sin(w0 * t) + a1 * np.sin(w1 * t)
 
         # Instantiate filter
         f = filter_class(
-            attenuation_type = "highpass",
-            order = 1,
-            cutoff_freq = 0.5 * w1,
-            time_step_ps = 1/fs,
-            n_steps = N
+            attenuation_type="highpass",
+            order=1,
+            cutoff_freq=0.5 * w1,
+            time_step_ps=1 / fs,
+            n_steps=N,
         )
 
         # Apply filter to signal
@@ -60,15 +57,14 @@ class TrajectoryFilterTest(unittest.TestCase):
         # Fourier transform results
         post_filter_freqs = {
             "h": fftpack.fft(post_filter),
-            "w": fftpack.fftfreq(N, d=1/fs)
+            "w": fftpack.fftfreq(N, d=1 / fs),
         }
 
-        w = post_filter_freqs["w"][:np.int32(N/2)]
-        amplitudes = (2 * (np.abs(post_filter_freqs["h"])) / N)[:np.int32(N/2)]
+        w = post_filter_freqs["w"][: np.int32(N / 2)]
+        amplitudes = (2 * (np.abs(post_filter_freqs["h"])) / N)[: np.int32(N / 2)]
 
         # Indices of peaks in FFT
         freqs = signal.find_peaks(amplitudes)[0]
 
         # Check low frequency sinusoid is greatly attenuated
-        self.assertTrue(amplitudes[freqs[0]] < a1*10e-3)
-
+        self.assertTrue(amplitudes[freqs[0]] < a1 * 10e-3)

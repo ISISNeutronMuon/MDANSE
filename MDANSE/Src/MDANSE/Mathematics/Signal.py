@@ -429,7 +429,7 @@ class Filter(ABC):
 
         # Get frequency response from transfer function expression and specify frequency range around which to compute response
         response = self.compute_frequencies(
-            transfer_function=expr, range=np.abs(2/np.pi * freq_range)
+            transfer_function=expr, range=np.abs(2 / np.pi * freq_range)
         )
         self._freq_response = self.FrequencyDomain(*response)
 
@@ -544,9 +544,9 @@ class Filter(ABC):
   {settings[setting]['description']}
       {self.__dict__[setting]}
             """
-            #description.append(
+            # description.append(
             #    f"  # {setting}\n  {settings[setting]['description']}\n      {self.__dict__[setting]}\n\n"
-            #)
+            # )
 
     def __str__(self):
         """Returns a string representation of the filter.
@@ -647,6 +647,7 @@ class Butterworth(Filter):
 
 class ChebyshevTypeI(Filter):
     """ """
+
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
         "max_ripple": {
@@ -682,6 +683,7 @@ class ChebyshevTypeI(Filter):
 
 class ChebyshevTypeII(Filter):
     """ """
+
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
         "min_attenuation": {
@@ -717,6 +719,7 @@ class ChebyshevTypeII(Filter):
 
 class Elliptical(Filter):
     """ """
+
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
         "max_ripple": {
@@ -757,6 +760,7 @@ class Elliptical(Filter):
 
 class Bessel(Filter):
     """ """
+
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
         "norm": {
@@ -793,6 +797,7 @@ class Bessel(Filter):
 
 class Notch(Filter):
     """ """
+
     default_settings = {
         "fundamental_freq": {
             "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
@@ -825,6 +830,7 @@ class Notch(Filter):
 
 class Peak(Filter):
     """ """
+
     default_settings = {
         "fundamental_freq": {
             "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
@@ -857,6 +863,7 @@ class Peak(Filter):
 
 class Comb(Filter):
     """ """
+
     default_settings = {
         "fundamental_freq": {
             "description": "Spacing between filter peaks (value must evenly divide sample frequency)",

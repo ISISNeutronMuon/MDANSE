@@ -43,7 +43,10 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
             The filter settings dictionary
         """
-        return {setting: values["value"] for setting, values in filter.default_settings.items()}
+        return {
+            setting: values["value"]
+            for setting, values in filter.default_settings.items()
+        }
 
     _settings = filter_default_attributes.__func__(object())
 
@@ -75,7 +78,9 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
             A string representation of the filter settings dictionary
         """
-        return f'{{ "filter": "{filter.__name__}", "attributes": {json.dumps(settings)}}}'
+        return (
+            f'{{ "filter": "{filter.__name__}", "attributes": {json.dumps(settings)}}}'
+        )
 
     _default = filter_description_string.__func__()
 
