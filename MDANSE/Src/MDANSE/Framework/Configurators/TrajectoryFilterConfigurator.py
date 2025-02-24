@@ -79,22 +79,6 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
     _default = filter_description_string.__func__()
 
-    @property
-    def settings(self):
-        return self._settings
-
-    @settings.setter
-    def settings(self, settings: dict):
-        self._settings = settings
-
-    @property
-    def filter(self):
-        return self._filter
-
-    @filter.setter
-    def filter(self, name):
-        self._filter = name
-
     def configure(self, value: str):
         """Configure an input value.
 
@@ -103,7 +87,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
         value : str
             The selection setting in a json readable format.
         """
-        self.settings = value
+        self._settings = value
 
         try:
             dict_value = json.loads(value)
@@ -115,4 +99,4 @@ class TrajectoryFilterConfigurator(IConfigurator):
             self.error_status = f"Value \n{value}\n in {self} is not of correct format (expected JSON string)"
 
         self.error_status = "OK"
-        self["value"] = self.settings
+        self["value"] = self._settings

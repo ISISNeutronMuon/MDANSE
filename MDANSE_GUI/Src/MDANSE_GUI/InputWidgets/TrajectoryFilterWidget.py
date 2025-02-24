@@ -93,7 +93,7 @@ class FilterDesigner(QDialog):
 
         self.layouts = QHBoxLayout()
 
-        self.set_filter(self._configurator.filter.__name__)
+        self.set_filter(self._configurator._filter.__name__)
         self.create_designer()
 
     def find_configuration_property(self, key) -> Any:
@@ -291,8 +291,8 @@ class FilterDesigner(QDialog):
         power_spectrum_freqs = Filter.energy_to_freq(power_spectrum_energies)
 
         # Set custom frequency range on filter object
-        filter.custom_freq_range = power_spectrum_freqs
-        filter.freq_response = (filter.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
+        filter._custom_freq_range = power_spectrum_freqs
+        filter.freq_response = (filter._coeffs, Filter.FrequencyRangeMethod.CUSTOM)
 
         # Resample and normalise trajectory power spectrum (y-axis)
         ps = self.resample_and_normalise(values=raw_power_spectrum_values, to_len=len(response.frequencies))
@@ -682,7 +682,7 @@ class FilterDesigner(QDialog):
         numerator, denominator = (
             filter_preview.to_digital_coeffs()
             if not analog_filter
-            else filter_preview.coeffs
+            else filter_preview._coeffs
         )
 
         # Render the filter graph and text
@@ -697,7 +697,7 @@ class FilterDesigner(QDialog):
                 numerator, denominator, analog=analog_filter
             ),
             self._settings["attributes"].get("cutoff_freq", DEFAULT_FILTER_CUTOFF),
-            filter_preview.sample_freq,
+            filter_preview._sample_freq,
         )
 
     def create_graph_canvas(self, fig_width=10.0, fig_height=10.0, dpi=100) -> QWidget:

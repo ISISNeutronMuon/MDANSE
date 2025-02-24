@@ -16,10 +16,8 @@
 import numpy as np
 from enum import Enum
 from collections import namedtuple
-from functools import partial
 from typing import Tuple
 
-import scipy.signal
 from abc import ABC, abstractmethod
 from MDANSE.Mathematics.Arithmetic import weight
 from scipy import signal, fftpack
@@ -348,11 +346,14 @@ class Filter(ABC):
     # Coefficients for numerator and denominator of filter transfer function
     _coeffs = None
 
+    # Stores a custom frequency range around which to compute the filter frequency response, as a linear series
+    _custom_freq_range = None
+
     # Frequency response of filter
     _freq_response = None
 
-    # Stores a custom frequency range around which to compute the filter frequency response, as a linear series
-    _custom_freq_range = None
+    # Sample frequency of molecular dynamics simulation being analysed
+    _sample_freq = None
 
     class FrequencyRangeMethod(Enum):
         """Enumeration for custom (externally provided) and FFT-derived frequency ranges for plotting the filter response"""
@@ -365,7 +366,7 @@ class Filter(ABC):
         # Number of simulation steps
         self.n_steps = kwargs.pop("n_steps")
         # Simulation sample frequency in pHz
-        self.sample_freq = 1 / kwargs.pop("time_step_ps")
+        self._sample_freq = 1 / kwargs.pop("time_step_ps")
         self.set_filter_attributes(kwargs)
 
     def compute_frequencies(
@@ -382,7 +383,7 @@ class Filter(ABC):
         :Returns:
             #. np.array: the resulting signal due to convolution with the filter instance
         """
-        coeffs = self.to_digital_coeffs() if not self.digital_only else self.coeffs
+        coeffs = self.to_digital_coeffs() if not self.digital_only else self._coeffs
         return signal.filtfilt(coeffs.numerator, coeffs.denominator, input)
 
     def to_digital_coeffs(self) -> TransferFunction:
@@ -393,23 +394,9 @@ class Filter(ABC):
         """
         return self.TransferFunction(
             *signal.bilinear(
-                self.coeffs.numerator, self.coeffs.denominator, self.sample_freq
+                self._coeffs.numerator, self._coeffs.denominator, self._sample_freq
             )
         )
-
-    @property
-    def sample_freq(self) -> float:
-        """Sample frequency in hertz.
-
-        :Returns:
-            #. float: Sample frequency
-        """
-        return self._sample_freq
-
-    @sample_freq.setter
-    def sample_freq(self, fs: float) -> None:
-        """Sample frequency in hertz."""
-        self._sample_freq = fs
 
     @property
     def freq_response(self) -> FrequencyDomain:
@@ -433,12 +420,12 @@ class Filter(ABC):
         methods = self.__class__.FrequencyRangeMethod
 
         if method is methods.FFT:
-            freq_range = self.frequency_range(self.n_steps, self.sample_freq ** (-1))
-        elif self.custom_freq_range.any() and method is methods.CUSTOM:
-            freq_range = self.custom_freq_range
+            freq_range = self.frequency_range(self.n_steps, self._sample_freq ** (-1))
+        elif self._custom_freq_range.any() and method is methods.CUSTOM:
+            freq_range = self._custom_freq_range
         else:
             RuntimeError(
-                f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' property on the instance of {self.__class__}"
+                f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' attribute on the instance of {self.__class__}"
             )
 
         # Get frequency response from transfer function expression and specify frequency range around which to compute response
@@ -448,49 +435,13 @@ class Filter(ABC):
         self._freq_response = self.FrequencyDomain(*response)
 
     @property
-    def coeffs(self) -> TransferFunction:
-        """Returns the filter's transfer function numerator and denominator coefficients.
-
-        :Returns:
-            #. TransferFunction: Coefficients for the filter transfer function
-        """
-        return self._coeffs
-
-    @coeffs.setter
-    def coeffs(self, expr: TransferFunction) -> None:
-        """Sets the filter's transfer function numerator and denominator coefficients.
-
-        :Parameters:
-            #. expr (np.array): the rational polynomial expression for the filter transfer function, in terms of its numerator and denominator coefficients
-        """
-        self._coeffs = expr
-
-    @property
     def nyquist(self) -> float:
         """Returns the nyquist limit for the filter sample frequency.
 
         :Returns:
             #. float: Nyquist limit
         """
-        return self.sample_freq / 2
-
-    @property
-    def custom_freq_range(self) -> np.ndarray:
-        """Returns the custom frequency range for use with filter plotting
-
-        :Returns:
-            #. np.ndarray: Coefficients for the filter transfer function
-        """
-        return self._custom_freq_range
-
-    @custom_freq_range.setter
-    def custom_freq_range(self, range: np.ndarray) -> None:
-        """Set the custom frequency range for use with filter plotting
-
-        :Parameters:
-            #. range (np.ndarray): Array of values specifying the frequency range
-        """
-        self._custom_freq_range = range
+        return self._sample_freq / 2
 
     @staticmethod
     def frequency_range(
@@ -683,7 +634,7 @@ class Butterworth(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = self.TransferFunction(
+        self._coeffs = self.TransferFunction(
             *signal.butter(
                 self.order,
                 self.cutoff_freq,
@@ -692,7 +643,7 @@ class Butterworth(Filter):
                 output="ba",
             )
         )
-        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class ChebyshevTypeI(Filter):
@@ -717,7 +668,7 @@ class ChebyshevTypeI(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = self.TransferFunction(
+        self._coeffs = self.TransferFunction(
             *signal.cheby1(
                 self.order,
                 self.max_ripple,
@@ -727,7 +678,7 @@ class ChebyshevTypeI(Filter):
                 output="ba",
             )
         )
-        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class ChebyshevTypeII(Filter):
@@ -752,7 +703,7 @@ class ChebyshevTypeII(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = self.TransferFunction(
+        self._coeffs = self.TransferFunction(
             *signal.cheby2(
                 self.order,
                 self.min_attenuation,
@@ -762,7 +713,7 @@ class ChebyshevTypeII(Filter):
                 output="ba",
             )
         )
-        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class Elliptical(Filter):
@@ -791,7 +742,7 @@ class Elliptical(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = self.TransferFunction(
+        self._coeffs = self.TransferFunction(
             *signal.ellip(
                 self.order,
                 self.max_ripple,
@@ -802,7 +753,7 @@ class Elliptical(Filter):
                 output="ba",
             )
         )
-        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class Bessel(Filter):
@@ -828,7 +779,7 @@ class Bessel(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = self.TransferFunction(
+        self._coeffs = self.TransferFunction(
             *signal.bessel(
                 self.order,
                 self.cutoff_freq,
@@ -838,7 +789,7 @@ class Bessel(Filter):
                 norm=self.norm,
             )
         )
-        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
 
 class Notch(Filter):
@@ -859,18 +810,18 @@ class Notch(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = self.TransferFunction(
+        self._coeffs = self.TransferFunction(
             *signal.iirnotch(
-                self.fundamental_freq, self.quality_factor, fs=self.sample_freq
+                self.fundamental_freq, self.quality_factor, fs=self._sample_freq
             )
         )
-        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
     def compute_frequencies(
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
     ):
         """ """
-        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
+        return signal.freqz(*transfer_function, worN=range, fs=self._sample_freq)
 
 
 class Peak(Filter):
@@ -891,18 +842,18 @@ class Peak(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = self.TransferFunction(
+        self._coeffs = self.TransferFunction(
             *signal.iirpeak(
-                self.fundamental_freq, self.quality_factor, fs=self.sample_freq
+                self.fundamental_freq, self.quality_factor, fs=self._sample_freq
             )
         )
-        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
     def compute_frequencies(
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
     ):
         """ """
-        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
+        return signal.freqz(*transfer_function, worN=range, fs=self._sample_freq)
 
 
 class Comb(Filter):
@@ -933,22 +884,22 @@ class Comb(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = self.TransferFunction(
+        self._coeffs = self.TransferFunction(
             *signal.iircomb(
                 self.fundamental_freq,
                 self.quality_factor,
                 ftype=self.comb_type,
                 pass_zero=self.pass_zero,
-                fs=self.sample_freq,
+                fs=self._sample_freq,
             )
         )
-        self.freq_response = (self.coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
     def compute_frequencies(
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
     ):
         """ """
-        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
+        return signal.freqz(*transfer_function, worN=range, fs=self._sample_freq)
 
 
 FILTERS = (
