@@ -19,7 +19,6 @@ from collections import namedtuple
 from typing import Tuple
 
 from abc import ABC, abstractmethod
-from MDANSE.Mathematics.Arithmetic import weight
 from scipy import signal, fftpack
 
 from MDANSE.Core.Error import Error
