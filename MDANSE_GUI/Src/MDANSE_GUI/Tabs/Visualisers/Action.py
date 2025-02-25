@@ -57,6 +57,7 @@ from MDANSE_GUI.InputWidgets import (
     RangeWidget,
     RunningModeWidget,
     StringWidget,
+    TrajectoryFilterWidget,
     UnitCellWidget,
     VectorWidget,
 )
