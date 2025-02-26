@@ -654,7 +654,7 @@ class FilterDesigner(QDialog):
             self._figure_info.append(f"           {denominator}")
         else:
             self._figure_info.append(
-                f"Number of filter coefficients exceeds available display area"
+                "Number of filter coefficients exceeds available display area"
             )
             self._figure_info.append(" ")
             self._figure_info.append(" ")
