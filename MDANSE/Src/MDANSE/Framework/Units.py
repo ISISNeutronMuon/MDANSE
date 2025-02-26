@@ -16,7 +16,7 @@
 import copy
 import math
 import numbers
-
+from collections import defaultdict
 import json
 
 from MDANSE.Core.Platform import PLATFORM
@@ -364,6 +364,76 @@ class _Unit(object):
 
         return other.__sub__(self)
 
+    def __ceil__(self):
+        """Ceil of a _Unit value in canonical units.
+
+        >>> print(measure(10.2, 'm/s').ceiling())
+        10.0000 m / s
+        >>> print(measure(3.6, 'm/s').ounit('km/h').ceiling())
+        10.0 km / h
+        >>> print(measure(50.3, 'km/h').ceiling())
+        50.0 km / h
+        """
+
+        r = copy.deepcopy(self)
+
+        if r._ounit is not None:
+            val = math.ceil(r.toval(r._ounit))
+            newu = _Unit("au", val)
+            newu *= _str_to_unit(r._ounit)
+            return newu.ounit(r._ounit)
+        else:
+            r._factor = math.ceil(r._factor)
+            return r
+
+    def __floor__(self):
+        """Floor of a _Unit value in canonical units.
+
+        >>> print(measure(10.2, 'm/s').floor())
+        10.0000 m / s
+        >>> print(measure(3.6, 'm/s').ounit('km/h').floor())
+        10.0 km / h
+        >>> print(measure(50.3, 'km/h').floor())
+        50.0 km / h
+        """
+
+        r = copy.deepcopy(self)
+
+        if r._ounit is not None:
+            val = math.floor(r.toval(r._ounit))
+            newu = _Unit("au", val)
+            newu *= _str_to_unit(r._ounit)
+            return newu.ounit(r._ounit)
+        else:
+            r._factor = math.floor(r._factor)
+            return r
+
+    def __round__(self, ndigits=None):
+        """Round of a _Unit value in canonical units.
+
+        >>> print(measure(10.2, 'm/s').round())
+        10.0000 m / s
+        >>> print(measure(3.6, 'm/s').ounit('km/h').round())
+        11.0 km / h
+        >>> print(measure(50.3, 'km/h').round())
+        50.0 km / h
+        """
+
+        r = copy.deepcopy(self)
+
+        if r._ounit is not None:
+            val = round(r.toval(r._ounit), ndigits)
+            newu = _Unit("au", val)
+            newu *= _str_to_unit(r._ounit)
+            return newu.ounit(r._ounit)
+        else:
+            r._factor = round(r._factor, ndigits)
+            return r
+
+    ceil = __ceil__
+    floor = __floor__
+    round = __round__
+
     def __sub__(self, other):
         """Substract _Unit instances. To be substracted, the units has to be analog or equivalent.
 
@@ -464,28 +534,6 @@ class _Unit(object):
         self._ounit = None
         self._out_factor = None
 
-    def ceil(self):
-        """Ceil of a _Unit value in canonical units.
-
-        >>> print(measure(10.2, 'm/s').ceiling())
-        10.0000 m / s
-        >>> print(measure(3.6, 'm/s').ounit('km/h').ceiling())
-        10.0 km / h
-        >>> print(measure(50.3, 'km/h').ceiling())
-        50.0 km / h
-        """
-
-        r = copy.deepcopy(self)
-
-        if r._ounit is not None:
-            val = math.ceil(r.toval(r._ounit))
-            newu = _Unit("au", val)
-            newu *= _str_to_unit(r._ounit)
-            return newu.ounit(r._ounit)
-        else:
-            r._factor = math.ceil(r._factor)
-            return r
-
     @property
     def dimension(self):
         """Getter for _dimension attribute. Returns a copy."""
@@ -509,28 +557,6 @@ class _Unit(object):
         """Getter for _factor attribute."""
 
         return self._factor
-
-    def floor(self):
-        """Floor of a _Unit value in canonical units.
-
-        >>> print(measure(10.2, 'm/s').floor())
-        10.0000 m / s
-        >>> print(measure(3.6, 'm/s').ounit('km/h').floor())
-        10.0 km / h
-        >>> print(measure(50.3, 'km/h').floor())
-        50.0 km / h
-        """
-
-        r = copy.deepcopy(self)
-
-        if r._ounit is not None:
-            val = math.floor(r.toval(r._ounit))
-            newu = _Unit("au", val)
-            newu *= _str_to_unit(r._ounit)
-            return newu.ounit(r._ounit)
-        else:
-            r._factor = math.floor(r._factor)
-            return r
 
     @property
     def format(self):
@@ -594,28 +620,6 @@ class _Unit(object):
                 raise UnitError("The units are not equivalents")
         else:
             raise UnitError("The units are not compatible")
-
-    def round(self):
-        """Round of a _Unit value in canonical units.
-
-        >>> print(measure(10.2, 'm/s').round())
-        10.0000 m / s
-        >>> print(measure(3.6, 'm/s').ounit('km/h').round())
-        11.0 km / h
-        >>> print(measure(50.3, 'km/h').round())
-        50.0 km / h
-        """
-
-        r = copy.deepcopy(self)
-
-        if r._ounit is not None:
-            val = round(r.toval(r._ounit))
-            newu = _Unit("au", val)
-            newu *= _str_to_unit(r._ounit)
-            return newu.ounit(r._ounit)
-        else:
-            r._factor = round(r._factor)
-            return r
 
     def sqrt(self):
         """Square root of a _Unit.
@@ -731,12 +735,12 @@ class UnitsManager(metaclass=Singleton):
         UnitsManager._UNITS = units
 
 
-_EQUIVALENCES = {}
+_EQUIVALENCES = defaultdict(dict)
 
 
 def add_equivalence(dim1, dim2, factor):
-    _EQUIVALENCES.setdefault(dim1, {}).__setitem__(dim2, factor)
-    _EQUIVALENCES.setdefault(dim2, {}).__setitem__(dim1, 1.0 / factor)
+    _EQUIVALENCES[dim1][dim2] = factor
+    _EQUIVALENCES[dim2][dim1] = 1.0 / factor
 
 
 def measure(val, iunit="au", ounit="", equivalent=False):
