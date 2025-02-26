@@ -97,7 +97,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
                     f"The dictionary \n{dict_value}\n does not contain the expected keys"
                 )
 
-        except (TypeError, ValueError) as e:
+        except (TypeError, ValueError):
             self.error_status = (
                 f"Value \n{value}\n in {self} is not of correct format (expected JSON string)"
             )
