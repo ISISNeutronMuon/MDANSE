@@ -116,7 +116,6 @@ class TrajectoryFilter(IJob):
 
         # get atom index
         indexes = self.configuration["atom_selection"]["indices"][index]
-        atoms = [self._atoms[idx] for idx in indexes]
 
         series = trajectory.read_com_trajectory(
             indexes,
