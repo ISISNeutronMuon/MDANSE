@@ -21,8 +21,10 @@ from typing import Tuple
 from abc import ABC, abstractmethod
 from scipy import signal, fftpack
 
+from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Core.Error import Error
 
+from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 
 class SignalError(Error):
     pass
@@ -917,18 +919,44 @@ def power_spectrum(
     :Returns:
         #. Tuple[np.ndarray, np.ndarray]: tuple containing the omegas (frequency range) and the corresponding power spectrum of the atomic trajectories
     """
-    num_atoms = len(atom_selection["indices"])
     trajectory = trajectory["instance"]
-    sorted_atoms = trajectory.chemical_system.atom_list
 
-    output = {"romega": instrument_resolution["romega"]}
+    output = OutputData()
+    output.add(
+        "romega",
+        "LineOutputVariable",
+        instrument_resolution["romega"],
+        units="rad/ps"
+    )
 
     for element in atom_selection["unique_names"]:
-        output[f"pacf_{element}"] = np.zeros(frames["n_frames"])
-        output[f"pps_{element}"] = np.zeros_like(output["romega"])
+        output.add(
+            f"pacf_{element}",
+            "LineOutputVariable",
+            np.zeros_like(output["romega"]),
+            units="nm2"
+        )
 
-    output["pacf_total"] = np.zeros(frames["n_frames"])
-    output["pps_total"] = np.zeros_like(output["romega"])
+        output.add(
+            f"pps_{element}",
+            "LineOutputVariable",
+            np.zeros_like(output["romega"]),
+            units="au"
+        )
+
+    output.add(
+        "pacf_total",
+        "LineOutputVariable",
+        np.zeros(frames["n_frames"]),
+        units="nm2"
+    )
+
+    output.add(
+        "pps_total",
+        "LineOutputVariable",
+        np.zeros_like(output["romega"]),
+        units="nm2"
+    )
 
     for indices, name in zip(atom_selection["indices"], atom_selection["names"]):
         series = trajectory.read_com_trajectory(
@@ -957,22 +985,18 @@ def power_spectrum(
         )
 
     weights = weights.get_weights()
-
-    output["pacf_total"][:] = weight(
-        weights,
+    weight_dict = get_weights(weights, nAtomsPerElement, 1)
+    assign_weights(output, weight_dict, "pacf_%s")
+    assign_weights(output, weight_dict, "pps_%s")
+    output["pacf_total"][:] = weighted_sum(
         output,
-        nAtomsPerElement,
-        1,
-        "pacf_%s",
-        update_partials=True,
+        weight_dict,
+        "pacf_%s"
     )
-    output["pps_total"][:] = weight(
-        weights,
+    output["pps_total"][:] = weighted_sum(
         output,
-        nAtomsPerElement,
-        1,
-        "pps_%s",
-        update_partials=True,
+        weight_dict,
+        "pps_%s"
     )
 
     # Adjust to atom selection
