@@ -106,7 +106,7 @@ class TrajectoryFilter(IJob):
 
     def run_step(self, index):
         """
-        Runs a single step of the job.\n
+        Runs a single step of the job.
 
         :Parameters:
             #. index (int): The index of the step.
@@ -130,9 +130,9 @@ class TrajectoryFilter(IJob):
 
     def combine(self, index, x):
         """
-        Combines returned results of run_step.\n
+        Combines returned results of run_step.
         :Parameters:
-            #. index (int): The index of the step.\n
+            #. index (int): The index of the step.
             #. x (any): The returned result(s) of run_step
         """
         pass
