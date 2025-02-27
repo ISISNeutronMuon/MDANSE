@@ -936,6 +936,7 @@ FILTERS = (
 
 FILTER_MAP = {filter_class.__name__: filter_class for filter_class in FILTERS}
 
+# Default filter type is Butterworth
 DEFAULT_FILTER = Butterworth
 
 
