@@ -372,7 +372,9 @@ class Filter(ABC):
         self._sample_freq = 1 / kwargs.pop("time_step_ps")
         self.set_filter_attributes(kwargs)
 
-    def compute_frequencies(self, transfer_function: TransferFunction, range: np.ndarray):
+    def compute_frequencies(
+        self, transfer_function: TransferFunction, range: np.ndarray
+    ):
         """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
 
         :Parameters:
@@ -402,7 +404,9 @@ class Filter(ABC):
             #. TransferFunction: Transfer function for filter with digital coefficients
         """
         return self.TransferFunction(
-            *signal.bilinear(self._coeffs.numerator, self._coeffs.denominator, self._sample_freq)
+            *signal.bilinear(
+                self._coeffs.numerator, self._coeffs.denominator, self._sample_freq
+            )
         )
 
     @property
@@ -415,7 +419,9 @@ class Filter(ABC):
         return self._freq_response
 
     @freq_response.setter
-    def freq_response(self, params: Tuple[TransferFunction, FrequencyRangeMethod]) -> None:
+    def freq_response(
+        self, params: Tuple[TransferFunction, FrequencyRangeMethod]
+    ) -> None:
         """Calculates the frequency response of the filter from the filter's transfer function numerator and denominator coefficients.
 
         :Parameters:
@@ -510,7 +516,9 @@ class Filter(ABC):
         return expr
 
     @classmethod
-    def rational_polynomial_string(cls, numerator, denominator, analog=True) -> dict[str, str]:
+    def rational_polynomial_string(
+        cls, numerator, denominator, analog=True
+    ) -> dict[str, str]:
         """Formats a transfer function rational polynomial into a pair of strings.
 
         :Parameters:
@@ -610,7 +618,9 @@ class Filter(ABC):
             #. float | np.ndarray: frequency
         """
         if isinstance(energy, list):
-            return (np.array(energy) * 1 / ((2 * np.pi) ** (-1) * cls._freq_to_mev)) * 1e-12
+            return (
+                np.array(energy) * 1 / ((2 * np.pi) ** (-1) * cls._freq_to_mev)
+            ) * 1e-12
 
         return (energy * 1 / ((2 * np.pi) ** (-1) * cls._freq_to_mev)) * 1e-12
 
@@ -816,11 +826,15 @@ class Notch(Filter):
         super().__init__(**kwargs)
 
         self._coeffs = self.TransferFunction(
-            *signal.iirnotch(self.fundamental_freq, self.quality_factor, fs=self._sample_freq)
+            *signal.iirnotch(
+                self.fundamental_freq, self.quality_factor, fs=self._sample_freq
+            )
         )
         self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
-    def compute_frequencies(self, transfer_function: Filter.TransferFunction, range: np.ndarray):
+    def compute_frequencies(
+        self, transfer_function: Filter.TransferFunction, range: np.ndarray
+    ):
         """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
 
         :Parameters:
@@ -853,11 +867,15 @@ class Peak(Filter):
         super().__init__(**kwargs)
 
         self._coeffs = self.TransferFunction(
-            *signal.iirpeak(self.fundamental_freq, self.quality_factor, fs=self._sample_freq)
+            *signal.iirpeak(
+                self.fundamental_freq, self.quality_factor, fs=self._sample_freq
+            )
         )
         self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
-    def compute_frequencies(self, transfer_function: Filter.TransferFunction, range: np.ndarray):
+    def compute_frequencies(
+        self, transfer_function: Filter.TransferFunction, range: np.ndarray
+    ):
         """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
 
         :Parameters:
@@ -910,7 +928,9 @@ class Comb(Filter):
         )
         self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
-    def compute_frequencies(self, transfer_function: Filter.TransferFunction, range: np.ndarray):
+    def compute_frequencies(
+        self, transfer_function: Filter.TransferFunction, range: np.ndarray
+    ):
         """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
 
         :Parameters:
@@ -948,7 +968,9 @@ def filter_default_attributes(filter=DEFAULT_FILTER):
     :Returns:
         #. The filter settings dictionary
     """
-    return {setting: values["value"] for setting, values in filter.default_settings.items()}
+    return {
+        setting: values["value"] for setting, values in filter.default_settings.items()
+    }
 
 
 def filter_description_string(
@@ -983,20 +1005,32 @@ def power_spectrum(
     trajectory = trajectory["instance"]
 
     output = OutputData()
-    output.add("romega", "LineOutputVariable", instrument_resolution["romega"], units="rad/ps")
+    output.add(
+        "romega", "LineOutputVariable", instrument_resolution["romega"], units="rad/ps"
+    )
 
     for element in atom_selection["unique_names"]:
         output.add(
-            f"pacf_{element}", "LineOutputVariable", np.zeros_like(output["romega"]), units="nm2"
+            f"pacf_{element}",
+            "LineOutputVariable",
+            np.zeros_like(output["romega"]),
+            units="nm2",
         )
 
         output.add(
-            f"pps_{element}", "LineOutputVariable", np.zeros_like(output["romega"]), units="au"
+            f"pps_{element}",
+            "LineOutputVariable",
+            np.zeros_like(output["romega"]),
+            units="au",
         )
 
-    output.add("pacf_total", "LineOutputVariable", np.zeros(frames["n_frames"]), units="nm2")
+    output.add(
+        "pacf_total", "LineOutputVariable", np.zeros(frames["n_frames"]), units="nm2"
+    )
 
-    output.add("pps_total", "LineOutputVariable", np.zeros_like(output["romega"]), units="nm2")
+    output.add(
+        "pps_total", "LineOutputVariable", np.zeros_like(output["romega"]), units="nm2"
+    )
 
     for indices, name in zip(atom_selection["indices"], atom_selection["names"]):
         series = trajectory.read_com_trajectory(
@@ -1010,7 +1044,9 @@ def power_spectrum(
         series = projection["projector"](series)
 
         n_configs = frames["n_configs"]
-        atomicPACF = signal.correlate(series, series[:n_configs], mode="valid") / (3 * n_configs)
+        atomicPACF = signal.correlate(series, series[:n_configs], mode="valid") / (
+            3 * n_configs
+        )
 
         output[f"pacf_{name}"] += np.array([x[0] for x in atomicPACF])
 

@@ -62,14 +62,10 @@ class TrajectoryFilterConfigurator(IConfigurator):
             dict_value = json.loads(value)
 
             if not {"filter", "attributes"} <= dict_value.keys():
-                self.error_status = (
-                    f"The dictionary \n{dict_value}\n does not contain the expected keys"
-                )
+                self.error_status = f"The dictionary \n{dict_value}\n does not contain the expected keys"
 
         except (TypeError, ValueError):
-            self.error_status = (
-                f"Value \n{value}\n in {self} is not of correct format (expected JSON string)"
-            )
+            self.error_status = f"Value \n{value}\n in {self} is not of correct format (expected JSON string)"
 
         self.error_status = "OK"
         self["value"] = self._settings
