@@ -15,7 +15,11 @@
 #
 import json
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Mathematics.Signal import DEFAULT_FILTER, filter_default_attributes, filter_description_string
+from MDANSE.Mathematics.Signal import (
+    DEFAULT_FILTER,
+    filter_default_attributes,
+    filter_description_string,
+)
 
 
 class TrajectoryFilterConfigurator(IConfigurator):

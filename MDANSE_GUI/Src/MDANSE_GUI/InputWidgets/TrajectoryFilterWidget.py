@@ -32,7 +32,7 @@ from qtpy.QtWidgets import (
     QSpinBox,
     QDoubleSpinBox,
     QTextEdit,
-    QWidget
+    QWidget,
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (

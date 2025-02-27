@@ -27,6 +27,7 @@ from MDANSE.Core.Error import Error
 
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 
+
 class SignalError(Error):
     pass
 
@@ -937,6 +938,7 @@ FILTER_MAP = {filter_class.__name__: filter_class for filter_class in FILTERS}
 
 DEFAULT_FILTER = Butterworth
 
+
 def filter_default_attributes(filter=DEFAULT_FILTER):
     """Get the filter-specific settings dictionary for a filter class.
 
@@ -947,7 +949,10 @@ def filter_default_attributes(filter=DEFAULT_FILTER):
     """
     return {setting: values["value"] for setting, values in filter.default_settings.items()}
 
-def filter_description_string(filter=DEFAULT_FILTER, settings=filter_default_attributes(DEFAULT_FILTER)) -> str:
+
+def filter_description_string(
+    filter=DEFAULT_FILTER, settings=filter_default_attributes(DEFAULT_FILTER)
+) -> str:
     """Convert a filter class and filter settings dictionary to a string.
 
     :Parameters:
@@ -957,6 +962,7 @@ def filter_description_string(filter=DEFAULT_FILTER, settings=filter_default_att
         #. str: string representation of the filter settings dictionary
     """
     return f'{{ "filter": "{filter.__name__}", "attributes": {json.dumps(settings)}}}'
+
 
 def power_spectrum(
     trajectory, frames, projection, atom_selection, weights, instrument_resolution
@@ -976,41 +982,20 @@ def power_spectrum(
     trajectory = trajectory["instance"]
 
     output = OutputData()
-    output.add(
-        "romega",
-        "LineOutputVariable",
-        instrument_resolution["romega"],
-        units="rad/ps"
-    )
+    output.add("romega", "LineOutputVariable", instrument_resolution["romega"], units="rad/ps")
 
     for element in atom_selection["unique_names"]:
         output.add(
-            f"pacf_{element}",
-            "LineOutputVariable",
-            np.zeros_like(output["romega"]),
-            units="nm2"
+            f"pacf_{element}", "LineOutputVariable", np.zeros_like(output["romega"]), units="nm2"
         )
 
         output.add(
-            f"pps_{element}",
-            "LineOutputVariable",
-            np.zeros_like(output["romega"]),
-            units="au"
+            f"pps_{element}", "LineOutputVariable", np.zeros_like(output["romega"]), units="au"
         )
 
-    output.add(
-        "pacf_total",
-        "LineOutputVariable",
-        np.zeros(frames["n_frames"]),
-        units="nm2"
-    )
+    output.add("pacf_total", "LineOutputVariable", np.zeros(frames["n_frames"]), units="nm2")
 
-    output.add(
-        "pps_total",
-        "LineOutputVariable",
-        np.zeros_like(output["romega"]),
-        units="nm2"
-    )
+    output.add("pps_total", "LineOutputVariable", np.zeros_like(output["romega"]), units="nm2")
 
     for indices, name in zip(atom_selection["indices"], atom_selection["names"]):
         series = trajectory.read_com_trajectory(
@@ -1042,16 +1027,8 @@ def power_spectrum(
     weight_dict = get_weights(weights, nAtomsPerElement, 1)
     assign_weights(output, weight_dict, "pacf_%s")
     assign_weights(output, weight_dict, "pps_%s")
-    output["pacf_total"][:] = weighted_sum(
-        output,
-        weight_dict,
-        "pacf_%s"
-    )
-    output["pps_total"][:] = weighted_sum(
-        output,
-        weight_dict,
-        "pps_%s"
-    )
+    output["pacf_total"][:] = weighted_sum(output, weight_dict, "pacf_%s")
+    output["pps_total"][:] = weighted_sum(output, weight_dict, "pps_%s")
 
     # Adjust to atom selection
     return (output["romega"], output["pps_total"])
