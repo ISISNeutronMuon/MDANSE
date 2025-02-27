@@ -18,7 +18,7 @@ from typing import Tuple, Any
 
 import numpy as np
 from scipy import signal
-from qtpy.QtCore import Qt, Slot, QTimer, QCoreApplication
+from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
     QLineEdit,
     QPushButton,
@@ -32,8 +32,7 @@ from qtpy.QtWidgets import (
     QSpinBox,
     QDoubleSpinBox,
     QTextEdit,
-    QWidget,
-    QMessageBox,
+    QWidget
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
@@ -41,6 +40,7 @@ from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
 )
 from MDANSE.Mathematics.Signal import (
     Filter,
+    filter_description_string,
     FILTER_MAP,
     DEFAULT_FILTER_CUTOFF,
     power_spectrum,
@@ -93,7 +93,7 @@ class FilterDesigner(QDialog):
 
         self.layouts = QHBoxLayout()
 
-        self.set_filter(self._configurator._filter.__name__)
+        self.set_filter(self._configurator._default_filter.__name__)
         self.create_designer()
 
     def find_configuration_property(self, key) -> Any:
@@ -566,7 +566,7 @@ class FilterDesigner(QDialog):
 
     def render_graph(
         self,
-        freqs: Filter.FrequencyDomain = TrajectoryFilterConfigurator._filter.freq_response,
+        freqs: Filter.FrequencyDomain = TrajectoryFilterConfigurator._default_filter.freq_response,
         db_response: bool = False,
         energies: bool = False,
         trajectory_power_spectrum: Tuple[np.ndarray, np.ndarray] = None,
@@ -780,7 +780,7 @@ class FilterDesigner(QDialog):
         filter_class = FILTER_MAP[self._settings["filter"]]
 
         # update widget field text to reflect filter designer
-        field = self._configurator.filter_description_string(
+        field = filter_description_string(
             filter_class,
             self.combine_attributes(filter_class, self._settings["attributes"]),
         )

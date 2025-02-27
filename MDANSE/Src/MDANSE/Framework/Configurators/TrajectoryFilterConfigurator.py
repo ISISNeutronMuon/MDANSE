@@ -15,7 +15,7 @@
 #
 import json
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Mathematics.Signal import FILTER_MAP
+from MDANSE.Mathematics.Signal import DEFAULT_FILTER, filter_default_attributes, filter_description_string
 
 
 class TrajectoryFilterConfigurator(IConfigurator):
@@ -27,25 +27,9 @@ class TrajectoryFilterConfigurator(IConfigurator):
         The defaults selection setting.
     """
 
-    _filter = tuple(FILTER_MAP.values())[0]
+    _default_filter = DEFAULT_FILTER
 
-    @classmethod
-    def filter_default_attributes(cls, filter=_filter):
-        """Get the filter-specific settings dictionary for a filter class.
-
-        Parameters
-        ----------
-        filter :
-            The filter class.
-
-        Returns
-        -------
-
-            The filter settings dictionary
-        """
-        return {setting: values["value"] for setting, values in filter.default_settings.items()}
-
-    _settings = filter_default_attributes.__func__(object())
+    _settings = filter_default_attributes()
 
     @classmethod
     def get_default(cls) -> str:
@@ -58,26 +42,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
         """
         return cls._default
 
-    @staticmethod
-    def filter_description_string(filter=_filter, settings=_settings) -> str:
-        """Convert a filter class and filter settings dictionary to a string.
-
-        Parameters
-        ----------
-        filter : str
-            The filter class
-
-        settings : dict
-            Dictionary containing the filter settings
-
-        Returns
-        -------
-
-            A string representation of the filter settings dictionary
-        """
-        return f'{{ "filter": "{filter.__name__}", "attributes": {json.dumps(settings)}}}'
-
-    _default = filter_description_string.__func__()
+    _default = filter_description_string()
 
     def configure(self, value: str):
         """Configure an input value.

@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import json
 import numpy as np
 from enum import Enum
 from collections import namedtuple
@@ -900,6 +901,40 @@ FILTERS = (
 
 FILTER_MAP = {filter_class.__name__: filter_class for filter_class in FILTERS}
 
+DEFAULT_FILTER = Butterworth
+
+def filter_default_attributes(filter=DEFAULT_FILTER):
+    """Get the filter-specific settings dictionary for a filter class.
+
+    Parameters
+    ----------
+    filter :
+        The filter class.
+
+    Returns
+    -------
+
+        The filter settings dictionary
+    """
+    return {setting: values["value"] for setting, values in filter.default_settings.items()}
+
+def filter_description_string(filter=DEFAULT_FILTER, settings=filter_default_attributes(DEFAULT_FILTER)) -> str:
+    """Convert a filter class and filter settings dictionary to a string.
+
+    Parameters
+    ----------
+    filter : str
+        The filter class
+
+    settings : dict
+        Dictionary containing the filter settings
+
+    Returns
+    -------
+
+        A string representation of the filter settings dictionary
+    """
+    return f'{{ "filter": "{filter.__name__}", "attributes": {json.dumps(settings)}}}'
 
 def power_spectrum(
     trajectory, frames, projection, atom_selection, weights, instrument_resolution
