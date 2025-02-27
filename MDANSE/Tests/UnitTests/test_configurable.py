@@ -13,80 +13,62 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import unittest
-
-import numpy
-
-
+import pytest
 from MDANSE.Framework.Configurable import Configurable
 
 
-class TestConfigurable(unittest.TestCase):
-    """Unittest for the configurators used to setup an analysis in MDANSE"""
+@pytest.mark.parametrize("opt, val, success", [
+    ({}, 20, True),
+    ({}, 20.2, True),
+    ({}, "30", True),
+    ({}, "30.2", True),
+    ({}, "xxxx", False),
+    ({}, [1, 2], False),
 
-    def setUp(self):
-        self._configurable = Configurable()
-        self._parameters = {}
+    ({"maxi": 10}, 10, True),
+    ({"mini": 10}, 10, True),
+    ({"maxi": 10}, 20, False),
+    ({"mini": 10}, 0, False),
 
-    def tearDown(self):
-        self._configurable.settings.clear()
-        self._parameters.clear()
+    ({"choices": [0, 10]}, 0, True),
+    ({"choices": [0, 10]}, 13, False),
+])
+def test_float_configurator(opt, val, success):
+    conf = Configurable()
+    conf.set_settings({"test_val": ("FloatConfigurator", opt)})
 
-    def test_integer(self):
-        """Test the integer configurator"""
+    parameters = {"test_val": val}
+    conf.setup(parameters)
+    assert conf._configured == success
 
-        self._configurable.set_settings({"test_integer": ("IntegerConfigurator", {})})
+    if success:
+        assert conf["test_val"]["value"] == float(val)
 
-        # Case of a valid integer
-        self._parameters["test_integer"] = 20
-        self._configurable.setup(self._parameters)
+@pytest.mark.parametrize("opt, val, success", [
+    ({}, 20, True),
+    ({}, 20.2, True),
+    ({}, "30", True),
+    ({}, "30.2", False),
+    ({}, "xxxx", False),
+    ({}, [1, 2], False),
 
-        # Case of a float that will casted to an integer
-        self._parameters["test_integer"] = 20.2
-        self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable["test_integer"]["value"], 20)
+    ({"maxi": 10}, 10, True),
+    ({"mini": 10}, 10, True),
+    ({"maxi": 10}, 20, False),
+    ({"mini": 10}, 0, False),
 
-        # Case of a string that can be casted to an integer
-        self._parameters["test_integer"] = "30"
-        self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable["test_integer"]["value"], 30)
+    ({"choices": [0, 10]}, 0, True),
+    ({"choices": [0, 10]}, 13, False),
+    ({"exclude": (0,)}, 0, False),
 
-        # Case of a string that cannot be casted to an integer
-        self._parameters["test_integer"] = "xxxx"
-        self._configurable.setup(self._parameters)
-        self.assertFalse(self._configurable._configured)
+])
+def test_integer_configurator(opt, val, success):
+    conf = Configurable()
+    conf.set_settings({"test_val": ("IntegerConfigurator", opt)})
 
-        # Case of an object that cannot be casted to an integer
-        self._parameters["test_integer"] = [1, 2]
-        self._configurable.setup(self._parameters)
-        self.assertFalse(self._configurable._configured)
+    parameters = {"test_val": val}
+    conf.setup(parameters)
+    assert conf._configured == success
 
-    def test_float(self):
-        """Test the float configurator"""
-
-        self._configurable.set_settings({"test_float": ("FloatConfigurator", {})})
-
-        # Case of an integer that will be casted to a float
-        self._parameters["test_float"] = 20
-        self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable["test_float"]["value"], 20.0)
-
-        # Case of a float
-        self._parameters["test_float"] = 20.2
-        self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable["test_float"]["value"], 20.2)
-
-        # Case of a string that can be casted to a float
-        self._parameters["test_float"] = "30.2"
-        self._configurable.setup(self._parameters)
-        self.assertEqual(self._configurable["test_float"]["value"], 30.2)
-
-        # Case of a string that cannot be casted to a float
-        self._parameters["test_float"] = "xxxx"
-        self._configurable.setup(self._parameters)
-        self.assertFalse(self._configurable._configured)
-
-        # Case of an object that cannot be casted to a float
-        self._parameters["test_float"] = [1, 2]
-        self._configurable.setup(self._parameters)
-        self.assertFalse(self._configurable._configured)
+    if success:
+        assert conf["test_val"]["value"] == int(val)
