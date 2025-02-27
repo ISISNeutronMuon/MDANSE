@@ -503,11 +503,11 @@ class FilterDesigner(QDialog):
             # X-axis in angular frequency or energy (meV)
             grid.addWidget(QLabel("X-axis units"), 1, 0)
             key_1 = "xaxis_units"
-            widget_1 = self.add_preference_combobox(key_1, ("pHz", "meV"))
+            widget_1 = self.add_preference_combobox(key_1, ("THz", "meV"))
             widget_1.currentTextChanged.connect(
                 lambda val: self.edit_preferences(key_1, val)
             )
-            widget_1.setToolTip("View x-axis as frequency (pHz) or energy (meV)")
+            widget_1.setToolTip("View x-axis as frequency (THz) or energy (meV)")
             grid.addWidget(widget_1, 1, 1)
 
             # Display filter transfer function in terms of analogue or digital filter coefficients
@@ -601,7 +601,7 @@ class FilterDesigner(QDialog):
         db_response : bool
             Display response (y-axis) in decibels, else magnitude
         energies : bool
-            Display response domain (x-axis) in meV, else frequency in picohertz
+            Display response domain (x-axis) in meV, else frequency in terahertz
         trajectory_power_spectrum : Tuple[np.ndarray, np.ndarray]
             Tuple containing trajectory power spectrum and attenuation due to filter
         """
@@ -633,14 +633,14 @@ class FilterDesigner(QDialog):
                 color="black",
             )
 
-        # Conditionally convert frequencies (pHz) to energies (meV)
+        # Conditionally convert frequencies (THz) to energies (meV)
         if energies:
             energy_ticks = np.int32(np.floor(Filter.freq_to_energy(axes.get_xticks())))
             axes.set_xticks(axes.get_xticks(), labels=energy_ticks)
 
         axes.set_xlim(0.0, x_max)
 
-        axes.set_xlabel("Energy (meV)" if energies else "Frequency (pHz)")
+        axes.set_xlabel("Energy (meV)" if energies else "Frequency (THz)")
         axes.set_ylabel("Magnitude (dB)" if db_response else "Amplitude")
 
         axes.legend(loc="best")
@@ -658,7 +658,7 @@ class FilterDesigner(QDialog):
         polynomial : str
             String representation of the filter transfer function as a polynomial (in the variable S for an analogue filter).
         polynomial : float
-            Sample frequency of the molecular dynamics simulation in pHz (picohertz)
+            Sample frequency of the molecular dynamics simulation in THz (terahertz)
         """
         self._figure_info.clear()
 
@@ -681,7 +681,7 @@ class FilterDesigner(QDialog):
             self._figure_info.append(" ")
 
         self._figure_info.append(
-            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 1)} meV, Sample frequency: {sample_freq} pHz"
+            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 1)} meV, Sample frequency: {sample_freq} THz"
         )
 
     def render_canvas_assets(self) -> None:

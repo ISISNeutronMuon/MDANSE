@@ -318,7 +318,7 @@ def get_spectrum(signal, window=None, timeStep=1.0, axis=0, fft="fft"):
     return fftSignal.real
 
 
-# Default frilter cutoff frequency in pHz, calculated from a time step of 0.005 picoseconds
+# Default filter cutoff frequency in THz, calculated from a time step of 0.005 picoseconds
 DEFAULT_FILTER_CUTOFF = 25.0
 
 
@@ -368,7 +368,7 @@ class Filter(ABC):
     def __init__(self, **kwargs):
         # Number of simulation steps
         self.n_steps = kwargs.pop("n_steps")
-        # Simulation sample frequency in pHz
+        # Simulation sample frequency in THz
         self._sample_freq = 1 / kwargs.pop("time_step_ps")
         self.set_filter_attributes(kwargs)
 
@@ -570,7 +570,7 @@ class Filter(ABC):
         string_representation = f"""Trajectory filter of type {self.__class__.__name__} implemented with the following parameters:
 
   # sample_freq
-  Reciprocal of the molecular dynamics time step, in picohertz
+  Reciprocal of the molecular dynamics time step, in terahertz
       {self.__dict__["_sample_freq"]}
 
   # freq_response (analog)
