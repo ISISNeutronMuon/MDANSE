@@ -1,17 +1,8 @@
-import tempfile
-import os
-from os import path
 import pytest
-
 from MDANSE.Framework.Jobs.IJob import IJob
+from test_helpers.paths import CONV_DIR
 
-
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "short_trajectory_after_changes.mdt",
-)
+short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
 
 ################################################################
@@ -47,18 +38,16 @@ def parameters():
     return parameters
 
 
-@pytest.mark.xfail(reason="see docstring")
-def test_mcstas(parameters):
-    """This test will be difficult to run:
-    On each platform we need a McStas instrument
-    compiled for that specific platform."""
-    temp_name = tempfile.mktemp()
+@pytest.mark.xfail(reason="Need platform-specific compiled McStas instrument.")
+def test_mcstas(tmp_path, parameters):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
+
     job = IJob.create("McStasVirtualInstrument")
     job.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+
+    assert out_file.is_file()
+    assert log_file.is_file()

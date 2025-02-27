@@ -1,25 +1,9 @@
-import tempfile
-import os
-from os import path
-
 import pytest
-import numpy as np
-import h5py
-
 from MDANSE.Framework.Jobs.IJob import IJob
+from test_helpers.compare_mdt import compare_mdt
+from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
-
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "named_molecules.mdt",
-)
-result_dir = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Results",
-)
+short_traj = CONV_DIR / "named_molecules.mdt"
 
 
 ################################################################
@@ -62,22 +46,21 @@ def parameters():
     [
         ("AreaPerMolecule", ["area_per_molecule"]),
         ("AngularCorrelation", ["ac"]),
-    ],
+    ], ids=lambda x: x[0],
 )
-def test_structure_analysis(parameters, job_info):
-    temp_name = tempfile.mktemp()
+def test_structure_analysis(tmp_path, parameters, job_info):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
+
     job = IJob.create(job_info[0])
     job.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    result_file = os.path.join(result_dir, f"structure_analysis_{job_info[0]}.mda")
 
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        for key in job_info[1]:
-            np.testing.assert_array_almost_equal(actual[f"/{key}"], desired[f"/{key}"])
+    assert out_file.is_file()
+    assert log_file.is_file()
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    result_file = RESULTS_DIR / f"structure_analysis_{job_info[0]}.mda"
+
+    compare_mdt(out_file, result_file, job_info[1])
