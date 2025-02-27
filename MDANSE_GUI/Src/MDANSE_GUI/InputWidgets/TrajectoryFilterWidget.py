@@ -136,7 +136,14 @@ class FilterDesigner(QDialog):
         }
 
     def clear_settings_grid(self, grid: QGridLayout) -> None:
-        """Clear all widgets contained in the settings grid layout."""
+        """Clear all widgets contained in the settings grid layout.
+
+        Parameters
+        ----------
+        grid : QGridLayout
+            Grid layout containing the widgets.
+        """
+
         for i in reversed(range(grid.count())):
             widget = grid.itemAt(i).widget()
             if widget:
@@ -144,6 +151,7 @@ class FilterDesigner(QDialog):
 
     def create_designer(self) -> None:
         """Create filter designer elements."""
+
         graph_layout = QVBoxLayout()
         settings_layout = QVBoxLayout()
 
@@ -255,7 +263,20 @@ class FilterDesigner(QDialog):
         self.render_canvas_assets()
 
     def resample_and_normalise(self, values, to_len):
-        """ """
+        """Resample the input signal values to a given length, with normalisation of output signal
+
+        Parameters
+        ----------
+        values : np.ndarray
+            The values of the signal
+        to_len : int
+            The new length of the signal after resampling
+
+        Returns
+        -------
+        np.ndarray
+            Resampled and normalised signal
+        """
         return signal.resample(values, to_len) * (values.max() ** (-1))
 
     def set_trajectory_power_spectrum(

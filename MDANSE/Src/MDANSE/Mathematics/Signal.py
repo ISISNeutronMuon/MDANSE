@@ -372,7 +372,15 @@ class Filter(ABC):
         self.set_filter_attributes(kwargs)
 
     def compute_frequencies(self, transfer_function: TransferFunction, range: np.ndarray):
-        """ """
+        """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
+
+        :Parameters:
+            #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
+            #. range (np.ndarray): range of frequency values over which to compute
+        :Returns:
+            #. np.array: frequency response over a given range
+        """
+
         return signal.freqs(*transfer_function, worN=range)
 
     def apply(self, input: np.array) -> np.ndarray:
@@ -530,7 +538,9 @@ class Filter(ABC):
         """Formats the given filter attribute into a description string.
 
         :Parameters:
-            #. str: The description of the attribute as a multiline string
+            #. description (str): The description of the attribute as a multiline string
+        :Returns:
+            #. str: The description string concatenated with substrings for each filer attribute
         """
         settings = self.__class__.__dict__["default_settings"]
         for setting in settings.keys():
@@ -605,7 +615,7 @@ class Filter(ABC):
 
 
 class Butterworth(Filter):
-    """Interface for the butterworth filter."""
+    """Interface for the Butterworth filter."""
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -636,7 +646,7 @@ class Butterworth(Filter):
 
 
 class ChebyshevTypeI(Filter):
-    """ """
+    """Interface for the Chebyshev type 1 filter."""
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -672,7 +682,7 @@ class ChebyshevTypeI(Filter):
 
 
 class ChebyshevTypeII(Filter):
-    """ """
+    """Interface for the Chebyshev type 2 filter."""
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -708,7 +718,7 @@ class ChebyshevTypeII(Filter):
 
 
 class Elliptical(Filter):
-    """ """
+    """Interface for the elliptical filter."""
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -749,7 +759,7 @@ class Elliptical(Filter):
 
 
 class Bessel(Filter):
-    """ """
+    """Interface for the Bessel filter."""
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -786,7 +796,7 @@ class Bessel(Filter):
 
 
 class Notch(Filter):
-    """ """
+    """Interface for the notch filter."""
 
     default_settings = {
         "fundamental_freq": {
@@ -810,12 +820,20 @@ class Notch(Filter):
         self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
     def compute_frequencies(self, transfer_function: Filter.TransferFunction, range: np.ndarray):
-        """ """
+        """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
+
+        :Parameters:
+            #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
+            #. range (np.ndarray): range of frequency values over which to compute
+        :Returns:
+            #. np.array: frequency response over a given range
+        """
+
         return signal.freqz(*transfer_function, worN=range, fs=self._sample_freq)
 
 
 class Peak(Filter):
-    """ """
+    """Interface for the peak filter."""
 
     default_settings = {
         "fundamental_freq": {
@@ -839,12 +857,20 @@ class Peak(Filter):
         self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
     def compute_frequencies(self, transfer_function: Filter.TransferFunction, range: np.ndarray):
-        """ """
+        """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
+
+        :Parameters:
+            #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
+            #. range (np.ndarray): range of frequency values over which to compute
+        :Returns:
+            #. np.array: frequency response over a given range
+        """
+
         return signal.freqz(*transfer_function, worN=range, fs=self._sample_freq)
 
 
 class Comb(Filter):
-    """ """
+    """Interface for the comb filter."""
 
     default_settings = {
         "fundamental_freq": {
@@ -884,7 +910,15 @@ class Comb(Filter):
         self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
 
     def compute_frequencies(self, transfer_function: Filter.TransferFunction, range: np.ndarray):
-        """ """
+        """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
+
+        :Parameters:
+            #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
+            #. range (np.ndarray): range of frequency values over which to compute
+        :Returns:
+            #. np.array: frequency response over a given range
+        """
+
         return signal.freqz(*transfer_function, worN=range, fs=self._sample_freq)
 
 
@@ -906,33 +940,21 @@ DEFAULT_FILTER = Butterworth
 def filter_default_attributes(filter=DEFAULT_FILTER):
     """Get the filter-specific settings dictionary for a filter class.
 
-    Parameters
-    ----------
-    filter :
-        The filter class.
-
-    Returns
-    -------
-
-        The filter settings dictionary
+    :Parameters:
+        #. filter (Filter) :  The filter class.
+    :Returns:
+        #. The filter settings dictionary
     """
     return {setting: values["value"] for setting, values in filter.default_settings.items()}
 
 def filter_description_string(filter=DEFAULT_FILTER, settings=filter_default_attributes(DEFAULT_FILTER)) -> str:
     """Convert a filter class and filter settings dictionary to a string.
 
-    Parameters
-    ----------
-    filter : str
-        The filter class
-
-    settings : dict
-        Dictionary containing the filter settings
-
-    Returns
-    -------
-
-        A string representation of the filter settings dictionary
+    :Parameters:
+        #. filter (str) : The filter class
+        #. settings (dict) : Dictionary containing the filter settings
+    :Returns:
+        #. str: string representation of the filter settings dictionary
     """
     return f'{{ "filter": "{filter.__name__}", "attributes": {json.dumps(settings)}}}'
 
@@ -942,12 +964,12 @@ def power_spectrum(
     """Returns the position power spectrum of a configuration's constituent atomic trajectories.
 
     :Parameters:
-        #. trajectory ( ): atomic trajectory object
-        #. frames ( ):
-        #. projection ( ):
-        #. atom_selection ( ):
-        #. weights ( ):
-        #. instrument_resolution ( ):
+        #. trajectory (HDFTrajectoryConfigurator): atomic trajectory object
+        #. frames (CorrelationFramesConfigurator): frames object
+        #. projection (ProjectionConfigurator): projection object
+        #. atom_selection (AtomSelectionConfigurator): atom selection object
+        #. weights (WeightsConfigurator): weights object
+        #. instrument_resolution (InstrumentResolutionConfigurator): instrument resolution object
     :Returns:
         #. Tuple[np.ndarray, np.ndarray]: tuple containing the omegas (frequency range) and the corresponding power spectrum of the atomic trajectories
     """
