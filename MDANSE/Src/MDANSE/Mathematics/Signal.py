@@ -525,7 +525,7 @@ class Filter(ABC):
         denominator_str = Filter.polynomial_string(denominator, cls.Z, False)
         return {"unit": "Z", "numerator": numerator_str, "denominator": denominator_str}
 
-    def attributes_to_string(self, description) -> None:
+    def attributes_to_string(self, description) -> str:
         """Formats the given filter attribute into a description string.
 
         :Parameters:
@@ -538,9 +538,8 @@ class Filter(ABC):
   {settings[setting]["description"]}
       {self.__dict__[setting]}
             """
-            # description.append(
-            #    f"  # {setting}\n  {settings[setting]['description']}\n      {self.__dict__[setting]}\n\n"
-            # )
+
+        return description
 
     def __str__(self):
         """Returns a string representation of the filter.
@@ -563,9 +562,7 @@ class Filter(ABC):
       {tuple(self.__dict__["_coeffs"].numerator), tuple(self.__dict__["_coeffs"].denominator)}
         """
 
-        self.attributes_to_string(string_representation)
-
-        return string_representation
+        return self.attributes_to_string(string_representation)
 
     def to_json(self) -> dict:
         """Returns a concise dictionary (json) representation of the filter.
