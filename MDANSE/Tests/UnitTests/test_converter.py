@@ -2,8 +2,6 @@ import os
 import tempfile
 from pathlib import Path
 
-from compare_mdt import compare_mdt
-
 import h5py
 import numpy as np
 import pytest
@@ -11,10 +9,8 @@ from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import \
     HDFTrajectoryConfigurator
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import JobError
-
-TEST_DIR = Path(__file__).parent
-CONV_DIR = TEST_DIR / "Converted"
-DATA_DIR = TEST_DIR / "Data"
+from test_helpers.compare_mdt import compare_mdt
+from test_helpers.paths import CONV_DIR, DATA_DIR
 
 lammps_config = DATA_DIR / "lammps_test.config"
 lammps_lammps = DATA_DIR / "lammps_test.lammps"

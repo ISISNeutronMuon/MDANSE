@@ -1,16 +1,14 @@
-from pathlib import Path
-
 import numpy as np
 import pytest
-from compare_mdt import compare_mdt
-from get_deep_attr import get_deep_attr
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import \
     HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import remove_jumps
+from test_helpers.compare_mdt import compare_mdt
+from test_helpers.get_deep_attr import get_deep_attr
+from test_helpers.paths import CONV_DIR, CONV_PATH
 
-CONV_DIR = Path(__file__).parents[1] / "Converted"
-short_traj = CONV_DIR / "trajectory_no_unit_cell.mdt"
+short_traj = CONV_PATH / "trajectory_no_unit_cell.mdt"
 
 CHARGE_ARRAY = [1.2, 1.2, 1.2, 1.2, 1.2, 1.2,
                 -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,
