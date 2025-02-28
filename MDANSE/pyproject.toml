@@ -59,6 +59,10 @@ MDANSE = ["Chemistry/*.json",
 mdanse = "MDANSE.Scripts.mdanse:main"
 
 [tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = "Tests"
+pythonpath = "Tests/CommonFunctions"
+addopts = "--import-mode=importlib"
 timeout = 240
 
 [tool.ruff]

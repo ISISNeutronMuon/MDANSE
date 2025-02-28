@@ -1,6 +1,6 @@
 import numpy as np
 from MDANSE.Framework.Jobs.IJob import IJob
-from test_helpers.compare_mdt import compare_mdt
+from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
 short_traj = CONV_DIR / "named_molecules.mdt"
@@ -41,7 +41,7 @@ def test_dacf_analysis(tmp_path):
 
     result_file = RESULTS_DIR / "dacf_analysis.mda"
 
-    compare_mdt(out_file, result_file, ("/dacf",), normalised=True)
+    compare_hdf5(out_file, result_file, ("/dacf",), scale_result=True)
 
 
 def test_ir_analysis(tmp_path):
@@ -81,4 +81,4 @@ def test_ir_analysis(tmp_path):
 
     result_file = RESULTS_DIR / "ir_analysis.mda"
 
-    compare_mdt(out_file, result_file, ("/ddacf", "/ir"), normalised=True)
+    compare_hdf5(out_file, result_file, ("/ddacf", "/ir"), scale_result=True)

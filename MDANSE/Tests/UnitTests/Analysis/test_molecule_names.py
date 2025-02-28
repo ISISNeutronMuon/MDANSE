@@ -1,6 +1,6 @@
 import pytest
 from MDANSE.Framework.Jobs.IJob import IJob
-from test_helpers.compare_mdt import compare_mdt
+from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
 short_traj = CONV_DIR / "named_molecules.mdt"
@@ -63,4 +63,4 @@ def test_structure_analysis(tmp_path, parameters, job_info):
 
     result_file = RESULTS_DIR / f"structure_analysis_{job_info[0]}.mda"
 
-    compare_mdt(out_file, result_file, job_info[1])
+    compare_hdf5(out_file, result_file, job_info[1])

@@ -4,11 +4,11 @@ from MDANSE.Framework.InputData.HDFTrajectoryInputData import \
     HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import remove_jumps
-from test_helpers.compare_mdt import compare_mdt
+from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.get_deep_attr import get_deep_attr
-from test_helpers.paths import CONV_DIR, CONV_PATH
+from test_helpers.paths import CONV_DIR
 
-short_traj = CONV_PATH / "trajectory_no_unit_cell.mdt"
+short_traj = CONV_DIR / "trajectory_no_unit_cell.mdt"
 
 CHARGE_ARRAY = [1.2, 1.2, 1.2, 1.2, 1.2, 1.2,
                 -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,
@@ -57,7 +57,7 @@ def test_jumps_removed_correctly():
       "/time"),
      ("trajectory.__len__()", ("trajectory.chemical_system.number_of_atoms", 14)),
      {"trajectory": short_traj, "frames": (0, 501, 1),
-      "atom_selection": '{"all": false, "element": ["H"]}'},
+      "atom_selection": '{"0": {"function_name": "select_atoms", "atom_types": ["H"]}}'},
      ),
 
     (("/configuration/coordinates", "/time"),
@@ -97,7 +97,7 @@ def test_jumps_removed_correctly():
      ),
 
     ((("/configuration/coordinates", (slice(None), slice(6, 20), slice(None))), "/time"),
-     (("trajectory.__len__()", ("trajectory.chemical_system.number_of_atoms", 8))),
+     (("trajectory.__len__()", ("trajectory.chemical_system.number_of_atoms", 14))),
      {"trajectory": short_traj, "frames": (0, 501, 1),
       "atom_selection": '{"0": {"function_name": "select_atoms", "atom_types": ["H"]}}'},
      ),
@@ -138,4 +138,4 @@ def test_editor(tmp_path, result, file_compare, traj_compare, parameters):
     original.close()
     changed.close()
 
-    compare_mdt(out_name, result_name, file_compare)
+    compare_hdf5(out_name, result_name, file_compare)

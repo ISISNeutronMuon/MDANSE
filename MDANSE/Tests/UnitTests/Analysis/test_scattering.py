@@ -7,32 +7,12 @@ import h5py
 import pytest
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from test_helpers.paths import CONV_DIR, RESULTS_DIR
+from test_helpers.compare_hdf5 import compare_hdf5
 
-
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "short_trajectory_after_changes.mdt",
-)
-mdmc_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "Ar_mdmc_h5md.h5",
-)
-com_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "com_trajectory.mdt",
-)
-result_dir = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Results",
-)
-
+short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
+mdmc_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
+com_traj = CONV_DIR / "com_trajectory.mdt"
 
 @pytest.fixture(scope="module")
 def qvector_grid():
@@ -43,147 +23,150 @@ def qvector_grid():
 
 
 @pytest.fixture(scope="module")
-def dcsf():
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-    parameters["q_vectors"] = (
-        "GridQVectors",
-        {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
-    )
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
-    parameters["weights"] = "b_coherent"
+def dcsf(tmp_path_factory):
+    temp_name = tmp_path_factory.mktemp("data") / "output_dcsf"
+    out_file = temp_name.with_suffix(".mda")
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "frames": (0, 10, 1, 5),
+        "instrument_resolution": ("Ideal", {}),
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
+        "q_vectors": (
+            "GridQVectors",
+            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
+        ),
+        "running_mode": ("single-core",),
+        "trajectory": short_traj,
+        "weights": "b_coherent",
+    }
+
     dcsf = IJob.create("DynamicCoherentStructureFactor")
     dcsf.run(parameters, status=True)
-    yield temp_name + ".mda"
-    os.remove(temp_name + ".mda")
+
+    yield out_file
 
 
 @pytest.fixture(scope="module")
-def disf():
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-    parameters["q_vectors"] = (
-        "GridQVectors",
-        {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
-    )
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
-    parameters["weights"] = "b_incoherent2"
+def disf(tmp_path_factory):
+    temp_name = tmp_path_factory.mktemp("data") / "output_disf"
+    out_file = temp_name.with_suffix(".mda")
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "frames": (0, 10, 1, 5),
+        "instrument_resolution": ("Ideal", {}),
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
+        "q_vectors": (
+            "GridQVectors",
+            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
+        ),
+        "running_mode": ("single-core",),
+        "trajectory": short_traj,
+        "weights": "b_incoherent2",
+    }
+
     disf = IJob.create("DynamicIncoherentStructureFactor")
     disf.run(parameters, status=True)
-    yield temp_name + ".mda"
-    os.remove(temp_name + ".mda")
+
+    yield out_file
 
 
 @pytest.mark.parametrize(
     "traj_info",
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
+    ids=lambda x: x[0],
 )
-def test_dcsf(traj_info, qvector_grid):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
-    parameters["q_vectors"] = qvector_grid
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = traj_info[1]
-    parameters["weights"] = "b_coherent"
+def test_dcsf(tmp_path, traj_info, qvector_grid):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+    text_file = tmp_path / "output_text.tar"
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "frames": (0, 10, 1, 5),
+        "instrument_resolution": ("Ideal", {}),
+        "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
+        "q_vectors": qvector_grid,
+        "running_mode": ("single-core",),
+        "trajectory": traj_info[1],
+        "weights": "b_coherent",
+    }
+
     dcsf = IJob.create("DynamicCoherentStructureFactor")
     dcsf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
 
-    result_file = os.path.join(result_dir, f"dcsf_{traj_info[0]}.mda")
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        keys = [
-            key for key in desired.keys()
-            if any(key.startswith(j) for j in ["f(q,t)", "s(q,f)"])
-        ]
-        for key in keys:
-            np.testing.assert_array_almost_equal(
-                actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
-                desired[f"/{key}"] * desired[f"/{key}"].attrs["scaling_factor"],
-            )
+    assert out_file.is_file()
+    assert log_file.is_file()
+    assert text_file.is_file()
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    result_file = RESULTS_DIR / f"dcsf_{traj_info[0]}.mda"
+
+    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)"),
+                 startswith=True, scale_result=True, scale_benchmark=True,
+                 atol=1e-8)
 
 
 @pytest.mark.parametrize(
     "traj_info",
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
+    ids=lambda x: x[0],
 )
-def test_ccf(traj_info, qvector_grid):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
-    parameters["q_vectors"] = qvector_grid
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = traj_info[1]
-    parameters["weights"] = "equal"
+def test_ccf(tmp_path, traj_info, qvector_grid):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+    text_file = tmp_path / "output_text.tar"
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "frames": (0, 10, 1, 5),
+        "instrument_resolution": ("Ideal", {}),
+        "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
+        "q_vectors": qvector_grid,
+        "running_mode": ("single-core",),
+        "trajectory": traj_info[1],
+        "weights": "equal",
+    }
+
     ccf = IJob.create("CurrentCorrelationFunction")
     ccf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
 
-    result_file = os.path.join(result_dir, f"ccf_{traj_info[0]}.mda")
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        keys = [
-            i for i in desired.keys() if any([j in i for j in ["J(q,f)", "j(q,t)"]])
-        ]
-        for key in keys:
-            np.testing.assert_array_almost_equal(
-                actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
-                desired[f"/{key}"] * desired[f"/{key}"].attrs["scaling_factor"],
-            )
+    assert out_file.is_file()
+    assert log_file.is_file()
+    assert text_file.is_file()
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    result_file = RESULTS_DIR / f"ccf_{traj_info[0]}.mda"
+
+    compare_hdf5(out_file, result_file, ("J(q,f)", "j(q,t)"),
+                 startswith=True, scale_result=True, scale_benchmark=True,
+                 atol=1e-6)
 
 
-def test_output_axis_preview(qvector_grid):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
-    parameters["q_vectors"] = qvector_grid
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
-    parameters["weights"] = "b_coherent"
+def test_output_axis_preview(tmp_path, qvector_grid):
+    temp_name = tmp_path / "output"
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "frames": (0, 10, 1, 5),
+        "instrument_resolution": ("Ideal", {}),
+        "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
+        "q_vectors": qvector_grid,
+        "running_mode": ("single-core",),
+        "trajectory": short_traj,
+        "weights": "b_coherent",
+    }
+
     dcsf = IJob.create("DynamicCoherentStructureFactor")
     dcsf.setup(parameters)
     axes = dcsf.preview_output_axis()
+
     print(axes)
     assert len(axes) == 3  # two configurators return valid arrays
 
@@ -191,173 +174,153 @@ def test_output_axis_preview(qvector_grid):
 @pytest.mark.parametrize(
     "traj_info",
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
+    ids=lambda x: x[0],
 )
-def test_disf(traj_info, qvector_grid):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
-    parameters["q_vectors"] = qvector_grid
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = traj_info[1]
-    parameters["weights"] = "b_incoherent2"
+def test_disf(tmp_path, traj_info, qvector_grid):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+    text_file = tmp_path / "output_text.tar"
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "frames": (0, 10, 1, 5),
+        "instrument_resolution": ("Ideal", {}),
+        "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
+        "q_vectors": qvector_grid,
+        "running_mode": ("single-core",),
+        "trajectory": traj_info[1],
+        "weights": "b_incoherent2",
+    }
+
     disf = IJob.create("DynamicIncoherentStructureFactor")
     disf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
 
-    result_file = os.path.join(result_dir, f"disf_{traj_info[0]}.mda")
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        keys = [
-            i for i in desired.keys() if any([j in i for j in ["f(q,t)", "s(q,f)"]])
-        ]
-        for key in keys:
-            np.testing.assert_array_almost_equal(
-                actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
-                desired[f"/{key}"] * desired[f"/{key}"].attrs["scaling_factor"],
-            )
+    assert out_file.is_file()
+    assert log_file.is_file()
+    assert text_file.is_file()
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    result_file = RESULTS_DIR / f"disf_{traj_info[0]}.mda"
+
+    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)"),
+                 startswith=True, scale_result=True, scale_benchmark=True)
 
 
 @pytest.mark.parametrize(
     "traj_info",
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
+    ids=lambda x: x[0],
 )
-def test_eisf(traj_info, qvector_grid):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
-    parameters["q_vectors"] = qvector_grid
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = traj_info[1]
-    parameters["weights"] = "b_incoherent"
+def test_eisf(tmp_path, traj_info, qvector_grid):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+    text_file = tmp_path / "output_text.tar"
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "frames": (0, 10, 1),
+        "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
+        "q_vectors": qvector_grid,
+        "running_mode": ("single-core",),
+        "trajectory": traj_info[1],
+        "weights": "b_incoherent",
+    }
+
     eisf = IJob.create("ElasticIncoherentStructureFactor")
     eisf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
 
-    result_file = os.path.join(result_dir, f"eisf_{traj_info[0]}.mda")
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        keys = [i for i in desired.keys() if "eisf" in i]
-        for key in keys:
-            np.testing.assert_array_almost_equal(
-                actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
-                desired[f"/{key}"],
-            )
+    assert out_file.is_file()
+    assert log_file.is_file()
+    assert text_file.is_file()
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    result_file = RESULTS_DIR / f"eisf_{traj_info[0]}.mda"
+    compare_hdf5(out_file, result_file, ("eisf",), startswith=True, scale_result=True)
 
 
 @pytest.mark.parametrize(
     "traj_info",
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
+    ids=lambda x: x[0],
 )
-def test_gdisf(traj_info):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
-    parameters["q_shells"] = (2.0, 12.2, 2.0)
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = traj_info[1]
-    parameters["weights"] = "b_incoherent2"
+def test_gdisf(tmp_path, traj_info):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+    text_file = tmp_path / "output_text.tar"
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "frames": (0, 10, 1, 5),
+        "instrument_resolution": ("Ideal", {}),
+        "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
+        "q_shells": (2.0, 12.2, 2.0),
+        "running_mode": ("single-core",),
+        "trajectory": traj_info[1],
+        "weights": "b_incoherent2",
+    }
+
     gdisf = IJob.create("GaussianDynamicIncoherentStructureFactor")
     gdisf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
 
-    result_file = os.path.join(result_dir, f"gdisf_{traj_info[0]}.mda")
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        keys = [
-            i for i in desired.keys() if any([j in i for j in ["f(q,t)", "s(q,f)", "msd"]])
-        ]
-        for key in keys:
-            np.testing.assert_array_almost_equal(
-                actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
-                desired[f"/{key}"] * desired[f"/{key}"].attrs["scaling_factor"],
-            )
+    assert out_file.is_file()
+    assert log_file.is_file()
+    assert text_file.is_file()
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    result_file = RESULTS_DIR / f"gdisf_{traj_info[0]}.mda"
+
+    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)", "msd"),
+                 startswith=True)
 
 
-def test_ndtsf(disf, dcsf, qvector_grid):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["atom_selection"] = None
-    parameters["atom_transmutation"] = None
-    parameters["disf_input_file"] = disf
-    parameters["dcsf_input_file"] = dcsf
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
+def test_ndtsf(tmp_path, disf, dcsf, qvector_grid):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+    text_file = tmp_path / "output_text.tar"
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "disf_input_file": disf,
+        "dcsf_input_file": dcsf,
+        "running_mode": ("single-core",),
+        "trajectory": short_traj,
+        "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
+    }
+
     ndtsf = IJob.create("NeutronDynamicTotalStructureFactor")
     ndtsf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
 
-    result_file = os.path.join(result_dir, "ndtsf.mda")
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        keys = [
-            i for i in desired.keys() if any([j in i for j in ["f(q,t)", "s(q,f)"]])
-        ]
-        for key in keys:
-            np.testing.assert_array_almost_equal(
-                actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
-                desired[f"/{key}"] * desired[f"/{key}"].attrs["scaling_factor"],
-            )
+    assert out_file.is_file()
+    assert log_file.is_file()
+    assert text_file.is_file()
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    result_file = RESULTS_DIR / "ndtsf.mda"
+
+    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)"),
+                 startswith=True, atol=1e-6)
 
 
-def test_ssfsf(disf):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["sample_inc"] = disf
-    parameters["running_mode"] = ("single-core",)
-    parameters["instrument_resolution"] = ("Ideal", {})
-    parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
+def test_ssfsf(tmp_path, disf):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+    text_file = tmp_path / "output_text.tar"
+
+    parameters = {
+        "sample_inc": disf,
+        "running_mode": ("single-core",),
+        "instrument_resolution": ("Ideal", {}),
+        "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
+    }
+
     ndtsf = IJob.create("StructureFactorFromScatteringFunction")
     ndtsf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + "_text.tar")
-    assert path.isfile(temp_name + "_text.tar")
-    os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+
+    assert out_file.is_file()
+    assert log_file.is_file()
+    assert text_file.is_file()

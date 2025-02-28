@@ -33,5 +33,6 @@ jobs:
         run: python -m pip install .
 
       - name: Run unit tests
-        working-directory: MDANSE/Tests/UnitTests
-        run: python -m pytest
+        working-directory: MDANSE
+        run: |
+          pytest

@@ -7,7 +7,7 @@ import h5py
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.paths import RESULTS_DIR, CONV_DIR
-from test_helpers.compare_mdt import compare_mdt
+from test_helpers.compare_hdf5 import compare_hdf5
 
 short_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
 
@@ -45,5 +45,5 @@ def test_h5md_temperature(tmp_path, trajectory, interp_order):
 
     result_file = RESULTS_DIR / f"h5md_temperature_{interp_order}.mda"
 
-    compare_mdt(out_file, result_file, ("/kinetic_energy", "/temperature",
+    compare_hdf5(out_file, result_file, ("/kinetic_energy", "/temperature",
                                         "/avg_kinetic_energy", "/avg_temperature"))

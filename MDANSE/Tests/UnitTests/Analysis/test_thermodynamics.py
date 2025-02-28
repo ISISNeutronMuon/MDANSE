@@ -1,132 +1,80 @@
-import tempfile
-import os
-from os import path
-import pytest
-
 import numpy as np
-import h5py
-
+import pytest
 from MDANSE.Framework.Jobs.IJob import IJob
+from test_helpers.compare_hdf5 import compare_hdf5
+from test_helpers.paths import CONV_DIR, RESULTS_DIR
+
+short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
+com_traj = CONV_DIR / "com_trajectory.mdt"
+mdmc_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
 
 
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "short_trajectory_after_changes.mdt",
+@pytest.mark.parametrize("interp_order", [1, 3])
+@pytest.mark.parametrize("traj_info", [
+    ("short_traj", short_traj),
+    ("mdmc_traj", mdmc_traj),
+    ("com_traj", com_traj),
+], ids=lambda x: x[0],
 )
-com_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "com_trajectory.mdt",
-)
-mdmc_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "Ar_mdmc_h5md.h5",
-)
-result_dir = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Results",
-)
+def test_temperature(tmp_path, traj_info, interp_order):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
 
+    parameters = {
+        "frames": (0, 10, 1),
+        "interpolation_order": interp_order,
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
+        "running_mode": ("single-core",),
+        "trajectory": traj_info[1],
+    }
 
-@pytest.mark.parametrize(
-    "traj_info,interp_order",
-    [
-        (("short_traj", short_traj), 1),
-        (("short_traj", short_traj), 3),
-        (("mdmc_traj", mdmc_traj), 1),
-        (("mdmc_traj", mdmc_traj), 3),
-        (("com_traj", com_traj), 1),
-        (("com_traj", com_traj), 3),
-    ],
-)
-def test_temperature(traj_info, interp_order):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1)
-    parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = traj_info[1]
     temp = IJob.create("Temperature")
     temp.run(parameters, status=True)
 
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    result_file = os.path.join(
-        result_dir, f"temperature_{traj_info[0]}_{interp_order}.mda"
-    )
+    assert out_file.is_file()
+    assert log_file.is_file()
 
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        np.testing.assert_array_almost_equal(
-            actual["/kinetic_energy"], desired["/kinetic_energy"]
-        )
-        np.testing.assert_array_almost_equal(
-            actual["/temperature"], desired["/temperature"]
-        )
-        np.testing.assert_array_almost_equal(
-            actual["/avg_kinetic_energy"], desired["/avg_kinetic_energy"]
-        )
-        np.testing.assert_array_almost_equal(
-            actual["/avg_temperature"], desired["/avg_temperature"]
-        )
+    result_file = RESULTS_DIR / f"temperature_{traj_info[0]}_{interp_order}.mda"
 
-    os.remove(temp_name + ".mda")
-
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    compare_hdf5(out_file, result_file, ("/kinetic_energy", "/temperature",
+                                        "/avg_kinetic_energy", "avg_temperature"))
 
 
-@pytest.mark.parametrize(
-    "traj_info,output_format",
-    [
-        (("short_traj", short_traj), "MDAFormat"),
-        (("short_traj", short_traj), "TextFormat"),
-        (("mdmc_traj", mdmc_traj), "MDAFormat"),
-        (("mdmc_traj", mdmc_traj), "TextFormat"),
-        (("com_traj", com_traj), "MDAFormat"),
-        (("com_traj", com_traj), "TextFormat"),
-    ],
+
+@pytest.mark.parametrize("traj_info", [
+    ("short_traj", short_traj),
+    ("mdmc_traj", mdmc_traj),
+    ("com_traj", com_traj),
+], ids=lambda x: x[0],
 )
-def test_density(traj_info, output_format):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1)
-    parameters["output_files"] = (temp_name, (output_format,), "INFO")
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = traj_info[1]
+@pytest.mark.parametrize("output_format", ["MDAFormat", "TextFormat"])
+def test_density(tmp_path, traj_info, output_format):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+
+    parameters = {
+        "frames": (0, 10, 1),
+        "output_files": (temp_name, (output_format,), "INFO"),
+        "running_mode": ("single-core",),
+        "trajectory": traj_info[1],
+    }
     den = IJob.create("Density")
     den.run(parameters, status=True)
+
     if output_format == "MDAFormat":
-        assert path.exists(temp_name + ".mda")
-        assert path.isfile(temp_name + ".mda")
-        result_file = os.path.join(result_dir, f"density_{traj_info[0]}.mda")
+        out_file = temp_name.with_suffix(".mda")
+        result_file = RESULTS_DIR / f"density_{traj_info[0]}.mda"
 
-        with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-            np.testing.assert_array_almost_equal(
-                actual["/atomic_density"], desired["/atomic_density"]
-            )
-            np.testing.assert_array_almost_equal(
-                actual["/mass_density"], desired["/mass_density"]
-            )
-            np.testing.assert_array_almost_equal(
-                actual["/avg_atomic_density"], desired["/avg_atomic_density"]
-            )
-            np.testing.assert_array_almost_equal(
-                actual["/avg_mass_density"], desired["/avg_mass_density"]
-            )
+        assert out_file.is_file()
 
-        os.remove(temp_name + ".mda")
+        compare_hdf5(out_file, result_file, ("/atomic_density", "/mass_density",
+                                            "/avg_atomic_density", "/avg_mass_density"),
+                     startswith=True)
+
     elif output_format == "TextFormat":
-        assert path.exists(temp_name + "_text.tar")
-        assert path.isfile(temp_name + "_text.tar")
-        os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+        out_file = temp_name.parent / (temp_name.stem + "_text.tar")
+        assert out_file.is_file()
+
+    assert log_file.is_file()

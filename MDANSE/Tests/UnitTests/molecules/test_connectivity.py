@@ -1,49 +1,46 @@
-import os
 import pytest
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from test_helpers.paths import CONV_DIR
 
-
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Converted", "co2gas_md3.mdt"
-)
+short_traj = CONV_DIR / "co2gas_md3.mdt"
 
 
 @pytest.fixture
-def trajectory() -> HDFTrajectoryInputData:
+def trajectory():
     trajectory = HDFTrajectoryInputData(short_traj)
     yield trajectory.trajectory
 
-
-def test_create_connectivity(trajectory: Trajectory):
+@pytest.fixture
+def connectivity(trajectory):
     conn = Connectivity(trajectory=trajectory)
-    print(conn._unique_elements)
+    conn.find_bonds()
+    return conn
+
+def test_create_connectivity(trajectory):
+    conn = Connectivity(trajectory=trajectory)
     assert len(conn._unique_elements) == 2
 
 
-def test_find_molecules(trajectory: Trajectory):
-    conn = Connectivity(trajectory=trajectory)
-    conn.find_bonds()
-    assert len(conn._unique_bonds) == 40
-    conn.add_bond_information(trajectory.chemical_system)
-    molecules_found = 0
-    for name in trajectory.chemical_system.unique_molecules():
-        molecules_found += trajectory.chemical_system.number_of_molecules(name)
+def test_find_molecules(trajectory, connectivity):
+    assert len(connectivity._unique_bonds) == 40
+
+    connectivity.add_bond_information(trajectory.chemical_system)
+
+    csys = trajectory.chemical_system
+    molecules_found = sum(csys.number_of_molecules(name)
+                          for name in csys.unique_molecules())
     assert molecules_found == 20
 
 
-def test_identify_molecules(trajectory: Trajectory):
-    conn = Connectivity(trajectory=trajectory)
-    conn.find_bonds()
+def test_identify_molecules(trajectory, connectivity):
+    connectivity.find_bonds()
     chemical_system = trajectory.chemical_system
-    conn.add_bond_information(chemical_system)
+    connectivity.add_bond_information(chemical_system)
+
     molstrings = []
-    for molname, mollist in chemical_system._clusters.items():
-        assert len(mollist) == 20
-    result = True
-    for ms in molstrings[1:]:
-        result = result and ms == molstrings[0]
-    assert result
-    print(chemical_system.unique_molecules())
+    assert all(len(mollist) == 20
+               for mollist in chemical_system._clusters.values())
+    assert all(ms == molstrings[0] for ms in molstrings[1:])
     assert len(chemical_system.unique_molecules()) == 1

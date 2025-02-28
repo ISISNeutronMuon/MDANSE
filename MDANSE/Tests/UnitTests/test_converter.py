@@ -9,7 +9,7 @@ from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import \
     HDFTrajectoryConfigurator
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import JobError
-from test_helpers.compare_mdt import compare_mdt
+from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, DATA_DIR
 
 lammps_config = DATA_DIR / "lammps_test.config"
@@ -64,7 +64,7 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
     traj_conf.get_information()
     traj_conf["hdf_trajectory"].close()
 
-    compare_mdt(out_name, result_name, compare)
+    compare_hdf5(out_name, result_name, compare, atol=1e-6)
 
     assert out_name.is_file()
     assert log_name.is_file()

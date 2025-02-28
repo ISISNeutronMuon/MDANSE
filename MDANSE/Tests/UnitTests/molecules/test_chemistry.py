@@ -1,11 +1,8 @@
-import os
 import pytest
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from test_helpers.paths import CONV_DIR
 
-
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Converted", "co2gas_md3.mdt"
-)
+short_traj = CONV_DIR / "co2gas_md3.mdt"
 
 
 @pytest.fixture(scope="module")

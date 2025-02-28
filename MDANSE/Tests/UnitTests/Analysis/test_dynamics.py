@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from MDANSE.Framework.Jobs.IJob import IJob
-from test_helpers.compare_mdt import compare_mdt
+from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
 short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
@@ -38,7 +38,7 @@ def test_vacf(tmp_path, interp_order, normalise):
 
     result_file = RESULTS_DIR / fname
 
-    compare_mdt(out_file, result_file, [f"/vacf_{elem}" for elem in ("Cu", "S", "Sb", "total")], normalised=normalise)
+    compare_hdf5(out_file, result_file, [f"/vacf_{elem}" for elem in ("Cu", "S", "Sb", "total")], scale_result=normalise)
 
 
 def test_pps(tmp_path):
@@ -61,9 +61,9 @@ def test_pps(tmp_path):
 
     result_file = RESULTS_DIR / "pps.mda"
 
-    compare_mdt(out_file, result_file,
+    compare_hdf5(out_file, result_file,
                 [f"/{fn}_{elem}" for elem in ("Cu", "S", "Sb", "total") for fn in ("pacf", "pps")],
-                normalised=True)
+                scale_result=True)
 
 
 ################################################################
@@ -132,14 +132,13 @@ def test_dynamics_analysis(
     job = IJob.create(job_type)
     job.run(parameters, status=True)
 
-
     if output_format == "MDAFormat":
         out_file = temp_name.with_suffix(".mda")
         result_file = RESULTS_DIR / f"dynamics_analysis_{traj_info[0]}_{job_type}.mda"
 
         assert out_file.is_file()
 
-        compare_mdt(out_file, result_file, outputs, startswith=True, normalised=normalised)
+        compare_hdf5(out_file, result_file, outputs, startswith=True, scale_result=normalised)
 
     elif output_format == "TextFormat":
         out_file = temp_name.parent / (temp_name.stem + "_text.tar")

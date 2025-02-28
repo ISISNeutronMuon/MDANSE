@@ -5,7 +5,7 @@ import h5py
 import numpy as np
 import pytest
 from MDANSE.Framework.Jobs.IJob import IJob
-from test_helpers.compare_mdt import compare_mdt
+from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
 short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
@@ -43,5 +43,5 @@ def test_basic_meansquare(tmp_path, running_mode):
 
     result_file = RESULTS_DIR / "basic_meansquare.mda"
 
-    compare_mdt(out_file, result_file,
+    compare_hdf5(out_file, result_file,
                 [f"/msd_{elem}" for elem in ("Cu", "S", "Sb", "total")])

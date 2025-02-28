@@ -4,14 +4,9 @@ from os import path
 import pytest
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from test_helpers.paths import CONV_DIR
 
-
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "short_trajectory_after_changes.mdt",
-)
+short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
 
 ################################################################
@@ -46,70 +41,24 @@ def parameters():
     parameters["weights"] = "equal"
     return parameters
 
+@pytest.mark.parametrize("traj_type", [
+    pytest.param("RigidBodyTrajectory",
+                 marks=pytest.mark.xfail()),
+    pytest.param("GlobalMotionFilteredTrajectory",
+                 marks=pytest.mark.xfail()),
+    "CroppedTrajectory",
+    "CenterOfMassesTrajectory",
+    "UnfoldedTrajectory",
+])
+def test_trajectory(tmp_path, parameters, traj_type):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mdt")
+    log_file = temp_name.with_suffix(".log")
 
-@pytest.mark.xfail(reason="see docstring")
-def test_RigidBodyTrajectory(parameters):
-    """We ignore the failure to merge other changes."""
-    temp_name = tempfile.mktemp()
     parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
-    job = IJob.create("RigidBodyTrajectory")
+
+    job = IJob.create(traj_type)
     job.run(parameters, status=True)
-    assert path.exists(temp_name + ".mdt")
-    assert path.isfile(temp_name + ".mdt")
-    os.remove(temp_name + ".mdt")
 
-
-@pytest.mark.xfail(reason="see docstring")
-def test_GlobalMotionFilteredTrajectory(parameters):
-    """We ignore the failure here to merge other changes."""
-    temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
-    job = IJob.create("GlobalMotionFilteredTrajectory")
-    job.run(parameters, status=True)
-    assert path.exists(temp_name + ".mdt")
-    assert path.isfile(temp_name + ".mdt")
-    os.remove(temp_name + ".mdt")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
-
-
-def test_CroppedTrajectory(parameters):
-    temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
-    job = IJob.create("CroppedTrajectory")
-    job.run(parameters, status=True)
-    assert path.exists(temp_name + ".mdt")
-    assert path.isfile(temp_name + ".mdt")
-    os.remove(temp_name + ".mdt")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
-
-
-def test_CenterOfMassesTrajectory(parameters):
-    """This will need to detect molecules before it can
-    find the centre of each one of them."""
-    temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
-    job = IJob.create("CenterOfMassesTrajectory")
-    job.run(parameters, status=True)
-    assert path.exists(temp_name + ".mdt")
-    assert path.isfile(temp_name + ".mdt")
-    os.remove(temp_name + ".mdt")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
-
-
-def test_UnfoldedTrajectory(parameters):
-    temp_name = tempfile.mktemp()
-    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
-    job = IJob.create("UnfoldedTrajectory")
-    job.run(parameters, status=True)
-    assert path.exists(temp_name + ".mdt")
-    assert path.isfile(temp_name + ".mdt")
-    os.remove(temp_name + ".mdt")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    assert out_file.exists()
+    assert log_file.exists()

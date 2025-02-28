@@ -1,6 +1,6 @@
 import pytest
 from MDANSE.Framework.Jobs.IJob import IJob
-from test_helpers.compare_mdt import compare_mdt
+from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import DATA_DIR, RESULTS_DIR
 
 mock_json = DATA_DIR / "mock.json"
@@ -35,6 +35,6 @@ def test_vacf(tmp_path, interp_order, normalise):
 
     result_file = RESULTS_DIR / fname
 
-    compare_mdt(out_file, result_file,
+    compare_hdf5(out_file, result_file,
                 [f"vacf_{elem}" for elem in ("H", "O", "Si", "total")],
-                normalised=normalise)
+                scale_result=normalise)

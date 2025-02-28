@@ -7,7 +7,6 @@ from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInput
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.paths import CONV_DIR
-from test_helpers.compare_mdt import compare_mdt
 
 short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
