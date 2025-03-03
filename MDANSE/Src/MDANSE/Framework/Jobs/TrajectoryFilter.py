@@ -21,7 +21,7 @@ import numpy as np
 
 import h5py
 from MDANSE.Framework.Formats import HDFFormat
-
+from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import FILTER_MAP
 from MDANSE.MolecularDynamics.Configuration import (
@@ -172,10 +172,14 @@ class TrajectoryFilter(IJob):
             != "lowpass",
         )
 
+        # Create new chemical system for output trajectory
+        output_chemical_system = ChemicalSystem("filtered")
+        output_chemical_system.initialise_atoms(self._selected_atoms)
+
         # Create trajectory writer object
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
-            self.configuration["trajectory"]["instance"].chemical_system,
+            output_chemical_system,
             filter_attributes["n_steps"],
             None,
             positions_dtype=self.configuration["output_files"]["dtype"],
