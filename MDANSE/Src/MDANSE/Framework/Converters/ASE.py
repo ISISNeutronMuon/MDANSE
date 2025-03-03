@@ -18,17 +18,17 @@ import collections
 import numpy as np
 from ase.io import iread, read
 from ase.io.trajectory import Trajectory as ASETrajectory
-
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
+from MDANSE.Framework.ConfigDescriptors import (BooleanConfigDesc,
+                                                FloatConfigDesc,
+                                                IntegerConfigDesc)
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
-)
+from MDANSE.MolecularDynamics.Configuration import (PeriodicRealConfiguration,
+                                                    RealConfiguration)
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -66,26 +66,13 @@ class ASE(Converter):
             "dependencies": {"input_file": "trajectory_file"},
         },
     )
-    settings["time_step"] = (
-        "FloatConfigurator",
-        {"label": "Time step", "default": 1.0, "mini": 1.0e-9},
-    )
     settings["time_unit"] = (
         "SingleChoiceConfigurator",
         {"label": "Time step unit", "choices": ["fs", "ps", "ns"], "default": "fs"},
     )
-    settings["n_steps"] = (
-        "IntegerConfigurator",
-        {
-            "label": "Number of time steps (0 for automatic detection)",
-            "default": 0,
-            "mini": 0,
-        },
-    )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates into box"},
-    )
+    time_step = FloatConfigDesc(default=1., mini=1e-9, label="Time step")
+    n_steps = IntegerConfigDesc(default=0, mini=0, label="Number of time steps (0 for automatic detection)")
+    fold = BooleanConfigDesc(label="Fold coordinates into box")
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
@@ -108,7 +95,7 @@ class ASE(Converter):
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # The number of steps of the analysis.
-        self.numberOfSteps = self.configuration["n_steps"]["value"]
+        self.numberOfSteps = self.n_steps
 
         self._timestep = float(self.configuration["time_step"]["value"]) * measure(
             1.0, self.configuration["time_unit"]["value"]
@@ -195,7 +182,7 @@ class ASE(Converter):
                     f"Could not create configuration for frame {index}. Will skip the rest"
                 )
                 return index, None
-            if self._configuration["fold"]["value"]:
+            if self.fold:
                 real_conf.fold_coordinates()
         else:
             try:
