@@ -47,6 +47,9 @@ from MDANSE.Mathematics.Signal import (
 )
 import matplotlib.pyplot as mpl
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5agg import (
+    NavigationToolbar2QT as NavigationToolbar2QTAgg,
+)
 
 
 class FilterDesigner(QDialog):
@@ -64,7 +67,7 @@ class FilterDesigner(QDialog):
     """
 
     _helper_title = "Filter designer"
-    _canvas_dimensions = {"width": 600, "height": 500}
+    _canvas_dimensions = {"width": 700, "height": 500}
     _setting_grid_layout = QGridLayout()
     _preferences_grid_layout = QGridLayout()
     _preferences = {}
@@ -743,15 +746,19 @@ class FilterDesigner(QDialog):
         figure = mpl.figure(figsize=[fig_width, fig_height], dpi=dpi, frameon=True)
         figAgg = FigureCanvasQTAgg(figure)
         figAgg.setParent(canvas)
+        toolbar = NavigationToolbar2QTAgg(figAgg, canvas)
+        toolbar.update()
         figAgg.setMinimumSize(*self._canvas_dimensions.values())
         figAgg.setFixedSize(*self._canvas_dimensions.values())
         figAgg.updateGeometry()
         layout.addWidget(figAgg)
+        layout.addWidget(toolbar)
         self._figure_info = QTextEdit()
         self._figure_info.setFontPointSize(8)
         self._figure_info.setReadOnly(True)
         layout.addWidget(self._figure_info)
         self._figure = figure
+        self._toolbar = toolbar
         return canvas
 
     def create_graph_layout(self, widget_area: QVBoxLayout) -> None:
