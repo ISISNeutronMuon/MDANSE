@@ -173,7 +173,10 @@ class TrajectoryFilter(IJob):
         )
 
         # Create new chemical system for output trajectory
-        output_chemical_system = ChemicalSystem("filtered")
+        name = self.configuration["output_files"]["file"].name.split('.').pop(0)
+        if not isinstance(name, str):
+            name = "filtered_traj_chemical_system"
+        output_chemical_system = ChemicalSystem(name)
         output_chemical_system.initialise_atoms(self._selected_atoms)
 
         # Create trajectory writer object
