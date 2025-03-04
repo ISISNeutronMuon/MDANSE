@@ -15,13 +15,15 @@
 #
 
 import collections
+from collections.abc import Sequence
+from typing import Union, Tuple
 
 import numpy as np
+import numpy.typing as npt
 
-from MDANSE.Framework.Formats.IFormat import IFormat
 from MDANSE.Core.Error import Error
-
 from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Framework.Formats.IFormat import IFormat
 
 
 class OutputVariableError(Error):
@@ -52,37 +54,56 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
 
     def __new__(
         cls,
-        value,
-        varname,
-        axis="index",
-        units="unitless",
-        main_result=False,
-        partial_result=False,
+        value: Union[Tuple[int, ...], npt.ArrayLike],
+        varname: str,
+        axis: Union[str, Sequence[str], None] = None,
+        units: str = "unitless",
+        *,
+        main_result: bool = False,
+        partial_result: bool = False,
     ):
+        """Instantiate a new MDANSE output variable.
+
+        Parameters
+        ----------
+        value : Union[Tuple[int, ...], npt.ArrayLike]
+            If value is tuple create empty array with those dimensions.
+
+            If value is ArrayLike interpret as array data.
+        varname : str
+            Variable name for reference.
+        axis : Union[str, Sequence[str], None]
+            List of axis labels. If str split on ``|``.
+        units : str
+            Units of main data.
+        main_result : bool
+            Whether the data are the main result of a calculation.
+        partial_result : bool
+            Whether the data are a complete calculation.
+
+        Raises
+        ------
+        OutputVariableError
+            If dimensions of provided data do not align with those of object.
         """
-        Instantiate a new MDANSE output variable.
-
-        @param cls: the class to instantiate.
-        @type cls: an OutputVariable object
-
-        @param varname: the name of the output variable.
-        @type varname: string
-
-        @param value: the input numpy array.
-        @type value: numpy array
-
-        @note: This is the standard implementation for subclassing a numpy array.
-        Please look at http://docs.scipy.org/doc/numpy/user/basics.subclassing.html for more information.
-        """
-
         if isinstance(value, tuple):
             value = np.zeros(value, dtype=np.float64)
         else:
             value = np.array(list(value), dtype=np.float64)
 
+        if isinstance(axis, str):
+            axis = axis.split("|")
+        elif axis is None:
+            axis = ["index"] * value.ndim
+
         if value.ndim != cls._nDimensions:
             raise OutputVariableError(
-                f"Invalid number of dimensions for an output variable of type {cls.name!r}"
+                f"Invalid number of dimensions ({value.ndim}) for an output variable of type {cls.__name__!r}"
+            )
+
+        if len(axis) != cls._nDimensions:
+            raise OutputVariableError(
+                f"Invalid number of dimensions ({len(axis)}) for an axis label of type {cls.__name__!r}"
             )
 
         # Input array is an already formed ndarray instance
@@ -94,7 +115,7 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
 
         obj.units = units
 
-        obj.axis = axis
+        obj.axis = "|".join(axis)
 
         obj.scaling_factor = 1.0
 
