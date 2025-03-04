@@ -191,7 +191,6 @@ class FilterDesigner(QDialog):
             List of length 2 containing the critical frequency bounds.
         """
         return np.array(
-            #sorted([self.__dict__[f"{self._settings["filter"]}_cutoff_freq_widget"].value(), self.__dict__[f"{self._settings["filter"]}_bound_freq_widget"].value()])
             sorted([self.retrieve_widget(self._settings["filter"], "cutoff_freq").value(), self.retrieve_widget(self._settings["filter"], "bound_freq").value()])
         ).tolist()
 
