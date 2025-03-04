@@ -103,7 +103,7 @@ class TrajectoryFilter(IJob):
 
         # This stores the trajectory (position array) of atoms by x, y, z component, to be filtered
         self.atomic_trajectory_array = np.zeros(
-            (len(self._atoms), 3, len(self.configuration["frames"]["value"]))
+            (len(self._selected_atoms), 3, len(self.configuration["frames"]["value"]))
         )
 
     def run_step(self, index):
