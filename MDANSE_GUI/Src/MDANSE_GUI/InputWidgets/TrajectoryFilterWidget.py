@@ -191,7 +191,16 @@ class FilterDesigner(QDialog):
             List of length 2 containing the critical frequency bounds.
         """
         return np.array(
-            sorted([self.retrieve_widget(self._settings["filter"], "cutoff_freq").value(), self.retrieve_widget(self._settings["filter"], "bound_freq").value()])
+            sorted(
+                [
+                    self.retrieve_widget(
+                        self._settings["filter"], "cutoff_freq"
+                    ).value(),
+                    self.retrieve_widget(
+                        self._settings["filter"], "bound_freq"
+                    ).value(),
+                ]
+            )
         ).tolist()
 
     def edit_current_filter(self, key: str, value: any) -> None:
@@ -216,10 +225,12 @@ class FilterDesigner(QDialog):
                 )
             elif value in {"lowpass", "highpass"}:
                 self.toggle_bound_frequencies(False)
-                self._settings["attributes"]["cutoff_freq"] = (
-                    self.retrieve_widget(self._settings["filter"], "cutoff_freq").value()
-                )
-            elif self.retrieve_widget(self._settings["filter"], "attenuation_type").currentText() in {"bandpass", "bandstop"}:
+                self._settings["attributes"]["cutoff_freq"] = self.retrieve_widget(
+                    self._settings["filter"], "cutoff_freq"
+                ).value()
+            elif self.retrieve_widget(
+                self._settings["filter"], "attenuation_type"
+            ).currentText() in {"bandpass", "bandstop"}:
                 self._settings["attributes"]["cutoff_freq"] = (
                     self.get_frequency_bounds()
                 )
@@ -443,9 +454,7 @@ class FilterDesigner(QDialog):
             grid_pos = indices.pop(0)
             label = QLabel(key.replace("_", " ").capitalize())
             layout.addWidget(label, grid_pos[0][0], grid_pos[0][1])
-            setting_widget = self.setting_to_widget(
-                setting_key=key, val_group=value
-            )
+            setting_widget = self.setting_to_widget(setting_key=key, val_group=value)
             # Store widget in object
             self.store_widget(f"{name}_{key}_widget", setting_widget)
             layout.addWidget(setting_widget, grid_pos[1][0], grid_pos[1][1])
@@ -463,9 +472,7 @@ class FilterDesigner(QDialog):
             widget.valueChanged.connect(
                 lambda val: self.edit_current_filter("cutoff_freq", val)
             )
-            layout.addWidget(
-                widget, grid_pos[1][0] + 1, grid_pos[1][1]
-            )
+            layout.addWidget(widget, grid_pos[1][0] + 1, grid_pos[1][1])
             item_count += 1
 
         grid.setLayout(layout)
@@ -480,7 +487,9 @@ class FilterDesigner(QDialog):
             If true, both inputs for upper and lower frequency bounds are enabled, else only one input is enabled
         """
         if on:
-            self.retrieve_widget(self._settings["filter"], "bound_freq").setEnabled(True)
+            self.retrieve_widget(self._settings["filter"], "bound_freq").setEnabled(
+                True
+            )
             return
         self.retrieve_widget(self._settings["filter"], "bound_freq").setEnabled(False)
 
@@ -594,7 +603,9 @@ class FilterDesigner(QDialog):
 
         # Add the filter settings grid layout to the stack
         settings_group = QGroupBox("Settings", None)
-        settings_group.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        settings_group.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum
+        )
 
         for filter_class in FILTER_MAP.values():
             settings = self.make_settings_grid(filter_class)
@@ -609,7 +620,9 @@ class FilterDesigner(QDialog):
 
         # Add the filter designer preferences grid layout
         preferences_group = QGroupBox("Preferences", None)
-        preferences_group.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        preferences_group.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum
+        )
 
         self.make_preferences_grid(self._preferences_grid_layout)
         preferences_group.setLayout(self._preferences_grid_layout)
