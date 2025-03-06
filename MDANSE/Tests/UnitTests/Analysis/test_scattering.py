@@ -114,7 +114,7 @@ def test_dcsf(traj_info, qvector_grid):
             if any(key.startswith(j) for j in ["f(q,t)", "s(q,f)"])
         ]
         for key in keys:
-            np.testing.assert_array_almost_equal(
+            np.testing.assert_allclose(
                 actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                 desired[f"/{key}"] * desired[f"/{key}"].attrs["scaling_factor"],
             )
@@ -155,7 +155,7 @@ def test_ccf(traj_info, qvector_grid):
             i for i in desired.keys() if any([j in i for j in ["J(q,f)", "j(q,t)"]])
         ]
         for key in keys:
-            np.testing.assert_array_almost_equal(
+            np.testing.assert_allclose(
                 actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                 desired[f"/{key}"] * desired[f"/{key}"].attrs["scaling_factor"],
             )
@@ -215,7 +215,7 @@ def test_disf(traj_info, qvector_grid):
             i for i in desired.keys() if any([j in i for j in ["f(q,t)", "s(q,f)"]])
         ]
         for key in keys:
-            np.testing.assert_array_almost_equal(
+            np.testing.assert_allclose(
                 actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                 desired[f"/{key}"] * desired[f"/{key}"].attrs["scaling_factor"],
             )
@@ -253,7 +253,7 @@ def test_eisf(traj_info, qvector_grid):
     with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
         keys = [i for i in desired.keys() if "eisf" in i]
         for key in keys:
-            np.testing.assert_array_almost_equal(
+            np.testing.assert_allclose(
                 actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                 desired[f"/{key}"],
             )
@@ -294,7 +294,7 @@ def test_gdisf(traj_info):
             i for i in desired.keys() if any([j in i for j in ["f(q,t)", "s(q,f)", "msd"]])
         ]
         for key in keys:
-            np.testing.assert_array_almost_equal(
+            np.testing.assert_allclose(
                 actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                 desired[f"/{key}"] * desired[f"/{key}"].attrs["scaling_factor"],
             )
@@ -329,7 +329,7 @@ def test_ndtsf(disf, dcsf, qvector_grid):
             i for i in desired.keys() if any([j in i for j in ["f(q,t)", "s(q,f)"]])
         ]
         for key in keys:
-            np.testing.assert_array_almost_equal(
+            np.testing.assert_allclose(
                 actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                 desired[f"/{key}"] * desired[f"/{key}"].attrs["scaling_factor"],
             )

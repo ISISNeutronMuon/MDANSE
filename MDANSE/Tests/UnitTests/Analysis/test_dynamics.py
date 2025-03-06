@@ -69,12 +69,12 @@ def test_vacf(interp_order, normalise):
     with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
         for key in ["vacf_Cu", "vacf_S", "vacf_Sb", "vacf_total"]:
             if normalise:
-                np.testing.assert_array_almost_equal(
+                np.testing.assert_allclose(
                     actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                     desired[f"/{key}"],
                 )
             else:
-                np.testing.assert_array_almost_equal(
+                np.testing.assert_allclose(
                     actual[f"/{key}"], desired[f"/{key}"],
                 )
 
@@ -109,7 +109,7 @@ def test_pps():
             "pps_Sb",
             "pps_total",
         ]:
-            np.testing.assert_array_almost_equal(
+            np.testing.assert_allclose(
                 actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                 desired[f"/{key}"],
             )
@@ -199,12 +199,12 @@ def test_dynamics_analysis(
             for key in keys:
                 # reference results may or may not have been scaled/normalized
                 if job_info[2]:
-                    np.testing.assert_array_almost_equal(
+                    np.testing.assert_allclose(
                         actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                         desired[f"/{key}"],
                     )
                 else:
-                    np.testing.assert_array_almost_equal(
+                    np.testing.assert_allclose(
                         actual[f"/{key}"], desired[f"/{key}"],
                     )
 

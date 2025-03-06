@@ -53,12 +53,12 @@ def test_vacf(interp_order, normalise):
     with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
         for key in ["vacf_H", "vacf_O", "vacf_Si", "vacf_total"]:
             if normalise:
-                np.testing.assert_array_almost_equal(
+                np.testing.assert_allclose(
                     actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                     desired[f"/{key}"],
                 )
             else:
-                np.testing.assert_array_almost_equal(
+                np.testing.assert_allclose(
                     actual[f"/{key}"], desired[f"/{key}"],
                 )
 

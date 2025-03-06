@@ -45,10 +45,10 @@ def test_basic_meansquare():
     result_file = os.path.join(result_dir, "basic_meansquare.mda")
 
     with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        np.testing.assert_array_almost_equal(actual["/msd_Cu"], desired["/msd_Cu"])
-        np.testing.assert_array_almost_equal(actual["/msd_S"], desired["/msd_S"])
-        np.testing.assert_array_almost_equal(actual["/msd_Sb"], desired["/msd_Sb"])
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(actual["/msd_Cu"], desired["/msd_Cu"])
+        np.testing.assert_allclose(actual["/msd_S"], desired["/msd_S"])
+        np.testing.assert_allclose(actual["/msd_Sb"], desired["/msd_Sb"])
+        np.testing.assert_allclose(
             actual["/msd_total"], desired["/msd_total"]
         )
 
@@ -81,7 +81,7 @@ def test_parallel_meansquare():
     ):
         for kk in single.keys():
             if not "metadata" in kk:
-                np.testing.assert_array_almost_equal(
+                np.testing.assert_allclose(
                     np.array(single[kk]), np.array(parallel[kk])
                 )
     os.remove(temp_name + ".mda")

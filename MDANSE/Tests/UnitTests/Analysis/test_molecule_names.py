@@ -75,7 +75,7 @@ def test_structure_analysis(parameters, job_info):
 
     with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
         for key in job_info[1]:
-            np.testing.assert_array_almost_equal(actual[f"/{key}"], desired[f"/{key}"])
+            np.testing.assert_allclose(actual[f"/{key}"], desired[f"/{key}"])
 
     os.remove(temp_name + ".mda")
     assert path.exists(temp_name + ".log")

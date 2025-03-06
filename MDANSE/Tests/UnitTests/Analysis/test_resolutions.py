@@ -110,7 +110,7 @@ def test_dos(trajectory, resolution_generator):
             "vacf_Sb",
             "vacf_total",
         ]:
-            np.testing.assert_array_almost_equal(
+            np.testing.assert_allclose(
                 actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
                 desired[f"/{key}"],
             )

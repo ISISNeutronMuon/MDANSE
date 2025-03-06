@@ -128,7 +128,7 @@ def test_structure_analysis(
         with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
             keys = [i for i in desired.keys() if any([j in i for j in job_info[1]])]
             for key in keys:
-                np.testing.assert_array_almost_equal(
+                np.testing.assert_allclose(
                     actual[f"/{key}"], desired[f"/{key}"]
                 )
 

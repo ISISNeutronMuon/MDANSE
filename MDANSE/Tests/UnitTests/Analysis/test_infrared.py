@@ -50,7 +50,7 @@ def test_dacf_analysis():
     result_file = os.path.join(result_dir, "dacf_analysis.mda")
 
     with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/dacf"] * actual["/dacf"].attrs["scaling_factor"], desired["/dacf"]
         )
 
@@ -92,11 +92,11 @@ def test_ir_analysis():
     result_file = os.path.join(result_dir, "ir_analysis.mda")
 
     with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/ddacf"] * actual["/ddacf"].attrs["scaling_factor"],
             desired["/ddacf"],
         )
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/ir"] * actual["/ir"].attrs["scaling_factor"], desired["/ir"]
         )
 

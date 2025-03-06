@@ -68,7 +68,7 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
 
     with h5py.File(out_name) as actual, h5py.File(result_name) as desired:
         for prop in compare:
-            np.testing.assert_array_almost_equal(actual[prop], desired[prop])
+            np.testing.assert_allclose(actual[prop], desired[prop])
 
     assert out_name.is_file()
     assert log_name.is_file()

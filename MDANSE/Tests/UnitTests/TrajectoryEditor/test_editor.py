@@ -67,10 +67,10 @@ def test_editor_null():
     changed.close()
 
     with h5py.File(temp_name + ".mdt") as actual, h5py.File(short_traj) as desired:
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/configuration/coordinates"], desired["/configuration/coordinates"]
         )
-        np.testing.assert_array_almost_equal(actual["/time"], desired["/time"])
+        np.testing.assert_allclose(actual["/time"], desired["/time"])
 
     os.remove(temp_name + ".mdt")
     os.remove(temp_name + ".log")
@@ -101,11 +101,11 @@ def test_editor_frames():
     changed.close()
 
     with h5py.File(temp_name + ".mdt") as actual, h5py.File(short_traj) as desired:
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/configuration/coordinates"],
             desired["/configuration/coordinates"][0:501:10],
         )
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/time"], desired["/time"][0:501:10]
         )
 
@@ -139,11 +139,11 @@ def test_editor_atoms():
     changed.close()
 
     with h5py.File(temp_name + ".mdt") as actual, h5py.File(short_traj) as desired:
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/configuration/coordinates"],
             desired["/configuration/coordinates"][:, 6:20, :],
         )
-        np.testing.assert_array_almost_equal(actual["/time"], desired["/time"])
+        np.testing.assert_allclose(actual["/time"], desired["/time"])
 
     os.remove(temp_name + ".mdt")
     os.remove(temp_name + ".log")
@@ -177,10 +177,10 @@ def test_editor_unit_cell():
     changed.close()
 
     with h5py.File(temp_name + ".mdt") as actual, h5py.File(short_traj) as desired:
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/configuration/coordinates"], desired["/configuration/coordinates"]
         )
-        np.testing.assert_array_almost_equal(actual["/time"], desired["/time"])
+        np.testing.assert_allclose(actual["/time"], desired["/time"])
 
     os.remove(temp_name + ".mdt")
     os.remove(temp_name + ".log")
@@ -218,10 +218,10 @@ def test_editor_transmute():
     changed.close()
 
     with h5py.File(temp_name + ".mdt") as actual, h5py.File(short_traj) as desired:
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/configuration/coordinates"], desired["/configuration/coordinates"]
         )
-        np.testing.assert_array_almost_equal(actual["/time"], desired["/time"])
+        np.testing.assert_allclose(actual["/time"], desired["/time"])
 
     os.remove(temp_name + ".mdt")
     os.remove(temp_name + ".log")
@@ -252,10 +252,10 @@ def test_editor_set_charges():
     changed.close()
 
     with h5py.File(temp_name + ".mdt") as actual, h5py.File(short_traj) as desired:
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/configuration/coordinates"], desired["/configuration/coordinates"]
         )
-        np.testing.assert_array_almost_equal(actual["/time"], desired["/time"])
+        np.testing.assert_allclose(actual["/time"], desired["/time"])
 
     os.remove(temp_name + ".mdt")
     os.remove(temp_name + ".log")
@@ -283,10 +283,10 @@ def test_editor_find_molecules():
     changed.close()
 
     with h5py.File(temp_name + ".mdt") as actual, h5py.File(short_traj) as desired:
-        np.testing.assert_array_almost_equal(
+        np.testing.assert_allclose(
             actual["/configuration/coordinates"], desired["/configuration/coordinates"]
         )
-        np.testing.assert_array_almost_equal(actual["/time"], desired["/time"])
+        np.testing.assert_allclose(actual["/time"], desired["/time"])
 
     os.remove(temp_name + ".mdt")
     os.remove(temp_name + ".log")
