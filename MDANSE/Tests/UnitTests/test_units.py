@@ -27,7 +27,6 @@ T = TypeVar("T")
 
 def _measure_or_val(m_o_v: T) -> Union[_Unit, T]:
     """Convert a value to a measure or leave if not (val, unit)."""
-    print(m_o_v)
     if isinstance(m_o_v, (tuple, list)):
         return measure(*m_o_v)
     return m_o_v

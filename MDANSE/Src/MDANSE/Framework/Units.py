@@ -80,7 +80,7 @@ def get_trailing_digits(string: str) -> Tuple[str, int]:
     Parameters
     ----------
     string : str
-        FIXME: Add docs.
+        String to parse.
 
     Returns
     -------
