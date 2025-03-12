@@ -204,7 +204,7 @@ class AtomsDatabase(_Database):
     _USER_DATABASE = PLATFORM.application_directory() / "atoms.json"
 
     # The python types supported by the database
-    _TYPES = {"str": str, "int": int, "float": float, "list": list, "color": color}
+    _TYPES = {"str": str, "int": int, "float": float, "list": list, "color": color, "complex": str}
 
     def __init__(self):
         """
