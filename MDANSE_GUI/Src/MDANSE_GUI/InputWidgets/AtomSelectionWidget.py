@@ -16,6 +16,7 @@
 
 import json
 from enum import StrEnum
+from pathlib import PurePath
 
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
@@ -24,6 +25,7 @@ from qtpy.QtGui import QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QDialog,
+    QFileDialog,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -152,6 +154,14 @@ class SelectionModel(QStandardItemModel):
         new_item.setEditable(False)
         self.appendRow(new_item)
         self.selection_changed.emit()
+
+    @Slot(str)
+    def create_from_string(self, json_string: str):
+        """Initialise a new selection from a string."""
+        self.clear()
+        dictionary = json.loads(json_string)
+        for selection_line in dictionary.values():
+            self.accept_from_widget(json.dumps(selection_line))
 
 
 class SelectionHelper(QDialog):
@@ -398,7 +408,9 @@ class SelectionHelper(QDialog):
 class AtomSelectionWidget(WidgetBase):
     """The atoms selection widget."""
 
-    _push_button_text = "Atom selection helper"
+    _push_button_text = "Create using helper dialog"
+    _database_button_text = "Pick from database"
+    _mda_button_text = "Load from .MDA file"
     _default_value = "{}"
     _tooltip_text = "Specify which atoms will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
 
@@ -415,11 +427,16 @@ class AtomSelectionWidget(WidgetBase):
         ]
         traj_filename = traj_config["filename"]
         hdf_traj = traj_config["hdf_trajectory"]
+        self._trajectory_path = PurePath(traj_filename).stem
         self.helper = self.create_helper((traj_filename, hdf_traj))
         helper_button = QPushButton(self._push_button_text, self._base)
+        database_button = QPushButton(self._database_button_text, self._base)
+        file_button = QPushButton(self._mda_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
-        self._layout.addWidget(self._field)
-        self._layout.addWidget(helper_button)
+        database_button.clicked.connect(self.database_dialog)
+        file_button.clicked.connect(self.mda_file_dialog)
+        for widget in [self._field, database_button, file_button, helper_button]:
+            self._layout.addWidget(widget)
         self.update_labels()
         self.updateValue()
         self._field.setToolTip(self._tooltip_text)
@@ -445,6 +462,29 @@ class AtomSelectionWidget(WidgetBase):
 
         """
         return SelectionHelper(traj_data, self._field, self._base)
+
+    @Slot()
+    def database_dialog(self) -> None:
+        """Pick a selection from the internal database."""
+
+    @Slot()
+    def mda_file_dialog(self) -> None:
+        """Load a selection from an .MDA file."""
+        fnames = QFileDialog.getOpenFileNames(
+            self._base,
+            "Load selection from an MDA file (MDANSE analysis results)",
+            self._trajectory_path,
+            "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
+        )
+        if fnames is None:
+            return
+        if len(fnames[0]) < 1:
+            return
+        temp_selection = ReusableSelection()
+        temp_selection.load_from_hdf5(fnames[0][0])
+        new_selection = temp_selection.convert_to_json()
+        self._field.setText(new_selection)
+        self.helper.selection_model.create_from_string(new_selection)
 
     @Slot()
     def helper_dialog(self) -> None:
