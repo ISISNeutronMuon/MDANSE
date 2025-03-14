@@ -17,6 +17,8 @@
 import json
 from typing import Any, Optional
 
+import h5py
+from MDANSE.MLogging import LOG
 from MDANSE.Framework.AtomSelector.atom_selection import select_atoms
 from MDANSE.Framework.AtomSelector.general_selection import (
     invert_selection,
@@ -233,3 +235,24 @@ class ReusableSelection:
             if not isinstance(v0, dict):
                 raise TypeError(f"Selection {v0} is not a dictionary.")
             self.set_selection(number=k0, function_parameters=v0)
+
+    def load_from_hdf5(self, filename: str):
+        """Load selection from an HDF5 output file (MDA format).
+
+        Parameters
+        ----------
+        filename : str
+            path to an MDA file, given as string
+
+        """
+        source = h5py.File(filename)
+        try:
+            byte_string = source["metadata/inputs/atom_selection"][0]
+        except KeyError:
+            LOG.error(f"atom selection string not found in file {filename}")
+            source.close()
+            return
+        else:
+            json_string = json.loads(byte_string.decode())
+        source.close()
+        self.load_from_json(json_string)

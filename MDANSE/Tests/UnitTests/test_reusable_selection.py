@@ -3,6 +3,7 @@ import os
 
 import pytest
 
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 
@@ -31,6 +32,26 @@ traj_2vb1 = os.path.join(
 @pytest.fixture(scope='module')
 def trajectory(request):
    return HDFTrajectoryInputData(request.param)
+
+
+def run_simple_job(tmp_path, input_trajectory, selection):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+
+    parameters = {
+        "atom_selection": selection,
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
+        "running_mode": ("single-core",),
+        "trajectory": input_trajectory,
+    }
+
+    temp = IJob.create("Eccentricity")
+    temp.run(parameters, status=True)
+
+    assert out_file.is_file()
+    assert log_file.is_file()
+    return out_file
 
 
 @pytest.mark.parametrize("trajectory", [short_traj, mdmc_traj, com_traj], indirect=True)
@@ -199,3 +220,21 @@ def test_selection_with_multiple_steps(trajectory):
     another_selection.load_from_json(json_string)
     water_oxygen_selection = another_selection.select_in_trajectory(trajectory.trajectory)
     assert len(water_oxygen_selection) == int(28746/3)
+
+
+@pytest.mark.parametrize("trajectory", [short_traj], indirect=True)
+@pytest.mark.parametrize("index_slice, expected", (
+    ([150,350,10], 20),
+    ([470,510,5], 2),
+))
+def test_load_selection_from_output(tmp_path, trajectory, index_slice, expected):
+    reusable_selection = ReusableSelection()
+    reusable_selection.set_selection(number=None, function_parameters={'function_name': 'select_atoms', 'index_slice': index_slice})
+    range_selection = reusable_selection.select_in_trajectory(trajectory.trajectory)
+    assert len(range_selection) == expected
+    json_string = reusable_selection.convert_to_json()
+    result_file = run_simple_job(tmp_path, trajectory.trajectory._filename, json_string)
+    another_selection = ReusableSelection()
+    another_selection.load_from_hdf5(result_file)
+    repeated_selection = another_selection.select_in_trajectory(trajectory.trajectory)
+    assert repeated_selection == range_selection
