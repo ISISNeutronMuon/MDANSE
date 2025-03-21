@@ -14,50 +14,49 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
-from pathlib import PurePath
 from collections import defaultdict
 from importlib import metadata
-
-from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger
-from qtpy.QtWidgets import (
-    QMainWindow,
-    QFileDialog,
-    QToolBar,
-    QMenuBar,
-    QMessageBox,
-    QApplication,
-    QAction,
-)
+from pathlib import PurePath
 
 from MDANSE.MLogging import LOG
+from qtpy.QtCore import QMessageLogger, QTimer, Signal, Slot
+from qtpy.QtWidgets import (
+    QAction,
+    QApplication,
+    QFileDialog,
+    QMainWindow,
+    QMenuBar,
+    QMessageBox,
+    QToolBar,
+)
 
-from MDANSE_GUI.Session.StructuredSession import StructuredSession
-from MDANSE_GUI.Resources import Resources
-from MDANSE_GUI.UnitsEditor import UnitsEditor
-from MDANSE_GUI.UserSettingsEditor import UserSettingsEditor
-from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
-from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
-from MDANSE_GUI.Tabs.Models.SelectionModel import SelectionModel
-from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
-from MDANSE_GUI.Tabs.TrajectoryTab import TrajectoryTab
-from MDANSE_GUI.Tabs.JobTab import JobTab
-from MDANSE_GUI.Tabs.RunTab import RunTab
-from MDANSE_GUI.Tabs.LoggingTab import LoggingTab, GuiLogHandler
+from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
+from MDANSE_GUI.Resources import Resources
+from MDANSE_GUI.Session.StructuredSession import StructuredSession
 from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
+from MDANSE_GUI.Tabs.InstrumentTab import InstrumentTab
+from MDANSE_GUI.Tabs.JobTab import JobTab
+from MDANSE_GUI.Tabs.LoggingTab import GuiLogHandler, LoggingTab
+from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
+from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
+from MDANSE_GUI.Tabs.Models.SelectionModel import SelectionGUIModel
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
-from MDANSE_GUI.Tabs.InstrumentTab import InstrumentTab
-from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
+from MDANSE_GUI.Tabs.RunTab import RunTab
+from MDANSE_GUI.Tabs.TrajectoryTab import TrajectoryTab
+from MDANSE_GUI.UnitsEditor import UnitsEditor
+from MDANSE_GUI.UserSettingsEditor import UserSettingsEditor
 from MDANSE_GUI.Widgets.NotificationTabWidget import NotificationTabWidget
+from MDANSE_GUI.Widgets.StyleDialog import StyleDatabase, StyleDialog
 
 
 class TabbedWindow(QMainWindow):
-    """The main window of the MDANSE GUI,
-    inherits QMainWindow.
+    """The main window of the MDANSE GUI, inherits QMainWindow.
 
     Args:
         QMainWindow - the base class.
+
     """
 
     def __init__(
@@ -119,7 +118,7 @@ class TabbedWindow(QMainWindow):
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
         self._instrument_model = GeneralModel()
-        self._selection_holder = SelectionModel()
+        self._selection_holder = SelectionGUIModel()
         self._job_holder = JobHolder()
         self._gui_log_handler = GuiLogHandler()
 

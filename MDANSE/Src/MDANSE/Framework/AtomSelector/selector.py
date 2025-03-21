@@ -18,7 +18,7 @@ import json
 from typing import Any, Optional
 
 import h5py
-from MDANSE.MLogging import LOG
+
 from MDANSE.Framework.AtomSelector.atom_selection import select_atoms
 from MDANSE.Framework.AtomSelector.general_selection import (
     invert_selection,
@@ -31,6 +31,7 @@ from MDANSE.Framework.AtomSelector.spatial_selection import (
     select_positions,
     select_sphere,
 )
+from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 function_lookup = {

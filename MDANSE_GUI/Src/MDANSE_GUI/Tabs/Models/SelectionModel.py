@@ -13,31 +13,25 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Optional
+import json
 import time
+from typing import Optional
 
-from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt
-from qtpy.QtGui import QStandardItemModel, QStandardItem
-
-
-class SelectionEntry:
-    """Database entry of a ReusableSelection definition"""
-
-    def __init__(self):
-        self.name: str = ""
-        self.selection_dict = {}
-        self.selection_json = ""
-        self.used_by = []
-        self.last_use_time = 0
+from MDANSE.Framework.AtomSelector.selection_storage import (
+    SelectionStorage,
+    SingleEntry,
+)
+from qtpy.QtCore import QModelIndex, QMutex, QObject, Qt, Signal, Slot
+from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 
 class SelectionGUIModel(QStandardItemModel):
-    """ """
+    """Encapsulates an MDANSE SelectionStorage for GUI access."""
 
     error = Signal(str)
     all_elements = Signal(object)
 
-    def __init__(self, parent: QObject = None):
+    def __init__(self, parent: QObject = None, filename: Optional[str] = None):
         """Load database from file.
 
         Parameters
@@ -46,67 +40,63 @@ class SelectionGUIModel(QStandardItemModel):
             path to a database file.
         parent : QObject, optional
             parent in the Qt object hierarchy
+        filename : str, optional
+            name of an additional file containing atom selections
 
         """
         super().__init__(parent=parent)
         self.mutex = QMutex()
-        self._node_numbers = []
-        self._nodes = {}
-        self._next_number = 0
+        self._selection_storage = SelectionStorage(filename=filename)
+        self.build_model_from_storage(self._selection_storage)
 
-    @Slot(tuple)
-    def append_object(self, input: tuple):
-        thing, label = input
-        self.mutex.lock()
-        self._nodes[self._next_number] = thing
-        self._node_numbers.append(self._next_number)
-        retval = int(self._next_number)
-        self._next_number += 1
-        item = QStandardItem(label)
-        item.setData(retval)
-        self.appendRow(item)
-        self.mutex.unlock()
-        self.summarise_items()
-        return retval
+    def build_model_from_storage(self, storage: SelectionStorage):
+        """Initialise the GUI model from an MDANSE storage instance.
 
-    @Slot(tuple)
-    def append_object_and_embed(self, input: tuple):
-        thing, label = input
-        self.mutex.lock()
-        self._nodes[self._next_number] = thing
-        self._node_numbers.append(self._next_number)
-        retval = int(self._next_number)
-        self._next_number += 1
-        item = QStandardItem(label)
-        item.setData(retval)
-        thing._list_item = item
-        thing._model_index = retval
-        self.appendRow(item)
-        self.mutex.unlock()
-        self.summarise_items()
-        return retval
+        Parameters
+        ----------
+        storage : SelectionStorage
+            an instance of MDANSE SelectionStorage
 
-    def summarise_items(self):
-        result = []
-        self.mutex.lock()
-        for nrow in range(self.rowCount()):
-            index = self.index(nrow, 0)
-            item = self.itemFromIndex(index)
-            result.append([item.text(), item.data()])
-        self.mutex.unlock()
-        self.all_elements.emit(result)
+        """
+        self.clear()
+        for entry in storage._named_entries.values():
+            self.add_single_selection(entry)
+        for entry in storage._unnamed_entries:
+            self.add_single_selection(entry)
 
-    def removeRow(self, row: int, parent: QModelIndex = None):
-        self.mutex.lock()
-        try:
-            node_number = self.item(row).data()
-        except AttributeError:
-            return
-        self._nodes.pop(node_number)
-        self._node_numbers.pop(self._node_numbers.index(node_number))
-        if parent is None:
-            super().removeRow(row)
-        else:
-            super().removeRow(row, parent)
-        self.mutex.unlock()
-        self.summarise_items()
+    def column_headers(self) -> dict[str, int]:
+        """Get the mapping of data field names to column numbers.
+
+        Returns
+        -------
+        dict[str, int]
+            A dictionary of column numbers for each data field name
+
+        """
+        return {
+            self.headerData(col_number, Qt.Orientation.Horizontal): col_number
+            for col_number in range(len(self.columnCount()))
+        }
+
+    def add_single_selection(self, entry: SingleEntry):
+        """Add an entry to be displayed in the GUI via the model.
+
+        Parameters
+        ----------
+        entry : SingleEntry
+            a SingleEntry object from the MDANSE selection storage
+
+        """
+        column_dict = self.column_headers()
+        column_headers = list(column_dict.keys())
+        for field in entry.data_fields:
+            if field not in column_headers:
+                column_headers.add(field)
+        self.setHorizontalHeaderLabels(column_headers)
+        new_column_dict = self.column_headers()
+        row = len(new_column_dict) * [None]
+        for field in new_column_dict:
+            data_entry = QStandardItem(json.dumps(getattr(entry, field, "")))
+            data_entry.setEditable(False)
+            row[new_column_dict[field]] = data_entry
+        self.appendRow(row)

@@ -18,12 +18,9 @@ import json
 from pathlib import Path
 from typing import Any, Optional
 
-import h5py
-
 from MDANSE import PLATFORM
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 DEFAULT_DATABASE = (
     PLATFORM.base_directory() / "MDANSE" / "Framework" / "selection_storage.json"
@@ -46,7 +43,7 @@ class SingleEntry:
             string label of the selection in the database, by default None
 
         """
-        self.data_fields = ["name", "json_string"]
+        self.data_fields = {"name", "json_string"}
         self.name = name
         self.json_string = json_string
 
@@ -54,7 +51,7 @@ class SingleEntry:
         """Set values from a dictionary, typically loaded from file."""
         for key, value in saved_values.items():
             setattr(self, key, value)
-            self.data_fields.append(key)
+            self.data_fields.add(key)
 
     def to_json(self) -> str:
         """Save all the data fields as a single dictionary in a JSON string."""
@@ -63,7 +60,7 @@ class SingleEntry:
 
 
 class SelectionStorage:
-    """Stores atom selection logic used most often by the users."""
+    """Stores atom selection sequences used by the users."""
 
     def __init__(self, filename: Optional[str] = None):
         """Create a backend for finding selection strings.
@@ -97,7 +94,8 @@ class SelectionStorage:
         path = Path(filename)
         if not path.exists():
             LOG.warning(
-                f"File {filename} was not found." "Atoms selections will not be loaded."
+                "File %s was not found." "Atoms selections will not be loaded.",
+                (filename),
             )
             return
         with path.open() as source:
