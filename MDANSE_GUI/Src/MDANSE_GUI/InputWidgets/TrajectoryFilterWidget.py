@@ -533,6 +533,7 @@ class FilterDesigner(QDialog):
         grid.addWidget(QLabel("Response units"), 0, 0)
         key_0 = "response_units"
         widget_0 = self.add_preference_combobox(key_0, ("amplitude", "dB"))
+        self.store_widget(f"{key_0}_widget", widget_0)
         widget_0.currentTextChanged.connect(
             lambda val: self.edit_preferences(key_0, val)
         )
@@ -543,6 +544,7 @@ class FilterDesigner(QDialog):
         grid.addWidget(QLabel("X-axis units"), 1, 0)
         key_1 = "xaxis_units"
         widget_1 = self.add_preference_combobox(key_1, ("THz", "meV"))
+        self.store_widget(f"{key_1}_widget", widget_1)
         widget_1.currentTextChanged.connect(
             lambda val: self.edit_preferences(key_1, val)
         )
@@ -553,6 +555,7 @@ class FilterDesigner(QDialog):
         grid.addWidget(QLabel("Filter coefficients"), 2, 0)
         key_2 = "coeff_type"
         widget_2 = self.add_preference_combobox(key_2, ("analog", "digital"))
+        self.store_widget(f"{key_2}_widget", widget_2)
         widget_2.currentTextChanged.connect(
             lambda val: self.edit_preferences(key_2, val)
         )
@@ -566,6 +569,7 @@ class FilterDesigner(QDialog):
         key_3 = "show_attenuation"
         attenuation_checkbox = QCheckBox()
         self._preferences.update({key_3: attenuation_checkbox.isChecked()})
+        self.store_widget(f"{key_3}_widget", attenuation_checkbox)
         attenuation_checkbox.stateChanged.connect(
             lambda val: self.edit_preferences(key_3, val)
         )
@@ -877,6 +881,19 @@ class FilterDesigner(QDialog):
         apply.clicked.connect(self.apply)
         close.clicked.connect(self.close)
         return [apply, close]
+
+    def disconnect_inputs(self) -> None:
+        """Disconnect all filter designer widgets
+        """
+        for key, value in self.__dict__.items():
+            if key.endswith("_widget"):
+                self.__dict__[key].disconnect()
+
+    def close(self) -> None:
+        """Overrides the widget close method
+        """
+        self.disconnect_inputs()
+        super().close()
 
 
 class TrajectoryFilterWidget(WidgetBase):
