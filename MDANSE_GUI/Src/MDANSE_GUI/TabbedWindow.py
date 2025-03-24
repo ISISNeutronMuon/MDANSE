@@ -44,6 +44,7 @@ from MDANSE_GUI.Tabs.Models.SelectionModel import SelectionGUIModel
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Tabs.RunTab import RunTab
+from MDANSE_GUI.Tabs.SelectionTab import SelectionTab
 from MDANSE_GUI.Tabs.TrajectoryTab import TrajectoryTab
 from MDANSE_GUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.UserSettingsEditor import UserSettingsEditor
@@ -130,6 +131,7 @@ class TabbedWindow(QMainWindow):
         self.createPlotSelection()
         self.createPlotHolder()
         self.createInstrumentSelector()
+        self.createSelectionTab()
         self.createLogViewer()
         self.setupMenubar()
         self.setupToolbar()
@@ -340,6 +342,20 @@ class TabbedWindow(QMainWindow):
         plot_tab.connect_units()
         self.tabs.addTab(plot_tab._core, name)
         self._tabs[name] = plot_tab
+
+    def createSelectionTab(self):
+        name = "Atom Selections"
+        selection_tab = SelectionTab.gui_instance(
+            self.tabs,
+            name,
+            self._session,
+            self._settings,
+            self._logger,
+            trajectory_model=self._trajectory_model,
+            selection_model=self._selection_holder,
+        )
+        self.tabs.addTab(selection_tab._core, name)
+        self._tabs[name] = selection_tab
 
     def createLogViewer(self):
         name = "Logger"

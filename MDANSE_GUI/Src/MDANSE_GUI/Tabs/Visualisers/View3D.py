@@ -51,3 +51,8 @@ class View3D(QWidget):
         except AttributeError:
             self.error.emit(f"3D View could not visualise {fullpath}")
             self._viewer.clear_trajectory()
+
+    @Slot(str)
+    def update_selection(self, json_string: str):
+        """:TODO: make it create a selection."""
+        self._viewer.mark_selected_atoms(json_string)
