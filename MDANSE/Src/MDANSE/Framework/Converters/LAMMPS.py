@@ -13,13 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import itertools
+from abc import ABC, abstractmethod
 from collections import defaultdict
-from collections.abc import Iterable
 from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Literal, Tuple, Union
-from abc import ABC, abstractmethod
 from itertools import count
 
 import h5py
@@ -36,6 +34,8 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from more_itertools import consume as drop
+from more_itertools import ilen, take
 from numpy.typing import NDArray
 
 ELECTRON_CHARGE = 1.6021765e-19
@@ -103,58 +103,6 @@ LAMMPS_UNITS = {
 UnitSchemes = Literal["real", "metal", "si", "cgs", "electron", "micro", "nano"]
 
 
-def _drop(it: Iterable, n: int) -> Iterable:
-    """Drop the next N elements from an iterator.
-
-    Parameters
-    ----------
-    it : Iterable
-        Iterable to modify.
-    n : int
-        Number of elements to drop.
-
-    Returns
-    -------
-    Iterable
-        Iterator with elements dropped.
-
-    Examples
-    --------
-    >>> it = (i for i in range(5))
-    >>> it = _drop(it, 3)
-    >>> list(it)
-    [3, 4]
-    """
-    return itertools.islice(it, n, None)
-
-
-def _take(it: Iterable, n: int) -> Iterable:
-    """Take the next N elements from an iterator.
-
-    Parameters
-    ----------
-    it : Iterable
-        Iterable to take values from.
-    n : int
-        Number of values to take.
-
-    Returns
-    -------
-    Iterable
-        Elements from front of iterable.
-
-    Examples
-    --------
-    >>> it = (i for i in range(5))
-    >>> x = _take(it, 3)
-    >>> list(x)
-    [0, 1, 2]
-    >>> list(it)
-    [3, 4]
-    """
-    return itertools.islice(it, n)
-
-
 class LAMMPSTrajectoryFileError(Error):
     pass
 
@@ -164,17 +112,23 @@ class BoxStyle(Enum):
 
     Handles conversion to standard 3x3 lattice vectors.
     """
+
     ORTHOGONAL = auto()
     NONORTHOGONAL = auto()
     TRICLINIC = auto()
 
-    def to_cell(self, value: NDArray[float]) -> Tuple[NDArray[float], NDArray[float]]:
+    def to_cell(
+        self, value: NDArray[float], *, bounds: bool = False
+    ) -> Tuple[NDArray[float], NDArray[float]]:
         """Convert from LAMMPS box definition to unit cell, origin.
 
         Parameters
         ----------
         value : NDArray[float]
             LAMMPS unit cell specification.
+        bounds : bool
+            For LAMMPS' non-orthogonal cells dumps provide *bounds*
+            rather than ``[xyz](lo|hi)``. If this is true, convert them.
 
         Returns
         -------
@@ -194,9 +148,17 @@ class BoxStyle(Enum):
                [0., 3., 0.],
                [0., 0., 3.]]), array([2., 2., 2.]))
         >>> BoxStyle.NONORTHOGONAL.to_cell([[2, 5, 1], [2, 5, 2], [2, 5, 4]])
-        (array([[3., 1., 2.],
-               [0., 3., 4.],
-               [0., 0., 3.]]), array([2., 2., 2.]))
+        (array([[3., 0., 0.],
+               [1., 3., 0.],
+               [2., 4., 3.]]), array([2., 2., 2.]))
+        >>> a = BoxStyle.NONORTHOGONAL.to_cell([[-7.6875, 20.0293, 0.],
+        ...                                     [0., 11.5962, -7.6875],
+        ...                                     [0., 19.6804, 0.]], bounds=True)
+        >>> b = BoxStyle.NONORTHOGONAL.to_cell([[0., 20.0293, 0.],
+        ...                                     [0., 11.5962, -7.6875],
+        ...                                     [0., 19.6804, 0.]], bounds=False)
+        >>> np.allclose(a[0], b[0]), np.allclose(a[1], b[1])
+        (True, True)
         >>> BoxStyle.TRICLINIC.to_cell([[1, 2, 3, 2], [4, 5, 6, 2], [7, 8, 9, 2]])
         (array([[1., 2., 3.],
                [4., 5., 6.],
@@ -208,10 +170,18 @@ class BoxStyle(Enum):
             unit_cell, origin = np.diag(value[:, 1] - value[:, 0]), value[:, 0]
         elif self is BoxStyle.NONORTHOGONAL:
             value = value.reshape((3, 3))
+            xy, xz, yz = value[:, 2]
+
+            if bounds:
+                value[0, 0] -= min(0.0, xy, xz, xy + xz)
+                value[0, 1] -= max(0.0, xy, xz, xy + xz)
+                value[1, 0] -= min(0.0, yz)
+                value[1, 1] -= max(0.0, yz)
+
             unit_cell, origin = np.diag(value[:, 1] - value[:, 0]), value[:, 0]
-            unit_cell[0, 1] = value[0, 2]
-            unit_cell[0, 2] = value[1, 2]
-            unit_cell[1, 2] = value[2, 2]
+            unit_cell[1, 0] = xy
+            unit_cell[2, 0] = xz
+            unit_cell[2, 1] = yz
         elif self is BoxStyle.TRICLINIC:
             value = value.reshape((3, 4))
             unit_cell, origin = value[:3, :3], value[:, 3]
@@ -221,6 +191,7 @@ class BoxStyle(Enum):
 
 class LAMMPSReader(ABC):
     """Abstract class for reading various LAMMPS files."""
+
     def __init__(
         self,
         *_args,
@@ -234,6 +205,12 @@ class LAMMPSReader(ABC):
         self._timestep = timestep
         self._fold = fold_coordinates
         self._file = None
+
+    @staticmethod
+    def _add_bonds(config, chemical_system):
+        if config["n_bonds"]:
+            bonds = [(idx1, idx2) for idx1, idx2 in config["bonds"]]
+            chemical_system.add_bonds(bonds)
 
     def close(self):
         """Close contained file when done reading."""
@@ -305,11 +282,6 @@ class LAMMPSReader(ABC):
 class LAMMPScustom(LAMMPSReader):
     """Parse LAMMPS custom dump format.
 
-    Parameters
-    ----------
-    LAMMPSReader : FIXME: Add type.
-        FIXME: Add docs.
-
     Raises
     ------
     LAMMPSTrajectoryFileError
@@ -357,7 +329,7 @@ class LAMMPScustom(LAMMPSReader):
             Number of timesteps found.
         """
         with open(filename, "r", encoding="utf-8") as file:
-            return sum(1 for line in file if line.startswith("ITEM: TIMESTEP"))
+            return ilen(filter(lambda line: line.startswith("ITEM: TIMESTEP"), file))
 
     def open_file(self, filename: Union[str, Path]) -> None:
         """Open file for reading as LAMMPS custom format.
@@ -431,10 +403,9 @@ class LAMMPScustom(LAMMPSReader):
 
                 for i in ("", "u", "s", "su"):
                     if all(f"{dim}{i}" in self.keywords for dim in DIMS):
-                        self.keywords["pos"] = tuple(
-                            f"{dim}{i}" for dim in DIMS
-                        )
+                        self.keywords["pos"] = tuple(f"{dim}{i}" for dim in DIMS)
                         self._fractionalCoordinates = "s" in i
+                        self._unwrappedCoordinates = "u" in i
                         break
                 else:
                     raise LAMMPSTrajectoryFileError(
@@ -451,7 +422,7 @@ class LAMMPScustom(LAMMPSReader):
                     curr_line + self._nAtoms + 1,
                 )
 
-                for i, (curr_line, line) in enumerate(_take(file, self._nAtoms)):
+                for i, (curr_line, line) in enumerate(take(self._nAtoms, file)):
                     temp = {
                         key: self._type_map[key](val)
                         for key, val in zip(self.keywords, line.split())
@@ -469,9 +440,11 @@ class LAMMPScustom(LAMMPSReader):
                         )
                         raise
 
-                    label, mass = map(str, config["elements"][atom_type])
+                    label = config["elements"][atom_type]
+                    mass = config["mass"][atom_type]
+
                     name = f"{label}_{idx:d}"
-                    temp_index = temp.get("index", i + 1) - 1
+                    temp_index = temp.get("index", i) - 1
                     self._rankToName[temp_index] = name
 
                     element = get_element_from_mapping(aliases, label, mass=mass)
@@ -485,9 +458,7 @@ class LAMMPScustom(LAMMPSReader):
                     np.array(element_list)[sorting], np.array(name_list)[sorting]
                 )
 
-                if config["n_bonds"] is not None:
-                    bonds = [(idx1, idx2) for idx1, idx2 in config["bonds"]]
-                    chemical_system.add_bonds(bonds)
+                self._add_bonds(config, chemical_system)
 
                 self._last = curr_line + self._nAtoms + 1
 
@@ -517,7 +488,7 @@ class LAMMPScustom(LAMMPSReader):
         file = iter(self._file)
 
         # Drop info before timestep.
-        file = _drop(file, self._item_location["TIMESTEP"][0])
+        drop(file, self._item_location["TIMESTEP"][0])
 
         step = next(file, None)
         if step is None:
@@ -525,18 +496,20 @@ class LAMMPScustom(LAMMPSReader):
 
         time = int(step) * self._timestep * measure(1.0, self.units["time"]).toval("ps")
 
-        file = _drop(
+        drop(
             file,
             self._item_location["BOX BOUNDS"][0] - self._item_location["TIMESTEP"][1],
         )
 
-        cell = np.fromstring(" ".join(_take(file, 3)), dtype=np.float64, sep=" ")
-        unit_cell, origin = self._style.to_cell(cell)
+        cell = np.fromstring(" ".join(take(3, file)), dtype=np.float64, sep=" ")
+        unit_cell, origin = self._style.to_cell(cell, bounds=True)
 
-        unit_cell *= measure(1.0, self.units["length"]).toval("nm")
+        len_conv = measure(1.0, self.units["length"]).toval("nm")
+
+        unit_cell *= len_conv
         unit_cell = UnitCell(unit_cell)
 
-        file = _drop(
+        drop(
             file, self._item_location["ATOMS"][0] - self._item_location["BOX BOUNDS"][1]
         )
 
@@ -549,7 +522,7 @@ class LAMMPScustom(LAMMPSReader):
                 self._trajectory.chemical_system.number_of_atoms, dtype=np.float64
             )
 
-        for i, line in enumerate(_take(file, self._nAtoms)):
+        for i, line in enumerate(take(self._nAtoms, file)):
             temp = {
                 key: self._type_map[key](val)
                 for key, val in zip(self.keywords, line.split())
@@ -562,10 +535,20 @@ class LAMMPScustom(LAMMPSReader):
             if "q" in temp:
                 charges[idx - 1] = self._type_map["q"](temp["q"])
 
+            if not self._unwrappedCoordinates and self._image:
+                if self._fractionalCoordinates:
+                    for ind, dim in enumerate(DIMS):
+                        coords[idx - 1, ind] += temp.get(f"i{dim}", 0)
+                else:
+                    for ind, dim, vec in zip(count(), DIMS, unit_cell.direct):
+                        coords[idx - 1, ind] += temp.get(f"i{dim}", 0.0) * vec
+
         if self._fractionalCoordinates:
-            if self._image:
-                for ind, dim in enumerate(DIMS):
-                    coords[:, ind] += temp.get(f"i{dim}", 0)
+            # MDANSE origin is always 0,0,0
+            origin *= len_conv
+            origin_recip = np.matmul(origin, unit_cell.inverse)
+
+            coords -= origin_recip
 
             conf = PeriodicBoxConfiguration(
                 self._trajectory.chemical_system, coords, unit_cell
@@ -576,12 +559,8 @@ class LAMMPScustom(LAMMPSReader):
         else:
             # MDANSE origin is always 0,0,0
             coords -= origin
+            coords *= len_conv
 
-            if self._image:
-                for ind, dim, vec in zip(count(), DIMS, unit_cell.direct):
-                    coords[:, ind] += temp.get(f"i{dim}", 0.) * vec
-
-            coords *= measure(1.0, self.units["length"]).toval("nm")
             real_conf = PeriodicRealConfiguration(
                 self._trajectory.chemical_system, coords, unit_cell
             )
@@ -657,7 +636,7 @@ class LAMMPSxyz(LAMMPSReader):
         positions = np.empty((number_of_atoms, 3), dtype=np.float64)
         atom_types = np.empty(number_of_atoms, dtype=int)
 
-        for ind, line in enumerate(_take(self._file, number_of_atoms)):
+        for ind, line in enumerate(take(number_of_atoms, self._file)):
             if not line:
                 break
 
@@ -702,7 +681,9 @@ class LAMMPSxyz(LAMMPSReader):
             full_cell = None
 
         elif np.allclose(span, [1.0, 1.0, 1.0], rtol=0.1, atol=0.1):
-            self._fractionalCoordinates = not np.allclose(cellspan, [1.0, 1.0, 1.0], rtol=0.1, atol=0.1)
+            self._fractionalCoordinates = not np.allclose(
+                cellspan, [1.0, 1.0, 1.0], rtol=0.1, atol=0.1
+            )
             full_cell = unit_cell * measure(1.0, self.units["length"]).toval("nm")
 
         else:
@@ -720,7 +701,8 @@ class LAMMPSxyz(LAMMPSReader):
 
         for idx in range(self._nAtoms):
             atom_type = atom_types[idx] - 1
-            label, mass = map(str, config["elements"][atom_type])
+            label = config["elements"][atom_type]
+            mass = config["mass"][atom_type]
             name = f"{label}_{idx:d}"
             self._rankToName[idx] = name
 
@@ -729,9 +711,7 @@ class LAMMPSxyz(LAMMPSReader):
 
         chemical_system.initialise_atoms(element_list, name_list)
 
-        if config["n_bonds"] is not None:
-            bonds = [(idx1, idx2) for idx1, idx2 in config["bonds"]]
-            chemical_system.add_bonds(bonds)
+        self._add_bonds(config, chemical_system)
 
         return chemical_system
 
@@ -822,7 +802,7 @@ class LAMMPSh5md(LAMMPSReader):
         self._file = h5py.File(filename, "r")
 
     def parse_first_step(
-        self, aliases: dict[str, dict[str, str]], config: dict[str, Any]
+        self, aliases: dict[str, dict[str, str]], config: "ConfigFileConfigurator"
     ) -> ChemicalSystem:
         """Parse first step to determine output sizes and data.
 
@@ -830,7 +810,7 @@ class LAMMPSh5md(LAMMPSReader):
         ----------
         aliases : dict[str, dict[str, str]]
             Mapping of atomic aliases to elements.
-        config : dict[str, Any]
+        config : ConfigFileConfigurator
             Configurations details.
 
         Returns
@@ -871,7 +851,8 @@ class LAMMPSh5md(LAMMPSReader):
 
         for idx in range(self._nAtoms):
             ty = atom_types[idx] - 1
-            label, mass = map(str, config["elements"][ty])
+            label = config["elements"][ty]
+            mass = config["mass"][ty]
             name = f"{label}_{idx:d}"
             self._rankToName[idx] = name
             element_list.append(get_element_from_mapping(aliases, label, mass=mass))
@@ -879,9 +860,7 @@ class LAMMPSh5md(LAMMPSReader):
 
         chemical_system.initialise_atoms(element_list, name_list)
 
-        if config["n_bonds"] is not None:
-            bonds = [(idx1, idx2) for idx1, idx2 in config["bonds"]]
-            chemical_system.add_bonds(bonds)
+        self._add_bonds(config, chemical_system)
 
         return chemical_system
 
@@ -1054,9 +1033,9 @@ class LAMMPS(Converter):
                 self.configuration["trajectory_file"]["value"]
             )
 
-        charges_single_cell = (
-            np.array(self._lammpsConfig["charges"]) * self._reader.units["charge_conv"]
-        )
+        charges_single_cell = self._lammpsConfig["charges"]
+        charges_single_cell *= self._reader.units["charge_conv"]
+
         if len(charges_single_cell) < self._chemical_system.number_of_atoms:
             charges = list(charges_single_cell) * int(
                 self._chemical_system.number_of_atoms // len(charges_single_cell)
@@ -1079,7 +1058,9 @@ class LAMMPS(Converter):
         self._reader.open_file(self.configuration["trajectory_file"]["value"])
         self._reader.set_output(self._trajectory)
 
-    def create_reader(self, trajectory_type: Literal["custom", "xyz", "h5md"]) -> LAMMPSReader:
+    def create_reader(
+        self, trajectory_type: Literal["custom", "xyz", "h5md"]
+    ) -> LAMMPSReader:
         """Create the required reader.
 
         Parameters

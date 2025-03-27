@@ -1,13 +1,12 @@
-import os
-import tempfile
-from pathlib import Path
-
-import h5py
+from more_itertools import run_length
 import numpy as np
 import pytest
+from MDANSE.Framework.Configurators.ConfigFileConfigurator import \
+    ConfigFileConfigurator
 from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import \
     HDFTrajectoryConfigurator
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Converters.LAMMPS import BoxStyle
 from MDANSE.Framework.Jobs.IJob import JobError
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, DATA_DIR
@@ -256,18 +255,144 @@ def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(tmp_pa
                      "time_unit": "fs"},
                     "gzip")
 
-def test_lammps_mdt_conversion_raise_exception_with_incorrect_format():
-    temp_name = tempfile.mktemp()
+def test_lammps_mdt_conversion_raise_exception_with_incorrect_format(tmp_path):
+    temp_name = tmp_path / "output"
 
-    parameters = {}
-    parameters["config_file"] = lammps_config
-    parameters["mass_tolerance"] = 0.05
-    parameters["n_steps"] = 0
-    parameters["output_files"] = (temp_name, ["IncorrectFormat"], "INFO")
-    parameters["smart_mass_association"] = True
-    parameters["time_step"] = 1.0
-    parameters["trajectory_file"] = lammps_lammps
+    parameters = {
+        "config_file": lammps_config,
+        "mass_tolerance": 0.05,
+        "n_steps": 0,
+        "output_files": (temp_name, ["IncorrectFormat"], "INFO"),
+        "smart_mass_association": True,
+        "time_step": 1.0,
+        "trajectory_file": lammps_lammps,
+    }
 
     lammps = Converter.create("LAMMPS")
     with pytest.raises(JobError):
         lammps.run(parameters, status=True)
+
+@pytest.mark.parametrize("files", [
+    ("lammps_ix_cubic_wrapped.dump", "lammps_ix_cubic_unwrapped.dump"),
+    ("lammps_ix.dump", "lammps_ix_unwrapped.dump"),
+], ids=["cubic", "nonorthogonal"])
+def test_lammps_ix_unwrap(tmp_path, files):
+    out_1 = tmp_path / "unwrapped"
+    out_2 = tmp_path / "ix"
+
+    out_1_name = out_1.with_suffix(".mdt")
+    out_2_name = out_2.with_suffix(".mdt")
+
+    parameters = {
+        "config_file": DATA_DIR / "POSCAR.lmp",
+        "mass_tolerance": 0.05,
+        "n_steps": 0,
+        "output_files": (out_1, 64, 128, "none", "INFO"),
+        "smart_mass_association": True,
+        "time_step": 1.0,
+    }
+
+    parameters["trajectory_file"] = DATA_DIR / files[0]
+    converter = Converter.create("LAMMPS")
+    converter.run(parameters, status=True)
+
+    parameters["trajectory_file"] = DATA_DIR / files[1]
+    parameters["output_files"] = (out_2, 64, 128, "none", "INFO")
+    converter.run(parameters, status=True)
+
+    compare_hdf5(out_1_name, out_2_name, ("/configuration/coordinates",), atol=1e-4)
+
+
+@pytest.mark.parametrize("config_file, expected", [
+    (DATA_DIR / "POSCAR.lmp", {
+        "atom_types": list(run_length.decode([(0, 16), (1, 92), (2, 178)])),
+        "charges": [0] * 286,
+        "elements": {0: "V", 1: "Bi", 2: "O"},
+        "mass": [50.942, 208.98, 15.999],
+        "n_angle_types": 0,
+        "n_angles": 0,
+        "n_atom_types": 3,
+        "n_atoms": 286,
+        "n_bond_types": 0,
+        "n_bonds": 0,
+        "n_dihedral_types": 0,
+        "n_dihedrals": 0,
+        "n_improper_types": 0,
+        "n_impropers": 0,
+        "origin": [0, 0, 0],
+        "style": BoxStyle.NONORTHOGONAL,
+        "unit_cell": [[20.0293808, 0, 0],
+                      [0, 11.59621143, 0],
+                      [-7.68758428, 0, 19.68041541]],
+    }),
+
+    (DATA_DIR / "lammps_test.config",
+     {"atom_types": [0, 1, 2, 3, 4, 4, 4, 5, 5,
+                     6, 7, 8, 9, 10, 9, 11, 5, 12, 12, 12],
+      "bonds": [(0, 1), (0, 4), (0, 5), (0, 6), (1, 2), (1, 8),
+                (1, 7), (2, 3), (2, 9), (9, 10), (9, 15), (10, 11),
+                (10, 13), (10, 16), (11, 12), (11, 14), (13, 17),
+                (13, 18), (13, 19)],
+      "charges": [-0.3, 0.13, 0.51, -0.51, 0.33, 0.33,
+                  0.33, 0.09, 0.09, -0.47, 0.07, 0.34,
+                  -0.67, -0.27, -0.67, 0.31,
+                  0.09, 0.09, 0.09, 0.09],
+      'elements': {0: '0', 1: '1', 2: '2', 3: '3', 4: '4',
+                   5: '5', 6: '6', 7: '7', 8: '8', 9: '9',
+                   10: '10', 11: '11', 12: '12'},
+      "mass": [14.0067, 12.0107, 12.0107, 15.9994,
+               1.0079, 1.0079, 14.0067, 12.0107,
+               12.0107, 15.9994, 12.0107, 1.0079, 1.0079],
+      "n_angle_types": 21,
+      "n_angles": 33,
+      "n_atom_types": 13,
+      "n_atoms": 20,
+      "n_bond_types": 12,
+      "n_bonds": 19,
+      "n_dihedral_types": 10,
+      "n_dihedrals": 41,
+      "n_improper_types": 3,
+      "n_impropers": 3,
+      "origin": [0, 0, 0],
+      "style": BoxStyle.ORTHOGONAL,
+      "unit_cell": [[40, 0, 0],
+                    [0, 40, 0],
+                    [0, 0, 40]]}
+     ),
+
+    (DATA_DIR / "lammps_2.config", {
+        "atom_types": list(run_length.decode([(0, 250), (1, 250)])),
+        "charges": [0] * 500,
+        "elements": {0: "Mg", 1: "O"},
+        "mass": [35., 16.],
+        "n_angle_types": 0,
+        "n_angles": 0,
+        "n_atom_types": 2,
+        "n_atoms": 500,
+        "n_bond_types": 0,
+        "n_bonds": 0,
+        "n_dihedral_types": 0,
+        "n_dihedrals": 0,
+        "n_improper_types": 0,
+        "n_impropers": 0,
+        "origin": [0, 0, 0],
+        "style": BoxStyle.TRICLINIC,
+        "timestep": "0",
+        "unit_cell": [[17.6,  0. ,  0. ],
+                      [ 8.8, 17.6,  0. ],
+                      [ 0. ,  0. ,  8.8]],
+        "units": "metal",
+    }),
+])
+def test_lammps_config_parser(config_file, expected):
+    conf = ConfigFileConfigurator("dummy_in")
+    conf.parse(config_file)
+
+    from pprint import pprint
+    pprint(conf)
+
+    for key in expected.keys() | conf.keys():
+        if isinstance(conf[key], np.ndarray):
+            np.testing.assert_allclose(conf[key], expected[key])
+        else:
+            assert conf.get(key) == expected.get(key)
