@@ -13,29 +13,29 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from multiprocessing import Queue
-from logging import FileHandler
-from logging.handlers import QueueHandler, QueueListener
-
 import abc
-import os
 import multiprocessing
+import os
 import queue
 import random
 import stat
 import string
-import time
 import sys
+import time
 import traceback
+from logging import FileHandler
+from logging.handlers import QueueHandler, QueueListener
+from multiprocessing import Queue
 from pathlib import Path
+from typing import Any, Optional, Union
 
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
+from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
-from MDANSE.Core.SubclassFactory import SubclassFactory
-from MDANSE.MLogging import LOG, FMT
+from MDANSE.MLogging import FMT, LOG
 
 
 class JobError(Error):
@@ -199,55 +199,61 @@ class IJob(Configurable, metaclass=SubclassFactory):
         return axes
 
     @classmethod
-    def save(cls, jobFile, parameters=None):
+    def save(
+        cls, jobFile: Union[str, Path], parameters: Optional[dict[str, Any]] = None
+    ) -> None:
+        """Save a job file for a given job.
+
+        Parameters
+        ----------
+        jobFile : Path
+            The name of the output job file.
+        parameters : Optional[dict[str, Any]]
+            If not None, the parameters with which the job file will be built.
         """
-        Save a job file for a given job.\n
-        :Parameters:
-            #. jobFile (str): The name of the output job file.\n
-            #. parameters (dict): optional. If not None, the parameters with which the job file will be built.
-        """
 
-        f = open(jobFile, "w")
+        with open(jobFile, "w") as f:
+            # The first line contains the call to the python executable. This is necessary for the file to
+            # be autostartable.
+            f.write(f"#!{sys.executable}\n\n")
 
-        # The first line contains the call to the python executable. This is necessary for the file to
-        # be autostartable.
-        f.write(f"#!{sys.executable}\n\n")
+            # Writes the input file header.
+            f.write("########################################################\n")
+            f.write("# This is an automatically generated MDANSE run script #\n")
+            f.write("########################################################\n\n")
 
-        # Writes the input file header.
-        f.write("########################################################\n")
-        f.write("# This is an automatically generated MDANSE run script #\n")
-        f.write("########################################################\n\n")
+            # Write the import.
+            f.write("from MDANSE.Framework.Jobs.IJob import IJob\n\n")
 
-        # Write the import.
-        f.write("from MDANSE.Framework.Jobs.IJob import IJob\n\n")
+            f.write("########################################################\n")
+            f.write("# Job parameters                                       #\n")
+            f.write("########################################################\n\n")
 
-        f.write("########################################################\n")
-        f.write("# Job parameters                                       #\n")
-        f.write("########################################################\n\n")
+            # Writes the line that will initialize the |parameters| dictionary.
+            if parameters is None:
+                parameters = cls.get_default_parameters()
 
-        # Writes the line that will initialize the |parameters| dictionary.
-        if parameters is None:
-            parameters = cls.get_default_parameters()
+            f.write("parameters = {\n")
+            for k, (v, label) in sorted(parameters.items()):
+                # Force paths to str
+                if isinstance(v, Path):
+                    v = str(v)
 
-        f.write("parameters = {\n")
-        for k, (v, label) in sorted(parameters.items()):
-            if label:
-                f.write(f"    {repr(k) + ': ' + repr(v) + ',':<50}  # {label}\n")
-            else:
-                f.write(f"    {repr(k) + ': ' + repr(v) + ',':<50}\n")
-        f.write("}\n")
+                if label:
+                    f.write(f"    {repr(k) + ': ' + repr(v) + ',':<50}  # {label}\n")
+                else:
+                    f.write(f"    {repr(k) + ': ' + repr(v) + ',':<50}\n")
+            f.write("}\n")
 
-        f.write("\n")
-        f.write("########################################################\n")
-        f.write("# Setup and run the analysis                           #\n")
-        f.write("########################################################\n")
-        f.write("\n")
+            f.write("\n")
+            f.write("########################################################\n")
+            f.write("# Setup and run the analysis                           #\n")
+            f.write("########################################################\n")
+            f.write("\n")
 
-        f.write('if __name__ == "__main__":\n')
-        f.write(f"    {cls.__name__.lower()} = IJob.create({cls.__name__!r})\n")
-        f.write(f"    {cls.__name__.lower()}.run(parameters, status=True)\n")
-
-        f.close()
+            f.write('if __name__ == "__main__":\n')
+            f.write(f"    {cls.__name__.lower()} = IJob.create({cls.__name__!r})\n")
+            f.write(f"    {cls.__name__.lower()}.run(parameters, status=True)\n")
 
         os.chmod(jobFile, stat.S_IRWXU)
 
