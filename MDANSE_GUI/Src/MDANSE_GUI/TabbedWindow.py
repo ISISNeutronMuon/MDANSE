@@ -131,7 +131,7 @@ class TabbedWindow(QMainWindow):
         self.createPlotSelection()
         self.createPlotHolder()
         self.createInstrumentSelector()
-        self.createSelectionTab()
+        # self.createSelectionTab()
         self.createLogViewer()
         self.setupMenubar()
         self.setupToolbar()
