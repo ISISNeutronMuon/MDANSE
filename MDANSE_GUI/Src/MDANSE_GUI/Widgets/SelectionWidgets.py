@@ -299,9 +299,12 @@ class IndexSelection(BasicSelectionWidget):
         self.selection_type_combo.addItems(mode.value for mode in IndexSelectionMode)
         self.selection_type_combo.setEditable(False)
         layout.addWidget(self.selection_type_combo)
+
         self.selection_field = QLineEdit(self)
         layout.addWidget(self.selection_field)
         self.selection_type_combo.currentTextChanged.connect(self.switch_mode)
+        # Set default
+        self.switch_mode("list")
 
     @Slot(str)
     def switch_mode(self, new_mode: str):
