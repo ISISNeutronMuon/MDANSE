@@ -42,3 +42,18 @@ jobs:
         with:
           src: "./MDANSE_GUI/Src"
           args: "check"
+
+  lint_vermin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install vermin
+        run: python -m pip install vermin
+
+      - name: Run Vermin
+        run: vermin -t=3.9 --lint --quiet --no-parse-comments MDANSE/ MDANSE_GUI/
