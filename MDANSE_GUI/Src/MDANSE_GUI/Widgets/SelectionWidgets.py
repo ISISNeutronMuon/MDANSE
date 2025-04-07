@@ -47,7 +47,11 @@ class IndexSelectionMode(Enum):
 
     @classmethod
     def _missing_(cls, value: str):
-        return cls[value.upper()]
+        value = value.lower()
+        for member in cls:
+            if member.value == value:
+                return member
+        return None
 
 
 class XYZValidator(QValidator):
@@ -302,7 +306,7 @@ class IndexSelection(BasicSelectionWidget):
     @Slot(str)
     def switch_mode(self, new_mode: str):
         """Change the meaning of the text input field."""
-        new_mode = IndexSelectionMode[new_mode]
+        new_mode = IndexSelectionMode(new_mode)
         self.selection_field.setText("")
 
         if new_mode is IndexSelectionMode.LIST:
