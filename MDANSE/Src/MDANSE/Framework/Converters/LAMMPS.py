@@ -965,8 +965,8 @@ class LAMMPS(Converter):
         "SingleChoiceConfigurator",
         {
             "label": "LAMMPS unit system",
-            "choices": ["real", "metal", "si", "cgs", "electron", "micro", "nano"],
-            "default": "real",
+            "choices": ["From config", "real", "metal", "si", "cgs", "electron", "micro", "nano"],
+            "default": "From config",
         },
     )
     settings["atom_aliases"] = (
@@ -1020,6 +1020,12 @@ class LAMMPS(Converter):
         self._lammpsConfig = self.configuration["config_file"]
 
         self._lammps_units = self.configuration["lammps_units"]["value"]
+
+        if self._lammps_units == "From config":
+            if "units" not in self._lammpsConfig:
+                raise KeyError("Units not found in lammps config")
+            self._lammps_units = self._lammpsConfig["units"]
+
         self._lammps_format = self.configuration["trajectory_format"]["value"]
 
         self._reader = self.create_reader(self._lammps_format)
@@ -1036,6 +1042,7 @@ class LAMMPS(Converter):
         charges_single_cell = self._lammpsConfig["charges"]
         charges_single_cell *= self._reader.units["charge_conv"]
 
+        # Assume replicate
         if len(charges_single_cell) < self._chemical_system.number_of_atoms:
             charges = list(charges_single_cell) * int(
                 self._chemical_system.number_of_atoms // len(charges_single_cell)
