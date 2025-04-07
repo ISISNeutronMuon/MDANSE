@@ -15,7 +15,7 @@
 #
 
 import json
-from enum import StrEnum
+from enum import Enum
 
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
@@ -51,7 +51,7 @@ from MDANSE_GUI.Widgets.SelectionWidgets import (
 )
 
 
-class SelectionValidity(StrEnum):
+class SelectionValidity(Enum):
     """Strings for selection check results."""
 
     VALID_SELECTION = "Valid selection"
@@ -82,8 +82,7 @@ class SelectionModel(QStandardItemModel):
         Returns
         -------
         SelectionValidity
-            result of the check on last_operation
-
+            Result of the check on last_operation.
         """
         self._selection = ReusableSelection()
         self._current_selection = set()

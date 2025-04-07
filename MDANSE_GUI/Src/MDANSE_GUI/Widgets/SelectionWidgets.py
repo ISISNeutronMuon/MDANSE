@@ -15,7 +15,7 @@
 #
 
 import json
-from enum import StrEnum
+from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -38,13 +38,16 @@ if TYPE_CHECKING:
     from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 
 
-class IndexSelectionMode(StrEnum):
+class IndexSelectionMode(Enum):
     """Valid atom selection modes for select_atoms."""
 
     LIST = "list"
     RANGE = "range"
     SLICE = "slice"
 
+    @classmethod
+    def _missing_(cls, value: str):
+        return cls[value.upper()]
 
 class XYZValidator(QValidator):
     """A custom validator for a QLineEdit.
@@ -288,7 +291,7 @@ class IndexSelection(BasicSelectionWidget):
         layout = self.layout()
         layout.addWidget(QLabel("Select atoms by index"))
         self.selection_type_combo = QComboBox(self)
-        self.selection_type_combo.addItems(str(mode) for mode in IndexSelectionMode)
+        self.selection_type_combo.addItems(mode.value for mode in IndexSelectionMode)
         self.selection_type_combo.setEditable(False)
         layout.addWidget(self.selection_type_combo)
         self.selection_field = QLineEdit(self)
@@ -298,16 +301,18 @@ class IndexSelection(BasicSelectionWidget):
     @Slot(str)
     def switch_mode(self, new_mode: str):
         """Change the meaning of the text input field."""
+        new_mode = IndexSelectionMode[new_mode]
         self.selection_field.setText("")
-        if new_mode == IndexSelectionMode.LIST:
+
+        if new_mode is IndexSelectionMode.LIST:
             self.selection_field.setPlaceholderText("0,1,2")
             self.selection_keyword = "index_list"
             self.selection_separator = ","
-        elif new_mode == IndexSelectionMode.RANGE:
+        elif new_mode is IndexSelectionMode.RANGE:
             self.selection_field.setPlaceholderText("0-20")
             self.selection_keyword = "index_range"
             self.selection_separator = "-"
-        elif new_mode == IndexSelectionMode.SLICE:
+        elif new_mode is IndexSelectionMode.SLICE:
             self.selection_field.setPlaceholderText("first:last:step")
             self.selection_keyword = "index_slice"
             self.selection_separator = ":"
