@@ -49,6 +49,7 @@ class IndexSelectionMode(Enum):
     def _missing_(cls, value: str):
         return cls[value.upper()]
 
+
 class XYZValidator(QValidator):
     """A custom validator for a QLineEdit.
 
