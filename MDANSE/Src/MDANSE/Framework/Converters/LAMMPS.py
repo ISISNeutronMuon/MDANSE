@@ -17,7 +17,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Literal, Tuple, Union
+from typing import Any, Literal, Tuple, Union, TYPE_CHECKING
 from itertools import count
 
 import h5py
@@ -37,6 +37,11 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from more_itertools import consume as drop
 from more_itertools import ilen, take
 from numpy.typing import NDArray
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Configurators.ConfigFileConfigurator import (
+        ConfigFileConfigurator,
+    )
 
 ELECTRON_CHARGE = 1.6021765e-19
 DIMS = ("x", "y", "z")
@@ -965,8 +970,17 @@ class LAMMPS(Converter):
         "SingleChoiceConfigurator",
         {
             "label": "LAMMPS unit system",
-            "choices": ["From config", "real", "metal", "si", "cgs", "electron", "micro", "nano"],
-            "default": "From config",
+            "choices": [
+                "From config",
+                "real",
+                "metal",
+                "si",
+                "cgs",
+                "electron",
+                "micro",
+                "nano",
+            ],
+            "default": "real",
         },
     )
     settings["atom_aliases"] = (

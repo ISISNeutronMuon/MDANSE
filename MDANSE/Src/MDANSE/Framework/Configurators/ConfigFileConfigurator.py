@@ -22,12 +22,12 @@ from string import ascii_uppercase as upcase
 from typing import Any, Dict, Iterable, Literal, Optional, Tuple, Union
 
 import numpy as np
-from numpy.typing import NDArray
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Converters.LAMMPS import BoxStyle
 from MDANSE.MLogging import LOG
 from more_itertools import first_true, split_before, spy, take
+from numpy.typing import NDArray
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
@@ -477,6 +477,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
         atom_style = ATOM_TYPES_MAP[atom_type]
         AtomData = namedtuple("AtomData", atom_style)
+        lines = map(strip_comments, lines)
         atom_data = list(starmap(AtomData, map(str.split, lines)))
 
         parsed["n_atoms"] = self.get("n_atoms", len(atom_data))
@@ -535,11 +536,11 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
             Block containing mass data.
         """
 
-        # ASE dumps element as comment on masses
+        # ASE/VMD dumps element as comment on masses (VMD doesn't respect case)
         element_map = {
-            int(line.split()[0]) - 1: match[1]
+            int(line.split()[0]) - 1: match[1].title()
             for line in lines
-            if (match := re.search("# ([A-Z][a-z]{,2})\s*$", line))
+            if (match := re.search("# ([A-Z][a-z]{,2})\s*$", line, re.I))
         }
 
         if element_map and self.setdefault("elements", element_map) != element_map:
@@ -625,7 +626,12 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         with open(self._filename, "r") as source_file:
             lines = map(str.strip, source_file)
 
-            comment = " ".join(take(2, lines))
+            comment = next(lines)
+            (line,), lines = spy(lines)
+
+            # Fix for VMD disobeying spec.
+            if not re.match("\s*\d+\s+atoms", line, re.I):
+                comment += " " + next(lines)
 
             for desc in re.finditer("(\w+)\s*=\s*(\w+)", comment):
                 self[desc[1]] = desc[2]
@@ -634,7 +640,8 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
             blocks = split_before(lines, self._is_block)
             header = next(blocks)
-            self.update(self.BLOCK_PARSERS["header"](header))
+
+            self.update(self.header_parser(header))
 
             for block in blocks:
                 block_type, *comment = map(str.strip, block[0].split("#"))

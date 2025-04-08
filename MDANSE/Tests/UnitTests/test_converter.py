@@ -17,6 +17,8 @@ lammps_moly = DATA_DIR / "structure_moly.lammps"
 lammps_custom = DATA_DIR / "lammps_moly_custom.txt"
 lammps_xyz = DATA_DIR / "lammps_moly_xyz.txt"
 lammps_h5md = CONV_DIR / "lammps_moly_h5md.h5"
+lammps_cao_config = DATA_DIR / "lammps_CaO.config"
+lammps_cao_run = DATA_DIR / "lammps_CaO.lammps"
 vasp_xdatcar = DATA_DIR / "XDATCAR_version5"
 discover_his = DATA_DIR / "sushi.his"
 discover_xtd = DATA_DIR / "sushi.xtd"
@@ -383,6 +385,32 @@ def test_lammps_ix_unwrap(tmp_path, files):
                       [ 0. ,  0. ,  8.8]],
         "units": "metal",
     }),
+
+    (lammps_cao_config, {
+        "atom_types": (([4, 1] * (5966 // 2)) +              # O, Ca
+                       ([3, 4] * ((6984 - 5966) // 2)) +     # Mg, O
+                       ([0, 4] * ((8028-6983) // 2)) +       # Al, O
+                       ([0, 4, 4] * ((9594 - 8028) // 3)) +  # Al, O, O
+                       ([5, 4, 4] * ((16140 - 9594) // 3)) + # Si, O, O,
+                       ([2, 4] * ((16150 - 16140) // 2))),   # Fe, O
+        "charges": [0]*16150,
+        "elements": {0: "Al", 1: "Ca", 2: "Fe", 3: "Mg", 4: "O", 5: "Si"},
+        "mass": [26.981539, 40.077999, 55.845001, 24.305   , 15.9994  , 28.085501],
+        "n_angle_types": 0,
+        "n_angles": 0,
+        "n_atom_types": 6,
+        "n_atoms": 16150,
+        "n_bond_types": 0,
+        "n_bonds": 0,
+        "n_dihedral_types": 0,
+        "n_dihedrals": 0,
+        "n_improper_types": 0,
+        "n_impropers": 0,
+        "origin": [0., 0., 0.],
+        "style": BoxStyle.ORTHOGONAL,
+        "unit_cell": [[59.6,  0. ,  0. ],
+                      [ 0. , 59.6,  0. ],
+                      [ 0. ,  0. , 59.6]]},),
 ])
 def test_lammps_config_parser(config_file, expected):
     conf = ConfigFileConfigurator("dummy_in")
