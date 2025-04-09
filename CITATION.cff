@@ -16,14 +16,41 @@ authors:
     family-names: Cheng
     email: chi.cheng@stfc.ac.uk
     affiliation: STFC
-  - given-names: Jacob
-    family-names: Wilkins
-    email: jacob.wilkins@stfc.ac.uk
+  - given-names: Raunakk
+    family-names: Banerjee
+    email: raunakk.banerjee@stfc.ac.uk
     affiliation: STFC
+  - given-names: Rob
+    family-names: Buchanan
+    email: rob.buchanan@stfc.ac.uk
+    affiliation: STFC
+  - given-names: Miguel Angel
+    family-names: Gonzales
+    affiliation: Institut Laue-Langevin
+    orcid: https://orcid.org/0000-0002-3478-0215
   - given-names: Sanghamitra
     family-names: Mukhopadhyay
     email: sanghamitra.mukhopadhyay@stfc.ac.uk
     affiliation: STFC
+  - given-names: Gael
+    family-names: Goret
+    email: gael.goret@gmail.com
+  - given-names: Eric
+    family-names: Pellegrini
+    affiliation: Institut Laue-Langevin
+  - given-names: Remi
+    family-names: Perenon
+    affiliation: Institut Laue-Langevin
+  - given-names: Rastislav
+    family-names: Turanyi
+    email: rastislav.turanyi@stfc.ac.uk
+    affiliation: STFC
+  - given-names: Jacob
+    family-names: Wilkins
+    email: jacob.wilkins@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0009-0004-9147-3475
+
 repository-code: 'https://github.com/ISISNeutronMuon/MDANSE'
 url: 'https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx'
 keywords:
@@ -33,6 +60,7 @@ keywords:
   - analysis
 license: GPL-3.0
 version: 2.0.0b3
+
 preferred-citation:
   type: article
   authors:
@@ -42,10 +70,72 @@ preferred-citation:
       given-names: B.
     - family-names: Pellegrini
       given-names: E.
-  title: "MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations"
+  title: |
+    MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations
   doi: 10.1021/acs.jcim.6b00571
   journal: "J Chem Inf Model"
   month: 1
   volume: 57
   issue: 1
   year: 2017
+
+references:
+  - type: software
+    title: nMOLDYN
+    repository-code: https://github.com/khinsen/nMOLDYN3
+    authors:
+      - given-names: Konrad
+        family-names: Hinsen
+      - given-names: Eric
+        family-names: Pellegrini
+        affiliation: Institut Laue-Langevin
+      - given-names: Gerald
+        family-names: Kneller
+      - given-names: Bachir
+        family-names: Aoun
+        affiliation: Fullrmc LLC
+        orcid: https://orcid.org/0000-0001-8965-9423
+      - given-names: Krzysztof
+        family-names: Murzyn
+        affiliation: Jagellonian University Kraków
+      - given-names: Tomasz
+        family-names: Róg
+
+  - type: article
+    title: |
+      nMOLDYN: A program package for a neutron scattering oriented analysis of Molecular Dynamics simulations
+    authors:
+       - given-names: Gerald R.
+         family-names: Kneller
+       - given-names: Volker
+         family-names: Keiner
+       - given-names: Meinhard
+         family-names: Kneller
+       - given-names: Matthias
+         family-names: Schiller
+    journal: Computer Physics Communications
+    volume: 91
+    number: 1
+    pages: 191-214
+    year: 1995
+    issn: 0010-4655
+    identifiers:
+      - type: doi
+        value: 10.1016/0010-4655(95)00048-K
+      - type: url
+        value: https://www.sciencedirect.com/science/article/pii/001046559500048K
+    keywords:
+      - Neutron scattering
+      - Molecular dynamics simulation
+    abstract: >
+      nMOLDYN is a modular program package for the analysis of
+      Molecular Dynamics simulations. It is especially designed for
+      the computation and decomposition of neutron scattering
+      spectra. The structure and dynamics of the simulated systems can
+      be characterized in terms of various space and time correlation
+      functions. To analyze the dynamics of complex systems,
+      rigid-body motions of arbitrarily chosen molecular subunits can
+      be studied. All modules use a common input data structure for
+      the MD trajectory files which facilitates an efficient
+      calculation of time correlation functions by Fast Fourier
+      Transform algorithms.
