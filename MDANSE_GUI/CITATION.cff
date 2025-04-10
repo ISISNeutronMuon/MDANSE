@@ -5,17 +5,18 @@ abstract: >-
   MDANSE Core package - Molecular Dynamics trajectory
   handling and analysis code.
 message: >-
-  If you have used MDANSE in your research, please cite both the MDANSE software itself,
+  If you have used the MDANSE gui in your research, please cite both the MDANSE software itself,
   and the article from preferred-citation.
 authors:
-  - given-names: Maciej
-    family-names: Bartkowiak
-    email: maciej.bartkowiak@stfc.ac.uk
-    affiliation: STFC
   - given-names: Raunakk
     family-names: Banerjee
     email: raunakk.banerjee@stfc.ac.uk
     affiliation: STFC
+  - given-names: Maciej
+    family-names: Bartkowiak
+    email: maciej.bartkowiak@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0000-0003-1974-1493
   - given-names: Rob
     family-names: Buchanan
     email: rob.buchanan@stfc.ac.uk
@@ -24,6 +25,7 @@ authors:
     family-names: Cheng
     email: chi.cheng@stfc.ac.uk
     affiliation: STFC
+    orcid: https://orcid.org/0000-0002-1957-9193
   - given-names: Sanghamitra
     family-names: Mukhopadhyay
     email: sanghamitra.mukhopadhyay@stfc.ac.uk
@@ -47,7 +49,7 @@ keywords:
   - analysis
 
 license: GPL-3.0
-version: 2.0.0b3
+version: 0.1.0b4
 
 preferred-citation:
   type: article

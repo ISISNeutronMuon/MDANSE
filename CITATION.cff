@@ -8,33 +8,35 @@ message: >-
   If you have used MDANSE in your research, please cite both the MDANSE software itself,
   and the article from preferred-citation.
 authors:
+  - given-names: Raunakk
+    family-names: Banerjee
+    email: raunakk.banerjee@stfc.ac.uk
+    affiliation: STFC
   - given-names: Maciej
     family-names: Bartkowiak
     email: maciej.bartkowiak@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0000-0003-1974-1493
+  - given-names: Rob
+    family-names: Buchanan
+    email: rob.buchanan@stfc.ac.uk
     affiliation: STFC
   - given-names: Chi Y.
     family-names: Cheng
     email: chi.cheng@stfc.ac.uk
     affiliation: STFC
-  - given-names: Raunakk
-    family-names: Banerjee
-    email: raunakk.banerjee@stfc.ac.uk
-    affiliation: STFC
-  - given-names: Rob
-    family-names: Buchanan
-    email: rob.buchanan@stfc.ac.uk
-    affiliation: STFC
+    orcid: https://orcid.org/0000-0002-1957-9193
   - given-names: Miguel Angel
     family-names: Gonzales
     affiliation: Institut Laue-Langevin
     orcid: https://orcid.org/0000-0002-3478-0215
+  - given-names: Gael
+    family-names: Goret
+    email: gael.goret@gmail.com
   - given-names: Sanghamitra
     family-names: Mukhopadhyay
     email: sanghamitra.mukhopadhyay@stfc.ac.uk
     affiliation: STFC
-  - given-names: Gael
-    family-names: Goret
-    email: gael.goret@gmail.com
   - given-names: Eric
     family-names: Pellegrini
     affiliation: Institut Laue-Langevin
