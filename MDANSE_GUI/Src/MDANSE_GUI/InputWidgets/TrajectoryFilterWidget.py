@@ -183,17 +183,20 @@ class FilterSettingGroup(QObject):
     Provides a groupbox of settings for a given filter.
 
     """
-    # Signal emitted when settings have been updated
-    _settings_updated = Signal()
+    # Signal: emits a dictionary of attributes when settings have been updated
+    _settings_updated = Signal(dict)
 
-    # Signal emitted when a setting has changed
+    # Signal: emitted when a setting has changed
     _setting_changed = Signal()
 
-    def __init__(self, name: str, schema: dict, parent_settings: dict, render_func: Callable):
+    def __init__(self, schema: dict, render_func: Callable):
         """
 
         """
         super().__init__()
+
+        # Dictionary of group specific settings
+        self._attributes = {}
 
         # Dictionary mapping setting name to input widget
         self._widgets = {}
@@ -204,15 +207,9 @@ class FilterSettingGroup(QObject):
         # The number of widgets in the group
         self._item_count = 0
 
-        # Settings dictionary of the filter designer
-        self._parent_settings = parent_settings
-
-        # Name of the filter
-        self._name = name
-
         # Schema for the filter settings
-        # TODO: Load widgets from schema before setting grid layout, then iterate over widgets
         self._schema = schema
+        self.load_from_schema()
 
         # Indices for populating the settings grid layout
         self._indices = list(self.generate_grid_indices(len(self._schema.items())))
@@ -227,14 +224,9 @@ class FilterSettingGroup(QObject):
         """
 
         """
-        print(f"\n\nLOADING FROM SCHEMA with name = {self._name}, attributes = {self._parent_settings["attributes"]}\n")
-        # Set the filer name
-        self._parent_settings["filter"] = self._name
-
-        # Initialise the filter settings
-        settings = self._parent_settings["attributes"]
+        print(f"\n\nLOADING FROM SCHEMA")
         for name, setting_dict in self._schema.items():
-            settings[name] = setting_dict["value"]
+            self._attributes[name] = setting_dict["value"]
 
     def store_widget(self, name: str, widget: QWidget) -> None:
         """Stores a widget in self
@@ -283,30 +275,17 @@ class FilterSettingGroup(QObject):
         if isinstance(widget, QCheckBox):
             return widget.isChecked()
 
-    def update_attributes(self, attributes: dict):
-        """
-
-        """
-        print(f"\n\nUPDATING ATTRIBUTES with name = {self._name}, attributes = {self._parent_settings["attributes"]}\n")
-        for name, widget in self._widgets.items():
-            if widget and (name in attributes.keys()):
-                attributes[name] = self.visit(widget)
-
     @Slot()
     def collect_inputs(self) -> None:
         """
 
         """
-        attributes = self._parent_settings["attributes"]
+        for name, widget in self._widgets.items():
+            if widget and (name in self._attributes.keys()):
+                self._attributes[name] = self.visit(widget)
 
-        # If attributes not in schema, or current filter name is not group name, load defaults
-        if (not set(self._schema) & set(attributes)) or (self._name != self._parent_settings["filter"]):
-            self.load_from_schema()
-
-        self.update_attributes(attributes)
-
-        print(f"\n\nSettings updated from class with name {self._name}: attempting to re-render with attributes {self._parent_settings["attributes"]} (where parent has {self._parent_settings})\n")
-        self._settings_updated.emit()
+        print(f"\n\nSettings updated")
+        self._settings_updated.emit(self._attributes)
 
     def as_grid(self) -> QGridLayout:
         """Creates the filter settings grid layout.
@@ -413,18 +392,18 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
     """
 
     """
-    # Signal emitted when frequency bounds are enabled
+    # Signal: emitted when frequency bounds are enabled
     _frequency_bounded = Signal(bool)
 
-    # Settings that can enable frequency bounds
+    # Bounds behaviour corresponding to attenuation settings
     _bounds_off = {"lowpass", "highpass"}
     _bounds_on = {"bandpass", "bandstop"}
 
-    def __init__(self, name: str, schema: dict, parent_settings: dict, render_func: Callable):
+    def __init__(self, schema: dict, render_func: Callable):
         """
 
         """
-        super().__init__(name, schema, parent_settings, render_func)
+        super().__init__(schema, render_func)
         last_index = self._indices[-1]
         self._indices.append(((last_index[0][0]+1, 0), (last_index[1][0]+1, 1)))
 
@@ -466,41 +445,28 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
             self._frequency_bounded.emit(value in self._bounds_on)
         super().notify()
 
-    def update_attributes(self, attributes: dict):
-        """
-
-        """
-        print(f"\n\nUPDATING ATTRIBUTES with name = {self._name}, attributes = {self._parent_settings["attributes"]}\n")
-        for name, widget in self._widgets.items():
-            if widget and (name in attributes.keys()):
-                value = self.visit(widget)
-                attributes[name] = value
-
-                # Check if attribute invokes change in how frequencies are passed to filter (single cutoff value or array of critical frequencies)
-                if value in {"bandpass", "bandstop"}:
-                    self.toggle_bound_frequencies()
-                    attributes["cutoff_freq"] = self.get_frequency_bounds()
-                elif value in {"lowpass", "highpass"}:
-                    self.toggle_bound_frequencies(False)
-                    attributes["cutoff_freq"] = self.retrieve_widget("cutoff_freq").value()
-                elif self.retrieve_widget("attenuation_type").currentText() in self._bounds_on:
-                    attributes["cutoff_freq"] = self.get_frequency_bounds()
-
     @Slot()
     def collect_inputs(self) -> None:
         """
 
         """
-        attributes = self._parent_settings["attributes"]
+        for name, widget in self._widgets.items():
+            if widget and (name in self._attributes.keys()):
+                value = self.visit(widget)
+                self._attributes[name] = value
 
-        # If schema keys not attributes, or current filter name is not group name, load defaults
-        if (not set(self._schema) & set(attributes)) or (self._name != self._parent_settings["filter"]):
-            super().load_from_schema()
+                # Check if attribute invokes change in how frequencies are passed to filter (single cutoff value or array of critical frequencies)
+                if value in {"bandpass", "bandstop"}:
+                    self.toggle_bound_frequencies()
+                    self._attributes["cutoff_freq"] = self.get_frequency_bounds()
+                elif value in {"lowpass", "highpass"}:
+                    self.toggle_bound_frequencies(False)
+                    self._attributes["cutoff_freq"] = self.retrieve_widget("cutoff_freq").value()
+                elif self.retrieve_widget("attenuation_type").currentText() in self._bounds_on:
+                    self._attributes["cutoff_freq"] = self.get_frequency_bounds()
 
-        self.update_attributes(attributes)
-
-        print(f"\n\nSettings updated from class with name {self._name}: attempting to re-render with attributes {self._parent_settings["attributes"]} (where parent has {self._parent_settings})\n")
-        self._settings_updated.emit()
+        print(f"\n\nSettings updated")
+        self._settings_updated.emit(self._attributes)
 
     def as_grid(self) -> QGridLayout:
         """
@@ -516,9 +482,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         widget.setSingleStep(step)
         widget.setValue(DEFAULT_FILTER_CUTOFF * 0.5)
         widget.setEnabled(False)
-        widget.valueChanged.connect(
-            lambda val: self.edit_current_filter("cutoff_freq", val)
-        )
+        widget.valueChanged.connect(self.notify)
         self.store_widget("bound_freq", widget)
         grid.addWidget(widget, grid_pos[1][0] + 1, grid_pos[1][1])
         self._item_count += 1
@@ -755,9 +719,7 @@ class FilterDesigner(QDialog):
         type_label = QLabel("Filter type")
         type_cbox.setCurrentText(self._settings["filter"])
 
-        type_cbox.currentTextChanged.connect(
-            lambda filter_type: self.update_filter(filter_type)
-        )
+        type_cbox.currentTextChanged.connect(self.update_filter)
 
         filter_type_layout = QHBoxLayout()
         filter_type_layout.addWidget(type_label)
@@ -773,7 +735,7 @@ class FilterDesigner(QDialog):
 
         for name, filter_class in FILTER_MAP.items():
             template = FilterSettingGroup if filter_class.digital_only else BoundedFilterSettingsGroup
-            group_obj = template(name=name, schema=filter_class.default_settings, parent_settings=self._settings, render_func=self.render_canvas_assets)
+            group_obj = template(schema=filter_class.default_settings, render_func=self.render_canvas_assets)
             self._settings_group.update({name: group_obj})
             widget = QWidget()
             layout = self._settings_group[name].as_grid()
@@ -905,9 +867,12 @@ class FilterDesigner(QDialog):
             f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 1)} meV, Sample frequency: {sample_freq} THz"
         )
 
-    def render_canvas_assets(self) -> None:
+    def render_canvas_assets(self, attributes: dict=None) -> None:
         """Render all elements of the filter designer graphing area, including data text"""
         print(f"\n\nInside render_canvas_assets\nAttempting to re-render with attributes {self._settings}\n\n")
+        if attributes:
+            self._settings["attributes"].update(attributes)
+
         # Set preferences
         analog_filter = self._preferences["coeff_type"] == "analog"
         db_response = self._preferences["response_units"] == "dB"
