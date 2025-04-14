@@ -127,9 +127,9 @@ class PreferencesSettingGroup(QObject):
         """
 
         """
-        for key in self._widgets.keys():
-            value = self.visit(self._widgets[key])
-            self._parent_preferences[key] = value
+        for name, widget in self._widgets.items():
+            value = self.visit(widget)
+            self._parent_preferences[name] = value
 
         self._preferences_updated.emit()
 
@@ -204,22 +204,37 @@ class FilterSettingGroup(QObject):
         # The number of widgets in the group
         self._item_count = 0
 
+        # Settings dictionary of the filter designer
         self._parent_settings = parent_settings
+
+        # Name of the filter
         self._name = name
+
+        # Schema for the filter settings
         # TODO: Load widgets from schema before setting grid layout, then iterate over widgets
         self._schema = schema
+
+        # Indices for populating the settings grid layout
         self._indices = list(self.generate_grid_indices(len(self._schema.items())))
+
+        # Connection: when a setting is changed, collect inputs
         self._setting_changed.connect(self.collect_inputs)
+
+        # Connection: when the settings have been updated, re-render the filter designer
         self._settings_updated.connect(render_func)
 
-    def clear_settings(self):
+    def load_from_schema(self):
         """
 
         """
+        print(f"\n\nLOADING FROM SCHEMA with name = {self._name}, attributes = {self._parent_settings["attributes"]}\n")
+        # Set the filer name
+        self._parent_settings["filter"] = self._name
+
+        # Initialise the filter settings
         settings = self._parent_settings["attributes"]
-        for setting in self._widgets.keys():
-            if setting in settings.keys():
-                del settings[setting]
+        for name, setting_dict in self._schema.items():
+            settings[name] = setting_dict["value"]
 
     def store_widget(self, name: str, widget: QWidget) -> None:
         """Stores a widget in self
@@ -268,22 +283,29 @@ class FilterSettingGroup(QObject):
         if isinstance(widget, QCheckBox):
             return widget.isChecked()
 
+    def update_attributes(self, attributes: dict):
+        """
+
+        """
+        print(f"\n\nUPDATING ATTRIBUTES with name = {self._name}, attributes = {self._parent_settings["attributes"]}\n")
+        for name, widget in self._widgets.items():
+            if widget and (name in attributes.keys()):
+                attributes[name] = self.visit(widget)
+
     @Slot()
     def collect_inputs(self) -> None:
         """
 
         """
-        self._parent_settings["filter"] = self._name
-        self.clear_settings()
-
         attributes = self._parent_settings["attributes"]
 
-        for key in attributes.keys():
-            widget = self.retrieve_widget(key)
-            if widget:
-                attributes[key] = self.visit(widget)
+        # If attributes not in schema, or current filter name is not group name, load defaults
+        if (not set(self._schema) & set(attributes)) or (self._name != self._parent_settings["filter"]):
+            self.load_from_schema()
 
-        print(f"Settings updated from class with name {self._name}: attempting to re-render with attributes {attributes} (where parent has {self._parent_settings})")
+        self.update_attributes(attributes)
+
+        print(f"\n\nSettings updated from class with name {self._name}: attempting to re-render with attributes {self._parent_settings["attributes"]} (where parent has {self._parent_settings})\n")
         self._settings_updated.emit()
 
     def as_grid(self) -> QGridLayout:
@@ -405,6 +427,8 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         super().__init__(name, schema, parent_settings, render_func)
         last_index = self._indices[-1]
         self._indices.append(((last_index[0][0]+1, 0), (last_index[1][0]+1, 1)))
+
+        # Connection: when the attenuation type requires/doesn't require frequency bounds, toggle the bounds widget on/off
         self._frequency_bounded.connect(self.toggle_bound_frequencies)
 
     def get_frequency_bounds(self) -> list:
@@ -442,21 +466,15 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
             self._frequency_bounded.emit(value in self._bounds_on)
         super().notify()
 
-    @Slot()
-    def collect_inputs(self) -> None:
+    def update_attributes(self, attributes: dict):
         """
 
         """
-        self._parent_settings["filter"] = self._name
-        super().clear_settings()
-
-        attributes = self._parent_settings["attributes"]
-
-        for key in self._widgets.keys():
-            widget = self.retrieve_widget(key)
-            if widget:
+        print(f"\n\nUPDATING ATTRIBUTES with name = {self._name}, attributes = {self._parent_settings["attributes"]}\n")
+        for name, widget in self._widgets.items():
+            if widget and (name in attributes.keys()):
                 value = self.visit(widget)
-                attributes[key] = value
+                attributes[name] = value
 
                 # Check if attribute invokes change in how frequencies are passed to filter (single cutoff value or array of critical frequencies)
                 if value in {"bandpass", "bandstop"}:
@@ -468,7 +486,20 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
                 elif self.retrieve_widget("attenuation_type").currentText() in self._bounds_on:
                     attributes["cutoff_freq"] = self.get_frequency_bounds()
 
-        print(f"Settings updated from class with name {self._name}: attempting to re-render with attributes {attributes} (where parent has {self._parent_settings})")
+    @Slot()
+    def collect_inputs(self) -> None:
+        """
+
+        """
+        attributes = self._parent_settings["attributes"]
+
+        # If schema keys not attributes, or current filter name is not group name, load defaults
+        if (not set(self._schema) & set(attributes)) or (self._name != self._parent_settings["filter"]):
+            super().load_from_schema()
+
+        self.update_attributes(attributes)
+
+        print(f"\n\nSettings updated from class with name {self._name}: attempting to re-render with attributes {self._parent_settings["attributes"]} (where parent has {self._parent_settings})\n")
         self._settings_updated.emit()
 
     def as_grid(self) -> QGridLayout:
@@ -876,7 +907,7 @@ class FilterDesigner(QDialog):
 
     def render_canvas_assets(self) -> None:
         """Render all elements of the filter designer graphing area, including data text"""
-        print(f"SAttempting to re-render with attributes {self._settings}")
+        print(f"\n\nInside render_canvas_assets\nAttempting to re-render with attributes {self._settings}\n\n")
         # Set preferences
         analog_filter = self._preferences["coeff_type"] == "analog"
         db_response = self._preferences["response_units"] == "dB"
