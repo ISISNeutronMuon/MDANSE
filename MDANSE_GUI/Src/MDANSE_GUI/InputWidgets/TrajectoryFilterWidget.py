@@ -54,25 +54,29 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
 
-class PreferencesSettingGroup(QObject):
+class FilterPreferencesGroup(QObject):
     """
 
     """
-    # Signal emitted when preferences have been updated
-    _preferences_updated = Signal()
+    # Signal: emits a dictionary of preferences when settings have been updated
+    _preferences_updated = Signal(dict)
 
-    # Grid layout into which the input widgets are placed
-    _grid = QGridLayout()
-
-    # Dictionary mapping setting name to input widget
-    _widgets = {}
-
-    def __init__(self, parent_preferences: dict, render_func: Callable):
+    def __init__(self, render_func: Callable):
         """
 
         """
         super().__init__()
-        self._parent_preferences = parent_preferences
+
+        # Dictionary mapping preferences to their values
+        self._preferences = {}
+
+        # Grid layout into which the input widgets are placed
+        self._grid = QGridLayout()
+
+        # Dictionary mapping setting name to input widget
+        self._widgets = {}
+
+        # Connection: when the preferences have been updated, re-render the filter designer
         self._preferences_updated.connect(render_func)
 
     def store_widget(self, name: str, widget: QWidget) -> None:
@@ -118,7 +122,7 @@ class PreferencesSettingGroup(QObject):
         widget.setEnabled(enabled)
         widget.setToolTip(tooltip)
         self.store_widget(key, widget)
-        self._parent_preferences.update({key: widget.currentText()})
+        self._preferences.update({key: widget.currentText()})
         widget.currentTextChanged.connect(self.collect_inputs)
         return widget
 
@@ -129,9 +133,9 @@ class PreferencesSettingGroup(QObject):
         """
         for name, widget in self._widgets.items():
             value = self.visit(widget)
-            self._parent_preferences[name] = value
+            self._preferences[name] = value
 
-        self._preferences_updated.emit()
+        self._preferences_updated.emit(self._preferences)
 
     def as_grid(self) -> QGridLayout:
         """Populate the preferences grid layout with the filter designer preference widgets
@@ -167,7 +171,8 @@ class PreferencesSettingGroup(QObject):
 
         return self._grid
 
-    def visit(self, widget: QWidget) -> Any:
+    @staticmethod
+    def visit(widget: QWidget) -> Any:
         """
 
         """
@@ -224,7 +229,6 @@ class FilterSettingGroup(QObject):
         """
 
         """
-        print(f"\n\nLOADING FROM SCHEMA")
         for name, setting_dict in self._schema.items():
             self._attributes[name] = setting_dict["value"]
 
@@ -262,7 +266,8 @@ class FilterSettingGroup(QObject):
         """
         return self._widgets.get(name, None)
 
-    def visit(self, widget: QWidget) -> Any:
+    @staticmethod
+    def visit(widget: QWidget) -> Any:
         """
 
         """
@@ -284,7 +289,6 @@ class FilterSettingGroup(QObject):
             if widget and (name in self._attributes.keys()):
                 self._attributes[name] = self.visit(widget)
 
-        print(f"\n\nSettings updated")
         self._settings_updated.emit(self._attributes)
 
     def as_grid(self) -> QGridLayout:
@@ -300,17 +304,19 @@ class FilterSettingGroup(QObject):
         QWidget
 
         """
-        if self._indices:
-            items = self._schema.items()
-            for key, value in items:
-                grid_pos = self._indices.pop(0)
-                label = QLabel(key.replace("_", " ").capitalize())
-                self._grid.addWidget(label, grid_pos[0][0], grid_pos[0][1])
-                setting_widget = self.setting_to_widget(setting_key=key, val_group=value)
-                # Store widget in object
-                self.store_widget(key, setting_widget)
-                self._grid.addWidget(setting_widget, grid_pos[1][0], grid_pos[1][1])
-                self._item_count += 1
+        if not self._indices:
+            self._indices = list(self.generate_grid_indices(len(self._schema.items())))
+
+        items = self._schema.items()
+        for key, value in items:
+            grid_pos = self._indices.pop(0)
+            label = QLabel(key.replace("_", " ").capitalize())
+            self._grid.addWidget(label, grid_pos[0][0], grid_pos[0][1])
+            setting_widget = self.setting_to_widget(setting_key=key, val_group=value)
+            # Store widget in object
+            self.store_widget(key, setting_widget)
+            self._grid.addWidget(setting_widget, grid_pos[1][0], grid_pos[1][1])
+            self._item_count += 1
 
         return self._grid
 
@@ -465,7 +471,6 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
                 elif self.retrieve_widget("attenuation_type").currentText() in self._bounds_on:
                     self._attributes["cutoff_freq"] = self.get_frequency_bounds()
 
-        print(f"\n\nSettings updated")
         self._settings_updated.emit(self._attributes)
 
     def as_grid(self) -> QGridLayout:
@@ -617,7 +622,7 @@ class FilterDesigner(QDialog):
         if hasattr(self, "_figure"):
             self.render_canvas_assets()
 
-    def edit_preferences(self, key: str, value: any) -> None:
+    def edit_preferences(self, preferences: dict) -> None:
         """Re-renders the filter according to display preferences.
 
         Parameters
@@ -627,10 +632,10 @@ class FilterDesigner(QDialog):
         value : any
             The value of the edited preference.
         """
-        self._preferences.update({key: value})
+        self._preferences.update(preferences)
 
         # Load trajectory attenuation
-        if key == "show_attenuation" and not self._trajectory_power_spectrum:
+        if self._preferences["show_attenuation"] and not self._trajectory_power_spectrum:
             self._trajectory_power_spectrum = power_spectrum(
                 self.find_configuration_property("trajectory"),
                 self.find_configuration_property("frames"),
@@ -727,7 +732,7 @@ class FilterDesigner(QDialog):
 
         widget_area.addLayout(filter_type_layout)
 
-        # Add the filter settings grid layout to the stack
+        # Add each of the filter settings grid layout to the stack
         settings_groupbox = QGroupBox("Settings", None)
         settings_groupbox.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum
@@ -749,16 +754,19 @@ class FilterDesigner(QDialog):
         settings_groupbox.setLayout(self._setting_stack_layout)
         widget_area.addWidget(settings_groupbox)
 
-        # Add the filter designer preferences grid layout
+        # Add the filter designer preferences stack layout
         preferences_groupbox = QGroupBox("Preferences", None)
         preferences_groupbox.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum
         )
 
-        self._preferences_group = PreferencesSettingGroup(parent_preferences=self._preferences, render_func=self.render_canvas_assets)
+        self._preferences_group = FilterPreferencesGroup(render_func=self.edit_preferences)
         preferences_groupbox.setLayout(self._preferences_group.as_grid())
 
         widget_area.addWidget(preferences_groupbox)
+
+        # Get default preferences
+        self._preferences.update({name: FilterPreferencesGroup.visit(widget) for name, widget in self._preferences_group._widgets.items()})
 
         # Add buttons
         buttons_layout = QHBoxLayout()
@@ -869,7 +877,6 @@ class FilterDesigner(QDialog):
 
     def render_canvas_assets(self, attributes: dict=None) -> None:
         """Render all elements of the filter designer graphing area, including data text"""
-        print(f"\n\nInside render_canvas_assets\nAttempting to re-render with attributes {self._settings}\n\n")
         if attributes:
             self._settings["attributes"].update(attributes)
 
