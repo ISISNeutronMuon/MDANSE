@@ -242,9 +242,6 @@ class FilterSettingGroup(QObject):
         # Grid layout into which the input widgets are placed
         self.grid = QGridLayout()
 
-        # The number of widgets in the group
-        self.item_count = 0
-
         # Schema for the filter settings
         self.schema = schema
         self.load_from_schema()
@@ -354,7 +351,6 @@ class FilterSettingGroup(QObject):
             # Store widget in object
             self.store_widget(key, setting_widget)
             self.grid.addWidget(setting_widget, grid_pos[1][0], grid_pos[1][1])
-            self.item_count += 1
 
         return self.grid
 
@@ -541,7 +537,6 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         widget.valueChanged.connect(self.notify)
         self.store_widget("bound_freq", widget)
         grid.addWidget(widget, grid_pos[1][0] + 1, grid_pos[1][1])
-        self.item_count += 1
 
         return grid
 
