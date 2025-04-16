@@ -35,7 +35,7 @@ from qtpy.QtWidgets import (
     QStackedLayout,
     QDoubleSpinBox,
     QTextEdit,
-    QWidget
+    QWidget,
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
@@ -54,16 +54,23 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
 
+
 class FilterPreferencesGroup(QObject):
-    """
+    """Interface for a filter preferences group.
+    Provides a grid layout of settings for a given filter.
 
     """
+
     # Signal: emits a dictionary of preferences when settings have been updated
     _preferences_updated = Signal(dict)
 
     def __init__(self, render_func: Callable):
         """
-
+        Parameters
+        ----------
+        render_func : Callable
+            Filter designer function to call when preferences have been updated.
+            Function re-renders the filter designer graph.
         """
         super().__init__()
 
@@ -128,9 +135,7 @@ class FilterPreferencesGroup(QObject):
 
     @Slot()
     def collect_inputs(self) -> None:
-        """
-
-        """
+        """Slot: iterate over input widgets, collecting their values and update attributes"""
         for name, widget in self.widgets.items():
             value = self.visit(widget)
             self.preferences[name] = value
@@ -147,17 +152,29 @@ class FilterPreferencesGroup(QObject):
         """
         # Y-axis in amplitude or decibels
         self.grid.addWidget(QLabel("Response units"), 0, 0)
-        response_cbox = self.add_combobox("response_units", ("amplitude", "dB"), "View y-axis in amplitude or decibels")
+        response_cbox = self.add_combobox(
+            "response_units",
+            ("amplitude", "dB"),
+            "View y-axis in amplitude or decibels",
+        )
         self.grid.addWidget(response_cbox, 0, 1)
 
         # X-axis in angular frequency or energy (meV)
         self.grid.addWidget(QLabel("X-axis units"), 1, 0)
-        xaxis_cbox = self.add_combobox("xaxis_units", ("THz", "meV"), "View x-axis as frequency (THz) or energy (meV)")
+        xaxis_cbox = self.add_combobox(
+            "xaxis_units",
+            ("THz", "meV"),
+            "View x-axis as frequency (THz) or energy (meV)",
+        )
         self.grid.addWidget(xaxis_cbox, 1, 1)
 
         # Display filter transfer function in terms of analogue or digital filter coefficients
         self.grid.addWidget(QLabel("Filter coefficients"), 2, 0)
-        coeff_type_cbox = self.add_combobox("coeff_type", ("analog", "digital"), "View filter transfer function in terms of analogue (S-domain/continuous time) or digital (Z-domain/discrete time) coefficients")
+        coeff_type_cbox = self.add_combobox(
+            "coeff_type",
+            ("analog", "digital"),
+            "View filter transfer function in terms of analogue (S-domain/continuous time) or digital (Z-domain/discrete time) coefficients",
+        )
         self.grid.addWidget(coeff_type_cbox, 2, 1)
 
         # Display trajectory position power spectral attentuation for comparison
@@ -166,15 +183,26 @@ class FilterPreferencesGroup(QObject):
         self.widgets.update({"show_attenuation": attenuation_checkbox})
         attenuation_checkbox.setEnabled(True)
         attenuation_checkbox.stateChanged.connect(self.collect_inputs)
-        attenuation_checkbox.setToolTip("Display trajectory power spectrum for comparison")
+        attenuation_checkbox.setToolTip(
+            "Display trajectory power spectrum for comparison"
+        )
         self.grid.addWidget(attenuation_checkbox, 3, 1)
 
         return self.grid
 
     @staticmethod
     def visit(widget: QWidget) -> Any:
-        """
+        """Get widget value by QWidget instance
 
+        Parameters
+        ----------
+        widget : QWidget
+            The wadget whose value we want to get.
+
+        Returns
+        -------
+        Any:
+            The widget value
         """
         if isinstance(widget, QComboBox):
             return widget.currentText()
@@ -185,9 +213,10 @@ class FilterPreferencesGroup(QObject):
 
 class FilterSettingGroup(QObject):
     """Interface for a filter settings group.
-    Provides a groupbox of settings for a given filter.
+    provides a grid layout of settings for a given filter.
 
     """
+
     # Signal: emits a dictionary of attributes when settings have been updated
     _settings_updated = Signal(dict)
 
@@ -196,7 +225,11 @@ class FilterSettingGroup(QObject):
 
     def __init__(self, schema: dict, render_func: Callable):
         """
-
+        Parameters
+        ----------
+        render_func : Callable
+            Filter designer function to call when attributes have been updated.
+            Function re-renders the filter designer graph.
         """
         super().__init__()
 
@@ -225,10 +258,8 @@ class FilterSettingGroup(QObject):
         # Connection: when the settings have been updated, re-render the filter designer
         self._settings_updated.connect(render_func)
 
-    def load_from_schema(self):
-        """
-
-        """
+    def load_from_schema(self) -> None:
+        """Load the attributes from the filter setting schema"""
         for name, setting_dict in self.schema.items():
             self.attributes[name] = setting_dict["value"]
 
@@ -264,12 +295,21 @@ class FilterSettingGroup(QObject):
         QWidget:
             The stored widget
         """
-        return self.widgets.get(name, None)
+        return self.widgets.get(name)
 
     @staticmethod
     def visit(widget: QWidget) -> Any:
-        """
+        """Get widget value by QWidget instance
 
+        Parameters
+        ----------
+        widget : QWidget
+            The wadget whose value we want to get.
+
+        Returns
+        -------
+        Any:
+            The widget value
         """
         if isinstance(widget, QSpinBox) or isinstance(widget, QDoubleSpinBox):
             return widget.value()
@@ -282,9 +322,7 @@ class FilterSettingGroup(QObject):
 
     @Slot()
     def collect_inputs(self) -> None:
-        """
-
-        """
+        """Slot: iterate over input widgets, collecting their values and update preferences"""
         for name, widget in self.widgets.items():
             if widget and (name in self.attributes.keys()):
                 self.attributes[name] = self.visit(widget)
@@ -375,9 +413,7 @@ class FilterSettingGroup(QObject):
         return widget
 
     def notify(self) -> None:
-        """
-
-        """
+        """Emit the signal on setting changed"""
         self._setting_changed.emit()
 
     @staticmethod
@@ -395,9 +431,11 @@ class FilterSettingGroup(QObject):
 
 
 class BoundedFilterSettingsGroup(FilterSettingGroup):
-    """
+    """Interface for a filter settings group, where the filter cutoff frequency is bounded.
+    provides a grid layout of settings for a given filter.
 
     """
+
     # Signal: emitted when frequency bounds are enabled
     _frequency_bounded = Signal(bool)
 
@@ -407,11 +445,15 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
 
     def __init__(self, schema: dict, render_func: Callable):
         """
-
+        Parameters
+        ----------
+        render_func : Callable
+            Filter designer function to call when attributes have been updated.
+            Function re-renders the filter designer graph.
         """
         super().__init__(schema, render_func)
         last_index = self.indices[-1]
-        self.indices.append(((last_index[0][0]+1, 0), (last_index[1][0]+1, 1)))
+        self.indices.append(((last_index[0][0] + 1, 0), (last_index[1][0] + 1, 1)))
 
         # Connection: when the attenuation type requires/doesn't require frequency bounds, toggle the bounds widget on/off
         self._frequency_bounded.connect(self.toggle_bound_frequencies)
@@ -425,8 +467,12 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
             List of length 2 containing the critical frequency bounds.
         """
         return np.array(
-            sorted([self.retrieve_widget("cutoff_freq").value(),
-                    self.retrieve_widget("bound_freq").value()])
+            sorted(
+                [
+                    self.retrieve_widget("cutoff_freq").value(),
+                    self.retrieve_widget("bound_freq").value(),
+                ]
+            )
         ).tolist()
 
     def toggle_bound_frequencies(self, on: bool = True) -> None:
@@ -438,24 +484,20 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
             If true, both inputs for upper and lower frequency bounds are enabled, else only one input is enabled
         """
         bounds = self.retrieve_widget("bound_freq")
-        if (bounds and on):
+        if bounds and on:
             bounds.setEnabled(True)
             return
         bounds.setEnabled(False)
 
     def notify(self, value: Any) -> None:
-        """
-
-        """
+        """Emit the signal on setting changed"""
         if value in (self._bounds_on | self._bounds_off):
             self._frequency_bounded.emit(value in self._bounds_on)
         super().notify()
 
     @Slot()
     def collect_inputs(self) -> None:
-        """
-
-        """
+        """Slot: iterate over input widgets, collecting their values and update attributes"""
         for name, widget in self.widgets.items():
             if widget and (name in self.attributes.keys()):
                 value = self.visit(widget)
@@ -467,15 +509,24 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
                     self.attributes["cutoff_freq"] = self.get_frequency_bounds()
                 elif value in {"lowpass", "highpass"}:
                     self.toggle_bound_frequencies(False)
-                    self.attributes["cutoff_freq"] = self.retrieve_widget("cutoff_freq").value()
-                elif self.retrieve_widget("attenuation_type").currentText() in self._bounds_on:
+                    self.attributes["cutoff_freq"] = self.retrieve_widget(
+                        "cutoff_freq"
+                    ).value()
+                elif (
+                    self.retrieve_widget("attenuation_type").currentText()
+                    in self._bounds_on
+                ):
                     self.attributes["cutoff_freq"] = self.get_frequency_bounds()
 
         self._settings_updated.emit(self.attributes)
 
     def as_grid(self) -> QGridLayout:
-        """
+        """Populate the preferences grid layout with the filter designer preference widgets
 
+        Parameters
+        ---------
+        grid : QGridLayout
+            The grid layout to which preference widgets will be added
         """
         grid = super().as_grid()
         grid_pos = self.indices.pop()
@@ -573,7 +624,6 @@ class FilterDesigner(QDialog):
         filter_type : str
             The name of the filter class.
         """
-
         self.settings = {
             "filter": filter_type,
             "attributes": {
@@ -740,8 +790,15 @@ class FilterDesigner(QDialog):
         )
 
         for name, filter_class in FILTER_MAP.items():
-            template = FilterSettingGroup if filter_class.digital_only else BoundedFilterSettingsGroup
-            group_obj = template(schema=filter_class.default_settings, render_func=self.render_canvas_assets)
+            template = (
+                FilterSettingGroup
+                if filter_class.digital_only
+                else BoundedFilterSettingsGroup
+            )
+            group_obj = template(
+                schema=filter_class.default_settings,
+                render_func=self.render_canvas_assets,
+            )
             self.settings_group.update({name: group_obj})
             widget = QWidget()
             layout = self.settings_group[name].as_grid()
@@ -761,13 +818,20 @@ class FilterDesigner(QDialog):
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum
         )
 
-        self.preferences_group = FilterPreferencesGroup(render_func=self.edit_preferences)
+        self.preferences_group = FilterPreferencesGroup(
+            render_func=self.edit_preferences
+        )
         preferences_groupbox.setLayout(self.preferences_group.as_grid())
 
         widget_area.addWidget(preferences_groupbox)
 
         # Get default preferences
-        self.preferences.update({name: FilterPreferencesGroup.visit(widget) for name, widget in self.preferences_group.widgets.items()})
+        self.preferences.update(
+            {
+                name: FilterPreferencesGroup.visit(widget)
+                for name, widget in self.preferences_group.widgets.items()
+            }
+        )
 
         # Add buttons
         buttons_layout = QHBoxLayout()
@@ -876,7 +940,7 @@ class FilterDesigner(QDialog):
             f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 1)} meV, Sample frequency: {sample_freq} THz"
         )
 
-    def render_canvas_assets(self, attributes: dict=None) -> None:
+    def render_canvas_assets(self, attributes: dict = None) -> None:
         """Render all elements of the filter designer graphing area, including data text"""
         if attributes:
             self.settings["attributes"].update(attributes)
