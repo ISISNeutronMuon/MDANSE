@@ -55,6 +55,65 @@ from matplotlib.backends.backend_qt5agg import (
 )
 
 
+class ConstrainedDoubleSpinBox(QDoubleSpinBox):
+    """Custom QDoubleSpinBox allowing for the application of a function
+    to changed values in order to find an appropriate new value that satisfies the constraint.
+
+    """
+
+    def __init__(self, constraint_func: Callable = None):
+        """
+        Parameters
+        ----------
+        constraint_func : Callable
+            Lambda for imposing constraint on spinbox value.
+        """
+        super().__init__()
+        self.constraint_func = constraint_func
+        self.valueChanged.connect(self.apply_constraint)
+
+    def setValue(self, val) -> None:
+        """Overrides setValue method of QDoubleSpinBox.
+        Sets a record of the initial value of the spinbox, for determination of direction of change.
+
+        Parameters
+        ----------
+        val : float
+            The value of the spinbox.
+        """
+        self.initial_value = val
+        super().setValue(val)
+
+    def apply_constraint(self, value: Any) -> None:
+        """Apply the constraint formalised in the lambda
+
+        Parameters
+        ----------
+        value : Any
+            The value of the spinbox.
+        """
+        if not self.constraint_func or self.constraint_func(value):
+            return
+
+        value_found = False
+        if self.value() < self.initial_value:
+            for x in np.arange(value, self.minimum(), -self.singleStep()):
+                if self.constraint_func(x):
+                    value_found = True
+                    break
+        else:
+            for x in np.arange(value, self.maximum(), self.singleStep()):
+                if self.constraint_func(x):
+                    value_found = True
+                    break
+
+        if not value_found:
+            return
+
+        # Update with constrained value
+        self.setValue(x)
+
+
 class FilterPreferencesGroup(QObject):
     """Interface for a filter preferences group.
     Provides a grid layout of settings for a given filter.
@@ -223,7 +282,13 @@ class FilterSettingGroup(QObject):
     # Signal: emitted when a setting has changed
     _setting_changed = Signal()
 
-    def __init__(self, schema: dict, render_func: Callable):
+    def __init__(
+        self,
+        designer_attributes: dict,
+        schema: dict,
+        render_func: Callable,
+        flags: set = set(),
+    ):
         """
         Parameters
         ----------
@@ -232,6 +297,12 @@ class FilterSettingGroup(QObject):
             Function re-renders the filter designer graph.
         """
         super().__init__()
+
+        # Flags
+        self.flags = flags
+
+        # Filter designer settings
+        self.designer_attributes = designer_attributes
 
         # Dictionary of group specific settings
         self.attributes = {}
@@ -382,7 +453,14 @@ class FilterSettingGroup(QObject):
             signal = widget.valueChanged
 
         if isinstance(setting, float):
-            widget = QDoubleSpinBox()
+            if (
+                Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags
+                and self.designer_attributes.get("time_step_ps")
+            ):
+                fs = self.designer_attributes["time_step_ps"] ** (-1)
+                widget = ConstrainedDoubleSpinBox(lambda x: (fs % x) == 0)
+            else:
+                widget = QDoubleSpinBox()
             step = 1.0
             widget.setValue(setting)
             widget.setMaximum(1000)
@@ -439,7 +517,13 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
     _bounds_off = {"lowpass", "highpass"}
     _bounds_on = {"bandpass", "bandstop"}
 
-    def __init__(self, schema: dict, render_func: Callable):
+    def __init__(
+        self,
+        designer_attributes: dict,
+        schema: dict,
+        render_func: Callable,
+        flags: set = set(),
+    ):
         """
         Parameters
         ----------
@@ -447,7 +531,9 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
             Filter designer function to call when attributes have been updated.
             Function re-renders the filter designer graph.
         """
-        super().__init__(schema, render_func)
+        super().__init__(designer_attributes, schema, render_func, flags)
+
+        # Generate an extra index for the frequency bound widget in the grid layout
         last_index = self.indices[-1]
         self.indices.append(((last_index[0][0] + 1, 0), (last_index[1][0] + 1, 1)))
 
@@ -787,12 +873,14 @@ class FilterDesigner(QDialog):
         for name, filter_class in FILTER_MAP.items():
             template = (
                 FilterSettingGroup
-                if filter_class.digital_only
+                if Filter.Flags.DIGITAL_ONLY in filter_class.flags
                 else BoundedFilterSettingsGroup
             )
             group_obj = template(
+                designer_attributes=copy.deepcopy(self.settings["attributes"]),
                 schema=filter_class.default_settings,
                 render_func=self.render_canvas_assets,
+                flags=filter_class.flags,
             )
             self.settings_group.update({name: group_obj})
             widget = QWidget()

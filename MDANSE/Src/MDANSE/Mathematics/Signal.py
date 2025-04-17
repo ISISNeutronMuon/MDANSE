@@ -331,8 +331,6 @@ class Filter(ABC):
     # Symbolic variable for digital filter transfer function (Z-plane)
     Z = "e^iw"
 
-    digital_only = False
-
     # Useful physical constants (from [pwtools](https://github.com/elcorto/pwtools)
     Ry_to_Hz = 3289841960777247.0
     Ry_to_eV = 13.60569193
@@ -363,6 +361,13 @@ class Filter(ABC):
 
         CUSTOM: int = 0
         FFT: int = 1
+
+    class Flags(Enum):
+        """Enumeration for flags associated with useage of filters"""
+
+        DIGITAL_ONLY: int = 0
+        DIGITAL_AND_ANALOGUE: int = 1
+        FUNDAMENTAL_EVENLY_DIVIDES_FS: int = 2
 
     @abstractmethod
     def __init__(self, **kwargs):
@@ -628,6 +633,8 @@ class Filter(ABC):
 class Butterworth(Filter):
     """Interface for the Butterworth filter."""
 
+    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
         "attenuation_type": {
@@ -658,6 +665,8 @@ class Butterworth(Filter):
 
 class ChebyshevTypeI(Filter):
     """Interface for the Chebyshev type 1 filter."""
+
+    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -695,6 +704,8 @@ class ChebyshevTypeI(Filter):
 class ChebyshevTypeII(Filter):
     """Interface for the Chebyshev type 2 filter."""
 
+    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
         "min_attenuation": {
@@ -730,6 +741,8 @@ class ChebyshevTypeII(Filter):
 
 class Elliptical(Filter):
     """Interface for the elliptical filter."""
+
+    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -772,6 +785,8 @@ class Elliptical(Filter):
 class Bessel(Filter):
     """Interface for the Bessel filter."""
 
+    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
         "norm": {
@@ -809,6 +824,8 @@ class Bessel(Filter):
 class Notch(Filter):
     """Interface for the notch filter."""
 
+    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS}
+
     default_settings = {
         "fundamental_freq": {
             "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
@@ -819,8 +836,6 @@ class Notch(Filter):
             "value": 1.0,
         },
     }
-
-    digital_only = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -850,6 +865,8 @@ class Notch(Filter):
 class Peak(Filter):
     """Interface for the peak filter."""
 
+    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS}
+
     default_settings = {
         "fundamental_freq": {
             "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
@@ -860,8 +877,6 @@ class Peak(Filter):
             "value": 1.0,
         },
     }
-
-    digital_only = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -891,6 +906,8 @@ class Peak(Filter):
 class Comb(Filter):
     """Interface for the comb filter."""
 
+    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS}
+
     default_settings = {
         "fundamental_freq": {
             "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
@@ -911,8 +928,6 @@ class Comb(Filter):
             "value": False,
         },
     }
-
-    digital_only = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
