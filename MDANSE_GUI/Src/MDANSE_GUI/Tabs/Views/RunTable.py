@@ -13,14 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QStandardItem
-from qtpy.QtWidgets import QAbstractItemView, QMenu, QMessageBox, QTableView
+from typing import Union
 
+from MDANSE.Framework.Jobs.JobStatus import ALLOWED_ACTIONS
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QContextMenuEvent, QStandardItem
+from qtpy.QtWidgets import QAbstractItemView, QMenu, QMessageBox, QTableView
 
 
 class RunTable(QTableView):
@@ -55,7 +57,7 @@ class RunTable(QTableView):
 
     def populateMenu(self, menu: QMenu, item: QStandardItem):
         entry, _, _, _ = self.getJobObjects()
-        job_state = entry._current_state
+        job_state = entry.job.state
         for action, method in [
             ("Delete", self.deleteNode),
             ("Pause", self.pauseJob),
@@ -65,8 +67,7 @@ class RunTable(QTableView):
         ]:
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
-            if action not in job_state._allowed_actions:
-                temp_action.setEnabled(False)
+            temp_action.setEnabled(action in ALLOWED_ACTIONS[job_state])
 
     def getJobObjects(self):
         model = self.model()
@@ -147,17 +148,17 @@ class RunTable(QTableView):
         self.item_details.emit(job_entry.text_summary())
         self.jobs_logs.emit(job_entry.handler.msgs_and_levels())
 
-    def connect_to_visualiser(self, visualiser: TextInfo) -> None:
+    def connect_to_visualiser(self, visualiser: Union[TextInfo, JobLogInfo]) -> None:
         """Connect to a visualiser.
 
         Parameters
         ----------
-        visualiser : TextInfo
+        visualiser : TextInfo | JobLogInfo
             A visualiser to connect to this view.
         """
-        if type(visualiser) is TextInfo:
+        if isinstance(visualiser, TextInfo):
             self.item_details.connect(visualiser.update_panel)
-        elif type(visualiser) is JobLogInfo:
+        elif isinstance(visualiser, JobLogInfo):
             self.jobs_logs.connect(visualiser.update_panel)
         else:
             raise NotImplementedError(
