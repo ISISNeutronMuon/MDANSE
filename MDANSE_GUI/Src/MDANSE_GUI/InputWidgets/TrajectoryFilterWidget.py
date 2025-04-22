@@ -46,6 +46,8 @@ from MDANSE.Mathematics.Signal import (
     filter_description_string,
     FILTER_MAP,
     DEFAULT_FILTER_CUTOFF,
+    DEFAULT_N_STEPS,
+    DEFAULT_TIME_STEP,
     power_spectrum,
 )
 import matplotlib.pyplot as mpl
@@ -459,16 +461,18 @@ class FilterSettingGroup(QObject):
             signal = widget.valueChanged
 
         if isinstance(setting, float):
-            fs = self.parent_attributes["time_step_ps"] ** (-1)
+            n_steps = self.parent_attributes.get("n_steps", DEFAULT_N_STEPS)
+            time_step = self.parent_attributes.get("time_step_ps", DEFAULT_TIME_STEP)
+            fs = time_step ** (-1)
             if (
                 Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags
                 and setting_key == "fundamental_freq"
-                and self.parent_attributes.get("time_step_ps")
             ):
                 widget = ConstrainedDoubleSpinBox(lambda x: (fs % x) == 0)
             else:
                 widget = QDoubleSpinBox()
-            step = 1.0
+            step = 1 / (n_steps * time_step)
+            widget.setDecimals(3)
             widget.setValue(setting)
             widget.setMaximum(fs / 2)
             widget.setMinimum(step)
@@ -635,7 +639,8 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         grid_pos = self.indices.pop()
 
         widget = QDoubleSpinBox()
-        step = 1.0
+        step = self.retrieve_widget("cutoff_freq").singleStep()
+        widget.setDecimals(3)
         widget.setMaximum(self.retrieve_widget("cutoff_freq").maximum())
         widget.setMinimum(step)
         widget.setSingleStep(step)
@@ -1028,7 +1033,7 @@ class FilterDesigner(QDialog):
             self._figure_info.append(" ")
 
         self._figure_info.append(
-            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 1)} meV, Sample frequency: {sample_freq} THz"
+            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 3)} meV, Sample frequency: {sample_freq} THz"
         )
 
     def render_canvas_assets(self, attributes: dict = None) -> None:

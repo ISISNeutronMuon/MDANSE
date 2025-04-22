@@ -974,6 +974,12 @@ FILTER_MAP = {filter_class.__name__: filter_class for filter_class in FILTERS}
 # Default filter type is Butterworth
 DEFAULT_FILTER = Butterworth
 
+# Default simulation time step in picoseconds
+DEFAULT_TIME_STEP = 0.005
+
+# Default number of simulation steps
+DEFAULT_N_STEPS = 320
+
 
 def filter_default_attributes(filter=DEFAULT_FILTER):
     """Get the filter-specific settings dictionary for a filter class.
