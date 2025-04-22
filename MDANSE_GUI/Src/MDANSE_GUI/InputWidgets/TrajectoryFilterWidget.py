@@ -455,6 +455,7 @@ class FilterSettingGroup(QObject):
         if isinstance(setting, float):
             if (
                 Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags
+                and setting_key == "fundamental_freq"
                 and self.designer_attributes.get("time_step_ps")
             ):
                 fs = self.designer_attributes["time_step_ps"] ** (-1)
