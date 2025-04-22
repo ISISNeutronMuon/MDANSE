@@ -274,6 +274,17 @@ class FilterSettingGroup(QObject):
     """Interface for a filter settings group.
     provides a grid layout of settings for a given filter.
 
+    Parameters
+    ----------
+    parent_attributes : dict
+        Dictionary of attributes belonging to the parent filter designer widget.
+    schema : dict
+        Dictionary representing the schema for the filter-specific settings.
+    render_func : Callable
+        Filter designer function to call when attributes have been updated.
+        Function re-renders the filter designer graph with updated attributes.
+    flags : set
+        The set of flags associated with the current filter that can be used to invoke certain rules about settings.
     """
 
     # Signal: emits a dictionary of attributes when settings have been updated
@@ -284,25 +295,18 @@ class FilterSettingGroup(QObject):
 
     def __init__(
         self,
-        designer_attributes: dict,
+        parent_attributes: dict,
         schema: dict,
         render_func: Callable,
         flags: set = set(),
     ):
-        """
-        Parameters
-        ----------
-        render_func : Callable
-            Filter designer function to call when attributes have been updated.
-            Function re-renders the filter designer graph.
-        """
         super().__init__()
 
         # Flags
         self.flags = flags
 
         # Filter designer settings
-        self.designer_attributes = designer_attributes
+        self.parent_attributes = parent_attributes
 
         # Dictionary of group specific settings
         self.attributes = {}
@@ -456,9 +460,9 @@ class FilterSettingGroup(QObject):
             if (
                 Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags
                 and setting_key == "fundamental_freq"
-                and self.designer_attributes.get("time_step_ps")
+                and self.parent_attributes.get("time_step_ps")
             ):
-                fs = self.designer_attributes["time_step_ps"] ** (-1)
+                fs = self.parent_attributes["time_step_ps"] ** (-1)
                 widget = ConstrainedDoubleSpinBox(lambda x: (fs % x) == 0)
             else:
                 widget = QDoubleSpinBox()
@@ -509,6 +513,18 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
     """Interface for a filter settings group, where the filter cutoff frequency is bounded.
     provides a grid layout of settings for a given filter.
 
+    Parameters
+    ----------
+    parent_attributes : dict
+        Dictionary of attributes belonging to the parent filter designer widget.
+    schema : dict
+        Dictionary representing the schema for the filter-specific settings.
+    render_func : Callable
+        Filter designer function to call when attributes have been updated.
+        Function re-renders the filter designer graph with updated attributes.
+    flags : set
+        The set of flags associated with the current filter that can be used to invoke certain rules about settings.
+
     """
 
     # Signal: emitted when frequency bounds are enabled
@@ -520,7 +536,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
 
     def __init__(
         self,
-        designer_attributes: dict,
+        parent_attributes: dict,
         schema: dict,
         render_func: Callable,
         flags: set = set(),
@@ -532,7 +548,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
             Filter designer function to call when attributes have been updated.
             Function re-renders the filter designer graph.
         """
-        super().__init__(designer_attributes, schema, render_func, flags)
+        super().__init__(parent_attributes, schema, render_func, flags)
 
         # Generate an extra index for the frequency bound widget in the grid layout
         last_index = self.indices[-1]
@@ -878,7 +894,7 @@ class FilterDesigner(QDialog):
                 else BoundedFilterSettingsGroup
             )
             group_obj = template(
-                designer_attributes=copy.deepcopy(self.settings["attributes"]),
+                parent_attributes=copy.deepcopy(self.settings["attributes"]),
                 schema=filter_class.default_settings,
                 render_func=self.render_canvas_assets,
                 flags=filter_class.flags,
