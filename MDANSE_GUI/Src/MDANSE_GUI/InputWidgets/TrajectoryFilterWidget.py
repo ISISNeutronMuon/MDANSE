@@ -274,17 +274,6 @@ class FilterSettingGroup(QObject):
     """Interface for a filter settings group.
     provides a grid layout of settings for a given filter.
 
-    Parameters
-    ----------
-    parent_attributes : dict
-        Dictionary of attributes belonging to the parent filter designer widget.
-    schema : dict
-        Dictionary representing the schema for the filter-specific settings.
-    render_func : Callable
-        Filter designer function to call when attributes have been updated.
-        Function re-renders the filter designer graph with updated attributes.
-    flags : set
-        The set of flags associated with the current filter that can be used to invoke certain rules about settings.
     """
 
     # Signal: emits a dictionary of attributes when settings have been updated
@@ -300,6 +289,19 @@ class FilterSettingGroup(QObject):
         render_func: Callable,
         flags: set = set(),
     ):
+        """
+        Parameters
+        ----------
+        parent_attributes : dict
+            Dictionary of attributes belonging to the parent filter designer widget.
+        schema : dict
+            Dictionary representing the schema for the filter-specific settings.
+        render_func : Callable
+            Filter designer function to call when attributes have been updated.
+            Function re-renders the filter designer graph with updated attributes.
+        flags : set
+            The set of flags associated with the current filter that can be used to invoke certain rules about settings.
+        """
         super().__init__()
 
         # Flags
@@ -513,26 +515,22 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
     """Interface for a filter settings group, where the filter cutoff frequency is bounded.
     provides a grid layout of settings for a given filter.
 
-    Parameters
+    Attributes
     ----------
-    parent_attributes : dict
-        Dictionary of attributes belonging to the parent filter designer widget.
-    schema : dict
-        Dictionary representing the schema for the filter-specific settings.
-    render_func : Callable
-        Filter designer function to call when attributes have been updated.
-        Function re-renders the filter designer graph with updated attributes.
-    flags : set
-        The set of flags associated with the current filter that can be used to invoke certain rules about settings.
-
+    _bounds_off : Set[string]
+        The settings corresponding to the frequency bounds 'off' state.
+        When these settings are used, the filter frequency is unbounded.
+    _bounds_on : Set[string]
+        The settings corresponding to the frequency bounds 'on' state.
+        When these settings are used, the filter frequency is bounded.
     """
-
-    # Signal: emitted when frequency bounds are enabled
-    _frequency_bounded = Signal(bool)
 
     # Bounds behaviour corresponding to attenuation settings
     _bounds_off = {"lowpass", "highpass"}
     _bounds_on = {"bandpass", "bandstop"}
+
+    # Signal: emitted when frequency bounds are enabled
+    _frequency_bounded = Signal(bool)
 
     def __init__(
         self,
@@ -544,9 +542,15 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         """
         Parameters
         ----------
+        parent_attributes : dict
+            Dictionary of attributes belonging to the parent filter designer widget.
+        schema : dict
+            Dictionary representing the schema for the filter-specific settings.
         render_func : Callable
             Filter designer function to call when attributes have been updated.
-            Function re-renders the filter designer graph.
+            Function re-renders the filter designer graph with updated attributes.
+        flags : set
+            The set of flags associated with the current filter that can be used to invoke certain rules about settings.
         """
         super().__init__(parent_attributes, schema, render_func, flags)
 
@@ -654,12 +658,6 @@ class FilterDesigner(QDialog):
         The title of the helper dialog window.
     _canvas_dimensions : dict
         Dimensions of the filter graph canvas.
-    _settings_stack_layout : QStackedLayout
-        Stack layout for the filter settings.
-    _preferences_grid_layout : QStackedLayout
-        Grid layout for the designer preferences.
-    _preferences : dict
-        Dictionary containing the preferences values for the filter designer.
     _trajectory_power_spectrum :  tuple[ndarray, ndarray] | None
         Trajectory power spectrum as a tuple containing the x-axis values (frequency domain) and the y-axis values (magnitudes)
     """
@@ -676,13 +674,6 @@ class FilterDesigner(QDialog):
         *args,
         **kwargs,
     ):
-        """
-        Parameters
-        ----------
-        field : QLineEdit
-            The QLineEdit field that will need to be updated when
-            applying the setting.
-        """
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle(self._helper_title)
         self.field = field
