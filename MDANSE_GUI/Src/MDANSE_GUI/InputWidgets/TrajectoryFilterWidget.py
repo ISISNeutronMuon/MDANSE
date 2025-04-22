@@ -459,18 +459,18 @@ class FilterSettingGroup(QObject):
             signal = widget.valueChanged
 
         if isinstance(setting, float):
+            fs = self.parent_attributes["time_step_ps"] ** (-1)
             if (
                 Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags
                 and setting_key == "fundamental_freq"
                 and self.parent_attributes.get("time_step_ps")
             ):
-                fs = self.parent_attributes["time_step_ps"] ** (-1)
                 widget = ConstrainedDoubleSpinBox(lambda x: (fs % x) == 0)
             else:
                 widget = QDoubleSpinBox()
             step = 1.0
             widget.setValue(setting)
-            widget.setMaximum(1000)
+            widget.setMaximum(fs / 2)
             widget.setMinimum(step)
             widget.setSingleStep(step)
             signal = widget.valueChanged
@@ -636,7 +636,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
 
         widget = QDoubleSpinBox()
         step = 1.0
-        widget.setMaximum(1000)
+        widget.setMaximum(self.retrieve_widget("cutoff_freq").maximum())
         widget.setMinimum(step)
         widget.setSingleStep(step)
         widget.setValue(DEFAULT_FILTER_CUTOFF * 0.5)
