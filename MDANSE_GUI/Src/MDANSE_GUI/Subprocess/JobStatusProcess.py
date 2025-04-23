@@ -100,11 +100,11 @@ class JobStatusProcess(Status):
         self._queue_1 = queue_1
 
         self._state = JobInfo(
-            name = job_name,
-            type = None,
-            start = time.time(),
-            elapsed = "N/A",
-            n_steps = self._nSteps,
+            name=job_name,
+            type=None,
+            start=time.time(),
+            elapsed="N/A",
+            n_steps=self._nSteps,
         )
 
         self._pause_event = pause_event

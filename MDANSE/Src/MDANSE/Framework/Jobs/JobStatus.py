@@ -21,8 +21,10 @@ from dataclasses import dataclass
 from MDANSE import PLATFORM
 from MDANSE.Framework.Status import Status
 
+
 class JobStates(Enum):
     """Possible states of jobs."""
+
     STARTING = auto()
     RUNNING = auto()
     ABORTED = auto()
@@ -58,15 +60,16 @@ class JobInfo:
     temporary_file: Optional[str] = None
     info: str = ""
 
+
 class JobStatus(Status):
     def __init__(self, job):
         Status.__init__(self)
 
         self._state = JobInfo(
-            name = job.name,
-            type = type(job).__name__,
-            start = time.time(),
-            state = JobStates.RUNNING,
+            name=job.name,
+            type=type(job).__name__,
+            start=time.time(),
+            state=JobStates.RUNNING,
         )
 
         self.save_status()

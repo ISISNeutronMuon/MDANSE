@@ -122,9 +122,9 @@ class JobEntry(QObject):
         self._load_afterwards = load_afterwards
 
         self.job = JobInfo(
-            name = command,
-            start = time.time(),
-            state = JobStates.STARTING,
+            name=command,
+            start=time.time(),
+            state=JobStates.STARTING,
         )
 
         # other variables
@@ -145,7 +145,7 @@ class JobEntry(QObject):
         return f"""\
 Job type: {self._command}
 Parameters:
-{nl.join(' - {} = {}'.format(*kv) for kv in self._parameters.items())}
+{nl.join(" - {} = {}".format(*kv) for kv in self._parameters.items())}
 Status:
   Current state: {self.job.state.name.title()}
   Percent complete: {self.job.progress}

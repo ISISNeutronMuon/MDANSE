@@ -70,6 +70,7 @@ class JobError(Error):
     def __str__(self):
         return self._message
 
+
 def key_generator(keySize, chars=None, prefix=""):
     if chars is None:
         chars = string.ascii_lowercase + string.digits
