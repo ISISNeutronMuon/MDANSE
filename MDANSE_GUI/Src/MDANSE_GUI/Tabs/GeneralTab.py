@@ -59,13 +59,14 @@ class GeneralTab(QObject):
         self._logger = kwargs.pop("logger", QMessageLogger())
         layout = kwargs.pop("layout", DoublePanel)
         label_text = kwargs.pop("label_text", "An abstract GUI element")
-        super().__init__(*args, **kwargs)
+        super().__init__(None)
         self._core = layout(
+            *args,
             **{
                 "data_side": self._view,
                 "visualiser_side": self._visualiser,
                 "tab_reference": self,
-            }
+            },
         )
         if self._model is not None:
             self._core.set_model(self._model)

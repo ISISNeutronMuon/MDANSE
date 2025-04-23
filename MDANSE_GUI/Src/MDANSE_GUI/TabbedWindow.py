@@ -18,7 +18,7 @@ from pathlib import PurePath
 from collections import defaultdict
 from importlib import metadata
 
-from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger
+from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger, QThread
 from qtpy.QtWidgets import (
     QMainWindow,
     QFileDialog,
@@ -73,6 +73,7 @@ class TabbedWindow(QMainWindow):
         self.setCentralWidget(self.tabs)
         self._views = defaultdict(list)
         self._actions = []
+        self._threads = {}
         self._tabs = {}
         self._session = StructuredSession()
         self._settings = self._session.obtain_settings(self)
@@ -97,6 +98,7 @@ class TabbedWindow(QMainWindow):
 
         if app_instance is not None:
             app_instance.aboutToQuit.connect(self._session.save)
+            app_instance.aboutToQuit.connect(self.stop_threads)
         self._session.load()
         self.settings_editor = UserSettingsEditor(self, current_session=self._session)
 
@@ -114,6 +116,22 @@ class TabbedWindow(QMainWindow):
             self._tabs["Actions"].update_action_after_instrument_change
         )
         self.tabs.currentChanged.connect(self.tabs.reset_current_color)
+        self.move_tabs_to_threads()
+
+    def move_tabs_to_threads(self):
+        for tabname, tabobject in self._tabs.items():
+            thread = QThread()
+            tabobject.moveToThread(thread)
+            self._threads[tabname] = thread
+            thread.start()
+
+    def stop_threads(self):
+        for thread in self._threads.values():
+            thread.terminate()
+        for thread in self._threads.values():
+            thread.quit()
+        for thread in self._threads.values():
+            thread.wait()
 
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
