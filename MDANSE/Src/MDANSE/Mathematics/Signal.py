@@ -399,7 +399,7 @@ class Filter(ABC):
         :Returns:
             #. np.array: the resulting signal due to convolution with the filter instance
         """
-        coeffs = self.to_digital_coeffs() if not self.digital_only else self._coeffs
+        coeffs = self.to_digital_coeffs() if not (Filter.Flags.DIGITAL_ONLY in self.flags) else self._coeffs
         return signal.filtfilt(coeffs.numerator, coeffs.denominator, input)
 
     def to_digital_coeffs(self) -> TransferFunction:

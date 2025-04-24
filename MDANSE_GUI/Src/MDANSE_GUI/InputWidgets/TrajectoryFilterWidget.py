@@ -474,7 +474,7 @@ class FilterSettingGroup(QObject):
             step = 1 / (n_steps * time_step)
             widget.setDecimals(3)
             widget.setValue(setting)
-            widget.setMaximum(fs / 2)
+            widget.setMaximum(1000)
             widget.setMinimum(step)
             widget.setSingleStep(step)
             signal = widget.valueChanged
