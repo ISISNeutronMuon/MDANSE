@@ -13,20 +13,20 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
-from matplotlib.pyplot import style as mpl_style
-from matplotlib import rcParams
-
-from MDANSE.MLogging import LOG
 from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
+
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
 class Plotter(metaclass=SubclassFactory):
+    """Parent class to all classes used for displaying data."""
+
     def __init__(self) -> None:
         self._figure = None
         self._axes = []
@@ -38,63 +38,90 @@ class Plotter(metaclass=SubclassFactory):
         self._slider_reference = None
 
     def request_slider_values(self):
+        """Manually read values from sliders, if they are present."""
         if self._slider_reference is None:
             return
         self._slider_reference.collect_values()
 
     def clear(self, figure: "Figure" = None):
-        if figure is None:
-            target = self._figure
-        else:
-            target = figure
+        """Clear the figure, usually before plotting again.
+
+        Parameters
+        ----------
+        figure : Figure, optional
+            Figure to be cleared. If None, clear the internally stored figure.
+            By default None
+
+        """
+        target = self._figure if figure is None else figure
         if target is None:
             return
         target.clear()
 
-    def slider_labels(self) -> List[str]:
+    def slider_labels(self) -> list[str]:
+        """Get text to be shown next to sliders."""
         return ["Slider 1", "Slider 2"]
 
-    def slider_limits(self) -> List[str]:
+    def slider_limits(self) -> list[str]:
+        """Get default limit values for sliders."""
         return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
 
     def sliders_coupled(self) -> bool:
+        """Check if the slider values depend on each other."""
         return False
 
     def get_figure(self, figure: "Figure" = None):
-        if figure is None:
-            target = self._figure
-        else:
-            target = figure
+        """Get the reference to the current figure, if present."""
+        target = self._figure if figure is None else figure
         if target is None:
             LOG.error(f"PlottingContext can't plot to {target}")
-            return
+            return None
         target.clear()
         return target
 
     def apply_settings(self, plotting_context: "PlottingContext"):
+        """Check that the plotting context can be used."""
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
 
-    def enable_slider(self, allow_slider: bool = True):
-        if allow_slider:
-            self._slider_reference.setEnabled(True)
-            self._slider_reference.blockSignals(False)
-        else:
-            self._slider_reference.setEnabled(False)
-            self._slider_reference.blockSignals(True)
+    def enable_slider(self, *, allow_slider: bool = True):
+        """Enable or disable sliders.
 
-    def handle_slider(self, new_value: List[float]):
+        Parameters
+        ----------
+        allow_slider : bool, optional
+            It True, sliders will become active, by default True
+
+        """
+        self._slider_reference.setEnabled(allow_slider)
+        self._slider_reference.blockSignals(not allow_slider)
+
+    def handle_slider(self, new_value: list[float]):
+        """Respond to new slider values."""
         self._slider_values = new_value
 
     def plot(
         self,
         plotting_context: "PlottingContext",
         figure: "Figure" = None,
-        colours=None,
         update_only=False,
         toolbar=None,
     ):
+        """Plot the selected data in the figure.
+
+        Parameters
+        ----------
+        plotting_context : PlottingContext
+            Data model storing the data to be plotted
+        figure : Figure, optional
+            Matplotlib figure instance for plotting, by default None
+        update_only : bool, optional
+            If true, try to re-use zoom settings, by default False
+        toolbar : _type_, optional
+            GUI instance of the matplotlib toolbar, by default None
+
+        """
         target = self.get_figure(figure)
         if target is None:
             return
@@ -102,4 +129,4 @@ class Plotter(metaclass=SubclassFactory):
             self._toolbar = toolbar
         axes = target.add_subplot(111)
         self._axes = [axes]
-        self.apply_settings(plotting_context, colours)
+        self.apply_settings(plotting_context)
