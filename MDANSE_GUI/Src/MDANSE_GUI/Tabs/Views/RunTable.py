@@ -15,14 +15,15 @@
 #
 from typing import Union
 
+from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QContextMenuEvent, QStandardItem
+from qtpy.QtWidgets import QAbstractItemView, QMenu, QMessageBox, QTableView
+
 from MDANSE.Framework.Jobs.JobStatus import ALLOWED_ACTIONS
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
-from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QStandardItem
-from qtpy.QtWidgets import QAbstractItemView, QMenu, QMessageBox, QTableView
 
 
 class RunTable(QTableView):
@@ -156,10 +157,10 @@ class RunTable(QTableView):
         visualiser : TextInfo | JobLogInfo
             A visualiser to connect to this view.
         """
-        if isinstance(visualiser, TextInfo):
-            self.item_details.connect(visualiser.update_panel)
-        elif isinstance(visualiser, JobLogInfo):
+        if isinstance(visualiser, JobLogInfo):
             self.jobs_logs.connect(visualiser.update_panel)
+        elif isinstance(visualiser, TextInfo):
+            self.item_details.connect(visualiser.update_panel)
         else:
             raise NotImplementedError(
                 f"Unable to connect view {type(self)} to visualiser {type(visualiser)}"

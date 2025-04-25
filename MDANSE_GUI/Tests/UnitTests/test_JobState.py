@@ -10,10 +10,10 @@ def temporary_jobentry() -> JobEntry:
 
 
 def test_start(temporary_jobentry: JobEntry):
-    temporary_jobentry.job.state.start()
-    assert temporary_jobentry.job.state._label is JobStates.RUNNING
+    temporary_jobentry.start_job()
+    assert temporary_jobentry.job.state is JobStates.RUNNING
 
 
 def test_fail(temporary_jobentry: JobEntry):
-    temporary_jobentry.job.state.fail()
-    assert temporary_jobentry.job.state._label is JobStates.FAILED
+    temporary_jobentry.fail_job()
+    assert temporary_jobentry.job.state is JobStates.FAILED

@@ -14,9 +14,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import time
+from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Optional, TypedDict
-from dataclasses import dataclass
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Status import Status

@@ -20,6 +20,8 @@ from multiprocessing import Queue
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event
 
+from qtpy.QtCore import QObject, Signal, Slot
+
 from MDANSE.Framework.Jobs.JobStatus import JobInfo, JobStates
 from MDANSE.Framework.Status import Status
 from MDANSE.MLogging import LOG

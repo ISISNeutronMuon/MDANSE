@@ -20,14 +20,15 @@ from logging.handlers import QueueListener
 from multiprocessing import Event, Pipe, Queue
 from typing import Optional
 
+from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
+from qtpy.QtGui import QStandardItem, QStandardItemModel
+
 from MDANSE.Framework.Converters import Converter
 from MDANSE.Framework.Jobs.JobStatus import JobInfo, JobStates
 from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
 from MDANSE_GUI.Subprocess.Subprocess import Connection, Subprocess
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
-from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
-from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 
 class JobThread(QThread):
@@ -127,12 +128,11 @@ class JobEntry(QObject):
             state=JobStates.STARTING,
         )
 
-        # other variables
+        # Other variables
         self._entry_number = entry_number
         self._prog_item = QStandardItem()
         self._stat_item = QStandardItem()
-        for item in [self._stat_item]:
-            item.setData(entry_number)
+        self._stat_item.setData(entry_number)
 
         self._prog_item.setData(0, role=Qt.ItemDataRole.UserRole)
         self._prog_item.setData("progress", role=Qt.ItemDataRole.DisplayRole)
