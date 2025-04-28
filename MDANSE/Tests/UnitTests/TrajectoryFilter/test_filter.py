@@ -11,13 +11,21 @@ from MDANSE.Mathematics.Signal import Filter, FILTER_MAP
 class TrajectoryFilterTest(unittest.TestCase):
     SIMPLE_HYDROGEN_PATH = "../Data/methane_hydrogen_position.csv"
 
+    def test_angular_freq_to_energy_conversion(self):
+        """60.0 rad/ps to meV"""
+        self.assertAlmostEqual(Filter.freq_to_energy(59.0, Filter.FrequencyUnits.ANGULAR), 39.0, 0)
+
+    def test_energy_to_angular_freq_conversion(self):
+        """39.0 meV to rad/ps"""
+        self.assertAlmostEqual(Filter.energy_to_freq(39.0, Filter.FrequencyUnits.ANGULAR), 59.0, 0)
+
     def test_freq_to_energy_conversion(self):
-        """60.0 pHz to meV"""
-        self.assertAlmostEqual(Filter.freq_to_energy(59.0), 39.0, 0)
+        """60.0 THz to meV"""
+        self.assertAlmostEqual(Filter.freq_to_energy(99.7, Filter.FrequencyUnits.CYCLIC), 412.0, 0)
 
     def test_energy_to_freq_conversion(self):
-        """39.0 meV to pHz"""
-        self.assertAlmostEqual(Filter.energy_to_freq(39.0), 59.0, 0)
+        """412.0 meV to THz"""
+        self.assertAlmostEqual(Filter.energy_to_freq(412.0, Filter.FrequencyUnits.CYCLIC), 99.7, 0)
 
     def test_simple_filter_sinusoidal(self):
         """
