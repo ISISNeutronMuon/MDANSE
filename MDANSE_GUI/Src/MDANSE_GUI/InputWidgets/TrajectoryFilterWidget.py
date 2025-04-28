@@ -837,7 +837,9 @@ class FilterDesigner(QDialog):
             raw_power_spectrum_energies.max(),
             len(response.frequencies),
         )
-        power_spectrum_freqs = Filter.energy_to_freq(power_spectrum_energies)
+        power_spectrum_freqs = Filter.energy_to_freq(
+            power_spectrum_energies, Filter.FrequencyUnits.ANGULAR
+        )
 
         # Set custom frequency range on filter object
         filter._custom_freq_range = power_spectrum_freqs
@@ -987,7 +989,13 @@ class FilterDesigner(QDialog):
 
         # Conditionally convert frequencies (rad/ps) to energies (meV)
         if energies:
-            energy_ticks = np.int32(np.floor(Filter.freq_to_energy(axes.get_xticks())))
+            energy_ticks = np.int32(
+                np.floor(
+                    Filter.freq_to_energy(
+                        axes.get_xticks(), Filter.FrequencyUnits.ANGULAR
+                    )
+                )
+            )
             axes.set_xticks(axes.get_xticks(), labels=energy_ticks)
 
         axes.set_xlim(0.0, x_max)
@@ -1035,7 +1043,7 @@ class FilterDesigner(QDialog):
             self._figure_info.append(" ")
 
         self._figure_info.append(
-            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff), 3)} meV, Sample frequency: {sample_freq} THz"
+            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff, Filter.FrequencyUnits.ANGULAR), 3)} meV, Sample frequency: {sample_freq} THz"
         )
 
     def render_canvas_assets(self, attributes: dict = None) -> None:

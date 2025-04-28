@@ -356,6 +356,12 @@ class Filter(ABC):
     # Sample frequency of molecular dynamics simulation being analysed
     _sample_freq = None
 
+    class FrequencyUnits(Enum):
+        """Enumeration for frequency unit type"""
+
+        CYCLIC: int = 0
+        ANGULAR: int = 1
+
     class FrequencyRangeMethod(Enum):
         """Enumeration for custom (externally provided) and FFT-derived frequency ranges for plotting the filter response"""
 
@@ -399,7 +405,11 @@ class Filter(ABC):
         :Returns:
             #. np.array: the resulting signal due to convolution with the filter instance
         """
-        coeffs = self.to_digital_coeffs() if not (Filter.Flags.DIGITAL_ONLY in self.flags) else self._coeffs
+        coeffs = (
+            self.to_digital_coeffs()
+            if not (Filter.Flags.DIGITAL_ONLY in self.flags)
+            else self._coeffs
+        )
         return signal.filtfilt(coeffs.numerator, coeffs.denominator, input)
 
     def to_digital_coeffs(self) -> TransferFunction:
@@ -600,34 +610,42 @@ class Filter(ABC):
         }
 
     @classmethod
-    def freq_to_energy(cls, freq):
-        """Returns the energy value (or values) in millielectronvolts (meV), converted from frequency value (or values) in terahertz (THz).
+    def freq_to_energy(cls, freq, units):
+        """Returns the energy value (or values) in millielectronvolts (meV), converted from frequency value (or values).
 
         :Parameters:
             #. freq (float | np.ndarray): frequency
+            #. units (FrequencyUnit): Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps)
         :Returns:
             #. float | np.ndarray: energy
         """
-        if isinstance(freq, list):
-            return (2 * np.pi) ** (-1) * (np.array(freq) * 1e12) * cls._freq_to_mev
+        scale_factor = 1.0
+        if units == Filter.FrequencyUnits.ANGULAR:
+            scale_factor *= 2 * np.pi
 
-        return (2 * np.pi) ** (-1) * (freq * 1e12) * cls._freq_to_mev
+        if isinstance(freq, list):
+            return (1 / scale_factor) * (np.array(freq) * 1e12) * cls._freq_to_mev
+
+        return (1 / scale_factor) * (freq * 1e12) * cls._freq_to_mev
 
     @classmethod
-    def energy_to_freq(cls, energy):
-        """Returns the frequency value (or values) in millielectronvolts (meV), converted from energy value (or values) in millielectronvolts (meV).
+    def energy_to_freq(cls, energy, units):
+        """Returns the frequency value (or values), converted from energy value (or values) in millielectronvolts (meV).
 
         :Parameters:
             #. energy (float | np.ndarray): energy
+            #. units (FrequencyUnit): Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps)
         :Returns:
             #. float | np.ndarray: frequency
         """
-        if isinstance(energy, list):
-            return (
-                np.array(energy) * 1 / ((2 * np.pi) ** (-1) * cls._freq_to_mev)
-            ) * 1e-12
+        scale_factor = 1.0
+        if units == Filter.FrequencyUnits.ANGULAR:
+            scale_factor *= 2 * np.pi
 
-        return (energy * 1 / ((2 * np.pi) ** (-1) * cls._freq_to_mev)) * 1e-12
+        if isinstance(energy, list):
+            return (np.array(energy) * scale_factor / cls._freq_to_mev) * 1e-12
+
+        return (energy * scale_factor / cls._freq_to_mev) * 1e-12
 
 
 class Butterworth(Filter):
