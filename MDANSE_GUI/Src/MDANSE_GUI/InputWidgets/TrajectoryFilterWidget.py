@@ -224,8 +224,8 @@ class FilterPreferencesGroup(QObject):
         self.grid.addWidget(QLabel("X-axis units"), 1, 0)
         xaxis_cbox = self.add_combobox(
             "xaxis_units",
-            ("THz", "meV"),
-            "View x-axis as frequency (THz) or energy (meV)",
+            ("rad/ps", "meV"),
+            "View x-axis as angular frequency (rad/ps) or energy (meV)",
         )
         self.grid.addWidget(xaxis_cbox, 1, 1)
 
@@ -985,14 +985,14 @@ class FilterDesigner(QDialog):
                 color="black",
             )
 
-        # Conditionally convert frequencies (THz) to energies (meV)
+        # Conditionally convert frequencies (rad/ps) to energies (meV)
         if energies:
             energy_ticks = np.int32(np.floor(Filter.freq_to_energy(axes.get_xticks())))
             axes.set_xticks(axes.get_xticks(), labels=energy_ticks)
 
         axes.set_xlim(0.0, x_max)
 
-        axes.set_xlabel("Energy (meV)" if energies else "Frequency (THz)")
+        axes.set_xlabel("Energy (meV)" if energies else "Frequency (rad/ps)")
         axes.set_ylabel("Magnitude (dB)" if db_response else "Amplitude")
 
         axes.legend(loc="best")
@@ -1009,7 +1009,9 @@ class FilterDesigner(QDialog):
         ----------
         polynomial : str
             String representation of the filter transfer function as a polynomial (in the variable S for an analogue filter).
-        polynomial : float
+        cutoff : float
+            Cutoff frequency of the designed filter in rad/ps
+        sample_freq : float
             Sample frequency of the molecular dynamics simulation in THz (terahertz)
         """
         self._figure_info.clear()

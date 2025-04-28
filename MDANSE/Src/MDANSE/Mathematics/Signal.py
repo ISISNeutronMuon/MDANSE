@@ -318,7 +318,7 @@ def get_spectrum(signal, window=None, timeStep=1.0, axis=0, fft="fft"):
     return fftSignal.real
 
 
-# Default filter cutoff frequency in THz, calculated from a time step of 0.005 picoseconds
+# Default filter cutoff frequency in rad/ps
 DEFAULT_FILTER_CUTOFF = 25.0
 
 
