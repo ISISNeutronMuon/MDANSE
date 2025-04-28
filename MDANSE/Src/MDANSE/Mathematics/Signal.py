@@ -460,14 +460,39 @@ class Filter(ABC):
         )
         self._freq_response = self.FrequencyDomain(*response)
 
-    @property
-    def nyquist(self) -> float:
+    @classmethod
+    def frequency_resolution(cls, num_steps: float, timestep: float, units):
+        """Returns the frequency resolution of the trajectory given N fixed timesteps.
+        Analogous to the bin-width of an FFT of the trajecotry.
+
+        :Parameters:
+            #. num_steps (float): Number of simulation timesteps
+            #. timestep (float): Simulation timestep in picoseconds
+            #. units (FrequencyUnit): Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps)
+        :Returns:
+            #. float: Frequency resolution
+        """
+        bin_width = 1 / (num_steps * timestep)
+        if units == Filter.FrequencyUnits.ANGULAR:
+            bin_width *= 2 * np.pi
+
+        return bin_width
+
+    @classmethod
+    def nyquist(cls, timestep: float, units) -> float:
         """Returns the nyquist limit for the filter sample frequency.
 
+        :Parameters:
+            #. timestep (np.array): Simulation timestep in picoseconds
+            #. units (FrequencyUnit): Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps)
         :Returns:
             #. float: Nyquist limit
         """
-        return self._sample_freq / 2
+        limit = (1 / timestep) / 2
+        if units == Filter.FrequencyUnits.ANGULAR:
+            limit *= 2 * np.pi
+
+        return limit
 
     @staticmethod
     def frequency_range(
@@ -842,11 +867,11 @@ class Bessel(Filter):
 class Notch(Filter):
     """Interface for the notch filter."""
 
-    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS}
+    flags = {Filter.Flags.DIGITAL_ONLY}
 
     default_settings = {
         "fundamental_freq": {
-            "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
+            "description": "Spacing between filter peaks (value must satisfy 0 < w0 < nyquist)",
             "value": DEFAULT_FILTER_CUTOFF,
         },
         "quality_factor": {
@@ -883,11 +908,11 @@ class Notch(Filter):
 class Peak(Filter):
     """Interface for the peak filter."""
 
-    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS}
+    flags = {Filter.Flags.DIGITAL_ONLY}
 
     default_settings = {
         "fundamental_freq": {
-            "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
+            "description": "Spacing between filter peaks (value must satisfy 0 < w0 < nyquist)",
             "value": DEFAULT_FILTER_CUTOFF,
         },
         "quality_factor": {

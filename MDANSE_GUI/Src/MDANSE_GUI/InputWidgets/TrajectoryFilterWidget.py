@@ -56,6 +56,12 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
 
+# Default maximum value for a float spinbox
+DEFAULT_SPINBOX_MAX_FLOAT = 1000.0
+
+# Default step size for a float spinbox
+DEFAULT_SPINBOX_STEP_FLOAT = 0.1
+
 
 class ConstrainedDoubleSpinBox(QDoubleSpinBox):
     """Custom QDoubleSpinBox allowing for the application of a function
@@ -110,6 +116,7 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
                     break
 
         if not value_found:
+            self.setValue(self.initial_value)
             return
 
         # Update with constrained value
@@ -464,6 +471,8 @@ class FilterSettingGroup(QObject):
             n_steps = self.parent_attributes.get("n_steps", DEFAULT_N_STEPS)
             time_step = self.parent_attributes.get("time_step_ps", DEFAULT_TIME_STEP)
             fs = time_step ** (-1)
+
+            # Apply constraint if filter is digital IIR
             if (
                 Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags
                 and setting_key == "fundamental_freq"
@@ -471,12 +480,30 @@ class FilterSettingGroup(QObject):
                 widget = ConstrainedDoubleSpinBox(lambda x: (fs % x) == 0)
             else:
                 widget = QDoubleSpinBox()
-            step = 1 / (n_steps * time_step)
+
+            # Obtain step size, initial value (multiple of step size), and max value
+            if setting_key in {"cutoff_freq", "fundamental_freq"}:
+                if Filter.Flags.DIGITAL_ONLY in self.flags:
+                    step = Filter.frequency_resolution(
+                        n_steps, time_step, Filter.FrequencyUnits.CYCLIC
+                    )
+                    value = step * 50
+                    max = Filter.nyquist(time_step, Filter.FrequencyUnits.CYCLIC) - step
+                else:
+                    step = Filter.frequency_resolution(
+                        n_steps, time_step, Filter.FrequencyUnits.ANGULAR
+                    )
+                    value = step * 5
+                    max = Filter.nyquist(time_step, Filter.FrequencyUnits.ANGULAR)
+            else:
+                value = setting
+                step = DEFAULT_SPINBOX_STEP_FLOAT
+                max = DEFAULT_SPINBOX_MAX_FLOAT
             widget.setDecimals(3)
-            widget.setValue(setting)
-            widget.setMaximum(1000)
+            widget.setMaximum(max)
             widget.setMinimum(step)
             widget.setSingleStep(step)
+            widget.setValue(value)
             signal = widget.valueChanged
 
         if isinstance(setting, bool):
@@ -491,8 +518,6 @@ class FilterSettingGroup(QObject):
             widget.setCurrentText(setting)
             signal = widget.currentTextChanged
 
-        if setting_key == "cutoff_freq":
-            widget.setValue(DEFAULT_FILTER_CUTOFF)
         signal.connect(self.notify)
         widget.setToolTip(tooltip)
         return widget
