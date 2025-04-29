@@ -463,7 +463,7 @@ class Filter(ABC):
     @classmethod
     def frequency_resolution(cls, num_steps: float, timestep: float, units):
         """Returns the frequency resolution of the trajectory given N fixed timesteps.
-        Analogous to the bin-width of an FFT of the trajecotry.
+        Analogous to the bin-width of an FFT of the trajectory.
 
         :Parameters:
             #. num_steps (float): Number of simulation timesteps
