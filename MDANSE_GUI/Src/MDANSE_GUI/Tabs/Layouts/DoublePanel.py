@@ -51,6 +51,7 @@ class DoublePanel(QWidget):
         self._model = None
         self._view = None
         self._visualiser = None
+        self.path_setting = "none"
 
         data_side = kwargs.pop("data_side", None)
         visualiser_side = kwargs.pop("visualiser_side", None)
@@ -130,7 +131,7 @@ class DoublePanel(QWidget):
             self.file_for_loading.emit(fname)
             last_path = str(Path(os.path.split(fname)[0]))
         if fnames[0]:
-            self.path_for_setting.emit(("trajectory", str(Path(last_path))))
+            self.path_for_setting.emit((self.path_setting, str(Path(last_path))))
 
     def connect_logging(self):
         self.error.connect(self._tab_reference.error)

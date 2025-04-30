@@ -21,7 +21,6 @@ from importlib import metadata
 from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger, QThread
 from qtpy.QtWidgets import (
     QMainWindow,
-    QFileDialog,
     QToolBar,
     QMenuBar,
     QMessageBox,

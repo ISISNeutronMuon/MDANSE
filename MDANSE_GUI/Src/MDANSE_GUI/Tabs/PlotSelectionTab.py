@@ -15,7 +15,7 @@
 #
 import os
 from functools import partial
-from pathlib import PurePath
+from pathlib import Path
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget, QFileDialog
@@ -39,7 +39,15 @@ in a new tab of the interface.
 class PlotSelectionTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._core.add_button("Load .MDA results", self.load_files)
+        self._core.path_setting = "plot_selection"
+        self._core.set_file_loading(
+            "Load an MDA file (MDANSE analysis results)",
+            str(self.get_path("plot_selection")),
+            "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
+        )
+        self._core.add_button("Load .MDA results", self._core.load_files)
+        self._core.file_for_loading.connect(self.load_results)
+        self._core.path_for_setting.connect(self.set_path_from_thread)
         self._visualiser._settings = self._settings
         self._visualiser._unit_lookup = self
 
@@ -58,26 +66,9 @@ class PlotSelectionTab(GeneralTab):
         ]
         return results
 
-    @Slot()
-    def load_files(self):
-        fnames = QFileDialog.getOpenFileNames(
-            self._core,
-            "Load an MDA file (MDANSE analysis results)",
-            str(self.get_path("plot_selection")),
-            "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
-        )
-        if fnames is None:
-            return
-        if len(fnames[0]) < 1:
-            return
-        for fname in fnames[0]:
-            self.load_results(str(PurePath(fname)))
-            last_path = str(PurePath(os.path.split(fname)[0]))
-        self.set_path("plot_selection", last_path)
-
     @Slot(str)
     def load_results(self, some_fname: str):
-        fname = PurePath(some_fname)
+        fname = Path(some_fname)
         if len(str(fname)) > 0:
             fname = os.path.abspath(fname)
             self._model.add_file(str(fname))
