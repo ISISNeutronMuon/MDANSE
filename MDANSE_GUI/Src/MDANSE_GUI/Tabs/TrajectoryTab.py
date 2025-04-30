@@ -46,9 +46,16 @@ of the trajectory are what you expected.
 class TrajectoryTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._core.add_button("Load .MDT Trajectories", self.load_trajectories)
+        self._core.set_file_loading(
+            "Load an MD trajectory",
+            str(self.get_path("trajectory")),
+            "HDF5 files, MDANSE or H5MD format (*.mdt *.h5);;H5MD files (*.h5);;All files (*)",
+        )
+        self._core.add_button("Load .MDT Trajectories", self._core.load_files)
+        self._core.file_for_loading.connect(self.load_trajectory)
+        self._core.path_for_setting.connect(self.set_path_from_thread)
 
-    @Slot()
+    @Slot(object)
     def load_trajectories(self):
         fnames = QFileDialog.getOpenFileNames(
             self._core,

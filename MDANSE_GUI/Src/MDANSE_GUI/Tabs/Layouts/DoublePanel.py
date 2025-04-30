@@ -13,6 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+import os
+from pathlib import Path
+
 from qtpy.QtWidgets import (
     QWidget,
     QHBoxLayout,
@@ -21,6 +25,7 @@ from qtpy.QtWidgets import (
     QLabel,
     QPushButton,
     QSplitter,
+    QFileDialog,
 )
 from qtpy.QtCore import Signal, Slot
 
@@ -35,6 +40,8 @@ class DoublePanel(QWidget):
 
     error = Signal(str)
     item_picked = Signal(object)
+    file_for_loading = Signal(str)
+    path_for_setting = Signal(object)
 
     def __init__(
         self,
@@ -105,6 +112,25 @@ class DoublePanel(QWidget):
 
         self._splitter.setStretchFactor(0, 1)
         self._splitter.setStretchFactor(1, 2)
+
+    def set_file_loading(self, caption: str, start_path: str, extensions: str):
+        self._file_caption = caption
+        self._file_path = start_path
+        self._file_extensions = extensions
+
+    @Slot()
+    def load_files(self):
+        fnames = QFileDialog.getOpenFileNames(
+            self,
+            self._file_caption,
+            self._file_path,
+            self._file_extensions,
+        )
+        for fname in fnames[0]:
+            self.file_for_loading.emit(fname)
+            last_path = str(Path(os.path.split(fname)[0]))
+        if fnames[0]:
+            self.path_for_setting.emit(("trajectory", str(Path(last_path))))
 
     def connect_logging(self):
         self.error.connect(self._tab_reference.error)

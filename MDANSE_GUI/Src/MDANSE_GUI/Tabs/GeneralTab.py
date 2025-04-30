@@ -175,6 +175,10 @@ class GeneralTab(QObject):
             path = os.path.abspath(".")
         return str(PurePath(path))
 
+    @Slot(object)
+    def set_path_from_thread(self, inputs):
+        self.set_path(inputs[0], inputs[1])
+
     def set_path(self, path_key: str, path_value: str):
         paths_group = self._settings.group("paths")
         if not paths_group.set(path_key, path_value):
