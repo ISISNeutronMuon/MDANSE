@@ -15,7 +15,7 @@
 #
 from functools import partial
 
-from qtpy.QtCore import Slot
+from qtpy.QtCore import Slot, Signal
 from qtpy.QtWidgets import QWidget
 
 from MDANSE.MLogging import LOG
@@ -36,6 +36,9 @@ here.
 
 
 class PlotTab(GeneralTab):
+    new_data_object = Signal(object)
+    update_plot = Signal(int)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._visualiser._unit_lookup = self
@@ -50,6 +53,9 @@ class PlotTab(GeneralTab):
             self.model.regenerate_colours
         )
         self._core._extra_visualiser.make_layout()
+        self.new_data_object.connect(self._visualiser.accept_external_data)
+        self._visualiser.plot_id.connect(self.tab_notification)
+        self.update_plot.connect(self._visualiser.plot)
 
     @classmethod
     def standard_instance(cls):
@@ -104,17 +110,7 @@ class PlotTab(GeneralTab):
     @Slot(object)
     def accept_external_data(self, data_model):
         LOG.debug(f"accept_external_data received {data_model}")
-        try:
-            self._visualiser.model.accept_external_data(data_model)
-        except Exception as e:
-            LOG.error(f"Visualiser failed to pass data model: {e}")
-        else:
-            try:
-                self._visualiser.plotter.plot_data()
-            except Exception as e2:
-                LOG.error(f"Visualiser failed to plot data: {e2}")
-            else:
-                self.tab_notification()
+        self.new_data_object.emit(data_model)
 
     @Slot(int)
     def switch_model(self, tab_id):

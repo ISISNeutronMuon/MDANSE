@@ -129,7 +129,9 @@ class DataPlotter(QWidget):
     def plot_data(self):
         if len(self._model.datasets()) == 0:
             return
-        self.data_for_plotting.emit(self._model)
+        temp_context = PlottingContext()
+        temp_context.accept_external_data(self._model)
+        self.data_for_plotting.emit(temp_context)
         group = self._settings.group("dialogs")
         try:
             show_it = group.get("data_plotted")

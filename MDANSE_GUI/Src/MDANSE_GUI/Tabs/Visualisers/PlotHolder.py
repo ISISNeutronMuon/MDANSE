@@ -30,6 +30,7 @@ class PlotHolder(QTabWidget):
 
     error = Signal(str)
     new_entry = Signal()
+    plot_id = Signal(int)
 
     def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -104,6 +105,11 @@ class PlotHolder(QTabWidget):
                 self.setCurrentIndex(self._current_id)
         self.removeTab(tab_id)
 
+    @Slot(object)
+    def accept_external_data(self, new_data: PlottingContext):
+        self.model.accept_external_data(new_data)
+        self.plotter.plot_data()
+
     @property
     def model(self):
         tab_id = self.currentIndex()
@@ -129,6 +135,10 @@ class PlotHolder(QTabWidget):
     def update_plot_details(self, input):
         """This will change the line colour, thickness, etc.
         At the moment it doesn't do anything."""
+
+    @Slot(int)
+    def plot(self, id_num: int):
+        self._plotter[id_num].plot_data()
 
     @Slot()
     def update_plots(self):
