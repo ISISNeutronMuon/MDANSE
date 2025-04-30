@@ -166,7 +166,7 @@ class Action(QWidget):
         trajectory : str or None
             The path and filename of the trajectory
         """
-        if trajectory == self._input_trajectory:
+        if trajectory == self._input_trajectory and self._input_trajectory is not None:
             LOG.debug("Skipping set_trajectory, no change.")
             return
         self._job_instance = IJob()
@@ -230,6 +230,7 @@ class Action(QWidget):
             self._job_instance = job_instance
         else:
             settings = self._job_instance.settings
+            job_instance = self._job_instance
         LOG.info(f"Configuration {job_instance.configuration}")
         if "trajectory" in settings.keys():
             if self._input_trajectory is None:
