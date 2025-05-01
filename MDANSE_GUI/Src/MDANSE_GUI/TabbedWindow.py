@@ -37,6 +37,7 @@ from MDANSE_GUI.UserSettingsEditor import UserSettingsEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
+from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
 from MDANSE_GUI.Tabs.TrajectoryTab import TrajectoryTab
 from MDANSE_GUI.Tabs.JobTab import JobTab
@@ -134,7 +135,7 @@ class TabbedWindow(QMainWindow):
             thread.wait()
 
     def createCommonModels(self):
-        self._trajectory_model = GeneralModel()
+        self._trajectory_model = TrajectoryModel()
         self._instrument_model = GeneralModel()
         self._job_holder = JobHolder()
         self._gui_log_handler = GuiLogHandler()

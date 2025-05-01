@@ -61,13 +61,8 @@ class TrajectoryTab(GeneralTab):
         fname = str(PurePath(some_fname))
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
-            try:
-                data = HDFTrajectoryInputData(fname)
-            except Exception as e:
-                self._core.error.emit(repr(e))
-            else:
-                self._core._model.append_object(((fname, data), short_name))
-                self._session.protect_filename(fname)
+            self._core._model.append_object((fname, short_name))
+            self._session.protect_filename(fname)
 
     @classmethod
     def standard_instance(cls):

@@ -13,11 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+from typing import TYPE_CHECKING
+
 from qtpy.QtWidgets import QWidget, QVBoxLayout
 from qtpy.QtCore import Slot, Signal
 
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 from MDANSE_GUI.MolecularViewer.Controls import ViewerControls
+
+if TYPE_CHECKING:
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class View3D(QWidget):
@@ -39,15 +45,14 @@ class View3D(QWidget):
         self._viewer = viewer
         self._controls = controls
 
-    @Slot(tuple)
-    def update_panel(self, data: tuple):
-        fullpath, incoming = data
-        if fullpath == "" or data is None:
+    @Slot(object)
+    def update_panel(self, data: "Trajectory"):
+        if data is None:
             self._viewer.clear_panel()
             return
 
         try:
-            self._viewer._new_trajectory_object(fullpath, incoming)
+            self._viewer._new_trajectory_object(data)
         except AttributeError:
-            self.error.emit(f"3D View could not visualise {fullpath}")
+            self.error.emit(f"3D View could not visualise {data}")
             self._viewer.clear_trajectory()
