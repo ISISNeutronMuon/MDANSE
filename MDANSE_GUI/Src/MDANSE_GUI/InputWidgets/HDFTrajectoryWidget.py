@@ -26,7 +26,7 @@ class HDFTrajectoryWidget(WidgetBase):
         super().__init__(*args, **kwargs)
         source_object = kwargs.get("source_object", None)
         try:
-            filename = source_object
+            filename = source_object.filename
         except AttributeError:
             filename = None
         if filename is not None:

@@ -74,6 +74,46 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
 
         self["has_velocities"] = "velocities" in self["instance"].variables()
 
+    def configure_from_gui(self, file_path, trajectory_instance):
+        """
+        Configure a HDF trajectory file.
+
+        :param value: the path for the HDF trajectory file.
+        :type value: str
+        """
+        if file_path == self._original_input:
+            return
+        self._original_input = file_path
+
+        InputFileConfigurator.configure(self, file_path)
+        try:
+            inputTraj = IInputData.create(
+                "HDFTrajectoryInputData", self["value"], load=False
+            )
+        except KeyError:
+            self.error_status = f"Could not use {file_path} as input trajectory"
+            return
+
+        self["hdf_trajectory"] = inputTraj
+
+        self["instance"] = inputTraj.trajectory
+
+        self["filename"] = PLATFORM.get_path(inputTraj.filename)
+
+        self["basename"] = self["filename"].name
+
+        self["length"] = len(self["instance"])
+
+        time_axis = self["instance"].time()
+        try:
+            self["md_time_step"] = time_axis[1] - time_axis[0]
+        except IndexError:
+            self["md_time_step"] = 1.0
+        except ValueError:
+            self["md_time_step"] = 1.0
+
+        self["has_velocities"] = "velocities" in self["instance"].variables()
+
     def get_information(self):
         """
         Returns some basic informations about the contents of the HDF trajectory file.

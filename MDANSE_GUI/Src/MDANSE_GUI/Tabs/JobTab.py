@@ -108,9 +108,7 @@ class JobTab(GeneralTab):
         )
         # The combobox was changed we need to update the action
         # widgets with the new trajectory
-        self.action.set_trajectory(
-            trajectory=str(PurePath(os.path.abspath(traj_model._nodes[node_number][0])))
-        )
+        self.action.set_trajectory(trajectory=traj_model.get_trajectory(node_number))
         current_item = self._core.current_item()
         if current_item is not None:
             # we only update the widget if a job is selected from the

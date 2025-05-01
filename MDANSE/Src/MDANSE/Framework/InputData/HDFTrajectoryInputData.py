@@ -39,6 +39,13 @@ class HDFTrajectoryInputData(InputFileData):
         self._data = traj
         self.check_metadata()
 
+    def set_trajectory(self, trajectory):
+        self._metadata = {}
+        traj = trajectory
+
+        self._data = traj
+        self.check_metadata()
+
     def close(self):
         self._data.close()
 

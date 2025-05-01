@@ -20,6 +20,7 @@ from pathlib import Path
 import numpy as np
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets import (
     AseInputFileWidget,
     AtomMappingWidget,
@@ -156,7 +157,7 @@ class Action(QWidget):
     def set_settings(self, settings):
         self._settings = settings
 
-    def set_trajectory(self, trajectory: str) -> None:
+    def set_trajectory(self, trajectory: Trajectory) -> None:
         """Set the trajectory path and filename.
 
         Parameters
@@ -166,13 +167,17 @@ class Action(QWidget):
         trajectory : str or None
             The path and filename of the trajectory
         """
-        if trajectory == self._input_trajectory and self._input_trajectory is not None:
+        if (
+            trajectory.filename == self._input_trajectory_path
+            and self._input_trajectory_path is not None
+        ):
             LOG.debug("Skipping set_trajectory, no change.")
             return
         self._job_instance = IJob()
+        self._input_trajectory_path = trajectory.filename
         self._input_trajectory = trajectory
-        if self._input_trajectory is not None:
-            self._default_path = Path(self._input_trajectory).parent
+        if self._input_trajectory_path is not None:
+            self._default_path = Path(self._input_trajectory_path).parent
         else:
             self._default_path = Path().absolute()
         if self._job_name is not None:
