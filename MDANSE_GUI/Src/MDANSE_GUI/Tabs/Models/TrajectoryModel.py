@@ -84,7 +84,7 @@ class TrajectoryModel(QStandardItemModel):
         trajectory, index = result_tuple
         self._trajectory_instances[index] = trajectory
         self.mutex.unlock()
-        self._loading_threads[index].join()
+        # self._loading_threads[index].wait()
 
     def summarise_items(self):
         result = []
