@@ -172,6 +172,7 @@ class VanHoveFunctionSelf(IJob):
             (self.n_mid_points, self.n_frames),
             axis="r|time",
             units="au",
+            main_result=True,
         )
         self._outputData.add(
             "4_pi_r2_g(r,t)_total",

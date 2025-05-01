@@ -82,6 +82,8 @@ class PairDistributionFunction(DistanceHistogram):
                     (npoints,),
                     axis="r",
                     units="au",
+                    main_result=i == "pdf",
+                    partial_result=i == "pdf",
                 )
 
         for i in ["pdf", "rdf", "tcf"]:
@@ -100,7 +102,12 @@ class PairDistributionFunction(DistanceHistogram):
                 units="au",
             )
             self._outputData.add(
-                f"{i}_total", "LineOutputVariable", (npoints,), axis="r", units="au"
+                f"{i}_total",
+                "LineOutputVariable",
+                (npoints,),
+                axis="r",
+                units="au",
+                main_result=i == "pdf",
             )
 
         nFrames = self.configuration["frames"]["number"]

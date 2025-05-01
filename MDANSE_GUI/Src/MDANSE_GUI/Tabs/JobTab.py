@@ -28,6 +28,7 @@ from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
+from MDANSE_GUI.InputWidgets.MoleculeWidget import MoleculeWidget
 
 
 job_tab_label = """This is the list of jobs

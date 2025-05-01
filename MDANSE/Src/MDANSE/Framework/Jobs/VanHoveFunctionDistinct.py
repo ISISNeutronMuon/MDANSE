@@ -312,6 +312,7 @@ class VanHoveFunctionDistinct(IJob):
             (self.n_mid_points, self.numberOfSteps),
             axis="r|time",
             units="au",
+            main_result=True,
         )
         for x, y in self._elementsPairs:
             self._outputData.add(

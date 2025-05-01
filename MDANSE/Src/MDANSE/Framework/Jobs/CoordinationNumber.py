@@ -112,6 +112,7 @@ class CoordinationNumber(DistanceHistogram):
                 (npoints,),
                 axis="r",
                 units="au",
+                main_result=True,
             )
             self._outputData.add(
                 f"cn_intra_{inv_pair_str}",
@@ -133,6 +134,7 @@ class CoordinationNumber(DistanceHistogram):
                 (npoints,),
                 axis="r",
                 units="au",
+                main_result=True,
             )
 
         nFrames = self.configuration["frames"]["number"]

@@ -14,12 +14,13 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from typing import Union
-
+import time
 from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication, QMenu
 from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
 from qtpy.QtGui import QMouseEvent, QDrag, QContextMenuEvent, QStandardItem
 
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
+from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
 from MDANSE_GUI.Widgets.DataDialog import DataDialog
 
@@ -29,7 +30,9 @@ class PlotDataView(QTreeView):
     execute_action = Signal(object)
     item_details = Signal(object)
     error = Signal(str)
+    fast_plotting_data = Signal(object)
     free_name = Signal(str)
+    fast_plotting_data = Signal(object)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,6 +42,29 @@ class PlotDataView(QTreeView):
         self.clicked.connect(self.on_select_dataset)
         # self.data_dialog = DataDialog(self)
         self._data_packet = None
+
+    def mouseDoubleClickEvent(self, e: QMouseEvent) -> None:
+        self.click_position = e.position()
+        if self.model() is None:
+            return None
+        index = self.indexAt(e.pos())
+        model = self.model()
+        mda_data_structure = model.inner_object(index)
+        model = PlottingContext()
+        for key in mda_data_structure._file.keys():
+            try:
+                if "main" in mda_data_structure._file[key].attrs["tags"]:
+                    if "partial" in mda_data_structure._file[key].attrs["tags"]:
+                        dataset = SingleDataset(
+                            key, mda_data_structure._file, linestyle="--"
+                        )
+                    else:
+                        dataset = SingleDataset(key, mda_data_structure._file)
+
+                    model.add_dataset(dataset)
+            except KeyError:
+                print(f"No attribute called Tag found in {key}, skipping")
+        self.fast_plotting_data.emit(model)
 
     def mousePressEvent(self, e: QMouseEvent) -> None:
         self.click_position = e.position()
