@@ -94,9 +94,9 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             self.error_status = f"Could not use {file_path} as input trajectory"
             return
 
-        self["hdf_trajectory"] = inputTraj
+        self["hdf_trajectory"] = None
 
-        self["instance"] = inputTraj.trajectory
+        self["instance"] = trajectory_instance
 
         self["filename"] = PLATFORM.get_path(inputTraj.filename)
 

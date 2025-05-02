@@ -254,11 +254,14 @@ class Action(QWidget):
             ddict["source_object"] = self._input_trajectory
             widget_class = widget_lookup[dtype]
             input_widget = widget_class(parent=self, **ddict)
+            self._trajectory_configurator = input_widget._configurator
+            self._trajectory_configurator.configure_from_gui(
+                self._input_trajectory_path, self._input_trajectory
+            )
             widget = input_widget._base
             self.layout.addWidget(widget, stretch=input_widget._relative_size)
             self._widgets_in_layout.append(widget)
             self._widgets.append(input_widget)
-            self._trajectory_configurator = input_widget._configurator
             LOG.info("Set up input trajectory")
         for key, value in settings.items():
             if key == "trajectory":

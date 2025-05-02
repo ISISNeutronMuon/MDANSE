@@ -30,7 +30,6 @@ class LoaderThread(QThread):
     def run(self):
         trajectory = Trajectory(self._filename)
         self.results.emit((trajectory, self._target_index))
-        return super().run()
 
 
 class TrajectoryModel(QStandardItemModel):
@@ -102,7 +101,8 @@ class TrajectoryModel(QStandardItemModel):
             node_number = self.item(row).data()
         except AttributeError:
             return
-        self._nodes.pop(node_number)
+        self._trajectory_instances.pop(node_number)
+        self._trajectory_paths.pop(node_number)
         self._node_numbers.pop(self._node_numbers.index(node_number))
         if parent is None:
             super().removeRow(row)

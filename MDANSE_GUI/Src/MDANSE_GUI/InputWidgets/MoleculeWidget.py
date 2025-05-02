@@ -47,7 +47,7 @@ class MoleculeWidget(WidgetBase):
         traj_config = self._configurator._configurable[
             self._configurator._dependencies["trajectory"]
         ]
-        hdf_traj = traj_config["hdf_trajectory"]
+        hdf_traj = traj_config["trajectory"]
         unique_molecules = hdf_traj.chemical_system.unique_molecules()
         traj_bond_list = hdf_traj.chemical_system._bonds
         self.atom_database = hdf_traj.trajectory

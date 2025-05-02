@@ -17,6 +17,7 @@
 import json
 from enum import Enum
 
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
 from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
 from qtpy.QtCore import Signal, Slot
@@ -167,7 +168,7 @@ class SelectionHelper(QDialog):
 
     def __init__(
         self,
-        traj_data: tuple[str, HDFTrajectoryInputData],
+        trajectory: Trajectory,
         field: QLineEdit,
         parent,
         *args,
@@ -187,7 +188,7 @@ class SelectionHelper(QDialog):
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle(self._helper_title)
 
-        self.trajectory = traj_data[1].trajectory
+        self.trajectory = trajectory
         self.system = self.trajectory.chemical_system
         self.selection_model = SelectionModel(self.trajectory)
         self._field = field
@@ -201,7 +202,7 @@ class SelectionHelper(QDialog):
         mol_view = MolecularViewerWithPicking()
         mol_view.picked_atoms_changed.connect(self.update_from_3d_view)
         self.view_3d = View3D(mol_view)
-        self.view_3d.update_panel(traj_data)
+        self.view_3d.update_panel(trajectory)
 
         layouts = self.create_layouts()
 
