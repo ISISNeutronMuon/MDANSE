@@ -65,7 +65,7 @@ def SingleChoiceConfigDesc(ChoiceConfigDesc):
                  **params):
         super().__init__(choices=choices, n_choices=1, **params)
 
-    def validate(self, value: T) -> T:
+    def validate(self, value: T, *_) -> T:
         self._original_input = value
 
         self.index = self._choices.find(value)
@@ -87,7 +87,7 @@ def MultipleChoiceConfigDesc(ChoiceConfigDesc):
 
     _old_name = "MultipleChoiceConfigurator"
 
-    def validate(self, values: Sequence[T]) -> Sequence[T]:
+    def validate(self, values: Sequence[T], *_) -> Sequence[T]:
         self._original_input = values
 
         if len(values) > self.n_choices:

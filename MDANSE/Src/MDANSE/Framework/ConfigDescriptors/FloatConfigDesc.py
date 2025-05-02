@@ -15,13 +15,14 @@
 #
 from collections.abc import Container
 from typing import Optional, Set, SupportsFloat
+from math import isclose
 
 from .AbsConfigDesc import ConfigError, ConfigureDescriptor
 
 
 class FloatConfigDesc(ConfigureDescriptor[float]):
     """
-    This Configurator allows to input a Float Value.
+    This configurator allows to input a float value.
     """
 
     _old_name = "FloatConfigurator"
@@ -29,12 +30,12 @@ class FloatConfigDesc(ConfigureDescriptor[float]):
     def __init__(self,
                  minimum: Optional[float] = None,
                  maximum: Optional[float] = None,
-                 choices: Container[float] = None,
+                 non_zero: float = 0.,
                  **params):
-        super().__init__(mini=minimum, maxi=maximum, choices=choices, **params)
+        super().__init__(**params)
         self.minimum = minimum
         self.maximum = maximum
-        self.choices = choices
+        self.non_zero = 0.
 
     @property
     def minimum(self) -> Optional[float]:
@@ -68,29 +69,19 @@ class FloatConfigDesc(ConfigureDescriptor[float]):
             self._maximum = None
         self._maximum = float(value)
 
-    @property
-    def choices(self) -> Set[float]:
-        """
-        Returns the list of floats allowed for an input float.
-        """
-        return self._choices
-
-    @choices.setter
-    def choices(self, value: Container[float]):
-        if value is None:
-            self._choices = []
-        self._choices = set(value)
-
-    def validate(self, value: SupportsFloat) -> float:
+    def validate(self, value: SupportsFloat, *_) -> float:
         try:
             value = float(value)
         except ValueError as error:
             raise ConfigError(f"Value ({value}) is not a valid float.") from error
 
-        if value not in self.choices:
-            raise ConfigError(f"Value ({value}) not in choices ({self.choices!r}).")
+        super().validate(value)
 
         if self.minimum > value > self.maximum:
             raise ConfigError(f"Value ({value}) outside of valid range ({self.minimum}, {self.maximum})")
+
+        if self.non_zero and isclose(value, 0., self.non_zero):
+            raise ConfigError(f"Non-null val ({value}) is too close to zero.")
+
 
         return value

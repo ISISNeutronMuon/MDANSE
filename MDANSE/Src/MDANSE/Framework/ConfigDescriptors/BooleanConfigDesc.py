@@ -44,7 +44,7 @@ class BooleanConfigDesc(ConfigureDescriptor[bool]):
         super().__init__(default=default, **params)
 
 
-    def validate(self, value: Union[bool, str]) -> bool:
+    def validate(self, value: Union[bool, str], *_) -> bool:
         if isinstance(value, str):
             value = value.lower()
         return self._alias[value]

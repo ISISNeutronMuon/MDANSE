@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from collections.abc import Container, Set
 from typing import Any, Generic, TypeVar
 
 from MDANSE.Core.Error import Error
@@ -11,50 +14,110 @@ class ConfigError(Error):
     pass
 
 class ConfigureDescriptor(ABC, Generic[T]):
-
-    _old_name = "Invalid"
-
     def __init__(self,
                  *,
                  root: str = None,
                  dependencies: dict = None,
-                 default: Any = SENTINEL,
-                 widget: type = None,
-                 label: str = None,
+                 default: T = SENTINEL,
+                 optional: bool = False,
+                 label: str = "",
+                 choices: Container[T] | None = None,
+                 exclude: Container[T] = (),
+                 mutex: Container[str] = (),
+                 depends: Container[str] = (),
                  **parameters):
         self.root = root
         self.dependencies = dependencies if dependencies else {}
         self.default = default
-        self.widget = widget if widget else type(self)
-        self.optional = default is not SENTINEL
+        self.optional = optional
+        self.choices = choices
+        self.exclude = exclude
+        self.mutex = mutex
+        self.depends = depends
         self.configured = False
-        self.value = default if self.optional else None
 
     def __set_name__(self, owner, name):
-        if not hasattr(owner, "settings"):
-            owner.settings = {}
-        owner.settings[name] = (self._old_name, self.__dict__.copy())
         self.name = name
 
-    def __get__(self, owner, objtype=None) -> T:
-        if not self.configured:
-            if self.optional:
-                return self.default
-            else:
-                raise ValueError(f"Mandatory parameter {self.name!r} not configured")
-        elif owner._configuration[self.name]["value"] != self.value:
-            ...
+    @property
+    def value(self):
+        if not self.optional and not self.configured:
+            raise ConfigError("Non-optional value has not been set")
 
-        return owner._configuration[self.name]["value"]
+        return self.default if self.default is not SENTINEL else self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+
+    def __get__(self, owner, objtype=None) -> T:
+        return self.value
+
+    @property
+    def _bad_mutex(self, owner):
+        return (getattr(owner, ex).configured for ex in self.mutex)
+
+    @property
+    def _bad_deps(self, owner):
+        return (not getattr(owner, dep).configured for dep in self.depends)
 
     def __set__(self, owner, value):
-        self.value = self.validate(value)
+        self.configured = False
+
+        if any(self._bad_deps):
+            raise ConfigError(f"Dependencies ({', '.join(self._bad_deps)}) are not correctly defined.")
+        if any(self._bad_mutex):
+            raise ConfigError(f"Mutually exclusive value ({', '.join(self._bad_mutex)}) is also configured.")
+
+        deps = {dep: getattr(owner, dep).value for dep in self.depends}
+
+        self.value = self.validate(value, deps)
         self.configured = True
-        owner._configuration[self.name]["value"] = self.value
+
+    @property
+    def choices(self) -> Set[T]:
+        """
+        Returns the set of values allowed for an input.
+        """
+        return self._choices
+
+    @choices.setter
+    def choices(self, value: Container[T]):
+        if value is None:
+            self._choices = []
+        self._choices = set(value)
+
+    @property
+    def exclude(self) -> Set[int]:
+        """
+        Returns the set of values which are not forbidden.
+
+        Returns
+        -------
+        Set[int]
+            Forbidden values.
+        """
+        return self._exclude
+
+    @exclude.setter
+    def exclude(self, value: Container[int]):
+        if value is None:
+            self._exclude = []
+        self._exclude = set(value)
+
+    def validate_choices(self, value):
+        return self.choices is not None and value in self.choices
+
+    def validate_exclude(self, value):
+        return self.exclude and value not in self.exclude
 
     @abstractmethod
-    def validate(self, value) -> T:
+    def validate(self, value, *_deps) -> T:
         """
         Ensure that the passed variable is of the right type.
         """
-        raise NotImplementedError()
+        if not self.validate_choices(value):
+            raise ConfigError(f"Value ({value}) not in choices ({self.choices!r}).")
+
+        if not self.validate_exclude(value):
+            raise ConfigError(f"Value ({value}) in excluded values ({self.exclude!r}).")

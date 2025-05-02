@@ -27,14 +27,10 @@ class IntegerConfigDesc(ConfigureDescriptor[int]):
     def __init__(self,
                  minimum: Optional[int] = None,
                  maximum: Optional[int] = None,
-                 choices: Container[int] = None,
-                 exclude: Container[int] = None,
                  **params):
-        super().__init__(mini=minimum, maxi=maximum, choices=choices, exclude=exclude, **params)
+        super().__init__(mini=minimum, maxi=maximum, **params)
         self.minimum = minimum
         self.maximum = maximum
-        self.choices = choices
-        self.exclude = exclude
 
     @property
     def minimum(self) -> Optional[int]:
@@ -68,50 +64,15 @@ class IntegerConfigDesc(ConfigureDescriptor[int]):
             self._maximum = None
         self._maximum = int(value)
 
-    @property
-    def choices(self) -> Set[int]:
-        """
-        Returns the list of integers allowed for an input float.
-        """
-        return self._choices
-
-    @choices.setter
-    def choices(self, value: Container[int]):
-        if value is None:
-            self._choices = []
-        self._choices = set(value)
-
-    @property
-    def exclude(self) -> Set[int]:
-        """
-        Returns the set of values which are not forbidden.
-
-        Returns
-        -------
-        Set[int]
-            Forbidden values.
-        """
-        return self._exclude
-
-    @exclude.setter
-    def exclude(self, value: Container[int]):
-        if value is None:
-            self._exclude = []
-        self._exclude = set(value)
-
-    def validate(self, value: SupportsInt) -> int:
+    def validate(self, value: SupportsInt, *_) -> int:
         try:
             value = int(value)
         except ValueError as error:
             raise ConfigError(f"Value ({value}) is not a valid integer.") from error
 
-        if value not in self.choices:
-            raise ConfigError(f"Value ({value}) not in choices ({self.choices!r}).")
+        super().validate(value)
 
         if self.minimum > value > self.maximum:
             raise ConfigError(f"Value ({value}) outside of valid range ({self.minimum}, {self.maximum})")
-
-        if value in self.exclude:
-            raise ConfigError(f"Value ({value}) in exluded values ({self.exclude!r})")
 
         return value
