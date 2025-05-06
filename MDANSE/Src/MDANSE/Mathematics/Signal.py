@@ -407,7 +407,7 @@ class Filter(ABC):
         """
         coeffs = (
             self.to_digital_coeffs()
-            if not (Filter.Flags.DIGITAL_ONLY in self.flags)
+            if Filter.Flags.DIGITAL_ONLY not in self.flags
             else self._coeffs
         )
         return signal.filtfilt(coeffs.numerator, coeffs.denominator, input)
