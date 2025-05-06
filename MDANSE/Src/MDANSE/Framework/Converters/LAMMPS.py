@@ -438,7 +438,8 @@ class LAMMPScustom(LAMMPSReader):
                         atom_type = temp.get("type")
                         if atom_type is None:
                             atom_type = config["atom_types"][i]
-                        atom_type -= 1
+                        else:
+                            atom_type -= 1
                     except IndexError:
                         LOG.error(
                             f"Failed to find index [{i}] in list of len {len(config['atom_types'])}"
