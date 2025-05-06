@@ -13,38 +13,67 @@ T = TypeVar("T")
 class ConfigError(Error):
     pass
 
+
 class ConfigureDescriptor(ABC, Generic[T]):
-    def __init__(self,
-                 *,
-                 root: str = None,
-                 dependencies: dict = None,
-                 default: T = SENTINEL,
-                 optional: bool = False,
-                 label: str = "",
-                 choices: Container[T] | None = None,
-                 exclude: Container[T] = (),
-                 mutex: Container[str] = (),
-                 depends: Container[str] = (),
-                 **parameters):
-        self.root = root
-        self.dependencies = dependencies if dependencies else {}
+    """Abstract configure descriptor.
+
+    Parameters
+    ----------
+    default : T
+        Default value if not configured.
+    optional : bool
+        Whether this value can be disabled (None).
+    choices : Container[T], optional
+        Valid options for this value.
+    exclude : Container[T]
+        Invalid options for this value.
+    mutex : Container[str]
+        Other variables with which this is mutually exclusive.
+    depends : Container[str]
+        Other variables which must be set for this to be set.
+    label : str
+        GUI label to present to user.
+    tooltip : str
+        GUI tooltip to present to user.
+    """
+
+    def __init__(
+        self,
+        *,
+        default: T = SENTINEL,
+        optional: bool = False,
+        choices: Container[T] = None,
+        exclude: Container[T] = (),
+        mutex: Container[str] = (),
+        depends: Container[str] = (),
+        label: str = "",
+        tooltip: str = "",
+    ):
         self.default = default
         self.optional = optional
+
         self.choices = choices
         self.exclude = exclude
+
         self.mutex = mutex
         self.depends = depends
+
+
+        self.label = label
+        self.tooltip = tooltip
+
         self.configured = False
+        self._value = default if default is not SENTINEL else None
 
     def __set_name__(self, owner, name):
         self.name = name
 
     @property
     def value(self):
-        if not self.optional and not self.configured:
+        if not self.optional and self.value is None:
             raise ConfigError("Non-optional value has not been set")
 
-        return self.default if self.default is not SENTINEL else self._value
+        return self._value
 
     @value.setter
     def value(self, value):
@@ -65,9 +94,13 @@ class ConfigureDescriptor(ABC, Generic[T]):
         self.configured = False
 
         if any(self._bad_deps):
-            raise ConfigError(f"Dependencies ({', '.join(self._bad_deps)}) are not correctly defined.")
+            raise ConfigError(
+                f"Dependencies ({', '.join(self._bad_deps)}) are not correctly defined."
+            )
         if any(self._bad_mutex):
-            raise ConfigError(f"Mutually exclusive value ({', '.join(self._bad_mutex)}) is also configured.")
+            raise ConfigError(
+                f"Mutually exclusive value ({', '.join(self._bad_mutex)}) is also configured."
+            )
 
         deps = {dep: getattr(owner, dep).value for dep in self.depends}
 
@@ -84,7 +117,7 @@ class ConfigureDescriptor(ABC, Generic[T]):
     @choices.setter
     def choices(self, value: Container[T]):
         if value is None:
-            self._choices = []
+            self._choices = set()
         self._choices = set(value)
 
     @property
@@ -102,7 +135,7 @@ class ConfigureDescriptor(ABC, Generic[T]):
     @exclude.setter
     def exclude(self, value: Container[int]):
         if value is None:
-            self._exclude = []
+            self._exclude = set()
         self._exclude = set(value)
 
     def validate_choices(self, value):
