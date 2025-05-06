@@ -69,16 +69,32 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
 
     """
 
-    def __init__(self, constraint_func: Callable = None):
+    def __init__(self, snap_to: float = None, constraint_func: Callable = None):
         """
         Parameters
         ----------
-        constraint_func : Callable
+        snap_to : float | None
+            Value to snap to.
+        constraint_func : Callable | None
             Lambda for imposing constraint on spinbox value.
         """
         super().__init__()
-        self.constraint_func = constraint_func
-        self.valueChanged.connect(self.apply_constraint)
+
+        self.setKeyboardTracking(False)
+
+        if constraint_func:
+            # We are constraining by searching for a value that satisfies a function
+            self.constraint_func = constraint_func
+            self.valueChanged.connect(self.search_by_function)
+            self.textChanged.connect(self.search_by_function)
+        elif snap_to:
+            # We are constraining by snapping to the nearest value modulo zero
+            self.snap_to = snap_to
+            self.valueChanged.connect(self.snap_to_value)
+            self.textChanged.connect(self.snap_to_value)
+        else:
+            # No constraint provided - default to normal double spinbox
+            return
 
     def setValue(self, val) -> None:
         """Overrides setValue method of QDoubleSpinBox.
@@ -92,7 +108,33 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         self.initial_value = val
         super().setValue(val)
 
-    def apply_constraint(self, value: Any) -> None:
+    def snap_to_value(self, value: Any) -> None:
+        """Apply the constraint by snapping up/down (depending on the change direction) to the nearest value module zero.
+
+        Parameters
+        ----------
+        value : Any
+            The value of the spinbox.
+        """
+        value = self.to_float(value)
+
+        if not hasattr(self, "initial_value"):
+            return
+
+        remainder = value % self.snap_to
+        if not self.snap_to or remainder == 0:
+            return
+
+        current = self.to_float(self.value())
+
+        if current < self.initial_value:
+            x = current - remainder
+        else:
+            x = current + remainder
+
+        self.setValue(x)
+
+    def search_by_function(self, value: Any) -> None:
         """Apply the constraint formalised in the lambda
 
         Parameters
@@ -100,11 +142,18 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         value : Any
             The value of the spinbox.
         """
-        if not self.constraint_func or self.constraint_func(value):
+        value = self.to_float(value)
+
+        if (
+            not self.constraint_func
+            or self.constraint_func(value)
+            or (not hasattr(self, "initial_value"))
+        ):
             return
 
+        current = self.to_float(self.value())
         value_found = False
-        if self.value() < self.initial_value:
+        if current < self.initial_value:
             for x in np.arange(value, self.minimum(), -self.singleStep()):
                 if self.constraint_func(x):
                     value_found = True
@@ -121,6 +170,24 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
 
         # Update with constrained value
         self.setValue(x)
+
+    @staticmethod
+    def to_float(value: Any) -> float:
+        """Convert spinbox value to float if string
+
+        Parameters
+        ----------
+        value : Any
+            The value of the spinbox.
+
+        Returns
+        ----------
+        float
+            The value of the spinbox.
+        """
+        if isinstance(value, str):
+            return float(value)
+        return value
 
 
 class FilterPreferencesGroup(QObject):
@@ -178,17 +245,17 @@ class FilterPreferencesGroup(QObject):
 
         Parameters
         --------
-        on : bool
-            If true, both inputs for upper and lower frequency bounds are enabled, else only one input is enabled
-
-        Returns
-        -------
         key : str
             The preference name
         items : tuple
             Items representing the available preference settings
         enabled : enabled
             Preference is enabled by default
+
+        Returns
+        -------
+        QWidget:
+            The specified QComboBox
         """
         widget = QComboBox()
         for i in items:
@@ -472,12 +539,18 @@ class FilterSettingGroup(QObject):
             time_step = self.parent_attributes.get("time_step_ps", DEFAULT_TIME_STEP)
             fs = time_step ** (-1)
 
-            # Apply constraint if filter is digital IIR
             if (
                 Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags
                 and setting_key == "fundamental_freq"
             ):
-                widget = ConstrainedDoubleSpinBox(lambda x: (fs % x) == 0)
+                widget = ConstrainedDoubleSpinBox(
+                    constraint_func=lambda x: (fs % x) == 0
+                )
+            elif setting_key == "cutoff_freq":
+                bin_width = Filter.frequency_resolution(
+                    n_steps, time_step, Filter.FrequencyUnits.ANGULAR
+                )
+                widget = ConstrainedDoubleSpinBox(snap_to=bin_width)
             else:
                 widget = QDoubleSpinBox()
 
