@@ -69,15 +69,7 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
 
     """
 
-    def __init__(
-        self,
-        minimum: float,
-        maximum: float,
-        step: float,
-        value: float,
-        snap_to: float = None,
-        constraint_func: Callable = None,
-    ):
+    def __init__(self, minimum: float, maximum: float, step: float, value: float):
         """
         Parameters
         ----------
@@ -89,10 +81,6 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
             Single step on spinbox.
         value: float
             Initial value.
-        snap_to : float | None
-            Value to snap to.
-        constraint_func : Callable | None
-            Lambda for imposing constraint on spinbox value.
         """
         super().__init__()
 
@@ -103,19 +91,38 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         self.setSingleStep(step)
         self.setValue(value)
 
-        if constraint_func:
-            # We are constraining by searching for a value that satisfies a function
-            self.constraint_func = constraint_func
-            self.valueChanged.connect(self.search_by_function)
-            self.textChanged.connect(self.search_by_function)
-        elif snap_to:
-            # We are constraining by snapping to the nearest value modulo zero
-            self.snap_to = snap_to
-            self.valueChanged.connect(self.snap_to_value)
-            self.textChanged.connect(self.snap_to_value)
-        else:
-            # No constraint provided - default to normal double spinbox
-            return
+    def reset_connections(self):
+        """Reset all connections to custom slots."""
+        for slot in (self.snap_to_value, self.search_by_function):
+            for signal in (self.valueChanged, self.textChanged):
+                try:
+                    signal.disconnect(slot)
+                except TypeError:
+                    return
+
+    def set_search(self, constraint_func: Callable) -> None:
+        """Set the search constraint function to be invoked when spinbox value or text changes.
+
+        constraint_func : Callable
+            Lambda for imposing constraint on spinbox value.
+        """
+        self.reset_connections()
+        self.constraint = constraint_func
+        callback = self.search_by_function
+        self.valueChanged.connect(callback)
+        self.textChanged.connect(callback)
+
+    def set_snap(self, snap_to: float) -> None:
+        """Set the value to be snapped to modulo zero when spinbox value or text changes.
+
+        snap_to : float
+            Value to snap to.
+        """
+        self.reset_connections()
+        self.constraint = snap_to
+        callback = self.snap_to_value
+        self.valueChanged.connect(callback)
+        self.textChanged.connect(callback)
 
     def setValue(self, val) -> None:
         """Overrides setValue method of QDoubleSpinBox.
@@ -142,8 +149,8 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         if not hasattr(self, "initial_value"):
             return
 
-        remainder = value % self.snap_to
-        if not self.snap_to or remainder == 0:
+        remainder = value % self.constraint
+        if not self.constraint or remainder == 0:
             return
 
         current = self.to_float(self.value())
@@ -166,8 +173,8 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         value = self.to_float(value)
 
         if (
-            not self.constraint_func
-            or self.constraint_func(value)
+            not self.constraint
+            or self.constraint(value)
             or (not hasattr(self, "initial_value"))
         ):
             return
@@ -176,12 +183,12 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         value_found = False
         if current < self.initial_value:
             for x in np.arange(value, self.minimum(), -self.singleStep()):
-                if self.constraint_func(x):
+                if self.constraint(x):
                     value_found = True
                     break
         else:
             for x in np.arange(value, self.maximum(), self.singleStep()):
-                if self.constraint_func(x):
+                if self.constraint(x):
                     value_found = True
                     break
 
@@ -586,7 +593,9 @@ class FilterSettingGroup(QObject):
                         maximum=Filter.nyquist(time_step, units=self.units) - bin_width,
                         step=bin_width,
                         value=bin_width,
-                        constraint_func=lambda x: ((1/time_step) % x) == 0,
+                    )
+                    widget.set_search(
+                        constraint_func=lambda x: ((1 / time_step) % x) == 0
                     )
                 else:
                     widget = ConstrainedDoubleSpinBox(
@@ -594,16 +603,16 @@ class FilterSettingGroup(QObject):
                         maximum=Filter.nyquist(time_step, units=self.units) - bin_width,
                         step=bin_width,
                         value=bin_width * initial_value_scale,
-                        snap_to=bin_width,
                     )
+                    widget.set_snap(snap_to=bin_width)
             else:
-                # Other data spinbox (standard QDoubleSpinBox)
-                widget = ConstrainedDoubleSpinBox(
-                    minimum=0,
-                    maximum=DEFAULT_SPINBOX_MAX_FLOAT,
-                    step=DEFAULT_SPINBOX_STEP_FLOAT,
-                    value=setting,
-                )
+                # Other data spinbox
+                widget = QDoubleSpinBox()
+                widget.setMinimum(0)
+                widget.setMaximum(DEFAULT_SPINBOX_MAX_FLOAT)
+                widget.setSingleStep(DEFAULT_SPINBOX_STEP_FLOAT)
+                widget.setValue(setting)
+
             widget.setDecimals(3)
             signal = widget.valueChanged
 
