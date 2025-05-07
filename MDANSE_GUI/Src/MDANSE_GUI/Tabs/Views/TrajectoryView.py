@@ -31,6 +31,7 @@ class TrajectoryView(QListView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._current_index = -1
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
 
@@ -65,8 +66,16 @@ class TrajectoryView(QListView):
     def item_picked(self, index: QModelIndex):
         model = self.model()
         node_number = model.itemFromIndex(index).data()
+        self._current_index = node_number
         trajectory = model.get_trajectory(node_number)
         self.item_details.emit(trajectory)
+
+    @Slot(int)
+    def item_updated(self, index: int):
+        if index == self._current_index:
+            model = self.model()
+            trajectory = model.get_trajectory(index)
+            self.item_details.emit(trajectory)
 
     def connect_to_visualiser(self, visualiser: Union[View3D, TrajectoryInfo]) -> None:
         """Connect to a visualiser.

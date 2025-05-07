@@ -101,6 +101,7 @@ class TrajectoryTab(GeneralTab):
             label_text=label_text,
         )
         the_tab._view.free_name.connect(session.free_filename)
+        the_tab._model.finished_loading.connect(the_tab._view.item_updated)
         return the_tab
 
 
