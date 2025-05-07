@@ -1,10 +1,10 @@
 from more_itertools import run_length
 import numpy as np
 import pytest
-from MDANSE.Framework.Configurators.ConfigFileConfigurator import \
-    ConfigFileConfigurator
-from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import \
-    HDFTrajectoryConfigurator
+from MDANSE.Framework.Configurators.ConfigFileConfigurator import ConfigFileConfigurator
+from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
+    HDFTrajectoryConfigurator,
+)
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Converters.LAMMPS import BoxStyle
 from MDANSE.Framework.Jobs.IJob import JobError
@@ -19,6 +19,7 @@ lammps_xyz = DATA_DIR / "lammps_moly_xyz.txt"
 lammps_h5md = CONV_DIR / "lammps_moly_h5md.h5"
 lammps_cao_config = DATA_DIR / "lammps_CaO.config"
 lammps_cao_run = DATA_DIR / "lammps_CaO.lammps"
+lammps_ar = DATA_DIR / "lammps_ar.config"
 vasp_xdatcar = DATA_DIR / "XDATCAR_version5"
 discover_his = DATA_DIR / "sushi.his"
 discover_xtd = DATA_DIR / "sushi.xtd"
@@ -70,200 +71,363 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
     assert out_name.is_file()
     assert log_name.is_file()
 
-@pytest.mark.parametrize("converter_type,result,compare,parameters", (
-    ("LAMMPS", "lammps.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
-     {"config_file": lammps_config,
-      "mass_tolerance": 0.05,
-      "n_steps": 0,
-      "smart_mass_association": True,
-      "time_step": 1.,
-      "trajectory_file": lammps_lammps}),
-    ("LAMMPS", "lammps_cao.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
-     {"config_file": lammps_cao_config,
-      "mass_tolerance": 0.05,
-      "n_steps": 0,
-      "smart_mass_association": True,
-      "time_step": 1.,
-      "trajectory_file": lammps_cao_run}),
-    ("VASP", "vasp.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time"),
-     {"fold": False,
-      "time_step": 1.0,
-      "xdatcar_file": vasp_xdatcar}),
-    ("discover", "discover.mdt",
-     ("/configuration/coordinates", "/configuration/velocities", "/time", "/charge"),
-     {"fold": True,
-      "his_file": discover_his,
-      "xtd_file": discover_xtd}),
-    ("cp2k", "cp2k_velocity.mdt",
-     ("/configuration/coordinates", "/configuration/velocities", "/time", "/charge"),
-     {"pos_file": cp2k_pos,
-      "cell_file": cp2k_cell,
-      "vel_file": cp2k_vel}),
-    ("cp2k", "cp2k.mdt",
-     ("/configuration/coordinates", "/time", "/charge"),
-     {"pos_file": cp2k_pos,
-      "cell_file": cp2k_cell,
-      "vel_file": None}),
-    ("cp2k", "cp2k.mdt",
-     ("/configuration/coordinates", "/time", "/charge"),
-     {"pos_file": cp2k_pos,
-      "cell_file": cp2k_cell,
-      "vel_file": ""}),
-    ("cp2k", "cp2k_srtio3.mdt",
-     ("/configuration/coordinates", "/configuration/velocities", "/configuration/forces", "/time"),
-     {"pos_file": cp2k_srtio3_pos,
-      "cell_file": cp2k_srtio3_cell,
-      "vel_file": cp2k_srtio3_vel,
-      "force_file": cp2k_srtio3_frc}),
-    ("cp2k", "cp2k_srtio3.mdt",
-     ("/configuration/coordinates", "/configuration/forces", "/time"),
-     {"pos_file": cp2k_srtio3_pos,
-      "cell_file": cp2k_srtio3_cell,
-      "force_file": cp2k_srtio3_frc}),
-    ("charmm", "hem_cam.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time"),
-     {"dcd_file": hem_cam_dcd,
-      "fold": False,
-      "pdb_file": hem_cam_pdb,
-      "time_step": 1.0}),
-    ("ase", "ase.mdt",
-     ("/configuration/coordinates", "/configuration/velocities", "/time"),
-     {"trajectory_file": ase_traj,
-      "fold": False,
-      "n_steps": 0,
-      "time_step": 50.0,
-      "time_unit": "fs"}),
-    ("ase", "ase_xyz.mdt",
-     ("/configuration/coordinates", "/configuration/velocities", "/unit_cell", "/time"),
-     {"trajectory_file": xyz_traj,
-      "fold": False,
-      "n_steps": 0,
-      "time_step": 50.0,
-      "time_unit": "fs"}),
-    ("improvedase", "ase.mdt",
-     (),
-     {"trajectory_file": (lammps_lammps, "lammps-dump-text"),
-      "configuration_file": (lammps_config, "lammps-data"),
-      "fold": False,
-      "n_steps": 0,
-      "elements_from_mass": True,
-      "time_step": 50.0,
-      "time_unit": "fs"}),
-    ("DL_POLY", "dlp_v2.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
-     {"atom_aliases": "{}",
-      "field_file": dlp_field_v2,
-      "fold": False,
-      "history_file": dlp_history_v2}),
-    ("DL_POLY", "dlp_v4.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time"),
-     {"atom_aliases": "{}",
-      "field_file": dlp_field_v4,
-      "fold": False,
-      "history_file": dlp_history_v4}),
-    ("DL_POLY", "dlp_with_grad.mdt",
-     ("/configuration/coordinates", "/configuration/velocities", "/configuration/gradients",
-      "/unit_cell", "/time", "/charge"),
-     {"atom_aliases": "{}",
-      "field_file": dlp_field_with_grad,
-      "fold": False,
-      "history_file": dlp_history_with_grad}),
-    ("NAMD", "namd.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time"),
-     {"dcd_file": apoferritin_dcd,
-      "fold": False,
-      "pdb_file": apoferritin_pdb,
-      "time_step": "1.0"}),
-    ("CASTEP", "castep.mdt",
-     ("/configuration/coordinates", "/configuration/velocities", "/configuration/gradients",
-      "/unit_cell", "/time"),
-     {"atom_aliases": "{}",
-      "castep_file": pbanew_md,
-      "fold": False}),
-    ("DFTB", "dftb.mdt",
-     ("/configuration/coordinates", "/configuration/velocities", "/unit_cell", "/time", "/charge"),
-     {"atom_aliases": "{}",
-      "fold": True,
-      "trj_file": h2o_trj,
-      "xtd_file": h2o_xtd}),
-    ("Forcite", "forcite.mdt",
-     ("/configuration/coordinates", "/configuration/velocities", "/unit_cell", "/time", "/charge"),
-     {"atom_aliases": "{}",
-      "fold": False,
-      "trj_file": h2o_trj,
-      "xtd_file": h2o_xtd}),
-    ("Gromacs", "md.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time"),
-     {"fold": False,
-      "pdb_file": md_pdb,
-      "xtc_file": md_xtc}),
-    ("Gromacs", "gromacs-nvt.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time"),
-     {"fold": False,
-      "pdb_file": gromacs_nvt[0],
-      "xtc_file": gromacs_nvt[1]}),
-    ("MDAnalysis", "md.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time"),
-     {"topology_file": (md_pdb, "AUTO"),
-      "coordinate_files": ([str(md_xtc)], "XTC")}),  # Does not work with Path
-    ("MDTraj", "hem_cam.mdt",
-     ("/configuration/coordinates", "/unit_cell", "/time"),
-     {"topology_file": hem_cam_pdb,
-      "coordinate_files": [str(hem_cam_dcd)],  # Does not work with Path
-      "time_step": 1.0}),
-))
+
+@pytest.mark.parametrize(
+    "converter_type,result,compare,parameters",
+    (
+        (
+            "LAMMPS",
+            "lammps.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
+            {
+                "config_file": lammps_config,
+                "mass_tolerance": 0.05,
+                "n_steps": 0,
+                "smart_mass_association": True,
+                "time_step": 1.0,
+                "trajectory_file": lammps_lammps,
+            },
+        ),
+        (
+            "LAMMPS",
+            "lammps_cao.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
+            {
+                "config_file": lammps_cao_config,
+                "mass_tolerance": 0.05,
+                "n_steps": 0,
+                "smart_mass_association": True,
+                "time_step": 1.0,
+                "trajectory_file": lammps_cao_run,
+            },
+        ),
+        (
+            "VASP",
+            "vasp.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time"),
+            {"fold": False, "time_step": 1.0, "xdatcar_file": vasp_xdatcar},
+        ),
+        (
+            "discover",
+            "discover.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/time",
+                "/charge",
+            ),
+            {"fold": True, "his_file": discover_his, "xtd_file": discover_xtd},
+        ),
+        (
+            "cp2k",
+            "cp2k_velocity.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/time",
+                "/charge",
+            ),
+            {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": cp2k_vel},
+        ),
+        (
+            "cp2k",
+            "cp2k.mdt",
+            ("/configuration/coordinates", "/time", "/charge"),
+            {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": None},
+        ),
+        (
+            "cp2k",
+            "cp2k.mdt",
+            ("/configuration/coordinates", "/time", "/charge"),
+            {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": ""},
+        ),
+        (
+            "cp2k",
+            "cp2k_srtio3.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/configuration/forces",
+                "/time",
+            ),
+            {
+                "pos_file": cp2k_srtio3_pos,
+                "cell_file": cp2k_srtio3_cell,
+                "vel_file": cp2k_srtio3_vel,
+                "force_file": cp2k_srtio3_frc,
+            },
+        ),
+        (
+            "cp2k",
+            "cp2k_srtio3.mdt",
+            ("/configuration/coordinates", "/configuration/forces", "/time"),
+            {
+                "pos_file": cp2k_srtio3_pos,
+                "cell_file": cp2k_srtio3_cell,
+                "force_file": cp2k_srtio3_frc,
+            },
+        ),
+        (
+            "charmm",
+            "hem_cam.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time"),
+            {
+                "dcd_file": hem_cam_dcd,
+                "fold": False,
+                "pdb_file": hem_cam_pdb,
+                "time_step": 1.0,
+            },
+        ),
+        (
+            "ase",
+            "ase.mdt",
+            ("/configuration/coordinates", "/configuration/velocities", "/time"),
+            {
+                "trajectory_file": ase_traj,
+                "fold": False,
+                "n_steps": 0,
+                "time_step": 50.0,
+                "time_unit": "fs",
+            },
+        ),
+        (
+            "ase",
+            "ase_xyz.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/unit_cell",
+                "/time",
+            ),
+            {
+                "trajectory_file": xyz_traj,
+                "fold": False,
+                "n_steps": 0,
+                "time_step": 50.0,
+                "time_unit": "fs",
+            },
+        ),
+        (
+            "improvedase",
+            "ase.mdt",
+            (),
+            {
+                "trajectory_file": (lammps_lammps, "lammps-dump-text"),
+                "configuration_file": (lammps_config, "lammps-data"),
+                "fold": False,
+                "n_steps": 0,
+                "elements_from_mass": True,
+                "time_step": 50.0,
+                "time_unit": "fs",
+            },
+        ),
+        (
+            "DL_POLY",
+            "dlp_v2.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
+            {
+                "atom_aliases": "{}",
+                "field_file": dlp_field_v2,
+                "fold": False,
+                "history_file": dlp_history_v2,
+            },
+        ),
+        (
+            "DL_POLY",
+            "dlp_v4.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time"),
+            {
+                "atom_aliases": "{}",
+                "field_file": dlp_field_v4,
+                "fold": False,
+                "history_file": dlp_history_v4,
+            },
+        ),
+        (
+            "DL_POLY",
+            "dlp_with_grad.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/configuration/gradients",
+                "/unit_cell",
+                "/time",
+                "/charge",
+            ),
+            {
+                "atom_aliases": "{}",
+                "field_file": dlp_field_with_grad,
+                "fold": False,
+                "history_file": dlp_history_with_grad,
+            },
+        ),
+        (
+            "NAMD",
+            "namd.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time"),
+            {
+                "dcd_file": apoferritin_dcd,
+                "fold": False,
+                "pdb_file": apoferritin_pdb,
+                "time_step": "1.0",
+            },
+        ),
+        (
+            "CASTEP",
+            "castep.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/configuration/gradients",
+                "/unit_cell",
+                "/time",
+            ),
+            {"atom_aliases": "{}", "castep_file": pbanew_md, "fold": False},
+        ),
+        (
+            "DFTB",
+            "dftb.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/unit_cell",
+                "/time",
+                "/charge",
+            ),
+            {
+                "atom_aliases": "{}",
+                "fold": True,
+                "trj_file": h2o_trj,
+                "xtd_file": h2o_xtd,
+            },
+        ),
+        (
+            "Forcite",
+            "forcite.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/unit_cell",
+                "/time",
+                "/charge",
+            ),
+            {
+                "atom_aliases": "{}",
+                "fold": False,
+                "trj_file": h2o_trj,
+                "xtd_file": h2o_xtd,
+            },
+        ),
+        (
+            "Gromacs",
+            "md.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time"),
+            {"fold": False, "pdb_file": md_pdb, "xtc_file": md_xtc},
+        ),
+        (
+            "Gromacs",
+            "gromacs-nvt.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time"),
+            {"fold": False, "pdb_file": gromacs_nvt[0], "xtc_file": gromacs_nvt[1]},
+        ),
+        (
+            "MDAnalysis",
+            "md.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time"),
+            {
+                "topology_file": (md_pdb, "AUTO"),
+                "coordinate_files": ([str(md_xtc)], "XTC"),
+            },
+        ),  # Does not work with Path
+        (
+            "MDTraj",
+            "hem_cam.mdt",
+            ("/configuration/coordinates", "/unit_cell", "/time"),
+            {
+                "topology_file": hem_cam_pdb,
+                "coordinate_files": [str(hem_cam_dcd)],  # Does not work with Path
+                "time_step": 1.0,
+            },
+        ),
+    ),
+)
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
-def test_build_mdt_file_and_load(tmp_path, converter_type, result, compare, parameters, compression):
+def test_build_mdt_file_and_load(
+    tmp_path, converter_type, result, compare, parameters, compression
+):
     _converter_test(tmp_path, converter_type, result, compare, parameters, compression)
+
 
 @pytest.mark.parametrize(
     "unit_system", ["real", "metal", "si", "cgs", "electron", "micro", "nano"]
 )
 def test_lammps_mdt_conversion_unit_system(tmp_path, unit_system):
-    _converter_test(tmp_path, "LAMMPS", f"lammps_{unit_system}.mdt",
-                    ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
-                    {"config_file": lammps_config,
-                     "mass_tolerance": 0.05,
-                     "n_steps": 0,
-                     "smart_mass_association": True,
-                     "time_step": 1.0,
-                     "trajectory_file": lammps_lammps,
-                     "lammps_units": unit_system},
-                    "gzip")
+    _converter_test(
+        tmp_path,
+        "LAMMPS",
+        f"lammps_{unit_system}.mdt",
+        ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
+        {
+            "config_file": lammps_config,
+            "mass_tolerance": 0.05,
+            "n_steps": 0,
+            "smart_mass_association": True,
+            "time_step": 1.0,
+            "trajectory_file": lammps_lammps,
+            "lammps_units": unit_system,
+        },
+        "gzip",
+    )
+
 
 @pytest.mark.parametrize(
     "trajectory_file,trajectory_format",
     [(lammps_custom, "custom"), (lammps_xyz, "xyz"), (lammps_h5md, "h5md")],
 )
-def test_lammps_mdt_conversion_trajectory_format(tmp_path, trajectory_file, trajectory_format):
-    _converter_test(tmp_path, "LAMMPS", f"lammps_moly_{trajectory_format}.mdt",
-                    ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
-                    {"config_file": lammps_moly,
-                     "mass_tolerance": 0.05,
-                     "n_steps": 0,
-                     "smart_mass_association": True,
-                     "time_step": 1.0,
-                     "trajectory_file": trajectory_file,
-                     "trajectory_format": trajectory_format,
-                     "lammps_units": "electron"},
-                    "gzip")
+def test_lammps_mdt_conversion_trajectory_format(
+    tmp_path, trajectory_file, trajectory_format
+):
+    _converter_test(
+        tmp_path,
+        "LAMMPS",
+        f"lammps_moly_{trajectory_format}.mdt",
+        ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
+        {
+            "config_file": lammps_moly,
+            "mass_tolerance": 0.05,
+            "n_steps": 0,
+            "smart_mass_association": True,
+            "time_step": 1.0,
+            "trajectory_file": trajectory_file,
+            "trajectory_format": trajectory_format,
+            "lammps_units": "electron",
+        },
+        "gzip",
+    )
+
 
 @pytest.mark.parametrize(
     "trajectory",
     (ase_traj, xyz_traj, vasp_xdatcar),
 )
-def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(tmp_path, trajectory):
-    _converter_test(tmp_path, "improvedase", "ase.mdt", # Dummy
-                    (),
-                    {"trajectory_file": str(trajectory),  # Does not work with Path
-                     "fold": False,
-                     "n_steps": 0,
-                     "time_step": 50.0,
-                     "time_unit": "fs"},
-                    "gzip")
+def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(
+    tmp_path, trajectory
+):
+    _converter_test(
+        tmp_path,
+        "improvedase",
+        "ase.mdt",  # Dummy
+        (),
+        {
+            "trajectory_file": str(trajectory),  # Does not work with Path
+            "fold": False,
+            "n_steps": 0,
+            "time_step": 50.0,
+            "time_unit": "fs",
+        },
+        "gzip",
+    )
+
 
 def test_lammps_mdt_conversion_raise_exception_with_incorrect_format(tmp_path):
     temp_name = tmp_path / "output"
@@ -282,10 +446,15 @@ def test_lammps_mdt_conversion_raise_exception_with_incorrect_format(tmp_path):
     with pytest.raises(JobError):
         lammps.run(parameters, status=True)
 
-@pytest.mark.parametrize("files", [
-    ("lammps_ix_cubic_wrapped.dump", "lammps_ix_cubic_unwrapped.dump"),
-    ("lammps_ix.dump", "lammps_ix_unwrapped.dump"),
-], ids=["cubic", "nonorthogonal"])
+
+@pytest.mark.parametrize(
+    "files",
+    [
+        ("lammps_ix_cubic_wrapped.dump", "lammps_ix_cubic_unwrapped.dump"),
+        ("lammps_ix.dump", "lammps_ix_unwrapped.dump"),
+    ],
+    ids=["cubic", "nonorthogonal"],
+)
 def test_lammps_ix_unwrap(tmp_path, files):
     out_1 = tmp_path / "unwrapped"
     out_2 = tmp_path / "ix"
@@ -313,118 +482,231 @@ def test_lammps_ix_unwrap(tmp_path, files):
     compare_hdf5(out_1_name, out_2_name, ("/configuration/coordinates",), atol=1e-4)
 
 
-@pytest.mark.parametrize("config_file, expected", [
-    (DATA_DIR / "POSCAR.lmp", {
-        "atom_types": list(run_length.decode([(0, 16), (1, 92), (2, 178)])),
-        "charges": [0] * 286,
-        "elements": {0: "V", 1: "Bi", 2: "O"},
-        "mass": [50.942, 208.98, 15.999],
-        "n_angle_types": 0,
-        "n_angles": 0,
-        "n_atom_types": 3,
-        "n_atoms": 286,
-        "n_bond_types": 0,
-        "n_bonds": 0,
-        "n_dihedral_types": 0,
-        "n_dihedrals": 0,
-        "n_improper_types": 0,
-        "n_impropers": 0,
-        "origin": [0, 0, 0],
-        "style": BoxStyle.NONORTHOGONAL,
-        "unit_cell": [[20.0293808, 0, 0],
-                      [0, 11.59621143, 0],
-                      [-7.68758428, 0, 19.68041541]],
-    }),
-
-    (DATA_DIR / "lammps_test.config",
-     {"atom_types": [0, 1, 2, 3, 4, 4, 4, 5, 5,
-                     6, 7, 8, 9, 10, 9, 11, 5, 12, 12, 12],
-      "bonds": [(0, 1), (0, 4), (0, 5), (0, 6), (1, 2), (1, 8),
-                (1, 7), (2, 3), (2, 9), (9, 10), (9, 15), (10, 11),
-                (10, 13), (10, 16), (11, 12), (11, 14), (13, 17),
-                (13, 18), (13, 19)],
-      "charges": [-0.3, 0.13, 0.51, -0.51, 0.33, 0.33,
-                  0.33, 0.09, 0.09, -0.47, 0.07, 0.34,
-                  -0.67, -0.27, -0.67, 0.31,
-                  0.09, 0.09, 0.09, 0.09],
-      'elements': {0: '0', 1: '1', 2: '2', 3: '3', 4: '4',
-                   5: '5', 6: '6', 7: '7', 8: '8', 9: '9',
-                   10: '10', 11: '11', 12: '12'},
-      "mass": [14.0067, 12.0107, 12.0107, 15.9994,
-               1.0079, 1.0079, 14.0067, 12.0107,
-               12.0107, 15.9994, 12.0107, 1.0079, 1.0079],
-      "n_angle_types": 21,
-      "n_angles": 33,
-      "n_atom_types": 13,
-      "n_atoms": 20,
-      "n_bond_types": 12,
-      "n_bonds": 19,
-      "n_dihedral_types": 10,
-      "n_dihedrals": 41,
-      "n_improper_types": 3,
-      "n_impropers": 3,
-      "origin": [0, 0, 0],
-      "style": BoxStyle.ORTHOGONAL,
-      "unit_cell": [[40, 0, 0],
-                    [0, 40, 0],
-                    [0, 0, 40]]}
-     ),
-
-    (DATA_DIR / "lammps_2.config", {
-        "atom_types": list(run_length.decode([(0, 250), (1, 250)])),
-        "charges": [0] * 500,
-        "elements": {0: "Mg", 1: "O"},
-        "mass": [35., 16.],
-        "n_angle_types": 0,
-        "n_angles": 0,
-        "n_atom_types": 2,
-        "n_atoms": 500,
-        "n_bond_types": 0,
-        "n_bonds": 0,
-        "n_dihedral_types": 0,
-        "n_dihedrals": 0,
-        "n_improper_types": 0,
-        "n_impropers": 0,
-        "origin": [0, 0, 0],
-        "style": BoxStyle.TRICLINIC,
-        "timestep": "0",
-        "unit_cell": [[17.6,  0. ,  0. ],
-                      [ 8.8, 17.6,  0. ],
-                      [ 0. ,  0. ,  8.8]],
-        "units": "metal",
-    }),
-
-    (lammps_cao_config, {
-        "atom_types": (([4, 1] * (5966 // 2)) +              # O, Ca
-                       ([3, 4] * ((6984 - 5966) // 2)) +     # Mg, O
-                       ([0, 4] * ((8028-6983) // 2)) +       # Al, O
-                       ([0, 4, 4] * ((9594 - 8028) // 3)) +  # Al, O, O
-                       ([5, 4, 4] * ((16140 - 9594) // 3)) + # Si, O, O,
-                       ([2, 4] * ((16150 - 16140) // 2))),   # Fe, O
-        "charges": [0]*16150,
-        "elements": {0: "Al", 1: "Ca", 2: "Fe", 3: "Mg", 4: "O", 5: "Si"},
-        "mass": [26.981539, 40.077999, 55.845001, 24.305   , 15.9994  , 28.085501],
-        "n_angle_types": 0,
-        "n_angles": 0,
-        "n_atom_types": 6,
-        "n_atoms": 16150,
-        "n_bond_types": 0,
-        "n_bonds": 0,
-        "n_dihedral_types": 0,
-        "n_dihedrals": 0,
-        "n_improper_types": 0,
-        "n_impropers": 0,
-        "origin": [0., 0., 0.],
-        "style": BoxStyle.ORTHOGONAL,
-        "unit_cell": [[59.6,  0. ,  0. ],
-                      [ 0. , 59.6,  0. ],
-                      [ 0. ,  0. , 59.6]]},),
-])
+@pytest.mark.parametrize(
+    "config_file, expected",
+    [
+        (
+            DATA_DIR / "POSCAR.lmp",
+            {
+                "atom_types": list(run_length.decode([(0, 16), (1, 92), (2, 178)])),
+                "charges": [0] * 286,
+                "elements": {0: "V", 1: "Bi", 2: "O"},
+                "mass": [50.942, 208.98, 15.999],
+                "n_angle_types": 0,
+                "n_angles": 0,
+                "n_atom_types": 3,
+                "n_atoms": 286,
+                "n_bond_types": 0,
+                "n_bonds": 0,
+                "n_dihedral_types": 0,
+                "n_dihedrals": 0,
+                "n_improper_types": 0,
+                "n_impropers": 0,
+                "origin": [0, 0, 0],
+                "style": BoxStyle.NONORTHOGONAL,
+                "unit_cell": [
+                    [20.0293808, 0, 0],
+                    [0, 11.59621143, 0],
+                    [-7.68758428, 0, 19.68041541],
+                ],
+            },
+        ),
+        (
+            DATA_DIR / "lammps_test.config",
+            {
+                "atom_types": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    4,
+                    4,
+                    5,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    9,
+                    11,
+                    5,
+                    12,
+                    12,
+                    12,
+                ],
+                "bonds": [
+                    (0, 1),
+                    (0, 4),
+                    (0, 5),
+                    (0, 6),
+                    (1, 2),
+                    (1, 8),
+                    (1, 7),
+                    (2, 3),
+                    (2, 9),
+                    (9, 10),
+                    (9, 15),
+                    (10, 11),
+                    (10, 13),
+                    (10, 16),
+                    (11, 12),
+                    (11, 14),
+                    (13, 17),
+                    (13, 18),
+                    (13, 19),
+                ],
+                "charges": [
+                    -0.3,
+                    0.13,
+                    0.51,
+                    -0.51,
+                    0.33,
+                    0.33,
+                    0.33,
+                    0.09,
+                    0.09,
+                    -0.47,
+                    0.07,
+                    0.34,
+                    -0.67,
+                    -0.27,
+                    -0.67,
+                    0.31,
+                    0.09,
+                    0.09,
+                    0.09,
+                    0.09,
+                ],
+                "elements": {
+                    0: "0",
+                    1: "1",
+                    2: "2",
+                    3: "3",
+                    4: "4",
+                    5: "5",
+                    6: "6",
+                    7: "7",
+                    8: "8",
+                    9: "9",
+                    10: "10",
+                    11: "11",
+                    12: "12",
+                },
+                "mass": [
+                    14.0067,
+                    12.0107,
+                    12.0107,
+                    15.9994,
+                    1.0079,
+                    1.0079,
+                    14.0067,
+                    12.0107,
+                    12.0107,
+                    15.9994,
+                    12.0107,
+                    1.0079,
+                    1.0079,
+                ],
+                "n_angle_types": 21,
+                "n_angles": 33,
+                "n_atom_types": 13,
+                "n_atoms": 20,
+                "n_bond_types": 12,
+                "n_bonds": 19,
+                "n_dihedral_types": 10,
+                "n_dihedrals": 41,
+                "n_improper_types": 3,
+                "n_impropers": 3,
+                "origin": [0, 0, 0],
+                "style": BoxStyle.ORTHOGONAL,
+                "unit_cell": [[40, 0, 0], [0, 40, 0], [0, 0, 40]],
+            },
+        ),
+        (
+            DATA_DIR / "lammps_2.config",
+            {
+                "atom_types": list(run_length.decode([(0, 250), (1, 250)])),
+                "charges": [0] * 500,
+                "elements": {0: "Mg", 1: "O"},
+                "mass": [35.0, 16.0],
+                "n_angle_types": 0,
+                "n_angles": 0,
+                "n_atom_types": 2,
+                "n_atoms": 500,
+                "n_bond_types": 0,
+                "n_bonds": 0,
+                "n_dihedral_types": 0,
+                "n_dihedrals": 0,
+                "n_improper_types": 0,
+                "n_impropers": 0,
+                "origin": [0, 0, 0],
+                "style": BoxStyle.TRICLINIC,
+                "timestep": "0",
+                "unit_cell": [[17.6, 0.0, 0.0], [8.8, 17.6, 0.0], [0.0, 0.0, 8.8]],
+                "units": "metal",
+            },
+        ),
+        (
+            lammps_cao_config,
+            {
+                "atom_types": (
+                    ([4, 1] * (5966 // 2))  # O, Ca
+                    + ([3, 4] * ((6984 - 5966) // 2))  # Mg, O
+                    + ([0, 4] * ((8028 - 6983) // 2))  # Al, O
+                    + ([0, 4, 4] * ((9594 - 8028) // 3))  # Al, O, O
+                    + ([5, 4, 4] * ((16140 - 9594) // 3))  # Si, O, O,
+                    + ([2, 4] * ((16150 - 16140) // 2))
+                ),  # Fe, O
+                "charges": [0] * 16150,
+                "elements": {0: "Al", 1: "Ca", 2: "Fe", 3: "Mg", 4: "O", 5: "Si"},
+                "mass": [26.981539, 40.077999, 55.845001, 24.305, 15.9994, 28.085501],
+                "n_angle_types": 0,
+                "n_angles": 0,
+                "n_atom_types": 6,
+                "n_atoms": 16150,
+                "n_bond_types": 0,
+                "n_bonds": 0,
+                "n_dihedral_types": 0,
+                "n_dihedrals": 0,
+                "n_improper_types": 0,
+                "n_impropers": 0,
+                "origin": [0.0, 0.0, 0.0],
+                "style": BoxStyle.ORTHOGONAL,
+                "unit_cell": [[59.6, 0.0, 0.0], [0.0, 59.6, 0.0], [0.0, 0.0, 59.6]],
+            },
+        ),
+        (
+            lammps_ar,
+            {
+                "atom_types": [0, 0, 0, 0],
+                "charges": [0.0, 0.0, 0.0, 0.0],
+                "elements": {0: "0"},
+                "mass": [36.0],
+                "n_angle_types": 0,
+                "n_angles": 0,
+                "n_atom_types": 1,
+                "n_atoms": 4,
+                "n_bond_types": 0,
+                "n_bonds": 0,
+                "n_dihedral_types": 0,
+                "n_dihedrals": 0,
+                "n_improper_types": 0,
+                "n_impropers": 0,
+                "origin": [0.0, 0.0, 0.0],
+                "style": BoxStyle.ORTHOGONAL,
+                "unit_cell": [[5.73, 0.0, 0.0], [0.0, 5.73, 0.0], [0.0, 0.0, 5.73]],
+            },
+        ),
+    ],
+)
 def test_lammps_config_parser(config_file, expected):
     conf = ConfigFileConfigurator("dummy_in")
     conf.parse(config_file)
 
     from pprint import pprint
+
     pprint(conf)
 
     for key in expected.keys() | conf.keys():

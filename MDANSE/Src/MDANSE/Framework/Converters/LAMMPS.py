@@ -984,6 +984,45 @@ class LAMMPS(Converter):
             "default": "real",
         },
     )
+    settings["atom_type"] = (
+        "SingleChoiceConfigurator",
+        {
+            "label": "LAMMPS atom type",
+            "choices": [
+                "From config",
+                "angle",
+                "atomic",
+                "body",
+                "bond",
+                "bpm/sphere",
+                "charge",
+                "dielectric",
+                "dipole",
+                "dpd",
+                "edpd",
+                "electron",
+                "ellipsoid",
+                "full",
+                "hybrid",
+                "line",
+                "mdpd",
+                "molecular",
+                "peri",
+                "rheo",
+                "rheo/thermal",
+                "smd",
+                "sph",
+                "sphere",
+                "spin",
+                "tdpd",
+                "template",
+                "tri",
+                "wavepacket",
+            ],
+            "default": "From config",
+        },
+    )
+
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -1035,6 +1074,7 @@ class LAMMPS(Converter):
         self._lammpsConfig = self.configuration["config_file"]
 
         self._lammps_units = self.configuration["lammps_units"]["value"]
+        self._atom_type = self.configuration["atom_type"]["value"]
 
         if self._lammps_units == "From config":
             if "units" not in self._lammpsConfig:
@@ -1097,6 +1137,7 @@ class LAMMPS(Converter):
         """
         return self._READERS[trajectory_type](
             lammps_units=self._lammps_units,
+            atom_type=self._atom_type,
             timestep=self.configuration["time_step"]["value"],
             fold_coordinates=self.configuration["fold"]["value"],
         )
