@@ -69,10 +69,26 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
 
     """
 
-    def __init__(self, snap_to: float = None, constraint_func: Callable = None):
+    def __init__(
+        self,
+        minimum: float,
+        maximum: float,
+        step: float,
+        value: float,
+        snap_to: float = None,
+        constraint_func: Callable = None,
+    ):
         """
         Parameters
         ----------
+        minimum: float
+            Spinbox minimum value.
+        maximum: float
+            Spinbox maximum value.
+        step: float
+            Single step on spinbox.
+        value: float
+            Initial value.
         snap_to : float | None
             Value to snap to.
         constraint_func : Callable | None
@@ -81,6 +97,11 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         super().__init__()
 
         self.setKeyboardTracking(False)
+
+        self.setMinimum(minimum)
+        self.setMaximum(maximum)
+        self.setSingleStep(step)
+        self.setValue(value)
 
         if constraint_func:
             # We are constraining by searching for a value that satisfies a function
@@ -383,6 +404,12 @@ class FilterSettingGroup(QObject):
         # Flags
         self.flags = flags
 
+        # Set frequency units
+        if Filter.Flags.DIGITAL_ONLY in self.flags:
+            self.units = Filter.FrequencyUnits.CYCLIC
+        else:
+            self.units = Filter.FrequencyUnits.ANGULAR
+
         # Filter designer settings
         self.parent_attributes = parent_attributes
 
@@ -535,48 +562,49 @@ class FilterSettingGroup(QObject):
             signal = widget.valueChanged
 
         if isinstance(setting, float):
-            n_steps = self.parent_attributes.get("n_steps", DEFAULT_N_STEPS)
-            time_step = self.parent_attributes.get("time_step_ps", DEFAULT_TIME_STEP)
-            fs = time_step ** (-1)
-
-            if (
-                Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags
-                and setting_key == "fundamental_freq"
-            ):
-                widget = ConstrainedDoubleSpinBox(
-                    constraint_func=lambda x: (fs % x) == 0
-                )
-            elif setting_key == "cutoff_freq":
-                bin_width = Filter.frequency_resolution(
-                    n_steps, time_step, Filter.FrequencyUnits.ANGULAR
-                )
-                widget = ConstrainedDoubleSpinBox(snap_to=bin_width)
-            else:
-                widget = QDoubleSpinBox()
-
-            # Obtain step size, initial value (multiple of step size), and max value
             if setting_key in {"cutoff_freq", "fundamental_freq"}:
+                # Filter frequency spinbox with constrained values
+                n_steps = self.parent_attributes.get("n_steps", DEFAULT_N_STEPS)
+                time_step = self.parent_attributes.get(
+                    "time_step_ps", DEFAULT_TIME_STEP
+                )
+
+                bin_width = Filter.frequency_resolution(
+                    n_steps, time_step, units=self.units
+                )
+
+                # Scale factor to be applied to bin width to create initial value
                 if Filter.Flags.DIGITAL_ONLY in self.flags:
-                    step = Filter.frequency_resolution(
-                        n_steps, time_step, Filter.FrequencyUnits.CYCLIC
-                    )
-                    value = step * 50
-                    max = Filter.nyquist(time_step, Filter.FrequencyUnits.CYCLIC) - step
+                    initial_value_scale = 50
                 else:
-                    step = Filter.frequency_resolution(
-                        n_steps, time_step, Filter.FrequencyUnits.ANGULAR
+                    initial_value_scale = 5
+
+                # Configure constrained spinbox based on filter type
+                if Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags:
+                    widget = ConstrainedDoubleSpinBox(
+                        minimum=bin_width,
+                        maximum=Filter.nyquist(time_step, units=self.units) - bin_width,
+                        step=bin_width,
+                        value=bin_width,
+                        constraint_func=lambda x: ((1/time_step) % x) == 0,
                     )
-                    value = step * 5
-                    max = Filter.nyquist(time_step, Filter.FrequencyUnits.ANGULAR)
+                else:
+                    widget = ConstrainedDoubleSpinBox(
+                        minimum=bin_width,
+                        maximum=Filter.nyquist(time_step, units=self.units) - bin_width,
+                        step=bin_width,
+                        value=bin_width * initial_value_scale,
+                        snap_to=bin_width,
+                    )
             else:
-                value = setting
-                step = DEFAULT_SPINBOX_STEP_FLOAT
-                max = DEFAULT_SPINBOX_MAX_FLOAT
+                # Other data spinbox (standard QDoubleSpinBox)
+                widget = ConstrainedDoubleSpinBox(
+                    minimum=0,
+                    maximum=DEFAULT_SPINBOX_MAX_FLOAT,
+                    step=DEFAULT_SPINBOX_STEP_FLOAT,
+                    value=setting,
+                )
             widget.setDecimals(3)
-            widget.setMaximum(max)
-            widget.setMinimum(step)
-            widget.setSingleStep(step)
-            widget.setValue(value)
             signal = widget.valueChanged
 
         if isinstance(setting, bool):
