@@ -14,8 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from icecream import ic
-
 from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt, QThread
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
@@ -45,7 +43,7 @@ class TrajectoryModel(QStandardItemModel):
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
-        # self.mutex = QMutex()
+        self.mutex = QMutex()
         self._node_numbers = []
         self._trajectory_paths = {}
         self._trajectory_instances = {}
@@ -55,8 +53,7 @@ class TrajectoryModel(QStandardItemModel):
     @Slot(tuple)
     def append_object(self, input: tuple):
         full_name, label = input
-        ic()
-        # # self.mutex.lock()
+        self.mutex.lock()
         self._node_numbers.append(self._next_number)
         self._trajectory_paths[self._next_number] = full_name
         self._trajectory_instances[self._next_number] = None
@@ -66,8 +63,7 @@ class TrajectoryModel(QStandardItemModel):
         item = QStandardItem(label)
         item.setData(retval)
         self.appendRow(item)
-        # self.mutex.unlock()
-        ic()
+        self.mutex.unlock()
         self.summarise_items()
         return retval
 
@@ -80,39 +76,32 @@ class TrajectoryModel(QStandardItemModel):
     def get_trajectory(self, index: int):
         if index not in self._trajectory_instances:
             return None
-        ic()
-        # self.mutex.lock()
+        self.mutex.lock()
         result = self._trajectory_instances.get(index)
-        # self.mutex.unlock()
-        ic()
+        self.mutex.unlock()
         return result
 
     @Slot(object)
     def accept_results(self, result_tuple):
-        ic()
-        # self.mutex.lock()
+        self.mutex.lock()
         trajectory, index = result_tuple
         self._trajectory_instances[index] = trajectory
-        # self.mutex.unlock()
-        ic()
+        self.mutex.unlock()
         self.finished_loading.emit(index)
         # self._loading_threads[index].wait()
 
     def summarise_items(self):
         result = []
-        ic()
-        # self.mutex.lock()
+        self.mutex.lock()
         for nrow in range(self.rowCount()):
             index = self.index(nrow, 0)
             item = self.itemFromIndex(index)
             result.append([item.text(), item.data()])
-        # self.mutex.unlock()
-        ic()
+        self.mutex.unlock()
         self.all_elements.emit(result)
 
     def removeRow(self, row: int, parent: QModelIndex = None):
-        ic()
-        # self.mutex.lock()
+        self.mutex.lock()
         try:
             node_number = self.item(row).data()
         except AttributeError:
@@ -124,6 +113,5 @@ class TrajectoryModel(QStandardItemModel):
             super().removeRow(row)
         else:
             super().removeRow(row, parent)
-        # self.mutex.unlock()
-        ic()
+        self.mutex.unlock()
         self.summarise_items()

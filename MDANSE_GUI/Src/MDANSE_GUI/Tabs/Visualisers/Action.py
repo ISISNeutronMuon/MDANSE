@@ -16,7 +16,6 @@
 import os
 import traceback
 from pathlib import Path
-from icecream import ic
 
 import numpy as np
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -141,7 +140,6 @@ class Action(QWidget):
         self._settings = None
         self._job_name = None
         self._job_instance = IJob()
-        ic(self._job_instance, type(self._job_instance))
         self._use_preview = use_preview
         self._current_instrument = None
         self._has_been_initialised = False
@@ -171,7 +169,6 @@ class Action(QWidget):
         """
         if trajectory is None:
             self._job_instance = IJob()
-            ic(self._job_instance, type(self._job_instance))
             self._input_trajectory = trajectory
             self._input_trajectory_path = None
             return
@@ -182,7 +179,6 @@ class Action(QWidget):
             LOG.debug("Skipping set_trajectory, no change.")
             return
         self._job_instance = IJob()
-        ic(self._job_instance, type(self._job_instance))
         self._input_trajectory = trajectory
         self._input_trajectory_path = trajectory.filename
         if self._input_trajectory_path is not None:
@@ -223,7 +219,6 @@ class Action(QWidget):
             type(self._job_instance).__name__,
             job_name,
         )
-        ic(self._job_instance, type(self._job_instance))
         if type(self._job_instance).__name__ != job_name:
             self.clear_panel()
             self._has_been_initialised = False
@@ -243,11 +238,9 @@ class Action(QWidget):
             job_instance.build_configuration()
             settings = job_instance.settings
             self._job_instance = job_instance
-            ic(self._job_instance, type(self._job_instance))
         else:
             settings = self._job_instance.settings
             job_instance = self._job_instance
-            ic(self._job_instance, type(self._job_instance))
         LOG.info(f"Configuration {job_instance.configuration}")
         if "trajectory" in settings.keys():
             if self._input_trajectory is None:
@@ -409,7 +402,6 @@ class Action(QWidget):
             LOG.info("Show output prediction")
             pardict = self.set_parameters()
             self._job_instance.setup(pardict, rebuild=False)
-            ic(self._job_instance, type(self._job_instance))
             axes = self._job_instance.preview_output_axis()
             LOG.info(f"Axes = {axes.keys()}")
             text = "<p><b>The results will cover the following range:</b></p>"
