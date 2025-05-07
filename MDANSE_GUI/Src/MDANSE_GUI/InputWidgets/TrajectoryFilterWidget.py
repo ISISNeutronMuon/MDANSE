@@ -93,10 +93,10 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
 
     def reset_connections(self):
         """Reset all connections to custom slots."""
-        for slot in (self.snap_to_value, self.search_by_function):
-            for signal in (self.valueChanged, self.textChanged):
+        for slot_func in (self.snap_to_value, self.search_by_function):
+            for signal_func in (self.valueChanged, self.textChanged):
                 try:
-                    signal.disconnect(slot)
+                    signal_func.disconnect(slot_func)
                 except TypeError:
                     return
 
