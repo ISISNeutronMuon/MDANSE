@@ -24,7 +24,14 @@ from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
 class GridQVectors(LatticeQVectors):
-    """ """
+    """Generates vectors on a grid.
+
+    Vectors are generated from HKL values based on
+    the definition of the unit cell.
+
+    No symmetry considerations are used when generating
+    the vectors.
+    """
 
     settings = collections.OrderedDict()
     settings["hrange"] = (
@@ -59,7 +66,7 @@ class GridQVectors(LatticeQVectors):
         hkls = hkls.reshape(3, nh * nk * nl)
 
         # The k matrix (3,n_hkls)
-        vects = np.dot(self._inverseUnitCell, hkls)
+        vects = self.hkl_to_qvectors(hkls, self._unit_cell)
 
         dists = np.sqrt(np.sum(vects**2, axis=0))
 
@@ -74,9 +81,7 @@ class GridQVectors(LatticeQVectors):
         dists = list(zip(range(len(dists)), dists))
         dists.sort(key=operator.itemgetter(1))
         qGroups = itertools.groupby(dists, key=operator.itemgetter(1))
-        qGroups = collections.OrderedDict(
-            [(k, [item[0] for item in v]) for k, v in qGroups]
-        )
+        qGroups = {k: list(map(operator.itemgetter(0), v)) for k, v in qGroups}
 
         if self._status is not None:
             self._status.start(len(qGroups))
@@ -93,5 +98,4 @@ class GridQVectors(LatticeQVectors):
             if self._status is not None:
                 if self._status.is_stopped():
                     return
-                else:
-                    self._status.update()
+                self._status.update()

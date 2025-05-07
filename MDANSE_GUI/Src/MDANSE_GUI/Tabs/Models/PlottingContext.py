@@ -95,6 +95,11 @@ class SingleDataset:
                 self._scaling_factor = np.array(source[name].attrs["scaling_factor"])
         self._axes = {}
         self._axes_units = {}
+        if self._axes_tag == "index":
+            for dim_number, dim_length in enumerate(self._data.shape):
+                self._axes[f"index{dim_number}"] = np.arange(dim_length)
+                self._axes_units[f"index{dim_number}"] = "N/A"
+            return
         self._current_units = {}
         self._axes_scaling = {}
         self._axes_order = []

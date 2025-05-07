@@ -19,13 +19,21 @@ import random
 
 import numpy as np
 
-from MDANSE.Mathematics.LinearAlgebra import Vector
-
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
+from MDANSE.Mathematics.LinearAlgebra import Vector
 
 
 class CircularLatticeQVectors(LatticeQVectors):
-    """ """
+    """Generates Q vectors on a plane.
+
+    Vectors are grouped into annuli (called 'shells')
+    based on their length.
+
+    Only vectors commensurate with the reciprocal
+    space lattice vectors will be generated.
+    |Q| values for which no valid vectors can
+    be found are omitted in the output.
+    """
 
     settings = collections.OrderedDict()
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
@@ -61,7 +69,7 @@ class CircularLatticeQVectors(LatticeQVectors):
             ]
         )
 
-        qVects = np.dot(self._inverseUnitCell, hkls)
+        qVects = self.hkl_to_qvectors(hkls, self._unit_cell)
 
         qMax = (
             self._configuration["shells"]["last"]
@@ -109,15 +117,11 @@ class CircularLatticeQVectors(LatticeQVectors):
                 self._configuration["q_vectors"][q]["q_vectors"] = vects[:, hits]
                 self._configuration["q_vectors"][q]["n_q_vectors"] = n
                 self._configuration["q_vectors"][q]["q"] = q
-                self._configuration["q_vectors"][q]["hkls"] = np.rint(
-                    np.dot(
-                        self._directUnitCell,
-                        self._configuration["q_vectors"][q]["q_vectors"],
-                    )
+                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
+                    vects[:, hits], self._unit_cell
                 )
 
             if self._status is not None:
                 if self._status.is_stopped():
                     return
-                else:
-                    self._status.update()
+                self._status.update()

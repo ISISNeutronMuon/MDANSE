@@ -15,7 +15,7 @@
 #
 import contextlib
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
@@ -35,6 +35,8 @@ class Grid(Plotter):
         super().__init__()
         self._figure = None
         self._backup_limits = []
+        self._active_curves = []
+        self._backup_curves = []
         self._plot_limit = 8
 
     def slider_labels(self) -> list[str]:
@@ -44,6 +46,42 @@ class Grid(Plotter):
     def slider_limits(self) -> list[str]:
         """Return generic slider limit values."""
         return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
+
+    def check_curve_lengths(self):
+        """Find the maximum number of elements in the x axes of the plot data."""
+        self.curve_length_limit = 0
+        for num, _ in enumerate(self._active_curves):
+            xdata = self._backup_curves[num][0]
+            self.curve_length_limit = max(self.curve_length_limit, len(xdata))
+
+    def change_normalisation(self, new_value: dict[str, Any]):
+        """Normalise the data based on the new parameters.
+
+        Parameters
+        ----------
+        new_value : dict[str, Any]
+            parameters as in NORMALISATION_DEFAULTS
+
+        """
+        super().change_normalisation(new_value)
+        target = self._figure
+        if target is None:
+            return
+        if len(self._active_curves) == 0:
+            return
+        for curve_index, curve in enumerate(self._active_curves):
+            xdata = self._backup_curves[curve_index][0]
+            ydata = self._backup_curves[curve_index][1]
+            xdata, ydata = self.normalise_curve(xdata, ydata)
+            curve.set_xdata(xdata)
+            curve.set_ydata(ydata)
+        target.canvas.draw()
+        for axes in self._axes:
+            axes.relim()
+            axes.autoscale()
+        if self._toolbar is not None:
+            self._toolbar.update()
+            self._toolbar.push_current()
 
     def plot(
         self,
@@ -75,7 +113,11 @@ class Grid(Plotter):
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
+        self._figure = target
         self._axes = []
+        self._backup_curves = []
+        self._active_curves = []
+        self._normalisation_errors = []
         self.apply_settings(plotting_context)
         nplots = 0
         for databundle in plotting_context.datasets().values():
@@ -124,5 +166,13 @@ class Grid(Plotter):
                 axes.set_xlabel(x_axis_label)
                 axes.legend(loc=0)
                 startnum += 1
+                self._active_curves.append(temp_curve)
+                self._backup_curves.append(
+                    [temp_curve.get_xdata(), temp_curve.get_ydata()],
+                )
         self.apply_settings(plotting_context)
+        self.check_curve_lengths()
         target.canvas.draw()
+        if self._toolbar is not None:
+            self._toolbar.update()
+            self._toolbar.push_current()

@@ -70,7 +70,6 @@ class NeutronDynamicTotalStructureFactor(IJob):
         "OutputFilesConfigurator",
         {"formats": ["MDAFormat", "TextFormat"]},
     )
-    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """

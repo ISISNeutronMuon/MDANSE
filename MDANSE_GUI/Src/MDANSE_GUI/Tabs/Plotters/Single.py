@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import contextlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from MDANSE.MLogging import LOG
@@ -31,6 +31,7 @@ class Single(Plotter):
     """Plots all the datasets in the same figure."""
 
     def __init__(self) -> None:
+        """Initialise all ploting parameters to default values."""
         super().__init__()
         self._figure = None
         self._active_curves = []
@@ -68,6 +69,18 @@ class Single(Plotter):
         super().handle_slider(new_value)
         self.offset_curves()
 
+    def change_normalisation(self, new_value: dict[str, Any]):
+        """Normalise the data based on the new parameters.
+
+        Parameters
+        ----------
+        new_value : dict[str, Any]
+            parameters as in NORMALISATION_DEFAULTS
+
+        """
+        super().change_normalisation(new_value)
+        self.offset_curves()
+
     def offset_curves(self):
         """Offset curves against each other based on slider settings."""
         target = self._figure
@@ -80,6 +93,7 @@ class Single(Plotter):
         for num, curve in enumerate(self._active_curves):
             xdata = self._backup_curves[num][0]
             ydata = self._backup_curves[num][1]
+            xdata, ydata = self.normalise_curve(xdata, ydata)
             new_xdata = xdata + num * self.length_max * new_value[1]
             new_ydata = ydata + num * self.height_max * new_value[0]
             curve.set_xdata(new_xdata)
@@ -109,6 +123,13 @@ class Single(Plotter):
                 f"Matplotlib could not set y limits to {saved_ymin}, {saved_ymax}",
             )
         target.canvas.draw()
+
+    def check_curve_lengths(self):
+        """Find the maximum number of elements in the x axes of the plot data."""
+        self.curve_length_limit = 0
+        for num, _ in enumerate(self._active_curves):
+            xdata = self._backup_curves[num][0]
+            self.curve_length_limit = max(self.curve_length_limit, len(xdata))
 
     def plot(
         self,
@@ -140,6 +161,7 @@ class Single(Plotter):
         self._figure = target
         self._active_curves = []
         self._backup_curves = []
+        self._normalisation_errors = []
         axes = target.add_subplot(111)
         self._axes = [axes]
         self.apply_settings(plotting_context)
@@ -221,4 +243,5 @@ class Single(Plotter):
         axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
         axes.grid(visible=True)
         axes.legend(loc=0)
+        self.check_curve_lengths()
         self.offset_curves()

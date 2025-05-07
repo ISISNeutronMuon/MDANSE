@@ -287,7 +287,6 @@ def test_ndtsf(tmp_path, disf, dcsf, qvector_grid):
         "atom_transmutation": None,
         "disf_input_file": disf,
         "dcsf_input_file": dcsf,
-        "running_mode": ("single-core",),
         "trajectory": short_traj,
         "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
     }
@@ -305,16 +304,15 @@ def test_ndtsf(tmp_path, disf, dcsf, qvector_grid):
                  startswith=True, atol=1e-6)
 
 
-def test_ssfsf(tmp_path, disf):
+def test_ssfsf(tmp_path, dcsf):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
     text_file = tmp_path / "output_text.tar"
 
     parameters = {
-        "sample_inc": disf,
-        "running_mode": ("single-core",),
-        "instrument_resolution": ("Ideal", {}),
+        "dcsf_input_file": dcsf,
+        "trajectory": short_traj,
         "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
     }
 
@@ -324,3 +322,8 @@ def test_ssfsf(tmp_path, disf):
     assert out_file.is_file()
     assert log_file.is_file()
     assert text_file.is_file()
+
+    result_file = RESULTS_DIR / "sffsf_short_traj.mda"
+
+    compare_hdf5(out_file, result_file, ("ssf_total"), startswith=True,
+                 atol=1e-6)

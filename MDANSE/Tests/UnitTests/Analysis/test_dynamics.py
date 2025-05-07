@@ -10,8 +10,7 @@ com_traj = CONV_DIR / "com_trajectory.mdt"
 
 
 @pytest.mark.parametrize("interp_order", [1, 2, 3])
-@pytest.mark.parametrize("normalise", [True, False])
-def test_vacf(tmp_path, interp_order, normalise):
+def test_vacf(tmp_path, interp_order):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
@@ -21,7 +20,6 @@ def test_vacf(tmp_path, interp_order, normalise):
         "interpolation_order": interp_order,
         "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "running_mode": ("single-core",),
-        "normalize": normalise,
         "trajectory": short_traj,
     }
 
@@ -31,14 +29,11 @@ def test_vacf(tmp_path, interp_order, normalise):
     assert out_file.is_file()
     assert log_file.is_file()
 
-    if normalise:
-        fname = f"vacf_{interp_order}_normalised.mda"
-    else:
-        fname = f"vacf_{interp_order}.mda"
+    fname = f"vacf_{interp_order}.mda"
 
     result_file = RESULTS_DIR / fname
 
-    compare_hdf5(out_file, result_file, [f"/vacf_{elem}" for elem in ("Cu", "S", "Sb", "total")], scale_result=normalise)
+    compare_hdf5(out_file, result_file, [f"/vacf_{elem}" for elem in ("Cu", "S", "Sb", "total")], scale_result=False)
 
 
 def test_pps(tmp_path):
@@ -93,7 +88,6 @@ def parameters():
         "instrument_resolution": ("Gaussian", {"sigma": 1.0, "mu": 0.0}),
         "interpolation_order": 3,
         "projection": None,
-        "normalize": True,
         "grouping_level": "atom",
         "weights": "equal",
     }
@@ -107,11 +101,11 @@ def parameters():
     # "GeneralAutoCorrelationFunction",
     ("DensityOfStates", ["dos", "vacf"], True),
     ("MeanSquareDisplacement", ["msd"], False),
-    ("VelocityAutoCorrelationFunction", ["vacf"], True),
+    ("VelocityAutoCorrelationFunction", ["vacf"], False),
     ("VanHoveFunctionDistinct", ["g(r,t)"], False),
     ("VanHoveFunctionSelf", ["g(r,t)"], True),
     # "OrderParameter",
-    ("PositionAutoCorrelationFunction", ["pacf"], True),
+    ("PositionAutoCorrelationFunction", ["pacf"], False),
     ("PositionPowerSpectrum", ["pacf", "pps"], True),
 ], ids=lambda x: x[0])
 @pytest.mark.parametrize("running_mode", [("single-core", 1), ("multicore", -4)], ids=lambda x: x[0])

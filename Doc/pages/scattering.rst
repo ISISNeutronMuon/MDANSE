@@ -513,18 +513,13 @@ These expressions correspond to the formalism and equations given in
 
 Structure Factor From Scattering Function
 '''''''''''''''''''''''''''''''''''''''''
-.. note::
+Calculates the static structure factor from the coherent intermediate
+scattering function via the following expression
 
-    **This job is under development and may change in future versions
-    of MDANSE. The documentation here is out-dated and only left here
-    for referencing purposes.**
+.. math::
+   :label: sffsf1
 
-    The structure factor from scattering function is a concept used in
-    scientific research, particularly in the field of neutron scattering
-    experiments. It relates to how particles or atoms within a material
-    contribute to its overall structural properties based on their scattering
-    behavior. This concept provides valuable insights into the material's
-    internal structure, dynamics, and interactions. Researchers use the Structure
-    Factor From Scattering Function to better understand the atomic-level details
-    of materials, which has applications in diverse areas, including materials
-    science and condensed matter physics
+   S_{\alpha\beta}(q) = \delta_{\alpha\beta} + \sqrt{c_{\alpha}c_{\beta}} \left[ F_{\mathrm{coh},\alpha\beta}(q, 0) - 1 \right].
+
+To obtain the total results MDANSE will use the same weights that were
+used in the DCSF calculation.

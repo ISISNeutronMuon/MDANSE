@@ -251,6 +251,9 @@ class DynamicIncoherentStructureFactor(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
+        self.configuration["q_vectors"]["generator"].write_vectors_to_file(
+            self._outputData
+        )
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         weights = self.configuration["weights"].get_weights()

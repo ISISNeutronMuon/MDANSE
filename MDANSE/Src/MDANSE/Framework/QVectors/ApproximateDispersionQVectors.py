@@ -24,7 +24,7 @@ from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
 class ApproximateDispersionQVectors(LatticeQVectors):
-    """ """
+    """Generates Q vectors along a path between two points."""
 
     settings = collections.OrderedDict()
     settings["q_start"] = (
@@ -69,7 +69,7 @@ class ApproximateDispersionQVectors(LatticeQVectors):
             np.array(qStart)[:, np.newaxis] + np.outer(n, np.arange(0, nSteps)) * qStep
         )
 
-        hkls = np.rint(np.dot(self._directUnitCell, vects))
+        hkls = self.qvectors_to_hkl(vects, self._unit_cell)
 
         dists = np.sqrt(np.sum(vects**2, axis=0))
         dists = list(zip(range(len(dists)), dists))
@@ -94,5 +94,4 @@ class ApproximateDispersionQVectors(LatticeQVectors):
             if self._status is not None:
                 if self._status.is_stopped():
                     return
-                else:
-                    self._status.update()
+                self._status.update()

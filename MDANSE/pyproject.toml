@@ -37,7 +37,8 @@ dependencies = [
     "rdkit",
     "MDAnalysis",
     "mdtraj",
-    "networkx"
+    "networkx",
+    "more-itertools",
 ]
 
 # dynamic = ["version", "description"]

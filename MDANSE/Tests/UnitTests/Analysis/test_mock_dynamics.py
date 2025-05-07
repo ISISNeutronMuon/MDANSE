@@ -7,8 +7,7 @@ mock_json = DATA_DIR / "mock.json"
 
 
 @pytest.mark.parametrize("interp_order", [1, 2, 3])
-@pytest.mark.parametrize("normalise", [True, False])
-def test_vacf(tmp_path, interp_order, normalise):
+def test_vacf(tmp_path, interp_order):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
@@ -18,7 +17,6 @@ def test_vacf(tmp_path, interp_order, normalise):
         "interpolation_order": interp_order,
         "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "running_mode": ("single-core",),
-        "normalize": normalise,
         "trajectory": mock_json,
     }
 
@@ -28,13 +26,10 @@ def test_vacf(tmp_path, interp_order, normalise):
     assert out_file.is_file()
     assert log_file.is_file()
 
-    if normalise:
-        fname = f"mock_traj_vacf_{interp_order}_normalised.mda"
-    else:
-        fname = f"mock_traj_vacf_{interp_order}.mda"
+    fname = f"mock_traj_vacf_{interp_order}.mda"
 
     result_file = RESULTS_DIR / fname
 
     compare_hdf5(out_file, result_file,
                 [f"vacf_{elem}" for elem in ("H", "O", "Si", "total")],
-                scale_result=normalise)
+                scale_result=False)

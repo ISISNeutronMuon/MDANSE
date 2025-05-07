@@ -144,7 +144,7 @@ class ProgressDelegate(QItemDelegate):
 
     def paint(self, painter, option, index):
         progress = index.data(self.progress_role)
-        progress_max = max(index.data(self.progress_role + 1) - 1, 1)
+        progress_max = max(index.data(self.progress_role + 1), 1)
         try:
             int(progress)
         except Exception:

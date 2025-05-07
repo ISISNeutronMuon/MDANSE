@@ -22,7 +22,13 @@ from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
 class MillerIndicesQVectors(LatticeQVectors):
-    """ """
+    """Generates vectors on a grid.
+
+    Vectors are generated from HKL values based on
+    the definition of the unit cell.
+    They are then grouped into shells based on
+    their length.
+    """
 
     settings = collections.OrderedDict()
     settings["shells"] = (
@@ -70,7 +76,7 @@ class MillerIndicesQVectors(LatticeQVectors):
         hkls = hkls.reshape(3, int(round(hkls.size / 3)))
 
         # The k matrix (3,n_hkls)
-        vects = np.dot(self._inverseUnitCell, hkls)
+        vects = self.hkl_to_qvectors(hkls, self._unit_cell)
 
         dists2 = np.sum(vects**2, axis=0)
 
@@ -96,15 +102,11 @@ class MillerIndicesQVectors(LatticeQVectors):
                 self._configuration["q_vectors"][q]["q_vectors"] = vects[:, hits]
                 self._configuration["q_vectors"][q]["n_q_vectors"] = nHits
                 self._configuration["q_vectors"][q]["q"] = q
-                self._configuration["q_vectors"][q]["hkls"] = np.rint(
-                    np.dot(
-                        self._directUnitCell,
-                        self._configuration["q_vectors"][q]["q_vectors"],
-                    )
+                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
+                    vects[:, hits], self._unit_cell
                 )
 
             if self._status is not None:
                 if self._status.is_stopped():
                     return
-                else:
-                    self._status.update()
+                self._status.update()

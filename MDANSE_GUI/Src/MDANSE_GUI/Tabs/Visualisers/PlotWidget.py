@@ -13,37 +13,40 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
-import numpy as np
 import matplotlib.pyplot as mpl
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
-from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QComboBox,
-    QLabel,
-    QGridLayout,
-    QDoubleSpinBox,
-)
-from qtpy.QtCore import Slot, Signal, Qt
-
 from MDANSE.MLogging import LOG
+from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtWidgets import (
+    QComboBox,
+    QDoubleSpinBox,
+    QGridLayout,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+)
 
-from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
+from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
+from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
 
 
 class SliderPack(QWidget):
+    """Widget combining several RestrictedSlider instances."""
+
     new_values = Signal(object)
 
     def __init__(self, *args, n_sliders=2, **kwargs) -> None:
+        """Create the widget with the specified number of sliders."""
         super().__init__(*args, **kwargs)
         layout = QGridLayout(self)
         self.setLayout(layout)
@@ -81,17 +84,38 @@ class SliderPack(QWidget):
 
     @Slot(bool)
     def new_coupling(self, new_val: bool):
+        """Couples the first two sliders together if new_val is true.
+
+        Parameters
+        ----------
+        new_val : bool
+            True for coupled sliders, false otherwise
+
+        """
         self._sliders[0]._coupled = new_val
         self._sliders[1]._coupled = new_val
 
     @Slot(object)
-    def new_slider_labels(self, input):
-        for number, element in enumerate(input):
+    def new_slider_labels(self, input_labels: list[str]):
+        """Change the text labels of the sliders to new values."""
+        for number, element in enumerate(input_labels):
             self._labels[number].setText(element)
 
     @Slot(object)
-    def new_limits(self, input):
-        for number, element in enumerate(input):
+    def new_limits(self, input_limits: list[list[float]]):
+        """Change the limits and step number of the sliders.
+
+        Since QSlider works with integer numbers, the float
+        values of limits are used in the spin boxes, while
+        the sliders work with integer 'clicks' in the background.
+
+        Parameters
+        ----------
+        input_limits : list[list[float]]
+            For each slider, [minimum, maximum, step_size] values
+
+        """
+        for number, element in enumerate(input_limits):
             minimum, maximum, stepsize = element[0], element[1], element[2]
             clicks = int(round((maximum - minimum) / stepsize))
             self._minarray[number] = minimum
@@ -103,13 +127,25 @@ class SliderPack(QWidget):
             self._spinboxes[number].setMinimum(minimum)
             self._spinboxes[number].setMaximum(maximum)
             self._spinboxes[number].setSingleStep(stepsize)
+            self._spinboxes[number].setDecimals(abs(int(np.floor(np.log10(stepsize)))))
             temp_value = min(maximum, temp_value)
             temp_value = max(minimum, temp_value)
             click_value = int(round((temp_value - minimum) / stepsize))
             self._sliders[number].setValue(click_value)
             self._spinboxes[number].setValue(temp_value)
 
-    def set_values(self, new_values: List[float]):
+    def set_values(self, new_values: list[float]):
+        """Set both spinboxes and sliders to the new incoming values.
+
+        Values will be replaced with maximum/minimum values allowed by
+        the slider if the input values are outside of the current limits.
+
+        Parameters
+        ----------
+        new_values : list[float]
+            One new value per slider
+
+        """
         nv = np.array(new_values)
         nv = np.maximum(nv, self._minarray)
         nv = np.minimum(nv, self._maxarray)
@@ -120,6 +156,7 @@ class SliderPack(QWidget):
 
     @Slot()
     def slider_to_box(self):
+        """Update spin boxes if slider is moving."""
         vals = np.zeros_like(self._valarray)
         clicks = np.zeros_like(self._clickarray)
         for ns, slider in enumerate(self._sliders):
@@ -130,6 +167,7 @@ class SliderPack(QWidget):
 
     @Slot()
     def box_to_slider(self):
+        """Update sliders if spin boxes have changed."""
         self.blockSignals(True)
         vals = np.zeros_like(self._valarray)
         clicks = np.zeros_like(self._clickarray)
@@ -143,6 +181,7 @@ class SliderPack(QWidget):
 
     @Slot()
     def collect_values(self):
+        """Get and emit current values from all sliders/spinboxes."""
         result = []
         for box in self._spinboxes:
             result.append(box.value())
@@ -151,26 +190,39 @@ class SliderPack(QWidget):
 
 
 class PlotWidget(QWidget):
+    """Plotting area with controls."""
+
     change_slider_labels = Signal(object)
     change_slider_limits = Signal(object)
     reset_slider_values = Signal(bool)
     change_slider_coupling = Signal(bool)
 
     def __init__(self, *args, **kwargs) -> None:
+        """Create an empty plot with the default plotter."""
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None
+        self._normaliser = None
         self._plotting_context = None
         self._slider_max = 100
         self.make_canvas()
         self.set_plotter("Single")
 
     def set_context(self, new_context: "PlottingContext"):
+        """Assign a data model to the plot widget."""
         self._plotting_context = new_context
         self._plotting_context._figure = self._figure
 
     @Slot(str)
     def set_plotter(self, plotter_option: str):
+        """Change the class handling the plot operation.
+
+        Parameters
+        ----------
+        plotter_option : str
+            Plotter name
+
+        """
         try:
             self._plotter = Plotter.create(plotter_option)
         except Exception:
@@ -185,18 +237,44 @@ class PlotWidget(QWidget):
 
     @Slot(object)
     def slider_change(self, new_values: object):
+        """Pass the new slider values to the plotter."""
         self._plotter.handle_slider(new_values)
+
+    @Slot(dict)
+    def normaliser_change(self, new_values: dict):
+        """Pass the new normalisation parameters to the plotter."""
+        self._plotter.change_normalisation(new_values)
+        self.mark_normalisation()
 
     @Slot(bool)
     def set_slider_values(self, reset_needed: bool):
+        """Adjust the slider values if plotter type has changed.
+
+        Parameters
+        ----------
+        reset_needed : bool
+            True if the new plotter uses the sliders differently.
+            If True, will set the sliders to the default values for
+            this plotter type.
+
+        """
         if reset_needed and self._sliderpack is not None:
             values = self._plotter._initial_values
             self._sliderpack.set_values(values)
 
-    def available_plotters(self) -> List[str]:
+    def available_plotters(self) -> list[str]:
+        """List all the plotters supported by this widget."""
         return [str(x) for x in Plotter.indirect_subclasses() if str(x) != "Text"]
 
     def plot_data(self, update_only=False):
+        """Use the internal plotter instance to create a plot.
+
+        Parameters
+        ----------
+        update_only : bool, optional
+            If true, will re-use existing plot elements, by default False
+
+        """
         if self._plotter is None:
             LOG.info("No plotter present in PlotWidget.")
             return
@@ -208,9 +286,20 @@ class PlotWidget(QWidget):
             update_only=update_only,
             toolbar=self._toolbar,
         )
+        self._normaliser.update_spinbox_limits(self._plotter.curve_length_limit)
+        self._normaliser.collect_values()
+        self._sliderpack.collect_values()
+        self.mark_normalisation()
+
+    def mark_normalisation(self):
+        """Indicate in the GUI if normalisation failed for some curves."""
+        if self._plotter._normalisation_errors:
+            self._normaliser.mark_error("\n".join(self._plotter._normalisation_errors))
+        else:
+            self._normaliser.clear_error()
 
     def make_canvas(self, width=12.0, height=9.0, dpi=100):
-        """Creates a matplotlib figure for plotting
+        """Create a matplotlib figure for plotting.
 
         Parameters
         ----------
@@ -225,6 +314,7 @@ class PlotWidget(QWidget):
         -------
         QWidget
             a widget containing both the figure and a toolbar below
+
         """
         canvas = self
         layout = QVBoxLayout(canvas)
@@ -235,14 +325,18 @@ class PlotWidget(QWidget):
         toolbar = NavigationToolbar2QTAgg(figAgg, canvas)
         toolbar.update()
         layout.addWidget(figAgg)
+        normaliser = NormalisationWidget(self)
         slider = SliderPack(self)
         self.change_slider_labels.connect(slider.new_slider_labels)
         self.change_slider_limits.connect(slider.new_limits)
         self.change_slider_coupling.connect(slider.new_coupling)
         self.reset_slider_values.connect(self.set_slider_values)
         slider.new_values.connect(self.slider_change)
+        normaliser.new_values.connect(self.normaliser_change)
         self._sliderpack = slider
+        self._normaliser = normaliser
         layout.addWidget(slider)
+        layout.addWidget(normaliser)
         layout.addWidget(toolbar)
         self._figure = figure
         self._toolbar = toolbar

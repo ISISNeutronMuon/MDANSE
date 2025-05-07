@@ -362,6 +362,8 @@ class DatasetFormatter:
         temp = []
         _ncols = len(new_axes) + 1
         ax_lengths = [len(new_axes[ax_num]) for ax_num in axis_numbers.values()]
+        LOG.debug(f"Axis lengths: {ax_lengths}")
+        LOG.debug(f"Axis sequence: {axis_numbers}")
         total_lines = reduce(lambda x, y: x * y, ax_lengths)
         if is_preview:
             counter = 0

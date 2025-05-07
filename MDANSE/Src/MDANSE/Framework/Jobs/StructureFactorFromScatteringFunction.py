@@ -13,15 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from math import sqrt
 import collections
+import itertools as it
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Signal import get_spectrum
 
 
 class StructureFactorFromScatteringFunction(IJob):
-    """
-    Computes the structure factor from a HDF file containing an intermediate scattering function.
+    """Computes the static structure factor from the intermediate
+    scattering function from the dynamic coherent scattering function
+    calculation results.
     """
 
     label = "Structure Factor From Scattering Function"
@@ -34,17 +36,23 @@ class StructureFactorFromScatteringFunction(IJob):
     ancestor = ["hdf_data"]
 
     settings = collections.OrderedDict()
-    settings["sample_inc"] = (
+    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
+    settings["dcsf_input_file"] = (
         "HDFInputFileConfigurator",
-        {
-            "label": "MDANSE Incoherent Structure Factor",
-            "variables": ["time", "f(q,t)_total"],
-            "default": "disf_prot.h5",
-        },
+        {"label": "MDANSE Coherent Structure Factor", "default": "dcsf.mda"},
     )
-    settings["instrument_resolution"] = (
-        "InstrumentResolutionConfigurator",
-        {"dependencies": {"frames": "sample_inc"}},
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["atom_transmutation"] = (
+        "AtomTransmutationConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
     )
     settings["output_files"] = (
         "OutputFilesConfigurator",
@@ -60,60 +68,37 @@ class StructureFactorFromScatteringFunction(IJob):
         # The number of steps is set to 1 as everything is performed in the finalize method
         self.numberOfSteps = 1
 
-        inputFile = self.configuration["sample_inc"]["instance"]
-
-        resolution = self.configuration["instrument_resolution"]
-
-        self._outputData.add(
-            "time", "LineOutputVariable", inputFile["time"][:], units="ps"
-        )
-
-        self._outputData.add(
-            "time_window",
-            "LineOutputVariable",
-            resolution["time_window_positive"],
-            axis="time",
-            units="au",
-        )
+        inputFile = self.configuration["dcsf_input_file"]["instance"]
 
         self._outputData.add("q", "LineOutputVariable", inputFile["q"][:], units="1/nm")
+        nq = len(inputFile["q"][:])
 
-        self._outputData.add(
-            "omega", "LineOutputVariable", resolution["omega"], units="rad/ps"
+        self._elementsPairs = sorted(
+            it.combinations_with_replacement(
+                self.configuration["atom_selection"]["unique_names"], 2
+            )
         )
+        for pair in self._elementsPairs:
+            pair_str = "".join(map(str, pair))
+
+            self._outputData.add(
+                f"ssf_total_{pair_str}",
+                "LineOutputVariable",
+                (nq,),
+                axis="q",
+                units="au",
+                main_result=True,
+                partial_result=True,
+            )
 
         self._outputData.add(
-            "omega_window",
+            "ssf_total",
             "LineOutputVariable",
-            resolution["omega_window"],
-            axis="omega",
+            (nq,),
+            axis="q",
             units="au",
+            main_result=True,
         )
-
-        nQVectors = len(inputFile["q"][:])
-        nOmegas = resolution["n_omegas"]
-
-        for k, v in list(inputFile.items()):
-            if k.startswith("f(q,t)_"):
-                self._outputData.add(
-                    k, "SurfaceOutputVariable", v[:], axis="q|time", units="au"
-                )
-                suffix = k[7:]
-                self._outputData.add(
-                    f"s(q,f)_{suffix}",
-                    "SurfaceOutputVariable",
-                    (nQVectors, nOmegas),
-                    axis="q|omega",
-                    units="au",
-                    main_result=True,
-                    partial_result=True,
-                )
-                self._outputData[f"s(q,f)_{suffix}"][:] = get_spectrum(
-                    v[:],
-                    self.configuration["instrument_resolution"]["time_window"],
-                    self.configuration["instrument_resolution"]["time_step"],
-                    axis=1,
-                )
 
     def run_step(self, index):
         """
@@ -137,9 +122,32 @@ class StructureFactorFromScatteringFunction(IJob):
         pass
 
     def finalize(self):
+        """Calculate the static structure factor from the intermediate
+        scattering function.
         """
-        Finalizes the calculations (e.g. averaging the total term, output files creations ...).
-        """
+        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        norm_natoms = 1.0 / sum(nAtomsPerElement.values())
+
+        for pair in self._elementsPairs:
+            pair_str = "".join(map(str, pair))
+            fqt = self.configuration["dcsf_input_file"]["instance"][
+                f"f(q,t)_{pair_str}"
+            ]
+            sqrt_cij = sqrt(
+                nAtomsPerElement[pair[0]] * nAtomsPerElement[pair[1]] * norm_natoms**2
+            )
+            delta_ij = 1 if pair[0] == pair[1] else 0
+            self._outputData[f"ssf_total_{pair_str}"][:] = (
+                1 + (fqt[:, 0] - delta_ij) / sqrt_cij
+            )
+            self._outputData[f"ssf_total_{pair_str}"].scaling_factor = (
+                fqt.attrs["scaling_factor"] * sqrt_cij
+            )
+
+            self._outputData["ssf_total"][:] += (
+                self._outputData[f"ssf_total_{pair_str}"][:]
+                * self._outputData[f"ssf_total_{pair_str}"].scaling_factor
+            )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
@@ -148,5 +156,6 @@ class StructureFactorFromScatteringFunction(IJob):
             self,
         )
 
-        self.configuration["sample_inc"]["instance"].close()
+        self.configuration["trajectory"]["instance"].close()
+        self.configuration["dcsf_input_file"]["instance"].close()
         super().finalize()

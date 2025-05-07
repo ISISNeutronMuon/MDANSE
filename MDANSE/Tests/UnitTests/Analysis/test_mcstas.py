@@ -32,7 +32,6 @@ def parameters():
     parameters["instrument_resolution"] = ("Gaussian", {"sigma": 1.0, "mu": 0.0})
     parameters["interpolation_order"] = "3rd order"
     parameters["projection"] = None
-    parameters["normalize"] = True
     parameters["grouping_level"] = "atom"
     parameters["weights"] = "equal"
     return parameters

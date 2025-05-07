@@ -22,7 +22,15 @@ from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
 
 class LinearQVectors(IQVectors):
-    """ """
+    """Generates vectors randomly on a straight line.
+
+    Vectors within one shell are generated within
+    a tolerance limit around a central |Q| value.
+    Most calculations will produce one data point
+    for |Q| by averaging the results over all
+    vectors in the group, which is still called
+    a shell.
+    """
 
     settings = collections.OrderedDict()
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
@@ -73,5 +81,4 @@ class LinearQVectors(IQVectors):
             if self._status is not None:
                 if self._status.is_stopped():
                     return
-                else:
-                    self._status.update()
+                self._status.update()

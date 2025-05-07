@@ -13,8 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import TYPE_CHECKING
+import copy
+import enum
+from typing import TYPE_CHECKING, Any
 
+import numpy as np
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.MLogging import LOG
 
@@ -24,10 +27,69 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
+class NormOperations(enum.Enum):
+    """Enum for selecting mathematical operations when calculating norms."""
+
+    AVERAGE = enum.auto()
+    SUM = enum.auto()
+    NOT_IMPLEMENTED = enum.auto()
+
+
+def str_to_enum(operation: str) -> NormOperations:
+    """Get the right enum from the input text string.
+
+    Parameters
+    ----------
+    operation : str
+        name of the mathematical operation as string.
+
+    Returns
+    -------
+    NormOperations
+        enum value of the operation.
+
+    """
+    if operation == "average":
+        return NormOperations.AVERAGE
+    if operation == "sum":
+        return NormOperations.SUM
+    return NormOperations.NOT_IMPLEMENTED
+
+
+def enum_to_str(operation: NormOperations) -> str:
+    """Convert the enum to a text string for the GUI.
+
+    Parameters
+    ----------
+    operation : NormOperations
+        Enum of the mathematical operation
+
+    Returns
+    -------
+    str
+        name of the operation as string
+
+    """
+    if operation == NormOperations.AVERAGE:
+        return "average"
+    if NormOperations.SUM:
+        return "sum"
+    return "not implemented"
+
+
+NORMALISATION_DEFAULTS = {
+    "apply": False,
+    "min_index": 0,
+    "max_index": 1,
+    "operation": NormOperations.AVERAGE,
+}
+
+
 class Plotter(metaclass=SubclassFactory):
     """Parent class to all classes used for displaying data."""
 
     def __init__(self) -> None:
+        """Create defaults common to all plotters."""
         self._figure = None
         self._axes = []
         self._initial_values = [0.0, 0.0]
@@ -36,6 +98,9 @@ class Plotter(metaclass=SubclassFactory):
         self._value_reset_needed = True
         self._toolbar = None
         self._slider_reference = None
+        self.curve_length_limit = 10
+        self._normalisation_values = copy.copy(NORMALISATION_DEFAULTS)
+        self._normalisation_errors = []
 
     def request_slider_values(self):
         """Manually read values from sliders, if they are present."""
@@ -101,6 +166,86 @@ class Plotter(metaclass=SubclassFactory):
         """Respond to new slider values."""
         self._slider_values = new_value
 
+    def normalise_curve(
+        self, xdata: np.ndarray, ydata: np.ndarray
+    ) -> tuple[np.ndarray]:
+        """Scale a 1D curve according to the current normalisation parameters.
+
+        Parameters
+        ----------
+        xdata : np.ndarray
+            1D array of x values of the curve
+        ydata : np.ndarray
+            1D array of y values of the curve
+
+        Returns
+        -------
+        tuple[np.ndarray]
+            xdata and ydata with scaling applied
+
+        """
+        apply = self._normalisation_values["apply"]
+        operation = self._normalisation_values["operation"]
+        if not apply or operation == NormOperations.NOT_IMPLEMENTED:
+            return xdata, ydata
+        min_index = self._normalisation_values["min_index"]
+        max_index = self._normalisation_values["max_index"]
+        ref_values = ydata[min_index:max_index]
+        if len(ref_values) < 1:
+            self._normalisation_errors.append(
+                "No points within the specified index range"
+            )
+            return xdata, ydata
+        if operation == NormOperations.AVERAGE:
+            scale_factor = np.mean(ref_values)
+        elif operation == NormOperations.SUM:
+            scale_factor = np.sum(ref_values)
+        if np.isclose(scale_factor, 0.0):
+            self._normalisation_errors.append(
+                "Normalisation factor is 0 and will not be applied."
+            )
+            return xdata, ydata
+        return xdata, ydata / scale_factor
+
+    def normalise_array(self, data_array: np.ndarray) -> np.ndarray:
+        """Normalise a 2D array according to the current normalisation parameters.
+
+        Parameters
+        ----------
+        data_array : np.ndarray
+            2D array of data for plotting
+
+        Returns
+        -------
+        np.ndarray
+            the data_array with new relative intensities between rows
+
+        """
+        apply = self._normalisation_values["apply"]
+        operation = self._normalisation_values["operation"]
+        if not apply or operation == NormOperations.NOT_IMPLEMENTED:
+            return data_array
+        min_index = self._normalisation_values["min_index"]
+        max_index = self._normalisation_values["max_index"]
+        ref_column = data_array[:, min_index:max_index]
+        if ref_column.shape[1] < 1:
+            return data_array
+        if operation == NormOperations.AVERAGE:
+            scale_column = np.mean(ref_column, axis=1)
+        elif operation == NormOperations.SUM:
+            scale_column = np.sum(ref_column, axis=1)
+        if np.any(np.isclose(scale_column, 0.0)):
+            self._normalisation_errors.append(
+                "Normalisation factor is 0 for some rows of the 2D array."
+            )
+            return data_array
+        return data_array / scale_column.reshape((len(scale_column), 1))
+
+    def change_normalisation(self, new_value: dict[str, Any]):
+        """Respond to new normalisation values."""
+        self._normalisation_errors = []
+        self._normalisation_values = new_value
+
     def plot(
         self,
         plotting_context: "PlottingContext",
@@ -122,6 +267,8 @@ class Plotter(metaclass=SubclassFactory):
             GUI instance of the matplotlib toolbar, by default None
 
         """
+        print(f"normalisation errors {self._normalisation_errors}, setting to []")
+        self._normalisation_errors = []
         target = self.get_figure(figure)
         if target is None:
             return
