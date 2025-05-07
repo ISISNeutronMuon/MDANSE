@@ -117,7 +117,7 @@ class TabbedWindow(QMainWindow):
         )
 
         self.tabs.currentChanged.connect(self.tabs.reset_current_color)
-        self.move_tabs_to_threads()
+        # self.move_tabs_to_threads()
 
     def move_tabs_to_threads(self):
         for tabname, tabobject in self._tabs.items():

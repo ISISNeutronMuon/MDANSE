@@ -413,9 +413,8 @@ class AtomSelectionWidget(WidgetBase):
         traj_config = self._configurator._configurable[
             self._configurator._dependencies["trajectory"]
         ]
-        traj_filename = traj_config["filename"]
-        hdf_traj = traj_config["hdf_trajectory"]
-        self.helper = self.create_helper((traj_filename, hdf_traj))
+        trajectory_instance = traj_config["instance"]
+        self.helper = self.create_helper(trajectory_instance)
         helper_button = QPushButton(self._push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
         self._layout.addWidget(self._field)
@@ -426,7 +425,7 @@ class AtomSelectionWidget(WidgetBase):
 
     def create_helper(
         self,
-        traj_data: tuple[str, HDFTrajectoryInputData],
+        trajectory: Trajectory,
     ) -> SelectionHelper:
         """Create the selection dialog.
 
@@ -435,8 +434,8 @@ class AtomSelectionWidget(WidgetBase):
 
         Parameters
         ----------
-        traj_data : tuple[str, HDFTrajectoryInputData]
-            A tuple of the trajectory data used to load the 3D viewer.
+        trajectory : Trajectory
+            A trajectory instance, loaded from a file by the GUI.
 
         Returns
         -------
@@ -444,7 +443,7 @@ class AtomSelectionWidget(WidgetBase):
             Create and return the selection helper QDialog.
 
         """
-        return SelectionHelper(traj_data, self._field, self._base)
+        return SelectionHelper(trajectory, self._field, self._base)
 
     @Slot()
     def helper_dialog(self) -> None:

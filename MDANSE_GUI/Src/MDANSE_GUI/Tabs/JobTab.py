@@ -68,6 +68,7 @@ class JobTab(GeneralTab):
         self._core.add_widget(self._instrument_combo, upper=False)
         self.action._parent_tab = self
         self._visualiser._parent_tab = self
+        cmodel.finished_loading.connect(self.current_trajectory_ready)
 
     def set_own_index(self, index: int):
         self._own_index = index
@@ -91,7 +92,14 @@ class JobTab(GeneralTab):
         return results
 
     @Slot(int)
+    def current_trajectory_ready(self, index: int):
+        if index != self._current_index:
+            return
+        self.set_current_trajectory(index)
+
+    @Slot(int)
     def set_current_trajectory(self, index: int) -> None:
+        self._current_index = index
         self._current_trajectory = self._trajectory_combo.currentText()
 
         traj_model = self._trajectory_combo.model()
