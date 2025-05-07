@@ -22,6 +22,8 @@ lammps_h5md = CONV_DIR / "lammps_moly_h5md.h5"
 lammps_cao_config = DATA_DIR / "lammps_CaO.config"
 lammps_cao_run = DATA_DIR / "lammps_CaO.lammps"
 lammps_ar = DATA_DIR / "lammps_ar.config"
+lammps_fake = DATA_DIR / "lammps_fake.lammps"
+lammps_fake_config = DATA_DIR / "lammps_fake.config"
 vasp_xdatcar = DATA_DIR / "XDATCAR_version5"
 discover_his = DATA_DIR / "sushi.his"
 discover_xtd = DATA_DIR / "sushi.xtd"
@@ -101,6 +103,19 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
                 "smart_mass_association": True,
                 "time_step": 1.0,
                 "trajectory_file": lammps_cao_run,
+            },
+        ),
+        (
+            "LAMMPS",
+            "lammps_fake.mdt",
+            ("/configuration/coordinates", "/configuration/gradients", "/configuration/velocities", "/unit_cell", "/time"),
+            {
+                "config_file": lammps_fake_config,
+                "mass_tolerance": 0.05,
+                "n_steps": 0,
+                "smart_mass_association": True,
+                "time_step": 1.0,
+                "trajectory_file": lammps_fake,
             },
         ),
         (

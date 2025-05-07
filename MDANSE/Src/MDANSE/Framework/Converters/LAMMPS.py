@@ -417,6 +417,10 @@ class LAMMPScustom(LAMMPSReader):
                         "No coordinates could be found in the trajectory"
                     )
 
+                for key in ("v", "f"):
+                    if all(f"{key}{dim}" in self.keywords for dim in DIMS):
+                        self.keywords[key] = tuple(f"{key}{dim}" for dim in DIMS)
+
                 self._rankToName = {}
                 element_list = []
                 name_list = []
@@ -520,6 +524,14 @@ class LAMMPScustom(LAMMPSReader):
         coords = np.empty(
             (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
         )
+        if "v" in self.keywords:
+            velocities = np.empty(
+                (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
+            )
+        if "f" in self.keywords:
+            forces = np.empty(
+                (self._trajectory.chemical_system.number_of_atoms, 3), dtype=np.float64
+            )
 
         if self._charge is not None:
             charges = np.empty(
@@ -533,8 +545,21 @@ class LAMMPScustom(LAMMPSReader):
             }
             idx = temp.get("id", i) - 1  # MDANSE 0-indexed
             coords[idx, :] = np.array(
-                [temp[pos] for pos in self.keywords["pos"]], dtype=np.float64
+                [temp[pos] for pos in self.keywords["pos"]],
+                dtype=np.float64,
             )
+
+            if "v" in self.keywords:
+                velocities[idx, :] = np.array(
+                    [temp[pos] for pos in self.keywords["v"]],
+                    dtype=np.float64,
+                )
+
+            if "f" in self.keywords:
+                forces[idx, :] = np.array(
+                    [temp[pos] for pos in self.keywords["f"]],
+                    dtype=np.float64,
+                )
 
             if "q" in temp:
                 charges[idx] = self._type_map["q"](temp["q"])
@@ -572,6 +597,11 @@ class LAMMPScustom(LAMMPSReader):
         if self._fold:
             # The whole configuration is folded in to the simulation box.
             real_conf.fold_coordinates()
+
+        if "v" in self.keywords:
+            real_conf["velocities"] = velocities
+        if "f" in self.keywords:
+            real_conf["gradients"] = forces
 
         # A snapshot is created out of the current configuration.
         self._trajectory.dump_configuration(

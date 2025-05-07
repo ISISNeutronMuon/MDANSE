@@ -512,7 +512,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
     def atoms_parser(
         self, lines: Iterable[str], atom_type: Optional[AtomTypes] = None
-    ) -> None:
+    ) -> dict:
         """Parse atoms block.
 
         If header does not contain atoms or atom types will set those.
