@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from functools import partial
-from qtpy.QtCore import Slot
+from qtpy.QtCore import Slot, Signal
 from qtpy.QtWidgets import QWidget
 
 from MDANSE.Framework.Converters.Converter import Converter
@@ -38,6 +38,8 @@ can be tried as a backup option.
 class ConverterTab(GeneralTab):
     """The tab for choosing and starting a new job."""
 
+    action_output_trigger = Signal()
+
     def __init__(self, *args, **kwargs):
         self.action = kwargs.pop("action")
         super().__init__(*args, **kwargs)
@@ -45,6 +47,7 @@ class ConverterTab(GeneralTab):
         self._job_starter = None
         self.action._parent_tab = self
         self._visualiser._parent_tab = self
+        self.action_output_trigger.connect(self.action.test_file_outputs)
 
     def set_job_starter(self, job_starter):
         self._job_starter = job_starter
@@ -57,7 +60,7 @@ class ConverterTab(GeneralTab):
 
     @Slot()
     def update_action_on_tab_activation(self):
-        self.action.test_file_outputs()
+        self.action_output_trigger.emit()
 
     def grouped_settings(self):
         results = super().grouped_settings()

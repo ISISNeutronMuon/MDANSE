@@ -16,7 +16,7 @@
 import os
 from pathlib import PurePath
 from functools import partial
-from qtpy.QtCore import Slot
+from qtpy.QtCore import Slot, Signal
 from qtpy.QtWidgets import QWidget, QComboBox, QLabel
 
 from MDANSE.MLogging import LOG
@@ -41,6 +41,13 @@ or to save the inputs as a script.
 
 class JobTab(GeneralTab):
     """The tab for choosing and starting a new job."""
+
+    action_output_trigger = Signal()
+    action_instrument_trigger = Signal()
+    action_clear_panel = Signal()
+    new_job = Signal(str)
+    new_instrument = Signal(object)
+    new_trajectory = Signal(object)
 
     def __init__(self, *args, **kwargs):
         self._needs_updating = False
@@ -69,6 +76,12 @@ class JobTab(GeneralTab):
         self.action._parent_tab = self
         self._visualiser._parent_tab = self
         cmodel.finished_loading.connect(self.current_trajectory_ready)
+        self.action_instrument_trigger.connect(self.action.apply_instrument)
+        self.action_output_trigger.connect(self.action.test_file_outputs)
+        self.new_job.connect(self.action.update_panel)
+        self.new_instrument.connect(self.action.set_instrument)
+        self.new_trajectory.connect(self.action.set_trajectory)
+        self.action_clear_panel.connect(self.action.clear_panel)
 
     def set_own_index(self, index: int):
         self._own_index = index
@@ -106,8 +119,8 @@ class JobTab(GeneralTab):
         if traj_model.rowCount() < 1:
             # the combobox changed and there are no trajectories, they
             # were probably deleted lets clear the action widgets
-            self.action.set_trajectory(trajectory=None)
-            self.action.clear_panel()
+            self.new_trajectory.emit(None)
+            self.action_clear_panel.emit()
             return
 
         node_number = traj_model.item(index, 0).data()
@@ -116,24 +129,24 @@ class JobTab(GeneralTab):
         )
         # The combobox was changed we need to update the action
         # widgets with the new trajectory
-        self.action.set_trajectory(trajectory=traj_model.get_trajectory(node_number))
+        self.new_trajectory.emit(traj_model.get_trajectory(node_number))
         current_item = self._core.current_item()
         if current_item is not None:
             # we only update the widget if a job is selected from the
             # actions tree
-            self.action.update_panel(current_item.text())
+            self.new_job.emit(current_item.text())
 
     @Slot(int)
     def set_current_instrument(self, index: int):
         LOG.debug(f"Switched instrument to {index}")
         instrument_model = self._instrument_combo.model()
-        self.action.set_instrument(instrument_model._nodes[index])
+        self.new_instrument.emit(instrument_model._nodes[index])
         self._instrument_index = index
         current_item = self._core.current_item()
         if current_item is not None:
             # we only update the widget if a job is selected from the
             # actions tree
-            self.action.apply_instrument()
+            self.action_instrument_trigger.emit()
 
     @Slot(int)
     def update_action_after_instrument_change(self, index: int):
@@ -145,11 +158,11 @@ class JobTab(GeneralTab):
     def update_action_on_tab_activation(self, current_index: int):
         if current_index != self._own_index:
             return
-        self.action.test_file_outputs()
+        self.action_output_trigger.emit()
         if self._needs_updating:
             current_item = self._core.current_item()
             if current_item is not None:
-                self.action.apply_instrument()
+                self.action_instrument_trigger.emit()
             self._needs_updating = False
 
     @classmethod

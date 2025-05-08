@@ -157,6 +157,7 @@ class Action(QWidget):
     def set_settings(self, settings):
         self._settings = settings
 
+    @Slot(object)
     def set_trajectory(self, trajectory: Trajectory) -> None:
         """Set the trajectory path and filename.
 
@@ -171,6 +172,7 @@ class Action(QWidget):
             self._job_instance = IJob()
             self._input_trajectory = trajectory
             self._input_trajectory_path = None
+            self._trajectory_configurator = None
             return
         if (
             trajectory.filename == self._input_trajectory_path
@@ -188,11 +190,16 @@ class Action(QWidget):
         if self._job_name is not None:
             self._parent_tab.set_path(self._job_name, str(self._default_path))
 
+    @Slot(object)
     def set_instrument(self, instrument: SimpleInstrument) -> None:
         self._current_instrument = instrument
 
+    @Slot()
     def clear_panel(self) -> None:
         """Clear the widgets so that it leaves an empty layout"""
+        self.save_button = None
+        self.execute_button = None
+        self.post_execute_checkbox = None
         for widget in self._widgets_in_layout:
             self.layout.removeWidget(widget)
             # fixes #448
@@ -206,6 +213,7 @@ class Action(QWidget):
         self._widgets_in_layout = []
         self._preview_box = None
 
+    @Slot(str)
     def update_panel(self, job_name: str) -> None:
         """Sets all the widgets for the selected job.
 
@@ -358,7 +366,10 @@ class Action(QWidget):
                 widget.updateValue()
         self.allow_execution()
 
+    @Slot()
     def apply_instrument(self):
+        if not self._trajectory_configurator:
+            return
         if self._current_instrument is not None:
             initial_configuration = self._trajectory_configurator[
                 "instance"

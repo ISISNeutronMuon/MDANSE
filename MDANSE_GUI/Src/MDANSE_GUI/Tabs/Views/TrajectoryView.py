@@ -56,7 +56,8 @@ class TrajectoryView(QListView):
         model = self.model()
         index = self.currentIndex()
         node_number = model.itemFromIndex(index).data()
-        trajectory, instance = model._nodes[node_number]
+        instance = model._trajectory_instances[node_number]
+        trajectory = model._trajectory_paths[node_number]
         instance.close()
         self.free_name.emit(str(trajectory))
         model.removeRow(index.row())
