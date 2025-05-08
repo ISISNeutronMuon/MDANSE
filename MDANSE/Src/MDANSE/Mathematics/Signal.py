@@ -440,7 +440,10 @@ class Filter(ABC):
         """Calculates the frequency response of the filter from the filter's transfer function numerator and denominator coefficients.
 
         :Parameters:
-            #. expr (np.array): the rational polynomial expression for the filter transfer function, in terms of its numerator and denominator coefficients
+            #. param (Tuple[TransferFunction, FrequencyRangeMethod]):
+            Tuple contains the following elements:
+                - the rational polynomial expression for the filter transfer function, in terms of its numerator and denominator coefficients
+                - the method by which to compute the frequency range for displaying the filter
         """
         expr, method = params
         methods = self.__class__.FrequencyRangeMethod
