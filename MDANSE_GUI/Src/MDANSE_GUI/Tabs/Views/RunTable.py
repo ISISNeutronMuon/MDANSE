@@ -23,6 +23,12 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
+from MDANSE_GUI.Tabs.Models.JobHolder import (
+    JobThread,
+    JobEntry,
+    Subprocess,
+    QueueListener,
+)
 
 
 class RunTable(QTableView):
@@ -70,7 +76,20 @@ class RunTable(QTableView):
             if action not in job_state._allowed_actions:
                 temp_action.setEnabled(False)
 
-    def getJobObjects(self):
+    def getJobObjects(self) -> tuple[JobEntry, JobThread, Subprocess, QueueListener]:
+        """Return the objects from JobHolder for the current row.
+
+        Returns
+        -------
+        JobEntry
+            the QObject supervising an MDANSE job
+        JobThread
+            a QThread updating the job progress bar and status
+        Subprocess
+            a Python Subprocess which is the actual runnig job
+        QueueListener
+            a handler object for interprocess communication
+        """
         model = self.model()
         index = self.currentIndex()
         item_row = index.row()
@@ -96,6 +115,8 @@ class RunTable(QTableView):
         except ValueError:
             LOG.error("The process is still running!")
         else:
+            watcher.terminate()
+            listener.stop()
             model = self.model()
             index = self.currentIndex()
             model.removeRow(index.row())

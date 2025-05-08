@@ -13,37 +13,51 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import traceback
 from logging import Handler
 from logging.handlers import QueueListener
-from multiprocessing import Pipe, Queue, Event
-import traceback
+from multiprocessing import Event, Pipe, Queue
+from typing import Optional
 
-from qtpy.QtGui import QStandardItemModel, QStandardItem
-from qtpy.QtCore import QObject, Slot, Signal, QTimer, QThread, QMutex, Qt
-
-from MDANSE.MLogging import FMT, LOG
 from MDANSE.Framework.Converters import Converter
+from MDANSE.MLogging import FMT, LOG
+from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
+from qtpy.QtGui import QStandardItem, QStandardItemModel
 
-from MDANSE_GUI.Subprocess.Subprocess import Subprocess, Connection
 from MDANSE_GUI.Subprocess.JobState import (
-    Starting,
-    Finished,
-    Running,
-    Failed,
-    Paused,
     Aborted,
+    Failed,
+    Finished,
+    Paused,
+    Running,
+    Starting,
 )
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
+from MDANSE_GUI.Subprocess.Subprocess import Connection, Subprocess
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 
 
 class JobThread(QThread):
+    """A QThread subclass monitoring a single MDANSE job."""
+
     def __init__(
         self,
         job_comm: "JobCommunicator",
         receiving_end: "Connection",
         subprocess_reference: "Subprocess",
     ):
+        """Create a thread for a job subprocess.
+
+        Parameters
+        ----------
+        job_comm : JobCommunicator
+            QObject for turning job updates into Qt signals
+        receiving_end : Connection
+            pipe end for receiving updates from job status object
+        subprocess_reference : Subprocess
+            the main process of the MDANSE analysis/conversion job.
+
+        """
         super().__init__()
         self._job_comm = job_comm
         self._pipe_end = receiving_end
@@ -54,11 +68,20 @@ class JobThread(QThread):
         self._timer.setInterval(2000)
 
     def start(self, *args, **kwargs) -> None:
+        """Start the thread event loop and the internal timer.
+
+        Returns
+        -------
+        None
+            output of the parent class .start method, which should be None
+
+        """
         retval = super().start(*args, **kwargs)
         self._timer.start()
         return retval
 
     def fail(self):
+        """End all the background processes if the job ended or failed."""
         self._job_comm.status_update(("COMMUNICATION", False))
         self._keep_running = False
         self._timer.stop()
@@ -66,6 +89,7 @@ class JobThread(QThread):
 
     @Slot()
     def check_if_alive(self):
+        """Check if the subprocess has been ended by external factors, and report it."""
         if self._subprocess._closed:
             # The subprocess was closed probably by the user, don't need
             # to keep checking that the subprocess is alive anymore.
@@ -79,6 +103,7 @@ class JobThread(QThread):
             self.fail()
 
     def run(self):
+        """Start the loop of updating the job status."""
         while self._keep_running:
             try:
                 status_update = self._pipe_end.recv()
@@ -89,7 +114,10 @@ class JobThread(QThread):
 
 
 class JobLogHandler(Handler):
+    """Logging handler for a specific MDANSE job run."""
+
     def __init__(self):
+        """Initialise the handlers and an empty list of log entries."""
         super().__init__()
         self.records = []
 
@@ -106,8 +134,11 @@ class JobLogHandler(Handler):
 
 
 class JobEntry(QObject):
-    """This coordinates all the objects that make up one line on the list
-    of current jobs. It is used for reporting the task progress to the GUI."""
+    """Collective object for data field in one line of the RunTable.
+
+    Synchronises all the objects that make up one line on the list
+    of current jobs. It is used for reporting the task progress to the GUI.
+    """
 
     for_loading = Signal(str)
     free_filename = Signal(str)
@@ -115,11 +146,25 @@ class JobEntry(QObject):
     def __init__(
         self,
         *args,
-        command=None,
-        entry_number=0,
-        pause_event=None,
+        command: Optional[str] = None,
+        entry_number: int = 0,
+        pause_event: "Event" = None,
         load_afterwards=False,
     ):
+        """Save input parameters and create QStandardDataItems.
+
+        Parameters
+        ----------
+        command : str, optional
+            Name of the job in the run, by default None
+        entry_number : int, optional
+            Number of the run in the data model of the table, by default 0
+        pause_event : Event, optional
+            Event used for pausing and resuming the run, by default None
+        load_afterwards : bool, optional
+            If true, the output of the run will be loaded into GUI, by default False
+
+        """
         super().__init__(*args)
         self._command = command
         self._finished = False
@@ -150,6 +195,7 @@ class JobEntry(QObject):
         self.handler = JobLogHandler()
 
     def text_summary(self) -> str:
+        """Return current state as a readable string."""
         result = ""
         result += f"Job type: {self._command}\n"
         result += "Parameters:\n"
@@ -162,13 +208,23 @@ class JobEntry(QObject):
 
     @property
     def parameters(self):
+        """The parameters of the job used in this run."""
         return self._parameters
 
     @parameters.setter
-    def parameters(self, input: dict):
-        self._parameters = input
+    def parameters(self, input_dict: dict):
+        """Replace the parameters with those from the input dict.
+
+        Parameters
+        ----------
+        input : dict
+            A dictionary of job parameters.
+
+        """
+        self._parameters = input_dict
 
     def update_fields(self):
+        """Change the current progress value in the table."""
         self._prog_item.setText(f"{self.percent_complete} percent complete")
         self._prog_item.setData(self.percent_complete, role=Qt.ItemDataRole.UserRole)
         self._prog_item.setData(
@@ -178,6 +234,16 @@ class JobEntry(QObject):
 
     @Slot(bool)
     def on_finished(self, success: bool):
+        """Update the progress bar when job is finished.
+
+        If requested, it will also cause the results to be loaded into the GUI.
+
+        Parameters
+        ----------
+        success : bool
+            use True if the job finished successfully, False otherwise
+
+        """
         if self._finished:
             return
         self._finished = True
@@ -280,6 +346,16 @@ class JobHolder(QStandardItemModel):
 
     @Slot(list)
     def startProcess(self, job_vars: list, load_afterwards=False):
+        """Create a job instance and connect it to the GUI elements.
+
+        Parameters
+        ----------
+        job_vars : list
+            List of parameters needed to set up the job
+        load_afterwards : bool, optional
+            If True, the GUI will load the results on completion, by default False
+
+        """
         log_queue = Queue()
 
         main_pipe, child_pipe = Pipe()
@@ -340,7 +416,7 @@ class JobHolder(QStandardItemModel):
         try:
             task_name = str(job_vars[0])
         except Exception:
-            task_name = str("This should have been a job name")
+            task_name = "This should have been a job name"
         name_item = QStandardItem(task_name)
         name_item.setData(entry_number, role=Qt.ItemDataRole.UserRole)
         self.protect_filename.emit(item_th.expected_output())
