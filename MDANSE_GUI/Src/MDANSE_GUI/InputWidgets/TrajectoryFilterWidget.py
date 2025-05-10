@@ -62,6 +62,15 @@ DEFAULT_SPINBOX_MAX_FLOAT = 1000.0
 # Default step size for a float spinbox
 DEFAULT_SPINBOX_STEP_FLOAT = 0.1
 
+# Decimal precision for a float spinbox
+FLOAT_SPINBOX_DECIMALS = 4
+
+# Dictionary mapping unit enum to display text
+FREQUENCY_UNIT_MAP = {
+    Filter.FrequencyUnits.ANGULAR: "rad/ps",
+    Filter.FrequencyUnits.CYCLIC: "THz",
+}
+
 
 class ConstrainedDoubleSpinBox(QDoubleSpinBox):
     """Custom QDoubleSpinBox allowing for the application of a function
@@ -326,8 +335,8 @@ class FilterPreferencesGroup(QObject):
         self.grid.addWidget(QLabel("X-axis units"), 1, 0)
         xaxis_cbox = self.add_combobox(
             "xaxis_units",
-            ("rad/ps", "meV"),
-            "View x-axis as angular frequency (rad/ps) or energy (meV)",
+            ("frequency", "meV"),
+            "View x-axis as frequency or energy (meV)",
         )
         self.grid.addWidget(xaxis_cbox, 1, 1)
 
@@ -613,7 +622,7 @@ class FilterSettingGroup(QObject):
                 widget.setSingleStep(DEFAULT_SPINBOX_STEP_FLOAT)
                 widget.setValue(setting)
 
-            widget.setDecimals(3)
+            widget.setDecimals(FLOAT_SPINBOX_DECIMALS)
             signal = widget.valueChanged
 
         if isinstance(setting, bool):
@@ -846,6 +855,18 @@ class FilterDesigner(QDialog):
         config = self.configurator._configurable._configuration
         return config.get(key)
 
+    def current_filter_units(self) -> Filter.FrequencyUnits:
+        """Finds the frequency unit enum based on the current filter.
+
+        Returns
+        -------
+        Filter.FrequencyUnits
+            Enum current filter frequency units.
+        """
+        current_index = self.setting_stack_layout.currentIndex()
+        settings_group = tuple(self.settings_group.values())[current_index]
+        return settings_group.units
+
     def set_filter(self, filter_type: str) -> None:
         """Set up a new filter settings dictionary.
 
@@ -965,16 +986,13 @@ class FilterDesigner(QDialog):
 
         # Trajectory power spectrum data
         raw_power_spectrum = copy.deepcopy(self._trajectory_power_spectrum)
-        raw_power_spectrum_energies, raw_power_spectrum_values = raw_power_spectrum
+        raw_power_spectrum_freqs, raw_power_spectrum_values = raw_power_spectrum
 
         # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain
-        power_spectrum_energies = np.linspace(
-            raw_power_spectrum_energies.min(),
-            raw_power_spectrum_energies.max(),
+        power_spectrum_freqs = np.linspace(
+            raw_power_spectrum_freqs.min(),
+            raw_power_spectrum_freqs.max(),
             len(response.frequencies),
-        )
-        power_spectrum_freqs = Filter.energy_to_freq(
-            power_spectrum_energies, Filter.FrequencyUnits.ANGULAR
         )
 
         # Set custom frequency range on filter object
@@ -1097,13 +1115,13 @@ class FilterDesigner(QDialog):
         """
         self._figure.clear()
 
-        x = freqs.frequencies
+        x, y = freqs.frequencies, freqs.magnitudes
         x_max = x.max()
 
         axes = self._figure.add_axes([0.1, 0.1, 0.8, 0.8])
         axes.plot(
             x,
-            20 * np.log10(abs(freqs.magnitudes)) if db_response else freqs.magnitudes,
+            20 * np.log10(abs(y)) if db_response else y,
             label="Filter response",
         )
 
@@ -1128,7 +1146,7 @@ class FilterDesigner(QDialog):
             energy_ticks = np.int32(
                 np.floor(
                     Filter.freq_to_energy(
-                        axes.get_xticks(), Filter.FrequencyUnits.ANGULAR
+                        axes.get_xticks(), self.current_filter_units()
                     )
                 )
             )
@@ -1136,7 +1154,10 @@ class FilterDesigner(QDialog):
 
         axes.set_xlim(0.0, x_max)
 
-        axes.set_xlabel("Energy (meV)" if energies else "Frequency (rad/ps)")
+        frequency_units = FREQUENCY_UNIT_MAP[self.current_filter_units()]
+        axes.set_xlabel(
+            "Energy (meV)" if energies else f"Frequency ({frequency_units})"
+        )
         axes.set_ylabel("Magnitude (dB)" if db_response else "Amplitude")
 
         axes.legend(loc="best")
@@ -1179,11 +1200,17 @@ class FilterDesigner(QDialog):
             self._figure_info.append(" ")
 
         self._figure_info.append(
-            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff, Filter.FrequencyUnits.ANGULAR), 3)} meV, Sample frequency: {sample_freq} THz"
+            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff, self.current_filter_units()), 3)} meV, Sample frequency: {sample_freq} THz"
         )
 
     def render_canvas_assets(self, attributes: dict = None) -> None:
-        """Render all elements of the filter designer graphing area, including data text"""
+        """Render all elements of the filter designer graphing area, including data text
+
+        Parameters
+        ----------
+        attributes: dict | None
+            Filter attributes dictionary
+        """
         if attributes:
             self.settings["attributes"].update(attributes)
 

@@ -18,6 +18,7 @@ import numpy as np
 from enum import Enum
 from collections import namedtuple
 from typing import Tuple
+from copy import copy
 
 from abc import ABC, abstractmethod
 from scipy import signal, fftpack
@@ -338,6 +339,10 @@ class Filter(ABC):
     # Conversion factor: frequency axis to energies in meV
     _freq_to_mev = 1e3 * Ry_to_eV / Ry_to_Hz
 
+    _angular_to_cyclic = 1 / (2 * np.pi)
+
+    _cyclic_to_angular = 2 * np.pi
+
     # Container for the filter transfer tranfer function expressed in terms of the numerator/denominator coefficients of a rational polynomial
     TransferFunction = namedtuple("TransferFunction", ["numerator", "denominator"])
 
@@ -440,26 +445,36 @@ class Filter(ABC):
         """Calculates the frequency response of the filter from the filter's transfer function numerator and denominator coefficients.
 
         :Parameters:
-            #. param (Tuple[TransferFunction, FrequencyRangeMethod]):
+            #. params (Tuple[TransferFunction, FrequencyRangeMethod]):
             Tuple contains the following elements:
                 - the rational polynomial expression for the filter transfer function, in terms of its numerator and denominator coefficients
                 - the method by which to compute the frequency range for displaying the filter
         """
         expr, method = params
         methods = self.__class__.FrequencyRangeMethod
+        units = (
+            Filter.FrequencyUnits.CYCLIC
+            if Filter.Flags.DIGITAL_ONLY in self.flags
+            else Filter.FrequencyUnits.ANGULAR
+        )
 
         if method is methods.FFT:
-            freq_range = self.frequency_range(self.n_steps, self._sample_freq ** (-1))
+            freq_range = self.frequency_range(
+                self.n_steps, self._sample_freq ** (-1), units=units
+            )
         elif self._custom_freq_range.any() and method is methods.CUSTOM:
-            freq_range = self._custom_freq_range
+            freq_range = copy(self._custom_freq_range)
+
+            # Convert frequency range to cyclic frequencies if necessary
+            if units == Filter.FrequencyUnits.CYCLIC:
+                freq_range *= self._angular_to_cyclic
         else:
             RuntimeError(
                 f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' attribute on the instance of {self.__class__}"
             )
 
-        # Get frequency response from transfer function expression and specify frequency range around which to compute response
         response = self.compute_frequencies(
-            transfer_function=expr, range=np.abs(2 / np.pi * freq_range)
+            transfer_function=expr, range=np.abs(freq_range)
         )
         self._freq_response = self.FrequencyDomain(*response)
 
@@ -499,7 +514,11 @@ class Filter(ABC):
 
     @staticmethod
     def frequency_range(
-        N: int, timestep: float, resize_to: int = 1000, symmetric: bool = False
+        N: int,
+        timestep: float,
+        resize_to: int = 1000,
+        units: FrequencyUnits = FrequencyUnits.ANGULAR,
+        symmetric: bool = False,
     ) -> np.ndarray:
         """Obtain an FFT-based frequency range for the frequency domain of a discrete time signal with a given number of elements and a constant time step.
 
@@ -511,9 +530,16 @@ class Filter(ABC):
         :Returns:
             #. np.ndarray: Symbolic polynomial string
         """
+        # Compute cyclic frequencies using FFT method
         axis_frequencies = fftpack.fftfreq(N, timestep)
         limit = np.int32(np.floor(len(axis_frequencies) / 2)) if not symmetric else -1
-        return np.linspace(axis_frequencies[0], axis_frequencies[limit], resize_to)
+        # Return FFT frequency range with appropriate unit conversion
+        coeff = (
+            Filter._cyclic_to_angular if units == Filter.FrequencyUnits.ANGULAR else 1.0
+        )
+        return coeff * np.linspace(
+            axis_frequencies[0], axis_frequencies[limit], resize_to
+        )
 
     def set_filter_attributes(self, attributes: dict) -> None:
         """Update filter instance attributes
@@ -1057,7 +1083,7 @@ def filter_description_string(
 def power_spectrum(
     trajectory, frames, projection, atom_selection, weights, instrument_resolution
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Returns the position power spectrum of a configuration's constituent atomic trajectories.
+    """Returns the position power spectrum and angular frequencies (rad/ps) of a configuration's constituent atomic trajectories.
 
     :Parameters:
         #. trajectory (HDFTrajectoryConfigurator): atomic trajectory object
