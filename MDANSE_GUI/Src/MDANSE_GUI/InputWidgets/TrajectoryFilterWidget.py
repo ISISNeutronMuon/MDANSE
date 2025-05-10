@@ -996,7 +996,7 @@ class FilterDesigner(QDialog):
         )
 
         # Set custom frequency range on filter object
-        filter._custom_freq_range = power_spectrum_freqs
+        filter.custom_freq_range = power_spectrum_freqs
         filter.freq_response = (filter._coeffs, Filter.FrequencyRangeMethod.CUSTOM)
 
         # Resample and normalise trajectory power spectrum (y-axis)
@@ -1246,7 +1246,7 @@ class FilterDesigner(QDialog):
                 numerator, denominator, analog=analog_filter
             ),
             self.settings["attributes"].get("cutoff_freq", DEFAULT_FILTER_CUTOFF),
-            filter_preview._sample_freq,
+            filter_preview.sample_freq,
         )
 
     def create_graph_canvas(self, fig_width=10.0, fig_height=10.0, dpi=100) -> QWidget:

@@ -351,18 +351,6 @@ class Filter(ABC):
     # Container for the frequency response of the filter
     FrequencyDomain = namedtuple("FrequencyDomain", ["frequencies", "magnitudes"])
 
-    # Coefficients for numerator and denominator of filter transfer function
-    _coeffs = None
-
-    # Custom frequency range (assumes frequencies are angular) around which to compute the filter frequency response
-    _custom_freq_range = None
-
-    # Frequency response of filter
-    _freq_response = None
-
-    # Sample frequency of molecular dynamics simulation being analysed
-    _sample_freq = None
-
     class FrequencyUnits(Enum):
         """Enumeration for frequency unit type"""
 
@@ -384,10 +372,12 @@ class Filter(ABC):
 
     @abstractmethod
     def __init__(self, **kwargs):
+        # Custom frequency range (assumes frequencies are angular) around which to compute the filter frequency response
+        self.custom_freq_range = []
         # Number of simulation steps
         self.n_steps = kwargs.pop("n_steps")
         # Simulation sample frequency in THz
-        self._sample_freq = 1 / kwargs.pop("time_step_ps")
+        self.sample_freq = 1 / kwargs.pop("time_step_ps")
         self.set_filter_attributes(kwargs)
 
     def compute_frequencies(
@@ -427,7 +417,7 @@ class Filter(ABC):
         """
         return self.TransferFunction(
             *signal.bilinear(
-                self._coeffs.numerator, self._coeffs.denominator, self._sample_freq
+                self._coeffs.numerator, self._coeffs.denominator, self.sample_freq
             )
         )
 
@@ -462,14 +452,14 @@ class Filter(ABC):
         if method is Filter.FrequencyRangeMethod.FFT:
             # Compute frequency range using FFT
             freq_range = self.frequency_range(
-                self.n_steps, self._sample_freq ** (-1), units=units
+                self.n_steps, self.sample_freq ** (-1), units=units
             )
         elif (
-            self._custom_freq_range.any()
+            self.custom_freq_range.any()
             and method is Filter.FrequencyRangeMethod.CUSTOM
         ):
             # Use custom frequency range (assumes frequencies are rad/ps)
-            freq_range = copy(self._custom_freq_range)
+            freq_range = copy(self.custom_freq_range)
 
             # Convert frequency range to cyclic frequencies if necessary
             if units == Filter.FrequencyUnits.CYCLIC:
@@ -922,7 +912,7 @@ class Notch(Filter):
 
         self._coeffs = self.TransferFunction(
             *signal.iirnotch(
-                self.fundamental_freq, self.quality_factor, fs=self._sample_freq
+                self.fundamental_freq, self.quality_factor, fs=self.sample_freq
             )
         )
         self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
@@ -939,7 +929,7 @@ class Notch(Filter):
             #. np.array: frequency response over a given range
         """
 
-        return signal.freqz(*transfer_function, worN=range, fs=self._sample_freq)
+        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
 
 
 class Peak(Filter):
@@ -963,7 +953,7 @@ class Peak(Filter):
 
         self._coeffs = self.TransferFunction(
             *signal.iirpeak(
-                self.fundamental_freq, self.quality_factor, fs=self._sample_freq
+                self.fundamental_freq, self.quality_factor, fs=self.sample_freq
             )
         )
         self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
@@ -980,7 +970,7 @@ class Peak(Filter):
             #. np.array: frequency response over a given range
         """
 
-        return signal.freqz(*transfer_function, worN=range, fs=self._sample_freq)
+        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
 
 
 class Comb(Filter):
@@ -1018,7 +1008,7 @@ class Comb(Filter):
                 self.quality_factor,
                 ftype=self.comb_type,
                 pass_zero=self.pass_zero,
-                fs=self._sample_freq,
+                fs=self.sample_freq,
             )
         )
         self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
@@ -1035,7 +1025,7 @@ class Comb(Filter):
             #. np.array: frequency response over a given range
         """
 
-        return signal.freqz(*transfer_function, worN=range, fs=self._sample_freq)
+        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
 
 
 FILTERS = (
