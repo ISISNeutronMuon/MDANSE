@@ -339,8 +339,10 @@ class Filter(ABC):
     # Conversion factor: frequency axis to energies in meV
     _freq_to_mev = 1e3 * Ry_to_eV / Ry_to_Hz
 
+    # Conversion factor: angular frequency to cyclic frequency
     _angular_to_cyclic = 1 / (2 * np.pi)
 
+    # Conversion factor: cyclic frequency to angular frequency
     _cyclic_to_angular = 2 * np.pi
 
     # Container for the filter transfer tranfer function expressed in terms of the numerator/denominator coefficients of a rational polynomial
@@ -352,7 +354,7 @@ class Filter(ABC):
     # Coefficients for numerator and denominator of filter transfer function
     _coeffs = None
 
-    # Stores a custom frequency range around which to compute the filter frequency response, as a linear series
+    # Custom frequency range (assumes frequencies are angular) around which to compute the filter frequency response
     _custom_freq_range = None
 
     # Frequency response of filter
@@ -459,10 +461,12 @@ class Filter(ABC):
         )
 
         if method is methods.FFT:
+            # Compute frequency range using FFT
             freq_range = self.frequency_range(
                 self.n_steps, self._sample_freq ** (-1), units=units
             )
         elif self._custom_freq_range.any() and method is methods.CUSTOM:
+            # Use custom frequency range (assumes frequencies are rad/ps)
             freq_range = copy(self._custom_freq_range)
 
             # Convert frequency range to cyclic frequencies if necessary
@@ -473,6 +477,7 @@ class Filter(ABC):
                 f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' attribute on the instance of {self.__class__}"
             )
 
+        # Compute filter response around frequencies given in range
         response = self.compute_frequencies(
             transfer_function=expr, range=np.abs(freq_range)
         )
@@ -492,7 +497,7 @@ class Filter(ABC):
         """
         bin_width = 1 / (num_steps * timestep)
         if units == Filter.FrequencyUnits.ANGULAR:
-            bin_width *= 2 * np.pi
+            bin_width *= cls._cyclic_to_angular
 
         return bin_width
 
@@ -508,7 +513,7 @@ class Filter(ABC):
         """
         limit = (1 / timestep) / 2
         if units == Filter.FrequencyUnits.ANGULAR:
-            limit *= 2 * np.pi
+            limit *= cls._cyclic_to_angular
 
         return limit
 
@@ -526,9 +531,10 @@ class Filter(ABC):
             #. N (int): Number of samples in input signal (to which filter will be applied to)
             #. timestep (float): Input signal timestep in picoseconds
             #. resize_to (int): Up- or down- sample the frequency range array to a given length
+            #. units (FrequencyUnits): Enumeration for returned frequency units (i.e. CYCLIC=THz, ANGULAR=rad/ps)
             #. symmetric (bool): If true, retain symmetric property of frequencies, else take only one half of the frequencies
         :Returns:
-            #. np.ndarray: Symbolic polynomial string
+            #. np.ndarray: FFT frequencies
         """
         # Compute cyclic frequencies using FFT method
         axis_frequencies = fftpack.fftfreq(N, timestep)
