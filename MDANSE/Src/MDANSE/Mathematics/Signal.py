@@ -453,19 +453,21 @@ class Filter(ABC):
                 - the method by which to compute the frequency range for displaying the filter
         """
         expr, method = params
-        methods = self.__class__.FrequencyRangeMethod
         units = (
             Filter.FrequencyUnits.CYCLIC
             if Filter.Flags.DIGITAL_ONLY in self.flags
             else Filter.FrequencyUnits.ANGULAR
         )
 
-        if method is methods.FFT:
+        if method is Filter.FrequencyRangeMethod.FFT:
             # Compute frequency range using FFT
             freq_range = self.frequency_range(
                 self.n_steps, self._sample_freq ** (-1), units=units
             )
-        elif self._custom_freq_range.any() and method is methods.CUSTOM:
+        elif (
+            self._custom_freq_range.any()
+            and method is Filter.FrequencyRangeMethod.CUSTOM
+        ):
             # Use custom frequency range (assumes frequencies are rad/ps)
             freq_range = copy(self._custom_freq_range)
 
@@ -738,7 +740,7 @@ class Butterworth(Filter):
                 output="ba",
             )
         )
-        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
 
 
 class ChebyshevTypeI(Filter):
@@ -776,7 +778,7 @@ class ChebyshevTypeI(Filter):
                 output="ba",
             )
         )
-        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
 
 
 class ChebyshevTypeII(Filter):
@@ -814,7 +816,7 @@ class ChebyshevTypeII(Filter):
                 output="ba",
             )
         )
-        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
 
 
 class Elliptical(Filter):
@@ -857,7 +859,7 @@ class Elliptical(Filter):
                 output="ba",
             )
         )
-        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
 
 
 class Bessel(Filter):
@@ -896,7 +898,7 @@ class Bessel(Filter):
                 norm=self.norm,
             )
         )
-        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
 
 
 class Notch(Filter):
@@ -923,7 +925,7 @@ class Notch(Filter):
                 self.fundamental_freq, self.quality_factor, fs=self._sample_freq
             )
         )
-        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
 
     def compute_frequencies(
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
@@ -964,7 +966,7 @@ class Peak(Filter):
                 self.fundamental_freq, self.quality_factor, fs=self._sample_freq
             )
         )
-        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
 
     def compute_frequencies(
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
@@ -1019,7 +1021,7 @@ class Comb(Filter):
                 fs=self._sample_freq,
             )
         )
-        self.freq_response = (self._coeffs, self.__class__.FrequencyRangeMethod.FFT)
+        self.freq_response = (self._coeffs, Filter.FrequencyRangeMethod.FFT)
 
     def compute_frequencies(
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
