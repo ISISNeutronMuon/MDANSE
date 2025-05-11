@@ -155,21 +155,13 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         """
         value = self.to_float(value)
 
-        if not hasattr(self, "initial_value"):
-            return
-
         remainder = value % self.constraint
-        if not self.constraint or remainder == 0:
+        if not self.constraint or np.isclose(remainder, 0):
             return
 
-        current = self.to_float(self.value())
-
-        if current < self.initial_value:
-            x = current - remainder
-        else:
-            x = current + remainder
-
-        self.setValue(x)
+        # New value is the closest value evenly dividing the constraint
+        new_value = np.round(value / self.constraint) * self.constraint
+        self.setValue(np.round(new_value, FLOAT_SPINBOX_DECIMALS))
 
     def search_by_function(self, value: Any) -> None:
         """Apply the constraint formalised in the lambda
@@ -504,8 +496,11 @@ class FilterSettingGroup(QObject):
         Any:
             The widget value
         """
-        if isinstance(widget, QSpinBox) or isinstance(widget, QDoubleSpinBox):
+        if isinstance(widget, QSpinBox):
             return widget.value()
+
+        if isinstance(widget, QDoubleSpinBox):
+            return np.round(widget.value(), FLOAT_SPINBOX_DECIMALS)
 
         if isinstance(widget, QComboBox):
             return widget.currentText()
@@ -585,8 +580,9 @@ class FilterSettingGroup(QObject):
                     "time_step_ps", DEFAULT_TIME_STEP
                 )
 
-                bin_width = Filter.frequency_resolution(
-                    n_steps, time_step, units=self.units
+                bin_width = np.round(
+                    Filter.frequency_resolution(n_steps, time_step, units=self.units),
+                    FLOAT_SPINBOX_DECIMALS,
                 )
 
                 # Scale factor to be applied to bin width to create initial value
@@ -595,11 +591,16 @@ class FilterSettingGroup(QObject):
                 else:
                     initial_value_scale = 5
 
+                max = np.round(
+                    Filter.nyquist(time_step, units=self.units) - bin_width,
+                    FLOAT_SPINBOX_DECIMALS,
+                )
+
                 # Configure constrained spinbox based on filter type
                 if Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags:
                     widget = ConstrainedDoubleSpinBox(
                         minimum=bin_width,
-                        maximum=Filter.nyquist(time_step, units=self.units) - bin_width,
+                        maximum=max,
                         step=bin_width,
                         value=bin_width,
                     )
@@ -609,7 +610,7 @@ class FilterSettingGroup(QObject):
                 else:
                     widget = ConstrainedDoubleSpinBox(
                         minimum=bin_width,
-                        maximum=Filter.nyquist(time_step, units=self.units) - bin_width,
+                        maximum=max,
                         step=bin_width,
                         value=bin_width * initial_value_scale,
                     )
@@ -717,11 +718,14 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         list :
             List of length 2 containing the critical frequency bounds.
         """
+        cutoff = self.retrieve_widget("cutoff_freq")
+        bound = self.retrieve_widget("bound_freq")
+
         return np.array(
             sorted(
                 [
-                    self.retrieve_widget("cutoff_freq").value(),
-                    self.retrieve_widget("bound_freq").value(),
+                    cutoff.value(),
+                    bound.value(),
                 ]
             )
         ).tolist()
@@ -744,7 +748,32 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         """Emit the signal on setting changed"""
         if value in (self._bounds_on | self._bounds_off):
             self._frequency_bounded.emit(value in self._bounds_on)
+
+        # Ensure that cutoff frequency and bound frequency cannot have the same value
+        if self.retrieve_widget("bound_freq").isEnabled():
+            self.separate_bounds()
+
         super().notify()
+
+    def separate_bounds(self):
+        """Separate the cutoff and bound frequency spinbox values by a single step."""
+        cutoff = self.retrieve_widget("cutoff_freq")
+        bound = self.retrieve_widget("bound_freq")
+
+        if cutoff.value() == bound.value():
+            # Values are the same - we must keep the values separated by a single step
+
+            # Ensure that the new bound value not greater than the maximum
+            if (bound.value() + bound.singleStep()) > bound.maximum():
+                cutoff.setValue(cutoff.value() - cutoff.singleStep())
+                return
+
+            # Ensure that the new bound value not less than the minimum
+            if (bound.value() - bound.singleStep()) < bound.minimum():
+                cutoff.setValue(cutoff.value() + cutoff.singleStep())
+                return
+
+            cutoff.setValue(cutoff.value() - cutoff.singleStep())
 
     @Slot()
     def collect_inputs(self) -> None:
@@ -782,14 +811,16 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         grid = super().as_grid()
         grid_pos = self.indices.pop()
 
-        widget = QDoubleSpinBox()
         cutoff = self.retrieve_widget("cutoff_freq")
-        step = self.retrieve_widget("cutoff_freq").singleStep()
-        widget.setDecimals(3)
-        widget.setMaximum(cutoff.maximum())
-        widget.setMinimum(step)
-        widget.setSingleStep(step)
-        widget.setValue(cutoff.value() - 2 * cutoff.singleStep())
+        step = cutoff.singleStep()
+        widget = ConstrainedDoubleSpinBox(
+            minimum=cutoff.minimum(),
+            maximum=cutoff.maximum(),
+            step=step,
+            value=cutoff.value() - 2 * step,
+        )
+        widget.setDecimals(FLOAT_SPINBOX_DECIMALS)
+        widget.set_snap(snap_to=step)
         widget.setEnabled(False)
         widget.valueChanged.connect(self.notify)
         self.store_widget("bound_freq", widget)
