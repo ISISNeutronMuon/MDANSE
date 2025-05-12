@@ -702,7 +702,14 @@ class Filter(ABC):
 
 
 class Butterworth(Filter):
-    """Interface for the Butterworth filter."""
+    """Interface for the Butterworth filter.
+
+    See Also
+    ________
+    scipy.signal.butter :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html
+
+    """
 
     flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
 
@@ -735,7 +742,14 @@ class Butterworth(Filter):
 
 
 class ChebyshevTypeI(Filter):
-    """Interface for the Chebyshev type 1 filter."""
+    """Interface for the Chebyshev type 1 filter.
+
+    See Also
+    ________
+    scipy.signal.cheby1 :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.cheby1.html
+
+    """
 
     flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
 
@@ -773,7 +787,14 @@ class ChebyshevTypeI(Filter):
 
 
 class ChebyshevTypeII(Filter):
-    """Interface for the Chebyshev type 2 filter."""
+    """Interface for the Chebyshev type 2 filter.
+
+    See Also
+    ________
+    scipy.signal.cheby2 :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.cheby2.html
+
+    """
 
     flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
 
@@ -811,7 +832,14 @@ class ChebyshevTypeII(Filter):
 
 
 class Elliptical(Filter):
-    """Interface for the elliptical filter."""
+    """Interface for the elliptical filter.
+
+    See Also
+    ________
+    scipy.signal.ellip :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.ellip.html
+
+    """
 
     flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
 
@@ -854,7 +882,14 @@ class Elliptical(Filter):
 
 
 class Bessel(Filter):
-    """Interface for the Bessel filter."""
+    """Interface for the Bessel filter.
+
+    See Also
+    ________
+    scipy.signal.bessel :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.bessel.html
+
+    """
 
     flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
 
@@ -893,7 +928,14 @@ class Bessel(Filter):
 
 
 class Notch(Filter):
-    """Interface for the notch filter."""
+    """Interface for the notch filter.
+
+    See Also
+    ________
+    scipy.signal.iirnotch :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.iirnotch.html
+
+    """
 
     flags = {Filter.Flags.DIGITAL_ONLY}
 
@@ -934,7 +976,14 @@ class Notch(Filter):
 
 
 class Peak(Filter):
-    """Interface for the peak filter."""
+    """Interface for the peak filter.
+
+    See Also
+    ________
+    scipy.signal.iirpeak :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.iirpeak.html
+
+    """
 
     flags = {Filter.Flags.DIGITAL_ONLY}
 
@@ -975,7 +1024,14 @@ class Peak(Filter):
 
 
 class Comb(Filter):
-    """Interface for the comb filter."""
+    """Interface for the comb filter.
+
+    See Also
+    ________
+    scipy.signal.iircomb :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.iircomb.html
+
+    """
 
     flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS}
 
