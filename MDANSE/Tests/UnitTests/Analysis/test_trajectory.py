@@ -92,7 +92,7 @@ def test_UnfoldedTrajectory(parameters):
 
 def test_SelectedTrajectoryFilter(tmp_path):
     parameters = {
-        "atom_selection": '{"all": false, "index": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}',
+        "atom_selection": '{"0": {"function_name": "select_atoms", "index_range": [0, 10], "operation_type": "union"}}',
         "frames": [0, 10, 1, 5],
         "instrument_resolution": ("ideal", {}),
         "projection": None,
@@ -114,7 +114,6 @@ def test_SelectedTrajectoryFilter(tmp_path):
 
 def test_TrajectoryFilter(tmp_path):
     parameters = {
-        "atom_selection": '{"all": true}',
         "frames": [0, 10, 1, 5],
         "instrument_resolution": ("ideal", {}),
         "projection": None,
