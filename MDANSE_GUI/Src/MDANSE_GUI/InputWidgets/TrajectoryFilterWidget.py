@@ -1391,6 +1391,12 @@ class FilterDesigner(QDialog):
         """
         apply = QPushButton("Use Setting")
         close = QPushButton("Close")
+
+        apply.setAutoDefault(False)
+        apply.setDefault(False)
+        close.setAutoDefault(False)
+        close.setDefault(False)
+
         apply.clicked.connect(self.apply)
         close.clicked.connect(self.close)
         return [apply, close]
