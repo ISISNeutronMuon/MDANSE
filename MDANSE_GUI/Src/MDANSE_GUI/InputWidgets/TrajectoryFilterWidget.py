@@ -1031,7 +1031,7 @@ class FilterDesigner(QDialog):
 
         # Set custom frequency range on filter object
         filter.custom_freq_range = power_spectrum_freqs
-        filter.freq_response = (filter._coeffs, Filter.FrequencyRangeMethod.CUSTOM)
+        filter.freq_response = (filter.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
 
         # Resample and normalise trajectory power spectrum (y-axis)
         ps = self.resample_and_normalise(
@@ -1265,7 +1265,7 @@ class FilterDesigner(QDialog):
         numerator, denominator = (
             filter_preview.to_digital_coeffs()
             if not analog_filter
-            else filter_preview._coeffs
+            else filter_preview.coeffs
         )
 
         # Render the filter graph and text
