@@ -386,6 +386,11 @@ class Filter(ABC):
     ):
         """Computes the frequency magnitudes over given angular frequency range, from the filter transfer function.
 
+        See Also
+        ________
+        scipy.signal.freqs :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqs.html
+
         :Parameters:
             #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
             #. range (np.ndarray): range of frequency values over which to compute
@@ -397,6 +402,11 @@ class Filter(ABC):
 
     def apply(self, input: np.array) -> np.ndarray:
         """Returns the convolution of the digital designed filter with an input signal.
+
+        See Also
+        ________
+        scipy.signal.filtfilt:
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.filtfilt.html
 
         :Parameters:
             #. input (np.array): the input signal
@@ -412,6 +422,11 @@ class Filter(ABC):
 
     def to_digital_coeffs(self) -> TransferFunction:
         """Returns the filter instance digital coefficients converted from analog, by performing a bilinear transform.
+
+        See Also
+        ________
+        scipy.signal.bilinear :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.bilinear.html
 
         :Returns:
             #. TransferFunction: Transfer function for filter with digital coefficients
@@ -965,6 +980,11 @@ class Notch(Filter):
     ):
         """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
 
+        See Also
+        ________
+        scipy.signal.freqz :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqz.html
+
         :Parameters:
             #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
             #. range (np.ndarray): range of frequency values over which to compute
@@ -1012,6 +1032,11 @@ class Peak(Filter):
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
     ):
         """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
+
+        See Also
+        ________
+        scipy.signal.freqz :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqz.html
 
         :Parameters:
             #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
@@ -1074,6 +1099,11 @@ class Comb(Filter):
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
     ):
         """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
+
+        See Also
+        ________
+        scipy.signal.freqz :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqz.html
 
         :Parameters:
             #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
