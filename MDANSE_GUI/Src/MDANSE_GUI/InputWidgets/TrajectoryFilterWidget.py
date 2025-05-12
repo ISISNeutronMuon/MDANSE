@@ -1163,7 +1163,7 @@ class FilterDesigner(QDialog):
                 color="black",
             )
 
-        # Conditionally convert frequencies (rad/ps) to energies (meV)
+        # Conditionally convert frequencies to energies (meV)
         if energies:
             energy_ticks = np.int32(
                 np.floor(
@@ -1197,7 +1197,7 @@ class FilterDesigner(QDialog):
         polynomial : str
             String representation of the filter transfer function as a polynomial (in the variable S for an analogue filter).
         cutoff : float
-            Cutoff frequency of the designed filter in rad/ps
+            Cutoff frequency of the designed filter
         sample_freq : float
             Sample frequency of the molecular dynamics simulation in THz (terahertz)
         """

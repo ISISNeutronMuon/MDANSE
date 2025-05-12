@@ -319,7 +319,7 @@ def get_spectrum(signal, window=None, timeStep=1.0, axis=0, fft="fft"):
     return fftSignal.real
 
 
-# Default filter cutoff frequency in rad/ps
+# Default filter cutoff frequency
 DEFAULT_FILTER_CUTOFF = 25.0
 
 
@@ -637,7 +637,7 @@ class Filter(ABC):
         string_representation = f"""Trajectory filter of type {self.__class__.__name__} implemented with the following parameters:
 
   # sample_freq
-  Reciprocal of the molecular dynamics time step, in terahertz
+  Molecular dynamics simulation sample frequency, in terahertz
       {self.__dict__["sample_freq"]}
 
   # freq_response (analog)
