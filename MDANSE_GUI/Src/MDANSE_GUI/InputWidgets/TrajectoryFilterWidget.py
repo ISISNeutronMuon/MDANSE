@@ -93,6 +93,8 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         """
         super().__init__()
 
+        self.setDecimals(FLOAT_SPINBOX_DECIMALS)
+
         self.setKeyboardTracking(False)
 
         self.setMinimum(minimum)
@@ -951,9 +953,10 @@ class FilterDesigner(QDialog):
         index = list(FILTER_MAP.keys()).index(filter_type)
         self.setting_stack_layout.setCurrentIndex(index)
 
-        # Check figure attribute exists before attempting to render
-        if hasattr(self, "_figure"):
-            self.render_canvas_assets()
+        settings_group = tuple(self.settings_group.values())[index]
+
+        # Re-render filter graph
+        settings_group._setting_changed.emit()
 
     def edit_preferences(self, preferences: dict) -> None:
         """Re-renders the filter according to display preferences.
