@@ -21,7 +21,8 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 
 
 class PairDistributionFunction(DistanceHistogram):
-    """
+    """Calculates a histogram of interatomic distances.
+
     The Pair-Distribution Function (PDF) is an example of a pair correlation function, which
     describes how, on average, the atoms in a system are radially packed around each other.
     This is a particularly effective way of describing the average structure of disordered
@@ -47,10 +48,11 @@ class PairDistributionFunction(DistanceHistogram):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     def finalize(self):
-        """
-        Finalizes the calculations (e.g. averaging the total term, output files creations ...).
-        """
+        """Perform the last steps of the analysis and write out results.
 
+        Finalizes the calculations (e.g. averaging the total term, output files creations ...).
+
+        """
         npoints = len(self.configuration["r_values"]["mid_points"])
 
         self._outputData.add(
@@ -82,6 +84,8 @@ class PairDistributionFunction(DistanceHistogram):
                     (npoints,),
                     axis="r",
                     units="au",
+                    main_result=i == "pdf",
+                    partial_result=i == "pdf",
                 )
 
         for i in ["pdf", "rdf", "tcf"]:
@@ -100,7 +104,12 @@ class PairDistributionFunction(DistanceHistogram):
                 units="au",
             )
             self._outputData.add(
-                f"{i}_total", "LineOutputVariable", (npoints,), axis="r", units="au"
+                f"{i}_total",
+                "LineOutputVariable",
+                (npoints,),
+                axis="r",
+                units="au",
+                main_result=i == "pdf",
             )
 
         nFrames = self.configuration["frames"]["number"]
@@ -123,7 +132,7 @@ class PairDistributionFunction(DistanceHistogram):
             idj = self.selectedElements.index(pair[1])
 
             if idi == idj:
-                nij = ni * (ni - 1) / 2.0
+                nij = ni**2 / 2.0
             else:
                 nij = ni * nj
                 self.hIntra[idi, idj] += self.hIntra[idj, idi]

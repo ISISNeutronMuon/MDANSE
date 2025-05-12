@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from math import sqrt
 import collections
 import itertools
-from typing import List
 
 import numpy as np
 
@@ -66,11 +66,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             }
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    settings["output_files"] = ("OutputFilesConfigurator", {})
 
     def initialize(self):
         """
@@ -400,34 +396,45 @@ class NeutronDynamicTotalStructureFactor(IJob):
             bj = self.configuration["trajectory"]["instance"].get_atom_property(
                 pair[1], "b_coherent"
             )
+            sqrt_cij = sqrt(
+                nAtomsPerElement[pair[0]] * nAtomsPerElement[pair[1]] * norm_natoms**2
+            )
+            pre_fac = 1 if pair[0] == pair[1] else 2
+            self._outputData[f"f(q,t)_coh_{pair_str}"].scaling_factor *= (
+                pre_fac * bi * bj * sqrt_cij
+            )
+            self._outputData[f"s(q,f)_coh_{pair_str}"].scaling_factor *= (
+                pre_fac * bi * bj * sqrt_cij
+            )
 
-            if pair[0] == pair[1]:  # Add a factor 2 if the two elements are different
-                self._outputData[f"f(q,t)_coh_{pair_str}"] *= bi * bj * norm_natoms
-                self._outputData[f"s(q,f)_coh_{pair_str}"] *= bi * bj * norm_natoms
-            else:
-                self._outputData[f"f(q,t)_coh_{pair_str}"] *= 2 * bi * bj * norm_natoms
-                self._outputData[f"s(q,f)_coh_{pair_str}"] *= 2 * bi * bj * norm_natoms
-
-            self._outputData["f(q,t)_coh_total"][:] += self._outputData[
-                f"f(q,t)_coh_{pair_str}"
-            ][:]
-            self._outputData["s(q,f)_coh_total"][:] += self._outputData[
-                f"s(q,f)_coh_{pair_str}"
-            ][:]
+            self._outputData["f(q,t)_coh_total"][:] += (
+                self._outputData[f"f(q,t)_coh_{pair_str}"][:]
+                * self._outputData[f"f(q,t)_coh_{pair_str}"].scaling_factor
+            )
+            self._outputData["s(q,f)_coh_total"][:] += (
+                self._outputData[f"s(q,f)_coh_{pair_str}"][:]
+                * self._outputData[f"s(q,f)_coh_{pair_str}"].scaling_factor
+            )
 
         # Compute incoherent functions and structure factor
-        for element in nAtomsPerElement:
+        for element, number in nAtomsPerElement.items():
             bi = self.configuration["trajectory"]["instance"].get_atom_property(
                 element, "b_incoherent2"
             )
-            self._outputData[f"f(q,t)_inc_{element}"][:] *= bi * norm_natoms
-            self._outputData[f"s(q,f)_inc_{element}"][:] *= bi * norm_natoms
-            self._outputData["f(q,t)_inc_total"][:] += self._outputData[
-                f"f(q,t)_inc_{element}"
-            ][:]
-            self._outputData["s(q,f)_inc_total"][:] += self._outputData[
-                f"s(q,f)_inc_{element}"
-            ][:]
+            self._outputData[f"f(q,t)_inc_{element}"].scaling_factor *= (
+                bi * number * norm_natoms
+            )
+            self._outputData[f"s(q,f)_inc_{element}"].scaling_factor *= (
+                bi * number * norm_natoms
+            )
+            self._outputData["f(q,t)_inc_total"][:] += (
+                self._outputData[f"f(q,t)_inc_{element}"][:]
+                * self._outputData[f"f(q,t)_inc_{element}"].scaling_factor
+            )
+            self._outputData["s(q,f)_inc_total"][:] += (
+                self._outputData[f"s(q,f)_inc_{element}"][:]
+                * self._outputData[f"s(q,f)_inc_{element}"].scaling_factor
+            )
 
         # Compute total F(Q,t) = inc + coh
         self._outputData["f(q,t)_total"][:] = (

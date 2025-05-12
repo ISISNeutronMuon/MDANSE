@@ -241,5 +241,6 @@ class TrajectoryEditor(IJob):
         self.configuration["trajectory"]["instance"].close()
 
         # The output trajectory is closed.
+        self._output_trajectory.write_standard_atom_database()
         self._output_trajectory.close()
         super().finalize()

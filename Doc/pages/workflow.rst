@@ -1,8 +1,8 @@
 
 .. _workflow-of-analysis:
 
-The MDANSE Workflow
-===================
+MDANSE Workflow
+===============
 
 Here we describe a typical computational workflow for most users
 which goes through three main stages (1) trajectory conversion, (2)

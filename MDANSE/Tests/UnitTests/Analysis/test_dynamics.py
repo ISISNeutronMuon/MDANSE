@@ -1,123 +1,64 @@
-import tempfile
-import os
-from os import path
-
-import h5py
 import numpy as np
 import pytest
-
 from MDANSE.Framework.Jobs.IJob import IJob
+from test_helpers.compare_hdf5 import compare_hdf5
+from test_helpers.paths import CONV_DIR, RESULTS_DIR
+
+short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
+mdmc_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
+com_traj = CONV_DIR / "com_trajectory.mdt"
 
 
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "short_trajectory_after_changes.mdt",
-)
-mdmc_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "Ar_mdmc_h5md.h5",
-)
-com_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "com_trajectory.mdt",
-)
-result_dir = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Results",
-)
+@pytest.mark.parametrize("interp_order", [1, 2, 3])
+def test_vacf(tmp_path, interp_order):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
 
+    parameters = {
+        "frames": (0, 10, 1, 5),
+        "interpolation_order": interp_order,
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
+        "running_mode": ("single-core",),
+        "trajectory": short_traj,
+    }
 
-@pytest.mark.parametrize(
-    "interp_order, normalise",
-    [
-        (1, True),
-        (2, True),
-        (3, True),
-        (1, False),
-        (2, False),
-        (3, False),
-    ],
-)
-def test_vacf(interp_order, normalise):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-    parameters["running_mode"] = ("single-core",)
-    parameters["normalize"] = normalise
-    parameters["trajectory"] = short_traj
     vacf = IJob.create("VelocityAutoCorrelationFunction")
     vacf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
 
-    if normalise:
-        fname = f"vacf_{interp_order}_normalised.mda"
-    else:
-        fname = f"vacf_{interp_order}.mda"
+    assert out_file.is_file()
+    assert log_file.is_file()
 
-    result_file = os.path.join(result_dir, fname)
+    fname = f"vacf_{interp_order}.mda"
 
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        for key in ["vacf_Cu", "vacf_S", "vacf_Sb", "vacf_total"]:
-            if normalise:
-                np.testing.assert_array_almost_equal(
-                    actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
-                    desired[f"/{key}"],
-                )
-            else:
-                np.testing.assert_array_almost_equal(
-                    actual[f"/{key}"], desired[f"/{key}"],
-                )
+    result_file = RESULTS_DIR / fname
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    compare_hdf5(out_file, result_file, [f"/vacf_{elem}" for elem in ("Cu", "S", "Sb", "total")], scale_result=False)
 
 
-def test_pps():
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
+def test_pps(tmp_path):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+
+    parameters = {
+        "frames": (0, 10, 1, 5),
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
+        "running_mode": ("single-core",),
+        "trajectory": short_traj
+    }
+
     pps = IJob.create("PositionPowerSpectrum")
     pps.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
 
-    result_file = os.path.join(result_dir, "pps.mda")
+    assert out_file.is_file()
+    assert log_file.is_file()
 
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        for key in [
-            "pacf_Cu",
-            "pacf_S",
-            "pacf_Sb",
-            "pacf_total",
-            "pps_Cu",
-            "pps_S",
-            "pps_Sb",
-            "pps_total",
-        ]:
-            np.testing.assert_array_almost_equal(
-                actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
-                desired[f"/{key}"],
-            )
+    result_file = RESULTS_DIR / "pps.mda"
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    compare_hdf5(out_file, result_file,
+                [f"/{fn}_{elem}" for elem in ("Cu", "S", "Sb", "total") for fn in ("pacf", "pps")],
+                scale_result=True)
 
 
 ################################################################
@@ -125,101 +66,84 @@ def test_pps():
 ################################################################
 @pytest.fixture(scope="function")
 def parameters():
-    parameters = {}
-    # parameters['atom_selection'] = None
-    # parameters['atom_transmutation'] = None
-    # parameters['frames'] = (0, 1000, 1)
-    parameters["trajectory"] = short_traj
-    parameters["running_mode"] = ("multicore", -4)
-    parameters["q_vectors"] = (
-        "SphericalLatticeQVectors",
-        {
-            "seed": 0,
-            "shells": (0, 5.0, 0.5),
-            "n_vectors": 100,
-            "width": 0.5,
-        },
-    )
-    parameters["q_values"] = (0.0, 10.0, 0.1)
-    parameters["r_values"] = (0.0, 0.9, 0.01)
-    parameters["per_axis"] = False
-    parameters["reference_direction"] = (0, 0, 1)
-    parameters["instrument_resolution"] = ("Gaussian", {"sigma": 1.0, "mu": 0.0})
-    parameters["interpolation_order"] = 3
-    parameters["projection"] = None
-    parameters["normalize"] = True
-    parameters["grouping_level"] = "atom"
-    parameters["weights"] = "equal"
+    parameters = {
+        # "atom_selection": None,
+        # "atom_transmutation": None,
+        # "frames": (0, 1000, 1),
+        "trajectory": short_traj,
+        "running_mode": ("multicore", -4),
+        "q_vectors": (
+            "SphericalLatticeQVectors",
+            {
+                "seed": 0,
+                "shells": (0, 5.0, 0.5),
+                "n_vectors": 100,
+                "width": 0.5,
+            },
+        ),
+        "q_values": (0.0, 10.0, 0.1),
+        "r_values": (0.0, 0.9, 0.01),
+        "per_axis": False,
+        "reference_direction": (0, 0, 1),
+        "instrument_resolution": ("Gaussian", {"sigma": 1.0, "mu": 0.0}),
+        "interpolation_order": 3,
+        "projection": None,
+        "grouping_level": "atom",
+        "weights": "equal",
+    }
     return parameters
 
 
-total_list = []
-
-for tp in [
-    ("short_traj", short_traj),
-    ("mdmc_traj", mdmc_traj),
-    ("com_traj", com_traj),
-]:
-    for jt in [
-        # "AngularCorrelation",
-        # "GeneralAutoCorrelationFunction",
-        ("DensityOfStates", ["dos", "vacf"], True),
-        ("MeanSquareDisplacement", ["msd"], False),
-        ("VelocityAutoCorrelationFunction", ["vacf"], True),
-        ("VanHoveFunctionDistinct", ["g(r,t)"], False),
-        ("VanHoveFunctionSelf", ["g(r,t)"], True),
-        # "OrderParameter",
-        ("PositionAutoCorrelationFunction", ["pacf"], True),
-        ("PositionPowerSpectrum", ["pacf", "pps"], True),
-    ]:
-        for rm in [("single-core", 1), ("multicore", -4)]:
-            for of in ["MDAFormat", "TextFormat"]:
-                total_list.append((tp, jt, rm, of))
-
-
-@pytest.mark.parametrize("traj_info,job_info,running_mode,output_format", total_list)
+@pytest.mark.parametrize("traj_info", [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
+                         ids=lambda x: x[0])
+@pytest.mark.parametrize("job_info", [
+    # "AngularCorrelation",
+    # "GeneralAutoCorrelationFunction",
+    ("DensityOfStates", ["dos", "vacf"], False),
+    ("MeanSquareDisplacement", ["msd"], False),
+    ("VelocityAutoCorrelationFunction", ["vacf"], False),
+    ("VanHoveFunctionDistinct", ["g(r,t)"], False),
+    ("VanHoveFunctionSelf", ["g(r,t)"], True),
+    # "OrderParameter",
+    ("PositionAutoCorrelationFunction", ["pacf"], False),
+    ("PositionPowerSpectrum", ["pacf", "pps"], False),
+], ids=lambda x: x[0])
+@pytest.mark.parametrize("running_mode", [("single-core", 1), ("multicore", -4)], ids=lambda x: x[0])
+@pytest.mark.parametrize("output_format", ["MDAFormat", "TextFormat"])
 def test_dynamics_analysis(
-    parameters, traj_info, job_info, running_mode, output_format
+        tmp_path, parameters, traj_info, job_info, running_mode, output_format
 ):
-    temp_name = tempfile.mktemp()
+    temp_name = tmp_path / "output"
+    log_file = temp_name.with_suffix(".log")
+
     parameters["trajectory"] = traj_info[1]
     parameters["running_mode"] = running_mode
     parameters["output_files"] = (temp_name, (output_format,), "INFO")
-    job = IJob.create(job_info[0])
+
+    job_type, outputs, normalised = job_info
+    outputs = tuple(outputs)
+
+    job = IJob.create(job_type)
     job.run(parameters, status=True)
+
     if output_format == "MDAFormat":
-        assert path.exists(temp_name + ".mda")
-        assert path.isfile(temp_name + ".mda")
-        result_file = os.path.join(
-            result_dir, f"dynamics_analysis_{traj_info[0]}_{job_info[0]}.mda"
-        )
-        print(f"{job_info[0]} {traj_info}")
-        with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-            keys = [i for i in desired.keys() if any([j in i for j in job_info[1]])]
-            for key in keys:
-                # reference results may or may not have been scaled/normalized
-                if job_info[2]:
-                    np.testing.assert_array_almost_equal(
-                        actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
-                        desired[f"/{key}"],
-                    )
-                else:
-                    np.testing.assert_array_almost_equal(
-                        actual[f"/{key}"], desired[f"/{key}"],
-                    )
+        out_file = temp_name.with_suffix(".mda")
+        result_file = RESULTS_DIR / f"dynamics_analysis_{traj_info[0]}_{job_type}.mda"
 
-        os.remove(temp_name + ".mda")
+        assert out_file.is_file()
+
+        compare_hdf5(out_file, result_file, outputs, startswith=True, scale_result=normalised)
+
     elif output_format == "TextFormat":
-        assert path.exists(temp_name + "_text.tar")
-        assert path.isfile(temp_name + "_text.tar")
-        os.remove(temp_name + "_text.tar")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+        out_file = temp_name.parent / (temp_name.stem + "_text.tar")
+        assert out_file.is_file()
+
+    assert log_file.is_file()
 
 
-def test_output_axis_preview(parameters):
-    temp_name = tempfile.mktemp()
+def test_output_axis_preview(tmp_path, parameters):
+    temp_name = tmp_path / "output"
+
     parameters["running_mode"] = ("single-core", 1)
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     job = IJob.create("DensityOfStates")

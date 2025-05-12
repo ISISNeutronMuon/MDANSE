@@ -11,7 +11,7 @@
 Welcome to MDANSE's documentation!
 ==================================
 
-**Useful links**: `MDANSE Project Website <https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx>`_ | `MDANSE GitHub Page <https://github.com/ISISNeutronMuon/MDANSE>`_
+**Useful links**: `MDANSE Project Website <https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx>`_ | `MDANSE GitHub <https://github.com/ISISNeutronMuon/MDANSE>`_ | `MDANSE-Examples GitHub <https://github.com/ISISNeutronMuon/MDANSE-Examples>`_
 
 **MDANSE (Molecular Dynamics Analysis for Neutron Scattering Experiments)**
 is a Python application designed for computing neutron observables
@@ -38,7 +38,7 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
        <div class="grid-item">
            <h3>⚛️ How-To Guides</h3>
            <p>Practical step-by-step guides to help you utilize MDANSE effectively.</p>
-           <a href="pages/H_gui.html">Learn More</a>
+           <a href="pages/H_start.html">Learn More</a>
        </div>
        <div class="grid-item">
            <h3>🧪 Tutorials</h3>
@@ -63,10 +63,13 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
    pages/workflow
    pages/trajectory
    pages/correlation
+   pages/weights
+   pages/qvectors
    pages/dynamics
    pages/scattering
    pages/structure
    pages/analysis
+   pages/notation
 
 .. toctree::
    :maxdepth: 5
@@ -75,17 +78,7 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
 
    pages/H_start
    pages/H_conv
-   pages/H_cli
-   pages/H_gui
-   pages/gui
-   pages/H_gloss
-   pages/H_Dynamics
-   pages/H_Scattering
-   pages/H_Structure
-   pages/H_other
-   pages/H_fca
    pages/H_Plotting
-   pages/H_Batch
 
 .. toctree::
    :maxdepth: 5
@@ -93,7 +86,6 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
    :caption: 🧪 Tutorials
 
    pages/T_external
-   pages/T_sim
 
 .. toctree::
    :maxdepth: 5
@@ -101,8 +93,8 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
    :caption: 📚 Technical References
 
    pages/R_contact
-   pages/parameters
    pages/R_traj
+   pages/parameters
    pages/R_units
    pages/R_further
    pages/references

@@ -33,28 +33,24 @@ class TestAtomsDatabase(unittest.TestCase):
             "H": {
                 "family": "non metal",
                 "nucleon": 0,
-                "alternatives": [],
                 "electronegativity": 2.2,
                 "symbol": "H",
             },
             "H2": {
                 "family": "non metal",
                 "nucleon": 2,
-                "alternatives": [],
                 "electronegativity": 2.2,
                 "symbol": "H",
             },
             "O": {
                 "family": "non metal",
                 "nucleon": 0,
-                "alternatives": [],
                 "electronegativity": 3.44,
                 "symbol": "O",
             },
             "Fe": {
                 "family": "transition metal",
                 "nucleon": 0,
-                "alternatives": [],
                 "electronegativity": 1.83,
                 "symbol": "Fe",
             },
@@ -62,7 +58,6 @@ class TestAtomsDatabase(unittest.TestCase):
         self.properties = {
             "family": "str",
             "nucleon": "int",
-            "alternatives": "list",
             "electronegativity": "float",
             "symbol": "str",
         }
@@ -119,7 +114,6 @@ class TestAtomsDatabase(unittest.TestCase):
             {
                 "family": "non metal",
                 "nucleon": 0,
-                "alternatives": [],
                 "electronegativity": 2.2,
                 "symbol": "H",
             },
@@ -134,7 +128,6 @@ class TestAtomsDatabase(unittest.TestCase):
             {
                 "family": "non metal",
                 "nucleon": 0,
-                "alternatives": [],
                 "electronegativity": 2.2,
                 "symbol": "H",
             },
@@ -151,7 +144,12 @@ class TestAtomsDatabase(unittest.TestCase):
             patch("MDANSE.Chemistry.Databases.AtomsDatabase.save") as n,
         ):
             ATOMS_DATABASE.add_atom("new_atom")
-            self.assertDictEqual({}, ATOMS_DATABASE["new_atom"])
+            self.assertDictEqual({
+                "family": "",
+                "nucleon": 0,
+                "electronegativity": 0.0,
+                "symbol": ""
+            }, ATOMS_DATABASE["new_atom"])
             assert not m.called
             assert not n.called
 
@@ -253,7 +251,6 @@ class TestAtomsDatabase(unittest.TestCase):
             "                                  H                                   \n"
             " property                                                         value\n"
             "----------------------------------------------------------------------\n"
-            " alternatives                                                        []\n"
             " electronegativity                                                  2.2\n"
             " family                                                       non metal\n"
             " nucleon                                                              0\n"
@@ -307,7 +304,7 @@ class TestAtomsDatabase(unittest.TestCase):
         self.assertEqual(4, ATOMS_DATABASE.n_atoms)
 
     def test_n_properties(self):
-        self.assertEqual(5, ATOMS_DATABASE.n_properties)
+        self.assertEqual(4, ATOMS_DATABASE.n_properties)
 
     def test_numeric_properties(self):
         self.assertEqual(
@@ -327,5 +324,58 @@ class TestAtomsDatabase(unittest.TestCase):
             ATOMS_DATABASE.save()
             op.assert_called_with(ATOMS_DATABASE._USER_DATABASE, "w")
             dump.assert_called_with(
-                {"properties": self.properties, "atoms": self.data}, ANY
+                {"properties": self.properties, "atoms": self.data}, ANY, indent=4
             )
+
+    def test_remove_atom(self):
+        ATOMS_DATABASE.remove_atom("Fe")
+        self.assertEqual(["H", "H2", "O"], ATOMS_DATABASE.atoms)
+
+    def test_remove_atom_for_atom_that_does_not_exist_raise_database_error(self):
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.remove_atom("Test")
+
+    def test_remove_property(self):
+        ATOMS_DATABASE.remove_property("electronegativity")
+        self.assertDictEqual({
+                "family": "transition metal",
+                "nucleon": 0,
+                "symbol": "Fe",
+            },
+            ATOMS_DATABASE["Fe"]
+        )
+
+    def test_remove_property_for_property_that_does_not_exist_raise_database_error(self):
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.remove_property("Test")
+
+    def test_rename_atom_type(self):
+        ATOMS_DATABASE.rename_atom_type("Fe", "FeNew")
+        self.assertEqual(["FeNew", "H", "H2", "O"], ATOMS_DATABASE.atoms)
+
+    def test_rename_atom_type_raise_database_error_when_new_atom_type_already_exists(self):
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.rename_atom_type("Fe", "H")
+
+    def test_rename_atom_type_raise_database_error_when_old_atom_type_does_not_exists(self):
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.rename_atom_type("Fee", "H")
+
+    def test_rename_atom_property(self):
+        ATOMS_DATABASE.rename_atom_property("electronegativity", "electronegativitynew")
+        self.assertDictEqual({
+                "family": "transition metal",
+                "nucleon": 0,
+                "electronegativitynew": 1.83,
+                "symbol": "Fe",
+            },
+            ATOMS_DATABASE["Fe"]
+        )
+
+    def test_rename_atom_property_raise_database_error_when_new_atom_property_already_exists(self):
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.rename_atom_property("symbol", "electronegativity")
+
+    def test_rename_atom_property_raise_database_error_when_old_atom_type_does_not_exists(self):
+        with self.assertRaises(AtomsDatabaseError):
+            ATOMS_DATABASE.rename_atom_property("electronegativitytest", "symbol")

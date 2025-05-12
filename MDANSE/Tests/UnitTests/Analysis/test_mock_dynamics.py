@@ -1,68 +1,35 @@
-import tempfile
-import os
-from os import path
-
-import h5py
-import numpy as np
 import pytest
-
 from MDANSE.Framework.Jobs.IJob import IJob
+from test_helpers.compare_hdf5 import compare_hdf5
+from test_helpers.paths import DATA_DIR, RESULTS_DIR
+
+mock_json = DATA_DIR / "mock.json"
 
 
-file_wd = os.path.dirname(os.path.realpath(__file__))
-mock_json = os.path.join(file_wd, "..", "Data", "mock.json")
-result_dir = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Results",
-)
+@pytest.mark.parametrize("interp_order", [1, 2, 3])
+def test_vacf(tmp_path, interp_order):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
 
+    parameters = {
+        "frames": (0, 10, 1, 5),
+        "interpolation_order": interp_order,
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
+        "running_mode": ("single-core",),
+        "trajectory": mock_json,
+    }
 
-@pytest.mark.parametrize(
-    "interp_order, normalise",
-    [
-        (1, True),
-        (2, True),
-        (3, True),
-        (1, False),
-        (2, False),
-        (3, False),
-    ],
-)
-def test_vacf(interp_order, normalise):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["interpolation_order"] = interp_order
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-    parameters["running_mode"] = ("single-core",)
-    parameters["normalize"] = normalise
-    parameters["trajectory"] = mock_json
     vacf = IJob.create("VelocityAutoCorrelationFunction", trajectory_input="mock")
     vacf.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
 
-    if normalise:
-        fname = f"mock_traj_vacf_{interp_order}_normalised.mda"
-    else:
-        fname = f"mock_traj_vacf_{interp_order}.mda"
+    assert out_file.is_file()
+    assert log_file.is_file()
 
-    result_file = os.path.join(result_dir, fname)
+    fname = f"mock_traj_vacf_{interp_order}.mda"
 
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        for key in ["vacf_H", "vacf_O", "vacf_Si", "vacf_total"]:
-            if normalise:
-                np.testing.assert_array_almost_equal(
-                    actual[f"/{key}"] * actual[f"/{key}"].attrs["scaling_factor"],
-                    desired[f"/{key}"],
-                )
-            else:
-                np.testing.assert_array_almost_equal(
-                    actual[f"/{key}"], desired[f"/{key}"],
-                )
+    result_file = RESULTS_DIR / fname
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    compare_hdf5(out_file, result_file,
+                [f"vacf_{elem}" for elem in ("H", "O", "Si", "total")],
+                scale_result=False)

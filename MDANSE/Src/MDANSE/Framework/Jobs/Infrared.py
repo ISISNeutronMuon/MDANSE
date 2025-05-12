@@ -67,10 +67,7 @@ class Infrared(IJob):
             "default": {},
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -86,6 +83,10 @@ class Infrared(IJob):
 
         self.numberOfSteps = len(self.molecules)
         instrResolution = self.configuration["instrument_resolution"]
+
+        self.add_ideal_results = (
+            self.configuration["instrument_resolution"]["kernel"] != "ideal"
+        )
 
         self._outputData.add(
             "time",
@@ -128,6 +129,13 @@ class Infrared(IJob):
             axis="romega",
             main_result=True,
         )
+        if self.add_ideal_results:
+            self._outputData.add(
+                "ir_ideal",
+                "LineOutputVariable",
+                (instrResolution["n_romegas"],),
+                axis="romega",
+            )
 
     def run_step(self, index: int) -> tuple[int, np.ndarray]:
         """Runs a single step of the job.
@@ -215,6 +223,13 @@ class Infrared(IJob):
             self.configuration["instrument_resolution"]["time_step"],
             fft="rfft",
         )
+        if self.add_ideal_results:
+            self._outputData["ir_ideal"][:] = get_spectrum(
+                self._outputData["ddacf"],
+                None,
+                self.configuration["instrument_resolution"]["time_step"],
+                fft="rfft",
+            )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

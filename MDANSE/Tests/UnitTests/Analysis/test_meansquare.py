@@ -1,23 +1,14 @@
-import tempfile
 import os
-from os import path
+import tempfile
 
-import numpy as np
 import h5py
+import numpy as np
+import pytest
 from MDANSE.Framework.Jobs.IJob import IJob
+from test_helpers.compare_hdf5 import compare_hdf5
+from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
-
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "short_trajectory_after_changes.mdt",
-)
-result_dir = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Results",
-)
+short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
 # Mean Square Displacements can accept many parameters, most of them optional
 # settings['trajectory']=('hdf_trajectory',{})
@@ -30,59 +21,27 @@ result_dir = os.path.join(
 # settings['output_files']=('output_files', {"formats":["hdf","netcdf","ascii","svg"]})
 # settings['running_mode']=('running_mode',{})
 
+@pytest.mark.parametrize("running_mode", [("single-core",), ("multicore", -4)],
+                         ids=lambda x: x[0])
+def test_basic_meansquare(tmp_path, running_mode):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
 
-def test_basic_meansquare():
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
+    parameters = {
+        "frames": (0, 10, 1, 5),
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
+        "running_mode": running_mode,
+        "trajectory": short_traj,
+    }
+
     msd = IJob.create("MeanSquareDisplacement")
     msd.run(parameters, status=True)
-    assert path.exists(temp_name + ".mda")
-    assert path.isfile(temp_name + ".mda")
-    result_file = os.path.join(result_dir, "basic_meansquare.mda")
 
-    with h5py.File(temp_name + ".mda") as actual, h5py.File(result_file) as desired:
-        np.testing.assert_array_almost_equal(actual["/msd_Cu"], desired["/msd_Cu"])
-        np.testing.assert_array_almost_equal(actual["/msd_S"], desired["/msd_S"])
-        np.testing.assert_array_almost_equal(actual["/msd_Sb"], desired["/msd_Sb"])
-        np.testing.assert_array_almost_equal(
-            actual["/msd_total"], desired["/msd_total"]
-        )
+    assert out_file.is_file()
+    assert log_file.is_file()
 
-    os.remove(temp_name + ".mda")
-    assert path.exists(temp_name + ".log")
-    assert path.isfile(temp_name + ".log")
-    os.remove(temp_name + ".log")
+    result_file = RESULTS_DIR / "basic_meansquare.mda"
 
-
-def test_parallel_meansquare():
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
-    msd = IJob.create("MeanSquareDisplacement")
-    msd.run(parameters, status=True)
-    temp_name2 = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1, 5)
-    parameters["output_files"] = (temp_name2, ("MDAFormat",), "INFO")
-    parameters["running_mode"] = ("multicore", -4)
-    parameters["trajectory"] = short_traj
-    msd_par = IJob.create("MeanSquareDisplacement")
-    msd_par.run(parameters, status=True)
-    with (
-        h5py.File(temp_name + ".mda") as single,
-        h5py.File(temp_name2 + ".mda") as parallel,
-    ):
-        for kk in single.keys():
-            if not "metadata" in kk:
-                np.testing.assert_array_almost_equal(
-                    np.array(single[kk]), np.array(parallel[kk])
-                )
-    os.remove(temp_name + ".mda")
-    os.remove(temp_name2 + ".mda")
+    compare_hdf5(out_file, result_file,
+                [f"/msd_{elem}" for elem in ("Cu", "S", "Sb", "total")])

@@ -13,8 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Dict
 import collections
+from typing import Dict
 
 from MDANSE.Core.Error import Error
 from MDANSE.MLogging import LOG
@@ -29,8 +29,7 @@ class ConfigurationError(Error):
 
 
 class Configurable(object):
-    """
-    This class allows any object that derives from it to be configurable within the MDANSE framework.
+    """Allows any object that derives from it to be configurable within the MDANSE framework.
 
     Within that framework, to be configurable, a class must:
         #. derive from this class
@@ -123,6 +122,41 @@ class Configurable(object):
         """
 
         return self._configuration
+
+    def check_status(self):
+        """Raise an exception if some of the job inputs are invalid.
+
+        Loops over all the configuration items, and collects the error status
+        of the invalid ones. For optional inputs, only a warning is logged.
+
+        Raises
+        ------
+        RuntimeError
+            Trying to run a job that is not configured correctly.
+
+        """
+        errors = {}
+        warnings = {}
+        for name, conf in list(self._configuration.items()):
+            if not conf.valid:
+                if conf.optional:
+                    warnings[name] = conf.error_status
+                else:
+                    errors[name] = conf.error_status
+        if warnings:
+            LOG.warning(
+                "\n".join(
+                    ["Optional configuration entries were not valid:"]
+                    + [f"{entry}: {error}" for entry, error in warnings.items()]
+                )
+            )
+        if errors:
+            raise RuntimeError(
+                "\n".join(
+                    ["Bad configuration entries:"]
+                    + [f"{entry}: {error}" for entry, error in errors.items()]
+                )
+            )
 
     def setup(self, parameters: dict, rebuild: bool = True):
         """Builds and sets the configuration according to a set of

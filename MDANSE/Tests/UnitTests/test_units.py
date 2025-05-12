@@ -13,170 +13,104 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import unittest
+from contextlib import nullcontext
+from math import ceil, floor
+from operator import (add, iadd, imul, ipow, isub, itruediv, mul, pow, sub,
+                      truediv)
+from random import random
+from typing import TypeVar, Union
 
-from MDANSE.Framework.Units import _PREFIXES, UnitError, measure
+import pytest
+from MDANSE.Framework.Units import _PREFIXES, UnitError, _Unit, measure
+
+T = TypeVar("T")
+
+def _measure_or_val(m_o_v: T) -> Union[_Unit, T]:
+    """Convert a value to a measure or leave if not (val, unit)."""
+    if isinstance(m_o_v, (tuple, list)):
+        return measure(*m_o_v)
+    return m_o_v
+
+@pytest.mark.parametrize("unit", [
+    "kg", "m", "s", "K", "mol", "A", "cd", "rad", "sr",
+])
+def test_basic_units(unit):
+    m = measure(1.0, unit)
+    assert m.toval() == pytest.approx(1.0)
+
+@pytest.mark.parametrize("prefix", [
+    "y", "z", "a", "f", "p", "n", "u", "m", "c", "d",
+    "da", "h", "k", "M", "G", "T", "P", "E", "Z", "Y",
+])
+def test_prefixes(prefix):
+    val = random()
+    m = measure(val, "s")
+    assert m.toval(f"{prefix}s") == pytest.approx(val / _PREFIXES[prefix])
+
+@pytest.mark.parametrize("from_, equivalent, to, expected", [
+    ((1., "m/s"), False, "km/h", nullcontext(3.6)),
+    ((1., "eV"), False, "THz", pytest.raises(UnitError)),
+    ((1., "eV"), True, "THz", nullcontext(241.799)),
+    ((1., "eV"), True, "K", nullcontext(11604.52)),
+])
+def test_conversion(from_, equivalent, to, expected):
+    m = measure(*from_, equivalent=equivalent)
+    with expected as val:
+        assert m.toval(to) == pytest.approx(val)
+
+@pytest.mark.parametrize("in_units, op, out_unit, out_val", [
+    (((1., "s"), (1., "ms")), add, "s", 1.001),
+    (((1., "s"), (1., "ms")), sub, "s", 0.999),
+
+    (((1., "m"), (5., "hm")), mul, "m2", 500.),
+    (((500., "m2"), (10., "cm")), mul, "m3", 50.),
+    (((50., "m3"), 20.), mul, "m3", 1000.),
+
+    (((1., "m"), (5., "hm")), truediv, "au", 0.002),
+    (((0.002, "au"), 0.0001), truediv, "au", 20.),
+    (((20., "au"), (5., "hm")), truediv, "1/m", 4.e-2),
+
+    (((4., "m"), 3), pow, "m3", 64.),
+
+    # In-place
+    (((1., "s"), (1., "ms")), iadd, "s", 1.001),
+    (((1., "s"), (1., "ms")), isub, "s", 0.999),
+
+    (((1., "m"), (5., "hm")), imul, "m2", 500.),
+    (((500., "m2"), (10., "cm")), imul, "m3", 50.),
+    (((50., "m3"), 20.), imul, "m3", 1000.),
+
+    (((1., "m"), (5., "hm")), itruediv, "au", 0.002),
+    (((0.002, "au"), 0.0001), itruediv, "au", 20.),
+    (((20., "au"), (5., "hm")), itruediv, "1/m", 4.e-2),
+
+    (((4., "m"), 3), ipow, "m3", 64.),
+
+    # Other ops
+    (((10.2, "m/s"),), floor, None, 10.),
+    (((3.6, "m/s"),), floor, None, 3.),
+    (((50.3, "km/h"),), floor, None, 50.),
+
+    (((10.2, "m/s"),), ceil, None, 11.),
+    (((3.6, "m/s"),), ceil, None, 4.),
+    (((50.3, "km/h"),), ceil, None, 51.),
+
+    (((10.2, "m/s"),), round, None, 10.),
+    (((3.6, "m/s"),), round, None, 4.),
+    (((50.3, "km/h"),), round, None, 50.),
+
+    (((50.3, "km/h"),), round, None, 50.),
+
+])
+def test_operators(in_units, op, out_unit, out_val):
+    m = op(*map(_measure_or_val, in_units))
+    assert m.toval(out_unit) == pytest.approx(out_val)
 
 
-class TestUnits(unittest.TestCase):
-    """
-    Unittest for the geometry-related functions
-    """
+def test_sqrt():
+    m = measure(4.0, "m2/s2")
 
-    def test_basic_units(self):
-        m = measure(1.0, "kg")
-        self.assertAlmostEqual(m.toval(), 1.0, delta=1.0e-09)
+    m = m.sqrt()
 
-        m = measure(1.0, "m")
-        self.assertAlmostEqual(m.toval(), 1.0, delta=1.0e-09)
-
-        m = measure(1.0, "s")
-        self.assertAlmostEqual(m.toval(), 1.0, delta=1.0e-09)
-
-        m = measure(1.0, "K")
-        self.assertAlmostEqual(m.toval(), 1.0, delta=1.0e-09)
-
-        m = measure(1.0, "mol")
-        self.assertAlmostEqual(m.toval(), 1.0, delta=1.0e-09)
-
-        m = measure(1.0, "A")
-        self.assertAlmostEqual(m.toval(), 1.0, delta=1.0e-09)
-
-        m = measure(1.0, "cd")
-        self.assertAlmostEqual(m.toval(), 1.0, delta=1.0e-09)
-
-        m = measure(1.0, "rad")
-        self.assertAlmostEqual(m.toval(), 1.0, delta=1.0e-09)
-
-        m = measure(1.0, "sr")
-        self.assertAlmostEqual(m.toval(), 1.0, delta=1.0e-09)
-
-    def test_prefix(self):
-        m = measure(1.0, "s")
-        self.assertAlmostEqual(m.toval("ys"), 1.0 / _PREFIXES["y"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("zs"), 1.0 / _PREFIXES["z"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("as"), 1.0 / _PREFIXES["a"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("fs"), 1.0 / _PREFIXES["f"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("ps"), 1.0 / _PREFIXES["p"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("ns"), 1.0 / _PREFIXES["n"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("us"), 1.0 / _PREFIXES["u"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("ms"), 1.0 / _PREFIXES["m"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("cs"), 1.0 / _PREFIXES["c"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("ds"), 1.0 / _PREFIXES["d"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("das"), 1.0 / _PREFIXES["da"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("hs"), 1.0 / _PREFIXES["h"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("ks"), 1.0 / _PREFIXES["k"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("Ms"), 1.0 / _PREFIXES["M"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("Gs"), 1.0 / _PREFIXES["G"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("Ts"), 1.0 / _PREFIXES["T"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("Ps"), 1.0 / _PREFIXES["P"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("Es"), 1.0 / _PREFIXES["E"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("Zs"), 1.0 / _PREFIXES["Z"], delta=1.0e-09)
-        self.assertAlmostEqual(m.toval("Ys"), 1.0 / _PREFIXES["Y"], delta=1.0e-09)
-
-    def test_composite_units(self):
-        m = measure(1.0, "m/s")
-        self.assertAlmostEqual(m.toval("km/h"), 3.6, delta=1.0e-09)
-
-    def test_add_units(self):
-        m1 = measure(1.0, "s")
-        m2 = measure(1.0, "ms")
-
-        m = m1 + m2
-        self.assertAlmostEqual(m.toval("s"), 1.001, delta=1.0e-09)
-
-        m += m2
-        self.assertAlmostEqual(m.toval("s"), 1.002, delta=1.0e-09)
-
-    def test_substract_units(self):
-        m1 = measure(1.0, "s")
-        m2 = measure(1.0, "ms")
-
-        m = m1 - m2
-        self.assertAlmostEqual(m.toval("s"), 0.999, delta=1.0e-09)
-
-        m -= m2
-        self.assertAlmostEqual(m.toval("s"), 0.998, delta=1.0e-09)
-
-    def test_product_units(self):
-        m1 = measure(1.0, "m")
-        m2 = measure(5.0, "hm")
-
-        m = m1 * m2
-        self.assertAlmostEqual(m.toval("m2"), 500, delta=1.0e-09)
-
-        m *= measure(10, "cm")
-        self.assertAlmostEqual(m.toval("m3"), 50, delta=1.0e-09)
-
-        m *= 20
-        self.assertAlmostEqual(m.toval("m3"), 1000, delta=1.0e-09)
-
-    def test_divide_units(self):
-        m1 = measure(1.0, "m")
-        m2 = measure(5.0, "hm")
-
-        m = m1 / m2
-        self.assertAlmostEqual(m.toval("au"), 0.002, delta=1.0e-09)
-
-        m /= 0.0001
-        self.assertAlmostEqual(m.toval("au"), 20.0, delta=1.0e-09)
-
-        m /= m2
-        self.assertRaises(UnitError, m.toval, "au")
-        self.assertAlmostEqual(m.toval("1/m"), 4.0e-02, delta=1.0e-09)
-
-    def test_floor_unit(self):
-        self.assertAlmostEqual(
-            measure(10.2, "m/s").floor().toval(), 10.0, delta=1.0e-09
-        )
-        self.assertAlmostEqual(
-            measure(3.6, "m/s").ounit("km/h").floor().toval(), 12.0, delta=1.0e-09
-        )
-        self.assertAlmostEqual(
-            measure(50.3, "km/h").floor().toval(), 50.0, delta=1.0e-09
-        )
-
-    def test_ceil_unit(self):
-        self.assertAlmostEqual(measure(10.2, "m/s").ceil().toval(), 11.0, delta=1.0e-09)
-        self.assertAlmostEqual(
-            measure(3.6, "m/s").ounit("km/h").ceil().toval(), 13.0, delta=1.0e-09
-        )
-        self.assertAlmostEqual(
-            measure(50.3, "km/h").ceil().toval(), 51.0, delta=1.0e-09
-        )
-
-    def test_round_unit(self):
-        self.assertAlmostEqual(
-            measure(10.2, "m/s").round().toval(), 10.0, delta=1.0e-09
-        )
-        self.assertAlmostEqual(
-            measure(3.6, "m/s").ounit("km/h").round().toval(), 13.0, delta=1.0e-09
-        )
-        self.assertAlmostEqual(
-            measure(50.3, "km/h").round().toval(), 50.0, delta=1.0e-09
-        )
-
-    def test_int_unit(self):
-        self.assertEqual(int(measure(10.2, "km/h")), 10)
-
-    def test_sqrt_unit(self):
-        m = measure(4.0, "m2/s2")
-
-        m = m.sqrt()
-
-        self.assertAlmostEqual(m.toval(), 2.0, delta=1.0e-09)
-        self.assertEqual(m.dimension, [0, 1, -1, 0, 0, 0, 0, 0, 0])
-
-    def test_power_unit(self):
-        m = measure(4.0, "m")
-        m **= 3
-        self.assertAlmostEqual(m.toval(), 64.0, delta=1.0e-09)
-        self.assertEqual(m.dimension, [0, 3, 0, 0, 0, 0, 0, 0, 0])
-
-    def test_equivalent_units(self):
-        m = measure(1.0, "eV", equivalent=True)
-        self.assertAlmostEqual(m.toval("THz"), 241.799, delta=1.0e-03)
-        self.assertAlmostEqual(m.toval("K"), 11604.52, delta=1.0e-02)
-
-        m = measure(1.0, "eV", equivalent=False)
-        self.assertRaises(UnitError, m.toval, "THz")
+    assert m.toval() == 2.0
+    assert m.dimension == [0, 1, -1, 0, 0, 0, 0, 0, 0]

@@ -33,6 +33,7 @@ label_text = """Here you can create plots of specific
 data sets. Load the files and assign the data sets
 to a plot. The plotting interface will appear
 in a new tab of the interface.
+DOUBLE CLICK FILE FOR FAST PLOTTING
 """
 
 

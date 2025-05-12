@@ -152,10 +152,6 @@ def random_points_on_circle(axis, radius=1.0, nPoints=100):
     return points
 
 
-def almost(a, b, tolerance=1e-7):
-    return abs(a - b) < tolerance
-
-
 def get_euler_angles(rotation, tolerance=1e-5):
     """
     R must be an indexable of shape (3,3) and represent and ORTHOGONAL POSITIVE
@@ -193,16 +189,20 @@ def get_euler_angles(rotation, tolerance=1e-5):
     else:
         alpha = np.degrees(np.arctan2(-rotation[0, 1], rotation[0, 0] * rotation[2, 2]))
         gamma = 0.0
-    if almost(beta, 0.0, fuzz):
+
+    if np.isclose(beta, 0.0, atol=fuzz):
         alpha, beta, gamma = alpha + gamma, 0.0, 0.0
-    elif almost(beta, 180.0, fuzz):
+    elif np.isclose(beta, 180.0, atol=fuzz):
         alpha, beta, gamma = alpha - gamma, 180.0, 0.0
+
     alpha = np.mod(alpha, 360.0)
     gamma = np.mod(gamma, 360.0)
-    if almost(alpha, 360.0, fuzz):
+
+    if np.isclose(alpha, 360.0, atol=fuzz):
         alpha = 0.0
-    if almost(gamma, 360.0, fuzz):
+    if np.isclose(gamma, 360.0, atol=fuzz):
         gamma = 0.0
+
     return alpha, beta, gamma
 
 

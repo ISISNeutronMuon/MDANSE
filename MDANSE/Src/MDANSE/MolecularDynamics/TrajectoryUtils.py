@@ -122,10 +122,10 @@ def atomic_trajectory(config, cell, rcell, box_coordinates=False):
     np.ndarray
         The input config but the unit cell jumps removed.
     """
-    trajectory = np.einsum("ij,ikj->ik", config, rcell)
+    trajectory = np.einsum("ij,ijk->ik", config, rcell)
     sdxyz = trajectory[1:, :] - trajectory[:-1, :]
     sdxyz -= np.cumsum(np.round(sdxyz), axis=0)
     trajectory[1:, :] = trajectory[:-1, :] + sdxyz
     if not box_coordinates:
-        trajectory = np.einsum("ij,ikj->ik", trajectory, cell)
+        trajectory = np.einsum("ij,ijk->ik", trajectory, cell)
     return trajectory

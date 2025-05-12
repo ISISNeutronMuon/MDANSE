@@ -84,10 +84,7 @@ class DensityOfStates(IJob):
             },
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -99,6 +96,9 @@ class DensityOfStates(IJob):
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
         instrResolution = self.configuration["instrument_resolution"]
+        self.add_ideal_results = (
+            self.configuration["instrument_resolution"]["kernel"] != "ideal"
+        )
 
         self._outputData.add(
             "time",
@@ -145,6 +145,14 @@ class DensityOfStates(IJob):
                 main_result=True,
                 partial_result=True,
             )
+            if self.add_ideal_results:
+                self._outputData.add(
+                    f"dos_ideal_{element}",
+                    "LineOutputVariable",
+                    (instrResolution["n_romegas"],),
+                    axis="romega",
+                    units="au",
+                )
         self._outputData.add(
             "vacf_total",
             "LineOutputVariable",
@@ -160,6 +168,14 @@ class DensityOfStates(IJob):
             units="au",
             main_result=True,
         )
+        if self.add_ideal_results:
+            self._outputData.add(
+                "dos_ideal_total",
+                "LineOutputVariable",
+                (instrResolution["n_romegas"],),
+                axis="romega",
+                units="au",
+            )
 
         self._atoms = self.configuration["trajectory"][
             "instance"
@@ -241,11 +257,20 @@ class DensityOfStates(IJob):
                 self.configuration["instrument_resolution"]["time_step"],
                 fft="rfft",
             )
+            if self.add_ideal_results:
+                self._outputData[f"dos_ideal_{element}"][:] = get_spectrum(
+                    self._outputData[f"vacf_{element}"],
+                    None,
+                    self.configuration["instrument_resolution"]["time_step"],
+                    fft="rfft",
+                )
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "vacf_%s")
         assign_weights(self._outputData, weight_dict, "dos_%s")
+        if self.add_ideal_results:
+            assign_weights(self._outputData, weight_dict, "dos_ideal_%s")
         self._outputData["vacf_total"][:] = weighted_sum(
             self._outputData,
             weight_dict,
@@ -256,6 +281,12 @@ class DensityOfStates(IJob):
             weight_dict,
             "dos_%s",
         )
+        if self.add_ideal_results:
+            self._outputData["dos_ideal_total"][:] = weighted_sum(
+                self._outputData,
+                weight_dict,
+                "dos_ideal_%s",
+            )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

@@ -75,7 +75,7 @@ class H5MDTrajectory:
         self._chemical_system = ChemicalSystem(self._h5_filename.stem)
         try:
             self._chemical_system.initialise_atoms(chemical_elements)
-        except Exception:
+        except (KeyError, TypeError):
             LOG.error(
                 "It was not possible to read chemical element information from an H5MD file."
             )
@@ -88,7 +88,7 @@ class H5MDTrajectory:
         coords = self._h5_file["/particles/all/position/value"][0, :, :]
         try:
             pos_unit = self._h5_file["/particles/all/position/value"].attrs["unit"]
-        except Exception:
+        except KeyError:
             conv_factor = 1.0
         else:
             if pos_unit in ("Ang", "Angstrom"):
@@ -271,24 +271,20 @@ class H5MDTrajectory:
         except KeyError:
             self._unit_cells = None
         else:
-            if len(cells.shape) > 1:
+            if cells.ndim > 1:
                 for cell in cells:
                     if cell.shape == (3, 3):
                         temp_array = np.array(cell)
+                    elif cell.shape == (3,):
+                        temp_array = np.diag(cell)
                     else:
-                        temp_array = np.array(
-                            [
-                                [cell[0], 0.0, 0.0],
-                                [0.0, cell[1], 0.0],
-                                [0.0, 0.0, cell[2]],
-                            ]
+                        raise ValueError(
+                            f"Cell array {cell} has a wrong shape {cell.shape}"
                         )
                     uc = UnitCell(temp_array)
                     self._unit_cells.append(uc)
             else:
-                temp_array = np.array(
-                    [[cells[0], 0.0, 0.0], [0.0, cells[1], 0.0], [0.0, 0.0, cells[2]]]
-                )
+                temp_array = np.diag(cells)
                 self._unit_cells.append(UnitCell(temp_array))
 
     def time(self):
@@ -456,10 +452,8 @@ class H5MDTrajectory:
             real_coordinates = np.empty(box_coordinates.shape, dtype=np.float64)
             comp = 0
             for i in range(first, last, step):
-                direct_cell = self.unit_cell(i).transposed_direct
-                real_coordinates[comp, :] = np.matmul(
-                    direct_cell, box_coordinates[comp, :]
-                )
+                direct_cell = self.unit_cell(i).direct
+                real_coordinates[comp, :] = box_coordinates[comp, :] @ direct_cell
                 comp += 1
             return real_coordinates
         else:
@@ -501,16 +495,10 @@ class H5MDTrajectory:
 
         if self._unit_cells is not None:
             direct_cells = np.array(
-                [
-                    self.unit_cell(nf).transposed_direct
-                    for nf in range(first, last, step)
-                ]
+                [self.unit_cell(nf).direct for nf in range(first, last, step)]
             )
             inverse_cells = np.array(
-                [
-                    self.unit_cell(nf).transposed_inverse
-                    for nf in range(first, last, step)
-                ]
+                [self.unit_cell(nf).inverse for nf in range(first, last, step)]
             )
             atomic_traj = atomic_trajectory(
                 coords, direct_cells, inverse_cells, box_coordinates

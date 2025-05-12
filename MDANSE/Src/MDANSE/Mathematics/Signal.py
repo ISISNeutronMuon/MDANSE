@@ -289,9 +289,10 @@ def get_spectrum(signal, window=None, timeStep=1.0, axis=0, fft="fft"):
 
     s = tuple(s)
 
-    # We compute the non-unitary fourier transform with angular
-    # frequencies with a 1/2pi factor applied to the forward transform.
-    # This is done for some historical reason see the git history.
+    # We compute the non-unitary fourier transform with a 1/2pi factor
+    # applied to the forward transform and angular frequencies.
+    # See the derivation of S(q,w) from QM in Principles of Neutron
+    # Scattering from Condensed Matter, Chap. 3.
 
     # For information about the manipulation around fftshift and ifftshift
     # http://www.mathworks.com/matlabcentral/newsreader/view_thread/285244

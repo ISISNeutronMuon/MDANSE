@@ -388,10 +388,10 @@ additive_atom_properties = [
 ]
 averaged_atom_properties = [
     "electronegativity",
-    "electroaffinity",
+    "electron_affinity",
     "atomic_number",
     "group",
-    "serie",
+    "series",
 ]
 constant_atom_properties = {
     "equal": 1.0,
@@ -400,7 +400,6 @@ constant_atom_properties = {
 atom_radii = [
     "covalent_radius",
     "vdw_radius",
-    "atomic_radius",
 ]
 
 
@@ -563,7 +562,27 @@ class TrajectoryWriter:
         for label in new_labels:
             if label.encode("utf-8") not in label_dataset:
                 label_dataset[next_index] = label
-                type_dataset[next_index] = ptypes[label]
+                if label in ptypes:
+                    type_dataset[next_index] = ptypes[label]
+                else:
+                    # the label was not found in ptypes this can
+                    # happen when the trajectory contained custom atom
+                    # properties and this function was inputted with
+                    # ptypes=None. Let's derive the type from the
+                    # properties value.
+                    if isinstance(properties[label], (float, np.float32, np.float64)):
+                        type_dataset[next_index] = "float"
+                    elif isinstance(properties[label], (int, np.int32, np.int64)):
+                        type_dataset[next_index] = "int"
+                    elif isinstance(properties[label], str):
+                        type_dataset[next_index] = "str"
+                    elif isinstance(properties[label], list):
+                        type_dataset[next_index] = "list"
+                    else:
+                        raise TypeError(
+                            f"The trajectories atom database contains atom "
+                            f"properties of an unexpected type: "
+                            f"{type(properties[label])}")
                 next_index += 1
         mapping = {
             property_label.decode("utf-8"): index

@@ -238,32 +238,3 @@ Table 2: A list of all units that can be used in MDANSE.
 |              |                | s              |                |
 +--------------+----------------+----------------+----------------+
 
-.. _section-1:
-
-.. |image35| image:: ./Pictures/10000001000004E6000002A73EEAE87D5C660F5C.png
-   :width: 7.655cm
-   :height: 4.159cm
-.. |image36| image:: ./Pictures/10000001000004E4000002A94202A3BFD79098BA.png
-   :width: 7.465cm
-   :height: 4.096cm
-.. |image37| image:: ./Pictures/1000000100000478000002C6F32754BFA135B144.png
-   :width: 6.854cm
-   :height: 4.255cm
-.. |image38| image:: ./Pictures/1000000100000483000002D2D853AC6BB7CFEA02.png
-   :width: 6.791cm
-   :height: 4.246cm
-.. |image39| image:: ./Pictures/10000001000003C2000003347082A5808C577BC7.png
-   :width: 4.815cm
-   :height: 4.105cm
-.. |image40| image:: ./Pictures/10000001000003C10000032F3AEF65741592C169.png
-   :width: 4.904cm
-   :height: 4.157cm
-.. |image41| image:: ./Pictures/10000001000003BF0000032F9CDC0562548E815A.png
-   :width: 4.798cm
-   :height: 4.076cm
-.. |image42| image:: ./Pictures/10000001000003C200000330E638C73D8C1D67D9.png
-   :width: 5.239cm
-   :height: 4.443cm
-.. |image43| image:: ./Pictures/100000010000072F000003336ED265D0B6E3D58A.png
-   :width: 9.844cm
-   :height: 4.383cm

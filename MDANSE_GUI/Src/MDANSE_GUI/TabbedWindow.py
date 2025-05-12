@@ -47,6 +47,7 @@ from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Tabs.InstrumentTab import InstrumentTab
+from MDANSE_GUI.Tabs.Views.PlotDataView import PlotDataView
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
 from MDANSE_GUI.Widgets.NotificationTabWidget import NotificationTabWidget
 
@@ -109,10 +110,10 @@ class TabbedWindow(QMainWindow):
         self._tabs["Plot Creator"]._visualiser.create_new_text.connect(
             self._tabs["Plot Holder"]._visualiser.new_text
         )
-
         self._tabs["Instruments"]._visualiser.instrument_details_changed.connect(
             self._tabs["Actions"].update_action_after_instrument_change
         )
+
         self.tabs.currentChanged.connect(self.tabs.reset_current_color)
 
     def createCommonModels(self):
@@ -224,12 +225,12 @@ class TabbedWindow(QMainWindow):
 
     def launch_dialog(self, dialog) -> None:
         if dialog.isVisible():
-            if dialog.isMaximized():
-                dialog.showMaximized()
-            else:
-                dialog.showNormal()
-            dialog.activateWindow()
+            geometry = dialog.saveGeometry()
+            dialog.previous_geometry = geometry
+            dialog.close()
         else:
+            if hasattr(dialog, "previous_geometry"):
+                dialog.restoreGeometry(dialog.previous_geometry)
             dialog.show()
 
     @Slot(bool)
@@ -326,6 +327,11 @@ class TabbedWindow(QMainWindow):
         self._tabs[name] = plot_tab
         self._job_holder.results_for_loading.connect(plot_tab.load_results)
         self._job_holder.results_for_loading.connect(plot_tab.tab_notification)
+        plot_tab._view.fast_plotting_data.connect(self.accept_external_data)
+
+    def accept_external_data(self, model):
+        self._tabs["Plot Creator"]._visualiser.new_plot()
+        self._tabs["Plot Holder"].accept_external_data(model)
 
     def createPlotHolder(self):
         name = "Plot Holder"

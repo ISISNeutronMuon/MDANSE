@@ -3,8 +3,8 @@ This section is dealing with specific types of analysis performed by
 MDANSE. If you are not sure where these fit into the general workflow
 of data analysis, please read :ref:`workflow-of-analysis`.
 
-Analysis Theory: Structure
-==========================
+Analysis: Structure
+===================
 
 This section contains the following plugins:
 
@@ -60,53 +60,15 @@ of complex molecular systems in simulations, serving several key purposes:
   arrangements, aiding in the identification of specific patterns like
   solvation shells or coordination spheres.
 
-In the context of MDANSE, CN is defined differently from the traditional
-concept. In MDANSE, CN is calculated not only around a single central atom but
-around the centers of gravity of a group of atoms. Importantly, when the
-selected group comprises only one atom, the MDANSE CN definition is
-effectively equivalent to the traditional CN definition based on a central
-atom. This extended definition allows for the analysis of coordination within
-groups of atoms rather than being limited to individual central atoms.
-In this context, the *CN* is defined as:
+In MDANSE the CN is defined as
 
 .. math::
-   :label: pfx118
+   :label: cn1
 
-   {n{\left( {r,{r + \mathrm{d}r}} \right) = \frac{1}{N_{\mathrm{G}}}}{\sum\limits_{g = 1}^{N_{\mathrm{G}}}{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{n_{\mathit{gI}}\left( {r,{r + \mathrm{d}r}} \right)}}}}
+    \mathrm{CN}_{\alpha\beta}(r) =  c_{\beta} \int\limits_{0}^{\infty}\mathrm{d}r \, 4 \pi r^2  \rho g_{\alpha\beta}(r)
 
-where :math:`N_{\mathrm{G}}` is the number of groups of atoms, :math:`N_{\mathrm{species}}` is the
-number of species found in the system and :math:`n_{gI}(r)` is the *CN*
-defined for species :math:`I` defined as the number of atoms of species :math:`I`
-found in a shell of width :math:`\mathrm{d}r` at a distance :math:`r` of the center of
-gravity of the group of atom :math:`g`.
-
-MDANSE allows one to compute the CN on a set of equidistantly spaced
-distances at different times
-
-.. math::
-   :label: pfx119
-
-   {\mathrm{CN}\left( r_{m} \right)\doteq\frac{1}{N_{\mathrm{frames}}}\frac{1}{N_{\mathrm{G}}}{\sum\limits_{f = 1}^{N_{\mathrm{frames}}}{\sum\limits_{g = 1}^{N_{\mathrm{G}}}{\sum\limits_{I = 1}^{N_{\mathrm{species}}}{\mathrm{CN}_{\mathit{gI}}\left( {r_{m},t_{f}} \right)}}}}}
-
-where :math:`{m = 0}, \ldots, {N_r - 1}` and :math:`{n = 0}, \ldots, {N_{\mathrm{frames}} - 1}`. :math:`N_r` and :math:`N_{\mathrm{frames}}` are respectively the number of
-distances and times at which the *CN* is evaluated and
-
-.. math::
-   :label: pfx120
-
-   {\mathrm{CN}_{\mathit{gI}}{\left( {r_{m},t_{f}} \right) = n_{\mathit{gI}}}\left( {r_{m},t_{f}} \right),}
-
-is the number of atoms of species :math:`I` found within :math:`[r_m, r_m + \mathrm{d}r]` at frame
-:math:`f` from the centre of gravity of group :math:`g`.
-
-From these expressions, several remarks can be done. Firstly, the Eqs.
-:math:numref:`pfx119` and :math:numref:`pfx120` can be restricted
-to intramolecular and intermolecular distances only. Secondly, these
-equations can be averaged over the selected frames providing a time
-averaged intra and intermolecular *CN*. Finally, the same equations
-(time-dependent and time-averaged) can be integrated over r to provide a
-cumulative CN, MDANSE computes all these variations.
-
+where :math:`g_{\alpha\beta}(r)` is the partial pair distribution function,
+see Section :ref:`pair-distribution-function` for details.
 
 .. _density-profile:
 
@@ -133,7 +95,9 @@ can be used to observe how the geometry of the system changes over time.
 The eccentricity of a selection of atom is calculated using the equation
 
 .. math::
-    e = \frac{\sqrt{\lambda_{3}^2 - \lambda_{1}^2}}{\lambda_{3}}
+   :label: ecc1
+
+    \mathrm{ecc} = \frac{\sqrt{\lambda_{3}^2 - \lambda_{1}^2}}{\lambda_{3}}
 
 where :math:`\lambda_{1}` and :math:`\lambda_{3}` are its smallest and
 largest principal moments of inertia. A spherically symmetric
@@ -171,7 +135,7 @@ Pair Distribution Function
 
 The pair distribution function (PDF) is an example of a pair
 correlation function, which describes how, on average, the atoms in a
-system are radially packed around each other. This proves to be a
+system are packed around each other. This proves to be a
 particularly effective way of describing the average structure of
 disordered molecular systems such as liquids. Also in systems like
 liquids, where there is continual movement of the atoms and a single
@@ -188,67 +152,57 @@ accurately.
 Mathematically, the PDF can be computed using the following formula:
 
 .. math::
-   :label: pfx121
+   :label: pdf1
 
-   {\mathrm{PDF}{(r) = {\sum\limits_{{I = 1},J\geq I}^{N_{\mathrm{species}}}n_{I}}}n_{J}\omega_{I}\omega_{J}g_{\mathit{IJ}}(r)}
+   g(\mathbf{r}) = \sum_{\alpha}\sum_{\beta \geq \alpha}  W_{\alpha\beta} g_{\alpha\beta}(\mathbf{r}), \qquad g_{\alpha\beta}(\mathbf{r}) = \frac{1}{Nc_{\alpha}c_{\beta}}\frac{1}{\rho} \frac{\mathrm{d} N_{\alpha\beta}(\mathbf{r})}{ \mathrm{d} \mathbf{r}}
 
-where :math:`N_{\mathrm{species}}` is the number of selected species, :math:`n_I`
-and :math:`n_J` are respectively the numbers of atoms of species :math:`I` and
-:math:`J`, :math:`\omega_I` and :math:`\omega_J` respectively the weights for species
-:math:`I` and :math:`J` (see Section `Coordination Number`_ for more details) and
-:math:`\mathrm{PDF}_{\mathit{\alpha\beta}}(r)` is the partial PDF for :math:`I` and :math:`J` species that can be defined as:
+where :math:`g_{\alpha\beta}(\mathbf{r})` is the partial PDF for :math:`\alpha`
+and :math:`\beta` atom-types, :math:`N(\mathbf{r})`
+is the average number of particles in the volume :math:`\mathrm{d} \mathbf{r}`
+at the position :math:`\mathbf{r}` between the atom-types :math:`\alpha`
+and :math:`\beta` and :math:`\rho` is the density of the system.
+
+For isotropic system we can define the PDF as a function of distance
 
 .. math::
-   :label: pfx123
+   :label: pdf2
 
-   {\mathrm{PDF}_{\mathit{IJ}}{(r) = \frac{\left\langle {\sum\limits_{\alpha = 1}^{n_{I}}{n_{\alpha J}(r)}} \right\rangle}{n_{I}\rho_{J}4\pi r^{2}\mathrm{d}r}}}
+   g(r) = \sum_{\alpha}\sum_{\beta \geq \alpha}  W_{\alpha\beta} g_{\alpha\beta}(r), \qquad g_{\alpha\beta}(r) = \frac{1}{Nc_{\alpha}c_{\beta}} \frac{1}{\rho} \frac{1}{4 \pi r^2}  \frac{\mathrm{d} N(r)}{ \mathrm{d} r}
 
-where :math:`\rho_J` is the density of atom of species :math:`J` and
-:math:`n_{\alpha J}(r)` is the mean number of atoms of species :math:`J` in
-a shell of width :math:`\mathrm{d}r` at distance :math:`r` of the atom :math:`\alpha`
-of species :math:`I`.
+where :math:`N(r)` is the average number of particles in the
+volume :math:`4 \pi r^2 \mathrm{d} r` at a distance :math:`r`
+between the atom-types :math:`\alpha` and :math:`\beta`.
 
 From the computation of PDF, two related quantities are also calculated;
-the radial distribution function (RDF), defined as
+the radial distribution function (RDF) and the total correlation function (TCF)
 
 .. math::
-   :label: pfx125
+   :label: pdf3
 
-   {\mathrm{RDF}{(r) = 4}\pi r^{2}\rho_{0}\mathrm{PDF}(r),}
-
-and the total correlation function (TCF), defined as
-
-.. math::
-   :label: pfx126
-
-   {\mathrm{TCF}{(r) = 4}\pi r\rho_{0}\left( {\mathrm{PDF}{(r) - 1}} \right),}
-
-where :math:`\rho_0` is the average atomic density, which is defined as
-:math:`\rho_{0} = N / V` where :math:`N` is the total number of atoms in the
-system and :math:`V` the volume of the simulation.
+   \mathrm{RDF}{(r) = 4}\pi r^{2}\rho g(r), \qquad \mathrm{TCF}{(r) = 4}\pi r\rho\left[ {g{(r) - 1}} \right].
 
 All these quantities are initially calculated as intramolecular and
 intermolecular parts for each pair of atoms, which are then added to
 create the total PDF/RDF/TCF for each pair of atoms, as well as the
-total intramolecular and total intermolecular values. Lastly, the total
-functions are computed. Please note, however, that in the case of TCF,
-the below set of equations have been chosen, which will return results
-that differ from those of nMOLDYN.
+total intramolecular and total intermolecular values.
+Please note, however, that in the case of TCF, the below set of equations
+have been chosen, which will return results that differ from those
+of nMOLDYN
 
 .. math::
-   :label: pfx128
+   :label: pdf4
 
-   {\mathrm{TCF}_{\mathrm{intramolecular}}{(r) = 4}\pi r\rho_{0}\mathrm{PDF}_{\mathrm{intramolecular}}(r),}
-
-.. math::
-   :label: pfx129
-
-   {\mathrm{TCF}_{\mathrm{intermolecular}}{(r) = 4}\pi r\rho_{0}\left( {\mathrm{PDF}_{\mathrm{intermolecular}}{(r) - 1}} \right),}
+   {\mathrm{TCF}_{\mathrm{intra}}{(r) = 4}\pi r\rho g_{\mathrm{intra}}(r),}
 
 .. math::
-   :label: pfx130
+   :label: pdf5
 
-   {\mathrm{TCF}_{\mathrm{total}}{(r) = 4}\pi r\rho_{0}\left( {\mathrm{PDF}_{\mathrm{total}}{(r) - 1}} \right),}
+   {\mathrm{TCF}_{\mathrm{inter}}{(r) = 4}\pi r\rho\left[ {g_{\mathrm{inter}}{(r) - 1}} \right],}
+
+.. math::
+   :label: pdf6
+
+   {\mathrm{TCF}_{\mathrm{tot}}{(r) = 4}\pi r\rho\left[ {g_{\mathrm{tot}}{(r) - 1}} \right].}
 
 
 .. _root-mean-square-deviation:
@@ -256,30 +210,26 @@ that differ from those of nMOLDYN.
 Root Mean Square Deviation
 ''''''''''''''''''''''''''
                          
-The Root mean-square deviation (RMSD) is perhaps the most popular estimator
+The root mean-square deviation (RMSD) is perhaps the most popular estimator
 of structural similarity. It quantifies differences between two structures by
 measuring the root mean-square of atomic position differences, revealing
 insights into their structural dissimilarities. It is a numerical measure of
-the difference between two structures. It can be defined as:
-
+the difference between two structures. For the RMSD of the atom of type
+:math:`\alpha` can be defined as
 
 .. math::
-   :label: pfx131
+   :label: rmsd1
 
-   {\mathrm{RMSD}{\left( {t} \right) = \sqrt{\frac{\sum\limits_{\alpha}^{N_{\alpha}}\vert {\mathbf{r}_{\alpha}{(t) - \mathbf{r}_{\alpha}}(t_{\mathrm{ref}})} \vert^{2}}{N_{\alpha}}}}}
+   \mathrm{RMSD}_{\alpha}(t) = \sqrt{ \frac{1}{Nc_{\alpha}} \sum\limits_{j \in \alpha} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{j}(t_{\mathrm{ref}}) \vert^{2} }
 
-where :math:`N_{\alpha}` is the number of selected atoms of
-the system and :math:`\mathbf{r}_{\alpha}(t)` and
-:math:`\mathbf{r}_{\alpha}(t_{\mathrm{ref}})`
-are respectively the position of atom :math:`\alpha` at time :math:`t` and :math:`t_{\mathrm{ref}}` where :math:`t_{\mathrm{ref}}` is
-a reference time usually chosen as the zeroth time of the simulation.
-
-Typically, RMSD is used to quantify the structural evolution of the
+where :math:`\mathbf{r}_{j}(t)` and :math:`\mathbf{r}_{j}(t_{\mathrm{ref}})`
+are respectively the position of atom :math:`j` at time :math:`t`
+and :math:`t_{\mathrm{ref}}` where :math:`t_{\mathrm{ref}}` is a reference
+time usually chosen as the zeroth time of the simulation. Typically,
+RMSD is used to quantify the structural evolution of the
 system during the simulation. It can provide precious information about
 the system especially if it reached equilibrium or conversely if major
-structural changes occurred during the simulation. MDANSE calculates the
-RMSD of individual atoms types, for example, the RMSD of the oxygen
-atoms in addition to the RMSD of all atoms of the system.
+structural changes occurred during the simulation.
 
 .. _root-mean-square-fluctuation:
 
@@ -289,42 +239,37 @@ Root Mean Square Fluctuation
 Root mean square fluctuation (RMSF) assesses how the positions of atoms or
 molecules within a system fluctuate over time. Specifically, RMSF measures the
 average magnitude of deviations or fluctuations in atomic positions from their
-mean positions during a simulation.
-
-RMSF analysis is valuable for understanding the flexibility and stability of
-molecules within a simulation, providing insights into regions where atoms or
-groups of atoms exhibit significant fluctuations. This information can be crucial
-for studying the dynamic behavior of biomolecules, protein-ligand interactions,
-or any molecular system subject to temporal variations.
+mean positions during a simulation. RMSF analysis is valuable for
+understanding the flexibility and stability of molecules within a simulation,
+providing insights into regions where atoms or groups of atoms exhibit
+significant fluctuations. This information can be crucial for studying the
+dynamic behavior of biomolecules, protein-ligand interactions, or any
+molecular system subject to temporal variations.
 
 
 .. _radius-of-gyration:
 
-Radius Of Gyration
+Radius of Gyration
 ''''''''''''''''''
 
 Radius of gyration (ROG) is calculated as a root (atomic mass weighted) mean
 square distance of the components of a system relative to either its centre of
 mass or a given axis of rotation. The ROG serves as a quantitative
 measure which can be used to characterize the spatial distribution of
-a system such as a molecule or a cluster of atoms.
-
-In MDANSE, ROG is calculated relative to the systems centre of mass.
-It can be defined as:
+a system such as a molecule or a cluster of atoms. In MDANSE, ROG is
+calculated relative to the systems centre of mass. It can be defined as
 
 .. math::
-   :label: pfx134
+   :label: rog1
 
-    {\mathrm{ROG}{({n\Delta t}) = \sqrt{\frac{\sum\limits_{i}^{N}m_{i}\vert {\mathbf{r}_{i}{(t) - \mathbf{r}_{\mathrm{CM}}}(t)} \vert^{2}}{\sum\limits_{i}^{N}m_{i}}}}}
+    \mathrm{ROG}(t) = \sqrt{ \frac{\sum_{j}m_{j} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{\mathrm{COM}}(t) \vert^{2}}{\sum_{j} m_{j}} }
 
-where :math:`N` is the number of atoms of the system,
-:math:`\mathbf{r}_{i}(t)` are the positions of the
-atoms :math:`i`, :math:`\mathbf{r}_{\mathrm{CM}}(t)` is the centre of mass of
-the system and :math:`t` is the time of the simulation.
-
-ROG can be used to describe the overall spread of the molecule and
-as such is a good measure for the molecule compactness. For example,
-it can be useful when monitoring folding process of a protein.
+where :math:`m_j` is the mass and :math:`\mathbf{r}_{j}(t)` are the positions
+of the atom :math:`j`, :math:`\mathbf{r}_{\mathrm{COM}}(t)` is the centre of mass of
+the system and :math:`t` is the time of the simulation. ROG can be used to
+describe the overall spread of the molecule and as such is a good measure
+for the molecule compactness. For example, it can be useful when monitoring
+folding process of a protein.
 
 
 .. _solvent-accessible-surface:
@@ -339,7 +284,7 @@ level of detail in the surface representation. Essentially, a higher
 density of points leads to a finer-grained representation, capturing
 smaller surface features and intricacies.
 
-**Probe radius**: Measured in nanometers, the probe radius is a crucial
+**Probe Radius**: Measured in nanometers, the probe radius is a crucial
 parameter influencing the precision of the calculation. Smaller probe
 radii provide a more detailed and  assessment of the
 molecular surface area, often resulting in a larger reported surface
@@ -351,17 +296,21 @@ area due to increased sensitivity to surface features.
 Static Structure Factor
 '''''''''''''''''''''''
 
-The static structure factor analysis offers a convenient method to
-calculate the static coherent structure factor, represented as :math:`S(q)`, where
-:math:`S(q) = F_{\mathrm{coh}}(q, t = 0)`. This factor is fundamental for gaining
-insights into the ordered arrangements of particles within a material.
+MDANSE computes the partial partial static structure factor (SSF) as the Fourier
+transform of the partial pair distribution function following the Faber-Ziman definition
 
-This analysis serves as a valuable tool, especially in trajectory-based
-simulations, for assessing the ordered structures of particles in a material.
-It provides the flexibility to control both distance and :math:`q`-value ranges,
-facilitating a  exploration of the material's structural
-properties.
+.. math::
+   :label: ssf1
 
+   S_{\alpha\beta}(q) = 1 + \frac{4\pi\rho}{q}\int\limits_{0}^{\infty}{\mathrm{d}r \,  \left\lbrack {g_{\alpha\beta}}(r)-1 \right\rbrack} r \sin(qr).
+
+The SSF here is related to the coherent intermediate scattering function
+calculated in MDANSE via the following expression
+
+.. math::
+   :label: ssf2
+
+   S_{\alpha\beta}(q) = \delta_{\alpha\beta} + \sqrt{c_{\alpha}c_{\beta}} \left[ F_{\mathrm{coh},\alpha\beta}(q, 0) - 1 \right].
 
 .. _voronoi:
 
@@ -382,7 +331,7 @@ molecular structures and dynamics.
 
 .. _xray-static-structure-factor:
 
-Xray Static Structure Factor
+X-ray Static Structure Factor
 ''''''''''''''''''''''''''''
 
 MDANSE's xray static structure factor analysis is tailored for neutron

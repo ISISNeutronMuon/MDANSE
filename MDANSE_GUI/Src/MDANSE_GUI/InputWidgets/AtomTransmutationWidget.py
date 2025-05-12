@@ -69,16 +69,13 @@ class TransmutationHelper(SelectionHelper):
         self.transmutation_textbox.setReadOnly(True)
         self.transmutation_combo = QComboBox()
         self.transmutation_combo.addItems(ATOMS_DATABASE.atoms)
-        self.transmuter.selector.settings["all"] = False
         super().__init__(
-            transmuter.selector,
             traj_data,
             field,
             parent,
             *args,
             **kwargs,
         )
-        self.all_selection = False
         self.update_transmutation_textbox()
 
     def right_widgets(self) -> list[QWidget]:
@@ -125,8 +122,9 @@ class TransmutationHelper(SelectionHelper):
         transmutation and update the transmutation textbox with the new
         transmutation setting.
         """
+        selection_string = self.selection_model.current_steps()
         self.transmuter.apply_transmutation(
-            self.settings, self.transmutation_combo.currentText()
+            selection_string, self.transmutation_combo.currentText()
         )
         self.update_transmutation_textbox()
 
@@ -134,12 +132,13 @@ class TransmutationHelper(SelectionHelper):
         """Update the transmutation textbox with the current transmuter
         setting information.
         """
-        map = self.transmuter.get_setting()
+        substitutions = self.transmuter.get_setting()
 
-        text = [f"Number of atoms transmuted:\n{len(map)}\n\nTransmuted atoms:\n"]
-        atoms = self.selector.system.atom_list
-        for idx, symbol in map.items():
-            text.append(f"{idx}  {atoms[idx]} -> {symbol}\n")
+        text = [
+            f"Number of atoms transmuted:\n{len(substitutions)}\n\nTransmuted atoms:\n"
+        ]
+        for idx, symbol in substitutions.items():
+            text.append(f"{idx}  {self.atm_full_names[idx]} -> {symbol}\n")
 
         self.transmutation_textbox.setText("".join(text))
 

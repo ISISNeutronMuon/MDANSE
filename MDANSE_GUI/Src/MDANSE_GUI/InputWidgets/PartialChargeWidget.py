@@ -68,8 +68,7 @@ class ChargeHelper(SelectionHelper):
         self.charge_textbox.setReadOnly(True)
         self.charge_qline = QLineEdit()
         self.charge_qline.setValidator(QDoubleValidator())
-        self.mapper.selector.settings["all"] = False
-        super().__init__(mapper.selector, traj_data, field, parent, *args, **kwargs)
+        super().__init__(traj_data, field, parent, *args, **kwargs)
         self.all_selection = False
         self.update_charge_textbox()
 
@@ -122,7 +121,8 @@ class ChargeHelper(SelectionHelper):
         except ValueError:
             # probably an empty QLineEdit box
             return
-        self.mapper.update_charges(self.settings, charge)
+        selection_string = self.selection_model.current_steps()
+        self.mapper.update_charges(selection_string, charge)
         self.update_charge_textbox()
 
     def update_charge_textbox(self) -> None:
@@ -132,9 +132,8 @@ class ChargeHelper(SelectionHelper):
         map = self.mapper.get_full_setting()
 
         text = ["Partial charge mapping:\n"]
-        atoms = self.selector.system.atom_list
         for idx, charge in map.items():
-            text.append(f"{idx}  ({atoms[idx]}) -> {charge}\n")
+            text.append(f"{idx}  ({self.atm_full_names[idx]}) -> {charge}\n")
 
         self.charge_textbox.setText("".join(text))
 

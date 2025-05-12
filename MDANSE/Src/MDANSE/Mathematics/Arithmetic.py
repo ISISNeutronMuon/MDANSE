@@ -19,7 +19,9 @@ import itertools
 import numpy as np
 
 
-def get_weights(props: Dict[str, float], contents: Dict[str, int], dim: int):
+def get_weights(
+    props: Dict[str, float], contents: Dict[str, int], dim: int, conc_exp: float = 1.0
+):
     """Calculate the scaling factors to be applied to output datasets.
 
     Returns a dictionary of scaling factors, where the
@@ -33,6 +35,9 @@ def get_weights(props: Dict[str, float], contents: Dict[str, int], dim: int):
         Dictionary of numbers of atoms in an object
     dim : int
         number of atom types in the label of the output datasets (e.g. 1 for "O", 2 for "CuCu")
+    conc_exp : float
+        The exponent the at the product of the concentrations are taken
+        to (e.g. (c_i * c_j)**0.5 which is used for DCSF jobs).
 
     Returns
     -------
@@ -43,17 +48,18 @@ def get_weights(props: Dict[str, float], contents: Dict[str, int], dim: int):
 
     weights = {}
 
+    n_atms = sum(contents[el] for el in props)
     cartesianProduct = itertools.product(props, repeat=dim)
     for elements in cartesianProduct:
-        atom_number_product = np.prod([contents[el] for el in elements])
+        atom_conc_product = np.prod([contents[el] / n_atms for el in elements])
         property_product = np.prod(np.array([props[el] for el in elements]), axis=0)
 
-        factor = atom_number_product * property_product
-        # E.g. for property b_coh, 5 Cu atoms and dim=2
-        # factor = 5*5 * b_coh(Cu)*b_coh(Cu)
+        factor = atom_conc_product**conc_exp * property_product
+        # E.g. for property b_coh, 5 Cu atoms, 100 total atoms, and dim=2
+        # factor = (5*5/(100*100))**conc_exp * b_coh(Cu)*b_coh(Cu)
 
         weights[elements] = np.float64(np.copy(factor))
-        normFactor += factor
+        normFactor += atom_conc_product * property_product
 
     normalise = True
     try:

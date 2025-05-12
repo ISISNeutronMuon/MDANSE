@@ -19,8 +19,8 @@ MDANSE comes with extensive documentation and is split into four sections:
 
 - **Explanations**: Clear understanding of MDANSE's capabilities and background knowledge.
 - **Tutorials**: Step-by-step instructions to help you get started and become proficient.
-- **How-to guides**: Practical solutions for common tasks.
-- **Technical references**: Detailed information about MDANSE's features and functionalities.
+- **How-to Guides**: Practical solutions for common tasks.
+- **Technical References**: Detailed information about MDANSE's features and functionalities.
 
 Sample Data
 -----------

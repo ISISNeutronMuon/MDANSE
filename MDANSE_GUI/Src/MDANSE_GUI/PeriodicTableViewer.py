@@ -310,7 +310,7 @@ class InfoDisplay(QFrame):
             "Electron configuration",
             "Relative atomic mass (uma)",
             "Electronegativity",
-            "Electroaffinity (eV)",
+            "Electron affinity (eV)",
             "Ionization energy (eV)",
         ]
 
@@ -351,7 +351,7 @@ class InfoDisplay(QFrame):
             "electronegativity = " + str(info_object["electronegativity"])
         )
         self.fields[8].setText(
-            "electroaffinity = " + str(info_object["electroaffinity"]) + " eV"
+            "electron_affinity = " + str(info_object["electron_affinity"]) + " eV"
         )
         self.fields[9].setText(
             "ionization energy = " + str(info_object["ionization_energy"]) + " eV"

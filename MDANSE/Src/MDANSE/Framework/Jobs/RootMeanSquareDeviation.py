@@ -69,10 +69,7 @@ class RootMeanSquareDeviation(IJob):
             }
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -156,17 +153,17 @@ class RootMeanSquareDeviation(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData[f"rmsd_{element}"] /= number
+            self._outputData[f"rmsd_{element}"][:] /= number
 
         for element, number in nAtomsPerElement.items():
-            self._outputData[f"rmsd_{element}"] = np.sqrt(
+            self._outputData[f"rmsd_{element}"][:] = np.sqrt(
                 self._outputData[f"rmsd_{element}"]
             )
 
-        self._outputData["rmsd_all"] /= self.configuration[
+        self._outputData["rmsd_all"][:] /= self.configuration[
             "atom_selection"
         ].get_total_natoms()
-        self._outputData["rmsd_all"] = np.sqrt(self._outputData["rmsd_all"])
+        self._outputData["rmsd_all"][:] = np.sqrt(self._outputData["rmsd_all"])
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

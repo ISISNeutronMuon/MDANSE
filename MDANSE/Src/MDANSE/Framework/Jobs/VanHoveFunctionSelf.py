@@ -18,6 +18,7 @@ import collections
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import DETAILED_CELL_MESSAGE
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
@@ -117,19 +118,8 @@ class VanHoveFunctionSelf(IJob):
             }
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
-
-    def detailed_unit_cell_error(self):
-        raise ValueError(
-            "This analysis job requires a unit cell (simulation box) to be defined. "
-            "The box will be used for calculating density in the analysis. "
-            "You can add a simulation box to the trajectory using the TrajectoryEditor job. "
-            "Be careful adding the simulation box, as the wrong dimensions can render the results meaningless."
-        )
 
     def initialize(self):
         super().initialize()
@@ -146,13 +136,10 @@ class VanHoveFunctionSelf(IJob):
         conf = self.configuration["trajectory"]["instance"].configuration(
             self.configuration["frames"]["first"]
         )
-        try:
-            cell_volume = conf.unit_cell.volume
-        except Exception:
-            self.detailed_unit_cell_error()
-        else:
-            if cell_volume < 1e-9:
-                self.detailed_unit_cell_error()
+        if not hasattr(conf, "unit_cell"):
+            raise ValueError(DETAILED_CELL_MESSAGE)
+        if conf.unit_cell.volume < 1e-9:
+            raise ValueError(DETAILED_CELL_MESSAGE)
 
         self._outputData.add(
             "r",
@@ -172,6 +159,7 @@ class VanHoveFunctionSelf(IJob):
             (self.n_mid_points, self.n_frames),
             axis="r|time",
             units="au",
+            main_result=True,
         )
         self._outputData.add(
             "4_pi_r2_g(r,t)_total",

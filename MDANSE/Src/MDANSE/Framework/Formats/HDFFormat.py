@@ -13,24 +13,23 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Union
 from importlib import metadata
+from pathlib import Path
+from typing import TYPE_CHECKING, Union
 
 import h5py
 
+from MDANSE import PLATFORM
 from MDANSE.Framework.Formats.IFormat import IFormat
 from MDANSE.MLogging import LOG
-from MDANSE import PLATFORM
 
 if TYPE_CHECKING:
-    from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
     from MDANSE.Framework.Jobs.IJob import IJob
+    from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 
 
 class HDFFormat(IFormat):
-    """
-    This class handles the writing of output variables in HDF file format.
+    """Handles the writing of output variables in HDF file format.
 
     Attributes
     ----------
@@ -38,6 +37,7 @@ class HDFFormat(IFormat):
         Extension used when writing.
     extensions : list[str]
         Other possible extension of this file format.
+
     """
 
     extension = ".h5"
@@ -47,11 +47,13 @@ class HDFFormat(IFormat):
     def write(
         cls,
         filename: Union[Path, str],
-        data: Dict[str, "IOutputVariable"],
+        data: dict[str, "IOutputVariable"],
         header: str = "",
         run_instance: "IJob" = None,
         extension: str = extensions[0],
-    ) -> None:
+        *,
+        in_memory: bool = False,
+    ) -> Union[None, h5py.File]:
         """Write a set of output variables into an HDF file.
 
         Attributes
@@ -64,14 +66,21 @@ class HDFFormat(IFormat):
             The header to add to the output file.
         extension : str
             The extension of the file.
+        in_memory : bool
+            if True, no file is created and the data structure is returned
+
         """
         string_dt = h5py.special_dtype(vlen=str)
 
-        filename = Path(filename).with_suffix(extension)
+        if in_memory:
+            outputFile = h5py.File.in_memory()
 
-        # The HDF output file is opened for writing.
-        PLATFORM.create_directory(filename.parent)
-        outputFile = h5py.File(filename, "w")
+        else:
+            filename = Path(filename).with_suffix(extension)
+
+            # The HDF output file is opened for writing.
+            PLATFORM.create_directory(filename.parent)
+            outputFile = h5py.File(filename, "w")
 
         if header:
             # This is to avoid any segmentation fault when writing the HDF header field
@@ -114,4 +123,7 @@ class HDFFormat(IFormat):
                 dset.attrs[k] = v
 
         # The HDF file is closed.
+        if in_memory:
+            return outputFile
         outputFile.close()
+        return None

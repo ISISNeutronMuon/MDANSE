@@ -118,10 +118,7 @@ class McStasVirtualInstrument(IJob):
             "exclude": ["sample_coh", "sample_inc"],
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
 
     @property
     def mcstas_output_dir(self) -> Path:

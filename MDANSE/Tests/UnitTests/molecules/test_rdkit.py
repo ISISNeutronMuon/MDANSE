@@ -1,17 +1,13 @@
-import os
 import numpy as np
-from rdkit.Chem.rdmolfiles import MolFromPDBFile
-from rdkit.Chem.rdchem import Mol, GetPeriodicTable
-from rdkit.Chem.rdmolops import SanitizeMol
-from rdkit.Chem.rdmolops import GetMolFrags
 import pytest
-from MDANSE.IO.MinimalPDBReader import MinimalPDBReader as PDBReader
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.IO.MinimalPDBReader import MinimalPDBReader as PDBReader
+from rdkit.Chem.rdchem import GetPeriodicTable, Mol
+from rdkit.Chem.rdmolfiles import MolFromPDBFile
+from rdkit.Chem.rdmolops import GetMolFrags, SanitizeMol
+from test_helpers.paths import DATA_DIR
 
-
-fname = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "Data", "CO2GAS-dump-1.pdb"
-)
+fname = DATA_DIR / "CO2GAS-dump-1.pdb"
 
 
 @pytest.fixture()
@@ -43,9 +39,8 @@ def test_rdkit(mol_from_rdkit: Mol):
 
 def test_splitting(mol_from_rdkit: Mol):
     gas_bits = GetMolFrags(mol_from_rdkit, asMols=True)
-    all_lengths = np.array([mol.GetNumAtoms() for mol in gas_bits])
     assert len(gas_bits) == 20
-    assert np.all(all_lengths == 3)
+    assert all(mol.GetNumAtoms() == 3 for mol in gas_bits)
 
 
 def test_periodic():
@@ -54,4 +49,3 @@ def test_periodic():
         cov = ptable.GetRcovalent(element)
         vdw = ptable.GetRvdw(element)
         print(element, cov, vdw)
-    # assert False  # this was just to trigger the printout

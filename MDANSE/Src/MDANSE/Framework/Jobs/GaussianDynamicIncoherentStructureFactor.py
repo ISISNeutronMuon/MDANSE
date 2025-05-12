@@ -89,10 +89,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             },
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -112,6 +109,10 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._nOmegas = self._instrResolution["n_omegas"]
 
         self._kSquare = self.configuration["q_shells"]["value"] ** 2
+
+        self.add_ideal_results = (
+            self.configuration["instrument_resolution"]["kernel"] != "ideal"
+        )
 
         self._outputData.add(
             "q",
@@ -172,9 +173,15 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                 (self._nFrames,),
                 axis="time",
                 units="nm2",
-                main_result=True,
-                partial_result=True,
             )
+            if self.add_ideal_results:
+                self._outputData.add(
+                    f"s(q,f)_ideal_{element}",
+                    "SurfaceOutputVariable",
+                    (self._nQShells, self._nOmegas),
+                    axis="q|omega",
+                    units="nm2/ps",
+                )
 
         self._outputData.add(
             "f(q,t)_total",
@@ -197,8 +204,15 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             (self._nFrames,),
             axis="time",
             units="nm2",
-            main_result=True,
         )
+        if self.add_ideal_results:
+            self._outputData.add(
+                "s(q,f)_ideal_total",
+                "SurfaceOutputVariable",
+                (self._nQShells, self._nOmegas),
+                axis="q|omega",
+                units="nm2/ps",
+            )
 
         self._atoms = self.configuration["trajectory"][
             "instance"
@@ -272,11 +286,20 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                 axis=1,
             )
             self._outputData[f"msd_{element}"][:] /= number
+            if self.add_ideal_results:
+                self._outputData[f"s(q,f)_ideal_{element}"][:] = get_spectrum(
+                    self._outputData[f"f(q,t)_{element}"],
+                    None,
+                    self.configuration["instrument_resolution"]["time_step"],
+                    axis=1,
+                )
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "f(q,t)_%s")
         assign_weights(self._outputData, weight_dict, "s(q,f)_%s")
+        if self.add_ideal_results:
+            assign_weights(self._outputData, weight_dict, "s(q,f)_ideal_%s")
         self._outputData["f(q,t)_total"][:] = weighted_sum(
             self._outputData,
             weight_dict,
@@ -287,6 +310,12 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             weight_dict,
             "s(q,f)_%s",
         )
+        if self.add_ideal_results:
+            self._outputData["s(q,f)_ideal_total"][:] = weighted_sum(
+                self._outputData,
+                weight_dict,
+                "s(q,f)_ideal_%s",
+            )
 
         # since GDISF ~ exp(-msd * q2 / 6.0) the MSD isn't weighted in
         # the exp lets save the MSD with equal weights

@@ -59,10 +59,7 @@ class MolecularTrace(IJob):
         "FloatConfigurator",
         {"mini": 0.01, "default": 0.1},
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):

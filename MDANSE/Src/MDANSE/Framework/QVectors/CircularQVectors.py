@@ -18,12 +18,16 @@ import collections
 
 import numpy as np
 
-from MDANSE.Framework.QVectors.IQVectors import IQVectors, QVectorsError
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Mathematics.Geometry import random_points_on_circle
 
 
 class CircularQVectors(IQVectors):
-    """ """
+    """Generates Q vectors on a plane.
+
+    Vectors are grouped into annuli (called 'shells')
+    based on their length.
+    """
 
     settings = collections.OrderedDict()
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
@@ -51,14 +55,11 @@ class CircularQVectors(IQVectors):
         if self._configuration["seed"]["value"] != 0:
             np.random.seed(self._configuration["seed"]["value"])
 
-        try:
-            axis = (
-                self._configuration["axis_1"]["vector"]
-                .cross(self._configuration["axis_2"]["vector"])
-                .normal()
-            )
-        except ZeroDivisionError as e:
-            raise QVectorsError(str(e))
+        axis = (
+            self._configuration["axis_1"]["vector"]
+            .cross(self._configuration["axis_2"]["vector"])
+            .normal()
+        )
 
         width = self._configuration["width"]["value"]
 
@@ -84,5 +85,4 @@ class CircularQVectors(IQVectors):
             if self._status is not None:
                 if self._status.is_stopped():
                     return
-                else:
-                    self._status.update()
+                self._status.update()

@@ -32,6 +32,9 @@ class View3D(QWidget):
         controls = ViewerControls(self)
         viewer.setParent(controls)
         controls.setViewer(viewer)
+        viewer.create_trace_dialog(controls)
+        if hasattr(viewer, "clicked_atom_index"):
+            viewer.clicked_atom_index.connect(controls._trace_widget.accept_atom_index)
         layout.addWidget(controls)
         self._viewer = viewer
         self._controls = controls

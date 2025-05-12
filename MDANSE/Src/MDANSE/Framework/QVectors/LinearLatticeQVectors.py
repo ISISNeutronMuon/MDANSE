@@ -19,13 +19,25 @@ import random
 
 import numpy as np
 
-from MDANSE.Mathematics.LinearAlgebra import Vector
-
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
+from MDANSE.Mathematics.LinearAlgebra import Vector
 
 
 class LinearLatticeQVectors(LatticeQVectors):
-    """ """
+    """Generates vectors randomly on a straight line.
+
+    Only vectors commensurate with the reciprocal
+    space lattice vectors will be generated.
+    |Q| values for which no valid vectors can
+    be found are omitted in the output.
+
+    Vectors within one shell are generated within
+    a tolerance limit around a central |Q| value.
+    Most calculations will produce one data point
+    for |Q| by averaging the results over all
+    vectors in the group, which is still called
+    a shell.
+    """
 
     settings = collections.OrderedDict()
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
@@ -51,7 +63,9 @@ class LinearLatticeQVectors(LatticeQVectors):
             random.seed(self._configuration["seed"]["value"])
 
         # The Q vector corresponding to the input hkl.
-        qVect = np.dot(self._inverseUnitCell, self._configuration["axis"]["vector"])
+        qVect = self.hkl_to_qvectors(
+            self._configuration["axis"]["vector"], self._unit_cell
+        )
 
         qMax = (
             self._configuration["shells"]["last"]
@@ -95,15 +109,11 @@ class LinearLatticeQVectors(LatticeQVectors):
                 self._configuration["q_vectors"][q]["q_vectors"] = vects[:, hits]
                 self._configuration["q_vectors"][q]["n_q_vectors"] = n
                 self._configuration["q_vectors"][q]["q"] = q
-                self._configuration["q_vectors"][q]["hkls"] = np.rint(
-                    np.dot(
-                        self._directUnitCell,
-                        self._configuration["q_vectors"][q]["q_vectors"],
-                    )
+                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
+                    vects[:, hits], self._unit_cell
                 )
 
             if self._status is not None:
                 if self._status.is_stopped():
                     return
-                else:
-                    self._status.update()
+                self._status.update()

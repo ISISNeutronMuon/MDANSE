@@ -14,18 +14,23 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import abc
+from typing import TYPE_CHECKING
+
+import numpy as np
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Framework.Configurable import Configurable
 from MDANSE.MLogging import LOG
 
-
-class QVectorsError(Error):
-    pass
+if TYPE_CHECKING:
+    from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
+    from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class IQVectors(Configurable, metaclass=SubclassFactory):
+    """Parent class of all Q vector generators."""
+
     is_lattice = False
 
     def __init__(self, atom_configuration, status=None):
@@ -40,17 +45,118 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
         pass
 
     def generate(self) -> bool:
+        """Generate vectors by calling the internal method _generate."""
         if self._configured:
             self._generate()
 
             if self._status is not None:
                 self._status.finish()
             return True
-        else:
-            LOG.error(
-                "Cannot generate vectors: q vector generator is not configured correctly."
-            )
-            return False
+        LOG.error(
+            "Cannot generate vectors: q vector generator is not configured correctly.",
+        )
+        return False
 
-    def setStatus(self, status):
-        self._status = status
+    @classmethod
+    def qvectors_to_hkl(
+        self,
+        vector_array: np.array,
+        unit_cell: "UnitCell",
+    ) -> np.ndarray:
+        """Recalculate Q vectors to HKL Miller indices.
+
+        Using a unit cell definition, recalculates an array
+        of q vectors to an equivalent array of HKL Miller indices.
+
+        Parameters
+        ----------
+        vector_array : np.array
+            a (3,N) array of scattering vectors
+        unit_cell : UnitCell
+            an instance of UnitCell class describing the simulation box
+
+        Returns
+        -------
+        np.ndarray
+            A (3,N) array of HKL values (Miller indices)
+
+        """
+        return np.dot(unit_cell.direct, vector_array) / (2 * np.pi)
+
+    @classmethod
+    def hkl_to_qvectors(self, hkls: np.array, unit_cell: "UnitCell") -> np.ndarray:
+        """Convert an array of HKL values to scattering vectors.
+
+        Uses a unit cell object to get the lattice vectors for conversion.
+
+        Parameters
+        ----------
+        hkls : np.array
+            A (3,N) array of HKL values (Miller indices)
+        unit_cell : UnitCell
+            An instance of UnitCell class describing the simulation box shape
+
+        Returns
+        -------
+        np.ndarray
+            a (3, N) array of Q vectors (scattering vectors)
+
+        """
+        return 2 * np.pi * np.dot(unit_cell.inverse, hkls)
+
+    def write_vectors_to_file(self, output_data: "OutputData"):
+        """Write the vectors to output file as an array.
+
+        Writes a summary of the generated vectors to the output
+        file using an OutputData class instance.
+
+        Parameters
+        ----------
+        output_data : OutputData
+            An object managing the writeout to one or many output files
+
+        """
+        qvector_info = self._configuration["q_vectors"]
+        q_values = [float(x) for x in qvector_info]
+        output_data.add(
+            "vector_generator_q",
+            "LineOutputVariable",
+            q_values,
+            units="1/nm",
+        )
+        output_data.add(
+            "vector_coordinate",
+            "LineOutputVariable",
+            [0, 1, 2],
+            units="au",
+        )
+        qvector_lengths = [qvector_info[q]["q_vectors"].shape[1] for q in q_values]
+        qarray_maxlength = np.max(qvector_lengths)
+        output_data.add(
+            "vector_generator_qvector_array",
+            "VolumeOutputVariable",
+            (len(q_values), 3, qarray_maxlength),
+            units="1/nm",
+            axis="vector_generator_q|vector_coordinate|index",
+        )
+        output_data["vector_generator_qvector_array"][:] = 0.0
+        for nq, q in enumerate(q_values):
+            output_data["vector_generator_qvector_array"][
+                nq, :, : qvector_lengths[nq]
+            ] = qvector_info[q]["q_vectors"]
+        try:
+            hkl_arrays = [qvector_info[q]["hkls"] for q in q_values]
+        except KeyError:
+            return
+        output_data.add(
+            "vector_generator_hkl_array",
+            "VolumeOutputVariable",
+            (len(q_values), 3, qarray_maxlength),
+            units="au",
+            axis="vector_generator_q|vector_coordinate|index",
+        )
+        output_data["vector_generator_hkl_array"][:] = 0.0
+        for nq, _ in enumerate(q_values):
+            output_data["vector_generator_hkl_array"][nq, :, : qvector_lengths[nq]] = (
+                hkl_arrays[nq]
+            )

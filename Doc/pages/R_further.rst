@@ -1,5 +1,5 @@
-Resources for Neutron Scattering Principles, MD Simulations, and Data Analysis
-==============================================================================
+Resources for Neutron Scattering, MD Simulations, and Data Analysis
+===================================================================
 
 Neutron Scattering Principles and Applications
 ----------------------------------------------

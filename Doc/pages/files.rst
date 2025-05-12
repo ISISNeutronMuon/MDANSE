@@ -1,7 +1,7 @@
 .. _file_formats:
 
-Supported File Formats
-======================
+File Formats
+============
 
 In MDANSE 2, there have been significant changes to the
 supported file formats for input and output. This section provides an
@@ -42,7 +42,7 @@ tarball is generated, which contains multiple files, including:
 
 - **jobinfo.txt**: A text file documenting the analysis options selected during
   the analysis.
-- **DAT files**: Each file is named after the variable it contains and
+- **DAT Files**: Each file is named after the variable it contains and
   includes the following information:
     - Variable name
     - Type of plot (representing plot dimensions)

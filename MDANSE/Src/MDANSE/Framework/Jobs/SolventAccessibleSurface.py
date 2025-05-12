@@ -122,10 +122,7 @@ class SolventAccessibleSurface(IJob):
     )
     settings["n_sphere_points"] = ("IntegerConfigurator", {"mini": 1, "default": 1000})
     settings["probe_radius"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.14})
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):

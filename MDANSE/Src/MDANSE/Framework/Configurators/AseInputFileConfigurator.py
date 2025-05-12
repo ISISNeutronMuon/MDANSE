@@ -63,6 +63,8 @@ class AseInputFileConfigurator(InputFileConfigurator):
         value = PLATFORM.get_path(value)
 
         if not value.exists():
+            if self.optional:
+                return
             LOG.error(f"FILE MISSING in {self._name}")
             self.error_status = f"The file {value} does not exist"
             return

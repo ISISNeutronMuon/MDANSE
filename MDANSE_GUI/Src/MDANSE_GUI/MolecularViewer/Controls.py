@@ -30,15 +30,12 @@ from qtpy.QtWidgets import (
     QColorDialog,
     QGroupBox,
     QCheckBox,
-)
-from qtpy.QtGui import (
-    QPaintEvent,
-    QPainter,
-    QColor,
+    QTabWidget,
 )
 
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
+from MDANSE_GUI.MolecularViewer.TraceWidget import TraceWidget
 
 button_lookup = {
     "start": QStyle.StandardPixmap.SP_MediaSkipBackward,
@@ -96,7 +93,7 @@ QSpinBox::down-button  {
 class ViewerControls(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
-        _layout = QGridLayout(self)
+        _ = QGridLayout(self)
         self._viewer = None
         self._buttons = {}
         self._delegates = {}
@@ -180,9 +177,15 @@ class ViewerControls(QWidget):
 
     def createSidePanel(self):
         """Adds widgets for finer control of the playback"""
+        absolute_base = QTabWidget(self)
+        absolute_base.setSizePolicy(
+            QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
+        )
+        self._side_base = absolute_base
         base = QWidget(self)
         layout = QVBoxLayout(base)
         base.setLayout(layout)
+        self._side_base.addTab(base, "Controls")
         # colour changes
         wrapper0 = QGroupBox("Colour settings", base)
         layout0 = QHBoxLayout(wrapper0)
@@ -263,19 +266,33 @@ class ViewerControls(QWidget):
             layout5.addWidget(box)
         layout.addWidget(wrapper5)
         # the database of atom types
-        # self._database = TrajectoryAtomData()
-        self.layout().addWidget(base, 0, 2, 2, 1)  # row, column, rowSpan, columnSpan
+        self.layout().addWidget(
+            absolute_base, 0, 2, 2, 1
+        )  # row, column, rowSpan, columnSpan
+
+    def createTracePanel(self, viewer):
+        """Adds widgets for finer control of the playback"""
+        base = QWidget(self)
+        base.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        layout = QVBoxLayout(base)
+        base.setLayout(layout)
+        self._side_base.addTab(base, "Atom trace")
+        # colour changes
+        self._trace_widget = TraceWidget(viewer)
+        self._trace_widget.initialise_values(viewer)
+        layout.addWidget(self._trace_widget)
+        return self._trace_widget
 
     @Slot()
     def set_background_colour(self):
         dialog = self._bkg_dialog
         if dialog.isVisible():
-            if dialog.isMaximized():
-                dialog.showMaximized()
-            else:
-                dialog.showNormal()
-            dialog.activateWindow()
+            geometry = dialog.saveGeometry()
+            dialog.previous_geometry = geometry
+            dialog.close()
         else:
+            if hasattr(dialog, "previous_geometry"):
+                dialog.restoreGeometry(dialog.previous_geometry)
             dialog.show()
         dialog.exec()
         if dialog.result() == QColorDialog.DialogCode.Accepted:

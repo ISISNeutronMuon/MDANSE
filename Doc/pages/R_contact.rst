@@ -10,7 +10,7 @@ documentation, tutorials, or usage examples. If you want to join the project, pl
 * Affiliation: ISIS Neutron and Muon Source, Rutherford Appleton Laboratory, Didcot, UK
 
 Software Inquiries
-==================
+------------------
 
 You are welcome to use the 
 `issue tracker <https://github.com/ISISNeutronMuon/MDANSE/issues>`_

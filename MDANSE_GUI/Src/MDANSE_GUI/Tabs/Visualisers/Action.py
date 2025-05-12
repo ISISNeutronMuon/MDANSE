@@ -15,7 +15,7 @@
 #
 import os
 import traceback
-from pathlib import PurePath
+from pathlib import Path
 
 import numpy as np
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -135,6 +135,7 @@ class Action(QWidget):
         self._trajectory_configurator = None
         self._settings = None
         self._job_name = None
+        self._job_instance = IJob()
         self._use_preview = use_preview
         self._current_instrument = None
         self._has_been_initialised = False
@@ -162,11 +163,15 @@ class Action(QWidget):
         trajectory : str or None
             The path and filename of the trajectory
         """
+        if trajectory == self._input_trajectory:
+            LOG.debug("Skipping set_trajectory, no change.")
+            return
+        self._job_instance = IJob()
         self._input_trajectory = trajectory
         if self._input_trajectory is not None:
-            self._default_path = PurePath(os.path.split(self._input_trajectory)[0])
+            self._default_path = Path(self._input_trajectory).parent
         else:
-            self._default_path = PurePath(os.path.abspath("."))
+            self._default_path = Path().absolute()
         if self._job_name is not None:
             self._parent_tab.set_path(self._job_name, str(self._default_path))
 
@@ -196,26 +201,32 @@ class Action(QWidget):
         job_name : str
             The job name.
         """
-        self.clear_panel()
-        self._has_been_initialised = False
+        LOG.debug(
+            "Old job type %s, new job type %s",
+            type(self._job_instance).__name__,
+            job_name,
+        )
+        if type(self._job_instance).__name__ != job_name:
+            self.clear_panel()
+            self._has_been_initialised = False
 
-        self._job_name = job_name
-        if self._default_path is None or PurePath(self._default_path) == PurePath(
-            os.path.abspath(".")
-        ):
-            self._default_path = str(PurePath(self._parent_tab.get_path(job_name)))
-        try:
-            job_instance = IJob.create(job_name)
-        except ValueError as e:
-            LOG.debug(
-                f"Failed to create IJob {job_name};\n"
-                f"reason {e};\n"
-                f"traceback {traceback.format_exc()}"
-            )
-            return
-        job_instance.build_configuration()
-        settings = job_instance.settings
-        self._job_instance = job_instance
+            self._job_name = job_name
+            if self._default_path is None or Path(self._default_path).samefile(Path()):
+                self._default_path = str(Path(self._parent_tab.get_path(job_name)))
+            try:
+                job_instance = IJob.create(job_name)
+            except ValueError as e:
+                LOG.debug(
+                    f"Failed to create IJob {job_name};\n"
+                    f"reason {e};\n"
+                    f"traceback {traceback.format_exc()}"
+                )
+                return
+            job_instance.build_configuration()
+            settings = job_instance.settings
+            self._job_instance = job_instance
+        else:
+            settings = self._job_instance.settings
         LOG.info(f"Configuration {job_instance.configuration}")
         if "trajectory" in settings.keys():
             if self._input_trajectory is None:
@@ -332,7 +343,12 @@ class Action(QWidget):
 
     def apply_instrument(self):
         if self._current_instrument is not None:
-            q_vector_tuple = self._current_instrument.create_q_vector_params()
+            initial_configuration = self._trajectory_configurator[
+                "instance"
+            ].configuration()
+            q_vector_tuple = self._current_instrument.create_q_vector_params(
+                initial_configuration
+            )
             resolution_tuple = self._current_instrument.create_resolution_params()
             for widget in self._widgets:
                 has_preview = callable(
@@ -407,11 +423,9 @@ class Action(QWidget):
         try:
             _cname = self._job_name
         except Exception:
-            currentpath = PurePath(os.path.abspath("."))
+            currentpath = Path().absolute()
         else:
-            currentpath = PurePath(
-                self._parent_tab.get_path(self._job_name + "_script")
-            )
+            currentpath = Path(self._parent_tab.get_path(self._job_name + "_script"))
         result, ftype = QFileDialog.getSaveFileName(
             self,
             "Save job as a Python script",
@@ -420,7 +434,7 @@ class Action(QWidget):
         )
         if result == "":
             return None
-        path = PurePath(os.path.split(result)[0])
+        path = Path(result).parent
         try:
             _cname = self._job_name
         except Exception:

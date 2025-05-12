@@ -43,6 +43,8 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         :param value: the path for the HDF trajectory file.
         :type value: str
         """
+        if value == self._original_input:
+            return
         self._original_input = value
 
         InputFileConfigurator.configure(self, value)

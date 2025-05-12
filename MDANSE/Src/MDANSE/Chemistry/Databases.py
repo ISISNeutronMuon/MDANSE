@@ -15,7 +15,7 @@
 #
 
 import copy
-from typing import Union, ItemsView, Dict, Any
+from typing import Union, ItemsView, Dict, Any, Optional
 from pathlib import Path
 
 import json
@@ -23,6 +23,36 @@ import json
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
+
+
+def color(color_string: Optional[str] = None):
+    """A color function used to create a color string for the atom
+    database.
+
+    Parameters
+    ----------
+    color_string: Optional[str]
+        The color string, if None then it returns a color string
+        for white.
+
+    Returns
+    -------
+    str
+        The color string following the
+    """
+    if not color_string:
+        # default color is white
+        return "255;255;255"
+
+    if (
+        not isinstance(color_string, str)
+        or len(color_string.split(";")) != 3
+        or any([not i.isdigit() for i in color_string.split(";")])
+        or any([0 > int(i) > 255 for i in color_string.split(";")])
+    ):
+        raise ValueError(f"{color_string} is not a valid color string.")
+
+    return color_string
 
 
 class _Database(metaclass=Singleton):
@@ -39,6 +69,7 @@ class _Database(metaclass=Singleton):
         """
 
         self._data = {}
+        self._default_data = {}
 
         self._reset()
 
@@ -93,16 +124,11 @@ class _Database(metaclass=Singleton):
         else:
             database_path = default_database
 
+        with open(default_database, "r") as f:
+            self._default_data = json.load(f)
+
         with open(database_path, "r") as f:
             self._data = json.load(f)
-
-    def _build_residue_map(self) -> None:
-        """Creates a dict mapping alternative names to the official name."""
-        self._residue_map = {}
-        for k, v in self._data.items():
-            self._residue_map[k] = k
-            for alt in v["alternatives"]:
-                self._residue_map[alt] = k
 
     def items(self) -> ItemsView[str, dict]:
         """
@@ -126,7 +152,7 @@ class _Database(metaclass=Singleton):
         future. If the user database already exists, calling this function will overwrite it.
         """
         with open(self._USER_DATABASE, "w") as f:
-            json.dump(self._data, f)
+            json.dump(self._data, f, indent=4)
 
 
 class AtomsDatabaseError(Error):
@@ -178,7 +204,7 @@ class AtomsDatabase(_Database):
     _USER_DATABASE = PLATFORM.application_directory() / "atoms.json"
 
     # The python types supported by the database
-    _TYPES = {"str": str, "int": int, "float": float, "list": list}
+    _TYPES = {"str": str, "int": int, "float": float, "list": list, "color": color}
 
     def __init__(self):
         """
@@ -188,6 +214,9 @@ class AtomsDatabase(_Database):
         self._atoms_by_atomic_number = {num: [] for num in range(140)}
 
         super().__init__()
+
+        self.default_atoms_types = list(self._default_data["atoms"].keys())
+        self.default_atoms_properties = list(self._default_data["properties"].keys())
 
     def __contains__(self, element: str) -> bool:
         """
@@ -243,20 +272,29 @@ class AtomsDatabase(_Database):
                 self._atoms_by_atomic_number[protons].append(atom)
 
     def add_atom(self, atom: str) -> None:
-        """
-        Add a new element to the atoms database. The data for this atom will be empty and will not be saved until the
-        :meth: `save()` method is called. If the atom already exists, an exception is raised.
+        """Add a new element to the atom database. The data for this
+        atom will be filled with default values and will not be saved
+        until the :meth: `save()` method is called.
 
-        :param atom: the name of the element to add
-        :type atom: str
-        """
+        Parameters
+        ----------
+        atom : str
+            The atom name.
 
+        Raises
+        ------
+        AtomsDatabaseError
+            When the atom already exist in the database.
+        """
         if atom in self._data:
             raise AtomsDatabaseError(
                 f"The atom {atom} is already stored in the database"
             )
 
-        self._data[atom] = {}
+        properties = {}
+        for pname, ptype in self._properties.items():
+            properties[pname] = AtomsDatabase._TYPES[ptype]()
+        self._data[atom] = properties
 
     def add_property(self, pname: str, ptype: str) -> None:
         """
@@ -595,7 +633,7 @@ class AtomsDatabase(_Database):
         d = {"properties": self._properties, "atoms": self._data}
 
         with open(AtomsDatabase._USER_DATABASE, "w") as fout:
-            json.dump(d, fout)
+            json.dump(d, fout, indent=4)
 
     def get_atom_property(self, symbol: str, property: str) -> Union[int, float, str]:
         """Faster access to the atom property as it avoids the deepcopy
@@ -644,6 +682,73 @@ class AtomsDatabase(_Database):
             property_name: self.get_value(symbol, property_name)
             for property_name in self.properties
         }
+
+    def remove_atom(self, symbol: str):
+        """Remove an atom from the database.
+
+        Parameters
+        ----------
+        symbol : str
+            The atoms symbol to remove from the database.
+        """
+        try:
+            del self._data[symbol]
+        except KeyError:
+            raise AtomsDatabaseError(f"Atom {symbol} does not exist.")
+
+    def remove_property(self, label: str):
+        """Remove an atom property from the database.
+
+        Parameters
+        ----------
+        label : str
+            The property to remove from the database.
+        """
+        try:
+            del self._properties[label]
+        except KeyError:
+            raise AtomsDatabaseError(f"Atom property {label} does not exist.")
+
+        for atm in self.atoms:
+            del self._data[atm][label]
+
+    def rename_atom_type(self, old_key: str, new_key: str):
+        """Renames the atom key in the atom database.
+
+        Parameters
+        ----------
+        old_key : str
+            The key of the atom to change.
+        new_key : str
+            The new key of the atom.
+        """
+        if old_key not in self._data:
+            raise AtomsDatabaseError(f"Atom {old_key} does not exist.")
+        if new_key in self._data:
+            raise AtomsDatabaseError(
+                f"Cannot rename atom from {old_key} to {new_key} as {new_key} is already exists."
+            )
+        self._data[new_key] = self._data.pop(old_key)
+
+    def rename_atom_property(self, old_key: str, new_key: str):
+        """Renames the atom property in the atom database.
+
+        Parameters
+        ----------
+        old_key : str
+            The key of the atom property to change.
+        new_key : str
+            The new key of the atom property.
+        """
+        if old_key not in self._properties:
+            raise AtomsDatabaseError(f"Atom property {old_key} does not exist.")
+        if new_key in self._properties:
+            raise AtomsDatabaseError(
+                f"Cannot rename atom property from {old_key} to {new_key} as {new_key} is already exists."
+            )
+        self._properties[new_key] = self._properties.pop(old_key)
+        for element in self._data.values():
+            element[new_key] = element.pop(old_key)
 
 
 if __name__ == "__main__":

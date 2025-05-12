@@ -68,14 +68,12 @@ class MultiInputFileConfigurator(IConfigurator):
             return
 
         values = [PLATFORM.get_path(value) for value in values]
-
-        none_exist = []
-        for value in values:
-            if not value.is_file():
-                none_exist.append(value)
+        none_exist = [value for value in values if not value.is_file()]
 
         if none_exist:
-            self.error_status = f"The files {', '.join(none_exist)} do not exist."
+            self.error_status = (
+                f"The files {', '.join(map(str, none_exist))} do not exist."
+            )
             return
 
         self["values"] = values

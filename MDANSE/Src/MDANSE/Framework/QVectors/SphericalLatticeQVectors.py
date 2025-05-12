@@ -23,7 +23,19 @@ from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
 class SphericalLatticeQVectors(LatticeQVectors):
-    """ """
+    """Generates vectors randomly on a sphere.
+
+    Only vectors commensurate with the reciprocal
+    space lattice vectors will be generated.
+    |Q| values for which no valid vectors can
+    be found are omitted in the output.
+
+    Vectors within one shell are generated within
+    a tolerance limit around a central |Q| value.
+    Most calculations will produce one data point
+    for |Q| by averaging the results over all
+    vectors in the shell.
+    """
 
     settings = collections.OrderedDict()
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
@@ -43,27 +55,25 @@ class SphericalLatticeQVectors(LatticeQVectors):
         if self._configuration["seed"]["value"] != 0:
             np.random.seed(self._configuration["seed"]["value"])
             random.seed(self._configuration["seed"]["value"])
-
         qMax = (
             self._configuration["shells"]["last"]
             + 0.5 * self._configuration["width"]["value"]
         )
 
-        hklMax = (
-            np.ceil([qMax / np.sqrt(np.sum(v**2)) for v in self._inverseUnitCell.T]) + 1
-        )
+        hklMax = np.ceil(self.qvectors_to_hkl(qMax * np.eye(3), self._unit_cell)) + 1
 
-        vects = np.mgrid[
-            -hklMax[0] : hklMax[0] + 1,
-            -hklMax[1] : hklMax[1] + 1,
-            -hklMax[2] : hklMax[2] + 1,
+        hkl_vects = np.mgrid[
+            -hklMax[0, 0] : hklMax[0, 0] + 1,
+            -hklMax[1, 1] : hklMax[1, 1] + 1,
+            -hklMax[2, 2] : hklMax[2, 2] + 1,
         ]
 
-        vects = vects.reshape(
-            3, int(2 * hklMax[0] + 1) * int(2 * hklMax[1] + 1) * int(2 * hklMax[2] + 1)
+        hkl_vects = hkl_vects.reshape(
+            3,
+            np.prod(2 * np.diag(hklMax) + 1, dtype=int),
         )
 
-        vects = np.dot(self._inverseUnitCell, vects)
+        vects = self.hkl_to_qvectors(hkl_vects, self._unit_cell)
 
         dists2 = np.sum(vects**2, axis=0)
 
@@ -96,15 +106,11 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 self._configuration["q_vectors"][q]["q_vectors"] = vects[:, hits]
                 self._configuration["q_vectors"][q]["n_q_vectors"] = n
                 self._configuration["q_vectors"][q]["q"] = q
-                self._configuration["q_vectors"][q]["hkls"] = np.rint(
-                    np.dot(
-                        self._directUnitCell,
-                        self._configuration["q_vectors"][q]["q_vectors"],
-                    )
+                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
+                    vects[:, hits], self._unit_cell
                 )
 
             if self._status is not None:
                 if self._status.is_stopped():
-                    return None
-                else:
-                    self._status.update()
+                    return
+                self._status.update()

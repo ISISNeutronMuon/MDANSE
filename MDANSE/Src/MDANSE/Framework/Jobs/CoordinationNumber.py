@@ -68,10 +68,7 @@ class CoordinationNumber(DistanceHistogram):
             }
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def finalize(self):
@@ -112,6 +109,7 @@ class CoordinationNumber(DistanceHistogram):
                 (npoints,),
                 axis="r",
                 units="au",
+                main_result=True,
             )
             self._outputData.add(
                 f"cn_intra_{inv_pair_str}",
@@ -133,6 +131,7 @@ class CoordinationNumber(DistanceHistogram):
                 (npoints,),
                 axis="r",
                 units="au",
+                main_result=True,
             )
 
         nFrames = self.configuration["frames"]["number"]
@@ -165,7 +164,7 @@ class CoordinationNumber(DistanceHistogram):
             idj = self.selectedElements.index(at2)
 
             if idi == idj:
-                nij = ni * (ni - 1) / 2.0
+                nij = ni**2 / 2.0
             else:
                 nij = ni * nj
                 self.hIntra[idi, idj] += self.hIntra[idj, idi]

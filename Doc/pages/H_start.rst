@@ -10,7 +10,7 @@ Create Virtual Environment
 To create your Python virtual environment for MDANSE use ``venv`` or ``virtualenv``.
 Open a terminal or command prompt.
 
-**Navigate to your project directory (optional)**: If you have a specific
+**Navigate to Your Project Directory (Optional)**: If you have a specific
 project directory where you want to work with MDANSE, navigate to that
 directory using the ``cd`` command. For example:
 
@@ -18,7 +18,7 @@ directory using the ``cd`` command. For example:
 
    cd path/to/your/project/directory
 
-**Create a virtual environment**: To create a virtual environment named
+**Create a Virtual Environment**: To create a virtual environment named
 ``mdanse``, use the following command:
 
 .. code-block:: bash

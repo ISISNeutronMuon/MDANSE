@@ -15,7 +15,7 @@
 #
 
 from __future__ import annotations
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Set
 import copy
 from functools import reduce
 
@@ -228,6 +228,11 @@ class ChemicalSystem:
     def number_of_atoms(self) -> int:
         """The number of non-ghost atoms in the ChemicalSystem."""
         return self._total_number_of_atoms
+
+    @property
+    def all_indices(self) -> Set[int]:
+        """The number of non-ghost atoms in the ChemicalSystem."""
+        return set(self._atom_indices)
 
     @property
     def total_number_of_atoms(self) -> int:

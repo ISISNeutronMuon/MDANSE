@@ -99,27 +99,6 @@ class UnitCell:
         return self._inverse_unit_cell
 
     @property
-    def transposed_direct(self) -> np.ndarray:
-        """
-        Return the transposed of the unit cell matrix.
-
-        :return: the transposed of the unit cell matrix
-        :rtype: numpy.ndarray
-        """
-        return self._unit_cell.T
-
-    @property
-    def transposed_inverse(self) -> np.ndarray:
-        """
-        Return the transposed of the inverse of unit cell matrix.
-
-        :return: the transposed of the inverse of the unit cell matrix
-        :rtype: numpy.ndarray
-        """
-
-        return self._inverse_unit_cell.T
-
-    @property
     def volume(self) -> float:
         """
         Return the volume unit cell matrix.

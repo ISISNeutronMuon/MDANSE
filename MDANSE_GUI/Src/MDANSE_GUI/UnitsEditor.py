@@ -169,7 +169,7 @@ class UnitsEditor(QDialog):
                     "format": str,
                     "label": "Unit name",
                     "tooltip": "Type the name of the new physical unit here.",
-                    "values": [""],
+                    "value": "",
                 }
             ),
             InputVariable(
@@ -178,7 +178,7 @@ class UnitsEditor(QDialog):
                     "format": float,
                     "label": "Scaling factor",
                     "tooltip": "Type the scaling factor of the new unit here.",
-                    "values": [1.0],
+                    "value": 1.0,
                 }
             ),
         ] + [
@@ -188,12 +188,14 @@ class UnitsEditor(QDialog):
                     "format": int,
                     "label": tag,
                     "tooltip": "Type the power to which the component should be raised.",
-                    "values": [0],
+                    "value": 0,
                 }
             )
             for tag in ["kg", "m", "s", "K", "mol", "A", "cd", "rad", "sr"]
         ]
-        nu_dialog = InputDialog(fields=dialog_variables)
+        nu_dialog = InputDialog(
+            parent=self.parent(), fields=dialog_variables, title="Create Custom Unit"
+        )
         nu_dialog.got_values.connect(self.model.addNewUnit)
         nu_dialog.show()
         _result = nu_dialog.exec()

@@ -83,10 +83,7 @@ class StaticStructureFactor(DistanceHistogram):
             },
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -163,6 +160,8 @@ class StaticStructureFactor(DistanceHistogram):
                 (nq,),
                 axis="q",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
 
             ni = nAtomsPerElement[pair[0]]
@@ -172,7 +171,7 @@ class StaticStructureFactor(DistanceHistogram):
             idj = self.selectedElements.index(pair[1])
 
             if pair[0] == pair[1]:
-                nij = ni * (ni - 1) / 2.0
+                nij = ni**2 / 2.0
             else:
                 nij = ni * nj
                 self.hIntra[idi, idj] += self.hIntra[idj, idi]
@@ -205,18 +204,24 @@ class StaticStructureFactor(DistanceHistogram):
             units="au",
         )
         self._outputData.add(
-            "ssf_total", "LineOutputVariable", (nq,), axis="q", units="au"
+            "ssf_total",
+            "LineOutputVariable",
+            (nq,),
+            axis="q",
+            units="au",
+            main_result=True,
         )
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 2)
         assign_weights(self._outputData, weight_dict, "ssf_intra_%s%s")
         assign_weights(self._outputData, weight_dict, "ssf_inter_%s%s")
+        assign_weights(self._outputData, weight_dict, "ssf_total_%s%s")
+
         ssfIntra = weighted_sum(self._outputData, weight_dict, "ssf_intra_%s%s")
         self._outputData["ssf_intra"][:] = ssfIntra
 
         ssfInter = weighted_sum(self._outputData, weight_dict, "ssf_inter_%s%s")
-
         self._outputData["ssf_inter"][:] = ssfInter
 
         self._outputData["ssf_total"][:] = ssfIntra + ssfInter

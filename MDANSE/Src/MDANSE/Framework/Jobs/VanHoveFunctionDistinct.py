@@ -24,6 +24,13 @@ from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
+DETAILED_CELL_MESSAGE = (
+    "This analysis job requires a unit cell (simulation box) to be defined. "
+    "The box will be used for calculating density in the analysis. "
+    "You can add a simulation box to the trajectory using the TrajectoryEditor job. "
+    "Be careful adding the simulation box, as the wrong dimensions can render the results meaningless."
+)
+
 
 def distance_array_2D(
     ref_atoms: np.ndarray, other_atoms: np.ndarray, cell_array: np.ndarray
@@ -109,7 +116,7 @@ def van_hove_distinct(
     for type1 in unique_types:
         type_indices[type1] = np.where(symbolindex == type1)
 
-    all_distances = distance_array_2D(scaleconfig_t0, scaleconfig_t1, cell.T)
+    all_distances = distance_array_2D(scaleconfig_t0, scaleconfig_t1, cell)
 
     bins = ((all_distances - rmin) / dr).astype(int)
 
@@ -240,19 +247,8 @@ class VanHoveFunctionDistinct(IJob):
             }
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
-
-    def detailed_unit_cell_error(self):
-        raise ValueError(
-            "This analysis job requires a unit cell (simulation box) to be defined. "
-            "The box will be used for calculating density in the analysis. "
-            "You can add a simulation box to the trajectory using the TrajectoryEditor job. "
-            "Be careful adding the simulation box, as the wrong dimensions can render the results meaningless."
-        )
 
     def initialize(self):
         super().initialize()
@@ -272,13 +268,10 @@ class VanHoveFunctionDistinct(IJob):
         conf = self.configuration["trajectory"]["instance"].configuration(
             self.configuration["frames"]["first"]
         )
-        try:
-            cell_volume = conf.unit_cell.volume
-        except Exception:
-            self.detailed_unit_cell_error()
-        else:
-            if cell_volume < 1e-9:
-                self.detailed_unit_cell_error()
+        if not hasattr(conf, "unit_cell"):
+            raise ValueError(DETAILED_CELL_MESSAGE)
+        if conf.unit_cell.volume < 1e-9:
+            raise ValueError(DETAILED_CELL_MESSAGE)
 
         self._outputData.add(
             "r",
@@ -312,6 +305,7 @@ class VanHoveFunctionDistinct(IJob):
             (self.n_mid_points, self.numberOfSteps),
             axis="r|time",
             units="au",
+            main_result=True,
         )
         for x, y in self._elementsPairs:
             self._outputData.add(
@@ -411,8 +405,8 @@ class VanHoveFunctionDistinct(IJob):
                 frame_index_t1
             )
             coords_t1 = conf_t1["coordinates"][self._indices]
-            direct_cell = conf_t1.unit_cell.transposed_direct
-            inverse_cell = conf_t1.unit_cell.transposed_inverse
+            direct_cell = conf_t1.unit_cell.direct
+            inverse_cell = conf_t1.unit_cell.inverse
 
             scaleconfig_t0 = coords_t0 @ inverse_cell
             scaleconfig_t1 = coords_t1 @ inverse_cell
@@ -469,7 +463,7 @@ class VanHoveFunctionDistinct(IJob):
             idj = self.selectedElements.index(pair[1])
 
             if idi == idj:
-                nij = ni * (ni - 1) / 2.0
+                nij = ni**2 / 2.0
             else:
                 nij = ni * nj
                 self.h_intra[idi, idj] += self.h_intra[idj, idi]

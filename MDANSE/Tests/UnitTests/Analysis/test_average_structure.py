@@ -1,18 +1,10 @@
-import tempfile
-import os
-from os import path
 import pytest
-
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.Framework.InputData.HDFTrajectoryInputData import \
+    HDFTrajectoryInputData
 from MDANSE.Framework.Jobs.IJob import IJob
+from test_helpers.paths import CONV_DIR
 
-
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "..",
-    "Converted",
-    "short_trajectory_after_changes.mdt",
-)
+short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
 
 @pytest.fixture(scope="module")
@@ -20,27 +12,19 @@ def trajectory():
     trajectory = HDFTrajectoryInputData(short_traj)
     yield trajectory
 
-
-units = ["Angstrom", "Bohr", "nm", "pm"]
-formats = ["vasp", "xyz", "turbomole", "abinit-in"]
-inputs = []
-for u in units:
-    for f in formats:
-        inputs.append((u, f))
-
-
-@pytest.mark.parametrize("output_unit,output_format", inputs)
-def test_avg_structure(trajectory, output_unit, output_format):
-    temp_name = tempfile.mktemp()
-    parameters = {}
-    parameters["frames"] = (0, 10, 1)
-    parameters["output_units"] = output_unit
-    parameters["fold"] = True
-    parameters["output_files"] = (temp_name, output_format, "INFO")
-    parameters["running_mode"] = ("single-core",)
-    parameters["trajectory"] = short_traj
+@pytest.mark.parametrize("output_unit", ["Angstrom", "Bohr", "nm", "pm"])
+@pytest.mark.parametrize("output_format", ["vasp", "xyz", "turbomole", "abinit-in"])
+def test_avg_structure(tmp_path, trajectory, output_unit, output_format):
+    temp_name = tmp_path / "output"
+    parameters = {
+        "frames": (0, 10, 1),
+        "output_units": output_unit,
+        "fold": True,
+        "output_files": (temp_name, output_format, "INFO"),
+        "running_mode": ("single-core",),
+        "trajectory": short_traj,
+    }
     temp = IJob.create("AverageStructure")
     temp.run(parameters, status=True)
-    assert path.exists(temp_name)
-    assert path.isfile(temp_name)
-    os.remove(temp_name)
+
+    assert temp_name.is_file()

@@ -13,8 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import Signal, Slot, Qt
+
 from qtpy.QtWidgets import QTextBrowser
+from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtGui import QStandardItem
 
 from MDANSE.MLogging import LOG
@@ -82,7 +83,6 @@ class SimpleInstrument:
     def create_resolution_params(self):
         if not self._configured:
             return
-        _general_resolution = ("gaussian", {"mu": 0.0, "sigma": 0.2})
         calculator = ResolutionCalculator()
         try:
             calculator.update_model(self._resolution_type)
@@ -114,12 +114,12 @@ class SimpleInstrument:
             results.append(new_entry)
         return results
 
-    def create_q_vector_params(self):
+    def create_q_vector_params(self, sample_configuration=None):
         if not self._configured:
             return
         cov_type = self._qvector_type
         try:
-            qvec_generator = IQVectors.create(cov_type, None)
+            qvec_generator = IQVectors.create(cov_type, sample_configuration)
         except ValueError:
             return ("No qvectors", {})
         except AttributeError:
@@ -162,7 +162,7 @@ class SimpleInstrument:
     def filter_qvector_generator(self):
         new_list = [str(x) for x in self.qvector_options]
         if self._sample == "isotropic":
-            new_list = [str(x) for x in new_list if "Lattice" not in x]
+            new_list = [str(x) for x in new_list if "Dispersion" not in x]
         if self._technique == "QENS":
             new_list = [str(x) for x in new_list if "Spherical" in x]
         return new_list
@@ -170,7 +170,7 @@ class SimpleInstrument:
     def pick_qvector_generator(self) -> str:
         qgenerator = "SphericalQVectors"
         if self._sample == "isotropic" and self._technique == "QENS":
-            qgenerator = "SphericalQVectors"
+            qgenerator = "SphericalLatticeQVectors"
         return qgenerator
 
 

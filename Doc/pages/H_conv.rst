@@ -1,5 +1,5 @@
-Converged Results
-=================
+Obtaining Converged Results
+===========================
 In MD, a large number of settings must be chosen correctly to ensure that
 high quality results are obtained. Some of these include the size of the MD
 box, the time step and the simulation length. The choice of these settings

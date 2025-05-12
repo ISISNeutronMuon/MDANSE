@@ -61,7 +61,13 @@ class OutputFilesWidget(WidgetBase):
         self._field = QLineEdit(str(guess_name), self._base)
         self._field.setPlaceholderText(str(guess_name))
         self.type_box = CheckableComboBox(self._base)
-        self.type_box.addItems(self._configurator.formats)
+        self.type_box.addItems(
+            [
+                fmt_string
+                for fmt_string in self._configurator.formats
+                if fmt_string != "FileInMemory"
+            ]
+        )
         self.type_box.set_default("MDAFormat")
         # self.type_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)

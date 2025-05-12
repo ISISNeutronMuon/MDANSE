@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    name: Build MDANSE and run tests on ${{ matrix.os }}
+    name: (${{ matrix.os }}-${{ matrix.python-version }}) Build MDANSE and run tests
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -15,6 +15,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macOS-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         # os: [ubuntu-20.04, windows-2019, macOS-11, ubuntu-latest, windows-latest, macOS-latest]
+
     if: |
       !contains( github.ref, 'legacy' )
     steps:
@@ -27,10 +28,11 @@ jobs:
       - name: Install pytest
         run: python -m pip install pytest pytest-timeout
 
-      - name: install MDANSE
-        run: (cd MDANSE && python -m pip install .)
+      - name: Install MDANSE
+        working-directory: MDANSE
+        run: python -m pip install .
 
-      - name: run unit tests
+      - name: Run unit tests
+        working-directory: MDANSE
         run: |
-          cd MDANSE/Tests/UnitTests
-          python -m pytest
+          pytest

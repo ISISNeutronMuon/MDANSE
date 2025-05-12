@@ -29,6 +29,7 @@ for name in modnames:
         tempmod = importlib.import_module("." + name, "MDANSE.Framework.Converters")
     except ModuleNotFoundError:
         LOG.error(f"Could not find {name} in MDANSE.Framework.Converters")
+        continue
     tempobject = getattr(tempmod, name)
     globdict[name] = tempobject
     del tempmod  # optionally delete the reference to the parent module

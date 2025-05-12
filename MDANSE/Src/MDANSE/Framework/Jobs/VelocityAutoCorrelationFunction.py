@@ -76,7 +76,6 @@ class VelocityAutoCorrelationFunction(IJob):
         "ProjectionConfigurator",
         {"label": "project coordinates"},
     )
-    settings["normalize"] = ("BooleanConfigurator", {"default": False})
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -99,10 +98,7 @@ class VelocityAutoCorrelationFunction(IJob):
             }
         },
     )
-    settings["output_files"] = (
-        "OutputFilesConfigurator",
-        {"formats": ["MDAFormat", "TextFormat"]},
-    )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
@@ -221,17 +217,6 @@ class VelocityAutoCorrelationFunction(IJob):
         assign_weights(self._outputData, weight_dict, "vacf_%s")
         vacfTotal = weighted_sum(self._outputData, weight_dict, "vacf_%s")
         self._outputData["vacf_total"][:] = vacfTotal
-
-        if self.configuration["normalize"]["value"]:
-            for element in nAtomsPerElement.keys():
-                self._outputData[
-                    f"vacf_{element}"
-                ].scaling_factor *= normalisation_factor(
-                    self._outputData[f"vacf_{element}"], axis=0
-                )
-            self._outputData["vacf_total"].scaling_factor *= normalisation_factor(
-                self._outputData["vacf_total"], axis=0
-            )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

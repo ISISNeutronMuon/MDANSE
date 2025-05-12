@@ -18,12 +18,19 @@ import collections
 
 import numpy as np
 
-from MDANSE.Mathematics.Geometry import random_points_on_sphere
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
+from MDANSE.Mathematics.Geometry import random_points_on_sphere
 
 
 class SphericalQVectors(IQVectors):
-    """ """
+    """Generates vectors randomly on a sphere.
+
+    Vectors within one shell are generated within
+    a tolerance limit around a central |Q| value.
+    Most calculations will produce one data point
+    for |Q| by averaging the results over all
+    vectors in the shell.
+    """
 
     settings = collections.OrderedDict()
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
@@ -68,5 +75,4 @@ class SphericalQVectors(IQVectors):
             if self._status is not None:
                 if self._status.is_stopped():
                     return
-                else:
-                    self._status.update()
+                self._status.update()

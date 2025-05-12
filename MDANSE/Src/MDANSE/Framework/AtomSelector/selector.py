@@ -13,362 +13,223 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import copy
+
 import json
-from typing import Union
+from typing import Any, Optional
 
-from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Framework.AtomSelector.atom_selection import select_atoms
+from MDANSE.Framework.AtomSelector.general_selection import (
+    invert_selection,
+    select_all,
+    select_none,
+)
+from MDANSE.Framework.AtomSelector.group_selection import select_labels, select_pattern
+from MDANSE.Framework.AtomSelector.molecule_selection import select_molecules
+from MDANSE.Framework.AtomSelector.spatial_selection import (
+    select_positions,
+    select_sphere,
+)
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
-from MDANSE.Framework.AtomSelector.all_selector import select_all
-from MDANSE.Framework.AtomSelector.atom_selectors import (
-    select_atom_fullname,
-    select_atom_name,
-    select_dummy,
-    select_element,
-    select_hs_on_element,
-    select_hs_on_heteroatom,
-    select_index,
-)
-from MDANSE.Framework.AtomSelector.group_selectors import (
-    select_hydroxy,
-    select_methyl,
-    select_phosphate,
-    select_primary_amine,
-    select_sulphate,
-    select_thiol,
-)
-from MDANSE.Framework.AtomSelector.molecule_selectors import select_water
+
+function_lookup = {
+    function.__name__: function
+    for function in [
+        select_all,
+        select_none,
+        invert_selection,
+        select_atoms,
+        select_molecules,
+        select_labels,
+        select_pattern,
+        select_positions,
+        select_sphere,
+    ]
+}
 
 
-class Selector:
-    """Used to get the indices of a subset of atoms of a chemical system.
+class ReusableSelection:
+    """Stores an applies atom selection operations.
 
-    Attributes
-    ----------
-    _default : dict[str, bool | dict]
-        The default settings.
-    _funcs : dict[str, Callable]
-        A dictionary of the functions.
-    _kwarg_keys : dict[str, str]
-        A dictionary of the function arg keys.
+    A reusable sequence of operations which, when applied
+    to a trajectory, returns a set of atom indices based
+    on the specified criteria.
+
     """
 
-    _default = {
-        "all": True,
-        "dummy": False,
-        "hs_on_heteroatom": False,
-        "primary_amine": False,
-        "hydroxy": False,
-        "methyl": False,
-        "phosphate": False,
-        "sulphate": False,
-        "thiol": False,
-        "water": False,
-        # e.g. {"S": True}
-        "hs_on_element": {},
-        "element": {},
-        "name": {},
-        "fullname": {},
-        # e.g. {1: True}
-        "index": {},
-    }
+    def __init__(self) -> None:
+        """Create an empty selection.
 
-    _funcs = {
-        "all": select_all,
-        "dummy": select_dummy,
-        "hs_on_heteroatom": select_hs_on_heteroatom,
-        "primary_amine": select_primary_amine,
-        "hydroxy": select_hydroxy,
-        "methyl": select_methyl,
-        "phosphate": select_phosphate,
-        "sulphate": select_sulphate,
-        "thiol": select_thiol,
-        "water": select_water,
-        "hs_on_element": select_hs_on_element,
-        "element": select_element,
-        "name": select_atom_name,
-        "fullname": select_atom_fullname,
-        "index": select_index,
-    }
-
-    _kwarg_keys = {
-        "hs_on_element": "symbol",
-        "element": "symbol",
-        "name": "name",
-        "fullname": "fullname",
-        "index": "index",
-    }
-
-    def __init__(self, trajectory: Trajectory) -> None:
-        """
         Parameters
         ----------
         trajectory: Trajectory
             The chemical system to apply the selection to.
+
         """
-        system = trajectory.chemical_system
-        self.system = system
-        self.trajectory = trajectory
-        self.all_idxs = set(system._atom_indices)
-        self.settings = copy.deepcopy(self._default)
+        self.reset()
 
-        symbols = set(system.atom_list)
-        # all possible values for the system
-        self._kwarg_vals = {
-            "element": symbols,
-            "hs_on_element": set(
-                [
-                    symbol
-                    for symbol in symbols
-                    if select_hs_on_element(trajectory, symbol, check_exists=True)
-                ]
-            ),
-            "name": set(system.atom_list),
-            "fullname": set(system.name_list),
-            "index": self.all_idxs,
-        }
+    def reset(self):
+        """Initialise the attributes to an empty list of operations."""
+        self.system = None
+        self.trajectory = None
+        self.all_idxs = set()
+        self.operations = {}
 
-        # figure out if a match exists for the selector function
-        self.match_exists = self.create_default_settings()
-        for k0, v0 in self.match_exists.items():
-            if isinstance(v0, dict):
-                for k1 in v0.keys():
-                    self.match_exists[k0][k1] = True
-            else:
-                self.match_exists[k0] = self._funcs[k0](
-                    self.trajectory, check_exists=True
-                )
-
-        self.settings = self.create_default_settings()
-
-    def create_default_settings(self) -> dict[str, Union[bool, dict]]:
-        """Create a new settings dictionary with default settings.
-
-        Returns
-        -------
-        dict[str, Union[bool, dict]]
-            A settings dictionary.
-        """
-        settings = copy.deepcopy(self._default)
-        for k, vs in self._kwarg_vals.items():
-            for v in sorted(vs):
-                settings[k][v] = False
-        return settings
-
-    def reset_settings(self) -> None:
-        """Resets the settings back to the defaults."""
-        self.settings = self.create_default_settings()
-
-    def update_settings(
-        self, settings: dict[str, Union[bool, dict]], reset_first: bool = False
-    ) -> None:
-        """Updates the selection settings.
+    def set_selection(
+        self,
+        *,
+        number: Optional[int] = None,
+        function_parameters: dict[str, Any],
+    ):
+        """Append a new selection operation, or overwrite an existing one.
 
         Parameters
         ----------
-        settings : dict[str, bool | dict]
-            The selection settings.
-        reset_first : bool, optional
-            Resets the settings to the default before loading.
+        number : Union[int, None], optional
+            the position of the new selection in the sequence of operations
+        function_parameters : Dict[str, Any], optional
+            the dictionary of keyword arguments defining a selection operation
 
-        Raises
-        ------
-        ValueError
-            Raises a ValueError if the inputted settings are not valid.
         """
-        if not self.check_valid_setting(settings):
-            raise ValueError(
-                f"Settings are not valid for the given chemical system - {settings}."
-            )
+        number = int(number) if number is not None else len(self.operations)
+        self.operations[number] = function_parameters
 
-        if reset_first:
-            self.reset_settings()
+    def apply_single_selection(
+        self,
+        function_parameters: dict[str, Any],
+        trajectory: Trajectory,
+        selection: set[int],
+    ) -> set[int]:
+        """Modify the input selection based on input parameters.
 
-        for k0, v0 in settings.items():
-            if isinstance(self.settings[k0], dict):
-                for k1, v1 in v0.items():
-                    self.settings[k0][k1] = v1
-            else:
-                self.settings[k0] = v0
+        This method applied a single selection operation to
+        an already exising selection for a specific trajectory.
 
-    def get_idxs(self) -> set[int]:
-        """The atom indices after applying the selection to the system.
+        Parameters
+        ----------
+        function_parameters : dict[str, Any]
+            All the inputs needed to call an atom selection function
+        trajectory : Trajectory
+            Instance of the trajectory in which we are selecting atoms
+        selection : set[int]
+            indices of atoms that resulted from previous steps
 
         Returns
         -------
         set[int]
-            The atoms indices.
+            indices of selected atoms from all operations so far
         """
-        idxs = set([])
-
-        for k, v in self.settings.items():
-            if isinstance(v, dict):
-                args = [{self._kwarg_keys[k]: i} for i in v.keys()]
-                switches = v.values()
+        function_name = function_parameters.get("function_name", "select_all")
+        if function_name == "invert_selection":
+            new_selection = self.all_idxs.difference(selection)
+        else:
+            operation_type = function_parameters.get("operation_type", "union")
+            function = function_lookup[function_name]
+            temp_selection = function(trajectory, **function_parameters)
+            if operation_type == "union":
+                new_selection = selection | temp_selection
+            elif operation_type == "intersection":
+                new_selection = selection & temp_selection
+            elif operation_type == "difference":
+                new_selection = selection - temp_selection
             else:
-                args = [{}]
-                switches = [v]
+                new_selection = temp_selection
+        return new_selection
 
-            for arg, switch in zip(args, switches):
-                if not switch:
-                    continue
+    def validate_selection_string(
+        self,
+        json_string: str,
+        trajectory: Trajectory,
+        current_selection: set[int],
+    ) -> bool:
+        """Check if the new selection string changes the current selection.
 
-                idxs.update(self._funcs[k](self.trajectory, **arg))
-
-        return idxs
-
-    def update_with_idxs(self, idxs: set[int]) -> None:
-        """Using the inputted idxs change the selection setting so
-        that it would return the same idxs with get_idxs. It will
-        switch off the setting if idxs is not a superset of the
-        selection for that setting.
+        Checks if the selection operation encoded in the input JSON string
+        will add any new atoms to the current selection on the given trajectory.
 
         Parameters
         ----------
-        idxs : set[int]
-            With the indices of the atom selection.
+        json_string : str
+            new selection operation in a JSON string
+        trajectory : Trajectory
+            a trajectory instance for which current_selection is defined
+        current_selection : Set[int]
+            set of currently selected atom indices
+
+        Returns
+        -------
+        bool
+            True if the operation changes selection, False otherwise
+
         """
-        new_settings = self.create_default_settings()
-        new_settings["all"] = False
+        function_parameters = json.loads(json_string)
+        if not self.operations:
+            return True
+        operation_type = function_parameters.get("operation_type", "union")
+        selection = self.apply_single_selection(
+            function_parameters, trajectory, current_selection
+        )
+        return ((selection - current_selection) and operation_type == "union") or (
+            (current_selection - selection) and operation_type != "union"
+        )
 
-        added = set([])
-        for k, v in self.settings.items():
-            if k == "index":
-                continue
+    def select_in_trajectory(self, trajectory: Trajectory) -> set[int]:
+        """Select atoms in the input trajectory.
 
-            if isinstance(v, dict):
-                args = [{self._kwarg_keys[k]: i} for i in v.keys()]
-                switches = v.values()
-            else:
-                args = [{}]
-                switches = [v]
+        Applies all the selection operations in sequence to the
+        input trajectory, and returns the resulting set of indices.
 
-            for arg, switch in zip(args, switches):
-                if not switch:
-                    continue
+        Parameters
+        ----------
+        trajectory : Trajectory
+            trajectory object in which the atoms will be selected
 
-                selection = self._funcs[k](self.trajectory, **arg)
-                if not idxs.issuperset(selection):
-                    continue
+        Returns
+        -------
+        set[int]
+            set of atom indices that have been selected in the input trajectory
 
-                added.update(selection)
-                if isinstance(v, dict):
-                    new_settings[k][arg[self._kwarg_keys[k]]] = True
-                else:
-                    new_settings[k] = True
+        """
+        selection = set()
+        self.all_idxs = trajectory.chemical_system.all_indices
+        sequence = sorted(map(int, self.operations))
+        if not sequence:
+            return self.all_idxs
+        for number in sequence:
+            function_parameters = self.operations[number]
+            selection = self.apply_single_selection(
+                function_parameters, trajectory, selection
+            )
+        return selection
 
-        for idx in idxs - added:
-            new_settings["index"][idx] = True
+    def convert_to_json(self) -> str:
+        """Output all the operations as a JSON string.
 
-        self.settings = new_settings
-
-    def settings_to_json(self) -> str:
-        """Return the minimal json string required to achieve the same
-        settings with the settings_from_json method.
+        For the purpose of storing the selection independent of the
+        trajectory it is acting on, this method encodes the sequence
+        of selection operations as a string.
 
         Returns
         -------
         str
-            A JSON string.
-        """
-        minimal_dict = {}
-        for k0, v0 in self.settings.items():
-            if isinstance(v0, bool) and (k0 == "all" or k0 != "all" and v0):
-                minimal_dict[k0] = v0
-            elif isinstance(v0, dict):
-                sub_list = []
-                for k1, v1 in v0.items():
-                    if v1:
-                        sub_list.append(k1)
-                if sub_list:
-                    minimal_dict[k0] = sorted(sub_list)
-        return json.dumps(minimal_dict)
+            All the operations of this selection, encoded as string
 
-    def json_to_settings(self, json_string: str) -> dict[str, Union[bool, dict]]:
-        """Loads the json string and converts to a settings.
+        """
+        return json.dumps(self.operations)
+
+    def load_from_json(self, json_string: str):
+        """Populate the operations sequence from the input string.
+
+        Loads the atom selection operations from a JSON string.
+        Adds the operations to the selection sequence.
 
         Parameters
         ----------
         json_string : str
-            The JSON string of settings.
+            A sequence of selection operations, encoded as a JSON string
 
-        Returns
-        -------
-        dict[str, Union[bool, dict]]
-            The selection settings.
         """
         json_setting = json.loads(json_string)
-        settings = {}
         for k0, v0 in json_setting.items():
-            if isinstance(v0, bool):
-                settings[k0] = v0
-            elif isinstance(v0, list):
-                sub_dict = {}
-                for k1 in v0:
-                    sub_dict[k1] = True
-                if sub_dict:
-                    settings[k0] = sub_dict
-        return settings
-
-    def load_from_json(self, json_string: str) -> None:
-        """Load the selection settings from a JSON string.
-
-        Parameters
-        ----------
-        json_string : str
-            The JSON string of settings.
-        """
-        self.update_settings(self.json_to_settings(json_string), reset_first=True)
-
-    def check_valid_setting(self, settings: dict[str, Union[bool, dict]]) -> bool:
-        """Checks that the input settings are valid.
-
-        Parameters
-        ----------
-        settings : dict[str, bool | dict]
-            The selection settings.
-
-        Returns
-        -------
-        bool
-            True if settings are valid.
-        """
-        setting_keys = self._default.keys()
-        dict_setting_keys = self._kwarg_keys.keys()
-        for k0, v0 in settings.items():
-            if k0 not in setting_keys:
-                return False
-
-            if k0 not in dict_setting_keys:
-                if not isinstance(v0, bool):
-                    return False
-
-            if k0 in dict_setting_keys:
-                if not isinstance(v0, dict):
-                    return False
-                for k1, v1 in v0.items():
-                    if k1 not in self._kwarg_vals[k0]:
-                        return False
-                    if not isinstance(v1, bool):
-                        return False
-
-        return True
-
-    def check_valid_json_settings(self, json_string: str) -> bool:
-        """Checks that the input JSON setting string is valid.
-
-        Parameters
-        ----------
-        json_string : str
-            The JSON string of settings.
-
-        Returns
-        -------
-        bool
-            True if settings are valid.
-        """
-        try:
-            settings = self.json_to_settings(json_string)
-        except ValueError:
-            return False
-        return self.check_valid_setting(settings)
+            if not isinstance(v0, dict):
+                raise TypeError(f"Selection {v0} is not a dictionary.")
+            self.set_selection(number=k0, function_parameters=v0)

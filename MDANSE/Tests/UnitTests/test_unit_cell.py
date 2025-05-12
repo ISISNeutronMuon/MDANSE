@@ -71,21 +71,5 @@ class TestUnitCell(unittest.TestCase):
             f"actual = {self.cell.inverse}",
         )
 
-    def test_transposed_matrices(self):
-        self.assertTrue(
-            np.allclose(
-                np.array([[1, 0, 0], [0, 2, 0], [1, 0, 1 / 2]]),
-                self.cell.transposed_direct,
-            ),
-            f"actual = {self.cell.transposed_direct}",
-        )
-        self.assertTrue(
-            np.allclose(
-                np.array([[1, 0, 0], [0, 0.5, 0], [-2, 0, 2]]),
-                self.cell.transposed_inverse,
-            ),
-            f"actual = {self.cell.transposed_inverse}",
-        )
-
     def test_volume(self):
         self.assertAlmostEqual(1, self.cell.volume)
