@@ -383,13 +383,13 @@ class Filter(ABC):
     def compute_frequencies(
         self, transfer_function: TransferFunction, range: np.ndarray
     ):
-        """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
+        """Computes the frequency magnitudes over given angular frequency range, from the filter transfer function.
 
         :Parameters:
             #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
             #. range (np.ndarray): range of frequency values over which to compute
         :Returns:
-            #. np.array: frequency response over a given range
+            #. np.array: frequency response over a given range of angular frequencies
         """
 
         return signal.freqs(*transfer_function, worN=range)
@@ -410,7 +410,7 @@ class Filter(ABC):
         return signal.filtfilt(coeffs.numerator, coeffs.denominator, input)
 
     def to_digital_coeffs(self) -> TransferFunction:
-        """Returns the filter instance digital coefficients converted from analog, by performing a bilinear transform
+        """Returns the filter instance digital coefficients converted from analog, by performing a bilinear transform.
 
         :Returns:
             #. TransferFunction: Transfer function for filter with digital coefficients
@@ -920,13 +920,13 @@ class Notch(Filter):
     def compute_frequencies(
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
     ):
-        """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
+        """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
 
         :Parameters:
             #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
             #. range (np.ndarray): range of frequency values over which to compute
         :Returns:
-            #. np.array: frequency response over a given range
+            #. np.array: frequency response over a given range of cyclic frequencies
         """
 
         return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
@@ -961,13 +961,13 @@ class Peak(Filter):
     def compute_frequencies(
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
     ):
-        """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
+        """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
 
         :Parameters:
             #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
             #. range (np.ndarray): range of frequency values over which to compute
         :Returns:
-            #. np.array: frequency response over a given range
+            #. np.array: frequency response over a given range of cyclic frequencies
         """
 
         return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
@@ -1016,13 +1016,13 @@ class Comb(Filter):
     def compute_frequencies(
         self, transfer_function: Filter.TransferFunction, range: np.ndarray
     ):
-        """Computes the frequency magnitudes over given frequency range, from the filter transfer function.
+        """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
 
         :Parameters:
             #. transfer_function (TransferFunction): the numerator and denominator of the filter transfer function
             #. range (np.ndarray): range of frequency values over which to compute
         :Returns:
-            #. np.array: frequency response over a given range
+            #. np.array: frequency response over a given range of cyclic frequencies
         """
 
         return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
