@@ -1286,7 +1286,12 @@ class FilterDesigner(QDialog):
             filter_class.rational_polynomial_string(
                 numerator, denominator, analog=analog_filter
             ),
-            self.settings["attributes"].get("cutoff_freq", DEFAULT_FILTER_CUTOFF),
+            self.settings["attributes"].get(
+                "cutoff_freq",
+                self.settings["attributes"].get(
+                    "fundamental_freq", DEFAULT_FILTER_CUTOFF
+                ),
+            ),
             filter_preview.sample_freq,
         )
 
