@@ -59,6 +59,9 @@ def test_trajectory(tmp_path, parameters, traj_type):
     job = IJob.create(traj_type)
     job.run(parameters, status=True)
 
+    assert out_file.exists()
+    assert log_file.exists()
+
 def test_CenterOfMassesTrajectory(parameters):
     """This will need to detect molecules before it can
     find the centre of each one of them."""
@@ -130,5 +133,3 @@ def test_TrajectoryFilter(tmp_path):
     assert path.exists(temp_name + ".log")
     assert path.isfile(temp_name + ".log")
     os.remove(temp_name + ".log")
-    assert out_file.exists()
-    assert log_file.exists()
