@@ -430,6 +430,14 @@ class FilterSettingGroup(QObject):
         self.schema = schema
         self.load_from_schema()
 
+        freq_key = [key for key in self.schema.keys() if key.endswith("_freq")]
+        initial_value = 1 / (
+            self.parent_attributes["time_step_ps"] * self.parent_attributes["n_steps"]
+        )
+        if self.units == Filter.FrequencyUnits.ANGULAR:
+            initial_value *= Filter._cyclic_to_angular
+        self.attributes.update({freq_key.pop(): initial_value})
+
         # Indices for populating the settings grid layout
         self.indices = list(self.generate_grid_indices(len(self.schema.items())))
 
@@ -602,7 +610,7 @@ class FilterSettingGroup(QObject):
                         minimum=bin_width,
                         maximum=max,
                         step=bin_width,
-                        value=bin_width * 5,
+                        value=bin_width,
                     )
                     widget.set_snap(snap_to=bin_width)
             else:
@@ -807,7 +815,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
             minimum=cutoff.minimum(),
             maximum=cutoff.maximum(),
             step=step,
-            value=cutoff.value() - 2 * step,
+            value=cutoff.value() + step,
         )
         widget.setDecimals(FLOAT_SPINBOX_DECIMALS)
         widget.set_snap(snap_to=step)
@@ -849,6 +857,8 @@ class FilterDesigner(QDialog):
         self.setWindowTitle(self._helper_title)
         self.field = field
         self.configurator = configurator
+
+        self.graph_ready = False
 
         self.setting_stack_layout = QStackedLayout()
         self.preferences = {}
@@ -916,11 +926,11 @@ class FilterDesigner(QDialog):
         graph_layout = QVBoxLayout()
         settings_layout = QVBoxLayout()
 
-        # Create the filter designer settings UI component
-        self.create_settings_layout(settings_layout)
-
         # Create the filter designer frequency-domain graph UI component
         self.create_graph_layout(graph_layout)
+
+        # Create the filter designer settings UI component
+        self.create_settings_layout(settings_layout)
 
         self.layouts = QHBoxLayout()
         self.layouts.addLayout(graph_layout)
@@ -1107,6 +1117,12 @@ class FilterDesigner(QDialog):
             }
         )
 
+        self.graph_ready = True
+
+        # Render graph
+        index = self.setting_stack_layout.currentIndex()
+        tuple(self.settings_group.values())[index]._setting_changed.emit()
+
         # Add buttons
         buttons_layout = QHBoxLayout()
         for button in self.create_buttons():
@@ -1233,6 +1249,9 @@ class FilterDesigner(QDialog):
         attributes: dict | None
             Filter attributes dictionary
         """
+        if not self.graph_ready:
+            return
+
         if attributes:
             self.settings["attributes"].update(attributes)
 
