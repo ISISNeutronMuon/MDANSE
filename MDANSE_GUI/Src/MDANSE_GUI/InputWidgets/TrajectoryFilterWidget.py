@@ -587,12 +587,6 @@ class FilterSettingGroup(QObject):
                     FLOAT_SPINBOX_DECIMALS,
                 )
 
-                # Scale factor to be applied to bin width to create initial value
-                if Filter.Flags.DIGITAL_ONLY in self.flags:
-                    initial_value_scale = 50
-                else:
-                    initial_value_scale = 5
-
                 max = np.round(
                     Filter.nyquist(time_step, units=self.units) - bin_width,
                     FLOAT_SPINBOX_DECIMALS,
@@ -614,7 +608,7 @@ class FilterSettingGroup(QObject):
                         minimum=bin_width,
                         maximum=max,
                         step=bin_width,
-                        value=bin_width * initial_value_scale,
+                        value=bin_width * 5,
                     )
                     widget.set_snap(snap_to=bin_width)
             else:
