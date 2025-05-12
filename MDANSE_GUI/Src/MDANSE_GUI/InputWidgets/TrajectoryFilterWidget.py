@@ -65,12 +65,6 @@ DEFAULT_SPINBOX_STEP_FLOAT = 0.1
 # Decimal precision for a float spinbox
 FLOAT_SPINBOX_DECIMALS = 4
 
-# Dictionary mapping unit enum to display text
-FREQUENCY_UNIT_MAP = {
-    Filter.FrequencyUnits.ANGULAR: "rad/ps",
-    Filter.FrequencyUnits.CYCLIC: "THz",
-}
-
 
 class ConstrainedDoubleSpinBox(QDoubleSpinBox):
     """Custom QDoubleSpinBox allowing for the application of a function
@@ -1182,7 +1176,7 @@ class FilterDesigner(QDialog):
 
         axes.set_xlim(0.0, x_max)
 
-        frequency_units = FREQUENCY_UNIT_MAP[self.current_filter_units()]
+        frequency_units = self.current_filter_units().value
         axes.set_xlabel(
             "Energy (meV)" if energies else f"Frequency ({frequency_units})"
         )

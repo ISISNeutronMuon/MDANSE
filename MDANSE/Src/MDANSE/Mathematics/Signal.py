@@ -354,8 +354,8 @@ class Filter(ABC):
     class FrequencyUnits(Enum):
         """Enumeration for frequency unit type"""
 
-        CYCLIC: int = 0
-        ANGULAR: int = 1
+        CYCLIC: str = "THz"
+        ANGULAR: str = "rad/ps"
 
     class FrequencyRangeMethod(Enum):
         """Enumeration for custom (externally provided) and FFT-derived frequency ranges for plotting the filter response"""
