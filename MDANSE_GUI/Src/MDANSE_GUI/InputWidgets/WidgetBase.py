@@ -111,6 +111,7 @@ class WidgetBase(QObject):
         self._configurator = configurator
         self._parent_dialog = parent
         self._empty = False
+        self.has_warning = False
 
     def update_labels(self):
         """Update contained labels (dependent on base_type)."""
@@ -172,13 +173,24 @@ class WidgetBase(QObject):
         self.valid_changed.emit()
 
     def mark_warning(self, warning_text: str):
+        """If the input caused a warning, display warning_text and highlight the widget.
+
+        If warning_text is an empty string, this method will clear errors instead.
+
+        Parameters
+        ----------
+        warning_text : str
+            Message displayed on hover-over.
+        """
         if warning_text:
+            self.has_warning = True
             self._base.setStyleSheet(
                 "QWidget#InputWidget { background-color:rgb(220,210,30); font-weight: bold }"
             )
             self._base.setToolTip(warning_text)
             self.valid_changed.emit()
             return
+        self.has_warning = False
         self.clear_error()
 
     def clear_error(self):
