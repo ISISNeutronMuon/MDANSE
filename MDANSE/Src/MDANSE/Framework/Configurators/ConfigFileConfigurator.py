@@ -567,9 +567,10 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                 f"Data mismatch between n_atoms in header ({parsed['n_atoms']}) and atoms in file ({len(atom_data)})."
             )
 
-        parsed["atom_types"] = (
-            np.array([atom.atom_type for atom in atom_data], dtype=int) - 1
+        parsed["atom_types"] = np.array(
+            [atom.atom_type for atom in atom_data], dtype=int
         )
+
         parsed["n_atom_types"] = self.get("n_atom_types", parsed["atom_types"].max())
         if parsed["atom_types"].max() > parsed["n_atom_types"]:
             raise LAMMPSConfigFileError(
@@ -593,10 +594,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
 
         """
-        bonds = [
-            tuple(map(lambda x: x - 1, elems[1:]))
-            for elems in int_list_parser(lines).values()
-        ]
+        bonds = [tuple(elems[1:]) for elems in int_list_parser(lines).values()]
 
         if len(bonds) != self["n_bonds"]:
             raise LAMMPSConfigFileError(
@@ -618,7 +616,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
         # ASE/VMD dumps element as comment on masses (VMD doesn't respect case)
         element_map = {
-            int(line.split()[0]) - 1: match[1].title()
+            int(line.split()[0]): match[1].title()
             for line in lines
             if (match := re.search("# ([A-Z][a-z]{,2})\s*$", line, re.I))
         }
@@ -647,7 +645,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         """
         return {
             "elements": {
-                int(key) - 1: val
+                int(key): val
                 for key, val in one_to_one_parser(filter(None, lines)).items()
             }
         }
@@ -730,7 +728,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
                 self.update(self.BLOCK_PARSERS[block_type](self, block[2:], *comment))
 
-        elem_range = range(self["n_atom_types"])
+        elem_range = range(1, self["n_atom_types"] + 1)
 
         self.setdefault("elements", dict(zip(elem_range, map(str, elem_range))))
         self.setdefault("charges", np.zeros(self["n_atoms"]))

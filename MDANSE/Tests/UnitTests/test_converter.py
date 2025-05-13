@@ -1,13 +1,15 @@
-from more_itertools import run_length
+from pathlib import Path
+
 import numpy as np
 import pytest
-from MDANSE.Framework.Configurators.ConfigFileConfigurator import ConfigFileConfigurator
-from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
-    HDFTrajectoryConfigurator,
-)
+from MDANSE.Framework.Configurators.ConfigFileConfigurator import \
+    ConfigFileConfigurator
+from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import \
+    HDFTrajectoryConfigurator
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Converters.LAMMPS import BoxStyle
 from MDANSE.Framework.Jobs.IJob import JobError
+from more_itertools import run_length
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, DATA_DIR
 
@@ -488,9 +490,9 @@ def test_lammps_ix_unwrap(tmp_path, files):
         (
             DATA_DIR / "POSCAR.lmp",
             {
-                "atom_types": list(run_length.decode([(0, 16), (1, 92), (2, 178)])),
+                "atom_types": list(run_length.decode([(1, 16), (2, 92), (3, 178)])),
                 "charges": [0] * 286,
-                "elements": {0: "V", 1: "Bi", 2: "O"},
+                "elements": {1: "V", 2: "Bi", 3: "O"},
                 "mass": [50.942, 208.98, 15.999],
                 "n_angle_types": 0,
                 "n_angles": 0,
@@ -515,47 +517,47 @@ def test_lammps_ix_unwrap(tmp_path, files):
             DATA_DIR / "lammps_test.config",
             {
                 "atom_types": [
-                    0,
                     1,
                     2,
                     3,
                     4,
-                    4,
-                    4,
                     5,
                     5,
+                    5,
+                    6,
                     6,
                     7,
                     8,
                     9,
                     10,
-                    9,
                     11,
-                    5,
+                    10,
                     12,
-                    12,
-                    12,
+                    6,
+                    13,
+                    13,
+                    13,
                 ],
                 "bonds": [
-                    (0, 1),
-                    (0, 4),
-                    (0, 5),
-                    (0, 6),
                     (1, 2),
-                    (1, 8),
+                    (1, 5),
+                    (1, 6),
                     (1, 7),
                     (2, 3),
                     (2, 9),
-                    (9, 10),
-                    (9, 15),
+                    (2, 8),
+                    (3, 4),
+                    (3, 10),
                     (10, 11),
-                    (10, 13),
                     (10, 16),
                     (11, 12),
                     (11, 14),
-                    (13, 17),
-                    (13, 18),
-                    (13, 19),
+                    (11, 17),
+                    (12, 13),
+                    (12, 15),
+                    (14, 18),
+                    (14, 19),
+                    (14, 20),
                 ],
                 "charges": [
                     -0.3,
@@ -580,7 +582,6 @@ def test_lammps_ix_unwrap(tmp_path, files):
                     0.09,
                 ],
                 "elements": {
-                    0: "0",
                     1: "1",
                     2: "2",
                     3: "3",
@@ -593,6 +594,7 @@ def test_lammps_ix_unwrap(tmp_path, files):
                     10: "10",
                     11: "11",
                     12: "12",
+                    13: "13",
                 },
                 "mass": [
                     14.0067,
@@ -627,9 +629,9 @@ def test_lammps_ix_unwrap(tmp_path, files):
         (
             DATA_DIR / "lammps_2.config",
             {
-                "atom_types": list(run_length.decode([(0, 250), (1, 250)])),
+                "atom_types": list(run_length.decode([(1, 250), (2, 250)])),
                 "charges": [0] * 500,
-                "elements": {0: "Mg", 1: "O"},
+                "elements": {1: "Mg", 2: "O"},
                 "mass": [35.0, 16.0],
                 "n_angle_types": 0,
                 "n_angles": 0,
@@ -652,15 +654,15 @@ def test_lammps_ix_unwrap(tmp_path, files):
             lammps_cao_config,
             {
                 "atom_types": (
-                    ([4, 1] * (5966 // 2))  # O, Ca
-                    + ([3, 4] * ((6984 - 5966) // 2))  # Mg, O
-                    + ([0, 4] * ((8028 - 6983) // 2))  # Al, O
-                    + ([0, 4, 4] * ((9594 - 8028) // 3))  # Al, O, O
-                    + ([5, 4, 4] * ((16140 - 9594) // 3))  # Si, O, O,
-                    + ([2, 4] * ((16150 - 16140) // 2))
+                    ([5, 2] * (5966 // 2))  # O, Ca
+                    + ([4, 5] * ((6984 - 5966) // 2))  # Mg, O
+                    + ([1, 5] * ((8028 - 6983) // 2))  # Al, O
+                    + ([1, 5, 5] * ((9594 - 8028) // 3))  # Al, O, O
+                    + ([6, 5, 5] * ((16140 - 9594) // 3))  # Si, O, O,
+                    + ([3, 5] * ((16150 - 16140) // 2))  # Fe, O
                 ),  # Fe, O
                 "charges": [0] * 16150,
-                "elements": {0: "Al", 1: "Ca", 2: "Fe", 3: "Mg", 4: "O", 5: "Si"},
+                "elements": {1: "Al", 2: "Ca", 3: "Fe", 4: "Mg", 5: "O", 6: "Si"},
                 "mass": [26.981539, 40.077999, 55.845001, 24.305, 15.9994, 28.085501],
                 "n_angle_types": 0,
                 "n_angles": 0,
@@ -680,9 +682,9 @@ def test_lammps_ix_unwrap(tmp_path, files):
         (
             lammps_ar,
             {
-                "atom_types": [0, 0, 0, 0],
+                "atom_types": [1, 1, 1, 1],
                 "charges": [0.0, 0.0, 0.0, 0.0],
-                "elements": {0: "0"},
+                "elements": {1: "1"},
                 "mass": [36.0],
                 "n_angle_types": 0,
                 "n_angles": 0,
@@ -699,7 +701,7 @@ def test_lammps_ix_unwrap(tmp_path, files):
                 "unit_cell": [[5.73, 0.0, 0.0], [0.0, 5.73, 0.0], [0.0, 0.0, 5.73]],
             },
         ),
-    ],
+    ], ids=lambda x: x.name if isinstance(x, Path) else None,
 )
 def test_lammps_config_parser(config_file, expected):
     conf = ConfigFileConfigurator("dummy_in")

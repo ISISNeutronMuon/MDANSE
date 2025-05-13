@@ -214,7 +214,7 @@ class LAMMPSReader(ABC):
     @staticmethod
     def _add_bonds(config, chemical_system):
         if config["n_bonds"]:
-            bonds = [(idx1, idx2) for idx1, idx2 in config["bonds"]]
+            bonds = [(idx1 - 1, idx2 - 1) for idx1, idx2 in config["bonds"]]
             chemical_system.add_bonds(bonds)
 
     def close(self):
@@ -438,8 +438,6 @@ class LAMMPScustom(LAMMPSReader):
                         atom_type = temp.get("type")
                         if atom_type is None:
                             atom_type = config["atom_types"][i]
-                        else:
-                            atom_type -= 1
                     except IndexError:
                         LOG.error(
                             f"Failed to find index [{i}] in list of len {len(config['atom_types'])}"
@@ -447,16 +445,16 @@ class LAMMPScustom(LAMMPSReader):
                         raise
 
                     label = config["elements"][atom_type]
-                    mass = config["mass"][atom_type]
+                    mass = config["mass"][atom_type - 1]  # Mass is array, 0-indexed
 
                     name = f"{label}_{idx:d}"
-                    temp_index = temp.get("index", i) - 1
+                    temp_index = temp.get("index", i)
                     self._rankToName[temp_index] = name
 
                     element = get_element_from_mapping(aliases, label, mass=mass)
 
                     element_list.append(element)
-                    name_list.append(str(atom_type + 1))
+                    name_list.append(str(atom_type))
                     index_list.append(idx)
 
                 sorting = np.argsort(index_list)
@@ -528,26 +526,26 @@ class LAMMPScustom(LAMMPSReader):
                 self._trajectory.chemical_system.number_of_atoms, dtype=np.float64
             )
 
-        for i, line in enumerate(take(self._nAtoms, file)):
+        for i, line in enumerate(take(self._nAtoms, file), 1):
             temp = {
                 key: self._type_map[key](val)
                 for key, val in zip(self.keywords, line.split())
             }
-            idx = temp.get("id", i + 1)
-            coords[idx - 1, :] = np.array(
+            idx = temp.get("id", i) - 1  # MDANSE 0-indexed
+            coords[idx, :] = np.array(
                 [temp[pos] for pos in self.keywords["pos"]], dtype=np.float64
             )
 
             if "q" in temp:
-                charges[idx - 1] = self._type_map["q"](temp["q"])
+                charges[idx] = self._type_map["q"](temp["q"])
 
             if not self._unwrappedCoordinates and self._image:
                 if self._fractionalCoordinates:
                     for ind, dim in enumerate(DIMS):
-                        coords[idx - 1, ind] += temp.get(f"i{dim}", 0)
+                        coords[idx, ind] += temp.get(f"i{dim}", 0)
                 else:
                     for ind, dim, vec in zip(count(), DIMS, unit_cell.direct):
-                        coords[idx - 1, ind] += temp.get(f"i{dim}", 0.0) * vec
+                        coords[idx, ind] += temp.get(f"i{dim}", 0.0) * vec
 
         if self._fractionalCoordinates:
             # MDANSE origin is always 0,0,0
@@ -706,9 +704,9 @@ class LAMMPSxyz(LAMMPSReader):
         chemical_system = ChemicalSystem()
 
         for idx in range(self._nAtoms):
-            atom_type = atom_types[idx] - 1
+            atom_type = atom_types[idx]
             label = config["elements"][atom_type]
-            mass = config["mass"][atom_type]
+            mass = config["mass"][atom_type - 1]
             name = f"{label}_{idx:d}"
             self._rankToName[idx] = name
 
@@ -856,13 +854,14 @@ class LAMMPSh5md(LAMMPSReader):
         name_list = []
 
         for idx in range(self._nAtoms):
-            ty = atom_types[idx] - 1
-            label = config["elements"][ty]
-            mass = config["mass"][ty]
+            atom_type = atom_types[idx]
+            label = config["elements"][atom_type]
+            mass = config["mass"][atom_type - 1]
             name = f"{label}_{idx:d}"
             self._rankToName[idx] = name
+
             element_list.append(get_element_from_mapping(aliases, label, mass=mass))
-            name_list.append(str(ty + 1))
+            name_list.append(str(atom_type + 1))
 
         chemical_system.initialise_atoms(element_list, name_list)
 
