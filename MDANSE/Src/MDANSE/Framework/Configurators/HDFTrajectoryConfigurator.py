@@ -70,3 +70,5 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             self["md_time_step"] = 1.0
 
         self["has_velocities"] = "velocities" in self["instance"].variables()
+
+        self.warning_status = trajectory_instance.unit_cell_warning()
