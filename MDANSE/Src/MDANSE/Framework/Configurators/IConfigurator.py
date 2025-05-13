@@ -156,6 +156,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         self._valid = True
 
         self._error_status = "OK"
+        self.warning_status = ""
 
         self._original_input = ""
 
