@@ -174,7 +174,9 @@ class MeanSquareDisplacement(IJob):
         """
 
         # The symbol of the atom.
-        self._grouper.assign_result(index, result)
+        self._grouper.assign_result(
+            self.configuration["atom_selection"]["flatten_indices"][index], result
+        )
 
     def finalize(self):
         """
