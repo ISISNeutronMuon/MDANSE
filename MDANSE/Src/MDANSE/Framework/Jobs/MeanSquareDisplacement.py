@@ -16,6 +16,7 @@
 
 import collections
 
+from MDANSE.Chemistry.GroupingTool import GroupingTool
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
@@ -101,6 +102,29 @@ class MeanSquareDisplacement(IJob):
         """
         super().initialize()
 
+        self._grouper = GroupingTool(
+            self.configuration["trajectory"]["instance"].chemical_system,
+            self._outputData,
+        )
+        self._grouper.set_selection(
+            self.configuration["atom_selection"]["flatten_indices"]
+        )
+        self._grouper.set_dataset_parameters(
+            {
+                "output_type": "LineOutputVariable",
+                "dimensions": (self.configuration["frames"]["n_frames"],),
+                "axis": "time",
+                "units": "nm2",
+                "main_result": True,
+                "partial_result": True,
+            }
+        )
+
+        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(weights, nAtomsPerElement, 1)
+        self._grouper.set_weight_dictionary(weight_dict)
+
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
         # Will store the time.
@@ -112,20 +136,8 @@ class MeanSquareDisplacement(IJob):
         )
 
         # Will store the mean square displacement evolution.
-        for element in self.configuration["atom_selection"]["unique_names"]:
-            self._outputData.add(
-                f"msd_{element}",
-                "LineOutputVariable",
-                (self.configuration["frames"]["n_frames"],),
-                axis="time",
-                units="nm2",
-                main_result=True,
-                partial_result=True,
-            )
-
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._grouper.set_grouping(self.configuration["grouping_level"]["value"])
+        self._grouper.create_result_groups("msd")
 
     def run_step(self, index):
         """
@@ -138,25 +150,12 @@ class MeanSquareDisplacement(IJob):
             tuple: the result of the step
         """
 
-        # get selected atom indices sublist
-        indices = self.configuration["atom_selection"]["indices"][index]
-        if len(indices) == 1:
-            series = self.configuration["trajectory"][
-                "instance"
-            ].read_atomic_trajectory(
-                indices[0],
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
-            )
-
-        else:
-            series = self.configuration["trajectory"]["instance"].read_com_trajectory(
-                indices,
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
-            )
+        series = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+            self.configuration["atom_selection"]["flatten_indices"][index],
+            first=self.configuration["frames"]["first"],
+            last=self.configuration["frames"]["last"] + 1,
+            step=self.configuration["frames"]["step"],
+        )
 
         series = self.configuration["projection"]["projector"](series)
 
@@ -175,33 +174,12 @@ class MeanSquareDisplacement(IJob):
         """
 
         # The symbol of the atom.
-        element = self.configuration["atom_selection"]["names"][index]
-
-        self._outputData[f"msd_{element}"] += result
+        self._grouper.assign_result(index, result)
 
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
-
-        # The MSDs per element are averaged.
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        for element, number in list(nAtomsPerElement.items()):
-            self._outputData[f"msd_{element}"] /= number
-
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "msd_%s")
-        msdTotal = weighted_sum(self._outputData, weight_dict, "msd_%s")
-
-        self._outputData.add(
-            "msd_total",
-            "LineOutputVariable",
-            msdTotal,
-            axis="time",
-            units="nm2",
-            main_result=True,
-        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

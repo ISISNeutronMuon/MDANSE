@@ -113,14 +113,18 @@ class HDFFormat(IFormat):
 
         # Loop over the OutputVariable instances to write.
 
-        for var in list(data.values()):
+        for key, var in data.items():
             varName = str(var.varname).strip().replace("/", "|")
 
             dset = outputFile.create_dataset(varName, data=var, shape=var.shape)
 
             # All the attributes stored in the OutputVariable instance are written to the HDF file.
             for k, v in list(vars(var).items()):
-                dset.attrs[k] = v
+                try:
+                    dset.attrs[k] = v
+                except TypeError:
+                    print(f"type error: {k}: {v} in {key}")
+                    raise RuntimeError("Bad HDF5 write")
 
         # The HDF file is closed.
         if in_memory:

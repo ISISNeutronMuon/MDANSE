@@ -15,9 +15,9 @@
 #
 
 from __future__ import annotations
-from typing import List, Tuple, Dict, Any, Set
+from typing import Optional, Any
 from enum import Enum, auto
-from functools import reduce
+from collections import Counter
 
 import numpy as np
 
@@ -27,7 +27,6 @@ from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 
 
 class GroupingLevel(Enum):
-
     ATOM = auto()
     MOL_EACH = auto()
     MOL_AVERAGE = auto()
@@ -35,16 +34,16 @@ class GroupingLevel(Enum):
 
 GROUPING_LABELS = {
     "atom": GroupingLevel.ATOM,
-    "individual molecules" : GroupingLevel.MOL_EACH,
-    "average over molecules" : GroupingLevel.MOL_AVERAGE,
+    "individual molecules": GroupingLevel.MOL_EACH,
+    "average over molecules": GroupingLevel.MOL_AVERAGE,
 }
 
-BACKUP_DATA_PARAMETERS ={
-            "axis": "index",
-            "units": "au",
-            "main_result": False,
-            "partial_result": True,
-            "dtype": np.float64
+BACKUP_DATA_PARAMETERS = {
+    "axis": "index",
+    "units": "au",
+    "main_result": True,
+    "partial_result": True,
+    "dtype": np.float64,
 }
 
 
@@ -58,12 +57,22 @@ class GroupingTool:
         self._output_data = output_data
         self._grouping = None
         self._data_parameters = {}
+        self._weight_dictionary = {}
+        self._current_selection = set()
+        self._indices_per_data_key = {}
         self._mandatory_keys = ["output_type", "dimensions"]
-        self._extra_keys = ["axis", "unit", "main_result", "partial_result", "dtype"]
-    
+        self._extra_keys = ["axis", "units", "main_result", "partial_result", "dtype"]
+        self._plain_datasets = set()
+        self._weighted_datasets = set()
+
     def set_grouping(self, text_key: str):
         self._grouping = GROUPING_LABELS.get(text_key, GroupingLevel.ATOM)
-    
+
+    def set_weight_dictionary(self, new_weights: dict):
+        self._weight_dictionary = {
+            "".join([*key]): value for key, value in new_weights.items()
+        }
+
     def set_dataset_parameters(self, parameters: dict[str, Any]):
         for key in self._mandatory_keys:
             if key not in parameters:
@@ -75,23 +84,95 @@ class GroupingTool:
             if value is None:
                 value = BACKUP_DATA_PARAMETERS[key]
             self._data_parameters[key] = value
-    
-    def add_dataset(self, name):
-        self._output_data.add(name,
-                              self._data_parameters["output_type"],
-                              self._data_parameters["dimensions"],
-                              **{key: self._data_parameters[key] for key in self._extra_keys})
+
+    def set_selection(self, selected_indices: set[int]):
+        self._current_selection = set(selected_indices)
+
+    def add_dataset(
+        self,
+        name,
+        override: Optional[dict[str, Any]] = None,
+        weight_key: Optional[str] = None,
+    ):
+        pardict = {key: self._data_parameters[key] for key in self._extra_keys}
+        if override:
+            for key, value in override.items():
+                pardict[key] = value
+        self._output_data.add(
+            name,
+            self._data_parameters["output_type"],
+            self._data_parameters["dimensions"],
+            **pardict,
+        )
+        if weight_key:
+            self._output_data[name].scaling_factor *= self._weight_dictionary[
+                weight_key
+            ]
 
     def create_result_groups(self, name: str):
         if self._data_parameters is None:
             raise RuntimeError("Creating output data groups without parameters.")
+        if not self._current_selection:
+            raise RuntimeError("Trying to group an empty selection.")
         self.create_atom_groups(name)
         if self._grouping == GroupingLevel.MOL_AVERAGE:
             self.create_averaged_molecule_groups(name)
         elif self._grouping == GroupingLevel.MOL_EACH:
             self.create_individual_molecule_groups(name)
-    
-    def create_atom_groups(self, name: str):
-        for atom in self._cs._unique_elements:
-            self.add_dataset("_".join([name, str(atom)]))
 
+    def create_atom_groups(self, name: str):
+        for atom_type in self._cs._unique_elements:
+            indices = self._current_selection.intersection(
+                self._cs.element_indices[atom_type]
+            )
+            if indices:
+                dset_name = "_".join([name, str(atom_type)])
+                self.add_dataset(dset_name, weight_key=str(atom_type))
+                self._output_data[dset_name].atom_indices = list(indices)
+                self._indices_per_data_key[dset_name] = indices
+                self._plain_datasets.add(dset_name)
+        dset_name = "_".join([name, "total"])
+        self.add_dataset(dset_name, override={"partial_result": False})
+        self._output_data[dset_name].atom_indices = list(self._current_selection)
+        self._indices_per_data_key[dset_name] = indices
+        self._weighted_datasets.add(dset_name)
+
+    def create_averaged_molecule_groups(self, name: str):
+        for molecule in self._cs.unique_molecules:
+            all_indices = set()
+            for mol in self._cs._clusters[molecule]:
+                trimmed_mol = self._current_selection.intersection(mol)
+                if set(mol) == trimmed_mol:
+                    all_indices.update(mol)
+            if all_indices:
+                dset_name = "_".join([name, str(molecule), "all"])
+                self.add_dataset(dset_name)
+                self._output_data[dset_name].atom_indices = list(all_indices)
+                self._indices_per_data_key[dset_name] = all_indices
+                self._weighted_datasets.add(dset_name)
+
+    def create_individual_molecule_groups(self, name: str):
+        for molecule in self._cs.unique_molecules:
+            for mindex, mol in enumerate(self._cs._clusters[molecule]):
+                trimmed_mol = self._current_selection.intersection(mol)
+                if set(mol) == trimmed_mol:
+                    dset_name = "_".join([name, str(molecule), str(mindex + 1)])
+                    self.add_dataset(dset_name)
+                    self._output_data[dset_name].atom_indices = list(trimmed_mol)
+                    self._indices_per_data_key[dset_name] = trimmed_mol
+                    self._weighted_datasets.add(dset_name)
+
+    def assign_result(self, index: int, result: np.ndarray):
+        for dset_name in self._plain_datasets:
+            indices = self._indices_per_data_key[dset_name]
+            if index in indices:
+                if dset_name in self._plain_datasets:
+                    result /= len(indices)
+                    self._output_data[dset_name] += result
+        for dset_name in self._weighted_datasets:
+            indices = self._indices_per_data_key[dset_name]
+            if index in indices:
+                atom_type = self._cs._atom_types[index]
+                self._output_data[dset_name] += (
+                    result * self._weight_dictionary[atom_type]
+                )

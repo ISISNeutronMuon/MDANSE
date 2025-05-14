@@ -45,6 +45,7 @@ class ChemicalSystem:
         self._atom_names = None
         self._atom_indices = []
         self._labels = {}  # arbitrary tag attached to atoms (e.g. residue name)
+        self.element_indices = {}
 
         self._bonds = []
 
@@ -66,6 +67,10 @@ class ChemicalSystem:
         self._unique_elements.update(set(element_list))
         if name_list is not None:
             self._atom_names = [str(x) for x in name_list]
+        for element in self._unique_elements:
+            self.element_indices[element] = {
+                index for index, type in enumerate(self._atom_types) if type == element
+            }
 
     def add_atom(self, atm_num: int) -> int:
         if atm_num is not None:
