@@ -72,13 +72,7 @@ class MeanSquareDisplacement(IJob):
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            }
-        },
+        {},
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",

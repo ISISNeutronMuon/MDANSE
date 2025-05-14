@@ -16,7 +16,7 @@
 
 import collections
 
-
+from MDANSE.Chemistry.GroupingTool import GROUPING_LABELS
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
 )
@@ -32,10 +32,8 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
     The level of granularity currently supported are:
 
     * 'atom': no grouping will be performed
-    * 'group': the atoms that belongs to an AtomCluster object will be grouped as a single atom per object while the ones that belongs to a Molecule, NucleotideChain, PeptideChain and Protein object will be grouped according to the chemical group they belong to (e.g. peptide group, methyl group ...)
-    * 'residue': the atoms that belongs to anAtomCluster or Molecule object will be grouped as a single atom per object while the ones thta belongs to a NucleotideChain, PeptideChain or Protein object will be grouped according to the residue to which they belong to (e.g. Histidine, Cytosyl ...)
-    * 'chain': the atoms that belongs to an AtomCluster or Molecule object will be grouped as a single atom per object while the ones that belongs to a NucleotideChain, PeptideChain or Protein object will be grouped according to the chain they belong to
-    * 'molecule': the atoms that belongs to any chemical entity will be grouped as a single atom per object
+    * 'individual molecules': the atoms that belongs to any molecule will be grouped as a single atom per object
+    * 'average over molecules': results will be grouped per molecule type
     """
 
     _default = "atom"
@@ -49,7 +47,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         :param choices: the level of granularities allowed for the input value. If None all levels are allowed.
         :type choices: one of ['atom','group','residue','chain','molecule'] or None
         """
-        usual_choices = ["atom", "molecule", "group"]
+        usual_choices = list(GROUPING_LABELS.keys())
 
         if choices is None:
             choices = usual_choices
@@ -71,73 +69,6 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         value = str(value)
 
         SingleChoiceConfigurator.configure(self, value)
-
-        if value == "atom":
-            return
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
-        atomSelectionConfig = self._configurable[self._dependencies["atom_selection"]]
-        chemical_system = trajConfig["instance"].chemical_system
-        indices = []
-        elements = []
-        names = []
-        masses = []
-        mass_lookup = chemical_system.atom_property("atomic_weight")
-
-        if value == "molecule":
-            for mol_name in chemical_system._clusters.keys():
-                for mol_number, cluster in enumerate(
-                    chemical_system._clusters[mol_name]
-                ):
-                    indices.append(cluster)
-                    elements.append([chemical_system.atom_list[x] for x in cluster])
-                    names.append(f"{mol_name}_mol{mol_number + 1}")
-                    masses.append([mass_lookup[x] for x in cluster])
-        elif value == "group":
-            for group_name, group_indices in chemical_system._labels.items():
-                residue = set(group_indices)
-                counter = 1
-                for clustername, clusterlist in chemical_system._clusters.items():
-                    for cluster in clusterlist:
-                        molecule = set(cluster)
-                        if molecule.issubset(residue) or residue.issubset(molecule):
-                            indices.append(list(molecule.intersection(residue)))
-                            elements.append(
-                                [chemical_system.atom_list[x] for x in cluster]
-                            )
-                            names.append(f"{group_name}_num{counter}_in_{clustername}")
-                            masses.append([mass_lookup[x] for x in cluster])
-                            counter += 1
-
-        atomSelectionConfig["indices"] = indices
-        atomSelectionConfig["elements"] = elements
-        atomSelectionConfig["masses"] = masses
-        atomSelectionConfig["names"] = names
-        atomSelectionConfig["selection_length"] = len(names)
-        atomSelectionConfig["unique_names"] = sorted(set(atomSelectionConfig["names"]))
-
-        self["level"] = value
-        self["group_indices"] = list(range(len(names)))
-        if atomSelectionConfig["selection_length"] == 0:
-            self.error_status = "This option resulted in nothing being selected in the current trajectory"
-
-    @staticmethod
-    def find_parent(atom, level):
-        """
-        Retrieve recursively the parent of a given atom at a given level.
-        For example, a level of 1 will return the direct parent of the atom.
-
-        :note: this is a static method
-
-        :param atom: the atom for which the parent is searched for
-        :type atom: Atom object
-        :param level: the level of the parent
-        :type level: int
-        """
-
-        for _ in range(level):
-            atom = atom.parent
-
-        return atom
 
     def get_information(self):
         """

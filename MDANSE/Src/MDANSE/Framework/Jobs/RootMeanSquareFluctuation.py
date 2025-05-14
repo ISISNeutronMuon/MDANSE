@@ -49,12 +49,7 @@ class RootMeanSquareFluctuation(IJob):
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-            }
-        },
+        {},
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
@@ -73,9 +68,8 @@ class RootMeanSquareFluctuation(IJob):
             for idxs in self.configuration["atom_selection"]["indices"]
             for idx in idxs
         ]
-        if self.configuration["grouping_level"]["value"] == "atom":
-            self._outputData.add("indices", "LineOutputVariable", indices)
-        else:
+        self._outputData.add("indices", "LineOutputVariable", indices)
+        if self.configuration["grouping_level"]["value"]:
             self._outputData.add(
                 "indices",
                 "LineOutputVariable",

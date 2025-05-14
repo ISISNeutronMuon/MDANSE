@@ -70,10 +70,6 @@ class RigidBodyTrajectory(IJob):
         "GroupingLevelConfigurator",
         {
             "default": "atom",
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-            },
         },
     )
     settings["reference"] = ("IntegerConfigurator", {"mini": 0})

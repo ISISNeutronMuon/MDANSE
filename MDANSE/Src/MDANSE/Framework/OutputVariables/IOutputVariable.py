@@ -126,6 +126,7 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
             data_tags.append("partial")
 
         obj.tags = ",".join(data_tags)
+        obj.atom_indices = []
 
         return obj
 
