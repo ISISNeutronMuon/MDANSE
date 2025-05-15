@@ -51,8 +51,6 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
 
         if choices is None:
             choices = usual_choices
-        else:
-            choices += [x for x in usual_choices if x not in choices]
 
         SingleChoiceConfigurator.__init__(self, name, choices=choices, **kwargs)
 

@@ -19,6 +19,7 @@ import collections
 import numpy as np
 from scipy.signal import correlate
 
+from MDANSE.Chemistry.GroupingTool import GroupingTool
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
@@ -107,10 +108,65 @@ class DynamicIncoherentStructureFactor(IJob):
         ].chemical_system.atom_list
 
         self._nOmegas = self._instrResolution["n_omegas"]
-
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
+
+        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(weights, nAtomsPerElement, 1)
+
+        self._groupers = {}
+        self._groupers["fqt"] = GroupingTool(
+            self.configuration["trajectory"]["instance"].chemical_system,
+            self._outputData,
+        )
+        self._groupers["sqf"] = GroupingTool(
+            self.configuration["trajectory"]["instance"].chemical_system,
+            self._outputData,
+        )
+        if self.add_ideal_results:
+            self._groupers["sqf_ideal"] = GroupingTool(
+                self.configuration["trajectory"]["instance"].chemical_system,
+                self._outputData,
+            )
+        dimensions = {
+            "fqt": (self._nQShells, self._nFrames),
+            "sqf": (self._nQShells, self._nOmegas),
+            "sqf_ideal": (self._nQShells, self._nOmegas),
+        }
+        units = {
+            "fqt": "au",
+            "sqf": "nm2/ps",
+            "sqf_ideal": "nm2/ps",
+        }
+        axes = {
+            "fqt": "q|time",
+            "sqf": "q|omega",
+            "sqf_ideal": "q|omega",
+        }
+        name_roots = {
+            "fqt": "f(q,t)",
+            "sqf": "s(q,f)",
+            "sqf_ideal": "s(q,f)_ideal",
+        }
+        for key, grouper in self._groupers.items():
+            grouper.set_selection(
+                self.configuration["atom_selection"]["flatten_indices"]
+            )
+            grouper.set_dataset_parameters(
+                {
+                    "output_type": "SurfaceOutputVariable",
+                    "dimensions": dimensions[key],
+                    "axis": axes[key],
+                    "units": units[key],
+                    "main_result": True,
+                    "partial_result": True,
+                }
+            )
+            grouper.set_weight_dictionary(weight_dict)
+            grouper.set_grouping(self.configuration["grouping_level"]["value"])
+            grouper.create_result_groups(name_roots[key])
 
         self._outputData.add(
             "q",
@@ -145,56 +201,6 @@ class DynamicIncoherentStructureFactor(IJob):
             axis="omega",
             units="au",
         )
-
-        for element in self.configuration["atom_selection"]["unique_names"]:
-            self._outputData.add(
-                f"f(q,t)_{element}",
-                "SurfaceOutputVariable",
-                (self._nQShells, self._nFrames),
-                axis="q|time",
-                units="au",
-            )
-            self._outputData.add(
-                f"s(q,f)_{element}",
-                "SurfaceOutputVariable",
-                (self._nQShells, self._nOmegas),
-                axis="q|omega",
-                units="nm2/ps",
-                main_result=True,
-                partial_result=True,
-            )
-            if self.add_ideal_results:
-                self._outputData.add(
-                    f"s(q,f)_ideal_{element}",
-                    "SurfaceOutputVariable",
-                    (self._nQShells, self._nOmegas),
-                    axis="q|omega",
-                    units="nm2/ps",
-                )
-
-        self._outputData.add(
-            "f(q,t)_total",
-            "SurfaceOutputVariable",
-            (self._nQShells, self._nFrames),
-            axis="q|time",
-            units="au",
-        )
-        self._outputData.add(
-            "s(q,f)_total",
-            "SurfaceOutputVariable",
-            (self._nQShells, self._nOmegas),
-            axis="q|omega",
-            units="nm2/ps",
-            main_result=True,
-        )
-        if self.add_ideal_results:
-            self._outputData.add(
-                "s(q,f)_ideal_total",
-                "SurfaceOutputVariable",
-                (self._nQShells, self._nOmegas),
-                axis="q|omega",
-                units="nm2/ps",
-            )
 
     def run_step(self, index):
         """
@@ -253,10 +259,10 @@ class DynamicIncoherentStructureFactor(IJob):
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """
-
-        element = self.configuration["atom_selection"]["names"][index]
-        for i, v in enumerate(disf_per_q_shell.values()):
-            self._outputData[f"f(q,t)_{element}"][i, :] += v
+        self._groupers["fqt"].assign_result(
+            self.configuration["atom_selection"]["flatten_indices"][index],
+            np.array([v for v in disf_per_q_shell.values()]),
+        )
 
     def finalize(self):
         """
@@ -266,48 +272,23 @@ class DynamicIncoherentStructureFactor(IJob):
             self._outputData
         )
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "f(q,t)_%s")
-        assign_weights(self._outputData, weight_dict, "s(q,f)_%s")
-        if self.add_ideal_results:
-            assign_weights(self._outputData, weight_dict, "s(q,f)_ideal_%s")
-        for element, number in list(nAtomsPerElement.items()):
-            extra_scaling = 1.0 / number
-            self._outputData[f"f(q,t)_{element}"] *= extra_scaling
-            self._outputData[f"s(q,f)_{element}"][:] = get_spectrum(
-                self._outputData[f"f(q,t)_{element}"],
-                self.configuration["instrument_resolution"]["time_window"],
-                self.configuration["instrument_resolution"]["time_step"],
-                axis=1,
-            )
-            if self.add_ideal_results:
-                self._outputData[f"s(q,f)_ideal_{element}"][:] = get_spectrum(
-                    self._outputData[f"f(q,t)_{element}"],
-                    None,
+        for inkey in self._outputData.keys():
+            if "f(q,t)" in inkey:
+                outkey = "_".join(["s(q,f)"] + inkey.split("_")[1:])
+                self._outputData[outkey][:] = get_spectrum(
+                    self._outputData[inkey],
+                    self.configuration["instrument_resolution"]["time_window"],
                     self.configuration["instrument_resolution"]["time_step"],
                     axis=1,
                 )
-
-        self._outputData["f(q,t)_total"][:] = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "f(q,t)_%s",
-        )
-
-        self._outputData["s(q,f)_total"][:] = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "s(q,f)_%s",
-        )
-
-        if self.add_ideal_results:
-            self._outputData["s(q,f)_ideal_total"][:] = weighted_sum(
-                self._outputData,
-                weight_dict,
-                "s(q,f)_ideal_%s",
-            )
+                if self.add_ideal_results:
+                    outkey = "_".join(["s(q,f)_ideal"] + inkey.split("_")[1:])
+                    self._outputData[outkey][:] = get_spectrum(
+                        self._outputData[inkey],
+                        None,
+                        self.configuration["instrument_resolution"]["time_step"],
+                        axis=1,
+                    )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

@@ -141,8 +141,9 @@ class RootMeanSquareDeviation(IJob):
         """
 
         self._grouper.assign_result(
-            self.configuration["atom_selection"]["flatten_indices"][index], x,
-            normalise=False
+            self.configuration["atom_selection"]["flatten_indices"][index],
+            x,
+            normalise=False,
         )
 
     def finalize(self):
@@ -154,10 +155,11 @@ class RootMeanSquareDeviation(IJob):
 
         for element, number in nAtomsPerElement.items():
             self._outputData[f"rmsd_{element}"][:] = np.sqrt(
-                self._outputData[f"rmsd_{element}"]/number
+                self._outputData[f"rmsd_{element}"] / number
             )
-        self._outputData["rmsd_total"][:] = np.sqrt(self._outputData["rmsd_total"]/
-                                                    self.numberOfSteps)
+        self._outputData["rmsd_total"][:] = np.sqrt(
+            self._outputData["rmsd_total"] / self.numberOfSteps
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

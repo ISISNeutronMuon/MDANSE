@@ -269,7 +269,7 @@ class GroupingTool:
                     self._indices_per_data_key[dset_name] = trimmed_mol
                     self._weighted_datasets.add(dset_name)
 
-    def assign_result(self, index: int, result: np.ndarray, normalise:bool=True):
+    def assign_result(self, index: int, result: np.ndarray, normalise: bool = True):
         """Add the current result to all the datasets that use it,
         together with the relevant scaling factors.
 

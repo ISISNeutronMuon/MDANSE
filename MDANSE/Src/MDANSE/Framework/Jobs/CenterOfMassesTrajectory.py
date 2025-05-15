@@ -59,9 +59,7 @@ class CenterOfMassesTrajectory(IJob):
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
-        {
-            "default": "individual molecules",
-        },
+        {"default": "individual molecules", "choices": ["individual molecules"]},
     )
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
