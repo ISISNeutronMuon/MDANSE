@@ -234,7 +234,7 @@ class GroupingTool:
             root of the dataset names
 
         """
-        for molecule in self._cs.unique_molecules:
+        for molecule in self._cs.unique_molecules():
             all_indices = set()
             for mol in self._cs._clusters[molecule]:
                 trimmed_mol = self._current_selection.intersection(mol)
@@ -259,7 +259,7 @@ class GroupingTool:
             root of the dataset names
 
         """
-        for molecule in self._cs.unique_molecules:
+        for molecule in self._cs.unique_molecules():
             for mindex, mol in enumerate(self._cs._clusters[molecule]):
                 trimmed_mol = self._current_selection.intersection(mol)
                 if set(mol) == trimmed_mol:

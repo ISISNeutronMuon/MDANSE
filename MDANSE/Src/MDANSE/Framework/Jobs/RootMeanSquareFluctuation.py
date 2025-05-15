@@ -16,6 +16,7 @@
 
 import collections
 
+from MDANSE.Chemistry.GroupingTool import GroupingTool
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import mean_square_fluctuation
 
@@ -63,17 +64,12 @@ class RootMeanSquareFluctuation(IJob):
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
         # Will store the indices.
-        indices = [
-            idx
-            for idxs in self.configuration["atom_selection"]["indices"]
-            for idx in idxs
-        ]
+        indices = self.configuration["atom_selection"]["flatten_indices"]
         self._outputData.add("indices", "LineOutputVariable", indices)
-        if self.configuration["grouping_level"]["value"]:
-            self._outputData.add(
-                "indices",
-                "LineOutputVariable",
-                self.configuration["grouping_level"]["group_indices"],
+        if self.configuration["grouping_level"]["value"] != "atom":
+            self._grouper = GroupingTool(
+                self.configuration["trajectory"]["instance"].chemical_system,
+                self._outputData,
             )
 
         # Will store the mean square fluctuation evolution.
