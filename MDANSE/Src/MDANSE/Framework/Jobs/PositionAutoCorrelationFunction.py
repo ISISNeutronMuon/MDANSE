@@ -122,6 +122,7 @@ class PositionAutoCorrelationFunction(IJob):
 
         self._grouper.set_grouping(self.configuration["grouping_level"]["value"])
         self._grouper.create_result_groups("pacf")
+        self._grouper.set_atom_masses(self.configuration["trajectory"]["instance"])
 
     def run_step(self, index):
         """
@@ -170,7 +171,7 @@ class PositionAutoCorrelationFunction(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
-
+        self._grouper.finalise_centre_of_mass()
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],

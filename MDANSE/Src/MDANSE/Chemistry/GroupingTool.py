@@ -17,7 +17,7 @@
 from __future__ import annotations
 from typing import Optional, Any
 from enum import Enum, auto
-from collections import Counter
+from collections import Counter, defaultdict
 from multiprocessing import Lock
 
 import numpy as np
@@ -69,12 +69,15 @@ class GroupingTool:
         self._grouping = None
         self._data_parameters = {}
         self._weight_dictionary = {}
+        self._mass_dictionary = {}
+        self._molecule_mass = defaultdict(float)
         self._current_selection = set()
         self._indices_per_data_key = {}
         self._mandatory_keys = ["output_type", "dimensions"]
         self._extra_keys = ["axis", "units", "main_result", "partial_result", "dtype"]
         self._plain_datasets = set()
         self._weighted_datasets = set()
+        self._molecule_datasets = set()
         self._mutex = Lock()
         self._debug_counter = Counter()
 
@@ -102,6 +105,20 @@ class GroupingTool:
         """
         self._weight_dictionary = {
             "".join([*key]): value for key, value in new_weights.items()
+        }
+
+    def set_atom_masses(self, atom_database):
+        """Get atom masses from an object that has .get_atom_property.
+
+        Parameters
+        ----------
+        atom_database : Union[AtomDatabase, Trajectory]
+            any object that has get_atom_property
+
+        """
+        self._mass_dictionary = {
+            atom_type: atom_database.get_atom_property(atom_type, "atomic_weight")
+            for atom_type in self._cs._unique_elements
         }
 
     def set_dataset_parameters(self, parameters: dict[str, Any]):
@@ -245,7 +262,7 @@ class GroupingTool:
                 self.add_dataset(dset_name)
                 self._output_data[dset_name].atom_indices = list(all_indices)
                 self._indices_per_data_key[dset_name] = all_indices
-                self._weighted_datasets.add(dset_name)
+                self._molecule_datasets.add(dset_name)
 
     def create_individual_molecule_groups(self, name: str):
         """Add datasets needed for results per EACH molecule.
@@ -264,13 +281,72 @@ class GroupingTool:
                 trimmed_mol = self._current_selection.intersection(mol)
                 if set(mol) == trimmed_mol:
                     dset_name = "_".join([name, str(molecule), str(mindex + 1)])
-                    self.add_dataset(dset_name)
+                    self.add_dataset(dset_name, override={"main_result": False})
                     self._output_data[dset_name].atom_indices = list(trimmed_mol)
                     self._indices_per_data_key[dset_name] = trimmed_mol
-                    self._weighted_datasets.add(dset_name)
+                    self._molecule_datasets.add(dset_name)
 
-    def assign_result(self, index: int, result: np.ndarray, normalise: bool = True):
+    def assign_result(
+        self,
+        index: int,
+        result: np.ndarray,
+        normalise: bool = True,
+        centre_of_mass: bool = True,
+    ):
         """Add the current result to all the datasets that use it,
+        together with the relevant scaling factors.
+
+        Parameters
+        ----------
+        index : int
+            index of the atom in the ChemicalSystem
+        result : np.ndarray
+            array with the calculation results.
+        normalise : bool
+            if True, result for each atom type will be divided by the
+            number of atoms of this type
+        centre_of_mass : bool
+            if True, results for each atom of the molecule will be scaled
+            by the atom mass
+
+        """
+        with self._mutex:
+            self.assign_result_molecular(index, result, centre_of_mass)
+            self.assign_result_atomic(index, result, normalise)
+
+    def assign_result_molecular(
+        self, index: int, result: np.ndarray, centre_of_mass: bool = True
+    ):
+        """Add the current result to the molecule-grouped datasets,
+        together with the relevant scaling factors.
+
+        Parameters
+        ----------
+        index : int
+            index of the atom in the ChemicalSystem
+        result : np.ndarray
+            array with the calculation results.
+        centre_of_mass : bool
+            if True, results for each atom of the molecule will be scaled
+            by the atom mass
+
+        """
+        for dset_name in self._molecule_datasets:
+            indices = self._indices_per_data_key[dset_name]
+            if index in indices:
+                atom_type = self._cs._atom_types[index]
+                if centre_of_mass:
+                    atom_mass = self._mass_dictionary[atom_type]
+                    self._output_data[dset_name] += result * atom_mass
+                    self._molecule_mass[dset_name] += atom_mass
+                else:
+                    self._output_data[dset_name] += result
+                    self._molecule_mass[dset_name] = 1.0
+
+    def assign_result_atomic(
+        self, index: int, result: np.ndarray, normalise: bool = True
+    ):
+        """Add the current result to the atom-averaged datasets,
         together with the relevant scaling factors.
 
         Parameters
@@ -284,17 +360,20 @@ class GroupingTool:
             number of atoms of this type
 
         """
-        with self._mutex:
-            for dset_name in self._plain_datasets:
-                indices = self._indices_per_data_key[dset_name]
-                if index in indices:
-                    if normalise:
-                        result /= len(indices)
-                    self._output_data[dset_name] += result
-            for dset_name in self._weighted_datasets:
-                indices = self._indices_per_data_key[dset_name]
-                if index in indices:
-                    atom_type = self._cs._atom_types[index]
-                    self._output_data[dset_name] += (
-                        result * self._weight_dictionary[atom_type]
-                    )
+        for dset_name in self._plain_datasets:
+            indices = self._indices_per_data_key[dset_name]
+            if index in indices:
+                if normalise:
+                    result /= len(indices)
+                self._output_data[dset_name] += result
+        for dset_name in self._weighted_datasets:
+            indices = self._indices_per_data_key[dset_name]
+            if index in indices:
+                atom_type = self._cs._atom_types[index]
+                self._output_data[dset_name] += (
+                    result * self._weight_dictionary[atom_type]
+                )
+
+    def finalise_centre_of_mass(self):
+        for dset_name in self._molecule_datasets:
+            self._output_data[dset_name] /= self._molecule_mass[dset_name]

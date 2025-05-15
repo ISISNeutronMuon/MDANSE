@@ -167,6 +167,7 @@ class DynamicIncoherentStructureFactor(IJob):
             grouper.set_weight_dictionary(weight_dict)
             grouper.set_grouping(self.configuration["grouping_level"]["value"])
             grouper.create_result_groups(name_roots[key])
+            grouper.set_atom_masses(self.configuration["trajectory"]["instance"])
 
         self._outputData.add(
             "q",
@@ -290,6 +291,8 @@ class DynamicIncoherentStructureFactor(IJob):
                         axis=1,
                     )
 
+        for grouper in self._groupers.values():
+            grouper.finalise_centre_of_mass()
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],

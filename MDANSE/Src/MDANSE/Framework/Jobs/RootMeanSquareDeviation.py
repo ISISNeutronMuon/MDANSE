@@ -109,6 +109,7 @@ class RootMeanSquareDeviation(IJob):
 
         self._grouper.set_grouping(self.configuration["grouping_level"]["value"])
         self._grouper.create_result_groups("rmsd")
+        self._grouper.set_atom_masses(self.configuration["trajectory"]["instance"])
 
     def run_step(self, index):
         """
@@ -160,6 +161,8 @@ class RootMeanSquareDeviation(IJob):
         self._outputData["rmsd_total"][:] = np.sqrt(
             self._outputData["rmsd_total"] / self.numberOfSteps
         )
+
+        self._grouper.finalise_centre_of_mass()
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
