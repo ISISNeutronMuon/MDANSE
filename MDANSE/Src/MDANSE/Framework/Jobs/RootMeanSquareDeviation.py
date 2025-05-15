@@ -18,6 +18,7 @@ import collections
 
 import numpy as np
 
+from MDANSE.Chemistry.GroupingTool import GroupingTool
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -73,6 +74,24 @@ class RootMeanSquareDeviation(IJob):
 
         self._referenceIndex = self.configuration["reference_frame"]["value"]
 
+        self._grouper = GroupingTool(
+            self.configuration["trajectory"]["instance"].chemical_system,
+            self._outputData,
+        )
+        self._grouper.set_selection(
+            self.configuration["atom_selection"]["flatten_indices"]
+        )
+        self._grouper.set_dataset_parameters(
+            {
+                "output_type": "LineOutputVariable",
+                "dimensions": (self.configuration["frames"]["number"],),
+                "axis": "time",
+                "units": "nm",
+                "main_result": True,
+                "partial_result": True,
+            }
+        )
+
         # Will store the time.
         self._outputData.add(
             "time",
@@ -81,29 +100,15 @@ class RootMeanSquareDeviation(IJob):
             units="ps",
         )
 
-        # Will initially store the mean square deviation before appling the root
-        for element in self.configuration["atom_selection"]["unique_names"]:
-            self._outputData.add(
-                f"rmsd_{element}",
-                "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
-                axis="time",
-                units="nm",
-                main_result=True,
-                partial_result=True,
-            )
-        self._outputData.add(
-            "rmsd_all",
-            "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
-            axis="time",
-            units="nm",
-            main_result=True,
-        )
-
         self._atoms = self.configuration["trajectory"][
             "instance"
         ].chemical_system.atom_list
+        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        weight_dict = {key: 1.0 for key in nAtomsPerElement}
+        self._grouper.set_weight_dictionary(weight_dict)
+
+        self._grouper.set_grouping(self.configuration["grouping_level"]["value"])
+        self._grouper.create_result_groups("rmsd")
 
     def run_step(self, index):
         """
@@ -135,10 +140,10 @@ class RootMeanSquareDeviation(IJob):
             #. x (any): The returned result(s) of run_step
         """
 
-        element = self.configuration["atom_selection"]["names"][index]
-
-        self._outputData[f"rmsd_{element}"] += x
-        self._outputData["rmsd_all"] += x
+        self._grouper.assign_result(
+            self.configuration["atom_selection"]["flatten_indices"][index], x,
+            normalise=False
+        )
 
     def finalize(self):
         """
@@ -146,18 +151,13 @@ class RootMeanSquareDeviation(IJob):
         """
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        for element, number in nAtomsPerElement.items():
-            self._outputData[f"rmsd_{element}"][:] /= number
 
         for element, number in nAtomsPerElement.items():
             self._outputData[f"rmsd_{element}"][:] = np.sqrt(
-                self._outputData[f"rmsd_{element}"]
+                self._outputData[f"rmsd_{element}"]/number
             )
-
-        self._outputData["rmsd_all"][:] /= self.configuration[
-            "atom_selection"
-        ].get_total_natoms()
-        self._outputData["rmsd_all"][:] = np.sqrt(self._outputData["rmsd_all"])
+        self._outputData["rmsd_total"][:] = np.sqrt(self._outputData["rmsd_total"]/
+                                                    self.numberOfSteps)
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

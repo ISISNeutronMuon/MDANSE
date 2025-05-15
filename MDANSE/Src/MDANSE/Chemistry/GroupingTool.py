@@ -269,7 +269,7 @@ class GroupingTool:
                     self._indices_per_data_key[dset_name] = trimmed_mol
                     self._weighted_datasets.add(dset_name)
 
-    def assign_result(self, index: int, result: np.ndarray):
+    def assign_result(self, index: int, result: np.ndarray, normalise:bool=True):
         """Add the current result to all the datasets that use it,
         together with the relevant scaling factors.
 
@@ -279,12 +279,17 @@ class GroupingTool:
             index of the atom in the ChemicalSystem
         result : np.ndarray
             array with the calculation results.
+        normalise : bool
+            if True, result for each atom type will be divided by the
+            number of atoms of this type
+
         """
         with self._mutex:
             for dset_name in self._plain_datasets:
                 indices = self._indices_per_data_key[dset_name]
                 if index in indices:
-                    result /= len(indices)
+                    if normalise:
+                        result /= len(indices)
                     self._output_data[dset_name] += result
             for dset_name in self._weighted_datasets:
                 indices = self._indices_per_data_key[dset_name]

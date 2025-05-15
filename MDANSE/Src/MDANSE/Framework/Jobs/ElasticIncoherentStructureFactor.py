@@ -18,6 +18,7 @@ import collections
 
 import numpy as np
 
+from MDANSE.Chemistry.GroupingTool import GroupingTool
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
@@ -91,10 +92,26 @@ class ElasticIncoherentStructureFactor(IJob):
         Initialize the input parameters and analysis self variables
         """
         super().initialize()
+        self._nQShells = self.configuration["q_vectors"]["n_shells"]
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
-
-        self._nQShells = self.configuration["q_vectors"]["n_shells"]
+        self._grouper = GroupingTool(
+            self.configuration["trajectory"]["instance"].chemical_system,
+            self._outputData,
+        )
+        self._grouper.set_selection(
+            self.configuration["atom_selection"]["flatten_indices"]
+        )
+        self._grouper.set_dataset_parameters(
+            {
+                "output_type": "LineOutputVariable",
+                "dimensions": (self._nQShells,),
+                "axis": "q",
+                "units": "au",
+                "main_result": True,
+                "partial_result": True,
+            }
+        )
 
         self._nFrames = self.configuration["frames"]["number"]
 
@@ -105,29 +122,17 @@ class ElasticIncoherentStructureFactor(IJob):
             units="1/nm",
         )
 
-        for element in self.configuration["atom_selection"]["unique_names"]:
-            self._outputData.add(
-                f"eisf_{element}",
-                "LineOutputVariable",
-                (self._nQShells,),
-                axis="q",
-                units="au",
-                main_result=True,
-                partial_result=True,
-            )
-
-        self._outputData.add(
-            "eisf_total",
-            "LineOutputVariable",
-            (self._nQShells,),
-            axis="q",
-            units="au",
-            main_result=True,
-        )
-
         self._atoms = self.configuration["trajectory"][
             "instance"
         ].chemical_system.atom_list
+
+        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(weights, nAtomsPerElement, 1)
+        self._grouper.set_weight_dictionary(weight_dict)
+
+        self._grouper.set_grouping(self.configuration["grouping_level"]["value"])
+        self._grouper.create_result_groups("eisf")
 
     def run_step(self, index):
         """
@@ -176,9 +181,9 @@ class ElasticIncoherentStructureFactor(IJob):
         """
 
         # The symbol of the atom.
-        element = self.configuration["atom_selection"]["names"][index]
-
-        self._outputData[f"eisf_{element}"] += x
+        self._grouper.assign_result(
+            self.configuration["atom_selection"]["flatten_indices"][index], x
+        )
 
     def finalize(self):
         """
@@ -187,19 +192,6 @@ class ElasticIncoherentStructureFactor(IJob):
 
         self.configuration["q_vectors"]["generator"].write_vectors_to_file(
             self._outputData
-        )
-
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        for element, number in list(nAtomsPerElement.items()):
-            self._outputData[f"eisf_{element}"][:] /= number
-
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "eisf_%s")
-        self._outputData["eisf_total"][:] = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "eisf_%s",
         )
 
         self._outputData.write(

@@ -18,6 +18,7 @@ import collections
 import numpy as np
 from scipy.signal import correlate
 
+from MDANSE.Chemistry.GroupingTool import GroupingTool
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import normalisation_factor
@@ -83,7 +84,23 @@ class PositionAutoCorrelationFunction(IJob):
         super().initialize()
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
-
+        self._grouper = GroupingTool(
+            self.configuration["trajectory"]["instance"].chemical_system,
+            self._outputData,
+        )
+        self._grouper.set_selection(
+            self.configuration["atom_selection"]["flatten_indices"]
+        )
+        self._grouper.set_dataset_parameters(
+            {
+                "output_type": "LineOutputVariable",
+                "dimensions": (self.configuration["frames"]["n_frames"],),
+                "axis": "time",
+                "units": "nm2",
+                "main_result": True,
+                "partial_result": True,
+            }
+        )
         # Will store the time.
         self._outputData.add(
             "time",
@@ -92,21 +109,19 @@ class PositionAutoCorrelationFunction(IJob):
             units="ps",
         )
 
-        # Will store the mean square displacement evolution.
-        for element in self.configuration["atom_selection"]["unique_names"]:
-            self._outputData.add(
-                f"pacf_{element}",
-                "LineOutputVariable",
-                (self.configuration["frames"]["n_frames"],),
-                axis="time",
-                units="nm2",
-                main_result=True,
-                partial_result=True,
-            )
-
         self._atoms = self.configuration["trajectory"][
             "instance"
         ].chemical_system.atom_list
+
+        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+
+        weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(weights, nAtomsPerElement, 1)
+        self._grouper.set_weight_dictionary(weight_dict)
+        print(weight_dict)
+
+        self._grouper.set_grouping(self.configuration["grouping_level"]["value"])
+        self._grouper.create_result_groups("pacf")
 
     def run_step(self, index):
         """
@@ -147,35 +162,14 @@ class PositionAutoCorrelationFunction(IJob):
         """
 
         # The symbol of the atom.
-        element = self.configuration["atom_selection"]["names"][index]
-
-        # The MSD for element |symbol| is updated.
-        self._outputData[f"pacf_{element}"] += x
+        self._grouper.assign_result(
+            self.configuration["atom_selection"]["flatten_indices"][index], x
+        )
 
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
-
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        self.configuration["atom_selection"]["n_atoms_per_element"] = nAtomsPerElement
-
-        for element, number in list(nAtomsPerElement.items()):
-            self._outputData[f"pacf_{element}"] /= number
-
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "pacf_%s")
-        pacfTotal = weighted_sum(self._outputData, weight_dict, "pacf_%s")
-
-        self._outputData.add(
-            "pacf_total",
-            "LineOutputVariable",
-            pacfTotal,
-            axis="time",
-            units="nm2",
-            main_result=True,
-        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
