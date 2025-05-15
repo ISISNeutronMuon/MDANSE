@@ -376,4 +376,7 @@ class GroupingTool:
 
     def finalise_centre_of_mass(self):
         for dset_name in self._molecule_datasets:
-            self._output_data[dset_name] /= self._molecule_mass[dset_name]
+            norm = self._molecule_mass[dset_name]
+            if np.isclose(norm, 0):
+                norm = 1.0
+            self._output_data[dset_name] /= norm

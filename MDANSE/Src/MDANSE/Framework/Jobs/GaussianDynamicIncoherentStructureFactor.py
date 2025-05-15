@@ -63,7 +63,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
-        {},
+        {"choices": ["atom", "average over molecules"]},
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",
