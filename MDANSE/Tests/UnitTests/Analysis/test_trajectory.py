@@ -46,13 +46,29 @@ def parameters():
     pytest.param("GlobalMotionFilteredTrajectory",
                  marks=pytest.mark.xfail()),
     "CroppedTrajectory",
-    "CenterOfMassesTrajectory",
     "UnfoldedTrajectory",
 ])
 def test_trajectory(tmp_path, parameters, traj_type):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mdt")
     log_file = temp_name.with_suffix(".log")
+
+    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
+
+    job = IJob.create(traj_type)
+    job.run(parameters, status=True)
+
+    assert out_file.exists()
+    assert log_file.exists()
+
+@pytest.mark.parametrize("traj_type", [
+    "CenterOfMassesTrajectory",
+])
+def test_grouped_trajectory(tmp_path, parameters, traj_type):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mdt")
+    log_file = temp_name.with_suffix(".log")
+    parameters["grouping_level"] = "individual molecules"
 
     parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
 

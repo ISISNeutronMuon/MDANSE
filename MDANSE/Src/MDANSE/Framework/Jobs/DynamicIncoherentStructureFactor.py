@@ -272,6 +272,7 @@ class DynamicIncoherentStructureFactor(IJob):
         self.configuration["q_vectors"]["generator"].write_vectors_to_file(
             self._outputData
         )
+        self._groupers["fqt"].finalise_centre_of_mass()
 
         for inkey in self._outputData.keys():
             if "f(q,t)" in inkey:
@@ -291,8 +292,9 @@ class DynamicIncoherentStructureFactor(IJob):
                         axis=1,
                     )
 
-        for grouper in self._groupers.values():
-            grouper.finalise_centre_of_mass()
+        for group in self._groupers:
+            if group != "fqt":
+                self._groupers[group].finalise_centre_of_mass()
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],

@@ -341,7 +341,7 @@ class GroupingTool:
                     self._molecule_mass[dset_name] += atom_mass
                 else:
                     self._output_data[dset_name] += result
-                    self._molecule_mass[dset_name] = 1.0
+                    self._molecule_mass[dset_name] += 1.0
 
     def assign_result_atomic(
         self, index: int, result: np.ndarray, normalise: bool = True
@@ -374,9 +374,26 @@ class GroupingTool:
                     result * self._weight_dictionary[atom_type]
                 )
 
-    def finalise_centre_of_mass(self):
+    def finalise_centre_of_mass(self, exponent: float = 1.0):
+        """Normalise the results grouped per molecule.
+
+        Divides either by the total mass of the molecule,
+        or by the total number of atoms in the molecule.
+        It can also square-root the results (used by
+        Root Mean Square Displacement.)
+
+        Parameters
+        ----------
+        exponent : float, optional
+            if square root is needed, set to 0.5, by default 1.0
+
+        """
         for dset_name in self._molecule_datasets:
             norm = self._molecule_mass[dset_name]
             if np.isclose(norm, 0):
                 norm = 1.0
             self._output_data[dset_name] /= norm
+            if not np.isclose(exponent, 1.0):
+                self._output_data[dset_name][:] = (
+                    self._output_data[dset_name] ** exponent
+                )

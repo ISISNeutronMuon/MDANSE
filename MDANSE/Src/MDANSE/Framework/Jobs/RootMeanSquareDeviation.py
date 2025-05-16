@@ -162,7 +162,7 @@ class RootMeanSquareDeviation(IJob):
             self._outputData["rmsd_total"] / self.numberOfSteps
         )
 
-        self._grouper.finalise_centre_of_mass()
+        self._grouper.finalise_centre_of_mass(exponent=0.5)
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
