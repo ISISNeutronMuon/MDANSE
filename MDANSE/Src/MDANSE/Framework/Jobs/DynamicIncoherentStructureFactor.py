@@ -116,15 +116,16 @@ class DynamicIncoherentStructureFactor(IJob):
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
 
-        self._groupers = {}
-        self._groupers["fqt"] = GroupingTool(
-            self.configuration["trajectory"]["instance"].chemical_system,
-            self._outputData,
-        )
-        self._groupers["sqf"] = GroupingTool(
-            self.configuration["trajectory"]["instance"].chemical_system,
-            self._outputData,
-        )
+        self._groupers = {
+            "fqt": GroupingTool(
+                self.configuration["trajectory"]["instance"].chemical_system,
+                self._outputData,
+            ),
+            "sqf": GroupingTool(
+                self.configuration["trajectory"]["instance"].chemical_system,
+                self._outputData,
+            ),
+        }
         if self.add_ideal_results:
             self._groupers["sqf_ideal"] = GroupingTool(
                 self.configuration["trajectory"]["instance"].chemical_system,
@@ -262,7 +263,7 @@ class DynamicIncoherentStructureFactor(IJob):
         """
         self._groupers["fqt"].assign_result(
             self.configuration["atom_selection"]["flatten_indices"][index],
-            np.array([v for v in disf_per_q_shell.values()]),
+            np.array(list(disf_per_q_shell.values())),
         )
 
     def finalize(self):
@@ -274,8 +275,7 @@ class DynamicIncoherentStructureFactor(IJob):
         )
         self._groupers["fqt"].finalise_centre_of_mass()
 
-        for inkey in self._outputData.keys():
-            if "f(q,t)" in inkey:
+        for inkey in (key for key in self._outputData if "f(q,t)" in key):
                 outkey = "_".join(["s(q,f)"] + inkey.split("_")[1:])
                 self._outputData[outkey][:] = get_spectrum(
                     self._outputData[inkey],
@@ -292,8 +292,7 @@ class DynamicIncoherentStructureFactor(IJob):
                         axis=1,
                     )
 
-        for group in self._groupers:
-            if group != "fqt":
+        for grouper in (value for key, value in self._groupers.items() if key != "fqt"):
                 self._groupers[group].finalise_centre_of_mass()
         self._outputData.write(
             self.configuration["output_files"]["root"],

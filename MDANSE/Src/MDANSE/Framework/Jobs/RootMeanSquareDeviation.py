@@ -104,7 +104,7 @@ class RootMeanSquareDeviation(IJob):
             "instance"
         ].chemical_system.atom_list
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        weight_dict = {key: 1.0 for key in nAtomsPerElement}
+        weight_dict = dict.fromkeys(nAtomsPerElement, 1.0)
         self._grouper.set_weight_dictionary(weight_dict)
 
         self._grouper.set_grouping(self.configuration["grouping_level"]["value"])

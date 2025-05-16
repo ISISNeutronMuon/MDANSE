@@ -152,12 +152,13 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             {atom: 1.0 for atom in nAtomsPerElement}, nAtomsPerElement, 1
         )
 
-        self._groupers = {}
-        for key in ["fqt", "sqf", "msd"]:
-            self._groupers[key] = GroupingTool(
+        self._groupers = {
+            key: GroupingTool(
                 self.configuration["trajectory"]["instance"].chemical_system,
                 self._outputData,
-            )
+            ) 
+            for key in ("fqt", "sqf", "msd")
+        }
         if self.add_ideal_results:
             self._groupers["sqf_ideal"] = GroupingTool(
                 self.configuration["trajectory"]["instance"].chemical_system,
