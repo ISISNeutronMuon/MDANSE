@@ -50,7 +50,7 @@ class RootMeanSquareFluctuation(IJob):
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
-        {},
+        {"choices": ["atom"]},
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})

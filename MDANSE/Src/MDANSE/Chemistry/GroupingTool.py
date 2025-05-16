@@ -251,18 +251,26 @@ class GroupingTool:
             root of the dataset names
 
         """
+        molecules_dropped = []
         for molecule in self._cs.unique_molecules():
             all_indices = set()
-            for mol in self._cs._clusters[molecule]:
+            for mindex, mol in enumerate(self._cs._clusters[molecule]):
                 trimmed_mol = self._current_selection.intersection(mol)
                 if set(mol) == trimmed_mol:
                     all_indices.update(mol)
+                elif len(trimmed_mol):
+                    molecules_dropped.append(mindex)
             if all_indices:
                 dset_name = "_".join([name, str(molecule), "all"])
                 self.add_dataset(dset_name)
                 self._output_data[dset_name].atom_indices = list(all_indices)
                 self._indices_per_data_key[dset_name] = all_indices
                 self._molecule_datasets.add(dset_name)
+        if molecules_dropped:
+            LOG.warning(
+                "Molecules %s were not fully selected and will be omitted",
+                molecules_dropped,
+            )
 
     def create_individual_molecule_groups(self, name: str):
         """Add datasets needed for results per EACH molecule.
@@ -276,6 +284,7 @@ class GroupingTool:
             root of the dataset names
 
         """
+        molecules_dropped = []
         for molecule in self._cs.unique_molecules():
             for mindex, mol in enumerate(self._cs._clusters[molecule]):
                 trimmed_mol = self._current_selection.intersection(mol)
@@ -285,6 +294,13 @@ class GroupingTool:
                     self._output_data[dset_name].atom_indices = list(trimmed_mol)
                     self._indices_per_data_key[dset_name] = trimmed_mol
                     self._molecule_datasets.add(dset_name)
+                elif len(trimmed_mol):
+                    molecules_dropped.append(mindex)
+        if molecules_dropped:
+            LOG.warning(
+                "Molecules %s were not fully selected and will be omitted",
+                molecules_dropped,
+            )
 
     def assign_result(
         self,
