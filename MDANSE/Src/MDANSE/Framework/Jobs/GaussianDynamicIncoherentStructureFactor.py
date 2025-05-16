@@ -156,7 +156,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             key: GroupingTool(
                 self.configuration["trajectory"]["instance"].chemical_system,
                 self._outputData,
-            ) 
+            )
             for key in ("fqt", "sqf", "msd")
         }
         if self.add_ideal_results:
@@ -276,7 +276,8 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         for inkey in self._outputData.keys():
             if "f(q,t)" in inkey:
-                outkey = "_".join(["s(q,f)"] + inkey.split("_")[1:])
+                rhs_part = inkey.split("_", 1)[1]
+                outkey = f"s(q,f)_{rhs_part}"
                 self._outputData[outkey][:] = get_spectrum(
                     self._outputData[inkey],
                     self.configuration["instrument_resolution"]["time_window"],
@@ -284,7 +285,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                     axis=1,
                 )
                 if self.add_ideal_results:
-                    outkey = "_".join(["s(q,f)_ideal"] + inkey.split("_")[1:])
+                    outkey = f"s(q,f)_ideal_{rhs_part}"
                     self._outputData[outkey][:] = get_spectrum(
                         self._outputData[inkey],
                         None,

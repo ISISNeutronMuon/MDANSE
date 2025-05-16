@@ -118,7 +118,6 @@ class PositionAutoCorrelationFunction(IJob):
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         self._grouper.set_weight_dictionary(weight_dict)
-        print(weight_dict)
 
         self._grouper.set_grouping(self.configuration["grouping_level"]["value"])
         self._grouper.create_result_groups("pacf")

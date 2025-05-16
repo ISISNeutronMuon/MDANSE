@@ -276,24 +276,25 @@ class DynamicIncoherentStructureFactor(IJob):
         self._groupers["fqt"].finalise_centre_of_mass()
 
         for inkey in (key for key in self._outputData if "f(q,t)" in key):
-                outkey = "_".join(["s(q,f)"] + inkey.split("_")[1:])
+            rhs_part = inkey.split("_", 1)[1]
+            outkey = f"s(q,f)_{rhs_part}"
+            self._outputData[outkey][:] = get_spectrum(
+                self._outputData[inkey],
+                self.configuration["instrument_resolution"]["time_window"],
+                self.configuration["instrument_resolution"]["time_step"],
+                axis=1,
+            )
+            if self.add_ideal_results:
+                outkey = f"s(q,f)_ideal_{rhs_part}"
                 self._outputData[outkey][:] = get_spectrum(
                     self._outputData[inkey],
-                    self.configuration["instrument_resolution"]["time_window"],
+                    None,
                     self.configuration["instrument_resolution"]["time_step"],
                     axis=1,
                 )
-                if self.add_ideal_results:
-                    outkey = "_".join(["s(q,f)_ideal"] + inkey.split("_")[1:])
-                    self._outputData[outkey][:] = get_spectrum(
-                        self._outputData[inkey],
-                        None,
-                        self.configuration["instrument_resolution"]["time_step"],
-                        axis=1,
-                    )
 
         for grouper in (value for key, value in self._groupers.items() if key != "fqt"):
-                self._groupers[group].finalise_centre_of_mass()
+            grouper.finalise_centre_of_mass()
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],

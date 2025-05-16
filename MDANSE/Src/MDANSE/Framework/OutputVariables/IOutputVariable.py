@@ -61,7 +61,7 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         *,
         main_result: bool = False,
         partial_result: bool = False,
-        dtype: type = np.float64,
+        dtype: np.dtype = np.float64,
     ):
         """Instantiate a new MDANSE output variable.
 

@@ -39,7 +39,7 @@ GROUPING_LABELS = {
     "average over molecules": GroupingLevel.MOL_AVERAGE,
 }
 
-BACKUP_DATA_PARAMETERS = {
+DEFAULT_DATA_PARAMETERS = {
     "axis": "index",
     "units": "au",
     "main_result": True,
@@ -133,9 +133,13 @@ class GroupingTool:
 
         """
         if missing := self._mandatory_keys - parameters.keys():
-            raise KeyError(f"Settings ({', '.join(missing)}) are missing from data parameters.")
+            raise KeyError(
+                f"Settings ({', '.join(missing)}) are missing from data parameters."
+            )
         for key in self._mandatory_keys + self._extra_keys:
-            self._data_parameters[key] = parameters.get(key, BACKUP_DATA_PARAMETERS.get(key))
+            self._data_parameters[key] = parameters.get(
+                key, DEFAULT_DATA_PARAMETERS.get(key)
+            )
 
     def set_selection(self, selected_indices: set[int]):
         """Save information about indices in the atom selection.
@@ -403,7 +407,11 @@ class GroupingTool:
             if np.isclose(norm, 0):
                 norm = 1.0
             self._output_data[dset_name] /= norm
-            if not np.isclose(exponent, 1.0):
+            if np.isclose(exponent, 1.0):
+                continue
+            elif np.isclose(exponent, 0.5):
+                self._output_data[dset_name][:] = np.sqrt(self._output_data[dset_name])
+            else:
                 self._output_data[dset_name][:] = (
                     self._output_data[dset_name] ** exponent
                 )
