@@ -252,9 +252,10 @@ class GroupingTool:
         for molecule in self._cs.unique_molecules():
             all_indices = set()
             for mindex, mol in enumerate(self._cs._clusters[molecule]):
+                original_mol = set(mol)
                 trimmed_mol = self._current_selection.intersection(mol)
-                if set(mol) == trimmed_mol:
-                    all_indices |= mol
+                if original_mol == trimmed_mol:
+                    all_indices |= original_mol
                 elif trimmed_mol:
                     molecules_dropped.append(mindex)
             if all_indices:
@@ -325,8 +326,8 @@ class GroupingTool:
 
         """
         with self._mutex:
-            self.assign_result_molecular(index, result, centre_of_mass)
-            self.assign_result_atomic(index, result, normalise)
+            self.assign_result_molecular(index, result, centre_of_mass=centre_of_mass)
+            self.assign_result_atomic(index, result, normalise=normalise)
 
     def assign_result_molecular(
         self, index: int, result: np.ndarray, *, centre_of_mass: bool = True
