@@ -356,6 +356,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 n_results += 1
                 self.combine(index, result)
 
+        if self._status is not None:
+            self._status.fixed_status(n_results)
+
         for p in self._processes:
             p.join()
 
