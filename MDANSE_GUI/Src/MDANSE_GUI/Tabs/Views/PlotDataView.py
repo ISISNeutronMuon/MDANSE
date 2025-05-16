@@ -13,16 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
 import time
-from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication, QMenu
-from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
-from qtpy.QtGui import QMouseEvent, QDrag, QContextMenuEvent, QStandardItem
+from typing import Union
 
-from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
+from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
 from MDANSE_GUI.Widgets.DataDialog import DataDialog
+from qtpy.QtCore import QMimeData, QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QContextMenuEvent, QDrag, QMouseEvent, QStandardItem
+from qtpy.QtWidgets import QAbstractItemView, QApplication, QMenu, QTreeView
 
 
 class PlotDataView(QTreeView):
@@ -63,7 +64,7 @@ class PlotDataView(QTreeView):
 
                     model.add_dataset(dataset)
             except KeyError:
-                print(f"No attribute called Tag found in {key}, skipping")
+                LOG.error(f"No attribute called Tag found in {key}, skipping")
         self.fast_plotting_data.emit(model)
 
     def mousePressEvent(self, e: QMouseEvent) -> None:
