@@ -314,14 +314,3 @@ class FortranFormat:
 
     def __getitem__(self, i):
         return self.fields[i]
-
-
-# Test code
-
-if __name__ == "__main__":
-    f = FortranFormat("'!!',D10.3,F10.3,G10.3,'!!'")
-    w = FortranLine([1.5707963, 3.14159265358, 2.71828], f)
-    print(str(w))
-    f = FortranFormat("F12.0")
-    w = FortranLine("2.1D2", f)
-    print(w[0])

@@ -754,4 +754,4 @@ class AtomsDatabase(_Database):
 if __name__ == "__main__":
     from MDANSE.Chemistry import ATOMS_DATABASE
 
-    print(ATOMS_DATABASE.numeric_properties)
+    print(ATOMS_DATABASE.numeric_properties)  # noqa: T201

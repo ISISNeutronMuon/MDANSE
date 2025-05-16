@@ -561,19 +561,3 @@ def angleFromSineAndCosine(y, x):
 
 def mod_angle(angle, mod):
     return (angle + mod / 2.0) % mod - mod / 2
-
-
-# Test code
-
-if __name__ == "__main__":
-    t = Translation(Vector(1.0, -2.0, 0))
-    r = Rotation(Vector(0.1, -2.0, 0.5), 1.0e-10)
-    q = r.asQuaternion()
-    angles = r.threeAngles(
-        Vector(1.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0), Vector(0.0, 0.0, 1.0)
-    )
-    c = t * r
-    print(c.screwMotion())
-    s = Scaling(2.0)
-    all = s * t * r
-    print(all(ex))

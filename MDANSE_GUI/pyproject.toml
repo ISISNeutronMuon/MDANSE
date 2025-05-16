@@ -93,6 +93,7 @@ select = [
     # "PERF",# Perflint
     # "D",   # Pydocstyle
     # "UP",  # Pyupgrade
+    "T20",   # Print
 ]
 ignore = [
     "F401",     # Unused import in init
