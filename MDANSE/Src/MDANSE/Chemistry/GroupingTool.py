@@ -104,7 +104,7 @@ class GroupingTool:
 
         """
         self._weight_dictionary = {
-            "".join([*key]): value for key, value in new_weights.items()
+            "".join(key): value for key, value in new_weights.items()
         }
 
     def set_atom_masses(self, atom_database):
@@ -132,16 +132,10 @@ class GroupingTool:
             dictionary of parameters needed by OutputData.write
 
         """
-        for key in self._mandatory_keys:
-            if key not in parameters:
-                raise KeyError(f"Setting {key} is missing from data parameters.")
-        for key in self._mandatory_keys:
-            self._data_parameters[key] = parameters[key]
-        for key in self._extra_keys:
-            value = parameters.get(key)
-            if value is None:
-                value = BACKUP_DATA_PARAMETERS[key]
-            self._data_parameters[key] = value
+        if missing := self._mandatory_keys - parameters.keys():
+            raise KeyError(f"Settings ({', '.join(missing)}) are missing from data parameters.")
+        for key in self._mandatory_keys + self._extra_keys:
+            self._data_parameters[key] = parameters.get(key, BACKUP_DATA_PARAMETERS.get(key))
 
     def set_selection(self, selected_indices: set[int]):
         """Save information about indices in the atom selection.
@@ -174,9 +168,8 @@ class GroupingTool:
         """
         self._debug_counter[name] += 1
         pardict = {key: self._data_parameters[key] for key in self._extra_keys}
-        if override:
-            for key, value in override.items():
-                pardict[key] = value
+        if override is not None:
+            pardict.update(override)
         self._output_data.add(
             name,
             self._data_parameters["output_type"],
@@ -207,9 +200,9 @@ class GroupingTool:
         if not self._current_selection:
             raise RuntimeError("Trying to group an empty selection.")
         self.create_atom_groups(name)
-        if self._grouping == GroupingLevel.MOL_AVERAGE:
+        if self._grouping is GroupingLevel.MOL_AVERAGE:
             self.create_averaged_molecule_groups(name)
-        elif self._grouping == GroupingLevel.MOL_EACH:
+        elif self._grouping is GroupingLevel.MOL_EACH:
             self.create_individual_molecule_groups(name)
 
     def create_atom_groups(self, name: str):
@@ -228,12 +221,12 @@ class GroupingTool:
                 self._cs.element_indices[atom_type]
             )
             if indices:
-                dset_name = "_".join([name, str(atom_type)])
+                dset_name = f"{name}_{atom_type}"
                 self.add_dataset(dset_name, weight_key=str(atom_type))
                 self._output_data[dset_name].atom_indices = list(indices)
                 self._indices_per_data_key[dset_name] = indices
                 self._plain_datasets.add(dset_name)
-        dset_name = "_".join([name, "total"])
+        dset_name = f"{name}_total"
         self.add_dataset(dset_name, override={"partial_result": False})
         self._output_data[dset_name].atom_indices = list(self._current_selection)
         self._indices_per_data_key[dset_name] = self._current_selection
@@ -257,11 +250,11 @@ class GroupingTool:
             for mindex, mol in enumerate(self._cs._clusters[molecule]):
                 trimmed_mol = self._current_selection.intersection(mol)
                 if set(mol) == trimmed_mol:
-                    all_indices.update(mol)
-                elif len(trimmed_mol):
+                    all_indices |= mol
+                elif trimmed_mol:
                     molecules_dropped.append(mindex)
             if all_indices:
-                dset_name = "_".join([name, str(molecule), "all"])
+                dset_name = f"{name}_{molecule}_all"
                 self.add_dataset(dset_name)
                 self._output_data[dset_name].atom_indices = list(all_indices)
                 self._indices_per_data_key[dset_name] = all_indices
@@ -289,12 +282,12 @@ class GroupingTool:
             for mindex, mol in enumerate(self._cs._clusters[molecule]):
                 trimmed_mol = self._current_selection.intersection(mol)
                 if set(mol) == trimmed_mol:
-                    dset_name = "_".join([name, str(molecule), str(mindex + 1)])
+                    dset_name = f"{name}_{molecule}_{mindex + 1}"
                     self.add_dataset(dset_name, override={"main_result": False})
                     self._output_data[dset_name].atom_indices = list(trimmed_mol)
                     self._indices_per_data_key[dset_name] = trimmed_mol
                     self._molecule_datasets.add(dset_name)
-                elif len(trimmed_mol):
+                elif trimmed_mol:
                     molecules_dropped.append(mindex)
         if molecules_dropped:
             LOG.warning(
@@ -306,6 +299,7 @@ class GroupingTool:
         self,
         index: int,
         result: np.ndarray,
+        *,
         normalise: bool = True,
         centre_of_mass: bool = True,
     ):
@@ -331,7 +325,7 @@ class GroupingTool:
             self.assign_result_atomic(index, result, normalise)
 
     def assign_result_molecular(
-        self, index: int, result: np.ndarray, centre_of_mass: bool = True
+        self, index: int, result: np.ndarray, *, centre_of_mass: bool = True
     ):
         """Add the current result to the molecule-grouped datasets,
         together with the relevant scaling factors.
@@ -360,7 +354,7 @@ class GroupingTool:
                     self._molecule_mass[dset_name] += 1.0
 
     def assign_result_atomic(
-        self, index: int, result: np.ndarray, normalise: bool = True
+        self, index: int, result: np.ndarray, *, normalise: bool = True
     ):
         """Add the current result to the atom-averaged datasets,
         together with the relevant scaling factors.
