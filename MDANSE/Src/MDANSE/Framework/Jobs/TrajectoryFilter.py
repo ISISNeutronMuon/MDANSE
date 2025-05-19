@@ -164,12 +164,14 @@ class TrajectoryFilter(IJob):
 
         trajectories = copy.deepcopy(self.atomic_trajectory_array)
 
-        # Apply filter (only apply initial position offset to atoms if filter is not lowpass and setting has been applied)
+        # Magnitude of zero frequency in filter response (equivalent to the average atomic positions)
+        zero_magnitude = np.abs(filter.freq_response.magnitudes[0])
+
+        # Apply filter (only apply initial position offset to atoms if filter response f(0) == 0)
         filtered_coords = apply(
             filter,
             trajectories,
-            apply_offsets=filter_attributes.get("attenuation_type", "bandpass")
-            != "lowpass",
+            apply_offsets=np.isclose(zero_magnitude, 0),
         )
 
         # Create new chemical system for output trajectory
