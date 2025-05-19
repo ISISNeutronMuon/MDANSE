@@ -123,7 +123,7 @@ class HDFFormat(IFormat):
                 try:
                     dset.attrs[k] = v
                 except TypeError as error:
-                    log.ERROR("TypeError: %s: %s in %s", k, v, key)
+                    LOG.ERROR("TypeError: %s: %s in %s", k, v, key)
                     raise RuntimeError("Bad HDF5 write.") from error
 
         # The HDF file is closed.
