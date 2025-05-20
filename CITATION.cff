@@ -5,7 +5,7 @@ abstract: >-
   MDANSE Core package - Molecular Dynamics trajectory
   handling and analysis code.
 message: >-
-  If you have used MDANSE in your research, please cite both the MDANSE software itself,
+  If you have used MDANSE or the MDANSE_GUI in your research, please cite both the MDANSE & MDANSE_GUI software,
   and the article from preferred-citation.
 authors:
   - given-names: Raunakk
