@@ -142,3 +142,70 @@ references:
       the MD trajectory files which facilitates an efficient
       calculation of time correlation functions by Fast Fourier
       Transform algorithms.
+
+  - type: article
+    title: |
+      nMoldyn - Interfacing spectroscopic experiments, molecular dynamics simulations and models for time correlation functions
+    authors:
+      - name: V. Calandrini
+      - name: E. Pellegrini
+      - name: P. Calligari
+      - name: K. Hinsen
+      - name: G. R. Kneller
+    identifiers:
+      - type: doi
+        value: 10.1051/sfn/201112010
+      - type: url
+        value: https://www.neutron-sciences.org/articles/sfn/abs/2011/01/sfn201112010/sfn201112010.html
+    journal: JDN
+    pages: 201-232
+    volume: 12
+    year: 2011
+
+  - type: article
+    authors:
+      - name: T. Róg
+      - name: K. Murzyn
+      - name: K. Hinsen
+      - name: G. R. Kneller
+    title: |
+      nMoldyn: A program package for a neutron scattering oriented analysis of molecular dynamics simulations
+    journal: Journal of Computational Chemistry
+    volume: 24
+    number: 5
+    pages: 657-667
+    keywords:
+      - Molecular Dynamics
+      - neutron scattering
+      - memory function
+    identifiers:
+      - type: doi
+        value: 10.1002/jcc.10243
+      - type: url
+        value: https://onlinelibrary.wiley.com/doi/abs/10.1002/jcc.10243
+    year: 2003
+
+  - type: article
+    authors:
+      - name: Konrad Hinsen
+      - name: Eric Pellegrini
+      - name: Sławomir Stachura
+      - name: Gerald R. Kneller
+    title: |
+      nMoldyn 3: Using task farming for a parallel spectroscopy-oriented analysis of molecular dynamics simulations
+    journal: Journal of Computational Chemistry
+    volume: 33
+    number: 25
+    pages: 2043-2048
+    keywords:
+      - parallel computing
+      - task farming
+      - time series analysis
+      - theoretical spectroscopy
+      - molecular simulation
+    identifiers:
+      - type: doi
+        value: 10.1002/jcc.23035
+      - type: url
+        value: https://onlinelibrary.wiley.com/doi/abs/10.1002/jcc.23035
+    year: 2012
