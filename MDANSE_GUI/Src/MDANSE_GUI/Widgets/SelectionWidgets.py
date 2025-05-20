@@ -513,7 +513,7 @@ class PositionSelection(BasicSelectionWidget):
         temp_coordinates = trajectory.coordinates(0)
         self._lower_limit = np.min(temp_coordinates, axis=0)
         self._upper_limit = np.max(temp_coordinates, axis=0)
-        print(f"shape: {temp_coordinates.shape}")
+
         self._current_lower_limit = self._lower_limit.copy()
         self._current_upper_limit = self._upper_limit.copy()
         super().__init__(parent, widget_label)
