@@ -20,6 +20,7 @@ SRTIO3_TRAJ = "cp2k_srtio3_unfiltered.mdt"
 # Test results must satisfy a 5% tolerance to error
 TOLERANCE = 5
 
+
 @pytest.fixture(scope="module")
 def unfiltered_power_spectrum(tmp_path_factory):
     """Fixture returns the output file of the PositionPowerSpectrum job with the SrTiO3 trajectory as the input."""
@@ -28,15 +29,15 @@ def unfiltered_power_spectrum(tmp_path_factory):
     out_file = temp_name.with_suffix(".mda")
 
     parameters = {
-        'atom_selection': '{}',
-        'atom_transmutation': '{}',
-        'frames': [0, 320, 1, 160],
-        'instrument_resolution': ('ideal', {}),
-        'output_files': (temp_name, ['MDAFormat'], 'no logs'),
-        'projection': ('NullProjector', []),
-        'running_mode': ('single-core',),
-        'trajectory': CONV_DIR / SRTIO3_TRAJ,
-        'weights': 'atomic_weight'
+        "atom_selection": "{}",
+        "atom_transmutation": "{}",
+        "frames": [0, 320, 1, 160],
+        "instrument_resolution": ("ideal", {}),
+        "output_files": (temp_name, ["MDAFormat"], "no logs"),
+        "projection": ("NullProjector", []),
+        "running_mode": ("single-core",),
+        "trajectory": CONV_DIR / SRTIO3_TRAJ,
+        "weights": "atomic_weight",
     }
 
     power_spectrum = IJob.create("PositionPowerSpectrum")
@@ -44,14 +45,53 @@ def unfiltered_power_spectrum(tmp_path_factory):
 
     yield out_file
 
+
 @pytest.mark.parametrize(
     "filter_config",
     [
-        { "filter": "Butterworth", "attributes": {"n_steps": 320, "time_step_ps": 0.005, "order": 1, "attenuation_type": "lowpass", "cutoff_freq": 19.635}},
-        { "filter": "Butterworth", "attributes": {"n_steps": 320, "time_step_ps": 0.005, "order": 1, "attenuation_type": "highpass", "cutoff_freq": 31.416}},
-        { "filter": "ChebyshevTypeII", "attributes": {"n_steps": 320, "time_step_ps": 0.005, "order": 1, "min_attenuation": 12.7, "attenuation_type": "bandpass", "cutoff_freq": [27.489000000000004, 376.992]}},
-        { "filter": "Bessel", "attributes": {"n_steps": 320, "time_step_ps": 0.005, "order": 1, "norm": "phase", "attenuation_type": "bandstop", "cutoff_freq": [27.489000000000004, 70.686]}}
-    ]
+        {
+            "filter": "Butterworth",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 1,
+                "attenuation_type": "lowpass",
+                "cutoff_freq": 19.635,
+            },
+        },
+        {
+            "filter": "Butterworth",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 1,
+                "attenuation_type": "highpass",
+                "cutoff_freq": 31.416,
+            },
+        },
+        {
+            "filter": "ChebyshevTypeII",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 1,
+                "min_attenuation": 12.7,
+                "attenuation_type": "bandpass",
+                "cutoff_freq": [27.489000000000004, 376.992],
+            },
+        },
+        {
+            "filter": "Bessel",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 1,
+                "norm": "phase",
+                "attenuation_type": "bandstop",
+                "cutoff_freq": [27.489000000000004, 70.686],
+            },
+        },
+    ],
 )
 def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_config):
     """The performance of the MDANSE trajectory filter is tested by analysing functional form.
@@ -70,7 +110,9 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
     """
 
     # Retrieve U(w), check the data is as expected
-    original_data = SingleDataset("pps_total", h5py.File(unfiltered_power_spectrum, "r+"))
+    original_data = SingleDataset(
+        "pps_total", h5py.File(unfiltered_power_spectrum, "r+")
+    )
     u_x_axis_name = original_data.available_x_axes()
 
     assert u_x_axis_name == ["romega"]
@@ -91,7 +133,10 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
 
     # Supply frequencies against which to calculate response H(w)
     filter_object.custom_freq_range = u_x_axis
-    filter_object.freq_response = (filter_object.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
+    filter_object.freq_response = (
+        filter_object.coeffs,
+        Filter.FrequencyRangeMethod.CUSTOM,
+    )
 
     assert np.round(filter_object.freq_response.frequencies.min(), 0) == 0
     assert np.round(filter_object.freq_response.frequencies.max(), 0) == 626
@@ -110,15 +155,15 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
     f_trajectory_out_file = temp_name.with_suffix(".mdt")
 
     trajectory_filter_parameters = {
-        'atom_selection': '{}',
-        'frames': [0, 320, 1, 160],
-        'instrument_resolution': ('ideal', {}),
-        'output_files': (temp_name, 64, 128, 'gzip', 'no logs'),
-        'projection': ('NullProjector', []),
-        'running_mode': ('single-core',),
-        'trajectory': CONV_DIR / SRTIO3_TRAJ,
-        'trajectory_filter': json.dumps(filter_config),
-        'weights': 'atomic_weight',
+        "atom_selection": "{}",
+        "frames": [0, 320, 1, 160],
+        "instrument_resolution": ("ideal", {}),
+        "output_files": (temp_name, 64, 128, "gzip", "no logs"),
+        "projection": ("NullProjector", []),
+        "running_mode": ("single-core",),
+        "trajectory": CONV_DIR / SRTIO3_TRAJ,
+        "trajectory_filter": json.dumps(filter_config),
+        "weights": "atomic_weight",
     }
 
     trajectory_filter_job = IJob.create("TrajectoryFilter")
@@ -131,15 +176,15 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
     fw_out_file = temp_name.with_suffix(".mda")
 
     parameters = {
-        'atom_selection': '{}',
-        'atom_transmutation': '{}',
-        'frames': [0, 320, 1, 160],
-        'instrument_resolution': ('ideal', {}),
-        'output_files': (temp_name, ['MDAFormat'], 'no logs'),
-        'projection': ('NullProjector', []),
-        'running_mode': ('single-core',),
-        'trajectory': f_trajectory_out_file,
-        'weights': 'atomic_weight'
+        "atom_selection": "{}",
+        "atom_transmutation": "{}",
+        "frames": [0, 320, 1, 160],
+        "instrument_resolution": ("ideal", {}),
+        "output_files": (temp_name, ["MDAFormat"], "no logs"),
+        "projection": ("NullProjector", []),
+        "running_mode": ("single-core",),
+        "trajectory": f_trajectory_out_file,
+        "weights": "atomic_weight",
     }
 
     fw_job = IJob.create("PositionPowerSpectrum")
@@ -164,8 +209,8 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
     assert len(fw) == len(uw)
 
     # Calculate differences between U(w)H(w) and F(w)
-    normalisation_coeff = 100/conv.max()
-    normalised = (conv*normalisation_coeff, fw*normalisation_coeff)
+    normalisation_coeff = 100 / conv.max()
+    normalised = (conv * normalisation_coeff, fw * normalisation_coeff)
 
-    error = np.mean(np.abs(normalised[0]-normalised[1]))
+    error = np.mean(np.abs(normalised[0] - normalised[1]))
     assert np.isclose(error, 0, atol=TOLERANCE)
