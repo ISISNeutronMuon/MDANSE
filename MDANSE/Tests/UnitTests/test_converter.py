@@ -44,6 +44,8 @@ dlp_field_v4 = DATA_DIR / "FIELD4"
 dlp_history_v4 = DATA_DIR / "HISTORY4"
 dlp_field_with_grad = DATA_DIR / "FIELD_methanol_short"
 dlp_history_with_grad = DATA_DIR / "HISTORY_methanol_short"
+dlp_field_awkward = DATA_DIR / "FIELD_CUT"
+dlp_history_awkward = DATA_DIR / "HISTORY_CUT"
 apoferritin_dcd = DATA_DIR / "apoferritin.dcd"
 apoferritin_pdb = DATA_DIR / "apoferritin.pdb"
 pbanew_md = DATA_DIR / "PBAnew.md"
@@ -276,6 +278,22 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
                 "field_file": dlp_field_with_grad,
                 "fold": False,
                 "history_file": dlp_history_with_grad,
+            },
+        ),
+        (
+            "DL_POLY",
+            "dlp_awkward.mdt",
+            (
+                "/configuration/coordinates",
+                "/unit_cell",
+                "/time",
+                "/charge",
+            ),
+            {
+                "atom_aliases": "{}",
+                "field_file": dlp_field_awkward,
+                "fold": False,
+                "history_file": dlp_history_awkward,
             },
         ),
         (

@@ -26,6 +26,7 @@ from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Converters.LAMMPS import BoxStyle
 from MDANSE.MLogging import LOG
+from MDANSE.IO.IOUtils import strip_comments
 from more_itertools import first, first_true, split_before, spy
 from numpy.typing import NDArray
 
@@ -296,18 +297,14 @@ EXPNUMBER_RE = rf"(?:(?:{FNUMBER_RE}|{INTNUMBER_RE})[Ee][+-]?\d{{1,3}})"
 EXPFNUMBER_RE = f"(?:{EXPNUMBER_RE}|{FNUMBER_RE})"
 
 
-def strip_comments(line: str) -> str:
-    return line.split("#", maxsplit=1)[0]
-
-
 def one_to_one_parser(lines, *_) -> Dict[str, str]:
-    return dict(line.split() for line in map(strip_comments, lines))
+    return dict(map(str.split, strip_comments(lines)))
 
 
 def float_list_parser(lines, *_) -> Dict[str, Tuple[float, ...]]:
     return {
         line.split()[0]: tuple(map(float, line.split()[1:]))
-        for line in map(strip_comments, lines)
+        for line in strip_comments(lines)
         if line
     }
 
@@ -315,7 +312,7 @@ def float_list_parser(lines, *_) -> Dict[str, Tuple[float, ...]]:
 def int_list_parser(lines, *_) -> Dict[str, Tuple[int, ...]]:
     return {
         line.split()[0]: tuple(map(int, line.split()[1:]))
-        for line in map(strip_comments, lines)
+        for line in strip_comments(lines)
         if line
     }
 
@@ -557,7 +554,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
         atom_style = ATOM_TYPES_MAP[atom_type]
         AtomData = namedtuple("AtomData", atom_style)
-        lines = map(strip_comments, lines)
+        lines = strip_comments(lines)
         atom_data = list(starmap(AtomData, map(str.split, lines)))
 
         parsed["n_atoms"] = self.get("n_atoms", len(atom_data))
@@ -690,8 +687,8 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         """
         with open(filename, "r") as source_file:
             return [
-                strip_comments(line).strip()
-                for line in source_file
+                line.strip()
+                for line in strip_comments(source_file)
                 if ConfigFileConfigurator._is_block(line)
             ]
 
