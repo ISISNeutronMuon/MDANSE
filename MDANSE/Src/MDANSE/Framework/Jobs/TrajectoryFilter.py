@@ -167,11 +167,11 @@ class TrajectoryFilter(IJob):
         # Magnitude of zero frequency in filter response (equivalent to the average atomic positions)
         zero_magnitude = np.abs(filter.freq_response.magnitudes[0])
 
-        # Apply filter (only apply initial position offset to atoms if filter response f(0) == 0)
+        # Apply filter (only apply initial position offset to atoms if filter response f(0) != 1)
         filtered_coords = apply(
             filter,
             trajectories,
-            apply_offsets=np.isclose(zero_magnitude, 0),
+            apply_offsets=np.isclose(zero_magnitude, 1),
         )
 
         # Create new chemical system for output trajectory
@@ -224,14 +224,12 @@ def apply(filter, trajectories, apply_offsets: bool) -> np.ndarray:
     output_trajectory_array = np.zeros(trajectories.shape)
 
     for at, (x, y, z) in enumerate(trajectories):
-        # Store initial positions
-        offsets = np.array([x[0], y[0], z[0]])
-
         for i, component in enumerate((x, y, z)):
             output = filter.apply(component)
 
             if apply_offsets:
-                output += offsets[i]
+                offset = component[0] - output[0]
+                output += offset
             output_trajectory_array[at][i] = output
 
     return output_trajectory_array
