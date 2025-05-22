@@ -14,14 +14,14 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import Set, Sequence
+from collections.abc import Sequence
 
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 def select_molecules(
     trajectory: Trajectory, molecule_names: Sequence[str] = (), **_kwargs: str
-) -> Set[int]:
+) -> set[int]:
     """Selects all the atoms belonging to the specified molecule types.
 
     Parameters

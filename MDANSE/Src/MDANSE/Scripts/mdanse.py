@@ -324,7 +324,7 @@ class CommandLineParser(optparse.OptionParser):
         try:
             jobs.create(name).save(filename)
         # Case where an error occured when writing the template.
-        except IOError:
+        except OSError:
             raise CommandLineParserError(
                 f"Could not write the job template as {filename!r}"
             )
@@ -366,7 +366,7 @@ class CommandLineParser(optparse.OptionParser):
 
         try:
             IJob.save_template(shortname, classname)
-        except (IOError, KeyError):
+        except (OSError, KeyError):
             return
 
 

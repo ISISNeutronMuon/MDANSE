@@ -15,13 +15,13 @@
 #
 
 import operator
-from typing import Union, Iterable, List
+from collections.abc import Iterable
+from typing import Union
 
 import numpy as np
-
-from MDANSE.Core.Error import Error
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Core.Error import Error
 
 
 class MolecularDynamicsError(Error):
@@ -46,7 +46,7 @@ def elements_from_masses(masses: Iterable[float], tolerance: float = 0.01):
     return result
 
 
-def atom_index_to_molecule_index(chemical_system: ChemicalSystem) -> List[int]:
+def atom_index_to_molecule_index(chemical_system: ChemicalSystem) -> list[int]:
     """Returns a list of molecule numbers, per atom. Single
     atoms are assigned the value -1.
 

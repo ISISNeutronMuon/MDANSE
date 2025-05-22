@@ -99,7 +99,7 @@ class TestAtomsDatabase(unittest.TestCase):
         ) as m:
             with patch("pathlib.Path.exists", spec=True):
                 ATOMS_DATABASE._load("user.json")
-                m.assert_called_with(Path("user.json"), "r")
+                m.assert_called_with(Path("user.json"), encoding="utf-8")
                 self.assertDictEqual({"family": "str"}, ATOMS_DATABASE._properties)
                 self.assertDictEqual(
                     {"H": {"family": "non-metal"}}, ATOMS_DATABASE._data

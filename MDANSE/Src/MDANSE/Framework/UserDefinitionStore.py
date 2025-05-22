@@ -25,7 +25,7 @@ class UserDefinitionStoreError(Error):
     pass
 
 
-class UserDefinitionStore(object, metaclass=Singleton):
+class UserDefinitionStore(metaclass=Singleton):
     """
     This class is used to register, save and delete MDANSE user definitions (a.k.a. UD).
 
@@ -79,7 +79,7 @@ class UserDefinitionStore(object, metaclass=Singleton):
 
         try:
             f = open(UserDefinitionStore.UD_PATH, "wb")
-        except IOError:
+        except OSError:
             return
         else:
             pickle.dump(self._definitions, f, protocol=2)

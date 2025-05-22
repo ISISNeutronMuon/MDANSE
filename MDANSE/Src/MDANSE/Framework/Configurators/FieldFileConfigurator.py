@@ -14,7 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import re
-from typing import Iterable, Iterator, NamedTuple
+from typing import NamedTuple
+from collections.abc import Iterable, Iterator
 
 import numpy as np
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
@@ -47,7 +48,7 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
 
     def parse(self):
         # The FIELD file is opened for reading, its contents stored into |lines| and then closed.
-        with open(self["filename"], "r") as unit:
+        with open(self["filename"]) as unit:
             lines = strip_comments(unit)
 
             self["title"] = next(lines)
@@ -102,7 +103,7 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
         blocks = split_before(molecule, self._find_molecular_key)
 
         bonds = []
-        n_mols = None
+        n_mols = -1
 
         for block in map(iter, blocks):
             line = next(block)
@@ -178,16 +179,16 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
         return np.concatenate(charge_groups)
 
     def build_chemical_system(
-        self, chemical_system: ChemicalSystem, aliases: dict[str, str]
+        self, chemical_system: ChemicalSystem, aliases: dict[str, dict[str, str]]
     ):
         """Parses FIELD file to construct initial system.
 
         Parameters
         ----------
+        chemical_system : ChemicalSystem
+            Chemical system to build on.
         aliases : dict[str, dict[str, str]]
             Mapping of atomic aliases to elements.
-        config : dict[str, Any]
-            Configurations details.
 
         Returns
         -------

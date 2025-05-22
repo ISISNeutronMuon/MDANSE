@@ -15,11 +15,12 @@
 #
 import re
 from collections import namedtuple
-from collections.abc import Sequence
+from collections.abc import Sequence, Iterable
 from itertools import starmap
 from pathlib import Path
 from string import ascii_uppercase as upcase
-from typing import Any, Dict, Iterable, Literal, Optional, Tuple, Union
+from typing import Any, Literal, Optional, Union
+
 
 import numpy as np
 from MDANSE.Core.Error import Error
@@ -297,11 +298,11 @@ EXPNUMBER_RE = rf"(?:(?:{FNUMBER_RE}|{INTNUMBER_RE})[Ee][+-]?\d{{1,3}})"
 EXPFNUMBER_RE = f"(?:{EXPNUMBER_RE}|{FNUMBER_RE})"
 
 
-def one_to_one_parser(lines, *_) -> Dict[str, str]:
+def one_to_one_parser(lines, *_) -> dict[str, str]:
     return dict(map(str.split, strip_comments(lines)))
 
 
-def float_list_parser(lines, *_) -> Dict[str, Tuple[float, ...]]:
+def float_list_parser(lines, *_) -> dict[str, tuple[float, ...]]:
     return {
         line.split()[0]: tuple(map(float, line.split()[1:]))
         for line in strip_comments(lines)
@@ -309,7 +310,7 @@ def float_list_parser(lines, *_) -> Dict[str, Tuple[float, ...]]:
     }
 
 
-def int_list_parser(lines, *_) -> Dict[str, Tuple[int, ...]]:
+def int_list_parser(lines, *_) -> dict[str, tuple[int, ...]]:
     return {
         line.split()[0]: tuple(map(int, line.split()[1:]))
         for line in strip_comments(lines)
@@ -325,7 +326,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
     """
 
     @staticmethod
-    def header_parser(lines: Iterable[str]) -> Dict[str, Any]:
+    def header_parser(lines: Iterable[str]) -> dict[str, Any]:
         """Parse config header.
 
         Parameters
@@ -581,7 +582,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
     def bonds_parser(
         self, lines: Iterable[str], *_
-    ) -> Dict[Literal["bonds"], Sequence[Tuple[int, int]]]:
+    ) -> dict[Literal["bonds"], Sequence[tuple[int, int]]]:
         """Parse bonded atoms.
 
         Parameters
@@ -602,7 +603,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
     def mass_parser(
         self, lines: Iterable[str], *_
-    ) -> Dict[Literal["mass"], NDArray[float]]:
+    ) -> dict[Literal["mass"], NDArray[float]]:
         """Get atom-type masses.
 
         Parameters
@@ -632,7 +633,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
     def elements_parser(
         self, lines: Iterable[str], *_
-    ) -> Dict[Literal["elements"], Dict[int, str]]:
+    ) -> dict[Literal["elements"], dict[int, str]]:
         """Parse elements block.
 
         Parameters
@@ -685,7 +686,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         list[str]
             Blocks present in file.
         """
-        with open(filename, "r") as source_file:
+        with open(filename, encoding="utf-8") as source_file:
             return [
                 line.strip()
                 for line in strip_comments(source_file)
@@ -698,7 +699,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
         self._known_blocks = self.scan(self._filename)
 
-        with open(self._filename, "r") as source_file:
+        with open(self._filename, encoding="utf-8") as source_file:
             lines = map(str.strip, source_file)
 
             comment = next(lines)

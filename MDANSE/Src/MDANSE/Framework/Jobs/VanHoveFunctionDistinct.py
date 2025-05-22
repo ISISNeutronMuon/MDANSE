@@ -17,6 +17,7 @@ import collections
 import itertools as it
 
 import numpy as np
+import numpy.typing as npt
 from scipy.spatial import KDTree
 
 from MDANSE.Chemistry import ChemicalSystem
@@ -35,7 +36,9 @@ DETAILED_CELL_MESSAGE = (
 
 
 def distance_array_2D(
-    ref_atoms: np.ndarray, other_atoms: np.ndarray, cell_array: np.ndarray
+    ref_atoms: npt.NDArray[float],
+    other_atoms: npt.NDArray[float],
+    cell_array: npt.NDArray[float],
 ):
     """Given two input arrays of atomic positions sized
     (N,3) and (M,3), returns an (M, N) array of distances
@@ -66,13 +69,13 @@ def distance_array_2D(
 
 
 def van_hove_distinct(
-    cell: np.ndarray,
-    indices_intra: np.ndarray[int],
+    cell: npt.NDArray[float],
+    indices_intra: npt.NDArray[int],
     symbolindex: list[int],
-    intra: np.ndarray,
-    total: np.ndarray,
-    coords_t0: np.ndarray,
-    coords_t1: np.ndarray,
+    intra: npt.NDArray[float],
+    total: npt.NDArray[float],
+    coords_t0: npt.NDArray[float],
+    coords_t1: npt.NDArray[float],
     rmin: float,
     dr: float,
     size_limit: int = 1024,
@@ -94,7 +97,7 @@ def van_hove_distinct(
         direct matrix of the unit cell of the system
     indices_intra : np.ndarray[int]
         array indices of the distance matrix elements for each molecule in the system
-    symbolindex : List[int]
+    symbolindex : list[int]
         list of int values of atom types in the system
     intra : np.ndarray
         the array of distance counts between atoms in the same molecule
@@ -186,17 +189,17 @@ def van_hove_distinct(
 
 
 def van_hove_distinct_all_inter(
-    cell: np.ndarray,
+    cell: npt.NDArray[float],
     _indices_intra: None,
     symbolindex: list[int],
     intra: None,
-    total: np.ndarray,
-    coords_t0: np.ndarray,
-    coords_t1: np.ndarray,
+    total: npt.NDArray[float],
+    coords_t0: npt.NDArray[float],
+    coords_t1: npt.NDArray[float],
     rmin: float,
     dr: float,
     size_limit: int = 1024,
-):
+) -> tuple[None, npt.NDArray[float]]:
     """Return the histogram of interatomic distances.
 
     Calculates the distance histogram between the configurations at
@@ -233,7 +236,7 @@ def van_hove_distinct_all_inter(
 
     Returns
     -------
-    Tuple[np.ndarray]
+    Tuple[None, np.ndarray]
         intra and total input arrays modified by adding new counts
 
     """
@@ -286,7 +289,9 @@ def van_hove_distinct_all_inter(
     return intra, total
 
 
-def intramolecular_lookup_dict(chemical_system: ChemicalSystem) -> np.ndarray[int]:
+def intramolecular_lookup_dict(
+    chemical_system: ChemicalSystem.ChemicalSystem,
+) -> npt.NDArray[int]:
     """Build a lookup dictionary of atom indices in the same molecule.
 
     Two atoms belonging to the same molecule will return the same value
@@ -498,7 +503,9 @@ class VanHoveFunctionDistinct(IJob):
             (self.nElements, self.nElements, self.n_mid_points, self.numberOfSteps),
         )
 
-    def run_step(self, time: int) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
+    def run_step(
+        self, time: int
+    ) -> tuple[int, tuple[npt.NDArray[float], npt.NDArray[float]]]:
         """Calculate results for a single time step.
 
         Calculates the distance histogram between the configurations
@@ -515,7 +522,6 @@ class VanHoveFunctionDistinct(IJob):
         tuple[int, tuple[np.ndarray]]
             A tuple containing the time difference and a tuple of the
             total and intramolecular distance histograms.
-
         """
         bins_intra = np.zeros((self.nElements, self.nElements, self.n_mid_points))
         bins_total = np.zeros((self.nElements, self.nElements, self.n_mid_points))
@@ -576,7 +582,9 @@ class VanHoveFunctionDistinct(IJob):
 
         return time, (bins_intra, bins_total)
 
-    def combine(self, time: int, x: tuple[np.ndarray, np.ndarray]):
+    def combine(
+        self, time: int, x: tuple[npt.NDArray[float], npt.NDArray[float]]
+    ) -> None:
         """Add the results into the histograms for the input time difference.
 
         Parameters

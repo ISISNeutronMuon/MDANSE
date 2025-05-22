@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
-from typing import Dict, Tuple
 from pathlib import PurePath
 
 from qtpy.QtCore import QObject, Slot, Signal, QMessageLogger
@@ -118,7 +117,7 @@ class GeneralTab(QObject):
                 LOG.debug(f"Visualiser {self._visualiser} has no unit lookup")
                 self._visualiser._unit_lookup = self
 
-    def conversion_factor(self, input_unit: str) -> Tuple[float, str]:
+    def conversion_factor(self, input_unit: str) -> tuple[float, str]:
         """Finds the conversion factor from an input unit
         to the unit preferred by the user for a given
         physical property.

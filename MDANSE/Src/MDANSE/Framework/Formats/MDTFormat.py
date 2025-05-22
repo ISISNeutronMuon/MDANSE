@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 from MDANSE.Framework.Formats.IFormat import IFormat
 
@@ -43,7 +43,7 @@ class MDTFormat(IFormat):
     def write(
         cls,
         filename: str,
-        data: Dict[str, "IOutputVariable"],
+        data: dict[str, "IOutputVariable"],
         header: str = "",
         run_instance: "IJob" = None,
         extension: str = extensions[0],

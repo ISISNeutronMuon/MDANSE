@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from matplotlib.pyplot import style as mpl_style
 from matplotlib import rcParams
@@ -162,10 +162,10 @@ class PlotterTemplate(metaclass=SubclassFactory):
             return
         target.clear()
 
-    def slider_labels(self) -> List[str]:
+    def slider_labels(self) -> list[str]:
         return ["Slider 1", "Slider 2"]
 
-    def slider_limits(self) -> List[str]:
+    def slider_limits(self) -> list[str]:
         return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
 
     def sliders_coupled(self) -> bool:
@@ -220,7 +220,7 @@ class PlotterTemplate(metaclass=SubclassFactory):
             self._slider_reference.setEnabled(False)
             self._slider_reference.blockSignals(True)
 
-    def handle_slider(self, new_value: List[float]):
+    def handle_slider(self, new_value: list[float]):
         self._slider_values = new_value
 
     def plot(

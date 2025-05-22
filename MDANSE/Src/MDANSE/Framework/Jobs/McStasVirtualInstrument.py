@@ -511,9 +511,8 @@ class McStasVirtualInstrument(IJob):
         # Add the data block
 
         data = []
-        f = open(simFile, "r")
-        lines = f.readlines()
-        f.close()
+        with open(simFile, encoding="utf-8") as file:
+            lines = file.readlines()
 
         header = True
         for line in lines:

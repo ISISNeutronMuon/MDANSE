@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Iterable
+from collections.abc import Iterable
 import re
 
 import numpy as np
@@ -40,7 +40,7 @@ class XYZFileConfigurator(FileWithAtomDataConfigurator):
         self._frame_lines = 0
         filename = self["filename"]
 
-        self["instance"] = open(filename, "r")
+        self["instance"] = open(filename, encoding="utf-8")
 
         self["instance"].seek(0, 0)  # go to the beginning of file
 

@@ -15,7 +15,8 @@
 #
 
 from __future__ import annotations
-from typing import List, Tuple, Dict, Any, Set
+
+from typing import Any
 import copy
 from functools import reduce
 
@@ -56,7 +57,9 @@ class ChemicalSystem:
     def __str__(self):
         return f"ChemicalSystem {self.name} consisting of {len(self._atom_types)} atoms in {len(self._clusters)} molecules"
 
-    def initialise_atoms(self, element_list: List[str], name_list: List[str] = None):
+    def initialise_atoms(
+        self, element_list: list[str], name_list: list[str] | None = None
+    ):
         self._atom_indices = [
             self.add_atom(self._database.get_atom_property(symbol, "atomic_number"))
             for symbol in element_list
@@ -76,21 +79,21 @@ class ChemicalSystem:
         rdkit_atm.SetNoImplicit(True)
         return self.rdkit_mol.AddAtom(rdkit_atm)
 
-    def add_bonds(self, pair_list: List[Tuple[int]]):
+    def add_bonds(self, pair_list: list[tuple[int, int]]):
         self._bonds += list(pair_list)
         for pair in pair_list:
             self.rdkit_mol.AddBond(
                 int(pair[0]), int(pair[1]), Chem.rdchem.BondType.UNSPECIFIED
             )
 
-    def add_labels(self, label_dict: Dict[str, List[int]]):
+    def add_labels(self, label_dict: dict[str, list[int]]):
         for key, item in label_dict.items():
             if key in self._labels.keys():
                 self._labels[key] += item
             else:
                 self._labels[key] = item
 
-    def add_clusters(self, group_list: List[List[int]]):
+    def add_clusters(self, group_list: list[list[int]]):
         for group in group_list:
             sorted_group = list(sorted(set(group)))
             if len(sorted_group) < 2:
@@ -183,7 +186,7 @@ class ChemicalSystem:
         """
         return 0
 
-    def copy(self) -> "ChemicalSystem":
+    def copy(self) -> ChemicalSystem:
         """
         Copies the instance of ChemicalSystem into a new, identical instance.
 
@@ -216,7 +219,7 @@ class ChemicalSystem:
             molecules.append(sorted(molecule))
         self.add_clusters(molecules)
 
-    def unique_molecules(self) -> List[str]:
+    def unique_molecules(self) -> list[str]:
         """Returns the list of unique names in the chemical system"""
         return list([str(x) for x in self._clusters.keys()])
 
@@ -230,7 +233,7 @@ class ChemicalSystem:
         return self._total_number_of_atoms
 
     @property
-    def all_indices(self) -> Set[int]:
+    def all_indices(self) -> set[int]:
         """The number of non-ghost atoms in the ChemicalSystem."""
         return set(self._atom_indices)
 

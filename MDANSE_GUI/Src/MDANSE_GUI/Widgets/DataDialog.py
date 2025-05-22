@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Optional, List
+from typing import Optional
 
 import numpy as np
 from qtpy.QtWidgets import (
@@ -36,8 +36,8 @@ class DataDialog(QDialog):
     def __init__(
         self,
         *args,
-        input_data: List[np.ndarray],
-        input_units: List[str],
+        input_data: list[np.ndarray],
+        input_units: list[str],
         is_input=False,
         **kwargs,
     ):

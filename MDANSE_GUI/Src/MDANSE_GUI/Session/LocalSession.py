@@ -16,7 +16,6 @@
 import os
 import json
 from pathlib import PurePath
-from typing import Dict, List
 
 from qtpy.QtCore import QObject, Signal, Slot
 
@@ -63,7 +62,7 @@ class LocalSession(QObject):
         self._colours["style"] = "ggplot"
 
     @Slot(dict)
-    def update_units(self, input: Dict):
+    def update_units(self, input: dict):
         for key, value in input.items():
             self._units[key] = value
         self.new_units.emit(self._units)
@@ -91,7 +90,7 @@ class LocalSession(QObject):
     def obtain_settings(self, gui_element):
         return LocalSettings()
 
-    def sections(self) -> List[Dict[str, str]]:
+    def sections(self) -> list[dict[str, str]]:
         return [self._units, self._colours]
 
     @Slot()
@@ -120,7 +119,7 @@ class LocalSession(QObject):
         if fname is None:
             fname = os.path.join(PLATFORM.application_directory(), "gui_session.json")
         try:
-            with open(fname, "r") as source:
+            with open(fname, encoding="utf-8") as source:
                 all_items_text = source.readline()
         except Exception:
             LOG.warning(f"Failed to read session settings from {fname}")

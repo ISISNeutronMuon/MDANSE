@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
-from typing import Dict
 
 from MDANSE.Core.Error import Error
 from MDANSE.MLogging import LOG
@@ -28,7 +27,7 @@ class ConfigurationError(Error):
     pass
 
 
-class Configurable(object):
+class Configurable:
     """Allows any object that derives from it to be configurable within the MDANSE framework.
 
     Within that framework, to be configurable, a class must:
@@ -230,7 +229,7 @@ class Configurable(object):
 
         self._configured = True
 
-    def output_configuration(self) -> Dict[str, str]:
+    def output_configuration(self) -> dict[str, str]:
         if not self._configured:
             return
         result = {}

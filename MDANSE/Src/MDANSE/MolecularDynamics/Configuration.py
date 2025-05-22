@@ -16,7 +16,7 @@
 from __future__ import annotations
 import abc
 import copy
-from typing import Union, TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING
 from functools import reduce
 
 import numpy as np
@@ -62,7 +62,7 @@ def contiguous_coordinates_real(
     coords: np.ndarray,
     cell: np.ndarray,
     rcell: np.ndarray,
-    indices: List[Tuple[int]],
+    indices: list[tuple[int, ...]],
     bring_to_centre: bool = False,
 ):
     """Translates atoms by a lattice vector. Returns a coordinate array
@@ -116,7 +116,7 @@ def contiguous_coordinates_real(
 
 def contiguous_coordinates_box(
     frac_coords: np.ndarray,
-    indices: List[Tuple[int]],
+    indices: list[tuple[int, ...]],
     bring_to_centre: bool = False,
 ):
     """Translates atoms by a lattice vector. Returns a FRACTIONAL coordinate array
@@ -166,7 +166,7 @@ def continuous_coordinates(
     coords: np.ndarray,
     cell: np.ndarray,
     rcell: np.ndarray,
-    bond_list: List[Tuple[int]],
+    bond_list: list[tuple[int, ...]],
 ):
     """Translates atoms by lattice vectors to ensure that
     no bonds are broken. Does nothing if no bonds are defined
@@ -206,7 +206,7 @@ def continuous_coordinates(
 
 def padded_coordinates(
     coords: np.ndarray,
-    unit_cell: "UnitCell",
+    unit_cell: UnitCell,
     thickness: float,
     fold_into_box: bool = True,
 ) -> np.ndarray:
@@ -458,15 +458,13 @@ class _PeriodicConfiguration(_Configuration):
         :param variables: keyword arguments for any other variables that should be saved to this configuration
         """
 
-        super(_PeriodicConfiguration, self).__init__(
-            chemical_system, coords, **variables
-        )
+        super().__init__(chemical_system, coords, **variables)
 
         if unit_cell.direct.shape != (3, 3):
             raise ValueError("Invalid unit cell dimensions")
         self._unit_cell = unit_cell
 
-    def clone(self, chemical_system: Union[ChemicalSystem, None] = None):
+    def clone(self, chemical_system: ChemicalSystem | None = None):
         """
         Creates a deep copy of this configuration, using the provided chemical system.
 
@@ -694,9 +692,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 class RealConfiguration(_Configuration):
     is_periodic = False
 
-    def clone(
-        self, chemical_system: Union[None, ChemicalSystem] = None
-    ) -> RealConfiguration:
+    def clone(self, chemical_system: ChemicalSystem | None = None) -> RealConfiguration:
         """
         Creates a deep copy of this configuration, using the provided chemical system.
 

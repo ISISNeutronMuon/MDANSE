@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import Tuple
 from pathlib import Path
 
 from MDANSE import PLATFORM
@@ -52,7 +51,7 @@ class SingleOutputFileConfigurator(IConfigurator):
             format if format is not None else SingleOutputFileConfigurator._default[-1]
         )
 
-    def configure(self, value: Tuple[str, str]):
+    def configure(self, value: tuple[str, str]):
         """
         Configure a set of output files for an analysis.
 

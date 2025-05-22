@@ -13,35 +13,29 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import List, Tuple, Dict, Any, Iterable
 import copy
+from typing import Any, Optional
 
 import numpy as np
-from scipy.spatial import cKDTree as KDTree
-
-from qtpy import QtWidgets
-from qtpy.QtCore import Signal, Slot
-from qtpy.QtWidgets import (
-    QSizePolicy,
-)
-
 import vtk
-from vtk.util import numpy_support
-from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
-
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.MLogging import LOG
-
-from MDANSE_GUI.MolecularViewer.readers import hdf5wrapper
-from MDANSE_GUI.MolecularViewer.TraceWidget import TRACE_PARAMETERS
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.MolecularViewer.AtomProperties import (
     AtomProperties,
     ndarray_to_vtkarray,
 )
+from MDANSE_GUI.MolecularViewer.readers import hdf5wrapper
+from MDANSE_GUI.MolecularViewer.TraceWidget import TRACE_PARAMETERS
+from qtpy import QtWidgets
+from qtpy.QtCore import Signal, Slot
+from qtpy.QtWidgets import QSizePolicy
+from scipy.spatial import cKDTree as KDTree
+from vtk.util import numpy_support
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
 
 
-def array_to_3d_imagedata(data: np.ndarray, spacing: Tuple[float]):
+def array_to_3d_imagedata(data: np.ndarray, spacing: tuple[float, float, float]):
     nx, ny, nz = data.shape
     image = vtk.vtkImageData()
     image.SetDimensions(nx, ny, nz)
@@ -99,7 +93,7 @@ class MolecularViewer(QtWidgets.QWidget):
     changed_trace = Signal()
 
     def __init__(self):
-        super(MolecularViewer, self).__init__()
+        super().__init__()
 
         self._scale_factor = 0.4
 
@@ -206,7 +200,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._scale_factor = scale_factor
         self.update_renderer()
 
-    def _new_visibility(self, flags: List[bool]):
+    def _new_visibility(self, flags: list[bool]):
         """Takes the new values of boolean flags which make
         different actors in the 3D scene (in)visible.
 
@@ -224,7 +218,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if result is False:
             self.update_renderer()
 
-    def trace_from_dialog(self, params: Dict[str, Any]):
+    def trace_from_dialog(self, params: dict[str, Any]):
         """Passes the input parameter dictionary to the method
         which draws an isosurface in the 3D view.
 
@@ -256,7 +250,7 @@ class MolecularViewer(QtWidgets.QWidget):
             self._iren.Render()
             self.changed_trace.emit()
 
-    def _draw_isosurface(self, index: int, params: Dict[str, Any] = None):
+    def _draw_isosurface(self, index: int, params: Optional[dict[str, Any]] = None):
         """Calculates the total volume used by an atom in the trajectory
         and draws an isosurface around it.
 
@@ -347,7 +341,7 @@ class MolecularViewer(QtWidgets.QWidget):
         LOG.info(f"Finished calculating the trace of atom {index}")
         self.changed_trace.emit()
 
-    def create_all_actors(self) -> List[vtk.vtkActor]:
+    def create_all_actors(self) -> list[vtk.vtkActor]:
         """Collects all the VTK actors that should be shown in 3D view.
 
         Returns
@@ -389,7 +383,7 @@ class MolecularViewer(QtWidgets.QWidget):
         polydata: vtk.vtkPolyData,
         line_opacity: float = 1.0,
         ball_opacity: float = 1.0,
-    ) -> List[vtk.vtkActor]:
+    ) -> list[vtk.vtkActor]:
         """Creates VTK actors which visualise atoms and bonds.
 
         Parameters
@@ -538,8 +532,8 @@ class MolecularViewer(QtWidgets.QWidget):
     def create_bond_cell_array(
         self,
         rs: np.ndarray,
-        covs: Iterable[float],
-        not_du: Iterable[bool],
+        covs: np.typing.NDArray[float],
+        not_du: list[bool],
         tolerance: float = 0.04,
     ):
         """Finds the pairs of atoms which should be connected by bonds,

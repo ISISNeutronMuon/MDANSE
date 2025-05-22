@@ -28,8 +28,6 @@ class Singleton(type):
         """
 
         if self.__name__ not in self.__instances:
-            self.__instances[self.__name__] = super(Singleton, self).__call__(
-                *args, **kwargs
-            )
+            self.__instances[self.__name__] = super().__call__(*args, **kwargs)
 
         return self.__instances[self.__name__]

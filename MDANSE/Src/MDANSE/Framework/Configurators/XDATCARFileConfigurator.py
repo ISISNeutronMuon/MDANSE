@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Iterable
+from collections.abc import Iterable
 
 import numpy as np
 
@@ -40,16 +40,20 @@ def read_modern_header(source):
 
 
 def check_trajectory(filename: str):
-    with open(filename, "r") as source:
+    with open(filename, encoding="utf-8") as source:
         _, _, atom_numbers, system_name = read_modern_header(source)
-    total_atom_number = np.sum(atom_numbers)
-    fixed_cell = True
-    frame_numbers = True
-    with open(filename, "r") as source:
+
+        total_atom_number = np.sum(atom_numbers)
+        fixed_cell = True
+        frame_numbers = True
+
+        source.seek(0)
+
         lines_read = 0
         names_found = 0
         empty_found = 0
         direct_configuration_found = 0
+
         for line in source:
             lines_read += 1
             if lines_read > 2 * total_atom_number + 10:
@@ -60,6 +64,7 @@ def check_trajectory(filename: str):
                 direct_configuration_found += 1
             if len(line.split()) == 0:
                 empty_found += 1
+
     if names_found > 1:
         fixed_cell = False
     if empty_found > 0:
@@ -76,14 +81,13 @@ def check_trajectory(filename: str):
 class XDATCARFileConfigurator(FileWithAtomDataConfigurator):
     def parse(self):
         filename = self["filename"]
-        with open(filename, "r") as source:
-            lines_read = 0
-            for _ in source:
-                lines_read += 1
+        self["instance"] = open(filename, encoding="utf-8")
+
+        lines_read = sum(1 for _ in self["instance"])
+
+        self["instance"].seek(0)
 
         self._has_fixed_cell, self._has_frame_numbers = check_trajectory(filename)
-
-        self["instance"] = open(filename, "r")
 
         self._conversion_factor = measure(1.0, "ang").toval("nm")
 
