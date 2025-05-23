@@ -21,7 +21,7 @@ from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
 from MDANSE.IO.IOUtils import strip_comments
-from more_itertools import split_at, split_before, take
+from more_itertools import split_at, split_before, take, first_true
 from numpy.typing import NDArray
 from MDANSE.MLogging import LOG
 
@@ -71,29 +71,49 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
         if self["n_molecular_types"] != len(self["molecules"]):
             raise FieldFileError("Error in the definition of the molecular types")
 
-    @staticmethod
+    MOLECULAR_KEYS = (
+        "nummol",
+        "atoms",
+        "shell",
+        "constr",
+        "pmf",
+        "rigid",
+        "teth",
+        "bonds",
+        "angles",
+        "dihedr",
+        "invers",
+    )
+
+    def _find_molecular_key(self, string: str):
+        string = string.lower()
+        return first_true(
+            self.MOLECULAR_KEYS,
+            pred=string.startswith,
+            default=None,
+        )
+
     def parse_molecule(
+        self,
         molecule: Iterable[str],
     ) -> Molecule:
         molecule = iter(molecule)
         molecule_name = next(molecule)
-        pattern = re.compile("^(\w+)\s+(\d+)$", re.I)
-        blocks = split_before(molecule, pattern.match)
+        blocks = split_before(molecule, self._find_molecular_key)
 
         bonds = []
         n_mols = None
 
         for block in map(iter, blocks):
             line = next(block)
-            key, count = line.split()
-            count = int(count)
-            key = key.upper()
+            key = self._find_molecular_key(line)
+            count = int(line.rsplit(maxsplit=1)[-1])
 
             LOG.debug("%s: %d", key, count)
 
-            if key == "NUMMOLS":
+            if key == "nummol":
                 n_mols = count
-            elif key == "ATOMS":
+            elif key == "atoms":
                 n_atoms = count
 
                 specs = np.empty(n_atoms, dtype="U8")
@@ -112,7 +132,7 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
 
                     curr += repeat
 
-            elif key == "BONDS":
+            elif key == "bonds":
                 n_bonds = count
 
                 bonds = [None] * n_bonds
