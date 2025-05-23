@@ -171,7 +171,7 @@ class TrajectoryFilter(IJob):
         filtered_coords = apply(
             filter,
             trajectories,
-            apply_offsets=np.isclose(zero_magnitude, 1),
+            apply_offsets=not np.isclose(zero_magnitude, 1),
         )
 
         # Create new chemical system for output trajectory
