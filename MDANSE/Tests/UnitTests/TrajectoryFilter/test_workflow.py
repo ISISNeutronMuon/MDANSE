@@ -2,6 +2,7 @@ import json
 import tempfile
 import os
 from os import path
+from pathlib import WindowsPath
 import pytest
 import h5py
 import scipy
@@ -15,10 +16,122 @@ from MDANSE_GUI.Tabs.Models.PlottingContext import SingleDataset
 
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
+# Trajectory constants
 SRTIO3_TRAJ = "cp2k_srtio3_unfiltered.mdt"
+
+CUAU_TRAJ = "CuAu_asap_10fs-step.mdt"
+
+DUT49_TRAJ = "plain_DUT49_20K_in_cell.mdt"
 
 # Test results must satisfy a 5% tolerance to error
 TOLERANCE = 5
+
+
+class LocalDataset:
+    """Mimics the SingleDataset class from MDANSE GUI."""
+
+    def __init__(self, name: str, source: h5py.File):
+        self._name = name
+        self._filename = source.filename
+        self._data_limits = None
+        self._data = source[name][:]
+        self._data_unit = source[name].attrs["units"]
+        self._n_dim = len(self._data.shape)
+        self._axes_tag = source[name].attrs["axis"]
+        self._scaling_factor = 1.0
+        self._scaling_factor = float(source[name].attrs["scaling_factor"])
+        self._axes = {}
+        self._axes_units = {}
+        if self._axes_tag == "index":
+            for dim_number, dim_length in enumerate(self._data.shape):
+                self._axes[f"index{dim_number}"] = np.arange(dim_length)
+                self._axes_units[f"index{dim_number}"] = "N/A"
+            return
+        self._current_units = {}
+        self._axes_scaling = {}
+        self._axes_order = []
+        for ax_number, axis_name in enumerate(self._axes_tag.split("|")):
+            aname = axis_name.strip()
+            if aname == "index":
+                axis_key = aname + str(ax_number)
+                self._axes[axis_key] = np.arange(len(self._data))
+                self._axes_units[axis_key] = "N/A"
+            else:
+                axis_key = aname
+                self._axes[axis_key] = source[axis_key][:]
+                self._axes_units[axis_key] = source[axis_key].attrs["units"]
+            self._axes_order.append(axis_key)
+            self._axes_scaling[axis_key] = 1.0
+            self._current_units[axis_key] = self._axes_units[axis_key]
+
+
+def mean_absolute_error(x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
+    """ """
+    return np.mean(np.abs(x1 - x2))
+
+
+def normalise(data: np.ndarray, reference: np.ndarray = None) -> np.ndarray:
+    """ """
+    if reference:
+        coeff = 1 / reference.max()
+    else:
+        coeff = 1 / data.max()
+    return data * coeff
+
+
+def run_trajectory_filter(
+    name: str, config: dict, traj_path: WindowsPath
+) -> WindowsPath:
+    """ """
+    out_file = name.with_suffix(".mdt")
+
+    trajectory_filter_parameters = {
+        "atom_selection": "{}",
+        "frames": [0, 320, 1, 160],
+        "instrument_resolution": ("ideal", {}),
+        "output_files": (name, 64, 128, "gzip", "no logs"),
+        "projection": ("NullProjector", []),
+        "running_mode": ("single-core",),
+        "trajectory": traj_path,
+        "trajectory_filter": config,
+        "weights": "atomic_weight",
+    }
+
+    trajectory_filter_job = IJob.create("TrajectoryFilter")
+    trajectory_filter_job.run(trajectory_filter_parameters, status=True)
+
+    return out_file
+
+
+def run_power_spectrum(name: str, traj_path: WindowsPath) -> WindowsPath:
+    """ """
+    out_file = name.with_suffix(".mda")
+
+    parameters = {
+        "atom_selection": "{}",
+        "atom_transmutation": "{}",
+        "frames": [0, 320, 1, 160],
+        "instrument_resolution": ("ideal", {}),
+        "output_files": (name, ["MDAFormat"], "no logs"),
+        "projection": ("NullProjector", []),
+        "running_mode": ("single-core",),
+        "trajectory": traj_path,
+        "weights": "atomic_weight",
+    }
+
+    power_spectrum = IJob.create("PositionPowerSpectrum")
+    power_spectrum.run(parameters, status=True)
+
+    return out_file
+
+
+def unfiltered_power_spectrum_fixture(tmp_path_factory):
+    """Fixture returns the output file of the PositionPowerSpectrum job with the SrTiO3 trajectory as the input."""
+
+    yield run_power_spectrum(
+        tmp_path_factory.mktemp("data") / "unfiltered_power_spectrum",
+        CONV_DIR / SRTIO3_TRAJ,
+    )
 
 
 @pytest.fixture(scope="module")
@@ -89,6 +202,28 @@ def unfiltered_power_spectrum(tmp_path_factory):
                 "norm": "phase",
                 "attenuation_type": "bandstop",
                 "cutoff_freq": [27.489000000000004, 70.686],
+            },
+        },
+        {
+            "filter": "ChebyshevTypeII",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 2,
+                "min_attenuation": 20.0,
+                "attenuation_type": "bandpass",
+                "cutoff_freq": [15.708000000000002, 145.299],
+            },
+        },
+        {
+            "filter": "ChebyshevTypeII",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 2,
+                "min_attenuation": 2.0,
+                "attenuation_type": "bandpass",
+                "cutoff_freq": [15.708000000000002, 145.299],
             },
         },
     ],
@@ -194,12 +329,12 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
 
     # Retrieve F(w), check the data is as expected
     filtered_data = SingleDataset("pps_total", h5py.File(fw_out_file, "r+"))
-    f_x_axis_name = original_data.available_x_axes()
+    f_x_axis_name = filtered_data.available_x_axes()
 
     assert f_x_axis_name == ["romega"]
-    assert original_data._axes_units[f_x_axis_name[0]] == "rad/ps"
+    assert filtered_data._axes_units[f_x_axis_name[0]] == "rad/ps"
 
-    f_x_axis = original_data._axes["romega"]
+    f_x_axis = filtered_data._axes["romega"]
 
     assert np.round(f_x_axis.min(), 0) == 0
     assert np.round(f_x_axis.max(), 0) == 626
@@ -214,3 +349,93 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
 
     error = np.mean(np.abs(normalised[0] - normalised[1]))
     assert np.isclose(error, 0, atol=TOLERANCE)
+
+
+filter_configs = {
+    SRTIO3_TRAJ: [
+        {
+            "filter": "Butterworth",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 1,
+                "attenuation_type": "lowpass",
+                "cutoff_freq": 19.635,
+            },
+        },
+        {
+            "filter": "Butterworth",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 1,
+                "attenuation_type": "highpass",
+                "cutoff_freq": 31.416,
+            },
+        },
+        {
+            "filter": "ChebyshevTypeII",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 1,
+                "min_attenuation": 12.7,
+                "attenuation_type": "bandpass",
+                "cutoff_freq": [27.489000000000004, 376.992],
+            },
+        },
+        {
+            "filter": "Bessel",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 1,
+                "norm": "phase",
+                "attenuation_type": "bandstop",
+                "cutoff_freq": [27.489000000000004, 70.686],
+            },
+        },
+        {
+            "filter": "ChebyshevTypeII",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 2,
+                "min_attenuation": 20.0,
+                "attenuation_type": "bandpass",
+                "cutoff_freq": [15.708000000000002, 145.299],
+            },
+        },
+        {
+            "filter": "ChebyshevTypeII",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "order": 2,
+                "min_attenuation": 2.0,
+                "attenuation_type": "bandpass",
+                "cutoff_freq": [15.708000000000002, 145.299],
+            },
+        },
+        {
+            "filter": "Notch",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "fundamental_freq": 6.875,
+                "quality_factor": 1.6,
+            },
+        },
+        {
+            "filter": "Comb",
+            "attributes": {
+                "n_steps": 320,
+                "time_step_ps": 0.005,
+                "fundamental_freq": 5.0,
+                "quality_factor": 1.5,
+                "comb_type": "notch",
+                "pass_zero": False,
+            },
+        },
+    ],
+}
