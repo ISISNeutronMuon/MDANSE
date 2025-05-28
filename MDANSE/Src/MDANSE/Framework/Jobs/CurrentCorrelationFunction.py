@@ -180,6 +180,7 @@ class CurrentCorrelationFunction(IJob):
                 (nQShells, self._nFrames),
                 axis="q|time",
                 units="au",
+                dtype=np.float64,
             )
             self._outputData.add(
                 f"j(q,t)_trans_{pair_str}",
@@ -187,6 +188,7 @@ class CurrentCorrelationFunction(IJob):
                 (nQShells, self._nFrames),
                 axis="q|time",
                 units="au",
+                dtype=np.float64,
             )
             self._outputData.add(
                 f"J(q,f)_long_{pair_str}",
@@ -196,6 +198,7 @@ class CurrentCorrelationFunction(IJob):
                 units="au",
                 main_result=True,
                 partial_result=True,
+                dtype=np.float64,
             )
             self._outputData.add(
                 f"J(q,f)_trans_{pair_str}",
@@ -205,6 +208,7 @@ class CurrentCorrelationFunction(IJob):
                 units="au",
                 main_result=True,
                 partial_result=True,
+                dtype=np.float64,
             )
             if self.add_ideal_results:
                 self._outputData.add(
@@ -213,6 +217,7 @@ class CurrentCorrelationFunction(IJob):
                     (nQShells, self._nOmegas),
                     axis="q|romega",
                     units="au",
+                    dtype=np.float64,
                 )
                 self._outputData.add(
                     f"J(q,f)_trans_ideal_{pair_str}",
@@ -220,14 +225,15 @@ class CurrentCorrelationFunction(IJob):
                     (nQShells, self._nOmegas),
                     axis="q|romega",
                     units="au",
+                    dtype=np.float64,
                 )
-
         self._outputData.add(
             "j(q,t)_long_total",
             "SurfaceOutputVariable",
             (nQShells, self._nFrames),
             axis="q|time",
             units="au",
+            dtype=np.float64,
         )
         self._outputData.add(
             "j(q,t)_trans_total",
@@ -243,6 +249,15 @@ class CurrentCorrelationFunction(IJob):
             axis="q|romega",
             units="au",
             main_result=True,
+            dtype=np.float64,
+        )
+        self._outputData.add(
+            "j(q,t)_trans_total",
+            "SurfaceOutputVariable",
+            (nQShells, self._nFrames),
+            axis="q|time",
+            units="au",
+            dtype=np.float64,
         )
         self._outputData.add(
             "J(q,f)_trans_total",
@@ -251,6 +266,7 @@ class CurrentCorrelationFunction(IJob):
             axis="q|romega",
             units="au",
             main_result=True,
+            dtype=np.float64,
         )
         if self.add_ideal_results:
             self._outputData.add(
@@ -259,6 +275,7 @@ class CurrentCorrelationFunction(IJob):
                 (nQShells, self._nOmegas),
                 axis="q|romega",
                 units="au",
+                dtype=np.float64,
             )
             self._outputData.add(
                 "J(q,f)_trans_ideal_total",
@@ -266,6 +283,7 @@ class CurrentCorrelationFunction(IJob):
                 (nQShells, self._nOmegas),
                 axis="q|romega",
                 units="au",
+                dtype=np.float64,
             )
 
         self._order = self.configuration["interpolation_order"]["value"]

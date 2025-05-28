@@ -88,6 +88,10 @@ class PositionPowerSpectrum(IJob):
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
         instrResolution = self.configuration["instrument_resolution"]
+        self._n_omegas = instrResolution["n_romegas"]
+        self.add_ideal_results = (
+            self.configuration["instrument_resolution"]["kernel"] != "ideal"
+        )
 
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
@@ -137,6 +141,7 @@ class PositionPowerSpectrum(IJob):
                 units="au",
                 main_result=True,
                 partial_result=True,
+                dtype=np.float64,
             )
             if self.add_ideal_results:
                 self._outputData.add(
@@ -145,6 +150,7 @@ class PositionPowerSpectrum(IJob):
                     (instrResolution["n_romegas"],),
                     axis="romega",
                     units="au",
+                    dtype=np.float64,
                 )
 
         self._outputData.add(
@@ -161,6 +167,7 @@ class PositionPowerSpectrum(IJob):
             axis="romega",
             units="au",
             main_result=True,
+            dtype=np.float64,
         )
         if self.add_ideal_results:
             self._outputData.add(
@@ -169,6 +176,7 @@ class PositionPowerSpectrum(IJob):
                 (instrResolution["n_romegas"],),
                 axis="romega",
                 units="au",
+                dtype=np.float64,
             )
 
         self._atoms = self.configuration["trajectory"][

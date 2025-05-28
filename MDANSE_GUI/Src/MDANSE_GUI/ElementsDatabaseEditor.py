@@ -17,6 +17,7 @@ from qtpy.QtCore import QSortFilterProxyModel, Signal, Slot, Qt
 from qtpy.QtGui import (
     QDoubleValidator,
     QIntValidator,
+    QValidator,
     QStandardItem,
     QStandardItemModel,
     QBrush,
@@ -42,6 +43,56 @@ from MDANSE_GUI.Widgets.GeneralWidgets import InputDialog, InputVariable
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker
 
 
+class ComplexValidator(QValidator):
+    """A complex number validator for a QLineEdit.
+
+    It is intended to limit the input to a string
+    that can be converted to a complex number.
+
+    """
+
+    def validate(self, input_string: str, position: int) -> tuple[int, str]:
+        """Check the input string from a widget.
+
+        Implementation of the virtual method of QValidator.
+        It takes in the string from a QLineEdit and the cursor position,
+        and an enum value of the validator state. Widgets will reject
+        inputs which change the state to Invalid.
+
+        Parameters
+        ----------
+        input_string : str
+            current contents of a text input field
+        position : int
+            position of the cursor in the text input field
+
+        Returns
+        -------
+        int
+            Validator state.
+        str
+            Original input string.
+        int
+            Cursor position.
+
+        """
+        state = QValidator.State.Intermediate
+        if input_string:
+            try:
+                _ = complex(input_string)
+            except (TypeError, ValueError):
+                bad_chars = [
+                    char for char in input_string if char not in "0123456789+-.j()e"
+                ]
+                if bad_chars:
+                    state = QValidator.State.Invalid
+                else:
+                    state = QValidator.State.Intermediate
+            else:
+                state = QValidator.State.Acceptable
+        return state, input_string, position
+
+
 class FloatInputField(QItemDelegate):
     """QLineEdit with a QDoubleValidator."""
 
@@ -59,6 +110,32 @@ class FloatInputField(QItemDelegate):
     def createEditor(self, parent, _option, _index):
         sbox = QLineEdit(parent)
         validator = QDoubleValidator()
+        sbox.setValidator(validator)
+        sbox.textChanged.connect(self.valueChanged)
+        return sbox
+
+    @Slot()
+    def valueChanged(self):
+        self.commitData.emit(self.sender())
+
+
+class ComplexInputField(QItemDelegate):
+    """QLineEdit with a ComplexValidator."""
+
+    def setEditorData(self, editor, index):
+        editor.setText(str(index.data()))
+
+    def setModelData(self, editor, model, index):
+        new_text = editor.text()
+        try:
+            complex(new_text)
+        except (ValueError, TypeError):
+            return
+        model.setData(index, new_text)
+
+    def createEditor(self, parent, _option, _index):
+        sbox = QLineEdit(parent)
+        validator = ComplexValidator()
         sbox.setValidator(validator)
         sbox.textChanged.connect(self.valueChanged)
         return sbox
@@ -157,7 +234,8 @@ class ElementView(QTableView):
 
         self.int_delegate = IntInputField(self)
         self.float_delegate = FloatInputField(self)
-        self.color_delegrate = ColorInputField(self)
+        self.color_delegate = ColorInputField(self)
+        self.complex_delegate = ComplexInputField(self)
         self.setSortingEnabled(True)
 
     def contextMenuEvent(self, event):
@@ -731,7 +809,7 @@ class ElementsDatabaseEditor(QDialog):
         column_type = ATOMS_DATABASE._properties.get(column_name, "str")
         if column_type == "color":
             self.viewer.setItemDelegateForColumn(
-                column_number, self.viewer.color_delegrate
+                column_number, self.viewer.color_delegate
             )
         elif column_type == "float":
             self.viewer.setItemDelegateForColumn(
@@ -740,6 +818,10 @@ class ElementsDatabaseEditor(QDialog):
         elif column_type == "int":
             self.viewer.setItemDelegateForColumn(
                 column_number, self.viewer.int_delegate
+            )
+        elif column_type == "complex":
+            self.viewer.setItemDelegateForColumn(
+                column_number, self.viewer.complex_delegate
             )
 
 

@@ -180,7 +180,6 @@ class AtomProperties(QStandardItemModel):
         groups = {}
         for unique in unique_atoms:
             groups[unique] = indices[np.where(all_atoms == unique)]
-
         colour_index_list = []
         for atom in unique_atoms:
             if (

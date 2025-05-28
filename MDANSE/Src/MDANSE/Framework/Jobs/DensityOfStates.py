@@ -15,6 +15,7 @@
 #
 import collections
 
+import numpy as np
 from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -100,6 +101,8 @@ class DensityOfStates(IJob):
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
 
+        self._n_omegas = instrResolution["n_romegas"]
+
         self._outputData.add(
             "time",
             "LineOutputVariable",
@@ -144,6 +147,7 @@ class DensityOfStates(IJob):
                 units="au",
                 main_result=True,
                 partial_result=True,
+                dtype=np.float64,
             )
             if self.add_ideal_results:
                 self._outputData.add(
@@ -152,6 +156,7 @@ class DensityOfStates(IJob):
                     (instrResolution["n_romegas"],),
                     axis="romega",
                     units="au",
+                    dtype=np.float64,
                 )
         self._outputData.add(
             "vacf_total",
@@ -167,6 +172,7 @@ class DensityOfStates(IJob):
             axis="romega",
             units="au",
             main_result=True,
+            dtype=np.float64,
         )
         if self.add_ideal_results:
             self._outputData.add(
@@ -175,6 +181,7 @@ class DensityOfStates(IJob):
                 (instrResolution["n_romegas"],),
                 axis="romega",
                 units="au",
+                dtype=np.float64,
             )
 
         self._atoms = self.configuration["trajectory"][
@@ -192,7 +199,6 @@ class DensityOfStates(IJob):
             #. atomicDOS (np.array): The calculated density of state for atom of index=index
             #. atomicVACF (np.array): The calculated velocity auto-correlation function for atom of index=index
         """
-        LOG.debug(f"Running step: {index}")
         trajectory = self.configuration["trajectory"]["instance"]
 
         # get atom index
@@ -266,6 +272,10 @@ class DensityOfStates(IJob):
                 )
 
         weights = self.configuration["weights"].get_weights()
+        if self.configuration["weights"]["property"] == "b_incoherent":
+            for key, value in weights.items():
+                temp = complex(value)
+                weights[key] = temp.conjugate() * temp
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "vacf_%s")
         assign_weights(self._outputData, weight_dict, "dos_%s")

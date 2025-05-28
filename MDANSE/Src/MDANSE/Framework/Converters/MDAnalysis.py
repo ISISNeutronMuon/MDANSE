@@ -236,7 +236,7 @@ class MDAnalysis(Converter):
                 "unit_cell": "nm",
                 "coordinates": "nm",
                 "velocities": "nm/ps",
-                "gradients": "uma nm/ps2",
+                "gradients": "Da nm/ps2",
             },
         )
 

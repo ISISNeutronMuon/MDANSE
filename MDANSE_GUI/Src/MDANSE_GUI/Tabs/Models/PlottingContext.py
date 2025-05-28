@@ -13,9 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import itertools
+from typing import TYPE_CHECKING, Union
 import os
-from typing import TYPE_CHECKING
+import itertools
+import copy
 
 if TYPE_CHECKING:
     import h5py
@@ -57,9 +58,10 @@ def get_mpl_colours():
 class SingleDataset:
     """Manages a plottable data set from an .mda file."""
 
-    def __init__(self, name: str, source: "h5py.File", linestyle: str = "-"):
+    def __init__(
+        self, name: str, source: Union["h5py.File", None], linestyle: str = "-"
+    ):
         self._name = name
-        self._filename = source.filename
         self._use_scaling = True
         self._curves = {}
         self._curve_labels = {}
@@ -67,13 +69,18 @@ class SingleDataset:
         self._planes = {}
         self._plane_labels = {}
         self._data_limits = None
-        bare_name = os.path.split(self._filename)[-1]
-        self._labels = {
-            "minimal": name,
-            "medium": f"{bare_name}:{name}",
-            "full": f"{self._filename}:{name}",
-        }
+        self._imaginary_data = None
         self._valid = True
+        self._scaling_factor = 1.0
+        self._axes = {}
+        self._axes_units = {}
+        self._current_units = {}
+        self._axes_scaling = {}
+        self._axes_order = []
+        if not source:
+            return
+        self._filename = source.filename
+        self.create_labels(self._filename)
         try:
             self._data = source[name][:]
         except KeyError:
@@ -84,18 +91,22 @@ class SingleDataset:
             self._valid = False
             LOG.debug(f"{name} is not plottable")
             return
-        self._data_unit = source[name].attrs["units"]
-        self._n_dim = len(self._data.shape)
-        self._axes_tag = source[name].attrs["axis"]
-        self._scaling_factor = 1.0
+        temp_array = np.imag(self._data)
+        if not np.allclose(temp_array, 0.0):
+            self._imaginary_data = temp_array
+        self._data = np.real(self._data)
         with contextlib.suppress(KeyError):
             try:
                 self._scaling_factor = float(source[name].attrs["scaling_factor"])
             except TypeError:
                 self._scaling_factor = np.array(source[name].attrs["scaling_factor"])
-        self._axes = {}
-        self._axes_units = {}
-        if self._axes_tag == "index":
+        self._data_unit = source[name].attrs["units"]
+        self._n_dim = len(self._data.shape)
+        self._axes_tag = source[name].attrs["axis"]
+        self.create_axes_tags(self._axes_tag, source)
+
+    def create_axes_tags(self, axes_tag: str, source: "h5py.File"):
+        if axes_tag == "index":
             for dim_number, dim_length in enumerate(self._data.shape):
                 self._axes[f"index{dim_number}"] = np.arange(dim_length)
                 self._axes_units[f"index{dim_number}"] = "N/A"
@@ -103,7 +114,7 @@ class SingleDataset:
         self._current_units = {}
         self._axes_scaling = {}
         self._axes_order = []
-        for ax_number, axis_name in enumerate(self._axes_tag.split("|")):
+        for ax_number, axis_name in enumerate(axes_tag.split("|")):
             aname = axis_name.strip()
             if aname == "index":
                 axis_key = aname + str(ax_number)
@@ -157,6 +168,32 @@ class SingleDataset:
             factor, new_unit = unit_lookup.conversion_factor(axis_unit)
             self._axes_scaling[axis_name] = factor
             self._current_units[axis_name] = new_unit
+
+    def create_labels(self, root_name: str):
+        bare_name = os.path.split(root_name)[-1]
+        self._labels = {
+            "minimal": self._name,
+            "medium": f"{bare_name}:{self._name}",
+            "full": f"{root_name}:{self._name}",
+        }
+
+    def spawn_imaginary_dataset(self) -> Union[None, "SingleDataset"]:
+        if self._imaginary_data is None:
+            return None
+        new_dataset = SingleDataset(f"{self._name}_imag", None)
+        new_dataset._data = self._imaginary_data.copy()
+        new_dataset.create_labels(self._filename)
+        for attr in [
+            "_axes",
+            "_axes_units",
+            "_axes_order",
+            "_scaling_factor",
+            "_data_unit",
+            "_n_dim",
+            "_filename",
+        ]:
+            setattr(new_dataset, attr, copy.deepcopy(getattr(self, attr)))
+        return new_dataset
 
     def set_data_limits(self, limit_string: str):
         """Parse the string used for selecting a subset of data.
@@ -520,6 +557,7 @@ class PlottingContext(QStandardItemModel):
         """
         for dataset in other._datasets.values():
             self.add_dataset(dataset)
+            self.add_dataset(dataset.spawn_imaginary_dataset())
         self.set_axes()
 
     @Slot(dict)
@@ -604,6 +642,8 @@ class PlottingContext(QStandardItemModel):
             a SingleDataset instance
 
         """
+        if new_dataset is None:
+            return
         if not new_dataset._valid:
             return
         newkey = f"{new_dataset._filename}:{new_dataset._name}"
@@ -640,6 +680,7 @@ class PlottingContext(QStandardItemModel):
         temp = items[plotting_column_index["Colour"]]
         temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
         self.appendRow(items)
+        self.add_dataset(new_dataset.spawn_imaginary_dataset())
 
     def set_axes(self):
         """Check that axis information can be found for datasets."""

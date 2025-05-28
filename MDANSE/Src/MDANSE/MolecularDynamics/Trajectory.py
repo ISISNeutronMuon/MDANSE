@@ -14,11 +14,12 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import operator
-from typing import TYPE_CHECKING, Any, Collection, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Collection, Union
 
 if TYPE_CHECKING:
     from MDANSE.Chemistry.Databases import AtomsDatabase
 
+import copy
 import math
 from pathlib import Path
 
@@ -26,10 +27,12 @@ import h5py
 import numpy as np
 from MDANSE import PLATFORM
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Chemistry.Databases import str_to_num
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
+
 
 available_formats = {
     "MDANSE": MdanseTrajectory,
@@ -48,6 +51,8 @@ class Trajectory:
         self._format = trajectory_format
         if self._format is None:
             self.guess_correct_format()
+        if self._format is None:
+            self._format = 'MDANSE'
         self._trajectory = self.open_trajectory(self._format)
         self._min_span = np.zeros(3)
         self._max_span = np.zeros(3)
@@ -281,15 +286,22 @@ class Trajectory:
 
     def get_atom_property(self, atom_symbol: str, property: str):
         if (atom_symbol, property) not in self._atom_cache.keys():
-            self._atom_cache[(atom_symbol, property)] = (
-                self._trajectory.get_atom_property(atom_symbol, property)
-            )
+            val = self._trajectory.get_atom_property(atom_symbol, property)
+            try:
+                numval = complex(val)
+            except (TypeError, ValueError):
+                self._atom_cache[(atom_symbol, property)] = val
+            else:
+                if np.isclose(numval.imag, 0.0):
+                    self._atom_cache[(atom_symbol, property)] = numval.real
+                else:
+                    self._atom_cache[(atom_symbol, property)] = numval
         return self._atom_cache[(atom_symbol, property)]
 
     def has_atom(self, symbol: str):
         return symbol in self.atoms_in_database
 
-    def get_property_dict(self, symbol: str) -> Dict[str, Any]:
+    def get_property_dict(self, symbol: str) -> dict[str, Any]:
         """Returns a dictionary of all the properties of an atom type.
 
         Parameters
@@ -308,11 +320,11 @@ class Trajectory:
         }
 
     @property
-    def atoms_in_database(self) -> List[str]:
+    def atoms_in_database(self) -> list[str]:
         return self._trajectory.atoms_in_database()
 
     @property
-    def properties_in_database(self) -> List[str]:
+    def properties_in_database(self) -> list[str]:
         return self._trajectory.properties_in_database()
 
     @property
@@ -363,7 +375,6 @@ class Trajectory:
 
 additive_atom_properties = [
     "nucleon",
-    "b_incoherent2",
     "xray_asf_b4",
     "proton",
     "atomic_weight",
@@ -404,7 +415,7 @@ atom_radii = [
 
 
 def create_average_atom(
-    atom_dictionary: Dict[str, int], database: Trajectory, radius_padding: float = 0.0
+    atom_dictionary: dict[str, int], database: Trajectory, radius_padding: float = 0.0
 ):
     all_properties = database.properties_in_database
     values = {}
@@ -416,11 +427,13 @@ def create_average_atom(
                 [database.get_atom_property(element_name, property), element_count]
             )
         if property in additive_atom_properties:
-            total = np.sum([float(x[0]) * int(x[1]) for x in temp])
+            total = np.sum([complex(x[0]) * int(x[1]) for x in temp])
+            total = str(total)
         elif property in averaged_atom_properties:
-            total = np.sum([float(x[0]) * int(x[1]) for x in temp]) / np.sum(
+            total = np.sum([complex(x[0]) * int(x[1]) for x in temp]) / np.sum(
                 [int(x[1]) for x in temp]
             )
+            total = str_to_num(total)
         elif property in constant_atom_properties.keys():
             total = constant_atom_properties[property]
         elif property in atom_radii:
@@ -524,8 +537,31 @@ class TrajectoryWriter:
             self._initial_charges = initial_charges
 
     def write_atom_properties(
-        self, symbol: str, properties: Dict[str, Any], ptypes: Dict[str, str] = None
+        self,
+        symbol: str,
+        properties: dict[str, Any],
+        ptypes: dict[str, str] = None,
+        punits: dict[str, str] = None
     ):
+        """Add the properties of a single atom to the in-file atom database.
+
+        Creates a new dataset with the atom symbol as the dataset name.
+        If the atom property dictionary contains new keywords, these get
+        added to the common dictionary of properties in the database,
+        and given an index in the data arrays.
+
+        Parameters
+        ----------
+        symbol : str
+            Chemical symbol of the new atom
+        properties : dict[str, Any]
+            dictionary of atom properties {property_name: value}
+        ptypes : dict[str, str], optional
+            dictionary of property types {property_name: type_name}, by default None
+        punits : dict[str, str], optional
+            dictionary of propery physical units {property_name: unit}, by default None
+
+        """
         if "atom_database" not in self._h5_file.keys():
             group = self._h5_file.create_group("/atom_database")
         else:
@@ -543,6 +579,12 @@ class TrajectoryWriter:
             )
         else:
             type_dataset = self._h5_file["/atom_database/property_types"]
+        if "property_units" not in group:
+            unit_dataset = group.create_dataset(
+                "property_units", data=200 * [""], dtype=string_dt
+            )
+        else:
+            unit_dataset = self._h5_file["/atom_database/property_units"]
         next_index = 0
         for label in label_dataset[:]:
             if len(label) > 0:
@@ -556,62 +598,72 @@ class TrajectoryWriter:
             if properties["element"] == "dummy":
                 properties["dummy"] = 1
         new_labels = [str(x) for x in properties.keys()]
+        old_labels = [x.decode("utf-8") for x in label_dataset[:]]
         if ptypes is None:
-            ptypes = ATOMS_DATABASE._properties
+            ptypes = copy.deepcopy(ATOMS_DATABASE._properties)
+        if punits is None:
+            punits = copy.deepcopy(ATOMS_DATABASE._units)
         ptypes["dummy"] = "int"
-        for label in new_labels:
-            if label.encode("utf-8") not in label_dataset:
-                label_dataset[next_index] = label
-                if label in ptypes:
-                    type_dataset[next_index] = ptypes[label]
-                else:
-                    # the label was not found in ptypes this can
-                    # happen when the trajectory contained custom atom
-                    # properties and this function was inputted with
-                    # ptypes=None. Let's derive the type from the
-                    # properties value.
-                    if isinstance(properties[label], (float, np.float32, np.float64)):
-                        type_dataset[next_index] = "float"
-                    elif isinstance(properties[label], (int, np.int32, np.int64)):
-                        type_dataset[next_index] = "int"
-                    elif isinstance(properties[label], str):
-                        type_dataset[next_index] = "str"
-                    elif isinstance(properties[label], list):
-                        type_dataset[next_index] = "list"
-                    else:
-                        raise TypeError(
-                            f"The trajectories atom database contains atom "
-                            f"properties of an unexpected type: "
-                            f"{type(properties[label])}")
-                next_index += 1
+        punits["dummy"] = "none"
+        really_new_labels = set(new_labels) - set(old_labels)
+        for label in really_new_labels:
+            label_dataset[next_index] = label
+            type_dataset[next_index] = ptypes[label]
+            if label in ["b_coherent", "b_incoherent"]:
+                unit_dataset[next_index] = "ang"
+            else:
+                unit_dataset[next_index] = punits[label]
+            next_index += 1
         mapping = {
             property_label.decode("utf-8"): index
             for index, property_label in enumerate(label_dataset[:])
         }
-        atom_dataset = group.create_dataset(symbol, data=200 * [-1.0])
+        atom_dataset = group.create_dataset(symbol, data=200 * [-1.0], dtype=complex)
         for key, value in properties.items():
             try:
-                float(value)
+                numval = complex(value)
             except ValueError:
                 continue
             except TypeError:
                 continue
             else:
-                atom_dataset[mapping[key]] = value
+                atom_dataset[mapping[key]] = numval
+        colour = properties["color"]
         try:
-            colour = [int(x) for x in properties["color"].split(";")]
-        except AttributeError:
-            colour = [int(x) for x in properties["color"][0].split(";")]
-        atom_dataset[mapping["color"]] = (
-            0x10000 * colour[0] + 0x100 * colour[1] + colour[2]
-        )
+            temp = int(colour)
+        except (TypeError, ValueError):
+            try:
+                colour = [int(x) for x in colour.split(";")]
+            except AttributeError:
+                colour = [int(x) for x in colour[0].split(";")]
+            atom_dataset[mapping["color"]] = (
+                0x10000 * colour[0] + 0x100 * colour[1] + colour[2]
+            )
+        else:
+            atom_dataset[mapping["color"]] = colour
 
     def write_atom_database(
         self,
-        symbols: List[str],
+        symbols: list[str],
         database: "AtomsDatabase",
-        optional_molecule_radii: Dict[str, float] = None,
+        optional_molecule_radii: dict[str, float] = None,
     ):
+        """Write atom properties into the trajectory file.
+        
+        The properties are copied into the file from an input trajectory.
+        If an artificial atom is introduced to represent a molecule,
+        the averaged properties will be created based on the molecule's composition.
+
+        Parameters
+        ----------
+        symbols : list[str]
+            list of chemical symbols of atoms in the trajectory
+        database : AtomsDatabase
+            database object containing atom properties
+        optional_molecule_radii : dict[str, float], optional
+            dictionary of {name: radius} pairs, for arificial atoms
+        
+        """
         for atom_symbol in symbols:
             if database.has_atom(atom_symbol):
                 property_dict = database.get_property_dict(atom_symbol)
@@ -645,6 +697,7 @@ class TrajectoryWriter:
                 self.write_atom_properties(atom_symbol, property_dict)
 
     def write_standard_atom_database(self):
+        """Write atom properties into the trajectory file."""
         symbols = list(np.unique(self._chemical_system.atom_list))
         database = ATOMS_DATABASE
         for atom_symbol in symbols:
@@ -833,7 +886,7 @@ class RigidBodyTrajectoryGenerator:
     def __init__(
         self,
         trajectory,
-        chemical_entity: List[int],
+        chemical_entity: list[int],
         reference,
         first=0,
         last=None,
@@ -956,7 +1009,7 @@ class RigidBodyTrajectoryGenerator:
 
 
 def partition_universe(universe, groups):
-    atoms = sorted(universe.atomList(), key=operator.attrgetter("index"))
+    atoms = sorted(universe.atomlist(), key=operator.attrgetter("index"))
 
     coll = [Collection([atoms[index] for index in gr]) for gr in groups]
 

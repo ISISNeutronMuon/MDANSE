@@ -84,6 +84,7 @@ class Infrared(IJob):
         self.numberOfSteps = len(self.molecules)
         instrResolution = self.configuration["instrument_resolution"]
 
+        self._n_omegas = instrResolution["n_romegas"]
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
@@ -128,6 +129,7 @@ class Infrared(IJob):
             (instrResolution["n_romegas"],),
             axis="romega",
             main_result=True,
+            dtype=np.float64,
         )
         if self.add_ideal_results:
             self._outputData.add(
@@ -135,6 +137,7 @@ class Infrared(IJob):
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
                 axis="romega",
+                dtype=np.float64,
             )
 
     def run_step(self, index: int) -> tuple[int, np.ndarray]:

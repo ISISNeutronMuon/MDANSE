@@ -11,7 +11,8 @@ def compare_hdf5(result_path: Path, benchmark_path: Path,
                 rtol: float = 1e-7,
                 startswith: bool = False,
                 scale_result: bool = False,
-                scale_benchmark: bool = False) -> None:
+                scale_benchmark: bool = False,
+                real_part_only: bool = True) -> None:
     """
     Compare two h5py files by the keys given in comparison_keys.
 
@@ -50,7 +51,12 @@ def compare_hdf5(result_path: Path, benchmark_path: Path,
             b = (benchmark[f"/{key}"][subset] * benchmark[f"/{key}"].attrs["scaling_factor"]
                  if scale_benchmark else
                  benchmark[f"/{key}"][subset])
-
-            np.testing.assert_allclose(a, b,
-                                       atol=atol, rtol=rtol,
-                                       err_msg=f"Failure in key {key!r}.")
+            
+            if real_part_only:
+                np.testing.assert_allclose(np.real(a), np.real(b),
+                                        atol=atol, rtol=rtol,
+                                        err_msg=f"Failure in key {key!r}.")            
+            else:
+                np.testing.assert_allclose(a, b,
+                                        atol=atol, rtol=rtol,
+                                        err_msg=f"Failure in key {key!r}.")

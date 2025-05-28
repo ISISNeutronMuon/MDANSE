@@ -108,7 +108,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         self["property"] = value
         self.error_status = "OK"
 
-    def get_weights(self, prop: Optional[str] = None):
+    def get_weights(self, prop: Optional[str] = None, normalise: bool = True):
         """Generate a dictionary of weights.
 
         Parameters
@@ -129,7 +129,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             self._dependencies["atom_selection"]
         ]
 
-        weights = defaultdict(float)
+        weights = defaultdict(complex)
         for name, elements in itertools.islice(
             zip(
                 atom_selection_configurator["names"],
@@ -142,10 +142,20 @@ class WeightsConfigurator(SingleChoiceConfigurator):
                 for element in elements
             )
 
-        for element, num_atoms in atom_selection_configurator.get_natoms().items():
-            weights[element] /= num_atoms
+        if normalise:
+            for element, num_atoms in atom_selection_configurator.get_natoms().items():
+                weights[element] /= num_atoms
 
         return weights
+
+    def get_norms(self):
+        atom_selection_configurator = self._configurable[
+            self._dependencies["atom_selection"]
+        ]
+        return {
+            atom: counts
+            for atom, counts in atom_selection_configurator.get_natoms().items()
+        }
 
     def get_information(self):
         """

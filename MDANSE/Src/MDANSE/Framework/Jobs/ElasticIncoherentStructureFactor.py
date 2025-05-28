@@ -82,7 +82,7 @@ class ElasticIncoherentStructureFactor(IJob):
     settings["weights"] = (
         "WeightsConfigurator",
         {
-            "default": "b_incoherent2",
+            "default": "b_incoherent",
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
@@ -120,6 +120,7 @@ class ElasticIncoherentStructureFactor(IJob):
                 units="au",
                 main_result=True,
                 partial_result=True,
+                dtype=np.float64,
             )
 
         self._outputData.add(
@@ -129,6 +130,7 @@ class ElasticIncoherentStructureFactor(IJob):
             axis="q",
             units="au",
             main_result=True,
+            dtype=np.float64,
         )
 
         self._atoms = self.configuration["trajectory"][
@@ -167,7 +169,7 @@ class ElasticIncoherentStructureFactor(IJob):
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
 
             a = np.average(np.exp(1j * np.dot(series, qVectors)), axis=0)
-            a = np.abs(a) ** 2
+            a = np.conjugate(a) * a
 
             atomicEISF[i] = np.average(a)
 
@@ -200,6 +202,10 @@ class ElasticIncoherentStructureFactor(IJob):
             self._outputData[f"eisf_{element}"][:] /= number
 
         weights = self.configuration["weights"].get_weights()
+        if self.configuration["weights"]["property"] == "b_incoherent":
+            for key, value in weights.items():
+                temp = complex(value)
+                weights[key] = temp.conjugate() * temp
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "eisf_%s")
         self._outputData["eisf_total"][:] = weighted_sum(

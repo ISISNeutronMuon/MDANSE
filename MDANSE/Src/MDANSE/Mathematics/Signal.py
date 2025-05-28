@@ -110,7 +110,7 @@ def correlation(x, y=None, axis=0, sumOverAxis=None, average=None):
 
     s = tuple(s)
 
-    corr = np.real(np.fft.ifft(np.conjugate(X) * Y, axis=axis)[s])
+    corr = np.fft.ifft(np.conjugate(X) * Y, axis=axis)[s]
 
     norm = n - np.arange(n)
 
@@ -307,4 +307,4 @@ def get_spectrum(signal, window=None, timeStep=1.0, axis=0, fft="fft"):
     else:
         raise ValueError("fft variable should be fft or rfft.")
 
-    return fftSignal.real
+    return fftSignal

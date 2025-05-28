@@ -32,7 +32,7 @@ def test_disf(tmp_path, trajectory, resolution_generator):
         ),
         "running_mode": ("single-core",),
         "trajectory": short_traj,
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
@@ -70,7 +70,7 @@ def test_dos(tmp_path, trajectory, resolution_generator):
         "instrument_resolution": ("Ideal", {}),
         "running_mode": ("single-core",),
         "trajectory": short_traj,
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
@@ -101,4 +101,60 @@ def test_dos(tmp_path, trajectory, resolution_generator):
             for fn in ("dos", "vacf")
             for elem in ("Cu", "S", "Sb", "total")]
 
-    compare_hdf5(out_file, result_file, keys, scale_result=True)
+    compare_hdf5(out_file,
+                 result_file,
+                 keys,
+                 scale_result=True,
+                 scale_benchmark=True)
+
+
+def test_dos_is_reproducible(tmp_path, trajectory):
+    resolution_generator = "ideal"
+
+    temp_name1 = tmp_path / "output1"
+    temp_name2 = tmp_path / "output2"
+    temp_name3 = tmp_path / "output3"
+
+    for temp_name in [temp_name1, temp_name2, temp_name3]:
+        parameters = {
+            "atom_selection": None,
+            "atom_transmutation": None,
+            "frames": (0, 10, 1, 5),
+            "instrument_resolution": ("Ideal", {}),
+            "running_mode": ("single-core",),
+            "trajectory": short_traj,
+            "weights": "b_incoherent",
+        }
+
+        parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
+
+        instance = IInstrumentResolution.create(resolution_generator)
+        resolution_defaults = {
+            name: value[1]["default"] for name, value in instance.settings.items()
+        }
+
+        print(resolution_generator)
+        print(resolution_defaults)
+
+        parameters["instrument_resolution"] = (
+            resolution_generator,
+            resolution_defaults,
+        )
+
+        disf = IJob.create("DensityOfStates")
+        disf.run(parameters, status=True)
+
+    keys = [f"{fn}_{elem}"
+            for fn in ("dos", "vacf")
+            for elem in ("Cu", "S", "Sb", "total")]
+
+    compare_hdf5(temp_name1.with_suffix(".mda"),
+                 temp_name2.with_suffix(".mda"),
+                 keys,
+                 scale_result=True,
+                 scale_benchmark=True)
+    compare_hdf5(temp_name1.with_suffix(".mda"),
+                 temp_name3.with_suffix(".mda"),
+                 keys,
+                 scale_result=True,
+                 scale_benchmark=True)

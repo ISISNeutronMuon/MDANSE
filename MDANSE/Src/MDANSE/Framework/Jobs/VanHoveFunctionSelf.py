@@ -292,6 +292,10 @@ class VanHoveFunctionSelf(IJob):
             )
 
         weights = self.configuration["weights"].get_weights()
+        for key, value in weights.items():
+            temp = complex(value)
+            new_value = temp * temp.conjugate()
+            weights[key] = new_value
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "g(r,t)_%s")
         assign_weights(self._outputData, weight_dict, "4_pi_r2_g(r,t)_%s")

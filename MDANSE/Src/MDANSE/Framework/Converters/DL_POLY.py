@@ -41,7 +41,7 @@ class HistoryFile(dict):
         super().__init__()
         self._dist_conversion = measure(1.0, "ang").toval("nm")
         self._vel_conversion = measure(1.0, "ang/ps").toval("nm/ps")
-        self._grad_conversion = measure(1.0, "uma ang / ps2").toval("uma nm / ps2")
+        self._grad_conversion = measure(1.0, "Da ang / ps2").toval("Da nm / ps2")
         with open(filename, "r") as source:
             _ = source.readline()
             tagline = source.readline()
@@ -241,7 +241,7 @@ class DL_POLY(Converter):
                 "unit_cell": "nm",
                 "coordinates": "nm",
                 "velocities": "nm/ps",
-                "gradients": "uma nm/ps2",
+                "gradients": "Da nm/ps2",
             },
         )
 

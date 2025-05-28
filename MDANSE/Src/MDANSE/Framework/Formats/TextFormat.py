@@ -150,7 +150,15 @@ class TextFormat(IFormat):
                 yValues = allData[yData]
                 fileobject.write(f"# 1st row: {yValues.varname} ({yValues.units})\n\n")
 
-            zData = np.zeros((data.shape[0] + 1, data.shape[1] + 1), dtype=np.float64)
+            if np.allclose(np.imag(data), 0.0):
+                zData = np.zeros(
+                    (data.shape[0] + 1, data.shape[1] + 1), dtype=np.float64
+                )
+                data = np.real(data)
+            else:
+                zData = np.zeros(
+                    (data.shape[0] + 1, data.shape[1] + 1), dtype=np.complex128
+                )
             zData[1:, 0] = xValues
             zData[0, 1:] = yValues
             zData[1:, 1:] = data

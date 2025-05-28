@@ -83,7 +83,7 @@ class DynamicIncoherentStructureFactor(IJob):
     settings["weights"] = (
         "WeightsConfigurator",
         {
-            "default": "b_incoherent2",
+            "default": "b_incoherent",
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
@@ -159,6 +159,7 @@ class DynamicIncoherentStructureFactor(IJob):
                 (self._nQShells, self._nFrames),
                 axis="q|time",
                 units="au",
+                dtype=np.float64,
             )
             self._outputData.add(
                 f"s(q,f)_{element}",
@@ -168,6 +169,7 @@ class DynamicIncoherentStructureFactor(IJob):
                 units="nm2/ps",
                 main_result=True,
                 partial_result=True,
+                dtype=np.float64,
             )
             if self.add_ideal_results:
                 self._outputData.add(
@@ -176,6 +178,7 @@ class DynamicIncoherentStructureFactor(IJob):
                     (self._nQShells, self._nOmegas),
                     axis="q|omega",
                     units="nm2/ps",
+                    dtype=np.float64,
                 )
 
         self._outputData.add(
@@ -184,6 +187,7 @@ class DynamicIncoherentStructureFactor(IJob):
             (self._nQShells, self._nFrames),
             axis="q|time",
             units="au",
+            dtype=np.float64,
         )
         self._outputData.add(
             "s(q,f)_total",
@@ -192,6 +196,7 @@ class DynamicIncoherentStructureFactor(IJob):
             axis="q|omega",
             units="nm2/ps",
             main_result=True,
+            dtype=np.float64,
         )
         if self.add_ideal_results:
             self._outputData.add(
@@ -200,6 +205,7 @@ class DynamicIncoherentStructureFactor(IJob):
                 (self._nQShells, self._nOmegas),
                 axis="q|omega",
                 units="nm2/ps",
+                dtype=np.float64,
             )
 
     def run_step(self, index):
@@ -274,6 +280,10 @@ class DynamicIncoherentStructureFactor(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         weights = self.configuration["weights"].get_weights()
+        if self.configuration["weights"]["property"] == "b_incoherent":
+            for key, value in weights.items():
+                temp = complex(value)
+                weights[key] = temp.conjugate() * temp
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "f(q,t)_%s")
         assign_weights(self._outputData, weight_dict, "s(q,f)_%s")

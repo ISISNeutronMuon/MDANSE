@@ -165,6 +165,7 @@ class DynamicCoherentStructureFactor(IJob):
                 (nQShells, self._nFrames),
                 axis="q|time",
                 units="au",
+                dtype=np.float64,
             )
             self._outputData.add(
                 f"s(q,f)_{pair_str}",
@@ -174,6 +175,7 @@ class DynamicCoherentStructureFactor(IJob):
                 units="nm2/ps",
                 main_result=True,
                 partial_result=True,
+                dtype=np.float64,
             )
             if self.add_ideal_results:
                 self._outputData.add(
@@ -182,6 +184,7 @@ class DynamicCoherentStructureFactor(IJob):
                     (nQShells, self._nOmegas),
                     axis="q|omega",
                     units="nm2/ps",
+                    dtype=np.float64,
                 )
 
         self._outputData.add(
@@ -190,6 +193,7 @@ class DynamicCoherentStructureFactor(IJob):
             (nQShells, self._nFrames),
             axis="q|time",
             units="au",
+            dtype=np.float64,
         )
         self._outputData.add(
             "s(q,f)_total",
@@ -198,6 +202,7 @@ class DynamicCoherentStructureFactor(IJob):
             axis="q|omega",
             units="nm2/ps",
             main_result=True,
+            dtype=np.float64,
         )
         if self.add_ideal_results:
             self._outputData.add(
@@ -206,6 +211,7 @@ class DynamicCoherentStructureFactor(IJob):
                 (nQShells, self._nOmegas),
                 axis="q|omega",
                 units="nm2/ps",
+                dtype=np.float64,
             )
 
         self._cell_std = 0.0

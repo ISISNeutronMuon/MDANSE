@@ -254,6 +254,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 fqt,
                 axis="q|time",
                 units="au",
+                dtype=np.float64,
             )
             self._outputData.add(
                 f"s(q,f)_inc_{element}",
@@ -261,6 +262,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 sqf,
                 axis="q|omega",
                 units="nm2/ps",
+                dtype=np.float64,
             )
 
         for pair in self._elementsPairs:
@@ -277,6 +279,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 fqt,
                 axis="q|time",
                 units="au",
+                dtype=np.float64,
             )
             self._outputData.add(
                 f"s(q,f)_coh_{pair_str}",
@@ -284,6 +287,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 sqf,
                 axis="q|omega",
                 units="nm2/ps",
+                dtype=np.float64,
             )
 
         nQValues = len(dcsf_q)
@@ -296,6 +300,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             (nQValues, nTimes),
             axis="q|time",
             units="au",
+            dtype=np.float64,
         )
         self._outputData.add(
             "f(q,t)_inc_total",
@@ -303,6 +308,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             (nQValues, nTimes),
             axis="q|time",
             units="au",
+            dtype=np.float64,
         )
         self._outputData.add(
             "f(q,t)_total",
@@ -310,6 +316,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             (nQValues, nTimes),
             axis="q|time",
             units="au",
+            dtype=np.float64,
         )
 
         self._outputData.add(
@@ -320,6 +327,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             units="nm2/ps",
             main_result=True,
             partial_result=True,
+            dtype=np.float64,
         )
         self._outputData.add(
             "s(q,f)_inc_total",
@@ -329,6 +337,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             units="nm2/ps",
             main_result=True,
             partial_result=True,
+            dtype=np.float64,
         )
         self._outputData.add(
             "s(q,f)_total",
@@ -337,6 +346,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             axis="q|omega",
             units="nm2/ps",
             main_result=True,
+            dtype=np.float64,
         )
         self._input_disf_weight = (
             self.configuration["disf_input_file"]["instance"][
@@ -390,42 +400,42 @@ class NeutronDynamicTotalStructureFactor(IJob):
         # Compute coherent functions and structure factor
         for pair in self._elementsPairs:
             pair_str = "".join(map(str, pair))
-            bi = self.configuration["trajectory"]["instance"].get_atom_property(
-                pair[0], "b_coherent"
-            )
-            bj = self.configuration["trajectory"]["instance"].get_atom_property(
-                pair[1], "b_coherent"
-            )
+            bi: complex = self.configuration["trajectory"][
+                "instance"
+            ].get_atom_property(pair[0], "b_coherent")
+            bj: complex = self.configuration["trajectory"][
+                "instance"
+            ].get_atom_property(pair[1], "b_coherent")
             sqrt_cij = sqrt(
                 nAtomsPerElement[pair[0]] * nAtomsPerElement[pair[1]] * norm_natoms**2
             )
             pre_fac = 1 if pair[0] == pair[1] else 2
             self._outputData[f"f(q,t)_coh_{pair_str}"].scaling_factor *= (
-                pre_fac * bi * bj * sqrt_cij
+                pre_fac * bi.conjugate() * bj * sqrt_cij
             )
             self._outputData[f"s(q,f)_coh_{pair_str}"].scaling_factor *= (
-                pre_fac * bi * bj * sqrt_cij
+                pre_fac * bi.conjugate() * bj * sqrt_cij
             )
 
-            self._outputData["f(q,t)_coh_total"][:] += (
+            self._outputData["f(q,t)_coh_total"][:] += np.real(
                 self._outputData[f"f(q,t)_coh_{pair_str}"][:]
                 * self._outputData[f"f(q,t)_coh_{pair_str}"].scaling_factor
             )
-            self._outputData["s(q,f)_coh_total"][:] += (
+            self._outputData["s(q,f)_coh_total"][:] += np.real(
                 self._outputData[f"s(q,f)_coh_{pair_str}"][:]
                 * self._outputData[f"s(q,f)_coh_{pair_str}"].scaling_factor
             )
 
         # Compute incoherent functions and structure factor
         for element, number in nAtomsPerElement.items():
-            bi = self.configuration["trajectory"]["instance"].get_atom_property(
-                element, "b_incoherent2"
-            )
+            bi: complex = self.configuration["trajectory"][
+                "instance"
+            ].get_atom_property(element, "b_incoherent")
             self._outputData[f"f(q,t)_inc_{element}"].scaling_factor *= (
-                bi * number * norm_natoms
+                bi.conjugate() * bi * number * norm_natoms
             )
             self._outputData[f"s(q,f)_inc_{element}"].scaling_factor *= (
-                bi * number * norm_natoms
+                bi.conjugate() * bi * number * norm_natoms
             )
             self._outputData["f(q,t)_inc_total"][:] += (
                 self._outputData[f"f(q,t)_inc_{element}"][:]
@@ -437,11 +447,11 @@ class NeutronDynamicTotalStructureFactor(IJob):
             )
 
         # Compute total F(Q,t) = inc + coh
-        self._outputData["f(q,t)_total"][:] = (
+        self._outputData["f(q,t)_total"][:] = np.real(
             self._outputData["f(q,t)_coh_total"][:]
             + self._outputData["f(q,t)_inc_total"][:]
         )
-        self._outputData["s(q,f)_total"][:] = (
+        self._outputData["s(q,f)_total"][:] = np.real(
             self._outputData["s(q,f)_coh_total"][:]
             + self._outputData["s(q,f)_inc_total"][:]
         )

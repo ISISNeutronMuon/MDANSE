@@ -13,15 +13,82 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 import itertools
 
 import numpy as np
 
 
+def complex_to_float(
+    input_weights: dict[str, Union[complex, float]],
+) -> dict[str, Union[complex, float]]:
+    """Convert complex values to float if all imaginary parts are 0.
+
+    It will replace the complex values with float values only if this
+    does not lead to any loss on information.
+
+    Parameters
+    ----------
+    input_weights : dict[str, Union[complex, float]]
+        Weight dictionary with possibly complex values
+
+    Returns
+    -------
+    dict[str, Union[complex, float]]
+        Unchanged dictionary, or dictionary with float values
+    """
+    no_imaginary = True
+    new_dict = {}
+    for key, x in input_weights.items():
+        if isinstance(x, np.ndarray):
+            no_imaginary &= np.allclose(np.imag(x), 0.0)
+            new_dict[key] = np.real(x)
+        else:
+            no_imaginary &= np.isclose(complex(x).imag, 0.0)
+            new_dict[key] = complex(x).real
+    if no_imaginary:
+        return new_dict
+    return input_weights
+
+
+def weights_1D(contents, props, conc_exp=1.0):
+    weights = {}
+    norm_factor = 0.0
+    n_atms = sum(contents.values())
+    for element in contents:
+        concentration = contents[element] / n_atms
+        property = props[element]
+        factor = concentration**conc_exp * property
+        weights[(element,)] = factor
+        norm_factor += concentration * property
+    return weights, norm_factor
+
+
+def weights_2D(contents, props, conc_exp=1.0):
+    weights = {}
+    norm_factor = 0.0
+    n_atms = sum(contents.values())
+    cartesianProduct = itertools.product(contents, repeat=2)
+    for el1, el2 in cartesianProduct:
+        concentration = contents[el1] * contents[el2] / n_atms**2
+        if isinstance(props[el1], np.ndarray):
+            prop1 = np.conjugate(props[el1].astype(complex))
+        else:
+            prop1 = complex(props[el1]).conjugate()
+        if isinstance(props[el2], np.ndarray):
+            prop2 = props[el2].astype(complex)
+        else:
+            prop2 = complex(props[el2])
+        property = prop1 * prop2
+        factor = concentration**conc_exp * property
+        weights[(el1, el2)] = factor
+        norm_factor += concentration * property
+    return weights, norm_factor
+
+
 def get_weights(
-    props: Dict[str, float], contents: Dict[str, int], dim: int, conc_exp: float = 1.0
-):
+    props: dict[str, float], contents: dict[str, int], dim: int, conc_exp: float = 1.0
+) -> dict[tuple[str], Union[float, complex]]:
     """Calculate the scaling factors to be applied to output datasets.
 
     Returns a dictionary of scaling factors, where the
@@ -41,38 +108,30 @@ def get_weights(
 
     Returns
     -------
-    Tuple(Dict[Tuple[str], float], float)
+    dict[tuple[str], float]
         Dictionary of scaling factors per dataset key, and a sum of all the factors
     """
-    normFactor = 0.0
-
-    weights = {}
-
-    n_atms = sum(contents[el] for el in props)
-    cartesianProduct = itertools.product(props, repeat=dim)
-    for elements in cartesianProduct:
-        atom_conc_product = np.prod([contents[el] / n_atms for el in elements])
-        property_product = np.prod(np.array([props[el] for el in elements]), axis=0)
-
-        factor = atom_conc_product**conc_exp * property_product
-        # E.g. for property b_coh, 5 Cu atoms, 100 total atoms, and dim=2
-        # factor = (5*5/(100*100))**conc_exp * b_coh(Cu)*b_coh(Cu)
-
-        weights[elements] = np.float64(np.copy(factor))
-        normFactor += atom_conc_product * property_product
+    if dim == 1:
+        weights, norm_factor = weights_1D(contents, props, conc_exp=conc_exp)
+    elif dim == 2:
+        weights, norm_factor = weights_2D(contents, props, conc_exp=conc_exp)
+    else:
+        raise NotImplementedError("Only 1D and 2D weights are available.")
 
     normalise = True
     try:
-        len(normFactor)
+        len(norm_factor)
     except TypeError:
-        normalise = abs(normFactor) > 0.0  # if normFactor is 0, all weights are 0 too.
+        normalise = (
+            abs(norm_factor) > 0.0
+        )  # if norm_factor is 0, all weights are 0 too.
     if normalise:
         for k in list(weights.keys()):
-            weights[k] /= np.float64(normFactor)
+            weights[k] /= norm_factor
 
-    weights["sum"] = normFactor
+    weights["sum"] = norm_factor
 
-    return weights
+    return complex_to_float(weights)
 
 
 def assign_weights(
@@ -105,8 +164,13 @@ def assign_weights(
 
     for k in values.keys() & matches:
         if symmetric:
+            w = 0
             permutations = set(itertools.permutations(matches[k], r=dim))
-            w = sum(weights[p] for p in permutations)
+            for n, p in enumerate(permutations):
+                if n % 2:
+                    w += weights[p]
+                else:
+                    w += np.conjugate(weights[p])
         else:
             w = weights[matches[k]]
 

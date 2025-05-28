@@ -17,6 +17,8 @@ from math import sqrt
 import collections
 import itertools as it
 
+import numpy as np
+
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -86,6 +88,7 @@ class StructureFactorFromScatteringFunction(IJob):
                 units="au",
                 main_result=True,
                 partial_result=True,
+                dtype=np.float64,
             )
 
         self._outputData.add(
@@ -95,6 +98,7 @@ class StructureFactorFromScatteringFunction(IJob):
             axis="q",
             units="au",
             main_result=True,
+            dtype=np.float64,
         )
 
     def run_step(self, index):
@@ -141,7 +145,7 @@ class StructureFactorFromScatteringFunction(IJob):
                 fqt.attrs["scaling_factor"] * sqrt_cij
             )
 
-            self._outputData["ssf_total"][:] += (
+            self._outputData["ssf_total"][:] += np.real(
                 self._outputData[f"ssf_total_{pair_str}"][:]
                 * self._outputData[f"ssf_total_{pair_str}"].scaling_factor
             )
