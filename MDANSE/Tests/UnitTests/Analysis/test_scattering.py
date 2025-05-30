@@ -237,7 +237,12 @@ def test_eisf(tmp_path, traj_info, qvector_grid):
     assert text_file.is_file()
 
     result_file = RESULTS_DIR / f"eisf_{traj_info[0]}.mda"
-    compare_hdf5(out_file, result_file, ("eisf",), startswith=True, scale_result=True)
+    compare_hdf5(out_file,
+                 result_file,
+                 ("eisf",),
+                 startswith=True,
+                 scale_result=True,
+                 scale_benchmark=True)
 
 
 @pytest.mark.parametrize(
