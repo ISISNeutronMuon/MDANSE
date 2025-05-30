@@ -1,8 +1,5 @@
 import json
-import tempfile
-import os
-from os import path
-from pathlib import WindowsPath
+from pathlib import Path
 import pytest
 import h5py
 import scipy
@@ -12,16 +9,152 @@ from MDANSE.Mathematics.Signal import FILTER_MAP, Filter
 
 from MDANSE.Framework.Jobs.IJob import IJob
 
-from MDANSE_GUI.Tabs.Models.PlottingContext import SingleDataset
-
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
 # Trajectory constants
 SRTIO3_TRAJ = "cp2k_srtio3_unfiltered.mdt"
 
-CUAU_TRAJ = "CuAu_asap_10fs-step.mdt"
+CUAU_TRAJ = "CuAu_asap_10fs-step_unfiltered.mdt"
 
-DUT49_TRAJ = "plain_DUT49_20K_in_cell.mdt"
+DUT49_TRAJ = "plain_DUT49_20K_in_cell_unfiltered.mdt"
+
+# Filter configurations
+FILTER_CONFIGS = [
+    {
+        "trajectory": SRTIO3_TRAJ,
+        "max_frequency": 626,
+        "frames": [0, 320, 1, 160],
+        "filter": "Butterworth",
+        "attributes": {
+            "n_steps": 320,
+            "time_step_ps": 0.005,
+            "order": 1,
+            "attenuation_type": "lowpass",
+            "cutoff_freq": 19.635,
+        },
+    },
+    {
+        "trajectory": SRTIO3_TRAJ,
+        "max_frequency": 626,
+        "frames": [0, 320, 1, 160],
+        "filter": "Butterworth",
+        "attributes": {
+            "n_steps": 320,
+            "time_step_ps": 0.005,
+            "order": 1,
+            "attenuation_type": "highpass",
+            "cutoff_freq": 31.416,
+        },
+    },
+    {
+        "trajectory": SRTIO3_TRAJ,
+        "max_frequency": 626,
+        "frames": [0, 320, 1, 160],
+        "filter": "ChebyshevTypeII",
+        "attributes": {
+            "n_steps": 320,
+            "time_step_ps": 0.005,
+            "order": 1,
+            "min_attenuation": 12.7,
+            "attenuation_type": "bandpass",
+            "cutoff_freq": [27.489000000000004, 376.992],
+        },
+    },
+    {
+        "trajectory": SRTIO3_TRAJ,
+        "max_frequency": 626,
+        "frames": [0, 320, 1, 160],
+        "filter": "Bessel",
+        "attributes": {
+            "n_steps": 320,
+            "time_step_ps": 0.005,
+            "order": 1,
+            "norm": "phase",
+            "attenuation_type": "bandstop",
+            "cutoff_freq": [27.489000000000004, 70.686],
+        },
+    },
+    {
+        "trajectory": SRTIO3_TRAJ,
+        "max_frequency": 626,
+        "frames": [0, 320, 1, 160],
+        "filter": "ChebyshevTypeII",
+        "attributes": {
+            "n_steps": 320,
+            "time_step_ps": 0.005,
+            "order": 2,
+            "min_attenuation": 20.0,
+            "attenuation_type": "bandpass",
+            "cutoff_freq": [15.708000000000002, 145.299],
+        },
+    },
+    {
+        "trajectory": SRTIO3_TRAJ,
+        "max_frequency": 626,
+        "frames": [0, 320, 1, 160],
+        "filter": "ChebyshevTypeII",
+        "attributes": {
+            "n_steps": 320,
+            "time_step_ps": 0.005,
+            "order": 2,
+            "min_attenuation": 2.0,
+            "attenuation_type": "bandpass",
+            "cutoff_freq": [15.708000000000002, 145.299],
+        },
+    },
+    {
+        "trajectory": SRTIO3_TRAJ,
+        "max_frequency": 626,
+        "frames": [0, 320, 1, 160],
+        "filter": "Notch",
+        "attributes": {
+            "n_steps": 320,
+            "time_step_ps": 0.005,
+            "fundamental_freq": 6.875,
+            "quality_factor": 1.6,
+        },
+    },
+    {
+        "trajectory": CUAU_TRAJ,
+        "max_frequency": 314,
+        "frames": [0, 1000, 1, 500],
+        "filter": "Peak",
+        "attributes": {
+            "n_steps": 1000,
+            "time_step_ps": 0.01,
+            "fundamental_freq": 5.7,
+            "quality_factor": 1.5,
+        },
+    },
+    {
+        "trajectory": CUAU_TRAJ,
+        "max_frequency": 314,
+        "frames": [0, 1000, 1, 500],
+        "filter": "Comb",
+        "attributes": {
+            "n_steps": 1000,
+            "time_step_ps": 0.01,
+            "fundamental_freq": 5.0,
+            "quality_factor": 30.0,
+            "comb_type": "notch",
+            "pass_zero": True,
+        },
+    },
+    {
+        "trajectory": DUT49_TRAJ,
+        "max_frequency": 3141,
+        "frames": [0, 7048, 1, 3524],
+        "filter": "ChebyshevTypeII",
+        "attributes": {
+            "n_steps": 7048,
+            "time_step_ps": 0.001,
+            "order": 1,
+            "min_attenuation": 10.0,
+            "attenuation_type": "highpass",
+            "cutoff_freq": 0.8915,
+        },
+    },
+]
 
 # Test results must satisfy a 5% tolerance to error
 TOLERANCE = 5
@@ -72,7 +205,7 @@ def mean_absolute_error(x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
 
 def normalise(data: np.ndarray, reference: np.ndarray = None) -> np.ndarray:
     """ """
-    if reference:
+    if reference is not None:
         coeff = 1 / reference.max()
     else:
         coeff = 1 / data.max()
@@ -80,20 +213,20 @@ def normalise(data: np.ndarray, reference: np.ndarray = None) -> np.ndarray:
 
 
 def run_trajectory_filter(
-    name: str, config: dict, traj_path: WindowsPath
-) -> WindowsPath:
+    name: Path, config: dict, frames: list, traj_path: Path
+) -> Path:
     """ """
     out_file = name.with_suffix(".mdt")
 
     trajectory_filter_parameters = {
         "atom_selection": "{}",
-        "frames": [0, 320, 1, 160],
+        "frames": frames,
         "instrument_resolution": ("ideal", {}),
         "output_files": (name, 64, 128, "gzip", "no logs"),
         "projection": ("NullProjector", []),
         "running_mode": ("single-core",),
         "trajectory": traj_path,
-        "trajectory_filter": config,
+        "trajectory_filter": json.dumps(config),
         "weights": "atomic_weight",
     }
 
@@ -103,14 +236,14 @@ def run_trajectory_filter(
     return out_file
 
 
-def run_power_spectrum(name: str, traj_path: WindowsPath) -> WindowsPath:
+def run_power_spectrum(name: Path, frames: list, traj_path: Path) -> Path:
     """ """
     out_file = name.with_suffix(".mda")
 
     parameters = {
         "atom_selection": "{}",
         "atom_transmutation": "{}",
-        "frames": [0, 320, 1, 160],
+        "frames": frames,
         "instrument_resolution": ("ideal", {}),
         "output_files": (name, ["MDAFormat"], "no logs"),
         "projection": ("NullProjector", []),
@@ -125,110 +258,47 @@ def run_power_spectrum(name: str, traj_path: WindowsPath) -> WindowsPath:
     return out_file
 
 
-def unfiltered_power_spectrum_fixture(tmp_path_factory):
-    """Fixture returns the output file of the PositionPowerSpectrum job with the SrTiO3 trajectory as the input."""
+@pytest.fixture(scope="module")
+def srtio3_spectrum_clean(tmp_path_factory):
+    """Fixture returns the output file of the PositionPowerSpectrum job with the cp2k SrTiO3 trajectory as the input."""
 
     yield run_power_spectrum(
-        tmp_path_factory.mktemp("data") / "unfiltered_power_spectrum",
+        tmp_path_factory.mktemp("data") / f"{SRTIO3_TRAJ}_unfiltered_power_spectrum",
+        [0, 320, 1, 160],
         CONV_DIR / SRTIO3_TRAJ,
     )
 
 
 @pytest.fixture(scope="module")
-def unfiltered_power_spectrum(tmp_path_factory):
-    """Fixture returns the output file of the PositionPowerSpectrum job with the SrTiO3 trajectory as the input."""
+def cuau_spectrum_clean(tmp_path_factory):
+    """Fixture returns the output file of the PositionPowerSpectrum job with the ASAP CuAu trajectory as the input."""
 
-    temp_name = tmp_path_factory.mktemp("data") / "unfiltered_power_spectrum"
-    out_file = temp_name.with_suffix(".mda")
-
-    parameters = {
-        "atom_selection": "{}",
-        "atom_transmutation": "{}",
-        "frames": [0, 320, 1, 160],
-        "instrument_resolution": ("ideal", {}),
-        "output_files": (temp_name, ["MDAFormat"], "no logs"),
-        "projection": ("NullProjector", []),
-        "running_mode": ("single-core",),
-        "trajectory": CONV_DIR / SRTIO3_TRAJ,
-        "weights": "atomic_weight",
-    }
-
-    power_spectrum = IJob.create("PositionPowerSpectrum")
-    power_spectrum.run(parameters, status=True)
-
-    yield out_file
+    yield run_power_spectrum(
+        tmp_path_factory.mktemp("data") / f"{CUAU_TRAJ}_unfiltered_power_spectrum",
+        [0, 1000, 1, 500],
+        CONV_DIR / CUAU_TRAJ,
+    )
 
 
-@pytest.mark.parametrize(
-    "filter_config",
-    [
-        {
-            "filter": "Butterworth",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 1,
-                "attenuation_type": "lowpass",
-                "cutoff_freq": 19.635,
-            },
-        },
-        {
-            "filter": "Butterworth",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 1,
-                "attenuation_type": "highpass",
-                "cutoff_freq": 31.416,
-            },
-        },
-        {
-            "filter": "ChebyshevTypeII",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 1,
-                "min_attenuation": 12.7,
-                "attenuation_type": "bandpass",
-                "cutoff_freq": [27.489000000000004, 376.992],
-            },
-        },
-        {
-            "filter": "Bessel",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 1,
-                "norm": "phase",
-                "attenuation_type": "bandstop",
-                "cutoff_freq": [27.489000000000004, 70.686],
-            },
-        },
-        {
-            "filter": "ChebyshevTypeII",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 2,
-                "min_attenuation": 20.0,
-                "attenuation_type": "bandpass",
-                "cutoff_freq": [15.708000000000002, 145.299],
-            },
-        },
-        {
-            "filter": "ChebyshevTypeII",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 2,
-                "min_attenuation": 2.0,
-                "attenuation_type": "bandpass",
-                "cutoff_freq": [15.708000000000002, 145.299],
-            },
-        },
-    ],
-)
-def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_config):
+@pytest.fixture(scope="module")
+def dut49_spectrum_clean(tmp_path_factory):
+    """Fixture returns the output file of the PositionPowerSpectrum job with the DUT49 metal-organic framework trajectory as the input."""
+
+    yield run_power_spectrum(
+        tmp_path_factory.mktemp("data") / f"{DUT49_TRAJ}_unfiltered_power_spectrum",
+        [0, 7048, 1, 3524],
+        CONV_DIR / DUT49_TRAJ,
+    )
+
+
+@pytest.mark.parametrize("filter_config", FILTER_CONFIGS)
+def test_convolution(
+    tmp_path,
+    srtio3_spectrum_clean,
+    cuau_spectrum_clean,
+    dut49_spectrum_clean,
+    filter_config,
+):
     """The performance of the MDANSE trajectory filter is tested by analysing functional form.
     In this case we compare the form of the power spectrum function of the filtered trajectory against the
     power spectrum of the unfiltered trajectory.
@@ -243,12 +313,25 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
 
     The deviation from the convolution theorem is assessed by taking the mean of the absolute error, | U(w)H(w) - F(w) |
     """
+    # Trajectory .mdt file name
+    trajectory_name = filter_config["trajectory"]
+
+    frames = filter_config["frames"]
+
+    if trajectory_name == SRTIO3_TRAJ:
+        unfiltered_power_spectrum = srtio3_spectrum_clean
+    elif trajectory_name == CUAU_TRAJ:
+        unfiltered_power_spectrum = cuau_spectrum_clean
+    elif trajectory_name == DUT49_TRAJ:
+        unfiltered_power_spectrum = dut49_spectrum_clean
+    else:
+        ValueError(f"{trajectory_name} is not a recognised .mdt file.")
 
     # Retrieve U(w), check the data is as expected
-    original_data = SingleDataset(
+    original_data = LocalDataset(
         "pps_total", h5py.File(unfiltered_power_spectrum, "r+")
     )
-    u_x_axis_name = original_data.available_x_axes()
+    u_x_axis_name = list(original_data._axes_units.keys())
 
     assert u_x_axis_name == ["romega"]
     assert original_data._axes_units[u_x_axis_name[0]] == "rad/ps"
@@ -256,9 +339,9 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
     u_x_axis = original_data._axes["romega"]
 
     assert np.round(u_x_axis.min(), 0) == 0
-    assert np.round(u_x_axis.max(), 0) == 626
+    assert np.round(u_x_axis.max(), 0) == filter_config["max_frequency"]
 
-    uw = original_data.data
+    uw = original_data._data
 
     # Retrieve filter configuration dict
     filter_class = FILTER_MAP[filter_config["filter"]]
@@ -273,63 +356,31 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
         Filter.FrequencyRangeMethod.CUSTOM,
     )
 
-    assert np.round(filter_object.freq_response.frequencies.min(), 0) == 0
-    assert np.round(filter_object.freq_response.frequencies.max(), 0) == 626
-
     # Resample H(w) to length of U(w)
     hw = np.abs(scipy.signal.resample(filter_object.freq_response.magnitudes, len(uw)))
 
     assert np.isclose(hw.max(), 1, 10e-3)
 
     # Compute the frequency domain convolution U(w)H(w) that we will compare F(w) with
-    conv = hw * uw
+    model = hw * uw
 
     # Run TrajectoryFilter job on the input trajectory
     f_name = "filtered_trajectory"
     temp_name = tmp_path / f_name
-    f_trajectory_out_file = temp_name.with_suffix(".mdt")
-
-    trajectory_filter_parameters = {
-        "atom_selection": "{}",
-        "frames": [0, 320, 1, 160],
-        "instrument_resolution": ("ideal", {}),
-        "output_files": (temp_name, 64, 128, "gzip", "no logs"),
-        "projection": ("NullProjector", []),
-        "running_mode": ("single-core",),
-        "trajectory": CONV_DIR / SRTIO3_TRAJ,
-        "trajectory_filter": json.dumps(filter_config),
-        "weights": "atomic_weight",
-    }
-
-    trajectory_filter_job = IJob.create("TrajectoryFilter")
-    trajectory_filter_job.run(trajectory_filter_parameters, status=True)
-
+    f_trajectory_out_file = run_trajectory_filter(
+        temp_name, filter_config, frames, CONV_DIR / trajectory_name
+    )
     assert f_trajectory_out_file.is_file()
 
     # Run PositionPowerSpectrum job on the filtered trajectory
     temp_name = tmp_path / "filtered_power_spectrum"
-    fw_out_file = temp_name.with_suffix(".mda")
-
-    parameters = {
-        "atom_selection": "{}",
-        "atom_transmutation": "{}",
-        "frames": [0, 320, 1, 160],
-        "instrument_resolution": ("ideal", {}),
-        "output_files": (temp_name, ["MDAFormat"], "no logs"),
-        "projection": ("NullProjector", []),
-        "running_mode": ("single-core",),
-        "trajectory": f_trajectory_out_file,
-        "weights": "atomic_weight",
-    }
-
-    fw_job = IJob.create("PositionPowerSpectrum")
-    fw_job.run(parameters, status=True)
+    fw_out_file = run_power_spectrum(temp_name, frames, f_trajectory_out_file)
 
     assert fw_out_file.is_file()
 
     # Retrieve F(w), check the data is as expected
-    filtered_data = SingleDataset("pps_total", h5py.File(fw_out_file, "r+"))
-    f_x_axis_name = filtered_data.available_x_axes()
+    filtered_data = LocalDataset("pps_total", h5py.File(fw_out_file, "r+"))
+    f_x_axis_name = list(filtered_data._axes_units.keys())
 
     assert f_x_axis_name == ["romega"]
     assert filtered_data._axes_units[f_x_axis_name[0]] == "rad/ps"
@@ -337,105 +388,12 @@ def test_filtered_functional_form(tmp_path, unfiltered_power_spectrum, filter_co
     f_x_axis = filtered_data._axes["romega"]
 
     assert np.round(f_x_axis.min(), 0) == 0
-    assert np.round(f_x_axis.max(), 0) == 626
+    assert np.round(f_x_axis.max(), 0) == filter_config["max_frequency"]
 
-    fw = filtered_data.data
+    fw = filtered_data._data
 
     assert len(fw) == len(uw)
 
     # Calculate differences between U(w)H(w) and F(w)
-    normalisation_coeff = 100 / conv.max()
-    normalised = (conv * normalisation_coeff, fw * normalisation_coeff)
-
-    error = np.mean(np.abs(normalised[0] - normalised[1]))
+    error = mean_absolute_error(normalise(model), normalise(fw, model))
     assert np.isclose(error, 0, atol=TOLERANCE)
-
-
-filter_configs = {
-    SRTIO3_TRAJ: [
-        {
-            "filter": "Butterworth",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 1,
-                "attenuation_type": "lowpass",
-                "cutoff_freq": 19.635,
-            },
-        },
-        {
-            "filter": "Butterworth",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 1,
-                "attenuation_type": "highpass",
-                "cutoff_freq": 31.416,
-            },
-        },
-        {
-            "filter": "ChebyshevTypeII",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 1,
-                "min_attenuation": 12.7,
-                "attenuation_type": "bandpass",
-                "cutoff_freq": [27.489000000000004, 376.992],
-            },
-        },
-        {
-            "filter": "Bessel",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 1,
-                "norm": "phase",
-                "attenuation_type": "bandstop",
-                "cutoff_freq": [27.489000000000004, 70.686],
-            },
-        },
-        {
-            "filter": "ChebyshevTypeII",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 2,
-                "min_attenuation": 20.0,
-                "attenuation_type": "bandpass",
-                "cutoff_freq": [15.708000000000002, 145.299],
-            },
-        },
-        {
-            "filter": "ChebyshevTypeII",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "order": 2,
-                "min_attenuation": 2.0,
-                "attenuation_type": "bandpass",
-                "cutoff_freq": [15.708000000000002, 145.299],
-            },
-        },
-        {
-            "filter": "Notch",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "fundamental_freq": 6.875,
-                "quality_factor": 1.6,
-            },
-        },
-        {
-            "filter": "Comb",
-            "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
-                "fundamental_freq": 5.0,
-                "quality_factor": 1.5,
-                "comb_type": "notch",
-                "pass_zero": False,
-            },
-        },
-    ],
-}
