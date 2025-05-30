@@ -82,7 +82,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     settings["weights"] = (
         "WeightsConfigurator",
         {
-            "default": "b_incoherent2",
+            "default": "b_incoherent",
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
@@ -295,6 +295,8 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                 )
 
         weights = self.configuration["weights"].get_weights()
+        for key, value in weights.items():
+            weights[key] = value * value
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "f(q,t)_%s")
         assign_weights(self._outputData, weight_dict, "s(q,f)_%s")

@@ -32,7 +32,7 @@ def test_disf(tmp_path, trajectory, resolution_generator):
         ),
         "running_mode": ("single-core",),
         "trajectory": short_traj,
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
@@ -70,7 +70,7 @@ def test_dos(tmp_path, trajectory, resolution_generator):
         "instrument_resolution": ("Ideal", {}),
         "running_mode": ("single-core",),
         "trajectory": short_traj,
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")

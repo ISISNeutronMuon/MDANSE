@@ -65,7 +65,7 @@ def disf(tmp_path_factory):
         ),
         "running_mode": ("single-core",),
         "trajectory": short_traj,
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     disf = IJob.create("DynamicIncoherentStructureFactor")
@@ -191,7 +191,7 @@ def test_disf(tmp_path, traj_info, qvector_grid):
         "q_vectors": qvector_grid,
         "running_mode": ("single-core",),
         "trajectory": traj_info[1],
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     disf = IJob.create("DynamicIncoherentStructureFactor")
@@ -260,7 +260,7 @@ def test_gdisf(tmp_path, traj_info):
         "q_shells": (2.0, 12.2, 2.0),
         "running_mode": ("single-core",),
         "trajectory": traj_info[1],
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     gdisf = IJob.create("GaussianDynamicIncoherentStructureFactor")

@@ -82,7 +82,7 @@ class ElasticIncoherentStructureFactor(IJob):
     settings["weights"] = (
         "WeightsConfigurator",
         {
-            "default": "b_incoherent2",
+            "default": "b_incoherent",
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
@@ -200,6 +200,8 @@ class ElasticIncoherentStructureFactor(IJob):
             self._outputData[f"eisf_{element}"][:] /= number
 
         weights = self.configuration["weights"].get_weights()
+        for key, value in weights.items():
+            weights[key] = value * value
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "eisf_%s")
         self._outputData["eisf_total"][:] = weighted_sum(

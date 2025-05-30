@@ -93,7 +93,7 @@ Rescaled Weights
 Single Atom-Type Weights
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-MDANSE weights are rescaled so that weights for DISF calculation using the ``b_incoherent2`` will be
+MDANSE weights are rescaled so that weights for DISF calculation using the ``b_incoherent`` will be
 
 .. math::
    :label: single1

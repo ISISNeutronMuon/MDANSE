@@ -24,8 +24,8 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 
 
-HBAR = measure(1.05457182e-34, "kg m2 / s").toval("uma nm2 / ps")
-HARTREE = measure(27.2113845, "eV").toval("uma nm2 / ps2")
+HBAR = measure(1.05457182e-34, "kg m2 / s").toval("Da nm2 / ps")
+HARTREE = measure(27.2113845, "eV").toval("Da nm2 / ps2")
 BOHR = measure(5.29177210903e-11, "m").toval("nm")
 
 
@@ -144,7 +144,7 @@ class CASTEP(Converter):
                 "coordinates": "nm",
                 "unit_cell": "nm",
                 "velocities": "nm/ps",
-                "gradients": "uma nm/ps2",
+                "gradients": "Da nm/ps2",
             },
         )
 

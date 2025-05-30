@@ -15,6 +15,7 @@
 #
 
 import copy
+from collections import defaultdict
 from typing import Union, ItemsView, Dict, Any, Optional
 from pathlib import Path
 
@@ -23,6 +24,67 @@ import json
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Singleton import Singleton
+from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
+
+
+class ComplexEncoder(json.JSONEncoder):
+    """Custom JSON encoder to encode complex numbers as strings."""
+
+    def default(self, obj):
+        if isinstance(obj, complex):
+            return str(obj)
+        return super().default(obj)
+
+
+def str_to_num(numstr: str) -> Union[float, complex]:
+    """Convert the number from string format to float or complex.
+
+    Parameters
+    ----------
+    numstr : str
+        number, saved as string
+
+    Returns
+    -------
+    Union[float, complex]
+        the input number as complex, or float if there is no imaginary part
+
+    """
+    return_value = complex(numstr)
+    if abs(return_value.imag) < 1e-13:
+        return_value = return_value.real
+    return return_value
+
+
+def color(color_string: Optional[str] = None):
+    """A color function used to create a color string for the atom
+    database.
+
+    Parameters
+    ----------
+    color_string: Optional[str]
+        The color string, if None then it returns a color string
+        for white.
+
+    Returns
+    -------
+    str
+        The color string following the
+    """
+    if not color_string:
+        # default color is white
+        return "255;255;255"
+
+    if (
+        not isinstance(color_string, str)
+        or len(color_string.split(";")) != 3
+        or any([not i.isdigit() for i in color_string.split(";")])
+        or any([0 > int(i) > 255 for i in color_string.split(";")])
+    ):
+        raise ValueError(f"{color_string} is not a valid color string.")
+
+    return color_string
 
 
 def color(color_string: Optional[str] = None):
@@ -201,22 +263,41 @@ class AtomsDatabase(_Database):
     _DEFAULT_DATABASE = Path(__file__).parent / "atoms.json"
 
     # The user path
-    _USER_DATABASE = PLATFORM.application_directory() / "atoms.json"
+    _OLD_USER_DATABASE = PLATFORM.application_directory() / "atoms.json"
+
+    _USER_DATABASE = PLATFORM.application_directory() / "atoms_extended.json"
 
     # The python types supported by the database
-    _TYPES = {"str": str, "int": int, "float": float, "list": list, "color": color}
+    _TYPES = {
+        "str": str,
+        "int": int,
+        "float": float,
+        "list": list,
+        "complex": complex,
+        "color": color,
+    }
+
+    _encoder = ComplexEncoder()
 
     def __init__(self):
         """
         Constructor
         """
-        self._properties = {}
+        self._properties = defaultdict(lambda: "str")
+        self._units = defaultdict(lambda: "none")
         self._atoms_by_atomic_number = {num: [] for num in range(140)}
 
         super().__init__()
 
         self.default_atoms_types = list(self._default_data["atoms"].keys())
         self.default_atoms_properties = list(self._default_data["properties"].keys())
+
+        if self._OLD_USER_DATABASE.exists():
+            LOG.warning(
+                "The old atom database %s will be ignored! MDANSE will use %s instead",
+                self._OLD_USER_DATABASE,
+                self._USER_DATABASE,
+            )
 
     def __contains__(self, element: str) -> bool:
         """
@@ -243,9 +324,7 @@ class AtomsDatabase(_Database):
         try:
             return copy.deepcopy(self._data[item])
         except KeyError:
-            raise AtomsDatabaseError(
-                f"The element {item} is not registered in the database."
-            )
+            raise KeyError(f"The element {item} is not registered in the database.")
 
     def _load(self, user_database: str = None, default_database: str = None) -> None:
         """
@@ -257,14 +336,25 @@ class AtomsDatabase(_Database):
         :param default_database: The path to the default MDANSE atom database. The default path is used by default.
         :type default_database: str or None
         """
-        super()._load(user_database, default_database)
+        super()._load(default_database)
 
-        self._properties = self._data["properties"]
+        for key, value in self._data["properties"].items():
+            self._properties[key] = value
+        for key, value in self._data["units"].items():
+            self._units[key] = value
+        self._data = self._data["atoms"]
+
+        super()._load(user_database)
+
+        for key, value in self._data["properties"].items():
+            self._properties[key] = value
+        for key, value in self._data["units"].items():
+            self._units[key] = value
         self._data = self._data["atoms"]
 
         try:
             number_of_protons = self.get_property("proton")
-        except AtomsDatabaseError:
+        except KeyError:
             pass
         else:
             for atom in self.atoms:
@@ -314,7 +404,7 @@ class AtomsDatabase(_Database):
             )
 
         if ptype not in AtomsDatabase._TYPES:
-            raise AtomsDatabaseError(f"The property type {ptype} is unknown")
+            raise TypeError(f"The property type {ptype} is unknown")
 
         self._properties[pname] = ptype
         ptype = AtomsDatabase._TYPES[ptype]
@@ -345,7 +435,7 @@ class AtomsDatabase(_Database):
         """
 
         if atom not in self._data:
-            raise AtomsDatabaseError(f"The atom {atom} is unknown")
+            raise KeyError(f"The atom {atom} is not in the database")
 
         # The isotopes are searched according to |symbol| property
         symbol = self._data[atom]["symbol"]
@@ -377,16 +467,9 @@ class AtomsDatabase(_Database):
         """
 
         if pname not in self._properties:
-            raise AtomsDatabaseError(
-                f"The property {pname} is not registered in the database"
-            )
+            raise KeyError(f"The property {pname} is not registered in the database")
 
-        ptype = AtomsDatabase._TYPES[self._properties[pname]]
-
-        return {
-            element: properties.get(pname, ptype())
-            for element, properties in self._data.items()
-        }
+        return {element: self.get_value(element, pname) for element in self._data}
 
     def get_value(self, atom: str, pname: str) -> Union[str, int, float, list]:
         """
@@ -403,17 +486,24 @@ class AtomsDatabase(_Database):
         """
 
         if atom not in self._data:
-            raise AtomsDatabaseError(f"The atom {atom} is unknown")
+            raise KeyError(f"The atom {atom} is not in the database")
 
         if pname not in self._properties:
-            raise AtomsDatabaseError(
-                f"The property {pname} is not registered in the database"
-            )
+            raise KeyError(f"The property {pname} is not registered in the database")
+        ptype_str = self._properties[pname]
+        ptype = AtomsDatabase._TYPES[ptype_str]
+        punit = self._units[pname]
 
-        ptype = self._properties[pname]
-        ptype = AtomsDatabase._TYPES[ptype]
-
-        return self._data[atom].get(pname, ptype())
+        value = self._data[atom].get(pname, ptype())
+        if ptype_str == "complex":
+            value = str_to_num(value)
+        if punit == "fm":
+            value = measure(value, punit).toval("ang")
+        elif punit == "barn":
+            value = measure(value, punit).toval("ang2")
+        elif punit != "none":
+            value = measure(value, punit).toval()
+        return value
 
     def get_values_for_multiple_atoms(
         self, atoms: list[str], prop: str
@@ -439,11 +529,9 @@ class AtomsDatabase(_Database):
             )
 
         if prop not in self._properties:
-            raise AtomsDatabaseError(
-                f"The property {prop} is not registered in the database"
-            )
+            raise KeyError(f"The property {prop} is not registered in the database")
 
-        values = {name: self._data[name][prop] for name in unique_atoms}
+        values = {name: self.get_value(name, prop) for name in unique_atoms}
         return [values[atom] for atom in atoms]
 
     def set_value(
@@ -463,12 +551,10 @@ class AtomsDatabase(_Database):
         """
 
         if atom not in self._data:
-            raise AtomsDatabaseError(f"The element {atom} is unknown")
+            raise KeyError(f"The element {atom} is not in the database")
 
         if pname not in self._properties:
-            raise AtomsDatabaseError(
-                f"The property {pname} is not registered in the database"
-            )
+            raise KeyError(f"The property {pname} is not registered in the database")
 
         try:
             self._data[atom][pname] = AtomsDatabase._TYPES[self._properties[pname]](
@@ -555,15 +641,13 @@ class AtomsDatabase(_Database):
         :rtype: list
         """
         try:
-            if self._properties[pname] not in ["int", "float"]:
+            if self._properties[pname] not in ["int", "float", "complex"]:
                 raise AtomsDatabaseError(
                     f'The provided property must be numeric, but "{pname}" has type '
                     f"{self._properties[pname]}."
                 )
         except KeyError:
-            raise AtomsDatabaseError(
-                f"The property {pname} is not registered in the database"
-            )
+            raise KeyError(f"The property {pname} is not registered in the database")
 
         tolerance = abs(tolerance)
         try:
@@ -612,7 +696,7 @@ class AtomsDatabase(_Database):
         return [
             pname
             for pname, prop in self._properties.items()
-            if prop in ["int", "float"]
+            if prop in ["int", "float", "complex"]
         ]
 
     def _reset(self) -> None:
@@ -630,10 +714,10 @@ class AtomsDatabase(_Database):
         future. If the user database already exists, calling this function will overwrite it.
         """
 
-        d = {"properties": self._properties, "atoms": self._data}
+        d = {"properties": self._properties, "units": self._units, "atoms": self._data}
 
         with open(AtomsDatabase._USER_DATABASE, "w") as fout:
-            json.dump(d, fout, indent=4)
+            fout.write(json.dumps(d, indent=4, cls=ComplexEncoder))
 
     def get_atom_property(self, symbol: str, property: str) -> Union[int, float, str]:
         """Faster access to the atom property as it avoids the deepcopy
@@ -652,7 +736,7 @@ class AtomsDatabase(_Database):
             The atom property.
         """
         try:
-            return self._data[symbol][property]
+            return self.get_value(symbol, property)
         except KeyError:
             if property == "dummy":
                 if symbol == "Du":

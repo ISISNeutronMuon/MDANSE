@@ -144,6 +144,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
 
         for element, num_atoms in atom_selection_configurator.get_natoms().items():
             weights[element] /= num_atoms
+            weights[element] = complex(weights[element]).real
 
         return weights
 

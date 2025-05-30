@@ -419,13 +419,13 @@ class NeutronDynamicTotalStructureFactor(IJob):
         # Compute incoherent functions and structure factor
         for element, number in nAtomsPerElement.items():
             bi = self.configuration["trajectory"]["instance"].get_atom_property(
-                element, "b_incoherent2"
+                element, "b_incoherent"
             )
             self._outputData[f"f(q,t)_inc_{element}"].scaling_factor *= (
-                bi * number * norm_natoms
+                bi * bi * number * norm_natoms
             )
             self._outputData[f"s(q,f)_inc_{element}"].scaling_factor *= (
-                bi * number * norm_natoms
+                bi * bi * number * norm_natoms
             )
             self._outputData["f(q,t)_inc_total"][:] += (
                 self._outputData[f"f(q,t)_inc_{element}"][:]
