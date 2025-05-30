@@ -57,7 +57,6 @@ class MdanseTrajectory:
         self._data_types = {}
         self._data_units = {}
         self._property_cache = {}
-        self._atom_database_cache = {}
 
         self._h5_filename = Path(h5_filename)
 

@@ -87,36 +87,6 @@ def color(color_string: Optional[str] = None):
     return color_string
 
 
-def color(color_string: Optional[str] = None):
-    """A color function used to create a color string for the atom
-    database.
-
-    Parameters
-    ----------
-    color_string: Optional[str]
-        The color string, if None then it returns a color string
-        for white.
-
-    Returns
-    -------
-    str
-        The color string following the
-    """
-    if not color_string:
-        # default color is white
-        return "255;255;255"
-
-    if (
-        not isinstance(color_string, str)
-        or len(color_string.split(";")) != 3
-        or any([not i.isdigit() for i in color_string.split(";")])
-        or any([0 > int(i) > 255 for i in color_string.split(";")])
-    ):
-        raise ValueError(f"{color_string} is not a valid color string.")
-
-    return color_string
-
-
 class _Database(metaclass=Singleton):
     """
     Base class for all the databases.
