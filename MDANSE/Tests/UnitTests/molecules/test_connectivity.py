@@ -1,6 +1,6 @@
 import pytest
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from test_helpers.paths import CONV_DIR
 
@@ -9,8 +9,8 @@ short_traj = CONV_DIR / "co2gas_md3.mdt"
 
 @pytest.fixture
 def trajectory():
-    trajectory = HDFTrajectoryInputData(short_traj)
-    yield trajectory.trajectory
+    trajectory = Trajectory(short_traj)
+    yield trajectory
 
 @pytest.fixture
 def connectivity(trajectory):

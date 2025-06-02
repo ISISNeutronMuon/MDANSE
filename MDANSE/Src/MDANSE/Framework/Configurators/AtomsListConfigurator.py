@@ -96,18 +96,3 @@ class AtomsListConfigurator(IConfigurator):
         )
 
         self["n_values"] = len(self["atoms"])
-
-    def get_information(self):
-        """
-        Returns some informations the atom selection.
-
-        :return: the information about the atom selection.
-        :rtype: str
-        """
-
-        if "atoms" not in self:
-            return "No configured yet"
-
-        info = [f"Number of selected {self._nAtoms:d}-tuplets:{self['n_values']:d}"]
-
-        return "\n".join(info) + "\n"

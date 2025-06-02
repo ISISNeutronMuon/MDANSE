@@ -103,7 +103,7 @@ def parameters():
     ("MeanSquareDisplacement", ["msd"], False),
     ("VelocityAutoCorrelationFunction", ["vacf"], False),
     ("VanHoveFunctionDistinct", ["g(r,t)"], False),
-    ("VanHoveFunctionSelf", ["g(r,t)"], True),
+    ("VanHoveFunctionSelf", ["g(r,t)"], False),
     # "OrderParameter",
     ("PositionAutoCorrelationFunction", ["pacf"], False),
     ("PositionPowerSpectrum", ["pacf", "pps"], False),

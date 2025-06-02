@@ -1,0 +1,79 @@
+cff-version: 1.2.0
+title: MDANSE
+type: software
+abstract: >-
+  MDANSE Core package - Molecular Dynamics trajectory
+  handling and analysis code.
+message: >-
+  If you have used MDANSE in your research, please cite both the MDANSE software itself,
+  and the article from preferred-citation.
+authors:
+  - given-names: Raunakk
+    family-names: Banerjee
+    email: raunakk.banerjee@stfc.ac.uk
+    affiliation: STFC
+  - given-names: Maciej
+    family-names: Bartkowiak
+    email: maciej.bartkowiak@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0000-0003-1974-1493
+  - given-names: Rob
+    family-names: Buchanan
+    email: rob.buchanan@stfc.ac.uk
+    affiliation: STFC
+  - given-names: Chi Y.
+    family-names: Cheng
+    email: chi.cheng@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0000-0002-1957-9193
+  - given-names: Gael
+    family-names: Goret
+    email: gael.goret@gmail.com
+  - given-names: Sanghamitra
+    family-names: Mukhopadhyay
+    email: sanghamitra.mukhopadhyay@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0000-0002-6501-4089
+  - given-names: Eric
+    family-names: Pellegrini
+    affiliation: Institut Laue-Langevin
+  - given-names: Remi
+    family-names: Perenon
+    affiliation: Institut Laue-Langevin
+  - given-names: Rastislav
+    family-names: Turanyi
+    email: rastislav.turanyi@stfc.ac.uk
+    affiliation: STFC
+  - given-names: Jacob
+    family-names: Wilkins
+    email: jacob.wilkins@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0009-0004-9147-3475
+
+repository-code: 'https://github.com/ISISNeutronMuon/MDANSE/tree/protos/MDANSE'
+url: 'https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx'
+keywords:
+  - molecular dynamics
+  - science
+  - simulation
+  - analysis
+
+license: GPL-3.0
+version: 2.0.0b3
+
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Goret
+      given-names: G.
+    - family-names: Aoun
+      given-names: B.
+    - family-names: Pellegrini
+      given-names: E.
+  title: "MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations"
+  doi: 10.1021/acs.jcim.6b00571
+  journal: "J Chem Inf Model"
+  month: 1
+  volume: 57
+  issue: 1
+  year: 2017

@@ -30,7 +30,7 @@ from vtk.util import numpy_support
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
 
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.MolecularViewer.readers import hdf5wrapper
@@ -177,17 +177,17 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.reset_camera = False
 
-    def _new_trajectory_object(self, fname: str, data: HDFTrajectoryInputData):
+    def _new_trajectory_object(self, fname: str, trajectory: Trajectory):
         """Creates and sets a new trajectory reader for the input trajectory.
 
         Parameters
         ----------
         fname : str
             trajectory file name
-        data : HDFTrajectoryInputData
+        data : Trajectory
             instance of the MDANSE input trajectory handler
         """
-        reader = hdf5wrapper.HDF5Wrapper(fname, data.trajectory, data.chemical_system)
+        reader = hdf5wrapper.HDF5Wrapper(fname, trajectory, trajectory.chemical_system)
         self.set_reader(reader)
 
     @Slot(float)

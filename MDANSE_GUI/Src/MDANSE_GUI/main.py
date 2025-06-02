@@ -62,6 +62,7 @@ def startGUI(some_args):
 
     path = os.path.dirname(os.path.abspath(__file__))
     splash_img = QPixmap(os.path.join(path, "Resources/splash.png"))
+    splash_img.setDevicePixelRatio(2)
     splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
     splash.show()
     t0 = time.time()

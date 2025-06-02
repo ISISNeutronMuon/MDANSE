@@ -26,7 +26,7 @@ from qtpy.QtWidgets import (
 from qtpy.QtGui import QDoubleValidator
 
 from MDANSE.Framework.Configurators.PartialChargeConfigurator import PartialChargeMapper
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import AtomSelectionWidget
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import SelectionHelper
 
@@ -45,7 +45,7 @@ class ChargeHelper(SelectionHelper):
     def __init__(
         self,
         mapper: PartialChargeMapper,
-        traj_data: tuple[str, HDFTrajectoryInputData],
+        traj_data: tuple[str, Trajectory],
         field: QLineEdit,
         parent,
         *args,
@@ -57,7 +57,7 @@ class ChargeHelper(SelectionHelper):
         mapper : PartialChargeMapper
             The charge mapper initialized with the current chemical
             system.
-        traj_data : tuple[str, HDFTrajectoryInputData]
+        traj_data : tuple[str, Trajectory]
             A tuple of the trajectory data used to load the 3D viewer.
         field : QLineEdit
             The QLineEdit field that will need to be updated when
@@ -157,13 +157,11 @@ class PartialChargeWidget(AtomSelectionWidget):
     _default_value = "{}"
     _tooltip_text = "Specify the partial charges that will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
 
-    def create_helper(
-        self, traj_data: tuple[str, HDFTrajectoryInputData]
-    ) -> ChargeHelper:
+    def create_helper(self, traj_data: tuple[str, Trajectory]) -> ChargeHelper:
         """
         Parameters
         ----------
-        traj_data : tuple[str, HDFTrajectoryInputData]
+        traj_data : tuple[str, Trajectory]
             A tuple of the trajectory data used to load the 3D viewer.
 
         Returns

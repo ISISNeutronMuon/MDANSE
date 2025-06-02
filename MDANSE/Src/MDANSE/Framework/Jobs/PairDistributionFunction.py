@@ -23,12 +23,13 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 class PairDistributionFunction(DistanceHistogram):
     """Calculates a histogram of interatomic distances.
 
-    The Pair-Distribution Function (PDF) is an example of a pair correlation function, which
-    describes how, on average, the atoms in a system are radially packed around each other.
-    This is a particularly effective way of describing the average structure of disordered
-    molecular systems such as liquids. Also in systems like liquids, where there is continual movement
-    of the atoms and a single snapshot of the system shows only the instantaneous disorder, it is
-    essential to determine the average structure.
+    The Pair-Distribution Function (PDF) is an example of a pair correlation function,
+    which describes how, on average, the atoms in a system are radially packed around
+    each other. This is a particularly effective way of describing the average
+    structure of disordered molecular systems such as liquids. Also in systems like
+    liquids, where there is continual movement of the atoms and a single snapshot of
+    the system shows only the instantaneous disorder, it is essential to determine
+    the average structure.
 
     The PDF can be compared with experimental data from x-ray or neutron diffraction.
         It can be used in conjunction with the inter-atomic pair potential
@@ -48,11 +49,7 @@ class PairDistributionFunction(DistanceHistogram):
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     def finalize(self):
-        """Perform the last steps of the analysis and write out results.
-
-        Finalizes the calculations (e.g. averaging the total term, output files creations ...).
-
-        """
+        """Perform the last steps of the analysis and write out results."""
         npoints = len(self.configuration["r_values"]["mid_points"])
 
         self._outputData.add(
@@ -62,47 +59,61 @@ class PairDistributionFunction(DistanceHistogram):
             units="nm",
         )
 
-        for x, y in self._elementsPairs:
-            for i in ["pdf", "rdf", "tcf"]:
-                self._outputData.add(
-                    f"{i}_intra_{x}{y}",
-                    "LineOutputVariable",
-                    (npoints,),
-                    axis="r",
-                    units="au",
-                )
-                self._outputData.add(
-                    f"{i}_inter_{x}{y}",
-                    "LineOutputVariable",
-                    (npoints,),
-                    axis="r",
-                    units="au",
-                )
-                self._outputData.add(
-                    f"{i}_total_{x}{y}",
-                    "LineOutputVariable",
-                    (npoints,),
-                    axis="r",
-                    units="au",
-                    main_result=i == "pdf",
-                    partial_result=i == "pdf",
-                )
+        if self.indices_intra is not None:
+            for x, y in self._elementsPairs:
+                for i in ["pdf", "rdf", "tcf"]:
+                    self._outputData.add(
+                        f"{i}_intra_{x}{y}",
+                        "LineOutputVariable",
+                        (npoints,),
+                        axis="r",
+                        units="au",
+                    )
+                    self._outputData.add(
+                        f"{i}_inter_{x}{y}",
+                        "LineOutputVariable",
+                        (npoints,),
+                        axis="r",
+                        units="au",
+                    )
+                    self._outputData.add(
+                        f"{i}_{x}{y}",
+                        "LineOutputVariable",
+                        (npoints,),
+                        axis="r",
+                        units="au",
+                        main_result=i == "pdf",
+                        partial_result=i == "pdf",
+                    )
+        else:
+            for x, y in self._elementsPairs:
+                for i in ["pdf", "rdf", "tcf"]:
+                    self._outputData.add(
+                        f"{i}_{x}{y}",
+                        "LineOutputVariable",
+                        (npoints,),
+                        axis="r",
+                        units="au",
+                        main_result=i == "pdf",
+                        partial_result=i == "pdf",
+                    )
 
         for i in ["pdf", "rdf", "tcf"]:
-            self._outputData.add(
-                f"{i}_intra_total",
-                "LineOutputVariable",
-                (npoints,),
-                axis="r",
-                units="au",
-            )
-            self._outputData.add(
-                f"{i}_inter_total",
-                "LineOutputVariable",
-                (npoints,),
-                axis="r",
-                units="au",
-            )
+            if self.indices_intra is not None:
+                self._outputData.add(
+                    f"{i}_intra_total",
+                    "LineOutputVariable",
+                    (npoints,),
+                    axis="r",
+                    units="au",
+                )
+                self._outputData.add(
+                    f"{i}_inter_total",
+                    "LineOutputVariable",
+                    (npoints,),
+                    axis="r",
+                    units="au",
+                )
             self._outputData.add(
                 f"{i}_total",
                 "LineOutputVariable",
@@ -135,53 +146,85 @@ class PairDistributionFunction(DistanceHistogram):
                 nij = ni**2 / 2.0
             else:
                 nij = ni * nj
-                self.hIntra[idi, idj] += self.hIntra[idj, idi]
-                self.hInter[idi, idj] += self.hInter[idj, idi]
+                if self.indices_intra is not None:
+                    self.h_intra[idi, idj] += self.h_intra[idj, idi]
+                self.h_total[idi, idj] += self.h_total[idj, idi]
 
             fact = 2 * nij * nFrames * shellVolumes
 
-            pdf_intra = self.hIntra[idi, idj, :] / fact
-            pdf_inter = self.hInter[idi, idj, :] / fact
-            pdf_total = pdf_intra + pdf_inter
+            if self.indices_intra is not None:
+                pdf_intra = self.h_intra[idi, idj, :] / fact
+                pdf_total = self.h_total[idi, idj, :] / fact
+                pdf_inter = pdf_total - pdf_intra
 
-            for i, pdf in zip(
-                ["intra", "inter", "total"], [pdf_intra, pdf_inter, pdf_total]
-            ):
-                self._outputData[f"pdf_{i}_{pair[0]}{pair[1]}"][:] = pdf
-                self._outputData[f"rdf_{i}_{pair[0]}{pair[1]}"][:] = (
+                for i, pdf in zip(
+                    ["_intra", "_inter", ""],
+                    [pdf_intra, pdf_inter, pdf_total],
+                ):
+                    self._outputData[f"pdf{i}_{pair[0]}{pair[1]}"][:] = pdf
+                    self._outputData[f"rdf{i}_{pair[0]}{pair[1]}"][:] = (
+                        shellSurfaces * self.averageDensity * pdf
+                    )
+                    self._outputData[f"tcf{i}_{pair[0]}{pair[1]}"][:] = (
+                        densityFactor
+                        * self.averageDensity
+                        * (pdf if i == "intra" else pdf - 1)
+                    )
+            else:
+                pdf = self.h_total[idi, idj, :] / fact
+
+                self._outputData[f"pdf_{pair[0]}{pair[1]}"][:] = pdf
+                self._outputData[f"rdf_{pair[0]}{pair[1]}"][:] = (
                     shellSurfaces * self.averageDensity * pdf
                 )
-                self._outputData[f"tcf_{i}_{pair[0]}{pair[1]}"][:] = (
-                    densityFactor
-                    * self.averageDensity
-                    * (pdf if i == "intra" else pdf - 1)
+                self._outputData[f"tcf_{pair[0]}{pair[1]}"][:] = (
+                    densityFactor * self.averageDensity * (pdf - 1)
                 )
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 2)
-        for i in ["_intra", "_inter", ""]:
+        if self.indices_intra is not None:
+            for i in ["_intra", "_inter", ""]:
+                assign_weights(
+                    self._outputData,
+                    weight_dict,
+                    f"pdf{i}_%s%s",
+                )
+                pdf = weighted_sum(
+                    self._outputData,
+                    weight_dict,
+                    f"pdf{i}_%s%s",
+                )
+                self._outputData[f"pdf{i}_total"][:] = pdf
+                self._outputData[f"rdf{i}_total"][:] = (
+                    shellSurfaces * self.averageDensity * pdf
+                )
+                self._outputData[f"tcf{i}_total"][:] = (
+                    densityFactor
+                    * self.averageDensity
+                    * (pdf if i == "_intra" else pdf - 1)
+                )
+        else:
             assign_weights(
-                self._outputData, weight_dict, "pdf{}_%s%s".format(i if i else "_total")
+                self._outputData,
+                weight_dict,
+                "pdf_%s%s",
             )
             pdf = weighted_sum(
                 self._outputData,
                 weight_dict,
-                f"pdf{i if i else '_total'}_%s%s",
+                "pdf_%s%s",
             )
-            self._outputData[f"pdf{i}_total"][:] = pdf
-            self._outputData[f"rdf{i}_total"][:] = (
-                shellSurfaces * self.averageDensity * pdf
-            )
-            self._outputData[f"tcf{i}_total"][:] = (
-                densityFactor
-                * self.averageDensity
-                * (pdf if i == "_intra" else pdf - 1)
+            self._outputData["pdf_total"][:] = pdf
+            self._outputData["rdf_total"][:] = shellSurfaces * self.averageDensity * pdf
+            self._outputData["tcf_total"][:] = (
+                densityFactor * self.averageDensity * (pdf - 1)
             )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
-            self._info,
+            str(self),
             self,
         )
 

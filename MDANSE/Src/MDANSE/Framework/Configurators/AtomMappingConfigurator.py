@@ -69,16 +69,3 @@ class AtomMappingConfigurator(IConfigurator):
 
         self.error_status = "OK"
         self["value"] = value
-
-    def get_information(self) -> str:
-        """Returns some information on the atom mapping configurator.
-
-        Returns
-        -------
-        str
-            The atom map JSON string.
-        """
-        if "value" not in self:
-            return "Not configured yet\n"
-
-        return str(self["value"]) + "\n"

@@ -72,17 +72,3 @@ class RunningModeConfigurator(IConfigurator):
 
         self["slots"] = slots
         self.error_status = "OK"
-
-    def get_information(self):
-        """
-        Returns string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-        try:
-            info = f"Run in {self['mode']} mode ({self['slots']:d} slots)\n"
-        except KeyError:
-            info = "Running mode has not been configured"
-
-        return info

@@ -23,7 +23,7 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 class UnitCellWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, layout_type="grid", **kwargs)
+        super().__init__(*args, layout_type="QGridLayout", **kwargs)
         self._changing_label = QLabel("Unit cell", parent=self._base)
         self._unit_label = QLabel("(nm)", parent=self._base)
         self._apply_box = QCheckBox("Apply unit cell", self._base)

@@ -13,14 +13,29 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Iterable
 import re
+from typing import Iterable, Iterator, NamedTuple
 
 import numpy as np
-
+from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.AtomMapping import get_element_from_mapping, AtomLabel
+from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
+from MDANSE.IO.IOUtils import strip_comments
+from more_itertools import split_at, split_before, take, first_true
+from numpy.typing import NDArray
+from MDANSE.MLogging import LOG
+
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
+
+
+class Molecule(NamedTuple):
+    name: str
+    n_mols: int
+    n_atoms: int
+    species: NDArray[float]
+    masses: NDArray[float]
+    charges: NDArray[float]
+    bonds: list[tuple[int, int]]
 
 
 class FieldFileError(Error):
@@ -33,82 +48,108 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
     def parse(self):
         # The FIELD file is opened for reading, its contents stored into |lines| and then closed.
         with open(self["filename"], "r") as unit:
-            # Read and remove the empty and comments lines from the contents of the FIELD file.
-            lines = [
-                line.strip()
-                for line in unit.readlines()
-                if line.strip() and not re.match("#", line)
-            ]
+            lines = strip_comments(unit)
 
-        self["title"] = lines.pop(0)
-
-        self["units"] = lines.pop(0)
-
-        # Extract the number of molecular types
-        _, self["n_molecular_types"] = re.match(
-            "(molecules|molecular types)\s+(\d+)", lines.pop(0), re.IGNORECASE
-        ).groups()
-
-        self["n_molecular_types"] = int(self["n_molecular_types"])
-
-        molBlocks = [
-            i for i, line in enumerate(lines) if re.match("finish", line, re.IGNORECASE)
-        ]
-
-        if self["n_molecular_types"] != len(molBlocks):
-            raise FieldFileError("Error in the definition of the molecular types")
-
-        self["molecules"] = []
-
-        first = 0
-
-        for last in molBlocks:
-            moleculeName = lines[first]
+            self["title"] = next(lines)
+            self["units"] = next(lines)
 
             # Extract the number of molecular types
-            nMolecules = re.match(
-                "nummols\s+(\d+)", lines[first + 1], re.IGNORECASE
-            ).groups()[0]
-            nMolecules = int(nMolecules)
+            self["n_molecular_types"] = int(next(lines).rsplit(maxsplit=1)[-1])
 
-            for i in range(first + 2, last):
-                match = re.match("atoms\s+(\d+)", lines[i], re.IGNORECASE)
-                if match:
-                    nAtoms = int(match.groups()[0])
+            molecules = split_at(
+                lines,
+                lambda line: line.upper() == "FINISH",
+                maxsplit=self["n_molecular_types"],
+            )
 
-                    sumAtoms = 0
+            self["molecules"] = [
+                self.parse_molecule(molecule)
+                for molecule in take(self["n_molecular_types"], molecules)
+            ]
+            molecules = iter(next(molecules))
 
-                    comp = i + 1
+        if self["n_molecular_types"] != len(self["molecules"]):
+            raise FieldFileError("Error in the definition of the molecular types")
 
-                    atoms = []
-                    masses = []
-                    charges = []
+    MOLECULAR_KEYS = (
+        "nummol",
+        "atoms",
+        "shell",
+        "constr",
+        "pmf",
+        "rigid",
+        "teth",
+        "bonds",
+        "angles",
+        "dihedr",
+        "invers",
+    )
 
-                    while sumAtoms < nAtoms:
-                        sitnam = lines[comp][:8].strip()
+    def _find_molecular_key(self, string: str):
+        string = string.lower()
+        return first_true(
+            self.MOLECULAR_KEYS,
+            pred=string.startswith,
+            default=None,
+        )
 
-                        vals = lines[comp][8:].split()
+    def parse_molecule(
+        self,
+        molecule: Iterable[str],
+    ) -> Molecule:
+        molecule = iter(molecule)
+        molecule_name = next(molecule)
+        blocks = split_before(molecule, self._find_molecular_key)
 
-                        try:
-                            nrept = int(vals[2])
-                        except IndexError:
-                            nrept = 1
+        bonds = []
+        n_mols = None
 
-                        masses.extend([float(vals[0])] * nrept)
-                        charges.extend([float(vals[1])] * nrept)
-                        atoms.extend([sitnam] * nrept)
+        for block in map(iter, blocks):
+            line = next(block)
+            key = self._find_molecular_key(line)
+            count = int(line.rsplit(maxsplit=1)[-1])
 
-                        sumAtoms += nrept
+            LOG.debug("%s: %d", key, count)
 
-                        comp += 1
+            if key == "nummol":
+                n_mols = count
+            elif key == "atoms":
+                n_atoms = count
 
-                    self["molecules"].append(
-                        [moleculeName, nMolecules, atoms, masses, charges]
-                    )
+                specs = np.empty(n_atoms, dtype="U8")
+                masses = np.empty(n_atoms, dtype=np.float64)
+                charges = np.empty(n_atoms, dtype=np.float64)
+                curr = 0
 
-                    break
+                for atom in block:
+                    spec, mass, charge, *rep_froz = (atom + " 1 0").split()
+                    repeat, frozen = map(int, rep_froz[:2])
 
-            first = last + 1
+                    current_slice = np.s_[curr : curr + repeat]
+                    specs[current_slice] = spec
+                    masses[current_slice] = mass
+                    charges[current_slice] = charge
+
+                    curr += repeat
+
+            elif key == "bonds":
+                n_bonds = count
+
+                bonds = [None] * n_bonds
+                for i, bond in enumerate(block):
+                    _type, a, b, *_params = bond.split()
+
+                    bonds[i] = a, b
+
+        return Molecule(
+            name=molecule_name,
+            n_mols=n_mols,
+            n_atoms=n_atoms,
+            species=specs,
+            masses=masses,
+            charges=charges,
+            bonds=bonds,
+        )
 
     def atom_labels(self) -> Iterable[AtomLabel]:
         """
@@ -117,9 +158,9 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
         AtomLabel
             An atom label.
         """
-        for mol_name, _, atomic_contents, masses, _ in self["molecules"]:
-            for atm_label, mass in zip(atomic_contents, masses):
-                yield AtomLabel(atm_label, molecule=mol_name, mass=mass)
+        for molecule in self["molecules"]:
+            for atm_label, mass in zip(molecule.species, molecule.masses):
+                yield AtomLabel(atm_label, molecule=molecule.name, mass=mass)
 
     def get_atom_charges(self) -> np.ndarray:
         """Returns an array of partial electric charges
@@ -129,33 +170,59 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
         np.ndarray
             array of floats, one value per atom
         """
-        charge_groups = []
-        for _, num_molecules, _, _, charges in self["molecules"]:
-            charge_groups.append(np.array(num_molecules * list(charges)))
+        charge_groups = [
+            np.repeat(molecule.charges, molecule.n_mols)
+            for molecule in self["molecules"]
+        ]
+
         return np.concatenate(charge_groups)
 
-    def build_chemical_system(self, chemical_system, aliases):
+    def build_chemical_system(
+        self, chemical_system: ChemicalSystem, aliases: dict[str, str]
+    ):
+        """Parses FIELD file to construct initial system.
+
+        Parameters
+        ----------
+        aliases : dict[str, dict[str, str]]
+            Mapping of atomic aliases to elements.
+        config : dict[str, Any]
+            Configurations details.
+
+        Returns
+        -------
+        ChemicalSystem
+            Initialised structure.
+        """
+        clusters = []
         element_list = []
         name_list = []
+        bonds = []
+        curr_n = 0
 
-        for db_name, nMolecules, atomic_contents, masses, _ in self["molecules"]:
-            # Loops over the number of molecules of the current type.
-            clusters = []
-            index = 0
-            for _ in range(nMolecules):
-                # This list will contains the instances of the atoms of the molecule.
-                # Loops over the atom of the molecule.
-                cluster = []
-                for _, (name, mass) in enumerate(zip(atomic_contents, masses)):
-                    # The atom is created.
-                    element = get_element_from_mapping(
-                        aliases, name, molecule=db_name, mass=mass
-                    )
-                    element_list.append(element)
-                    name_list.append(name)
-                    cluster.append(index)
-                    index += 1
-                if len(cluster) > 1:
-                    clusters.append(cluster)
+        for molecule in self["molecules"]:
+            curr_element_list = [
+                get_element_from_mapping(
+                    aliases, name, molecule=molecule.name, mass=mass
+                )
+                for name, mass in zip(molecule.species, molecule.masses)
+            ]
+            curr_name_list = molecule.species
+            curr_cluster = np.arange(molecule.n_atoms, dtype=int)
+
+            # Bonds 0-indexed in RDKit
+            curr_bonds = np.array(molecule.bonds, dtype=int) - 1
+
+            for i in range(1, molecule.n_mols + 1):
+                element_list.extend(curr_element_list)
+                name_list.extend(curr_name_list)
+                bonds.extend(map(tuple, curr_bonds + curr_n))
+
+                if len(curr_cluster) > 1:
+                    clusters.append(list(curr_cluster + curr_n))
+
+                curr_n += molecule.n_atoms
+
         chemical_system.initialise_atoms(element_list, name_list)
         chemical_system.add_clusters(clusters)
+        chemical_system.add_bonds(bonds)

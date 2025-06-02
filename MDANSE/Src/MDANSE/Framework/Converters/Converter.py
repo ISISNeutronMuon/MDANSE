@@ -14,10 +14,10 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from abc import abstractmethod
-from importlib import metadata
 
 import h5py
 
+from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.MLogging import LOG
@@ -32,27 +32,6 @@ class Converter(IJob, metaclass=SubclassFactory):
     def run_step(self, index):
         pass
 
-    def write_metadata(self, output_file):
-        string_dt = h5py.special_dtype(vlen=str)
-        meta = output_file.create_group("metadata")
-        meta.create_dataset(
-            "task_name", (1,), data=str(self.__class__.__name__), dtype=string_dt
-        )
-        meta.create_dataset(
-            "MDANSE_version",
-            (1,),
-            data=str(metadata.version("MDANSE")),
-            dtype=string_dt,
-        )
-
-        inputs = self.output_configuration()
-
-        if inputs is not None:
-            LOG.info(inputs)
-            dgroup = meta.create_group("inputs")
-            for key, value in inputs.items():
-                dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
-
     def finalize(self):
         if not hasattr(self, "_trajectory"):
             return
@@ -64,7 +43,7 @@ class Converter(IJob, metaclass=SubclassFactory):
             LOG.warning("Skipping the finalize call in Converter")
             return
 
-        self.write_metadata(output_file)
+        write_metadata(self, output_file)
 
         try:
             if "time" in output_file:

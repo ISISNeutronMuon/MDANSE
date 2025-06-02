@@ -18,6 +18,9 @@ import abc
 import json
 from pathlib import Path
 
+from more_itertools import value_chain
+import numpy as np
+
 from MDANSE.Core.Error import Error
 
 from MDANSE.Core.SubclassFactory import SubclassFactory
@@ -29,6 +32,8 @@ class CustomEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Path):
             return str(obj)
+        if isinstance(obj, np.ndarray):
+            return "\n".join(str(row) for row in obj)
         return super().default(obj)
 
 
@@ -116,6 +121,15 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         self._name = name
 
+        self._printable_attributes = [
+            "_name",
+            "_original_input",
+            "_configured",
+            "_valid",
+            "_default",
+            "_error_status",
+        ]
+
         self._configurable = kwargs.get("configurable", None)
 
         self._root = kwargs.get("root", None)
@@ -144,6 +158,18 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         self._error_status = "OK"
 
         self._original_input = ""
+
+    def __str__(self) -> str:
+        return "\n".join(
+            value_chain(
+                "",
+                (
+                    f"{label}={str(getattr(self, label, 'Not set'))}"
+                    for label in self._printable_attributes
+                ),
+                (f"{key}={str(self.get(key, 'Not set'))}" for key in self),
+            )
+        )
 
     @property
     def configurable(self):
@@ -307,15 +333,3 @@ class IConfigurator(dict, metaclass=SubclassFactory):
                 return False
 
         return True
-
-    def get_information(self):
-        """
-        Returns some informations about this configurator.
-
-        :return: the information about this configurator
-        :rtype: str
-
-        :note: this is an abstract method.
-        """
-
-        return ""

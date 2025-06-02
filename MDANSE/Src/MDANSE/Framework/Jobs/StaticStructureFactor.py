@@ -140,22 +140,23 @@ class StaticStructureFactor(DistanceHistogram):
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for pair in self._elementsPairs:
             pair_str = "".join(map(str, pair))
+            if self.indices_intra is not None:
+                self._outputData.add(
+                    f"ssf_intra_{pair_str}",
+                    "LineOutputVariable",
+                    (nq,),
+                    axis="q",
+                    units="au",
+                )
+                self._outputData.add(
+                    f"ssf_inter_{pair_str}",
+                    "LineOutputVariable",
+                    (nq,),
+                    axis="q",
+                    units="au",
+                )
             self._outputData.add(
-                f"ssf_intra_{pair_str}",
-                "LineOutputVariable",
-                (nq,),
-                axis="q",
-                units="au",
-            )
-            self._outputData.add(
-                f"ssf_inter_{pair_str}",
-                "LineOutputVariable",
-                (nq,),
-                axis="q",
-                units="au",
-            )
-            self._outputData.add(
-                f"ssf_total_{pair_str}",
+                f"ssf_{pair_str}",
                 "LineOutputVariable",
                 (nq,),
                 axis="q",
@@ -174,35 +175,45 @@ class StaticStructureFactor(DistanceHistogram):
                 nij = ni**2 / 2.0
             else:
                 nij = ni * nj
-                self.hIntra[idi, idj] += self.hIntra[idj, idi]
-                self.hInter[idi, idj] += self.hInter[idj, idi]
+                if self.indices_intra is not None:
+                    self.h_intra[idi, idj] += self.h_intra[idj, idi]
+                self.h_total[idi, idj] += self.h_total[idj, idi]
 
             fact = 2 * nij * nFrames * shellVolumes
 
-            pdfIntra = self.hIntra[idi, idj, :] / fact
-            pdfInter = self.hInter[idi, idj, :] / fact
+            if self.indices_intra is not None:
+                pdfIntra = self.h_intra[idi, idj, :] / fact
+                pdfTotal = self.h_total[idi, idj, :] / fact
+                pdfInter = pdfTotal - pdfIntra
+                self._outputData[f"ssf_intra_{pair_str}"][:] = (
+                    fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr
+                )
+                self._outputData[f"ssf_inter_{pair_str}"][:] = (
+                    1.0
+                    + fact1 * np.sum((r**2) * (pdfInter - 1.0) * sincqr, axis=1) * dr
+                )
+                self._outputData[f"ssf_{pair_str}"][:] = (
+                    self._outputData[f"ssf_intra_{pair_str}"][:]
+                    + self._outputData[f"ssf_inter_{pair_str}"][:]
+                )
+            else:
+                pdfTotal = self.h_total[idi, idj, :] / fact
+                self._outputData[f"ssf_{pair_str}"][:] = (
+                    1.0
+                    + fact1 * np.sum((r**2) * (pdfTotal - 1.0) * sincqr, axis=1) * dr
+                )
 
-            self._outputData[f"ssf_intra_{pair_str}"][:] = (
-                fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr
+        if self.indices_intra is not None:
+            self._outputData.add(
+                "ssf_intra_total", "LineOutputVariable", (nq,), axis="q", units="au"
             )
-            self._outputData[f"ssf_inter_{pair_str}"][:] = (
-                1.0 + fact1 * np.sum((r**2) * (pdfInter - 1.0) * sincqr, axis=1) * dr
+            self._outputData.add(
+                "ssf_inter_total",
+                "LineOutputVariable",
+                (nq,),
+                axis="q",
+                units="au",
             )
-            self._outputData[f"ssf_total_{pair_str}"][:] = (
-                self._outputData[f"ssf_intra_{pair_str}"][:]
-                + self._outputData[f"ssf_inter_{pair_str}"][:]
-            )
-
-        self._outputData.add(
-            "ssf_intra", "LineOutputVariable", (nq,), axis="q", units="au"
-        )
-        self._outputData.add(
-            "ssf_inter",
-            "LineOutputVariable",
-            (nq,),
-            axis="q",
-            units="au",
-        )
         self._outputData.add(
             "ssf_total",
             "LineOutputVariable",
@@ -214,22 +225,25 @@ class StaticStructureFactor(DistanceHistogram):
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 2)
-        assign_weights(self._outputData, weight_dict, "ssf_intra_%s%s")
-        assign_weights(self._outputData, weight_dict, "ssf_inter_%s%s")
-        assign_weights(self._outputData, weight_dict, "ssf_total_%s%s")
-
-        ssfIntra = weighted_sum(self._outputData, weight_dict, "ssf_intra_%s%s")
-        self._outputData["ssf_intra"][:] = ssfIntra
-
-        ssfInter = weighted_sum(self._outputData, weight_dict, "ssf_inter_%s%s")
-        self._outputData["ssf_inter"][:] = ssfInter
-
-        self._outputData["ssf_total"][:] = ssfIntra + ssfInter
+        if self.indices_intra is not None:
+            assign_weights(self._outputData, weight_dict, "ssf_intra_%s%s")
+            assign_weights(self._outputData, weight_dict, "ssf_inter_%s%s")
+            assign_weights(self._outputData, weight_dict, "ssf_%s%s")
+            ssfIntra = weighted_sum(self._outputData, weight_dict, "ssf_intra_%s%s")
+            self._outputData["ssf_intra_total"][:] = ssfIntra
+            ssfInter = weighted_sum(self._outputData, weight_dict, "ssf_inter_%s%s")
+            self._outputData["ssf_inter_total"][:] = ssfInter
+            self._outputData["ssf_total"][:] = ssfIntra + ssfInter
+        else:
+            assign_weights(self._outputData, weight_dict, "ssf_%s%s")
+            self._outputData["ssf_total"][:] = weighted_sum(
+                self._outputData, weight_dict, "ssf_%s%s"
+            )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
-            self._info,
+            str(self),
             self,
         )
 

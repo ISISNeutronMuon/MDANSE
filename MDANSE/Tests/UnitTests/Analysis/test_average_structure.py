@@ -1,6 +1,6 @@
 import pytest
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import \
-    HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import \
+    Trajectory
 from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.paths import CONV_DIR
 
@@ -9,7 +9,7 @@ short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
 @pytest.fixture(scope="module")
 def trajectory():
-    trajectory = HDFTrajectoryInputData(short_traj)
+    trajectory = Trajectory(short_traj)
     yield trajectory
 
 @pytest.mark.parametrize("output_unit", ["Angstrom", "Bohr", "nm", "pm"])

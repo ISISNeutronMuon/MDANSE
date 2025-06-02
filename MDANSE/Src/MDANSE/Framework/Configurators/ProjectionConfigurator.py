@@ -84,16 +84,3 @@ class ProjectionConfigurator(IConfigurator):
                 self["axis"] = self["projector"].axis
 
         self.error_status = "OK"
-
-    def get_information(self):
-        """
-        Returns string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-
-        if self["axis"] is not None:
-            return "No projection performed\n"
-        else:
-            return f"Projection along {self['axis']!r} axis\n"

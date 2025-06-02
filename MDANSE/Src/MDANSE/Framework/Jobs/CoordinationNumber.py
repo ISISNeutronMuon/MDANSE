@@ -89,50 +89,68 @@ class CoordinationNumber(DistanceHistogram):
             invPair = pair[::-1]
             pair_str = "".join(map(str, pair))
             inv_pair_str = "".join(map(str, invPair))
-            self._outputData.add(
-                f"cn_intra_{pair_str}",
-                "LineOutputVariable",
-                (npoints,),
-                axis="r",
-                units="au",
-            )
-            self._outputData.add(
-                f"cn_inter_{pair_str}",
-                "LineOutputVariable",
-                (npoints,),
-                axis="r",
-                units="au",
-            )
-            self._outputData.add(
-                f"cn_total_{pair_str}",
-                "LineOutputVariable",
-                (npoints,),
-                axis="r",
-                units="au",
-                main_result=True,
-            )
-            self._outputData.add(
-                f"cn_intra_{inv_pair_str}",
-                "LineOutputVariable",
-                (npoints,),
-                axis="r",
-                units="au",
-            )
-            self._outputData.add(
-                f"cn_inter_{inv_pair_str}",
-                "LineOutputVariable",
-                (npoints,),
-                axis="r",
-                units="au",
-            )
-            self._outputData.add(
-                f"cn_total_{inv_pair_str}",
-                "LineOutputVariable",
-                (npoints,),
-                axis="r",
-                units="au",
-                main_result=True,
-            )
+            if self.indices_intra is not None:
+                self._outputData.add(
+                    f"cn_intra_{pair_str}",
+                    "LineOutputVariable",
+                    (npoints,),
+                    axis="r",
+                    units="au",
+                )
+                self._outputData.add(
+                    f"cn_inter_{pair_str}",
+                    "LineOutputVariable",
+                    (npoints,),
+                    axis="r",
+                    units="au",
+                )
+                self._outputData.add(
+                    f"cn_total_{pair_str}",
+                    "LineOutputVariable",
+                    (npoints,),
+                    axis="r",
+                    units="au",
+                    main_result=True,
+                )
+                self._outputData.add(
+                    f"cn_intra_{inv_pair_str}",
+                    "LineOutputVariable",
+                    (npoints,),
+                    axis="r",
+                    units="au",
+                )
+                self._outputData.add(
+                    f"cn_inter_{inv_pair_str}",
+                    "LineOutputVariable",
+                    (npoints,),
+                    axis="r",
+                    units="au",
+                )
+                self._outputData.add(
+                    f"cn_total_{inv_pair_str}",
+                    "LineOutputVariable",
+                    (npoints,),
+                    axis="r",
+                    units="au",
+                    main_result=True,
+                )
+            else:
+                self._outputData.add(
+                    f"cn_{pair_str}",
+                    "LineOutputVariable",
+                    (npoints,),
+                    axis="r",
+                    units="au",
+                    main_result=True,
+                )
+                self._outputData.add(
+                    f"cn_{inv_pair_str}",
+                    "LineOutputVariable",
+                    (npoints,),
+                    axis="r",
+                    units="au",
+                    main_result=True,
+                )
 
         nFrames = self.configuration["frames"]["number"]
 
@@ -167,44 +185,57 @@ class CoordinationNumber(DistanceHistogram):
                 nij = ni**2 / 2.0
             else:
                 nij = ni * nj
-                self.hIntra[idi, idj] += self.hIntra[idj, idi]
-                self.hInter[idi, idj] += self.hInter[idj, idi]
+                if self.indices_intra is not None:
+                    self.h_intra[idi, idj] += self.h_intra[idj, idi]
+                self.h_total[idi, idj] += self.h_total[idj, idi]
 
             fact = 2 * nij * nFrames * shellVolumes
 
-            self.hIntra[idi, idj, :] /= fact
-            self.hInter[idi, idj, :] /= fact
+            if self.indices_intra is not None:
+                self.h_intra[idi, idj, :] /= fact
+            self.h_total[idi, idj, :] /= fact
 
-            cnIntra = np.add.accumulate(self.hIntra[idi, idj, :] * r2) * dr
-            cnInter = np.add.accumulate(self.hInter[idi, idj, :] * r2) * dr
-            cnTotal = cnIntra + cnInter
+            if self.indices_intra is not None:
+                cnIntra = np.add.accumulate(self.h_intra[idi, idj, :] * r2) * dr
+            cnTotal = np.add.accumulate(self.h_total[idi, idj, :] * r2) * dr
+
+            if self.indices_intra is not None:
+                cnInter = cnTotal - cnIntra
 
             cAlpha = self._concentrations[pair[0]]
             cBeta = self._concentrations[pair[1]]
 
-            self._outputData[f"cn_intra_{pair_str}"][:] = (
-                self.averageDensity * cBeta * cnIntra
-            )
-            self._outputData[f"cn_inter_{pair_str}"][:] = (
-                self.averageDensity * cBeta * cnInter
-            )
-            self._outputData[f"cn_total_{pair_str}"][:] = (
-                self.averageDensity * cBeta * cnTotal
-            )
-            self._outputData[f"cn_intra_{inv_pair_str}"][:] = (
-                self.averageDensity * cAlpha * cnIntra
-            )
-            self._outputData[f"cn_inter_{inv_pair_str}"][:] = (
-                self.averageDensity * cAlpha * cnInter
-            )
-            self._outputData[f"cn_total_{inv_pair_str}"][:] = (
-                self.averageDensity * cAlpha * cnTotal
-            )
+            if self.indices_intra is not None:
+                self._outputData[f"cn_intra_{pair_str}"][:] = (
+                    self.averageDensity * cBeta * cnIntra
+                )
+                self._outputData[f"cn_inter_{pair_str}"][:] = (
+                    self.averageDensity * cBeta * cnInter
+                )
+                self._outputData[f"cn_total_{pair_str}"][:] = (
+                    self.averageDensity * cBeta * cnTotal
+                )
+                self._outputData[f"cn_intra_{inv_pair_str}"][:] = (
+                    self.averageDensity * cAlpha * cnIntra
+                )
+                self._outputData[f"cn_inter_{inv_pair_str}"][:] = (
+                    self.averageDensity * cAlpha * cnInter
+                )
+                self._outputData[f"cn_total_{inv_pair_str}"][:] = (
+                    self.averageDensity * cAlpha * cnTotal
+                )
+            else:
+                self._outputData[f"cn_{pair_str}"][:] = (
+                    self.averageDensity * cBeta * cnTotal
+                )
+                self._outputData[f"cn_{inv_pair_str}"][:] = (
+                    self.averageDensity * cAlpha * cnTotal
+                )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
-            self._info,
+            str(self),
             self,
         )
 

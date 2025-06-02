@@ -218,10 +218,14 @@ class MDAnalysis(Converter):
                 conf.fold_coordinates()
 
             if hasattr(self.u.trajectory.ts, "velocities"):
-                conf["velocities"] = self.u.trajectory.ts.velocities
+                conf["velocities"] = self.u.trajectory.ts.velocities * measure(
+                    1.0, "ang/ps"
+                ).toval("nm/ps")
 
             if hasattr(self.u.trajectory.ts, "forces"):
-                conf["gradients"] = self.u.trajectory.ts.forces
+                conf["gradients"] = self.u.trajectory.ts.forces * measure(
+                    1.0, "kJ/mol ang", equivalent=True
+                ).toval("uma nm/ps2")
 
         if float(self.configuration["time_step"]["value"]) == 0.0:
             time = index * self.u.trajectory.ts.dt

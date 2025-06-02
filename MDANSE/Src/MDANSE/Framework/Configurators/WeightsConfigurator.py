@@ -146,17 +146,3 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             weights[element] /= num_atoms
 
         return weights
-
-    def get_information(self):
-        """
-        Returns string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-        try:
-            info = f"selected weight: {self['property']}\n"
-        except KeyError:
-            info = "Weights have not been configured"
-
-        return info

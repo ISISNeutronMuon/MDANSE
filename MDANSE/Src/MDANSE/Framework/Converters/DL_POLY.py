@@ -13,9 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import collections
-import numpy as np
+from __future__ import annotations
 
+import collections
+from typing import Union, Any
+
+import numpy as np
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
@@ -26,6 +29,8 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from more_itertools import consume as drop
+from more_itertools import take
 
 
 class HistoryFileError(Error):
@@ -37,82 +42,74 @@ class DL_POLYConverterError(Error):
 
 
 class HistoryFile(dict):
+    _dist_conversion = measure(1.0, "ang").toval("nm")
+    _vel_conversion = measure(1.0, "ang/ps").toval("nm/ps")
+    _grad_conversion = measure(1.0, "uma ang / ps2").toval("uma nm / ps2")
+
     def __init__(self, filename):
         super().__init__()
-        self._dist_conversion = measure(1.0, "ang").toval("nm")
-        self._vel_conversion = measure(1.0, "ang/ps").toval("nm/ps")
-        self._grad_conversion = measure(1.0, "uma ang / ps2").toval("uma nm / ps2")
-        with open(filename, "r") as source:
-            _ = source.readline()
-            tagline = source.readline()
-            toks = tagline.split()
-            self["keytrj"], self["imcon"], self["natms"] = [int(v) for v in toks[:3]]
-            timeline = source.readline()
-            toks = timeline.split()
-            self._timeStep = float(toks[5])
-            self._firstStep = int(toks[1])
-        n_frames = 0
-        with open(filename, "r") as source:
-            for line in source:
-                if "timestep" in line:
-                    n_frames += 1
-        self["n_frames"] = n_frames
-        self["instance"] = open(filename, "r")
-        for _ in range(2):
-            self["instance"].readline()
 
-    def read_step(self, step):
+        self["filename"] = filename
+        self["instance"] = open(filename, encoding="utf-8")
+
+        drop(self["instance"], 1)
+        tagline = self["instance"].readline()
+        toks = tagline.split()
+        self["keytrj"], self["imcon"], self["natms"] = map(int, toks[:3])
+
+        timeline = self["instance"].readline()
+        toks = timeline.split()
+        self._timeStep = float(toks[5])
+        self._firstStep = int(toks[1])
+
+        self["instance"].seek(0)
+
+        self["n_frames"] = sum(1 for line in self["instance"] if "timestep" in line)
+
+        self["instance"].seek(0)
+
+        drop(self["instance"], 2)
+
+    def read_step(self, step: int):
         headerline = self["instance"].readline()
         currentStep = int(headerline.split()[1])
 
         timeStep = (currentStep - self._firstStep) * self._timeStep
-        if self["imcon"] > 0:
-            cell_nums = []
-            for _ in range(3):
-                cell_nums.append(
-                    [float(x) for x in self["instance"].readline().split()]
-                )
-            cell = np.array(cell_nums, dtype=np.float64)
-            cell = np.reshape(cell, (3, 3)).T
+        lines_per_atom = 2 + self["keytrj"]
+
+        if self["imcon"]:
+            cell = " ".join(take(3, self["instance"]))
+            cell = np.array(cell.split(), dtype=np.float64).reshape(3, 3).T
             cell *= self._dist_conversion
         else:
             cell = None
 
         charges = np.empty(self["natms"])
-        positions = np.empty((self["natms"], 3))
-        lines_per_atom = 2
+
+        data = {"positions": np.empty((self["natms"], 3))}
         if self["keytrj"] > 0:
-            velocities = np.empty((self["natms"], 3))
-            lines_per_atom = 3
+            data["velocities"] = np.empty((self["natms"], 3))
         if self["keytrj"] > 1:
-            gradients = np.empty((self["natms"], 3))
-            lines_per_atom = 4
+            data["gradients"] = np.empty((self["natms"], 3))
 
-        for atom_num in range(self["natms"]):
-            for line_num in range(lines_per_atom):
-                toks = self["instance"].readline().split()
-                if line_num == 0:
-                    charges[atom_num] = float(toks[3])
-                elif line_num == 1:
-                    positions[atom_num] = [float(x) for x in toks]
-                elif line_num == 2:
-                    velocities[atom_num] = [float(x) for x in toks]
-                elif line_num == 3:
-                    gradients[atom_num] = [float(x) for x in toks]
+        for _ in range(self["natms"]):
+            atom = iter(take(lines_per_atom, self["instance"]))
+            atom_info = next(atom)
+            spec, ind, mass, charge, *_rsd = atom_info.split()
+            ind = int(ind) - 1
+            mass = float(mass)
+            charge = float(charge)
+            charges[ind] = float(charge)
+            for arr, val in zip(data.values(), atom):
+                arr[ind] = np.array(val.split(), dtype=np.float64)
 
-        positions *= self._dist_conversion
-        config = [positions]
-        # Case of the velocities
-        if self["keytrj"] > 0:
-            velocities *= self._vel_conversion
-            config.append(velocities)
+        data["positions"] *= self._dist_conversion
+        if "velocities" in data:
+            data["velocities"] *= self._vel_conversion
+        if "gradients" in data:
+            data["gradients"] *= self._grad_conversion
 
-        # Case of the velocities + gradients
-        if self["keytrj"] > 1:
-            gradients *= self._grad_conversion
-            config.append(gradients)
-
-        return timeStep, cell, config, charges
+        return timeStep, cell, data, charges
 
     def close(self):
         self["instance"].close()
@@ -171,14 +168,11 @@ class DL_POLY(Converter):
         super().initialize()
 
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
-
         self._fieldFile = self.configuration["field_file"]
-
         self._historyFile = HistoryFile(self.configuration["history_file"]["filename"])
 
         # The number of steps of the analysis.
         self.numberOfSteps = int(self._historyFile["n_frames"])
-
         self._chemical_system = ChemicalSystem()
 
         self._fieldFile.build_chemical_system(
@@ -195,43 +189,45 @@ class DL_POLY(Converter):
             initial_charges=self._fieldFile.get_atom_charges(),
         )
 
-        self._velocities = None
-        self._gradients = None
-
-        if self._historyFile["keytrj"] > 0:
-            self._velocities = True
-        if self._historyFile["keytrj"] > 1:
-            self._gradients = True
-
-    def run_step(self, index):
+    def run_step(self, index: int) -> tuple[int, None]:
         """Runs a single step of the job.
 
-        @param index: the index of the step.
-        @type index: int.
+        Parameters
+        ----------
+        index : int
+            The index of the loop.
 
-        @note: the argument index is the index of the loop note the index of the frame.
+        Notes
+        -----
+        The argument index is note the index of the frame.
+        the index of the step.
+
+        Returns
+        -------
+        int
+            Index.
         """
-
         # The x, y and z values of the current frame.
         time, unitCell, config, charge = self._historyFile.read_step(index)
 
         unitCell = UnitCell(unitCell)
 
-        if self._historyFile["imcon"] > 0:
+        if self._historyFile["imcon"]:
             conf = PeriodicRealConfiguration(
-                self._trajectory.chemical_system, config[0], unitCell
+                self._trajectory.chemical_system, config["positions"], unitCell
             )
         else:
-            conf = RealConfiguration(self._trajectory.chemical_system, config[0])
+            conf = RealConfiguration(
+                self._trajectory.chemical_system, config["positions"]
+            )
 
         if self.configuration["fold"]["value"]:
             conf.fold_coordinates()
 
-        if self._velocities is not None:
-            conf["velocities"] = config[1]
-
-        if self._gradients is not None:
-            conf["gradients"] = config[2]
+        if "velocities" in config:
+            conf["velocities"] = config["velocities"]
+        if "gradients" in config:
+            conf["gradients"] = config["gradients"]
 
         self._trajectory.dump_configuration(
             conf,
@@ -249,15 +245,16 @@ class DL_POLY(Converter):
 
         return index, None
 
-    def combine(self, index, x):
-        """
-        @param index: the index of the step.
-        @type index: int.
+    def combine(self, index: int, x: Any):
+        """Join job steps.
 
-        @param x:
-        @type x: any.
+        Parameters
+        ----------
+        index : int
+            Current index.
+        x : Any
+            Misc data.
         """
-
         pass
 
     def finalize(self):
@@ -271,4 +268,4 @@ class DL_POLY(Converter):
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()
 
-        super(DL_POLY, self).finalize()
+        super().finalize()

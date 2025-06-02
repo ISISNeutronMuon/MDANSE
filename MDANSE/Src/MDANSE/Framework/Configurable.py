@@ -44,7 +44,7 @@ class Configurable(object):
 
     settings = collections.OrderedDict()
 
-    def __init__(self, settings=None, trajectory_input="mdasne"):
+    def __init__(self, settings=None, trajectory_input="mdanse"):
         """
         Constructor
         """
@@ -52,8 +52,6 @@ class Configurable(object):
         self._configuration = collections.OrderedDict()
 
         self._configured = False
-
-        self._info = []
 
         if settings is not None:
             self.set_settings(settings)
@@ -206,13 +204,10 @@ class Configurable(object):
                 if conf.check_dependencies(configured):
                     if not conf.optional:
                         conf.configure(parameters[name])
-                        self._info.append(conf.get_information())
                     else:
                         if parameters[name]:
                             conf.configure(parameters[name])
-                            if conf.valid:
-                                self._info.append(conf.get_information())
-                            else:
+                            if not conf.valid:
                                 self._configuration[name] = False
 
                     conf.set_configured(True)
@@ -251,10 +246,9 @@ class Configurable(object):
         :rtype: str
         """
 
-        if not self._info:
-            return "No information available yet."
-
-        return "\n".join(self._info)
+        return "\n".join(
+            f"{key}: {value}" for key, value in self._configuration.items()
+        )
 
     @classmethod
     def build_doc_example(cls):

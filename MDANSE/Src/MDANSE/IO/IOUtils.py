@@ -13,77 +13,167 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
-import abc
-from collections import OrderedDict
+import re
+from collections.abc import Iterable, Iterator
+from itertools import filterfalse
 
 
-class _IFileVariable(metaclass=abc.ABCMeta):
-    """This is the abstract base class for file variable.
+def _strip_inline_comments(
+    data: Iterable[str],
+    *,
+    comment_char: set[str],
+) -> Iterator[str]:
+    r"""
+    Strip all comments from provided data.
 
-    Basically, this class allows to have a common interface for the data formats supported by MDANSE.
+    Parameters
+    ----------
+    data
+        Data to strip comments from.
+    comment_char
+        Characters to interpret as comments.
+
+    Yields
+    ------
+    str
+        Data with line-initial comments stripped.
+
+    Notes
+    -----
+    Also strips trailing, but not leading whitespace to clean up comment blocks.
+
+    Also strips empty lines.
+
+    Examples
+    --------
+    >>> from io import StringIO
+    >>> inp = StringIO('''
+    ... Hello
+    ... # Initial line comment
+    ... End of line # comment
+    ... ''')
+    >>> '|'.join(_strip_inline_comments(inp, comment_char={"#",}))
+    'Hello|End of line'
     """
+    comment_re = re.compile(f"({'|'.join(comment_char)})")
 
-    def __init__(self, variable):
-        self._variable = variable
+    for line in data:
+        line = comment_re.split(line)[0].rstrip()
+        if not line:
+            continue
 
-    def __getattr__(self, name):
-        return getattr(self._variable, name)
-
-    def __hasattr__(self, name):
-        return hasattr(self._variable, name)
-
-    @property
-    def variable(self):
-        return self._variable
-
-    @abc.abstractmethod
-    def get_array(self):
-        """Returns the actual data stored by the plotter data.
-
-        :return: the data
-        :rtype: numpy array
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_attributes(self):
-        """Returns the attributes stored by the plotter data.
-
-        :return: the attributes
-        :rtype: dict
-        """
-        pass
+        yield line
 
 
-def load_variables(dictionary):
+def _strip_initial_comments(
+    data: Iterable[str],
+    *,
+    comment_char: set[str],
+) -> Iterator[str]:
+    r"""
+    Strip line-initial comments from provided data.
+
+    Parameters
+    ----------
+    data
+        Data to strip comments from.
+    comment_char
+        Characters to interpret as comments.
+
+    Yields
+    ------
+    str
+        Data with line-initial comments stripped.
+
+    Notes
+    -----
+    Also strips trailing, but not leading whitespace to clean up comment blocks.
+
+    Also strips empty lines.
+
+    Examples
+    --------
+    >>> from io import StringIO
+    >>> inp = StringIO('''
+    ... Hello
+    ... # Initial line comment
+    ... End of line # comment
+    ... ''')
+    >>> '|'.join(_strip_initial_comments(inp, comment_char={"#",}))
+    'Hello|End of line # comment'
     """
-    Processes the provided variables into a form usable by MDANSE. This is done by moving the various attributes and
-    properties of each variable into a dictionary.
+    comment_re = re.compile(rf"^\s*({'|'.join(comment_char)})")
+    data = filterfalse(comment_re.match, data)
+    data = map(str.rstrip, data)
+    data = filter(None, data)
+    yield from data
 
-    :param dictionary: The variables to be processed.
-    :type dictionary: dict[str, (str, _IFileVariable)]
 
-    :return: The processed variables.
-    :rtype: collections.OrderedDict[str, dict]
+def strip_comments(
+    data: Iterable[str],
+    *,
+    comment_char: str | set[str] = "#!",
+    remove_inline: bool = True,
+) -> Iterable[str]:
+    r"""
+    Strip comments from data.
+
+    Parameters
+    ----------
+    data
+        Data to strip comments from.
+    remove_inline
+        Whether to remove inline comments or just line initial.
+    comment_char
+        Character sets to read as comments and remove.
+
+        .. note::
+
+            If the chars are passed as a string, it is assumed that
+            each character is a comment character.
+
+            To match a multicharacter comment you **must** pass this
+            as a set or sequence of strings.
+
+    Returns
+    -------
+    Iterable[str]
+        Block of data without comments.
+
+    Notes
+    -----
+    Also strips trailing, but not leading whitespace to clean up comment blocks.
+
+    Also strips empty lines.
+
+    Examples
+    --------
+    >>> from io import StringIO
+    >>> inp = StringIO('''
+    ... Hello
+    ... # Initial line comment
+    ... End of line # comment
+    ... // C-style
+    ... ''')
+    >>> x = strip_comments(inp, remove_inline=False)
+    >>> '|'.join(x)
+    'Hello|End of line # comment|// C-style'
+    >>> _ = inp.seek(0)
+    >>> x = strip_comments(inp, remove_inline=True)
+    >>> '|'.join(x)
+    'Hello|End of line|// C-style'
+    >>> _ = inp.seek(0)
+    >>> x = strip_comments(inp, comment_char={"//", "#"})
+    >>> '|'.join(x)
+    'Hello|End of line # comment'
     """
-    data = OrderedDict()
-    for vname, vinfo in list(dictionary.items()):
-        vpath, variable = vinfo
-        arr = variable.get_array()
-        attributes = variable.get_attributes()
+    if not isinstance(comment_char, set):
+        comment_char = set(comment_char)
 
-        data[vname] = {}
-        if "axis" in attributes:
-            axis = attributes["axis"]
-            if axis:
-                data[vname]["axis"] = axis.split("|")
-            else:
-                data[vname]["axis"] = []
-        else:
-            data[vname]["axis"] = []
-        data[vname]["path"] = vpath
-        data[vname]["data"] = arr
-        data[vname]["units"] = attributes.get("units", "au")
+    strip_function = (
+        _strip_inline_comments if remove_inline else _strip_initial_comments
+    )
 
-    return data
+    return strip_function(data, comment_char=comment_char)

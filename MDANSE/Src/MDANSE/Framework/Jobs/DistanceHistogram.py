@@ -21,13 +21,13 @@ import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
-    find_index_groups,
-    van_hove_distinct,
+    CELL_SIZE_LIMIT,
     DETAILED_CELL_MESSAGE,
+    intramolecular_lookup_dict,
+    van_hove_distinct,
+    van_hove_distinct_all_inter,
 )
 from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
-
-CELL_SIZE_LIMIT = 1e-9
 
 
 class DistanceHistogram(IJob):
@@ -71,7 +71,7 @@ class DistanceHistogram(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-            }
+            },
         },
     )
     settings["weights"] = (
@@ -80,7 +80,7 @@ class DistanceHistogram(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-            }
+            },
         },
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
@@ -99,6 +99,14 @@ class DistanceHistogram(IJob):
         ]
         self._indices = np.array(self._indices, dtype=np.int32)
 
+        if self.configuration["trajectory"][
+            "instance"
+        ].chemical_system.unique_molecules():
+            self.indices_intra = intramolecular_lookup_dict(
+                self.configuration["trajectory"]["instance"].chemical_system,
+            )
+        else:
+            self.indices_intra = None
         self.selectedElements = self.configuration["atom_selection"]["unique_names"]
 
         self.indexToSymbol = np.array(
@@ -109,22 +117,23 @@ class DistanceHistogram(IJob):
             dtype=np.int32,
         )
 
-        lut = atom_index_to_molecule_index(
-            self.configuration["trajectory"]["instance"].chemical_system,
-        )
-
-        self.indexToMolecule = np.array([lut[i] for i in self._indices], dtype=np.int32)
-
         nElements = len(self.selectedElements)
 
         # The histogram of the intramolecular distances.
-        self.hIntra = np.zeros(
-            (nElements, nElements, len(self.configuration["r_values"]["mid_points"])),
-            dtype=np.float64,
-        )
+        if self.indices_intra is not None:
+            self.h_intra = np.zeros(
+                (
+                    nElements,
+                    nElements,
+                    len(self.configuration["r_values"]["mid_points"]),
+                ),
+                dtype=np.float64,
+            )
+        else:
+            self.h_intra = None
 
         # The histogram of the intermolecular distances.
-        self.hInter = np.zeros(
+        self.h_total = np.zeros(
             (nElements, nElements, len(self.configuration["r_values"]["mid_points"])),
             dtype=np.float64,
         )
@@ -142,9 +151,8 @@ class DistanceHistogram(IJob):
             self._concentrations[k] = 0.0
 
         self._elementsPairs = sorted(
-            itertools.combinations_with_replacement(self.selectedElements, 2)
+            itertools.combinations_with_replacement(self.selectedElements, 2),
         )
-        self.indices_intra = find_index_groups(self.indexToMolecule, self.indexToSymbol)
 
     def run_step(self, index):
         """Run a single step of the analysis.
@@ -168,33 +176,48 @@ class DistanceHistogram(IJob):
         conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
         if not hasattr(conf, "unit_cell"):
             raise ValueError(DETAILED_CELL_MESSAGE)
-        if conf.unit_cell.volume < 1e-9:
+        if conf.unit_cell.volume < CELL_SIZE_LIMIT:
             raise ValueError(DETAILED_CELL_MESSAGE)
 
         direct_cell = conf.unit_cell.direct
-        inverse_cell = conf.unit_cell.inverse
         cell_volume = conf.unit_cell.volume
 
         coords = conf["coordinates"][self._indices]
-        scaleconfig = coords @ inverse_cell
+        frac_coords = coords @ conf.unit_cell.inverse
 
-        hIntraTemp = np.zeros(self.hIntra.shape, dtype=np.float64)
-        hTotalTemp = np.zeros(self.hInter.shape, dtype=np.float64)
+        if self.indices_intra is not None:
+            hIntraTemp = np.zeros(self.h_intra.shape, dtype=np.float64)
+            hTotalTemp = np.zeros(self.h_total.shape, dtype=np.float64)
 
-        van_hove_distinct(
-            direct_cell,
-            self.indices_intra,
-            self.indexToSymbol,
-            hIntraTemp,
-            hTotalTemp,
-            scaleconfig,
-            scaleconfig,
-            self.configuration["r_values"]["first"],
-            self.configuration["r_values"]["step"],
-        )
+            van_hove_distinct(
+                direct_cell,
+                self.indices_intra,
+                self.indexToSymbol,
+                hIntraTemp,
+                hTotalTemp,
+                frac_coords,
+                frac_coords,
+                self.configuration["r_values"]["first"],
+                self.configuration["r_values"]["step"],
+            )
 
-        np.multiply(hIntraTemp, cell_volume, hIntraTemp)
-        np.multiply(hTotalTemp, cell_volume, hTotalTemp)
+            np.multiply(hIntraTemp, cell_volume, hIntraTemp)
+            np.multiply(hTotalTemp, cell_volume, hTotalTemp)
+        else:
+            hTotalTemp = np.zeros(self.h_total.shape, dtype=np.float64)
+            hIntraTemp = None
+            van_hove_distinct_all_inter(
+                direct_cell,
+                self.indices_intra,
+                self.indexToSymbol,
+                None,
+                hTotalTemp,
+                frac_coords,
+                frac_coords,
+                self.configuration["r_values"]["first"],
+                self.configuration["r_values"]["step"],
+            )
+            np.multiply(hTotalTemp, cell_volume, hTotalTemp)
 
         return index, (cell_volume, hIntraTemp, hTotalTemp)
 
@@ -215,11 +238,14 @@ class DistanceHistogram(IJob):
 
         self.averageDensity += nAtoms / x[0]
 
-        # The temporary distance histograms are normalized by the volume. This is done for each step because the
-        # volume can variate during the MD (e.g. NPT conditions). This volume is the one that intervene in the density
+        # The temporary distance histograms are normalized by the volume.
+        # This is done for each step because the
+        # volume can vary during the MD (e.g. NPT conditions).
+        # This volume is the one that intervene in the density
         # calculation.
-        self.hIntra += x[1]
-        self.hInter += x[2] - x[1]
+        if self.indices_intra is not None:
+            self.h_intra += x[1]
+        self.h_total += x[2]
 
         for k, v in list(self._nAtomsPerElement.items()):
             self._concentrations[k] += float(v) / nAtoms

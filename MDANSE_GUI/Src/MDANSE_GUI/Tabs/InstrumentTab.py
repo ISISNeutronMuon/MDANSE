@@ -21,7 +21,7 @@ from qtpy.QtWidgets import QWidget
 
 from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
@@ -79,7 +79,7 @@ class InstrumentTab(GeneralTab):
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
             try:
-                data = HDFTrajectoryInputData(fname)
+                data = Trajectory(fname)
             except Exception as e:
                 self._core.error.emit(repr(e))
             else:

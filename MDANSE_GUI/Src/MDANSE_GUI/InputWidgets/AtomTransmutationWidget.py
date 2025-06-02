@@ -26,7 +26,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Framework.Configurators.AtomTransmutationConfigurator import AtomTransmuter
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import AtomSelectionWidget
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import SelectionHelper
@@ -46,7 +46,7 @@ class TransmutationHelper(SelectionHelper):
     def __init__(
         self,
         transmuter: AtomTransmuter,
-        traj_data: tuple[str, HDFTrajectoryInputData],
+        traj_data: tuple[str, Trajectory],
         field: QLineEdit,
         parent,
         *args,
@@ -58,7 +58,7 @@ class TransmutationHelper(SelectionHelper):
         transmuter : AtomTransmuter
             The MDANSE atom transmuter initialized with the current
             chemical system.
-        traj_data : tuple[str, HDFTrajectoryInputData]
+        traj_data : tuple[str, Trajectory]
             A tuple of the trajectory data used to load the 3D viewer.
         field : QLineEdit
             The QLineEdit field that will need to be updated when
@@ -162,13 +162,11 @@ class AtomTransmutationWidget(AtomSelectionWidget):
     _default_value = "{}"
     _tooltip_text = "Specify the atom transmutation that will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
 
-    def create_helper(
-        self, traj_data: tuple[str, HDFTrajectoryInputData]
-    ) -> TransmutationHelper:
+    def create_helper(self, traj_data: tuple[str, Trajectory]) -> TransmutationHelper:
         """
         Parameters
         ----------
-        traj_data : tuple[str, HDFTrajectoryInputData]
+        traj_data : tuple[str, Trajectory]
             A tuple of the trajectory data used to load the 3D viewer.
 
         Returns

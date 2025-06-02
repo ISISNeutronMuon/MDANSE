@@ -74,15 +74,3 @@ class BasisSelectionConfigurator(IConfigurator):
         self["basis"] = list(zip(e1, e2, e3))
 
         self["n_basis"] = len(self["basis"])
-
-    def get_information(self):
-        """
-        Returns some informations about this configurator.
-
-        :return: the information about this configurator
-        :rtype: str
-        """
-        if "value" not in self:
-            return "Not configured yet\n"
-
-        return f"Basis vector:{self['value']}\n"

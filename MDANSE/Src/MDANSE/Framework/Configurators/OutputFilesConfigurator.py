@@ -134,22 +134,6 @@ class OutputFilesConfigurator(IConfigurator):
         """
         return self._formats
 
-    def get_information(self):
-        """Return string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-        if "files" not in self:
-            return "Output Files have not been defined"
-
-        info = ["Input files:\n"]
-        for f in self["files"]:
-            info.append(str(f))
-            info.append("\n")
-
-        return "".join(info)
-
     @property
     def default(self) -> tuple[str, list[str]]:
         """Return the default values of the inputs.

@@ -114,15 +114,3 @@ class FloatConfigurator(IConfigurator):
         """
 
         return self._choices
-
-    def get_information(self):
-        """
-        Returns some informations about this configurator.
-
-        :return: the information about this configurator
-        :rtype: str
-        """
-        if "value" not in self:
-            return "Not configured yet\n"
-
-        return f"Value: {self['value']!r}\n"

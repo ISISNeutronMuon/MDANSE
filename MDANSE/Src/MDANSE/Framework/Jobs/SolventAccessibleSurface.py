@@ -229,7 +229,7 @@ class SolventAccessibleSurface(IJob):
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
-            self._info,
+            str(self),
             self,
         )
 

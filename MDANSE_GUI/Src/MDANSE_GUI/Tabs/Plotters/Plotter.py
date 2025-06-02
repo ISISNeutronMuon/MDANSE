@@ -267,7 +267,7 @@ class Plotter(metaclass=SubclassFactory):
             GUI instance of the matplotlib toolbar, by default None
 
         """
-        print(f"normalisation errors {self._normalisation_errors}, setting to []")
+        LOG.info(f"normalisation errors {self._normalisation_errors}, setting to []")
         self._normalisation_errors = []
         target = self.get_figure(figure)
         if target is None:

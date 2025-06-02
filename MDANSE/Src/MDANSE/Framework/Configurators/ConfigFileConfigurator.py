@@ -26,7 +26,8 @@ from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Converters.LAMMPS import BoxStyle
 from MDANSE.MLogging import LOG
-from more_itertools import first_true, split_before, spy, take
+from MDANSE.IO.IOUtils import strip_comments
+from more_itertools import first, first_true, split_before, spy
 from numpy.typing import NDArray
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
@@ -74,9 +75,9 @@ ATOM_TYPES_MAP = {
     "charge": ("atom_ID", "atom_type", "q", "x", "y", "z"),
     "bond": ("atom_ID", "molecule_ID", "atom_type", "x", "y", "z"),
     "angle": ("atom_ID", "molecule_ID", "atom_type", "x", "y", "z"),
+    "full": ("atom_ID", "molecule_ID", "atom_type", "q", "x", "y", "z"),
     "body": ("atom_ID", "atom_type", "bodyflag", "mass", "x", "y", "z"),
     "molecular": ("atom_ID", "molecule_ID", "atom_type", "x", "y", "z"),
-    "full": ("atom_ID", "molecule_ID", "atom_type", "q", "x", "y", "z"),
     # Prioritise basic types.
     "atomic_w_image": ("atom_ID", "atom_type", "x", "y", "z", "ix", "iy", "iz"),
     "charge_w_image": ("atom_ID", "atom_type", "q", "x", "y", "z", "ix", "iy", "iz"),
@@ -102,6 +103,18 @@ ATOM_TYPES_MAP = {
         "iy",
         "iz",
     ),
+    "full_w_image": (
+        "atom_ID",
+        "molecule_ID",
+        "atom_type",
+        "q",
+        "x",
+        "y",
+        "z",
+        "ix",
+        "iy",
+        "iz",
+    ),
     "body_w_image": (
         "atom_ID",
         "atom_type",
@@ -118,18 +131,6 @@ ATOM_TYPES_MAP = {
         "atom_ID",
         "molecule_ID",
         "atom_type",
-        "x",
-        "y",
-        "z",
-        "ix",
-        "iy",
-        "iz",
-    ),
-    "full_w_image": (
-        "atom_ID",
-        "molecule_ID",
-        "atom_type",
-        "q",
         "x",
         "y",
         "z",
@@ -223,7 +224,7 @@ ATOM_TYPES_MAP = {
     "wavepacket": (
         "atom_ID",
         "atom_type",
-        "charge",
+        "q",
         "espin",
         "eradius",
         "etag",
@@ -236,12 +237,25 @@ ATOM_TYPES_MAP = {
     "tdpd": ("atom_ID", "atom_type", "x", "y", "z", "cc1", "cc2", ..., "ccNspecies"),
     "hybrid": ("atom_ID", "atom_type", "x", "y", "z", "sub_style1", "sub_style2", ...),
 }
+
 ATOM_TYPES_MAP.update(
     {
         f"{key}_w_image": value + ("ix", "iy", "iz")
         for key, value in ATOM_TYPES_MAP.items()
     }
 )
+
+
+KEY_TYPES_MAP = {
+    r"(atom|molecule)_ID": int,
+    r"atom_type": int,
+    r"i[xyz]": int,
+    r"[a-z]+flag": bool,
+    r"e(spin|tag)": int,
+    r"template_[a-z]+": int,
+    r"status": int,
+    r".*": float,
+}
 
 AtomTypes = Literal[
     "angle",
@@ -276,19 +290,21 @@ AtomTypes = Literal[
 
 DESIRED = {"header", "Masses", "Atom Type Labels", "Bonds", "Atoms"}
 
-
-def strip_comments(line: str) -> str:
-    return line.split("#", maxsplit=1)[0]
+# Regexps to recognise numbers
+FNUMBER_RE = r"(?:[+-]?(?:\d*\.\d+|\d+\.\d*))"
+INTNUMBER_RE = r"(?:[+-]?(?<!\.)\d+(?!\.))"
+EXPNUMBER_RE = rf"(?:(?:{FNUMBER_RE}|{INTNUMBER_RE})[Ee][+-]?\d{{1,3}})"
+EXPFNUMBER_RE = f"(?:{EXPNUMBER_RE}|{FNUMBER_RE})"
 
 
 def one_to_one_parser(lines, *_) -> Dict[str, str]:
-    return dict(line.split() for line in map(strip_comments, lines))
+    return dict(map(str.split, strip_comments(lines)))
 
 
 def float_list_parser(lines, *_) -> Dict[str, Tuple[float, ...]]:
     return {
         line.split()[0]: tuple(map(float, line.split()[1:]))
-        for line in map(strip_comments, lines)
+        for line in strip_comments(lines)
         if line
     }
 
@@ -296,7 +312,7 @@ def float_list_parser(lines, *_) -> Dict[str, Tuple[float, ...]]:
 def int_list_parser(lines, *_) -> Dict[str, Tuple[int, ...]]:
     return {
         line.split()[0]: tuple(map(int, line.split()[1:]))
-        for line in map(strip_comments, lines)
+        for line in strip_comments(lines)
         if line
     }
 
@@ -410,6 +426,42 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
     _IMPROPER_RESTRICT = {"angle"}
     _IMPROPER_RESTRICT |= {f"{key}_w_image" for key in _IMPROPER_RESTRICT}
 
+    @staticmethod
+    def _guess_type(word: str) -> type:
+        """Quick guess at what type `word` represents.
+
+        Since ``issubclass(bool, int) is True`` can blindly
+        return ``bool``.
+
+        Parameters
+        ----------
+        word : str
+            Word from line.
+
+        Returns
+        -------
+        type
+            Best guess at type.
+
+        Examples
+        --------
+        >>> ConfigFileConfigurator._guess_type("0")
+        <class 'bool'>
+        >>> ConfigFileConfigurator._guess_type("1.3")
+        <class 'float'>
+        >>> ConfigFileConfigurator._guess_type("17")
+        <class 'int'>
+        >>> ConfigFileConfigurator._guess_type("Hello")
+        <class 'str'>
+        """
+        if word in "01":
+            return bool
+        if re.fullmatch(INTNUMBER_RE, word):
+            return int
+        if re.fullmatch(EXPFNUMBER_RE, word):
+            return float
+        return str
+
     def _guess_atom_type(self, line: str):
         """Attempt to guess atom type given current knowledge.
 
@@ -418,7 +470,9 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         line : str
             Example line from config.
         """
-        n_elem = len(line.split())
+        words = line.split()
+        n_elem = len(words)
+        types = list(map(self._guess_type, words))
 
         # Cannot distinguish these due to variable length.
         excl = {"tdpd", "hybrid", "tdpd_w_image", "hybrid_w_image"}
@@ -430,13 +484,32 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         if "Impropers" in self._known_blocks:
             excl |= self._BOND_RESTRICT | self._ANGLE_RESTRICT | self._IMPROPER_RESTRICT
 
-        keys = (key for key in ATOM_TYPES_MAP if key not in excl)
-        # Assume first one is right one.
-        return first_true(keys, pred=lambda key: len(ATOM_TYPES_MAP[key]) == n_elem)
+        keys = (
+            key
+            for key in ATOM_TYPES_MAP
+            if key not in excl and len(ATOM_TYPES_MAP[key]) == n_elem
+        )
+
+        for key in keys:
+            trial_atom_type = ATOM_TYPES_MAP[key]
+            trial_var_types = (
+                first(
+                    val
+                    for key_re, val in KEY_TYPES_MAP.items()
+                    if re.fullmatch(key_re, name)
+                )
+                for name in trial_atom_type
+            )
+
+            # Assume first one is right one.
+            if all(map(issubclass, types, trial_var_types)):
+                return key
+
+        raise LAMMPSConfigFileError("Cannot guess atom type.")
 
     def atoms_parser(
         self, lines: Iterable[str], atom_type: Optional[AtomTypes] = None
-    ) -> None:
+    ) -> dict:
         """Parse atoms block.
 
         If header does not contain atoms or atom types will set those.
@@ -444,9 +517,9 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         Parameters
         ----------
         lines : Iterable[str]
-            FIXME: Add docs.
+            Lines to parse.
         atom_type : Optional[AtomTypes]
-            FIXME: Add docs.
+            Atom type if known.
 
         Raises
         ------
@@ -461,6 +534,10 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         trial, lines = spy(lines)
 
         parsed = {}
+
+        # User defined atom type takes priority.
+        if self.get("atom_type", "From config") != "From config":
+            atom_type = self["atom_type"]
 
         if atom_type and atom_type != "unknown":
             if len(trial[0].split()) == len(ATOM_TYPES_MAP[atom_type]) + 3:
@@ -477,7 +554,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
         atom_style = ATOM_TYPES_MAP[atom_type]
         AtomData = namedtuple("AtomData", atom_style)
-        lines = map(strip_comments, lines)
+        lines = strip_comments(lines)
         atom_data = list(starmap(AtomData, map(str.split, lines)))
 
         parsed["n_atoms"] = self.get("n_atoms", len(atom_data))
@@ -487,9 +564,10 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                 f"Data mismatch between n_atoms in header ({parsed['n_atoms']}) and atoms in file ({len(atom_data)})."
             )
 
-        parsed["atom_types"] = (
-            np.array([atom.atom_type for atom in atom_data], dtype=int) - 1
+        parsed["atom_types"] = np.array(
+            [atom.atom_type for atom in atom_data], dtype=int
         )
+
         parsed["n_atom_types"] = self.get("n_atom_types", parsed["atom_types"].max())
         if parsed["atom_types"].max() > parsed["n_atom_types"]:
             raise LAMMPSConfigFileError(
@@ -513,10 +591,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
 
         """
-        bonds = [
-            tuple(map(lambda x: x - 1, elems[1:]))
-            for elems in int_list_parser(lines).values()
-        ]
+        bonds = [tuple(elems[1:]) for elems in int_list_parser(lines).values()]
 
         if len(bonds) != self["n_bonds"]:
             raise LAMMPSConfigFileError(
@@ -538,7 +613,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
         # ASE/VMD dumps element as comment on masses (VMD doesn't respect case)
         element_map = {
-            int(line.split()[0]) - 1: match[1].title()
+            int(line.split()[0]): match[1].title()
             for line in lines
             if (match := re.search("# ([A-Z][a-z]{,2})\s*$", line, re.I))
         }
@@ -567,7 +642,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         """
         return {
             "elements": {
-                int(key) - 1: val
+                int(key): val
                 for key, val in one_to_one_parser(filter(None, lines)).items()
             }
         }
@@ -612,8 +687,8 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         """
         with open(filename, "r") as source_file:
             return [
-                strip_comments(line).strip()
-                for line in source_file
+                line.strip()
+                for line in strip_comments(source_file)
                 if ConfigFileConfigurator._is_block(line)
             ]
 
@@ -650,7 +725,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
                 self.update(self.BLOCK_PARSERS[block_type](self, block[2:], *comment))
 
-        elem_range = range(self["n_atom_types"])
+        elem_range = range(1, self["n_atom_types"] + 1)
 
         self.setdefault("elements", dict(zip(elem_range, map(str, elem_range))))
         self.setdefault("charges", np.zeros(self["n_atoms"]))

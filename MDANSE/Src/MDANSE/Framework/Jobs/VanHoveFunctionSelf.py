@@ -18,7 +18,10 @@ import collections
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import DETAILED_CELL_MESSAGE
+from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
+    CELL_SIZE_LIMIT,
+    DETAILED_CELL_MESSAGE,
+)
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
@@ -31,7 +34,9 @@ def van_hove_self(
     n_configs: int,
     n_frames: int,
 ):
-    """Calculates the distance histogram between an atom at time t0
+    """Calculate the self van Hove function for one atom.
+
+    Calculates the distance histogram between an atom at time t0
     and the same atom at a time t0 + t. The results from this function
     can be used to calculate the self part of the van Hove function.
 
@@ -51,8 +56,8 @@ def van_hove_self(
         Number of configs to be averaged over.
     n_frames : int
         Number of correlation frames.
-    """
 
+    """
     nbins = histograms.shape[0]
 
     for i in range(n_configs):
@@ -68,7 +73,9 @@ def van_hove_self(
 
 
 class VanHoveFunctionSelf(IJob):
-    """The van Hove function is related to the intermediate scattering
+    """Calculates the self part of the van Hove function.
+
+    The van Hove function is related to the intermediate scattering
     function via a Fourier transform and the dynamic structure factor
     via a double Fourier transform. The van Hove function describes the
     probability of finding a particle (j) at a distance r at time t from
@@ -115,13 +122,14 @@ class VanHoveFunctionSelf(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-            }
+            },
         },
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
+        """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
@@ -134,11 +142,11 @@ class VanHoveFunctionSelf(IJob):
         self.n_mid_points = len(self.configuration["r_values"]["mid_points"])
 
         conf = self.configuration["trajectory"]["instance"].configuration(
-            self.configuration["frames"]["first"]
+            self.configuration["frames"]["first"],
         )
         if not hasattr(conf, "unit_cell"):
             raise ValueError(DETAILED_CELL_MESSAGE)
-        if conf.unit_cell.volume < 1e-9:
+        if conf.unit_cell.volume < CELL_SIZE_LIMIT:
             raise ValueError(DETAILED_CELL_MESSAGE)
 
         self._outputData.add(
@@ -196,12 +204,14 @@ class VanHoveFunctionSelf(IJob):
                     + self.configuration["r_values"]["step"]
                 )
                 ** 3
-                - self.configuration["r_values"]["value"][i] ** 3
+                - self.configuration["r_values"]["value"][i] ** 3,
             )
         self.shell_volumes = (4 / 3) * np.pi * np.array(self.shell_volumes)
 
     def run_step(self, atm_index: int) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
-        """Calculates a distance histograms of an atoms displacement.
+        """Run the analysis for a single atom.
+
+        Calculates a distance histograms of an atoms displacement.
         The distance histograms are used to calculate the self part of
         the van Hove function.
 
@@ -215,6 +225,7 @@ class VanHoveFunctionSelf(IJob):
         -------
         tuple
             A tuple containing the atom index and distance histograms.
+
         """
         histograms = np.zeros((self.n_mid_points, self.n_frames))
         first = self.configuration["frames"]["first"]
@@ -234,7 +245,7 @@ class VanHoveFunctionSelf(IJob):
                 .configuration(i)
                 .unit_cell.volume
                 for i in range(first, last, step)
-            ]
+            ],
         )
 
         histograms = van_hove_self(
@@ -250,8 +261,7 @@ class VanHoveFunctionSelf(IJob):
         return atm_index, histograms
 
     def combine(self, atm_index: int, histogram: np.ndarray):
-        """Add the results into the histograms for the inputted time
-        difference.
+        """Add the results into the histograms for the input time difference.
 
         Parameters
         ----------
@@ -260,16 +270,18 @@ class VanHoveFunctionSelf(IJob):
         histogram : np.ndarray
             A histogram of the distances between an atom at
             time t0 and t0 + t.
+
         """
         element = self.configuration["atom_selection"]["names"][atm_index]
         self._outputData[f"g(r,t)_{element}"][:] += histogram
         self._outputData[f"4_pi_r2_g(r,t)_{element}"][:] += histogram
 
     def finalize(self):
-        """Using the distance histograms calculate, normalize and save the
+        """Apply scaling to the summed up results.
+
+        Using the distance histograms calculate, normalize and save the
         self part of the Van Hove function.
         """
-
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in list(nAtomsPerElement.items()):
             self._outputData[f"g(r,t)_{element}"][:] /= (
@@ -297,7 +309,7 @@ class VanHoveFunctionSelf(IJob):
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
-            self._info,
+            str(self),
             self,
         )
         self.configuration["trajectory"]["instance"].close()

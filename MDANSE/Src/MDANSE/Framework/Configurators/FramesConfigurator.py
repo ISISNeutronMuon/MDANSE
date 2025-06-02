@@ -112,21 +112,3 @@ class FramesConfigurator(RangeConfigurator):
         if not self._valid:
             return None, None
         return self["time"], "ps"
-
-    def get_information(self):
-        """
-        Returns some informations about this configurator.
-
-        :return: the information about this configurator
-        :rtype: str
-        """
-
-        try:
-            result = (
-                f"{self['n_frames']} frames selected "
-                f"(first={self['time'][0]:.3f} ; last = {self['time'][-1]:.3f} ; time step = {self['time_step']:.3f})\n"
-            )
-        except KeyError:
-            result = "FramesConfigurator could not be configured!"
-
-        return result

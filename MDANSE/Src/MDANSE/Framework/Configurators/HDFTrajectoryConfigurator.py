@@ -17,7 +17,7 @@
 from MDANSE import PLATFORM
 
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
-from MDANSE.Framework.InputData.IInputData import IInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class HDFTrajectoryConfigurator(InputFileConfigurator):
@@ -49,16 +49,14 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
 
         InputFileConfigurator.configure(self, value)
         try:
-            inputTraj = IInputData.create("HDFTrajectoryInputData", self["value"])
+            trajectory_instance = Trajectory(self["value"])
         except KeyError:
             self.error_status = f"Could not use {value} as input trajectory"
             return
 
-        self["hdf_trajectory"] = inputTraj
+        self["instance"] = trajectory_instance
 
-        self["instance"] = inputTraj.trajectory
-
-        self["filename"] = PLATFORM.get_path(inputTraj.filename)
+        self["filename"] = PLATFORM.get_path(trajectory_instance.filename)
 
         self["basename"] = self["filename"].name
 
@@ -73,28 +71,3 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             self["md_time_step"] = 1.0
 
         self["has_velocities"] = "velocities" in self["instance"].variables()
-
-    def get_information(self):
-        """
-        Returns some basic informations about the contents of the HDF trajectory file.
-
-        :return: the informations about the contents of the HDF trajectory file.
-        :rtype: str
-        """
-        try:
-            info = [f"HDF input trajectory: {self['filename']!r}\n"]
-            info.append(f"Number of steps: {self['length']:d}\n")
-        except KeyError:
-            info = "Input trajectory has not been configured"
-        else:
-            info.append(
-                f"Size of the chemical system: {self['instance'].chemical_system.number_of_atoms:d}\n"
-            )
-
-            if self["has_velocities"]:
-                info.append("The trajectory contains atomic velocities\n")
-            else:
-                info.append("The trajectory does not contain atomic velocities\n")
-            info = "".join(info)
-
-        return info

@@ -95,14 +95,18 @@ class SingleDataset:
                 self._scaling_factor = np.array(source[name].attrs["scaling_factor"])
         self._axes = {}
         self._axes_units = {}
+        self._axes_scaling = {}
+        self._current_units = {}
+        self._axes_order = []
         if self._axes_tag == "index":
             for dim_number, dim_length in enumerate(self._data.shape):
-                self._axes[f"index{dim_number}"] = np.arange(dim_length)
-                self._axes_units[f"index{dim_number}"] = "N/A"
+                temp_key = f"index{dim_number}"
+                self._axes[temp_key] = np.arange(dim_length)
+                self._axes_units[temp_key] = "N/A"
+                self._current_units[temp_key] = "N/A"
+                self._axes_scaling[temp_key] = 1.0
+                self._axes_order.append(temp_key)
             return
-        self._current_units = {}
-        self._axes_scaling = {}
-        self._axes_order = []
         for ax_number, axis_name in enumerate(self._axes_tag.split("|")):
             aname = axis_name.strip()
             if aname == "index":
@@ -274,9 +278,15 @@ class SingleDataset:
             axis_values = self.x_axis(axis_name)
             axis_unit = self._current_units[axis_name]
             picked_value = axis_values[index_tuple[axis_index]]
-            significant_digit = np.floor(
-                np.log10(abs(np.mean(axis_values[1:] - axis_values[:-1])))
-            ).astype(int)
+            if len(axis_values) > 1:
+                significant_digit = np.floor(
+                    np.log10(abs(np.mean(axis_values[1:] - axis_values[:-1])))
+                ).astype(int)
+            elif len(axis_values) == 1:
+                significant_digit = np.floor(np.log10(abs(axis_values[0]))).astype(int)
+            else:
+                label += f"{axis_name} has no values, unit {axis_unit}"
+                continue
             if significant_digit < 0:
                 picked_value = round(picked_value, abs(significant_digit) + 2)
             else:

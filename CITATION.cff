@@ -1,0 +1,211 @@
+cff-version: 1.2.0
+title: MDANSE
+type: software
+abstract: >-
+  MDANSE Core package - Molecular Dynamics trajectory
+  handling and analysis code.
+message: >-
+  If you have used MDANSE or the MDANSE_GUI in your research, please cite both the MDANSE & MDANSE_GUI software,
+  and the article from preferred-citation.
+authors:
+  - given-names: Raunakk
+    family-names: Banerjee
+    email: raunakk.banerjee@stfc.ac.uk
+    affiliation: STFC
+  - given-names: Maciej
+    family-names: Bartkowiak
+    email: maciej.bartkowiak@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0000-0003-1974-1493
+  - given-names: Rob
+    family-names: Buchanan
+    email: rob.buchanan@stfc.ac.uk
+    affiliation: STFC
+  - given-names: Chi Y.
+    family-names: Cheng
+    email: chi.cheng@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0000-0002-1957-9193
+  - given-names: Miguel Angel
+    family-names: Gonzales
+    affiliation: Institut Laue-Langevin
+    orcid: https://orcid.org/0000-0002-3478-0215
+  - given-names: Gael
+    family-names: Goret
+    email: gael.goret@gmail.com
+  - given-names: Sanghamitra
+    family-names: Mukhopadhyay
+    email: sanghamitra.mukhopadhyay@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0000-0002-6501-4089
+  - given-names: Eric
+    family-names: Pellegrini
+    affiliation: Institut Laue-Langevin
+  - given-names: Remi
+    family-names: Perenon
+    affiliation: Institut Laue-Langevin
+  - given-names: Rastislav
+    family-names: Turanyi
+    email: rastislav.turanyi@stfc.ac.uk
+    affiliation: STFC
+  - given-names: Jacob
+    family-names: Wilkins
+    email: jacob.wilkins@stfc.ac.uk
+    affiliation: STFC
+    orcid: https://orcid.org/0009-0004-9147-3475
+
+repository-code: 'https://github.com/ISISNeutronMuon/MDANSE'
+url: 'https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx'
+keywords:
+  - molecular dynamics
+  - science
+  - simulation
+  - analysis
+license: GPL-3.0
+version: 2.0.0b3
+
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Goret
+      given-names: G.
+    - family-names: Aoun
+      given-names: B.
+    - family-names: Pellegrini
+      given-names: E.
+  title: |
+    MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations
+  doi: 10.1021/acs.jcim.6b00571
+  journal: "J Chem Inf Model"
+  month: 1
+  volume: 57
+  issue: 1
+  year: 2017
+
+references:
+  - type: software
+    title: nMOLDYN
+    repository-code: https://github.com/khinsen/nMOLDYN3
+    authors:
+      - given-names: Konrad
+        family-names: Hinsen
+      - given-names: Eric
+        family-names: Pellegrini
+        affiliation: Institut Laue-Langevin
+      - given-names: Gerald
+        family-names: Kneller
+      - given-names: Bachir
+        family-names: Aoun
+        affiliation: Fullrmc LLC
+        orcid: https://orcid.org/0000-0001-8965-9423
+      - given-names: Krzysztof
+        family-names: Murzyn
+        affiliation: Jagellonian University Kraków
+      - given-names: Tomasz
+        family-names: Róg
+
+  - type: article
+    title: |
+      nMOLDYN: A program package for a neutron scattering oriented analysis of Molecular Dynamics simulations
+    authors:
+       - given-names: Gerald R.
+         family-names: Kneller
+       - given-names: Volker
+         family-names: Keiner
+       - given-names: Meinhard
+         family-names: Kneller
+       - given-names: Matthias
+         family-names: Schiller
+    journal: Computer Physics Communications
+    volume: 91
+    number: 1
+    pages: 191-214
+    year: 1995
+    issn: 0010-4655
+    identifiers:
+      - type: doi
+        value: 10.1016/0010-4655(95)00048-K
+      - type: url
+        value: https://www.sciencedirect.com/science/article/pii/001046559500048K
+    keywords:
+      - Neutron scattering
+      - Molecular dynamics simulation
+    abstract: >
+      nMOLDYN is a modular program package for the analysis of
+      Molecular Dynamics simulations. It is especially designed for
+      the computation and decomposition of neutron scattering
+      spectra. The structure and dynamics of the simulated systems can
+      be characterized in terms of various space and time correlation
+      functions. To analyze the dynamics of complex systems,
+      rigid-body motions of arbitrarily chosen molecular subunits can
+      be studied. All modules use a common input data structure for
+      the MD trajectory files which facilitates an efficient
+      calculation of time correlation functions by Fast Fourier
+      Transform algorithms.
+
+  - type: article
+    title: |
+      nMoldyn - Interfacing spectroscopic experiments, molecular dynamics simulations and models for time correlation functions
+    authors:
+      - name: V. Calandrini
+      - name: E. Pellegrini
+      - name: P. Calligari
+      - name: K. Hinsen
+      - name: G. R. Kneller
+    identifiers:
+      - type: doi
+        value: 10.1051/sfn/201112010
+      - type: url
+        value: https://www.neutron-sciences.org/articles/sfn/abs/2011/01/sfn201112010/sfn201112010.html
+    journal: JDN
+    pages: 201-232
+    volume: 12
+    year: 2011
+
+  - type: article
+    authors:
+      - name: T. Róg
+      - name: K. Murzyn
+      - name: K. Hinsen
+      - name: G. R. Kneller
+    title: |
+      nMoldyn: A program package for a neutron scattering oriented analysis of molecular dynamics simulations
+    journal: Journal of Computational Chemistry
+    volume: 24
+    number: 5
+    pages: 657-667
+    keywords:
+      - Molecular Dynamics
+      - neutron scattering
+      - memory function
+    identifiers:
+      - type: doi
+        value: 10.1002/jcc.10243
+      - type: url
+        value: https://onlinelibrary.wiley.com/doi/abs/10.1002/jcc.10243
+    year: 2003
+
+  - type: article
+    authors:
+      - name: Konrad Hinsen
+      - name: Eric Pellegrini
+      - name: Sławomir Stachura
+      - name: Gerald R. Kneller
+    title: |
+      nMoldyn 3: Using task farming for a parallel spectroscopy-oriented analysis of molecular dynamics simulations
+    journal: Journal of Computational Chemistry
+    volume: 33
+    number: 25
+    pages: 2043-2048
+    keywords:
+      - parallel computing
+      - task farming
+      - time series analysis
+      - theoretical spectroscopy
+      - molecular simulation
+    identifiers:
+      - type: doi
+        value: 10.1002/jcc.23035
+      - type: url
+        value: https://onlinelibrary.wiley.com/doi/abs/10.1002/jcc.23035
+    year: 2012

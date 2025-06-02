@@ -257,7 +257,7 @@ class ChemicalSystem:
         try:
             grp.create_dataset("atom_types", data=self._atom_types, dtype=string_dt)
         except TypeError:
-            print(f"Bad array: {self._atom_types}")
+            LOG.error(f"Bad array: {self._atom_types}")
             import sys
 
             sys.exit(1)
@@ -265,7 +265,7 @@ class ChemicalSystem:
             try:
                 grp.create_dataset("atom_names", data=self._atom_names, dtype=string_dt)
             except TypeError:
-                print(f"Bad array: {self._atom_names}")
+                LOG.error(f"Bad array: {self._atom_names}")
                 import sys
 
                 sys.exit(1)

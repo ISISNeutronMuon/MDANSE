@@ -4,7 +4,7 @@ import os
 import pytest
 
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 short_traj = os.path.join(
@@ -30,7 +30,7 @@ traj_2vb1 = os.path.join(
 
 @pytest.fixture(scope='module')
 def trajectory(request):
-   return HDFTrajectoryInputData(request.param)
+   return Trajectory(request.param)
 
 
 @pytest.mark.parametrize("trajectory", [short_traj, mdmc_traj, com_traj], indirect=True)
@@ -38,7 +38,7 @@ def test_select_all(trajectory):
     n_atoms = len(trajectory.chemical_system.atom_list)
     reusable_selection = ReusableSelection()
     reusable_selection.set_selection(number=None, function_parameters={'function_name': 'select_all'})
-    selection = reusable_selection.select_in_trajectory(trajectory.trajectory)
+    selection = reusable_selection.select_in_trajectory(trajectory)
     assert len(selection) == n_atoms
 
 
@@ -47,7 +47,7 @@ def test_empty_json_string_selects_all(trajectory):
     n_atoms = len(trajectory.chemical_system.atom_list)
     reusable_selection = ReusableSelection()
     reusable_selection.load_from_json('{}')
-    selection = reusable_selection.select_in_trajectory(trajectory.trajectory)
+    selection = reusable_selection.select_in_trajectory(trajectory)
     assert len(selection) == n_atoms
 
 
@@ -55,7 +55,7 @@ def test_empty_json_string_selects_all(trajectory):
 def test_select_none(trajectory):
     reusable_selection = ReusableSelection()
     reusable_selection.set_selection(number=None, function_parameters={'function_name': 'select_none'})
-    selection = reusable_selection.select_in_trajectory(trajectory.trajectory)
+    selection = reusable_selection.select_in_trajectory(trajectory)
     assert len(selection) == 0
 
 
@@ -64,7 +64,7 @@ def test_inverted_all_is_none(trajectory):
     reusable_selection = ReusableSelection()
     reusable_selection.set_selection(number=None, function_parameters={'function_name': 'select_all'})
     reusable_selection.set_selection(number=None, function_parameters={'function_name': 'invert_selection'})
-    selection = reusable_selection.select_in_trajectory(trajectory.trajectory)
+    selection = reusable_selection.select_in_trajectory(trajectory)
     assert len(selection) == 0
 
 
@@ -84,11 +84,11 @@ def test_selection_from_json_is_the_same_as_from_runtime(trajectory):
     reusable_selection = ReusableSelection()
     reusable_selection.set_selection(number=None, function_parameters={'function_name': 'select_all'})
     reusable_selection.set_selection(number=None, function_parameters={'function_name': 'invert_selection'})
-    selection = reusable_selection.select_in_trajectory(trajectory.trajectory)
+    selection = reusable_selection.select_in_trajectory(trajectory)
     json_string = reusable_selection.convert_to_json()
     another_selection = ReusableSelection()
     another_selection.load_from_json(json_string)
-    selection2 = another_selection.select_in_trajectory(trajectory.trajectory)
+    selection2 = another_selection.select_in_trajectory(trajectory)
     print(f"original: {reusable_selection.operations}")
     print(f"another: {another_selection.operations}")
     assert selection == selection2
@@ -122,7 +122,7 @@ def test_select_atoms_selects_by_element(trajectory, element, expected):
 def test_select_atoms_selects_by_range(trajectory, index_range, expected):
     reusable_selection = ReusableSelection()
     reusable_selection.set_selection(number=None, function_parameters={'function_name': 'select_atoms', 'index_range': index_range})
-    range_selection = reusable_selection.select_in_trajectory(trajectory.trajectory)
+    range_selection = reusable_selection.select_in_trajectory(trajectory)
     assert len(range_selection) == expected
 
 
@@ -134,12 +134,12 @@ def test_select_atoms_selects_by_range(trajectory, index_range, expected):
 def test_select_atoms_selects_by_slice(trajectory, index_slice, expected):
     reusable_selection = ReusableSelection()
     reusable_selection.set_selection(number=None, function_parameters={'function_name': 'select_atoms', 'index_slice': index_slice})
-    range_selection = reusable_selection.select_in_trajectory(trajectory.trajectory)
+    range_selection = reusable_selection.select_in_trajectory(trajectory)
     assert len(range_selection) == expected
     json_string = reusable_selection.convert_to_json()
     another_selection = ReusableSelection()
     another_selection.load_from_json(json_string)
-    overshoot_selection = another_selection.select_in_trajectory(trajectory.trajectory)
+    overshoot_selection = another_selection.select_in_trajectory(trajectory)
     assert len(overshoot_selection) == expected
 
 
@@ -151,12 +151,12 @@ def test_select_atoms_selects_by_slice(trajectory, index_slice, expected):
 def test_select_molecules_selects_water(trajectory, molecule_names, expected):
     reusable_selection = ReusableSelection()
     reusable_selection.set_selection(number=None, function_parameters={'function_name': 'select_molecules', 'molecule_names': molecule_names})
-    first_selection = reusable_selection.select_in_trajectory(trajectory.trajectory)
+    first_selection = reusable_selection.select_in_trajectory(trajectory)
     assert len(first_selection) == expected
     json_string = reusable_selection.convert_to_json()
     another_selection = ReusableSelection()
     another_selection.load_from_json(json_string)
-    second_selection = another_selection.select_in_trajectory(trajectory.trajectory)
+    second_selection = another_selection.select_in_trajectory(trajectory)
     assert len(second_selection) == expected
 
 
@@ -168,7 +168,7 @@ def test_select_molecules_inverted_selects_ions(trajectory):
     json_string = reusable_selection.convert_to_json()
     another_selection = ReusableSelection()
     another_selection.load_from_json(json_string)
-    non_molecules_selection = another_selection.select_in_trajectory(trajectory.trajectory)
+    non_molecules_selection = another_selection.select_in_trajectory(trajectory)
     assert all([trajectory.chemical_system.atom_list[index] in ['Na', 'Cl'] for index in non_molecules_selection])
 
 
@@ -179,7 +179,7 @@ def test_select_pattern_selects_water(trajectory):
     json_string = reusable_selection.convert_to_json()
     another_selection = ReusableSelection()
     another_selection.load_from_json(json_string)
-    water_selection = another_selection.select_in_trajectory(trajectory.trajectory)
+    water_selection = another_selection.select_in_trajectory(trajectory)
     assert len(water_selection) == 28746
 
 
@@ -197,5 +197,5 @@ def test_selection_with_multiple_steps(trajectory):
     json_string = reusable_selection.convert_to_json()
     another_selection = ReusableSelection()
     another_selection.load_from_json(json_string)
-    water_oxygen_selection = another_selection.select_in_trajectory(trajectory.trajectory)
+    water_oxygen_selection = another_selection.select_in_trajectory(trajectory)
     assert len(water_oxygen_selection) == int(28746/3)

@@ -133,22 +133,23 @@ class XRayStaticStructureFactor(DistanceHistogram):
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for pair in self._elementsPairs:
             pair_str = "".join(map(str, pair))
+            if self.indices_intra is not None:
+                self._outputData.add(
+                    f"xssf_intra_{pair_str}",
+                    "LineOutputVariable",
+                    (nq,),
+                    axis="q",
+                    units="au",
+                )
+                self._outputData.add(
+                    f"xssf_inter_{pair_str}",
+                    "LineOutputVariable",
+                    (nq,),
+                    axis="q",
+                    units="au",
+                )
             self._outputData.add(
-                f"xssf_intra_{pair_str}",
-                "LineOutputVariable",
-                (nq,),
-                axis="q",
-                units="au",
-            )
-            self._outputData.add(
-                f"xssf_inter_{pair_str}",
-                "LineOutputVariable",
-                (nq,),
-                axis="q",
-                units="au",
-            )
-            self._outputData.add(
-                f"xssf_total_{pair_str}",
+                f"xssf_{pair_str}",
                 "LineOutputVariable",
                 (nq,),
                 axis="q",
@@ -167,39 +168,48 @@ class XRayStaticStructureFactor(DistanceHistogram):
                 nij = ni**2 / 2.0
             else:
                 nij = ni * nj
-                self.hIntra[idi, idj] += self.hIntra[idj, idi]
-                self.hInter[idi, idj] += self.hInter[idj, idi]
+                if self.indices_intra is not None:
+                    self.h_intra[idi, idj] += self.h_intra[idj, idi]
+                self.h_total[idi, idj] += self.h_total[idj, idi]
 
             fact = 2 * nij * nFrames * shellVolumes
+            if self.indices_intra is not None:
+                pdfIntra = self.h_intra[idi, idj, :] / fact
+                pdfTotal = self.h_total[idi, idj, :] / fact
+                pdfInter = pdfTotal - pdfIntra
 
-            pdfIntra = self.hIntra[idi, idj, :] / fact
-            pdfInter = self.hInter[idi, idj, :] / fact
-
-            self._outputData[f"xssf_intra_{pair_str}"][:] = (
-                fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr
+                self._outputData[f"xssf_intra_{pair_str}"][:] = (
+                    fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr
+                )
+                self._outputData[f"xssf_inter_{pair_str}"][:] = (
+                    1.0
+                    + fact1 * np.sum((r**2) * (pdfInter - 1.0) * sincqr, axis=1) * dr
+                )
+                self._outputData[f"xssf_{pair_str}"][:] = (
+                    self._outputData[f"xssf_intra_{pair_str}"][:]
+                    + self._outputData[f"xssf_inter_{pair_str}"][:]
+                )
+            else:
+                pdfTotal = self.h_total[idi, idj, :] / fact
+                self._outputData[f"xssf_{pair_str}"][:] = (
+                    1.0
+                    + fact1 * np.sum((r**2) * (pdfTotal - 1.0) * sincqr, axis=1) * dr
+                )
+        if self.indices_intra is not None:
+            self._outputData.add(
+                "xssf_intra_total",
+                "LineOutputVariable",
+                (nq,),
+                axis="q",
+                units="au",
             )
-            self._outputData[f"xssf_inter_{pair_str}"][:] = (
-                1.0 + fact1 * np.sum((r**2) * (pdfInter - 1.0) * sincqr, axis=1) * dr
+            self._outputData.add(
+                "xssf_inter_total",
+                "LineOutputVariable",
+                (nq,),
+                axis="q",
+                units="au",
             )
-            self._outputData[f"xssf_total_{pair_str}"][:] = (
-                self._outputData[f"xssf_intra_{pair_str}"][:]
-                + self._outputData[f"xssf_inter_{pair_str}"][:]
-            )
-
-        self._outputData.add(
-            "xssf_intra",
-            "LineOutputVariable",
-            (nq,),
-            axis="q",
-            units="au",
-        )
-        self._outputData.add(
-            "xssf_inter",
-            "LineOutputVariable",
-            (nq,),
-            axis="q",
-            units="au",
-        )
         self._outputData.add(
             "xssf_total",
             "LineOutputVariable",
@@ -221,21 +231,27 @@ class XRayStaticStructureFactor(DistanceHistogram):
             for k in list(nAtomsPerElement.keys())
         )
         weight_dict = get_weights(asf, nAtomsPerElement, 2)
-        assign_weights(self._outputData, weight_dict, "xssf_intra_%s%s")
-        assign_weights(self._outputData, weight_dict, "xssf_inter_%s%s")
-        assign_weights(self._outputData, weight_dict, "xssf_total_%s%s")
-        xssfIntra = weighted_sum(self._outputData, weight_dict, "xssf_intra_%s%s")
-        self._outputData["xssf_intra"][:] = xssfIntra
+        if self.indices_intra is not None:
+            assign_weights(self._outputData, weight_dict, "xssf_intra_%s%s")
+            assign_weights(self._outputData, weight_dict, "xssf_inter_%s%s")
+            assign_weights(self._outputData, weight_dict, "xssf_%s%s")
+            xssfIntra = weighted_sum(self._outputData, weight_dict, "xssf_intra_%s%s")
+            self._outputData["xssf_intra_total"][:] = xssfIntra
 
-        xssfInter = weighted_sum(self._outputData, weight_dict, "xssf_inter_%s%s")
-        self._outputData["xssf_inter"][:] = xssfInter
+            xssfInter = weighted_sum(self._outputData, weight_dict, "xssf_inter_%s%s")
+            self._outputData["xssf_inter_total"][:] = xssfInter
 
-        self._outputData["xssf_total"][:] = xssfIntra + xssfInter
+            self._outputData["xssf_total"][:] = xssfIntra + xssfInter
+        else:
+            assign_weights(self._outputData, weight_dict, "xssf_%s%s")
+            self._outputData["xssf_total"][:] = weighted_sum(
+                self._outputData, weight_dict, "xssf_%s%s"
+            )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
-            self._info,
+            str(self),
             self,
         )
 

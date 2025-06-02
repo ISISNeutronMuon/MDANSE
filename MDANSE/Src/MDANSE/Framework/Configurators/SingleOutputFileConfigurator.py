@@ -111,20 +111,6 @@ class SingleOutputFileConfigurator(IConfigurator):
         """
         return self._format
 
-    def get_information(self):
-        """
-        Returns string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-        try:
-            info = f"Output file: {self['file']}\n"
-        except KeyError:
-            info = "Output file has not been configured"
-
-        return info
-
     @property
     def default(self) -> tuple[str, str]:
         """

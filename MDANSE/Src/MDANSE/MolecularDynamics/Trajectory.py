@@ -48,6 +48,8 @@ class Trajectory:
         self._format = trajectory_format
         if self._format is None:
             self.guess_correct_format()
+        if self._format is None:
+            self._format = 'MDANSE'
         self._trajectory = self.open_trajectory(self._format)
         self._min_span = np.zeros(3)
         self._max_span = np.zeros(3)

@@ -48,10 +48,72 @@ def test_prefixes(prefix):
     assert m.toval(f"{prefix}s") == pytest.approx(val / _PREFIXES[prefix])
 
 @pytest.mark.parametrize("from_, equivalent, to, expected", [
+    # speed unit conversions
     ((1., "m/s"), False, "km/h", nullcontext(3.6)),
+
+    # energy unit conversion
     ((1., "eV"), False, "THz", pytest.raises(UnitError)),
     ((1., "eV"), True, "THz", nullcontext(241.799)),
     ((1., "eV"), True, "K", nullcontext(11604.52)),
+    # energy unit conversion values taken from
+    # https://wild.life.nctu.edu.tw/class/common/energy-unit-conv-table-detail.html
+    ((1., "eV"), True, "eV", nullcontext(1)),
+    ((1., "eV"), True, "1/cm", nullcontext(8065.54)),
+    ((1., "eV"), True, "kcal/mol", nullcontext(23.060548)),
+    ((1., "eV"), True, "kJ/mol", nullcontext(96.485332)),
+    ((1., "eV"), True, "K", nullcontext(11604.51)),  # actual value from reference is 11604.5
+    ((1., "eV"), True, "J", nullcontext(1.60217663e-19)),
+    ((1., "eV"), True, "Hz", nullcontext(2.41798924e14)),
+    ((1., "1/cm"), True, "eV", nullcontext(1.23984198e-4)),
+    ((1., "1/cm"), True, "1/cm", nullcontext(1)),
+    ((1., "1/cm"), True, "kcal/mol", nullcontext(0.002859153)), # actual value from reference is 0.00285914
+    ((1., "1/cm"), True, "kJ/mol", nullcontext(0.0119627)),
+    ((1., "1/cm"), True, "K", nullcontext(1.438777)),
+    ((1., "1/cm"), True, "J", nullcontext(1.98644586e-23)),
+    ((1., "1/cm"), True, "Hz", nullcontext(2.99792458e10)),
+    ((1., "kcal/mol"), True, "eV", nullcontext(0.0433641)),
+    ((1., "kcal/mol"), True, "1/cm", nullcontext(349.7538)), # actual value from reference is 349.755
+    ((1., "kcal/mol"), True, "kcal/mol", nullcontext(1)),
+    ((1., "kcal/mol"), True, "kJ/mol", nullcontext(4.184)),
+    ((1., "kcal/mol"), True, "K", nullcontext(503.226)), # actual value from reference is 503.220
+    ((1., "kcal/mol"), True, "J", nullcontext(6.94769546e-21)),
+    ((1., "kcal/mol"), True, "Hz", nullcontext(1.04853938e+13)),
+    ((1., "kJ/mol"), True, "eV", nullcontext(0.01036427)), # actual value from reference is 0.0103643
+    ((1., "kJ/mol"), True, "1/cm", nullcontext(83.5931)), # actual value from reference is 83.59347
+    ((1., "kJ/mol"), True, "kcal/mol", nullcontext(0.2390057)), # actual value from reference is 0.239006
+    ((1., "kJ/mol"), True, "kJ/mol", nullcontext(1)),
+    ((1., "kJ/mol"), True, "K", nullcontext(120.2739)), # actual value from reference is 120.2724
+    ((1., "kJ/mol"), True, "J", nullcontext(1.66053907e-21)),
+    ((1., "kJ/mol"), True, "Hz", nullcontext(2.5060692e12)),
+    ((1., "K"), True, "eV", nullcontext(0.0000861733)),
+    ((1., "K"), True, "1/cm", nullcontext(0.695035)),
+    ((1., "K"), True, "kcal/mol", nullcontext(0.001987177)), # actual value from reference is 0.00198720
+    ((1., "K"), True, "kJ/mol", nullcontext(0.00831435)), # actual value from reference is 0.00831446
+    ((1., "K"), True, "K", nullcontext(1)),
+    ((1., "K"), True, "J", nullcontext(1.38064900e-23)),
+    ((1., "K"), True, "Hz", nullcontext(2.08366191e10)),
+    ((1., "J"), True, "eV", nullcontext(6.24150907e18)),
+    ((1., "J"), True, "1/cm", nullcontext(5.03411657e22)),
+    ((1., "J"), True, "kcal/mol", nullcontext(1.43932619e20)),
+    ((1., "J"), True, "kJ/mol", nullcontext(6.02214076e20)),
+    ((1., "J"), True, "K", nullcontext(7.24297052e22)),
+    ((1., "J"), True, "J", nullcontext(1)),
+    ((1., "J"), True, "Hz", nullcontext(1.50919018e33)),
+    ((1., "Hz"), True, "eV", nullcontext(4.13566770e-15)),
+    ((1., "Hz"), True, "1/cm", nullcontext(3.33564095e-11)),
+    ((1., "Hz"), True, "kcal/mol", nullcontext(9.53707627e-14)),
+    ((1., "Hz"), True, "kJ/mol", nullcontext(3.99031271e-13)),
+    ((1., "Hz"), True, "K", nullcontext(4.79924307e-11)),
+    ((1., "Hz"), True, "J", nullcontext(6.62607015e-34)),
+    ((1., "Hz"), True, "Hz", nullcontext(1)),
+
+    # named unit conversions
+    ((1., "kcal/mol"), True, "kcal_per_mole", nullcontext(1)),
+    ((1., "kJ/mol"), True, "kJ_per_mole", nullcontext(1)),
+    ((1., "1/nm"), True, "inv_nm", nullcontext(1)),
+
+    # force unit conversions
+    ((1., "kJ/ang mol"), True, "J/m", nullcontext(1.66053892103219e-11)),
 ])
 def test_conversion(from_, equivalent, to, expected):
     m = measure(*from_, equivalent=equivalent)

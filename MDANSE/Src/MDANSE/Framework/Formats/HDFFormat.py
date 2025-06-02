@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Union
 
 import h5py
+import json
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Formats.IFormat import IFormat
@@ -26,6 +27,103 @@ from MDANSE.MLogging import LOG
 if TYPE_CHECKING:
     from MDANSE.Framework.Jobs.IJob import IJob
     from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
+
+
+json_decoder = json.decoder.JSONDecoder()
+
+
+def check_metadata(hdf5_file: h5py.File) -> dict[str, str]:
+    """Extract metadata from an MDANSE HDF5 file.
+
+    Parameters
+    ----------
+    hdf5_file : h5py.File
+        MDANSE output file, .mda or .mdt
+
+    Returns
+    -------
+    dict[str, str]
+        dictionary of saved input information used to create the file
+
+    """
+    meta_dict = {}
+
+    def put_into_dict(name: str, obj: bytes):
+        """Put an entry from an HDF5 dataset into a dictionary, as string.
+
+        This helper function is used together with the visititems method
+        of HDF5 datasets, provided by h5py. It will be called for each
+        dataset in the 'metadata' group, and it will try to convert
+        the contents of that dataset to string, which will then be stored
+        in the meta_dict dictionary.
+
+        Parameters
+        ----------
+        name : str
+            name (key) of the dataset from an HDF5 group
+        obj : bytes
+            contents of the dataset (text stored as 'bytes')
+        """
+        try:
+            string = obj[:][0]
+        except TypeError:
+            try:
+                string = obj[0]
+            except TypeError:
+                return
+        try:
+            string = string.decode()
+        except KeyError:
+            LOG.debug(f"Decode failed for {name}: {obj}")
+            meta_dict[name] = str(obj)
+        else:
+            try:
+                meta_dict[name] = json_decoder.decode(string)
+            except ValueError:
+                meta_dict[name] = string
+
+    try:
+        meta = hdf5_file["metadata"]
+    except KeyError:
+        return
+    else:
+        meta.visititems(put_into_dict)
+
+    meta_dict["<b>file header</b>"] = "\n" + hdf5_file.attrs.get("header", "no header")
+
+    return meta_dict
+
+
+def write_metadata(job: "IJob", output_file: h5py.File):
+    """Save parameters of IJob in the output file.
+
+    Parameters
+    ----------
+    job : IJob
+        IJob instance, typically Converter
+    output_file : h5py.File
+        an open HDF5 file, typically .mdt
+
+    """
+    string_dt = h5py.special_dtype(vlen=str)
+    meta = output_file.create_group("metadata")
+    meta.create_dataset(
+        "task_name", (1,), data=str(job.__class__.__name__), dtype=string_dt
+    )
+    meta.create_dataset(
+        "MDANSE_version",
+        (1,),
+        data=str(metadata.version("MDANSE")),
+        dtype=string_dt,
+    )
+
+    inputs = job.output_configuration()
+
+    if inputs is not None:
+        LOG.info(inputs)
+        dgroup = meta.create_group("inputs")
+        for key, value in inputs.items():
+            dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
 
 
 class HDFFormat(IFormat):

@@ -510,8 +510,10 @@ class PositionSelection(BasicSelectionWidget):
 
         """
         self._viewer = molecular_viewer
-        self._lower_limit = np.zeros(3)
-        self._upper_limit = np.linalg.norm(trajectory.unit_cell(0)._unit_cell, axis=1)
+        temp_coordinates = trajectory.coordinates(0)
+        self._lower_limit = np.min(temp_coordinates, axis=0)
+        self._upper_limit = np.max(temp_coordinates, axis=0)
+
         self._current_lower_limit = self._lower_limit.copy()
         self._current_upper_limit = self._upper_limit.copy()
         super().__init__(parent, widget_label)
@@ -589,8 +591,9 @@ class SphereSelection(BasicSelectionWidget):
 
         """
         self._viewer = molecular_viewer
-        self._current_sphere_centre = np.diag(trajectory.unit_cell(0)._unit_cell) * 0.5
-        self._current_sphere_radius = np.min(self._current_sphere_centre)
+        temp_coordinates = trajectory.coordinates(0)
+        self._current_sphere_centre = np.mean(temp_coordinates, axis=0)
+        self._current_sphere_radius = round(np.min(np.std(temp_coordinates, axis=0)), 3)
         super().__init__(parent, widget_label)
 
     def add_specific_widgets(self):
@@ -603,7 +606,7 @@ class SphereSelection(BasicSelectionWidget):
         )
         layout.addWidget(self._sphere_centre_input)
         layout.addWidget(QLabel("Sphere radius (nm)"))
-        self._sphere_radius_input = QLineEdit("0.5", self)
+        self._sphere_radius_input = QLineEdit(str(self._current_sphere_radius), self)
         layout.addWidget(self._sphere_radius_input)
         self._sphere_centre_input.setValidator(XYZValidator())
         self._sphere_centre_input.textChanged.connect(self.check_inputs)

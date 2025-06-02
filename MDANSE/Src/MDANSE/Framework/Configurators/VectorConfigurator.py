@@ -131,15 +131,3 @@ class VectorConfigurator(IConfigurator):
         """
 
         return self._dimension
-
-    def get_information(self):
-        """
-        Returns string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-        if "value" not in self:
-            return "Not configured yet\n"
-
-        return f"Value: {self['value']!r}\n"

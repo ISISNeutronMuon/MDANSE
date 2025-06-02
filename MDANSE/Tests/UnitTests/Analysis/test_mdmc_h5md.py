@@ -4,7 +4,7 @@ import pytest
 
 import numpy as np
 import h5py
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.paths import RESULTS_DIR, CONV_DIR
 from test_helpers.compare_hdf5 import compare_hdf5
@@ -13,17 +13,17 @@ short_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
 
 @pytest.fixture(scope="module")
 def trajectory():
-    trajectory = HDFTrajectoryInputData(short_traj)
+    trajectory = Trajectory(short_traj)
     yield trajectory
 
 
 @pytest.mark.parametrize("interp_order", [1, 3])
 def test_h5md_temperature(tmp_path, trajectory, interp_order):
-    pos = trajectory._data.coordinates(0)
+    pos = trajectory.coordinates(0)
 
     print(f"Coordinates span: {pos.min()}, {pos.max()}")
-    print(f"Trajectory length: {len(trajectory.trajectory)}")
-    print(f"Positions array shape: {trajectory.trajectory.variable('position').shape}")
+    print(f"Trajectory length: {len(trajectory)}")
+    print(f"Positions array shape: {trajectory.variable('position').shape}")
 
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")

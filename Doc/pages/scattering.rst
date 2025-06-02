@@ -310,12 +310,12 @@ intermediate scattering function is a weighted sum of the partial term
 .. math::
    :label: disf1
 
-    S_{\text{inc}}(\mathbf{q},\omega) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} S_{\text{coh},\alpha\beta}(\mathbf{q},\omega),
+    S_{\text{inc}}(\mathbf{q},\omega) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} S_{\text{inc},\alpha\beta}(\mathbf{q},\omega),
 
 .. math::
    :label: disf2
 
-    F_{\text{inc}}(\mathbf{q},t) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} F_{\text{coh},\alpha\beta}(\mathbf{q},t)
+    F_{\text{inc}}(\mathbf{q},t) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} F_{\text{inc},\alpha\beta}(\mathbf{q},t)
 
 where
 

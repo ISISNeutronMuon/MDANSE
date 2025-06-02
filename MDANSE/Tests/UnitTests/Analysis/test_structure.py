@@ -1,5 +1,7 @@
 import numpy as np
 import pytest
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import van_hove_distinct
 from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
@@ -8,7 +10,7 @@ short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 mdmc_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
 com_traj = CONV_DIR / "com_trajectory.mdt"
 nonorth_traj = CONV_DIR / "nonorthogonal_cell.mdt"
-
+molecule_traj = CONV_DIR / "named_molecules.mdt"
 
 ################################################################
 # Job parameters                                               #
@@ -45,6 +47,7 @@ def parameters():
     ("short_traj", short_traj),
     ("mdmc_traj", mdmc_traj),
     ("com_traj", com_traj),
+    ("mol_traj", molecule_traj),
 ], ids=lambda x: x[0])
 @pytest.mark.parametrize("job_info", [
         ("SolventAccessibleSurface", ["sas"]),
@@ -118,4 +121,33 @@ def test_pdf_is_zero_at_low_distances(
     banned_range = y_axis[np.where(x_axis<0.05)]
     assert np.allclose(banned_range, 0.0)
 
+
+def test_vhd():
+    temp_cell = UnitCell(2*np.eye(3))
+    coords1 = np.array([[0.1, 0.1, 0.1],
+                        [0.0,0.0,0.0],
+                        [0.2,0.0,0.0],
+                        [0.1,0.2,0.0],
+                        [0.2,0.2,0.2],
+                        [0.0,0.0,0.2]])
+    coords2 = coords1 + np.array([0.0, 0.5, 0.0])
+    frac_coords1 = coords1 @ temp_cell.inverse
+    frac_coords2 = coords2 @ temp_cell.inverse
+    intra, total = van_hove_distinct(2*np.eye(3),
+                      np.array([0, 1, 1, -3, 1, -5], dtype=int),
+                      np.array([0,0,0,0,0,0], dtype=int),
+                      np.zeros((1,1,30)),
+                      np.zeros((1,1,30)),
+                      frac_coords1,
+                      frac_coords2,
+                      0.0,
+                      0.05,)
+    expected_intra = np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,2.0,
+                               0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,
+                               0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.])
+    expected_inter = np.array([0.0,0.0,0.0,0.0,0.0,0.0,2.0,2.0,5.0,0.0,4.0,
+                               2.0,5.0,0.0,4.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+                               0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.])
+    np.testing.assert_almost_equal(intra[0,0,:], expected_intra, decimal=3, err_msg="Failed at intra")
+    np.testing.assert_almost_equal(total[0,0,:]-intra[0,0,:], expected_inter, decimal=3, err_msg="Failed at inter")
     

@@ -656,18 +656,3 @@ epsilon = Tensor(
         [[0, 1, 0], [-1, 0, 0], [0, 0, 0]],
     ]
 )
-
-if __name__ == "__main__":
-    # axis = Vector(1., -2., 1.).normal()
-    # phi = 0.2
-    # sin_phi_2 = np.sin(0.5*phi)
-    # cos_phi_2 = np.cos(0.5*phi)
-    # quat = Quaternion(cos_phi_2, sin_phi_2*axis[0],
-    #                   sin_phi_2*axis[1], sin_phi_2*axis[2])
-    # rot = quat.asRotation()
-    # print(rot.axisAndAngle())
-
-    v = Vector(1.0, 2.0, 3.0)
-    e1 = Vector(1.0, 0.0, 0.0)
-    e2 = (v * e1) * e1
-    print(isinstance(e2, Vector))

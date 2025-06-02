@@ -138,15 +138,3 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
             atom = atom.parent
 
         return atom
-
-    def get_information(self):
-        """
-        Returns some informations about this configurator.
-
-        :return: the information about this configurator
-        :rtype: str
-        """
-        if "value" not in self:
-            return "Not configured yet\n"
-
-        return f"Grouping level: {self['value']!r}\n"

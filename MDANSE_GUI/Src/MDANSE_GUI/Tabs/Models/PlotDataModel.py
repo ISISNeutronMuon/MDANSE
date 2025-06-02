@@ -21,6 +21,7 @@ import h5py
 from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
+from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Session.LocalSession import json_decoder
@@ -92,7 +93,7 @@ class DataFileItem(BasicPlotDataItem):
 class MDADataStructure:
     def __init__(self, filename: str):
         self._file = h5py.File(filename)
-        self.check_metadata()
+        self._metadata = check_metadata(self._file)
         self.find_information()
 
     def close(self):
@@ -103,36 +104,6 @@ class MDADataStructure:
         self._components = []
         self._axis_datasets = []
         self._supporting_datasets = []
-
-    def check_metadata(self):
-        meta_dict = {}
-
-        def put_into_dict(name, obj):
-            try:
-                string = obj[:][0]
-            except TypeError:
-                try:
-                    string = obj[0]
-                except TypeError:
-                    return
-            try:
-                string = string.decode()
-            except KeyError:
-                LOG.debug(f"Decode failed for {name}: {obj}")
-                meta_dict[name] = str(obj)
-            else:
-                try:
-                    meta_dict[name] = json_decoder.decode(string)
-                except ValueError:
-                    meta_dict[name] = string
-
-        try:
-            meta = self._file["metadata"]
-        except KeyError:
-            return
-        else:
-            meta.visititems(put_into_dict)
-        self._metadata = meta_dict
 
 
 class PlotDataModel(QStandardItemModel):

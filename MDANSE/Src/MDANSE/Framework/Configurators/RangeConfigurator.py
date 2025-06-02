@@ -201,24 +201,3 @@ class RangeConfigurator(IConfigurator):
         """
 
         return self._maxi
-
-    def get_information(self):
-        """
-        Returns string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-
-        if self._valid:
-            info = f"{self['number']:d} values from {self['first']} to {self['last']}"
-
-            if self._includeLast:
-                info += " last value included"
-            else:
-                info += " last value excluded"
-
-            return info + "\n"
-
-        else:
-            return "Invalid input parameters\n"

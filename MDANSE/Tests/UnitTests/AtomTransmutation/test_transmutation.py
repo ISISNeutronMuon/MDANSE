@@ -1,7 +1,7 @@
 from contextlib import nullcontext as success
 
 import pytest
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.Framework.Configurators.AtomTransmutationConfigurator import AtomTransmuter
 from test_helpers.paths import CONV_DIR
 
@@ -10,8 +10,8 @@ traj_2vb1 = CONV_DIR / "2vb1.mdt"
 
 @pytest.fixture(scope="module")
 def protein_trajectory():
-    protein_trajectory = HDFTrajectoryInputData(traj_2vb1)
-    return protein_trajectory.trajectory
+    protein_trajectory = Trajectory(traj_2vb1)
+    return protein_trajectory
 
 @pytest.mark.parametrize("transmutations, expected", [
     ((), success({})),

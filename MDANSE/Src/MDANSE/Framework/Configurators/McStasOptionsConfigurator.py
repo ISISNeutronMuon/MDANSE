@@ -96,15 +96,3 @@ class McStasOptionsConfigurator(IConfigurator):
 
         self["value"] = tmp
         self.error_status = "OK"
-
-    def get_information(self):
-        """
-        Returns the McStas options as they would be input when using McStas in command line mode.
-
-        :return: the McStas command-line options.
-        :rtype: str
-        """
-        if "value" not in self:
-            return "Not configured yet\n"
-
-        return f"McStas command line options: {self['value']}\n"

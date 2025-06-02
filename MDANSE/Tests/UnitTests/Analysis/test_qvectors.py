@@ -5,7 +5,7 @@ import pytest
 
 import numpy as np
 
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -16,7 +16,7 @@ short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
 @pytest.fixture(scope="module")
 def trajectory():
-    trajectory = HDFTrajectoryInputData(short_traj)
+    trajectory = Trajectory(short_traj)
     yield trajectory
 
 
@@ -35,9 +35,9 @@ def test_qvectors_for_nonorthogonal_cell():
 
 @pytest.mark.parametrize("qvector_generator", IQVectors.indirect_subclasses())
 def test_qvector_to_hkl_conversion(trajectory, qvector_generator):
-    instance = IQVectors.create(qvector_generator, trajectory.trajectory.configuration(0))
+    instance = IQVectors.create(qvector_generator, trajectory.configuration(0))
     instance.setup({"shells": (5.0, 50.0, 10.0)})
-    unit_cell = trajectory.trajectory.unit_cell(0)
+    unit_cell = trajectory.unit_cell(0)
     instance.generate()
     try:
         instance._configuration["shells"]
@@ -73,7 +73,7 @@ def test_disf(tmp_path, trajectory, qvector_generator):
         "weights": "b_incoherent2",
     }
 
-    instance = IQVectors.create(qvector_generator, trajectory._data.configuration())
+    instance = IQVectors.create(qvector_generator, trajectory.configuration())
     qvector_defaults = {
         name: value[1]["default"] for name, value in instance.settings.items()
     }
