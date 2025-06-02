@@ -63,7 +63,7 @@ DEFAULT_SPINBOX_MAX_FLOAT = 1000.0
 DEFAULT_SPINBOX_STEP_FLOAT = 0.1
 
 # Decimal precision for a float spinbox
-FLOAT_SPINBOX_DECIMALS = 4
+FLOAT_SPINBOX_DECIMALS = 8
 
 
 class ConstrainedDoubleSpinBox(QDoubleSpinBox):
@@ -1238,7 +1238,7 @@ class FilterDesigner(QDialog):
             self._figure_info.append(" ")
 
         self._figure_info.append(
-            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff, self.current_filter_units()), 3)} meV, Sample frequency: {sample_freq} THz"
+            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff, self.current_filter_units()), FLOAT_SPINBOX_DECIMALS)} meV, Sample frequency: {sample_freq} THz"
         )
 
     def render_canvas_assets(self, attributes: dict = None) -> None:
