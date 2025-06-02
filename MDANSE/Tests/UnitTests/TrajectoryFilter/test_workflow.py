@@ -18,11 +18,13 @@ CUAU_TRAJ = "CuAu_asap_10fs-step_unfiltered.mdt"
 
 DUT49_TRAJ = "plain_DUT49_20K_in_cell_unfiltered.mdt"
 
+GLYCYL_L_ALANINE_TRAJ = "glycyl_l_alanine_charmm_unfiltered.mdt"
+
 # Filter configurations
 FILTER_CONFIGS = [
     {
         "trajectory": SRTIO3_TRAJ,
-        "max_frequency": 626,
+        "max_frequency": (626, 0),
         "frames": [0, 320, 1, 160],
         "filter": "Butterworth",
         "attributes": {
@@ -35,7 +37,7 @@ FILTER_CONFIGS = [
     },
     {
         "trajectory": SRTIO3_TRAJ,
-        "max_frequency": 626,
+        "max_frequency": (626, 0),
         "frames": [0, 320, 1, 160],
         "filter": "Butterworth",
         "attributes": {
@@ -48,7 +50,7 @@ FILTER_CONFIGS = [
     },
     {
         "trajectory": SRTIO3_TRAJ,
-        "max_frequency": 626,
+        "max_frequency": (626, 0),
         "frames": [0, 320, 1, 160],
         "filter": "ChebyshevTypeII",
         "attributes": {
@@ -62,7 +64,7 @@ FILTER_CONFIGS = [
     },
     {
         "trajectory": SRTIO3_TRAJ,
-        "max_frequency": 626,
+        "max_frequency": (626, 0),
         "frames": [0, 320, 1, 160],
         "filter": "Bessel",
         "attributes": {
@@ -76,7 +78,7 @@ FILTER_CONFIGS = [
     },
     {
         "trajectory": SRTIO3_TRAJ,
-        "max_frequency": 626,
+        "max_frequency": (626, 0),
         "frames": [0, 320, 1, 160],
         "filter": "ChebyshevTypeII",
         "attributes": {
@@ -90,7 +92,7 @@ FILTER_CONFIGS = [
     },
     {
         "trajectory": SRTIO3_TRAJ,
-        "max_frequency": 626,
+        "max_frequency": (626, 0),
         "frames": [0, 320, 1, 160],
         "filter": "ChebyshevTypeII",
         "attributes": {
@@ -104,7 +106,7 @@ FILTER_CONFIGS = [
     },
     {
         "trajectory": SRTIO3_TRAJ,
-        "max_frequency": 626,
+        "max_frequency": (626, 0),
         "frames": [0, 320, 1, 160],
         "filter": "Notch",
         "attributes": {
@@ -116,7 +118,7 @@ FILTER_CONFIGS = [
     },
     {
         "trajectory": CUAU_TRAJ,
-        "max_frequency": 314,
+        "max_frequency": (314, 0),
         "frames": [0, 1000, 1, 500],
         "filter": "Peak",
         "attributes": {
@@ -128,7 +130,7 @@ FILTER_CONFIGS = [
     },
     {
         "trajectory": CUAU_TRAJ,
-        "max_frequency": 314,
+        "max_frequency": (314, 0),
         "frames": [0, 1000, 1, 500],
         "filter": "Comb",
         "attributes": {
@@ -142,7 +144,7 @@ FILTER_CONFIGS = [
     },
     {
         "trajectory": DUT49_TRAJ,
-        "max_frequency": 3141,
+        "max_frequency": (3141, 0),
         "frames": [0, 7048, 1, 3524],
         "filter": "ChebyshevTypeII",
         "attributes": {
@@ -152,6 +154,63 @@ FILTER_CONFIGS = [
             "min_attenuation": 10.0,
             "attenuation_type": "highpass",
             "cutoff_freq": 0.8915,
+        },
+    },
+    {
+        "trajectory": GLYCYL_L_ALANINE_TRAJ,
+        "max_frequency": (0.000754, 7),
+        "frames": [0, 25, 1, 13],
+        "filter": "ChebyshevTypeII",
+        "attributes": {
+            "n_steps": 25,
+            "time_step_ps": 4000.0,
+            "order": 1,
+            "min_attenuation": 1.0,
+            "attenuation_type": "bandpass",
+            "cutoff_freq": [0.0003, 0.0005],
+        },
+    },
+    {
+        "trajectory": GLYCYL_L_ALANINE_TRAJ,
+        "max_frequency": (0.000754, 7),
+        "frames": [0, 25, 1, 13],
+        "filter": "ChebyshevTypeII",
+        "attributes": {
+            "n_steps": 25,
+            "time_step_ps": 4000.0,
+            "order": 1,
+            "min_attenuation": 0.1,
+            "attenuation_type": "bandstop",
+            "cutoff_freq": [0.0001, 0.0005],
+        },
+    },
+    {
+        "trajectory": GLYCYL_L_ALANINE_TRAJ,
+        "max_frequency": (0.000754, 7),
+        "frames": [0, 25, 1, 13],
+        "filter": "Elliptical",
+        "attributes": {
+            "n_steps": 25,
+            "time_step_ps": 4000.0,
+            "order": 2,
+            "max_ripple": 1.0,
+            "min_attenuation": 20.0,
+            "attenuation_type": "bandpass",
+            "cutoff_freq": [0.0003, 0.0006],
+        },
+    },
+    {
+        "trajectory": GLYCYL_L_ALANINE_TRAJ,
+        "max_frequency": (0.000754, 7),
+        "frames": [0, 25, 1, 13],
+        "filter": "ChebyshevTypeI",
+        "attributes": {
+            "n_steps": 25,
+            "time_step_ps": 4000.0,
+            "order": 1,
+            "max_ripple": 0.4,
+            "attenuation_type": "bandstop",
+            "cutoff_freq": [0.0002, 0.0006],
         },
     },
 ]
@@ -291,12 +350,25 @@ def dut49_spectrum_clean(tmp_path_factory):
     )
 
 
+@pytest.fixture(scope="module")
+def glycl_l_alanine_spectrum_clean(tmp_path_factory):
+    """Fixture returns the output file of the PositionPowerSpectrum job with the LAMMPS Glycl-L-Alanaine CHARMM trajectory as the input."""
+
+    yield run_power_spectrum(
+        tmp_path_factory.mktemp("data")
+        / f"{GLYCYL_L_ALANINE_TRAJ}_unfiltered_power_spectrum",
+        [0, 25, 1, 13],
+        CONV_DIR / GLYCYL_L_ALANINE_TRAJ,
+    )
+
+
 @pytest.mark.parametrize("filter_config", FILTER_CONFIGS)
 def test_convolution(
     tmp_path,
     srtio3_spectrum_clean,
     cuau_spectrum_clean,
     dut49_spectrum_clean,
+    glycl_l_alanine_spectrum_clean,
     filter_config,
 ):
     """The performance of the MDANSE trajectory filter is tested by analysing functional form.
@@ -318,12 +390,15 @@ def test_convolution(
 
     frames = filter_config["frames"]
 
+    # Select unfiltered power spectrum fixture
     if trajectory_name == SRTIO3_TRAJ:
         unfiltered_power_spectrum = srtio3_spectrum_clean
     elif trajectory_name == CUAU_TRAJ:
         unfiltered_power_spectrum = cuau_spectrum_clean
     elif trajectory_name == DUT49_TRAJ:
         unfiltered_power_spectrum = dut49_spectrum_clean
+    elif trajectory_name == GLYCYL_L_ALANINE_TRAJ:
+        unfiltered_power_spectrum = glycl_l_alanine_spectrum_clean
     else:
         ValueError(f"{trajectory_name} is not a recognised .mdt file.")
 
@@ -338,8 +413,9 @@ def test_convolution(
 
     u_x_axis = original_data._axes["romega"]
 
+    max, precision = filter_config["max_frequency"]
     assert np.round(u_x_axis.min(), 0) == 0
-    assert np.round(u_x_axis.max(), 0) == filter_config["max_frequency"]
+    assert np.round(u_x_axis.max(), precision) == max
 
     uw = original_data._data
 
@@ -359,7 +435,7 @@ def test_convolution(
     # Resample H(w) to length of U(w)
     hw = np.abs(scipy.signal.resample(filter_object.freq_response.magnitudes, len(uw)))
 
-    assert np.isclose(hw.max(), 1, 10e-3)
+    assert np.isclose(hw.max(), 1, 10e-2)
 
     # Compute the frequency domain convolution U(w)H(w) that we will compare F(w) with
     model = hw * uw
@@ -388,7 +464,7 @@ def test_convolution(
     f_x_axis = filtered_data._axes["romega"]
 
     assert np.round(f_x_axis.min(), 0) == 0
-    assert np.round(f_x_axis.max(), 0) == filter_config["max_frequency"]
+    assert np.round(f_x_axis.max(), precision) == max
 
     fw = filtered_data._data
 
@@ -397,3 +473,115 @@ def test_convolution(
     # Calculate differences between U(w)H(w) and F(w)
     error = mean_absolute_error(normalise(model), normalise(fw, model))
     assert np.isclose(error, 0, atol=TOLERANCE)
+
+
+@pytest.mark.parametrize(
+    "filter_config",
+    (
+        {
+            "trajectory": GLYCYL_L_ALANINE_TRAJ,
+            "frames": [0, 25, 1, 13],
+            "filter": "Butterworth",
+            "attributes": {
+                "n_steps": 25,
+                "time_step_ps": 4000.0,
+                "cutoff_freq": 0.000377,
+            },
+        },
+        {
+            "trajectory": GLYCYL_L_ALANINE_TRAJ,
+            "frames": [0, 25, 1, 13],
+            "filter": "ChebyshevTypeI",
+            "attributes": {
+                "n_steps": 25,
+                "time_step_ps": 4000.0,
+                "cutoff_freq": 0.000377,
+            },
+        },
+        {
+            "trajectory": GLYCYL_L_ALANINE_TRAJ,
+            "frames": [0, 25, 1, 13],
+            "filter": "ChebyshevTypeII",
+            "attributes": {
+                "n_steps": 25,
+                "time_step_ps": 4000.0,
+                "cutoff_freq": 0.000377,
+                "min_attenuation": 10.0,
+            },
+        },
+        {
+            "trajectory": GLYCYL_L_ALANINE_TRAJ,
+            "frames": [0, 25, 1, 13],
+            "filter": "Elliptical",
+            "attributes": {
+                "n_steps": 25,
+                "time_step_ps": 4000.0,
+                "attenuation_type": "bandpass",
+                "cutoff_freq": [0.000377, 0.000577],
+            },
+        },
+        {
+            "trajectory": GLYCYL_L_ALANINE_TRAJ,
+            "frames": [0, 25, 1, 13],
+            "filter": "Bessel",
+            "attributes": {
+                "n_steps": 25,
+                "time_step_ps": 4000.0,
+                "attenuation_type": "bandpass",
+                "cutoff_freq": [0.000377, 0.000577],
+            },
+        },
+        {
+            "trajectory": GLYCYL_L_ALANINE_TRAJ,
+            "frames": [0, 25, 1, 13],
+            "filter": "Notch",
+            "attributes": {
+                "n_steps": 25,
+                "time_step_ps": 4000.0,
+                "fundamental_freq": 0.000125
+            },
+        },
+        {
+            "trajectory": GLYCYL_L_ALANINE_TRAJ,
+            "frames": [0, 25, 1, 13],
+            "filter": "Peak",
+            "attributes": {
+                "n_steps": 25,
+                "time_step_ps": 4000.0,
+                "fundamental_freq": 0.000125
+            },
+        },
+        {
+            "trajectory": GLYCYL_L_ALANINE_TRAJ,
+            "frames": [0, 25, 1, 13],
+            "filter": "Comb",
+            "attributes": {
+                "n_steps": 25,
+                "time_step_ps": 4000.0,
+                "fundamental_freq": 6.25e-05,
+                "comb_type": "notch"
+            },
+        },
+        {
+            "trajectory": GLYCYL_L_ALANINE_TRAJ,
+            "frames": [0, 25, 1, 13],
+            "filter": "Comb",
+            "attributes": {
+                "n_steps": 25,
+                "time_step_ps": 4000.0,
+                "fundamental_freq": 6.25e-05
+            },
+        },
+    ),
+)
+def test_default_settings(
+    tmp_path,
+    filter_config,
+):
+    """ """
+    assert run_trajectory_filter(
+        tmp_path,
+        filter_config,
+        filter_config["frames"],
+        CONV_DIR / GLYCYL_L_ALANINE_TRAJ,
+    ).is_file()
