@@ -961,7 +961,7 @@ class Notch(Filter):
         },
         "quality_factor": {
             "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
-            "value": 1.0,
+            "value": 30.0,
         },
     }
 
@@ -1014,7 +1014,7 @@ class Peak(Filter):
         },
         "quality_factor": {
             "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
-            "value": 1.0,
+            "value": 30.0,
         },
     }
 
@@ -1067,7 +1067,7 @@ class Comb(Filter):
         },
         "quality_factor": {
             "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
-            "value": 1.0,
+            "value": 30.0,
         },
         "comb_type": {
             "description": "Determines whether quality factor applies to notches or peaks",
