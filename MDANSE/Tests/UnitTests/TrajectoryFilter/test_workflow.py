@@ -583,5 +583,5 @@ def test_default_settings(
         tmp_path,
         filter_config,
         filter_config["frames"],
-        CONV_DIR / GLYCYL_L_ALANINE_TRAJ,
+        CONV_DIR / filter_config["trajectory"],
     ).is_file()
