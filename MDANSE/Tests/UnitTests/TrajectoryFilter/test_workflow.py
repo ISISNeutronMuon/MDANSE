@@ -538,7 +538,7 @@ def test_convolution(
             "attributes": {
                 "n_steps": 25,
                 "time_step_ps": 4000.0,
-                "fundamental_freq": 0.000125
+                "fundamental_freq": 0.000125,
             },
         },
         {
@@ -548,7 +548,7 @@ def test_convolution(
             "attributes": {
                 "n_steps": 25,
                 "time_step_ps": 4000.0,
-                "fundamental_freq": 0.000125
+                "fundamental_freq": 0.000125,
             },
         },
         {
@@ -559,7 +559,7 @@ def test_convolution(
                 "n_steps": 25,
                 "time_step_ps": 4000.0,
                 "fundamental_freq": 6.25e-05,
-                "comb_type": "notch"
+                "comb_type": "notch",
             },
         },
         {
@@ -569,7 +569,7 @@ def test_convolution(
             "attributes": {
                 "n_steps": 25,
                 "time_step_ps": 4000.0,
-                "fundamental_freq": 6.25e-05
+                "fundamental_freq": 6.25e-05,
             },
         },
     ),
