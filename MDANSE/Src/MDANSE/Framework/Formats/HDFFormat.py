@@ -13,9 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from importlib import metadata
 from pathlib import Path
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 import h5py
 import json
@@ -94,7 +96,7 @@ def check_metadata(hdf5_file: h5py.File) -> dict[str, str]:
     return meta_dict
 
 
-def write_metadata(job: "IJob", output_file: h5py.File):
+def write_metadata(job: IJob, output_file: h5py.File):
     """Save parameters of IJob in the output file.
 
     Parameters
@@ -107,9 +109,7 @@ def write_metadata(job: "IJob", output_file: h5py.File):
     """
     string_dt = h5py.special_dtype(vlen=str)
     meta = output_file.create_group("metadata")
-    meta.create_dataset(
-        "task_name", (1,), data=str(job.__class__.__name__), dtype=string_dt
-    )
+    meta.create_dataset("task_name", (1,), data=type(job).__name__, dtype=string_dt)
     meta.create_dataset(
         "MDANSE_version",
         (1,),
@@ -144,17 +144,17 @@ class HDFFormat(IFormat):
     @classmethod
     def write(
         cls,
-        filename: Union[Path, str],
-        data: dict[str, "IOutputVariable"],
+        filename: Path | str,
+        data: dict[str, IOutputVariable],
         header: str = "",
-        run_instance: "IJob" = None,
-        extension: str = extensions[0],
+        run_instance: IJob | None = None,
+        extension: str | None = None,
         *,
         in_memory: bool = False,
-    ) -> Union[None, h5py.File]:
+    ) -> None | h5py.File:
         """Write a set of output variables into an HDF file.
 
-        Attributes
+        Parameters
         ----------
         filename : str
             The path to the output HDF file.
@@ -167,7 +167,14 @@ class HDFFormat(IFormat):
         in_memory : bool
             if True, no file is created and the data structure is returned
 
+        Returns
+        -------
+        None | h5py.File
+            ``None`` if not ``in_memory``, otherwise the "written" datafile.
         """
+        if extension is None:
+            extension = cls.extensions[0]
+
         string_dt = h5py.special_dtype(vlen=str)
 
         if in_memory:
@@ -191,7 +198,7 @@ class HDFFormat(IFormat):
             meta.create_dataset(
                 "task_name",
                 (1,),
-                data=str(run_instance.__class__.__name__),
+                data=type(run_instance).__name__,
                 dtype=string_dt,
             )
             meta.create_dataset(
@@ -201,9 +208,7 @@ class HDFFormat(IFormat):
                 dtype=string_dt,
             )
 
-            inputs = run_instance.output_configuration()
-
-            if inputs is not None:
+            if inputs := run_instance.output_configuration():
                 LOG.info(inputs)
                 dgroup = meta.create_group("inputs")
                 for key, value in inputs.items():
@@ -211,13 +216,14 @@ class HDFFormat(IFormat):
 
         # Loop over the OutputVariable instances to write.
 
-        for var in list(data.values()):
-            varName = str(var.varname).strip().replace("/", "|")
+        for var in data.values():
+            # h5py.File.create_dataset natively supports `create_data("a/b/c", ...)` and will create parents.
+            varName = str(var.varname).strip()
 
             dset = outputFile.create_dataset(varName, data=var, shape=var.shape)
 
             # All the attributes stored in the OutputVariable instance are written to the HDF file.
-            for k, v in list(vars(var).items()):
+            for k, v in vars(var).items():
                 dset.attrs[k] = v
 
         # The HDF file is closed.

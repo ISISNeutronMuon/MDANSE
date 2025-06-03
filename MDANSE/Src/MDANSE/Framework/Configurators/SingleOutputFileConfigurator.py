@@ -87,7 +87,7 @@ class SingleOutputFileConfigurator(IConfigurator):
             )
             return
 
-        if format not in IFormat.subclasses():
+        if format not in IFormat.indirect_subclasses():
             self.error_status = f"the output file format {format} is not registered as a valid file format."
             return
 
