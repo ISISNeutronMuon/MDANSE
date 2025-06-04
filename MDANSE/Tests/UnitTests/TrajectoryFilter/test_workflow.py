@@ -488,9 +488,6 @@ def test_convolution(
     error = mean_absolute_error(
         normalise(model, numerator=100), normalise(fw, model, numerator=100)
     )
-    open("log.txt", "a").write(
-        f"Trajectory with\nNAME: {filter_config['trajectory']}\nTYPE: {filter_config['filter']}\nATTRIBUTES: {filter_config['attributes']}\nhad error of {np.round(error, 2)}% and {'PASSED' if np.isclose(error, 0, atol=TOLERANCE) else 'FAILED'}\n"
-    )
     assert np.isclose(error, 0, atol=TOLERANCE)
 
 
