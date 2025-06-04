@@ -778,8 +778,8 @@ def test_default_settings(
 )
 def test_position_stability(tmp_path, filter_config):
     """This test case ensures that atomic initial positions are preserved after filtering with a 10% tolerance to error."""
-    # Test results must satisfy a 10% tolerance to error
-    TOLERANCE = 10
+    # Test results must satisfy an 8% tolerance to error
+    TOLERANCE = 8
 
     # Unfiltered trajectory
     initial = Trajectory(CONV_DIR / filter_config["trajectory"])
@@ -801,7 +801,7 @@ def test_position_stability(tmp_path, filter_config):
     filtered_x0 = filtered._trajectory[:]["coordinates"][0]
 
     assert np.isclose(
-        normalise(initial_x0, numerator=100) - normalise(filtered_x0, numerator=100),
+        normalise(initial_x0, numerator=100) - normalise(filtered_x0, initial_x0, numerator=100),
         0,
         atol=TOLERANCE,
     ).all()
