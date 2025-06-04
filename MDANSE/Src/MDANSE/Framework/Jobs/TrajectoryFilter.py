@@ -20,7 +20,7 @@ import json
 import numpy as np
 
 import h5py
-from MDANSE.Framework.Formats import HDFFormat
+from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import FILTER_MAP
@@ -203,11 +203,12 @@ class TrajectoryFilter(IJob):
         self.configuration["trajectory"]["instance"].close()
 
         # The output trajectory is closed.
+        write_metadata(self, self._output_trajectory._h5_file)
         self._output_trajectory.close()
 
         # Write the filter metadata to output
         outputFile = h5py.File(self.configuration["output_files"]["file"], "r+")
-        outputFile.create_group("metadata").create_dataset(
+        outputFile.create_group("metadata/filter").create_dataset(
             "trajectory_filter",
             (1,),
             data=filter.__str__(),
