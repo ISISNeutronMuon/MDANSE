@@ -30,6 +30,7 @@ from MDANSE_GUI.Session.LocalSession import json_decoder
 
 
 Self = TypeVar("Self", bound="BasicPlotDataItem")
+EXCLUDE = {"metadata"}
 
 
 class BasicPlotDataItem(QStandardItem):
@@ -56,7 +57,7 @@ class BasicPlotDataItem(QStandardItem):
             return str(Path(self.data_parent.child_path) / self.text())
 
     def populate(self, data: h5py.File | h5py.Group):
-        for key in data.keys():
+        for key in data.keys() - EXCLUDE:
             try:
                 data[key]
             except Exception as e:

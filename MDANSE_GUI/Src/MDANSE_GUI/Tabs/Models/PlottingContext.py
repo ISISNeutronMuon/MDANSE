@@ -111,7 +111,7 @@ class SingleDataset:
             aname = axis_name.strip()
             if aname == "index":
                 axis_key = aname + str(ax_number)
-                self._axes[axis_key] = np.arange(len(self._data))
+                self._axes[axis_key] = np.arange(self._data.shape[ax_number])
                 self._axes_units[axis_key] = "N/A"
             else:
                 axis_key = aname
