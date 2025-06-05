@@ -4,776 +4,730 @@
 Glossary of Parameters
 =======================
 
-.. _param-frames:
-
-Frames
-~~~~~~
-
-+--------------+---------+------------------+---------------------------------------------------------+
-| Parameter    | Format  | Default Value    | Description                                             |
-+==============+=========+==================+=========================================================+
-| First frame  | int     | 0                | The frame from which the analysis will begin, the       |
-|              |         |                  | first frame taken into account.                         |
-+--------------+---------+------------------+---------------------------------------------------------+
-| Last frame   | int     | Last frame       | The frame until which the analysis proceeds. The last   |
-|              |         |                  | frame taken into account.                               |
-+--------------+---------+------------------+---------------------------------------------------------+
-| Frame step   | int     | 1                | Determines the periodicity of which steps are used      |
-|              |         |                  | and which are skipped. 1 means that all frames are      |
-|              |         |                  | read, 2 means every other is read, etc.                 |
-+--------------+---------+------------------+---------------------------------------------------------+
-
-.. _param-qshells:
-
-Q shells
-~~~~~~~~
-
-+--------------+---------+---------+--------------------------------------------------------+
-| Input        | Format  | Default | Description                                            |
-+==============+=========+=========+========================================================+
-| from         | float   | 0       | The lowest value of :math:`|Q|` to be used in Q-vector |
-|              |         |         | generation.                                            |
-+--------------+---------+---------+--------------------------------------------------------+
-| to           | float   | 10      | The highest value of :math:`|Q|` to be used in Q-vector|
-|              |         |         | generation.                                            |
-+--------------+---------+---------+--------------------------------------------------------+
-| by step of   | float   | 1       | The step by which :math:`|Q|` is incremented when      |
-|              |         |         | changing from one Q-shell to the next one. Please      |
-|              |         |         | adjust the *width* input parameter accordingly when    |
-|              |         |         | changing the step.                                     |
-+--------------+---------+---------+--------------------------------------------------------+
-
-The *unit* of the Q-vector length in MDANSE is :math:`\text{nm}^{-1}`.
-
-.. _param-output-files:
-
-Output files
-~~~~~~~~~~~~
-
-This is one of the two parameters that are present in each analysis, the
-other being :ref:`param-frames`. It usually appears at the bottom of
-an analysis window (:ref:`analysis`), right above the
-buttons. 
-
--  **output files**
-
-+---------------+---------------------------------------------------------------+
-| Output Files  |                                                               |
-+===============+===============================================================+
-|   Format:     | `str`                                                         |
-+---------------+---------------------------------------------------------------+
-|   Default:    | `trajectory_directory_path\<trajectory_filename>_             |
-|               | <analysis_acronym>`                                           |
-+---------------+---------------------------------------------------------------+
-|   Browse:     | The **Browse** button opens a system file browser window,     |
-|               | allowing the navigation of the filesystem.                    |
-+---------------+---------------------------------------------------------------+
-
-**Description:** Specifies the location where analysis results will be stored.
-It's typically composed of a directory path, the name of the HDF file being
-analyzed, and a shortened analysis acronym (e.g., "disf" for dynamic incoherent
-structure factor). If a file with the same name already exists, a unique number
-(n) is appended to avoid overwriting.
-
--  **output formats**
-
-+-------------------+------------------------------------------------------+
-| Output Formats    |                                                      |
-+-------------------+------------------------------------------------------+
-| Format            | Drop-down                                            |
-| Default           | HDF5 (for analysis), HDF (for trajectory conversion) |
-+-------------------+------------------------------------------------------+
-
-*Description:* specifies the :ref:`file_formats` in
-which the analysis results are saved. :ref:`hdf5`,
-:ref:`text_output`, or cominbations of those can be selected.
-The name of these files is given in the 'Basename' string.
-
-Creating selections
+Analysis Parameters
 ~~~~~~~~~~~~~~~~~~~
 
-There are the following Selections in MDANSE, each of which provides a
-variety of ways to alter the analysis:
-
--  :ref:`param-axis-selection`
--  :ref:`param-atom-selection`
--  :ref:`param-atom-transmutation`
--  :ref:`param-atom-charges`
--  Q Vectors (explored separately in the `next
-   section <#_A3.4._Q_vectors>`__)
-
-The ones relevant to the analysis are present in its window, but some
-can also be performed from :ref:`molecular-viewer`. By
-default, there are no Selections saved in MDANSE; they all have to be
-created manually. Each selection is unique to a trajectory HDF
-file, but all selections are stored in the same folder, $APPDATA/mdanse.
-Therefore, if a selection is to be reuse, it is important to give
-selections unique names even when creating the same selection for
-multiple trajectories. To help with that, all existing saved selection
-can be viewed in the User Definition Viewer which can be accessed from
-the `toolbar <#_Toolbar>`__. To save a selection, type a name in the
-field next to the **Save** button, and then click on the button. This
-will save the selection without closing the window.
-
-.. _param-axis-selection:
-
-Axis Selection/Reference Basis
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Inside an analysis window, Axis Selection looks like this:
-
-The drop-down menu is used to choose one of the existing definitions.
-Only the definitions with the format matching the analysis, i.e. those
-with the same number of selected atoms as the analysis expects, will
-appear. New ones can be created by clicking on the **New definition**
-button, which will open the window below. The details of the currently
-selected definition can be viewed in the User Definition Viewer by
-clicking on the **View selected definition**.
-
-When this window is opened from an analysis window, the 'Number of
-atoms' field at the top will be set to the number of atoms that must be
-selected for the selection to work in the analysis from whose window it
-was opened. The field will also not be editable. Thus, when the New
-definition button is clicked in :ref:`analysis-angular-correlation`
-analysis, the field will be set
-to 2, because that is how many it requires.
-
-The number of atoms indicates how many atoms from one molecule must be
-selected. To select an atom, click on the + button in the 'Molecules'
-list to show which atoms that molecule contains, and then double-click
-the atom. That will cause the chosen atom to appear in the 'Selected
-atoms' list, and its details in the box below. An atom can be removed
-from selection by clicking on it in the 'Selected atoms' list and
-hitting the Delete key on the keyboard.
-
-Axis selection is available for :ref:`analysis-angular-correlation`
-and :ref:`analysis-op` analyses.
-
-
-.. _param-atom-selection:
-
-Atom Selection
-^^^^^^^^^^^^^^
-
-Atom Selection allows you to select any set of atoms and/or other
-particles. These selected particles are then the ones that are made the
-target of the analysis. There is no limit to which particles can be
-included in a selection, or to how many selections can be used
-simultaneously. There can even be none; Atom Selection is entirely
-optional.
-
-Inside an analysis window, Atom Selection appears thusly:
-
-The green button adds a line for another selection, allowing you to
-choose one more selection to apply to that analysis:
-
-The line can be removed by clicking on the red button. The drop-down
-menu and the **View selected definition** button work the way they do in
-Axis Selection <link>. The **Set new selection** button opens the
-following window:
-
-The **Filter by** field contains different ways to access the various
-particles in the loaded trajectory. Clicking on a filter will make all
-the relevant particles appear in the top right box:
-
-Clicking on the particles/groups in that window will highlight them and
-make them appear in the **Selection** box. Together with the buttons for
-logical operations, it is possible to make complex selections, like so:
-
-The large box below the **Selection** box should show information about
-your selection, but it is broken for complex selections. The box at the
-very bottom, next to the **Save** button, is used for naming the
-selection. Each selection must be named with a unique name. The **Save**
-button saves the selection for the loaded trajectory, but it will not
-close the Atom Selection window. Once selection has been saved, it
-should appear in the drop-down menu in the analysis window.
-
-Atom selection is available for all the analyses for which
-:ref:`param-atom-transmutation` is available, as well as all
-:ref:`analysis-trajectory` analyses, :ref:`analysis-gacf`, `Molecular
-Trace <#_Molecular_Trace>`__, `Root Mean Square
-Fluctuation, <#_Root_Mean_Square_1>`__ `Radius of
-Gyration <#_Radius_Of_Gyration>`__, `Solvent Accessible
-Surface <#_Solvent_Accessible_Surface>`__.
-
-.. _param-atom-transmutation:
-
-Atom Transmutation
-^^^^^^^^^^^^^^^^^^
-
-To use Atom Transmutation, simply select an Atom Selection in the grey
-drop-down menu on the left, and then choose the element into which the
-atoms in that Atom Selection will be transmuted from the white drop-down
-menu next to the red button. For example, the below Atom Transmutation
-will transmute all sodium ions into potassium ions:
-
-This parameter is available for the following analyses: `Coordination
-Number <#_Coordination_Number>`__, `Current Correlation
-Function <#_Current_Correlation_Function>`__, `Density Of
-States <#_Density_Of_States>`__, `Density
-Profile <#_Density_Profile>`__, `Dynamic Coherent Structure
-Factor <#_Dynamic_Coherent_Structure>`__, `Dynamic Incoherent Structure
-Factor <#_Dynamic_Incoherent_Structure>`__,
-`Eccentricity <#_Eccentricity>`__, `Elastic Incoherent Structure
-Factor <#_Elastic_Incoherent_Structure>`__, `Gaussian Dynamic Incoherent
-Structure Factor <#_Gaussian_Dynamic_Incoherent>`__, `General Auto
-Correlation Function <#_General_AutoCorrelation_Function>`__, `Mean
-Square Displacement <#_Mean_Square_Displacement>`__, `Neutron Dynamic
-Total Structure Factor <#_Neutron_Dynamic_Total>`__, `Order
-Parameter <#_Order_Parameter>`__, `Pair Distribution
-Function <#_Pair_Distribution_Function>`__, `Position Auto Correlation
-Function <#_Position_AutoCorrelation_Function>`__, `Root Mean Square
-Deviation <#_Root_Mean_Square>`__, `Static Structure
-Factor <#_Static_Structure_Factor>`__, `Velocity Auto Correlation
-Function <#_Velocity_AutoCorrelation_Function>`__, `X-Ray Static
-Structure Factor <#_Xray_Static_Structure>`__.
-
-.. _param-atom-charges:
-
-Atom Charges
-^^^^^^^^^^^^
-
-This selection works inside an analysis window exactly the same as
-:ref:`param-axis-selection`. The only difference is the window that
-opens when **Set new selection** button is clicked. The Partial Charges
-window appears as below, and allows you to edit the charges at each atom
-inside the system. To do that, simply click on a field in the **charge**
-column and type in a number. The change will be confirmed once you hit
-enter or click outside the field. Once all changes have been made, name
-the selection using the box at the bottom, then click the **Save**
-button, and finally close the window.
-
-This parameter is only available for the
-:ref:`analysis-dacf` analysis.
-
-.. _param-q-vectors:
-
-Q vectors
-~~~~~~~~~
-
-Similar to the selections above but specific to `Scattering
-Plugin <#_Scattering>`__\ s, Q vectors give the opportunity to change
-how the analysis is performed. Each window has a part like this:
-
-This section must be filled for analysis to be able to run. Like for
-other selections, there are no definitions by default. Therefore, one
-has to be created by clicking on the **New definition** button. This
-will open a window like in one of the following subsections, which show
-how Q Vectors are defined for each type of Q Vector. There are many
-types, and it is up to you to choose which is the best for a given
-experiment.
-
-Once a definition of choice exists, it can be selected from the
-drop-down menu. The **View selected definition** opens the User
-Definition viewer <link> at the currently selected definition.
-
-Spherical Lattice Vectors
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-+------------------+-----------+---------+------------------------------------------------------------+
-| Parameter        | Format    | Default | Description                                                |
-+==================+===========+=========+============================================================+
-| seed             | int       | 0       | RNG seed used to generate the vectors. Setting the same    |
-|                  |           |         | seed ensures reproducibility of random numbers.            |
-+------------------+-----------+---------+------------------------------------------------------------+
-| n vectors        | int       | 50      | Number of hkl vectors in each shell. Higher values result  |
-| (Number of hkl   |           |         | in higher accuracy but longer computation time.            |
-| vectors)         |           |         |                                                            |
-+------------------+-----------+---------+------------------------------------------------------------+
-| width            | float     | 1.0     | Accepted tolerance of each shell. Often identical to the   |
-|                  |           |         | "by step of" parameter.                                    |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Generate button  |           |         | Generates hkl vectors based on the specified parameters    |
-|                  |           |         | (seed, n vectors, width). Must be clicked before saving.   |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Name             | str       | None    | Allows you to name the generated vectors. Name must be     |
-|                  |           |         | set before saving the vectors.                             |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Save button      |           |         | Saves the generated vectors. It doesn't close the Q        |
-|                  |           |         | Vectors window. Saved vectors may be in a specific format. |    
-+------------------+-----------+---------+------------------------------------------------------------+
-
-
-Circular Lattice Vectors
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-+------------------+-----------+---------+------------------------------------------------------------+
-| Parameter        | Format    | Default | Description                                                |
-+==================+===========+=========+============================================================+
-| seed             | int       | 0       | The RNG seed used to generate the vectors. Setting the same|
-|                  |           |         | seed ensures reproducibility of random numbers.            |
-+------------------+-----------+---------+------------------------------------------------------------+
-| n vectors        | int       | 50      | Number of hkl vectors in each shell. Higher values result  |
-|                  |           |         | in higher accuracy but at the cost of longer computational |
-|                  |           |         | time.                                                      |
-+------------------+-----------+---------+------------------------------------------------------------+
-| width            | float     | 1.0     | Accepted tolerance of each shell. Often identical to the   |
-|                  |           |         | "by step of" parameter.                                    |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Generate button  |           |         | Generates hkl vectors based on the specified parameters    |
-|                  |           |         | (seed, n vectors, width). Must be clicked before saving.   |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Name             | str       | None    | Allows you to name the generated vectors. Name must be     |
-|                  |           |         | set before saving the vectors.                             |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Save button      |           |         | Saves the generated vectors. It doesn't close the Q        |
-|                  |           |         | Vectors window. Saved vectors may be in a specific format. |    
-+------------------+-----------+---------+------------------------------------------------------------+
-
--  axis 1
-
-   +--------------+-----------+---------+-----------------------+
-   | Component    | Format    | Default | Description           |
-   +==============+===========+=========+=======================+
-   | x-component  | int       | 1       | X-component for plane |
-   +--------------+-----------+---------+-----------------------+
-   | y-component  | int       | 0       | Y-component for plane |
-   +--------------+-----------+---------+-----------------------+
-   | z-component  | int       | 0       | Z-component for plane |
-   +--------------+-----------+---------+-----------------------+
-
--  axis 2
-
-   +--------------+-----------+---------+-----------------------+
-   | Component    | Format    | Default | Description           |
-   +==============+===========+=========+=======================+
-   | x-component  | int       | 0       | X-component for plane |
-   +--------------+-----------+---------+-----------------------+
-   | y-component  | int       | 1       | Y-component for plane |
-   +--------------+-----------+---------+-----------------------+
-   | z-component  | int       | 0       | Z-component for plane |
-   +--------------+-----------+---------+-----------------------+
-
-
-
-Linear Lattice Vectors
-^^^^^^^^^^^^^^^^^^^^^^
-
-+------------------+-----------+---------+------------------------------------------------------------+
-| Parameter        | Format    | Default | Description                                                |
-+==================+===========+=========+============================================================+
-| seed             | int       | 0       | The RNG seed used to generate the vectors. Setting the same|
-|                  |           |         | seed ensures reproducibility of random numbers.            |
-+------------------+-----------+---------+------------------------------------------------------------+
-| n vectors        | int       | 50      | Number of hkl vectors in each shell. Higher values result  |
-|                  |           |         | in higher accuracy but at the cost of longer computational |
-|                  |           |         | time.                                                      |
-+------------------+-----------+---------+------------------------------------------------------------+
-| width            | float     | 1.0     | Accepted tolerance of each shell. Often identical to the   |
-|                  |           |         | "by step of" parameter.                                    |
-+------------------+-----------+---------+------------------------------------------------------------+
-| axis             |           |         |                                                            |
-+------------------+-----------+---------+------------------------------------------------------------+
-|   x-component   | int       | 1       | The x-components of the specified axis.                     |
-+------------------+-----------+---------+------------------------------------------------------------+
-|   y-component   | int       | 0       | The y-components of the specified axis.                     |
-+------------------+-----------+---------+------------------------------------------------------------+
-|   z-component   | int       | 0       | The z-components of the specified axis.                     |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Generate button  |           |         | Generates hkl vectors based on the specified parameters    |
-|                  |           |         | (seed, n vectors, width). Must be clicked before saving.   |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Name             | str       | None    | This is the empty box at the bottom of the window. It      |
-|                  |           |         | allows you to name the generated vectors. This must be     |
-|                  |           |         | set before saving the vectors.                             |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Save button      |           |         | Saves the generated vectors. It doesn't close the Q        |
-|                  |           |         | Vectors window. Saved vectors may be in a specific format. |    
-+------------------+-----------+---------+------------------------------------------------------------+
-
-
-Miller Indices Lattice Vectors
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                                |
-+=================+===========+=========+============================================================+
-| seed            | int       | 0       | The RNG seed used to generate the vectors. Setting the same|
-|                 |           |         | seed ensures reproducibility of random numbers.            |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| width           | float     | 1.0     | Accepted tolerance of each shell. Often identical to the   |
-|                 |           |         | "by step of" parameter.                                    |
-+-----------------+-----------+---------+------------------------------------------------------------+
-
-
--  h (and the same goes for k and l fields)
-
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                                |
-+=================+===========+=========+============================================================+
-|   from          | int       | 0       | Minimum value used to construct the range of h vectors.    |
-+-----------------+-----------+---------+------------------------------------------------------------+
-|   to            | int       | 0       | Maximum value used to construct the range of h vectors.    |
-+-----------------+-----------+---------+------------------------------------------------------------+
-|   by step of    | int       | 1       | Step used to construct the range of h vectors. If it is    |
-|                 |           |         | 1, every integer between **from** and **to** is placed     |
-|                 |           |         | into the range; if it is 2, every other, etc.              |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Generate button |           |         | Generates hkl vectors based on the specified parameters    |
-|                 |           |         | (h ranges). Must be clicked before saving.                 |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Name            | str       | None    | This is the empty box at the bottom of the window. It      |
-|                 |           |         | allows you to name the generated vectors. This must be     |
-|                 |           |         | set before saving the vectors.                             |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Save button     |           |         | Saves the generated vectors. It doesn't close the Q      |
-|                 |           |         | Vectors window. Saved vectors may be in a specific format.|    
-+-----------------+-----------+---------+------------------------------------------------------------+
-
-
-Spherical Vectors
-^^^^^^^^^^^^^^^^^
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                                |
-+=================+===========+=========+============================================================+
-| seed            | int       | 0       | The RNG seed used to generate the vectors. Setting the same|
-|                 |           |         | seed ensures reproducibility of random numbers.            |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| n vectors       | int       | 50      | The number of hkl vectors in each shell. Higher values     |
-|                 |           |         | result in higher accuracy but longer computational time.   |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| width           | float     | 1.0     | The accepted tolerance of each shell. Often identical to   |
-|                 |           |         | the "by step of" parameter.                                |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Generate button |           |         | Generates hkl vectors based on the specified parameters    |
-|                 |           |         | (seed, n vectors, width). Must be clicked before saving.   |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Name            | str       | None    | This is the empty box at the bottom of the window. It      |
-|                 |           |         | allows you to name the generated vectors before saving.    |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Save button     |           |         | Saves the generated vectors. It doesn't close the Q        |
-|                 |           |         | Vectors window.                                            |
-+-----------------+-----------+---------+------------------------------------------------------------+
-
-
-Circular Vectors
-^^^^^^^^^^^^^^^^
-
-+-----------------+-----------+---------+--------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                            |
-+=================+===========+=========+========================================================+
-| seed            | int       | 0       | The RNG seed used to generate the vectors. Setting the |
-|                 |           |         | same seed ensures that the same random numbers are     |
-|                 |           |         | generated, making the calculation reproducible.        |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| n vectors       | int       | 50      | The number of hkl vectors in each shell. Increasing    |
-|                 |           |         | this value improves accuracy but also increases        |
-|                 |           |         | computational time.                                    |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| width           | float     | 1.0     | The accepted tolerance of each shell. It often matches |
-|                 |           |         | the "by step of" parameter.                            |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| axis 1          |           |         | Axis 1 parameters:                                     |
-|                 |           |         |   - x-component: int, default 1                        |
-|                 |           |         |     The x-component of the first axis used to specify  |
-|                 |           |         |     the plane.                                         |
-|                 |           |         |   - y-component: int, default 0                        |
-|                 |           |         |     The y-component of the first axis used to specify  |
-|                 |           |         |     the plane.                                         |
-|                 |           |         |   - z-component: int, default 0                        |
-|                 |           |         |     The z-component of the first axis used to specify  |
-|                 |           |         |     the plane.                                         |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| axis 2          |           |         | Axis 2 parameters:                                     |
-|                 |           |         |   - x-component: int, default 0*                       |
-|                 |           |         |     The x-component of the second axis used to         |
-|                 |           |         |     specify the plane.                                 |
-|                 |           |         |   - y-component: int, default 1                        |
-|                 |           |         |     The y-component of the second axis used to         |
-|                 |           |         |     specify the plane.                                 |
-|                 |           |         |   - z-component: int, default 0                        |
-|                 |           |         |     The z-component of the second axis used to         |
-|                 |           |         |     specify the plane.                                 |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| Generate button |           |         | Generates hkl vectors based on the specified           |
-|                 |           |         | parameters (seed, n vectors, width, axis components).  |
-|                 |           |         | Must be clicked before saving.                         |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| Name            | str       | None    | This is the empty box at the bottom of the window.     |
-|                 |           |         | It allows you to name the generated vectors before     |
-|                 |           |         | saving. Must be set before saving.                     |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| Save button     |           |         | Saves the generated vectors. It does not close the Q   |
-|                 |           |         | Vectors window. The saved vectors may be in a          |
-|                 |           |         | specific format, such as a table format.               |
-+-----------------+-----------+---------+--------------------------------------------------------+
-
-
-Linear Vectors
-^^^^^^^^^^^^^^
-
-+-----------------+-----------+---------+-------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                           |
-+=================+===========+=========+=======================================================+
-| seed            | int       | 0       | The RNG seed used to generate the vectors. Setting    |
-|                 |           |         | the same seed ensures that the same random numbers    |
-|                 |           |         | are generated, making the calculation more            |
-|                 |           |         | reproducible.                                         |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| n vectors       | int       | 50      | The number of hkl vectors in each shell. Higher       |
-|                 |           |         | values result in higher accuracy but longer           |
-|                 |           |         | computational time.                                   |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| width           | float     | 1.0     | The accepted tolerance of each shell. It is often     |
-|                 |           |         | identical to the "by step of" parameter.              |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| axis            |           |         | Axis parameters:                                      |
-|                 |           |         |   - x-component: int, default 1                       |
-|                 |           |         |     The x-component of the specified axis.            |
-|                 |           |         |   - y-component: int, default 0                       |
-|                 |           |         |     The y-component of the specified axis.            |
-|                 |           |         |   - z-component: int, default 0                       |
-|                 |           |         |     The z-component of the specified axis.            |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| Generate button |           |         | Generates hkl vectors based on the specified          |
-|                 |           |         | parameters (seed, n vectors, width, axis              |
-|                 |           |         | components). Must be clicked before saving.           |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| Name            | str       | None    | This is the empty box at the bottom of the window.    |
-|                 |           |         | It allows you to name the generated vectors before    |
-|                 |           |         | saving. Must be set before saving.                    |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| Save button     |           |         | Saves the generated vectors. It does not close the    |
-|                 |           |         | Q Vectors window.                                     |
-+-----------------+-----------+---------+-------------------------------------------------------+
-
-
-Grid Vectors
-^^^^^^^^^^^^
-
-+-----------------+-----------+---------+---------------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                                   |
-+=================+===========+=========+===============================================================+
-| seed            | int       | 0       | The RNG seed used to generate the vectors. Setting the same   |
-|                 |           |         | seed ensures that the same random numbers are generated,      |
-|                 |           |         | making the calculation more reproducible.                     |
-+-----------------+-----------+---------+---------------------------------------------------------------+
-| hrange (krange  |           |         | Range parameters for h, k, and l vectors:                     |
-| , lrange fields)|           |         |   - from: int, default 0                                      |
-|                 |           |         |     The minimum value used to construct the range of h        |
-|                 |           |         |     vectors.                                                  |
-|                 |           |         |   - to: int, default 0                                        |
-|                 |           |         |     The maximum value used to construct the range of h        |
-|                 |           |         |     vectors.                                                  |
-|                 |           |         |   - by step of: int, default 1                                |
-|                 |           |         |     The step used to construct the range of h vectors. If it  |
-|                 |           |         |     is 1, every integer between **from** and **to** is        |
-|                 |           |         |     placed into the range; if it is 2, every other, etc.      |
-+-----------------+-----------+---------+---------------------------------------------------------------+
-| qstep           | float     | 0.01    | Determines how the hkl vectors are grouped.                   |
-+-----------------+-----------+---------+---------------------------------------------------------------+
-| Generate button |           |         | Generates hkl vectors based on the specified parameters       |
-|                 |           |         | (seed, hrange, krange, lrange, qstep). Must be clicked        |
-|                 |           |         | before saving.                                                |
-+-----------------+-----------+---------+---------------------------------------------------------------+
-| Name            | str       | None    | This is the empty box at the bottom of the window. It         |
-|                 |           |         | allows you to name the generated vectors before saving.       |
-|                 |           |         | Must be set before saving.                                    |
-+-----------------+-----------+---------+---------------------------------------------------------------+
-| Save button     |           |         | Saves the generated vectors. It does not close the Q          |
-|                 |           |         | Vectors window. Saved vectors may be in a specific format.    |
-+-----------------+-----------+---------+---------------------------------------------------------------+
-
-
-Approximated Dispersion Vectors
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-+-----------------+-----------+----------------------+------------------------------------------------------------+
-| Parameter       | Format    | Default              | Description                                                |
-+=================+===========+======================+============================================================+
-| generator       | drop-down | circular_lattice     | The selection of which type of Q Vectors is being          |
-|                 |           |                      | defined.                                                   |
-+-----------------+-----------+----------------------+------------------------------------------------------------+
-| Q start (nm^-1) |           |                      | Q start parameters for the first and second Q points:      |
-|                 |           |                      |   - x-component: int, default 1                            |
-|                 |           |                      |     The x-component of this Q point.                       |
-|                 |           |                      |   - y-component: int, default 0                            |
-|                 |           |                      |     The y-component of this Q point.                       |
-|                 |           |                      |   - z-component: int, default 0                            |
-|                 |           |                      |     The z-component of this Q point.                       |
-+-----------------+-----------+----------------------+------------------------------------------------------------+
-| Q step (nm^-1)  | float     | 0.1                  | The increment by which Q is increased when tracing the     |
-|                 |           |                      | line between the two points.                               |
-+-----------------+-----------+----------------------+------------------------------------------------------------+
-| Generate button |           |                      | Generates hkl vectors based on the specified parameters    |
-|                 |           |                      | (generator, Q start, Q step). Must be clicked before       |
-|                 |           |                      | saving.                                                    |
-+-----------------+-----------+----------------------+------------------------------------------------------------+
-| Name            | str       | None                 | This is the empty box at the bottom of the window. It      |
-|                 |           |                      | allows you to name the generated vectors before saving.    |
-|                 |           |                      | Must be set before saving.                                 |
-+-----------------+-----------+----------------------+------------------------------------------------------------+
-| Save button     |           |                      | Saves the generated vectors. It does not close the Q       |
-|                 |           |                      | Vectors window. Saved vectors may be in a specific format. |    
-+-----------------+-----------+----------------------+------------------------------------------------------------+
-
-
-.. _param-group-coordinates:
-
-Group coordinates
-~~~~~~~~~~~~~~~~~
-
-This parameter is available in the following analyses: 
-:ref:`trajectory-comt`,
-:ref:`analysis-dos`, :ref:`analysis-disf`,
-:ref:`analysis-eisf`, :ref:`analysis-gdisf`, 
-:ref:`analysis-gacf`, :ref:`analysis-msd`, 
-:ref:`analysis-op`, `Rigid Body
-Trajectory <#_Rigid_Body_Trajectory>`__, `Root Mean Square
-Deviation <#_Root_Mean_Square>`__, `Root Mean Square
-Fluctuation <#_Root_Mean_Square_1>`__, `Velocity Auto Correlation
-Function <#_Velocity_AutoCorrelation_Function>`__.
-
-.. _param-instrument-resolution:
-
-Instrument resolution
-~~~~~~~~~~~~~~~~~~~~~
-
-This option is available in all the analyses performing a time Fourier
-Transform, e.g. for the calculation of the density of states or the
-dynamic structure factor. The following resolution shapes are supported
-in MDANSE at the moment:
-
-- Gaussian
-
-  :code:`('gaussian', {'mu': 0.0, 'sigma': 1.0})`
-
-- Lorentzian
-
-  :code:`('lorentzian', {'mu': 0.0, 'sigma': 1.0})`
-
-- Pseudo-Voigt
-
-  The corresponding MDANSE input is:
-
-  :code:`('pseudo-voigt', {'eta': 0.5, 'mu_lorentzian': 0.0, 'sigma_lorentzian': 1.0, 'mu_gaussian': 0.0, 'sigma_gaussian': 1.0})`
-
-- square
-
-  The corresponding MDANSE input is:
-
-  :code:`('square', {'mu': 0.0, 'sigma': 1.0})`
-
-- triangular
-
-  The corresponding MDANSE input is:
-
-  :code:`('triangular', {'mu': 0.0, 'sigma': 1.0})`
-
-- ideal
-  The corresponding MDANSE input is:
-
-  :code:`('ideal', {})`
-
-
-This parameter is available for the following analyses: `Current
-Correlation Function <#_Current_Correlation_Function>`__, `Density of
-States <#_Density_Of_States>`__, `Dynamic Coherent Structure
-Factor <#_Dynamic_Coherent_Structure>`__, `Dynamic Incoherent Structure
-Factor <#_Dynamic_Incoherent_Structure>`__, `Gaussian Dynamic Incoherent
-Structure Factor <#_Gaussian_Dynamic_Incoherent>`__, `Neutron Dynamic
-Total Structure Factor <#_Neutron_Dynamic_Total>`__, `Structure Factor
-From Scattering Function <#_Structure_Factor_From>`__.
-
-.. _params-interpolation-order:
-
-Interpolation order
-~~~~~~~~~~~~~~~~~~~
-
-Analyses that require atomic velocity data have an option to interpolate
-this data from atomic positions. By default, no interpolation is
-performed and instead MDANSE attempts to use the velocities stored int
-the HDF trajectory. Of course, depending on the way your simulation
-was set up, it is possible that the atoms velocities were not even stored
-in the output. It is still possible to derive the velocities of atoms
-from their positions at known time intervals, which is the subject of this
-section.
-
-
-Interpolation order is available for the following analyses: `Current
-Correlation Function <#_Current_Correlation_Function>`__, `Density of
-States <#_Density_Of_States>`__, `Temperature <#_Temperature>`__,
-`Velocity Auto Correlation
-Function <#_Velocity_AutoCorrelation_Function>`__. However, please note
-that due to the nature of the `Current Correlation
-Function <#_Current_Correlation_Function>`__ analysis, the interpolation
-there is more complicated, the details of which can be found in its
-`section <#_GUI>`__.
-
-.. _param-normalize:
-
-Normalize
-~~~~~~~~~
-
-Normalisation is available for the following analyses: `Current
-Correlation Function <#_Current_Correlation_Function>`__, `General Auto
-Correlation Function <#_General_AutoCorrelation_Function>`__, `Position
-Auto Correlation Function <#_Position_AutoCorrelation_Function>`__,
-`Velocity Auto Correlation
-Function <#_Velocity_AutoCorrelation_Function>`__.
-
-.. _param-project-coordinates:
-
-Project coordinates 
-~~~~~~~~~~~~~~~~~~~~
-
-This parameter is available for the following analyses: `Density of
-States <#_Density_Of_States>`__, `Dynamic Incoherent Structure
-Factor <#_Dynamic_Incoherent_Structure>`__, `Elastic Incoherent
-Structure Factor <#_Elastic_Incoherent_Structure>`__, `Gaussian Dynamic
-Incoherent Structure Factor <#_Gaussian_Dynamic_Incoherent>`__, `Mean
-Square Displacement <#_Mean_Square_Displacement>`__, `Position Auto
-Correlation Function <#_Position_AutoCorrelation_Function>`__, `Velocity
-Auto Correlation Function <#_Velocity_AutoCorrelation_Function>`__.
-
-.. _param-weights:
-
-Weights
-~~~~~~~
-
-This parameter is available in the following analyses: `Current
-Correlation Function <#_Current_Correlation_Function>`__, `Density of
-States <#_Density_Of_States>`__, `Density
-Profile <#_Density_Profile>`__, `Dynamic Coherent Structure
-Factor <#_Dynamic_Coherent_Structure>`__, `Dynamic Incoherent Structure
-Factor <#_Dynamic_Incoherent_Structure>`__,
-`Eccentricity <#_Eccentricity>`__, `Elastic Incoherent Structure
-Factor <#_Elastic_Incoherent_Structure>`__, `Gaussian Dynamic Incoherent
-Structure Factor <#_Gaussian_Dynamic_Incoherent>`__, `General Auto
-Correlation Function <#_General_AutoCorrelation_Function>`__, `Mean
-Square Displacement <#_Mean_Square_Displacement>`__, `Pair Distribution
-Function <#_Pair_Distribution_Function>`__, `Radius of
-Gyration <#_Radius_Of_Gyration>`__, `Rigid Body
-Trajectory <#_Rigid_Body_Trajectory>`__, `Root Mean Square
-Deviation <#_Root_Mean_Square>`__, `Static Structure
-Factor <#_Static_Structure_Factor>`__, `Velocity Auto Correlation
-Function <#_Velocity_AutoCorrelation_Function>`__.
-
-.. _param-running-mode:
-
-Running mode
-~~~~~~~~~~~~
-
-Running mode is available for most analyses: all
-`Dynamics <#_Dynamics>`__ analyses, all `Trajectory <#_Trajectory>`__
-analyses, all `Thermodynamics <#_Thermodynamics>`__ analyses, `Area Per
-Molecule <#_Area_Per_Molecule>`__, `Coordination
-Number <#_Coordination_Number>`__, `Current Correlation
-Function <#_Current_Correlation_Function>`__, `Density
-Profile <#_Density_Profile>`__, `Dipole Auto Correlation
-Function <#_Dipole_AutoCorrelation_Function>`__, `Dynamic Coherent
-Structure Factor <#_Dynamic_Coherent_Structure>`__, `Dynamic Incoherent
-Structure Factor <#_Dynamic_Incoherent_Structure>`__,
-`Eccentricity <#_Eccentricity>`__, `Elastic Incoherent Structure
-Factor <#_Elastic_Incoherent_Structure>`__, `Gaussian Dynamic Incoherent
-Structure Factor <#_Gaussian_Dynamic_Incoherent>`__, `McStas Virtual
-Instrument <#_McStas_Virtual_Instrument>`__, `Molecular
-Trace <#_Molecular_Trace>`__, `Neutron Dynamic Total Structure
-Factor <#_Neutron_Dynamic_Total>`__, `Order
-Parameter <#_Order_Parameter>`__, `Pair Distribution
-Function <#_Pair_Distribution_Function>`__, `Radius of
-Gyration <#_Radius_Of_Gyration>`__, `Rigid Body
-Trajectory <#_Rigid_Body_Trajectory>`__, `Root Mean Square
-Deviation <#_Root_Mean_Square>`__, `Root Mean Square
-Fluctuation <#_Root_Mean_Square_1>`__, `Static Structure
-Factor <#_Static_Structure_Factor>`__, `Voronoi <#_Voronoi>`__, `X-Ray
-Static Structure Factor <#_Xray_Static_Structure>`__.
+**AtomSelectionConfigurator**
+-----------------------------
+
+  default={}
+
+    Selects atoms in trajectory based on the input string.
+
+    This configurator allows the selection of a specific set of
+    atoms on which the analysis will be performed. The defaults setting
+    selects all atoms.
+
+    Attributes
+    ----------
+    _default : str
+        The defaults selection setting.
+
+    
+
+**AtomTransmutationConfigurator**
+---------------------------------
+
+  default={}
+
+    This configurator allows to define a set of atoms to be
+    transmuted to a given chemical element.
+
+    For some analysis it can be necessary to change the nature of the
+    chemical element of a given part of the system to have results
+    closer to experience. A good example is to change some hydrogen
+    atoms to deuterium in order to fit with experiments where
+    deuteration experiments have been performed for improving the
+    contrast and having a better access to the dynamics of a specific
+    part of the molecular system.
+
+    Attributes
+    ----------
+    _default : str
+        The defaults transmutation setting.
+    
+
+**AtomsListConfigurator**
+-------------------------
+
+  default=None
+
+    
+    This configurator allows of a given list of atom names.
+
+    The atoms has to belong to the same molecule.
+
+    :note: this configurator depends on 'trajectory'
+    
+
+**AxisSelectionConfigurator**
+-----------------------------
+
+  default=None
+
+    
+    This configurator allows to define a local axis per molecule.
+
+    For each molecule, the axis is defined using the coordinates of two atoms of the molecule.
+
+    :note: this configurator depends on 'trajectory' configurator to be configured.
+    
+
+**BasisSelectionConfigurator**
+------------------------------
+
+  default=None
+
+    
+    This configurator allows to define a local basis per molecule.
+
+    For each molecule, the basis is defined using the coordinates of three atoms of the molecule.
+    These coordinates will respectively define the origin, the X axis and y axis of the basis, the
+    Z axis being latter defined in such a way that the basis is direct.
+    
+
+**BooleanConfigurator**
+-----------------------
+
+  default=False
+
+    
+    This Configurator allows to input a Boolean Value (True or False).
+
+    The input value can be directly provided as a Python boolean or by the using the following (standard)
+     representation of a boolean: 'true'/'false', 'yes'/'no', 'y'/'n', '1'/'0', 1/0
+    
+
+
+
+**CorrelationFramesConfigurator**
+---------------------------------
+
+  default=all
+
+    Parses the input of trajectory frames.
+
+    Configures the time frame range to be used in the calculations
+    together with a movable window used for correlations.
+    
+
+**DerivativeOrderConfigurator**
+-------------------------------
+
+  default=3
+
+    Configurator used when numerical derivatives are required.
+
+**DistHistCutoffConfigurator**
+------------------------------
+
+  default=(0, 10, 1)
+
+    None
+
+
+**FloatConfigurator**
+---------------------
+
+  default=0
+
+    
+    This Configurator allows to input a float.
+    
+
+**FramesConfigurator**
+----------------------
+
+  default=all
+
+    
+    This configurator allows to input a frame selection for the analysis.
+
+    The frame selection can be input as:
+
+    #. a 3-tuple where the 1st, 2nd will correspond respectively to the indices of the first and     last (excluded) frames to be selected while the 3rd element will correspond to the step number between two frames. For example (1,11,3) will give 1,4,7,10
+    #. *'all'* keyword, in such case, all the frames of the trajectory are selected
+    #. ``None`` keyword, in such case, all the frames of the trajectory are selected
+
+    :note: this configurator depends on 'trajectory' configurator to be configured
+    
+
+**GroupingLevelConfigurator**
+-----------------------------
+
+  default=atom
+
+    
+    This configurator allows to choose the level of granularity in the atom selection.
+
+    When reading the trajectory, the level of granularity will be applied by grouping the atoms of the selection
+    to a single dummy-atoms located on the center of gravity of those atoms.
+
+    The level of granularity currently supported are:
+
+    * 'atom': no grouping will be performed
+    * 'group': the atoms that belongs to an AtomCluster object will be grouped as a single atom per object while the ones that belongs to a Molecule, NucleotideChain, PeptideChain and Protein object will be grouped according to the chemical group they belong to (e.g. peptide group, methyl group ...)
+    * 'residue': the atoms that belongs to anAtomCluster or Molecule object will be grouped as a single atom per object while the ones thta belongs to a NucleotideChain, PeptideChain or Protein object will be grouped according to the residue to which they belong to (e.g. Histidine, Cytosyl ...)
+    * 'chain': the atoms that belongs to an AtomCluster or Molecule object will be grouped as a single atom per object while the ones that belongs to a NucleotideChain, PeptideChain or Protein object will be grouped according to the chain they belong to
+    * 'molecule': the atoms that belongs to any chemical entity will be grouped as a single atom per object
+    
+
+**HDFInputFileConfigurator**
+----------------------------
+
+  default=INPUT_FILENAME.mda
+
+    
+    This configurator allows to input an HDF file as input file.
+    
+
+**HDFTrajectoryConfigurator**
+-----------------------------
+
+  default=INPUT_FILENAME.mdt
+
+    
+    This configurator allow to input a HDF trajectory file.
+
+    HDF trajectory file is the format used in MDANSE to store Molecular Dynamics trajectories. It is an HDF5 file
+    that store various data related to the molecular dynamics : atomic positions, velocities, energies, energy gradients etc...
+
+    To use trajectories derived from MD packages different from HDF, it is compulsory to convert them before to a
+    HDF trajectory file.
+
+    :attention: once configured, the HDF trajectory file will be opened for reading.
+    
+
+**InputDirectoryConfigurator**
+------------------------------
+
+  default=MDANSE/Tests/UnitTests
+
+    
+    This Configurator allows to set an input directory.
+
+    :attention: The directory will be created at configuration time if it does not exist.
+    
+
+**InputFileConfigurator**
+-------------------------
+
+  default=
+
+    
+    This Configurator allows to set an input file.
+    
+
+**InstrumentResolutionConfigurator**
+------------------------------------
+
+  default=('gaussian', {'mu': 0.0, 'sigma': 10.0})
+
+    
+    This configurator allows to set an instrument resolution.
+
+    The instrument resolution will be used in frequency-dependant analysis (e.g. the vibrational density
+    of states) when performing the fourier transform of its time-dependant counterpart. This allow to
+    convolute of the signal with a resolution function to have a better match with experimental spectrum.
+
+    In MDANSE, the instrument resolution are defined in omegas space and are internally
+    inverse-fourier-transformed to get a time-dependant version. This time-dependant resolution function will then
+    be multiplied by the time-dependant signal to get the resolution effect according to the Fourier Transform theorem:
+
+    .. math:: TF(f(t) * r(t)) = F(\omega) \otimes R(\omega) = G(\omega)
+
+    where f(t) and r(t) are respectively the time-dependant signal and instrument resolution and
+    F(\omega) and R(\omega) are their corresponding spectrum. Hence, G(\omega) represents the signal
+    convoluted by the instrument resolution and, as such, represents the quantity to be compared directly with
+    experimental results.
+
+    An instrument resolution is represented in MDANSE by a kernel function and a sets of parameters for this function.
+    MDANSE currently supports the aussian, lorentzian, square, triangular and pseudo-voigt kernels.
+
+    :note: this configurator depends on the 'frame' configurator to be configured.
+    
+
+**IntegerConfigurator**
+-----------------------
+
+  default=0
+
+    
+    This Configurator allows to input an integer.
+    
+
+**InterpolationOrderConfigurator**
+----------------------------------
+
+  default=3
+
+    
+    This configurator allows to input the interpolation order to be applied when deriving velocities from atomic coordinates.
+
+    The allowed value are 0 (no interpolation) , 1 (1st order), ..., 5 (5th order), the
+    former one will not interpolate the velocities from atomic coordinates but will directly use the velocities stored in the trajectory file.
+
+    :attention: it is of paramount importance for the trajectory to be sampled with a very low time     step to get accurate velocities interpolated from atomic coordinates.
+
+    :note: this configurator depends on 'trajectory' configurator to be configured.
+    
+
+**McStasInstrumentConfigurator**
+--------------------------------
+
+  default=
+
+    
+    This configurator allows to input a McStas executable file
+    
+
+**McStasOptionsConfigurator**
+-----------------------------
+
+  default={'ncount': 10000, 'dir': PosixPath('/var/folders/jx/__bc7gns12g9b7f_v09x8mzm0000gq/T/mcstas_output/05.06.2025-11:53:42')}
+
+    
+    This configurator allows to input the McStas options that will be used to run a McStas executable file.
+    
+
+**McStasParametersConfigurator**
+--------------------------------
+
+  default={'beam_wavelength_Angs': 2.0, 'environment_thickness_m': 0.002, 'beam_resolution_meV': 0.1, 'container': 'INPUT_FILENAME.laz', 'container_thickness_m': 5e-05, 'sample_height_m': 0.05, 'environment': 'INPUT_FILENAME.laz', 'environment_radius_m': 0.025, 'sample_thickness_m': 0.001, 'sample_detector_distance_m': 4.0, 'sample_width_m': 0.02, 'sample_rotation_deg': 45.0, 'detector_height_m': 3.0}
+
+    
+    This configurator allows to input the McStas instrument parameters that will be used to run a McStas executable file.
+    
+
+**MockTrajectoryConfigurator**
+------------------------------
+
+  default=None
+
+    
+    This is a replacement for a trajectory stored in and HDF5 file.
+    It is intended to be a drop-in replacement for HDFTrajectoryConfigurator,
+    even though it is NOT based on an HDF5 file.
+    It can use a JSON file with MockTrajectory parameters to create
+    a trajectory entirely in the RAM.
+    
+
+**MoleculeSelectionConfigurator**
+---------------------------------
+
+  default=
+
+    Picks a molecule type present in the trajectory.
+
+    Attributes
+    ----------
+    _default : str
+        Empty by default.
+
+
+**MultipleChoicesConfigurator**
+-------------------------------
+
+  default=[]
+
+    
+    This Configurator allows to select several items among multiple choices.
+
+    :attention: all the selected items must belong to the allowed selection list.
+    
+
+**OptionalFloatConfigurator**
+-----------------------------
+
+  default=[False, 1.0]
+
+    
+    This Configurator allows to input a float.
+    
+
+**OutputDirectoryConfigurator**
+-------------------------------
+
+  default=MDANSE/Tests/UnitTests
+
+    
+    This Configurator allows to set an output directory.
+    
+
+**OutputFilesConfigurator**
+---------------------------
+
+  default=('OUTPUT_FILENAME', ['MDAFormat', 'TextFormat', 'FileInMemory'], 'no logs')
+
+    Allows the user to choose the output file for writing.
+
+    This configurator allows to define the output directory,
+    the basename, and the format(s) of the output file(s)
+    resulting from an analysis.
+
+    Once configured, this configurator will provide a list of files
+    built by joining the given output directory, the
+    basename and the extensions corresponding to the input file formats.
+
+    For analysis, MDANSE currently supports:
+    1. MDAFormat - an HDF5 file written to the disk,
+    2. TextFormat - a tar file containing a text file for each array,
+    3. FileInMemory - an HDF5 data object NOT written to the disk.
+    FileInMemory is not available when running from the GUI.
+    To define a new output file format for an analysis, you must inherit
+    from MDANSE.Framework.Formats.IFormat.IFormat interface.
+    
+
+**OutputStructureConfigurator**
+-------------------------------
+
+  default=('OUTPUT_FILENAME', 'vasp')
+
+    
+    This configurator allows to define the output directory, the basename, and the format(s) of the output file(s)
+    resulting from an analysis.
+
+    Once configured, this configurator will provide a list of files built by joining the given output directory, the
+    basename and the extensions corresponding to the input file formats.
+
+    For analysis, MDANSE currently supports only the HDF and Text formats. To define a new output file format
+    for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
+
+
+**PartialChargeConfigurator**
+-----------------------------
+
+  default={}
+
+    This configurator allows to input partial charges.
+
+**ProjectionConfigurator**
+--------------------------
+
+  default=None
+
+    
+    This configurator allows to define a projector for atomic coordinates.
+
+    Planar and axial projections are supported by MDANSE while a null projector, that does not project the coordinates, has been introduced
+    in MDANSE.Framework.Projectors.IProjector.IProjector for the sake of homogeneity.
+    
+
+**PythonObjectConfigurator**
+----------------------------
+
+  default=""
+
+    
+    This Configurator allows to input and evaluate basic python object.
+
+    The python object supported are strings, numbers, tuples, lists, dicts, booleans and None type.
+
+    :note: this configurator is based on a literal and safe evaluation of the input using ast standard library module.
+    
+
+**PythonScriptConfigurator**
+----------------------------
+
+  default=
+
+    
+    This configurator allows to input a Python script.
+    
+
+**QVectorsConfigurator**
+------------------------
+
+  default=('SphericalLatticeQVectors', {'shells': (0.1, 5, 0.1), 'width': 0.1, 'n_vectors': 50, 'seed': 0})
+
+    Creates and configures a q-vector generator.
+
+    Reciprocal vectors are used in MDANSE for analysis related to
+    scattering experiments, such as dynamic coherent structure
+    or elastic incoherent structure factor analysis. In MDANSE, properties
+    that depend on Q vectors are always scalar regarding Q vectors
+    in the sense that the values of these properties will be computed
+    for a given norm of Q vectors and not for a given Q vector.
+    Hence, the Q vectors generator supported by MDANSE always generates
+    Q vectors on Q-shells, each shell containing a set of Q vectors whose
+    norm match the Q shell value within a given tolerance.
+
+    Depending on the generator selected, Q vectors can be generated
+    isotropically or anistropically, on a lattice or randomly.
+
+    
+
+**RangeConfigurator**
+---------------------
+
+  default=(0, 10, 1)
+
+    
+    This configurator allow to input a range of values given 3 parameters : start, stop, step.
+
+    By default the values are generated as a NumPy array.
+    
+
+**RunningModeConfigurator**
+---------------------------
+
+  default=('single-core', 1)
+
+    
+    This configurator allows to choose the mode used to run the calculation.
+
+    MDANSE currently support single-core or multicore (SMP) running modes. In the latter case, you have to
+    specify the number of slots used for running the analysis.
+    
+
+**SingleChoiceConfigurator**
+----------------------------
+
+  default=[]
+
+    
+    This Configurator allows to select a single item among multiple choices.
+    
+
+**SingleOutputFileConfigurator**
+--------------------------------
+
+  default=('OUTPUT_FILENAME', 'HDFFormat')
+
+    
+    This configurator allows to define the output directory, the basename, and the format(s) of the output file(s)
+    resulting from a trajectory conversion.
+
+    Once configured, this configurator will provide a list of files built by joining the given output directory,
+    the basename and the  extensions corresponding to the input file formats.
+
+    For trajectories, MDANSE supports only the HDF format. To define a new output file format for a trajectory
+    conversion, you must inherit from the MDANSE.Framework.Formats.IFormat.IFormat interface.
+    
+
+**StringConfigurator**
+----------------------
+
+  default=
+
+    
+    This Configurator allows to input a string.
+    
+
+**TrajectoryVariableConfigurator**
+----------------------------------
+
+  default=velocities
+
+    
+    This configurator allows to check that a given variable is actually present in a configuration.
+
+    :note: this configurator depends on 'trajectory' configurator to be configured
+    
+
+**UnitCellConfigurator**
+------------------------
+
+  default=([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], False)
+
+    
+    This configurator allows to input a unit cell, in order to replace
+    or change the existing cell definition
+    
+
+**VectorConfigurator**
+----------------------
+
+  default=[1.0, 0.0, 0.0]
+
+    
+    This configurator allows to input a 3D vector, by giving its 3 components
+    
+
+**WeightsConfigurator**
+-----------------------
+
+  default=equal
+
+    
+    This configurator allows to select how the properties that depends on atom type will be weighted when computing
+    the total contribution of all atoms.
+
+    Any numeric property defined in MDANSE.Data.ElementsDatabase.ElementsDatabase can be used as a weigh.
+    
+   
+Converter Inputs
+~~~~~~~~~~~~~~~~
+
+**ASEFileConfigurator**
+-----------------------
+
+  default=
+
+    
+    This Configurator allows to set an input file.
+    
+
+**AseInputFileConfigurator**
+----------------------------
+
+  default=
+
+    
+    This Configurator allows to set an input file.
+ 
+**AtomMappingConfigurator**
+---------------------------
+
+  default={}
+
+    The atom mapping configurator.
+
+    Attributes
+    ----------
+    _default : dict
+        The default atom map setting JSON string.
+
+**ConfigFileConfigurator**
+--------------------------
+
+  default=
+
+    Parse the result of a LAMMPS ``write_data``.
+
+    Provides necessary initial details if not included in
+    trajectory.
+    
+**FieldFileConfigurator**
+-------------------------
+
+  default=
+
+    The DL_POLY field file configurator.
+
+**FileWithAtomDataConfigurator**
+--------------------------------
+
+  default=
+
+    None
+
+
+**MDAnalysisCoordinateFileConfigurator**
+----------------------------------------
+
+  default=('', 'AUTO')
+
+    None
+
+**MDAnalysisTimeStepConfigurator**
+----------------------------------
+
+  default=0.0
+
+    None
+
+**MDAnalysisTopologyFileConfigurator**
+--------------------------------------
+
+  default=('', 'AUTO')
+
+    None
+
+**MDFileConfigurator**
+----------------------
+
+  default=
+
+    
+    Class representing a .md file format (documentation can be found at
+    https://www.tcm.phy.cam.ac.uk/castep/MD/node13.html). It is used to determine the structure of the file (eg. the
+    length of each section) and to read the information stored in one frame of the trajectory.
+    
+
+**MDMCTrajectoryConfigurator**
+------------------------------
+
+  default=None
+
+    
+    This is a replacement for a trajectory stored in and HDF5 file.
+    It is intended to be a drop-in replacement for HDFTrajectoryConfigurator,
+    even though it is NOT file-based.
+    
+**MDTrajTimeStepConfigurator**
+------------------------------
+
+  default=0.0
+
+    None
+
+**MDTrajTopologyFileConfigurator**
+----------------------------------
+
+  default=
+
+    None
+
+**MDTrajTrajectoryFileConfigurator**
+------------------------------------
+
+  default=
+
+    None
+
+    
+**MultiInputFileConfigurator**
+------------------------------
+
+  default=
+
+    None
+
+**OptionalXYZFileConfigurator**
+-------------------------------
+
+  default=
+
+    None
+
+
+**OutputTrajectoryConfigurator**
+--------------------------------
+
+  default=('OUTPUT_TRAJECTORY', 64, 128, 'none', 'no logs')
+
+    
+    This configurator allows to define the output directory, the basename, and the format(s) of the output file(s)
+    resulting from a trajectory conversion.
+
+    Once configured, this configurator will provide a list of files built by joining the given output directory,
+    the basename and the  extensions corresponding to the input file formats.
+
+    For trajectories, MDANSE supports only the HDF format. To define a new output file format for a trajectory
+    conversion, you must inherit from the MDANSE.Framework.Formats.IFormat.IFormat interface.
+    
+
+**XDATCARFileConfigurator**
+---------------------------
+
+  default=
+
+    None
+
+**XTDFileConfigurator**
+-----------------------
+
+  default=
+
+    None
+
+**XYZFileConfigurator**
+-----------------------
+
+  default=
+
+    This class loads the contents of an XYZ file,
+    which in the case of CP2K may contain either the
+    positions of atoms, or velocities. In either case
+    there will be 3 components per atom.
