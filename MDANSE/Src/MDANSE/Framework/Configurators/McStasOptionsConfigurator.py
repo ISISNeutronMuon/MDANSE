@@ -16,14 +16,14 @@
 
 import tempfile
 import time
-from typing import Dict, Any
+from typing import Any
 from pathlib import Path
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
-def parse_dictionary(input: str) -> Dict[str, Any]:
+def parse_dictionary(input: str) -> dict[str, Any]:
     big_line = input.strip("\{\}[] \n")
     tokens = big_line.split(",")
     result = {}

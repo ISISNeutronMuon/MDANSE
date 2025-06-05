@@ -15,7 +15,7 @@
 #
 
 from pathlib import Path
-from typing import Union, List
+from typing import Union
 
 import numpy as np
 import h5py
@@ -560,10 +560,10 @@ class H5MDTrajectory:
     def get_atom_property(self, atom_symbol: str, property: str):
         return ATOMS_DATABASE.get_atom_property(atom_symbol, property)
 
-    def atoms_in_database(self) -> List[str]:
+    def atoms_in_database(self) -> list[str]:
         return ATOMS_DATABASE.atoms
 
-    def properties_in_database(self) -> List[str]:
+    def properties_in_database(self) -> list[str]:
         return ATOMS_DATABASE.properties
 
     @property

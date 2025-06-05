@@ -116,7 +116,7 @@ def strip_comments(
     *,
     comment_char: str | set[str] = "#!",
     remove_inline: bool = True,
-) -> Iterable[str]:
+) -> Iterator[str]:
     r"""
     Strip comments from data.
 

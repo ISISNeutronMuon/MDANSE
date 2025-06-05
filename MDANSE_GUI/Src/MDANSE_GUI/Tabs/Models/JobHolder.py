@@ -340,7 +340,7 @@ class JobHolder(QStandardItemModel):
         try:
             task_name = str(job_vars[0])
         except Exception:
-            task_name = str("This should have been a job name")
+            task_name = "This should have been a job name"
         name_item = QStandardItem(task_name)
         name_item.setData(entry_number, role=Qt.ItemDataRole.UserRole)
         self.protect_filename.emit(item_th.expected_output())

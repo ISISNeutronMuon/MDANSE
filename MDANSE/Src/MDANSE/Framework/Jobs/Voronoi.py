@@ -16,7 +16,6 @@
 
 import collections
 import math
-from typing import List
 
 import numpy as np
 from scipy.spatial import Voronoi as scipyVoronoi
@@ -26,7 +25,7 @@ from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
-def no_exc_min(numbers: List[float]):
+def no_exc_min(numbers: list[float]):
     try:
         return min(numbers)
     except ValueError:
@@ -91,7 +90,7 @@ class Voronoi(IJob):
         )
 
         # Will store mean volume for voronoi regions.
-        self.mean_volume = np.zeros((self.numberOfSteps))
+        self.mean_volume = np.zeros(self.numberOfSteps)
 
         self.nb_init_pts = self.configuration["trajectory"][
             "instance"

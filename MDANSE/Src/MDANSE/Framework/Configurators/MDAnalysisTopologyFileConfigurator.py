@@ -13,11 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Iterable
+from collections.abc import Iterable
 
 import MDAnalysis as mda
-
 from MDANSE.Framework.AtomMapping import AtomLabel
+
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 

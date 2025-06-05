@@ -13,18 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Iterable
-
 import itertools
 import re
-import numpy as np
+from collections.abc import Iterable
 
+import numpy as np
 from MDANSE.Core.Error import Error
+from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from MDANSE.Framework.AtomMapping import AtomLabel
-from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
+from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 HBAR = measure(1.05457182e-34, "kg m2 / s").toval("uma nm2 / ps")
 HARTREE = measure(27.2113845, "eV").toval("uma nm2 / ps2")

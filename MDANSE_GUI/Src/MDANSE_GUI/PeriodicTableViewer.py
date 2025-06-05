@@ -338,8 +338,7 @@ class InfoDisplay(QFrame):
             "<sup>" + str(info_object["proton"]) + "</sup>" + str(info_object["symbol"])
         )
         self.fields[2].setText(
-            "%2s,%s,%s"
-            % (info_object["group"], info_object["period"], info_object["block"])
+            f"{str(info_object['group']):2s},{info_object['period']},{info_object['block']}",
         )
         self.fields[3].setText(str(info_object["element"]))
         self.fields[4].setText(str(info_object["family"]))

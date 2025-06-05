@@ -182,4 +182,4 @@ class VASP(Converter):
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()
 
-        super(VASP, self).finalize()
+        super().finalize()

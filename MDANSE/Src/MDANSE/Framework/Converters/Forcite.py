@@ -415,4 +415,4 @@ class Forcite(Converter):
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()
 
-        super(Forcite, self).finalize()
+        super().finalize()

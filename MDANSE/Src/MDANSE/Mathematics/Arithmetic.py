@@ -13,15 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import List, Dict, Tuple
 import itertools
 
 import numpy as np
 
 
 def get_weights(
-    props: Dict[str, float], contents: Dict[str, int], dim: int, conc_exp: float = 1.0
-):
+    props: dict[str, float], contents: dict[str, int], dim: int, conc_exp: float = 1.0
+) -> tuple[dict[tuple[str], float], float]:
     """Calculate the scaling factors to be applied to output datasets.
 
     Returns a dictionary of scaling factors, where the
@@ -29,9 +28,9 @@ def get_weights(
 
     Parameters
     ----------
-    props : Dict[str, float]
+    props : dict[str, float]
         Dictionary of values of an atom property for a selected object, averaged over atoms in that object
-    contents : Dict[str, int]
+    contents : dict[str, int]
         Dictionary of numbers of atoms in an object
     dim : int
         number of atom types in the label of the output datasets (e.g. 1 for "O", 2 for "CuCu")
@@ -76,8 +75,8 @@ def get_weights(
 
 
 def assign_weights(
-    values: Dict[str, np.ndarray],
-    weights: Dict[str, float],
+    values: dict[str, np.ndarray],
+    weights: dict[str, float],
     key: str,
     symmetric: bool = True,
 ):
@@ -114,8 +113,8 @@ def assign_weights(
 
 
 def weighted_sum(
-    values: Dict[str, np.ndarray],
-    weights: Dict[str, float],
+    values: dict[str, np.ndarray],
+    weights: dict[str, float],
     key: str,
 ):
     """Sums up partial datasets multiplied by their scaling factors.

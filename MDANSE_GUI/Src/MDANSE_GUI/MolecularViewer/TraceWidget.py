@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import TYPE_CHECKING, Tuple, Dict, Any
+from typing import TYPE_CHECKING, Any
 from contextlib import suppress
 import copy
 
@@ -56,7 +56,9 @@ class RGBValidator(QValidator):
     a preliminary step when typing in 3 numbers.
     """
 
-    def validate(self, input_string: str, position: int) -> Tuple[int, str]:
+    def validate(
+        self, input_string: str, position: int
+    ) -> tuple[QValidator.State, int, str]:
         """Implementation of the virtual method of QValidator.
         It takes in the string from a QLineEdit and the cursor position,
         and an enum value of the validator state. Widgets will reject
@@ -228,7 +230,7 @@ class TraceWidget(QWidget):
         self.remove_trace_button.setEnabled(len(self._molviewer._surfaces) != 0)
         self.add_trace_button.setEnabled(self._molviewer._n_atoms > 0)
 
-    def get_values(self) -> Dict[str, Any]:
+    def get_values(self) -> dict[str, Any]:
         """Reads the values of the input widgets and returns
         a dictionary containing these values.
 

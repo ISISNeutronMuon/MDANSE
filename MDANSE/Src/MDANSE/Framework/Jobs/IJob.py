@@ -528,7 +528,7 @@ class {classname}(IJob):
 '''
                 )
 
-        except IOError:
+        except OSError:
             return None
         return templateFile
 

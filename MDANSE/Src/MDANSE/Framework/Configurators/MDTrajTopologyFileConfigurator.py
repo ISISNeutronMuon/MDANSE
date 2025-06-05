@@ -13,14 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Optional, Iterable
 import traceback
+from collections.abc import Iterable
 from pathlib import Path
+from typing import Optional
 
 import mdtraj as md
+from MDANSE.Framework.AtomMapping import AtomLabel
 from mdtraj.core.trajectory import _TOPOLOGY_EXTS
 
-from MDANSE.Framework.AtomMapping import AtomLabel
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 

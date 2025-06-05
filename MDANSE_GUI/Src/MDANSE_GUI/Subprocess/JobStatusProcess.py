@@ -14,15 +14,14 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
-from typing import Tuple
 from multiprocessing import Queue
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event
+from typing import Union
 
-from qtpy.QtCore import QObject, Slot, Signal
-
-from MDANSE.MLogging import LOG
 from MDANSE.Framework.Status import Status
+from MDANSE.MLogging import LOG
+from qtpy.QtCore import QObject, Signal, Slot
 
 
 class JobCommunicator(QObject):
@@ -31,7 +30,7 @@ class JobCommunicator(QObject):
     finished = Signal(bool)
     oscillate = Signal()
 
-    def status_update(self, input: Tuple):
+    def status_update(self, input: tuple[str, Union[bool, int]]):
         key, value = input
         if key == "FINISHED":
             self.finished.emit(value)

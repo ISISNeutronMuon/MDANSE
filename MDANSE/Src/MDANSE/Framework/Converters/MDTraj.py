@@ -222,4 +222,4 @@ class MDTraj(Converter):
 
     def finalize(self):
         self._trajectory.close()
-        super(MDTraj, self).finalize()
+        super().finalize()

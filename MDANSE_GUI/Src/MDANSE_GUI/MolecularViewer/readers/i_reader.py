@@ -158,7 +158,7 @@ class IReader(abc.ABC):
                     self._atom_types.append(upper_atom_name.capitalize())
                     break
                 if start == 0:
-                    raise ValueError("Unknown atom type: {}".format(atom_name))
+                    raise ValueError(f"Unknown atom type: {atom_name}")
                 start -= 1
 
     def read_atom_trajectory(self, index):

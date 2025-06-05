@@ -15,7 +15,6 @@
 #
 
 from collections.abc import Generator, Iterable
-from typing import List
 
 import numpy as np
 from ase.io import read as ase_read
@@ -71,7 +70,7 @@ class MinimalPDBReader:
         atom_lines = self.find_atoms(filename)
         self.build_chemical_system(atom_lines)
 
-    def find_unit_cell(self, filename: str, frame_number: int = 0) -> List[float]:
+    def find_unit_cell(self, filename: str, frame_number: int = 0) -> list[float]:
         """
         Find unit cell in PDB file.
 
@@ -89,7 +88,7 @@ class MinimalPDBReader:
         """
         fail_count = 0
 
-        with open(filename, "r") as source:
+        with open(filename, encoding="utf-8") as source:
             for line in source:
                 if line.startswith("CRYST"):
                     cell_line = line
@@ -121,7 +120,7 @@ class MinimalPDBReader:
         str
             Each atom line in PDB file.
         """
-        with open(filename, "r") as source:
+        with open(filename, encoding="utf-8") as source:
             for line in source:
                 if line.startswith(("ATOM", "HETATM")):
                     yield line

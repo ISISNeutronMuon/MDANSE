@@ -19,7 +19,7 @@ import math
 import numbers
 from collections import defaultdict
 from functools import singledispatchmethod
-from typing import Optional, Tuple
+from typing import Optional
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
@@ -72,7 +72,7 @@ class UnitError(Exception):
     pass
 
 
-def get_trailing_digits(string: str) -> Tuple[str, int]:
+def get_trailing_digits(string: str) -> tuple[str, int]:
     """Get digits from the end of a string.
 
     Always returns ``1`` if no digits.
@@ -1038,11 +1038,11 @@ class UnitsManager(metaclass=Singleton):
 
         d = {}
 
-        with open(UnitsManager._DEFAULT_DATABASE, "r") as fin:
+        with open(UnitsManager._DEFAULT_DATABASE, encoding="utf-8") as fin:
             d.update(json.load(fin))
 
         try:
-            with open(UnitsManager._USER_DATABASE, "r") as fin:
+            with open(UnitsManager._USER_DATABASE, encoding="utf-8") as fin:
                 d.update(json.load(fin))
 
         except FileNotFoundError:

@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 import csv
 import os
 from pathlib import PurePath
@@ -231,7 +231,7 @@ class DataWidget(QWidget):
             values = self._plotter._initial_values
             self._sliderpack.set_values(values)
 
-    def available_plotters(self) -> List[str]:
+    def available_plotters(self) -> list[str]:
         return ["Text"]
 
     def plot_data(self, update_only=False):

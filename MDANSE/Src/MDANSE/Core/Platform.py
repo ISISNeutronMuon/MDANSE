@@ -39,7 +39,7 @@ class PlatformError(Error):
     pass
 
 
-class Platform(object, metaclass=abc.ABCMeta):
+class Platform(metaclass=abc.ABCMeta):
     """
     This is the base class for OS-free standard operations.
     """
@@ -56,7 +56,7 @@ class Platform(object, metaclass=abc.ABCMeta):
 
         # Case of the first instantiation.
         if cls.__instance is None:
-            cls.__instance = super(Platform, cls).__new__(cls, *args, **kwargs)
+            cls.__instance = super().__new__(cls, *args, **kwargs)
 
         return cls.__instance
 

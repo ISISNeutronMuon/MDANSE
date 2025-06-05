@@ -15,7 +15,7 @@
 #
 from MDANSE.Framework.Formats.IFormat import IFormat
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
@@ -42,7 +42,7 @@ class MDAFormat(IFormat):
     def write(
         cls,
         filename: str,
-        data: Dict[str, "IOutputVariable"],
+        data: dict[str, "IOutputVariable"],
         header: str = "",
         run_instance: "IJob" = None,
         extension: str = extensions[0],

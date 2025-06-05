@@ -74,7 +74,7 @@ def get_byte_order(filename):
     return byteOrder
 
 
-class FortranBinaryFile(object):
+class FortranBinaryFile:
     """Sets up a Fortran binary file reader.
 
     @note: written by Konrad Hinsen.
@@ -386,4 +386,4 @@ class DCD(Converter):
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()
 
-        super(DCD, self).finalize()
+        super().finalize()
