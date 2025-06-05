@@ -14,11 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import collections
-
 import numpy as np
-
-
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
@@ -31,7 +27,9 @@ class DensityProfileError(Error):
 class DensityProfile(IJob):
     """
     The Density Profile analysis shows the weighted atomic density heterogeneity in the directions of the simulation box axes.
+
     For a lipid membrane, the density variation in the direction perpendicular to the membrane is probed in reflectometry measurements.
+
     The Density Profile Analysis can show segregation or cluster order formation, for example during the formation of micelles.
     """
 
@@ -44,7 +42,7 @@ class DensityProfile(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
@@ -123,12 +121,20 @@ class DensityProfile(IJob):
 
         self._extent = 0.0
 
-    def run_step(self, index):
-        """
-        Runs a single step of the job.
+    def run_step(self, index: int):
+        """Runs a single step of the job.
 
-        @param index: the index of the step.
-        @type index: int.
+        Parameters
+        ----------
+        index : int
+            The index of the step.
+
+        Returns
+        -------
+        int
+            Index calculated.
+        tuple[float, np.ndarray]
+            Axis length and density profile.
         """
 
         # get the Frame index
@@ -145,40 +151,46 @@ class DensityProfile(IJob):
 
         dp_per_frame = {}
 
-        for k, v in self._indices_per_element.items():
-            h = np.histogram(
-                box_coords[v, axis_index], bins=self._n_bins, range=[0.0, 1.0]
+        for element, indices in self._indices_per_element.items():
+            dp_per_frame[element], _bins = np.histogram(
+                box_coords[indices, axis_index],
+                bins=self._n_bins,
+                range=(0.0, 1.0),
             )
-            dp_per_frame[k] = h[0]
 
         return index, (axis_length, dp_per_frame)
 
-    def combine(self, index, x):
+    def combine(self, index: int, data: tuple[float, dict[str, np.ndarray]]) -> None:
+        """Combine results together.
+
+        Parameters
+        ----------
+        index : int
+            The index of the step.
+        data : tuple[float, dict[str, np.ndarray]]
+            Axis length and density profile.
         """
-        @param index: the index of the step.
-        @type index: int.
 
-        @param x:
-        @type x: any.
-        """
+        self._extent, density_profile = data
 
-        self._extent += x[0]
-
-        for element, hist in list(x[1].items()):
+        for element, hist in density_profile.items():
             self._outputData[f"dp_{element}"] += hist
 
-    def finalize(self):
+    def finalize(self) -> None:
         """
         Finalize the job.
         """
 
         n_atoms_per_element = self.configuration["atom_selection"].get_natoms()
-        for element in n_atoms_per_element.keys():
-            self._outputData[f"dp_{element}"] += self.numberOfSteps
+
+        for element in n_atoms_per_element:
+            self._outputData[f"dp_{element}"] /= self.numberOfSteps
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, n_atoms_per_element, 1)
+
         assign_weights(self._outputData, weight_dict, "dp_%s")
+
         dp_total = weighted_sum(
             self._outputData,
             weight_dict,
@@ -189,9 +201,7 @@ class DensityProfile(IJob):
             "dp_total", "LineOutputVariable", dp_total, axis="r", units="au"
         )
 
-        self._extent /= self.numberOfSteps
-
-        r_values = self._extent * np.linspace(0, 1, self._n_bins + 1)
+        r_values = np.linspace(0, self._extent, self._n_bins + 1)
         self._outputData["r"][:] = (r_values[1:] + r_values[:-1]) / 2
 
         self._outputData.write(
