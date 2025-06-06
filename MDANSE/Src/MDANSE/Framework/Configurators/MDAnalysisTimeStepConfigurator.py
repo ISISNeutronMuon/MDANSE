@@ -19,6 +19,12 @@ from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
 
 
 class MDAnalysisTimeStepConfigurator(FloatConfigurator):
+    """Input for the trajectory time step in the MDAnalysis converter.
+
+    MDAnalysis will attempt to determine the correct value of the time step
+    based on the input files. That value is not guaranteed to be correct.
+    """
+
     _default = 0.0
 
     def configure(self, value):

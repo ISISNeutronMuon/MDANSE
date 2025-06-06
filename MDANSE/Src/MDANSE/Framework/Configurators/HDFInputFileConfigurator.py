@@ -19,9 +19,7 @@ from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfig
 
 
 class HDFInputFileConfigurator(InputFileConfigurator):
-    """
-    This configurator allows to input an HDF file as input file.
-    """
+    """Uses an .mda file from another analysis as input."""
 
     _default = "INPUT_FILENAME.mda"
 

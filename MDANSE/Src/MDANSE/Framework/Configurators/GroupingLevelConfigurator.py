@@ -14,28 +14,18 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import collections
-
-
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
 )
 
 
 class GroupingLevelConfigurator(SingleChoiceConfigurator):
-    """
-    This configurator allows to choose the level of granularity in the atom selection.
+    """Define how the partial results will be grouped in the output.
 
-    When reading the trajectory, the level of granularity will be applied by grouping the atoms of the selection
-    to a single dummy-atoms located on the center of gravity of those atoms.
-
-    The level of granularity currently supported are:
-
-    * 'atom': no grouping will be performed
-    * 'group': the atoms that belongs to an AtomCluster object will be grouped as a single atom per object while the ones that belongs to a Molecule, NucleotideChain, PeptideChain and Protein object will be grouped according to the chemical group they belong to (e.g. peptide group, methyl group ...)
-    * 'residue': the atoms that belongs to anAtomCluster or Molecule object will be grouped as a single atom per object while the ones thta belongs to a NucleotideChain, PeptideChain or Protein object will be grouped according to the residue to which they belong to (e.g. Histidine, Cytosyl ...)
-    * 'chain': the atoms that belongs to an AtomCluster or Molecule object will be grouped as a single atom per object while the ones that belongs to a NucleotideChain, PeptideChain or Protein object will be grouped according to the chain they belong to
-    * 'molecule': the atoms that belongs to any chemical entity will be grouped as a single atom per object
+    'atom' - partial results for each chemical elements are output.
+    'molecule' - for each molecule type, a set of outputs will be created,
+      showing how different elements in that molecule contributed to the
+      total signal.
     """
 
     _default = "atom"

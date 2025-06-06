@@ -17,11 +17,11 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class BooleanConfigurator(IConfigurator):
-    """
-    This Configurator allows to input a Boolean Value (True or False).
+    """Sets a value to a logical True or False.
 
-    The input value can be directly provided as a Python boolean or by the using the following (standard)
-     representation of a boolean: 'true'/'false', 'yes'/'no', 'y'/'n', '1'/'0', 1/0
+    The input value can be directly provided as a Python boolean
+    or by the using the following (standard)
+    representation of a boolean: 'true'/'false', 'yes'/'no', 'y'/'n', '1'/'0', 1/0
     """
 
     _default = False

@@ -21,9 +21,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
 
 
 class IntegerConfigurator(IConfigurator):
-    """
-    This Configurator allows to input an integer.
-    """
+    """Inputs a single integer number."""
 
     _default = 0
 

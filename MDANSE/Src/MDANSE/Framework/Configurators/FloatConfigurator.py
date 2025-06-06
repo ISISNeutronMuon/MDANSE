@@ -19,9 +19,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class FloatConfigurator(IConfigurator):
-    """
-    This Configurator allows to input a float.
-    """
+    """Inputs a single floating-point number."""
 
     _default = 0
 

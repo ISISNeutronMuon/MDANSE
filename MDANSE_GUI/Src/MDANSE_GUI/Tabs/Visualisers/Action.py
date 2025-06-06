@@ -108,7 +108,6 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "GroupingLevelConfigurator": ComboWidget,
     "SingleChoiceConfigurator": ComboWidget,
     "QVectorsConfigurator": QVectorsWidget,
-    "InputDirectoryConfigurator": InputDirectoryWidget,
     "OutputDirectoryConfigurator": OutputDirectoryWidget,
     "OutputStructureConfigurator": OutputStructureWidget,
     "OutputTrajectoryConfigurator": OutputTrajectoryWidget,

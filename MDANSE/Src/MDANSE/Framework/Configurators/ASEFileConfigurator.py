@@ -23,9 +23,7 @@ from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 
 class ASEFileConfigurator(FileWithAtomDataConfigurator):
-    """
-    This Configurator allows to set an input file.
-    """
+    """Sets an input file for the ASE converter."""
 
     def parse(self):
         try:

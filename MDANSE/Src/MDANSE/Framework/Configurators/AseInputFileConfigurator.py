@@ -22,9 +22,7 @@ from MDANSE.MLogging import LOG
 
 
 class AseInputFileConfigurator(InputFileConfigurator):
-    """
-    This Configurator allows to set an input file.
-    """
+    """Sets an input file for the ASE-based converters."""
 
     _default = ""
     _allowed_formats = ["guess"] + [str(x) for x in all_formats.keys()]

@@ -19,7 +19,10 @@ from MDANSE.Framework.Configurators.IntegerConfigurator import IntegerConfigurat
 
 
 class DerivativeOrderConfigurator(IntegerConfigurator):
-    """Configurator used when numerical derivatives are required."""
+    """Specifies the order of a numerical derivative.
+
+    Values from 1 to 5 are allowed.
+    """
 
     _default = 3
 

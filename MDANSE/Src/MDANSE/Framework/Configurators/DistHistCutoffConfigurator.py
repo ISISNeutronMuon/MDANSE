@@ -6,6 +6,12 @@ from .RangeConfigurator import RangeConfigurator
 
 
 class DistHistCutoffConfigurator(RangeConfigurator):
+    """Range of interatomic distances for a histogram.
+
+    It does not allow distances large enough to include
+    the periodic image of any atom in the system.
+    """
+
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self._max_value = kwargs.get("max_value", True)

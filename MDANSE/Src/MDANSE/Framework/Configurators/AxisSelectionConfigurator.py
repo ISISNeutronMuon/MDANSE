@@ -21,12 +21,10 @@ from MDANSE.MolecularDynamics.TrajectoryUtils import find_atoms_in_molecule
 
 
 class AxisSelectionConfigurator(IConfigurator):
-    """
-    This configurator allows to define a local axis per molecule.
+    """Defines a local axis per molecule.
 
-    For each molecule, the axis is defined using the coordinates of two atoms of the molecule.
-
-    :note: this configurator depends on 'trajectory' configurator to be configured.
+    For each molecule, the axis is defined using the coordinates
+    of two atoms of the molecule.
     """
 
     _default = None

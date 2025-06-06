@@ -23,6 +23,8 @@ from .InputFileConfigurator import InputFileConfigurator
 
 
 class FileWithAtomDataConfigurator(InputFileConfigurator):
+    """Parent class for handling files that contain atom information."""
+
     def configure(self, filepath: str) -> None:
         """
         Parameters

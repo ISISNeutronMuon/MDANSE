@@ -17,17 +17,10 @@ from MDANSE.Framework.Configurators.RangeConfigurator import RangeConfigurator
 
 
 class FramesConfigurator(RangeConfigurator):
-    """
-    This configurator allows to input a frame selection for the analysis.
+    """Select the trajectory frames on which to run the analysis.
 
-    The frame selection can be input as:
-
-    #. a 3-tuple where the 1st, 2nd will correspond respectively to the indices of the first and \
-    last (excluded) frames to be selected while the 3rd element will correspond to the step number between two frames. For example (1,11,3) will give 1,4,7,10
-    #. *'all'* keyword, in such case, all the frames of the trajectory are selected
-    #. ``None`` keyword, in such case, all the frames of the trajectory are selected
-
-    :note: this configurator depends on 'trajectory' configurator to be configured
+    The frame selection can be input as three numbers, in the format
+    of (first, last, step).
     """
 
     _label = "Subset of frames to be selected (first, last, step size)"

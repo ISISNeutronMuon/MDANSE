@@ -90,8 +90,7 @@ class AtomTransmuter:
 
 
 class AtomTransmutationConfigurator(IConfigurator):
-    """This configurator allows to define a set of atoms to be
-    transmuted to a given chemical element.
+    """Assigns different chemical elements to selected atoms.
 
     For some analysis it can be necessary to change the nature of the
     chemical element of a given part of the system to have results
@@ -105,6 +104,7 @@ class AtomTransmutationConfigurator(IConfigurator):
     ----------
     _default : str
         The defaults transmutation setting.
+
     """
 
     _default = "{}"
