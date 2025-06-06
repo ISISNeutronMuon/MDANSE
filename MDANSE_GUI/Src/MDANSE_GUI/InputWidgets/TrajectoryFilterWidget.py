@@ -516,7 +516,7 @@ class FilterSettingGroup(QObject):
     def collect_inputs(self) -> None:
         """Slot: iterate over input widgets, collecting their values and update preferences"""
         for name, widget in self.widgets.items():
-            if widget and (name in self.attributes):
+            if widget and name in self.attributes:
                 self.attributes[name] = self.visit(widget)
 
         self._settings_updated.emit(self.attributes)
