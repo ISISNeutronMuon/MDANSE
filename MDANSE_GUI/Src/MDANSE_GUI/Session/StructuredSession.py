@@ -51,7 +51,6 @@ class UserSettingsModel(QStandardItemModel):
     def refresh(self):
         # self._settings.load_from_file()
         self.populate_model()
-        return
 
     @Slot()
     def append_group(self):

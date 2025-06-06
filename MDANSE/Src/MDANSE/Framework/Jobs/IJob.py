@@ -214,49 +214,45 @@ class IJob(Configurable, metaclass=SubclassFactory):
         parameters : Optional[dict[str, Any]]
             If not None, the parameters with which the job file will be built.
         """
+        if parameters is None:
+            parameters = cls.get_default_parameters()
+
+        parameters = {
+            key: (val, label) if not isinstance(val, Path) else (str(val), label)
+            for key, (val, label) in sorted(parameters.items())
+        }
+
+        param_str = "\n".join(
+            f"    {k!r}: {v!r}," + ("# " + label if label else "")
+            for k, (v, label) in parameters.items()
+        )
 
         with open(jobFile, "w") as f:
-            # The first line contains the call to the python executable. This is necessary for the file to
-            # be autostartable.
-            f.write(f"#!{sys.executable}\n\n")
+            f.write(f"""\
+#!{sys.executable}
 
-            # Writes the input file header.
-            f.write("########################################################\n")
-            f.write("# This is an automatically generated MDANSE run script #\n")
-            f.write("########################################################\n\n")
+########################################################
+# This is an automatically generated MDANSE run script #
+########################################################
 
-            # Write the import.
-            f.write("from MDANSE.Framework.Jobs.IJob import IJob\n\n")
+from MDANSE.Framework.Jobs.IJob import IJob
 
-            f.write("########################################################\n")
-            f.write("# Job parameters                                       #\n")
-            f.write("########################################################\n\n")
+########################################################
+# Job parameters                                       #
+########################################################
 
-            # Writes the line that will initialize the |parameters| dictionary.
-            if parameters is None:
-                parameters = cls.get_default_parameters()
+parameters = {{
+{param_str}
+}}
 
-            f.write("parameters = {\n")
-            for k, (v, label) in sorted(parameters.items()):
-                # Force paths to str
-                if isinstance(v, Path):
-                    v = str(v)
+########################################################
+# Setup and run the analysis                           #
+########################################################
 
-                if label:
-                    f.write(f"    {repr(k) + ': ' + repr(v) + ',':<50}  # {label}\n")
-                else:
-                    f.write(f"    {repr(k) + ': ' + repr(v) + ',':<50}\n")
-            f.write("}\n")
-
-            f.write("\n")
-            f.write("########################################################\n")
-            f.write("# Setup and run the analysis                           #\n")
-            f.write("########################################################\n")
-            f.write("\n")
-
-            f.write('if __name__ == "__main__":\n')
-            f.write(f"    {cls.__name__.lower()} = IJob.create({cls.__name__!r})\n")
-            f.write(f"    {cls.__name__.lower()}.run(parameters, status=True)\n")
+if __name__ == "__main__":
+    {cls.__name__.lower()} = IJob.create({cls.__name__!r}
+    {cls.__name__.lower()}.run(parameters, status=True)
+""")
 
         os.chmod(jobFile, stat.S_IRWXU)
 

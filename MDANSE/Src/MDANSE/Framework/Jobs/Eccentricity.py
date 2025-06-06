@@ -22,7 +22,7 @@ from MDANSE.Mathematics.Geometry import center_of_mass
 
 
 class Eccentricity(IJob):
-    """Computes the eccentricity of a selected set of atoms.
+    r"""Computes the eccentricity of a selected set of atoms.
 
     The eccentricity is calculated from the principal moments of
     inertia via the equation

@@ -369,7 +369,7 @@ class McStasVirtualInstrument(IJob):
             typ = FS["type"].split("(")[0].strip()
             if typ != "multiarray_1d":
                 FS = self.save_single(FS)
-                exit()
+                raise OSError("Invalid")
                 Datfile = 1
 
         # Get filenames from the sim file

@@ -85,7 +85,7 @@ class McStasParametersConfigurator(IConfigurator):
             [
                 (v[0], [v[1], v[2]])
                 for v in re.findall(
-                    "\s*(\w+)\s*\((\w+)\)\s*\[default='(\S+)'\]", parameters_string
+                    r"\s*(\w+)\s*\((\w+)\)\s*\[default='(\S+)'\]", parameters_string
                 )
                 if v[0] not in self._exclude
             ]

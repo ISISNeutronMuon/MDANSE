@@ -28,7 +28,7 @@ class NeutronDynamicTotalStructureFactorError(Error):
 
 
 class NeutronDynamicTotalStructureFactor(IJob):
-    """Combines the coherent and incoherent dynamic structure factors.
+    r"""Combines the coherent and incoherent dynamic structure factors.
 
     The partial results need to be calculated before using the Dynamic
     Coherent/Incoherent Structure Factor jobs with the same

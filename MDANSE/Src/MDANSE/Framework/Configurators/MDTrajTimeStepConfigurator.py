@@ -32,7 +32,7 @@ class MDTrajTimeStepConfigurator(FloatConfigurator):
         except (TypeError, ValueError):
             pass
 
-        if value is None or value == "" or value == 0.0:
+        if value in {None, "", 0.0}:
             coord_conf = self.configurable[self.dependencies["coordinate_files"]]
             top_conf = self.configurable[self.dependencies["topology_file"]]
             if coord_conf.valid and top_conf.valid:

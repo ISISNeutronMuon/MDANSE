@@ -78,7 +78,6 @@ class WidgetBase(QObject):
         layout_type: Layouts = "QHBoxLayout",
         **kwargs,
     ):
-        parent = parent
         super().__init__(*args, parent=parent)
         self._value = None
         self._relative_size = 1

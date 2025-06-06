@@ -48,8 +48,8 @@ def single_search(parent_class: type, name: str, case_sensitive: bool = False):
             rhand = name.lower()
         if lhand == rhand:
             return parent_class._registered_subclasses[skey]
-    else:
-        return None
+
+    return None
 
 
 def recursive_search(parent_class: type, name: str):

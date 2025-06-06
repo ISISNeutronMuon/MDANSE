@@ -20,6 +20,7 @@ from pathlib import Path
 
 import h5py
 import numpy as np
+from more_itertools import first
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
@@ -56,7 +57,7 @@ class MdanseTrajectory:
 
         Parameters
         ----------
-        h5_filename : Union[Path, str]
+        h5_filename : Path or str
             path to the trajectory file
 
         """
@@ -81,40 +82,39 @@ class MdanseTrajectory:
         self._load_unit_cells()
 
     @classmethod
-    def file_is_right(self, filename: Path | str) -> bool:
+    def file_is_right(cls, filename: Path | str) -> bool:
         """Check if the input file is likely to be an .mdt trajectory."""
         filename = Path(filename)
-        result = True
+
         try:
             file_object = h5py.File(filename)
         except Exception:
-            result = False
-        else:
-            try:
-                with MdanseTrajectory(filename) as mdtraj:
-                    chem = ChemicalSystem(file_object, mdtraj)
-                    chem.load(filename)
-            except Exception:
-                LOG.warning(
-                    f"Could not load ChemicalSystem from {filename}. MDANSE will try"
-                    " to read it as H5MD next.",
-                )
-                result = False
-            else:
-                return True
-            try:
-                grp = file_object["/composition"]
-                _ = grp.attrs["name"]
-            except KeyError:
-                LOG.warning(
-                    f"Could not find /composition from {filename}. MDANSE will try"
-                    " to read it as H5MD next.",
-                )
-                result = False
-            else:
-                result = True
-            file_object.close()
-        return result
+            return False
+
+        try:
+            mdtraj = cls(filename)
+            chem = ChemicalSystem(file_object, mdtraj)
+            chem.load(filename)
+        except Exception:
+            LOG.warning(
+                f"Could not load ChemicalSystem from {filename}. MDANSE will try"
+                " to read it as H5MD next.",
+            )
+            return False
+
+        try:
+            grp = file_object["/composition"]
+            _ = grp.attrs["name"]
+        except KeyError:
+            LOG.warning(
+                f"Could not find /composition from {filename}. MDANSE will try"
+                " to read it as H5MD next.",
+            )
+            return False
+
+        file_object.close()
+
+        return True
 
     def close(self):
         """Close the trajectory."""
@@ -525,8 +525,12 @@ class MdanseTrajectory:
         """
         return variable in self._h5_file["/configuration"]
 
-    def get_atom_property(self, symbol: str, atom_property: str) -> float | int | str:
-        """Return the value of the 'atom_property' for atom type 'symbol'.
+    def get_atom_property(
+        self,
+        symbol: str,
+        property_name: str,
+    ) -> float | int | str:
+        """Get the value of a property for an atom type.
 
         The priority is given to the values stored in the trajectory file.
         If the atom property or type are not included in the trajectory,
@@ -550,40 +554,49 @@ class MdanseTrajectory:
             If no database contained the required entry.
 
         """
-        if not self._has_database:
-            return ATOMS_DATABASE.get_atom_property(symbol, atom_property)
-        if symbol not in self._has_atoms:
-            if symbol in self._h5_file["/atom_database"]:
-                self._has_atoms.append(symbol)
-            else:
-                return ATOMS_DATABASE.get_atom_property(symbol, atom_property)
-        if atom_property not in self._property_map:
-            temp = np.where(
-                self._h5_file["/atom_database/property_labels"][:]
-                == atom_property.encode("utf-8"),
-            )[0]
-            if len(temp) == 0:
-                if atom_property == "dummy":
-                    try:
-                        return ATOMS_DATABASE.get_atom_property(symbol, atom_property)
-                    except KeyError:
-                        if (
-                            "_" in symbol
-                        ):  # this is most likely an artificial atom from a molecule
-                            return 0  # the molecule atoms are not dummy
-                else:
+        if not self._has_database or (
+            symbol not in self._has_atoms
+            and symbol not in self._h5_file["/atom_database"]
+        ):
+            return ATOMS_DATABASE.get_atom_property(symbol, property_name)
+
+        if symbol not in self._has_atoms and symbol in self._h5_file["/atom_database"]:
+            self._has_atoms.append(symbol)
+
+        if property_name not in self._property_map:
+            index = first(
+                np.where(
+                    self._h5_file["/atom_database/property_labels"][:]
+                    == property_name.encode("utf-8"),
+                )[0],
+                None,
+            )
+
+            if index is None:
+                if property_name != "dummy":
                     raise KeyError(
-                        f"Property {atom_property} is not in the trajectory's"
+                        f"Property {property_name} is not in the trajectory's"
                         " internal database.",
                     )
-            index = temp.flatten()[0]
-            self._property_map[atom_property] = index
-        index = self._property_map[atom_property]
+
+                try:
+                    return ATOMS_DATABASE.get_atom_property(symbol, property_name)
+                except KeyError:
+                    if (
+                        "_" in symbol
+                    ):  # this is most likely an artificial atom from a molecule
+                        return 0  # the molecule atoms are not dummy
+
+            self._property_map[property_name] = index
+
+        index = self._property_map[property_name]
         if index not in self._data_types:
             self._data_types[index] = self._h5_file["/atom_database/property_types"][
                 index
             ]
+
         data_type = self._data_types[index]
+
         if index not in self._data_units:
             data_unit = "none"
             try:
@@ -599,31 +612,39 @@ class MdanseTrajectory:
                 data_unit = unit_lookup[index]
             self._data_units[index] = data_unit
         data_unit = self._data_units[index]
+
         if (symbol, index) not in self._property_cache:
             value = self._h5_file[f"/atom_database/{symbol}"][index]
             if data_type != b"complex":
                 value = value.real
             self._property_cache[(symbol, index)] = value
+
         value = self._property_cache[(symbol, index)]
-        if atom_property == "color":
+
+        if property_name == "color":
             value = str_to_num(value)
-            return ";".join(map(str, int(value).to_bytes(3, "big")))
-        if data_type == b"int":
-            return int(value)
-        if data_type == b"str":
+            out = ";".join(map(str, int(value).to_bytes(3, "big")))
+
+        elif data_type == b"int":
+            out = int(value)
+
+        elif data_type == b"str":
             if isinstance(value, bytes):
-                return value.decode("utf-8")
-            return value
-        value = str_to_num(value)
-        unit_conv = {
-            b"fm": "ang",
-            b"barn": "ang2",
-        }
-        if data_unit in unit_conv:
-            return measure(value, data_unit.decode("utf-8")).toval(
-                unit_conv.get(data_unit)
-            )
-        return value
+                value = value.decode("utf-8")
+            out = value
+
+        else:
+            out = str_to_num(value)
+            unit_conv = {
+                b"fm": "ang",
+                b"barn": "ang2",
+            }
+            if data_unit in unit_conv:
+                out = measure(out, data_unit.decode("utf-8")).toval(
+                    unit_conv[data_unit]
+                )
+
+        return out
 
     def atoms_in_database(self) -> list[str]:
         """Return the list of all the atom types in trajectory's database.

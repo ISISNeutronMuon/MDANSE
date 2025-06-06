@@ -87,22 +87,20 @@ class VectorModel(QStandardItemModel):
             result = [inner_type(x) for x in tempstring.split(",")]
             if len(result) == 3:
                 return result
-            else:
-                return "failed"
         elif vtype == "VectorConfigurator":
             inner_type = self._generator.settings[vname][1]["valueType"]
             tempstring = value.strip("()[] ")
             result = [inner_type(x) for x in tempstring.split(",")]
             if len(result) == 3:
                 return result
-            else:
-                return "failed"
         elif vtype == "FloatConfigurator":
             return float(value)
         elif vtype == "IntegerConfigurator":
             return int(value)
         else:
             return value
+
+        return "failed"
 
 
 class QVectorsWidget(WidgetBase):

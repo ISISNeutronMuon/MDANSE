@@ -25,7 +25,7 @@ from MDANSE.Mathematics.Signal import get_spectrum
 
 
 class DynamicIncoherentStructureFactor(IJob):
-    """Computes the dynamic incoherent structure factor :math:`S_{\text{inc}}(\mathbf{q},\omega)` for a set of atoms.
+    r"""Computes the dynamic incoherent structure factor :math:`S_{\text{inc}}(\mathbf{q},\omega)` for a set of atoms.
 
     It can be compared to experimental data e.g. the quasielastic scattering due to
     diffusion processes.
