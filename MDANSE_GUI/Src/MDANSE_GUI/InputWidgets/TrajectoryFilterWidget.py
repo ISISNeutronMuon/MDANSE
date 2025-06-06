@@ -254,7 +254,7 @@ class FilterPreferencesGroup(QObject):
         name : str
             The name of the instance attribute to be stored, or key string.
         widget : QWidget
-            The wadget to be stored, or value corresponding to the key.
+            The widget to be stored, or value corresponding to the key.
 
         Returns
         -------
@@ -357,7 +357,7 @@ class FilterPreferencesGroup(QObject):
         Parameters
         ----------
         widget : QWidget
-            The wadget whose value we want to get.
+            The widget whose value we want to get.
 
         Returns
         -------
@@ -460,7 +460,7 @@ class FilterSettingGroup(QObject):
         name : str
             The name of the instance attribute to be stored, or key string.
         widget : QWidget
-            The wadget to be stored, or value corresponding to the key.
+            The widget to be stored, or value corresponding to the key.
 
         Returns
         -------
@@ -493,7 +493,7 @@ class FilterSettingGroup(QObject):
         Parameters
         ----------
         widget : QWidget
-            The wadget whose value we want to get.
+            The widget whose value we want to get.
 
         Returns
         -------
