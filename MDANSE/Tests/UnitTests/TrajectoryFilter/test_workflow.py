@@ -76,7 +76,18 @@ def mean_absolute_error(x1: np.ndarray, x2: np.ndarray) -> float:
 def normalise(
     data: np.ndarray, reference: np.ndarray = None, numerator: float = 1.0
 ) -> np.ndarray:
-    """ """
+    """Normalise an array to a given scale factor, with the option to use another
+    reference array for comparison.
+
+    :Parameters:
+        #. data (np.ndarray): Array to normalise
+        #. reference (np.ndarray): Array to reference during normalisation. For example,
+            this may be an array that determines the scaling of the input data in order to maintain
+            proportions during comparison with eachother.
+        #. numerator (float): Overall scale factor to apply
+    :Returns:
+        #. np.ndarray: Normalised data
+    """
     if reference is not None:
         coeff = numerator / reference.max()
     else:
