@@ -716,17 +716,11 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         list :
             List of length 2 containing the critical frequency bounds.
         """
-        cutoff = self.retrieve_widget("cutoff_freq")
-        bound = self.retrieve_widget("bound_freq")
-
-        return np.array(
-            sorted(
-                [
-                    cutoff.value(),
-                    bound.value(),
-                ]
-            )
-        ).tolist()
+        values = [
+            self.retrieve_widget("cutoff_freq").value(),
+            self.retrieve_widget("bound_freq").value(),
+        ]
+        return sorted(values)
 
     def toggle_bound_frequencies(self, on: bool = True) -> None:
         """Toggle the pair of critical frequency inputs on/off.
