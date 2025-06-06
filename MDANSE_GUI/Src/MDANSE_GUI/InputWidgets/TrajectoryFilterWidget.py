@@ -1090,7 +1090,7 @@ class FilterDesigner(QDialog):
             self.setting_stack_layout.addWidget(widget)
 
         # Set current index for settings stack layout
-        index = list(FILTER_MAP.keys()).index(self.settings["filter"])
+        index = list(FILTER_MAP).index(self.settings["filter"])
         self.setting_stack_layout.setCurrentIndex(index)
 
         settings_groupbox.setLayout(self.setting_stack_layout)
