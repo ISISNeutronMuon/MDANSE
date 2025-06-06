@@ -19,10 +19,14 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 class MoleculeSelectionConfigurator(IConfigurator):
     """Picks a molecule type present in the trajectory.
 
+    If the molecule labels are not available, you can detect the molecules
+    using TrajectoryEditor.
+
     Attributes
     ----------
     _default : str
         Empty by default.
+
     """
 
     _default = ""

@@ -24,11 +24,11 @@ from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
 
 
 class WeightsConfigurator(SingleChoiceConfigurator):
-    """
-    This configurator allows to select how the properties that depends on atom type will be weighted when computing
-    the total contribution of all atoms.
+    """Selects the atom property to be used by the weighting scheme.
 
-    Any numeric property defined in MDANSE.Data.ElementsDatabase.ElementsDatabase can be used as a weigh.
+    This configurator allows to select how the analysis results will
+    weighted when computing the total result.
+
     """
 
     _default = "equal"

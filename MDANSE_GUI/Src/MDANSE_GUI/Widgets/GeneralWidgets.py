@@ -253,11 +253,7 @@ class InputFactory:
         """
         kind = kwargs.get("kind", "String")
 
-        if kind == "StringConfigurator":
-            result = InputFactory.createSingle(*args, **kwargs)
-        elif kind == "PythonObjectConfigurator":
-            result = InputFactory.createSingle(*args, **kwargs)
-        elif kind == "IntegerConfigurator":
+        if kind == "IntegerConfigurator":
             result = InputFactory.createSingle(*args, **kwargs)
         elif kind == "RangeConfigurator":
             result = InputFactory.createMultiple(*args, **kwargs)
@@ -269,8 +265,6 @@ class InputFactory:
             result = InputFactory.createBool(*args, **kwargs)
         elif kind == "InputFileConfigurator":
             result = InputFactory.createFile(*args, direction="in", **kwargs)
-        elif kind == "SingleOutputFileConfigurator":
-            result = InputFactory.createFile(*args, direction="out", **kwargs)
         elif kind == "OutputTrajectoryConfigurator":
             result = InputFactory.createTrajectory(*args, direction="out", **kwargs)
         else:

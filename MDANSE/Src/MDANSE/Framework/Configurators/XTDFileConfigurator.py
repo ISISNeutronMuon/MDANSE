@@ -34,7 +34,7 @@ from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
 
 class XTDFileConfigurator(FileWithAtomDataConfigurator):
     """Opens and reads an XTD file.
-    
+
     The information contained in the XTD file will be used
     to construct an instance of ChemicalSystem.
     """

@@ -21,9 +21,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
 
 
 class SingleChoiceConfigurator(IConfigurator):
-    """
-    This Configurator allows to select a single item among multiple choices.
-    """
+    """Selects a single item from multiple choices."""
 
     _default = []
 

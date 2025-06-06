@@ -21,6 +21,12 @@ from .MultiInputFileConfigurator import MultiInputFileConfigurator
 
 
 class MDTrajTrajectoryFileConfigurator(MultiInputFileConfigurator):
+    """Passes one or more trajectory files to the MDTraj converter.
+
+    Multiple files can be concatenated, but they have to be all in
+    the same format.
+    """
+
     def configure(self, value):
         super().configure(value)
 

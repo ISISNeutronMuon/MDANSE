@@ -23,7 +23,7 @@ from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 class MDAnalysisTopologyFileConfigurator(FileWithAtomDataConfigurator):
     """Constructs and MDAnalysis.Universe from the input file.
-    
+
     The format of the input file can be specified manually, or
     set to AUTO. The automatic format determination typically
     fails for filenames without an extension.
