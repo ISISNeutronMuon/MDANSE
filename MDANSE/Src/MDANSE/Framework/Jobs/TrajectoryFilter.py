@@ -211,7 +211,7 @@ class TrajectoryFilter(IJob):
         outputFile.create_group("metadata/filter").create_dataset(
             "trajectory_filter",
             (1,),
-            data=filter.__str__(),
+            data=str(filter),
             dtype=h5py.string_dtype(),
         )
 
