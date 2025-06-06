@@ -41,7 +41,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
         Returns
         -------
-
+        str
             A string representation of the default filter settings dictionary
         """
         return cls._default
