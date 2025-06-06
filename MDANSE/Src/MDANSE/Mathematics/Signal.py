@@ -1161,7 +1161,7 @@ def filter_description_string(
     :Returns:
         #. str: string representation of the filter settings dictionary
     """
-    return f'{{ "filter": "{filter.__name__}", "attributes": {json.dumps(settings)}}}'
+    return json.dumps({"filter": filter.__name__, "attributes": settings})
 
 
 def power_spectrum(
