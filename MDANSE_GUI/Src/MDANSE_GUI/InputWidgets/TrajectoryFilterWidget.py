@@ -1051,7 +1051,7 @@ class FilterDesigner(QDialog):
         """
         # Add filter type combobox
         type_cbox = QComboBox()
-        for filter_name in FILTER_MAP.keys():
+        for filter_name in FILTER_MAP:
             type_cbox.addItem(filter_name)
 
         type_label = QLabel("Filter type")
