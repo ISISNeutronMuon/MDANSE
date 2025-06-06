@@ -1241,7 +1241,7 @@ class FilterDesigner(QDialog):
             f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff, self.current_filter_units()), FLOAT_SPINBOX_DECIMALS)} meV, Sample frequency: {sample_freq} THz"
         )
 
-    def render_canvas_assets(self, attributes: dict = None) -> None:
+    def render_canvas_assets(self, attributes: dict | None = None) -> None:
         """Render all elements of the filter designer graphing area, including data text
 
         Parameters
