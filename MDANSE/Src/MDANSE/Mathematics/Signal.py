@@ -365,7 +365,7 @@ class Filter(ABC):
         FFT: int = 1
 
     class Flags(Enum):
-        """Enumeration for flags associated with useage of filters"""
+        """Enumeration for flags associated with usage of filters"""
 
         DIGITAL_ONLY: int = 0
         DIGITAL_AND_ANALOGUE: int = 1
