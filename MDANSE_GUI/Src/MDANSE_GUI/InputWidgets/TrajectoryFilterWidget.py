@@ -1083,7 +1083,7 @@ class FilterDesigner(QDialog):
                 render_func=self.render_canvas_assets,
                 flags=filter_class.flags,
             )
-            self.settings_group.update({name: group_obj})
+            self.settings_group[name] = group_obj
             widget = QWidget()
             layout = self.settings_group[name].as_grid()
             widget.setLayout(layout)
