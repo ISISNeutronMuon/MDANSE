@@ -1,8 +1,12 @@
 
 .. _parameters:
 
-Glossary of Parameters
-=======================
+Commonly used parameters
+========================
+
+This is a detailed explanation of a few input parameters that are most commonly
+used by MDANSE.
+A full list can be found in section :ref:`full_parameter_list`.
 
 Frames
 ~~~~~~
@@ -19,6 +23,28 @@ Frames
 | Frame step   | int     | 1                | Determines the periodicity of which steps are used      |
 |              |         |                  | and which are skipped. 1 means that all frames are      |
 |              |         |                  | read, 2 means every other is read, etc.                 |
++--------------+---------+------------------+---------------------------------------------------------+
+
+
+Correlation Frames
+~~~~~~~~~~~~~~~~~~
+
++--------------+---------+------------------+---------------------------------------------------------+
+| Parameter    | Format  | Default Value    | Description                                             |
++==============+=========+==================+=========================================================+
+| First frame  | int     | 0                | The frame from which the analysis will begin, the       |
+|              |         |                  | first frame taken into account.                         |
++--------------+---------+------------------+---------------------------------------------------------+
+| Last frame   | int     | Last frame       | The frame until which the analysis proceeds. The last   |
+|              |         |                  | frame taken into account.                               |
++--------------+---------+------------------+---------------------------------------------------------+
+| Frame step   | int     | 1                | Determines the periodicity of which steps are used      |
+|              |         |                  | and which are skipped. 1 means that all frames are      |
+|              |         |                  | read, 2 means every other is read, etc.                 |
++--------------+---------+------------------+---------------------------------------------------------+
+| Correlation  | int     | Last frame / 2   | Determines the size of the correlation window (in       |
+| frames       |         |                  | frames). This determines the time range of the output   |
+|              |         |                  | of the analysis. See also :ref:`correlation-frames`.      |
 +--------------+---------+------------------+---------------------------------------------------------+
 
 .. _param-qshells:
@@ -42,112 +68,67 @@ Q shells
 +--------------+---------+---------+--------------------------------------------------------+
 
 The *unit* of the Q-vector length in MDANSE is :math:`\text{nm}^{-1}`.
+.. _param-output-files:
+
+Output trajectory
+~~~~~~~~~~~~~~~~~
+
+This is used in every converter, and a few analysis jobs that also output 
+a trajectory (:ref:`analysis-reference-CenterOfMassesTrajectory`,
+:ref:`analysis-reference-TrajectoryEditor`).
+
++--------------+---------+---------+--------------------------------------------------------+
+| Input        | Format  | Default | Description                                            |
++==============+=========+=========+========================================================+
+| filename     | str     |         | The full path to the new file that will be created by  |
+|              |         |         | this run.                                              |
++--------------+---------+---------+--------------------------------------------------------+
+| precision    | int     | 64      | Number of bits used for writing out floating point     |
+|              |         |         | numbers. 64, 32 and 16 are possible                    |
++--------------+---------+---------+--------------------------------------------------------+
+| chunk size   | int     | 128     | Number of atoms to be included in a single chunk of    |
+|              |         |         | the HDF5 datasets in the output trajectory.            |
+|              |         |         | An entire chunk must be loaded to access any number    |
+|              |         |         | in that chunk. Smaller number means faster analysis,   |
+|              |         |         | but also larger files. There rarely any advantage to   |
+|              |         |         | chunks smaller than 128.                               |
++--------------+---------+---------+--------------------------------------------------------+
+| compression  | str     | gzip    | Can be 'none', 'gzip' or 'lzf'. 'none' means no        |
+|              |         |         | compression. For most trajectories, compressing the    |
+|              |         |         | atom coordinate arrays visibly reduces the file size   |
+|              |         |         | at an expense of only a minor slowing down.            |
++--------------+---------+---------+--------------------------------------------------------+
+| log level    | str     | no logs | Can be "no logs", "DEBUG", "INFO", "WARN", "ERROR" or  |
+|              |         |         | "CRITICAL". Not relevant to the output trajectory      |
+|              |         |         | itself, but will change the amount of output in the    |
+|              |         |         | log file of the converter run.                         |
++--------------+---------+---------+--------------------------------------------------------+
+
 
 .. _param-output-files:
 
 Output files
 ~~~~~~~~~~~~
 
-This is one of the two parameters that are present in each analysis, the
-other being :ref:`param-frames`. It usually appears at the bottom of
-an analysis window (:ref:`analysis`), right above the
-buttons. 
+Most analysis types define their output file using this.
 
--  **output files**
-
-+---------------+---------------------------------------------------------------+
-| Output Files  |                                                               |
-+===============+===============================================================+
-|   Format:     | `str`                                                         |
-+---------------+---------------------------------------------------------------+
-|   Default:    | `trajectory_directory_path\<trajectory_filename>_             |
-|               | <analysis_acronym>`                                           |
-+---------------+---------------------------------------------------------------+
-|   Browse:     | The **Browse** button opens a system file browser window,     |
-|               | allowing the navigation of the filesystem.                    |
-+---------------+---------------------------------------------------------------+
-
-**Description:** Specifies the location where analysis results will be stored.
-It's typically composed of a directory path, the name of the HDF file being
-analyzed, and a shortened analysis acronym (e.g., "disf" for dynamic incoherent
-structure factor). If a file with the same name already exists, a unique number
-(n) is appended to avoid overwriting.
-
--  **output formats**
-
-+-------------------+------------------------------------------------------+
-| Output Formats    |                                                      |
-+-------------------+------------------------------------------------------+
-| Format            | Drop-down                                            |
-| Default           | HDF5 (for analysis), HDF (for trajectory conversion) |
-+-------------------+------------------------------------------------------+
-
-*Description:* specifies the :ref:`file_formats` in
-which the analysis results are saved. :ref:`hdf5`,
-:ref:`text_output`, or cominbations of those can be selected.
-The name of these files is given in the 'Basename' string.
-
-Creating selections
-~~~~~~~~~~~~~~~~~~~
-
-There are the following Selections in MDANSE, each of which provides a
-variety of ways to alter the analysis:
-
--  :ref:`param-axis-selection`
--  :ref:`param-atom-selection`
--  :ref:`param-atom-transmutation`
--  :ref:`param-atom-charges`
--  Q Vectors (explored separately in the `next
-   section <#_A3.4._Q_vectors>`__)
-
-The ones relevant to the analysis are present in its window, but some
-can also be performed from :ref:`molecular-viewer`. By
-default, there are no Selections saved in MDANSE; they all have to be
-created manually. Each selection is unique to a trajectory HDF
-file, but all selections are stored in the same folder, $APPDATA/mdanse.
-Therefore, if a selection is to be reuse, it is important to give
-selections unique names even when creating the same selection for
-multiple trajectories. To help with that, all existing saved selection
-can be viewed in the User Definition Viewer which can be accessed from
-the `toolbar <#_Toolbar>`__. To save a selection, type a name in the
-field next to the **Save** button, and then click on the button. This
-will save the selection without closing the window.
-
-.. _param-axis-selection:
-
-Axis Selection/Reference Basis
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Inside an analysis window, Axis Selection looks like this:
-
-The drop-down menu is used to choose one of the existing definitions.
-Only the definitions with the format matching the analysis, i.e. those
-with the same number of selected atoms as the analysis expects, will
-appear. New ones can be created by clicking on the **New definition**
-button, which will open the window below. The details of the currently
-selected definition can be viewed in the User Definition Viewer by
-clicking on the **View selected definition**.
-
-When this window is opened from an analysis window, the 'Number of
-atoms' field at the top will be set to the number of atoms that must be
-selected for the selection to work in the analysis from whose window it
-was opened. The field will also not be editable. Thus, when the New
-definition button is clicked in :ref:`analysis-angular-correlation`
-analysis, the field will be set
-to 2, because that is how many it requires.
-
-The number of atoms indicates how many atoms from one molecule must be
-selected. To select an atom, click on the + button in the 'Molecules'
-list to show which atoms that molecule contains, and then double-click
-the atom. That will cause the chosen atom to appear in the 'Selected
-atoms' list, and its details in the box below. An atom can be removed
-from selection by clicking on it in the 'Selected atoms' list and
-hitting the Delete key on the keyboard.
-
-Axis selection is available for :ref:`analysis-angular-correlation`
-and :ref:`analysis-op` analyses.
-
-
++--------------+-----------+-----------+--------------------------------------------------------+
+| Input        | Format    | Default   | Description                                            |
++==============+===========+===========+========================================================+
+| filename     | str       |           | The full path to the new file that will be created by  |
+|              |           |           | this run. Since multiple formats can be selected, it   |
+|              |           |           | can be used as the base name to which different exten- |
+|              |           |           | sions will be appended for different output formats.   |
++--------------+-----------+-----------+--------------------------------------------------------+
+| format       | list[str] | MDAFormat | Can be ["MDAFormat"], ["TextFormat"] or both can be    |
+|              |           |           | used with ["MDAFormat", "TextFormat"]. MDA format is   |
+|              |           |           | the only format used by the MDANSE_GUI.                |
++--------------+-----------+-----------+--------------------------------------------------------+
+| log level    | str       | no logs   | Can be "no logs", "DEBUG", "INFO", "WARN", "ERROR" or  |
+|              |           |           | "CRITICAL". Not relevant to the output trajectory      |
+|              |           |           | itself, but will change the amount of output in the    |
+|              |           |           | log file of the converter run.                         |
++--------------+-----------+-----------+--------------------------------------------------------+
 
 Atom Selection
 ^^^^^^^^^^^^^^
@@ -159,110 +140,36 @@ included in a selection, or to how many selections can be used
 simultaneously. There can even be none; Atom Selection is entirely
 optional.
 
-Inside an analysis window, Atom Selection appears thusly:
-
-The green button adds a line for another selection, allowing you to
-choose one more selection to apply to that analysis:
-
-The line can be removed by clicking on the red button. The drop-down
-menu and the **View selected definition** button work the way they do in
-Axis Selection <link>. The **Set new selection** button opens the
-following window:
-
-The **Filter by** field contains different ways to access the various
-particles in the loaded trajectory. Clicking on a filter will make all
-the relevant particles appear in the top right box:
-
-Clicking on the particles/groups in that window will highlight them and
-make them appear in the **Selection** box. Together with the buttons for
-logical operations, it is possible to make complex selections, like so:
-
-The large box below the **Selection** box should show information about
-your selection, but it is broken for complex selections. The box at the
-very bottom, next to the **Save** button, is used for naming the
-selection. Each selection must be named with a unique name. The **Save**
-button saves the selection for the loaded trajectory, but it will not
-close the Atom Selection window. Once selection has been saved, it
-should appear in the drop-down menu in the analysis window.
-
-Atom selection is available for all the analyses for which
-:ref:`param-atom-transmutation` is available, as well as all
-:ref:`analysis-trajectory` analyses, :ref:`analysis-gacf`, `Molecular
-Trace <#_Molecular_Trace>`__, `Root Mean Square
-Fluctuation, <#_Root_Mean_Square_1>`__ `Radius of
-Gyration <#_Radius_Of_Gyration>`__, `Solvent Accessible
-Surface <#_Solvent_Accessible_Surface>`__.
+More information about atom selection can be found here: :ref:`atom-selection`.
 
 .. _param-atom-transmutation:
 
 Atom Transmutation
 ^^^^^^^^^^^^^^^^^^
 
-To use Atom Transmutation, simply select an Atom Selection in the grey
-drop-down menu on the left, and then choose the element into which the
-atoms in that Atom Selection will be transmuted from the white drop-down
-menu next to the red button. For example, the below Atom Transmutation
-will transmute all sodium ions into potassium ions:
-
-This parameter is available for the following analyses: `Coordination
-Number <#_Coordination_Number>`__, `Current Correlation
-Function <#_Current_Correlation_Function>`__, `Density Of
-States <#_Density_Of_States>`__, `Density
-Profile <#_Density_Profile>`__, `Dynamic Coherent Structure
-Factor <#_Dynamic_Coherent_Structure>`__, `Dynamic Incoherent Structure
-Factor <#_Dynamic_Incoherent_Structure>`__,
-`Eccentricity <#_Eccentricity>`__, `Elastic Incoherent Structure
-Factor <#_Elastic_Incoherent_Structure>`__, `Gaussian Dynamic Incoherent
-Structure Factor <#_Gaussian_Dynamic_Incoherent>`__, `General Auto
-Correlation Function <#_General_AutoCorrelation_Function>`__, `Mean
-Square Displacement <#_Mean_Square_Displacement>`__, `Neutron Dynamic
-Total Structure Factor <#_Neutron_Dynamic_Total>`__, `Order
-Parameter <#_Order_Parameter>`__, `Pair Distribution
-Function <#_Pair_Distribution_Function>`__, `Position Auto Correlation
-Function <#_Position_AutoCorrelation_Function>`__, `Root Mean Square
-Deviation <#_Root_Mean_Square>`__, `Static Structure
-Factor <#_Static_Structure_Factor>`__, `Velocity Auto Correlation
-Function <#_Velocity_AutoCorrelation_Function>`__, `X-Ray Static
-Structure Factor <#_Xray_Static_Structure>`__.
+Atom transmutation uses the same interface as atom selection.
+Once you have selected the atoms you wanted to transmute,
+you can choose what chemical elements to replace them with,
+and add this change to the total transmutation mapping. 
 
 .. _param-atom-charges:
 
 Atom Charges
 ^^^^^^^^^^^^
 
-This selection works inside an analysis window exactly the same as
-:ref:`param-axis-selection`. The only difference is the window that
-opens when **Set new selection** button is clicked. The Partial Charges
-window appears as below, and allows you to edit the charges at each atom
-inside the system. To do that, simply click on a field in the **charge**
-column and type in a number. The change will be confirmed once you hit
-enter or click outside the field. Once all changes have been made, name
-the selection using the box at the bottom, then click the **Save**
-button, and finally close the window.
-
-This parameter is only available for the
-:ref:`analysis-dacf` analysis.
+The partial charge setting uses the same interface as the atom selection.
+You will most likely need to create several selections one after another.
+Every time you have selected atoms which should have the same charge assigned,
+set their charge and reset the selection. Once all the charges have been set,
+confirm the changes by clicking "Use setting".
 
 .. _param-q-vectors:
 
 Q vectors
 ~~~~~~~~~
 
-Similar to the selections above but specific to `Scattering
-Plugin <#_Scattering>`__\ s, Q vectors give the opportunity to change
-how the analysis is performed. Each window has a part like this:
-
-This section must be filled for analysis to be able to run. Like for
-other selections, there are no definitions by default. Therefore, one
-has to be created by clicking on the **New definition** button. This
-will open a window like in one of the following subsections, which show
-how Q Vectors are defined for each type of Q Vector. There are many
-types, and it is up to you to choose which is the best for a given
-experiment.
-
-Once a definition of choice exists, it can be selected from the
-drop-down menu. The **View selected definition** opens the User
-Definition viewer <link> at the currently selected definition.
+Q vectors can be created using several generators. The generators use
+different input parameters. The details are given here.
 
 Spherical Lattice Vectors
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -603,23 +510,6 @@ Approximated Dispersion Vectors
 |                 |           |                      | Vectors window. Saved vectors may be in a specific format. |    
 +-----------------+-----------+----------------------+------------------------------------------------------------+
 
-
-.. _param-group-coordinates:
-
-Group coordinates
-~~~~~~~~~~~~~~~~~
-
-This parameter is available in the following analyses: 
-:ref:`trajectory-comt`,
-:ref:`analysis-dos`, :ref:`analysis-disf`,
-:ref:`analysis-eisf`, :ref:`analysis-gdisf`, 
-:ref:`analysis-gacf`, :ref:`analysis-msd`, 
-:ref:`analysis-op`, `Rigid Body
-Trajectory <#_Rigid_Body_Trajectory>`__, `Root Mean Square
-Deviation <#_Root_Mean_Square>`__, `Root Mean Square
-Fluctuation <#_Root_Mean_Square_1>`__, `Velocity Auto Correlation
-Function <#_Velocity_AutoCorrelation_Function>`__.
-
 .. _param-instrument-resolution:
 
 Instrument resolution
@@ -660,117 +550,3 @@ in MDANSE at the moment:
   The corresponding MDANSE input is:
 
   :code:`('ideal', {})`
-
-
-This parameter is available for the following analyses: `Current
-Correlation Function <#_Current_Correlation_Function>`__, `Density of
-States <#_Density_Of_States>`__, `Dynamic Coherent Structure
-Factor <#_Dynamic_Coherent_Structure>`__, `Dynamic Incoherent Structure
-Factor <#_Dynamic_Incoherent_Structure>`__, `Gaussian Dynamic Incoherent
-Structure Factor <#_Gaussian_Dynamic_Incoherent>`__, `Neutron Dynamic
-Total Structure Factor <#_Neutron_Dynamic_Total>`__, `Structure Factor
-From Scattering Function <#_Structure_Factor_From>`__.
-
-.. _params-interpolation-order:
-
-Interpolation order
-~~~~~~~~~~~~~~~~~~~
-
-Analyses that require atomic velocity data have an option to interpolate
-this data from atomic positions. By default, no interpolation is
-performed and instead MDANSE attempts to use the velocities stored int
-the HDF trajectory. Of course, depending on the way your simulation
-was set up, it is possible that the atoms velocities were not even stored
-in the output. It is still possible to derive the velocities of atoms
-from their positions at known time intervals, which is the subject of this
-section.
-
-
-Interpolation order is available for the following analyses: `Current
-Correlation Function <#_Current_Correlation_Function>`__, `Density of
-States <#_Density_Of_States>`__, `Temperature <#_Temperature>`__,
-`Velocity Auto Correlation
-Function <#_Velocity_AutoCorrelation_Function>`__. However, please note
-that due to the nature of the `Current Correlation
-Function <#_Current_Correlation_Function>`__ analysis, the interpolation
-there is more complicated, the details of which can be found in its
-`section <#_GUI>`__.
-
-.. _param-normalize:
-
-Normalize
-~~~~~~~~~
-
-Normalisation is available for the following analyses: `Current
-Correlation Function <#_Current_Correlation_Function>`__, `General Auto
-Correlation Function <#_General_AutoCorrelation_Function>`__, `Position
-Auto Correlation Function <#_Position_AutoCorrelation_Function>`__,
-`Velocity Auto Correlation
-Function <#_Velocity_AutoCorrelation_Function>`__.
-
-.. _param-project-coordinates:
-
-Project coordinates 
-~~~~~~~~~~~~~~~~~~~~
-
-This parameter is available for the following analyses: `Density of
-States <#_Density_Of_States>`__, `Dynamic Incoherent Structure
-Factor <#_Dynamic_Incoherent_Structure>`__, `Elastic Incoherent
-Structure Factor <#_Elastic_Incoherent_Structure>`__, `Gaussian Dynamic
-Incoherent Structure Factor <#_Gaussian_Dynamic_Incoherent>`__, `Mean
-Square Displacement <#_Mean_Square_Displacement>`__, `Position Auto
-Correlation Function <#_Position_AutoCorrelation_Function>`__, `Velocity
-Auto Correlation Function <#_Velocity_AutoCorrelation_Function>`__.
-
-.. _param-weights:
-
-Weights
-~~~~~~~
-
-This parameter is available in the following analyses: `Current
-Correlation Function <#_Current_Correlation_Function>`__, `Density of
-States <#_Density_Of_States>`__, `Density
-Profile <#_Density_Profile>`__, `Dynamic Coherent Structure
-Factor <#_Dynamic_Coherent_Structure>`__, `Dynamic Incoherent Structure
-Factor <#_Dynamic_Incoherent_Structure>`__,
-`Eccentricity <#_Eccentricity>`__, `Elastic Incoherent Structure
-Factor <#_Elastic_Incoherent_Structure>`__, `Gaussian Dynamic Incoherent
-Structure Factor <#_Gaussian_Dynamic_Incoherent>`__, `General Auto
-Correlation Function <#_General_AutoCorrelation_Function>`__, `Mean
-Square Displacement <#_Mean_Square_Displacement>`__, `Pair Distribution
-Function <#_Pair_Distribution_Function>`__, `Radius of
-Gyration <#_Radius_Of_Gyration>`__, `Rigid Body
-Trajectory <#_Rigid_Body_Trajectory>`__, `Root Mean Square
-Deviation <#_Root_Mean_Square>`__, `Static Structure
-Factor <#_Static_Structure_Factor>`__, `Velocity Auto Correlation
-Function <#_Velocity_AutoCorrelation_Function>`__.
-
-.. _param-running-mode:
-
-Running mode
-~~~~~~~~~~~~
-
-Running mode is available for most analyses: all
-`Dynamics <#_Dynamics>`__ analyses, all `Trajectory <#_Trajectory>`__
-analyses, all `Thermodynamics <#_Thermodynamics>`__ analyses, `Area Per
-Molecule <#_Area_Per_Molecule>`__, `Coordination
-Number <#_Coordination_Number>`__, `Current Correlation
-Function <#_Current_Correlation_Function>`__, `Density
-Profile <#_Density_Profile>`__, `Dipole Auto Correlation
-Function <#_Dipole_AutoCorrelation_Function>`__, `Dynamic Coherent
-Structure Factor <#_Dynamic_Coherent_Structure>`__, `Dynamic Incoherent
-Structure Factor <#_Dynamic_Incoherent_Structure>`__,
-`Eccentricity <#_Eccentricity>`__, `Elastic Incoherent Structure
-Factor <#_Elastic_Incoherent_Structure>`__, `Gaussian Dynamic Incoherent
-Structure Factor <#_Gaussian_Dynamic_Incoherent>`__, `McStas Virtual
-Instrument <#_McStas_Virtual_Instrument>`__, `Molecular
-Trace <#_Molecular_Trace>`__, `Neutron Dynamic Total Structure
-Factor <#_Neutron_Dynamic_Total>`__, `Order
-Parameter <#_Order_Parameter>`__, `Pair Distribution
-Function <#_Pair_Distribution_Function>`__, `Radius of
-Gyration <#_Radius_Of_Gyration>`__, `Rigid Body
-Trajectory <#_Rigid_Body_Trajectory>`__, `Root Mean Square
-Deviation <#_Root_Mean_Square>`__, `Root Mean Square
-Fluctuation <#_Root_Mean_Square_1>`__, `Static Structure
-Factor <#_Static_Structure_Factor>`__, `Voronoi <#_Voronoi>`__, `X-Ray
-Static Structure Factor <#_Xray_Static_Structure>`__.

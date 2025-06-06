@@ -42,7 +42,7 @@ Frames
 You can decide to limit the range of simulation frames used in the calculations,
 or to reduce the number of the frames taken in that
 range by increasing the step between them. Only the frames you selected will
-be passed to the analysis job. See also :ref:`param-frames`.
+be passed to the analysis job. See also :ref:`configurator-analysis-FramesConfigurator`.
 
 A more detailed discussion of the (correlation) frames can be found here:
 :ref:`correlation-frames`.
