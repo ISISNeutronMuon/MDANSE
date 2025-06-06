@@ -38,9 +38,12 @@ class ASETrajectoryFileError(Error):
 
 
 class ASE(Converter):
-    """
+    """Converts a trajectory to MDT format using ASE.
+
     Attempts to convert a trajectory file to MDANSE .mdt format (HDF5).
     The conversion is done using the ase.io module.
+    It works both for the ASE's own .traj format, and for other formats
+    supported by ASE.
     Please help the ASE format detection mechanism by using
     standard input file names.
     """

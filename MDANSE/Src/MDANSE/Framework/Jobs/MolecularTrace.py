@@ -22,18 +22,20 @@ from MDANSE.Framework.Jobs.IJob import IJob
 
 
 class MolecularTrace(IJob):
-    """
-    A Molecular Trace is a time-integrated trace of selected atoms in terms of their coordinates.
+    """Maps the volume occupied by atoms over time.
 
-    * the minimal and maximal coordinates from the selected atomic trajectories are computed.
+    A Molecular Trace is a time-integrated trace of selected atoms coordinates.
+
+    * the minimal and maximal coordinates from the selected atomic trajectories are
+      computed.
     * based on these min/max and a spatial resolution, a cartesian grid is constructed.
-    * for each atom and for each frame of the selected trajectories, a histogram of presence, called the spatial density, is constructed.
+    * for each atom and for each frame of the selected trajectories, a histogram of
+      presence, called the spatial density, is constructed.
 
     The molecular trace can reveal anisotropic vibrations and diffusion pathways.
 
-    **Acknowledgement and publication:**\n
+    **Acknowledgement and publication:**
     Gael Goret, PELLEGRINI Eric
-
     """
 
     label = "Molecular Trace"

@@ -9,8 +9,12 @@ List of trajectory converters
 ASE
 ~~~
 
+Converts a trajectory to MDT format using ASE.
+
 Attempts to convert a trajectory file to MDANSE .mdt format (HDF5).
 The conversion is done using the ase.io module.
+It works both for the ASE's own .traj format, and for other formats
+supported by ASE.
 Please help the ASE format detection mechanism by using
 standard input file names.
 
@@ -30,7 +34,7 @@ Inputs:
 CASTEP
 ~~~~~~
 
-Converts a Castep Trajectory into a HDF trajectory file.
+Converts a Castep Trajectory into an MDT trajectory file.
 
 Inputs:
 
@@ -45,7 +49,7 @@ Inputs:
 CHARMM
 ~~~~~~
 
-Converts a CHARMM trajectory to a HDF trajectory.
+Converts a CHARMM trajectory to an MDT trajectory.
 
 Inputs:
 
@@ -61,7 +65,7 @@ Inputs:
 CP2K
 ~~~~
 
-Converts a CP2K trajectory to an HDF5 trajectory in the MDANSE format.
+Converts a CP2K trajectory to an MDT trajectory.
 
 Inputs:
 
@@ -79,7 +83,7 @@ Inputs:
 DCD
 ~~~
 
-Converts a DCD trajectory to a HDF trajectory.
+Converts a DCD trajectory to an MDT trajectory.
 
 Inputs:
 
@@ -95,7 +99,7 @@ Inputs:
 DFTB
 ~~~~
 
-Converts a DFTB trajectory to a HDF trajectory.
+Converts a DFTB trajectory to an MDT trajectory.
 
 Inputs:
 
@@ -111,7 +115,7 @@ Inputs:
 DL_POLY
 ~~~~~~~
 
-Converts a DL_POLY trajectory to a HDF trajectory.
+Converts a DL_POLY trajectory to an MDT trajectory.
 
 Inputs:
 
@@ -127,7 +131,7 @@ Inputs:
 DMol
 ~~~~
 
-Converts a DMol trajectory to a HDF trajectory.
+Converts a DMol trajectory to an MDT trajectory.
 
 Inputs:
 
@@ -143,7 +147,11 @@ Inputs:
 Discover
 ~~~~~~~~
 
-Converts a Discover trajectory to a HDF trajectory.
+Converts a Discover trajectory to an MDT trajectory.
+
+There are knows problems with the unit cell format in Discover output files,
+and this converter is only included for the users who want to re-run some
+old trajectories that may be of historical interest.
 
 Inputs:
 
@@ -159,7 +167,7 @@ Inputs:
 Forcite
 ~~~~~~~
 
-Converts a Forcite trajectory to a HDF trajectory.
+Converts a Forcite trajectory to an MDT trajectory.
 
 Inputs:
 
@@ -175,7 +183,7 @@ Inputs:
 Gromacs
 ~~~~~~~
 
-Converts a Gromacs trajectory to a HDF trajectory.
+Converts a Gromacs trajectory to an MDT trajectory.
 
 Inputs:
 
@@ -190,7 +198,7 @@ Inputs:
 LAMMPS
 ~~~~~~
 
-Converts a LAMMPS trajectory to a HDF trajectory.
+Converts a LAMMPS trajectory to an MDT trajectory.
 
 Inputs:
 
@@ -210,13 +218,17 @@ Inputs:
 
 MDAnalysis
 ~~~~~~~~~~
-Using MDAnalysis, read the MD trajectory and write the data out to
-the MDT file. MDAnalysis reads MD trajectories by specifying
+
+Converts a trajectory to the MDT format using MDAnalysis.
+
+MDAnalysis reads MD trajectories by specifying
 topology and coordinate files. Multiple files can be used for the
 coordinate files so that trajectories will be stitched together.
 For supported file formats, the continuous option ensures that
-duplicated time-frames will not be added, see <a href="https://userguide.mdanalysis.org/stable/reading_and_writing.html">reading and writing</a>.
-For topology and coordinate files supported by MDAnalysis see <a href="https://userguide.mdanalysis.org/stable/formats/index.html#formats">formats</a>.
+duplicated time-frames will not be added, see
+<a href="https://userguide.mdanalysis.org/stable/reading_and_writing.html">reading and writing</a>.
+For topology and coordinate files supported by MDAnalysis see
+<a href="https://userguide.mdanalysis.org/stable/formats/index.html#formats">formats</a>.
 
 Inputs:
 
@@ -233,11 +245,12 @@ Inputs:
 
 MDTraj
 ~~~~~~
-Using MDTraj, read the MD trajectory and write the data out to
-the MDT file. MDTraj reads MD trajectories by specifying
-trajectory files and optionally a topology file. Multiple files can
-be used for the trajectory files so that trajectories will be
-stitched together.
+
+Converts a trajectory to the MDT format using MDTraj.
+
+MDTraj reads MD trajectories by specifying trajectory files and optionally
+a topology file. Multiple files can be used for the trajectory files so that
+trajectories will be stitched together.
 
 Inputs:
 
@@ -255,7 +268,7 @@ Inputs:
 NAMD
 ~~~~
 
-Converts a NAMD trajectory to a HDF trajectory.
+Converts a NAMD trajectory to an MDT trajectory.
 
 Inputs:
 
@@ -271,6 +284,8 @@ Inputs:
 VASP
 ~~~~
 
+Converts a VASP XDATCAR file to an MDT trajectory.
+
 This converter works for XDATCAR files which contain a *header*
 specifying the unit cell size and atom types.
 
@@ -280,13 +295,19 @@ the CONTCAR file.
 
 A valid header should look like this:
 
-unknown system
-1
-9.050041    0.000000    0.000000
-0.000000    8.236754    0.000000
-0.000000    0.000000   11.000452
-Cu   Rb   Cl    S
-9   4   7   12
+.. code-block::
+
+    unknown system
+    1
+    9.050041    0.000000    0.000000
+    0.000000    8.236754    0.000000
+    0.000000    0.000000   11.000452
+    Cu   Rb   Cl    S
+    9   4   7   12
+
+where the last two lines specify the atomic types and the number
+of the atoms of each type in the same order as they appear in the
+atom coordinates below.
 
 Inputs:
 
@@ -302,7 +323,7 @@ Inputs:
 XPLOR
 ~~~~~
 
-Converts an Xplor trajectory to a HDF trajectory.
+Converts an Xplor trajectory to an MDT trajectory.
 
 Inputs:
 

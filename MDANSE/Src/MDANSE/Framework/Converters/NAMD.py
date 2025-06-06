@@ -17,8 +17,6 @@ from MDANSE.Framework.Converters.DCD import DCD
 
 
 class NAMD(DCD):
-    """
-    Converts a NAMD trajectory to a HDF trajectory.
-    """
+    """Converts a NAMD trajectory to an MDT trajectory."""
 
     label = "NAMD"

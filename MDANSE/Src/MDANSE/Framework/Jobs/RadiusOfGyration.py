@@ -23,7 +23,8 @@ from MDANSE.MolecularDynamics.Analysis import radius_of_gyration
 
 
 class RadiusOfGyration(IJob):
-    """
+    """Calculates the radius of gyration of selected atoms.
+
     The Radius of Gyration can be used, for example, to determine the
     compactness of a molecule. It is calculated as a root (mass weighted)
     mean square distance of the atoms of a molecule relative to its

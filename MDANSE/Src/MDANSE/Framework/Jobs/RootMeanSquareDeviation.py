@@ -22,11 +22,13 @@ from MDANSE.Framework.Jobs.IJob import IJob
 
 
 class RootMeanSquareDeviation(IJob):
-    """
-    The Root Mean-Square Deviation (RMSD) is one of the most popular measures of structural similarity.
-    It is a numerical measure of the difference between two structures. Typically, the RMSD is used to
-    quantify the structural evolution of the system during the simulation.
-    It can provide essential information about the structure, if it reached equilibrium or conversely
+    """Calculates the Root Mean Square Deviation of the selected atoms.
+
+    The Root Mean-Square Deviation (RMSD) is one of the most popular measures
+    of structural similarity. It is a numerical measure of the difference
+    between two structures. Typically, the RMSD is used to quantify the structural
+    evolution of the system during the simulation. It can provide essential
+    information about the structure, if it reached equilibrium or conversely
     if major structural changes occurred during the simulation.
     """
 

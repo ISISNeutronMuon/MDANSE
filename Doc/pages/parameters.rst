@@ -24,12 +24,6 @@ It allows the user to verify and potentially change the way
 atom types from an MD trajectory will be converted to the
 chemical elements used by MDANSE.
 
-Attributes
-----------
-_default : dict
-The default atom map setting JSON string.
-
-
 
 .. _configurator-converter-BooleanConfigurator:
 
@@ -141,10 +135,12 @@ MDFileConfigurator
 
 default=
 
+Set a CASTEP .md file as input.
 
 Class representing a .md file format (documentation can be found at
-https://www.tcm.phy.cam.ac.uk/castep/MD/node13.html). It is used to determine the structure of the file (eg. the
-length of each section) and to read the information stored in one frame of the trajectory.
+https://www.tcm.phy.cam.ac.uk/castep/MD/node13.html). It is used to
+determine the structure of the file (eg. the length of each section)
+and to read the information stored in one frame of the trajectory.
 
 
 .. _configurator-converter-MDTrajTimeStepConfigurator:
@@ -154,7 +150,7 @@ MDTrajTimeStepConfigurator
 
 default=0.0
 
-
+Inputs the time step value for the MDTraj converter.
 
 .. _configurator-converter-MDTrajTopologyFileConfigurator:
 
@@ -163,7 +159,7 @@ MDTrajTopologyFileConfigurator
 
 default=
 
-
+Uses MDTraj to read the system topology information from a file.
 
 .. _configurator-converter-MDTrajTrajectoryFileConfigurator:
 
@@ -172,6 +168,10 @@ MDTrajTrajectoryFileConfigurator
 
 default=
 
+Passes one or more trajectory files to the MDTraj converter.
+
+Multiple files can be concatenated, but they have to be all in
+the same format.
 
 
 .. _configurator-converter-OptionalXYZFileConfigurator:
@@ -205,9 +205,7 @@ SingleChoiceConfigurator
 
 default=[]
 
-
-This Configurator allows to select a single item among multiple choices.
-
+Selects a single item from multiple choices.
 
 .. _configurator-converter-XDATCARFileConfigurator:
 
@@ -216,7 +214,7 @@ XDATCARFileConfigurator
 
 default=
 
-
+Inputs an XDATCAR file (for the VASP converter).
 
 .. _configurator-converter-XTDFileConfigurator:
 
@@ -238,10 +236,14 @@ XYZFileConfigurator
 
 default=
 
-This class loads the contents of an XYZ file,
-which in the case of CP2K may contain either the
-positions of atoms, or velocities. In either case
-there will be 3 components per atom.
+Reads information from an XYZ file for the CP2K converter.
+
+This class loads the contents of an XYZ file.
+This file may contain the atom positions, velocities or forces.
+In either case there will be 3 components per atom.
+
+If you have an ExtendedXYZ file, load it with the ASE converter instead.
+
 
 
 Analysis Inputs
@@ -260,12 +262,6 @@ This configurator allows the selection of a specific set of
 atoms on which the analysis will be performed. The defaults setting
 selects all atoms.
 
-Attributes
-----------
-_default : str
-The defaults selection setting.
-
-
 
 .. _configurator-analysis-AtomTransmutationConfigurator:
 
@@ -283,12 +279,6 @@ atoms to deuterium in order to fit with experiments where
 deuteration experiments have been performed for improving the
 contrast and having a better access to the dynamics of a specific
 part of the molecular system.
-
-Attributes
-----------
-_default : str
-The defaults transmutation setting.
-
 
 
 .. _configurator-analysis-BooleanConfigurator:
@@ -470,10 +460,8 @@ default=
 
 Picks a molecule type present in the trajectory.
 
-Attributes
-----------
-_default : str
-Empty by default.
+If the molecule labels are not available, you can detect the molecules
+using TrajectoryEditor.
 
 
 .. _configurator-analysis-OptionalFloatConfigurator:
@@ -483,9 +471,7 @@ OptionalFloatConfigurator
 
 default=[False, 1.0]
 
-
-This Configurator allows to input a float.
-
+Inputs a single floating point number. Empty input is allowed.
 
 .. _configurator-analysis-OutputFilesConfigurator:
 
@@ -553,7 +539,7 @@ PartialChargeConfigurator
 
 default={}
 
-This configurator allows to input partial charges.
+Assigns partial charges to atoms.
 
 .. _configurator-analysis-ProjectionConfigurator:
 
@@ -562,11 +548,12 @@ ProjectionConfigurator
 
 default=None
 
+Projects atomic coordinates onto an axis or plane.
 
-This configurator allows to define a projector for atomic coordinates.
+Null projector (which does nothing) is the standard choice.
+The input vector can be used as an axis direction,
+or as a plane normal vector.
 
-Planar and axial projections are supported by MDANSE while a null projector, that does not project the coordinates, has been introduced
-in MDANSE.Framework.Projectors.IProjector.IProjector for the sake of homogeneity.
 
 
 .. _configurator-analysis-QVectorsConfigurator:
@@ -600,8 +587,7 @@ RangeConfigurator
 
 default=(0, 10, 1)
 
-
-This configurator allow to input a range of values given 3 parameters : start, stop, step.
+Inputs a range of values as 3 parameters : start, stop, step.
 
 By default the values are generated as a NumPy array.
 
@@ -627,9 +613,7 @@ SingleChoiceConfigurator
 
 default=[]
 
-
-This Configurator allows to select a single item among multiple choices.
-
+Selects a single item from multiple choices.
 
 .. _configurator-analysis-UnitCellConfigurator:
 
@@ -638,9 +622,10 @@ UnitCellConfigurator
 
 default=([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], False)
 
+Input a unit cell definition.
 
-This configurator allows to input a unit cell, in order to replace
-or change the existing cell definition
+This is normally used to introduce a cell definition to a trajectory,
+or to change the existing cell definition.
 
 
 .. _configurator-analysis-WeightsConfigurator:
@@ -650,9 +635,9 @@ WeightsConfigurator
 
 default=equal
 
+Selects the atom property to be used by the weighting scheme.
 
-This configurator allows to select how the properties that depends on atom type will be weighted when computing
-the total contribution of all atoms.
+This configurator allows to select how the analysis results will
+weighted when computing the total result.
 
-Any numeric property defined in MDANSE.Data.ElementsDatabase.ElementsDatabase can be used as a weigh.
 

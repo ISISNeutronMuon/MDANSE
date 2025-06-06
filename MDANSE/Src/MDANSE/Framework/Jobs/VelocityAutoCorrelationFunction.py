@@ -23,31 +23,12 @@ from MDANSE.Mathematics.Signal import differentiate, normalisation_factor
 
 
 class VelocityAutoCorrelationFunction(IJob):
-    """
-    The Velocity AutoCorrelation Function (VACF) is a property describing the dynamics of a molecular system.
-    It reveals the underlying nature of the forces acting on the system. Its Fourier Transform gives the cartesian density of states for a set of atoms.
+    r"""Calculates the velocity autocorrelation function of the selected atoms.
 
-    In a molecular system that would be made of non interacting particles, the velocities would be constant
-    at any time giving a VACF of constant value. In the gas-phase, the magnitude and direction of the velocity of a particle
-    will change gradually over time due collisions with other particles. In this case, the VACF is represented by a decaying exponential.
-
-    In the solid phase, the interactions are much stronger and, as a result, the atoms are bound to a given, equilibrium position from
-    which they move backwards and forwards.  The oscillations are not be of equal magnitude however, but decay in time, because there are
-    anharmonic, perturbative forces which disrupt the oscillatory motion. In this case, the VACF looks like a damped harmonic motion.
-
-    In the liquid phase, the atoms have more freedom than in the solid phase and because of the diffusion process, the oscillatory motion
-    seen in solid phase is damped rapidly depending on the density of the system. So, the VACF tends to have one very damped oscillation
-    before decaying to zero. The decaying time can be considered as the average time for a collision between two atoms.
-
-    As well as revealing the dynamical processes in a system, the VACF has other interesting properties. Firstly, its Fourier transform,
-    a.k.a as vibrational Density Of States (vDOS) can be used to reveal the underlying frequencies of the molecular processes. This is closely
-    related to the infra-red spectrum of the system, which is also concerned with vibration on the molecular scale. Secondly, provided the VACF
-    decays to zero at long time, the function may be integrated mathematically to calculate the diffusion coefficient D, as in:
-
-    .. math:: D = \\frac{1}{3}\int_{0}^{+\infty}{<v(0) \cdot v(t)>dt}
-
-    This is a special case of a more general relationship between the VACF and the mean square displacement, and belongs to a class of properties
-    known as the Green-Kubo relations, which relate correlation functions to so-called transport coefficients.
+    The Velocity AutoCorrelation Function (VACF) is a property describing the dynamics
+    of a molecular system. It reveals the underlying nature of the forces acting on
+    the system. Its Fourier Transform gives the cartesian density of states for a set
+    of atoms.
     """
 
     label = "Velocity AutoCorrelation Function"

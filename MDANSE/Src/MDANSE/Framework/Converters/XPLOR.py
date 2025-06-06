@@ -19,8 +19,6 @@ from MDANSE.Framework.Converters.DCD import DCD
 
 
 class XPLOR(DCD):
-    """
-    Converts an Xplor trajectory to a HDF trajectory.
-    """
+    """Converts an Xplor trajectory to an MDT trajectory."""
 
     label = "XPLOR"

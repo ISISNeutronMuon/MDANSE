@@ -259,9 +259,7 @@ class TrjFile(dict):
 
 
 class Forcite(Converter):
-    """
-    Converts a Forcite trajectory to a HDF trajectory.
-    """
+    """Converts a Forcite trajectory to an MDT trajectory."""
 
     label = "Forcite"
 

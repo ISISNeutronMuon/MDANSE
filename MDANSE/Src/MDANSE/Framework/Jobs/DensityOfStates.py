@@ -24,10 +24,12 @@ from MDANSE.MLogging import LOG
 
 
 class DensityOfStates(IJob):
-    """
+    """Calculate the vibrational density of states of the trajectory.
+
     The Density Of States describes the number of vibrations per unit frequency.
-    In MDANSE the DOS calculation returns the Fourier transform (FT) of the weighted Velocity AutoCorrelation Function (VACF).
-    With an atomic mass weighting scheme the MDANSE DOS result is proportional to the actual DOS.
+    In MDANSE the DOS calculation returns the Fourier transform (FT) of the weighted
+    Velocity AutoCorrelation Function (VACF). With an atomic mass weighting scheme
+    the MDANSE DOS result is proportional to the actual vibrational DOS.
     The partial DOS corresponds to selected sets of atoms or molecules.
     """
 

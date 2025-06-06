@@ -229,8 +229,11 @@ class HisFile(dict):
 
 
 class Discover(Converter):
-    """
-    Converts a Discover trajectory to a HDF trajectory.
+    """Converts a Discover trajectory to an MDT trajectory.
+
+    There are knows problems with the unit cell format in Discover output files,
+    and this converter is only included for the users who want to re-run some
+    old trajectories that may be of historical interest.
     """
 
     label = "Discover"

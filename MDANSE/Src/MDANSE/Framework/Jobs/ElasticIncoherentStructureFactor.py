@@ -23,13 +23,16 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 
 
 class ElasticIncoherentStructureFactor(IJob):
-    """
-    The Elastic Incoherent Structure Factor (EISF ) is defined as the limit of the incoherent
-    intermediate scattering function for infinite time.
+    """Calculates the Elastic Incoherent Structure Factor of a trajectory.
 
-    The EISF appears as the incoherent amplitude of the elastic line in the neutron scattering spectrum.
-    Elastic scattering is only present for systems in which the atomic motion is confined in space, as
-    in solids. The Q-dependence of the EISF indicates e.g. the fraction of static/mobile atoms and the spatial dependence of the dynamics.
+    The Elastic Incoherent Structure Factor (EISF) is defined as the limit of the
+    incoherent intermediate scattering function for infinite time.
+
+    The EISF appears as the incoherent amplitude of the elastic line in the neutron
+    scattering spectrum. Elastic scattering is only present for systems in which
+    the atomic motion is confined in space, as in solids. The Q-dependence of the
+    EISF indicates e.g. the fraction of static/mobile atoms and the spatial dependence
+    of the dynamics.
     """
 
     label = "Elastic Incoherent Structure Factor"

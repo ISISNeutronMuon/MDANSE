@@ -34,9 +34,7 @@ class GromacsConverterError(Error):
 
 
 class Gromacs(Converter):
-    """
-    Converts a Gromacs trajectory to a HDF trajectory.
-    """
+    """Converts a Gromacs trajectory to an MDT trajectory."""
 
     label = "Gromacs"
 

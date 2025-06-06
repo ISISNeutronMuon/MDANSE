@@ -24,6 +24,13 @@ from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 
 
 class Infrared(IJob):
+    """Calculates the infrared spectrum of a system of molecules.
+
+    The infrared spectrum is a derivative of the dipole autocorrelation function.
+    This analysis requires molecules to be defined in the system,
+    and partial charges to be set to non-zero values.
+    """
+
     enabled = True
 
     label = "Infrared Spectrum"

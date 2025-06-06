@@ -25,12 +25,16 @@ class DensityProfileError(Error):
 
 
 class DensityProfile(IJob):
-    """
-    The Density Profile analysis shows the weighted atomic density heterogeneity in the directions of the simulation box axes.
+    """Calculates the averaged (numerical) density profile along a direction.
 
-    For a lipid membrane, the density variation in the direction perpendicular to the membrane is probed in reflectometry measurements.
+    The Density Profile analysis shows the weighted atomic density heterogeneity in
+    the directions of the simulation box axes.
 
-    The Density Profile Analysis can show segregation or cluster order formation, for example during the formation of micelles.
+    For a lipid membrane, the density variation in the direction perpendicular to
+    the membrane is probed in reflectometry measurements.
+
+    The Density Profile Analysis can show segregation or cluster order formation,
+    for example during the formation of micelles.
     """
 
     label = "Density Profile"

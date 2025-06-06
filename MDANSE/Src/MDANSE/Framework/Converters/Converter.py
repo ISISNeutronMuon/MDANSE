@@ -24,6 +24,8 @@ from MDANSE.MLogging import LOG
 
 
 class Converter(IJob, metaclass=SubclassFactory):
+    """Outputs a trajectory in the MDT format."""
+
     category = ("Converters",)
 
     ancestor = ["empty_data"]

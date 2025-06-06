@@ -19,9 +19,7 @@ from MDANSE.Framework.Converters.Forcite import Forcite
 
 
 class DFTB(Forcite):
-    """
-    Converts a DFTB trajectory to a HDF trajectory.
-    """
+    """Converts a DFTB trajectory to an MDT trajectory."""
 
     label = "DFTB"
 

@@ -24,8 +24,10 @@ from MDANSE.Mathematics.Signal import normalisation_factor
 
 
 class PositionAutoCorrelationFunction(IJob):
-    """
-    Like the velocity autocorrelation function, but using positions instead of velocities.
+    """Calculates the position autocorrelation function.
+
+    Like the velocity autocorrelation function, but using positions instead of
+    velocities.
     """
 
     label = "Position AutoCorrelation Function"

@@ -268,9 +268,7 @@ class DCDFile(FortranBinaryFile, dict):
 
 
 class DCD(Converter):
-    """
-    Converts a DCD trajectory to a HDF trajectory.
-    """
+    """Converts a DCD trajectory to an MDT trajectory."""
 
     label = "DCD"
 

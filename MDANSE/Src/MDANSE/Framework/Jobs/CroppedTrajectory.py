@@ -20,8 +20,10 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 
 class CroppedTrajectory(IJob):
-    """
-    Crop a trajectory in terms of the contents of the simulation box (selected atoms or molecules) and the trajectory length.
+    """Outputs a subset of frames or atoms of the input trajectory.
+
+    Crop a trajectory in terms of the contents of the simulation box
+    (selected atoms or molecules) and the trajectory length.
     """
 
     enabled = False

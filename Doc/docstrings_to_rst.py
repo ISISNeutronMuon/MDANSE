@@ -38,11 +38,13 @@ for job in jobs:
         continue
     result += f"\n.. _analysis-reference-{job}:\n\n"
     result += f"{job}\n"
-    result += "".join(len(job)*['~'])+'\n'
+    result += "".join(len(job)*['~'])+'\n\n'
     if temp.__doc__:
-        result += '\n'.join(str(x).strip() for x in temp.__doc__.split('\n'))
+        result += '\n'.join(str(x).lstrip() for x in temp.__doc__.split('\n'))
     else:
         print(f"bad docstring in {conf}")
+    if not result.endswith('\n'):
+        result += '\n'
     result += "\nInputs:\n\n"
     for iname, itype in temp.settings.items():
         conf = itype[0]
@@ -59,11 +61,13 @@ for job in converters:
         continue
     result += f"\n.. _converter-reference-{job}:\n\n"
     result += f"{job}\n"
-    result += "".join(len(job)*['~'])+'\n'
+    result += "".join(len(job)*['~'])+'\n\n'
     if temp.__doc__:
-        result += '\n'.join(str(x).strip() for x in temp.__doc__.split('\n'))
+        result += '\n'.join(str(x).lstrip() for x in temp.__doc__.split('\n'))
     else:
         print(f"bad docstring in {conf}")
+    if not result.endswith('\n'):
+        result += '\n'
     result += "\nInputs:\n\n"
     for iname, itype in temp.settings.items():
         conf = itype[0]

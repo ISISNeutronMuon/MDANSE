@@ -24,14 +24,14 @@ from MDANSE.Framework.Jobs.IJob import IJob
 
 
 class AngularCorrelation(IJob):
-    """
-    Computes the angular correlation for a vector defined with respect to a molecule or set of molecules.
+    r"""Computes the angular correlation of a vector defined in a molecule.
 
     Vector defined by user, starting at the origin pointing in a particular direction.
-    Origin and direction can either be an atom or a centre definition (centre of a group of atoms). For example, the origin
-    could be defined by the geometric centre of the head group of a surfactant molecule and the direction simply by the last atom
-    of the tail or chain. The correlation is calculated for the angle formed by the same vector at
-    different times
+    Origin and direction can either be an atom or a centre definition
+    (centre of a group of atoms). For example, the origin could be defined by the
+    geometric centre of the head group of a surfactant molecule and the direction
+    simply by the last atom of the tail or chain. The correlation is calculated for
+    the angle formed by the same vector at different simulation frames.
 
     **Calculation:** \n
     angle at time T is calculated as the following: \n

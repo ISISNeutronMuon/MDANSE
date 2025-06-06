@@ -19,8 +19,6 @@ from MDANSE.Framework.Converters.Discover import Discover
 
 
 class DMol(Discover):
-    """
-    Converts a DMol trajectory to a HDF trajectory.
-    """
+    """Converts a DMol trajectory to an MDT trajectory."""
 
     label = "DMol"
