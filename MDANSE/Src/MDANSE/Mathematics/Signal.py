@@ -346,7 +346,7 @@ class Filter(ABC):
     # Conversion factor: cyclic frequency to angular frequency
     _cyclic_to_angular = 2 * np.pi
 
-    # Container for the filter transfer tranfer function expressed in terms of the numerator/denominator coefficients of a rational polynomial
+    # Container for the filter transfer transfer function expressed in terms of the numerator/denominator coefficients of a rational polynomial
     TransferFunction = namedtuple("TransferFunction", ["numerator", "denominator"])
 
     # Container for the frequency response of the filter
