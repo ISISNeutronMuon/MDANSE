@@ -98,7 +98,7 @@ class TrajectoryFilter(IJob):
 
         self._selected_atoms = [
             self._atoms[i]
-            for i in np.array(self.configuration["atom_selection"]["indices"]).flatten()
+            for i in np.array(self.configuration["atom_selection"]["indices"]).flat
         ]
 
         # This stores the trajectory (position array) of atoms by x, y, z component, to be filtered
