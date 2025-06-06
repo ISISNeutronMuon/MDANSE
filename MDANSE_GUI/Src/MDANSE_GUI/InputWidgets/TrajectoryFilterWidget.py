@@ -996,7 +996,7 @@ class FilterDesigner(QDialog):
         np.ndarray
             Resampled and normalised signal
         """
-        return signal.resample(values, to_len) * (values.max() ** (-1))
+        return signal.resample(values, to_len) / values.max()
 
     def set_trajectory_power_spectrum(
         self, filter: Filter
