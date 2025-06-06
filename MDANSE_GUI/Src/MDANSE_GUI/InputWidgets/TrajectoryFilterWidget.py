@@ -142,7 +142,7 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         super().setValue(val)
 
     def snap_to_value(self, value: Any) -> None:
-        """Apply the constraint by snapping up/down (depending on the change direction) to the nearest value module zero.
+        """Apply the constraint by snapping up/down (depending on the change direction) to the nearest value modulo zero.
 
         Parameters
         ----------
