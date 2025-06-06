@@ -17,7 +17,6 @@ import json
 import numpy as np
 from enum import Enum
 from collections import namedtuple
-from typing import Tuple
 from copy import copy
 
 from abc import ABC, abstractmethod
@@ -448,13 +447,13 @@ class Filter(ABC):
 
     @freq_response.setter
     def freq_response(
-        self, params: Tuple[TransferFunction, FrequencyRangeMethod]
+        self, params: tuple[TransferFunction, FrequencyRangeMethod]
     ) -> None:
         """Calculates the frequency response of the filter from the filter's transfer function numerator and denominator coefficients.
 
         :Parameters:
-            #. params (Tuple[TransferFunction, FrequencyRangeMethod]):
-            Tuple contains the following elements:
+            #. params (tuple[TransferFunction, FrequencyRangeMethod]):
+            tuple contains the following elements:
                 - the rational polynomial expression for the filter transfer function, in terms of its numerator and denominator coefficients
                 - the method by which to compute the frequency range for displaying the filter
         """
@@ -1167,7 +1166,7 @@ def filter_description_string(
 
 def power_spectrum(
     trajectory, frames, projection, atom_selection, weights, instrument_resolution
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Returns the position power spectrum and angular frequencies (rad/ps) of a configuration's constituent atomic trajectories.
 
     :Parameters:
@@ -1178,7 +1177,7 @@ def power_spectrum(
         #. weights (WeightsConfigurator): weights object
         #. instrument_resolution (InstrumentResolutionConfigurator): instrument resolution object
     :Returns:
-        #. Tuple[np.ndarray, np.ndarray]: tuple containing the omegas (frequency range) and the corresponding power spectrum of the atomic trajectories
+        #. tuple[np.ndarray, np.ndarray]: tuple containing the omegas (frequency range) and the corresponding power spectrum of the atomic trajectories
     """
     trajectory = trajectory["instance"]
 

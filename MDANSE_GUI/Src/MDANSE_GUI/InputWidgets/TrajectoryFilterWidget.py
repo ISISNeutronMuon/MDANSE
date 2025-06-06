@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import copy
-from typing import Tuple, Any, Callable
+from typing import Any, Callable
 
 import numpy as np
 from scipy import signal
@@ -1000,7 +1000,7 @@ class FilterDesigner(QDialog):
 
     def set_trajectory_power_spectrum(
         self, filter: Filter
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Generate an appropriately resampled power spectrum for the input trajectory,
         as well as the multiplicative attenuation effect of the designed filter.
 
@@ -1011,7 +1011,7 @@ class FilterDesigner(QDialog):
 
         Returns
         -------
-        Tuple[np.ndarray, np.ndarray]
+        tuple[np.ndarray, np.ndarray]
             Trajectory power spectrum and the attenuated power spectrum due to the designed filter response
         """
         response = filter.freq_response
@@ -1136,7 +1136,7 @@ class FilterDesigner(QDialog):
         freqs: Filter.FrequencyDomain = TrajectoryFilterConfigurator._default_filter.freq_response,
         db_response: bool = False,
         energies: bool = False,
-        trajectory_power_spectrum: Tuple[np.ndarray, np.ndarray] = None,
+        trajectory_power_spectrum: tuple[np.ndarray, np.ndarray] = None,
     ) -> None:
         """Renders the graph of the designed filter frequency response.
 
@@ -1148,8 +1148,8 @@ class FilterDesigner(QDialog):
             Display response (y-axis) in decibels, else magnitude
         energies : bool
             Display response domain (x-axis) in meV, else frequency in terahertz
-        trajectory_power_spectrum : Tuple[np.ndarray, np.ndarray]
-            Tuple containing trajectory power spectrum and attenuation due to filter
+        trajectory_power_spectrum : tuple[np.ndarray, np.ndarray]
+            tuple containing trajectory power spectrum and attenuation due to filter
         """
         self._figure.clear()
 
