@@ -65,7 +65,7 @@ class ChemicalSystem:
         return f"ChemicalSystem {self.name} consisting of {len(self._atom_types)} atoms in {len(self._clusters)} molecules"
 
     def initialise_atoms(
-        self, element_list: list[str], name_list: Optional[list[str]] = None
+        self, element_list: list[str], name_list: list[str] | None = None
     ):
         """Assign indices to atoms, save their types and names.
 
@@ -203,7 +203,7 @@ class ChemicalSystem:
         """
         return 0
 
-    def copy(self) -> "ChemicalSystem":
+    def copy(self) -> ChemicalSystem:
         """Copy the instance of ChemicalSystem into a new, identical instance.
 
         :return: Copy of the ChemicalSystem instance
