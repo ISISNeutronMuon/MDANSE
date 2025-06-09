@@ -785,7 +785,7 @@ def test_default_settings(
     ],
 )
 def test_position_stability(tmp_path, filter_config):
-    """This test case ensures that atomic initial positions are preserved after filtering with a 10% tolerance to error."""
+    """This test case ensures that atomic initial positions are preserved after filtering."""
     # Test results must satisfy an 8% tolerance to error
     TOLERANCE = 8
 
