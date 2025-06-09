@@ -712,7 +712,7 @@ class Filter(ABC):
             scale_factor *= cls._cyclic_to_angular
 
         if isinstance(energy, list):
-            return np.array(energy) * scale_factor
+            energy = np.array(energy)
 
         return energy * scale_factor
 
