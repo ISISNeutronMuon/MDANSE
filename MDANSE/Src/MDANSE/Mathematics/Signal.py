@@ -688,14 +688,14 @@ class Filter(ABC):
         :Returns:
             #. float | np.ndarray: energy
         """
-        scale_factor = 1.0
+        scale_factor = 1e12 * cls._freq_to_mev
         if units is Filter.FrequencyUnits.ANGULAR:
-            scale_factor *= 2 * np.pi
+            scale_factor /= 2 * np.pi
 
         if isinstance(freq, list):
-            return (1 / scale_factor) * (np.array(freq) * 1e12) * cls._freq_to_mev
+            freq = np.array(freq)
 
-        return (1 / scale_factor) * (freq * 1e12) * cls._freq_to_mev
+        return scale_factor * freq
 
     @classmethod
     def energy_to_freq(cls, energy, units):
@@ -707,14 +707,14 @@ class Filter(ABC):
         :Returns:
             #. float | np.ndarray: frequency
         """
-        scale_factor = 1.0
+        scale_factor = 1e-12 / cls._freq_to_mev
         if units is Filter.FrequencyUnits.ANGULAR:
             scale_factor *= 2 * np.pi
 
         if isinstance(energy, list):
-            return (np.array(energy) * scale_factor / cls._freq_to_mev) * 1e-12
+            return np.array(energy) * scale_factor
 
-        return (energy * scale_factor / cls._freq_to_mev) * 1e-12
+        return energy * scale_factor
 
 
 class Butterworth(Filter):
