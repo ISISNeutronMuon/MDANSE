@@ -152,13 +152,8 @@ class TrajectoryFilter(IJob):
             filter_config["attributes"],
         )
 
-        if {"n_steps", "time_step_ps"} not in set(filter_attributes.keys()):
-            filter_attributes.update(
-                {
-                    "n_steps": self.configuration["trajectory"]["length"],
-                    "time_step_ps": self.configuration["trajectory"]["md_time_step"],
-                }
-            )
+        filter_attributes.setdefault("n_steps", self.configuration["trajectory"]["length"])
+        filter_attributes.setdefault("time_step_ps", self.configuration["trajectory"]["md_time_step"])
 
         filter = filter_class(**filter_attributes)
 
