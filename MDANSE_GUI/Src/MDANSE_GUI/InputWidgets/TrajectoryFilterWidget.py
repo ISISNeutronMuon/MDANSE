@@ -263,7 +263,7 @@ class FilterPreferencesGroup(QObject):
         self.widgets[name] = widget
 
     def add_combobox(
-        self, key: str, items: tuple = tuple(), tooltip: str = "", enabled: bool = True
+        self, key: str, items: tuple = (), tooltip: str = "", enabled: bool = True
     ) -> QWidget:
         """Produce a combobox for a filter designer preference
 
