@@ -479,7 +479,7 @@ class Filter(ABC):
             freq_range = copy(self.custom_freq_range)
 
             # Convert frequency range to cyclic frequencies if necessary
-            if units == Filter.FrequencyUnits.CYCLIC:
+            if units is Filter.FrequencyUnits.CYCLIC:
                 freq_range *= self._angular_to_cyclic
         else:
             RuntimeError(
@@ -505,7 +505,7 @@ class Filter(ABC):
             #. float: Frequency resolution
         """
         bin_width = 1 / (num_steps * timestep)
-        if units == Filter.FrequencyUnits.ANGULAR:
+        if units is Filter.FrequencyUnits.ANGULAR:
             bin_width *= cls._cyclic_to_angular
 
         return bin_width
@@ -521,7 +521,7 @@ class Filter(ABC):
             #. float: Nyquist limit
         """
         limit = (1 / timestep) / 2
-        if units == Filter.FrequencyUnits.ANGULAR:
+        if units is Filter.FrequencyUnits.ANGULAR:
             limit *= cls._cyclic_to_angular
 
         return limit
@@ -550,7 +550,7 @@ class Filter(ABC):
         limit = np.int32(np.floor(len(axis_frequencies) / 2)) if not symmetric else -1
         # Return FFT frequency range with appropriate unit conversion
         coeff = (
-            Filter._cyclic_to_angular if units == Filter.FrequencyUnits.ANGULAR else 1.0
+            Filter._cyclic_to_angular if units is Filter.FrequencyUnits.ANGULAR else 1.0
         )
         return coeff * np.linspace(
             axis_frequencies[0], axis_frequencies[limit], resize_to
@@ -689,7 +689,7 @@ class Filter(ABC):
             #. float | np.ndarray: energy
         """
         scale_factor = 1.0
-        if units == Filter.FrequencyUnits.ANGULAR:
+        if units is Filter.FrequencyUnits.ANGULAR:
             scale_factor *= 2 * np.pi
 
         if isinstance(freq, list):
@@ -708,7 +708,7 @@ class Filter(ABC):
             #. float | np.ndarray: frequency
         """
         scale_factor = 1.0
-        if units == Filter.FrequencyUnits.ANGULAR:
+        if units is Filter.FrequencyUnits.ANGULAR:
             scale_factor *= 2 * np.pi
 
         if isinstance(energy, list):

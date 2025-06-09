@@ -435,7 +435,7 @@ class FilterSettingGroup(QObject):
         initial_value = 1 / (
             self.parent_attributes["time_step_ps"] * self.parent_attributes["n_steps"]
         )
-        if self.units == Filter.FrequencyUnits.ANGULAR:
+        if self.units is Filter.FrequencyUnits.ANGULAR:
             initial_value *= Filter._cyclic_to_angular
         self.attributes.update({freq_key.pop(): initial_value})
 
@@ -1006,8 +1006,10 @@ class FilterDesigner(QDialog):
 
         Returns
         -------
-        tuple[np.ndarray, np.ndarray]
-            Trajectory power spectrum and the attenuated power spectrum due to the designed filter response
+       power_spectrum : np.ndarray
+            The trajectory power spectrum.
+       attenuated_power_spectrum : np.ndarray
+            The attenuated power spectrum due to the designed filter response.
         """
         response = filter.freq_response
 
