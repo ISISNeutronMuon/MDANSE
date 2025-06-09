@@ -483,7 +483,7 @@ class Filter(ABC):
                 freq_range *= self._angular_to_cyclic
         else:
             RuntimeError(
-                f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' attribute on the instance of {self.__class__}"
+                f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' attribute on the instance of {type(self)}"
             )
 
         # Compute filter response around frequencies given in range
@@ -651,7 +651,7 @@ class Filter(ABC):
         :Returns:
             #. str: string representation of the filter
         """
-        string_representation = f"""Trajectory filter of type {self.__class__.__name__} implemented with the following parameters:
+        string_representation = f"""Trajectory filter of type {type(self).__name__} implemented with the following parameters:
 
   # sample_freq
   Molecular dynamics simulation sample frequency, in terahertz
@@ -674,7 +674,7 @@ class Filter(ABC):
         :Returns:
             #. dict: dictionary containing filter attributes
         """
-        return {"Filter": self.__class__.__name__} | {
+        return {"Filter": type(self).__name__} | {
             k: v for k, v in self.__dict__.items() if k != "_freq_response"
         }
 
