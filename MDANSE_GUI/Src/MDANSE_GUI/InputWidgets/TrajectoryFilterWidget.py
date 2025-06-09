@@ -262,7 +262,7 @@ class FilterPreferencesGroup(QObject):
         QWidget:
             The stored widget
         """
-        self.widgets.update({name: widget})
+        self.widgets[name] = widget
 
     def add_combobox(
         self, key: str, items: tuple = tuple(), tooltip: str = "", enabled: bool = True
@@ -772,7 +772,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
     def collect_inputs(self) -> None:
         """Slot: iterate over input widgets, collecting their values and update attributes"""
         for name, widget in self.widgets.items():
-            if widget and (name in self.attributes.keys()):
+            if widget and name in self.attributes:
                 value = self.visit(widget)
                 self.attributes[name] = value
 
