@@ -211,9 +211,7 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         float
             The value of the spinbox.
         """
-        if isinstance(value, str):
-            return float(value)
-        return value
+        return float(value)
 
 
 class FilterPreferencesGroup(QObject):
