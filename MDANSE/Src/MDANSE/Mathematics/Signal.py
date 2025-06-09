@@ -655,15 +655,15 @@ class Filter(ABC):
 
   # sample_freq
   Molecular dynamics simulation sample frequency, in terahertz
-      {self.__dict__["sample_freq"]}
+      {self.sample_freq}
 
   # freq_response (analog)
   N coefficients of analog filter transfer function, numerator and denominator (multiples of {Filter.S}^(N-n))
-      {tuple(self.__dict__["coeffs"].numerator), tuple(self.__dict__["coeffs"].denominator)}
+      {tuple(self.coeffs.numerator), tuple(self.coeffs.denominator)}
 
   # freq_response (digital)
   M coefficients of digital filter transfer function, numerator and denominator (multiples of {Filter.Z}^(-m))
-      {tuple(self.__dict__["coeffs"].numerator), tuple(self.__dict__["coeffs"].denominator)}
+      {tuple(self.coeffs.numerator), tuple(self.coeffs.denominator)}
         """
 
         return self.attributes_to_string(string_representation)
