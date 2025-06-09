@@ -1173,13 +1173,11 @@ class FilterDesigner(QDialog):
 
         # Conditionally convert frequencies to energies (meV)
         if energies:
-            energy_ticks = np.int32(
-                np.floor(
+            energy_ticks = np.floor(
                     Filter.freq_to_energy(
                         axes.get_xticks(), self.current_filter_units()
                     )
-                )
-            )
+                ).astype(int)
             axes.set_xticks(axes.get_xticks(), labels=energy_ticks)
 
         axes.set_xlim(0.0, x_max)

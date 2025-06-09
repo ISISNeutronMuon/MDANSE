@@ -547,7 +547,7 @@ class Filter(ABC):
         """
         # Compute cyclic frequencies using FFT method
         axis_frequencies = fftpack.fftfreq(N, timestep)
-        limit = np.int32(np.floor(len(axis_frequencies) / 2)) if not symmetric else -1
+        limit = int(np.floor(len(axis_frequencies) / 2)) if not symmetric else -1
         # Return FFT frequency range with appropriate unit conversion
         coeff = (
             Filter._cyclic_to_angular if units is Filter.FrequencyUnits.ANGULAR else 1.0
