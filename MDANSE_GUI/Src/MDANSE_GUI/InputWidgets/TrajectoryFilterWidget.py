@@ -282,8 +282,7 @@ class FilterPreferencesGroup(QObject):
             The specified QComboBox
         """
         widget = QComboBox()
-        for i in items:
-            widget.addItem(i)
+        widget.addItems(items)
         widget.setCurrentText(items[0])
         widget.setEnabled(enabled)
         widget.setToolTip(tooltip)
