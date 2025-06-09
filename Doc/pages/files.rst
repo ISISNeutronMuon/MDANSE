@@ -44,6 +44,7 @@ tarball is generated, which contains multiple files, including:
   the analysis.
 - **DAT Files**: Each file is named after the variable it contains and
   includes the following information:
+  
     - Variable name
     - Type of plot (representing plot dimensions)
     - Variable's placement on the *x*-axis (if plotted on the *y*-axis in the

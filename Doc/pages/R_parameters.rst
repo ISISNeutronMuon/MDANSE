@@ -44,7 +44,7 @@ Correlation Frames
 +--------------+---------+------------------+---------------------------------------------------------+
 | Correlation  | int     | Last frame / 2   | Determines the size of the correlation window (in       |
 | frames       |         |                  | frames). This determines the time range of the output   |
-|              |         |                  | of the analysis. See also :ref:`correlation-frames`.      |
+|              |         |                  | of the analysis. See also :ref:`correlation-frames`.    |
 +--------------+---------+------------------+---------------------------------------------------------+
 
 .. _param-qshells:
@@ -187,15 +187,6 @@ Spherical Lattice Vectors
 | width            | float     | 1.0     | Accepted tolerance of each shell. Often identical to the   |
 |                  |           |         | "by step of" parameter.                                    |
 +------------------+-----------+---------+------------------------------------------------------------+
-| Generate button  |           |         | Generates hkl vectors based on the specified parameters    |
-|                  |           |         | (seed, n vectors, width). Must be clicked before saving.   |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Name             | str       | None    | Allows you to name the generated vectors. Name must be     |
-|                  |           |         | set before saving the vectors.                             |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Save button      |           |         | Saves the generated vectors. It doesn't close the Q        |
-|                  |           |         | Vectors window. Saved vectors may be in a specific format. |    
-+------------------+-----------+---------+------------------------------------------------------------+
 
 
 Circular Lattice Vectors
@@ -213,15 +204,6 @@ Circular Lattice Vectors
 +------------------+-----------+---------+------------------------------------------------------------+
 | width            | float     | 1.0     | Accepted tolerance of each shell. Often identical to the   |
 |                  |           |         | "by step of" parameter.                                    |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Generate button  |           |         | Generates hkl vectors based on the specified parameters    |
-|                  |           |         | (seed, n vectors, width). Must be clicked before saving.   |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Name             | str       | None    | Allows you to name the generated vectors. Name must be     |
-|                  |           |         | set before saving the vectors.                             |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Save button      |           |         | Saves the generated vectors. It doesn't close the Q        |
-|                  |           |         | Vectors window. Saved vectors may be in a specific format. |    
 +------------------+-----------+---------+------------------------------------------------------------+
 
 -  axis 1
@@ -274,16 +256,6 @@ Linear Lattice Vectors
 +------------------+-----------+---------+------------------------------------------------------------+
 |   z-component   | int       | 0       | The z-components of the specified axis.                     |
 +------------------+-----------+---------+------------------------------------------------------------+
-| Generate button  |           |         | Generates hkl vectors based on the specified parameters    |
-|                  |           |         | (seed, n vectors, width). Must be clicked before saving.   |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Name             | str       | None    | This is the empty box at the bottom of the window. It      |
-|                  |           |         | allows you to name the generated vectors. This must be     |
-|                  |           |         | set before saving the vectors.                             |
-+------------------+-----------+---------+------------------------------------------------------------+
-| Save button      |           |         | Saves the generated vectors. It doesn't close the Q        |
-|                  |           |         | Vectors window. Saved vectors may be in a specific format. |    
-+------------------+-----------+---------+------------------------------------------------------------+
 
 
 Miller Indices Lattice Vectors
@@ -313,16 +285,6 @@ Miller Indices Lattice Vectors
 |                 |           |         | 1, every integer between **from** and **to** is placed     |
 |                 |           |         | into the range; if it is 2, every other, etc.              |
 +-----------------+-----------+---------+------------------------------------------------------------+
-| Generate button |           |         | Generates hkl vectors based on the specified parameters    |
-|                 |           |         | (h ranges). Must be clicked before saving.                 |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Name            | str       | None    | This is the empty box at the bottom of the window. It      |
-|                 |           |         | allows you to name the generated vectors. This must be     |
-|                 |           |         | set before saving the vectors.                             |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Save button     |           |         | Saves the generated vectors. It doesn't close the Q      |
-|                 |           |         | Vectors window. Saved vectors may be in a specific format.|    
-+-----------------+-----------+---------+------------------------------------------------------------+
 
 
 Spherical Vectors
@@ -338,15 +300,6 @@ Spherical Vectors
 +-----------------+-----------+---------+------------------------------------------------------------+
 | width           | float     | 1.0     | The accepted tolerance of each shell. Often identical to   |
 |                 |           |         | the "by step of" parameter.                                |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Generate button |           |         | Generates hkl vectors based on the specified parameters    |
-|                 |           |         | (seed, n vectors, width). Must be clicked before saving.   |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Name            | str       | None    | This is the empty box at the bottom of the window. It      |
-|                 |           |         | allows you to name the generated vectors before saving.    |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Save button     |           |         | Saves the generated vectors. It doesn't close the Q        |
-|                 |           |         | Vectors window.                                            |
 +-----------------+-----------+---------+------------------------------------------------------------+
 
 
@@ -389,18 +342,6 @@ Circular Vectors
 |                 |           |         |     The z-component of the second axis used to         |
 |                 |           |         |     specify the plane.                                 |
 +-----------------+-----------+---------+--------------------------------------------------------+
-| Generate button |           |         | Generates hkl vectors based on the specified           |
-|                 |           |         | parameters (seed, n vectors, width, axis components).  |
-|                 |           |         | Must be clicked before saving.                         |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| Name            | str       | None    | This is the empty box at the bottom of the window.     |
-|                 |           |         | It allows you to name the generated vectors before     |
-|                 |           |         | saving. Must be set before saving.                     |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| Save button     |           |         | Saves the generated vectors. It does not close the Q   |
-|                 |           |         | Vectors window. The saved vectors may be in a          |
-|                 |           |         | specific format, such as a table format.               |
-+-----------------+-----------+---------+--------------------------------------------------------+
 
 
 Linear Vectors
@@ -429,17 +370,6 @@ Linear Vectors
 |                 |           |         |   - z-component: int, default 0                       |
 |                 |           |         |     The z-component of the specified axis.            |
 +-----------------+-----------+---------+-------------------------------------------------------+
-| Generate button |           |         | Generates hkl vectors based on the specified          |
-|                 |           |         | parameters (seed, n vectors, width, axis              |
-|                 |           |         | components). Must be clicked before saving.           |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| Name            | str       | None    | This is the empty box at the bottom of the window.    |
-|                 |           |         | It allows you to name the generated vectors before    |
-|                 |           |         | saving. Must be set before saving.                    |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| Save button     |           |         | Saves the generated vectors. It does not close the    |
-|                 |           |         | Q Vectors window.                                     |
-+-----------------+-----------+---------+-------------------------------------------------------+
 
 
 Grid Vectors
@@ -466,17 +396,6 @@ Grid Vectors
 +-----------------+-----------+---------+---------------------------------------------------------------+
 | qstep           | float     | 0.01    | Determines how the hkl vectors are grouped.                   |
 +-----------------+-----------+---------+---------------------------------------------------------------+
-| Generate button |           |         | Generates hkl vectors based on the specified parameters       |
-|                 |           |         | (seed, hrange, krange, lrange, qstep). Must be clicked        |
-|                 |           |         | before saving.                                                |
-+-----------------+-----------+---------+---------------------------------------------------------------+
-| Name            | str       | None    | This is the empty box at the bottom of the window. It         |
-|                 |           |         | allows you to name the generated vectors before saving.       |
-|                 |           |         | Must be set before saving.                                    |
-+-----------------+-----------+---------+---------------------------------------------------------------+
-| Save button     |           |         | Saves the generated vectors. It does not close the Q          |
-|                 |           |         | Vectors window. Saved vectors may be in a specific format.    |
-+-----------------+-----------+---------+---------------------------------------------------------------+
 
 
 Approximated Dispersion Vectors
@@ -497,17 +416,6 @@ Approximated Dispersion Vectors
 +-----------------+-----------+----------------------+------------------------------------------------------------+
 | Q step (nm^-1)  | float     | 0.1                  | The increment by which Q is increased when tracing the     |
 |                 |           |                      | line between the two points.                               |
-+-----------------+-----------+----------------------+------------------------------------------------------------+
-| Generate button |           |                      | Generates hkl vectors based on the specified parameters    |
-|                 |           |                      | (generator, Q start, Q step). Must be clicked before       |
-|                 |           |                      | saving.                                                    |
-+-----------------+-----------+----------------------+------------------------------------------------------------+
-| Name            | str       | None                 | This is the empty box at the bottom of the window. It      |
-|                 |           |                      | allows you to name the generated vectors before saving.    |
-|                 |           |                      | Must be set before saving.                                 |
-+-----------------+-----------+----------------------+------------------------------------------------------------+
-| Save button     |           |                      | Saves the generated vectors. It does not close the Q       |
-|                 |           |                      | Vectors window. Saved vectors may be in a specific format. |    
 +-----------------+-----------+----------------------+------------------------------------------------------------+
 
 .. _param-instrument-resolution:

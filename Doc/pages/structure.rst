@@ -315,7 +315,7 @@ calculated in MDANSE via the following expression
 .. _voronoi:
 
 Voronoi
-''''''''
+'''''''
 
 In MDANSE, Voronoi analysis plays a pivotal role in characterizing the
 spatial distribution and organization of particles or atoms within a
@@ -332,7 +332,7 @@ molecular structures and dynamics.
 .. _xray-static-structure-factor:
 
 X-ray Static Structure Factor
-''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''
 
 MDANSE's xray static structure factor analysis is tailored for neutron
 and X-ray scattering experiments in material science. It systematically

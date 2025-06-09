@@ -29,8 +29,9 @@ arguments should be entered as space-separated values.
 For example, to display the chemical contents of a trajectory, use the
 following command:
 
-```bash
-mdanse --traj my_trajectory.dcd
+.. code-block:: shell
+
+  mdanse --traj my_trajectory.dcd
 
 +----------------------------------+-----------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | Option                           | Description                                                     | Expected Arguments                                                                                                                  |
