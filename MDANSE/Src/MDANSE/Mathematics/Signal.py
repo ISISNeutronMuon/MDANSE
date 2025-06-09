@@ -690,7 +690,7 @@ class Filter(ABC):
         """
         scale_factor = 1e12 * cls._freq_to_mev
         if units is Filter.FrequencyUnits.ANGULAR:
-            scale_factor /= 2 * np.pi
+            scale_factor /= cls._cyclic_to_angular
 
         if isinstance(freq, list):
             freq = np.array(freq)
@@ -709,7 +709,7 @@ class Filter(ABC):
         """
         scale_factor = 1e-12 / cls._freq_to_mev
         if units is Filter.FrequencyUnits.ANGULAR:
-            scale_factor *= 2 * np.pi
+            scale_factor *= cls._cyclic_to_angular
 
         if isinstance(energy, list):
             return np.array(energy) * scale_factor
