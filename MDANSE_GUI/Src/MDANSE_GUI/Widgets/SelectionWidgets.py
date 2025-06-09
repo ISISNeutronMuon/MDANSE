@@ -16,7 +16,7 @@
 
 import json
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 import numpy as np
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
@@ -29,6 +29,7 @@ from qtpy.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QWidget,
 )
 from rdkit.Chem import MolFromSmarts
 
@@ -118,7 +119,13 @@ class BasicSelectionWidget(QGroupBox):
 
     new_selection = Signal(str)
 
-    def __init__(self, parent=None, widget_label="Atom selection widget"):
+    def __init__(
+        self,
+        parent: Optional[QWidget] = None,
+        *,
+        widget_label: str = "Atom selection widget",
+        add_standard_widgets: bool = True,
+    ):
         """Create subwidgets common to atom selection.
 
         Parameters
@@ -127,6 +134,8 @@ class BasicSelectionWidget(QGroupBox):
             parent in the Qt hierarchy, by default None
         widget_label : str, optional
             Text shown above the widget, by default "Atom selection widget"
+        add_standard_widgets: bool, optional
+            if True, the operation type combo box and apply button appead in the widget
 
         """
         super().__init__(parent)
@@ -134,7 +143,8 @@ class BasicSelectionWidget(QGroupBox):
         self.setLayout(layout)
         self.setTitle(widget_label)
         self.add_specific_widgets()
-        self.add_standard_widgets()
+        if add_standard_widgets:
+            self.add_standard_widgets()
 
     def parameter_dictionary(self) -> dict[str, Any]:
         """Collect and return selection function parameters."""
@@ -173,6 +183,36 @@ class BasicSelectionWidget(QGroupBox):
         self.new_selection.emit(json.dumps(funtion_parameters))
 
 
+class GUISelection(BasicSelectionWidget):
+    """Widget for confirming and cancelling manual selection in 3D view."""
+
+    def __init__(
+        self,
+        parent: Optional[QWidget] = None,
+        *,
+        widget_label: str = "Manual Selection",
+    ):
+        """Pass inputs to the parent class init.
+
+        Parameters
+        ----------
+        parent : QWidget, optional
+            parent in the Qt hierarchy, by default None
+        widget_label : str, optional
+            Text over the widget, by default "ALL ATOMS"
+
+        """
+        super().__init__(parent, widget_label=widget_label, add_standard_widgets=False)
+
+    def add_specific_widgets(self) -> None:
+        """Add GUI selection buttons, not connected."""
+        layout = self.layout()
+        self.confirm_gui_selection = QPushButton("CONFIRM manual selection", self)
+        self.undo_gui_selection = QPushButton("Undo GUI selection", self)
+        for button in [self.confirm_gui_selection, self.undo_gui_selection]:
+            layout.addWidget(button)
+
+
 class AllAtomSelection(BasicSelectionWidget):
     """Widget for global atom selection, e.g. all atoms, no atoms."""
 
@@ -187,7 +227,7 @@ class AllAtomSelection(BasicSelectionWidget):
             Text over the widget, by default "ALL ATOMS"
 
         """
-        super().__init__(parent, widget_label)
+        super().__init__(parent, widget_label=widget_label)
 
     def add_specific_widgets(self):
         """Add the INVERT button."""
@@ -239,7 +279,7 @@ class AtomSelection(BasicSelectionWidget):
             self.selection_types += ["type"]
         if self.atom_names:
             self.selection_types += ["name"]
-        super().__init__(parent, widget_label)
+        super().__init__(parent, widget_label=widget_label)
 
     def add_specific_widgets(self):
         """Create selection combo boxes."""
@@ -288,7 +328,7 @@ class IndexSelection(BasicSelectionWidget):
             Text shown above the widget, by default "Index selection"
 
         """
-        super().__init__(parent, widget_label)
+        super().__init__(parent, widget_label=widget_label)
         self.selection_keyword = "index_list"
 
     def add_specific_widgets(self):
@@ -359,7 +399,7 @@ class MoleculeSelection(BasicSelectionWidget):
         self.molecule_names = []
         if trajectory:
             self.molecule_names = trajectory.chemical_system.unique_molecules()
-        super().__init__(parent, widget_label)
+        super().__init__(parent, widget_label=widget_label)
 
     def add_specific_widgets(self):
         """Create the combo box for molecule names."""
@@ -401,7 +441,7 @@ class LabelSelection(BasicSelectionWidget):
         self.labels = []
         if trajectory:
             self.labels = list(trajectory.chemical_system._labels.keys())
-        super().__init__(parent, widget_label)
+        super().__init__(parent, widget_label=widget_label)
 
     def add_specific_widgets(self):
         """Create the combo box for atom labels."""
@@ -445,7 +485,7 @@ class PatternSelection(BasicSelectionWidget):
             "sulphate": "[#16X4](~[#8])(~[#8])(~[#8])~[#8]",
             "thiol": "[#16X2;H1]~[H]",
         }
-        super().__init__(parent, widget_label)
+        super().__init__(parent, widget_label=widget_label)
 
     def add_specific_widgets(self):
         """Create the pattern text field."""
@@ -488,6 +528,8 @@ class PatternSelection(BasicSelectionWidget):
 class PositionSelection(BasicSelectionWidget):
     """GUI frontend for select_positions."""
 
+    N_DIMS = 3
+
     def __init__(
         self,
         parent=None,
@@ -516,7 +558,7 @@ class PositionSelection(BasicSelectionWidget):
 
         self._current_lower_limit = self._lower_limit.copy()
         self._current_upper_limit = self._upper_limit.copy()
-        super().__init__(parent, widget_label)
+        super().__init__(parent, widget_label=widget_label)
 
     def add_specific_widgets(self):
         """Create text input fields with validators."""
@@ -550,8 +592,8 @@ class PositionSelection(BasicSelectionWidget):
             enable = False
         else:
             if (
-                len(self._current_lower_limit) != 3
-                or len(self._current_upper_limit) != 3
+                len(self._current_lower_limit) != self.N_DIMS
+                or len(self._current_upper_limit) != self.N_DIMS
             ):
                 enable = False
         self.commit_button.setEnabled(enable)
@@ -568,6 +610,8 @@ class PositionSelection(BasicSelectionWidget):
 
 class SphereSelection(BasicSelectionWidget):
     """GUI frontend for select_sphere."""
+
+    N_DIMS = 3
 
     def __init__(
         self,
@@ -594,7 +638,7 @@ class SphereSelection(BasicSelectionWidget):
         temp_coordinates = trajectory.coordinates(0)
         self._current_sphere_centre = np.mean(temp_coordinates, axis=0)
         self._current_sphere_radius = round(np.min(np.std(temp_coordinates, axis=0)), 3)
-        super().__init__(parent, widget_label)
+        super().__init__(parent, widget_label=widget_label)
 
     def add_specific_widgets(self):
         """Create the text input fields for sphere radius and centre."""
@@ -625,7 +669,7 @@ class SphereSelection(BasicSelectionWidget):
         except (TypeError, ValueError):
             enable = False
         else:
-            if len(self._current_sphere_centre) != 3:
+            if len(self._current_sphere_centre) != self.N_DIMS:
                 enable = False
         self.commit_button.setEnabled(enable)
 

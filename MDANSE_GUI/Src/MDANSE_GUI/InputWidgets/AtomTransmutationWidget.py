@@ -13,23 +13,26 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Framework.Configurators.AtomTransmutationConfigurator import AtomTransmuter
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from qtpy.QtWidgets import (
     QComboBox,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
     QLineEdit,
     QPushButton,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGroupBox,
-    QLabel,
     QTextEdit,
+    QVBoxLayout,
     QWidget,
 )
 
-from MDANSE.Framework.Configurators.AtomTransmutationConfigurator import AtomTransmuter
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
-from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE_GUI.InputWidgets.AtomSelectionWidget import AtomSelectionWidget
-from MDANSE_GUI.InputWidgets.AtomSelectionWidget import SelectionHelper
+from MDANSE_GUI.InputWidgets.AtomSelectionWidget import (
+    AtomSelectionWidget,
+    SelectionHelper,
+    SelectionModel,
+)
 
 
 class TransmutationHelper(SelectionHelper):
@@ -39,6 +42,7 @@ class TransmutationHelper(SelectionHelper):
     ----------
     _helper_title : str
         The title of the helper dialog window.
+
     """
 
     _helper_title = "Atom transmutation helper"
@@ -52,7 +56,8 @@ class TransmutationHelper(SelectionHelper):
         *args,
         **kwargs,
     ):
-        """
+        """Create a dialog for atom transmutation.
+
         Parameters
         ----------
         transmuter : AtomTransmuter
@@ -63,19 +68,31 @@ class TransmutationHelper(SelectionHelper):
         field : QLineEdit
             The QLineEdit field that will need to be updated when
             applying the setting.
+        parent : QObject
+            parent object in the Qt object hierarchy
+        *args : Any, ...
+            catches all the arguments that may be passed to the QDialog constructor
+        **kwargs : dict[str, Any]
+            catches all the keyword arguments passed to the QDialog constructor
+
         """
         self.transmuter = transmuter
         self.transmutation_textbox = QTextEdit()
         self.transmutation_textbox.setReadOnly(True)
         self.transmutation_combo = QComboBox()
         self.transmutation_combo.addItems(ATOMS_DATABASE.atoms)
+        self._field = field
+        self.inner_model = SelectionModel(traj_data[1])
         super().__init__(
             traj_data,
-            field,
+            self.inner_model,
             parent,
             *args,
             **kwargs,
         )
+        transmutation_reset = QPushButton("Reset TRANSMUTATION", self)
+        transmutation_reset.clicked.connect(self.reset_transmuation)
+        self.bottom_buttons.addWidget(transmutation_reset)
         self.update_transmutation_textbox()
 
     def right_widgets(self) -> list[QWidget]:
@@ -86,18 +103,20 @@ class TransmutationHelper(SelectionHelper):
         list[QWidget]
             List of QWidgets to add to the right layout from
             create_layouts.
+
         """
         widgets = super().right_widgets()
-        return widgets + [self.transmutation_textbox]
+        return [*widgets, self.transmutation_textbox]
 
     def left_widgets(self) -> list[QWidget]:
-        """Adds a transmutation widget to the selection helper.
+        """Add a transmutation widget to the selection helper.
 
         Returns
         -------
         list[QWidget]
             List of QWidgets to add to the first layout from
             create_layouts.
+
         """
         widgets = super().left_widgets()
         transmutation = QGroupBox("transmutation")
@@ -115,43 +134,39 @@ class TransmutationHelper(SelectionHelper):
         transmute.clicked.connect(self.apply_transmutation)
 
         transmutation.setLayout(transmutation_layout)
-        return widgets + [transmutation]
+        return [*widgets, transmutation]
 
     def apply_transmutation(self) -> None:
-        """With the selection and the transmutation choice apply the
-        transmutation and update the transmutation textbox with the new
-        transmutation setting.
-        """
+        """Apply the transmutation to the selected atoms."""
+        self.inner_model.finalise_manual_selection()
         selection_string = self.selection_model.current_steps()
         self.transmuter.apply_transmutation(
-            selection_string, self.transmutation_combo.currentText()
+            selection_string,
+            self.transmutation_combo.currentText(),
         )
         self.update_transmutation_textbox()
+        self.apply()
 
     def update_transmutation_textbox(self) -> None:
-        """Update the transmutation textbox with the current transmuter
-        setting information.
-        """
+        """Update the list of transmuted atoms in the text box."""
         substitutions = self.transmuter.get_setting()
 
         text = [
-            f"Number of atoms transmuted:\n{len(substitutions)}\n\nTransmuted atoms:\n"
+            f"Number of atoms transmuted:\n{len(substitutions)}\n\nTransmuted atoms:\n",
         ]
         for idx, symbol in substitutions.items():
             text.append(f"{idx}  {self.atm_full_names[idx]} -> {symbol}\n")
 
         self.transmutation_textbox.setText("".join(text))
 
-    def reset(self):
+    def reset_transmuation(self):
         """Reset the transmuter so that no transmutation are set."""
-        super().reset()
         self.transmuter.reset_setting()
         self.update_transmutation_textbox()
+        self.apply()
 
     def apply(self) -> None:
-        """Set the field of the AtomTransmutationWidget to the currently
-        chosen setting in this widget.
-        """
+        """Pass the transmutation settings to the main widget."""
         self._field.setText(self.transmuter.get_json_setting())
 
 
@@ -160,10 +175,28 @@ class AtomTransmutationWidget(AtomSelectionWidget):
 
     _push_button_text = "Atom transmutation helper"
     _default_value = "{}"
-    _tooltip_text = "Specify the atom transmutation that will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
+    _tooltip_text = (
+        "Specify the atom transmutation that will be used in the analysis."
+        " The input is a JSON string, and can be created using"
+        " the helper dialog."
+    )
+
+    def __init__(self, *args, **kwargs):
+        """Create the main widget for transmuting atom types.
+
+        Parameters
+        ----------
+        _use_list_view : bool, optional
+            If True, a ListView will replace LineEdit, by default True
+
+        """
+        if kwargs.get("use_list_view", False):
+            raise TypeError(f"Cannot use list view with {type(self).__name__}.")
+        super().__init__(*args, use_list_view=False, **kwargs)
 
     def create_helper(self, traj_data: tuple[str, Trajectory]) -> TransmutationHelper:
-        """
+        """Create a helper dialog for selecting and transmuting atoms.
+
         Parameters
         ----------
         traj_data : tuple[str, Trajectory]
@@ -173,6 +206,7 @@ class AtomTransmutationWidget(AtomSelectionWidget):
         -------
         TransmutationHelper
             Create and return the transmutation helper QDialog.
+
         """
         transmuter = self._configurator.get_transmuter()
         return TransmutationHelper(transmuter, traj_data, self._field, self._base)

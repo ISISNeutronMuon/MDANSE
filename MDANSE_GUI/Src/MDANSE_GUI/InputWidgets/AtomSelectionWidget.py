@@ -16,14 +16,16 @@
 
 import json
 from enum import Enum
+from pathlib import Path
 
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
+from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
-    QAbstractItemView,
     QDialog,
+    QFileDialog,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -42,6 +44,7 @@ from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
 from MDANSE_GUI.Widgets.SelectionWidgets import (
     AllAtomSelection,
     AtomSelection,
+    GUISelection,
     IndexSelection,
     LabelSelection,
     MoleculeSelection,
@@ -70,6 +73,13 @@ class SelectionModel(QStandardItemModel):
         self._trajectory = trajectory
         self._selection = ReusableSelection()
         self._current_selection = set()
+        self._manual_selection_item = None
+        self._clicked_atoms = []
+
+    def clear(self):
+        """Remove all the lines from the selection model."""
+        self._clicked_atoms = []
+        return super().clear()
 
     def rebuild_selection(self, last_operation: str) -> SelectionValidity:
         """Update the current selection based on the text in the GUI.
@@ -83,6 +93,7 @@ class SelectionModel(QStandardItemModel):
         -------
         SelectionValidity
             Result of the check on last_operation.
+
         """
         self._selection = ReusableSelection()
         self._current_selection = set()
@@ -109,6 +120,27 @@ class SelectionModel(QStandardItemModel):
             return SelectionValidity.USELESS_SELECTION
         return None
 
+    @Slot(int)
+    def on_atom_clicked(self, index: int):
+        """Add atom index to manual selection. Receives signals from View3D."""
+        if not self._clicked_atoms:
+            self._manual_selection_item = QStandardItem("Manual selection IN PROGRESS")
+            self.appendRow([self._manual_selection_item])
+        self._clicked_atoms.append(index)
+        self._manual_selection_item.setText(
+            f"Manual selection IN PROGRESS: clicked on {self._clicked_atoms}",
+        )
+
+    @Slot()
+    def clear_manual_selection(self):
+        """Remove the placeholder item from the end of the list, clear clicked atoms."""
+        if not self._clicked_atoms:
+            return
+        if self._manual_selection_item:
+            self.removeRow(self.rowCount() - 1)
+            self._manual_selection_item = None
+        self._clicked_atoms = []
+
     def current_selection(self, last_operation: str = "") -> set[int]:
         """Return the selected atom indices.
 
@@ -123,6 +155,7 @@ class SelectionModel(QStandardItemModel):
             indices of all the selected atoms
 
         """
+        self.finalise_manual_selection()
         self.rebuild_selection(last_operation)
         return self._selection.select_in_trajectory(self._trajectory)
 
@@ -144,13 +177,42 @@ class SelectionModel(QStandardItemModel):
             result[row] = python_object
         return json.dumps(result)
 
+    def finalise_manual_selection(self):
+        """Replace the placeholder item with an actual atom selection operation.
+
+        This method commits the changes to selection made by the user in the
+        3D view. It should be called before adding a new selection, closing
+        the dialog and saving the selection. Optionally, the user can also
+        call this method manually with a button.
+        """
+        if self._clicked_atoms:
+            if self._manual_selection_item:
+                self.removeRow(self.rowCount() - 1)
+                self._manual_selection_item = None
+            new_params = {
+                "function_name": "toggle_selection",
+                "clicked_atoms": self._clicked_atoms,
+            }
+            json_string = json.dumps(new_params)
+            self._clicked_atoms = []
+            self.accept_from_widget(json_string)
+
     @Slot(str)
     def accept_from_widget(self, json_string: str):
         """Add a selection operation sent from a selection widget."""
+        self.finalise_manual_selection()
         new_item = QStandardItem(json_string)
         new_item.setEditable(False)
         self.appendRow(new_item)
         self.selection_changed.emit()
+
+    @Slot(str)
+    def create_from_string(self, json_string: str):
+        """Initialise a new selection from a string."""
+        self.clear()
+        dictionary = json.loads(json_string)
+        for selection_line in dictionary.values():
+            self.accept_from_widget(json.dumps(selection_line))
 
 
 class SelectionHelper(QDialog):
@@ -168,7 +230,7 @@ class SelectionHelper(QDialog):
     def __init__(
         self,
         traj_data: tuple[str, Trajectory],
-        field: QLineEdit,
+        model: SelectionModel,
         parent,
         *args,
         **kwargs,
@@ -179,9 +241,14 @@ class SelectionHelper(QDialog):
         ----------
         traj_data : tuple[str, Trajectory]
             A tuple of the trajectory data used to load the 3D viewer.
-        field : QLineEdit
-            The QLineEdit field that will need to be updated when
-            applying the setting.
+        model : SelectionModel
+            Data object storing selection operations, shared with the main widget
+        parent : QObject
+            parent object in the Qt object hierarchy
+        *args : Any, ...
+            catches all the arguments that may be passed to the QDialog constructor
+        **kwargs : dict[str, Any]
+            catches all the keyword arguments passed to the QDialog constructor
 
         """
         super().__init__(parent, *args, **kwargs)
@@ -189,25 +256,25 @@ class SelectionHelper(QDialog):
 
         self.trajectory = traj_data[1]
         self.system = self.trajectory.chemical_system
-        self.selection_model = SelectionModel(self.trajectory)
-        self._field = field
+        self.selection_model = model
         self.atm_full_names = self.system.name_list
         self.molecule_names = self.system.unique_molecules()
         self.labels = list(map(str, self.system._labels))
 
+        self._trajectory_path = Path(self.trajectory.filename).parent
         self.selection_textbox = QPlainTextEdit()
         self.selection_textbox.setReadOnly(True)
 
         mol_view = MolecularViewerWithPicking()
-        mol_view.picked_atoms_changed.connect(self.update_from_3d_view)
+        mol_view.clicked_atom_index.connect(self.update_from_3d_view)
         self.view_3d = View3D(mol_view)
         self.view_3d.update_panel(traj_data)
 
         layouts = self.create_layouts()
 
-        bottom = QHBoxLayout()
+        self.bottom_buttons = QHBoxLayout()
         for button in self.create_buttons():
-            bottom.addWidget(button)
+            self.bottom_buttons.addWidget(button)
 
         helper_layout = QHBoxLayout()
         sub_layout = QVBoxLayout()
@@ -215,7 +282,7 @@ class SelectionHelper(QDialog):
         helper_layout.addLayout(sub_layout)
         for layout in layouts[1:]:
             sub_layout.addLayout(layout)
-        sub_layout.addLayout(bottom)
+        sub_layout.addLayout(self.bottom_buttons)
 
         self.setLayout(helper_layout)
 
@@ -229,6 +296,7 @@ class SelectionHelper(QDialog):
         Some issues occur in the
         3D viewer when it is closed and then reopened.
         """
+        self.selection_model.finalise_manual_selection()
         a0.ignore()
         self.hide()
 
@@ -242,13 +310,38 @@ class SelectionHelper(QDialog):
             create_layouts.
 
         """
-        apply = QPushButton("Use Setting")
-        reset = QPushButton("Reset")
+        reset = QPushButton("Reset SELECTION")
         close = QPushButton("Close")
-        apply.clicked.connect(self.apply)
         reset.clicked.connect(self.reset)
         close.clicked.connect(self.close)
-        return [apply, reset, close]
+        return [reset, close]
+
+    def create_optional_save_button(self):
+        """Add a 'save selection' button.
+
+        This is optional, because selection saving is available only in the
+        AtomSelectionWidget, and not in the child classes for atom transmutation
+        or setting partial charges.
+        """
+        button = QPushButton("Save selection", self)
+        button.clicked.connect(self.save_selection_dialog)
+        self.bottom_buttons.addWidget(button)
+
+    def save_selection_dialog(self) -> None:
+        """Load a selection from a file.
+
+        At the moment it is possible to use .mda files which contain a selection,
+        or JSON text files.
+        """
+        self.selection_model.finalise_manual_selection()
+        fname = QFileDialog.getSaveFileName(
+            self,
+            "Save current selection to a JSON file",
+            str(self._trajectory_path),
+            "MDANSE selection files (*.json);;All files(*.*)",
+        )
+        if fname[0]:
+            self.selection_model._selection.save_to_json_file(fname[0])
 
     def create_layouts(self) -> list[QVBoxLayout]:
         """Call functions creating other widgets.
@@ -302,6 +395,7 @@ class SelectionHelper(QDialog):
 
         self.selection_widgets = [
             AllAtomSelection(self),
+            GUISelection(self),
             AtomSelection(self, self.trajectory),
             IndexSelection(self),
             MoleculeSelection(self, self.trajectory),
@@ -313,7 +407,13 @@ class SelectionHelper(QDialog):
 
         for widget in self.selection_widgets:
             select_layout.addWidget(widget)
-            widget.new_selection.connect(self.selection_model.accept_from_widget)
+            if isinstance(widget, GUISelection):
+                widget.confirm_gui_selection.clicked.connect(
+                    self.selection_model.finalise_manual_selection,
+                )
+                widget.undo_gui_selection.clicked.connect(self.undo_manual_selection)
+            else:
+                widget.new_selection.connect(self.selection_model.accept_from_widget)
 
         invert_layout = QHBoxLayout()
         label = QLabel("Current selection:")
@@ -333,13 +433,20 @@ class SelectionHelper(QDialog):
         return [scroll_area]
 
     @Slot()
+    def undo_manual_selection(self):
+        """Remove all atoms (de)selected in the most recent manual selection."""
+        self.selection_model.clear_manual_selection()
+        self.recalculate_selection()
+
+    @Slot()
     def recalculate_selection(self):
         """Update atom indices after selection change."""
         self.selected = self.selection_model.current_selection()
         self.view_3d._viewer.change_picked(self.selected)
         self.update_selection_textbox()
 
-    def update_from_3d_view(self, _selection: set[int]) -> None:
+    @Slot(int)
+    def update_from_3d_view(self, index: int) -> None:
         """Update atom indices after an atom has been clicked.
 
         A selection/deselection was made in the 3d view, update the
@@ -347,10 +454,11 @@ class SelectionHelper(QDialog):
 
         Parameters
         ----------
-        selection : set[int]
-            Selection indexes from the 3d view.
+        index : int
+            index of a single atom selected by clicking in View3D
 
         """
+        self.selection_model.on_atom_clicked(index)
         self.update_selection_textbox()
 
     @Slot()
@@ -381,10 +489,6 @@ class SelectionHelper(QDialog):
             text.append(f"{idx}  ({self.atm_full_names[idx]})\n")
         self.selection_textbox.setPlainText("".join(text))
 
-    def apply(self) -> None:
-        """Send the selection from the dialog to the main widget."""
-        self._field.setText(self.selection_model.current_steps())
-
     def reset(self) -> None:
         """Reset the helper to the default state."""
         self.selection_model.clear()
@@ -398,27 +502,41 @@ class AtomSelectionWidget(WidgetBase):
     """The atoms selection widget."""
 
     _push_button_text = "Atom selection helper"
+    _load_button_text = "Load selection from file"
     _default_value = "{}"
-    _tooltip_text = "Specify which atoms will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
+    _tooltip_text = (
+        "Specify which atoms will be used in the analysis. "
+        "The input is a JSON string, and can be created"
+        " using the helper dialog."
+    )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, use_list_view: bool = True, **kwargs):
         """Create the main widget for atom selection."""
         super().__init__(*args, **kwargs)
         self._value = self._default_value
-        self._field = QLineEdit(self._default_value, self._base)
-        self._field.setPlaceholderText(self._default_value)
-        self._field.setMaxLength(2147483647)  # set to the largest possible
-        self._field.textChanged.connect(self.updateValue)
+        if use_list_view:
+            self._field = QListView(self._base)
+            load_button = QPushButton(self._load_button_text, self._base)
+            load_button.clicked.connect(self.load_selection_from_file_dialog)
+        else:
+            self._field = QLineEdit(self._base)
         traj_config = self._configurator._configurable[
             self._configurator._dependencies["trajectory"]
         ]
         traj_filename = traj_config["filename"]
         trajectory = traj_config["instance"]
+        self._trajectory_path = Path(traj_filename).parent
+        self.selection_model = SelectionModel(trajectory)
+        if use_list_view:
+            self._field.setModel(self.selection_model)
         self.helper = self.create_helper((traj_filename, trajectory))
         helper_button = QPushButton(self._push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
         self._layout.addWidget(self._field)
         self._layout.addWidget(helper_button)
+        if use_list_view:
+            self._layout.addWidget(load_button)
+            self.helper.create_optional_save_button()
         self.update_labels()
         self.updateValue()
         self._field.setToolTip(self._tooltip_text)
@@ -443,7 +561,7 @@ class AtomSelectionWidget(WidgetBase):
             Create and return the selection helper QDialog.
 
         """
-        return SelectionHelper(traj_data, self._field, self._base)
+        return SelectionHelper(traj_data, self.selection_model, self._base)
 
     @Slot()
     def helper_dialog(self) -> None:
@@ -457,6 +575,38 @@ class AtomSelectionWidget(WidgetBase):
                 self.helper.restoreGeometry(self.helper.previous_geometry)
             self.helper.show()
 
+    @Slot()
+    def load_selection_from_file_dialog(self) -> None:
+        """Load a selection from a file.
+
+        At the moment it is possible to use .mda files,
+        or JSON text files.
+        """
+        fname = QFileDialog.getOpenFileName(
+            self._base,
+            "Load selection from a file (JSON or MDA)",
+            str(self._trajectory_path),
+            "MDANSE selection files (*.mda *.json);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
+        )[0]
+        if not fname:
+            return
+        temp_selection = ReusableSelection()
+        try:
+            temp_selection.load_from_hdf5(fname)
+        except OSError:
+            LOG.info("File %s could not be read as an HDF5 file", fname)
+            try:
+                temp_selection.load_from_json_file(fname)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                LOG.info("File %s could not be read using JSON decoder", fname)
+                LOG.warning("Selection will NOT be loaded from %s", fname)
+                return
+        if not temp_selection.operations:
+            LOG.warning("Selection from %s was empty and will be ignored", fname)
+            return
+        new_selection = temp_selection.convert_to_json()
+        self.helper.selection_model.create_from_string(new_selection)
+
     def get_widget_value(self) -> str:
         """Return the current text in the input field.
 
@@ -466,9 +616,4 @@ class AtomSelectionWidget(WidgetBase):
             The JSON selector setting.
 
         """
-        selection_string = self._field.text()
-        if len(selection_string) < 1:
-            self._empty = True
-            return self._default_value
-        self._empty = False
-        return selection_string
+        return self.selection_model.current_steps()

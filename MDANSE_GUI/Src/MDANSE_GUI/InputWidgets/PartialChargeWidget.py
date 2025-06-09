@@ -13,22 +13,25 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtWidgets import (
-    QLineEdit,
-    QPushButton,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGroupBox,
-    QLabel,
-    QTextEdit,
-    QWidget,
-)
-from qtpy.QtGui import QDoubleValidator
-
 from MDANSE.Framework.Configurators.PartialChargeConfigurator import PartialChargeMapper
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
-from MDANSE_GUI.InputWidgets.AtomSelectionWidget import AtomSelectionWidget
-from MDANSE_GUI.InputWidgets.AtomSelectionWidget import SelectionHelper
+from qtpy.QtGui import QDoubleValidator
+from qtpy.QtWidgets import (
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
+from MDANSE_GUI.InputWidgets.AtomSelectionWidget import (
+    AtomSelectionWidget,
+    SelectionHelper,
+    SelectionModel,
+)
 
 
 class ChargeHelper(SelectionHelper):
@@ -38,6 +41,7 @@ class ChargeHelper(SelectionHelper):
     ----------
     _helper_title : str
         The title of the helper dialog window.
+
     """
 
     _helper_title = "Partial charge helper"
@@ -51,7 +55,8 @@ class ChargeHelper(SelectionHelper):
         *args,
         **kwargs,
     ):
-        """
+        """Build a helper dialog for setting atom charges.
+
         Parameters
         ----------
         mapper : PartialChargeMapper
@@ -62,13 +67,25 @@ class ChargeHelper(SelectionHelper):
         field : QLineEdit
             The QLineEdit field that will need to be updated when
             applying the setting.
+        parent : QObject
+            Parent object in the Qt hierarchy of objects
+        *args : Any, ...
+            catches all the arguments that may be passed to the QDialog constructor
+        **kwargs : dict[str, Any]
+            catches all the keyword arguments passed to the QDialog constructor
+
         """
         self.mapper = mapper
         self.charge_textbox = QTextEdit()
         self.charge_textbox.setReadOnly(True)
         self.charge_qline = QLineEdit()
         self.charge_qline.setValidator(QDoubleValidator())
-        super().__init__(traj_data, field, parent, *args, **kwargs)
+        self.inner_model = SelectionModel(traj_data[1])
+        self._field = field
+        super().__init__(traj_data, self.inner_model, parent, *args, **kwargs)
+        charge_reset = QPushButton("Reset CHARGES", self)
+        charge_reset.clicked.connect(self.reset_charges)
+        self.bottom_buttons.addWidget(charge_reset)
         self.all_selection = False
         self.update_charge_textbox()
 
@@ -80,18 +97,20 @@ class ChargeHelper(SelectionHelper):
         list[QWidget]
             List of QWidgets to add to the right layout from
             create_layouts.
+
         """
         widgets = super().right_widgets()
-        return widgets + [self.charge_textbox]
+        return [*widgets, self.charge_textbox]
 
     def left_widgets(self) -> list[QWidget]:
-        """Adds a partial charge widget to the selection helper.
+        """Add a partial charge widget to the selection helper.
 
         Returns
         -------
         list[QWidget]
             List of QWidgets to add to the first layout from
             create_layouts.
+
         """
         widgets = super().left_widgets()
         partial_charge = QGroupBox("partial_charge")
@@ -109,44 +128,39 @@ class ChargeHelper(SelectionHelper):
         apply_charge.clicked.connect(self.apply_charges)
 
         partial_charge.setLayout(charge_layout)
-        return widgets + [partial_charge]
+        return [*widgets, partial_charge]
 
     def apply_charges(self) -> None:
-        """With the selection and the charge choice update the charge
-        mapper and update the charge textbox with the new partial
-        charge map info.
-        """
+        """Set charges of the curretly selected atoms."""
         try:
             charge = float(self.charge_qline.text())
         except ValueError:
             # probably an empty QLineEdit box
             return
+        self.selection_model.finalise_manual_selection()
         selection_string = self.selection_model.current_steps()
         self.mapper.update_charges(selection_string, charge)
         self.update_charge_textbox()
+        self.apply()
 
     def update_charge_textbox(self) -> None:
-        """Update the partial charge textbox with the current charge
-        mapper setting information.
-        """
-        map = self.mapper.get_full_setting()
+        """Show the current atom charges in the text box."""
+        charge_map = self.mapper.get_full_setting()
 
         text = ["Partial charge mapping:\n"]
-        for idx, charge in map.items():
+        for idx, charge in charge_map.items():
             text.append(f"{idx}  ({self.atm_full_names[idx]}) -> {charge}\n")
 
         self.charge_textbox.setText("".join(text))
 
-    def reset(self):
+    def reset_charges(self):
         """Reset the mapper so that no charges are set."""
-        super().reset()
         self.mapper.reset_setting()
         self.update_charge_textbox()
+        self.apply()
 
     def apply(self) -> None:
-        """Set the field of the PartialChargeWidget to the currently
-        chosen setting in this widget.
-        """
+        """Pass the charge setting to the main widget."""
         self._field.setText(self.mapper.get_json_setting())
 
 
@@ -155,10 +169,28 @@ class PartialChargeWidget(AtomSelectionWidget):
 
     _push_button_text = "Partial charge helper"
     _default_value = "{}"
-    _tooltip_text = "Specify the partial charges that will be used in the analysis. The input is a JSON string, and can be created using the helper dialog."
+    _tooltip_text = (
+        "Specify the partial charges that will be used in the analysis."
+        " The input is a JSON string, and can be created using"
+        " the helper dialog."
+    )
+
+    def __init__(self, *args, **kwargs):
+        """Create the widget for setting atom charges.
+
+        Parameters
+        ----------
+        _use_list_view : bool, optional
+            ignored here. This widget always sets use_list_view=False
+
+        """
+        if kwargs.get("use_list_view", False):
+            raise TypeError(f"Cannot use list view with {type(self).__name__}.")
+        super().__init__(*args, use_list_view=False, **kwargs)
 
     def create_helper(self, traj_data: tuple[str, Trajectory]) -> ChargeHelper:
-        """
+        """Create the dialog for selecting atoms and setting their charges.
+
         Parameters
         ----------
         traj_data : tuple[str, Trajectory]
@@ -168,6 +200,7 @@ class PartialChargeWidget(AtomSelectionWidget):
         -------
         ChargeHelper
             Create and return the partial charge helper QDialog.
+
         """
         mapper = self._configurator.get_charge_mapper()
         return ChargeHelper(mapper, traj_data, self._field, self._base)

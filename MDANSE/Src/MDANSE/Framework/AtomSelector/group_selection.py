@@ -16,6 +16,8 @@
 
 from collections.abc import Sequence
 
+from more_itertools import value_chain
+
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
@@ -42,7 +44,7 @@ def select_labels(
 
     """
     system = trajectory.chemical_system
-    return {system._labels[label] for label in atom_labels if label in system._labels}
+    return {struc for label in atom_labels for struc in system._labels.get(label, [])}
 
 
 def select_pattern(

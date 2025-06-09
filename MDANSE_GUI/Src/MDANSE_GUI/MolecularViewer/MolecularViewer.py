@@ -928,6 +928,7 @@ class MolecularViewerExtended(MolecularViewer):
 class MolecularViewerWithPicking(MolecularViewer):
     """This class implements a molecular viewer with picking."""
 
+    clicked_atom_index = Signal(int)
     picked_atoms_changed = Signal(object)
 
     def __init__(self):
@@ -980,6 +981,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         if picked_atom < 0 or picked_atom >= self._n_atoms:
             return
 
+        self.clicked_atom_index.emit(picked_atom)
         if picked_atom in self.picked_atoms:
             self.picked_atoms.remove(picked_atom)
         else:
