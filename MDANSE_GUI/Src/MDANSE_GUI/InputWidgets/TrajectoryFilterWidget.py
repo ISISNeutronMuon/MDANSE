@@ -729,10 +729,8 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
             If true, both inputs for upper and lower frequency bounds are enabled, else only one input is enabled
         """
         bounds = self.retrieve_widget("bound_freq")
-        if bounds and on:
-            bounds.setEnabled(True)
-            return
-        bounds.setEnabled(False)
+        if bounds:
+            bounds.setEnabled(on)
 
     def notify(self, value: Any) -> None:
         """Emit the signal on setting changed"""
