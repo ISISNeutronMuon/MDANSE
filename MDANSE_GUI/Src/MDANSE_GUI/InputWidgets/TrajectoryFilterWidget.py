@@ -1349,15 +1349,8 @@ class FilterDesigner(QDialog):
         dict
             Combined attributes
         """
-        defaults = filter.default_settings
-        missing = set(attributes) ^ set(defaults)
-        attributes.update(
-            {
-                key: filter.default_settings[key]["value"]
-                for key in missing
-                if key in defaults
-            }
-        )
+        for key, val in filter.default_settings.items():
+            attributes.setdefault(key, val["value"])
         return attributes
 
     def apply(self) -> None:
