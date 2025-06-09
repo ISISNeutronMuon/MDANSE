@@ -1438,9 +1438,5 @@ class TrajectoryFilterWidget(WidgetBase):
             The JSON selector setting.
         """
         selection_string = self._field.text()
-        if len(selection_string) < 1:
-            self._empty = True
-            return self._default_value
-        else:
-            self._empty = False
-        return selection_string
+        self._empty = not selection_string
+        return selection_string if selection_string else self._default_value
