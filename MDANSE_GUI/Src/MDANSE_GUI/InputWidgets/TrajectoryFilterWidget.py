@@ -568,7 +568,7 @@ class FilterSettingGroup(QObject):
         """
         widget = None
         setting = val_group["value"]
-        setting_group = val_group.get("values", None)
+        setting_group = val_group.get("values")
         tooltip = val_group.get("description", "")
         if isinstance(setting, int) and not setting_group:
             widget = QSpinBox()
@@ -1063,7 +1063,7 @@ class FilterDesigner(QDialog):
         widget_area.addLayout(filter_type_layout)
 
         # Add each of the filter settings grid layout to the stack
-        settings_groupbox = QGroupBox("Settings", None)
+        settings_groupbox = QGroupBox("Settings")
         settings_groupbox.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum
         )
@@ -1094,7 +1094,7 @@ class FilterDesigner(QDialog):
         widget_area.addWidget(settings_groupbox)
 
         # Add the filter designer preferences stack layout
-        preferences_groupbox = QGroupBox("Preferences", None)
+        preferences_groupbox = QGroupBox("Preferences")
         preferences_groupbox.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum
         )
