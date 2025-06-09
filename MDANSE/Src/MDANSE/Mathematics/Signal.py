@@ -635,7 +635,7 @@ class Filter(ABC):
         :Returns:
             #. str: The description string concatenated with substrings for each filer attribute
         """
-        settings = self.__class__.__dict__["default_settings"]
+        settings = type(self).__dict__["default_settings"]
         for setting in settings.keys():
             description += f"""
   # {setting}
