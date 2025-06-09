@@ -16,9 +16,9 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from enum import Enum, auto
-from pathlib import Path
-from typing import Any, Literal, Tuple, Union, TYPE_CHECKING
 from itertools import count
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 import h5py
 import numpy as np
@@ -124,7 +124,7 @@ class BoxStyle(Enum):
 
     def to_cell(
         self, value: NDArray[float], *, bounds: bool = False
-    ) -> Tuple[NDArray[float], NDArray[float]]:
+    ) -> tuple[NDArray[float], NDArray[float]]:
         """Convert from LAMMPS box definition to unit cell, origin.
 
         Parameters
@@ -333,7 +333,7 @@ class LAMMPScustom(LAMMPSReader):
         int
             Number of timesteps found.
         """
-        with open(filename, "r", encoding="utf-8") as file:
+        with open(filename, encoding="utf-8") as file:
             return ilen(filter(lambda line: line.startswith("ITEM: TIMESTEP"), file))
 
     def open_file(self, filename: Union[str, Path]) -> None:
@@ -344,7 +344,7 @@ class LAMMPScustom(LAMMPSReader):
         filename : Union[str, Path]
             File to open for reading.
         """
-        self._file = open(filename, "r")
+        self._file = open(filename, encoding="utf-8")
         self._start = 0
 
     def parse_first_step(
@@ -474,7 +474,7 @@ class LAMMPScustom(LAMMPSReader):
 
         return chemical_system
 
-    def run_step(self, index: int) -> Tuple[int, int]:
+    def run_step(self, index: int) -> tuple[int, Optional[int]]:
         """Runs a single step of the conversion job.
 
         Parameters
@@ -637,7 +637,7 @@ class LAMMPSxyz(LAMMPSReader):
         int
             Number of timesteps found.
         """
-        with open(filename, "r", encoding="utf-8") as file:
+        with open(filename, encoding="utf-8") as file:
             return sum(1 for line in file if len(line.split()) == 1)
 
     def open_file(self, filename: Union[Path, str]) -> None:
@@ -648,9 +648,9 @@ class LAMMPSxyz(LAMMPSReader):
         filename : Union[str, Path]
             File to open for reading.
         """
-        self._file = open(filename, "r")
+        self._file = open(filename, encoding="utf-8")
 
-    def read_step(self) -> Tuple[int, NDArray[int], NDArray[float]]:
+    def read_step(self) -> tuple[int, NDArray[int], NDArray[float]]:
         """Read an XYZ file step.
 
         Returns
@@ -749,7 +749,7 @@ class LAMMPSxyz(LAMMPSReader):
 
         return chemical_system
 
-    def run_step(self, index) -> Tuple[int, int]:
+    def run_step(self, index) -> tuple[int, Optional[int]]:
         """Runs a single step of the conversion job.
 
         Parameters
@@ -899,7 +899,7 @@ class LAMMPSh5md(LAMMPSReader):
 
         return chemical_system
 
-    def run_step(self, index: int) -> Tuple[int, int]:
+    def run_step(self, index: int) -> tuple[int, int]:
         """Runs a single step of the conversion job.
 
         Parameters
@@ -1171,7 +1171,7 @@ class LAMMPS(Converter):
             fold_coordinates=self.configuration["fold"]["value"],
         )
 
-    def run_step(self, index) -> Tuple[int, None]:
+    def run_step(self, index) -> tuple[int, None]:
         """Runs a single step of the job.
 
         Parameters

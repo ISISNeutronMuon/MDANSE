@@ -9,7 +9,7 @@ from MDANSE.Framework.AtomSelector.atom_selection import select_atoms
 from MDANSE.Framework.AtomSelector.molecule_selection import select_molecules
 from MDANSE.Framework.AtomSelector.group_selection import select_labels, select_pattern
 from MDANSE.Framework.AtomSelector.spatial_selection import select_positions, select_sphere
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 short_traj = os.path.join(
@@ -36,19 +36,19 @@ traj_2vb1 = os.path.join(
 
 @pytest.fixture(scope='module')
 def trajectory(request):
-   return HDFTrajectoryInputData(request.param)
+   return Trajectory(request.param)
 
 
 @pytest.fixture(scope="module")
 def short_trajectory():
-    traj_object = HDFTrajectoryInputData(short_traj)
+    traj_object = Trajectory(short_traj)
     yield traj_object.trajectory
     traj_object.close()
 
 
 @pytest.fixture(scope="module")
 def gromacs_trajectory():
-    traj_object = HDFTrajectoryInputData(traj_2vb1)
+    traj_object = Trajectory(traj_2vb1)
     yield traj_object.trajectory
     traj_object.close()
 
@@ -56,21 +56,21 @@ def gromacs_trajectory():
 @pytest.mark.parametrize("trajectory", [short_traj, mdmc_traj, com_traj], indirect=True)
 def test_select_all(trajectory):
     n_atoms = len(trajectory.chemical_system.atom_list)
-    selection = select_all(trajectory.trajectory)
+    selection = select_all(trajectory)
     assert len(selection) == n_atoms
 
 
 @pytest.mark.parametrize("trajectory", [short_traj, mdmc_traj, com_traj], indirect=True)
 def test_select_none(trajectory):
-    selection = select_none(trajectory.trajectory)
+    selection = select_none(trajectory)
     assert len(selection) == 0
 
 
 @pytest.mark.parametrize("trajectory", [short_traj, mdmc_traj, com_traj], indirect=True)
 def test_inverted_none_is_all(trajectory):
-    none_selection = select_none(trajectory.trajectory)
-    all_selection = select_all(trajectory.trajectory)
-    inverted_none = invert_selection(trajectory.trajectory, none_selection)
+    none_selection = select_none(trajectory)
+    all_selection = select_all(trajectory)
+    inverted_none = invert_selection(trajectory, none_selection)
     assert all_selection == inverted_none
 
 
@@ -82,7 +82,7 @@ def test_inverted_none_is_all(trajectory):
     (["S", "Sb", "Cu"], 480)
 ))
 def test_select_atoms_selects_by_element(trajectory, element, expected):
-    s_selection = select_atoms(trajectory.trajectory, atom_types=element)
+    s_selection = select_atoms(trajectory, atom_types=element)
     assert len(s_selection) == expected
 
 
@@ -92,7 +92,7 @@ def test_select_atoms_selects_by_element(trajectory, element, expected):
     ([470,510], 10),
 ))
 def test_select_atoms_selects_by_range(trajectory, index_range, expected):
-    range_selection = select_atoms(trajectory.trajectory, index_range=index_range)
+    range_selection = select_atoms(trajectory, index_range=index_range)
     assert len(range_selection) == expected
 
 
@@ -102,7 +102,7 @@ def test_select_atoms_selects_by_range(trajectory, index_range, expected):
     ([470,510,5], 2),
 ))
 def test_select_atoms_selects_by_slice(trajectory, index_slice, expected):
-    range_selection = select_atoms(trajectory.trajectory, index_slice=index_slice)
+    range_selection = select_atoms(trajectory, index_slice=index_slice)
     assert len(range_selection) == expected
 
 
@@ -112,20 +112,20 @@ def test_select_atoms_selects_by_slice(trajectory, index_slice, expected):
     (['C613 H959 N193 O185 S10'], 1960),
 ))
 def test_select_molecules(trajectory, molecule_names, expected):
-    water_selection = select_molecules(trajectory.trajectory, molecule_names = molecule_names)
+    water_selection = select_molecules(trajectory, molecule_names = molecule_names)
     assert len(water_selection) == expected
 
 
 @pytest.mark.parametrize("trajectory", [traj_2vb1], indirect=True)
 def test_select_molecules_inverted_selects_ions(trajectory):
-    all_molecules_selection = select_molecules(trajectory.trajectory, molecule_names = ['C613 H959 N193 O185 S10', 'H2 O1'])
-    non_molecules_selection = invert_selection(trajectory.trajectory, all_molecules_selection)
+    all_molecules_selection = select_molecules(trajectory, molecule_names = ['C613 H959 N193 O185 S10', 'H2 O1'])
+    non_molecules_selection = invert_selection(trajectory, all_molecules_selection)
     assert all([trajectory.chemical_system.atom_list[index] in ['Na', 'Cl'] for index in non_molecules_selection])
 
 
 @pytest.mark.parametrize("trajectory", [traj_2vb1], indirect=True)
 def test_select_pattern_selects_water(trajectory):
-    water_selection = select_pattern(trajectory.trajectory, rdkit_pattern="[#8X2;H2](~[H])~[H]")
+    water_selection = select_pattern(trajectory, rdkit_pattern="[#8X2;H2](~[H])~[H]")
     assert len(water_selection) == 28746
 
 
@@ -136,7 +136,7 @@ def test_select_pattern_selects_water(trajectory):
     ([1.8, 1.8, 1.8], None, {453}),
 ))
 def test_select_positions(trajectory, lower_limit, upper_limit, expected):
-    cube_selection = select_positions(trajectory.trajectory,
+    cube_selection = select_positions(trajectory,
                                       position_minimum = lower_limit,
                                       position_maximum = upper_limit)
     assert cube_selection == expected
@@ -144,7 +144,7 @@ def test_select_positions(trajectory, lower_limit, upper_limit, expected):
 
 @pytest.mark.parametrize("trajectory", [short_traj], indirect=True)
 def test_select_sphere(trajectory):
-    sphere_selection = select_sphere(trajectory.trajectory,
+    sphere_selection = select_sphere(trajectory,
                                       sphere_centre = 0.6*np.ones(3),
                                       sphere_radius = 0.2)
     assert sphere_selection == {19, 17, 59, 15}

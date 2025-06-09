@@ -16,7 +16,6 @@
 import h5py
 
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
-from MDANSE.IO.HDF import find_numeric_variables
 
 
 class HDFInputFileConfigurator(InputFileConfigurator):
@@ -67,7 +66,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         try:
             self["instance"] = h5py.File(self["value"], "r")
 
-        except IOError:
+        except OSError:
             self.error_status = f"can not open {value} HDF file for reading"
             return
 
@@ -106,25 +105,3 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         """
 
         return self._variables
-
-    def get_information(self):
-        """
-        Returns some basic informations about the contents of the HDF file.
-
-        :return: the informations about the contents of the HDF file.
-        :rtype: str
-        """
-        if "value" not in self:
-            return "Not configured yet\n"
-
-        info = [f"HDF input file: {self['value']!r}"]
-
-        if "instance" in self:
-            info.append("Contains the following variables:")
-            variables = []
-            find_numeric_variables(variables, self["instance"])
-
-            for v in variables:
-                info.append(f"\t-{v}")
-
-        return "\n".join(info) + "\n"

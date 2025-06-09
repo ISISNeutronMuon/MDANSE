@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import \
-    HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import \
+    Trajectory
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import remove_jumps
 from test_helpers.compare_hdf5 import compare_hdf5
@@ -43,33 +43,33 @@ def test_jumps_removed_correctly():
 
 @pytest.mark.parametrize("file_compare, traj_compare, parameters", [
     (("/configuration/coordinates", "/time"),
-     ("trajectory.chemical_system.number_of_atoms", "trajectory.__len__()"),
+     ("chemical_system.number_of_atoms", "__len__()"),
      {"trajectory": short_traj, "frames": (0, 501, 1)},
      ),
 
     ((("/configuration/coordinates", slice(0, 501, 10)),
       ("/time", slice(0, 501, 10))),
-     ("trajectory.chemical_system.number_of_atoms", ("trajectory.__len__()", 51)),
+     ("chemical_system.number_of_atoms", ("__len__()", 51)),
      {"trajectory": short_traj, "frames": (0, 501, 10)},
      ),
 
     ((("/configuration/coordinates", (slice(None), slice(6, 20), slice(None))),
       "/time"),
-     ("trajectory.__len__()", ("trajectory.chemical_system.number_of_atoms", 14)),
+     ("__len__()", ("chemical_system.number_of_atoms", 14)),
      {"trajectory": short_traj, "frames": (0, 501, 1),
       "atom_selection": '{"0": {"function_name": "select_atoms", "atom_types": ["H"]}}'},
      ),
 
     (("/configuration/coordinates", "/time"),
-     ("trajectory.chemical_system.number_of_atoms", "trajectory.__len__()",
-      ("trajectory.unit_cell(0)._unit_cell", np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))),
+     ("chemical_system.number_of_atoms", "__len__()",
+      ("unit_cell(0)._unit_cell", np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))),
      {"trajectory": short_traj, "frames": (0, 501, 1),
       "unit_cell": (np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]), True)},
      ),
 
     (("/configuration/coordinates", "/time"),
-     ("trajectory.chemical_system.number_of_atoms", "trajectory.__len__()",
-      ("trajectory.chemical_system.atom_list", ['C', 'C', 'C', 'C', 'C', 'C',
+     ("chemical_system.number_of_atoms", "__len__()",
+      ("chemical_system.atom_list", ['C', 'C', 'C', 'C', 'C', 'C',
                                                 'B', 'B', 'B', 'B', 'B', 'B', 'B',
                                                 'B', 'B', 'B', 'B', 'B', 'B', 'B'])),
      {"trajectory": short_traj, "frames": (0, 501, 1),
@@ -80,7 +80,7 @@ def test_jumps_removed_correctly():
      ),
 
     (("/configuration/coordinates", "/time"),
-     (("trajectory.charges(0)", CHARGE_ARRAY), "trajectory.__len__()"),
+     (("charges(0)", CHARGE_ARRAY), "__len__()"),
      {"trajectory": short_traj, "frames": (0, 501, 1),
       "atom_charges": (
         '{"0": 1.2, "1": 1.2, "2": 1.2, "3": 1.2, "4": 1.2, "5": 1.2, '
@@ -91,13 +91,13 @@ def test_jumps_removed_correctly():
      ),
 
     (("/configuration/coordinates", "/time"),
-     (("trajectory.chemical_system.unique_molecules()", ["C6_H14"]),),
+     (("chemical_system.unique_molecules()", ["C6_H14"]),),
      {"trajectory": short_traj, "frames": (0, 501, 1),
       "molecule_tolerance": [True, 0.04]},
      ),
 
     ((("/configuration/coordinates", (slice(None), slice(6, 20), slice(None))), "/time"),
-     (("trajectory.__len__()", ("trajectory.chemical_system.number_of_atoms", 14))),
+     (("__len__()", ("chemical_system.number_of_atoms", 14))),
      {"trajectory": short_traj, "frames": (0, 501, 1),
       "atom_selection": '{"0": {"function_name": "select_atoms", "atom_types": ["H"]}}'},
      ),
@@ -119,8 +119,8 @@ def test_editor(tmp_path, result, file_compare, traj_compare, parameters):
     assert out_name.exists()
     assert log_name.exists()
 
-    original = HDFTrajectoryInputData(result_name)
-    changed = HDFTrajectoryInputData(out_name)
+    original = Trajectory(result_name)
+    changed = Trajectory(out_name)
 
     for key in traj_compare:
         if isinstance(key, tuple):

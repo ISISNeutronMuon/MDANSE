@@ -18,6 +18,7 @@ import collections
 
 import numpy as np
 
+from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -242,5 +243,6 @@ class TrajectoryEditor(IJob):
 
         # The output trajectory is closed.
         self._output_trajectory.write_standard_atom_database()
+        write_metadata(self, self._output_trajectory._h5_file)
         self._output_trajectory.close()
         super().finalize()

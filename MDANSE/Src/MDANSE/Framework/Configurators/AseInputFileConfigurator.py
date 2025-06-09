@@ -92,19 +92,3 @@ class AseInputFileConfigurator(InputFileConfigurator):
         """
 
         return self._wildcard
-
-    def get_information(self):
-        """
-        Returns some informations about this configurator.
-
-        :return: the information about this configurator
-        :rtype: str
-        """
-        try:
-            self["value"]
-        except KeyError:
-            result = f"No VALUE in {self._name}"
-            LOG.error(result)
-            return result
-        else:
-            return f"Input file: {self['value']!r}\n"

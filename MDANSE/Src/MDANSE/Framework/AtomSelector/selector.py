@@ -15,13 +15,17 @@
 #
 
 import json
-from typing import Any, Optional
+from pathlib import Path
+from typing import Any, Optional, Union
+
+import h5py
 
 from MDANSE.Framework.AtomSelector.atom_selection import select_atoms
 from MDANSE.Framework.AtomSelector.general_selection import (
     invert_selection,
     select_all,
     select_none,
+    toggle_selection,
 )
 from MDANSE.Framework.AtomSelector.group_selection import select_labels, select_pattern
 from MDANSE.Framework.AtomSelector.molecule_selection import select_molecules
@@ -29,6 +33,7 @@ from MDANSE.Framework.AtomSelector.spatial_selection import (
     select_positions,
     select_sphere,
 )
+from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 function_lookup = {
@@ -117,10 +122,17 @@ class ReusableSelection:
         -------
         set[int]
             indices of selected atoms from all operations so far
+
         """
         function_name = function_parameters.get("function_name", "select_all")
         if function_name == "invert_selection":
             new_selection = self.all_idxs.difference(selection)
+        elif function_name == "toggle_selection":
+            new_selection = toggle_selection(
+                trajectory,
+                selection,
+                function_parameters.get("clicked_atoms", []),
+            )
         else:
             operation_type = function_parameters.get("operation_type", "union")
             function = function_lookup[function_name]
@@ -166,7 +178,9 @@ class ReusableSelection:
             return True
         operation_type = function_parameters.get("operation_type", "union")
         selection = self.apply_single_selection(
-            function_parameters, trajectory, current_selection
+            function_parameters,
+            trajectory,
+            current_selection,
         )
         return ((selection - current_selection) and operation_type == "union") or (
             (current_selection - selection) and operation_type != "union"
@@ -197,7 +211,9 @@ class ReusableSelection:
         for number in sequence:
             function_parameters = self.operations[number]
             selection = self.apply_single_selection(
-                function_parameters, trajectory, selection
+                function_parameters,
+                trajectory,
+                selection,
             )
         return selection
 
@@ -233,3 +249,54 @@ class ReusableSelection:
             if not isinstance(v0, dict):
                 raise TypeError(f"Selection {v0} is not a dictionary.")
             self.set_selection(number=k0, function_parameters=v0)
+
+    def load_from_json_file(self, filename: Union[Path, str]):
+        """Load a selection from a JSON text file.
+
+        Parameters
+        ----------
+        filename : Union[Path, str]
+            name of a text file containing just a selection in JSON format
+
+        """
+        with open(filename) as source:
+            json_setting = json.load(source)
+            for k0, v0 in json_setting.items():
+                if not isinstance(v0, dict):
+                    raise TypeError(f"Selection {v0} is not a dictionary.")
+                self.set_selection(number=k0, function_parameters=v0)
+
+    def save_to_json_file(self, filename: Union[Path, str]):
+        """Output all the operations as a JSON string.
+
+        For the purpose of storing the selection independent of the
+        trajectory it is acting on, this method encodes the sequence
+        of selection operations as a string.
+
+        Returns
+        -------
+        str
+            All the operations of this selection, encoded as string
+
+        """
+        with open(filename, "w") as target:
+            json.dump(self.operations, target)
+
+    def load_from_hdf5(self, filename: str):
+        """Load selection from an HDF5 output file (MDA format).
+
+        Parameters
+        ----------
+        filename : str
+            path to an MDA file, given as string
+
+        """
+        with h5py.File(filename) as source:
+            try:
+                byte_string = source["metadata/inputs/atom_selection"][0]
+            except KeyError:
+                LOG.warning(f"atom selection string not found in file {filename}")
+                json_string = "{}"
+            else:
+                json_string = json.loads(byte_string.decode())
+            self.load_from_json(json_string)

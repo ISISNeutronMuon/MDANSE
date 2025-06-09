@@ -83,16 +83,3 @@ class MultiInputFileConfigurator(IConfigurator):
     @property
     def wildcard(self):
         return self._wildcard
-
-    def get_information(self) -> str:
-        """
-        Returns
-        -------
-        str
-           Input file names.
-        """
-        try:
-            filenames = self["value"]
-        except KeyError:
-            filenames = ["None"]
-        return f"Input files: {', '.join(filenames)}.\n"

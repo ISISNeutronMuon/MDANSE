@@ -1,6 +1,6 @@
 import pytest
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import \
-    HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import \
+    Trajectory
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import \
     IInstrumentResolution
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -12,7 +12,7 @@ short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
 @pytest.fixture(scope="module")
 def trajectory():
-    trajectory = HDFTrajectoryInputData(short_traj)
+    trajectory = Trajectory(short_traj)
     yield trajectory
 
 @pytest.mark.parametrize("resolution_generator", IInstrumentResolution.subclasses())

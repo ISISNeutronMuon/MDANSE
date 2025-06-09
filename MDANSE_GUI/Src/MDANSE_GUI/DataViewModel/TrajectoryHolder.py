@@ -22,7 +22,7 @@ from qtpy.QtCore import QObject, Slot
 
 from MDANSE.MLogging import LOG
 
-from MDANSE.Framework.InputData import InputFileData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class FileObject:
@@ -107,6 +107,8 @@ class DataTreeModel(QStandardItemModel):
         self._trajectory_objects = {}
 
     @Slot(object)
-    def addItem(self, new_entry: InputFileData):
-        traj = TrajectoryItem(new_entry.basename, trajectory=new_entry)
+    def addItem(self, new_entry: Trajectory):
+        traj = TrajectoryItem(
+            os.path.split(new_entry.filename)[1], trajectory=new_entry
+        )
         self.appendRow([traj])

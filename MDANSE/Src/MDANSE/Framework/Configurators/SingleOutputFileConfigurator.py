@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import Tuple
 from pathlib import Path
 
 from MDANSE import PLATFORM
@@ -52,7 +51,7 @@ class SingleOutputFileConfigurator(IConfigurator):
             format if format is not None else SingleOutputFileConfigurator._default[-1]
         )
 
-    def configure(self, value: Tuple[str, str]):
+    def configure(self, value: tuple[str, str]):
         """
         Configure a set of output files for an analysis.
 
@@ -88,7 +87,7 @@ class SingleOutputFileConfigurator(IConfigurator):
             )
             return
 
-        if format not in IFormat.subclasses():
+        if format not in IFormat.indirect_subclasses():
             self.error_status = f"the output file format {format} is not registered as a valid file format."
             return
 
@@ -110,20 +109,6 @@ class SingleOutputFileConfigurator(IConfigurator):
         :rtype: str
         """
         return self._format
-
-    def get_information(self):
-        """
-        Returns string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-        try:
-            info = f"Output file: {self['file']}\n"
-        except KeyError:
-            info = "Output file has not been configured"
-
-        return info
 
     @property
     def default(self) -> tuple[str, str]:

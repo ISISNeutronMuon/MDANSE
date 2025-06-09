@@ -3,7 +3,7 @@ import os
 from os import path
 import pytest
 
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -16,7 +16,7 @@ short_traj = os.path.join(
 
 @pytest.fixture(scope="module")
 def trajectory():
-    trajectory = HDFTrajectoryInputData(short_traj)
+    trajectory = Trajectory(short_traj)
     yield trajectory
 
 

@@ -47,16 +47,16 @@ class MoleculeWidget(WidgetBase):
         traj_config = self._configurator._configurable[
             self._configurator._dependencies["trajectory"]
         ]
-        hdf_traj = traj_config["hdf_trajectory"]
-        unique_molecules = hdf_traj.chemical_system.unique_molecules()
-        traj_bond_list = hdf_traj.chemical_system._bonds
-        self.atom_database = hdf_traj.trajectory
+        trajectory = traj_config["instance"]
+        unique_molecules = trajectory.chemical_system.unique_molecules()
+        traj_bond_list = trajectory.chemical_system._bonds
+        self.atom_database = trajectory
         self.mol_dict = {}
         for mol_name in unique_molecules:
-            no_of_molecules = len(hdf_traj.chemical_system._clusters[mol_name])
-            atom_indices = hdf_traj.chemical_system._clusters[mol_name][0]
+            no_of_molecules = len(trajectory.chemical_system._clusters[mol_name])
+            atom_indices = trajectory.chemical_system._clusters[mol_name][0]
             atom_symbols = [
-                hdf_traj.chemical_system.atom_list[index] for index in atom_indices
+                trajectory.chemical_system.atom_list[index] for index in atom_indices
             ]
             unique_atoms, atom_counts = np.unique(atom_symbols, return_counts=True)
             atom_counts = {

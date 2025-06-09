@@ -62,23 +62,3 @@ class MDMCTrajectoryConfigurator(IConfigurator):
         self["md_time_step"] = 1.0
 
         self["has_velocities"] = self["instance"].has_velocity
-
-    def get_information(self):
-        """
-        Returns some basic informations about the contents of the HDF trajectory file.
-
-        :return: the informations about the contents of the HDF trajectory file.
-        :rtype: str
-        """
-
-        info = ["MDMC trajectory used as input"]
-        info.append(f"Number of steps: {self['length']:d}\n")
-        info.append(
-            f"Size of the chemical system: {self['instance'].chemical_system.number_of_atoms:d}\n"
-        )
-        if self["has_velocities"]:
-            info.append("The trajectory contains atomic velocities\n")
-        else:
-            info.append("The trajectory does not contain atomic velocities\n")
-
-        return "".join(info)

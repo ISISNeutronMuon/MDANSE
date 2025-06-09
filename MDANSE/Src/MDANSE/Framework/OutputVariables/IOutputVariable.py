@@ -16,7 +16,7 @@
 
 import collections
 from collections.abc import Sequence
-from typing import Union, Tuple
+from typing import Union
 
 import numpy as np
 import numpy.typing as npt
@@ -54,7 +54,7 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
 
     def __new__(
         cls,
-        value: Union[Tuple[int, ...], npt.ArrayLike],
+        value: Union[tuple[int, ...], npt.ArrayLike],
         varname: str,
         axis: Union[str, Sequence[str], None] = None,
         units: str = "unitless",

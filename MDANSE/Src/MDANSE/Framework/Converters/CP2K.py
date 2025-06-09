@@ -37,7 +37,7 @@ class CellFile(dict):
     """
 
     def __init__(self, filename):
-        self["instance"] = open(filename, "r")
+        self["instance"] = open(filename, encoding="utf-8")
 
         # Skip the first line
         self["instance"].readline()
@@ -321,4 +321,4 @@ class CP2K(Converter):
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()
 
-        super(CP2K, self).finalize()
+        super().finalize()

@@ -252,4 +252,4 @@ class MDAnalysis(Converter):
     def finalize(self):
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()
-        super(MDAnalysis, self).finalize()
+        super().finalize()

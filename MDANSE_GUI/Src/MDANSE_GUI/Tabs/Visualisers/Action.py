@@ -229,6 +229,7 @@ class Action(QWidget):
             settings = job_instance.settings
             self._job_instance = job_instance
         else:
+            job_instance = self._job_instance
             settings = self._job_instance.settings
         LOG.info(f"Configuration {job_instance.configuration}")
         if "trajectory" in settings.keys():

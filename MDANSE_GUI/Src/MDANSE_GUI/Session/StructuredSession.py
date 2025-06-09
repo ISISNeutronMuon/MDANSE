@@ -15,7 +15,6 @@
 #
 
 import os
-from typing import Dict, List
 from pathlib import PurePath
 
 from qtpy.QtCore import QObject, Signal, Slot, Qt, QModelIndex
@@ -224,19 +223,19 @@ class SettingsGroup:
     def get_comment(self, varname: str):
         return self._comments[varname]
 
-    def populate(self, settings: Dict, comments: Dict):
+    def populate(self, settings: dict, comments: dict):
         for key, value in settings.items():
             self._settings[key] = value
             self._comments[key] = comments.get(key, "---")
 
-    def update(self, settings: Dict, comments: Dict):
+    def update(self, settings: dict, comments: dict):
         for key, value in settings.items():
             if key in self._settings:
                 continue
             self._settings[key] = value
             self._comments[key] = comments.get(key, "---")
 
-    def compare(self, settings: Dict, comments: Dict):
+    def compare(self, settings: dict, comments: dict):
         obsolete_values, obsolete_comments = [], []
         for key in self._settings:
             if key not in settings:
@@ -372,7 +371,7 @@ class StructuredSession(QObject):
         """Included for compatibility with LocalSession only.
         Now each component loads its own config separately."""
 
-    def reserved_filenames(self) -> List[str]:
+    def reserved_filenames(self) -> list[str]:
         return self._reserved_filenames
 
     @Slot(str)

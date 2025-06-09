@@ -61,7 +61,7 @@ class WidgetBase(QObject):
 
     def __init__(
         self,
-        parent: Optional[QObject] = None,
+        parent: QObject | None = None,
         *args,
         configurator: IConfigurator,
         label: str = "",

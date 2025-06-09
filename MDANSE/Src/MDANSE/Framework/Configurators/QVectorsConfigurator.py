@@ -117,22 +117,3 @@ class QVectorsConfigurator(IConfigurator):
         if not self._valid:
             return None, None
         return self["shells"], "1/nm"
-
-    def get_information(self) -> str:
-        """Return human-readable information about the generated vectors.
-
-        Returns
-        -------
-        str
-            Summary of generated vectors.
-
-        """
-        try:
-            info = [f"{self['n_shells']} Q shells generated\n"]
-        except KeyError:
-            return "QVectors could not be configured correctly"
-        else:
-            for qValue, qVectors in self["q_vectors"].items():
-                info.append(f"Shell {qValue}: {len(qVectors)} Q vectors generated\n")
-
-            return "".join(info)

@@ -126,21 +126,3 @@ class AtomSelectionConfigurator(IConfigurator):
             indicesPerElement[v].extend(self["indices"][i])
 
         return indicesPerElement
-
-    def get_information(self) -> str:
-        """Create a text summary of the selection.
-
-        Returns
-        -------
-        str
-            Human-readable information on the atom selection.
-
-        """
-        if "selection_length" not in self:
-            return "Not configured yet\n"
-
-        info = []
-        info.append(f"Number of selected atoms:{self['selection_length']:d}")
-        info.append(f"Selected elements:{self['unique_names']}")
-
-        return "\n".join(info) + "\n"

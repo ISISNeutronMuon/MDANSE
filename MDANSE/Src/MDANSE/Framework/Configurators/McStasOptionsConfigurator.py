@@ -16,14 +16,14 @@
 
 import tempfile
 import time
-from typing import Dict, Any
+from typing import Any
 from pathlib import Path
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
-def parse_dictionary(input: str) -> Dict[str, Any]:
+def parse_dictionary(input: str) -> dict[str, Any]:
     big_line = input.strip("\{\}[] \n")
     tokens = big_line.split(",")
     result = {}
@@ -96,15 +96,3 @@ class McStasOptionsConfigurator(IConfigurator):
 
         self["value"] = tmp
         self.error_status = "OK"
-
-    def get_information(self):
-        """
-        Returns the McStas options as they would be input when using McStas in command line mode.
-
-        :return: the McStas command-line options.
-        :rtype: str
-        """
-        if "value" not in self:
-            return "Not configured yet\n"
-
-        return f"McStas command line options: {self['value']}\n"

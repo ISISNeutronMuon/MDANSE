@@ -103,20 +103,6 @@ class OutputStructureConfigurator(IConfigurator):
         """
         return self._formats
 
-    def get_information(self):
-        """
-        Returns string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-        if "file" not in self:
-            return "Output File have not been defined"
-
-        info = f"Output file: {self['file']}\n"
-
-        return info
-
     @property
     def default(self) -> tuple[str, str]:
         """

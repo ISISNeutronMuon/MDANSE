@@ -105,7 +105,7 @@ class OutputFilesConfigurator(IConfigurator):
                 )
                 return
 
-            if fmt not in IFormat.subclasses():
+            if fmt not in IFormat.indirect_subclasses():
                 self.error_status = f"the output file format {fmt} is not registered as a valid file format."
                 return
 
@@ -133,22 +133,6 @@ class OutputFilesConfigurator(IConfigurator):
         :rtype: list of str
         """
         return self._formats
-
-    def get_information(self):
-        """Return string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-        if "files" not in self:
-            return "Output Files have not been defined"
-
-        info = ["Input files:\n"]
-        for f in self["files"]:
-            info.append(str(f))
-            info.append("\n")
-
-        return "".join(info)
 
     @property
     def default(self) -> tuple[str, list[str]]:

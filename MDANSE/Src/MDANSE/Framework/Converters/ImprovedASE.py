@@ -210,7 +210,7 @@ class ImprovedASE(Converter):
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()
 
-        super(ImprovedASE, self).finalize()
+        super().finalize()
 
     def extract_initial_information(self, ase_object):
         element_list = None

@@ -154,7 +154,6 @@ class ProgressDelegate(QItemDelegate):
         opt.minimum = 0
         opt.maximum = progress_max
         opt.progress = progress
-        percentage = min(round(100 * progress / progress_max, 2), 100.0)
-        opt.text = "{}%".format(percentage)
+        opt.text = f"{progress / progress_max:.2%}"
         opt.textVisible = True
         QApplication.style().drawControl(QStyle.CE_ProgressBar, opt, painter)

@@ -18,6 +18,7 @@ import collections
 
 import numpy as np
 
+from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -202,6 +203,7 @@ class CenterOfMassesTrajectory(IJob):
         )
         # The input trajectory is closed.
         self.configuration["trajectory"]["instance"].close()
+        write_metadata(self, self._output_trajectory._h5_file)
 
         # The output trajectory is closed.
         self._output_trajectory.close()

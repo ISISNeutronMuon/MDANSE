@@ -70,16 +70,3 @@ class InputFileConfigurator(IConfigurator):
         """
 
         return self._wildcard
-
-    def get_information(self):
-        """
-        Returns some informations about this configurator.
-
-        :return: the information about this configurator
-        :rtype: str
-        """
-        try:
-            filename = self["value"]
-        except KeyError:
-            filename = "None"
-        return f"Input file: {filename}\n"

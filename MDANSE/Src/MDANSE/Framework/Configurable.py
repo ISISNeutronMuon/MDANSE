@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
-from typing import Dict
 
 from MDANSE.Core.Error import Error
 from MDANSE.MLogging import LOG
@@ -28,7 +27,7 @@ class ConfigurationError(Error):
     pass
 
 
-class Configurable(object):
+class Configurable:
     """Allows any object that derives from it to be configurable within the MDANSE framework.
 
     Within that framework, to be configurable, a class must:
@@ -44,7 +43,7 @@ class Configurable(object):
 
     settings = collections.OrderedDict()
 
-    def __init__(self, settings=None, trajectory_input="mdasne"):
+    def __init__(self, settings=None, trajectory_input="mdanse"):
         """
         Constructor
         """
@@ -52,8 +51,6 @@ class Configurable(object):
         self._configuration = collections.OrderedDict()
 
         self._configured = False
-
-        self._info = []
 
         if settings is not None:
             self.set_settings(settings)
@@ -206,13 +203,10 @@ class Configurable(object):
                 if conf.check_dependencies(configured):
                     if not conf.optional:
                         conf.configure(parameters[name])
-                        self._info.append(conf.get_information())
                     else:
                         if parameters[name]:
                             conf.configure(parameters[name])
-                            if conf.valid:
-                                self._info.append(conf.get_information())
-                            else:
+                            if not conf.valid:
                                 self._configuration[name] = False
 
                     conf.set_configured(True)
@@ -235,7 +229,7 @@ class Configurable(object):
 
         self._configured = True
 
-    def output_configuration(self) -> Dict[str, str]:
+    def output_configuration(self) -> dict[str, str]:
         if not self._configured:
             return
         result = {}
@@ -251,10 +245,9 @@ class Configurable(object):
         :rtype: str
         """
 
-        if not self._info:
-            return "No information available yet."
-
-        return "\n".join(self._info)
+        return "\n".join(
+            f"{key}: {value}" for key, value in self._configuration.items()
+        )
 
     @classmethod
     def build_doc_example(cls):

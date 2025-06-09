@@ -450,7 +450,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
     @property
     def info(self):
-        return self._info
+        return str(self)
 
     @classmethod
     def save_template(cls, shortname, classname):
@@ -479,8 +479,6 @@ class {classname}(IJob):
 
     # You should enter the category under which your job will be references.
     category = ('My jobs',)
-
-    ancestor = ["hdf_trajectory"]
 
     # You should enter the configuration of your job here
     # Here a basic example of a job that will use a HDF trajectory, a frame selection and an output file in HDF5 and Text file formats
@@ -521,7 +519,7 @@ class {classname}(IJob):
         """
 
         # The output data are written
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], self._info,
+        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], str(self),
             self.output_configuration())
 
         # The trajectory is closed
@@ -530,7 +528,7 @@ class {classname}(IJob):
 '''
                 )
 
-        except IOError:
+        except OSError:
             return None
         return templateFile
 

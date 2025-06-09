@@ -13,28 +13,32 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from abc import abstractmethod
-import os
-from pathlib import PurePath
+from pathlib import Path
+from typing import TypeVar
 
 import h5py
 from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
+from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MLogging import LOG
 
 from MDANSE_GUI.Session.LocalSession import json_decoder
 
 
-class BasicPlotDataItem(QStandardItem):
-    """Each item in the PlotDataModel is a BasicPlotDataItem.
-    Since there are only two levels of nesting in the data tree,
-    there are two types of item we will use, both of them
-    derived from BasicPlotDataItem
-    """
+Self = TypeVar("Self", bound="BasicPlotDataItem")
+EXCLUDE = {"metadata"}
 
-    def __init__(self, *args, **kwargs):
+
+class BasicPlotDataItem(QStandardItem):
+    """Each item in the PlotDataModel is a BasicPlotDataItem."""
+
+    def __init__(self, *args, data_parent: Self | None = None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.data_parent = data_parent
         self._item_type = "generic"
 
     @abstractmethod
@@ -45,22 +49,31 @@ class BasicPlotDataItem(QStandardItem):
     def file_number(self):
         pass
 
-    def populate(self, file):
-        for key in file.keys():
+    @property
+    def child_path(self):
+        if self.data_parent is None:
+            return "/"
+        else:
+            return str(Path(self.data_parent.child_path) / self.text())
+
+    def populate(self, data: h5py.File | h5py.Group):
+        for key in data.keys() - EXCLUDE:
             try:
-                file[key]
+                data[key]
             except Exception as e:
-                LOG.error(f"error {e} when accessing file[{key}]")
-            else:
-                child = DataSetItem()
-                child.setText(key)
-                child.setData(key, role=Qt.ItemDataRole.DisplayRole)
-                child.setData(key, role=Qt.ItemDataRole.UserRole)
-                try:
-                    file[key][:]
-                except Exception:
-                    child._item_type = "group"
-                self.appendRow(child)
+                LOG.error(f"error {e} when accessing data[{key}]")
+                continue
+
+            child = DataSetItem(data_parent=self)
+            child.setText(key)
+            child.setData(key, role=Qt.ItemDataRole.DisplayRole)
+            child.setData(key, role=Qt.ItemDataRole.UserRole)
+            try:
+                data[key][:]
+            except Exception:
+                child.populate(data[key])
+                child._item_type = "group"
+            self.appendRow(child)
 
 
 class DataSetItem(BasicPlotDataItem):
@@ -69,9 +82,9 @@ class DataSetItem(BasicPlotDataItem):
         self._item_type = "dataset"
 
     def data_path(self) -> str:
-        parent_path = self.parent().data_path()
+        parent_path = Path(self.parent().data_path())
         own_path = self.data(role=Qt.ItemDataRole.UserRole)
-        return str(PurePath(os.path.join(parent_path, own_path)))
+        return str(parent_path / own_path)
 
     def file_number(self) -> int:
         return self.parent().file_number()
@@ -92,7 +105,7 @@ class DataFileItem(BasicPlotDataItem):
 class MDADataStructure:
     def __init__(self, filename: str):
         self._file = h5py.File(filename)
-        self.check_metadata()
+        self._metadata = check_metadata(self._file)
         self.find_information()
 
     def close(self):
@@ -103,36 +116,6 @@ class MDADataStructure:
         self._components = []
         self._axis_datasets = []
         self._supporting_datasets = []
-
-    def check_metadata(self):
-        meta_dict = {}
-
-        def put_into_dict(name, obj):
-            try:
-                string = obj[:][0]
-            except TypeError:
-                try:
-                    string = obj[0]
-                except TypeError:
-                    return
-            try:
-                string = string.decode()
-            except KeyError:
-                LOG.debug(f"Decode failed for {name}: {obj}")
-                meta_dict[name] = str(obj)
-            else:
-                try:
-                    meta_dict[name] = json_decoder.decode(string)
-                except ValueError:
-                    meta_dict[name] = string
-
-        try:
-            meta = self._file["metadata"]
-        except KeyError:
-            return
-        else:
-            meta.visititems(put_into_dict)
-        self._metadata = meta_dict
 
 
 class PlotDataModel(QStandardItemModel):

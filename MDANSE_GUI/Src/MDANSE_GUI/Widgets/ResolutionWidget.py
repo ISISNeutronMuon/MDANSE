@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import List
 import math
 
 import numpy as np
@@ -59,7 +58,9 @@ widget_text_map = {
 gauss_denum = 2.0 * (2.0 * math.log(2.0)) ** 0.5
 
 
-def convert_parameters(fwhm: float, centre: float, peak_type: str) -> List[float]:
+def convert_parameters(
+    fwhm: float, centre: float, peak_type: str
+) -> tuple[float, float]:
     """Takes the values from the ResolutionDialog as input,
     and returns the sigma and mu values as expected by MDANSE.
     The conversion between sigma and FWHM is different for
@@ -76,25 +77,26 @@ def convert_parameters(fwhm: float, centre: float, peak_type: str) -> List[float
 
     Returns
     -------
-    List[float]
-        A pair of [sigma, mu] values, or empty for ideal
+    sigma
+        Std. dev. of resolution.
+    mu
+        Mean of resolution.
     """
     if peak_type == "ideal":
-        return []
-    elif peak_type == "triangular":
-        vals = [fwhm, centre]
-    elif peak_type == "square":
-        vals = [fwhm / 2, centre]
-    elif peak_type == "gaussian":
-        vals = [fwhm / gauss_denum, centre]
-    elif peak_type == "lorentzian":
-        vals = [fwhm / 2, centre]
-    else:
-        vals = [fwhm, centre]
-    return vals[0], vals[1]
+        return 0.0, 0.0
+    if peak_type == "triangular":
+        return fwhm, centre
+    if peak_type == "square":
+        return fwhm / 2, centre
+    if peak_type == "gaussian":
+        return fwhm / gauss_denum, centre
+    if peak_type == "lorentzian":
+        return fwhm / 2, centre
+
+    return fwhm, centre
 
 
-def revert_parameters(values: dict, peak_type: str) -> List[float]:
+def revert_parameters(values: dict, peak_type: str) -> tuple[float, float]:
     """Converts the sigma and mu values back to FWHM and peak centre.
     Used for passing the values from the main GUI back to the
     helper dialog.
@@ -108,20 +110,23 @@ def revert_parameters(values: dict, peak_type: str) -> List[float]:
 
     Returns
     -------
-    List[float]
-        A pair of [FWHM, centre] values
+    FWHM
+        Resolution full width half maximum.
+    Centre
+        Peak centre.
     """
     if peak_type == "ideal":
-        return [1.0, 0]
-    elif peak_type == "triangular":
-        vals = [values["sigma"], values["mu"]]
-    elif peak_type == "square":
-        vals = [values["sigma"] * 2, values["mu"]]
-    elif peak_type == "gaussian":
-        vals = [values["sigma"] * gauss_denum, values["mu"]]
-    elif peak_type == "lorentzian":
-        vals = [values["sigma"] * 2, values["mu"]]
-    elif "oigt" in peak_type:
+        return 1.0, 0.0
+    if peak_type == "triangular":
+        return values["sigma"], values["mu"]
+    if peak_type == "square":
+        return values["sigma"] * 2, values["mu"]
+    if peak_type == "gaussian":
+        return values["sigma"] * gauss_denum, values["mu"]
+    if peak_type == "lorentzian":
+        return values["sigma"] * 2, values["mu"]
+
+    if "oigt" in peak_type:
         try:
             sigma = (
                 values["sigma_gaussian"] * gauss_denum + values["sigma_lorentzian"] * 2
@@ -132,10 +137,9 @@ def revert_parameters(values: dict, peak_type: str) -> List[float]:
             mu = values["mu_gaussian"] + values["mu_lorentzian"]
         except KeyError:
             mu = 0.0
-        vals = [sigma / 2, mu / 2]
-    else:
-        vals = [values["sigma"], values["mu"]]
-    return vals[0], vals[1]
+        return sigma / 2, mu / 2
+
+    return values["sigma"], values["mu"]
 
 
 class ResolutionCalculator:

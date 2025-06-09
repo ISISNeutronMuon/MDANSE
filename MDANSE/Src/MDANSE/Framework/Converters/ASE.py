@@ -249,7 +249,7 @@ class ASE(Converter):
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()
 
-        super(ASE, self).finalize()
+        super().finalize()
 
     def parse_first_step(self, mapping):
         try:

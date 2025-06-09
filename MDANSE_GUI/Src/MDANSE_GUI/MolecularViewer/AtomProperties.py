@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import List, Optional
+from typing import Optional
 
 import numpy as np
 from vtk.util.numpy_support import numpy_to_vtk
@@ -67,8 +67,8 @@ class AtomEntry(QObject):
         self._items = []
 
     def set_values(
-        self, name: str, indices: List[int], colour: QColor, size: float
-    ) -> List[QStandardItem]:
+        self, name: str, indices: list[int], colour: QColor, size: float
+    ) -> list[QStandardItem]:
         self._indices = indices
         name_item = QStandardItem(str(name))
         name_item.setEditable(False)
@@ -84,14 +84,14 @@ class AtomEntry(QObject):
     def size(self) -> float:
         return float(self._items[2].text())
 
-    def indices(self) -> List[int]:
+    def indices(self) -> list[int]:
         return self._indices
 
 
 class AtomProperties(QStandardItemModel):
     new_atom_properties = Signal(object)
 
-    def __init__(self, *args, init_colours: list = None, **kwargs):
+    def __init__(self, *args, init_colours: Optional[list] = None, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._lut = vtk.vtkColorTransferFunction()

@@ -190,21 +190,6 @@ class AtomTransmutationConfigurator(IConfigurator):
             atomSelConfigurator["elements"][idxInSelection] = [element]
             self._nTransmutedAtoms += 1
 
-    def get_information(self) -> str:
-        """
-        Returns
-        -------
-        str
-            Some information on the atoms selected for being transmuted.
-        """
-        if "value" not in self:
-            return "Not configured yet"
-
-        if self["value"] is None:
-            return "No atoms selected for transmutation\n"
-
-        return f"Number of transmuted atoms:{self._nTransmutedAtoms:d}\n"
-
     def get_transmuter(self) -> AtomTransmuter:
         """
         Returns

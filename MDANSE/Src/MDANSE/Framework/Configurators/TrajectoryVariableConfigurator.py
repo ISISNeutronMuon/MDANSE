@@ -46,15 +46,3 @@ class TrajectoryVariableConfigurator(IConfigurator):
 
         self["value"] = value
         self.error_status = "OK"
-
-    def get_information(self):
-        """
-        Returns string information about this configurator.
-
-        :return: the information about this configurator.
-        :rtype: str
-        """
-        if "value" not in self:
-            return "Not configured yet\n"
-
-        return f"Selected variable: {self['value']!r}\n"

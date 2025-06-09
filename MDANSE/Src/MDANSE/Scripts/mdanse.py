@@ -23,7 +23,7 @@ from pathlib import Path
 from MDANSE.Core.Error import Error
 from MDANSE import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.Framework.Jobs.JobStatus import JobState
 from MDANSE.MLogging import LOG
 
@@ -223,8 +223,8 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         trajName = parser.rargs[0]
-        inputTraj = HDFTrajectoryInputData(trajName)
-        LOG.info(inputTraj.info())
+        inputTraj = Trajectory(trajName)
+        LOG.info(str(inputTraj))
 
     def error(self, msg):
         """Called when an error occured in the command line.
@@ -324,7 +324,7 @@ class CommandLineParser(optparse.OptionParser):
         try:
             jobs.create(name).save(filename)
         # Case where an error occured when writing the template.
-        except IOError:
+        except OSError:
             raise CommandLineParserError(
                 f"Could not write the job template as {filename!r}"
             )
@@ -366,7 +366,7 @@ class CommandLineParser(optparse.OptionParser):
 
         try:
             IJob.save_template(shortname, classname)
-        except (IOError, KeyError):
+        except (OSError, KeyError):
             return
 
 

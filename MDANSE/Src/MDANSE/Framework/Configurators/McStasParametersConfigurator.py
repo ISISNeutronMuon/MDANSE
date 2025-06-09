@@ -113,15 +113,3 @@ class McStasParametersConfigurator(IConfigurator):
         """
 
         return self._exclude
-
-    def get_information(self):
-        """
-        Returns the McStas parameters as they would be input when using McStas in command line mode.
-
-        :return: the McStas command-line parameters.
-        :rtype: str
-        """
-        if "value" not in self:
-            return "Not configured yet\n"
-
-        return f"McStas command line parameters:{self['value']}\n"

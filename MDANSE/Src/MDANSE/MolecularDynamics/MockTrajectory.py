@@ -16,7 +16,7 @@
 
 import math
 import json
-from typing import TypeVar, List
+from typing import TypeVar
 
 import numpy as np
 
@@ -112,8 +112,8 @@ class MockTrajectory:
 
     def modulate_structure(
         self,
-        polarisation: np.ndarray = None,
-        propagation_vector: np.ndarray = None,
+        polarisation: np.ndarray,
+        propagation_vector: np.ndarray,
         period: int = 10,
         amplitude: float = 0.1,
     ):
@@ -123,9 +123,9 @@ class MockTrajectory:
 
         Parameters
         ----------
-        polarisation : np.ndarray, optional
+        polarisation : np.ndarray
             direction of atom displacements
-        propagation_vector : np.ndarray, optional
+        propagation_vector : np.ndarray
             propagation vector of the wave (phonon). All zeros for standing wave
         period : int, optional
             Number of frames corresponding to a total 2pi period of the wave.
@@ -160,7 +160,7 @@ class MockTrajectory:
             if current_steps > period:
                 n_steps = current_steps
             if current_steps < period:
-                step = math.gcd([current_steps, period])
+                step = math.gcd(current_steps, period)
                 while len(self._coordinates) < period:
                     self._coordinates = np.vstack(
                         [self._coordinates, self._coordinates[-step:]]
@@ -300,11 +300,11 @@ class MockTrajectory:
         return ATOMS_DATABASE.get_atom_property(atom_symbol, property)
 
     @property
-    def atoms_in_database(self) -> List[str]:
+    def atoms_in_database(self) -> list[str]:
         return ATOMS_DATABASE.atoms
 
     @property
-    def properties_in_database(self) -> List[str]:
+    def properties_in_database(self) -> list[str]:
         return ATOMS_DATABASE.properties
 
     def unit_cell(self, frame: int) -> UnitCell:
@@ -570,7 +570,7 @@ class MockTrajectory:
         Self
             a MockTrajectory instance
         """
-        with open(filename, "r") as source:
+        with open(filename, encoding="utf-8") as source:
             struct = json.load(source)
         temp = struct["parameters"]
         temp["box_size"] = np.array(temp["box_size"])

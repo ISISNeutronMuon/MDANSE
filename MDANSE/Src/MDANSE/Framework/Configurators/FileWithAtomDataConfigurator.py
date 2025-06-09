@@ -13,11 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Iterable
-from abc import abstractmethod
 import traceback
+from abc import abstractmethod
+from collections.abc import Iterable
 
 from MDANSE.Framework.AtomMapping import AtomLabel
+
 from .InputFileConfigurator import InputFileConfigurator
 
 

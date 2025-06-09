@@ -71,8 +71,7 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
 
     traj_conf = HDFTrajectoryConfigurator("trajectory")
     traj_conf.configure(out_name)
-    traj_conf.get_information()
-    traj_conf["hdf_trajectory"].close()
+    traj_conf["instance"].close()
 
     compare_hdf5(out_name, result_name, compare, atol=1e-6)
 

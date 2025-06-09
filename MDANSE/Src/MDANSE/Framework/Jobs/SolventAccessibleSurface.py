@@ -15,7 +15,6 @@
 #
 
 import collections
-from typing import List
 
 import numpy as np
 from scipy.spatial import KDTree
@@ -27,7 +26,7 @@ from MDANSE.Mathematics.Geometry import generate_sphere_points
 
 def solvent_accessible_surface(
     coords: np.ndarray,
-    indexes: List[int],
+    indexes: list[int],
     vdwRadii: np.ndarray,
     sphere_points: np.ndarray,
     probe_radius_value: float,
@@ -229,7 +228,7 @@ class SolventAccessibleSurface(IJob):
         self._outputData.write(
             self.configuration["output_files"]["root"],
             self.configuration["output_files"]["formats"],
-            self._info,
+            str(self),
             self,
         )
 

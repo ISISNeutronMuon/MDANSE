@@ -110,24 +110,3 @@ class InstrumentResolutionConfigurator(IConfigurator):
             return self["romega"], "rad/ps"
         else:
             return None, None
-
-    def get_information(self):
-        """
-        Returns some informations the instrument resolution.
-
-        :return: the information the instrument resolution.
-        :rtype: str
-        """
-
-        if "kernel" not in self:
-            return "No configured yet"
-
-        info = [f"Instrument resolution kernel: {self['kernel']}"]
-        if self["parameters"]:
-            info.append("Parameters:")
-            for k, v in self["parameters"].items():
-                info.append(f"{k} = {v}")
-
-        info = "\n".join(info)
-
-        return info + "\n"

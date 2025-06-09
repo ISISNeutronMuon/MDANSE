@@ -28,7 +28,7 @@ from MDANSE_GUI.MolecularViewer.readers.i_reader import IReader
 
 class HDF5Wrapper(IReader):
     def __init__(self, fname, trajectory: "Trajectory", chemical: "ChemicalSystem"):
-        super(HDF5Wrapper, self).__init__(fname)
+        super().__init__(fname)
         self._n_atoms = chemical.number_of_atoms
         self._n_frames = len(trajectory)
         self._trajectory = trajectory
@@ -37,11 +37,11 @@ class HDF5Wrapper(IReader):
         self._atom_ids = chemical._atom_indices
         self._atom_types = chemical.atom_list
         self._atom_names = [
-            str(element) + "_" + str(index)
+            f"{element}_{index}"
             for element, index in zip(chemical.atom_list, chemical._atom_indices)
         ]
 
-    def read_frame(self, frame: int) -> "np.array":
+    def read_frame(self, frame: int) -> np.ndarray:
         coords = self._trajectory.coordinates(frame)
         return np.array(coords)
 

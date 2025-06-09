@@ -20,7 +20,7 @@ from pathlib import PurePath
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget, QFileDialog
 
-from MDANSE.Framework.InputData.HDFTrajectoryInputData import HDFTrajectoryInputData
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
@@ -69,7 +69,7 @@ class TrajectoryTab(GeneralTab):
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
             try:
-                data = HDFTrajectoryInputData(fname)
+                data = Trajectory(fname)
             except Exception as e:
                 self._core.error.emit(repr(e))
             else:

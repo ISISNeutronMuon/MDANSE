@@ -172,4 +172,4 @@ class CASTEP(Converter):
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()
 
-        super(CASTEP, self).finalize()
+        super().finalize()

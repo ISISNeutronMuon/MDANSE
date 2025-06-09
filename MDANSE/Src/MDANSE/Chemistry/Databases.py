@@ -16,13 +16,13 @@
 
 import copy
 from collections import defaultdict
-from typing import Union, ItemsView, Dict, Any, Optional
-from pathlib import Path
-
+from collections.abc import ItemsView
 import json
+from pathlib import Path
+from typing import Any, Optional, Union
 
-from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Error import Error
+from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
@@ -156,10 +156,10 @@ class _Database(metaclass=Singleton):
         else:
             database_path = default_database
 
-        with open(default_database, "r") as f:
+        with open(default_database, encoding="utf-8") as f:
             self._default_data = json.load(f)
 
-        with open(database_path, "r") as f:
+        with open(database_path, encoding="utf-8") as f:
             self._data = json.load(f)
 
     def items(self) -> ItemsView[str, dict]:
@@ -296,7 +296,11 @@ class AtomsDatabase(_Database):
         except KeyError:
             raise KeyError(f"The element {item} is not registered in the database.")
 
-    def _load(self, user_database: str = None, default_database: str = None) -> None:
+    def _load(
+        self,
+        user_database: Union[Path, str, None] = None,
+        default_database: Union[Path, str, None] = None,
+    ) -> None:
         """
         Load the atom database. This method should never be called elsewhere than __init__ or unit testing.
 
@@ -689,7 +693,9 @@ class AtomsDatabase(_Database):
         with open(AtomsDatabase._USER_DATABASE, "w") as fout:
             fout.write(json.dumps(d, indent=4, cls=ComplexEncoder))
 
-    def get_atom_property(self, symbol: str, property: str) -> Union[int, float, str]:
+    def get_atom_property(
+        self, symbol: str, property: str
+    ) -> Union[int, float, str, None]:
         """Faster access to the atom property as it avoids the deepcopy
         in __getitem__.
 
@@ -716,7 +722,7 @@ class AtomsDatabase(_Database):
                 return 0
             return None
 
-    def get_property_dict(self, symbol: str) -> Dict[str, Any]:
+    def get_property_dict(self, symbol: str) -> dict[str, Any]:
         """Faster access to the atom property as it avoids the deepcopy
         in __getitem__.
 

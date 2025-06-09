@@ -119,44 +119,35 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
         qvector_info = self._configuration["q_vectors"]
         q_values = [float(x) for x in qvector_info]
         output_data.add(
-            "vector_generator_q",
+            "vector_generator/q",
             "LineOutputVariable",
             q_values,
             units="1/nm",
         )
         output_data.add(
-            "vector_coordinate",
+            "vector_generator/coordinates",
             "LineOutputVariable",
             [0, 1, 2],
             units="au",
         )
-        qvector_lengths = [qvector_info[q]["q_vectors"].shape[1] for q in q_values]
-        qarray_maxlength = np.max(qvector_lengths)
-        output_data.add(
-            "vector_generator_qvector_array",
-            "VolumeOutputVariable",
-            (len(q_values), 3, qarray_maxlength),
-            units="1/nm",
-            axis="vector_generator_q|vector_coordinate|index",
-        )
-        output_data["vector_generator_qvector_array"][:] = 0.0
+
         for nq, q in enumerate(q_values):
-            output_data["vector_generator_qvector_array"][
-                nq, :, : qvector_lengths[nq]
-            ] = qvector_info[q]["q_vectors"]
-        try:
-            hkl_arrays = [qvector_info[q]["hkls"] for q in q_values]
-        except KeyError:
-            return
-        output_data.add(
-            "vector_generator_hkl_array",
-            "VolumeOutputVariable",
-            (len(q_values), 3, qarray_maxlength),
-            units="au",
-            axis="vector_generator_q|vector_coordinate|index",
-        )
-        output_data["vector_generator_hkl_array"][:] = 0.0
-        for nq, _ in enumerate(q_values):
-            output_data["vector_generator_hkl_array"][nq, :, : qvector_lengths[nq]] = (
-                hkl_arrays[nq]
+            current = f"vector_generator/shell_{nq}/qvector_array"
+            output_data.add(
+                current,
+                "SurfaceOutputVariable",
+                qvector_info[q]["q_vectors"],
+                units="1/nm",
+                axis="vector_generator/coordinates|index",
             )
+
+        for nq, q in enumerate(q_values):
+            if (data := qvector_info[q].get("hkls")) is not None:
+                current = f"vector_generator/shell_{nq}/hkl_array"
+                output_data.add(
+                    current,
+                    "SurfaceOutputVariable",
+                    data,
+                    units="au",
+                    axis="vector_generator/coordinates|index",
+                )
