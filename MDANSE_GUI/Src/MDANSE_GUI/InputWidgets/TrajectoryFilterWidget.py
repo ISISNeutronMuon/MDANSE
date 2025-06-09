@@ -49,6 +49,7 @@ from MDANSE.Mathematics.Signal import (
     DEFAULT_N_STEPS,
     DEFAULT_TIME_STEP,
     power_spectrum,
+    FrequencyDomain
 )
 import matplotlib.pyplot as mpl
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -1127,7 +1128,7 @@ class FilterDesigner(QDialog):
 
     def render_graph(
         self,
-        freqs: Filter.FrequencyDomain = TrajectoryFilterConfigurator._default_filter.freq_response,
+        freqs: FrequencyDomain = TrajectoryFilterConfigurator._default_filter.freq_response,
         db_response: bool = False,
         energies: bool = False,
         trajectory_power_spectrum: tuple[np.ndarray, np.ndarray] = None,
@@ -1136,7 +1137,7 @@ class FilterDesigner(QDialog):
 
         Parameters
         ----------
-        freqs : Filter.FrequencyDomain
+        freqs : FrequencyDomain
             Named tuple containing the magnitudes and frequencies of the filter frequency response.
         db_response : bool
             Display response (y-axis) in decibels, else magnitude
