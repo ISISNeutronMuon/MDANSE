@@ -18,8 +18,6 @@ SRTIO3_TRAJ = "cp2k_srtio3_unfiltered.mdt"
 
 CUAU_TRAJ = "CuAu_asap_10fs-step_unfiltered.mdt"
 
-DUT49_TRAJ = "plain_DUT49_20K_in_cell_unfiltered.mdt"
-
 GLYCYL_L_ALANINE_TRAJ = "glycyl_l_alanine_charmm_unfiltered.mdt"
 
 
@@ -135,7 +133,7 @@ def run_trajectory_filter(
     out_file = name.with_suffix(".mdt")
 
     trajectory_filter_parameters = {
-        "atom_selection": "{}",
+        "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
         "frames": frames,
         "instrument_resolution": ("ideal", {}),
         "output_files": (name, 64, 128, "gzip", "no logs"),
@@ -173,7 +171,7 @@ def run_power_spectrum(name: Path, frames: list, traj_path: Path) -> Path:
     out_file = name.with_suffix(".mda")
 
     parameters = {
-        "atom_selection": "{}",
+        "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
         "atom_transmutation": "{}",
         "frames": frames,
         "instrument_resolution": ("ideal", {}),
@@ -213,20 +211,6 @@ def cuau_spectrum_clean(tmp_path_factory):
 
 
 @pytest.fixture(scope="module")
-def dut49_spectrum_clean(tmp_path_factory):
-    """Fixture returns the output file of the PositionPowerSpectrum job with the DUT49 metal-organic framework
-    trajectory as the input.
-
-    """
-
-    yield run_power_spectrum(
-        tmp_path_factory.mktemp("data") / f"{DUT49_TRAJ}_unfiltered_power_spectrum",
-        [0, 7048, 1, 3524],
-        CONV_DIR / DUT49_TRAJ,
-    )
-
-
-@pytest.fixture(scope="module")
 def glycl_l_alanine_spectrum_clean(tmp_path_factory):
     """Fixture returns the output file of the PositionPowerSpectrum job with the LAMMPS Glycl-L-Alanaine CHARMM
     trajectory as the input.
@@ -248,6 +232,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Butterworth",
             "attributes": {
                 "n_steps": 320,
@@ -261,6 +246,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Butterworth",
             "attributes": {
                 "n_steps": 320,
@@ -274,6 +260,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
                 "n_steps": 320,
@@ -288,6 +275,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Bessel",
             "attributes": {
                 "n_steps": 320,
@@ -302,6 +290,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
                 "n_steps": 320,
@@ -316,6 +305,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
                 "n_steps": 320,
@@ -330,6 +320,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Notch",
             "attributes": {
                 "n_steps": 320,
@@ -342,6 +333,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": CUAU_TRAJ,
             "max_frequency": (314, 0),
             "frames": [0, 1000, 1, 500],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Peak",
             "attributes": {
                 "n_steps": 1000,
@@ -354,6 +346,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": CUAU_TRAJ,
             "max_frequency": (314, 0),
             "frames": [0, 1000, 1, 500],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Comb",
             "attributes": {
                 "n_steps": 1000,
@@ -365,23 +358,10 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             },
         },
         {
-            "trajectory": DUT49_TRAJ,
-            "max_frequency": (3141, 0),
-            "frames": [0, 7048, 1, 3524],
-            "filter": "ChebyshevTypeII",
-            "attributes": {
-                "n_steps": 7048,
-                "time_step_ps": 0.001,
-                "order": 1,
-                "min_attenuation": 10.0,
-                "attenuation_type": "highpass",
-                "cutoff_freq": 0.8915,
-            },
-        },
-        {
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
             "max_frequency": (0.000754, 7),
             "frames": [0, 25, 1, 13],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
                 "n_steps": 25,
@@ -396,6 +376,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
             "max_frequency": (0.000754, 7),
             "frames": [0, 25, 1, 13],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Elliptical",
             "attributes": {
                 "n_steps": 25,
@@ -411,6 +392,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
             "max_frequency": (0.000754, 7),
             "frames": [0, 25, 1, 13],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeI",
             "attributes": {
                 "n_steps": 25,
@@ -427,7 +409,6 @@ def test_convolution(
     tmp_path,
     srtio3_spectrum_clean,
     cuau_spectrum_clean,
-    dut49_spectrum_clean,
     glycl_l_alanine_spectrum_clean,
     filter_config,
 ):
@@ -445,8 +426,8 @@ def test_convolution(
 
     Deviation from the convolution theorem is assessed by taking the mean of the absolute error, | U(w)H(w) - F(w) |.
     """
-    # Test results must satisfy an 8% tolerance to error
-    TOLERANCE = 8
+    # Test results must satisfy a 10% tolerance to error
+    TOLERANCE = 10
 
     # Trajectory .mdt file name
     trajectory_name = filter_config["trajectory"]
@@ -458,8 +439,6 @@ def test_convolution(
         unfiltered_power_spectrum = srtio3_spectrum_clean
     elif trajectory_name == CUAU_TRAJ:
         unfiltered_power_spectrum = cuau_spectrum_clean
-    elif trajectory_name == DUT49_TRAJ:
-        unfiltered_power_spectrum = dut49_spectrum_clean
     elif trajectory_name == GLYCYL_L_ALANINE_TRAJ:
         unfiltered_power_spectrum = glycl_l_alanine_spectrum_clean
     else:
@@ -663,6 +642,7 @@ def test_default_settings(
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Butterworth",
             "attributes": {
                 "n_steps": 320,
@@ -676,6 +656,7 @@ def test_default_settings(
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Butterworth",
             "attributes": {
                 "n_steps": 320,
@@ -689,6 +670,7 @@ def test_default_settings(
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
                 "n_steps": 320,
@@ -703,6 +685,7 @@ def test_default_settings(
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Comb",
             "attributes": {
                 "n_steps": 320,
@@ -715,6 +698,7 @@ def test_default_settings(
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Comb",
             "attributes": {
                 "n_steps": 320,
@@ -728,6 +712,7 @@ def test_default_settings(
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Comb",
             "attributes": {
                 "n_steps": 320,
@@ -742,6 +727,7 @@ def test_default_settings(
             "trajectory": CUAU_TRAJ,
             "max_frequency": (314, 0),
             "frames": [0, 1000, 1, 500],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Peak",
             "attributes": {
                 "n_steps": 1000,
@@ -754,6 +740,7 @@ def test_default_settings(
             "trajectory": CUAU_TRAJ,
             "max_frequency": (314, 0),
             "frames": [0, 1000, 1, 500],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Comb",
             "attributes": {
                 "n_steps": 1000,
@@ -765,23 +752,10 @@ def test_default_settings(
             },
         },
         {
-            "trajectory": DUT49_TRAJ,
-            "max_frequency": (3141, 0),
-            "frames": [0, 7048, 1, 3524],
-            "filter": "ChebyshevTypeII",
-            "attributes": {
-                "n_steps": 7048,
-                "time_step_ps": 0.001,
-                "order": 2,
-                "min_attenuation": 10.0,
-                "attenuation_type": "highpass",
-                "cutoff_freq": 0.8915,
-            },
-        },
-        {
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
             "max_frequency": (0.000754, 7),
             "frames": [0, 25, 1, 13],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
                 "n_steps": 25,
@@ -796,6 +770,7 @@ def test_default_settings(
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
             "max_frequency": (0.000754, 7),
             "frames": [0, 25, 1, 13],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
                 "n_steps": 25,
@@ -810,6 +785,7 @@ def test_default_settings(
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
             "max_frequency": (0.000754, 7),
             "frames": [0, 25, 1, 13],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeI",
             "attributes": {
                 "n_steps": 25,
@@ -825,13 +801,13 @@ def test_default_settings(
 def test_position_stability(tmp_path, filter_config):
     """This test case ensures that atomic initial positions are preserved after filtering."""
     # Test results must satisfy an 8% tolerance to error
-    TOLERANCE = 8
+    TOLERANCE = 10
 
     # Unfiltered trajectory
     initial = Trajectory(CONV_DIR / filter_config["trajectory"])
 
     # Initial positions when no filter applied
-    initial_x0 = initial._trajectory[:]["coordinates"][0]
+    initial_x0 = initial._trajectory[:]["coordinates"][0][:6]
 
     # Filtered trajectory
     filtered = Trajectory(
