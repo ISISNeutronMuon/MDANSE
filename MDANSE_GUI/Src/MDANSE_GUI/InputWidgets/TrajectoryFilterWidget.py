@@ -686,18 +686,18 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
 
     Attributes
     ----------
-    _bounds_off : Set[string]
+    _unbounded_filters : Set[string]
         Settings corresponding to the frequency bounds 'off' state.
         When these settings are used, the filter frequency is unbounded.
-    _bounds_on : Set[string]
+    _bounded_filters : Set[string]
         Settings corresponding to the frequency bounds 'on' state.
         When these settings are used, the filter frequency is bounded.
 
     """
 
     # Bounds behaviour corresponding to attenuation settings
-    _bounds_off = {"lowpass", "highpass"}
-    _bounds_on = {"bandpass", "bandstop"}
+    _unbounded_filters = {"lowpass", "highpass"}
+    _bounded_filters = {"bandpass", "bandstop"}
 
     # Signal: emitted when frequency bounds are enabled
     _frequency_bounded = Signal(bool)
@@ -719,7 +719,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         render_func : Callable
             Filter designer function to call when preferences have been updated. The supplied function re-renders the
             filter designer graph with the updated attributes.
-        flags : set
+        flags : Set[Filter.Flags]
             Set of flags associated with the current filter that can be used to invoke certain rules about settings.
 
         """
@@ -762,8 +762,8 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
 
     def notify(self, value: Any) -> None:
         """Emit the signal on setting changed."""
-        if value in (self._bounds_on | self._bounds_off):
-            self._frequency_bounded.emit(value in self._bounds_on)
+        if value in (self._bounded_filters | self._unbounded_filters):
+            self._frequency_bounded.emit(value in self._bounded_filters)
 
         # Ensure that cutoff frequency and bound frequency cannot have the same value
         if self.retrieve_widget("bound_freq").isEnabled():
@@ -810,7 +810,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
                     ).value()
                 elif (
                     self.retrieve_widget("attenuation_type").currentText()
-                    in self._bounds_on
+                    in self._bounded_filters
                 ):
                     self.attributes["cutoff_freq"] = self.get_frequency_bounds()
 
