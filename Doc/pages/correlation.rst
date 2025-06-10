@@ -39,6 +39,8 @@ average correlation; leading to spuriously large correlations for some
 time intervals. However in MDANSE 2 your correlation functions will be
 truncated since :math:`t_{\mathrm{tot}} \geq t_{\mathrm{cor}}`.
 
+.. _correlation-fourier-spectrum :
+
 Fourier Spectrum
 ~~~~~~~~~~~~~~~~
 

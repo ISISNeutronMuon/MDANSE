@@ -179,7 +179,9 @@ will be identified based on interatomic distances and covalent radii.
 SMARTS patterns
 ---------------
 
-The SMARTS functionality in MDANSE is still very limited, since
+The `SMARTS <https://www.daylight.com/dayhtml/doc/theory/theory.smarts.html>`_
+(SMILES arbitrary target specification) functionality
+in MDANSE is still very limited, since
 MDANSE does not differentiate between different types of chemical
 bonds. Therefore, the SMARTS strings provided by MDANSE do
 not specify the bond type, and any custom strings input by

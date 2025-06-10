@@ -108,6 +108,10 @@ class DistanceHistogram(IJob):
         else:
             self.indices_intra = None
         self.selectedElements = self.configuration["atom_selection"]["unique_names"]
+        if self.indices_intra is not None and len(self.indices_intra) > len(
+            self._indices
+        ):
+            self.indices_intra = self.indices_intra[self._indices]
 
         self.indexToSymbol = np.array(
             [
@@ -135,11 +139,6 @@ class DistanceHistogram(IJob):
         # The histogram of the intermolecular distances.
         self.h_total = np.zeros(
             (nElements, nElements, len(self.configuration["r_values"]["mid_points"])),
-            dtype=np.float64,
-        )
-
-        self.scaleconfig = np.zeros(
-            (self.configuration["atom_selection"]["selection_length"], 3),
             dtype=np.float64,
         )
 

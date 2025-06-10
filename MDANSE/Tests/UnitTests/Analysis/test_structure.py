@@ -11,6 +11,7 @@ mdmc_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
 com_traj = CONV_DIR / "com_trajectory.mdt"
 nonorth_traj = CONV_DIR / "nonorthogonal_cell.mdt"
 molecule_traj = CONV_DIR / "named_molecules.mdt"
+cubane_traj = CONV_DIR / "four_molecules.mdt"
 
 ################################################################
 # Job parameters                                               #
@@ -151,3 +152,23 @@ def test_vhd():
     np.testing.assert_almost_equal(intra[0,0,:], expected_intra, decimal=3, err_msg="Failed at intra")
     np.testing.assert_almost_equal(total[0,0,:]-intra[0,0,:], expected_inter, decimal=3, err_msg="Failed at inter")
     
+def test_intermolecular_part_is_zero_for_single_molecule(tmp_path, parameters):
+    temp_name = tmp_path / "output"
+
+    job_type = "PairDistributionFunction"
+
+    parameters["trajectory"] = cubane_traj
+    parameters["r_values"] = (0.0, 0.5, 0.01)
+    parameters['atom_selection'] = '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_sphere", "frame_number": 0, "sphere_centre": [1.5, 1.5, 1.5], "sphere_radius": 0.5, "operation_type": "intersection"}}'
+    parameters["output_files"] = (temp_name, ("FileInMemory",), "no logs")
+
+    job = IJob.create(job_type)
+    job.run(parameters, status=True)
+    results = job.results
+    
+    print(results.keys())
+
+    assert "pdf_inter_total" in results
+    assert "pdf_intra_total" in results
+    np.testing.assert_allclose(results["pdf_inter_total"], 0.0, equal_nan=True)
+

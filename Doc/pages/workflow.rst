@@ -61,8 +61,9 @@ Resolution
 ^^^^^^^^^^
 
 The resolution is enabled only for the analysis types which calculate an
-energy spectrum.This is normally applied to calculations involving Fourier
-transform of a correlation function. The resolution is applied by multiplying
+energy spectrum. This is normally applied to calculations involving
+Fourier transform of a correlation function (see also :ref:`correlation-fourier-spectrum`).
+The resolution is applied by multiplying
 the time-dependent function with a window function before applying the Fourier
 transform. The details are given in the section
 :ref:`param-instrument-resolution`.

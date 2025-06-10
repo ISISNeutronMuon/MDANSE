@@ -13,53 +13,20 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from typing import TYPE_CHECKING
-
-from MDANSE.Framework.Formats.IFormat import IFormat
-
-if TYPE_CHECKING:
-    from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
-    from MDANSE.Framework.Jobs.IJob import IJob
-from .HDFFormat import HDFFormat
+from MDANSE.Framework.Formats.HDFFormat import HDFFormat
 
 
-class MDTFormat(IFormat):
+class MDTFormat(HDFFormat):
     """
     This class handles the writing of output variables in MDT file format.
 
     Attributes
     ----------
     extension : str
-        Extension used when writing.
+        File extension used when writing.
     extensions : list[str]
-        Other possible extension of this file format.
+        Other possible extensions of this file format.
     """
 
     extension = ".mdt"
     extensions = [".mdt"]
-
-    @classmethod
-    def write(
-        cls,
-        filename: str,
-        data: dict[str, "IOutputVariable"],
-        header: str = "",
-        run_instance: "IJob" = None,
-        extension: str = extensions[0],
-    ) -> None:
-        """Write a set of output variables into an HDF file with the
-        MDANSE trajectory file extension.
-
-        Attributes
-        ----------
-        filename : str
-            The path to the output HDF file.
-        data : dict[str, IOutputVariable]
-            The data to be written out
-        header : str
-            The header to add to the output file.
-        extension : str
-            The extension of the file.
-        """
-        HDFFormat.write(filename, data, header, run_instance, extension)

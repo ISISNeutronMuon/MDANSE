@@ -105,7 +105,7 @@ class OutputFilesConfigurator(IConfigurator):
                 )
                 return
 
-            if fmt not in IFormat.subclasses():
+            if fmt not in IFormat.indirect_subclasses():
                 self.error_status = f"the output file format {fmt} is not registered as a valid file format."
                 return
 

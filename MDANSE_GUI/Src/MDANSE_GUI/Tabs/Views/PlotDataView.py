@@ -116,7 +116,7 @@ class PlotDataView(QTreeView):
     def on_select_dataset(self, index):
         model = self.model()
         item = model.itemFromIndex(index)
-        text = item.text()
+        text = item.child_path
         mda_data_structure = model.inner_object(index)
         try:
             packet = text, mda_data_structure._file

@@ -13,9 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from abc import abstractmethod
-import os
-from pathlib import PurePath
+from typing import TypeVar
 
 import h5py
 from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt
@@ -27,15 +28,16 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.LocalSession import json_decoder
 
 
-class BasicPlotDataItem(QStandardItem):
-    """Each item in the PlotDataModel is a BasicPlotDataItem.
-    Since there are only two levels of nesting in the data tree,
-    there are two types of item we will use, both of them
-    derived from BasicPlotDataItem
-    """
+Self = TypeVar("Self", bound="BasicPlotDataItem")
+EXCLUDE = {"metadata"}
 
-    def __init__(self, *args, **kwargs):
+
+class BasicPlotDataItem(QStandardItem):
+    """Each item in the PlotDataModel is a BasicPlotDataItem."""
+
+    def __init__(self, *args, data_parent: Self | None = None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.data_parent = data_parent
         self._item_type = "generic"
 
     @abstractmethod
@@ -46,22 +48,31 @@ class BasicPlotDataItem(QStandardItem):
     def file_number(self):
         pass
 
-    def populate(self, file):
-        for key in file.keys():
+    @property
+    def child_path(self):
+        if self.data_parent is None:
+            return ""
+        else:
+            return f"{self.data_parent.child_path}/{self.text()}"
+
+    def populate(self, data: h5py.File | h5py.Group):
+        for key in data.keys() - EXCLUDE:
             try:
-                file[key]
+                data[key]
             except Exception as e:
-                LOG.error(f"error {e} when accessing file[{key}]")
-            else:
-                child = DataSetItem()
-                child.setText(key)
-                child.setData(key, role=Qt.ItemDataRole.DisplayRole)
-                child.setData(key, role=Qt.ItemDataRole.UserRole)
-                try:
-                    file[key][:]
-                except Exception:
-                    child._item_type = "group"
-                self.appendRow(child)
+                LOG.error(f"error {e} when accessing data[{key}]")
+                continue
+
+            child = DataSetItem(data_parent=self)
+            child.setText(key)
+            child.setData(key, role=Qt.ItemDataRole.DisplayRole)
+            child.setData(key, role=Qt.ItemDataRole.UserRole)
+            try:
+                data[key][:]
+            except Exception:
+                child.populate(data[key])
+                child._item_type = "group"
+            self.appendRow(child)
 
 
 class DataSetItem(BasicPlotDataItem):
@@ -72,7 +83,7 @@ class DataSetItem(BasicPlotDataItem):
     def data_path(self) -> str:
         parent_path = self.parent().data_path()
         own_path = self.data(role=Qt.ItemDataRole.UserRole)
-        return str(PurePath(os.path.join(parent_path, own_path)))
+        return f"{parent_path}/{own_path}"
 
     def file_number(self) -> int:
         return self.parent().file_number()
