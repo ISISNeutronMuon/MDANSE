@@ -322,18 +322,24 @@ def get_spectrum(signal, window=None, timeStep=1.0, axis=0, fft="fft"):
 # Default filter cutoff frequency
 DEFAULT_FILTER_CUTOFF = 25.0
 
+
 class TransferFunction(NamedTuple):
-    """Container for the filter transfer transfer function expressed in terms of the numerator/denominator coefficients of a rational polynomial"""
+    """Container for the filter transfer transfer function expressed in terms of the numerator/denominator coefficients of a rational polynomial."""
+
     numerator: np.ndarray
     denominator: np.ndarray
 
+
 class FrequencyDomain(NamedTuple):
-    """Container for the frequency response of the filter"""
+    """Container for the frequency response of the filter."""
+
     frequencies: np.ndarray
     magnitudes: np.ndarray
 
+
 class Filter(ABC):
     """Base class for a filter operating on a signal."""
+
     # Symbolic variable for analog filter transfer function (Laplace plane)
     S = "iw"
 
@@ -354,19 +360,22 @@ class Filter(ABC):
     _cyclic_to_angular = 2 * np.pi
 
     class FrequencyUnits(Enum):
-        """Enumeration for frequency unit type"""
+        """Enumeration for frequency unit type."""
 
         CYCLIC: str = "THz"
         ANGULAR: str = "rad/ps"
 
     class FrequencyRangeMethod(Enum):
-        """Enumeration for custom (externally provided) and FFT-derived frequency ranges for plotting the filter response"""
+        """Enumeration for custom (externally provided) and FFT-derived frequency ranges for plotting the
+        filter response.
+
+        """
 
         CUSTOM: int = 0
         FFT: int = 1
 
     class Flags(Enum):
-        """Enumeration for flags associated with usage of filters"""
+        """Enumeration for flags associated with usage of filters."""
 
         DIGITAL_ONLY: int = 0
         DIGITAL_AND_ANALOGUE: int = 1
@@ -395,9 +404,9 @@ class Filter(ABC):
         Parameters
         ----------
         transfer_function : TransferFunction
-            The numerator and denominator of the filter transfer function
+            Numerator and denominator of the filter transfer function.
         range : np.ndarray
-            Range of frequency values over which to compute
+            Range of frequency values over which to compute.
 
         Returns
         -------
@@ -419,12 +428,12 @@ class Filter(ABC):
         Parameters
         ----------
         input : np.ndarray
-            The input signal
+            Input signal.
 
         Returns
         -------
         np.ndarray
-            The resulting signal due to convolution with the filter instance.
+            Output signal resulting from convolution with the filter.
 
         """
         coeffs = (
@@ -461,7 +470,7 @@ class Filter(ABC):
         Returns
         -------
         FrequencyDomain
-            Named tuple containing the x-axis (frequency range) and y-axis (amplitude) of the filter
+            Named tuple containing the x-axis (frequency range) and y-axis (amplitude) of the filter.
 
         """
         return self._freq_response
@@ -470,14 +479,17 @@ class Filter(ABC):
     def freq_response(
         self, params: tuple[TransferFunction, FrequencyRangeMethod]
     ) -> None:
-        """Calculates the frequency response of the filter from the filter's transfer function numerator and denominator coefficients.
+        """Calculates the frequency response of the filter from the filter's transfer function numerator and denominator
+        coefficients.
 
         Parameters
         ----------
         params : tuple[TransferFunction, FrequencyRangeMethod]
-            tuple contains the following elements:
-                - the rational polynomial expression for the filter transfer function, in terms of its numerator and denominator coefficients
-                - the method by which to compute the frequency range for displaying the filter
+            Tuple contains the following elements:
+                - the rational polynomial expression for the filter transfer function, in terms of its numerator and
+                denominator coefficients.
+                - the method by which to compute the frequency range for displaying the filter.
+
         """
         expr, method = params
         units = (
@@ -520,16 +532,16 @@ class Filter(ABC):
         Parameters
         ----------
         num_steps : float
-            Number of simulation timesteps
+            Number of simulation timesteps.
         timestep : float
-            Simulation timestep in picoseconds
+            Simulation timestep in picoseconds.
         units : FrequencyUnit
-            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps)
+            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps).
 
         Returns
         -------
         float
-            Frequency resolution
+            Frequency resolution.
 
         """
         bin_width = 1 / (num_steps * timestep)
@@ -545,14 +557,14 @@ class Filter(ABC):
         Parameters
         ----------
         timestep : np.ndarray
-            Simulation timestep in picoseconds
+            Simulation timestep in picoseconds.
         units : FrequencyUnit
-            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps)
+            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps).
 
         Returns
         -------
         float
-            Nyquist limit
+            Nyquist limit.
 
         """
         limit = (1 / timestep) / 2
@@ -569,25 +581,26 @@ class Filter(ABC):
         units: FrequencyUnits = FrequencyUnits.ANGULAR,
         symmetric: bool = False,
     ) -> np.ndarray:
-        """Obtain an FFT-based frequency range for the frequency domain of a discrete time signal with a given number of elements and a constant time step.
+        """Obtain an FFT-based frequency range for the frequency domain of a discrete time signal with a given number
+        of elements and a constant time step.
 
         Parameters
         ----------
         N : int
-            Number of samples in input signal (to which filter will be applied to)
+            Number of samples in input signal (to which filter will be applied to).
         timestep: float
-            Input signal timestep in picoseconds
+            Input signal timestep in picoseconds.
         resize_to: int
-            Up- or down- sample the frequency range array to a given length
+            Up- or down- sample the frequency range array to a given length.
         units : FrequencyUnits
-            Enumeration for returned frequency units (i.e. CYCLIC=THz, ANGULAR=rad/ps)
+            Enumeration for returned frequency units (i.e. CYCLIC=THz, ANGULAR=rad/ps).
         symmetric : bool
-            If true, retain symmetric property of frequencies, else take only one half of the frequencies
+            If true, retain symmetric property of frequencies, else take only one half of the frequencies.
 
         Returns
         -------
         np.ndarray
-            FFT frequencies
+            FFT frequencies.
 
         """
         # Compute cyclic frequencies using FFT method
@@ -602,12 +615,12 @@ class Filter(ABC):
         )
 
     def set_filter_attributes(self, attributes: dict) -> None:
-        """Update filter instance attributes
+        """Update filter instance attributes.
 
         Parameters
         ----------
         attributes : dict
-            Dictionary containing filter attributes
+            Dictionary containing filter attributes.
 
         """
         settings = self.default_settings
@@ -621,15 +634,15 @@ class Filter(ABC):
 
         Parameters
         ----------
-        coeffs : np.ndarray)
-            Array of polynomial coefficients
+        coeffs : np.ndarray
+            Array of polynomial coefficients.
         unit : str
-            String representation of the mathematical symbol corresponding to the S or Z planes
+            String representation of the mathematical symbol corresponding to the S or Z planes.
 
         Returns
         -------
         str
-            Symbolic polynomial string
+            Symbolic polynomial string.
 
         """
         if not coeffs.any():
@@ -663,16 +676,16 @@ class Filter(ABC):
         Parameters
         ----------
         numerator : np.ndarray
-            Array of coefficients representing the numerator of the transfer function
+            Array of coefficients representing the numerator of the transfer function.
         denominator : np.ndarray)
-            Array of coefficients representing the denominator of the transfer function
+            Array of coefficients representing the denominator of the transfer function.
         analog : bool
-            The filter is analog (Laplace/S-domain) or digital (Z-domain)
+            Filter is analog (Laplace/S-domain) or digital (Z-domain).
 
         Returns
         -------
         dict[str, str]
-            Dictionary of string coefficients representing the transfer function rational polynomial
+            Dictionary of string coefficients representing the transfer function rational polynomial.
 
         """
         if analog:
@@ -696,12 +709,12 @@ class Filter(ABC):
         Parameters
         ----------
         description : str
-            The description of the attribute as a multiline string
+            Description of the attribute as a multiline string.
 
         Returns
         -------
         str
-            The description string concatenated with substrings for each filer attribute
+            Description string concatenated with substrings for each filer attribute.
 
         """
         settings = type(self).__dict__["default_settings"]
@@ -717,8 +730,11 @@ class Filter(ABC):
     def __str__(self):
         """Returns a string representation of the filter.
 
-        :Returns:
-            #. str: string representation of the filter
+        Returns
+        -------
+        str
+            String representation of the filter.
+
         """
         string_representation = f"""Trajectory filter of type {type(self).__name__} implemented with the following parameters:
 
@@ -757,14 +773,14 @@ class Filter(ABC):
         Parameters
         ----------
         freq : float | np.ndarray
-            frequency
+            Frequency.
         units : FrequencyUnit
-            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps)
+            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps).
 
         Returns
         -------
         float | np.ndarray
-            Energy
+            Energy.
 
         """
         scale_factor = 1e12 * cls._freq_to_mev
@@ -783,14 +799,14 @@ class Filter(ABC):
         Parameters
         ----------
         energy : float | np.ndarray
-            Energy
+            Energy.
         units : FrequencyUnit
-            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps)
+            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps).
 
         Returns
         -------
         float | np.ndarray
-            Frequency
+            Frequency.
 
         """
         scale_factor = 1e-12 / cls._freq_to_mev
@@ -1075,14 +1091,14 @@ class Notch(Filter):
         Parameters
         ----------
         transfer_function : TransferFunction
-            the numerator and denominator of the filter transfer function
+            Numerator and denominator of the filter transfer function.
         range : np.ndarray
-            range of frequency values over which to compute
+            Range of frequency values over which to compute.
 
         Returns
         -------
         np.ndarray
-            Frequency response over a given range of cyclic frequencies
+            Frequency response over a given range of cyclic frequencies.
         """
 
         return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
@@ -1134,14 +1150,14 @@ class Peak(Filter):
         Parameters
         ----------
         transfer_function : TransferFunction)
-            the numerator and denominator of the filter transfer function
+            Numerator and denominator of the filter transfer function.
         range : np.ndarray
-            range of frequency values over which to compute
+            Range of frequency values over which to compute.
 
         Returns
         -------
         np.ndarray
-            Frequency response over a given range of cyclic frequencies
+            Frequency response over a given range of cyclic frequencies.
 
         """
 
@@ -1208,14 +1224,14 @@ class Comb(Filter):
         Parameters
         ----------
         transfer_function : TransferFunction
-            the numerator and denominator of the filter transfer function
+            Numerator and denominator of the filter transfer function.
         range : np.ndarray
-            range of frequency values over which to compute
+            Range of frequency values over which to compute.
 
         Returns
         -------
         np.ndarray
-            frequency response over a given range of cyclic frequencies
+            Frequency response over a given range of cyclic frequencies.
 
         """
 
@@ -1251,12 +1267,12 @@ def filter_default_attributes(filter=DEFAULT_FILTER):
     Parameters
     ----------
     filter : Filter
-        The filter class.
+        Filter class.
 
     Returns
     -------
     dict[str, Any]
-        The filter settings dictionary
+        Filter settings dictionary.
 
     """
     return {
@@ -1272,14 +1288,14 @@ def filter_description_string(
     Parameters
     ----------
     filter : str
-        The filter class
+        Filter class.
     settings : dict
-        Dictionary containing the filter settings
+        Dictionary containing the filter settings.
 
     Returns
     -------
     str
-        string representation of the filter settings dictionary
+        String representation of the filter settings dictionary.
 
     """
     return json.dumps({"filter": filter.__name__, "attributes": settings})
@@ -1293,22 +1309,22 @@ def power_spectrum(
     Parameters
     ----------
     trajectory : HDFTrajectoryConfigurator
-        atomic trajectory object
+        Atomic trajectory object.
     frames : CorrelationFramesConfigurator
-        frames object
+        Frames object.
     projection : ProjectionConfigurator
-        projection object
+        Projection object.
     atom_selection : AtomSelectionConfigurator
-        atom selection object
+        Atom selection object.
     weights : WeightsConfigurator
-        weights object
+        Weights object.
     instrument_resolution : InstrumentResolutionConfigurator
-        instrument resolution object
+        Instrument resolution object.
 
     Returns
     -------
     tuple[np.ndarray, np.ndarray]
-        tuple containing the omegas (frequency range) and the corresponding power spectrum of the atomic trajectories
+        Tuple containing the omegas (frequency range) and the corresponding power spectrum of the atomic trajectories.
 
     """
     trajectory = trajectory["instance"]
