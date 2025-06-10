@@ -328,6 +328,7 @@ class Action(QWidget):
             self.layout.addWidget(buttonbase)
             self._widgets_in_layout["button_base"] = buttonbase
         self.apply_instrument()
+        self.allow_execution()
 
     def check_inputs(self):
         configured = False
