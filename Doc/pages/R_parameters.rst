@@ -68,7 +68,8 @@ Q shells
 +--------------+---------+---------+--------------------------------------------------------+
 
 The *unit* of the Q-vector length in MDANSE is :math:`\text{nm}^{-1}`.
-.. _param-output-files:
+
+.. _param-output-trajectory:
 
 Output trajectory
 ~~~~~~~~~~~~~~~~~
@@ -137,8 +138,8 @@ Atom Selection allows you to select any set of atoms and/or other
 particles. These selected particles are then the ones that are made the
 target of the analysis. There is no limit to which particles can be
 included in a selection, or to how many selections can be used
-simultaneously. There can even be none; Atom Selection is entirely
-optional.
+simultaneously. Atom Selection is entirely optional; if it is omitted,
+all the particles in the simulation are used.
 
 More information about atom selection can be found here: :ref:`atom-selection`.
 
@@ -171,205 +172,197 @@ Q vectors
 Q vectors can be created using several generators. The generators use
 different input parameters. The details are given here.
 
+For vector generators requiring "shells" and "width" input, the "shell" input defines
+a range of bin centres, and "width" gives the bin width used for assigning vectors to shells.
+For example, shells = (4.0, 8.0, 2.0) will generate 3 bins, centred on 4.0, 6.0 and 8.0
+:math:`\text{nm}^{-1}`. The bins will contain vectors with :math:`|Q|` in the ranges of
+3.5-4.5, 5.5-6.5 and 7.5-8.5, respectively. That is, for each bin the range of accepted
+:math:`|Q|` is
+:math:`(\text{centre}-0.5*\text{width}, \text{centre}+0.5*\text{width})`.
+
+Vector generators with "Lattice" in their name generate vectors commensurate with the
+reciprocal lattice of the simulation box. This is important for analysis types which
+calculate correlations of pairs of atoms (:ref:`current-correlation-function`
+and :ref:`dynamic-coherent-structure-factor`).
+
+While :ref:`dynamic-incoherent-structure-factor` does not require a Lattice vector
+generator, it is still necessary to use one if you intend to combine the coherent
+and incoherent parts into the total signal using
+:ref:`neutron-dynamic-total-structure-factor`.
+
 Spherical Lattice Vectors
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-+------------------+-----------+---------+------------------------------------------------------------+
-| Parameter        | Format    | Default | Description                                                |
-+==================+===========+=========+============================================================+
-| seed             | int       | 0       | RNG seed used to generate the vectors. Setting the same    |
-|                  |           |         | seed ensures reproducibility of random numbers.            |
-+------------------+-----------+---------+------------------------------------------------------------+
-| n vectors        | int       | 50      | Number of hkl vectors in each shell. Higher values result  |
-| (Number of hkl   |           |         | in higher accuracy but longer computation time.            |
-| vectors)         |           |         |                                                            |
-+------------------+-----------+---------+------------------------------------------------------------+
-| width            | float     | 1.0     | Accepted tolerance of each shell. Often identical to the   |
-|                  |           |         | "by step of" parameter.                                    |
-+------------------+-----------+---------+------------------------------------------------------------+
++------------------+-----------+---------------+------------------------------------------------------------+
+| Parameter        | Format    | Default       | Description                                                |
++==================+===========+===============+============================================================+
+| seed             | int       | 0             | RNG seed used to generate the vectors. Setting the same    |
+|                  |           |               | seed ensures reproducibility of random numbers.            |
++------------------+-----------+---------------+------------------------------------------------------------+
+| shells           | 3*[float] | [0, 5.0, 0.5] | A [first, last, step] definition of a range of :math:`|Q|` |
+|                  |           |               | values used as centres of vector shells.                   |
++------------------+-----------+---------------+------------------------------------------------------------+
+| n vectors        | int       | 50            | Number of hkl vectors in each shell. Higher values result  |
+| (Number of hkl   |           |               | in higher accuracy but longer computation time.            |
+| vectors)         |           |               |                                                            |
++------------------+-----------+---------------+------------------------------------------------------------+
+| width            | float     | 1.0           | Accepted tolerance of each shell. Often identical to the   |
+|                  |           |               | "by step of" parameter.                                    |
++------------------+-----------+---------------+------------------------------------------------------------+
 
+The most commonly used vector generator, appropriate for isotropic systems. Generates vectors in all directions,
+and groups them into spherical shells of finite thickness. The results for each shell are averaged over
+all the component vectors, resulting in an approximation of random orientation. Only vectors commensurate
+with the reciprocal lattice of the simulation box are generated.
 
 Circular Lattice Vectors
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-+------------------+-----------+---------+------------------------------------------------------------+
-| Parameter        | Format    | Default | Description                                                |
-+==================+===========+=========+============================================================+
-| seed             | int       | 0       | The RNG seed used to generate the vectors. Setting the same|
-|                  |           |         | seed ensures reproducibility of random numbers.            |
-+------------------+-----------+---------+------------------------------------------------------------+
-| n vectors        | int       | 50      | Number of hkl vectors in each shell. Higher values result  |
-|                  |           |         | in higher accuracy but at the cost of longer computational |
-|                  |           |         | time.                                                      |
-+------------------+-----------+---------+------------------------------------------------------------+
-| width            | float     | 1.0     | Accepted tolerance of each shell. Often identical to the   |
-|                  |           |         | "by step of" parameter.                                    |
-+------------------+-----------+---------+------------------------------------------------------------+
++------------------+-----------+---------------+------------------------------------------------------------+
+| Parameter        | Format    | Default       | Description                                                |
++==================+===========+===============+============================================================+
+| seed             | int       | 0             | The RNG seed used to generate the vectors. Setting the same|
+|                  |           |               | seed ensures reproducibility of random numbers.            |
++------------------+-----------+---------------+------------------------------------------------------------+
+| shells           | 3*[float] | [0, 5.0, 0.5] | A [first, last, step] definition of a range of :math:`|Q|` |
+|                  |           |               | values used as centres of vector shells.                   |
++------------------+-----------+---------------+------------------------------------------------------------+
+| n vectors        | int       | 50            | Number of hkl vectors in each shell. Higher values result  |
+|                  |           |               | in higher accuracy but at the cost of longer computational |
+|                  |           |               | time.                                                      |
++------------------+-----------+---------------+------------------------------------------------------------+
+| width            | float     | 1.0           | Accepted tolerance of each shell. Often identical to the   |
+|                  |           |               | "by step of" parameter.                                    |
++------------------+-----------+---------------+------------------------------------------------------------+
+| axis 1           | 3*[float] | [1,0,0]       | :math:`[h,k,l]`                                            |
++------------------+-----------+---------------+------------------------------------------------------------+
+| axis 2           | 3*[float] | [0,1,0]       | :math:`[h,k,l]`                                            |
++------------------+-----------+---------------+------------------------------------------------------------+
 
--  axis 1
-
-   +--------------+-----------+---------+-----------------------+
-   | Component    | Format    | Default | Description           |
-   +==============+===========+=========+=======================+
-   | x-component  | int       | 1       | X-component for plane |
-   +--------------+-----------+---------+-----------------------+
-   | y-component  | int       | 0       | Y-component for plane |
-   +--------------+-----------+---------+-----------------------+
-   | z-component  | int       | 0       | Z-component for plane |
-   +--------------+-----------+---------+-----------------------+
-
--  axis 2
-
-   +--------------+-----------+---------+-----------------------+
-   | Component    | Format    | Default | Description           |
-   +==============+===========+=========+=======================+
-   | x-component  | int       | 0       | X-component for plane |
-   +--------------+-----------+---------+-----------------------+
-   | y-component  | int       | 1       | Y-component for plane |
-   +--------------+-----------+---------+-----------------------+
-   | z-component  | int       | 0       | Z-component for plane |
-   +--------------+-----------+---------+-----------------------+
-
-
+The reciprocal space vectors "axis 1" and "axis 2" define a plane in which the vectors are generated.
+Only vectors commensurate with the reciprocal lattive defined by the simulation box will be generated.
 
 Linear Lattice Vectors
 ^^^^^^^^^^^^^^^^^^^^^^
 
-+------------------+-----------+---------+------------------------------------------------------------+
-| Parameter        | Format    | Default | Description                                                |
-+==================+===========+=========+============================================================+
-| seed             | int       | 0       | The RNG seed used to generate the vectors. Setting the same|
-|                  |           |         | seed ensures reproducibility of random numbers.            |
-+------------------+-----------+---------+------------------------------------------------------------+
-| n vectors        | int       | 50      | Number of hkl vectors in each shell. Higher values result  |
-|                  |           |         | in higher accuracy but at the cost of longer computational |
-|                  |           |         | time.                                                      |
-+------------------+-----------+---------+------------------------------------------------------------+
-| width            | float     | 1.0     | Accepted tolerance of each shell. Often identical to the   |
-|                  |           |         | "by step of" parameter.                                    |
-+------------------+-----------+---------+------------------------------------------------------------+
-| axis             |           |         |                                                            |
-+------------------+-----------+---------+------------------------------------------------------------+
-|   x-component   | int       | 1       | The x-components of the specified axis.                     |
-+------------------+-----------+---------+------------------------------------------------------------+
-|   y-component   | int       | 0       | The y-components of the specified axis.                     |
-+------------------+-----------+---------+------------------------------------------------------------+
-|   z-component   | int       | 0       | The z-components of the specified axis.                     |
-+------------------+-----------+---------+------------------------------------------------------------+
++------------------+-----------+---------------+------------------------------------------------------------+
+| Parameter        | Format    | Default       | Description                                                |
++==================+===========+===============+============================================================+
+| seed             | int       | 0             | The RNG seed used to generate the vectors. Setting the same|
+|                  |           |               | seed ensures reproducibility of random numbers.            |
++------------------+-----------+---------------+------------------------------------------------------------+
+| shells           | 3*[float] | [0, 5.0, 0.5] | A [first, last, step] definition of a range of :math:`|Q|` |
+|                  |           |               | values used as centres of vector shells.                   |
++------------------+-----------+---------------+------------------------------------------------------------+
+| n vectors        | int       | 50            | Number of hkl vectors in each shell. Higher values result  |
+|                  |           |               | in higher accuracy but at the cost of longer computational |
+|                  |           |               | time.                                                      |
++------------------+-----------+---------------+------------------------------------------------------------+
+| width            | float     | 1.0           | Accepted tolerance of each shell. Often identical to the   |
+|                  |           |               | "by step of" parameter.                                    |
++------------------+-----------+---------------+------------------------------------------------------------+
+| axis             | 3*[float] | [1,0,0]       | :math:`[h,k,l]`                                            |
++------------------+-----------+---------------+------------------------------------------------------------+
 
+The Q vectors will be generated along the reciprocal space direction "axis". Only vectors commensurate
+with the reciprocal lattive defined by the simulation box will be generated.
 
 Miller Indices Lattice Vectors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                                |
-+=================+===========+=========+============================================================+
-| seed            | int       | 0       | The RNG seed used to generate the vectors. Setting the same|
-|                 |           |         | seed ensures reproducibility of random numbers.            |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| width           | float     | 1.0     | Accepted tolerance of each shell. Often identical to the   |
-|                 |           |         | "by step of" parameter.                                    |
-+-----------------+-----------+---------+------------------------------------------------------------+
++-----------------+-----------+---------------+------------------------------------------------------------+
+| Parameter       | Format    | Default       | Description                                                |
++=================+===========+===============+============================================================+
+| seed            | int       | 0             | The RNG seed used to generate the vectors. Setting the same|
+|                 |           |               | seed ensures reproducibility of random numbers.            |
++-----------------+-----------+---------------+------------------------------------------------------------+
+| shells          | 3*[float] | [0, 5.0, 0.5] | A [first, last, step] definition of a range of :math:`|Q|` |
+|                 |           |               | values used as centres of vector shells.                   |
++-----------------+-----------+---------------+------------------------------------------------------------+
+| width           | float     | 1.0           | Accepted tolerance of each shell. Often identical to the   |
+|                 |           |               | "by step of" parameter.                                    |
++-----------------+-----------+---------------+------------------------------------------------------------+
+| h               | 3*[int]   | [0,8,1]       | Integer values of [first, last, step]                      |
++-----------------+-----------+---------------+------------------------------------------------------------+
+| k               | 3*[int]   | [0,8,1]       | Integer values of [first, last, step]                      |
++-----------------+-----------+---------------+------------------------------------------------------------+
+| l               | 3*[int]   | [0,8,1]       | Integer values of [first, last, step]                      |
++-----------------+-----------+---------------+------------------------------------------------------------+
 
-
--  h (and the same goes for k and l fields)
-
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                                |
-+=================+===========+=========+============================================================+
-|   from          | int       | 0       | Minimum value used to construct the range of h vectors.    |
-+-----------------+-----------+---------+------------------------------------------------------------+
-|   to            | int       | 0       | Maximum value used to construct the range of h vectors.    |
-+-----------------+-----------+---------+------------------------------------------------------------+
-|   by step of    | int       | 1       | Step used to construct the range of h vectors. If it is    |
-|                 |           |         | 1, every integer between **from** and **to** is placed     |
-|                 |           |         | into the range; if it is 2, every other, etc.              |
-+-----------------+-----------+---------+------------------------------------------------------------+
-
+Only reciprocal space vectors with integer values of H, K, L will be generated. Once generated,
+they will still be grouped into shells based on their :math:`|Q|`.
 
 Spherical Vectors
 ^^^^^^^^^^^^^^^^^
-+-----------------+-----------+---------+------------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                                |
-+=================+===========+=========+============================================================+
-| seed            | int       | 0       | The RNG seed used to generate the vectors. Setting the same|
-|                 |           |         | seed ensures reproducibility of random numbers.            |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| n vectors       | int       | 50      | The number of hkl vectors in each shell. Higher values     |
-|                 |           |         | result in higher accuracy but longer computational time.   |
-+-----------------+-----------+---------+------------------------------------------------------------+
-| width           | float     | 1.0     | The accepted tolerance of each shell. Often identical to   |
-|                 |           |         | the "by step of" parameter.                                |
-+-----------------+-----------+---------+------------------------------------------------------------+
+
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| Parameter       | Format    | Default       | Description                                                 |
++=================+===========+===============+=============================================================+
+| seed            | int       | 0             | The RNG seed used to generate the vectors. Setting the same |
+|                 |           |               | seed ensures reproducibility of random numbers.             |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| shells          | 3*[float] | [0, 5.0, 0.5] | A [first, last, step] definition of a range of :math:`|Q|`  |
+|                 |           |               | values used as centres of vector shells.                    |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| n vectors       | int       | 50            | The number of hkl vectors in each shell. Higher values      |
+|                 |           |               | result in higher accuracy but longer computational time.    |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| width           | float     | 1.0           | The accepted tolerance of each shell. Often identical to    |
+|                 |           |               | the "by step of" parameter.                                 |
++-----------------+-----------+---------------+-------------------------------------------------------------+
 
 
 Circular Vectors
 ^^^^^^^^^^^^^^^^
 
-+-----------------+-----------+---------+--------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                            |
-+=================+===========+=========+========================================================+
-| seed            | int       | 0       | The RNG seed used to generate the vectors. Setting the |
-|                 |           |         | same seed ensures that the same random numbers are     |
-|                 |           |         | generated, making the calculation reproducible.        |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| n vectors       | int       | 50      | The number of hkl vectors in each shell. Increasing    |
-|                 |           |         | this value improves accuracy but also increases        |
-|                 |           |         | computational time.                                    |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| width           | float     | 1.0     | The accepted tolerance of each shell. It often matches |
-|                 |           |         | the "by step of" parameter.                            |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| axis 1          |           |         | Axis 1 parameters:                                     |
-|                 |           |         |   - x-component: int, default 1                        |
-|                 |           |         |     The x-component of the first axis used to specify  |
-|                 |           |         |     the plane.                                         |
-|                 |           |         |   - y-component: int, default 0                        |
-|                 |           |         |     The y-component of the first axis used to specify  |
-|                 |           |         |     the plane.                                         |
-|                 |           |         |   - z-component: int, default 0                        |
-|                 |           |         |     The z-component of the first axis used to specify  |
-|                 |           |         |     the plane.                                         |
-+-----------------+-----------+---------+--------------------------------------------------------+
-| axis 2          |           |         | Axis 2 parameters:                                     |
-|                 |           |         |   - x-component: int, default 0*                       |
-|                 |           |         |     The x-component of the second axis used to         |
-|                 |           |         |     specify the plane.                                 |
-|                 |           |         |   - y-component: int, default 1                        |
-|                 |           |         |     The y-component of the second axis used to         |
-|                 |           |         |     specify the plane.                                 |
-|                 |           |         |   - z-component: int, default 0                        |
-|                 |           |         |     The z-component of the second axis used to         |
-|                 |           |         |     specify the plane.                                 |
-+-----------------+-----------+---------+--------------------------------------------------------+
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| Parameter       | Format    | Default       | Description                                                 |
++=================+===========+===============+=============================================================+
+| seed            | int       | 0             | The RNG seed used to generate the vectors. Setting the      |
+|                 |           |               | same seed ensures that the same random numbers are          |
+|                 |           |               | generated, making the calculation reproducible.             |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| shells          | 3*[float] | [0, 5.0, 0.5] | A [first, last, step] definition of a range of :math:`|Q|`  |
+|                 |           |               | values used as centres of vector shells.                    |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| n vectors       | int       | 50            | The number of hkl vectors in each shell. Increasing         |
+|                 |           |               | this value improves accuracy but also increases             |
+|                 |           |               | computational time.                                         |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| width           | float     | 1.0           | The accepted tolerance of each shell. It often matches      |
+|                 |           |               | the "by step of" parameter.                                 |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| axis 1          | 3*[float] | [1,0,0]       | :math:`[h,k,l]` vector 1                                    |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| axis 2          | 3*[float] | [0,1,0]       | :math:`[h,k,l]` vector 2                                    |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+
+The reciprocal space vectors "axis 1" and "axis 2" define a plane in which the vectors are generated.
 
 
 Linear Vectors
 ^^^^^^^^^^^^^^
 
-+-----------------+-----------+---------+-------------------------------------------------------+
-| Parameter       | Format    | Default | Description                                           |
-+=================+===========+=========+=======================================================+
-| seed            | int       | 0       | The RNG seed used to generate the vectors. Setting    |
-|                 |           |         | the same seed ensures that the same random numbers    |
-|                 |           |         | are generated, making the calculation more            |
-|                 |           |         | reproducible.                                         |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| n vectors       | int       | 50      | The number of hkl vectors in each shell. Higher       |
-|                 |           |         | values result in higher accuracy but longer           |
-|                 |           |         | computational time.                                   |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| width           | float     | 1.0     | The accepted tolerance of each shell. It is often     |
-|                 |           |         | identical to the "by step of" parameter.              |
-+-----------------+-----------+---------+-------------------------------------------------------+
-| axis            |           |         | Axis parameters:                                      |
-|                 |           |         |   - x-component: int, default 1                       |
-|                 |           |         |     The x-component of the specified axis.            |
-|                 |           |         |   - y-component: int, default 0                       |
-|                 |           |         |     The y-component of the specified axis.            |
-|                 |           |         |   - z-component: int, default 0                       |
-|                 |           |         |     The z-component of the specified axis.            |
-+-----------------+-----------+---------+-------------------------------------------------------+
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| Parameter       | Format    | Default       | Description                                                 |
++=================+===========+===============+=============================================================+
+| seed            | int       | 0             | The RNG seed used to generate the vectors. Setting          |
+|                 |           |               | the same seed ensures that the same random numbers          |
+|                 |           |               | are generated, making the calculation more                  |
+|                 |           |               | reproducible.                                               |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| shells          | 3*[float] | [0, 5.0, 0.5] | A [first, last, step] definition of a range of :math:`|Q|`  |
+|                 |           |               | values used as centres of vector shells.                    |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| n vectors       | int       | 50            | The number of hkl vectors in each shell. Higher             |
+|                 |           |               | values result in higher accuracy but longer                 |
+|                 |           |               | computational time.                                         |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| width           | float     | 1.0           | The accepted tolerance of each shell. It is often           |
+|                 |           |               | identical to the "by step of" parameter.                    |
++-----------------+-----------+---------------+-------------------------------------------------------------+
+| axis            | 3*[float] | [1,0,0]       | :math:`[h,k,l]`                                             |
++-----------------+-----------+---------------+-------------------------------------------------------------+
 
 
 Grid Vectors
@@ -382,41 +375,53 @@ Grid Vectors
 |                 |           |         | seed ensures that the same random numbers are generated,      |
 |                 |           |         | making the calculation more reproducible.                     |
 +-----------------+-----------+---------+---------------------------------------------------------------+
-| hrange (krange  |           |         | Range parameters for h, k, and l vectors:                     |
-| , lrange fields)|           |         |   - from: int, default 0                                      |
-|                 |           |         |     The minimum value used to construct the range of h        |
-|                 |           |         |     vectors.                                                  |
-|                 |           |         |   - to: int, default 0                                        |
-|                 |           |         |     The maximum value used to construct the range of h        |
-|                 |           |         |     vectors.                                                  |
-|                 |           |         |   - by step of: int, default 1                                |
-|                 |           |         |     The step used to construct the range of h vectors. If it  |
-|                 |           |         |     is 1, every integer between **from** and **to** is        |
-|                 |           |         |     placed into the range; if it is 2, every other, etc.      |
+| hrange          | 3*[int]   | [0,8,1] | Integer values of [first, last, step]                         |
 +-----------------+-----------+---------+---------------------------------------------------------------+
-| qstep           | float     | 0.01    | Determines how the hkl vectors are grouped.                   |
+| krange          | 3*[int]   | [0,8,1] | Integer values of [first, last, step]                         |
 +-----------------+-----------+---------+---------------------------------------------------------------+
+| lrange          | 3*[int]   | [0,8,1] | Integer values of [first, last, step]                         |
++-----------------+-----------+---------+---------------------------------------------------------------+
+| qstep           | float     | 0.01    | Size of the :math:`|Q|` bin for grouping vectors in shells.   |
++-----------------+-----------+---------+---------------------------------------------------------------+
+
 
 
 Approximated Dispersion Vectors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
++-----------------+-----------+----------------------+------------------------------------------------------------+
+| Parameter       | Format    | Default              | Description                                                |
++=================+===========+======================+============================================================+
+| q_start         | 3*[float] | [0,0,0]              | :math:`q_0 = [q_x, q_y, q_z] (\text{nm}^{-1})`             |
++-----------------+-----------+----------------------+------------------------------------------------------------+
+| q_end           | 3*[float] | [1,0,0]              | :math:`q_1 = [q_x, q_y, q_z] (\text{nm}^{-1})`             |
++-----------------+-----------+----------------------+------------------------------------------------------------+
+| Q step          | float     | 0.1                  | The increment (in :math:`\text{nm}^{-1}`) by which Q is    |
+|                 |           |                      | increased when tracing the line between the two points.    |
++-----------------+-----------+----------------------+------------------------------------------------------------+
+
+Generates a line between any two arbitrary points in reciprocal space. The input values are in inverse nanometers,
+and NOT in reciprocal lattice units.
+
+
+Dispersion Lattice Vectors
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 +-----------------+-----------+----------------------+------------------------------------------------------------+
 | Parameter       | Format    | Default              | Description                                                |
 +=================+===========+======================+============================================================+
 | generator       | drop-down | circular_lattice     | The selection of which type of Q Vectors is being          |
 |                 |           |                      | defined.                                                   |
 +-----------------+-----------+----------------------+------------------------------------------------------------+
-| Q start (nm^-1) |           |                      | Q start parameters for the first and second Q points:      |
-|                 |           |                      |   - x-component: int, default 1                            |
-|                 |           |                      |     The x-component of this Q point.                       |
-|                 |           |                      |   - y-component: int, default 0                            |
-|                 |           |                      |     The y-component of this Q point.                       |
-|                 |           |                      |   - z-component: int, default 0                            |
-|                 |           |                      |     The z-component of this Q point.                       |
+| start           | 3*[int]   | [0,0,0]              | :math:`[h,k,l]`                                            |
 +-----------------+-----------+----------------------+------------------------------------------------------------+
-| Q step (nm^-1)  | float     | 0.1                  | The increment by which Q is increased when tracing the     |
-|                 |           |                      | line between the two points.                               |
+| direction       | 3*[int]   | [1,0,0]              | :math:`[h,k,l]`                                            |
 +-----------------+-----------+----------------------+------------------------------------------------------------+
+| n steps         | int       | 10                   | The increment (in :math:`\text{nm}^{-1}`) by which Q is    |
+|                 |           |                      | increased when tracing the line between the two points.    |
++-----------------+-----------+----------------------+------------------------------------------------------------+
+
+Generates reciprocal lattice vectors (integer indices only) from the starting point in the selected direction.
 
 .. _param-instrument-resolution:
 
