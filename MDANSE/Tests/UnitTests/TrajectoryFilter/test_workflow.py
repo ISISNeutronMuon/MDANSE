@@ -64,11 +64,18 @@ class LocalDataset:
 def mean_absolute_error(x1: np.ndarray, x2: np.ndarray) -> float:
     """Calculate the mean absolute error between two arrays.
 
-    :Parameters:
-        #. x1 (np.ndarray): First array
-        #. x2 (np.ndarray): Second array
-    :Returns:
-        #. float: Mean absolute error
+    Parameters
+    ----------
+    x1 : np.ndarray
+        First array.
+    x2 : np.ndarray
+        Second array.
+
+    Returns
+    -------
+    float
+        Mean absolute error.
+
     """
     return np.mean(np.abs(x1 - x2))
 
@@ -79,14 +86,22 @@ def normalise(
     """Normalise an array to a given scale factor, with the option to use another
     reference array for comparison.
 
-    :Parameters:
-        #. data (np.ndarray): Array to normalise
-        #. reference (np.ndarray): Array to reference during normalisation. For example,
-            this may be an array that determines the scaling of the input data in order to maintain
-            proportions during comparison with eachother.
-        #. numerator (float): Overall scale factor to apply
-    :Returns:
-        #. np.ndarray: Normalised data
+    Parameters
+    ----------
+    data : np.ndarray
+        Array to normalise.
+    reference : np.ndarray
+        Array to reference during normalisation. For example,
+        this may be an array that determines the scaling of the input data in order to maintain
+        proportions during comparison with each other.
+    numerator : float
+        Overall scale factor to apply.
+
+    Returns
+    -------
+    np.ndarray
+        Normalised data.
+
     """
     if reference is not None:
         coeff = numerator / reference.max()
@@ -100,13 +115,22 @@ def run_trajectory_filter(
 ) -> Path:
     """Runs the TrajectoryFilter job.
 
-    :Parameters:
-        #. name (Path): Temporary path to output trajectory
-        #. config (dict): Filter configuration dictionary
-        #. frames (list): List of trajectory frames
-        #. name (Path): Temporary path to output trajectory
-    :Returns:
-        #. Path: Path to output trajectory
+    Parameters
+    ----------
+    name : Path
+        Temporary path to output trajectory.
+    config : dict
+        Filter configuration dictionary.
+    frames : list
+        List of trajectory frames.
+    name : Path
+        Temporary path to output trajectory.
+
+    Returns
+    -------
+    Path
+        Path to output trajectory.
+
     """
     out_file = name.with_suffix(".mdt")
 
@@ -131,12 +155,20 @@ def run_trajectory_filter(
 def run_power_spectrum(name: Path, frames: list, traj_path: Path) -> Path:
     """Runs the PositionPowerSpectrum job.
 
-    :Parameters:
-        #. name (Path): Temporary path to output trajectory
-        #. frames (list): List of trajectory frames
-        #. name (Path): Temporary path to output trajectory
-    :Returns:
-        #. Path: Path to output trajectory
+    Parameters
+    ----------
+    name : Path
+        Temporary path to output trajectory.
+    frames : list
+        List of trajectory frames.
+    name : Path
+        Temporary path to output trajectory.
+
+    Returns
+    -------
+    Path
+        Path to output trajectory.
+
     """
     out_file = name.with_suffix(".mda")
 
@@ -182,7 +214,10 @@ def cuau_spectrum_clean(tmp_path_factory):
 
 @pytest.fixture(scope="module")
 def dut49_spectrum_clean(tmp_path_factory):
-    """Fixture returns the output file of the PositionPowerSpectrum job with the DUT49 metal-organic framework trajectory as the input."""
+    """Fixture returns the output file of the PositionPowerSpectrum job with the DUT49 metal-organic framework
+    trajectory as the input.
+
+    """
 
     yield run_power_spectrum(
         tmp_path_factory.mktemp("data") / f"{DUT49_TRAJ}_unfiltered_power_spectrum",
@@ -193,7 +228,10 @@ def dut49_spectrum_clean(tmp_path_factory):
 
 @pytest.fixture(scope="module")
 def glycl_l_alanine_spectrum_clean(tmp_path_factory):
-    """Fixture returns the output file of the PositionPowerSpectrum job with the LAMMPS Glycl-L-Alanaine CHARMM trajectory as the input."""
+    """Fixture returns the output file of the PositionPowerSpectrum job with the LAMMPS Glycl-L-Alanaine CHARMM
+    trajectory as the input.
+
+    """
 
     yield run_power_spectrum(
         tmp_path_factory.mktemp("data")
@@ -405,7 +443,7 @@ def test_convolution(
     Therefore, the power spectrum of the filtered trajectory, F(w), should be close (with some tolerance) to the product
     of the unfiltered trajectory power spectrum, U(w), and the filter frequency response, H(w).
 
-    The deviation from the convolution theorem is assessed by taking the mean of the absolute error, | U(w)H(w) - F(w) |
+    Deviation from the convolution theorem is assessed by taking the mean of the absolute error, | U(w)H(w) - F(w) |.
     """
     # Test results must satisfy an 8% tolerance to error
     TOLERANCE = 8
@@ -809,7 +847,8 @@ def test_position_stability(tmp_path, filter_config):
     filtered_x0 = filtered._trajectory[:]["coordinates"][0]
 
     assert np.isclose(
-        normalise(initial_x0, numerator=100) - normalise(filtered_x0, initial_x0, numerator=100),
+        normalise(initial_x0, numerator=100)
+        - normalise(filtered_x0, initial_x0, numerator=100),
         0,
         atol=TOLERANCE,
     ).all()

@@ -12,25 +12,25 @@ class TrajectoryFilterTest(unittest.TestCase):
     SIMPLE_HYDROGEN_PATH = "../Data/methane_hydrogen_position.csv"
 
     def test_angular_freq_to_energy_conversion(self):
-        """60.0 rad/ps to meV"""
+        """60.0 rad/ps to meV."""
         self.assertAlmostEqual(Filter.freq_to_energy(59.0, Filter.FrequencyUnits.ANGULAR), 39.0, 0)
 
     def test_energy_to_angular_freq_conversion(self):
-        """39.0 meV to rad/ps"""
+        """39.0 meV to rad/ps."""
         self.assertAlmostEqual(Filter.energy_to_freq(39.0, Filter.FrequencyUnits.ANGULAR), 59.0, 0)
 
     def test_freq_to_energy_conversion(self):
-        """60.0 THz to meV"""
+        """60.0 THz to meV."""
         self.assertAlmostEqual(Filter.freq_to_energy(99.7, Filter.FrequencyUnits.CYCLIC), 412.0, 0)
 
     def test_energy_to_freq_conversion(self):
-        """412.0 meV to THz"""
+        """412.0 meV to THz."""
         self.assertAlmostEqual(Filter.energy_to_freq(412.0, Filter.FrequencyUnits.CYCLIC), 99.7, 0)
 
     def test_simple_filter_sinusoidal(self):
-        """
-        Apply 1st order Butterworth filter to a sinusoid consisting of two frequencies,
+        """Apply 1st order Butterworth filter to a sinusoid consisting of two frequencies,
         attentuating the higher of the two.
+
         """
         filter_class = FILTER_MAP["Butterworth"]
 
