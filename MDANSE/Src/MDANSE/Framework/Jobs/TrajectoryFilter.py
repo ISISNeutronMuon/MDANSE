@@ -307,7 +307,7 @@ def get_output_configuration(
     parent: _Configuration,
     output_chemical_system: ChemicalSystem,
     output_coordinates: np.ndarray,
-) -> RealConfiguration | PeriodicRealConfiguration:
+):
     """Returns configuration for filtered trajectory writer, determined by the periodicity of the parent configuration.
 
     Parameters
