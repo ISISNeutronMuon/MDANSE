@@ -104,7 +104,7 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
                 try:
                     signal_func.disconnect(slot_func)
                 except TypeError:
-                    return
+                    print(f"Callable {signal_func} not a recognised signal in {type(self)}. No slots were disconnected.")
 
     def set_search(self, constraint_func: Callable) -> None:
         """Set the search constraint function to be invoked when spinbox value or text changes.
