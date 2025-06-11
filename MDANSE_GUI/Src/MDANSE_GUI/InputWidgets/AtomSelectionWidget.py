@@ -520,8 +520,8 @@ class AtomSelectionWidget(WidgetBase):
             load_button.clicked.connect(self.load_selection_from_file_dialog)
         else:
             self._field = QLineEdit(self._base)
-        traj_config = self._configurator._configurable[
-            self._configurator._dependencies["trajectory"]
+        traj_config = self._configurator.configurable[
+            self._configurator.dependencies["trajectory"]
         ]
         traj_filename = traj_config["filename"]
         trajectory = traj_config["instance"]

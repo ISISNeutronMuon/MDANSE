@@ -36,9 +36,9 @@ class UnitCellWidget(WidgetBase):
         self._array_fields = {}
         self._configurator.update_trajectory_information()
         try:
-            self.start_values = self._configurator._recommended_cell
+            self.start_values = self._configurator.recommended_cell
         except AttributeError:
-            self.start_values = self._configurator._default
+            self.start_values = self._configurator.default
         for row in range(3):
             for column in range(3):
                 temp = QLineEdit(

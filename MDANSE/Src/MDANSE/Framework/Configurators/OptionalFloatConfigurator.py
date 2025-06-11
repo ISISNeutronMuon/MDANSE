@@ -48,7 +48,7 @@ class OptionalFloatConfigurator(IConfigurator):
 
         self.choices = choices if choices is not None else []
 
-        self._label_text = kwargs.pop("label_text", "Apply")
+        self.label_text = kwargs.pop("label_text", "Apply")
 
     def configure(self, value):
         """

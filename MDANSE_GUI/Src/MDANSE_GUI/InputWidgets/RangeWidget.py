@@ -27,7 +27,7 @@ class RangeWidget(WidgetBase):
         self.setup_fields(*args, **kwargs)
 
     def setup_fields(self, *args, **kwargs):
-        start, end, step = kwargs.get("default", self._configurator._default)
+        start, end, step = kwargs.get("default", self._configurator.default)
         num_type = kwargs.get("valueType", int)
 
         labels = [
@@ -80,7 +80,7 @@ class RangeWidget(WidgetBase):
 
     def value_from_configurator(self):
         if self._configurator.check_dependencies():
-            minval, maxval = self._configurator._mini, self._configurator._maxi
+            minval, maxval = self._configurator.mini, self._configurator.maxi
             LOG.info(f"Configurator min/max: {minval}, {maxval}")
             if maxval is None:
                 return

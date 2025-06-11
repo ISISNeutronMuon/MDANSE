@@ -28,7 +28,7 @@ class OptionalFloatWidget(WidgetBase):
             default_option = float(self._configurator.default[1])
         except ValueError:
             default_option = 0.0
-        label_text = self._configurator._label_text
+        label_text = self._configurator.label_text
         self._apply_box = QCheckBox(label_text, self._base)
         self._apply_box.setTristate(False)
         self._apply_box.checkStateChanged.connect(self.toggle_widgets)

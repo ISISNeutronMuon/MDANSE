@@ -33,8 +33,8 @@ class MDAnalysisCoordinateFileWidget(
         for widget in self.parent()._widgets:
             if (
                 widget._configurator
-                is self._configurator._configurable[
-                    self._configurator._dependencies["input_file"]
+                is self._configurator.configurable[
+                    self._configurator.dependencies["input_file"]
                 ]
             ):
                 widget.value_changed.connect(self.updateValue)
