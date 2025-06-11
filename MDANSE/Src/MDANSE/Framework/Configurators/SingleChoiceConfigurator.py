@@ -39,7 +39,7 @@ class SingleChoiceConfigurator(IConfigurator):
 
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._choices = choices if choices is not None else []
+        self.choices = choices if choices is not None else []
 
     def configure(self, value):
         """
@@ -51,21 +51,10 @@ class SingleChoiceConfigurator(IConfigurator):
         self._original_input = value
 
         try:
-            self["index"] = self._choices.index(value)
+            self["index"] = self.choices.index(value)
         except ValueError:
             self.error_status = f"{value} item is not a valid choice"
             return
         else:
             self["value"] = value
         self.error_status = "OK"
-
-    @property
-    def choices(self):
-        """
-        Returns the list of allowed selection items.
-
-        :return: the list of allowed selection items.
-        :rtype: list
-        """
-
-        return self._choices

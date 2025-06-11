@@ -74,8 +74,8 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
 
         if value == "atom":
             return
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
-        atomSelectionConfig = self._configurable[self._dependencies["atom_selection"]]
+        trajConfig = self.configurable[self.dependencies["trajectory"]]
+        atomSelectionConfig = self.configurable[self.dependencies["atom_selection"]]
         chemical_system = trajConfig["instance"].chemical_system
         indices = []
         elements = []

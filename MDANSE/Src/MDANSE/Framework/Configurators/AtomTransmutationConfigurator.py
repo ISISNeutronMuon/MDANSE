@@ -135,7 +135,7 @@ class AtomTransmutationConfigurator(IConfigurator):
             self.error_status = "Unable to load JSON string."
             return
 
-        traj_config = self._configurable[self._dependencies["trajectory"]]
+        traj_config = self.configurable[self.dependencies["trajectory"]]
         system = traj_config["instance"].chemical_system
         idxs = system._atom_indices
 
@@ -161,7 +161,7 @@ class AtomTransmutationConfigurator(IConfigurator):
 
             self.transmute(idx, element)
 
-        atomSelConfigurator = self._configurable[self._dependencies["atom_selection"]]
+        atomSelConfigurator = self.configurable[self.dependencies["atom_selection"]]
         atomSelConfigurator["unique_names"] = sorted(set(atomSelConfigurator["names"]))
         atomSelConfigurator["masses"] = [
             [traj_config["instance"].get_atom_property(n, "atomic_weight")]
@@ -179,7 +179,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         element : str
             The element to transmute the atom to.
         """
-        atomSelConfigurator = self._configurable[self._dependencies["atom_selection"]]
+        atomSelConfigurator = self.configurable[self.dependencies["atom_selection"]]
 
         try:
             idxInSelection = atomSelConfigurator["flatten_indices"].index(idx)
@@ -198,6 +198,6 @@ class AtomTransmutationConfigurator(IConfigurator):
             The atom transmuter object initialised with the trajectories
             chemical system.
         """
-        traj_config = self._configurable[self._dependencies["trajectory"]]
+        traj_config = self.configurable[self.dependencies["trajectory"]]
         transmuter = AtomTransmuter(traj_config["instance"])
         return transmuter

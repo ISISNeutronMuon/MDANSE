@@ -46,11 +46,11 @@ class IntegerConfigurator(IConfigurator):
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._mini = int(mini) if mini is not None else None
+        self.mini = int(mini) if mini is not None else None
 
-        self._maxi = int(maxi) if maxi is not None else None
+        self.maxi = int(maxi) if maxi is not None else None
 
-        self._choices = choices if choices is not None else []
+        self.choices = choices if choices is not None else []
 
         self._exclude = exclude if exclude is not None else ()
 
@@ -70,19 +70,19 @@ class IntegerConfigurator(IConfigurator):
             self.error_status = "Wrong input for an integer" + str(e)
             return
 
-        if self._choices:
-            if value not in self._choices:
+        if self.choices:
+            if value not in self.choices:
                 self.error_status = "the input value is not a valid choice."
                 return
 
-        if self._mini is not None:
-            if value < self._mini:
-                self.error_status = f"the input value is lower than {self._mini}"
+        if self.mini is not None:
+            if value < self.mini:
+                self.error_status = f"the input value is lower than {self.mini}"
                 return
 
-        if self._maxi is not None:
-            if value > self._maxi:
-                self.error_status = f"the input value is higher than {self._maxi}"
+        if self.maxi is not None:
+            if value > self.maxi:
+                self.error_status = f"the input value is higher than {self.maxi}"
                 return
 
         if self._exclude:
@@ -92,36 +92,3 @@ class IntegerConfigurator(IConfigurator):
 
         self["value"] = value
         self.error_status = "OK"
-
-    @property
-    def mini(self):
-        """
-        Returns the minimum value allowed for an input integer.
-
-        :return: the minimum value allowed for an input value integer.
-        :rtype: int or None
-        """
-
-        return self._mini
-
-    @property
-    def maxi(self):
-        """
-        Returns the maximum value allowed for an input integer.
-
-        :return: the maximum value allowed for an input value integer.
-        :rtype: int or None
-        """
-
-        return self._maxi
-
-    @property
-    def choices(self):
-        """
-        Returns the list of integers allowed for an input float.
-
-        :return: the choices allowed for an input float.
-        :rtype: int-list or None
-        """
-
-        return self._choices

@@ -13,17 +13,20 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import abc
 import json
 from pathlib import Path
+from typing import Any
+from warnings import warn
 
-from more_itertools import value_chain
 import numpy as np
+from more_itertools import value_chain
 
 from MDANSE.Core.Error import Error
-
 from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.MLogging import LOG
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -37,61 +40,64 @@ class CustomEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
+class ConfiguratorWarning(Warning):
+    """Reports a problem with one of the job inputs.
+
+    This warning is produced when the job is still able to execute,
+    but there are reasons to believe that the results may be scientifically
+    incorrect.
+    """
+
+
 class ConfiguratorError(Error):
-    """
-    This class handles any exception related to Configurator-derived object
-    """
+    """Error raised by a job input parser."""
 
-    def __init__(self, message, configurator=None):
+    def __init__(self, message: str, configurator: IConfigurator = None):
+        """Store the error message and configurator reference.
+
+        Parameters
+        ----------
+        message : str
+            Error message related to one of the job inputs
+        configurator : IConfigurator, optional
+            Reference to the input parser producing the error, by default None
+
         """
-        Initializes the the object.
-
-        :param message: the exception message
-        :type message: str
-        :param configurator: the configurator in which the exception was raised
-        :type configurator: an instance or derived instance of a MDANSE.Framework.Configurators.Configurator object
-        """
-
         self._message = message
-        self._configurator = configurator
+        self.configurator = configurator
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return a readable summary of the error as string.
+
+        Returns
+        -------
+        str
+            Text and source of the error.
+
         """
-        Returns the informal string representation of this object.
-
-        :return: the informal string representation of this object
-        :rtype: str
-        """
-
-        if self._configurator is not None:
+        if self.configurator is not None:
             self._message = (
-                f"Configurator: {self._configurator.name!r} --> {self._message}"
+                f"Configurator: {self.configurator.name!r} --> {self._message}"
             )
 
         return self._message
 
-    @property
-    def configurator(self):
-        """
-        Returns the configurator in which the exception was raised
-
-        :return: the configurator in which the exception was raised
-        :rtype: an instance or derived instance of a MDANSE.Framework.Configurators.Configurator object
-        """
-        return self._configurator
-
 
 class IConfigurator(dict, metaclass=SubclassFactory):
-    """
-    This class implements the base class for configurator objects. A configurator object is a dictionary-derived object that is used
-    to configure one item of a given configuration. Once the input value given for that item is configured, the dictionary is updated
+    """The base class for configurator objects.
+
+    A configurator object is a dictionary-derived object
+    that is used to configure one item of a
+    given configuration. Once the input value given for
+    that item is configured, the dictionary is updated
     with keys/values providing information about this item.
 
-    A configurator is not designed to be used as a stand-alone object. It should be used within the scope of a Configurable object that
-    will store a complete configuration for a given task (e.g. job, Q vectors, instrument resolution ...).
+    A configurator is not designed to be used as a stand-alone object. It should be
+    used within the scope of a Configurable object that will store a complete
+    configuration for a given task (e.g. job, Q vectors, instrument resolution ...).
 
-    Usually, configurator objects are self-consistent but for complex ones, it can happen that they depends on other configurators of the
-    configuration.
+    Usually, configurator objects are self-consistent but for complex ones, it can
+    happen that they depends on other configurators of the configuration.
     """
 
     _default = None
@@ -101,25 +107,16 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
     _doc_ = "undocumented"
 
-    def __init__(self, name, **kwargs):
-        """
-        Initializes a configurator object.
+    def __init__(self, name: str, **kwargs):
+        """Create an input parser for MDANSE jobs.
 
-        :param name: the name of this configurator.
-        :type name: str
-        :param dependencies: the other configurators on which this configurator depends on to be configured. \
-        This has to be input as a dictionary that maps the name under which the dependency will be used within \
-        the configurator implementation to the actual name of the configurator on which this configurator is depending on.
-        :type dependencies: (str,str)-dict
-        :param default: the default value of this configurator.
-        :type default: any python object
-        :param label: the label of the panel in which this configurator will be inserted in the MDANSE GUI.
-        :type label: str
-        :param widget: the configurator widget that corresponds to this configurator.
-        :type widget: str
-        """
+        Parameters
+        ----------
+        name : str
+            the key of this object in the Configurable dictionary
 
-        self._name = name
+        """
+        self.name = name
 
         self._printable_attributes = [
             "_name",
@@ -130,33 +127,31 @@ class IConfigurator(dict, metaclass=SubclassFactory):
             "_error_status",
         ]
 
-        self._configurable = kwargs.get("configurable", None)
+        self.configurable = kwargs.get("configurable")
 
-        self._root = kwargs.get("root", None)
+        self.root = kwargs.get("root")
 
-        self._dependencies = kwargs.get("dependencies", {})
+        self.dependencies = kwargs.get("dependencies", {})
 
-        self._default = kwargs.get("default", self.__class__._default)
+        self.default = kwargs.get("default", self.__class__._default)
 
-        self._label = kwargs.get(
+        self.label = kwargs.get(
             "label",
             (
-                self.__class__._label
-                if hasattr(self.__class__, "_label")
+                self.__class__.label
+                if hasattr(self.__class__, "label")
                 else " ".join(name.split("_")).strip()
             ),
         )
 
-        self._widget = kwargs.get("widget", self.__class__)
+        self.optional = kwargs.get("optional", False)
 
-        self._optional = kwargs.get("optional", False)
+        self.configured = False
 
-        self._configured = False
-
-        self._valid = True
+        self.valid = True
 
         self._error_status = "OK"
-        self.warning_status = ""
+        self._warning_status = ""
 
         self._original_input = ""
 
@@ -165,172 +160,122 @@ class IConfigurator(dict, metaclass=SubclassFactory):
             value_chain(
                 "",
                 (
-                    f"{label}={str(getattr(self, label, 'Not set'))}"
+                    f"{label}={getattr(self, label, 'Not set')!s}"
                     for label in self._printable_attributes
                 ),
-                (f"{key}={str(self.get(key, 'Not set'))}" for key in self),
-            )
+                (f"{key}={self.get(key, 'Not set')!s}" for key in self),
+            ),
         )
 
     @property
-    def configurable(self):
-        return self._configurable
-
-    @property
-    def default(self):
-        """
-        Returns the default value of this configurator.
-
-        :return: the default value of this configurator.
-        :rtype: any Python object
-        """
-
-        return self._default
-
-    @property
-    def dependencies(self):
-        """
-        Returns the dependencies maps of this configurator.
-
-        :return: the dependencies maps of this configurator.
-        :rtype: (str,str)-dict
-        """
-
-        return self._dependencies
-
-    @property
-    def label(self):
-        """
-        Returns the label of this configurator that will be used when inserting its corresponding widget in a configuration panel.
-
-        :return: the label of this configurator.
-        :rtype: str
-        """
-
-        return self._label
-
-    @property
-    def name(self):
-        """
-        Returns the name of this configurator. That name will be used as a key of a Configurable object.
-
-        :return: the name of this configurator.
-        :rtype: str
-        """
-
-        return self._name
-
-    @property
-    def valid(self):
-        """Tells if the current value stored by the configurator
-        is a valid input.
-        There is no benefit in rejecting the entire configuration
-        and killing the GUI just because a value needs to be corrected.
-        Instead the GUI should highlight the values that need correcting.
-
-        Returns
-        -------
-        bool
-            true if the current value stored by the configurator can be used
-        """
-        return self._valid
-
-    @property
     def error_status(self):
+        """Details of the configuration error.
+
+        Is set to 'OK' if no errors occurred.
+        """
         return self._error_status
 
     @error_status.setter
     def error_status(self, error_text: str):
-        """Sets the string explaining why the current input
-        cannot be accepted.
+        """Set the error description string.
 
-        If the string is longer than 'OK', the self._valid
+        If the string is longer than 'OK', the self.valid
         flag is set to False.
 
         Parameters
         ----------
         error_text : str
             Text explaining why the current input is invalid
+
         """
         self._error_status = error_text
         if len(self._error_status) > 2:
-            self._valid = False
+            self.valid = False
         else:
-            self._valid = True
+            self.valid = True
 
     @property
-    def optional(self):
+    def warning_status(self):
+        """Text describing the potential problems with this input value."""
+        return self._warning_status
+
+    @warning_status.setter
+    def warning_status(self, warning_text: str):
+        """Store the warning text and emit a Python warning.
+
+        Parameters
+        ----------
+        warning_text : str
+            Short summary of the problem with this job input.
+
         """
-        Returns the optional state name of this configurator.
-
-        :return: the optional state.
-        :rtype: boolean
-        """
-
-        return self._optional
-
-    @property
-    def root(self):
-        return self._root
-
-    @property
-    def widget(self):
-        """
-        Returns the name of the widget that will be associated to this configurator.
-
-        :return: the name of the configurator-widget.
-        :rtype: str
-        """
-
-        return self._widget
+        self._warning_status = warning_text
+        if warning_text:
+            LOG.warning(warning_text)
+            warn(warning_text, ConfiguratorWarning)
 
     @abc.abstractmethod
-    def configure(self, value):
-        """
-        Configures this configurator with a given value.
+    def configure(self, value: str):
+        """Set the value of this job input variable.
 
-        :param value: the input value to be configured.
-        :type value: depends on the configurator
+        Parameters
+        ----------
+        value : str
+            Text string defining the value of the job variable.
 
-        :note: this is an abstract method.
         """
 
     def to_json(self) -> str:
+        """Encode this input variable as a JSON string.
+
+        Returns
+        -------
+        str
+            JSON representation of the input value of this variable.
+
+        """
         return self._encoder.encode(self._original_input)
 
     def from_json(self, json_input: str):
+        """Set this input value from its JSON represenation.
+
+        Parameters
+        ----------
+        json_input : str
+            input value of this variable encoded as a JSON string.
+
+        """
         self.configure(self._decoder.decode(json_input))
 
     def set_configured(self, configured):
-        self._configured = configured
+        self.configured = configured
 
     def is_configured(self):
-        return self._configured
+        return self.configured
 
     def set_configurable(self, configurable):
-        self._configurable = configurable
+        self.configurable = configurable
 
-    def check_dependencies(self, configured=None):
+    def check_dependencies(self, configured: list[str] | None = None) -> bool:
+        """Check if the other Configurators needed by this one are ready.
+
+        Parameters
+        ----------
+        configured : list[str], optional
+            List of job inputs known to have already been configured, by default None
+
+        Returns
+        -------
+        bool
+            True if all dependencies are ready, False otherwise
+
         """
-        Check that the configurators on which this configurator depends on have already been configured.
-
-        :param configured: the names of the configurators that have already been configured when configuring this configurator.
-        :type: list of str
-
-        :return: True if the configurators on which this configurator depends on have already been configured. False otherwise.
-        :rtype: bool
-        """
-
         if configured is None:
-            names = [str(key) for key in self._configurable._configuration.keys()]
+            names = [str(key) for key in self.configurable._configuration]
             configured = [
                 name
                 for name in names
-                if self._configurable._configuration[name].is_configured()
+                if self.configurable._configuration[name].is_configured()
             ]
 
-        for c in list(self._dependencies.values()):
-            if c not in configured:
-                return False
-
-        return True
+        return all(c in configured for c in list(self.dependencies.values()))

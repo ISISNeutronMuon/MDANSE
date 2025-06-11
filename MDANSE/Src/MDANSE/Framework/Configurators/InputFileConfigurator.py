@@ -39,7 +39,7 @@ class InputFileConfigurator(IConfigurator):
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._wildcard = wildcard
+        self.wildcard = wildcard
 
     def configure(self, value):
         """
@@ -59,14 +59,3 @@ class InputFileConfigurator(IConfigurator):
         self["value"] = value
         self["filename"] = value
         self.error_status = "OK"
-
-    @property
-    def wildcard(self):
-        """
-        Returns the wildcard used to filter the input file.
-
-        :return: the wildcard used to filter the input file.
-        :rtype: str
-        """
-
-        return self._wildcard

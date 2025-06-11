@@ -52,7 +52,7 @@ class FramesConfigurator(RangeConfigurator):
         """
         self._original_input = value
 
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
+        trajConfig = self.configurable[self.dependencies["trajectory"]]
         n_steps = trajConfig["length"]
 
         # if all or None set to default
@@ -109,6 +109,6 @@ class FramesConfigurator(RangeConfigurator):
     def preview_output_axis(self):
         if not self.is_configured():
             return None, None
-        if not self._valid:
+        if not self.valid:
             return None, None
         return self["time"], "ps"

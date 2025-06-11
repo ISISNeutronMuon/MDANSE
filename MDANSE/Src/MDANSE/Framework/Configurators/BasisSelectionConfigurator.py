@@ -49,7 +49,7 @@ class BasisSelectionConfigurator(IConfigurator):
         """
         self._original_input = value
 
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
+        trajConfig = self.configurable[self.dependencies["trajectory"]]
 
         if UD_STORE.has_definition(trajConfig["basename"], "basis_selection", value):
             ud = UD_STORE.get_definition(

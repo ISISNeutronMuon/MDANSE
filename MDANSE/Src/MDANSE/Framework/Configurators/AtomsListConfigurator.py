@@ -43,11 +43,7 @@ class AtomsListConfigurator(IConfigurator):
 
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._nAtoms = nAtoms
-
-    @property
-    def nAtoms(self):
-        return self._nAtoms
+        self.nAtoms = nAtoms
 
     def configure(self, value):
         """
@@ -61,13 +57,13 @@ class AtomsListConfigurator(IConfigurator):
         """
 
         self._original_input = value
-        traj_configurator = self._configurable[self._dependencies["trajectory"]]
+        traj_configurator = self.configurable[self.dependencies["trajectory"]]
 
         if UD_STORE.has_definition(
-            traj_configurator["basename"], f"{self._nAtoms:d}_atoms_list", value
+            traj_configurator["basename"], f"{self.nAtoms:d}_atoms_list", value
         ):
             molecule, atoms = UD_STORE.get_definition(
-                traj_configurator["basename"], f"{self._nAtoms:d}_atoms_list", value
+                traj_configurator["basename"], f"{self.nAtoms:d}_atoms_list", value
             )
         elif UD_STORE.has_definition(
             traj_configurator["basename"], "AtomsListConfigurator", value
@@ -76,9 +72,9 @@ class AtomsListConfigurator(IConfigurator):
                 traj_configurator["basename"], "AtomsListConfigurator", value
             )
             natoms = tempdict["natoms"]
-            if not natoms == self._nAtoms:
+            if not natoms == self.nAtoms:
                 raise ValueError(
-                    f"The atom list must have {self._nAtoms} "
+                    f"The atom list must have {self.nAtoms} "
                     f"atoms per molecule, but {natoms} were found."
                 )
             atoms = tempdict["indices"]

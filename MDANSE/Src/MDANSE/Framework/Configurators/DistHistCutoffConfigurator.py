@@ -35,7 +35,7 @@ class DistHistCutoffConfigurator(RangeConfigurator):
         float
             The maximum cutoff for the distance histogram job.
         """
-        traj_config = self._configurable[self._dependencies["trajectory"]]["instance"]
+        traj_config = self.configurable[self.dependencies["trajectory"]]["instance"]
         try:
             trajectory_array = np.array(
                 [

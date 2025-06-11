@@ -39,11 +39,7 @@ class MoleculeSelectionConfigurator(IConfigurator):
 
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._choices = []
-
-    @property
-    def choices(self):
-        return self._choices
+        self.choices = []
 
     def configure(self, value) -> None:
         """
@@ -60,16 +56,16 @@ class MoleculeSelectionConfigurator(IConfigurator):
             self.error_status = "Invalid input value."
             return
 
-        trajectory_configurator = self._configurable[self._dependencies["trajectory"]]
-        if not trajectory_configurator._valid:
+        trajectory_configurator = self.configurable[self.dependencies["trajectory"]]
+        if not trajectory_configurator.valid:
             self.error_status = "Input file not selected."
             return
 
-        self._choices = trajectory_configurator[
+        self.choices = trajectory_configurator[
             "instance"
         ].chemical_system.unique_molecules()
 
-        if value in self._choices:
+        if value in self.choices:
             self.error_status = "OK"
             self["value"] = value
         else:

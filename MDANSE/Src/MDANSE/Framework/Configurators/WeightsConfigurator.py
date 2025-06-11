@@ -86,7 +86,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         :type value: one of the numeric properties of MDANSE.Data.ElementsDatabase.ElementsDatabase
         """
         self._original_input = value
-        self._trajectory = self._configurable[self._dependencies["trajectory"]][
+        self._trajectory = self.configurable[self.dependencies["trajectory"]][
             "instance"
         ]
 
@@ -125,8 +125,8 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         if not prop:
             prop = self["property"]
 
-        atom_selection_configurator = self._configurable[
-            self._dependencies["atom_selection"]
+        atom_selection_configurator = self.configurable[
+            self.dependencies["atom_selection"]
         ]
 
         weights = defaultdict(float)

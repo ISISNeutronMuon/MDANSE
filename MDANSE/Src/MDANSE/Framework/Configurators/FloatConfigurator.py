@@ -42,11 +42,11 @@ class FloatConfigurator(IConfigurator):
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._mini = float(mini) if mini is not None else None
+        self.mini = float(mini) if mini is not None else None
 
-        self._maxi = float(maxi) if maxi is not None else None
+        self.maxi = float(maxi) if maxi is not None else None
 
-        self._choices = choices if choices is not None else []
+        self.choices = choices if choices is not None else []
 
     def configure(self, value):
         """
@@ -64,53 +64,20 @@ class FloatConfigurator(IConfigurator):
             self.error_status = f"Wrong value {value} in {self}"
             return
 
-        if self._choices:
-            if value not in self._choices:
+        if self.choices:
+            if value not in self.choices:
                 self.error_status = "the input value is not a valid choice."
                 return
 
-        if self._mini is not None:
-            if value < self._mini:
-                self.error_status = f"the input value is lower than {self._mini}"
+        if self.mini is not None:
+            if value < self.mini:
+                self.error_status = f"the input value is lower than {self.mini}"
                 return
 
-        if self._maxi is not None:
-            if value > self._maxi:
-                self.error_status = f"the input value is higher than {self._maxi}"
+        if self.maxi is not None:
+            if value > self.maxi:
+                self.error_status = f"the input value is higher than {self.maxi}"
                 return
 
         self.error_status = "OK"
         self["value"] = value
-
-    @property
-    def mini(self):
-        """
-        Returns the minimum value allowed for an input float.
-
-        :return: the minimum value allowed for an input float.
-        :rtype: float or None
-        """
-
-        return self._mini
-
-    @property
-    def maxi(self):
-        """
-        Returns the maximum value allowed for an input float.
-
-        :return: the maximum value allowed for an input float.
-        :rtype: float or None
-        """
-
-        return self._maxi
-
-    @property
-    def choices(self):
-        """
-        Returns the list of floats allowed for an input float.
-
-        :return: the choices allowed for an input float.
-        :rtype: list of floats or None
-        """
-
-        return self._choices

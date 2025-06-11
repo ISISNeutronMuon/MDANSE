@@ -65,7 +65,7 @@ class OutputFilesConfigurator(IConfigurator):
         """
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._formats = (
+        self.formats = (
             formats if formats is not None else OutputFilesConfigurator._default[1]
         )
         self._forbidden_files = []
@@ -99,7 +99,7 @@ class OutputFilesConfigurator(IConfigurator):
             return
 
         for fmt in formats:
-            if fmt not in self._formats:
+            if fmt not in self.formats:
                 self.error_status = (
                     f"the output file format {fmt} is not a valid output format"
                 )
@@ -124,24 +124,3 @@ class OutputFilesConfigurator(IConfigurator):
         self["log_level"] = logs
         self["write_logs"] = logs != "no logs"
         self.error_status = "OK"
-
-    @property
-    def formats(self):
-        """Return the list of output file formats supported.
-
-        :return: the list of file formats supported.
-        :rtype: list of str
-        """
-        return self._formats
-
-    @property
-    def default(self) -> tuple[str, list[str]]:
-        """Return the default values of the inputs.
-
-        Returns
-        -------
-        tuple[str, str]
-            A tuple of the default filename and format.
-
-        """
-        return self._default[0], self.formats
