@@ -157,19 +157,23 @@ class WidgetBase(QObject):
         self._field.setPlaceholderText(str(default))
         self._configurator.configure(default)
 
-    def mark_error(self, error_text: str):
+    def mark_error(self, error_text: str, *, silent: bool = False):
         """Highlight an erroneous entry and display given error_text.
 
         Parameters
         ----------
         error_text : str
             Message displayed on hover-over.
+        silent : bool
+            If True, update the widget's error without sending signals
+
         """
         self._base.setStyleSheet(
             "QWidget#InputWidget { background-color:rgb(180,20,180); font-weight: bold }"
         )
         self._base.setToolTip(error_text)
-        self.valid_changed.emit()
+        if not silent:
+            self.valid_changed.emit()
 
     def mark_warning(self, warning_text: str):
         """If the input caused a warning, display warning_text and highlight the widget.
