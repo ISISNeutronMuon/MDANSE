@@ -18,7 +18,7 @@ from __future__ import annotations
 import abc
 import json
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 from warnings import warn
 
 import numpy as np
@@ -27,6 +27,12 @@ from more_itertools import value_chain
 from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.MLogging import LOG
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Configurable import Configurable
+
+
+ERROR_LENGTH_MIN = len("OK")
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -86,18 +92,12 @@ class ConfiguratorError(Error):
 class IConfigurator(dict, metaclass=SubclassFactory):
     """The base class for configurator objects.
 
-    A configurator object is a dictionary-derived object
-    that is used to configure one item of a
-    given configuration. Once the input value given for
-    that item is configured, the dictionary is updated
-    with keys/values providing information about this item.
+    A configurator is an input parser for a variable required by any subclass
+    of Configurable.
 
-    A configurator is not designed to be used as a stand-alone object. It should be
-    used within the scope of a Configurable object that will store a complete
-    configuration for a given task (e.g. job, Q vectors, instrument resolution ...).
-
-    Usually, configurator objects are self-consistent but for complex ones, it can
-    happen that they depends on other configurators of the configuration.
+    In some cases, a configurator may depend on another configurator.
+    A 'dependencies' keyword argument can be used to list the other
+    configurators that the current one will need to access.
     """
 
     _default = None
@@ -108,7 +108,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
     _doc_ = "undocumented"
 
     def __init__(self, name: str, **kwargs):
-        """Create an input parser for MDANSE jobs.
+        """Create an input parser for an MDANSE job input parameter.
 
         Parameters
         ----------
@@ -156,6 +156,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         self._original_input = ""
 
     def __str__(self) -> str:
+        """Output all the configurator attributes and dict entries as text."""
         return "\n".join(
             value_chain(
                 "",
@@ -171,7 +172,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
     def error_status(self):
         """Details of the configuration error.
 
-        Is set to 'OK' if no errors occurred.
+        It is set to 'OK' if no errors occurred.
         """
         return self._error_status
 
@@ -189,7 +190,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         """
         self._error_status = error_text
-        if len(self._error_status) > 2:
+        if len(self._error_status) > ERROR_LENGTH_MIN:
             self.valid = False
         else:
             self.valid = True
@@ -237,7 +238,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         return self._encoder.encode(self._original_input)
 
     def from_json(self, json_input: str):
-        """Set this input value from its JSON represenation.
+        """Set this input value from its JSON representation.
 
         Parameters
         ----------
@@ -247,13 +248,37 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         """
         self.configure(self._decoder.decode(json_input))
 
-    def set_configured(self, configured):
+    def set_configured(self, configured: bool):
+        """Set the 'configured' flag to the input value.
+
+        Parameters
+        ----------
+        configured : bool
+            True if this configurator has already parsed its input
+
+        """
         self.configured = configured
 
-    def is_configured(self):
+    def is_configured(self) -> bool:
+        """Return True if the input parsing has been completed, False otherwise.
+
+        Returns
+        -------
+        bool
+            True if the input parsing has been completed
+
+        """
         return self.configured
 
-    def set_configurable(self, configurable):
+    def set_configurable(self, configurable: Configurable):
+        """Store a reference to the parent instance of the Configurable class.
+
+        Parameters
+        ----------
+        configurable : Configurable
+            the Configurable instance for which is using this configurator
+
+        """
         self.configurable = configurable
 
     def check_dependencies(self, configured: list[str] | None = None) -> bool:
