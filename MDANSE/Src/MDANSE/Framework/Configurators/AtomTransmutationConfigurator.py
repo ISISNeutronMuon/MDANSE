@@ -183,11 +183,11 @@ class AtomTransmutationConfigurator(IConfigurator):
             pass
         else:
             if (
-                "grouping_level" in self._dependencies
+                "grouping_level" in self.dependencies
                 and "atom"
-                != self._configurable[self._dependencies["grouping_level"]]["level"]
+                != self.configurable[self.dependencies["grouping_level"]]["level"]
             ):
-                group_config = self._configurable[self._dependencies["grouping_level"]]
+                group_config = self.configurable[self.dependencies["grouping_level"]]
                 prev_element = atomSelConfigurator["elements"][idxInSelection][0]
                 group_name = atomSelConfigurator["names"][idxInSelection][
                     : -(len(prev_element) + 1)
@@ -200,7 +200,7 @@ class AtomTransmutationConfigurator(IConfigurator):
             else:
                 atomSelConfigurator["names"][idxInSelection] = element
             atomSelConfigurator["elements"][idxInSelection] = [element]
-            traj_config = self._configurable[self._dependencies["trajectory"]]
+            traj_config = self.configurable[self.dependencies["trajectory"]]
             atomSelConfigurator["masses"][idxInSelection] = [
                 traj_config["instance"].get_atom_property(element, "atomic_weight")
             ]
