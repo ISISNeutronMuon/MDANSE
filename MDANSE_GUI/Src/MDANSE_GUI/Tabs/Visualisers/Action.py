@@ -57,6 +57,7 @@ from MDANSE_GUI.InputWidgets import (
     RangeWidget,
     RunningModeWidget,
     StringWidget,
+    TrajectoryFilterWidget,
     UnitCellWidget,
     VectorWidget,
 )
@@ -118,11 +119,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "AtomTransmutationConfigurator": AtomTransmutationWidget,
     "InstrumentResolutionConfigurator": InstrumentResolutionWidget,
     "PartialChargeConfigurator": PartialChargeWidget,
-    "UnitCellConfigurator": UnitCellWidget,
-    "MDAnalysisTimeStepConfigurator": MDAnalysisMDTrajTimeStepWidget,
-    "MDTrajTimeStepConfigurator": MDAnalysisMDTrajTimeStepWidget,
-    "MDTrajTrajectoryFileConfigurator": MultiInputFileWidget,
-    "MDTrajTopologyFileConfigurator": MDTrajTopologyFileWidget,
+    "TrajectoryFilterConfigurator": TrajectoryFilterWidget,
 }
 
 
