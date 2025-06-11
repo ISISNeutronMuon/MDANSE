@@ -56,19 +56,18 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         "ProjectionConfigurator",
         {"label": "project coordinates"},
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
             }
         },
+    )
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",
@@ -76,6 +75,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
             }
         },
     )
@@ -113,6 +113,11 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
+
+        self.labels = [
+            (element, (element,))
+            for element in self.configuration["atom_selection"].get_natoms()
+        ]
 
         self._outputData.add(
             "q",
@@ -163,7 +168,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                 "SurfaceOutputVariable",
                 (self._nQShells, self._nOmegas),
                 axis="q|omega",
-                units="nm2/ps",
+                units="au",
                 main_result=True,
                 partial_result=True,
             )
@@ -180,7 +185,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                     "SurfaceOutputVariable",
                     (self._nQShells, self._nOmegas),
                     axis="q|omega",
-                    units="nm2/ps",
+                    units="au",
                 )
 
         self._outputData.add(
@@ -195,7 +200,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             "SurfaceOutputVariable",
             (self._nQShells, self._nOmegas),
             axis="q|omega",
-            units="nm2/ps",
+            units="au",
             main_result=True,
         )
         self._outputData.add(
@@ -211,7 +216,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                 "SurfaceOutputVariable",
                 (self._nQShells, self._nOmegas),
                 axis="q|omega",
-                units="nm2/ps",
+                units="au",
             )
 
         self._atoms = self.configuration["trajectory"][
@@ -296,36 +301,62 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "f(q,t)_%s")
-        assign_weights(self._outputData, weight_dict, "s(q,f)_%s")
+        assign_weights(self._outputData, weight_dict, "f(q,t)_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "s(q,f)_%s", self.labels)
         if self.add_ideal_results:
-            assign_weights(self._outputData, weight_dict, "s(q,f)_ideal_%s")
+            assign_weights(
+                self._outputData, weight_dict, "s(q,f)_ideal_%s", self.labels
+            )
+
         self._outputData["f(q,t)_total"][:] = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "f(q,t)_%s",
+            self._outputData, "f(q,t)_%s", self.labels
         )
         self._outputData["s(q,f)_total"][:] = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "s(q,f)_%s",
+            self._outputData, "s(q,f)_%s", self.labels
         )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "f(q,t)",
+            "SurfaceOutputVariable",
+            axis="q|time",
+            units="au",
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "s(q,f)",
+            "SurfaceOutputVariable",
+            axis="q|omega",
+            units="au",
+            main_result=True,
+            partial_result=True,
+        )
+
         if self.add_ideal_results:
             self._outputData["s(q,f)_ideal_total"][:] = weighted_sum(
+                self._outputData, "s(q,f)_ideal_%s", self.labels
+            )
+            self.configuration["grouping_level"].add_grouped_totals(
                 self._outputData,
-                weight_dict,
-                "s(q,f)_ideal_%s",
+                "s(q,f)_ideal",
+                "SurfaceOutputVariable",
+                axis="q|omega",
+                units="au",
             )
 
         # since GDISF ~ exp(-msd * q2 / 6.0) the MSD isn't weighted in
         # the exp lets save the MSD with equal weights
         weights = self.configuration["weights"].get_weights("equal")
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "msd_%s")
+        assign_weights(self._outputData, weight_dict, "msd_%s", self.labels)
         self._outputData["msd_total"][:] = weighted_sum(
+            self._outputData, "msd_%s", self.labels
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            weight_dict,
-            "msd_%s",
+            "msd",
+            "LineOutputVariable",
+            axis="time",
+            units="nm2",
         )
 
         self._outputData.write(

@@ -46,10 +46,6 @@ class RootMeanSquareDeviation(IJob):
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["reference_frame"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
         {
@@ -59,6 +55,10 @@ class RootMeanSquareDeviation(IJob):
                 "atom_transmutation": "atom_transmutation",
             }
         },
+    )
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",
@@ -150,20 +150,28 @@ class RootMeanSquareDeviation(IJob):
         """
         Finalize the job.
         """
+        n_atms = self.configuration["atom_selection"].get_total_natoms()
+
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "rmsd",
+            "LineOutputVariable",
+            axis="time",
+            units="nm",
+            scaling_factor=False,
+            post_func=lambda x: np.sqrt(x / n_atms),
+            post_label="all",
+            main_result=True,
+            partial_result=True,
+        )
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData[f"rmsd_{element}"][:] /= number
-
-        for element, number in nAtomsPerElement.items():
             self._outputData[f"rmsd_{element}"][:] = np.sqrt(
-                self._outputData[f"rmsd_{element}"]
+                self._outputData[f"rmsd_{element}"] / number
             )
 
-        self._outputData["rmsd_all"][:] /= self.configuration[
-            "atom_selection"
-        ].get_total_natoms()
-        self._outputData["rmsd_all"][:] = np.sqrt(self._outputData["rmsd_all"])
+        self._outputData["rmsd_all"][:] = np.sqrt(self._outputData["rmsd_all"] / n_atms)
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

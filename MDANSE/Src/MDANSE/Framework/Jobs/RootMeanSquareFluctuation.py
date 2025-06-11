@@ -43,18 +43,20 @@ class RootMeanSquareFluctuation(IJob):
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
         {
+            "choices": ["each atom", "each molecule"],
+            "default": "each atom",
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-            }
+            },
         },
+    )
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
@@ -68,18 +70,17 @@ class RootMeanSquareFluctuation(IJob):
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
 
         # Will store the indices.
-        indices = [
-            idx
-            for idxs in self.configuration["atom_selection"]["indices"]
-            for idx in idxs
-        ]
-        if self.configuration["grouping_level"]["value"] == "atom":
-            self._outputData.add("indices", "LineOutputVariable", indices)
+        if self.configuration["grouping_level"]["value"] == "each atom":
+            self._outputData.add(
+                "indices",
+                "LineOutputVariable",
+                self.configuration["atom_selection"]["flatten_indices"],
+            )
         else:
             self._outputData.add(
                 "indices",
                 "LineOutputVariable",
-                self.configuration["grouping_level"]["group_indices"],
+                list(range(len(self.configuration["atom_selection"]["names"]))),
             )
 
         # Will store the mean square fluctuation evolution.

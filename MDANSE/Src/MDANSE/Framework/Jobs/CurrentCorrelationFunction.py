@@ -82,6 +82,15 @@ class CurrentCorrelationFunction(IJob):
         "QVectorsConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -92,7 +101,8 @@ class CurrentCorrelationFunction(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-            },
+                "grouping_level": "grouping_level",
+            }
         },
     )
     settings["weights"] = (
@@ -163,17 +173,14 @@ class CurrentCorrelationFunction(IJob):
 
         self._nFrames = self.configuration["frames"]["n_frames"]
         self._elements = self.configuration["atom_selection"]["unique_names"]
-        self._elementsPairs = sorted(
-            itertools.combinations_with_replacement(self._elements, 2),
-        )
+        self.labels = self.configuration["grouping_level"].pair_labels()
 
         self._indicesPerElement = self.configuration["atom_selection"].get_indices()
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
 
-        for pair in self._elementsPairs:
-            pair_str = "".join(map(str, pair))
+        for pair_str, _ in self.labels:
             self._outputData.add(
                 f"j(q,t)_long_{pair_str}",
                 "SurfaceOutputVariable",
@@ -458,30 +465,34 @@ class CurrentCorrelationFunction(IJob):
 
         """
         if x is None:
-            for at1, at2 in self._elementsPairs:
-                self._outputData[f"j(q,t)_long_{at1}{at2}"][index, :] = np.zeros(
+            for pair_str, _ in self.labels:
+                self._outputData[f"j(q,t)_long_{pair_str}"][index, :] = np.zeros(
                     self._nFrames,
                 )
-                self._outputData[f"j(q,t)_trans_{at1}{at2}"][index, :] = np.zeros(
+                self._outputData[f"j(q,t)_trans_{pair_str}"][index, :] = np.zeros(
                     self._nFrames,
                 )
             return
 
         rho_l, rho_t = x
         n_configs = self.configuration["frames"]["n_configs"]
-        for at1, at2 in self._elementsPairs:
-            corr_l = correlate(rho_l[at1], rho_l[at2][:n_configs], mode="valid")[
+        for pair_str, (label_i, label_j) in self.labels:
+            corr_l = correlate(
+                rho_l[label_i], rho_l[label_j][:n_configs], mode="valid"
+            )[
                 :,
                 0,
                 0,
-            ] / (3 * n_configs * rho_l[at1].shape[2])
-            self._outputData[f"j(q,t)_long_{at1}{at2}"][index, :] += corr_l.real
-            corr_t = correlate(rho_t[at1], rho_t[at2][:n_configs], mode="valid")[
+            ] / (3 * n_configs * rho_l[label_i].shape[2])
+            self._outputData[f"j(q,t)_long_{pair_str}"][index, :] += corr_l.real
+            corr_t = correlate(
+                rho_t[label_i], rho_t[label_j][:n_configs], mode="valid"
+            )[
                 :,
                 0,
                 0,
-            ] / (3 * n_configs * rho_t[at1].shape[2])
-            self._outputData[f"j(q,t)_trans_{at1}{at2}"][index, :] += corr_t.real
+            ] / (3 * n_configs * rho_t[label_i].shape[2])
+            self._outputData[f"j(q,t)_trans_{pair_str}"][index, :] += corr_t.real
 
     def finalize(self):
         """Normalize, Fourier transform and write the results out."""
@@ -490,11 +501,9 @@ class CurrentCorrelationFunction(IJob):
         )
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        for pair in self._elementsPairs:
-            pair_str = "".join(map(str, pair))
-            at1, at2 = pair
-            ni = nAtomsPerElement[at1]
-            nj = nAtomsPerElement[at2]
+        for pair_str, (label_i, label_j) in self.labels:
+            ni = nAtomsPerElement[label_i]
+            nj = nAtomsPerElement[label_j]
             self._outputData[f"j(q,t)_long_{pair_str}"][:] /= sqrt(ni * nj)
             self._outputData[f"j(q,t)_trans_{pair_str}"][:] /= sqrt(ni * nj)
             self._outputData[f"J(q,f)_long_{pair_str}"][:] = get_spectrum(
@@ -529,52 +538,101 @@ class CurrentCorrelationFunction(IJob):
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 2, conc_exp=0.5)
-        assign_weights(self._outputData, weight_dict, "j(q,t)_long_%s%s")
-        assign_weights(self._outputData, weight_dict, "j(q,t)_trans_%s%s")
-        assign_weights(self._outputData, weight_dict, "J(q,f)_long_%s%s")
-        assign_weights(self._outputData, weight_dict, "J(q,f)_trans_%s%s")
+        assign_weights(self._outputData, weight_dict, "j(q,t)_long_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "j(q,t)_trans_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "J(q,f)_long_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "J(q,f)_trans_%s", self.labels)
         if self.add_ideal_results:
-            assign_weights(self._outputData, weight_dict, "J(q,f)_long_ideal_%s%s")
-            assign_weights(self._outputData, weight_dict, "J(q,f)_trans_ideal_%s%s")
-        jqtLongTotal = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "j(q,t)_long_%s%s",
-        )
-        self._outputData["j(q,t)_long_total"][:] = jqtLongTotal
-        jqtTransTotal = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "j(q,t)_trans_%s%s",
-        )
-        self._outputData["j(q,t)_trans_total"][:] = jqtTransTotal
+            assign_weights(
+                self._outputData,
+                weight_dict,
+                "J(q,f)_long_ideal_%s",
+                self.labels,
+            )
+            assign_weights(
+                self._outputData,
+                weight_dict,
+                "J(q,f)_trans_ideal_%s",
+                self.labels,
+            )
 
-        sqfLongTotal = weighted_sum(
+        jqtLongTotal = weighted_sum(self._outputData, "j(q,t)_long_%s", self.labels)
+        self._outputData["j(q,t)_long_total"][:] = jqtLongTotal
+        jqtTransTotal = weighted_sum(self._outputData, "j(q,t)_trans_%s", self.labels)
+        self._outputData["j(q,t)_trans_total"][:] = jqtTransTotal
+        self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            weight_dict,
-            "J(q,f)_long_%s%s",
+            "j(q,t)_long",
+            "SurfaceOutputVariable",
+            dim=2,
+            conc_exp=0.5,
+            axis="q|time",
+            units="au",
         )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "j(q,t)_trans",
+            "SurfaceOutputVariable",
+            dim=2,
+            conc_exp=0.5,
+            axis="q|time",
+            units="au",
+        )
+
+        sqfLongTotal = weighted_sum(self._outputData, "J(q,f)_long_%s", self.labels)
         self._outputData["J(q,f)_long_total"][:] = sqfLongTotal
-        sqfTransTotal = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "J(q,f)_trans_%s%s",
-        )
+        sqfTransTotal = weighted_sum(self._outputData, "J(q,f)_trans_%s", self.labels)
         self._outputData["J(q,f)_trans_total"][:] = sqfTransTotal
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "J(q,f)_long",
+            "SurfaceOutputVariable",
+            dim=2,
+            conc_exp=0.5,
+            axis="q|romega",
+            units="au",
+            main_result=True,
+            partial_result=True,
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "J(q,f)_trans",
+            "SurfaceOutputVariable",
+            dim=2,
+            conc_exp=0.5,
+            axis="q|romega",
+            units="au",
+            main_result=True,
+            partial_result=True,
+        )
 
         if self.add_ideal_results:
             sqfLongTotal = weighted_sum(
-                self._outputData,
-                weight_dict,
-                "J(q,f)_long_ideal_%s%s",
+                self._outputData, "J(q,f)_long_ideal_%s", self.labels
             )
             self._outputData["J(q,f)_long_ideal_total"][:] = sqfLongTotal
             sqfTransTotal = weighted_sum(
-                self._outputData,
-                weight_dict,
-                "J(q,f)_trans_ideal_%s%s",
+                self._outputData, "J(q,f)_trans_ideal_%s", self.labels
             )
             self._outputData["J(q,f)_trans_ideal_total"][:] = sqfTransTotal
+            self.configuration["grouping_level"].add_grouped_totals(
+                self._outputData,
+                "J(q,f)_long_ideal",
+                "SurfaceOutputVariable",
+                dim=2,
+                conc_exp=0.5,
+                axis="q|romega",
+                units="au",
+            )
+            self.configuration["grouping_level"].add_grouped_totals(
+                self._outputData,
+                "J(q,f)_trans_ideal",
+                "SurfaceOutputVariable",
+                dim=2,
+                conc_exp=0.5,
+                axis="q|romega",
+                units="au",
+            )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

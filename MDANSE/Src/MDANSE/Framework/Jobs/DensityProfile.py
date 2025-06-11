@@ -108,6 +108,11 @@ class DensityProfile(IJob):
 
         self._indices_per_element = self.configuration["atom_selection"].get_indices()
 
+        self.labels = [
+            (element, (element,))
+            for element in self.configuration["atom_selection"].get_natoms()
+        ]
+
         for element in self._indices_per_element.keys():
             self._outputData.add(
                 f"dp_{element}",
@@ -188,14 +193,8 @@ class DensityProfile(IJob):
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, n_atoms_per_element, 1)
-
-        assign_weights(self._outputData, weight_dict, "dp_%s")
-
-        dp_total = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "dp_%s",
-        )
+        assign_weights(self._outputData, weight_dict, "dp_%s", self.labels)
+        dp_total = weighted_sum(self._outputData, "dp_%s", self.labels)
 
         self._outputData.add(
             "dp_total", "LineOutputVariable", dp_total, axis="r", units="au"

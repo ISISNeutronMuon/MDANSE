@@ -53,6 +53,15 @@ class PositionPowerSpectrum(IJob):
         "ProjectionConfigurator",
         {"label": "project coordinates"},
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -63,6 +72,7 @@ class PositionPowerSpectrum(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
             }
         },
     )
@@ -92,6 +102,11 @@ class PositionPowerSpectrum(IJob):
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
+
+        self.labels = [
+            (element, (element,))
+            for element in self.configuration["atom_selection"].get_natoms()
+        ]
 
         self._outputData.add(
             "time",
@@ -246,25 +261,48 @@ class PositionPowerSpectrum(IJob):
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "pacf_%s")
-        assign_weights(self._outputData, weight_dict, "pps_%s")
+        assign_weights(self._outputData, weight_dict, "pacf_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "pps_%s", self.labels)
         if self.add_ideal_results:
-            assign_weights(self._outputData, weight_dict, "pps_ideal_%s")
+            assign_weights(self._outputData, weight_dict, "pps_ideal_%s", self.labels)
         self._outputData["pacf_total"][:] = weighted_sum(
             self._outputData,
-            weight_dict,
             "pacf_%s",
+            self.labels,
         )
         self._outputData["pps_total"][:] = weighted_sum(
             self._outputData,
-            weight_dict,
             "pps_%s",
+            self.labels,
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "pacf",
+            "LineOutputVariable",
+            axis="time",
+            units="nm2",
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "pps",
+            "LineOutputVariable",
+            axis="romega",
+            units="au",
+            main_result=True,
+            partial_result=True,
         )
         if self.add_ideal_results:
             self._outputData["pps_ideal_total"][:] = weighted_sum(
                 self._outputData,
-                weight_dict,
                 "pps_ideal_%s",
+                self.labels,
+            )
+            self.configuration["grouping_level"].add_grouped_totals(
+                self._outputData,
+                "pps_ideal",
+                "LineOutputVariable",
+                axis="romega",
+                units="au",
             )
 
         self._outputData.write(

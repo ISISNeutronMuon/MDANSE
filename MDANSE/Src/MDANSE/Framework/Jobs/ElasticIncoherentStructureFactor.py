@@ -56,19 +56,18 @@ class ElasticIncoherentStructureFactor(IJob):
         "ProjectionConfigurator",
         {"label": "project coordinates"},
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
             }
         },
+    )
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",
@@ -76,6 +75,7 @@ class ElasticIncoherentStructureFactor(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
             }
         },
     )
@@ -103,6 +103,11 @@ class ElasticIncoherentStructureFactor(IJob):
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
 
         self._nFrames = self.configuration["frames"]["number"]
+
+        self.labels = [
+            (element, (element,))
+            for element in self.configuration["atom_selection"].get_natoms()
+        ]
 
         self._outputData.add(
             "q",
@@ -201,11 +206,19 @@ class ElasticIncoherentStructureFactor(IJob):
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "eisf_%s")
+        assign_weights(self._outputData, weight_dict, "eisf_%s", self.labels)
         self._outputData["eisf_total"][:] = weighted_sum(
+            self._outputData, "eisf_%s", self.labels
+        )
+
+        self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            weight_dict,
-            "eisf_%s",
+            "eisf",
+            "LineOutputVariable",
+            axis="q",
+            units="au",
+            main_result=True,
+            partial_result=True,
         )
 
         self._outputData.write(

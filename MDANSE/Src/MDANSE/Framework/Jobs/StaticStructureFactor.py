@@ -13,10 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+from collections.abc import Iterator
 import collections
 
 import numpy as np
+import numpy.typing as npt
 
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
@@ -59,6 +60,15 @@ class StaticStructureFactor(DistanceHistogram):
         "RangeConfigurator",
         {"valueType": float, "includeLast": True, "mini": 0.0, "default": (0, 500, 1)},
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -69,6 +79,7 @@ class StaticStructureFactor(DistanceHistogram):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
             }
         },
     )
@@ -128,35 +139,11 @@ class StaticStructureFactor(DistanceHistogram):
             units="1/nm",
         )
 
-        q = self._outputData["q"]
-        r = self.configuration["r_values"]["mid_points"]
-
-        fact1 = 4.0 * np.pi * self.averageDensity
-
-        sincqr = np.sinc(np.outer(q, r) / np.pi)
-
-        dr = self.configuration["r_values"]["step"]
-
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        for pair in self._elementsPairs:
-            pair_str = "".join(map(str, pair))
-            if self.indices_intra is not None:
-                self._outputData.add(
-                    f"ssf_intra_{pair_str}",
-                    "LineOutputVariable",
-                    (nq,),
-                    axis="q",
-                    units="au",
-                )
-                self._outputData.add(
-                    f"ssf_inter_{pair_str}",
-                    "LineOutputVariable",
-                    (nq,),
-                    axis="q",
-                    units="au",
-                )
+
+        for label, _ in self.labels:
             self._outputData.add(
-                f"ssf_{pair_str}",
+                f"ssf_{label}",
                 "LineOutputVariable",
                 (nq,),
                 axis="q",
@@ -164,46 +151,33 @@ class StaticStructureFactor(DistanceHistogram):
                 main_result=True,
                 partial_result=True,
             )
-
-            ni = nAtomsPerElement[pair[0]]
-            nj = nAtomsPerElement[pair[1]]
-
-            idi = self.selectedElements.index(pair[0])
-            idj = self.selectedElements.index(pair[1])
-
-            if pair[0] == pair[1]:
-                nij = ni**2 / 2.0
-            else:
-                nij = ni * nj
-                if self.indices_intra is not None:
-                    self.h_intra[idi, idj] += self.h_intra[idj, idi]
-                self.h_total[idi, idj] += self.h_total[idj, idi]
-
-            fact = 2 * nij * nFrames * shellVolumes
-
-            if self.indices_intra is not None:
-                pdfIntra = self.h_intra[idi, idj, :] / fact
-                pdfTotal = self.h_total[idi, idj, :] / fact
-                pdfInter = pdfTotal - pdfIntra
-                self._outputData[f"ssf_intra_{pair_str}"][:] = (
-                    fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr
+        if self.intra:
+            for label, _ in self.labels_intra:
+                self._outputData.add(
+                    f"ssf_intra_{label}",
+                    "LineOutputVariable",
+                    (nq,),
+                    axis="q",
+                    units="au",
                 )
-                self._outputData[f"ssf_inter_{pair_str}"][:] = (
-                    1.0
-                    + fact1 * np.sum((r**2) * (pdfInter - 1.0) * sincqr, axis=1) * dr
-                )
-                self._outputData[f"ssf_{pair_str}"][:] = (
-                    self._outputData[f"ssf_intra_{pair_str}"][:]
-                    + self._outputData[f"ssf_inter_{pair_str}"][:]
-                )
-            else:
-                pdfTotal = self.h_total[idi, idj, :] / fact
-                self._outputData[f"ssf_{pair_str}"][:] = (
-                    1.0
-                    + fact1 * np.sum((r**2) * (pdfTotal - 1.0) * sincqr, axis=1) * dr
+            for label, _ in self.labels:
+                self._outputData.add(
+                    f"ssf_inter_{label}",
+                    "LineOutputVariable",
+                    (nq,),
+                    axis="q",
+                    units="au",
                 )
 
-        if self.indices_intra is not None:
+        self._outputData.add(
+            "ssf_total",
+            "LineOutputVariable",
+            (nq,),
+            axis="q",
+            units="au",
+            main_result=True,
+        )
+        if self.intra:
             self._outputData.add(
                 "ssf_intra_total", "LineOutputVariable", (nq,), axis="q", units="au"
             )
@@ -214,30 +188,108 @@ class StaticStructureFactor(DistanceHistogram):
                 axis="q",
                 units="au",
             )
-        self._outputData.add(
-            "ssf_total",
-            "LineOutputVariable",
-            (nq,),
-            axis="q",
-            units="au",
-            main_result=True,
+
+        q = self._outputData["q"]
+        r = self.configuration["r_values"]["mid_points"]
+
+        fact1 = 4.0 * np.pi * self.averageDensity
+
+        sincqr = np.sinc(np.outer(q, r) / np.pi)
+
+        dr = self.configuration["r_values"]["step"]
+
+        def calc_func(
+            label_i: str, label_j: str
+        ) -> Iterator[tuple[str, bool, npt.NDArray]]:
+            """Calculates the SSF for a given pair of element labels.
+
+            Parameters
+            ----------
+            label_i : str
+                The element label.
+            label_j : str
+                The element label.
+
+            Yields
+            ------
+            name : str
+                The results name.
+            inter : bool
+                Whether results are for intermolecular atom pairs.
+            results : npt.NDArray
+                The results.
+            """
+            ni = nAtomsPerElement[label_i]
+            nj = nAtomsPerElement[label_j]
+
+            idi = self.selectedElements.index(label_i)
+            idj = self.selectedElements.index(label_j)
+
+            if label_i == label_j:
+                nij = ni**2 / 2.0
+            else:
+                nij = ni * nj
+                if self.intra:
+                    self.h_intra[idi, idj] += self.h_intra[idj, idi]
+                self.h_total[idi, idj] += self.h_total[idj, idi]
+
+            fact = 2 * nij * nFrames * shellVolumes
+
+            pdfTotal = self.h_total[idi, idj, :] / fact
+            yield (
+                "ssf",
+                False,
+                1.0 + fact1 * np.sum((r**2) * (pdfTotal - 1.0) * sincqr, axis=1) * dr,
+            )
+
+            if self.intra:
+                pdfIntra = self.h_intra[idi, idj, :] / fact
+                pdfInter = pdfTotal - pdfIntra
+                yield (
+                    "ssf_inter",
+                    False,
+                    1.0
+                    + fact1 * np.sum((r**2) * (pdfInter - 1.0) * sincqr, axis=1) * dr,
+                )
+                yield (
+                    "ssf_intra",
+                    True,
+                    fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr,
+                )
+
+        self.configuration["grouping_level"].update_pair_results(
+            calc_func, self._outputData
         )
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 2)
-        if self.indices_intra is not None:
-            assign_weights(self._outputData, weight_dict, "ssf_intra_%s%s")
-            assign_weights(self._outputData, weight_dict, "ssf_inter_%s%s")
-            assign_weights(self._outputData, weight_dict, "ssf_%s%s")
-            ssfIntra = weighted_sum(self._outputData, weight_dict, "ssf_intra_%s%s")
+        if self.intra:
+            assign_weights(
+                self._outputData, weight_dict, "ssf_intra_%s", self.labels_intra
+            )
+            assign_weights(self._outputData, weight_dict, "ssf_inter_%s", self.labels)
+            assign_weights(self._outputData, weight_dict, "ssf_%s", self.labels)
+            ssfIntra = weighted_sum(self._outputData, "ssf_intra_%s", self.labels_intra)
             self._outputData["ssf_intra_total"][:] = ssfIntra
-            ssfInter = weighted_sum(self._outputData, weight_dict, "ssf_inter_%s%s")
+            ssfInter = weighted_sum(self._outputData, "ssf_inter_%s", self.labels)
             self._outputData["ssf_inter_total"][:] = ssfInter
             self._outputData["ssf_total"][:] = ssfIntra + ssfInter
+            for i in ["_intra", "_inter", ""]:
+                self.configuration["grouping_level"].add_grouped_totals(
+                    self._outputData,
+                    f"ssf{i}",
+                    "LineOutputVariable",
+                    dim=2,
+                    intra=i == "_intra",
+                    axis="q",
+                    units="au",
+                    main_result=i == "",
+                    partial_result=i == "",
+                )
         else:
-            assign_weights(self._outputData, weight_dict, "ssf_%s%s")
+            assign_weights(self._outputData, weight_dict, "ssf_%s", self.labels)
             self._outputData["ssf_total"][:] = weighted_sum(
-                self._outputData, weight_dict, "ssf_%s%s"
+                self._outputData, "ssf_%s", self.labels
             )
 
         self._outputData.write(
