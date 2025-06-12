@@ -243,9 +243,7 @@ class _Unit:
         10 V
         """
         u = copy.deepcopy(self)
-        if isinstance(other, numbers.Number):
-            u._factor /= other
-        elif isinstance(other, numbers.Complex):
+        if isinstance(other, (numbers.Number, numbers.Complex)):
             u._factor /= other
         elif isinstance(other, _Unit):
             u._div_by(other)
@@ -301,10 +299,7 @@ class _Unit:
         """
 
         u = copy.deepcopy(self)
-        if isinstance(other, numbers.Number):
-            u._factor *= other
-            return u
-        elif isinstance(other, numbers.Complex):
+        if isinstance(other, (numbers.Number, numbers.Complex)):
             u._factor *= other
             return u
         elif isinstance(other, _Unit):

@@ -82,7 +82,7 @@ class ComplexValidator(QValidator):
                 _ = complex(input_string)
             except (TypeError, ValueError):
                 bad_chars = [
-                    char for char in input_string if char not in "0123456789+-.j()e"
+                    char for char in input_string if char not in "0123456789+-.j()e "
                 ]
                 if bad_chars:
                     state = QValidator.State.Invalid

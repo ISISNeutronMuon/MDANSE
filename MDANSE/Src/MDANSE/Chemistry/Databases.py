@@ -315,18 +315,15 @@ class AtomsDatabase(_Database):
         """
         super()._load(default_database)
 
-        for key, value in self._data["properties"].items():
-            self._properties[key] = value
-        for key, value in self._data["units"].items():
-            self._units[key] = value
+       
+ self._properties.update(self._data["properties"])
+        self._units.update(self._data["units"])
         self._data = self._data["atoms"]
 
         super()._load(user_database)
 
-        for key, value in self._data["properties"].items():
-            self._properties[key] = value
-        for key, value in self._data["units"].items():
-            self._units[key] = value
+        self._properties.update(self._data["properties"])
+        self._units.update("self._data["units"])
         self._data = self._data["atoms"]
 
         try:
