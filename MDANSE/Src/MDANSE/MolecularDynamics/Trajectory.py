@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import operator
-from typing import TYPE_CHECKING, Any, Collection, Union
+from typing import TYPE_CHECKING, Any, Collection, Union, Optional
 
 if TYPE_CHECKING:
     from MDANSE.Chemistry.Databases import AtomsDatabase
@@ -1003,95 +1003,3 @@ class RigidBodyTrajectoryGenerator:
         from MDANSE.Mathematics.LinearAlgebra import Quaternion
 
         return Vector(self.cms[index]), Quaternion(self.quaternions[index])
-
-
-def partition_universe(universe, groups):
-    atoms = sorted(universe.atomList(), key=operator.attrgetter("index"))
-
-    coll = [Collection([atoms[index] for index in gr]) for gr in groups]
-
-    return coll
-
-
-def read_atoms_trajectory(
-    trajectory,
-    atoms,
-    first,
-    last=None,
-    step=1,
-    variable="configuration",
-    weights=None,
-    dtype=np.float64,
-):
-    if not isinstance(atoms, (list, tuple)):
-        atoms = [atoms]
-
-    if last is None:
-        last = len(trajectory)
-
-    # nFrames = len(range(first, last, step))
-
-    # serie = np.zeros((nFrames, 3), dtype=dtype)
-
-    if weights is None or len(atoms) == 1:
-        weights = [1.0] * len(atoms)
-
-    # cs.configuration = conf
-
-    # tw = TrajectoryWriter('toto.h5',cs)
-    # tw.dump_configuration()
-    # tw.close()
-
-    # t = Trajectory('toto.h5')
-    # print(t.read_atom_trajectory(2))
-    # t.close()
-
-    # import numpy as np
-
-    # from MDANSE.MolecularDynamics.Configuration import RealConfiguration
-
-    # from MDANSE.Chemistry.ChemicalSystem import Atom
-    # cs = ChemicalSystem()
-    # for i in range(768):
-    #     cs.add_chemical_entity(Atom(symbol='H'))
-
-    # coords = np.load('coords.npy')
-    # unit_cell = np.load('unit_cell.npy')
-
-    # tw = TrajectoryWriter('waterbox.h5',cs)
-
-    # n_frames = coords.shape[0]
-    # for i in range(n_frames):
-    #     c = RealConfiguration(cs,coords[i,:,:],unit_cell[i,:,:])
-    #     cs.configuration = c
-    #     tw.dump_configuration()
-
-    # tw.close()
-
-    # t = Trajectory('waterbox.h5')
-    # t.close()
-
-
-if __name__ == "__main__":
-    from MDANSE.Chemistry.ChemicalEntity import Atom
-    from MDANSE.MolecularDynamics.Configuration import RealConfiguration
-
-    cs = ChemicalSystem()
-    for i in range(2):
-        cs.add_chemical_entity(Atom(symbol="H"))
-
-    tw = TrajectoryWriter("test.h5", cs)
-    unit_cell = 10.0 * np.identity(3)
-
-    coords = np.empty((2, 3), dtype=np.float64)
-    coords[0, :] = [-4, 0, 0]
-    coords[1, :] = [4, 0, 0]
-
-    c = RealConfiguration(cs, coords, unit_cell)
-    cs.configuration = c
-    tw.dump_configuration(1.0)
-    tw.close()
-
-    t = Trajectory("test.h5")
-    print(t.read_cog_trajectory([0, 1], 0, 10, 1).shape)
-    t.close()

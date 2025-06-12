@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from pathlib import Path
-from typing import Union
+from typing import Union, Sequence, Optional
 
 import h5py
 import numpy as np
@@ -536,7 +536,7 @@ class MdanseTrajectory:
             value = str_to_num(value)
             r, value = divmod(value, 65536)
             g, b = divmod(value, 256)
-            return ";".join([str(int(x)) for x in [num1, num2, num3]])
+            return ";".join([str(int(x)) for x in [r, g, b]])
         if data_type == b"int":
             return int(value)
         if data_type == b"str":
@@ -545,11 +545,12 @@ class MdanseTrajectory:
             return value
         value = str_to_num(value)
         unit_conv = {
-            "fm": "ang",
-            "barn": "ang2",
-            "none": "",
+            b"fm": "ang",
+            b"barn": "ang2",
         }
-        return measure(value, data_unit).toval(unit_conv.get(data_unit))
+        if data_unit in unit_conv:
+            return measure(value, data_unit.decode("utf-8")).toval(unit_conv.get(data_unit))
+        return value
 
     def atoms_in_database(self) -> list[str]:
         if "atom_database" not in self._h5_file:

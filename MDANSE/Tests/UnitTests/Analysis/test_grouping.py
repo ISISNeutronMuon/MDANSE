@@ -69,7 +69,7 @@ def disf(tmp_path_factory):
             {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
         ),
         "trajectory": named_mols,
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
         "grouping_level": "molecule",
     }
 
@@ -94,9 +94,9 @@ def disf(tmp_path_factory):
     ("XRayStaticStructureFactor", ["xssf"], "equal", 1e-10, 1e-7),
     ("DynamicCoherentStructureFactor", ["f(q,t)", "s(q,f)"], "b_coherent", 1e-6, 1e-6),
     ("CurrentCorrelationFunction", ["J(q,f)", "j(q,t)"], "b_coherent", 1e-6, 1e-7),
-    ("DynamicIncoherentStructureFactor", ["f(q,t)", "s(q,f)"], "b_incoherent2", 1e-10, 1e-7),
-    ("ElasticIncoherentStructureFactor", ["eisf"], "b_incoherent2", 1e-10, 1e-7),
-    ("GaussianDynamicIncoherentStructureFactor", ["f(q,t)", "s(q,f)", "msd"], "b_incoherent2", 1e-10, 1e-7),
+    ("DynamicIncoherentStructureFactor", ["f(q,t)", "s(q,f)"], "b_incoherent", 1e-10, 1e-7),
+    ("ElasticIncoherentStructureFactor", ["eisf"], "b_incoherent", 1e-10, 1e-7),
+    ("GaussianDynamicIncoherentStructureFactor", ["f(q,t)", "s(q,f)", "msd"], "b_incoherent", 1e-10, 1e-7),
 ], ids=lambda x: x[0])
 def test_analysis(
         tmp_path, parameters, job_info

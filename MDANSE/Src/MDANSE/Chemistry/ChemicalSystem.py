@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import copy
 from functools import reduce
-from typing import Any, Optional
+from typing import Any, Optional, Iterable, SupportsInt
 
 import h5py
 import networkx as nx

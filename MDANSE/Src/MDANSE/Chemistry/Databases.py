@@ -315,15 +315,14 @@ class AtomsDatabase(_Database):
         """
         super()._load(default_database)
 
-       
- self._properties.update(self._data["properties"])
+        self._properties.update(self._data["properties"])
         self._units.update(self._data["units"])
         self._data = self._data["atoms"]
 
         super()._load(user_database)
 
         self._properties.update(self._data["properties"])
-        self._units.update("self._data["units"])
+        self._units.update(self._data["units"])
         self._data = self._data["atoms"]
 
         try:
@@ -474,9 +473,12 @@ class AtomsDatabase(_Database):
         unit_conv = {
             "fm": "ang",
             "barn": "ang2",
-            "none": "",
         }
-        return measure(value, punit).toval(unit_conv.get(punit))
+        if punit in unit_conv:
+            return measure(value, punit).toval(unit_conv.get(punit))
+        if punit == "none":
+            return value
+        return measure(value, punit).toval()
 
     def get_values_for_multiple_atoms(
         self, atoms: list[str], prop: str
