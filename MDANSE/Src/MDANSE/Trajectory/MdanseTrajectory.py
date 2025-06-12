@@ -540,16 +540,17 @@ class MdanseTrajectory:
             return ";".join([str(int(x)) for x in [num1, num2, num3]])
         if data_type == b"int":
             return int(value)
-        elif data_type == b"str":
+        if data_type == b"str":
             if isinstance(value, bytes):
                 return value.decode("utf-8")
             return value
         value = str_to_num(value)
-        if data_unit == b"fm":
-            value = measure(value, "fm").toval("ang")
-        elif data_unit == b"barn":
-            value = measure(value, "barn").toval("ang2")
-        return value
+        unit_conv = {
+            "fm": "ang",
+            "barn": "ang2",
+            "none": "",
+        }
+        return measure(value, data_unit).toval(unit_conv.get(data_unit))
 
     def atoms_in_database(self) -> list[str]:
         if "atom_database" not in self._h5_file:

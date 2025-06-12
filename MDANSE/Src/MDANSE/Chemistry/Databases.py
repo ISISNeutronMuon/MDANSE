@@ -28,6 +28,9 @@ from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 
 
+TOLERANCE_IMG = 1e-13
+
+
 class ComplexEncoder(json.JSONEncoder):
     """Custom JSON encoder to encode complex numbers as strings."""
 
@@ -52,7 +55,7 @@ def str_to_num(numstr: str) -> Union[float, complex]:
 
     """
     return_value = complex(numstr)
-    if abs(return_value.imag) < 1e-13:
+    if abs(return_value.imag) < TOLERANCE_IMG:
         return_value = return_value.real
     return return_value
 
@@ -188,7 +191,7 @@ class _Database(metaclass=Singleton):
 
 
 class AtomsDatabaseError(Error):
-    """This class handles the exceptions related to AtomsDatabase"""
+    """Error type for the exceptions related to AtomsDatabase."""
 
     pass
 
@@ -352,7 +355,7 @@ class AtomsDatabase(_Database):
         """
         if atom in self._data:
             raise AtomsDatabaseError(
-                f"The atom {atom} is already stored in the database"
+                f"The atom {atom} is already stored in the database."
             )
 
         properties = {}
@@ -378,7 +381,7 @@ class AtomsDatabase(_Database):
             )
 
         if ptype not in AtomsDatabase._TYPES:
-            raise TypeError(f"The property type {ptype} is unknown")
+            raise TypeError(f"The property type {ptype} is unknown.")
 
         self._properties[pname] = ptype
         ptype = AtomsDatabase._TYPES[ptype]
@@ -409,7 +412,7 @@ class AtomsDatabase(_Database):
         """
 
         if atom not in self._data:
-            raise KeyError(f"The atom {atom} is not in the database")
+            raise KeyError(f"The atom {atom} is not in the database.")
 
         # The isotopes are searched according to |symbol| property
         symbol = self._data[atom]["symbol"]
@@ -441,7 +444,7 @@ class AtomsDatabase(_Database):
         """
 
         if pname not in self._properties:
-            raise KeyError(f"The property {pname} is not registered in the database")
+            raise KeyError(f"The property {pname} is not registered in the database.")
 
         return {element: self.get_value(element, pname) for element in self._data}
 
@@ -460,10 +463,10 @@ class AtomsDatabase(_Database):
         """
 
         if atom not in self._data:
-            raise KeyError(f"The atom {atom} is not in the database")
+            raise KeyError(f"The atom {atom} is not in the database.")
 
         if pname not in self._properties:
-            raise KeyError(f"The property {pname} is not registered in the database")
+            raise KeyError(f"The property {pname} is not registered in the database.")
         ptype_str = self._properties[pname]
         ptype = AtomsDatabase._TYPES[ptype_str]
         punit = self._units[pname]
@@ -471,13 +474,12 @@ class AtomsDatabase(_Database):
         value = self._data[atom].get(pname, ptype())
         if ptype_str == "complex":
             value = str_to_num(value)
-        if punit == "fm":
-            value = measure(value, punit).toval("ang")
-        elif punit == "barn":
-            value = measure(value, punit).toval("ang2")
-        elif punit != "none":
-            value = measure(value, punit).toval()
-        return value
+        unit_conv = {
+            "fm": "ang",
+            "barn": "ang2",
+            "none": "",
+        }
+        return measure(value, punit).toval(unit_conv.get(punit))
 
     def get_values_for_multiple_atoms(
         self, atoms: list[str], prop: str
@@ -499,11 +501,11 @@ class AtomsDatabase(_Database):
 
         if not all(atom in self._data for atom in atoms):
             raise AtomsDatabaseError(
-                f"One or more of the provided atoms {atoms} are unknown"
+                f"One or more of the provided atoms {atoms} are unknown."
             )
 
         if prop not in self._properties:
-            raise KeyError(f"The property {prop} is not registered in the database")
+            raise KeyError(f"The property {prop} is not registered in the database.")
 
         values = {name: self.get_value(name, prop) for name in unique_atoms}
         return [values[atom] for atom in atoms]
@@ -525,10 +527,10 @@ class AtomsDatabase(_Database):
         """
 
         if atom not in self._data:
-            raise KeyError(f"The element {atom} is not in the database")
+            raise KeyError(f"The element {atom} is not in the database.")
 
         if pname not in self._properties:
-            raise KeyError(f"The property {pname} is not registered in the database")
+            raise KeyError(f"The property {pname} is not registered in the database.")
 
         try:
             self._data[atom][pname] = AtomsDatabase._TYPES[self._properties[pname]](
@@ -536,7 +538,7 @@ class AtomsDatabase(_Database):
             )
         except ValueError:
             raise AtomsDatabaseError(
-                f"Can not coerce {value} to {self._properties[pname]} type"
+                f"Can not coerce {value} to {self._properties[pname]} type."
             )
 
     def has_atom(self, atom: str) -> bool:
@@ -621,7 +623,7 @@ class AtomsDatabase(_Database):
                     f"{self._properties[pname]}."
                 )
         except KeyError:
-            raise KeyError(f"The property {pname} is not registered in the database")
+            raise KeyError(f"The property {pname} is not registered in the database.")
 
         tolerance = abs(tolerance)
         try:

@@ -99,11 +99,6 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         elif axis is None:
             axis = ["index"] * value.ndim
 
-        if isinstance(axis, str):
-            axis = axis.split("|")
-        elif axis is None:
-            axis = ["index"] * value.ndim
-
         if value.ndim != cls._nDimensions:
             raise OutputVariableError(
                 f"Invalid number of dimensions ({value.ndim}) for an output variable of type {cls.__name__!r}"

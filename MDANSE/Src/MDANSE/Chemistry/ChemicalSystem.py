@@ -328,9 +328,10 @@ class ChemicalSystem:
 
         self.add_bonds([[int(pair[0]), int(pair[1])] for pair in grp["bonds"][:]])
 
-        self._labels = {}
-        for label in grp["labels"]:
-            self._labels[str(label)] = [int(tag) for tag in grp[f"labels/{label!s}"]]
+        self._labels = {
+            label: [int(tag) for tag in grp[f"labels/{label}"]]
+            for label in map(str, grp["labels"])
+        }
 
         for cluster in grp["clusters"]:
             self._clusters[str(cluster)] = [
