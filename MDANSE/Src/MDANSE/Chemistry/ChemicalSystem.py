@@ -17,8 +17,9 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import Iterable
 from functools import reduce
-from typing import Any, Optional, Iterable, SupportsInt
+from typing import Any, Optional, SupportsInt
 
 import h5py
 import networkx as nx
@@ -62,10 +63,15 @@ class ChemicalSystem:
         self._unique_elements = set()
 
     def __str__(self):
-        return f"ChemicalSystem {self.name} consisting of {len(self._atom_types)} atoms in {len(self._clusters)} molecules"
+        return (
+            f"ChemicalSystem {self.name} consisting of {len(self._atom_types)}"
+            " atoms in {len(self._clusters)} molecules"
+        )
 
     def initialise_atoms(
-        self, element_list: list[str], name_list: list[str] | None = None
+        self,
+        element_list: list[str],
+        name_list: list[str] | None = None,
     ):
         """Assign indices to atoms, save their types and names.
 
@@ -88,10 +94,7 @@ class ChemicalSystem:
             self._atom_names = [str(x) for x in name_list]
 
     def add_atom(self, atm_num: int) -> int:
-        if atm_num is not None:
-            rdkit_atm = Chem.Atom(atm_num)
-        else:
-            rdkit_atm = Chem.Atom(0)
+        rdkit_atm = Chem.Atom(atm_num) if atm_num is not None else Chem.Atom(0)
         rdkit_atm.SetNumExplicitHs(0)
         rdkit_atm.SetNoImplicit(True)
         return self.rdkit_mol.AddAtom(rdkit_atm)
@@ -105,26 +108,25 @@ class ChemicalSystem:
 
     def add_labels(self, label_dict: dict[str, list[int]]):
         for key, item in label_dict.items():
-            if key in self._labels.keys():
+            if key in self._labels:
                 self._labels[key] += item
             else:
                 self._labels[key] = item
 
     def add_clusters(self, group_list: list[list[int]]):
         for group in group_list:
-            sorted_group = list(sorted(set(group)))
+            sorted_group = sorted(set(group))
             if len(sorted_group) < 2:
                 continue
             atom_list = [self._atom_types[index] for index in group]
             unique_atoms, counts = np.unique(atom_list, return_counts=True)
             name = "_".join(
-                [str(unique_atoms[n]) + str(counts[n]) for n in range(len(counts))]
+                [str(unique_atoms[n]) + str(counts[n]) for n in range(len(counts))],
             )
             if name not in self._clusters:
                 self._clusters[name] = [sorted_group]
-            else:
-                if sorted_group not in self._clusters[name]:
-                    self._clusters[name].append(group)
+            elif sorted_group not in self._clusters[name]:
+                self._clusters[name].append(group)
 
     def has_substructure_match(self, smarts: str) -> bool:
         """Check if there is a substructure match.
@@ -138,11 +140,14 @@ class ChemicalSystem:
         -------
         bool
             True if the there is a substructure match.
+
         """
         return self.rdkit_mol.HasSubstructMatch(Chem.MolFromSmarts(smarts))
 
     def get_substructure_matches(
-        self, smarts: str, maxmatches: int = 1000000
+        self,
+        smarts: str,
+        maxmatches: int = 1000000,
     ) -> set[int]:
         """Get the indices which match the smarts string. Note that
         the default bond type in MDANSE is
@@ -171,21 +176,21 @@ class ChemicalSystem:
 
     @property
     def atom_list(self) -> list[str]:
-        """list of all non-ghost atoms in the ChemicalSystem."""
+        """Return the indices of all atoms in the ChemicalSystem."""
         return self._atom_types
 
     @property
     def name_list(self) -> list[str]:
-        """List of all non-ghost atoms in the ChemicalSystem."""
+        """Return the names of all atoms in the ChemicalSystem."""
         if self._atom_names is not None:
             return self._atom_names
         return self._atom_types
 
-    def atom_property(self, property: str) -> list[Any]:
-        """List of a specific property, for all atoms in the system"""
+    def atom_property(self, atom_property: str) -> list[Any]:
+        """Return the values of a specific property, for all atoms in the system."""
         lookup = {}
         for atom in self.atom_list:
-            lookup[atom] = self._database.get_atom_property(atom, property)
+            lookup[atom] = self._database.get_atom_property(atom, atom_property)
         return [lookup[atom] for atom in self.atom_list]
 
     def grouping_level(self, index: int) -> int:
@@ -200,14 +205,18 @@ class ChemicalSystem:
         -------
         int
             grouping level for the GroupingLevelConfigurator
+
         """
         return 0
 
     def copy(self) -> ChemicalSystem:
-        """Copy the instance of ChemicalSystem into a new, identical instance.
+        """Return a new instance of ChemicalSystem with the same contents.
 
-        :return: Copy of the ChemicalSystem instance
-        :rtype: MDANSE.Chemistry.ChemicalSystem.ChemicalSystem
+        Returns
+        -------
+        ChemicalSystem
+            A copy of the existing ChemicalSystem.
+
         """
         cs = ChemicalSystem(self.name)
 
@@ -219,6 +228,11 @@ class ChemicalSystem:
         return cs
 
     def find_clusters_from_bonds(self):
+        """Build cluster information based on the saved chemical bonds.
+
+        Builds graphs and walks them to identify all the atoms that can
+        be reached from a starting atom by following bonds.
+        """
         molecules = []
         atom_pool = list(self._atom_indices)
 
@@ -237,7 +251,7 @@ class ChemicalSystem:
 
     def unique_molecules(self) -> list[str]:
         """Return the list of unique names in the chemical system."""
-        return list([str(x) for x in self._clusters.keys()])
+        return [str(x) for x in self._clusters]
 
     def number_of_molecules(self, molecule_name: str) -> int:
         """Return the number of molecules with the given name in the system."""
@@ -259,14 +273,13 @@ class ChemicalSystem:
         return self._total_number_of_atoms
 
     def serialize(self, h5_file: h5py.File) -> None:
-        """
-        Serializes the contents of the ChemicalSystem object and stores all the data necessary to reconstruct it into
-        the provided HDF5 file.
+        """Write the current system information into the HDF5 file.
 
-        :param h5_file: The file into which the ChemicalSystem is saved
-        :type h5_file: h5py.File
+        Parameters
+        ----------
+        h5_file : h5py.File
+            File object of the target trajectory, open for writing.
 
-        :return: None
         """
         string_dt = h5py.special_dtype(vlen=str)
 
@@ -299,7 +312,15 @@ class ChemicalSystem:
         for key, value in self._clusters.items():
             clusters_group.create_dataset(key, data=value)
 
-    def load(self, trajectory: str):
+    def load(self, trajectory: str | h5py.File):
+        """Read the ChemicalSystem information from the trajectory.
+
+        Parameters
+        ----------
+        trajectory : str | h5py.File
+            Filename or a file object of the trajectory.
+
+        """
         close_on_end = False
         if hasattr(trajectory, "keys"):
             source = trajectory
@@ -340,7 +361,15 @@ class ChemicalSystem:
         if close_on_end:
             source.close()
 
-    def legacy_load(self, trajectory: str):
+    def legacy_load(self, trajectory: str | h5py.File):
+        """Read the ChemicalSystem from an old (pre-2025) trajectory.
+
+        Parameters
+        ----------
+        trajectory : str | h5py.File
+            Filename or a file object of the trajectory.
+
+        """
         close_on_end = False
         if hasattr(trajectory, "keys"):
             source = trajectory

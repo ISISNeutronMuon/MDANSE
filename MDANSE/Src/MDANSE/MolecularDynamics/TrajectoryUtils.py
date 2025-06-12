@@ -102,9 +102,8 @@ def find_atoms_in_molecule(
     return result
 
 
-def atomic_trajectory(config, cell, rcell, box_coordinates=False):
-    """For the coordinates of a specific atom, remove all unit cell
-    jumps.
+def atomic_trajectory(config, cell, rcell, *, box_coordinates=False) -> np.ndarray:
+    """For the coordinates of a specific atom, remove all unit cell jumps.
 
     Parameters
     ----------
@@ -121,6 +120,7 @@ def atomic_trajectory(config, cell, rcell, box_coordinates=False):
     -------
     np.ndarray
         The input config but the unit cell jumps removed.
+
     """
     trajectory = np.einsum("ij,ijk->ik", config, rcell)
     sdxyz = trajectory[1:, :] - trajectory[:-1, :]

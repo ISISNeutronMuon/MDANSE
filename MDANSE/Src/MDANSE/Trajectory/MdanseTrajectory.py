@@ -13,8 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Union, Sequence, Optional
+from typing import Optional, Union
 
 import h5py
 import numpy as np
@@ -43,7 +46,7 @@ class MdanseTrajectory:
     is the specific implementation for the Mdanse HDF5 format.
     """
 
-    def __init__(self, h5_filename: Union[Path, str]):
+    def __init__(self, h5_filename: Path | str):
         """Open the file and build a trajectory.
 
         Parameters
@@ -72,7 +75,7 @@ class MdanseTrajectory:
         self._load_unit_cells()
 
     @classmethod
-    def file_is_right(self, filename: Union[Path, str]):
+    def file_is_right(self, filename: Path | str) -> bool:
         """Check if the input file is likely to be an .mdt trajectory."""
         filename = Path(filename)
         result = True
@@ -87,7 +90,8 @@ class MdanseTrajectory:
                     chem.load(filename)
             except Exception:
                 LOG.warning(
-                    f"Could not load ChemicalSystem from {filename}. MDANSE will try to read it as H5MD next."
+                    f"Could not load ChemicalSystem from {filename}. MDANSE will try"
+                    " to read it as H5MD next.",
                 )
                 result = False
             else:
@@ -97,7 +101,8 @@ class MdanseTrajectory:
                 _ = grp.attrs["name"]
             except KeyError:
                 LOG.warning(
-                    f"Could not find /composition from {filename}. MDANSE will try to read it as H5MD next."
+                    f"Could not find /composition from {filename}. MDANSE will try"
+                    " to read it as H5MD next.",
                 )
                 result = False
             else:
@@ -110,8 +115,9 @@ class MdanseTrajectory:
         self._h5_file.close()
 
     def __getitem__(
-        self, frame: int
-    ) -> Union[RealConfiguration, PeriodicRealConfiguration]:
+        self,
+        frame: int,
+    ) -> RealConfiguration | PeriodicRealConfiguration:
         """Return the atom configuration for a specific frame.
 
         Parameters
@@ -207,8 +213,9 @@ class MdanseTrajectory:
         return grp["coordinates"][frame].astype(np.float64)
 
     def configuration(
-        self, frame: int
-    ) -> Union[RealConfiguration, PeriodicRealConfiguration]:
+        self,
+        frame: int,
+    ) -> RealConfiguration | PeriodicRealConfiguration:
         """Return the atom configuration for a specific frame.
 
         Parameters
@@ -258,14 +265,24 @@ class MdanseTrajectory:
         """Return the time array for all the frames."""
         return self._h5_file["time"][:]
 
-    def unit_cell(self, frame):
-        """Return the unit cell at a given frame. If no unit cell is defined, returns None.
+    def unit_cell(self, frame: int) -> UnitCell | None:
+        """Return the unit cell at a given frame.
 
-        :param frame: the frame number
-        :type frame: int
+        Parameters
+        ----------
+        frame : int
+            Index of the selected trajectory frame.
 
-        :return: the unit cell
-        :rtype: ndarray
+        Returns
+        -------
+        UnitCell | None
+            Unit cell definition. None if no cell is defined in the trajectory.
+
+        Raises
+        ------
+        IndexError
+            If frame index is out of the range covered by the trajectory.
+
         """
         if frame < 0 or frame >= len(self):
             raise IndexError(f"Invalid frame number: {frame}")
@@ -285,7 +302,13 @@ class MdanseTrajectory:
         return grp["coordinates"].shape[0]
 
     def read_com_trajectory(
-        self, atom_indices: Sequence[int], first: int = 0, last: Optional[int] = None, step: int = 1, *, box_coordinates: bool = False
+        self,
+        atom_indices: Sequence[int],
+        first: int = 0,
+        last: int | None = None,
+        step: int = 1,
+        *,
+        box_coordinates: bool = False,
     ):
         """Build the trajectory of the center of mass of a set of atoms.
 
@@ -390,8 +413,14 @@ class MdanseTrajectory:
         return box_coordinates
 
     def read_atomic_trajectory(
-        self, index, first=0, last=None, step=1, box_coordinates=False
-    ):
+        self,
+        index,
+        first=0,
+        last=None,
+        step=1,
+        *,
+        box_coordinates=False,
+    ) -> np.ndarray:
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
         :param index: the index of the atom
@@ -425,7 +454,7 @@ class MdanseTrajectory:
                 coords,
                 direct_cells,
                 inverse_cells,
-                box_coordinates,
+                box_coordinates=box_coordinates,
             )
         return coords
 
@@ -478,23 +507,47 @@ class MdanseTrajectory:
         """
         return variable in self._h5_file["/configuration"]
 
-    def get_atom_property(self, symbol: str, property: str):
+    def get_atom_property(self, symbol: str, atom_property: str) -> float | int | str:
+        """Return the value of the 'atom_property' for atom type 'symbol'.
+
+        The priority is given to the values stored in the trajectory file.
+        If the atom property or type are not included in the trajectory,
+        they will be taken from the central database instead.
+
+        Parameters
+        ----------
+        symbol : str
+            Atom type.
+        atom_property : str
+            Name of the property, such as mass or neutron scattering length.
+
+        Returns
+        -------
+        float | int | str
+            The value of the property in any format specified by the database.
+
+        Raises
+        ------
+        KeyError
+            If no database contained the required entry.
+
+        """
         if not self._has_database:
-            return ATOMS_DATABASE.get_atom_property(symbol, property)
-        elif symbol not in self._has_atoms:
+            return ATOMS_DATABASE.get_atom_property(symbol, atom_property)
+        if symbol not in self._has_atoms:
             if symbol in self._h5_file["/atom_database"]:
                 self._has_atoms.append(symbol)
             else:
-                return ATOMS_DATABASE.get_atom_property(symbol, property)
-        if property not in self._property_map:
+                return ATOMS_DATABASE.get_atom_property(symbol, atom_property)
+        if atom_property not in self._property_map:
             temp = np.where(
                 self._h5_file["/atom_database/property_labels"][:]
-                == property.encode("utf-8")
+                == atom_property.encode("utf-8"),
             )[0]
             if len(temp) == 0:
-                if property == "dummy":
+                if atom_property == "dummy":
                     try:
-                        return ATOMS_DATABASE.get_atom_property(symbol, property)
+                        return ATOMS_DATABASE.get_atom_property(symbol, atom_property)
                     except KeyError:
                         if (
                             "_" in symbol
@@ -502,11 +555,12 @@ class MdanseTrajectory:
                             return 0  # the molecule atoms are not dummy
                 else:
                     raise KeyError(
-                        f"Property {property} is not in the trajectory's internal database."
+                        f"Property {atom_property} is not in the trajectory's"
+                        " internal database.",
                     )
             index = temp.flatten()[0]
-            self._property_map[property] = index
-        index = self._property_map[property]
+            self._property_map[atom_property] = index
+        index = self._property_map[atom_property]
         if index not in self._data_types:
             self._data_types[index] = self._h5_file["/atom_database/property_types"][
                 index
@@ -519,7 +573,8 @@ class MdanseTrajectory:
             except KeyError:
                 if not self.warned_about_complex_numbers:
                     LOG.warning(
-                        "This trajectory file was generated with old MDANSE. If you need complex b, please generate it again."
+                        "This trajectory file was generated with old MDANSE. If you"
+                        "need complex b, please generate it again.",
                     )
                     self.warned_about_complex_numbers = True
             else:
@@ -532,7 +587,7 @@ class MdanseTrajectory:
                 value = value.real
             self._property_cache[(symbol, index)] = value
         value = self._property_cache[(symbol, index)]
-        if property == "color":
+        if atom_property == "color":
             value = str_to_num(value)
             r, value = divmod(value, 65536)
             g, b = divmod(value, 256)
@@ -549,15 +604,33 @@ class MdanseTrajectory:
             b"barn": "ang2",
         }
         if data_unit in unit_conv:
-            return measure(value, data_unit.decode("utf-8")).toval(unit_conv.get(data_unit))
+            return measure(value, data_unit.decode("utf-8")).toval(
+                unit_conv.get(data_unit)
+            )
         return value
 
     def atoms_in_database(self) -> list[str]:
+        """Return the list of all the atom types in trajectory's database.
+
+        Returns
+        -------
+        list[str]
+            List of atom type names.
+
+        """
         if "atom_database" not in self._h5_file:
             return ATOMS_DATABASE.atoms
         return list(self._h5_file["/atom_database"].keys())
 
     def properties_in_database(self) -> list[str]:
+        """Return the list of all the properties in the trajectory's database.
+
+        Returns
+        -------
+        list[str]
+            List of valid atom property names.
+
+        """
         if "atom_database" not in self._h5_file:
             return ATOMS_DATABASE.properties
         return [

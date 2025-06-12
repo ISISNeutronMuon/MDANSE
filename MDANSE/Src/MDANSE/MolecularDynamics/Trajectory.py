@@ -222,7 +222,7 @@ class Trajectory:
         return self._trajectory.to_real_coordinates(box_coordinates, first, last, step)
 
     def read_atomic_trajectory(
-        self, index, first=0, last=None, step=1, box_coordinates=False
+        self, index:int, first:int=0, last:int=None, step:int=1, *, box_coordinates:bool=False
     ):
         """Read an atomic trajectory. The trajectory is corrected for box jumps.
 
@@ -938,7 +938,7 @@ class RigidBodyTrajectoryGenerator:
             inverse_unit_cells = inverse_unit_cells[first:last:step, :, :]
 
         for i, at in enumerate(atoms):
-            r = self._trajectory.read_atomic_trajectory(i, first, last, step, True)
+            r = self._trajectory.read_atomic_trajectory(i, first, last, step, box_coordinates=True)
             r = r - rcms
 
             r = r[:, np.newaxis, :]

@@ -460,7 +460,13 @@ class H5MDTrajectory:
             return box_coordinates
 
     def read_atomic_trajectory(
-        self, index, first=0, last=None, step=1, box_coordinates=False
+        self,
+        index: int,
+        first: int = 0,
+        last: int | None = None,
+        step: int = 1,
+        *,
+        box_coordinates: bool = False,
     ):
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
@@ -501,7 +507,7 @@ class H5MDTrajectory:
                 [self.unit_cell(nf).inverse for nf in range(first, last, step)]
             )
             atomic_traj = atomic_trajectory(
-                coords, direct_cells, inverse_cells, box_coordinates
+                coords, direct_cells, inverse_cells, box_coordinates=box_coordinates
             )
             return atomic_traj
         else:

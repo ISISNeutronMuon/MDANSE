@@ -280,7 +280,7 @@ class DynamicIncoherentStructureFactor(IJob):
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         weights = self.configuration["weights"].get_weights()
         for key, value in weights.items():
-            weights[key] = value ** 2
+            weights[key] = value**2
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "f(q,t)_%s", self.labels)
         assign_weights(self._outputData, weight_dict, "s(q,f)_%s", self.labels)

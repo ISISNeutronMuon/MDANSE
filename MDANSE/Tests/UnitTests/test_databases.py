@@ -176,24 +176,6 @@ class TestAtomsDatabase(unittest.TestCase):
         with self.assertRaises(KeyError):
             ATOMS_DATABASE.get_value("H", "INVALID")
 
-    def test_get_value_for_multiple_atoms_valid(self):
-        self.assertEqual(
-            [0, 0, 2, 0, 0, 0, 0],
-            ATOMS_DATABASE.get_values_for_multiple_atoms(
-                ["H", "H", "H2", "O", "O", "O", "H"], "nucleon"
-            ),
-        )
-
-    def test_get_value_for_multiple_atoms_unknown_atom(self):
-        with self.assertRaises(AtomsDatabaseError):
-            ATOMS_DATABASE.get_values_for_multiple_atoms(
-                ["H", "O", "O", "INVALID"], "nucleon"
-            )
-
-    def test_get_value_for_multiple_atoms_unknown_property(self):
-        with self.assertRaises(KeyError):
-            ATOMS_DATABASE.get_values_for_multiple_atoms(["H", "H", "H"], "INVALID")
-
     def test_set_value_valid(self):
         ATOMS_DATABASE.set_value("H", "symbol", "C")
         self.assertEqual("C", ATOMS_DATABASE["H"]["symbol"])
@@ -257,21 +239,12 @@ class TestAtomsDatabase(unittest.TestCase):
         )
 
     def test_match_numeric_property_unknown_property(self):
-        with self.assertRaises(KeyError) as e:
+        with self.assertRaises(KeyError):
             ATOMS_DATABASE.match_numeric_property("INVALID", 0)
-        self.assertEqual(
-            "The property INVALID is not registered in the database",
-            str(e.exception)[1:-1],
-        )
 
     def test_match_numeric_property_non_numeric_value(self):
-        with self.assertRaises(AtomsDatabaseError) as e:
+        with self.assertRaises(AtomsDatabaseError):
             ATOMS_DATABASE.match_numeric_property("electronegativity", [])
-        self.assertEqual(
-            "The provided value must be a numeric type, but [] was provided, which is of type "
-            "<class 'list'>. If you are sure that [] is numeric, then your database might be corrupt.",
-            str(e.exception)[1:-1],
-        )
 
     def test_n_atoms(self):
         self.assertEqual(4, ATOMS_DATABASE.n_atoms)

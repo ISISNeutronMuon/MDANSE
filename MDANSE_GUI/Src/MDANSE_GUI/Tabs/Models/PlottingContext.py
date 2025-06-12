@@ -13,13 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import TYPE_CHECKING, Union, Optional
-import os
-import itertools
 import copy
+import itertools
+import os
+from typing import TYPE_CHECKING, Optional, Union
 
 if TYPE_CHECKING:
     import h5py
+
+import contextlib
 
 import matplotlib.pyplot as mpl
 import numpy as np
@@ -27,10 +29,13 @@ from matplotlib import rcParams
 from matplotlib.colors import to_hex as mpl_to_hex
 from matplotlib.lines import lineStyles
 from matplotlib.markers import MarkerStyle
-from MDANSE.MLogging import LOG
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
-import contextlib
+
+from MDANSE.MLogging import LOG
+
+NUMBERS_FOR_SLICE = 3
+NUMBERS_FOR_RANGE = 2
 
 
 def get_mpl_markers():
@@ -106,6 +111,16 @@ class SingleDataset:
         self.create_axes_tags(self._axes_tag, source)
 
     def create_axes_tags(self, axes_tag: str, source: "h5py.File"):
+        """Find the right axes datasets for the current dataset.
+
+        Parameters
+        ----------
+        axes_tag : str
+            String form of the axis attribute of the main dataset
+        source : h5py.File
+            File object from which the axes datasets can be read.
+
+        """
         if axes_tag == "index":
             for dim_number, dim_length in enumerate(self._data.shape):
                 self._axes[f"index{dim_number}"] = np.arange(dim_length)
@@ -170,6 +185,14 @@ class SingleDataset:
             self._current_units[axis_name] = new_unit
 
     def create_labels(self, root_name: str):
+        """Create several labels of different length for the plot legend.
+
+        Parameters
+        ----------
+        root_name : str
+            Path to the data file from which this data set has been read.
+
+        """
         bare_name = os.path.split(root_name)[-1]
         self._labels = {
             "minimal": self._name,
@@ -177,7 +200,15 @@ class SingleDataset:
             "full": f"{root_name}:{self._name}",
         }
 
-    def spawn_imaginary_dataset(self) -> Optional[ "SingleDataset"]:
+    def spawn_imaginary_dataset(self) -> Optional["SingleDataset"]:
+        """Create another dataset with the imaginary part of the data.
+
+        Returns
+        -------
+        SingleDataset | None
+            None if data values are real, or SingleDataset of the imaginary part.
+
+        """
         if self._imaginary_data is None:
             return None
         new_dataset = SingleDataset(f"{self._name}_imag", None)
@@ -211,14 +242,14 @@ class SingleDataset:
                     slice_parts = [int(x) for x in token.split(":")]
                 except Exception:
                     continue
-                if len(slice_parts) < 4:
+                if len(slice_parts) <= NUMBERS_FOR_SLICE:
                     complete_subset_list += list(range(*slice_parts))
             elif "-" in token:
                 try:
                     slice_parts = [int(x) for x in token.split("-")]
                 except Exception:
                     continue
-                if len(slice_parts) == 2:
+                if len(slice_parts) == NUMBERS_FOR_RANGE:
                     complete_subset_list += list(range(slice_parts[0], slice_parts[1]))
             elif "," in token:
                 try:
@@ -313,7 +344,7 @@ class SingleDataset:
             picked_value = axis_values[index_tuple[axis_index]]
             if len(axis_values) > 1:
                 significant_digit = np.floor(
-                    np.log10(abs(np.mean(axis_values[1:] - axis_values[:-1])))
+                    np.log10(abs(np.mean(axis_values[1:] - axis_values[:-1]))),
                 ).astype(int)
             elif len(axis_values) == 1:
                 significant_digit = np.floor(np.log10(abs(axis_values[0]))).astype(int)
@@ -532,7 +563,8 @@ class PlottingContext(QStandardItemModel):
                 != self._last_colour_list[row % len(self._last_colour_list)]
             ):
                 LOG.debug(
-                    f"colours not equal: {current_colour} vs {self._last_colour_list[row % len(self._last_colour_list)]}"
+                    f"colours not equal: {current_colour} vs "
+                    f"{self._last_colour_list[row % len(self._last_colour_list)]}",
                 )
                 self._last_colour += 1
             else:
@@ -594,34 +626,34 @@ class PlottingContext(QStandardItemModel):
         result = {}
         for ds_num, row in enumerate(range(self.rowCount())):
             key = self.index(row, plotting_column_index["Dataset"]).data(
-                role=Qt.ItemDataRole.UserRole
+                role=Qt.ItemDataRole.UserRole,
             )
             useit = (
                 self.itemFromIndex(
-                    self.index(row, plotting_column_index["Use it?"])
+                    self.index(row, plotting_column_index["Use it?"]),
                 ).checkState()
                 == Qt.CheckState.Checked
             )
             set_scaling = (
                 self.itemFromIndex(
-                    self.index(row, plotting_column_index["Apply weights?"])
+                    self.index(row, plotting_column_index["Apply weights?"]),
                 ).checkState()
                 == Qt.CheckState.Checked
             )
             data_number_string = self.itemFromIndex(
-                self.index(row, plotting_column_index["Use it?"])
+                self.index(row, plotting_column_index["Use it?"]),
             ).text()
             colour = self.itemFromIndex(
-                self.index(row, plotting_column_index["Colour"])
+                self.index(row, plotting_column_index["Colour"]),
             ).text()
             style = self.itemFromIndex(
-                self.index(row, plotting_column_index["Line style"])
+                self.index(row, plotting_column_index["Line style"]),
             ).text()
             marker = self.itemFromIndex(
-                self.index(row, plotting_column_index["Marker"])
+                self.index(row, plotting_column_index["Marker"]),
             ).text()
             axis = self.itemFromIndex(
-                self.index(row, plotting_column_index["Main axis"])
+                self.index(row, plotting_column_index["Main axis"]),
             ).text()
             if useit:
                 self._datasets[key].set_data_limits(data_number_string)
