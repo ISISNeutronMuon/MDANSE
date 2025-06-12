@@ -173,17 +173,19 @@ class AngularCorrelation(IJob):
             configuration = self.configuration["trajectory"]["instance"].configuration(
                 frame_index
             )
-            coordinates = configuration.contiguous_configuration().coordinates
+            coordinates = configuration.contiguous_configuration().coordinates[molecule]
             if self.inner_index2 is not None:
-                ref_pos = coordinates[molecule[self.inner_index2]]
+                ref_pos = coordinates[self.inner_index2]
             else:
-                centre_coordinates = center_of_mass(coordinates[molecule], masses)
+                centre_coordinates = center_of_mass(coordinates, masses)
                 ref_pos = centre_coordinates
             if self.inner_index1 is None:
-                pm1, _, _ = moment_of_inertia(coordinates, centre_coordinates, masses)
+                pm1, _, _ = moment_of_inertia(
+                    coordinates, centre_coordinates, masses, output_eigenvectors=True
+                )
                 diff[i] = pm1
                 continue
-            diff[i] = coordinates[molecule[self.inner_index1]] - ref_pos
+            diff[i] = coordinates[self.inner_index1] - ref_pos
 
         modulus = np.sqrt(np.sum(diff**2, 1))
 
