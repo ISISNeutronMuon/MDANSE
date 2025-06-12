@@ -26,9 +26,18 @@ class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
     """
     This configurator allows to define a local axis per molecule.
 
-    For each molecule, the axis is defined using the coordinates of two atoms of the molecule.
+    The input is the name of a molecule type, and one or two indices
+    of atoms within the molecule.
 
-    :note: this configurator depends on 'trajectory' configurator to be configured.
+    If the atom indices are not defined, the calculation will use
+    the principal axis of the molecule determined from the moment
+    of inertia.
+
+    If one index is given, the molecule axis will be a vector from
+    the molecule centre to the atom with the given index.
+
+    If two indices are given, the molecule axis will be a vector
+    between the atoms with the two indices.
     """
 
     _default = (None, 0)
@@ -42,10 +51,18 @@ class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
         self["index2"] = None
         molecule_name = value[0]
         super().configure(molecule_name)
+        try:
+            val1 = int(value[1])
+        except (TypeError, ValueError, IndexError):
+            val1 = None
+        try:
+            val2 = int(value[2])
+        except (TypeError, ValueError, IndexError):
+            val2 = None
         if len(value) == 3:
-            self["index1"] = int(value[1])
-            self["index2"] = int(value[2])
+            self["index1"] = val1
+            self["index2"] = val2
         elif len(value) == 2:
-            self["index1"] = int(value[1])
+            self["index1"] = val1
         elif len(value) > 3:
             raise ValueError(f"Too many items in input: {value}")

@@ -69,7 +69,11 @@ center = center_of_mass
 
 
 def moment_of_inertia(
-    coords: np.ndarray, com: np.ndarray, mass: np.ndarray
+    coords: np.ndarray,
+    com: np.ndarray,
+    mass: np.ndarray,
+    *,
+    output_eigenvectors: bool = False,
 ) -> np.ndarray:
     """Return the three eigenvectors of the moment of inertia.
 
@@ -85,6 +89,8 @@ def moment_of_inertia(
         Centre of mass of the molecule.
     mass : np.ndarray
         Masses of the atoms.
+    output_eigenvectors : bool
+        If True, output the eigenvectors, if False, output eigenvalues.
 
     Returns
     -------
@@ -106,8 +112,10 @@ def moment_of_inertia(
             [xz, yz, zz],
         ]
     )
-
-    return np.linalg.eigvalsh(moi)
+    if output_eigenvectors:
+        return np.linalg.eigh(moi)[1]
+    else:
+        return np.linalg.eigvalsh(moi)
 
 
 def build_cartesian_axes(origin, p1, p2, dtype=np.float64):
