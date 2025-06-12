@@ -18,7 +18,7 @@ import collections
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Geometry import center_of_mass
+from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 
 
 class Eccentricity(IJob):
@@ -109,23 +109,8 @@ class Eccentricity(IJob):
 
         # calculate the inertia moments
         mass = np.array(self._selectionMasses)
-        x, y, z = (series - com).T
-        xx = np.sum(mass * (y**2 + z**2))
-        xy = np.sum(-mass * x * y)
-        xz = np.sum(-mass * x * z)
-        yy = np.sum(mass * (x**2 + z**2))
-        yz = np.sum(-mass * y * z)
-        zz = np.sum(mass * (x**2 + y**2))
 
-        moi = np.array(
-            [
-                [xx, xy, xz],
-                [xy, yy, yz],
-                [xz, yz, zz],
-            ]
-        )
-
-        pm1, pm2, pm3 = np.linalg.eigvalsh(moi)
+        pm1, pm2, pm3 = moment_of_inertia(series, com, mass)
         eccentricity = np.sqrt(pm3**2 - pm1**2) / pm3
         return index, eccentricity
 
