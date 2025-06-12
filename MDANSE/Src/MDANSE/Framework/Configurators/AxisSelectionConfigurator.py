@@ -16,11 +16,13 @@
 
 
 from MDANSE.Framework.UserDefinitionStore import UD_STORE
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.Configurators.MoleculeSelectionConfigurator import (
+    MoleculeSelectionConfigurator,
+)
 from MDANSE.MolecularDynamics.TrajectoryUtils import find_atoms_in_molecule
 
 
-class AxisSelectionConfigurator(IConfigurator):
+class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
     """
     This configurator allows to define a local axis per molecule.
 
@@ -29,51 +31,21 @@ class AxisSelectionConfigurator(IConfigurator):
     :note: this configurator depends on 'trajectory' configurator to be configured.
     """
 
-    _default = None
+    _default = (None, 0)
 
     def configure(self, value):
-        """
-        Configure an input value.
-
-        The value can be:
-
-        #. a dict with *'molecule'*, *'endpoint1'* and *'endpoint2'* keys. *'molecule'* key \
-        is the name of the molecule for which the axis selection will be performed and *'endpoint1'* \
-        and *'endpoint2'* keys are the names of two atoms of the molecule along which the axis will be defined
-        #. str: the axis selection will be performed by reading the corresponding user definition.
-
-        :param configuration: the current configuration
-        :type configuration: MDANSE.Framework.Configurable.Configurable
-        :param value: the input value
-        :type value: tuple or str
-        """
         self._original_input = value
 
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
-
-        if UD_STORE.has_definition(trajConfig["basename"], "axis_selection", value):
-            ud = UD_STORE.get_definition(
-                trajConfig["basename"], "axis_selection", value
-            )
-            self.update(ud)
-        else:
-            self.update(value)
-
-        e1 = find_atoms_in_molecule(
-            trajConfig["instance"].chemical_system,
-            self["molecule"],
-            self["endpoint1"],
-            True,
-        )
-        e2 = find_atoms_in_molecule(
-            trajConfig["instance"].chemical_system,
-            self["molecule"],
-            self["endpoint2"],
-            True,
-        )
-
-        self["value"] = value
-
-        self["endpoints"] = list(zip(e1, e2))
-
-        self["n_axis"] = len(self["endpoints"])
+        self.use_MOI_axes = True
+        self.use_COM_reference = True
+        self["index1"] = None
+        self["index2"] = None
+        molecule_name = value[0]
+        super().configure(molecule_name)
+        if len(value) == 3:
+            self["index1"] = int(value[1])
+            self["index2"] = int(value[2])
+        elif len(value) == 2:
+            self["index1"] = int(value[1])
+        elif len(value) > 3:
+            raise ValueError(f"Too many items in input: {value}")

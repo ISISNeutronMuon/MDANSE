@@ -19,7 +19,7 @@ import collections
 import numpy as np
 from scipy.signal import correlate
 
-from MDANSE.Mathematics.Geometry import center_of_mass
+from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -61,8 +61,8 @@ class AngularCorrelation(IJob):
         "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["molecule_name"] = (
-        "MoleculeSelectionConfigurator",
+    settings["molecule_and_axis"] = (
+        "AxisSelectionConfigurator",
         {
             "label": "molecule name",
             "default": "",
@@ -84,7 +84,10 @@ class AngularCorrelation(IJob):
 
         self.molecules = self.configuration["trajectory"][
             "instance"
-        ].chemical_system._clusters[self.configuration["molecule_name"]["value"]]
+        ].chemical_system._clusters[self.configuration["molecule_and_axis"]["value"]]
+
+        self.inner_index1 = self.configuration["molecule_and_axis"]["index1"]
+        self.inner_index2 = self.configuration["molecule_and_axis"]["index2"]
 
         self.numberOfSteps = len(self.molecules)
 
@@ -108,7 +111,7 @@ class AngularCorrelation(IJob):
                 self.configuration["trajectory"][
                     "instance"
                 ].chemical_system.number_of_molecules(
-                    self.configuration["molecule_name"]["value"]
+                    self.configuration["molecule_and_axis"]["value"]
                 )
             ),
             units="au",
@@ -131,7 +134,7 @@ class AngularCorrelation(IJob):
                     self.configuration["trajectory"][
                         "instance"
                     ].chemical_system.number_of_molecules(
-                        self.configuration["molecule_name"]["value"]
+                        self.configuration["molecule_and_axis"]["value"]
                     ),
                     self.configuration["frames"]["n_frames"],
                 ),
@@ -141,22 +144,24 @@ class AngularCorrelation(IJob):
                 partial_result=True,
             )
 
-    def run_step(self, index):
-        """
-        Runs a single step of the job.\n
+    def run_step(self, index: int) -> tuple[int, np.ndarray]:
+        """Run the analysis for a single molecule.
 
-        :Parameters:
-            #. index (int): The index of the step.
-        :Returns:
-            #. index (int): The index of the step.
-            #. vectors (np.array): The calculated vectors
+        Parameters
+        ----------
+        index : int
+            Index of the molecule in the chemical system.
+
+        Returns
+        -------
+        tuple[int, np.ndarray]
+            Molecule index and the correlation array.
         """
 
         molecule = self.molecules[index]
         masses = self.masses[molecule]
 
-        at1_traj = np.empty((self.configuration["frames"]["number"], 3))
-        at2_traj = np.empty((self.configuration["frames"]["number"], 3))
+        diff = np.empty((self.configuration["frames"]["number"], 3))
 
         for i, frame_index in enumerate(
             range(
@@ -169,11 +174,16 @@ class AngularCorrelation(IJob):
                 frame_index
             )
             coordinates = configuration.contiguous_configuration().coordinates
-            centre_coordinates = center_of_mass(coordinates[molecule], masses)
-            at1_traj[i] = centre_coordinates
-            at2_traj[i] = coordinates[molecule[0]]
-
-        diff = at2_traj - at1_traj
+            if self.inner_index2 is not None:
+                ref_pos = coordinates[molecule[self.inner_index2]]
+            else:
+                centre_coordinates = center_of_mass(coordinates[molecule], masses)
+                ref_pos = centre_coordinates
+            if self.inner_index1 is None:
+                pm1, _, _ = moment_of_inertia(coordinates, centre_coordinates, masses)
+                diff[i] = pm1
+                continue
+            diff[i] = coordinates[molecule[self.inner_index1]] - ref_pos
 
         modulus = np.sqrt(np.sum(diff**2, 1))
 
@@ -204,7 +214,7 @@ class AngularCorrelation(IJob):
         self._outputData["ac"] /= self.configuration["trajectory"][
             "instance"
         ].chemical_system.number_of_molecules(
-            self.configuration["molecule_name"]["value"]
+            self.configuration["molecule_and_axis"]["value"]
         )
 
         self._outputData.write(
