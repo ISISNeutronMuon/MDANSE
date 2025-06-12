@@ -61,3 +61,74 @@ def test_trajectory(tmp_path, parameters, traj_type):
 
     assert out_file.exists()
     assert log_file.exists()
+
+def test_CenterOfMassesTrajectory(parameters):
+    """This will need to detect molecules before it can
+    find the centre of each one of them."""
+    temp_name = tempfile.mktemp()
+    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
+    job = IJob.create("CenterOfMassesTrajectory")
+    job.run(parameters, status=True)
+    assert path.exists(temp_name + ".mdt")
+    assert path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
+
+
+def test_UnfoldedTrajectory(parameters):
+    temp_name = tempfile.mktemp()
+    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
+    job = IJob.create("UnfoldedTrajectory")
+    job.run(parameters, status=True)
+    assert path.exists(temp_name + ".mdt")
+    assert path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
+
+
+def test_SelectedTrajectoryFilter(tmp_path):
+    parameters = {
+        "atom_selection": '{"0": {"function_name": "select_atoms", "index_range": [0, 10], "operation_type": "union"}}',
+        "frames": [0, 10, 1, 5],
+        "instrument_resolution": ("ideal", {}),
+        "projection": None,
+        "running_mode": ("single-core",),
+        "trajectory_filter": '{ "filter": "Butterworth", "attributes": { "order": 1, "attenuation_type": "lowpass", "cutoff_freq": 25.0 } }',
+        "weights": "atomic_weight",
+    }
+    parameters["trajectory"] = short_traj
+    temp_name = str(tmp_path / "filtered_trajectory")
+    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
+    job = IJob.create("TrajectoryFilter")
+    job.run(parameters, status=True)
+    assert path.exists(temp_name + ".mdt")
+    assert path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")
+
+def test_TrajectoryFilter(tmp_path):
+    parameters = {
+        "frames": [0, 10, 1, 5],
+        "instrument_resolution": ("ideal", {}),
+        "projection": None,
+        "running_mode": ("single-core",),
+        "trajectory_filter": '{ "filter": "Butterworth", "attributes": { "order": 1, "attenuation_type": "lowpass", "cutoff_freq": 25.0 } }',
+        "weights": "atomic_weight",
+    }
+    parameters["trajectory"] = short_traj
+    temp_name = str(tmp_path / "filtered_trajectory")
+    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
+    job = IJob.create("TrajectoryFilter")
+    job.run(parameters, status=True)
+    assert path.exists(temp_name + ".mdt")
+    assert path.isfile(temp_name + ".mdt")
+    os.remove(temp_name + ".mdt")
+    assert path.exists(temp_name + ".log")
+    assert path.isfile(temp_name + ".log")
+    os.remove(temp_name + ".log")

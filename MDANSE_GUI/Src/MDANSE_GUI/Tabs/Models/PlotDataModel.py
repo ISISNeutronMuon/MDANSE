@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from pathlib import Path
 from typing import TypeVar
 
 import h5py
@@ -52,9 +51,9 @@ class BasicPlotDataItem(QStandardItem):
     @property
     def child_path(self):
         if self.data_parent is None:
-            return "/"
+            return ""
         else:
-            return str(Path(self.data_parent.child_path) / self.text())
+            return f"{self.data_parent.child_path}/{self.text()}"
 
     def populate(self, data: h5py.File | h5py.Group):
         for key in data.keys() - EXCLUDE:
@@ -82,9 +81,9 @@ class DataSetItem(BasicPlotDataItem):
         self._item_type = "dataset"
 
     def data_path(self) -> str:
-        parent_path = Path(self.parent().data_path())
+        parent_path = self.parent().data_path()
         own_path = self.data(role=Qt.ItemDataRole.UserRole)
-        return str(parent_path / own_path)
+        return f"{parent_path}/{own_path}"
 
     def file_number(self) -> int:
         return self.parent().file_number()

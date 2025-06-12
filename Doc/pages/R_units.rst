@@ -3,14 +3,10 @@ Units
 
 The units used by MDANSE are nm for length and ps for time, and their
 inverses for Q (nm\ :sup:`-1`) and angular frequencies, :math:`\omega`
-(ps\ :sup:`-1`). Any input must be given using these units, and the
-output files do also employ the same units. The :ref:`2d3dplotter` includes
-the Python magnitude module, so you can modify the units when plotting
-the results using the `Axes settings <#_Axes_settings>`__ (available
-from the context menu that appears by right clicking on the plot). If
-you use the export option in the graphic after having changed the units,
-your output file will be saved with the desired units. But remember that
-the original output file (typically a HDF) is written using the
+(ps\ :sup:`-1`). It is possible to change the preferred units in the
+plotter interface, and to output results as text files from the plotter
+using the values after unit conversion. The original output file
+(typically an HDF5 file with an MDA extension) is written using the
 original standard units.
 
 The list of prefixes to physical quantities is listed in Table 1.
@@ -61,15 +57,13 @@ Table 2: A list of all units that can be used in MDANSE.
 |              |                | 10\ :sup:`-10` |                |
 |              |                | m              |                |
 +--------------+----------------+----------------+----------------+
+| Bohr         | Bohr radius    | 5.2917721 \*   |                |
+|              |                | 10\ :sup:`-11` |                |
+|              |                | m              |                |
++--------------+----------------+----------------+----------------+
 | ft           | foot           | 0.3048 m       |                |
 +--------------+----------------+----------------+----------------+
 | inch         | inch           | 0.0254 m       |                |
-+--------------+----------------+----------------+----------------+
-| ly           | light year     | 9.             |                |
-|              |                | 460,730,472,58 |                |
-|              |                | \*             |                |
-|              |                | 10\ :sup:`15`  |                |
-|              |                | m              |                |
 +--------------+----------------+----------------+----------------+
 | b            | Barn           | 1 \*           | surface        |
 |              |                | 10\ :sup:`-28` |                |
@@ -117,17 +111,13 @@ Table 2: A list of all units that can be used in MDANSE.
 |              |                | m\ :sup:`2`    |                |
 |              |                | s\ :sup:`-2`   |                |
 +--------------+----------------+----------------+----------------+
-| cal_per_mole | calorie per    | 6.947,78 \*    |                |
-|              | mole           | 10\ :sup:`-24` |                |
-|              |                | kg m\ :sup:`2` |                |
+| cal_per_mole | calorie per    | 4.184 kg       |                |
+|              | mole           | m\ :sup:`2`    |                |
 |              |                | s\ :sup:`-2`   |                |
 |              |                | mol\ :sup:`-1` |                |
 +--------------+----------------+----------------+----------------+
-| J_per_mole   | Joule per mole | 1.             |                |
-|              |                | 660,559,273,42 |                |
-|              |                | \*             |                |
-|              |                | 10\ :sup:`-24` |                |
-|              |                | kg m\ :sup:`2` |                |
+| J_per_mole   | Joule per mole | 1 kg           |                |
+|              |                | m\ :sup:`2`    |                |
 |              |                | s\ :sup:`-2`   |                |
 |              |                | mol\ :sup:`-1` |                |
 +--------------+----------------+----------------+----------------+

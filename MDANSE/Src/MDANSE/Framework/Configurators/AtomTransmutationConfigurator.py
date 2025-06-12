@@ -163,10 +163,6 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         atomSelConfigurator = self._configurable[self._dependencies["atom_selection"]]
         atomSelConfigurator["unique_names"] = sorted(set(atomSelConfigurator["names"]))
-        atomSelConfigurator["masses"] = [
-            [traj_config["instance"].get_atom_property(n, "atomic_weight")]
-            for n in atomSelConfigurator["names"]
-        ]
         self.error_status = "OK"
 
     def transmute(self, idx: int, element: str) -> None:
@@ -186,8 +182,28 @@ class AtomTransmutationConfigurator(IConfigurator):
         except ValueError:
             pass
         else:
-            atomSelConfigurator["names"][idxInSelection] = element
+            if (
+                "grouping_level" in self._dependencies
+                and "atom"
+                != self._configurable[self._dependencies["grouping_level"]]["level"]
+            ):
+                group_config = self._configurable[self._dependencies["grouping_level"]]
+                prev_element = atomSelConfigurator["elements"][idxInSelection][0]
+                group_name = atomSelConfigurator["names"][idxInSelection][
+                    : -(len(prev_element) + 1)
+                ]
+                atomSelConfigurator["names"][idxInSelection] = (
+                    group_name + "_" + element
+                )
+                group_config["group_elements"][group_name].remove(prev_element)
+                group_config["group_elements"][group_name].append(element)
+            else:
+                atomSelConfigurator["names"][idxInSelection] = element
             atomSelConfigurator["elements"][idxInSelection] = [element]
+            traj_config = self._configurable[self._dependencies["trajectory"]]
+            atomSelConfigurator["masses"][idxInSelection] = [
+                traj_config["instance"].get_atom_property(element, "atomic_weight")
+            ]
             self._nTransmutedAtoms += 1
 
     def get_transmuter(self) -> AtomTransmuter:

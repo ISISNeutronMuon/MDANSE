@@ -10,9 +10,9 @@ overview of these changes and the file formats used by MDANSE.
 .. _hdf5:
 
 HDF5 Based File Formats
-------------------------
+-----------------------
 
-In the MDANSE 2, the primary file format for both trajectory (MDT)
+In MDANSE 2, the primary file format for both trajectory (MDT)
 storage and analysis (MDA) results are based on the `Hierarchical Data Format (HDF5) <https://www.hdfgroup.org/solutions/hdf5/>`_
 . HDF5 is a versatile file format designed for efficiently organizing and managing
 large data sets. It employs a hierarchical structure, akin to a file system,
@@ -23,7 +23,7 @@ HDF5 ensures platform independence, efficient data storage, and
 self-contained information within trajectory files.
 
 Trajectories have to be converted to the MDT format before
-MDANSE can perform analysis calculations. Multiple converters
+they can be analysed with MDANSE. Multiple converters
 are available in MDANSE to convert outputs of different MD engines
 to the MDT format.
 
@@ -33,7 +33,7 @@ Contents of the MDA files can be viewed and plotted in the MDANSE GUI.
 .. _text_output:
 
 DAT File Format
------------------
+---------------
 
 An alternative output format of analysis results is in the form of DAT files, which
 are text-based and easily readable. Each DAT file corresponds to a specific
@@ -54,3 +54,32 @@ tarball is generated, which contains multiple files, including:
 
 The DAT format simplifies data sharing and analysis, providing a clear and
 human-readable representation of analysis results.
+
+CSV files
+---------
+
+Instead of writing the results straight into a text file,
+it is also possible to export the results to a CSV file
+in post-processing, using the data plotter.
+More details on this can be found in :ref:`plotter-csv-output`.
+
+.. _note-on-h5md-files:
+
+H5MD Files
+----------
+
+When created according to
+`the standard <https://www.nongnu.org/h5md/h5md.html>`_,
+H5MD trajectories contain all the information needed by MDANSE
+to load, visualise and analyse them. You should be able to
+load an H5MD trajectory into MDANSE GUI without converting it
+to the MDT format.
+
+Some popular MD engines provide packages for writing H5MD files,
+but the resulting files do not include essential information such
+as the physical units of time, positions and velocities.
+Please try out your
+MD engine's H5MD implementation using a very short MD run.
+If you are not able to load the resulting H5MD file into MDANSE,
+please use the engine's standard trajectory format for other
+runs.

@@ -3,10 +3,11 @@
 Installing MDANSE
 =================
 
-MDANSE can be easily installed by following these steps:
+MDANSE can be installed by following these steps:
 
 Create Virtual Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 To create your Python virtual environment for MDANSE use ``venv`` or ``virtualenv``.
 Open a terminal or command prompt.
 
@@ -25,11 +26,13 @@ directory using the ``cd`` command. For example:
 
    python3 -m venv mdanse
 
+.. _venv_for_mdanse:
 
 Activate Virtual Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-After creating the virtual environment, you need to activate it to use MDANSE within this isolated environment. The
+After creating the virtual environment, you need to activate it
+to use MDANSE within this isolated environment. The
 activation command varies by operating system:
 
 - On macOS and Linux:
@@ -80,6 +83,10 @@ You can now start using MDANSE by running the following command:
 
 This will launch the MDANSE graphical user interface (GUI),
 and you can start using MDANSE for your analysis.
+
+Make sure that you are starting MDANSE from a shell/console
+in which you have activated the Python virtual environment,
+as described above in section :ref:`venv_for_mdanse`.
 
 MDANSE Scripts
 ~~~~~~~~~~~~~~

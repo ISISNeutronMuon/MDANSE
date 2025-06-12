@@ -20,9 +20,8 @@ All converters output the trajectories as .MDT files, which are binary HDF5 file
 +-------------------+--------------------------------------+-------------------+------------------------------------------+
 | CP2K Converter    | CP2K trajectory format               | .xyz (position),  | Converts CP2K trajectory files to HDF    |
 |                   |                                      | .xyz (velocity),  | format, including positions, velocities, |
-|                   |                                      | .cell (cell)      | and cell dimensions. Velocity            |
-|                   |                                      |                   | approximation from positions available;  |
-|                   |                                      |                   | optimal for incomplete datasets.         |
+|                   |                                      | .xyz (force),     | forces and cell dimensions.              |
+|                   |                                      | .cell (cell)      |                                          |
 +-------------------+--------------------------------------+-------------------+------------------------------------------+
 | DFTB Converter    | DFTB trajectory format               | .xtd (XTD file),  | Converts DFTB trajectory files to HDF    |
 |                   |                                      | .trj (TRJ file)   | format. Requires system's XTD file for   |

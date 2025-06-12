@@ -13,11 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+from collections.abc import Iterator
+import itertools as it
 import collections
 
 import numpy as np
-
+import numpy.typing as npt
 
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 
@@ -55,6 +56,15 @@ class CoordinationNumber(DistanceHistogram):
             "dependencies": {"trajectory": "trajectory"},
         },
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -65,6 +75,7 @@ class CoordinationNumber(DistanceHistogram):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
             }
         },
     )
@@ -85,71 +96,36 @@ class CoordinationNumber(DistanceHistogram):
             units="nm",
         )
 
-        for pair in self._elementsPairs:
-            invPair = pair[::-1]
-            pair_str = "".join(map(str, pair))
-            inv_pair_str = "".join(map(str, invPair))
-            if self.indices_intra is not None:
+        self.labels = self.configuration["grouping_level"].pair_labels(all_pairs=True)
+        self.labels_intra = self.configuration["grouping_level"].pair_labels(
+            intra=True, all_pairs=True
+        )
+
+        for label, _ in self.labels:
+            self._outputData.add(
+                f"cn_{label}",
+                "LineOutputVariable",
+                (npoints,),
+                axis="r",
+                units="au",
+                main_result=True,
+            )
+        if self.intra:
+            for label, _ in self.labels_intra:
                 self._outputData.add(
-                    f"cn_intra_{pair_str}",
+                    f"cn_intra_{label}",
                     "LineOutputVariable",
                     (npoints,),
                     axis="r",
                     units="au",
                 )
+            for label, _ in self.labels:
                 self._outputData.add(
-                    f"cn_inter_{pair_str}",
+                    f"cn_inter_{label}",
                     "LineOutputVariable",
                     (npoints,),
                     axis="r",
                     units="au",
-                )
-                self._outputData.add(
-                    f"cn_total_{pair_str}",
-                    "LineOutputVariable",
-                    (npoints,),
-                    axis="r",
-                    units="au",
-                    main_result=True,
-                )
-                self._outputData.add(
-                    f"cn_intra_{inv_pair_str}",
-                    "LineOutputVariable",
-                    (npoints,),
-                    axis="r",
-                    units="au",
-                )
-                self._outputData.add(
-                    f"cn_inter_{inv_pair_str}",
-                    "LineOutputVariable",
-                    (npoints,),
-                    axis="r",
-                    units="au",
-                )
-                self._outputData.add(
-                    f"cn_total_{inv_pair_str}",
-                    "LineOutputVariable",
-                    (npoints,),
-                    axis="r",
-                    units="au",
-                    main_result=True,
-                )
-            else:
-                self._outputData.add(
-                    f"cn_{pair_str}",
-                    "LineOutputVariable",
-                    (npoints,),
-                    axis="r",
-                    units="au",
-                    main_result=True,
-                )
-                self._outputData.add(
-                    f"cn_{inv_pair_str}",
-                    "LineOutputVariable",
-                    (npoints,),
-                    axis="r",
-                    units="au",
-                    main_result=True,
                 )
 
         nFrames = self.configuration["frames"]["number"]
@@ -169,68 +145,69 @@ class CoordinationNumber(DistanceHistogram):
             self._concentrations[k] /= nFrames
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        for pair in self._elementsPairs:
-            at1, at2 = pair
-            invPair = pair[::-1]
-            pair_str = "".join(map(str, pair))
-            inv_pair_str = "".join(map(str, invPair))
 
-            ni = nAtomsPerElement[at1]
-            nj = nAtomsPerElement[at2]
+        # symmetrize the data
+        for i, j in it.combinations_with_replacement(self.selectedElements, 2):
+            idi = self.selectedElements.index(i)
+            idj = self.selectedElements.index(j)
+            if i != j:
+                if self.indices_intra is not None:
+                    self.h_intra[idi, idj] += self.h_intra[idj, idi]
+                    self.h_intra[idj, idi] = self.h_intra[idi, idj]
+                self.h_total[idi, idj] += self.h_total[idj, idi]
+                self.h_total[idj, idi] = self.h_total[idi, idj]
 
-            idi = self.selectedElements.index(at1)
-            idj = self.selectedElements.index(at2)
+        def calc_func(
+            label_i: str, label_j: str
+        ) -> Iterator[tuple[str, bool, npt.NDArray]]:
+            """Calculates the coordination number for a given pair of
+            element labels.
 
-            if idi == idj:
+            Parameters
+            ----------
+            label_i : str
+                The element label.
+            label_j : str
+                The element label.
+
+            Yields
+            ------
+            name : str
+                The results name.
+            inter : bool
+                Whether results are for intermolecular atom pairs.
+            results : npt.NDArray
+                The results.
+            """
+            ni = nAtomsPerElement[label_i]
+            nj = nAtomsPerElement[label_j]
+
+            idi = self.selectedElements.index(label_i)
+            idj = self.selectedElements.index(label_j)
+
+            if label_i == label_j:
                 nij = ni**2 / 2.0
             else:
                 nij = ni * nj
-                if self.indices_intra is not None:
-                    self.h_intra[idi, idj] += self.h_intra[idj, idi]
-                self.h_total[idi, idj] += self.h_total[idj, idi]
 
             fact = 2 * nij * nFrames * shellVolumes
 
-            if self.indices_intra is not None:
-                self.h_intra[idi, idj, :] /= fact
+            rho_j = self.averageDensity * self._concentrations[label_j]
+
             self.h_total[idi, idj, :] /= fact
-
-            if self.indices_intra is not None:
-                cnIntra = np.add.accumulate(self.h_intra[idi, idj, :] * r2) * dr
             cnTotal = np.add.accumulate(self.h_total[idi, idj, :] * r2) * dr
+            yield "cn", False, rho_j * cnTotal
 
-            if self.indices_intra is not None:
+            if self.intra:
+                self.h_intra[idi, idj, :] /= fact
+                cnIntra = np.add.accumulate(self.h_intra[idi, idj, :] * r2) * dr
                 cnInter = cnTotal - cnIntra
+                yield "cn_inter", False, rho_j * cnInter
+                yield "cn_intra", True, rho_j * cnIntra
 
-            cAlpha = self._concentrations[pair[0]]
-            cBeta = self._concentrations[pair[1]]
-
-            if self.indices_intra is not None:
-                self._outputData[f"cn_intra_{pair_str}"][:] = (
-                    self.averageDensity * cBeta * cnIntra
-                )
-                self._outputData[f"cn_inter_{pair_str}"][:] = (
-                    self.averageDensity * cBeta * cnInter
-                )
-                self._outputData[f"cn_total_{pair_str}"][:] = (
-                    self.averageDensity * cBeta * cnTotal
-                )
-                self._outputData[f"cn_intra_{inv_pair_str}"][:] = (
-                    self.averageDensity * cAlpha * cnIntra
-                )
-                self._outputData[f"cn_inter_{inv_pair_str}"][:] = (
-                    self.averageDensity * cAlpha * cnInter
-                )
-                self._outputData[f"cn_total_{inv_pair_str}"][:] = (
-                    self.averageDensity * cAlpha * cnTotal
-                )
-            else:
-                self._outputData[f"cn_{pair_str}"][:] = (
-                    self.averageDensity * cBeta * cnTotal
-                )
-                self._outputData[f"cn_{inv_pair_str}"][:] = (
-                    self.averageDensity * cAlpha * cnTotal
-                )
+        self.configuration["grouping_level"].update_pair_results(
+            calc_func, self._outputData, all_pairs=True
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

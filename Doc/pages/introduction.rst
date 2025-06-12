@@ -6,44 +6,49 @@ structure and dynamics of materials. Computational simulations and
 modeling plays a crucial role in analyzing and interpreting such experiments,
 leading to improvements in existing materials and the design of new ones.
 Atomistic simulations, particularly molecular dynamics (MD) simulations, are
-increasingly employed for these purposes. However, predicting neutron observables
-from MD trajectories is a complex process that involves various calculations and
-transformations, such as mean square displacements, densities of states, velocity
-and position auto- and cross-correlation functions, and
-convolutions with instrument parameters, to obtain neutron observables that can
+increasingly employed for these purposes. 
+Many properties, including neutron observables, can be derived from
+from MD trajectories. These include mean square displacement,
+vibrational density of states, velocity
+and position auto- and cross-correlation functions and van Hove functions.
+In the case of neutron observables, the neutron scattering lengths of
+the component atoms and convolutions with instrument parameters
+need to be included in the calculation to produce neutron observables that can
 be directly compared with experimental data.
 
 Purpose and Capabilities
 ------------------------
 
-MDANSE serves as a versatile toolkit designed to streamline the analysis of
-molecular dynamics simulations. Its primary objectives are to:
+MDANSE is a toolkit designed to analyse molecular dynamics simulations.
+It can be used for
 
-- Facilitate the visualization and animation of trajectory data.
-- Enable the computation of various properties, including dynamics, infrared,
-  scattering, structural, and thermodynamic properties.
+- visualization and animation of trajectory data,
+- general trajectory analysis (average structure, dynamic properties, etc.)
+- computation of neutron scattering observables,
 
-Flexibility and Compatibility
------------------------------
+Transferability and Compatibility
+---------------------------------
 
-- A Python-based graphical user interface (GUI) via the MDANSE_GUI package,
-  including a trajectory viewer and a data plotter.
-- Command-line utilities for creating and running MDANSE jobs as Python scripts.
-- Specialised trajectory converters for specific MD engines.
-- General trajectory converters based on ASE, MDAnalysis and MDTraj.
+- A Python-based graphical user interface (from the MDANSE_GUI package)
+  can run different analysis types.
+- The GUI can also save run parameters as scripts, which can be copied to
+  and run on other platforms.
+- Both the trajectories and the analysis results are saved as HDF5 files,
+  and are transferable between different machines and operating systems.
+- Specific trajectory converters are available for different MD engines,
+  together with general trajectory converters based on ASE, MDAnalysis and mdtraj.
 
 Your Guide to MDANSE
 ---------------------
 
-This user's guide provides a detailed overview of MDANSE's capabilities, along
-with theoretical background information and installation instructions for three
-different platforms: Windows, MacOS, and Ubuntu.
+This user's guide provides an overview of MDANSE's capabilities, along
+with theoretical background information and installation instructions.
 
 Collaboration and Feedback
 --------------------------
 
 The authors welcome suggestions, feedback, and bug reports regarding the MDANSE
-software and this user's guide, we encourage you to report them. Your feedback is
+software and this user's guide. Your feedback is
 essential in helping us enhance the software and improve the user experience.
 You can report issues and make suggestions on our `GitHub repository <https://github.com/ISISNeutronMuon/MDANSE>`_.
 Alternatively, you can contact the developers directly by emailing us at MDANSE-help@stfc.ac.uk.

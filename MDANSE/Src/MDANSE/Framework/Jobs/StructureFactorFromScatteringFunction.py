@@ -41,6 +41,15 @@ class StructureFactorFromScatteringFunction(IJob):
         "HDFInputFileConfigurator",
         {"label": "MDANSE Coherent Structure Factor", "default": "dcsf.mda"},
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -51,6 +60,7 @@ class StructureFactorFromScatteringFunction(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
             }
         },
     )
@@ -69,17 +79,11 @@ class StructureFactorFromScatteringFunction(IJob):
 
         self._outputData.add("q", "LineOutputVariable", inputFile["q"][:], units="1/nm")
         nq = len(inputFile["q"][:])
+        self.labels = self.configuration["grouping_level"].pair_labels()
 
-        self._elementsPairs = sorted(
-            it.combinations_with_replacement(
-                self.configuration["atom_selection"]["unique_names"], 2
-            )
-        )
-        for pair in self._elementsPairs:
-            pair_str = "".join(map(str, pair))
-
+        for pair_str, _ in self.labels:
             self._outputData.add(
-                f"ssf_total_{pair_str}",
+                f"ssf_{pair_str}",
                 "LineOutputVariable",
                 (nq,),
                 axis="q",
@@ -125,26 +129,37 @@ class StructureFactorFromScatteringFunction(IJob):
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         norm_natoms = 1.0 / sum(nAtomsPerElement.values())
 
-        for pair in self._elementsPairs:
-            pair_str = "".join(map(str, pair))
+        for pair_str, (label_i, label_j) in self.labels:
             fqt = self.configuration["dcsf_input_file"]["instance"][
                 f"f(q,t)_{pair_str}"
             ]
             sqrt_cij = sqrt(
-                nAtomsPerElement[pair[0]] * nAtomsPerElement[pair[1]] * norm_natoms**2
+                nAtomsPerElement[label_i] * nAtomsPerElement[label_j] * norm_natoms**2
             )
-            delta_ij = 1 if pair[0] == pair[1] else 0
-            self._outputData[f"ssf_total_{pair_str}"][:] = (
+            delta_ij = 1 if label_i == label_j else 0
+            self._outputData[f"ssf_{pair_str}"][:] = (
                 1 + (fqt[:, 0] - delta_ij) / sqrt_cij
             )
-            self._outputData[f"ssf_total_{pair_str}"].scaling_factor = (
+            self._outputData[f"ssf_{pair_str}"].scaling_factor = (
                 fqt.attrs["scaling_factor"] * sqrt_cij
             )
 
             self._outputData["ssf_total"][:] += (
-                self._outputData[f"ssf_total_{pair_str}"][:]
-                * self._outputData[f"ssf_total_{pair_str}"].scaling_factor
+                self._outputData[f"ssf_{pair_str}"][:]
+                * self._outputData[f"ssf_{pair_str}"].scaling_factor
             )
+
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "ssf",
+            "LineOutputVariable",
+            dim=2,
+            conc_exp=0.5,
+            axis="q",
+            units="au",
+            main_result=True,
+            partial_result=True,
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

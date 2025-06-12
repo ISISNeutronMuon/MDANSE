@@ -13,10 +13,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
+import json
 import numpy as np
+from enum import Enum
+from collections import namedtuple
+from copy import copy
+from typing import NamedTuple
+from abc import ABC, abstractmethod
+from scipy import signal, fftpack
 
+from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Core.Error import Error
+
+from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 
 
 class SignalError(Error):
@@ -250,10 +259,10 @@ def symmetrize(signal, axis=0):
     """Return a symmetrized version of an input signal
 
     :Parameters:
-        #. signal (np.array): the input signal
+        #. signal (np.ndarray): the input signal
         #. axis (int): the axis along which the signal should be symmetrized
     :Returns:
-        #. np.array: the symmetrized signal
+        #. np.ndarray: the symmetrized signal
     """
 
     s = [slice(None)] * signal.ndim
@@ -308,3 +317,1080 @@ def get_spectrum(signal, window=None, timeStep=1.0, axis=0, fft="fft"):
         raise ValueError("fft variable should be fft or rfft.")
 
     return fftSignal.real
+
+
+# Default filter cutoff frequency
+DEFAULT_FILTER_CUTOFF = 25.0
+
+
+class TransferFunction(NamedTuple):
+    """Container for the filter transfer transfer function expressed in terms of the numerator/denominator coefficients of a rational polynomial."""
+
+    numerator: np.ndarray
+    denominator: np.ndarray
+
+
+class FrequencyDomain(NamedTuple):
+    """Container for the frequency response of the filter."""
+
+    frequencies: np.ndarray
+    magnitudes: np.ndarray
+
+
+class Filter(ABC):
+    """Base class for a filter operating on a signal."""
+
+    # Symbolic variable for analog filter transfer function (Laplace plane)
+    S = "iw"
+
+    # Symbolic variable for digital filter transfer function (Z-plane)
+    Z = "e^iw"
+
+    # Useful physical constants (from [pwtools](https://github.com/elcorto/pwtools)
+    Ry_to_Hz = 3289841960777247.0
+    Ry_to_eV = 13.60569193
+
+    # Conversion factor: frequency axis to energies in meV
+    _freq_to_mev = 1e3 * Ry_to_eV / Ry_to_Hz
+
+    # Conversion factor: angular frequency to cyclic frequency
+    _angular_to_cyclic = 1 / (2 * np.pi)
+
+    # Conversion factor: cyclic frequency to angular frequency
+    _cyclic_to_angular = 2 * np.pi
+
+    class FrequencyUnits(Enum):
+        """Enumeration for frequency unit type."""
+
+        CYCLIC: str = "THz"
+        ANGULAR: str = "rad/ps"
+
+    class FrequencyRangeMethod(Enum):
+        """Enumeration for custom (externally provided) and FFT-derived frequency ranges for plotting the
+        filter response.
+
+        """
+
+        CUSTOM: int = 0
+        FFT: int = 1
+
+    class Flags(Enum):
+        """Enumeration for flags associated with usage of filters."""
+
+        DIGITAL_ONLY: int = 0
+        DIGITAL_AND_ANALOGUE: int = 1
+        FUNDAMENTAL_EVENLY_DIVIDES_FS: int = 2
+
+    @abstractmethod
+    def __init__(self, **kwargs):
+        # Custom frequency range (assumes frequencies are angular) around which to compute the filter frequency response
+        self.custom_freq_range = []
+        # Number of simulation steps
+        self.n_steps = kwargs.pop("n_steps")
+        # Simulation sample frequency in THz
+        self.sample_freq = 1 / kwargs.pop("time_step_ps")
+        self.set_filter_attributes(kwargs)
+
+    def compute_frequencies(
+        self, transfer_function: TransferFunction, range: np.ndarray
+    ):
+        """Computes the frequency magnitudes over given angular frequency range, from the filter transfer function.
+
+        See Also
+        ________
+        scipy.signal.freqs :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqs.html
+
+        Parameters
+        ----------
+        transfer_function : TransferFunction
+            Numerator and denominator of the filter transfer function.
+        range : np.ndarray
+            Range of frequency values over which to compute.
+
+        Returns
+        -------
+        np.ndarray
+            Frequency response over a given range of angular frequencies.
+
+        """
+
+        return signal.freqs(*transfer_function, worN=range)
+
+    def apply(self, input: np.array) -> np.ndarray:
+        """Returns the convolution of the digital designed filter with an input signal.
+
+        See Also
+        ________
+        scipy.signal.filtfilt:
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.filtfilt.html
+
+        Parameters
+        ----------
+        input : np.ndarray
+            Input signal.
+
+        Returns
+        -------
+        np.ndarray
+            Output signal resulting from convolution with the filter.
+
+        """
+        coeffs = (
+            self.to_digital_coeffs()
+            if Filter.Flags.DIGITAL_ONLY not in self.flags
+            else self.coeffs
+        )
+        return signal.filtfilt(coeffs.numerator, coeffs.denominator, input)
+
+    def to_digital_coeffs(self) -> TransferFunction:
+        """Returns the filter instance digital coefficients converted from analog, by performing a bilinear transform.
+
+        See Also
+        ________
+        scipy.signal.bilinear :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.bilinear.html
+
+        Returns
+        -------
+        TransferFunction
+            Transfer function for filter with digital coefficients.
+
+        """
+        return TransferFunction(
+            *signal.bilinear(
+                self.coeffs.numerator, self.coeffs.denominator, self.sample_freq
+            )
+        )
+
+    @property
+    def freq_response(self) -> FrequencyDomain:
+        """Returns the frequency response of the filter, i.e. amplitude as a function of frequency.
+
+        Returns
+        -------
+        FrequencyDomain
+            Named tuple containing the x-axis (frequency range) and y-axis (amplitude) of the filter.
+
+        """
+        return self._freq_response
+
+    @freq_response.setter
+    def freq_response(
+        self, params: tuple[TransferFunction, FrequencyRangeMethod]
+    ) -> None:
+        """Calculates the frequency response of the filter from the filter's transfer function numerator and denominator
+        coefficients.
+
+        Parameters
+        ----------
+        params : tuple[TransferFunction, FrequencyRangeMethod]
+            Tuple contains the following elements:
+                - the rational polynomial expression for the filter transfer function, in terms of its numerator and
+                denominator coefficients.
+                - the method by which to compute the frequency range for displaying the filter.
+
+        """
+        expr, method = params
+        units = (
+            Filter.FrequencyUnits.CYCLIC
+            if Filter.Flags.DIGITAL_ONLY in self.flags
+            else Filter.FrequencyUnits.ANGULAR
+        )
+
+        if method is Filter.FrequencyRangeMethod.FFT:
+            # Compute frequency range using FFT
+            freq_range = self.frequency_range(
+                self.n_steps, self.sample_freq ** (-1), units=units
+            )
+        elif (
+            self.custom_freq_range.any()
+            and method is Filter.FrequencyRangeMethod.CUSTOM
+        ):
+            # Use custom frequency range (assumes frequencies are rad/ps)
+            freq_range = copy(self.custom_freq_range)
+
+            # Convert frequency range to cyclic frequencies if necessary
+            if units is Filter.FrequencyUnits.CYCLIC:
+                freq_range *= self._angular_to_cyclic
+        else:
+            RuntimeError(
+                f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' attribute on the instance of {type(self)}"
+            )
+
+        # Compute filter response around frequencies given in range
+        response = self.compute_frequencies(
+            transfer_function=expr, range=np.abs(freq_range)
+        )
+        self._freq_response = FrequencyDomain(*response)
+
+    @classmethod
+    def frequency_resolution(cls, num_steps: float, timestep: float, units):
+        """Returns the frequency resolution of the trajectory given N fixed timesteps.
+        Analogous to the bin-width of an FFT of the trajectory.
+
+        Parameters
+        ----------
+        num_steps : float
+            Number of simulation timesteps.
+        timestep : float
+            Simulation timestep in picoseconds.
+        units : FrequencyUnit
+            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps).
+
+        Returns
+        -------
+        float
+            Frequency resolution.
+
+        """
+        bin_width = 1 / (num_steps * timestep)
+        if units is Filter.FrequencyUnits.ANGULAR:
+            bin_width *= cls._cyclic_to_angular
+
+        return bin_width
+
+    @classmethod
+    def nyquist(cls, timestep: float, units) -> float:
+        """Returns the nyquist limit for the filter sample frequency.
+
+        Parameters
+        ----------
+        timestep : np.ndarray
+            Simulation timestep in picoseconds.
+        units : FrequencyUnit
+            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps).
+
+        Returns
+        -------
+        float
+            Nyquist limit.
+
+        """
+        limit = (1 / timestep) / 2
+        if units is Filter.FrequencyUnits.ANGULAR:
+            limit *= cls._cyclic_to_angular
+
+        return limit
+
+    @staticmethod
+    def frequency_range(
+        N: int,
+        timestep: float,
+        resize_to: int = 1000,
+        units: FrequencyUnits = FrequencyUnits.ANGULAR,
+        symmetric: bool = False,
+    ) -> np.ndarray:
+        """Obtain an FFT-based frequency range for the frequency domain of a discrete time signal with a given number
+        of elements and a constant time step.
+
+        Parameters
+        ----------
+        N : int
+            Number of samples in input signal (to which filter will be applied to).
+        timestep: float
+            Input signal timestep in picoseconds.
+        resize_to: int
+            Up- or down- sample the frequency range array to a given length.
+        units : FrequencyUnits
+            Enumeration for returned frequency units (i.e. CYCLIC=THz, ANGULAR=rad/ps).
+        symmetric : bool
+            If true, retain symmetric property of frequencies, else take only one half of the frequencies.
+
+        Returns
+        -------
+        np.ndarray
+            FFT frequencies.
+
+        """
+        # Compute cyclic frequencies using FFT method
+        axis_frequencies = fftpack.fftfreq(N, timestep)
+        limit = int(np.floor(len(axis_frequencies) / 2)) if not symmetric else -1
+        # Return FFT frequency range with appropriate unit conversion
+        coeff = (
+            Filter._cyclic_to_angular if units is Filter.FrequencyUnits.ANGULAR else 1.0
+        )
+        return coeff * np.linspace(
+            axis_frequencies[0], axis_frequencies[limit], resize_to
+        )
+
+    def set_filter_attributes(self, attributes: dict) -> None:
+        """Update filter instance attributes.
+
+        Parameters
+        ----------
+        attributes : dict
+            Dictionary containing filter attributes.
+
+        """
+        settings = self.default_settings
+
+        for key, default in settings.items():
+            setattr(self, key, attributes.get(key, default["value"]))
+
+    @staticmethod
+    def polynomial_string(coeffs, unit, analog: bool = True) -> str:
+        """Formats a polynomial into a string that has a symbolic mathematical appearance.
+
+        Parameters
+        ----------
+        coeffs : np.ndarray
+            Array of polynomial coefficients.
+        unit : str
+            String representation of the mathematical symbol corresponding to the S or Z planes.
+
+        Returns
+        -------
+        str
+            Symbolic polynomial string.
+
+        """
+        if not coeffs.any():
+            return ""
+        order = len(coeffs) - 1
+        expr = ""
+
+        for idx, coeff in enumerate(coeffs):
+            power = order - idx if analog else -idx
+            if coeff != 0:
+                if idx > 0 and coeff > 0:
+                    expr += " + "
+                elif idx > 0 and coeff < 0:
+                    expr += " - "
+
+                abs_coeff = abs(coeff)
+                if power == 0:
+                    expr += f"{abs_coeff:.3f}"
+                elif power == 1:
+                    expr += f"{abs_coeff:.3f}*({unit})"
+                else:
+                    expr += f"{abs_coeff:.3f}*({unit})^{power}"
+        return expr
+
+    @classmethod
+    def rational_polynomial_string(
+        cls, numerator, denominator, analog=True
+    ) -> dict[str, str]:
+        """Formats a transfer function rational polynomial into a pair of strings.
+
+        Parameters
+        ----------
+        numerator : np.ndarray
+            Array of coefficients representing the numerator of the transfer function.
+        denominator : np.ndarray)
+            Array of coefficients representing the denominator of the transfer function.
+        analog : bool
+            Filter is analog (Laplace/S-domain) or digital (Z-domain).
+
+        Returns
+        -------
+        dict[str, str]
+            Dictionary of string coefficients representing the transfer function rational polynomial.
+
+        """
+        if analog:
+            # Analogue (Laplace-domain) transfer function
+            numerator_str = cls.polynomial_string(numerator, cls.S)
+            denominator_str = Filter.polynomial_string(denominator, cls.S)
+            return {
+                "unit": "S",
+                "numerator": numerator_str,
+                "denominator": denominator_str,
+            }
+
+        # Digital (Z-domain) transfer function
+        numerator_str = Filter.polynomial_string(numerator, cls.Z, False)
+        denominator_str = Filter.polynomial_string(denominator, cls.Z, False)
+        return {"unit": "Z", "numerator": numerator_str, "denominator": denominator_str}
+
+    def attributes_to_string(self, description) -> str:
+        """Formats the given filter attribute into a description string.
+
+        Parameters
+        ----------
+        description : str
+            Description of the attribute as a multiline string.
+
+        Returns
+        -------
+        str
+            Description string concatenated with substrings for each filer attribute.
+
+        """
+        settings = type(self).__dict__["default_settings"]
+        for setting in settings.keys():
+            description += f"""
+  # {setting}
+  {settings[setting]["description"]}
+      {self.__dict__[setting]}
+            """
+
+        return description
+
+    def __str__(self):
+        """Returns a string representation of the filter.
+
+        Returns
+        -------
+        str
+            String representation of the filter.
+
+        """
+        string_representation = f"""Trajectory filter of type {type(self).__name__} implemented with the following parameters:
+
+  # sample_freq
+  Molecular dynamics simulation sample frequency, in terahertz
+      {self.sample_freq}
+
+  # freq_response (analog)
+  N coefficients of analog filter transfer function, numerator and denominator (multiples of {Filter.S}^(N-n))
+      {tuple(self.coeffs.numerator), tuple(self.coeffs.denominator)}
+
+  # freq_response (digital)
+  M coefficients of digital filter transfer function, numerator and denominator (multiples of {Filter.Z}^(-m))
+      {tuple(self.coeffs.numerator), tuple(self.coeffs.denominator)}
+        """
+
+        return self.attributes_to_string(string_representation)
+
+    def to_json(self) -> dict:
+        """Returns a concise dictionary (json) representation of the filter.
+
+        Returns
+        -------
+        dict
+            Dictionary containing filter attributes.
+
+        """
+        return {"Filter": type(self).__name__} | {
+            k: v for k, v in self.__dict__.items() if k != "_freq_response"
+        }
+
+    @classmethod
+    def freq_to_energy(cls, freq, units):
+        """Returns the energy value (or values) in millielectronvolts (meV), converted from frequency value (or values).
+
+        Parameters
+        ----------
+        freq : float | np.ndarray
+            Frequency.
+        units : FrequencyUnit
+            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps).
+
+        Returns
+        -------
+        float | np.ndarray
+            Energy.
+
+        """
+        scale_factor = 1e12 * cls._freq_to_mev
+        if units is Filter.FrequencyUnits.ANGULAR:
+            scale_factor /= cls._cyclic_to_angular
+
+        if isinstance(freq, list):
+            freq = np.array(freq)
+
+        return scale_factor * freq
+
+    @classmethod
+    def energy_to_freq(cls, energy, units):
+        """Returns the frequency value (or values), converted from energy value (or values) in millielectronvolts (meV).
+
+        Parameters
+        ----------
+        energy : float | np.ndarray
+            Energy.
+        units : FrequencyUnit
+            Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps).
+
+        Returns
+        -------
+        float | np.ndarray
+            Frequency.
+
+        """
+        scale_factor = 1e-12 / cls._freq_to_mev
+        if units is Filter.FrequencyUnits.ANGULAR:
+            scale_factor *= cls._cyclic_to_angular
+
+        if isinstance(energy, list):
+            energy = np.array(energy)
+
+        return energy * scale_factor
+
+
+class Butterworth(Filter):
+    """Interface for the Butterworth filter.
+
+    See Also
+    ________
+    scipy.signal.butter :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html
+
+    """
+
+    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+
+    default_settings = {
+        "order": {"description": "The order of the filter", "value": 1},
+        "attenuation_type": {
+            "description": "Filter attenuation type",
+            "values": {"lowpass", "highpass", "bandpass", "bandstop"},
+            "value": "lowpass",
+        },
+        "cutoff_freq": {
+            "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.coeffs = TransferFunction(
+            *signal.butter(
+                self.order,
+                self.cutoff_freq,
+                btype=self.attenuation_type,
+                analog=True,
+                output="ba",
+            )
+        )
+        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+
+
+class ChebyshevTypeI(Filter):
+    """Interface for the Chebyshev type 1 filter.
+
+    See Also
+    ________
+    scipy.signal.cheby1 :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.cheby1.html
+
+    """
+
+    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+
+    default_settings = {
+        "order": {"description": "The order of the filter", "value": 1},
+        "max_ripple": {
+            "description": "Decibel measure of maximum ripple allowed below unit gain in the passband",
+            "value": 5.0,
+        },
+        "attenuation_type": {
+            "description": "Filter attenuation type",
+            "values": {"lowpass", "highpass", "bandpass", "bandstop"},
+            "value": "lowpass",
+        },
+        "cutoff_freq": {
+            "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.coeffs = TransferFunction(
+            *signal.cheby1(
+                self.order,
+                self.max_ripple,
+                self.cutoff_freq,
+                btype=self.attenuation_type,
+                analog=True,
+                output="ba",
+            )
+        )
+        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+
+
+class ChebyshevTypeII(Filter):
+    """Interface for the Chebyshev type 2 filter.
+
+    See Also
+    ________
+    scipy.signal.cheby2 :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.cheby2.html
+
+    """
+
+    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+
+    default_settings = {
+        "order": {"description": "The order of the filter", "value": 1},
+        "min_attenuation": {
+            "description": "Decibel measure of minimum attenuation required in the stopband",
+            "value": 20.0,
+        },
+        "attenuation_type": {
+            "description": "Filter attenuation type",
+            "values": {"lowpass", "highpass", "bandpass", "bandstop"},
+            "value": "lowpass",
+        },
+        "cutoff_freq": {
+            "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.coeffs = TransferFunction(
+            *signal.cheby2(
+                self.order,
+                self.min_attenuation,
+                self.cutoff_freq,
+                btype=self.attenuation_type,
+                analog=True,
+                output="ba",
+            )
+        )
+        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+
+
+class Elliptical(Filter):
+    """Interface for the elliptical filter.
+
+    See Also
+    ________
+    scipy.signal.ellip :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.ellip.html
+
+    """
+
+    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+
+    default_settings = {
+        "order": {"description": "The order of the filter", "value": 1},
+        "max_ripple": {
+            "description": "Decibel measure of maximum ripple allowed below unit gain in the passband",
+            "value": 5.0,
+        },
+        "min_attenuation": {
+            "description": "Decibel measure of minimum attenuation required in the stopband",
+            "value": 20.0,
+        },
+        "attenuation_type": {
+            "description": "Filter attenuation type",
+            "values": {"lowpass", "highpass", "bandpass", "bandstop"},
+            "value": "lowpass",
+        },
+        "cutoff_freq": {
+            "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.coeffs = TransferFunction(
+            *signal.ellip(
+                self.order,
+                self.max_ripple,
+                self.min_attenuation,
+                self.cutoff_freq,
+                btype=self.attenuation_type,
+                analog=True,
+                output="ba",
+            )
+        )
+        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+
+
+class Bessel(Filter):
+    """Interface for the Bessel filter.
+
+    See Also
+    ________
+    scipy.signal.bessel :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.bessel.html
+
+    """
+
+    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+
+    default_settings = {
+        "order": {"description": "The order of the filter", "value": 1},
+        "norm": {
+            "description": "Filter normalization results in the following behaviour at cutoff - phase: phase response obtains midpoint - delay: group delay in passband is the reciprocal of cutoff - mag: gain magnitude is -3 dB",
+            "values": {"phase", "delay", "mag"},
+            "value": "phase",
+        },
+        "attenuation_type": {
+            "description": "Filter attenuation type",
+            "values": {"lowpass", "highpass", "bandpass", "bandstop"},
+            "value": "lowpass",
+        },
+        "cutoff_freq": {
+            "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.coeffs = TransferFunction(
+            *signal.bessel(
+                self.order,
+                self.cutoff_freq,
+                btype=self.attenuation_type,
+                analog=True,
+                output="ba",
+                norm=self.norm,
+            )
+        )
+        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+
+
+class Notch(Filter):
+    """Interface for the notch filter.
+
+    See Also
+    ________
+    scipy.signal.iirnotch :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.iirnotch.html
+
+    """
+
+    flags = {Filter.Flags.DIGITAL_ONLY}
+
+    default_settings = {
+        "fundamental_freq": {
+            "description": "Spacing between filter peaks (value must satisfy 0 < w0 < nyquist)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+        "quality_factor": {
+            "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
+            "value": 30.0,
+        },
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.coeffs = TransferFunction(
+            *signal.iirnotch(
+                self.fundamental_freq, self.quality_factor, fs=self.sample_freq
+            )
+        )
+        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+
+    def compute_frequencies(
+        self, transfer_function: TransferFunction, range: np.ndarray
+    ):
+        """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
+
+        See Also
+        ________
+        scipy.signal.freqz :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqz.html
+
+        Parameters
+        ----------
+        transfer_function : TransferFunction
+            Numerator and denominator of the filter transfer function.
+        range : np.ndarray
+            Range of frequency values over which to compute.
+
+        Returns
+        -------
+        np.ndarray
+            Frequency response over a given range of cyclic frequencies.
+        """
+
+        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
+
+
+class Peak(Filter):
+    """Interface for the peak filter.
+
+    See Also
+    ________
+    scipy.signal.iirpeak :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.iirpeak.html
+
+    """
+
+    flags = {Filter.Flags.DIGITAL_ONLY}
+
+    default_settings = {
+        "fundamental_freq": {
+            "description": "Spacing between filter peaks (value must satisfy 0 < w0 < nyquist)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+        "quality_factor": {
+            "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
+            "value": 30.0,
+        },
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.coeffs = TransferFunction(
+            *signal.iirpeak(
+                self.fundamental_freq, self.quality_factor, fs=self.sample_freq
+            )
+        )
+        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+
+    def compute_frequencies(
+        self, transfer_function: TransferFunction, range: np.ndarray
+    ):
+        """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
+
+        See Also
+        ________
+        scipy.signal.freqz :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqz.html
+
+        Parameters
+        ----------
+        transfer_function : TransferFunction)
+            Numerator and denominator of the filter transfer function.
+        range : np.ndarray
+            Range of frequency values over which to compute.
+
+        Returns
+        -------
+        np.ndarray
+            Frequency response over a given range of cyclic frequencies.
+
+        """
+
+        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
+
+
+class Comb(Filter):
+    """Interface for the comb filter.
+
+    See Also
+    ________
+    scipy.signal.iircomb :
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.iircomb.html
+
+    """
+
+    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS}
+
+    default_settings = {
+        "fundamental_freq": {
+            "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
+            "value": DEFAULT_FILTER_CUTOFF,
+        },
+        "quality_factor": {
+            "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
+            "value": 30.0,
+        },
+        "comb_type": {
+            "description": "Determines whether quality factor applies to notches or peaks",
+            "values": {"peak", "notch"},
+            "value": "notch",
+        },
+        "pass_zero": {
+            "description": "Determines whether notches or peaks centered on integer multiples of fundamental frequency",
+            "values": {True, False},
+            "value": False,
+        },
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.coeffs = TransferFunction(
+            *signal.iircomb(
+                self.fundamental_freq,
+                self.quality_factor,
+                ftype=self.comb_type,
+                pass_zero=self.pass_zero,
+                fs=self.sample_freq,
+            )
+        )
+        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+
+    def compute_frequencies(
+        self, transfer_function: TransferFunction, range: np.ndarray
+    ):
+        """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
+
+        See Also
+        ________
+        scipy.signal.freqz :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqz.html
+
+        Parameters
+        ----------
+        transfer_function : TransferFunction
+            Numerator and denominator of the filter transfer function.
+        range : np.ndarray
+            Range of frequency values over which to compute.
+
+        Returns
+        -------
+        np.ndarray
+            Frequency response over a given range of cyclic frequencies.
+
+        """
+
+        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
+
+
+FILTERS = (
+    Butterworth,
+    ChebyshevTypeI,
+    ChebyshevTypeII,
+    Elliptical,
+    Bessel,
+    Notch,
+    Peak,
+    Comb,
+)
+
+FILTER_MAP = {filter_class.__name__: filter_class for filter_class in FILTERS}
+
+# Default filter type is Butterworth
+DEFAULT_FILTER = Butterworth
+
+# Default simulation time step in picoseconds
+DEFAULT_TIME_STEP = 0.005
+
+# Default number of simulation steps
+DEFAULT_N_STEPS = 320
+
+
+def filter_default_attributes(filter=DEFAULT_FILTER):
+    """Get the filter-specific settings dictionary for a filter class.
+
+    Parameters
+    ----------
+    filter : Filter
+        Filter class.
+
+    Returns
+    -------
+    dict[str, Any]
+        Filter settings dictionary.
+
+    """
+    return {
+        setting: values["value"] for setting, values in filter.default_settings.items()
+    }
+
+
+def filter_description_string(
+    filter=DEFAULT_FILTER, settings=filter_default_attributes(DEFAULT_FILTER)
+) -> str:
+    """Convert a filter class and filter settings dictionary to a string.
+
+    Parameters
+    ----------
+    filter : str
+        Filter class.
+    settings : dict
+        Dictionary containing the filter settings.
+
+    Returns
+    -------
+    str
+        String representation of the filter settings dictionary.
+
+    """
+    return json.dumps({"filter": filter.__name__, "attributes": settings})
+
+
+def power_spectrum(
+    trajectory, frames, projection, atom_selection, weights, instrument_resolution
+) -> tuple[np.ndarray, np.ndarray]:
+    """Returns the position power spectrum and angular frequencies (rad/ps) of a configuration's constituent atomic trajectories.
+
+    Parameters
+    ----------
+    trajectory : HDFTrajectoryConfigurator
+        Atomic trajectory object.
+    frames : CorrelationFramesConfigurator
+        Frames object.
+    projection : ProjectionConfigurator
+        Projection object.
+    atom_selection : AtomSelectionConfigurator
+        Atom selection object.
+    weights : WeightsConfigurator
+        Weights object.
+    instrument_resolution : InstrumentResolutionConfigurator
+        Instrument resolution object.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        Tuple containing the omegas (frequency range) and the corresponding power spectrum of the atomic trajectories.
+
+    """
+    trajectory = trajectory["instance"]
+
+    output = OutputData()
+    output.add(
+        "romega", "LineOutputVariable", instrument_resolution["romega"], units="rad/ps"
+    )
+
+    for element in atom_selection["unique_names"]:
+        output.add(
+            f"pacf_{element}",
+            "LineOutputVariable",
+            np.zeros_like(output["romega"]),
+            units="nm2",
+        )
+
+        output.add(
+            f"pps_{element}",
+            "LineOutputVariable",
+            np.zeros_like(output["romega"]),
+            units="au",
+        )
+
+    output.add(
+        "pacf_total", "LineOutputVariable", np.zeros(frames["n_frames"]), units="nm2"
+    )
+
+    output.add(
+        "pps_total", "LineOutputVariable", np.zeros_like(output["romega"]), units="nm2"
+    )
+
+    for indices, name in zip(atom_selection["indices"], atom_selection["names"]):
+        series = trajectory.read_com_trajectory(
+            indices,
+            first=frames["first"],
+            last=frames["last"] + 1,
+            step=frames["step"],
+        )
+
+        series = series - np.average(series, axis=0)
+        series = projection["projector"](series)
+
+        n_configs = frames["n_configs"]
+        atomicPACF = signal.correlate(series, series[:n_configs], mode="valid") / (
+            3 * n_configs
+        )
+
+        output[f"pacf_{name}"] += np.array([x[0] for x in atomicPACF])
+
+    nAtomsPerElement = atom_selection.get_natoms()
+    for element, number in nAtomsPerElement.items():
+        output[f"pacf_{element}"][:] /= number
+        output[f"pps_{element}"][:] = get_spectrum(
+            output[f"pacf_{element}"],
+            instrument_resolution["time_window"],
+            instrument_resolution["time_step"],
+            fft="rfft",
+        )
+
+    weights = weights.get_weights()
+    weight_dict = get_weights(weights, nAtomsPerElement, 1)
+    assign_weights(output, weight_dict, "pacf_%s")
+    assign_weights(output, weight_dict, "pps_%s")
+    output["pacf_total"][:] = weighted_sum(output, weight_dict, "pacf_%s")
+    output["pps_total"][:] = weighted_sum(output, weight_dict, "pps_%s")
+
+    # Adjust to atom selection
+    return (output["romega"], output["pps_total"])

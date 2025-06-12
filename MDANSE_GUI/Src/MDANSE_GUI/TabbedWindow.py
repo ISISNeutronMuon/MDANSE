@@ -18,7 +18,8 @@ from pathlib import PurePath
 from collections import defaultdict
 from importlib import metadata
 
-from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger
+from qtpy.QtCore import Slot, QTimer, Signal, QMessageLogger, QUrl
+from qtpy.QtGui import QDesktopServices
 from qtpy.QtWidgets import (
     QMainWindow,
     QFileDialog,
@@ -50,6 +51,11 @@ from MDANSE_GUI.Tabs.InstrumentTab import InstrumentTab
 from MDANSE_GUI.Tabs.Views.PlotDataView import PlotDataView
 from MDANSE_GUI.Widgets.StyleDialog import StyleDialog, StyleDatabase
 from MDANSE_GUI.Widgets.NotificationTabWidget import NotificationTabWidget
+
+
+MDANSE_CODE_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE")
+MDANSE_DOCS_WEBSITE = QUrl("https://mdanse.readthedocs.io/en/latest/")
+MDANSE_PROJECT_WEBSITE = QUrl("https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx")
 
 
 class TabbedWindow(QMainWindow):
@@ -167,6 +173,17 @@ class TabbedWindow(QMainWindow):
         settings_group.addAction(self.settingsAct)
         self.aboutAct = QAction("About MDANSE", parent=menubar)
         self.aboutAct.triggered.connect(self.version_information)
+        self.website_actions = []
+        for label, function in [
+            ("project", self.show_website_project),
+            ("source code", self.show_website_code),
+            ("documentation", self.show_website_docs),
+        ]:
+            temp_action = QAction(f"Open MDANSE {label} website", parent=menubar)
+            temp_action.triggered.connect(function)
+            self.website_actions.append(temp_action)
+        help_group.addActions(self.website_actions)
+        help_group.addSeparator()
         help_group.addAction(self.aboutAct)
         self.setMenuBar(menubar)
 
@@ -179,6 +196,15 @@ class TabbedWindow(QMainWindow):
         version += f"MDANSE version: {metadata.version('MDANSE')}\n"
         version += f"MDANSE_GUI version: {metadata.version('MDANSE_GUI')}\n"
         _popup = QMessageBox.about(self, "MDANSE Version Information", version)
+
+    def show_website_code(self):
+        QDesktopServices.openUrl(MDANSE_CODE_WEBSITE)
+
+    def show_website_project(self):
+        QDesktopServices.openUrl(MDANSE_PROJECT_WEBSITE)
+
+    def show_website_docs(self):
+        QDesktopServices.openUrl(MDANSE_DOCS_WEBSITE)
 
     def setupToolbar(self):
         self._toolBar = QToolBar("Main MDANSE toolbar", self)

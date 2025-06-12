@@ -6,7 +6,7 @@
 .. note::
    This is the documentation of the MDANSE 2.0 release.
    The documentation, just like the code itself, is still under development.
-   MDANSE 2 has currently (October 2024) just reached the first beta release.
+   MDANSE 2 is currently (June 2025) approaching its first release.
 
 Welcome to MDANSE's documentation!
 ==================================
@@ -15,12 +15,21 @@ Welcome to MDANSE's documentation!
 
 **MDANSE (Molecular Dynamics Analysis for Neutron Scattering Experiments)**
 is a Python application designed for computing neutron observables
-from molecular dynamics (MD) trajectories that can be directly compared with
+from molecular dynamics (MD) trajectories.
+The results can be directly compared with
 neutron scattering experiments, particularly inelastic and quasi-elastic
-neutron scattering spectroscopies. MDANSE can analyse MD trajectories from a
-variety of MD simulation software such
-as CASTEP, VASP, DMOL, Gromacs, DL_POLY, CHARMM, LAMMPS, DFTB and etc.,
-and provides both graphical user interface (GUI) and command line interfaces.
+neutron scattering spectroscopies. MDANSE can analyse MD trajectories 
+produced by different simulation software, including
+CASTEP, VASP, DMOL, Gromacs, DL_POLY, CHARMM, LAMMPS, DFTB and CP2K.
+General-purpose trajectory converters using external libraries
+(ASE, mdtraj and MDAnalysis) are also available in MDANSE.
+The recommended way of working with MDANSE is via the
+graphical user interface (GUI) provided by
+the `MDANSE_GUI Python package <https://pypi.org/project/MDANSE-GUI/>`_.
+However, it is also possible to install only
+`the core MDANSE package <https://pypi.org/project/MDANSE/>`_ and
+use it to run analysis scripts
+(also the scripts created in the GUI on another platform).
 
 The MDANSE project has been published previously in: \
 `G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations",
@@ -58,12 +67,13 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
    :caption: 💡 Explanations
 
    pages/introduction
-   pages/installation
+   pages/getting_started
    pages/files
    pages/workflow
    pages/trajectory
    pages/correlation
    pages/weights
+   pages/atom_selection
    pages/qvectors
    pages/dynamics
    pages/scattering

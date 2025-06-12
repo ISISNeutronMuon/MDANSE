@@ -64,6 +64,15 @@ class DynamicCoherentStructureFactor(IJob):
         "QVectorsConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -74,7 +83,8 @@ class DynamicCoherentStructureFactor(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-            },
+                "grouping_level": "grouping_level",
+            }
         },
     )
     settings["weights"] = (
@@ -146,19 +156,14 @@ class DynamicCoherentStructureFactor(IJob):
             units="au",
         )
 
-        self._elementsPairs = sorted(
-            itertools.combinations_with_replacement(
-                self.configuration["atom_selection"]["unique_names"],
-                2,
-            ),
-        )
         self._indicesPerElement = self.configuration["atom_selection"].get_indices()
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
 
-        for pair in self._elementsPairs:
-            pair_str = "".join(map(str, pair))
+        self.labels = self.configuration["grouping_level"].pair_labels()
+
+        for pair_str, _ in self.labels:
             self._outputData.add(
                 f"f(q,t)_{pair_str}",
                 "SurfaceOutputVariable",
@@ -171,7 +176,7 @@ class DynamicCoherentStructureFactor(IJob):
                 "SurfaceOutputVariable",
                 (nQShells, self._nOmegas),
                 axis="q|omega",
-                units="nm2/ps",
+                units="au",
                 main_result=True,
                 partial_result=True,
             )
@@ -181,7 +186,7 @@ class DynamicCoherentStructureFactor(IJob):
                     "SurfaceOutputVariable",
                     (nQShells, self._nOmegas),
                     axis="q|omega",
-                    units="nm2/ps",
+                    units="au",
                 )
 
         self._outputData.add(
@@ -196,7 +201,7 @@ class DynamicCoherentStructureFactor(IJob):
             "SurfaceOutputVariable",
             (nQShells, self._nOmegas),
             axis="q|omega",
-            units="nm2/ps",
+            units="au",
             main_result=True,
         )
         if self.add_ideal_results:
@@ -205,7 +210,7 @@ class DynamicCoherentStructureFactor(IJob):
                 "SurfaceOutputVariable",
                 (nQShells, self._nOmegas),
                 axis="q|omega",
-                units="nm2/ps",
+                units="au",
             )
 
         self._cell_std = 0.0
@@ -314,13 +319,12 @@ class DynamicCoherentStructureFactor(IJob):
         """Add partial results to the final array."""
         if x is not None:
             n_configs = self.configuration["frames"]["n_configs"]
-            for pair in self._elementsPairs:
-                pair_str = "".join(map(str, pair))
+            for pair_str, (label_i, label_j) in self.labels:
                 # F_ab(Q,t) = F_ba(Q,t) this is valid as long as
                 # n_configs is sufficiently large
-                corr = correlate(x[pair[0]], x[pair[1]][:n_configs], mode="valid").T[
+                corr = correlate(x[label_i], x[label_j][:n_configs], mode="valid").T[
                     0
-                ] / (n_configs * x[pair[0]].shape[1])
+                ] / (n_configs * x[label_i].shape[1])
                 self._outputData[f"f(q,t)_{pair_str}"][index, :] += corr.real
 
     def finalize(self):
@@ -332,14 +336,15 @@ class DynamicCoherentStructureFactor(IJob):
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 2, conc_exp=0.5)
-        assign_weights(self._outputData, weight_dict, "f(q,t)_%s%s")
-        assign_weights(self._outputData, weight_dict, "s(q,f)_%s%s")
+        assign_weights(self._outputData, weight_dict, "f(q,t)_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "s(q,f)_%s", self.labels)
         if self.add_ideal_results:
-            assign_weights(self._outputData, weight_dict, "s(q,f)_ideal_%s%s")
-        for pair in self._elementsPairs:
-            pair_str = "".join(map(str, pair))
-            ni = nAtomsPerElement[pair[0]]
-            nj = nAtomsPerElement[pair[1]]
+            assign_weights(
+                self._outputData, weight_dict, "s(q,f)_ideal_%s", self.labels
+            )
+        for pair_str, (label_i, label_j) in self.labels:
+            ni = nAtomsPerElement[label_i]
+            nj = nAtomsPerElement[label_j]
             self._outputData[f"f(q,t)_{pair_str}"] /= sqrt(ni * nj)
             self._outputData[f"s(q,f)_{pair_str}"][:] = get_spectrum(
                 self._outputData[f"f(q,t)_{pair_str}"],
@@ -356,22 +361,45 @@ class DynamicCoherentStructureFactor(IJob):
                 )
 
         self._outputData["f(q,t)_total"][:] = weighted_sum(
+            self._outputData, "f(q,t)_%s", self.labels
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            weight_dict,
-            "f(q,t)_%s%s",
+            "f(q,t)",
+            "SurfaceOutputVariable",
+            dim=2,
+            conc_exp=0.5,
+            axis="q|time",
+            units="au",
         )
 
         self._outputData["s(q,f)_total"][:] = weighted_sum(
+            self._outputData, "s(q,f)_%s", self.labels
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            weight_dict,
-            "s(q,f)_%s%s",
+            "s(q,f)",
+            "SurfaceOutputVariable",
+            dim=2,
+            conc_exp=0.5,
+            axis="q|omega",
+            units="au",
+            main_result=True,
+            partial_result=True,
         )
 
         if self.add_ideal_results:
             self._outputData["s(q,f)_ideal_total"][:] = weighted_sum(
+                self._outputData, "s(q,f)_ideal_%s", self.labels
+            )
+            self.configuration["grouping_level"].add_grouped_totals(
                 self._outputData,
-                weight_dict,
-                "s(q,f)_ideal_%s%s",
+                "s(q,f)_ideal",
+                "SurfaceOutputVariable",
+                dim=2,
+                conc_exp=0.5,
+                axis="q|omega",
+                units="au",
             )
 
         self._outputData.write(

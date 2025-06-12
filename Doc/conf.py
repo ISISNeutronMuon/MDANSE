@@ -1,34 +1,29 @@
-#MDANSE : Molecular Dynamics Analysis for Neutron Scattering Experiments
-#------------------------------------------------------------------------------------------
-#Copyright (C)
-#2015- Eric C. Pellegrini Institut Laue-Langevin
-#BP 156
-#6, rue Jules Horowitz
-#38042 Grenoble Cedex 9
-#France
-#pellegrini[at]ill.fr
-#goret[at]ill.fr
-#aoun[at]ill.fr
+#    This file is part of MDANSE.
 #
-#This library is free software; you can redistribute it and/or
-#modify it under the terms of the GNU Lesser General Public
-#License as published by the Free Software Foundation; either
-#version 2.1 of the License, or (at your option) any later version.
+#    MDANSE is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-#This library is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#Lesser General Public License for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-#You should have received a copy of the GNU Lesser General Public
-#License along with this library; if not, write to the Free Software
-#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
 
-import os
-import sys
 import datetime
+import sys
+from pathlib import Path
 
-sys.path.insert(0, os.path.abspath('..'))
+DOC_ROOT = Path(__file__).parent
+sys.path.insert(0, DOC_ROOT)
+sys.path.insert(0, DOC_ROOT.parent / "MDANSE/Src")
+
+import MDANSE
+from ruamel import yaml
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -37,21 +32,24 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+yaml_eng = yaml.YAML()
+CITATION = yaml_eng.load(DOC_ROOT.parent / "CITATION.cff")
 
-# project = 'MDANSE'
-# copyright = '2015-2022, Eric Pellegrini'
-author = 'Eric Pellegrini'
-release = '2.0.0b1'
-version = '2.0'
+author = ", ".join(f"{auth['given-names']} {auth['family-names']}" for auth in CITATION["authors"])
+
+# The version info for the project you're documenting, acts as replacement for
+# |version| and |release|, also used in various other places throughout the
+# built documents.
+#
+# The short X.Y version.
+release = MDANSE.__version__
+version, _ = MDANSE.__version__.rsplit(".", maxsplit=1)
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
-
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -67,19 +65,21 @@ needs_sphinx = '1.0'
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.graphviz',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.mathjax',
+    "sphinx.ext.intersphinx",
 ]#,'rst2pdf.pdfbuilder']
 
-imgmath_latex_preamble = "\\usepackage{mathrsfs}"
+imgmath_latex_preamble = r"\usepackage{mathrsfs}"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
 
 # The encoding of source files.
 source_encoding = 'utf-8-sig'
@@ -91,22 +91,24 @@ numfig = True
 
 current_year = datetime.date.today().year
 # General information about the project.
-project = u'MDANSE'
-copyright = u'2015-' + str(current_year) + u', MDANSE is developed and supported by the Institut Laue-Langevin and the ISIS Neutron and Muon Source'
+project = 'MDANSE'
+copyright = f'2015-{current_year}, MDANSE is developed and supported by the Institut Laue-Langevin and the ISIS Neutron and Muon Source'
 
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-#
-# The short X.Y version.
+napoleon_use_ivar = True
+napoleon_use_param = False
+napoleon_use_admonition_for_notes = True
 
 html_logo = '_static/mdanse_logo.png'
 
-inheritance_graph_attrs = dict(size='""')
+inheritance_graph_attrs = {"size": '""'}
+inheritance_graph_attrs = {"rankdir": "TB", "size": '""'}
+inheritance_node_attrs = {"color": 'lightblue', "style": 'filled'}
 
-inheritance_graph_attrs = dict(rankdir="TB", size='""')
-
-inheritance_node_attrs = dict(color='lightblue', style='filled')
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    "numpy": ("http://numpy.org/doc/2.2", None),
+    "h5py": ("https://docs.h5py.org/en/stable/", None),
+}
 
 # The following is uncommented only in Windows CI/CD
 #graphviz_dot = r'C:\Miniconda\envs\mdanse\Library\bin\graphviz\dot.exe'

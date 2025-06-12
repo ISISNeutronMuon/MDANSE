@@ -89,7 +89,7 @@ Since the DOS is computed from the unnormalized VACF, the DOS at :math:`\omega=0
 approximate value for the diffusion constant (see Eq. :math:numref:`pfx7`)
 when an equal weighting scheme is used. The DOS can be
 smoothed by, for example, a Gaussian window applied in the time domain
-[Ref10]_ (see the section :ref:`appendix-fca`); the diffusion
+[Ref10]_ (see the section :ref:`correlation-frames`); the diffusion
 constant obtained from this DOS is biased due to the spectral smoothing
 procedure since the VACF is weighted by this window Gaussian function.
 

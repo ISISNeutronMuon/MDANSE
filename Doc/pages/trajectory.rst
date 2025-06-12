@@ -4,35 +4,44 @@
 Trajectory Converters
 =====================
 
-Below is the list of converters present in MDANSE. These converters allow for the
-outputs of a variety of MD simulation packages to be used in
-MDANSE by converting the various file formats to the MDT format. These trajectory
-converters convert positions and other vital
-information such as the unit cell parameters.
+Converters allow for the
+outputs of different MD simulation packages to be used in
+MDANSE by converting the various file formats to the MDT format.
+An MDT file is meant to contain all the information that is needed
+to analyse a trajectory, and so the converters will typically
+require the user to add the information that is missing from
+the input trajectory. Frequently the time step of the trajectory
+has to be specified manually, and in some cases (e.g. LAMMPS)
+the information about chemical elements is not guaranteed to
+be included in the input files.
 
-- ASE
+Specific converters
+~~~~~~~~~~~~~~~~~~~
+
+- ASE (for ASE .traj files)
 - CASTEP
-- DCD
+- CHARMM
 - CP2K
-- Forcite
-- Discover
+- DCD
 - DFTB
+- Discover
 - DMol
 - DL_POLY
+- Forcite
 - Gromacs
 - LAMMPS
-- MDAnalysis
-- MDTraj
-- VASP
-- CHARMM
 - NAMD
+- VASP
 - XPLOR
 
-The MDANSE MD engine specific converters were developed to convert
-specific trajectory formats outputted by those MD engines. If you are
-unable to find the MD package you used or if you had dumped the
-trajectory to a format not support by that particular
-converter, we recommend trying the ASE, MDAnalysis or MDTraj converters
-which may support the file format you need to convert. These general
-trajectory converters utilise their respective libraries to read MD
-trajectory files and convert them to MDT.
+General converters
+~~~~~~~~~~~~~~~~~~
+
+MDANSE can also use external libraries to read trajectory and structure files.
+At the moment, there are three converters which can load different
+trajectory formats. If the specific converters listed above do not
+work for your input files, please try one of these:
+
+- MDAnalysis
+- MDTraj
+- ASE
