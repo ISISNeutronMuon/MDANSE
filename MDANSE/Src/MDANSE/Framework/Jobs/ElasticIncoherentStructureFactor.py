@@ -201,7 +201,7 @@ class ElasticIncoherentStructureFactor(IJob):
 
         weights = self.configuration["weights"].get_weights()
         for key, value in weights.items():
-            weights[key] = value * value
+            weights[key] = value ** 2
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "eisf_%s")
         self._outputData["eisf_total"][:] = weighted_sum(

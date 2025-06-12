@@ -96,8 +96,8 @@ class ChemicalSystem:
         rdkit_atm.SetNoImplicit(True)
         return self.rdkit_mol.AddAtom(rdkit_atm)
 
-    def add_bonds(self, pair_list: list[tuple[int]]):
-        self._bonds += list(pair_list)
+    def add_bonds(self, pair_list: Iterable[tuple[SupportsInt, SupportsInt]]):
+        self._bonds.extend(pair_list)
         for pair in pair_list:
             self.rdkit_mol.AddBond(
                 int(pair[0]), int(pair[1]), Chem.rdchem.BondType.UNSPECIFIED
@@ -176,13 +176,13 @@ class ChemicalSystem:
 
     @property
     def name_list(self) -> list[str]:
-        """list of all non-ghost atoms in the ChemicalSystem."""
+        """List of all non-ghost atoms in the ChemicalSystem."""
         if self._atom_names is not None:
             return self._atom_names
         return self._atom_types
 
     def atom_property(self, property: str) -> list[Any]:
-        """list of a specific property, for all atoms in the system"""
+        """List of a specific property, for all atoms in the system"""
         lookup = {}
         for atom in self.atom_list:
             lookup[atom] = self._database.get_atom_property(atom, property)
@@ -230,7 +230,7 @@ class ChemicalSystem:
             temp_dict = nx.dfs_successors(total_graph, last_atom)
             others = reduce(list.__add__, temp_dict.values(), [])
             for atom in others:
-                atom_pool.pop(atom_pool.index(atom))
+                atom_pool.remove(atom)
             molecule = [last_atom, *others]
             molecules.append(sorted(molecule))
         self.add_clusters(molecules)

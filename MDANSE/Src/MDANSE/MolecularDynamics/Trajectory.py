@@ -430,8 +430,8 @@ def create_average_atom(
             total = np.sum([complex(x[0]) * int(x[1]) for x in temp])
             total = str(total)
         elif property in averaged_atom_properties:
-            total = np.sum([complex(x[0]) * int(x[1]) for x in temp]) / np.sum(
-                [int(x[1]) for x in temp]
+            total = sum(complex(x[0]) * int(x[1]) for x in temp) / sum(
+                int(x[1]) for x in temp
             )
             total = str_to_num(total)
         elif property in constant_atom_properties.keys():
@@ -540,8 +540,8 @@ class TrajectoryWriter:
         self,
         symbol: str,
         properties: dict[str, Any],
-        ptypes: dict[str, str] = None,
-        punits: dict[str, str] = None
+        ptypes: Optional[dict[str, str]] = None,
+        punits: Optional[dict[str, str]] = None
     ):
         """Add the properties of a single atom to the in-file atom database.
 
@@ -606,14 +606,13 @@ class TrajectoryWriter:
         ptypes["dummy"] = "int"
         punits["dummy"] = "none"
         really_new_labels = set(new_labels) - set(old_labels)
-        for label in really_new_labels:
+        for next_index, label in enumerate(really_new_labels):
             label_dataset[next_index] = label
             type_dataset[next_index] = ptypes[label]
             if label in ["b_coherent", "b_incoherent"]:
                 unit_dataset[next_index] = "ang"
             else:
                 unit_dataset[next_index] = punits[label]
-            next_index += 1
         mapping = {
             property_label.decode("utf-8"): index
             for index, property_label in enumerate(label_dataset[:])
@@ -633,12 +632,10 @@ class TrajectoryWriter:
             temp = int(colour)
         except (TypeError, ValueError):
             try:
-                colour = [int(x) for x in colour.split(";")]
+                colour = bytes(map(int, colour.split(";")))
             except AttributeError:
-                colour = [int(x) for x in colour[0].split(";")]
-            atom_dataset[mapping["color"]] = (
-                0x10000 * colour[0] + 0x100 * colour[1] + colour[2]
-            )
+                colour = bytes(map(int, colour[0].split(";")))
+            atom_dataset[mapping["color"]] = int.from_bytes(colour, byteorder="big")
         else:
             atom_dataset[mapping["color"]] = colour
 
@@ -888,8 +885,8 @@ class RigidBodyTrajectoryGenerator:
         trajectory,
         chemical_entity: list[int],
         reference,
-        first=0,
-        last=None,
+        first: int = 0,
+        last: Optional[int] = None,
         step=1,
     ):
         """Constructor.
@@ -1009,7 +1006,7 @@ class RigidBodyTrajectoryGenerator:
 
 
 def partition_universe(universe, groups):
-    atoms = sorted(universe.atomlist(), key=operator.attrgetter("index"))
+    atoms = sorted(universe.atomList(), key=operator.attrgetter("index"))
 
     coll = [Collection([atoms[index] for index in gr]) for gr in groups]
 

@@ -177,7 +177,7 @@ class SingleDataset:
             "full": f"{root_name}:{self._name}",
         }
 
-    def spawn_imaginary_dataset(self) -> Union[None, "SingleDataset"]:
+    def spawn_imaginary_dataset(self) -> Optional[ "SingleDataset"]:
         if self._imaginary_data is None:
             return None
         new_dataset = SingleDataset(f"{self._name}_imag", None)

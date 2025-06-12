@@ -312,18 +312,15 @@ class AtomsDatabase(_Database):
         """
         super()._load(default_database)
 
-        for key, value in self._data["properties"].items():
-            self._properties[key] = value
-        for key, value in self._data["units"].items():
-            self._units[key] = value
+       
+ self._properties.update(self._data["properties"])
+        self._units.update(self._data["units"])
         self._data = self._data["atoms"]
 
         super()._load(user_database)
 
-        for key, value in self._data["properties"].items():
-            self._properties[key] = value
-        for key, value in self._data["units"].items():
-            self._units[key] = value
+        self._properties.update(self._data["properties"])
+        self._units.update("self._data["units"])
         self._data = self._data["atoms"]
 
         try:
@@ -378,7 +375,7 @@ class AtomsDatabase(_Database):
             )
 
         if ptype not in AtomsDatabase._TYPES:
-            raise TypeError(f"The property type {ptype} is unknown")
+            raise TypeError(f"The property type {ptype} is unknown.")
 
         self._properties[pname] = ptype
         ptype = AtomsDatabase._TYPES[ptype]
@@ -409,7 +406,7 @@ class AtomsDatabase(_Database):
         """
 
         if atom not in self._data:
-            raise KeyError(f"The atom {atom} is not in the database")
+            raise KeyError(f"The atom {atom} is not in the database.")
 
         # The isotopes are searched according to |symbol| property
         symbol = self._data[atom]["symbol"]
@@ -441,7 +438,7 @@ class AtomsDatabase(_Database):
         """
 
         if pname not in self._properties:
-            raise KeyError(f"The property {pname} is not registered in the database")
+            raise KeyError(f"The property {pname} is not registered in the database.")
 
         return {element: self.get_value(element, pname) for element in self._data}
 

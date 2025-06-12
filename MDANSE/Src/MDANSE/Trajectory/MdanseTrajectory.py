@@ -285,7 +285,7 @@ class MdanseTrajectory:
         return grp["coordinates"].shape[0]
 
     def read_com_trajectory(
-        self, atom_indices, first=0, last=None, step=1, box_coordinates=False
+        self, atom_indices: Sequence[int], first: int = 0, last: Optional[int] = None, step: int = 1, *, box_coordinates: bool = False
     ):
         """Build the trajectory of the center of mass of a set of atoms.
 
@@ -534,9 +534,8 @@ class MdanseTrajectory:
         value = self._property_cache[(symbol, index)]
         if property == "color":
             value = str_to_num(value)
-            num1 = round(value // 0x10000)
-            num2 = round((value - num1 * 0x10000) // 0x100)
-            num3 = round(value - num1 * 0x10000 - num2 * 0x100)
+            r, value = divmod(value, 65536)
+            g, b = divmod(value, 256)
             return ";".join([str(int(x)) for x in [num1, num2, num3]])
         if data_type == b"int":
             return int(value)
