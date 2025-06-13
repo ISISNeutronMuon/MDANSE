@@ -257,8 +257,6 @@ class Action(QWidget):
         for key, value in settings.items():
             if key in self._widgets_in_layout:
                 continue
-            if key == "trajectory":
-                continue
             dtype = value[0]
             ddict = value[1]
             configurator = job_instance.configuration[key]
