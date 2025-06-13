@@ -88,10 +88,13 @@ class MoleculeWidget(WidgetBase):
         )
         index_elements = ["None"]
         index_elements.extend(str(x) for x in range(initial_num_atoms))
-        for _ in range(index_boxes):
+        for box_index in range(index_boxes):
             index_box = QComboBox(self._base)
             index_box.setEditable(False)
             index_box.addItems(index_elements)
+            index_box.setCurrentText("None") if box_index else index_box.setCurrentText(
+                "0"
+            )
             self.index_combo_boxes.append(index_box)
         button = QPushButton(self._base)
         button.setText("Molecule Preview")
