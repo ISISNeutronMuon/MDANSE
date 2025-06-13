@@ -19,19 +19,18 @@ import collections
 import numpy as np
 from scipy.signal import correlate
 
-from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 
 
 class AngularCorrelation(IJob):
-    """
-    Computes the angular correlation for a vector defined with respect to a molecule or set of molecules.
+    r"""Calculates the angular correlation of a vector in a molecule.
 
-    Vector defined by user, starting at the origin pointing in a particular direction.
-    Origin and direction can either be an atom or a centre definition (centre of a group of atoms). For example, the origin
-    could be defined by the geometric centre of the head group of a surfactant molecule and the direction simply by the last atom
-    of the tail or chain. The correlation is calculated for the angle formed by the same vector at
-    different times
+    The user can specify the indices of reference atoms inside the molecule.
+    If no indices are given, the principal axis of the moment of inertia (pm1)
+    will be used in the calculation. For one index, the axis will be defined
+    by the positions of the atom with that index and the molecule centre of mass.
+    For two indices, the axis will be the vector between the atom with these indices.
 
     **Calculation:** \n
     angle at time T is calculated as the following: \n
@@ -77,9 +76,7 @@ class AngularCorrelation(IJob):
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
-        """
-        Initialize the input parameters and analysis self variables
-        """
+        """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
         self.molecules = self.configuration["trajectory"][
@@ -93,8 +90,8 @@ class AngularCorrelation(IJob):
 
         self.masses = np.array(
             self.configuration["trajectory"]["instance"].chemical_system.atom_property(
-                "atomic_weight"
-            )
+                "atomic_weight",
+            ),
         )
 
         self._outputData.add(
@@ -111,8 +108,8 @@ class AngularCorrelation(IJob):
                 self.configuration["trajectory"][
                     "instance"
                 ].chemical_system.number_of_molecules(
-                    self.configuration["molecule_and_axis"]["value"]
-                )
+                    self.configuration["molecule_and_axis"]["value"],
+                ),
             ),
             units="au",
         )
@@ -134,7 +131,7 @@ class AngularCorrelation(IJob):
                     self.configuration["trajectory"][
                         "instance"
                     ].chemical_system.number_of_molecules(
-                        self.configuration["molecule_and_axis"]["value"]
+                        self.configuration["molecule_and_axis"]["value"],
                     ),
                     self.configuration["frames"]["n_frames"],
                 ),
@@ -156,8 +153,8 @@ class AngularCorrelation(IJob):
         -------
         tuple[int, np.ndarray]
             Molecule index and the correlation array.
-        """
 
+        """
         molecule = self.molecules[index]
         masses = self.masses[molecule]
 
@@ -168,10 +165,10 @@ class AngularCorrelation(IJob):
                 self.configuration["frames"]["first"],
                 self.configuration["frames"]["last"] + 1,
                 self.configuration["frames"]["step"],
-            )
+            ),
         ):
             configuration = self.configuration["trajectory"]["instance"].configuration(
-                frame_index
+                frame_index,
             )
             coordinates = configuration.contiguous_configuration().coordinates[molecule]
             if self.inner_index2 is not None:
@@ -186,43 +183,42 @@ class AngularCorrelation(IJob):
                     masses,
                 )
                 _, eigenvectors = np.linalg.eigh(moi)
-                if i > 1 and np.dot(diff[i - 1], eigenvectors[0]) < 0:
+                if i > 0 and np.dot(diff[i - 1], eigenvectors[0]) < 0:
                     diff[i] = -eigenvectors[0]
                 else:
                     diff[i] = eigenvectors[0]
                 continue
             diff[i] = coordinates[self.inner_index1] - ref_pos
-
         modulus = np.sqrt(np.sum(diff**2, 1))
 
         diff /= modulus[:, np.newaxis]
 
         n_configs = self.configuration["frames"]["n_configs"]
-        ac = correlate(diff, diff[:n_configs], mode="valid") / (3 * n_configs)
+        ac = correlate(diff, diff[:n_configs], mode="valid") / n_configs
         return index, ac.T[0]
 
-    def combine(self, index, x):
-        """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
-        """
+    def combine(self, index: int, x: np.ndarray):
+        """Add the partial result to the results.
 
+        Parameters
+        ----------
+        index : int
+            index of the molecule
+        x : np.ndarray
+            array of the correlation results
+
+        """
         self._outputData["ac"] += x
 
         if self.configuration["per_axis"]["value"]:
             self._outputData["ac_per_axis"][index, :] = x
 
     def finalize(self):
-        """
-        Finalizes the calculations (e.g. averaging the total term, output files creations ...).
-        """
-
+        """Normalise and write out the results."""
         self._outputData["ac"] /= self.configuration["trajectory"][
             "instance"
         ].chemical_system.number_of_molecules(
-            self.configuration["molecule_and_axis"]["value"]
+            self.configuration["molecule_and_axis"]["value"],
         )
 
         self._outputData.write(

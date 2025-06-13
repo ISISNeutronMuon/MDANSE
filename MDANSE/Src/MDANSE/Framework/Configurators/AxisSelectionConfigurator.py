@@ -13,18 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
-
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.MoleculeSelectionConfigurator import (
     MoleculeSelectionConfigurator,
 )
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.MolecularDynamics.TrajectoryUtils import find_atoms_in_molecule
 
 
 class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
-    """
-    This configurator allows to define a local axis per molecule.
+    """Defines a local axis in a molecule.
 
     The input is the name of a molecule type, and one or two indices
     of atoms within the molecule.
@@ -42,7 +41,20 @@ class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
 
     _default = (None, 0)
 
-    def configure(self, value):
+    def configure(self, value: tuple[str, str | None, str | None]):
+        """Set the molecule name, and the optional atom indices.
+
+        Parameters
+        ----------
+        value : tuple[str, str  |  None, str  |  None]
+            Molecule name, first atom index or None, second atom index or None.
+
+        Raises
+        ------
+        ValueError
+            If too many values were included in the input tuple.
+
+        """
         self._original_input = value
         self["index1"] = None
         self["index2"] = None
