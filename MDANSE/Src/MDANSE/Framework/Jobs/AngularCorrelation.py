@@ -186,7 +186,10 @@ class AngularCorrelation(IJob):
                     masses,
                 )
                 _, eigenvectors = np.linalg.eigh(moi)
-                diff[i] = eigenvectors[0]
+                if i > 1 and np.dot(diff[i - 1], eigenvectors[0]) < 0:
+                    diff[i] = -eigenvectors[0]
+                else:
+                    diff[i] = eigenvectors[0]
                 continue
             diff[i] = coordinates[self.inner_index1] - ref_pos
 

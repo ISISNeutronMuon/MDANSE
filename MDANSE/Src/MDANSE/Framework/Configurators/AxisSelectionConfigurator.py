@@ -43,12 +43,12 @@ class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
 
     def configure(self, value):
         self._original_input = value
-
-        self.use_MOI_axes = True
-        self.use_COM_reference = True
         self["index1"] = None
         self["index2"] = None
         molecule_name = value[0]
+        self["details"] = (
+            f"Axis in molecule {molecule_name} determined from moment of inertia"
+        )
         super().configure(molecule_name)
         try:
             val1 = int(value[1])
@@ -61,7 +61,13 @@ class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
         if len(value) == 3:
             self["index1"] = val1
             self["index2"] = val2
+            self["details"] = (
+                f"Axis in molecule {molecule_name} from atom {val1!s} to {val2!s}"
+            )
         elif len(value) == 2:
             self["index1"] = val1
+            self["details"] = (
+                f"Axis in molecule {molecule_name} from atom {val1!s} to the centre of mass"
+            )
         elif len(value) > 3:
             raise ValueError(f"Too many items in input: {value}")
