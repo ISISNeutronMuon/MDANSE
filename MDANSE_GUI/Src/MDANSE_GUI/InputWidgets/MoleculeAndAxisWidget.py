@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QComboBox
@@ -50,6 +51,7 @@ class MoleculeAndAxisWidget(MoleculeWidget):
 
     @Slot()
     def update_combo_boxes(self):
+        """Set new atom index limits on molecule change."""
         if self.selected_mol is None:
             for cbox in self.index_combo_boxes:
                 cbox.clear()
@@ -75,6 +77,12 @@ class MoleculeAndAxisWidget(MoleculeWidget):
                     cbox.setCurrentText(current_value)
 
     def enable_combo_boxes(self):
+        """Activate or deactivate combo boxes based on other inputs.
+
+        The combo boxes of atom index are disabled if no molecule has been
+        selected. If the first index is already set to 'None', the second
+        combo box is disabled, since its index value will not be used.
+        """
         if self.selected_mol is None:
             for cbox in self.index_combo_boxes:
                 cbox.setEnabled(False)
@@ -91,6 +99,7 @@ class MoleculeAndAxisWidget(MoleculeWidget):
         -------
         list[str, int | None, int | None]
             Molecule name, optional atom index 1, optional atom index 2
+
         """
         result = [super().get_widget_value(), None, None]
         for nbox, cbox in enumerate(self.index_combo_boxes):

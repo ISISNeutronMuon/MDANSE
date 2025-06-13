@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from typing import Union
 
@@ -84,7 +85,7 @@ class MoleculeWidget(WidgetBase):
         self.field.currentTextChanged.connect(self.updateValue)
         self.field.currentTextChanged.connect(self.molecule_changed)
         initial_num_atoms = len(
-            self.mol_dict.get(default_option, {}).get("atom_indices", [])
+            self.mol_dict.get(default_option, {}).get("atom_indices", []),
         )
         index_elements = ["None"]
         index_elements.extend(str(x) for x in range(initial_num_atoms))
@@ -93,7 +94,7 @@ class MoleculeWidget(WidgetBase):
             index_box.setEditable(False)
             index_box.addItems(index_elements)
             index_box.setCurrentText("None") if box_index else index_box.setCurrentText(
-                "0"
+                "0",
             )
             self.index_combo_boxes.append(index_box)
         button = QPushButton(self._base)
@@ -171,7 +172,7 @@ class MoleculeWidget(WidgetBase):
         """Enable the button only if molecules are present."""
         self.view_button.setEnabled(self.field.count())
 
-    def get_widget_value(self) -> Union[str, None]:
+    def get_widget_value(self) -> str | None:
         """Return the currently selected molecule name."""
         mol_key = self._field.currentText()
         if mol_key in self.mol_dict:
