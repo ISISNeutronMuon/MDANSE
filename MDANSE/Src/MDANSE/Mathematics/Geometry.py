@@ -72,14 +72,11 @@ def moment_of_inertia(
     coords: np.ndarray,
     com: np.ndarray,
     mass: np.ndarray,
-    *,
-    output_eigenvectors: bool = False,
 ) -> np.ndarray:
-    """Return the three eigenvectors of the moment of inertia.
+    """Return the moment of inertia of a set of atoms.
 
-    Calculates the moment of inertia of a group of atoms,
-    typically in a molecule, and returns the eigenvectors, which are
-    the primary axes of inertia.
+    The moment of inertia if given as a 3x3 array, and can be diagonalised
+    to determine the primary axes of inertia.
 
     Parameters
     ----------
@@ -89,13 +86,11 @@ def moment_of_inertia(
         Centre of mass of the molecule.
     mass : np.ndarray
         Masses of the atoms.
-    output_eigenvectors : bool
-        If True, output the eigenvectors, if False, output eigenvalues.
 
     Returns
     -------
     np.ndarray
-        3x3 array of the primary axes of inertia
+        3x3 array of the moment of inertia
     """
     x, y, z = (coords - com).T
     xx = np.sum(mass * (y**2 + z**2))
@@ -112,10 +107,7 @@ def moment_of_inertia(
             [xz, yz, zz],
         ]
     )
-    if output_eigenvectors:
-        return np.linalg.eigh(moi)[1]
-    else:
-        return np.linalg.eigvalsh(moi)
+    return moi
 
 
 def build_cartesian_axes(origin, p1, p2, dtype=np.float64):

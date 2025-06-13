@@ -180,10 +180,13 @@ class AngularCorrelation(IJob):
                 centre_coordinates = center_of_mass(coordinates, masses)
                 ref_pos = centre_coordinates
             if self.inner_index1 is None:
-                pm1, _, _ = moment_of_inertia(
-                    coordinates, centre_coordinates, masses, output_eigenvectors=True
+                moi = moment_of_inertia(
+                    coordinates,
+                    centre_coordinates,
+                    masses,
                 )
-                diff[i] = pm1
+                _, eigenvectors = np.linalg.eigh(moi)
+                diff[i] = eigenvectors[0]
                 continue
             diff[i] = coordinates[self.inner_index1] - ref_pos
 
