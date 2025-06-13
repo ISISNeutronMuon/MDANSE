@@ -119,6 +119,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "AtomTransmutationConfigurator": AtomTransmutationWidget,
     "InstrumentResolutionConfigurator": InstrumentResolutionWidget,
     "PartialChargeConfigurator": PartialChargeWidget,
+    "UnitCellConfigurator": UnitCellWidget,
     "TrajectoryFilterConfigurator": TrajectoryFilterWidget,
     "UnitCellConfigurator": UnitCellWidget,
     "MDAnalysisTimeStepConfigurator": MDAnalysisMDTrajTimeStepWidget,
