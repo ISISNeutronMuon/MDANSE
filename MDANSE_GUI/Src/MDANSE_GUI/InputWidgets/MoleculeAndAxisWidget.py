@@ -14,13 +14,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import Union
-
-import numpy as np
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QComboBox, QPushButton
+from qtpy.QtWidgets import QComboBox
 
-from MDANSE_GUI.InputWidgets.MoleculePreviewWidget import MoleculePreviewWidget
 from MDANSE_GUI.InputWidgets.MoleculeWidget import MoleculeWidget
 
 
@@ -64,12 +60,12 @@ class MoleculeAndAxisWidget(MoleculeWidget):
         n_atoms = len(self.selected_mol["atom_indices"])
         index_elements = ["None"]
         index_elements.extend(str(x) for x in range(n_atoms))
-        for cbox in self.index_combo_boxes:
+        for box_index, cbox in enumerate(self.index_combo_boxes):
             cbox: QComboBox
             current_value = cbox.currentText()
             cbox.clear()
             cbox.addItems(index_elements)
-            cbox.setCurrentText("None")
+            cbox.setCurrentText("None") if box_index else cbox.setCurrentText("0")
             try:
                 numval = int(current_value)
             except (TypeError, ValueError):

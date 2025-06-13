@@ -54,20 +54,23 @@ class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
             val1 = int(value[1])
         except (TypeError, ValueError, IndexError):
             val1 = None
-        try:
-            val2 = int(value[2])
-        except (TypeError, ValueError, IndexError):
             val2 = None
+        else:
+            try:
+                val2 = int(value[2])
+            except (TypeError, ValueError, IndexError):
+                val2 = None
+                self["details"] = (
+                    f"Axis in molecule {molecule_name} from atom {val1!s} to the centre of mass"
+                )
+            else:
+                self["details"] = (
+                    f"Axis in molecule {molecule_name} from atom {val1!s} to {val2!s}"
+                )
         if len(value) == 3:
             self["index1"] = val1
             self["index2"] = val2
-            self["details"] = (
-                f"Axis in molecule {molecule_name} from atom {val1!s} to {val2!s}"
-            )
         elif len(value) == 2:
             self["index1"] = val1
-            self["details"] = (
-                f"Axis in molecule {molecule_name} from atom {val1!s} to the centre of mass"
-            )
         elif len(value) > 3:
             raise ValueError(f"Too many items in input: {value}")
