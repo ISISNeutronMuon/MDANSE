@@ -210,3 +210,14 @@ class AtomTransmutationWidget(AtomSelectionWidget):
         """
         transmuter = self._configurator.get_transmuter()
         return TransmutationHelper(transmuter, traj_data, self._field, self._base)
+
+    def get_widget_value(self) -> str:
+        """Return the current text in the input field.
+
+        Returns
+        -------
+        str
+            The JSON selector setting.
+
+        """
+        return self._field.text()
