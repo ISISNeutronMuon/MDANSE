@@ -452,7 +452,9 @@ class AtomsDatabase(_Database):
 
         return {element: self.get_value(element, pname) for element in self._data}
 
-    def get_value(self, atom: str, pname: str) -> str | int | float | list:
+    def get_value(
+        self, atom: str, pname: str, *, raw_value: bool = False
+    ) -> str | int | float | list:
         """Return the value of the property for the input atom type.
 
         Parameters
@@ -461,6 +463,8 @@ class AtomsDatabase(_Database):
             Atom type name.
         pname : str
             Atom property name.
+        raw_value : bool
+            If True, no unit conversion is applied to the value. False by default.
 
         Returns
         -------
@@ -483,6 +487,8 @@ class AtomsDatabase(_Database):
         punit = self._units[pname]
 
         value = self._data[atom].get(pname, ptype())
+        if raw_value:
+            return value
         if ptype_str == "complex":
             value = str_to_num(value)
         unit_conv = {

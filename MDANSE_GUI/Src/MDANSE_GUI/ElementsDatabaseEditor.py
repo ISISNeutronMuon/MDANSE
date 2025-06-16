@@ -578,7 +578,7 @@ class ElementModel(QStandardItemModel):
         row = []
         for i in range(self.columnCount()):
             key = self.horizontalHeaderItem(i).text()
-            new_value = self.database.get_value(db_key, key)
+            new_value = self.database.get_value(db_key, key, raw_value=True)
             self.database.set_value(new_label, key, new_value)
             item = QStandardItem(str(new_value))
             if ATOMS_DATABASE._properties[key] == "color":
@@ -673,7 +673,7 @@ class ElementModel(QStandardItemModel):
         column = []
         for i in range(self.rowCount()):
             key = self.verticalHeaderItem(i).text()
-            new_value = self.database.get_value(key, old_prop_name)
+            new_value = self.database.get_value(key, old_prop_name, raw_value=True)
             self.database.set_value(key, new_prop_name, new_value)
             item = QStandardItem(str(new_value))
             if ATOMS_DATABASE._properties[old_prop_name] == "color":
