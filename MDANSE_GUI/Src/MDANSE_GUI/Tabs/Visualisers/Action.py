@@ -415,6 +415,7 @@ class Action(QWidget):
         for widget in self._widgets:
             if not widget._configurator.valid:
                 allow = False
+                widget.mark_error(widget._configurator.error_status, silent=True)
             if widget.has_warning:
                 has_warning = True
         if self.execute_button is not None:
