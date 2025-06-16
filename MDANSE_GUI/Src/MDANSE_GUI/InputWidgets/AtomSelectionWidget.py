@@ -495,6 +495,9 @@ class SelectionHelper(QDialog):
         self.selection_model.accept_from_widget(
             '{"function_name": "select_all", "operation_type": "union"}'
         )
+        self.selection_model.accept_from_widget(
+            '{"function_name": "select_atoms", "atom_types": ["Du"], "operation_type": "difference"}'
+        )
         self.recalculate_selection()
 
 
