@@ -20,7 +20,7 @@ from typing import Any, Optional, Union
 
 import h5py
 
-from MDANSE.Framework.AtomSelector.atom_selection import select_atoms
+from MDANSE.Framework.AtomSelector.atom_selection import select_atoms, select_dummy
 from MDANSE.Framework.AtomSelector.general_selection import (
     invert_selection,
     select_all,
@@ -43,6 +43,7 @@ function_lookup = {
         select_none,
         invert_selection,
         select_atoms,
+        select_dummy,
         select_molecules,
         select_labels,
         select_pattern,
