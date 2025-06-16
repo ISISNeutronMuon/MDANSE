@@ -20,24 +20,21 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
-class DensityProfileError(Error):
+class ScatteringLengthDensityProfileError(Error):
     pass
 
 
-class DensityProfile(IJob):
-    """
-    The Density Profile analysis shows the weighted atomic density heterogeneity in the directions of the simulation box axes.
+class ScatteringLengthDensityProfile(IJob):
+    """Produces the time-averaged scattering length density profile.
 
-    For a lipid membrane, the density variation in the direction perpendicular to the membrane is probed in reflectometry measurements.
-
-    The Density Profile Analysis can show segregation or cluster order formation, for example during the formation of micelles.
+    The result can be used in neutron reflectometry calculations.
     """
 
-    label = "Density Profile"
+    label = "Scattering Length Density Profile"
 
     category = (
         "Analysis",
-        "Structure",
+        "Scattering",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
@@ -89,14 +86,14 @@ class DensityProfile(IJob):
 
         self._dr = self.configuration["dr"]["value"]
 
-        axis_index = self.configuration["axis"]["index"]
-
+        self.axis_index = self.configuration["axis"]["index"]
+        trajectory = self.configuration["trajectory"]["instance"]
         first_conf = self.configuration["trajectory"]["instance"].configuration()
 
         try:
-            axis = first_conf.unit_cell.direct[axis_index, :]
+            axis = first_conf.unit_cell.direct[self.axis_index, :]
         except Exception:
-            raise DensityProfileError(
+            raise ScatteringLengthDensityProfileError(
                 "Density profile cannot be computed without a simulation box. "
                 "You can add a box using TrajectoryEditor."
             )
@@ -107,21 +104,36 @@ class DensityProfile(IJob):
         self._outputData.add("r", "LineOutputVariable", (self._n_bins,), units="nm")
 
         self._indices_per_element = self.configuration["atom_selection"].get_indices()
+        self._elements = list(self.configuration["atom_selection"].get_natoms().keys())
 
-        self.labels = [
-            (element, (element,))
-            for element in self.configuration["atom_selection"].get_natoms()
-        ]
+        self.scattering_lengths = {
+            element: [
+                trajectory.get_atom_property(element, "b_coherent"),
+                trajectory.get_atom_property(element, "b_incoherent"),
+                np.sqrt(trajectory.get_atom_property(element, "xs_scattering"))
+                / (4 * np.pi),
+            ]
+            for element in self._elements
+        }
 
-        for element in self._indices_per_element.keys():
+        for element in self._elements:
             self._outputData.add(
                 f"dp_{element}",
                 "LineOutputVariable",
                 (self._n_bins,),
                 axis="r",
-                units="au",
+                units="1 / ang3",
                 main_result=True,
-                partial_result=True,
+            )
+
+        for component in ["coherent", "incoherent", "total"]:
+            self._outputData.add(
+                f"sldp_{component}",
+                "LineOutputVariable",
+                (self._n_bins,),
+                axis="r",
+                units="1e-6 / ang2",
+                main_result=True,
             )
 
         self._extent = 0.0
@@ -153,6 +165,9 @@ class DensityProfile(IJob):
         axis_index = self.configuration["axis"]["index"]
         axis = conf.unit_cell.direct[axis_index, :]
         axis_length = np.sqrt(np.sum(axis**2))
+        self._extent += axis_length
+
+        slice_volume = conf.unit_cell.volume / self._n_bins
 
         dp_per_frame = {}
 
@@ -163,7 +178,7 @@ class DensityProfile(IJob):
                 range=(0.0, 1.0),
             )
 
-        return index, (axis_length, dp_per_frame)
+        return index, (slice_volume, dp_per_frame)
 
     def combine(self, index: int, data: tuple[float, dict[str, np.ndarray]]) -> None:
         """Combine results together.
@@ -176,32 +191,31 @@ class DensityProfile(IJob):
             Axis length and density profile.
         """
 
-        self._extent, density_profile = data
+        slice_volume, density_profile = data
 
         for element, hist in density_profile.items():
-            self._outputData[f"dp_{element}"] += hist
+            self._outputData[f"dp_{element}"] += hist / slice_volume
+            slen_dict = self.scattering_lengths[element]
+            for nb, component in enumerate(["coherent", "incoherent", "total"]):
+                self._outputData[f"sldp_{component}"] += (
+                    slen_dict[element][nb] * hist / slice_volume
+                )
 
     def finalize(self) -> None:
         """
         Finalize the job.
         """
 
-        n_atoms_per_element = self.configuration["atom_selection"].get_natoms()
-
-        for element in n_atoms_per_element:
-            self._outputData[f"dp_{element}"] /= self.numberOfSteps
-
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, n_atoms_per_element, 1)
-        assign_weights(self._outputData, weight_dict, "dp_%s", self.labels)
-        dp_total = weighted_sum(self._outputData, "dp_%s", self.labels)
-
-        self._outputData.add(
-            "dp_total", "LineOutputVariable", dp_total, axis="r", units="au"
-        )
+        self._extent /= self.numberOfSteps
 
         r_values = np.linspace(0, self._extent, self._n_bins + 1)
         self._outputData["r"][:] = (r_values[1:] + r_values[:-1]) / 2
+
+        for element in self._elements:
+            self._outputData[f"dp_{element}"] /= self.numberOfSteps
+
+        for component in ["coherent", "incoherent", "total"]:
+            self._outputData[f"sldp_{component}"] /= self.numberOfSteps
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
