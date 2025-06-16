@@ -24,8 +24,6 @@ Specific converters
 - CP2K
 - DCD
 - DFTB
-- Discover
-- DMol
 - DL_POLY
 - Forcite
 - Gromacs
