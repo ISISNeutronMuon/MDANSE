@@ -14,21 +14,19 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import (
-    QLabel,
-    QWidget,
-    QLineEdit,
-    QComboBox,
-    QGridLayout,
-)
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator, QIntValidator
+from qtpy.QtWidgets import (
+    QComboBox,
+    QGridLayout,
+    QLabel,
+    QLineEdit,
+    QWidget,
+)
 
 from MDANSE.MLogging import LOG
-
+from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import InstrumentInfo, SimpleInstrument
 from MDANSE_GUI.Widgets.VectorWidget import VectorWidget
-from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import InstrumentInfo
-from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 
 
 class InstrumentDetails(QWidget):

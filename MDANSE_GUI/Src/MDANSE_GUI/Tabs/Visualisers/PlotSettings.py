@@ -14,17 +14,17 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import matplotlib.pyplot as mpl
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
-    QWidget,
-    QFormLayout,
     QComboBox,
+    QFormLayout,
     QGroupBox,
     QVBoxLayout,
+    QWidget,
 )
-from qtpy.QtCore import Slot, Signal
 
-from MDANSE.MLogging import LOG
 from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
 
 
 class PlotSettings(QWidget):

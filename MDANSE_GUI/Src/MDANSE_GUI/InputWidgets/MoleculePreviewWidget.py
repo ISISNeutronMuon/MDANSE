@@ -19,11 +19,12 @@ from typing import Any, Union
 import rdkit.Chem as chem
 import rdkit.Chem.AllChem as allchem
 import rdkit.Chem.Draw as draw
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from PIL.ImageQt import ImageQt
 from qtpy.QtCore import QObject
 from qtpy.QtGui import QFont, QImage, QPixmap
 from qtpy.QtWidgets import QDialog, QLabel, QVBoxLayout
+
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class MoleculePreviewWidget(QDialog):

@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtWidgets import QLineEdit, QLabel
+from qtpy.QtWidgets import QLabel, QLineEdit
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

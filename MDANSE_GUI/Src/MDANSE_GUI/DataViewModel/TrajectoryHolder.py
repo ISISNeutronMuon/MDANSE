@@ -17,11 +17,10 @@ import hashlib
 import os
 from pathlib import PurePath
 
-from qtpy.QtGui import QStandardItemModel, QStandardItem
 from qtpy.QtCore import QObject, Slot
+from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.MLogging import LOG
-
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 

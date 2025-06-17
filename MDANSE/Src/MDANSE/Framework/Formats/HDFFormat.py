@@ -15,12 +15,12 @@
 #
 from __future__ import annotations
 
+import json
 from importlib import metadata
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import h5py
-import json
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Formats.IFormat import IFormat

@@ -13,8 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt
-from qtpy.QtGui import QStandardItemModel, QStandardItem
+from qtpy.QtCore import QModelIndex, QMutex, QObject, Qt, Signal, Slot
+from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 
 class GeneralModel(QStandardItemModel):

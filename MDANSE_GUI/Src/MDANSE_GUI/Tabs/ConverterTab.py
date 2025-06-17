@@ -14,19 +14,18 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from functools import partial
+
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget
 
 from MDANSE.Framework.Converters.Converter import Converter
-
+from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
-from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
-from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
-
+from MDANSE_GUI.Tabs.Visualisers.Action import Action
+from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 tab_label = """Convert your trajectory to the MDANSE MDT format.
 If you cannot find a dedciated converter
@@ -136,6 +135,7 @@ class ConverterTab(GeneralTab):
 
 if __name__ == "__main__":
     import sys
+
     from qtpy.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)

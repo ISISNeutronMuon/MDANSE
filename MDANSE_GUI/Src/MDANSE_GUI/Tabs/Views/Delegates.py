@@ -14,18 +14,18 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtGui import QColor
 from qtpy.QtWidgets import (
-    QDoubleSpinBox,
-    QComboBox,
-    QItemDelegate,
-    QStyledItemDelegate,
-    QColorDialog,
     QApplication,
+    QColorDialog,
+    QComboBox,
+    QDoubleSpinBox,
+    QItemDelegate,
     QStyle,
+    QStyledItemDelegate,
     QStyleOptionProgressBar,
 )
-from qtpy.QtCore import Signal, Slot, Qt
-from qtpy.QtGui import QColor
 
 
 class ColourPicker(QStyledItemDelegate):

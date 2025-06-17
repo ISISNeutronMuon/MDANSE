@@ -14,17 +14,18 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
+
 import numpy as np
 
-from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
+from MDANSE.Framework.AtomMapping import get_element_from_mapping
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from MDANSE.Framework.AtomMapping import get_element_from_mapping
-from MDANSE.MLogging import LOG
 
 
 class CellFileError(Error):

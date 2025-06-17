@@ -16,8 +16,8 @@
 
 import tempfile
 import time
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator

@@ -13,14 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
 import json
+import os
 from pathlib import PurePath
 
 from qtpy.QtCore import QObject, Signal, Slot
 
-from MDANSE.MLogging import LOG
 from MDANSE import PLATFORM
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Settings.LocalSettings import LocalSettings
 
 json_encoder = json.encoder.JSONEncoder()

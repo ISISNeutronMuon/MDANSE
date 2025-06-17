@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import json
+
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Mathematics.Signal import (
     DEFAULT_FILTER,

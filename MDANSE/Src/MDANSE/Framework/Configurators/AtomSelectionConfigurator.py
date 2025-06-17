@@ -77,7 +77,8 @@ class AtomSelectionConfigurator(IConfigurator):
 
         self["selection_length"] = len(self["flatten_indices"])
         self["indices"] = [[idx] for idx in self["flatten_indices"]]
-
+        self["all_names"] = list(atoms)
+        self["all_elements"] = [[at] for at in atoms]
         self["elements"] = [[at] for at in selectedAtoms]
         self["names"] = list(selectedAtoms)
         self["unique_names"] = sorted(set(self["names"]))
@@ -100,6 +101,17 @@ class AtomSelectionConfigurator(IConfigurator):
 
         """
         return Counter(self["names"])
+
+    def get_all_natoms(self) -> dict[str, int]:
+        """Count all atoms, per element.
+
+        Returns
+        -------
+        dict
+            A dictionary of the number of atom per element.
+
+        """
+        return Counter(self["all_names"])
 
     def get_total_natoms(self) -> int:
         """Count all the selected atoms.

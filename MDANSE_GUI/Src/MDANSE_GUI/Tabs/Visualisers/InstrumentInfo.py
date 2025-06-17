@@ -14,13 +14,13 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QTextBrowser
-from qtpy.QtCore import Signal, Slot, Qt
+from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem
+from qtpy.QtWidgets import QTextBrowser
 
-from MDANSE.MLogging import LOG
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_text_map
 
 

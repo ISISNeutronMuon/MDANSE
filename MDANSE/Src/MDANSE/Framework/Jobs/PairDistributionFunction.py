@@ -192,8 +192,19 @@ class PairDistributionFunction(DistanceHistogram):
             calc_func, self._outputData
         )
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 2)
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            2,
+        )
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        factor = (n_selected / n_total) ** 2
+
         if self.intra:
             for i in ["_intra", "_inter", ""]:
                 if i == "_intra":
@@ -202,15 +213,19 @@ class PairDistributionFunction(DistanceHistogram):
                     labels = self.labels
                 assign_weights(self._outputData, weight_dict, f"pdf{i}_%s", labels)
                 pdf = weighted_sum(self._outputData, f"pdf{i}_%s", labels)
-                self._outputData[f"pdf{i}_total"][:] = pdf
+                self._outputData[f"pdf{i}_total"][:] = pdf / factor
                 self._outputData[f"rdf{i}_total"][:] = (
-                    shellSurfaces * self.averageDensity * pdf
+                    shellSurfaces * self.averageDensity * pdf / factor
                 )
                 self._outputData[f"tcf{i}_total"][:] = (
                     densityFactor
                     * self.averageDensity
-                    * (pdf if i == "_intra" else pdf - 1)
+                    * (pdf / factor if i == "_intra" else (pdf - factor) / factor)
                 )
+                self._outputData[f"pdf{i}_total"].scaling_factor = factor
+                self._outputData[f"rdf{i}_total"].scaling_factor = factor
+                self._outputData[f"tcf{i}_total"].scaling_factor = factor
+
                 for j in ["pdf", "rdf", "tcf"]:
                     self.configuration["grouping_level"].add_grouped_totals(
                         self._outputData,
@@ -226,11 +241,16 @@ class PairDistributionFunction(DistanceHistogram):
         else:
             assign_weights(self._outputData, weight_dict, "pdf_%s", self.labels)
             pdf = weighted_sum(self._outputData, "pdf_%s", self.labels)
-            self._outputData["pdf_total"][:] = pdf
-            self._outputData["rdf_total"][:] = shellSurfaces * self.averageDensity * pdf
-            self._outputData["tcf_total"][:] = (
-                densityFactor * self.averageDensity * (pdf - 1)
+            self._outputData["pdf_total"][:] = pdf / factor
+            self._outputData["rdf_total"][:] = (
+                shellSurfaces * self.averageDensity * pdf / factor
             )
+            self._outputData["tcf_total"][:] = (
+                densityFactor * self.averageDensity * (pdf - factor) / factor
+            )
+            self._outputData["pdf_total"].scaling_factor = factor
+            self._outputData["rdf_total"].scaling_factor = factor
+            self._outputData["tcf_total"].scaling_factor = factor
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

@@ -19,8 +19,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from matplotlib.axis import Axis
     from matplotlib.axes import Axes
+    from matplotlib.axis import Axis
 
 
 class AxesWrapper:

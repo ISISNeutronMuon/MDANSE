@@ -14,8 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import MDAnalysis as mda
-
-from qtpy.QtWidgets import QLineEdit, QPushButton, QComboBox
+from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton
 
 from .InputFileWidget import InputFileWidget
 

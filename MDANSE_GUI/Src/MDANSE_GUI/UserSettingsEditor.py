@@ -15,16 +15,16 @@
 #
 
 
+from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
 from qtpy.QtWidgets import (
-    QDialog,
-    QPushButton,
-    QVBoxLayout,
     QApplication,
-    QMenu,
     QComboBox,
+    QDialog,
+    QMenu,
+    QPushButton,
     QTreeView,
+    QVBoxLayout,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QSortFilterProxyModel
 
 from MDANSE.MLogging import LOG
 

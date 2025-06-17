@@ -15,7 +15,6 @@
 #
 
 from MDANSE import PLATFORM
-
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 

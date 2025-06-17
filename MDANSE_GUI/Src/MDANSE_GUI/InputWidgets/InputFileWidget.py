@@ -16,11 +16,10 @@
 import os
 from pathlib import PurePath
 
-from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog
 from qtpy.QtCore import Slot
+from qtpy.QtWidgets import QFileDialog, QLineEdit, QPushButton
 
 from MDANSE.MLogging import LOG
-
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 

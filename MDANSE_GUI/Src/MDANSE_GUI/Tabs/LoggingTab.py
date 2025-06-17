@@ -16,17 +16,15 @@
 
 from logging import Handler, LogRecord
 
-from qtpy.QtCore import qInstallMessageHandler, Slot
-from qtpy.QtWidgets import QWidget, QComboBox
+from qtpy.QtCore import Slot, qInstallMessageHandler
+from qtpy.QtWidgets import QComboBox, QWidget
 
-from MDANSE.MLogging import LOG, FMT
-
+from MDANSE.MLogging import FMT, LOG
+from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.SinglePanel import SinglePanel
-from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Widgets.DefaultCombobox import highlight_default_value
-
 
 log_tab_label = """MDANSE_GUI message log.
 
@@ -132,6 +130,7 @@ class LoggingTab(GeneralTab):
 
 if __name__ == "__main__":
     import sys
+
     from qtpy.QtWidgets import QApplication, QMainWindow, QVBoxLayout
 
     app = QApplication(sys.argv)

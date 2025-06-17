@@ -13,9 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
 from itertools import count, groupby
-from qtpy.QtCore import Qt, QEvent, QObject
+from typing import Union
+
+from qtpy.QtCore import QEvent, QObject, Qt
 from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import QComboBox
 

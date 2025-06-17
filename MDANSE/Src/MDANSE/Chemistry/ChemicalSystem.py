@@ -19,7 +19,7 @@ from __future__ import annotations
 import copy
 from collections.abc import Iterable
 from functools import reduce
-from typing import Any, Optional, SupportsInt
+from typing import Any, SupportsInt
 
 import h5py
 import networkx as nx

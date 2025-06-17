@@ -16,8 +16,8 @@
 
 import numpy as np
 
-from MDANSE.MLogging import LOG
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.MLogging import LOG
 
 
 class UnitCellConfigurator(IConfigurator):

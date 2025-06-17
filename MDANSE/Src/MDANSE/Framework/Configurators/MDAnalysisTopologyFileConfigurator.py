@@ -16,6 +16,7 @@
 from collections.abc import Iterable
 
 import MDAnalysis as mda
+
 from MDANSE.Framework.AtomMapping import AtomLabel
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator

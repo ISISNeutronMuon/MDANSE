@@ -19,6 +19,7 @@ from collections.abc import Iterable
 from typing import Union
 
 import numpy as np
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error

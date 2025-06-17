@@ -14,18 +14,18 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import codecs
 import io
 import tarfile
-import codecs
 import time
+from importlib import metadata
 from pathlib import Path
 from typing import TYPE_CHECKING, Union
-from importlib import metadata
 
 import numpy as np
 
-from MDANSE.Framework.Formats.IFormat import IFormat
 from MDANSE import PLATFORM
+from MDANSE.Framework.Formats.IFormat import IFormat
 
 if TYPE_CHECKING:
     from MDANSE.Framework.Jobs.IJob import IJob

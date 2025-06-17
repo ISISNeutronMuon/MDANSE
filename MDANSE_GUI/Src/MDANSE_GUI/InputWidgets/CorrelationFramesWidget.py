@@ -15,8 +15,8 @@
 #
 import math
 
-from qtpy.QtWidgets import QLineEdit, QLabel
 from qtpy.QtGui import QIntValidator
+from qtpy.QtWidgets import QLabel, QLineEdit
 
 from .FramesWidget import FramesWidget
 

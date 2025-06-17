@@ -13,27 +13,26 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import traceback
 from logging import Handler
 from logging.handlers import QueueListener
-from multiprocessing import Pipe, Queue, Event
-import traceback
+from multiprocessing import Event, Pipe, Queue
 
-from qtpy.QtGui import QStandardItemModel, QStandardItem
-from qtpy.QtCore import QObject, Slot, Signal, QTimer, QThread, QMutex, Qt
+from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
+from qtpy.QtGui import QStandardItem, QStandardItemModel
 
-from MDANSE.MLogging import FMT, LOG
 from MDANSE.Framework.Converters import Converter
-
-from MDANSE_GUI.Subprocess.Subprocess import Subprocess, Connection
+from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.Subprocess.JobState import (
-    Starting,
-    Finished,
-    Running,
-    Failed,
-    Paused,
     Aborted,
+    Failed,
+    Finished,
+    Paused,
+    Running,
+    Starting,
 )
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
+from MDANSE_GUI.Subprocess.Subprocess import Connection, Subprocess
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 
 

@@ -16,8 +16,9 @@
 
 
 def main():
-    from MDANSE_GUI.UnitsEditor import UnitsEditor, QApplication
     import sys
+
+    from MDANSE_GUI.UnitsEditor import QApplication, UnitsEditor
 
     app = QApplication(sys.argv)
     root = UnitsEditor()

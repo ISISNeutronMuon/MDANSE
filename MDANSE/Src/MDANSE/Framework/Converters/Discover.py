@@ -15,6 +15,7 @@
 #
 import collections
 import struct
+
 import numpy as np
 
 from MDANSE.Framework.Converters.Converter import Converter

@@ -14,14 +14,12 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import time
-
 from logging.handlers import QueueHandler
-from multiprocessing import Queue, Process, Event
+from multiprocessing import Event, Process, Queue
 from multiprocessing.connection import Connection
 
-from MDANSE.MLogging import LOG
 from MDANSE.Framework.Jobs.IJob import IJob
-
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess
 
 

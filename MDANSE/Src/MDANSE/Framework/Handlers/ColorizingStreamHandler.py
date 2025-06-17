@@ -18,7 +18,6 @@ import ctypes
 import logging
 import os
 
-
 from MDANSE.Framework.Handlers.IHandler import IHandler
 
 

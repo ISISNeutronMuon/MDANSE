@@ -16,14 +16,13 @@
 import os
 from pathlib import PurePath
 
-from qtpy.QtCore import QObject, Slot, Signal, QMessageLogger
+from qtpy.QtCore import QMessageLogger, QObject, Signal, Slot
 from qtpy.QtWidgets import QListView
 
-from MDANSE.MLogging import LOG
 from MDANSE.Framework.Units import measure, unit_lookup
-
-from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 

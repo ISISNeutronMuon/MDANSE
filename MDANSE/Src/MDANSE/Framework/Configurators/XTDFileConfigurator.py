@@ -13,23 +13,23 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from collections.abc import Iterable
 import collections
 import xml.etree.ElementTree as ElementTree
+from collections.abc import Iterable
 
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
+from MDANSE.Framework.Configurators.FileWithAtomDataConfigurator import (
+    FileWithAtomDataConfigurator,
+)
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicBoxConfiguration,
     RealConfiguration,
 )
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from MDANSE.Framework.Configurators.FileWithAtomDataConfigurator import (
-    FileWithAtomDataConfigurator,
-)
-from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
 
 
 class XTDFileConfigurator(FileWithAtomDataConfigurator):

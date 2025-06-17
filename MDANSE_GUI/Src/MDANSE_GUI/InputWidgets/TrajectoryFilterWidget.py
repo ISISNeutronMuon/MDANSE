@@ -16,46 +16,47 @@
 import copy
 from typing import Any, Callable
 
-import numpy as np
-from scipy import signal
-from qtpy.QtCore import Qt, Slot, Signal, QObject
-from qtpy.QtWidgets import (
-    QLineEdit,
-    QPushButton,
-    QDialog,
-    QComboBox,
-    QCheckBox,
-    QGridLayout,
-    QGroupBox,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QSizePolicy,
-    QSpinBox,
-    QStackedLayout,
-    QDoubleSpinBox,
-    QTextEdit,
-    QWidget,
-)
-from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
-    TrajectoryFilterConfigurator,
-)
-from MDANSE.Mathematics.Signal import (
-    Filter,
-    filter_description_string,
-    FILTER_MAP,
-    DEFAULT_FILTER_CUTOFF,
-    DEFAULT_N_STEPS,
-    DEFAULT_TIME_STEP,
-    power_spectrum,
-    FrequencyDomain,
-)
 import matplotlib.pyplot as mpl
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
+from qtpy.QtCore import QObject, Qt, Signal, Slot
+from qtpy.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QDoubleSpinBox,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSizePolicy,
+    QSpinBox,
+    QStackedLayout,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from scipy import signal
+
+from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
+    TrajectoryFilterConfigurator,
+)
+from MDANSE.Mathematics.Signal import (
+    DEFAULT_FILTER_CUTOFF,
+    DEFAULT_N_STEPS,
+    DEFAULT_TIME_STEP,
+    FILTER_MAP,
+    Filter,
+    FrequencyDomain,
+    filter_description_string,
+    power_spectrum,
+)
+from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 # Default maximum value for a float spinbox
 DEFAULT_SPINBOX_MAX_FLOAT = 1000.0

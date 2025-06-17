@@ -16,7 +16,6 @@
 
 import logging.handlers
 
-
 from MDANSE.Framework.Handlers.IHandler import IHandler
 
 

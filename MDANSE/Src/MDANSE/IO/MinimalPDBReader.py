@@ -18,6 +18,7 @@ from collections.abc import Generator, Iterable
 
 import numpy as np
 from ase.io import read as ase_read
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.MLogging import LOG

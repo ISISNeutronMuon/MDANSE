@@ -15,35 +15,32 @@
 
 import math
 
-import numpy as np
-
-from qtpy.QtWidgets import (
-    QDialog,
-    QPushButton,
-    QGridLayout,
-    QVBoxLayout,
-    QWidget,
-    QLabel,
-    QComboBox,
-    QLineEdit,
-    QTextEdit,
-    QApplication,
-)
-from qtpy.QtCore import Signal, Slot
-from qtpy.QtGui import QDoubleValidator
-
 import matplotlib.pyplot as mpl
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
 )
+from qtpy.QtCore import Signal, Slot
+from qtpy.QtGui import QDoubleValidator
+from qtpy.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QDialog,
+    QGridLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
-from MDANSE.MLogging import LOG
-from MDANSE.Framework.Units import measure
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )
-
+from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
 
 widget_text_map = {
     "ideal": "ideal",

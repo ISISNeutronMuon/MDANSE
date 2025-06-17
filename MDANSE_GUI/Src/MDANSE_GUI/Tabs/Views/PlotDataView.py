@@ -16,14 +16,15 @@
 import time
 from typing import Union
 
+from qtpy.QtCore import QMimeData, QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QContextMenuEvent, QDrag, QMouseEvent, QStandardItem
+from qtpy.QtWidgets import QAbstractItemView, QApplication, QMenu, QTreeView
+
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
 from MDANSE_GUI.Widgets.DataDialog import DataDialog
-from qtpy.QtCore import QMimeData, QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QDrag, QMouseEvent, QStandardItem
-from qtpy.QtWidgets import QAbstractItemView, QApplication, QMenu, QTreeView
 
 
 class PlotDataView(QTreeView):

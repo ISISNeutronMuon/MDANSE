@@ -19,9 +19,8 @@ import abc
 import numpy as np
 
 from MDANSE.Core.Error import Error
-from MDANSE.Framework.Configurable import Configurable
-
 from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Framework.Configurable import Configurable
 
 
 class InstrumentResolutionError(Error):

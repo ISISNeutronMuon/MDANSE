@@ -14,20 +14,20 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from typing import TYPE_CHECKING, Any
-from contextlib import suppress
 import copy
+from contextlib import suppress
+from typing import TYPE_CHECKING, Any
 
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QValidator
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QPushButton,
-    QLineEdit,
     QDoubleSpinBox,
-    QSpinBox,
     QGroupBox,
+    QLineEdit,
+    QPushButton,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
 )
 
 if TYPE_CHECKING:

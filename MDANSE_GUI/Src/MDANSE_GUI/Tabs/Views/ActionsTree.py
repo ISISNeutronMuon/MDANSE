@@ -15,14 +15,13 @@
 #
 from typing import Union
 
-from qtpy.QtWidgets import QTreeView, QAbstractItemView, QApplication
-from qtpy.QtCore import Signal, Slot, QModelIndex, Qt, QMimeData
-from qtpy.QtGui import QMouseEvent, QDrag
+from qtpy.QtCore import QMimeData, QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QDrag, QMouseEvent
+from qtpy.QtWidgets import QAbstractItemView, QApplication, QTreeView
 
 from MDANSE.MLogging import LOG
-
-from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.DataViewModel.ActionsHolder import ActionsHolder
+from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 

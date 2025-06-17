@@ -18,7 +18,6 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Literal, Optional
 
-from MDANSE.MLogging import LOG
 from qtpy.QtCore import QObject, Signal, Slot
 from qtpy.QtWidgets import (
     QGridLayout,
@@ -28,6 +27,8 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
     from MDANSE.Framework.Configurators.IConfigurator import IConfigurator

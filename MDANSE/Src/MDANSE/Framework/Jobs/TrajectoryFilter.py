@@ -17,20 +17,20 @@ import collections
 import copy
 import json
 
+import h5py
 import numpy as np
 
-import h5py
-from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import FILTER_MAP, Filter
+from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
-    RealConfiguration,
     PeriodicRealConfiguration,
+    RealConfiguration,
     _Configuration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
-from MDANSE.MLogging import LOG
 
 
 class TrajectoryFilter(IJob):

@@ -18,11 +18,10 @@ import abc
 import json
 from pathlib import Path
 
-from more_itertools import value_chain
 import numpy as np
+from more_itertools import value_chain
 
 from MDANSE.Core.Error import Error
-
 from MDANSE.Core.SubclassFactory import SubclassFactory
 
 

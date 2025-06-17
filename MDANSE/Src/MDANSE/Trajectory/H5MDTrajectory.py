@@ -17,14 +17,14 @@
 from pathlib import Path
 from typing import Union
 
-import numpy as np
 import h5py
+import numpy as np
 
-from MDANSE.MLogging import LOG
-from MDANSE.Framework.Units import measure
-from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Framework.Units import measure
+from MDANSE.Mathematics.Geometry import center_of_mass
+from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
