@@ -13,17 +13,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import QSortFilterProxyModel, Signal, Slot, Qt
+from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
 from qtpy.QtGui import (
+    QBrush,
+    QColor,
     QDoubleValidator,
     QIntValidator,
     QStandardItem,
     QStandardItemModel,
-    QBrush,
-    QColor,
 )
 from qtpy.QtWidgets import (
     QApplication,
+    QColorDialog,
     QDialog,
     QItemDelegate,
     QLineEdit,
@@ -31,15 +32,13 @@ from qtpy.QtWidgets import (
     QPushButton,
     QTableView,
     QVBoxLayout,
-    QColorDialog,
 )
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.MLogging import LOG
 from MDANSE.Chemistry.Databases import AtomsDatabaseError
-
-from MDANSE_GUI.Widgets.GeneralWidgets import InputDialog, InputVariable
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker
+from MDANSE_GUI.Widgets.GeneralWidgets import InputDialog, InputVariable
 
 
 class FloatInputField(QItemDelegate):

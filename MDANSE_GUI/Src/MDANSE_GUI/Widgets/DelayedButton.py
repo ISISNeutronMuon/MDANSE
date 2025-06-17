@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from qtpy.QtCore import Slot, Signal, QObject, QTimer
+from qtpy.QtCore import QObject, QTimer, Signal, Slot
 from qtpy.QtWidgets import QPushButton
 
 

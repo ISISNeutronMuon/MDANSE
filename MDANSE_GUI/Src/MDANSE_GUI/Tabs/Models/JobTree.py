@@ -13,11 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from MDANSE.Framework.Jobs.IJob import IJob
+from qtpy.QtCore import Qt, Signal
+from qtpy.QtGui import QStandardItem, QStandardItemModel
 
-from qtpy.QtGui import QStandardItemModel, QStandardItem
-from qtpy.QtCore import Signal
-from qtpy.QtCore import Qt
+from MDANSE.Framework.Jobs.IJob import IJob
 
 
 class JobTree(QStandardItemModel):

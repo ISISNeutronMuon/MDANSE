@@ -18,6 +18,7 @@ from typing import Union
 import MDAnalysis as mda
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
 from .MultiInputFileConfigurator import MultiInputFileConfigurator
 
 

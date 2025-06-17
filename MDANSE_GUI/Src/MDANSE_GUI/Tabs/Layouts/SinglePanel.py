@@ -13,15 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
-    QWidget,
     QHBoxLayout,
-    QVBoxLayout,
-    QScrollArea,
     QLabel,
     QPushButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
 )
-from qtpy.QtCore import Signal, Slot
 
 
 class SinglePanel(QWidget):

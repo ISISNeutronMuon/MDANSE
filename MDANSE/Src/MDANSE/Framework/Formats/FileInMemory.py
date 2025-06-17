@@ -13,11 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from typing import TYPE_CHECKING
+
 import h5py
 
 from MDANSE.Framework.Formats.IFormat import IFormat
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from MDANSE.Framework.Jobs.IJob import IJob

@@ -15,22 +15,22 @@
 #
 import collections
 
+import numpy as np
 from ase.io import iread, read
 from ase.io.trajectory import Trajectory as ASETrajectory
-import numpy as np
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicBoxConfiguration,
     PeriodicRealConfiguration,
 )
-from MDANSE.MolecularDynamics.TrajectoryUtils import elements_from_masses
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.TrajectoryUtils import elements_from_masses
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from MDANSE.MLogging import LOG
 
 
 class ASETrajectoryFileError(Error):

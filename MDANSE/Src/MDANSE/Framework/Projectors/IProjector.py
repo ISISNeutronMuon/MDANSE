@@ -15,7 +15,6 @@
 #
 
 from MDANSE.Core.Error import Error
-
 from MDANSE.Core.SubclassFactory import SubclassFactory
 
 

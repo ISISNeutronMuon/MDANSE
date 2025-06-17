@@ -14,13 +14,14 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+
 import abc
 import copy
-from typing import TYPE_CHECKING
 from functools import reduce
+from typing import TYPE_CHECKING
 
-import numpy as np
 import networkx as nx
+import numpy as np
 from numpy.typing import ArrayLike
 
 if TYPE_CHECKING:

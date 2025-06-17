@@ -15,6 +15,7 @@
 #
 import importlib
 from pathlib import Path
+
 from MDANSE.MLogging import LOG
 
 current_path = Path(__file__).parent

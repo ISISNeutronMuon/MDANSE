@@ -13,8 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
 import re
+from typing import Union
+
 import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE

@@ -16,9 +16,8 @@
 
 import numpy as np
 
-from MDANSE.Mathematics.LinearAlgebra import Vector
-
 from MDANSE.Framework.Projectors.IProjector import IProjector, ProjectorError
+from MDANSE.Mathematics.LinearAlgebra import Vector
 
 
 class AxialProjector(IProjector):

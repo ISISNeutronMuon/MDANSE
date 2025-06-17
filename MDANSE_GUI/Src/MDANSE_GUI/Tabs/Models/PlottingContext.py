@@ -20,16 +20,18 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import h5py
 
+import contextlib
+
 import matplotlib.pyplot as mpl
 import numpy as np
 from matplotlib import rcParams
 from matplotlib.colors import to_hex as mpl_to_hex
 from matplotlib.lines import lineStyles
 from matplotlib.markers import MarkerStyle
-from MDANSE.MLogging import LOG
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
-import contextlib
+
+from MDANSE.MLogging import LOG
 
 
 def get_mpl_markers():

@@ -16,30 +16,29 @@
 
 import copy
 
+from qtpy.QtCore import (
+    QModelIndex,
+    Signal,
+    Slot,
+)
+from qtpy.QtGui import (
+    QDoubleValidator,
+    QStandardItem,
+    QStandardItemModel,
+)
 from qtpy.QtWidgets import (
+    QApplication,
     QDialog,
-    QPushButton,
     QFrame,
     QGridLayout,
     QLabel,
-    QApplication,
     QLineEdit,
     QListView,
-)
-from qtpy.QtCore import (
-    Signal,
-    Slot,
-    QModelIndex,
-)
-from qtpy.QtGui import (
-    QStandardItem,
-    QStandardItemModel,
-    QDoubleValidator,
+    QPushButton,
 )
 
 from MDANSE.Framework.Units import UNITS_MANAGER
-
-from MDANSE_GUI.Widgets.GeneralWidgets import InputVariable, InputDialog
+from MDANSE_GUI.Widgets.GeneralWidgets import InputDialog, InputVariable
 
 
 class UnitVisualiser(QFrame):

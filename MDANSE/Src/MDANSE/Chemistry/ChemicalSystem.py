@@ -16,16 +16,17 @@
 
 from __future__ import annotations
 
-from typing import Any
 import copy
 from functools import reduce
+from typing import Any
 
 import h5py
+import networkx as nx
 import numpy as np
 from rdkit import Chem
-import networkx as nx
-from MDANSE.MLogging import LOG
+
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.MLogging import LOG
 
 
 class ChemicalSystem:

@@ -16,11 +16,12 @@
 
 
 def main():
+    import sys
+
     from MDANSE_GUI.ElementsDatabaseEditor import (
         ElementsDatabaseEditor,
         QApplication,
     )
-    import sys
 
     app = QApplication(sys.argv)
     root = ElementsDatabaseEditor()

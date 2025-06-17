@@ -15,17 +15,16 @@
 
 from typing import Optional
 
+from qtpy.QtCore import QObject, Signal, Slot
 from qtpy.QtWidgets import (
+    QComboBox,
     QDialog,
     QPushButton,
-    QVBoxLayout,
-    QComboBox,
     QTextEdit,
+    QVBoxLayout,
 )
-from qtpy.QtCore import Signal, Slot, QObject
 
 from MDANSE.Framework.Jobs.IJob import IJob
-
 
 sample_styles = {
     "blank_stylesheet": "",

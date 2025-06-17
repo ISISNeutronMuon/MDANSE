@@ -13,19 +13,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import pickle
 import optparse
+import pickle
 import subprocess
 import sys
 import textwrap
 from pathlib import Path
 
-from MDANSE.Core.Error import Error
 from MDANSE import PLATFORM
+from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.Framework.Jobs.JobStatus import JobState
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class IndentedHelp(optparse.IndentedHelpFormatter):

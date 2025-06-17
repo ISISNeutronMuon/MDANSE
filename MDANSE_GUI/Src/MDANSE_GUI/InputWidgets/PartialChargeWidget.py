@@ -13,8 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from MDANSE.Framework.Configurators.PartialChargeConfigurator import PartialChargeMapper
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import (
     QGroupBox,
@@ -27,6 +25,8 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE.Framework.Configurators.PartialChargeConfigurator import PartialChargeMapper
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import (
     AtomSelectionWidget,
     SelectionHelper,

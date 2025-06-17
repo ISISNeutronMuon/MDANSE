@@ -14,16 +14,15 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import logging
-import sys
 import os
+import sys
 import time
 
+from qtpy.QtCore import QLocale, QSettings, Qt, QTimer
+from qtpy.QtGui import QIcon, QPixmap
 from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory
-from qtpy.QtCore import QSettings, Qt, QTimer, QLocale
-from qtpy.QtGui import QPixmap, QIcon
 
-from MDANSE.MLogging import LOG, FMT
-
+from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.TabbedWindow import TabbedWindow
 
 

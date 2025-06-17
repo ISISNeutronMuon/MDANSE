@@ -18,7 +18,6 @@ import collections
 
 import numpy as np
 
-
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )

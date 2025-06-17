@@ -18,8 +18,8 @@ import collections
 import numpy as np
 from scipy.signal import correlate
 
-from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 
 

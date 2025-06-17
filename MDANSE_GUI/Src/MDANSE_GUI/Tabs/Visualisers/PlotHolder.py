@@ -13,14 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtWidgets import QVBoxLayout, QTabWidget, QTabBar
-from qtpy.QtCore import Slot, Signal
+from qtpy.QtCore import Signal, Slot
+from qtpy.QtWidgets import QTabBar, QTabWidget, QVBoxLayout
 
 from MDANSE.MLogging import LOG
-
-from MDANSE_GUI.Tabs.Visualisers.PlotWidget import PlotWidget
-from MDANSE_GUI.Tabs.Visualisers.DataWidget import DataWidget
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
+from MDANSE_GUI.Tabs.Visualisers.DataWidget import DataWidget
+from MDANSE_GUI.Tabs.Visualisers.PlotWidget import PlotWidget
 
 
 class PlotHolder(QTabWidget):

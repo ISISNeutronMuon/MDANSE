@@ -19,15 +19,13 @@ from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget
 
 from MDANSE.MLogging import LOG
-
+from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 from MDANSE_GUI.Tabs.Views.PlotDetailsView import PlotDetailsView
 from MDANSE_GUI.Tabs.Visualisers.PlotHolder import PlotHolder
 from MDANSE_GUI.Tabs.Visualisers.PlotSettings import PlotSettings
-from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
-
 
 label_text = """This tab manages a single plot.
 You can change the contents and appearance of the plot
@@ -123,6 +121,7 @@ class PlotTab(GeneralTab):
 
 if __name__ == "__main__":
     import sys
+
     from qtpy.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)

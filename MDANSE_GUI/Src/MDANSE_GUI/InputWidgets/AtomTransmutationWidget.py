@@ -13,9 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Framework.Configurators.AtomTransmutationConfigurator import AtomTransmuter
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from qtpy.QtWidgets import (
     QComboBox,
     QGroupBox,
@@ -28,6 +25,9 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Framework.Configurators.AtomTransmutationConfigurator import AtomTransmuter
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import (
     AtomSelectionWidget,
     SelectionHelper,

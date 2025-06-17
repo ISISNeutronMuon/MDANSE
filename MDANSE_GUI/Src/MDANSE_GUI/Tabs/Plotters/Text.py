@@ -18,9 +18,9 @@ from itertools import product
 from typing import TYPE_CHECKING
 
 import numpy as np
+
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
-
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:

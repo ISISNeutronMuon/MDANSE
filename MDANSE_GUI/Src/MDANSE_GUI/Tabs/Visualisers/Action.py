@@ -18,6 +18,17 @@ import traceback
 from pathlib import Path
 
 import numpy as np
+from qtpy.QtCore import Signal, Slot
+from qtpy.QtWidgets import (
+    QCheckBox,
+    QFileDialog,
+    QHBoxLayout,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets import (
@@ -63,16 +74,6 @@ from MDANSE_GUI.InputWidgets import (
 )
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 from MDANSE_GUI.Widgets.DelayedButton import DelayedButton
-from qtpy.QtCore import Signal, Slot
-from qtpy.QtWidgets import (
-    QCheckBox,
-    QFileDialog,
-    QHBoxLayout,
-    QPushButton,
-    QTextEdit,
-    QVBoxLayout,
-    QWidget,
-)
 
 widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "FloatConfigurator": FloatWidget,

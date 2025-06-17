@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import Slot, Signal
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QTextBrowser
 
 

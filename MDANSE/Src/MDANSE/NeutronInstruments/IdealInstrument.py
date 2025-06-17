@@ -14,8 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from MDANSE.NeutronInstruments.NeutronInstrument import NeutronInstrument
 from MDANSE.NeutronInstruments.Coverage.Coverage import Coverage
+from MDANSE.NeutronInstruments.NeutronInstrument import NeutronInstrument
 from MDANSE.NeutronInstruments.Resolution.Resolution import Resolution
 from MDANSE.NeutronInstruments.Spectrum.Spectrum import Spectrum
 

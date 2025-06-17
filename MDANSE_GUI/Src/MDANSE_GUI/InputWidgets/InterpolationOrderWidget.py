@@ -14,11 +14,10 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QSpinBox, QLabel
 from qtpy.QtCore import Slot
+from qtpy.QtWidgets import QLabel, QSpinBox
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-
 
 suffix_dict = {
     "0": "th order - no interpolation",

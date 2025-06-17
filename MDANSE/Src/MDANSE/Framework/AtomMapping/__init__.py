@@ -13,8 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from .atom_mapping import guess_element
-from .atom_mapping import get_element_from_mapping
-from .atom_mapping import fill_remaining_labels
-from .atom_mapping import check_mapping_valid
-from .atom_mapping import AtomLabel
+from .atom_mapping import (
+    AtomLabel,
+    check_mapping_valid,
+    fill_remaining_labels,
+    get_element_from_mapping,
+    guess_element,
+)

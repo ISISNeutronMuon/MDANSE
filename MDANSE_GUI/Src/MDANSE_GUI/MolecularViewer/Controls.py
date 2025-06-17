@@ -14,28 +14,28 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtCore import Slot, Qt, QTimer, QMutex
+from qtpy.QtCore import QMutex, Qt, QTimer, Slot
 from qtpy.QtWidgets import (
-    QWidget,
-    QGridLayout,
-    QSlider,
-    QHBoxLayout,
-    QSpinBox,
-    QVBoxLayout,
-    QPushButton,
-    QStyle,
-    QSizePolicy,
-    QTreeView,
-    QDoubleSpinBox,
-    QColorDialog,
-    QGroupBox,
     QCheckBox,
+    QColorDialog,
+    QDoubleSpinBox,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QPushButton,
+    QSizePolicy,
+    QSlider,
+    QSpinBox,
+    QStyle,
     QTabWidget,
+    QTreeView,
+    QVBoxLayout,
+    QWidget,
 )
 
-from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 from MDANSE_GUI.MolecularViewer.TraceWidget import TraceWidget
+from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
 
 button_lookup = {
     "start": QStyle.StandardPixmap.SP_MediaSkipBackward,

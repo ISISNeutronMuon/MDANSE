@@ -16,9 +16,9 @@
 
 import collections
 
-from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 
 
 class MeanSquareDisplacement(IJob):

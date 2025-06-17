@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from collections.abc import Iterator
 import collections
 import itertools as it
+from collections.abc import Iterator
 
 import numpy as np
 import numpy.typing as npt
@@ -23,7 +23,6 @@ import numpy.typing as npt
 from MDANSE.Chemistry import ChemicalSystem
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
-
 
 CELL_SIZE_LIMIT = 1e-9
 DETAILED_CELL_MESSAGE = (

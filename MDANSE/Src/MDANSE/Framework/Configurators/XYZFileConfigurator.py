@@ -13,13 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from collections.abc import Iterable
 import re
+from collections.abc import Iterable
 
 import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
+
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 

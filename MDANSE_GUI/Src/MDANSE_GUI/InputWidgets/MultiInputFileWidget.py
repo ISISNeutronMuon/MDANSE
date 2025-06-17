@@ -20,6 +20,7 @@ from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog
 
 from MDANSE.MLogging import LOG
+
 from .InputFileWidget import InputFileWidget
 
 

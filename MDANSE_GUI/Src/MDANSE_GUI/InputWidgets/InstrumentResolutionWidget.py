@@ -15,19 +15,18 @@
 #
 
 
+from qtpy.QtCore import Slot
+from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import (
+    QComboBox,
     QLabel,
     QLineEdit,
     QPushButton,
-    QComboBox,
 )
-from qtpy.QtCore import Slot
-from qtpy.QtGui import QDoubleValidator
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.Widgets.ResolutionDialog import ResolutionDialog
 from MDANSE_GUI.Widgets.ResolutionWidget import widget_text_map
-
 
 reverse_text_map = {value: key for key, value in widget_text_map.items()}
 

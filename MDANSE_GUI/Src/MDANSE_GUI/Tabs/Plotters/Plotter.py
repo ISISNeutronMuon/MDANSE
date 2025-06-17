@@ -18,6 +18,7 @@ import enum
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.MLogging import LOG
 
