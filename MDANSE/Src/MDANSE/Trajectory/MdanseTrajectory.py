@@ -33,11 +33,11 @@ from MDANSE.MolecularDynamics.TrajectoryUtils import (
     atomic_trajectory,
 )
 from MDANSE.MolecularDynamics.UnitCell import (
-    UnitCell,
-    NO_CELL,
     BAD_CELL,
-    CHANGING_CELL,
     CELL_SIZE_LIMIT,
+    CHANGING_CELL,
+    NO_CELL,
+    UnitCell,
 )
 
 
