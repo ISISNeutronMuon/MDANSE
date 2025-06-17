@@ -262,7 +262,7 @@ class MdanseTrajectory:
             self._unit_cells = None
             self.unit_cell_warning = NO_CELL
         if not self.unit_cell_warning:
-            if abs(self._unit_cells[0].volume) < CELL_SIZE_LIMIT:
+            if self._unit_cells[0].volume < CELL_SIZE_LIMIT:
                 self.unit_cell_warning = BAD_CELL
                 return
             reference_array = self._unit_cells[0].direct

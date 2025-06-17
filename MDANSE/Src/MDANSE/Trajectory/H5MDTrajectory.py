@@ -291,9 +291,8 @@ class H5MDTrajectory:
                         )
                     uc = UnitCell(temp_array)
                     self._unit_cells.append(uc)
-                    if not self.unit_cell_warning:
-                        if abs(uc.volume) < CELL_SIZE_LIMIT:
-                            self.unit_cell_warning = BAD_CELL
+                    if not self.unit_cell_warning and uc.volume < CELL_SIZE_LIMIT:
+                        self.unit_cell_warning = BAD_CELL
             else:
                 temp_array = np.diag(cells)
                 self._unit_cells.append(UnitCell(temp_array))

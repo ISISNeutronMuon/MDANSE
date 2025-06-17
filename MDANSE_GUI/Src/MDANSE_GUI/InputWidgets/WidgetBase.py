@@ -36,6 +36,13 @@ if TYPE_CHECKING:
 Layouts = Literal["QHBoxLayout", "QVBoxLayout", "QGridLayout"]
 Bases = Literal["QWidget", "QGroupBox"]
 
+WARNING_STYLE = (
+    "QWidget#InputWidget { background-color:rgb(220,210,30); font-weight: bold }"
+)
+ERROR_STYLE = (
+    "QWidget#InputWidget { background-color:rgb(180,20,180); font-weight: bold }"
+)
+
 
 class WidgetBase(QObject):
     """Object to serve as an ABC to GUI widgets in MDANSE.
@@ -169,9 +176,7 @@ class WidgetBase(QObject):
             If True, update the widget's error without sending signals
 
         """
-        self._base.setStyleSheet(
-            "QWidget#InputWidget { background-color:rgb(180,20,180); font-weight: bold }"
-        )
+        self._base.setStyleSheet(ERROR_STYLE)
         self._base.setToolTip(error_text)
         if not silent:
             self.valid_changed.emit()
@@ -188,9 +193,7 @@ class WidgetBase(QObject):
         """
         if warning_text:
             self.has_warning = True
-            self._base.setStyleSheet(
-                "QWidget#InputWidget { background-color:rgb(220,210,30); font-weight: bold }"
-            )
+            self._base.setStyleSheet(WARNING_STYLE)
             self._base.setToolTip(warning_text)
             self.valid_changed.emit()
             return
