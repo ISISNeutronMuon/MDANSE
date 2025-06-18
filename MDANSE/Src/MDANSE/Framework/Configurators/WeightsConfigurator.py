@@ -18,6 +18,8 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 
+import numpy as np
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
@@ -123,7 +125,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
     def test_values_for_nan(self, property_name: str) -> bool:
         """Throw an error early if weights are not usable."""
         atm_select = self._configurable[self._dependencies["atom_selection"]]
-        atom_types = set(atm_select.get_natoms().keys())
+        atom_types = np.unique(atm_select["elements"])
         return any(
             math.isnan(self._trajectory.get_atom_property(atom, property_name))
             for atom in atom_types
