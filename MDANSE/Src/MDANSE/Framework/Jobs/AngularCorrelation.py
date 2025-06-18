@@ -26,11 +26,18 @@ from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 class AngularCorrelation(IJob):
     r"""Calculates the angular correlation of a vector in a molecule.
 
-    The user can specify the indices of reference atoms inside the molecule.
-    If no indices are given, the principal axis of the moment of inertia (pm1)
-    will be used in the calculation. For one index, the axis will be defined
-    by the positions of the atom with that index and the molecule centre of mass.
-    For two indices, the axis will be the vector between the atom with these indices.
+    The result is a reorientational time-correlation function, which describes
+    the change in orientation of a specific direction axis within a molecule.
+    For one index, the axis will be defined by the positions of the atom with
+    that index and the molecule's centre of mass.
+    For two indices, the axis will be the vector between the atoms with these indices.
+    If no indices are given, the shortest axis of the moment of inertia (pm1)
+    will be used in the calculation. This will not be tied to specific atoms and
+    will be sensitive to changes in the molecule's shape.
+
+    In principle, reorientational time-correlation functions can be Legendre
+    polynomials of different order. The results of this analysis correspond to
+    the l=1 case.
 
     **Calculation:** \n
     angle at time T is calculated as the following: \n
@@ -39,7 +46,6 @@ class AngularCorrelation(IJob):
 
     **Output:** \n
     #. angular_correlation_legendre_1st: :math:`<cos(\phi(T))>`
-    #. angular_correlation_legendre_2nd: :math:`<\\frac{1}{2}(3cos(\phi(T))^{2}-1)>`
 
     **Usage:** \n
     This analysis is used to study molecule's orientation and rotation relaxation.
