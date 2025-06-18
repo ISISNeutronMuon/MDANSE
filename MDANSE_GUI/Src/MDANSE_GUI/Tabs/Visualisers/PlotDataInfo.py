@@ -17,7 +17,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 import numpy as np
-from qtpy.QtCore import Slot, Signal
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QTextBrowser
 
 if TYPE_CHECKING:

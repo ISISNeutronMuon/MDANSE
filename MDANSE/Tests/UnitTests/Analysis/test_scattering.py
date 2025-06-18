@@ -316,8 +316,8 @@ def test_ssfsf(tmp_path, dcsf):
         "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
     }
 
-    ndtsf = IJob.create("StructureFactorFromScatteringFunction")
-    ndtsf.run(parameters, status=True)
+    ssfsf = IJob.create("StructureFactorFromScatteringFunction")
+    ssfsf.run(parameters, status=True)
 
     assert out_file.is_file()
     assert log_file.is_file()

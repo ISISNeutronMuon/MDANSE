@@ -13,11 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtWidgets import QWidget, QVBoxLayout
-from qtpy.QtCore import Slot, Signal
+from qtpy.QtCore import Signal, Slot
+from qtpy.QtWidgets import QVBoxLayout, QWidget
 
-from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 from MDANSE_GUI.MolecularViewer.Controls import ViewerControls
+from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 
 
 class View3D(QWidget):

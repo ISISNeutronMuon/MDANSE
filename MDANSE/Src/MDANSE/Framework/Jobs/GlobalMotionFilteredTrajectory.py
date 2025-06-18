@@ -17,9 +17,8 @@
 import collections
 import copy
 
-import numpy as np
-
 import h5py
+import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration

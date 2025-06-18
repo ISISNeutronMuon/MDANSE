@@ -14,8 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QCheckBox
 from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QCheckBox
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

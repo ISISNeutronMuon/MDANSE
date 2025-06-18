@@ -14,9 +14,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from qtpy.QtCore import Slot, Signal, QObject, QTimer
-from qtpy.QtWidgets import QTabWidget
+from qtpy.QtCore import QObject, QTimer, Signal, Slot
 from qtpy.QtGui import QColor, QIcon
+from qtpy.QtWidgets import QTabWidget
 
 
 class NotificationTabWidget(QTabWidget):

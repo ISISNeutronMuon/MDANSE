@@ -150,6 +150,9 @@ class Trajectory:
         """
 
         return self._trajectory.unit_cell(frame)
+    
+    def unit_cell_warning(self) -> str:
+        return self._trajectory.unit_cell_warning
 
     def calculate_coordinate_span(self) -> None:
         min_span = np.array(3 * [1e11])

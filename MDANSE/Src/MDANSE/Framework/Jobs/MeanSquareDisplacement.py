@@ -16,9 +16,9 @@
 
 import collections
 
-from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 
 
 class MeanSquareDisplacement(IJob):
@@ -66,19 +66,18 @@ class MeanSquareDisplacement(IJob):
         "ProjectionConfigurator",
         {"label": "project coordinates"},
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
             }
         },
+    )
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",
@@ -86,6 +85,7 @@ class MeanSquareDisplacement(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
             }
         },
     )
@@ -108,6 +108,11 @@ class MeanSquareDisplacement(IJob):
         super().initialize()
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+
+        self.labels = [
+            (element, (element,))
+            for element in self.configuration["atom_selection"].get_natoms()
+        ]
 
         # Will store the time.
         self._outputData.add(
@@ -195,11 +200,21 @@ class MeanSquareDisplacement(IJob):
         for element, number in list(nAtomsPerElement.items()):
             self._outputData[f"msd_{element}"] /= number
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "msd_%s")
-        msdTotal = weighted_sum(self._outputData, weight_dict, "msd_%s")
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            1,
+        )
+        assign_weights(self._outputData, weight_dict, "msd_%s", self.labels)
 
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
+
+        msdTotal = weighted_sum(self._outputData, "msd_%s", self.labels) / fact
         self._outputData.add(
             "msd_total",
             "LineOutputVariable",
@@ -207,6 +222,17 @@ class MeanSquareDisplacement(IJob):
             axis="time",
             units="nm2",
             main_result=True,
+        )
+        self._outputData["msd_total"].scaling_factor = fact
+
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "msd",
+            "LineOutputVariable",
+            axis="time",
+            units="nm2",
+            main_result=True,
+            partial_result=True,
         )
 
         self._outputData.write(

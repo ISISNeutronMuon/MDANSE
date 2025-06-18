@@ -18,11 +18,14 @@
 Linear transformations in 3D space
 """
 
-import numpy as np
-
 from math import atan2
 
+import numpy as np
+
 from MDANSE.Mathematics.LinearAlgebra import (
+    Quaternion,
+    Tensor,
+    Vector,
     delta,
     epsilon,
     ex,
@@ -30,9 +33,6 @@ from MDANSE.Mathematics.LinearAlgebra import (
     is_tensor,
     is_vector,
     nullVector,
-    Quaternion,
-    Tensor,
-    Vector,
 )
 
 

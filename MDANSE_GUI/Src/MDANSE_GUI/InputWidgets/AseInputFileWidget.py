@@ -16,15 +16,14 @@
 import os
 from pathlib import PurePath
 
-from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog, QComboBox
-from qtpy.QtCore import Slot
 from ase.io.formats import filetype
+from qtpy.QtCore import Slot
+from qtpy.QtWidgets import QComboBox, QFileDialog, QLineEdit, QPushButton
 
-from MDANSE.MLogging import LOG
 from MDANSE.Framework.Configurators.AseInputFileConfigurator import (
     AseInputFileConfigurator,
 )
-
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 

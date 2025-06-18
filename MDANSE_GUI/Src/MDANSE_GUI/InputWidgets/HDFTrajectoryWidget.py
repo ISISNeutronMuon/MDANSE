@@ -45,6 +45,7 @@ class HDFTrajectoryWidget(WidgetBase):
         else:
             tooltip_text = "A single logical value that can be True of False"
         label.setToolTip(tooltip_text)
+        self._label = label
 
     def configure_using_default(self):
         """This is too static to have a default value"""
@@ -63,4 +64,14 @@ class HDFTrajectoryWidget(WidgetBase):
         return self._configurator["value"]
 
     def get_widget_value(self):
-        return self.get_value()
+        result = self.get_value()
+        if not self._configurator.valid:
+            self.mark_error(self._configurator.error_status)
+        else:
+            self.mark_warning(self._configurator.warning_status)
+            if self._configurator.warning_status:
+                self._label.setToolTip(self._configurator.warning_status)
+            else:
+                self._label.setToolTip(self._tooltip)
+            self.value_updated.emit()
+        return result

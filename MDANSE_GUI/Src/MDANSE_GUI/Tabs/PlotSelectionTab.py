@@ -18,16 +18,15 @@ from functools import partial
 from pathlib import PurePath
 
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QWidget, QFileDialog
+from qtpy.QtWidgets import QFileDialog, QWidget
 
+from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
-from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Models.PlotDataModel import PlotDataModel
 from MDANSE_GUI.Tabs.Views.PlotDataView import PlotDataView
-from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
-
+from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
 
 label_text = """Here you can create plots of specific
 data sets. Load the files and assign the data sets
@@ -127,6 +126,7 @@ class PlotSelectionTab(GeneralTab):
 
 if __name__ == "__main__":
     import sys
+
     from qtpy.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)

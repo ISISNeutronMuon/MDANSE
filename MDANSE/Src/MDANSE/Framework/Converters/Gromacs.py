@@ -18,8 +18,8 @@ import collections
 from pathlib import Path
 
 import numpy as np
-from mdtraj.formats.xtc import XTCTrajectoryFile
 from mdtraj.formats.trr import TRRTrajectoryFile
+from mdtraj.formats.xtc import XTCTrajectoryFile
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter

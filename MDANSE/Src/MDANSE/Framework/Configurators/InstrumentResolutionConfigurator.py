@@ -16,7 +16,6 @@
 
 import numpy as np
 
-
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,

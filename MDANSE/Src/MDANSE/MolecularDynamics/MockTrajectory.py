@@ -14,16 +14,16 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import math
 import json
+import math
 from typing import TypeVar
 
 import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Mathematics.Geometry import center_of_mass
-from MDANSE.Framework.Units import measure
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Framework.Units import measure
+from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
@@ -32,7 +32,6 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.TrajectoryUtils import atomic_trajectory
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-
 
 Self = TypeVar("Self", bound="MockTrajectory")
 

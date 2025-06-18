@@ -15,8 +15,8 @@
 #
 
 
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.UserDefinitionStore import UD_STORE
 from MDANSE.MolecularDynamics.TrajectoryUtils import find_atoms_in_molecule
 
 

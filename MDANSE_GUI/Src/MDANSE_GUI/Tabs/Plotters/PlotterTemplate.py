@@ -15,18 +15,19 @@
 #
 from typing import TYPE_CHECKING
 
-from matplotlib.pyplot import style as mpl_style
 from matplotlib import rcParams
+from matplotlib.pyplot import style as mpl_style
 
-from MDANSE.MLogging import LOG
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
+from MDANSE_GUI.Tabs.PlotModifiers.AxesWrapper import AxesWrapper
 from MDANSE_GUI.Tabs.PlotModifiers.NormGenerator import NullNorms
 from MDANSE_GUI.Tabs.PlotModifiers.WeightGenerator import NullWeights
-from MDANSE_GUI.Tabs.PlotModifiers.AxesWrapper import AxesWrapper
 
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
+
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 

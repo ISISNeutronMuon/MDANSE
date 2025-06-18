@@ -14,20 +14,20 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+from qtpy.QtCore import QPoint, Qt, Signal, Slot
+from qtpy.QtGui import QEnterEvent
 from qtpy.QtWidgets import (
+    QApplication,
     QDialog,
-    QToolButton,
     QFrame,
     QGridLayout,
+    QLabel,
+    QMenu,
+    QSizePolicy,
+    QToolButton,
     QVBoxLayout,
     QWidget,
-    QLabel,
-    QApplication,
-    QSizePolicy,
-    QMenu,
 )
-from qtpy.QtCore import Signal, Slot, Qt, QPoint
-from qtpy.QtGui import QEnterEvent
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 

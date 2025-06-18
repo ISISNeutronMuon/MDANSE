@@ -18,9 +18,6 @@ import json
 from enum import Enum
 from pathlib import Path
 
-from MDANSE.Framework.AtomSelector.selector import ReusableSelection
-from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
@@ -38,6 +35,9 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE.Framework.AtomSelector.selector import ReusableSelection
+from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewerWithPicking
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D

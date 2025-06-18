@@ -17,14 +17,13 @@ import os
 import os.path
 from pathlib import PurePath
 
-from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton, QFileDialog, QLabel
-from qtpy.QtCore import Slot, Qt
+from qtpy.QtCore import Qt, Slot
+from qtpy.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton
 
-from MDANSE.MLogging import LOG
 from MDANSE.Framework.Configurators.OutputStructureConfigurator import (
     OutputStructureConfigurator,
 )
-
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 

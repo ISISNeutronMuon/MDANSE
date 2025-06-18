@@ -17,8 +17,7 @@
 import numpy as np
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Framework.Projectors.IProjector import IProjector
-from MDANSE.Framework.Projectors.IProjector import ProjectorError
+from MDANSE.Framework.Projectors.IProjector import IProjector, ProjectorError
 
 
 class ProjectionConfigurator(IConfigurator):

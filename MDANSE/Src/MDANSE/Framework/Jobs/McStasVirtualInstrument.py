@@ -14,16 +14,15 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
+import io
 import shutil
 import subprocess
 import tempfile
-import io
+from functools import partial
 from pathlib import Path
 from typing import Union
-from functools import partial
 
 import numpy as np
-
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob

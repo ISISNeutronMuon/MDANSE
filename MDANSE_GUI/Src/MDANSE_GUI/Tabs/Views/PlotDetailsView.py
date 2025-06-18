@@ -14,15 +14,15 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QTreeView
 from qtpy.QtCore import Signal
+from qtpy.QtWidgets import QTreeView
 
-from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, MplStyleCombo, MainAxisCombo
 from MDANSE_GUI.Tabs.Models.PlottingContext import (
     get_mpl_lines,
     get_mpl_markers,
     plotting_column_index,
 )
+from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, MainAxisCombo, MplStyleCombo
 
 
 class PlotDetailsView(QTreeView):

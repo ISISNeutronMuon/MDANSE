@@ -15,6 +15,7 @@
 #
 
 import numpy as np
+
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
@@ -112,6 +113,11 @@ class DensityProfile(IJob):
 
         self._indices_per_element = self.configuration["atom_selection"].get_indices()
 
+        self.labels = [
+            (element, (element,))
+            for element in self.configuration["atom_selection"].get_natoms()
+        ]
+
         for element in self._indices_per_element.keys():
             self._outputData.add(
                 f"dp_{element}",
@@ -190,20 +196,25 @@ class DensityProfile(IJob):
         for element in n_atoms_per_element:
             self._outputData[f"dp_{element}"] /= self.numberOfSteps
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, n_atoms_per_element, 1)
-
-        assign_weights(self._outputData, weight_dict, "dp_%s")
-
-        dp_total = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "dp_%s",
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            n_atoms_per_element,
+            self.configuration["atom_selection"].get_all_natoms(),
+            1,
         )
+        assign_weights(self._outputData, weight_dict, "dp_%s", self.labels)
 
+        n_selected = sum(n_atoms_per_element.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
+
+        dp_total = weighted_sum(self._outputData, "dp_%s", self.labels) / fact
         self._outputData.add(
             "dp_total", "LineOutputVariable", dp_total, axis="r", units="au"
         )
+        self._outputData["dp_total"].scaling_factor = fact
 
         r_values = np.linspace(0, self._extent, self._n_bins + 1)
         self._outputData["r"][:] = (r_values[1:] + r_values[:-1]) / 2

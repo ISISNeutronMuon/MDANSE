@@ -17,12 +17,12 @@ import collections
 from pathlib import Path
 
 import numpy as np
+from ase.atoms import Atom, Atoms
 from ase.io import write as ase_write
-from ase.atoms import Atoms, Atom
 
-from MDANSE.Framework.Units import measure
-from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE import PLATFORM
+from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Units import measure
 
 
 class AverageStructure(IJob):

@@ -18,11 +18,11 @@ import collections
 import math
 
 import numpy as np
-from scipy.spatial import Voronoi as scipyVoronoi
 from scipy.spatial import Delaunay as scipyDelaunay
+from scipy.spatial import Voronoi as scipyVoronoi
 
-from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 
 
 def no_exc_min(numbers: list[float]):

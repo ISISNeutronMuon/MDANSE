@@ -20,8 +20,8 @@ import numpy as np
 from scipy.spatial import KDTree
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 from MDANSE.Mathematics.Geometry import generate_sphere_points
+from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 
 
 def solvent_accessible_surface(

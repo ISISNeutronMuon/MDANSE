@@ -18,10 +18,9 @@ import struct
 
 import numpy as np
 
-from MDANSE.Framework.Units import measure
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
-
 
 FORCE_FACTOR = measure(1.0, "kcal_per_mole/ang", equivalent=True).toval(
     "uma nm/ps2 mol"

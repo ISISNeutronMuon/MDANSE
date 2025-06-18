@@ -19,9 +19,10 @@ from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event
 from typing import Union
 
+from qtpy.QtCore import QObject, Signal, Slot
+
 from MDANSE.Framework.Status import Status
 from MDANSE.MLogging import LOG
-from qtpy.QtCore import QObject, Signal, Slot
 
 
 class JobCommunicator(QObject):

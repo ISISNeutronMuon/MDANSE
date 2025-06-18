@@ -13,29 +13,29 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
+import copy
 from collections.abc import Iterable
 from pathlib import PurePath
-import copy
+from typing import Union
 
+from qtpy.QtCore import QObject, Qt, Signal, Slot
+from qtpy.QtGui import (
+    QDoubleValidator,
+    QIntValidator,
+    QPalette,
+)
 from qtpy.QtWidgets import (
-    QDialog,
-    QPushButton,
-    QFileDialog,
-    QVBoxLayout,
-    QWidget,
-    QLabel,
+    QCheckBox,
     QComboBox,
-    QLineEdit,
+    QDialog,
+    QFileDialog,
     QFormLayout,
     QHBoxLayout,
-    QCheckBox,
-)
-from qtpy.QtCore import Signal, Slot, QObject, Qt
-from qtpy.QtGui import (
-    QIntValidator,
-    QDoubleValidator,
-    QPalette,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
 )
 
 from MDANSE.MLogging import LOG

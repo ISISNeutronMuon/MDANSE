@@ -18,6 +18,7 @@ import re
 from collections.abc import Iterable
 
 import numpy as np
+
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Units import measure

@@ -14,13 +14,20 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import itertools
+from collections.abc import Iterable
+from typing import Union
 
 import numpy as np
 
 
 def get_weights(
-    props: dict[str, float], contents: dict[str, int], dim: int, conc_exp: float = 1.0
-) -> tuple[dict[tuple[str], float], float]:
+    selected_props: dict[str, float],
+    all_props: dict[str, float],
+    selected_contents: dict[str, int],
+    all_contents: dict[str, int],
+    dim: int,
+    conc_exp: float = 1.0,
+) -> dict[str, float]:
     """Calculate the scaling factors to be applied to output datasets.
 
     Returns a dictionary of scaling factors, where the
@@ -28,10 +35,14 @@ def get_weights(
 
     Parameters
     ----------
-    props : dict[str, float]
-        Dictionary of values of an atom property for a selected object, averaged over atoms in that object
-    contents : dict[str, int]
-        Dictionary of numbers of atoms in an object
+    selected_props : dict[str, float]
+        Dictionary of values of an atom property for the selected subset of the trajectory, averaged over atoms in that object
+    all_props : dict[str, float]
+        Dictionary of values of an atom property for the trajectory, averaged over atoms in that object
+    selected_contents : dict[str, int]
+        Dictionary of numbers of atoms in the selected subset of the trajectory
+    all_contents : dict[str, int]
+        Dictionary of numbers of atoms of the trajectory
     dim : int
         number of atom types in the label of the output datasets (e.g. 1 for "O", 2 for "CuCu")
     conc_exp : float
@@ -43,11 +54,59 @@ def get_weights(
     Tuple(Dict[Tuple[str], float], float)
         Dictionary of scaling factors per dataset key, and a sum of all the factors
     """
+    n_atms = sum(all_contents[el] for el in all_props)
+    weights, _ = adjust_weights(
+        selected_props, selected_contents, n_atms, dim, conc_exp
+    )
+    _, normFactor = adjust_weights(all_props, all_contents, n_atms, dim, conc_exp)
+
+    normalise = True
+    try:
+        len(normFactor)
+    except TypeError:
+        normalise = abs(normFactor) > 0.0  # if normFactor is 0, all weights are 0 too.
+    if normalise:
+        for k in weights:
+            weights[k] /= np.float64(normFactor)
+
+    weights["sum"] = normFactor
+
+    return weights
+
+
+def adjust_weights(
+    props: dict[str, float],
+    contents: dict[str, int],
+    n_atms: int,
+    dim: int,
+    conc_exp: float = 1.0,
+) -> tuple[dict[Union[str, tuple[str]], float], float]:
+    """Combine the weights based on whether they will be used for nth-body
+    property and adjust them based on their atom concentrations.
+
+    Parameters
+    ----------
+    props : dict[str, float]
+        Dictionary of values of an atom property for the selected subset of the trajectory, averaged over atoms in that object
+    contents : dict[str, int]
+        Dictionary of numbers of atoms in the selected subset of the trajectory
+    n_atms : int
+        Total number of atoms of the trajectory.
+    dim : int
+        number of atom types in the label of the output datasets (e.g. 1 for "O", 2 for "CuCu")
+    conc_exp : float
+        The exponent the at the product of the concentrations are taken
+        to (e.g. (c_i * c_j)**0.5 which is used for DCSF jobs).
+
+    Returns
+    -------
+    tuple[dict[Union[str, tuple[str]], float], float]
+        The dictionary of weights and a normalisation factor.
+    """
     normFactor = 0.0
 
     weights = {}
 
-    n_atms = sum(contents[el] for el in props)
     cartesianProduct = itertools.product(props, repeat=dim)
     for elements in cartesianProduct:
         atom_conc_product = np.prod([contents[el] / n_atms for el in elements])
@@ -60,24 +119,14 @@ def get_weights(
         weights[elements] = np.float64(np.copy(factor))
         normFactor += atom_conc_product * property_product
 
-    normalise = True
-    try:
-        len(normFactor)
-    except TypeError:
-        normalise = abs(normFactor) > 0.0  # if normFactor is 0, all weights are 0 too.
-    if normalise:
-        for k in list(weights.keys()):
-            weights[k] /= np.float64(normFactor)
-
-    weights["sum"] = normFactor
-
-    return weights
+    return weights, normFactor
 
 
 def assign_weights(
     values: dict[str, np.ndarray],
     weights: dict[str, float],
-    key: str,
+    match_key: str,
+    match_labels: Iterable[tuple[str, tuple[str, ...]]],
     symmetric: bool = True,
 ):
     """Updates the scaling factors of partial datasets, without
@@ -89,8 +138,10 @@ def assign_weights(
         Dictionary of data arrays containing analysis results.
     weights : Dict[str, float]
         Dictionary of scaling factors per dataset
-    key : str
-        A string data set name with formatting elements (placeholders for chemical element labels)
+    match_key: str
+        A key used to generate the dict of matches to assign weights for.
+    match_labels: Iterable[tuple[str, Union[tuple[str, ], tuple[str, str]]]]
+        The labels used to generate the dict of matches to assign weights for.
     symmetric : bool, optional
         do not generate results for the same elements in a different sequence, by default True
 
@@ -99,12 +150,11 @@ def assign_weights(
     np.ndarray
         total sum of all the component arrays scaled by their weights
     """
-    matches = {key % k: k for k in weights if k not in ["sum"]}
-    dim = key.count("%s")
+    matches = {match_key % label: k for label, k in match_labels}
 
     for k in values.keys() & matches:
         if symmetric:
-            permutations = set(itertools.permutations(matches[k], r=dim))
+            permutations = set(itertools.permutations(matches[k], r=len(matches[k])))
             w = sum(weights[p] for p in permutations)
         else:
             w = weights[matches[k]]
@@ -112,11 +162,7 @@ def assign_weights(
         values[k].scaling_factor *= w
 
 
-def weighted_sum(
-    values: dict[str, np.ndarray],
-    weights: dict[str, float],
-    key: str,
-):
+def weighted_sum(values: dict[str, np.ndarray], match_key: str, match_labels: Iterable):
     """Sums up partial datasets multiplied by their scaling factors.
     The scaling factors have to be set before, typically by calling
     the assign_weights function.
@@ -125,20 +171,20 @@ def weighted_sum(
     ----------
     values : Dict[str, np.ndarray]
         Dictionary of data arrays containing analysis results.
-    weights : Dict[str, float]
-        Dictionary of scaling factors per dataset
-    key : str
-        A string data set name with formatting elements (placeholders for chemical element labels)
+    match_key: str
+        A key used to generate the list of matches to sum over.
+    match_labels: Iterable
+        The labels used to generate the list of matches to sum over.
 
     Returns
     -------
     np.ndarray
-        total sum of all the component arrays scaled by their weights
+        Total sum of all the component arrays scaled by their weights
     """
-    weightedSum = 0.0
-    matches = {key % k for k in weights if k not in ["sum"]}
+    matches = {match_key % val[0] for val in match_labels}
+    weighted_sum = 0.0
 
     for val in (val for key, val in values.items() if key in matches):
-        weightedSum += val * val.scaling_factor
+        weighted_sum += val * val.scaling_factor
 
-    return weightedSum
+    return weighted_sum

@@ -63,6 +63,15 @@ class DensityOfStates(IJob):
         "ProjectionConfigurator",
         {"label": "project coordinates"},
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -73,6 +82,7 @@ class DensityOfStates(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
             }
         },
     )
@@ -101,6 +111,11 @@ class DensityOfStates(IJob):
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
+
+        self.labels = [
+            (element, (element,))
+            for element in self.configuration["atom_selection"].get_natoms()
+        ]
 
         self._outputData.add(
             "time",
@@ -267,27 +282,60 @@ class DensityOfStates(IJob):
                     fft="rfft",
                 )
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "vacf_%s")
-        assign_weights(self._outputData, weight_dict, "dos_%s")
-        if self.add_ideal_results:
-            assign_weights(self._outputData, weight_dict, "dos_ideal_%s")
-        self._outputData["vacf_total"][:] = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "vacf_%s",
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            1,
         )
-        self._outputData["dos_total"][:] = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "dos_%s",
-        )
+        assign_weights(self._outputData, weight_dict, "vacf_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "dos_%s", self.labels)
         if self.add_ideal_results:
-            self._outputData["dos_ideal_total"][:] = weighted_sum(
+            assign_weights(self._outputData, weight_dict, "dos_ideal_%s", self.labels)
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
+
+        self._outputData["vacf_total"][:] = (
+            weighted_sum(self._outputData, "vacf_%s", self.labels) / fact
+        )
+        self._outputData["vacf_total"].scaling_factor = fact
+        self._outputData["dos_total"][:] = (
+            weighted_sum(self._outputData, "dos_%s", self.labels) / fact
+        )
+        self._outputData["dos_total"].scaling_factor = fact
+
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "vacf",
+            "LineOutputVariable",
+            axis="time",
+            units="nm2/ps2",
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "dos",
+            "LineOutputVariable",
+            axis="romega",
+            units="au",
+            main_result=True,
+            partial_result=True,
+        )
+
+        if self.add_ideal_results:
+            self._outputData["dos_ideal_total"][:] = (
+                weighted_sum(self._outputData, "dos_ideal_%s", self.labels) / fact
+            )
+            self._outputData["dos_ideal_total"].scaling_factor = fact
+            self.configuration["grouping_level"].add_grouped_totals(
                 self._outputData,
-                weight_dict,
-                "dos_ideal_%s",
+                "dos_ideal",
+                "LineOutputVariable",
+                axis="romega",
+                units="au",
             )
 
         self._outputData.write(

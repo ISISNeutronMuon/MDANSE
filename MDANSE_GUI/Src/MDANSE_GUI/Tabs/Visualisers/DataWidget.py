@@ -13,35 +13,34 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import TYPE_CHECKING
 import csv
 import os
 from pathlib import PurePath
 from traceback import format_exc
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 import numpy as np
+from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QTextBrowser,
-    QGridLayout,
-    QLabel,
-    QSpinBox,
-    QLineEdit,
     QCheckBox,
-    QPushButton,
     QComboBox,
     QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSpinBox,
+    QTextBrowser,
+    QVBoxLayout,
+    QWidget,
 )
-from qtpy.QtCore import Slot, Signal, Qt
 
-from MDANSE.MLogging import LOG
 from MDANSE import PLATFORM
-
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 

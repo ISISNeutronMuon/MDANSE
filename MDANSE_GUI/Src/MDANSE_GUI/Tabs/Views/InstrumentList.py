@@ -13,19 +13,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
-import tomlkit
 import copy
+import os
+
+import tomlkit
+from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QContextMenuEvent, QStandardItem
+from qtpy.QtWidgets import QAbstractItemView, QListView, QMenu
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
 
-from qtpy.QtCore import Slot, Signal, QModelIndex, Qt
-from qtpy.QtWidgets import QListView, QAbstractItemView, QMenu
-from qtpy.QtGui import QContextMenuEvent, QStandardItem
-
 from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
-
 from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import (
     InstrumentDetails,
     SimpleInstrument,

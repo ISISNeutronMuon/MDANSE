@@ -13,8 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtWidgets import QLineEdit, QDoubleSpinBox
 from qtpy.QtGui import QDoubleValidator
+from qtpy.QtWidgets import QDoubleSpinBox, QLineEdit
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

@@ -17,14 +17,13 @@ from functools import partial
 
 from qtpy.QtWidgets import QWidget
 
+from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
-from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
 from MDANSE_GUI.Tabs.Views.RunTable import RunTable
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
-
+from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 run_tab_label = """This table shows the status of jobs
 which have been started in your session.
@@ -98,6 +97,7 @@ class RunTab(GeneralTab):
 
 if __name__ == "__main__":
     import sys
+
     from qtpy.QtWidgets import QApplication, QMainWindow, QVBoxLayout
 
     app = QApplication(sys.argv)

@@ -14,18 +14,17 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QTableView,
-    QPushButton,
     QHBoxLayout,
     QMessageBox,
+    QPushButton,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
 )
-from qtpy.QtCore import Slot, Signal
 
 from MDANSE.MLogging import LOG
-
 from MDANSE_GUI.Tabs.Models.PlottingContext import (
     PlottingContext,
     SingleDataset,

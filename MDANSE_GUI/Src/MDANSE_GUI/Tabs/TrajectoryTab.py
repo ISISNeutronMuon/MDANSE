@@ -18,19 +18,17 @@ from functools import partial
 from pathlib import PurePath
 
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QWidget, QFileDialog
+from qtpy.QtWidgets import QFileDialog, QWidget
 
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
-
+from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewerExtended
+from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
-from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
-from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewerExtended
-
 
 label_text = """Here you can load the .mdt files.
 They are MD trajectories in HDF5 format
@@ -118,6 +116,7 @@ class TrajectoryTab(GeneralTab):
 
 if __name__ == "__main__":
     import sys
+
     from qtpy.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)

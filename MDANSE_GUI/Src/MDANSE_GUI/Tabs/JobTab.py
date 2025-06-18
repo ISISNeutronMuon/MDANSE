@@ -14,22 +14,21 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
-from pathlib import PurePath
 from functools import partial
+from pathlib import PurePath
+
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QWidget, QComboBox, QLabel
+from qtpy.QtWidgets import QComboBox, QLabel, QWidget
 
 from MDANSE.MLogging import LOG
-
+from MDANSE_GUI.InputWidgets.MoleculeWidget import MoleculeWidget
+from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
-from MDANSE_GUI.Session.LocalSession import LocalSession
-from MDANSE_GUI.Tabs.Visualisers.Action import Action
-from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
-from MDANSE_GUI.InputWidgets.MoleculeWidget import MoleculeWidget
-
+from MDANSE_GUI.Tabs.Visualisers.Action import Action
+from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 job_tab_label = """This is the list of jobs
 you can run using MDANSE.
@@ -213,6 +212,7 @@ class JobTab(GeneralTab):
 
 if __name__ == "__main__":
     import sys
+
     from qtpy.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)

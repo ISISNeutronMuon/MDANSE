@@ -16,9 +16,8 @@
 import math
 
 import numpy as np
-
-from qtpy.QtWidgets import QDialog, QVBoxLayout, QApplication
-from qtpy.QtCore import Qt, Slot, Signal
+from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtWidgets import QApplication, QDialog, QVBoxLayout
 
 from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionWidget
 

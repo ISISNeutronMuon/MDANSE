@@ -13,17 +13,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtCore import QSortFilterProxyModel, Signal, Slot, Qt
+from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
 from qtpy.QtGui import (
+    QBrush,
+    QColor,
     QDoubleValidator,
     QIntValidator,
     QStandardItem,
     QStandardItemModel,
-    QBrush,
-    QColor,
 )
 from qtpy.QtWidgets import (
     QApplication,
+    QColorDialog,
     QDialog,
     QItemDelegate,
     QLineEdit,
@@ -31,15 +32,13 @@ from qtpy.QtWidgets import (
     QPushButton,
     QTableView,
     QVBoxLayout,
-    QColorDialog,
 )
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.MLogging import LOG
 from MDANSE.Chemistry.Databases import AtomsDatabaseError
-
-from MDANSE_GUI.Widgets.GeneralWidgets import InputDialog, InputVariable
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker
+from MDANSE_GUI.Widgets.GeneralWidgets import InputDialog, InputVariable
 
 
 class FloatInputField(QItemDelegate):
@@ -174,12 +173,11 @@ class ElementView(QTableView):
 
         data_model = self.parent().data_model
 
-        enable_rename_atoms = len(
-            set(ATOMS_DATABASE.atoms) - set(ATOMS_DATABASE.default_atoms_types)
+        custom_atms = set(ATOMS_DATABASE.atoms) - set(
+            ATOMS_DATABASE.default_atoms_types
         )
-        enable_rename_property = len(
-            set(ATOMS_DATABASE.properties)
-            - set(ATOMS_DATABASE.default_atoms_properties)
+        custom_props = set(ATOMS_DATABASE.properties) - set(
+            ATOMS_DATABASE.default_atoms_properties
         )
 
         vert_header_idxs = set(
@@ -206,11 +204,17 @@ class ElementView(QTableView):
             [prop_label not in def_props for prop_label in prop_labels]
         )
 
+        idx = self.currentIndex()
+        self.mouse_prop = data_model.horizontalHeaderItem(idx.column()).text()
+        self.mouse_atm = data_model.verticalHeaderItem(
+            self.model().mapToSource(idx).row()
+        ).text()
+
         temp_model = self.model().sourceModel()
         if temp_model is not None:
             Action1.triggered.connect(temp_model.new_line_dialog)
             Action2.triggered.connect(temp_model.copy_rows)
-            if enable_rename_atoms:
+            if self.mouse_atm in custom_atms:
                 Action3.triggered.connect(temp_model.rename_row_dialog)
             else:
                 Action3.setEnabled(False)
@@ -220,7 +224,7 @@ class ElementView(QTableView):
                 Action4.setEnabled(False)
             Action5.triggered.connect(temp_model.new_column_dialog)
             Action6.triggered.connect(temp_model.copy_columns)
-            if enable_rename_property:
+            if self.mouse_prop in custom_props:
                 Action7.triggered.connect(temp_model.rename_column_dialog)
             else:
                 Action7.setEnabled(False)
@@ -390,25 +394,12 @@ class ElementModel(QStandardItemModel):
         """Opens a dialog window which allows for custom atom type keys
         to be renamed.
         """
-        custom_atoms = list(
-            set(self.all_row_names) - set(self.database.default_atoms_types)
-        )
-        custom_atoms.sort()
         dialog_variables = [
-            InputVariable(
-                input_dict={
-                    "keyval": "old_atom_name",
-                    "format": str,
-                    "label": "Custom atom name",
-                    "tooltip": "The old name of the chemical element.",
-                    "value": custom_atoms,
-                }
-            ),
             NewAtomTypeNameVariable(
                 input_dict={
                     "keyval": "new_atom_name",
                     "format": str,
-                    "label": "New custom atom name",
+                    "label": f'Rename custom atom "{self.parent().viewer.mouse_atm}" to',
                     "tooltip": "Type the new name of the chemical element here.",
                     "value": "",
                 }
@@ -430,7 +421,7 @@ class ElementModel(QStandardItemModel):
         input_variables : dict
             Dictionary containing old and new atom names.
         """
-        old_label = input_variables["old_atom_name"]
+        old_label = self.parent().viewer.mouse_atm
         new_label = input_variables["new_atom_name"]
         try:
             self.database.rename_atom_type(old_label, new_label)
@@ -450,25 +441,12 @@ class ElementModel(QStandardItemModel):
         """Opens a dialog window which allows for custom properties to
         be renamed.
         """
-        custom_props = list(
-            set(self.all_column_names) - set(self.database.default_atoms_properties)
-        )
-        custom_props.sort()
         dialog_variables = [
-            InputVariable(
-                input_dict={
-                    "keyval": "old_prop_name",
-                    "format": str,
-                    "label": "Custom atom property name",
-                    "tooltip": "The old name of the atom property.",
-                    "value": custom_props,
-                }
-            ),
             NewAtomPropertyNameVariable(
                 input_dict={
                     "keyval": "new_prop_name",
                     "format": str,
-                    "label": "New custom atom property name",
+                    "label": f'Rename custom property "{self.parent().viewer.mouse_prop}" to',
                     "tooltip": "Type the new name of the atom property here.",
                     "value": "",
                 }
@@ -492,7 +470,7 @@ class ElementModel(QStandardItemModel):
         input_variables : dict
             Dictionary containing old and new atom property names.
         """
-        old_label = input_variables["old_prop_name"]
+        old_label = self.parent().viewer.mouse_prop
         new_label = input_variables["new_prop_name"]
         try:
             self.database.rename_atom_property(old_label, new_label)

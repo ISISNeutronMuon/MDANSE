@@ -59,19 +59,18 @@ class ElasticIncoherentStructureFactor(IJob):
         "ProjectionConfigurator",
         {"label": "project coordinates"},
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
         {
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
             }
         },
+    )
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",
@@ -79,6 +78,7 @@ class ElasticIncoherentStructureFactor(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
             }
         },
     )
@@ -106,6 +106,11 @@ class ElasticIncoherentStructureFactor(IJob):
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
 
         self._nFrames = self.configuration["frames"]["number"]
+
+        self.labels = [
+            (element, (element,))
+            for element in self.configuration["atom_selection"].get_natoms()
+        ]
 
         self._outputData.add(
             "q",
@@ -202,13 +207,33 @@ class ElasticIncoherentStructureFactor(IJob):
         for element, number in list(nAtomsPerElement.items()):
             self._outputData[f"eisf_{element}"][:] /= number
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "eisf_%s")
-        self._outputData["eisf_total"][:] = weighted_sum(
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            1,
+        )
+        assign_weights(self._outputData, weight_dict, "eisf_%s", self.labels)
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
+
+        self._outputData["eisf_total"][:] = (
+            weighted_sum(self._outputData, "eisf_%s", self.labels) / fact
+        )
+        self._outputData["eisf_total"].scaling_factor = fact
+
+        self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            weight_dict,
-            "eisf_%s",
+            "eisf",
+            "LineOutputVariable",
+            axis="q",
+            units="au",
+            main_result=True,
+            partial_result=True,
         )
 
         self._outputData.write(

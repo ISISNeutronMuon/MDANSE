@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from math import sqrt
 import collections
 import itertools
+from math import sqrt
 
 import numpy as np
 
@@ -58,6 +58,15 @@ class NeutronDynamicTotalStructureFactor(IJob):
         "HDFInputFileConfigurator",
         {"label": "MDANSE Incoherent Structure Factor", "default": "disf.mda"},
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -68,6 +77,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
             }
         },
     )
@@ -80,6 +90,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
         super().initialize()
 
         self.numberOfSteps = 1
+
+        self.pair_labels = self.configuration["grouping_level"].pair_labels()
 
         # Check time consistency
         if "time" not in self.configuration["dcsf_input_file"]["instance"]:
@@ -194,13 +206,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
         )
 
         # Check f(q,t) and s(q,f) for dcsf
-        self._elementsPairs = sorted(
-            itertools.combinations_with_replacement(
-                self.configuration["atom_selection"]["unique_names"], 2
-            )
-        )
-        for pair in self._elementsPairs:
-            pair_str = "".join(map(str, pair))
+        for pair_str, _ in self.pair_labels:
             if (
                 f"f(q,t)_{pair_str}"
                 not in self.configuration["dcsf_input_file"]["instance"]
@@ -218,7 +224,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             if (
                 "scaling_factor"
                 not in self.configuration["dcsf_input_file"]["instance"][
-                    "s(q,f)_{}{}".format(*pair)
+                    f"s(q,f)_{pair_str}"
                 ].attrs.keys()
             ):
                 raise NeutronDynamicTotalStructureFactorError(
@@ -268,8 +274,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 units="nm2/ps",
             )
 
-        for pair in self._elementsPairs:
-            pair_str = "".join(map(str, pair))
+        for pair_str, _ in self.pair_labels:
             fqt = self.configuration["dcsf_input_file"]["instance"][
                 f"f(q,t)_{pair_str}"
             ]
@@ -385,26 +390,25 @@ class NeutronDynamicTotalStructureFactor(IJob):
         """
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
 
-        # Compute concentrations
-        nTotalAtoms = 0
-        for val in list(nAtomsPerElement.values()):
-            nTotalAtoms += val
-
-        norm_natoms = 1.0 / nTotalAtoms
+        norm_natoms = 1.0 / n_total
         # Compute coherent functions and structure factor
-        for pair in self._elementsPairs:
-            pair_str = "".join(map(str, pair))
+        for pair_str, (label_i, label_j) in self.pair_labels:
+            ele_i = self.configuration["grouping_level"].get_element_from_label(label_i)
+            ele_j = self.configuration["grouping_level"].get_element_from_label(label_j)
             bi = self.configuration["trajectory"]["instance"].get_atom_property(
-                pair[0], "b_coherent"
+                ele_i, "b_coherent"
             )
             bj = self.configuration["trajectory"]["instance"].get_atom_property(
-                pair[1], "b_coherent"
+                ele_j, "b_coherent"
             )
             sqrt_cij = sqrt(
-                nAtomsPerElement[pair[0]] * nAtomsPerElement[pair[1]] * norm_natoms**2
+                nAtomsPerElement[label_i] * nAtomsPerElement[label_j] * norm_natoms**2
             )
-            pre_fac = 1 if pair[0] == pair[1] else 2
+            pre_fac = 1 if label_i == label_j else 2
             self._outputData[f"f(q,t)_coh_{pair_str}"].scaling_factor *= (
                 pre_fac * bi * bj * sqrt_cij
             )
@@ -415,41 +419,91 @@ class NeutronDynamicTotalStructureFactor(IJob):
             self._outputData["f(q,t)_coh_total"][:] += (
                 self._outputData[f"f(q,t)_coh_{pair_str}"][:]
                 * self._outputData[f"f(q,t)_coh_{pair_str}"].scaling_factor
+                / fact
             )
             self._outputData["s(q,f)_coh_total"][:] += (
                 self._outputData[f"s(q,f)_coh_{pair_str}"][:]
                 * self._outputData[f"s(q,f)_coh_{pair_str}"].scaling_factor
+                / fact
             )
 
+        self._outputData["f(q,t)_coh_total"].scaling_factor = fact
+        self._outputData["s(q,f)_coh_total"].scaling_factor = fact
+
         # Compute incoherent functions and structure factor
-        for element, number in nAtomsPerElement.items():
+        for label, number in nAtomsPerElement.items():
+            ele_i = self.configuration["grouping_level"].get_element_from_label(label)
             bi = self.configuration["trajectory"]["instance"].get_atom_property(
-                element, "b_incoherent2"
+                ele_i, "b_incoherent2"
             )
-            self._outputData[f"f(q,t)_inc_{element}"].scaling_factor *= (
+            self._outputData[f"f(q,t)_inc_{label}"].scaling_factor *= (
                 bi * number * norm_natoms
             )
-            self._outputData[f"s(q,f)_inc_{element}"].scaling_factor *= (
+            self._outputData[f"s(q,f)_inc_{label}"].scaling_factor *= (
                 bi * number * norm_natoms
             )
             self._outputData["f(q,t)_inc_total"][:] += (
-                self._outputData[f"f(q,t)_inc_{element}"][:]
-                * self._outputData[f"f(q,t)_inc_{element}"].scaling_factor
+                self._outputData[f"f(q,t)_inc_{label}"][:]
+                * self._outputData[f"f(q,t)_inc_{label}"].scaling_factor
+                / fact
             )
             self._outputData["s(q,f)_inc_total"][:] += (
-                self._outputData[f"s(q,f)_inc_{element}"][:]
-                * self._outputData[f"s(q,f)_inc_{element}"].scaling_factor
+                self._outputData[f"s(q,f)_inc_{label}"][:]
+                * self._outputData[f"s(q,f)_inc_{label}"].scaling_factor
+                / fact
             )
+
+        self._outputData["f(q,t)_inc_total"].scaling_factor = fact
+        self._outputData["s(q,f)_inc_total"].scaling_factor = fact
+
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "f(q,t)_inc",
+            "SurfaceOutputVariable",
+            axis="q|time",
+            units="au",
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "f(q,t)_coh",
+            "SurfaceOutputVariable",
+            dim=2,
+            conc_exp=0.5,
+            axis="q|time",
+            units="au",
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "s(q,f)_inc",
+            "SurfaceOutputVariable",
+            axis="q|omega",
+            units="au",
+            main_result=True,
+            partial_result=True,
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "s(q,f)_coh",
+            "SurfaceOutputVariable",
+            dim=2,
+            conc_exp=0.5,
+            axis="q|omega",
+            units="au",
+            main_result=True,
+            partial_result=True,
+        )
 
         # Compute total F(Q,t) = inc + coh
         self._outputData["f(q,t)_total"][:] = (
             self._outputData["f(q,t)_coh_total"][:]
             + self._outputData["f(q,t)_inc_total"][:]
         )
+        self._outputData["f(q,t)_total"].scaling_factor = fact
         self._outputData["s(q,f)_total"][:] = (
             self._outputData["s(q,f)_coh_total"][:]
             + self._outputData["s(q,f)_inc_total"][:]
         )
+        self._outputData["s(q,f)_total"].scaling_factor = fact
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

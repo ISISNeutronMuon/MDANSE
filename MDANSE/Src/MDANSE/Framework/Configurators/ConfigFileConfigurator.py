@@ -15,21 +15,21 @@
 #
 import re
 from collections import namedtuple
-from collections.abc import Sequence, Iterable
+from collections.abc import Iterable, Sequence
 from itertools import starmap
 from pathlib import Path
 from string import ascii_uppercase as upcase
 from typing import Any, Literal, Optional, Union
 
-
 import numpy as np
+from more_itertools import first, first_true, split_before, spy
+from numpy.typing import NDArray
+
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Converters.LAMMPS import BoxStyle
-from MDANSE.MLogging import LOG
 from MDANSE.IO.IOUtils import strip_comments
-from more_itertools import first, first_true, split_before, spy
-from numpy.typing import NDArray
+from MDANSE.MLogging import LOG
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 

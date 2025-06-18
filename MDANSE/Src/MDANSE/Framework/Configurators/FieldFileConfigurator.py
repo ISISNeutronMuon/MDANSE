@@ -13,16 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from collections.abc import Iterable
 from typing import NamedTuple
-from collections.abc import Iterable, Iterator
 
 import numpy as np
+from more_itertools import first_true, split_at, split_before, take
+from numpy.typing import NDArray
+
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
 from MDANSE.IO.IOUtils import strip_comments
-from more_itertools import split_at, split_before, take, first_true
-from numpy.typing import NDArray
 from MDANSE.MLogging import LOG
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator

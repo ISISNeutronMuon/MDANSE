@@ -32,7 +32,6 @@ from MDANSE_GUI.Tabs.Plotters.Plotter import (
     str_to_enum,
 )
 
-
 NORM_ERROR_STYLE = "QWidget { background-color:rgb(220,210,30); font-weight: bold }"
 NORM_CLEAN_STYLE = "QWidget { }"
 

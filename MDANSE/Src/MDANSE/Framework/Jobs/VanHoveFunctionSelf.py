@@ -112,9 +112,28 @@ class VanHoveFunctionSelf(IJob):
             "max_value": False,
         },
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["atom_transmutation"] = (
+        "AtomTransmutationConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+                "grouping_level": "grouping_level",
+            }
+        },
     )
     settings["weights"] = (
         "WeightsConfigurator",
@@ -140,6 +159,11 @@ class VanHoveFunctionSelf(IJob):
         self.nElements = len(self.selectedElements)
 
         self.n_mid_points = len(self.configuration["r_values"]["mid_points"])
+
+        self.labels = [
+            (element, (element,))
+            for element in self.configuration["atom_selection"].get_natoms()
+        ]
 
         conf = self.configuration["trajectory"]["instance"].configuration(
             self.configuration["frames"]["first"],
@@ -183,6 +207,8 @@ class VanHoveFunctionSelf(IJob):
                 (self.n_mid_points, self.n_frames),
                 axis="r|time",
                 units="au",
+                main_result=True,
+                partial_result=True,
             )
             self._outputData.add(
                 f"4_pi_r2_g(r,t)_{element}",
@@ -291,19 +317,45 @@ class VanHoveFunctionSelf(IJob):
                 number**2 * self.n_configs * self.configuration["r_values"]["step"]
             )
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "g(r,t)_%s")
-        assign_weights(self._outputData, weight_dict, "4_pi_r2_g(r,t)_%s")
-        self._outputData["g(r,t)_total"][:] = weighted_sum(
-            self._outputData,
-            weight_dict,
-            "g(r,t)_%s",
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            1,
         )
-        self._outputData["4_pi_r2_g(r,t)_total"][:] = weighted_sum(
+        assign_weights(self._outputData, weight_dict, "g(r,t)_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "4_pi_r2_g(r,t)_%s", self.labels)
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
+
+        self._outputData["g(r,t)_total"][:] = (
+            weighted_sum(self._outputData, "g(r,t)_%s", self.labels) / fact
+        )
+        self._outputData["g(r,t)_total"].scaling_factor = fact
+        self._outputData["4_pi_r2_g(r,t)_total"][:] = (
+            weighted_sum(self._outputData, "4_pi_r2_g(r,t)_%s", self.labels) / fact
+        )
+        self._outputData["4_pi_r2_g(r,t)_total"].scaling_factor = fact
+
+        self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            weight_dict,
-            "4_pi_r2_g(r,t)_%s",
+            "g(r,t)",
+            "SurfaceOutputVariable",
+            axis="r|time",
+            units="au",
+            main_result=True,
+            partial_result=True,
+        )
+        self.configuration["grouping_level"].add_grouped_totals(
+            self._outputData,
+            "4_pi_r2_g(r,t)",
+            "SurfaceOutputVariable",
+            axis="r|time",
+            units="au",
         )
 
         self._outputData.write(

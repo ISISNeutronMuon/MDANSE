@@ -15,12 +15,12 @@
 #
 from typing import Union
 
-from qtpy.QtCore import Slot, Signal, QModelIndex
-from qtpy.QtWidgets import QMenu, QListView, QAbstractItemView
-from qtpy.QtGui import QStandardItem, QContextMenuEvent
+from qtpy.QtCore import QModelIndex, Signal, Slot
+from qtpy.QtGui import QContextMenuEvent, QStandardItem
+from qtpy.QtWidgets import QAbstractItemView, QListView, QMenu
 
-from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
+from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
 
 
 class TrajectoryView(QListView):

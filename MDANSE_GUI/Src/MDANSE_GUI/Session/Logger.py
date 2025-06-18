@@ -15,10 +15,9 @@
 #
 import time
 
-from MDANSE.MLogging import LOG
+from qtpy.QtCore import QtMsgType, qInstallMessageHandler
 
-from qtpy.QtCore import QtMsgType
-from qtpy.QtCore import qInstallMessageHandler
+from MDANSE.MLogging import LOG
 
 
 def generate_timestamp() -> str:

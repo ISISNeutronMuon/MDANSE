@@ -19,14 +19,12 @@ from abc import abstractmethod
 from typing import TypeVar
 
 import h5py
-from qtpy.QtCore import QObject, Slot, Signal, QMutex, QModelIndex, Qt
-from qtpy.QtGui import QStandardItemModel, QStandardItem
+from qtpy.QtCore import QModelIndex, QMutex, QObject, Qt, Signal, Slot
+from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MLogging import LOG
-
 from MDANSE_GUI.Session.LocalSession import json_decoder
-
 
 Self = TypeVar("Self", bound="BasicPlotDataItem")
 EXCLUDE = {"metadata"}

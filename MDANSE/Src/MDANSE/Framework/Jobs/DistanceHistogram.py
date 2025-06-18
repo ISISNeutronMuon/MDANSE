@@ -61,6 +61,15 @@ class DistanceHistogram(IJob):
             "dependencies": {"trajectory": "trajectory"},
         },
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+            }
+        },
+    )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
@@ -71,7 +80,8 @@ class DistanceHistogram(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
-            },
+                "grouping_level": "grouping_level",
+            }
         },
     )
     settings["weights"] = (
@@ -107,6 +117,7 @@ class DistanceHistogram(IJob):
             )
         else:
             self.indices_intra = None
+        self.intra = self.indices_intra is not None
         self.selectedElements = self.configuration["atom_selection"]["unique_names"]
         if self.indices_intra is not None and len(self.indices_intra) > len(
             self._indices
@@ -124,7 +135,7 @@ class DistanceHistogram(IJob):
         nElements = len(self.selectedElements)
 
         # The histogram of the intramolecular distances.
-        if self.indices_intra is not None:
+        if self.intra:
             self.h_intra = np.zeros(
                 (
                     nElements,
@@ -149,9 +160,8 @@ class DistanceHistogram(IJob):
         for k in list(self._nAtomsPerElement.keys()):
             self._concentrations[k] = 0.0
 
-        self._elementsPairs = sorted(
-            itertools.combinations_with_replacement(self.selectedElements, 2),
-        )
+        self.labels = self.configuration["grouping_level"].pair_labels()
+        self.labels_intra = self.configuration["grouping_level"].pair_labels(intra=True)
 
     def run_step(self, index):
         """Run a single step of the analysis.
@@ -184,7 +194,7 @@ class DistanceHistogram(IJob):
         coords = conf["coordinates"][self._indices]
         frac_coords = coords @ conf.unit_cell.inverse
 
-        if self.indices_intra is not None:
+        if self.intra:
             hIntraTemp = np.zeros(self.h_intra.shape, dtype=np.float64)
             hTotalTemp = np.zeros(self.h_total.shape, dtype=np.float64)
 
@@ -242,7 +252,7 @@ class DistanceHistogram(IJob):
         # volume can vary during the MD (e.g. NPT conditions).
         # This volume is the one that intervene in the density
         # calculation.
-        if self.indices_intra is not None:
+        if self.intra:
             self.h_intra += x[1]
         self.h_total += x[2]
 

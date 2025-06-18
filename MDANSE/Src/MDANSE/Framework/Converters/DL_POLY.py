@@ -16,9 +16,12 @@
 from __future__ import annotations
 
 import collections
-from typing import Union, Any
+from typing import Any, Union
 
 import numpy as np
+from more_itertools import consume as drop
+from more_itertools import take
+
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
@@ -29,8 +32,6 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from more_itertools import consume as drop
-from more_itertools import take
 
 
 class HistoryFileError(Error):

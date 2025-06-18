@@ -17,7 +17,6 @@ import collections
 
 import numpy as np
 
-
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 
