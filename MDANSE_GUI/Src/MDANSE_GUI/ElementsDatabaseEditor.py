@@ -258,34 +258,30 @@ class ElementView(QTableView):
             ATOMS_DATABASE.default_atoms_properties
         )
 
-        vert_header_idxs = set(
-            [
-                self.model().mapToSource(idx).row()
-                for idx in self.selectionModel().selectedIndexes()
-            ]
-        )
+        vert_header_idxs = {
+            self.model().mapToSource(idx).row()
+            for idx in self.selectionModel().selectedIndexes()
+        }
         atm_syms = [
             data_model.verticalHeaderItem(row_idx).text()
             for row_idx in vert_header_idxs
         ]
         def_atms = ATOMS_DATABASE.default_atoms_types
-        enable_delete_atms = any([atm_sym not in def_atms for atm_sym in atm_syms])
+        enable_delete_atms = any(atm_sym not in def_atms for atm_sym in atm_syms)
 
-        col_idxs = set(
-            [idx.column() for idx in self.selectionModel().selectedIndexes()]
-        )
+        col_idxs = {idx.column() for idx in self.selectionModel().selectedIndexes()}
         prop_labels = [
             data_model.horizontalHeaderItem(col_idx).text() for col_idx in col_idxs
         ]
         def_props = ATOMS_DATABASE.default_atoms_properties
         enable_delete_props = any(
-            [prop_label not in def_props for prop_label in prop_labels]
+            prop_label not in def_props for prop_label in prop_labels
         )
 
         idx = self.currentIndex()
         self.mouse_prop = data_model.horizontalHeaderItem(idx.column()).text()
         self.mouse_atm = data_model.verticalHeaderItem(
-            self.model().mapToSource(idx).row()
+            self.model().mapToSource(idx).row(),
         ).text()
 
         temp_model = self.model().sourceModel()
@@ -338,7 +334,9 @@ class NewElementDialog(QDialog):
 
 
 class ElementModel(QStandardItemModel):
-    """A Qt model interfacing with MDANSE AtomDatabase. Note that the
+    """A Qt model interfacing with MDANSE AtomDatabase.
+
+    Note that the
     order of atom and properties in the atom database may not be the
     same as the order of the atom and properties in the table. Their
     orderings might diverge as the database gets edited and/or the
@@ -356,13 +354,16 @@ class ElementModel(QStandardItemModel):
 
     @property
     def all_row_names(self):
+        """Names of all atoms."""
         return self.database.atoms
 
     @property
     def all_column_names(self):
+        """Names of all properties."""
         return self.database.properties
 
     def parseDatabase(self):
+        """Build a Qt model from the MDANSE atom database."""
         def_columns = self.database.default_atoms_properties
         def_rows = self.database.default_atoms_types
 
@@ -408,13 +409,12 @@ class ElementModel(QStandardItemModel):
 
     @Slot()
     def save_changes(self):
+        """Write the current database to the standard user file."""
         self.database.save()
 
     @Slot()
     def new_line_dialog(self):
-        """Opens a dialog window which allows for custom atom types to
-        be created.
-        """
+        """Open a dialog window for creating custom atom types."""
         dialog_variables = [
             NewAtomTypeNameVariable(
                 input_dict={
@@ -427,7 +427,9 @@ class ElementModel(QStandardItemModel):
             )
         ]
         ne_dialog = InputDialog(
-            parent=self.parent(), fields=dialog_variables, title="Create Custom Atom"
+            parent=self.parent(),
+            fields=dialog_variables,
+            title="Create Custom Atom",
         )
         ne_dialog.got_values.connect(self.add_row)
         ne_dialog.show()
@@ -435,9 +437,7 @@ class ElementModel(QStandardItemModel):
 
     @Slot()
     def new_column_dialog(self):
-        """Opens a dialog window which allows for custom properties to
-        be created.
-        """
+        """Open a dialog window for creating custom properties."""
         dialog_variables = [
             InputVariable(
                 input_dict={
@@ -446,16 +446,25 @@ class ElementModel(QStandardItemModel):
                     "label": "New property name",
                     "tooltip": "Type the name of the new property here; it will be added to the table.",
                     "value": "",
-                }
+                },
             ),
             InputVariable(
                 input_dict={
                     "keyval": "property_type",
                     "format": str,
                     "label": "Type of the new property",
-                    "tooltip": "One of the following: int, float, str, list",
-                    "value": ["int", "float", "str", "list"],
-                }
+                    "tooltip": "One of the following: int, float, complex, str, list",
+                    "value": ["int", "float", "complex", "str", "list"],
+                },
+            ),
+            InputVariable(
+                input_dict={
+                    "keyval": "property_unit",
+                    "format": str,
+                    "label": "Unit of the new property",
+                    "tooltip": "A valid physical unit, as used by MDANSE units.py",
+                    "value": "none",
+                },
             ),
         ]
         ne_dialog = InputDialog(
@@ -469,9 +478,7 @@ class ElementModel(QStandardItemModel):
 
     @Slot()
     def rename_row_dialog(self):
-        """Opens a dialog window which allows for custom atom type keys
-        to be renamed.
-        """
+        """Open a dialog window for renaming custom atoms."""
         dialog_variables = [
             NewAtomTypeNameVariable(
                 input_dict={
@@ -480,11 +487,13 @@ class ElementModel(QStandardItemModel):
                     "label": f'Rename custom atom "{self.parent().viewer.mouse_atm}" to',
                     "tooltip": "Type the new name of the chemical element here.",
                     "value": "",
-                }
+                },
             ),
         ]
         ne_dialog = InputDialog(
-            parent=self.parent(), fields=dialog_variables, title="Rename Custom Atom"
+            parent=self.parent(),
+            fields=dialog_variables,
+            title="Rename Custom Atom",
         )
         ne_dialog.got_values.connect(self.rename_row)
         ne_dialog.show()
@@ -492,12 +501,13 @@ class ElementModel(QStandardItemModel):
 
     @Slot(dict)
     def rename_row(self, input_variables: dict):
-        """Renames an atom from one label to another.
+        """Rename an atom from one label to another.
 
         Parameters
         ----------
         input_variables : dict
             Dictionary containing old and new atom names.
+
         """
         old_label = self.parent().viewer.mouse_atm
         new_label = input_variables["new_atom_name"]
@@ -516,9 +526,7 @@ class ElementModel(QStandardItemModel):
 
     @Slot()
     def rename_column_dialog(self):
-        """Opens a dialog window which allows for custom properties to
-        be renamed.
-        """
+        """Open a dialog window for renaming custom properties."""
         dialog_variables = [
             NewAtomPropertyNameVariable(
                 input_dict={
@@ -527,7 +535,7 @@ class ElementModel(QStandardItemModel):
                     "label": f'Rename custom property "{self.parent().viewer.mouse_prop}" to',
                     "tooltip": "Type the new name of the atom property here.",
                     "value": "",
-                }
+                },
             ),
         ]
         ne_dialog = InputDialog(
@@ -541,12 +549,13 @@ class ElementModel(QStandardItemModel):
 
     @Slot(dict)
     def rename_column(self, input_variables: dict):
-        """Renames an atom property from one name to another.
+        """Rename an atom property from one name to another.
 
         Parameters
         ----------
         input_variables : dict
             Dictionary containing old and new atom property names.
+
         """
         old_label = self.parent().viewer.mouse_prop
         new_label = input_variables["new_prop_name"]
@@ -564,8 +573,7 @@ class ElementModel(QStandardItemModel):
         self.save_changes()
 
     def copy_row_in_database(self, new_label: str, db_key: str):
-        """Copy row data from one database entry to another and update
-        the table.
+        """Copy row data into a new entry and update the table.
 
         Parameters
         ----------
@@ -573,6 +581,7 @@ class ElementModel(QStandardItemModel):
             The new label the results are copied to.
         db_key : str
             The key of the data the new_labels data will be copied from.
+
         """
         row = []
         for i in range(self.columnCount()):
@@ -597,9 +606,7 @@ class ElementModel(QStandardItemModel):
         view = self.parent().viewer
 
         idxs = view.selectionModel().selectedIndexes()
-        row_idxs = set(
-            [(idx.row(), view.model().mapToSource(idx).row()) for idx in idxs]
-        )
+        row_idxs = {(idx.row(), view.model().mapToSource(idx).row()) for idx in idxs}
         row_idxs = sorted(row_idxs, key=lambda x: x[0])
 
         for _, idx in row_idxs:
@@ -610,8 +617,7 @@ class ElementModel(QStandardItemModel):
                     self.database.add_atom(atm_sym_copy)
                     self.copy_row_in_database(atm_sym_copy, atm_sym)
                     break
-                else:
-                    atm_sym_copy += " (copy)"
+                atm_sym_copy += " (copy)"
         self.save_changes()
 
     @Slot(dict)
@@ -622,6 +628,7 @@ class ElementModel(QStandardItemModel):
         ----------
         input_variables : dict
             Variables used to create the new entry.
+
         """
         try:
             new_label = input_variables["atom_name"]
@@ -638,9 +645,7 @@ class ElementModel(QStandardItemModel):
         view = self.parent().viewer
 
         idxs = view.selectionModel().selectedIndexes()
-        row_idxs = set(
-            [(idx.row(), view.model().mapToSource(idx).row()) for idx in idxs]
-        )
+        row_idxs = {(idx.row(), view.model().mapToSource(idx).row()) for idx in idxs}
         row_idxs = sorted(row_idxs, key=lambda x: x[0], reverse=True)
         row_idxs_atm_syms = [
             (i, self.verticalHeaderItem(j).text()) for i, j in row_idxs
@@ -654,10 +659,13 @@ class ElementModel(QStandardItemModel):
         self.save_changes()
 
     def copy_column_in_database(
-        self, new_prop_name: str, old_prop_name: str, prop_type: str
+        self,
+        new_prop_name: str,
+        old_prop_name: str,
+        prop_type: str,
+        prop_unit: str,
     ):
-        """Copy column data from one database entry to another and
-        update the table.
+        """Copy column data into a new column and update the table.
 
         Parameters
         ----------
@@ -667,8 +675,11 @@ class ElementModel(QStandardItemModel):
             The label of the property to copy from.
         prop_type : str
             The property type.
+        prop_unit : str
+            The physical unit of the property.
+
         """
-        self.database.add_property(new_prop_name, prop_type)
+        self.database.add_property(new_prop_name, prop_type, unit=prop_unit)
         column = []
         for i in range(self.rowCount()):
             key = self.verticalHeaderItem(i).text()
@@ -689,13 +700,14 @@ class ElementModel(QStandardItemModel):
 
     @Slot(dict)
     def add_new_column(self, input_variables: dict):
-        """Adds a custom properties to the atom database.
+        """Add a custom property to the atom database.
 
         Parameters
         ----------
         input_variables: dict
             A dictionary containing the property name and property type
             to add.
+
         """
         try:
             new_label = input_variables["property_name"]
@@ -705,8 +717,12 @@ class ElementModel(QStandardItemModel):
             new_type = input_variables["property_type"]
         except KeyError:
             return
+        try:
+            new_unit = input_variables["property_unit"]
+        except KeyError:
+            return
         if new_label not in self.database.atoms:
-            self.copy_column_in_database(new_label, new_label, new_type)
+            self.copy_column_in_database(new_label, new_label, new_type, new_unit)
         self.save_changes()
 
     @Slot()
@@ -714,19 +730,21 @@ class ElementModel(QStandardItemModel):
         """Update the database and table with a copied properties."""
         view = self.parent().viewer
         col_idx = list(
-            set([idx.column() for idx in view.selectionModel().selectedIndexes()])
+            {idx.column() for idx in view.selectionModel().selectedIndexes()},
         )
         col_idx.sort()
         for idx in col_idx:
             prop_label = self.horizontalHeaderItem(idx).text()
             prop_label_copy = prop_label + " (copy)"
             prop_type = self.database._properties[prop_label]
+            prop_unit = self.database._units[prop_label]
             while True:
                 if prop_label_copy not in self.database.properties:
-                    self.copy_column_in_database(prop_label_copy, prop_label, prop_type)
+                    self.copy_column_in_database(
+                        prop_label_copy, prop_label, prop_type, prop_unit
+                    )
                     break
-                else:
-                    prop_label_copy += " (copy)"
+                prop_label_copy += " (copy)"
         self.save_changes()
 
     @Slot()
@@ -734,7 +752,7 @@ class ElementModel(QStandardItemModel):
         """Delete custom columns from the table and update the database."""
         view = self.parent().viewer
         col_idx = list(
-            set([idx.column() for idx in view.selectionModel().selectedIndexes()])
+            {idx.column() for idx in view.selectionModel().selectedIndexes()},
         )
         col_idx.sort(reverse=True)
         def_props = ATOMS_DATABASE.default_atoms_properties
@@ -782,24 +800,29 @@ class ElementsDatabaseEditor(QDialog):
         ----------
         column_number : int
             The column number that needs have the delegate to be set.
+
         """
         column_name = self.data_model.horizontalHeaderItem(column_number).text()
         column_type = ATOMS_DATABASE._properties.get(column_name, "str")
         if column_type == "color":
             self.viewer.setItemDelegateForColumn(
-                column_number, self.viewer.color_delegate
+                column_number,
+                self.viewer.color_delegate,
             )
         elif column_type == "float":
             self.viewer.setItemDelegateForColumn(
-                column_number, self.viewer.float_delegate
+                column_number,
+                self.viewer.float_delegate,
             )
         elif column_type == "int":
             self.viewer.setItemDelegateForColumn(
-                column_number, self.viewer.int_delegate
+                column_number,
+                self.viewer.int_delegate,
             )
         elif column_type == "complex":
             self.viewer.setItemDelegateForColumn(
-                column_number, self.viewer.complex_delegate
+                column_number,
+                self.viewer.complex_delegate,
             )
 
 

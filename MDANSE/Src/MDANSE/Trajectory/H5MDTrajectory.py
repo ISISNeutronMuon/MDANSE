@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Union
@@ -42,7 +43,7 @@ class H5MDTrajectory:
     H5MD files created by MDMC.
     """
 
-    def __init__(self, h5_filename: Union[Path, str]):
+    def __init__(self, h5_filename: Path | str):
         """Constructor.
 
         :param h5_filename: the trajectory filename
