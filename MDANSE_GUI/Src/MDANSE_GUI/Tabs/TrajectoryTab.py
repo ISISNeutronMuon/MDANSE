@@ -30,14 +30,18 @@ from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
 
-label_text = """Here you can load the .mdt files.
-They are MD trajectories in HDF5 format
-created by one of the MDANSE converters.
-Any trajectory you select will be visualised
-in the 3D view window on the right side.
-The animation of the MD trajectory will
-allow you to verify if the contents 
+label_text = """<b>Load and view trajectories.</b>
+<br><br>
+Any trajectory you select will be visualised in the 3D view window on the right side.
+The animation of the MD trajectory will allow you to verify if the contents 
 of the trajectory are what you expected.
+<br><br>
+You can load .mdt trajectories created using MDANSE converters, or
+H5MD trajectories, as long as they contain physical unit information.
+<br><br>
+Additionally, atom trace plotting option is available in the right panel.
+Choose an atom by clicking on it, and visualise the volume occupied by
+the atom over all simulation frames.
 """
 
 
