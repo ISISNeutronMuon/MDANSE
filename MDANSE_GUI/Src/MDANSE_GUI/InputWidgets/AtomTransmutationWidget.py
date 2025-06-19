@@ -221,4 +221,5 @@ class AtomTransmutationWidget(AtomSelectionWidget):
             The JSON selector setting.
 
         """
-        return self._field.text()
+        text = self._field.text()
+        return text if text else self._default_value
