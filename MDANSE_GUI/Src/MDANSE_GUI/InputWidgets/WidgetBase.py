@@ -36,6 +36,13 @@ if TYPE_CHECKING:
 Layouts = Literal["QHBoxLayout", "QVBoxLayout", "QGridLayout"]
 Bases = Literal["QWidget", "QGroupBox"]
 
+WARNING_STYLE = (
+    "QWidget#InputWidget { background-color:rgb(220,210,30); font-weight: bold }"
+)
+ERROR_STYLE = (
+    "QWidget#InputWidget { background-color:rgb(180,20,180); font-weight: bold }"
+)
+
 
 class WidgetBase(QObject):
     """Object to serve as an ABC to GUI widgets in MDANSE.
@@ -111,6 +118,7 @@ class WidgetBase(QObject):
         self._configurator = configurator
         self._parent_dialog = parent
         self._empty = False
+        self.has_warning = False
 
     def update_labels(self):
         """Update contained labels (dependent on base_type)."""
@@ -157,19 +165,40 @@ class WidgetBase(QObject):
         self._field.setPlaceholderText(str(default))
         self._configurator.configure(default)
 
-    def mark_error(self, error_text: str):
+    def mark_error(self, error_text: str, *, silent: bool = False):
         """Highlight an erroneous entry and display given error_text.
 
         Parameters
         ----------
         error_text : str
             Message displayed on hover-over.
+        silent : bool
+            If True, update the widget's error without sending signals
+
         """
-        self._base.setStyleSheet(
-            "QWidget#InputWidget { background-color:rgb(180,20,180); font-weight: bold }"
-        )
+        self._base.setStyleSheet(ERROR_STYLE)
         self._base.setToolTip(error_text)
-        self.valid_changed.emit()
+        if not silent:
+            self.valid_changed.emit()
+
+    def mark_warning(self, warning_text: str):
+        """If the input caused a warning, display warning_text and highlight the widget.
+
+        If warning_text is an empty string, this method will clear errors instead.
+
+        Parameters
+        ----------
+        warning_text : str
+            Message displayed on hover-over.
+        """
+        if warning_text:
+            self.has_warning = True
+            self._base.setStyleSheet(WARNING_STYLE)
+            self._base.setToolTip(warning_text)
+            self.valid_changed.emit()
+            return
+        self.has_warning = False
+        self.clear_error()
 
     def clear_error(self):
         """Remove error highlighting."""
@@ -190,11 +219,11 @@ class WidgetBase(QObject):
                 "COULD NOT SET THIS VALUE - you may need to change the values in other widgets"
             )
         self.value_changed.emit()
-        if self._configurator.valid:
-            self.clear_error()
-            self.value_updated.emit()
-        else:
+        if not self._configurator.valid:
             self.mark_error(self._configurator.error_status)
+        else:
+            self.mark_warning(self._configurator.warning_status)
+            self.value_updated.emit()
 
     @abstractmethod
     def get_value(self):

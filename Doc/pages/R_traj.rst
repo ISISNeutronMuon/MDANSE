@@ -28,21 +28,11 @@ All converters output the trajectories as .MDT files, which are binary HDF5 file
 |                   |                                      |                   | accurate trajectory conversion of DFTB   |
 |                   |                                      |                   | files.                                   |
 +-------------------+--------------------------------------+-------------------+------------------------------------------+
-| Discover Converter| Discover module trajectory files     |  .xtd, .his       | Converts Discover module trajectory to   |
-|                   |                                      |                   | HDF format. Enhanced support for         |
-|                   |                                      |                   | variable header lengths in CASTEP files. |
-+-------------------+--------------------------------------+-------------------+------------------------------------------+
 | DL_POLY Converter | DL POLY trajectory files             | .field, .history  | Converts DL POLY trajectory to HDF       |
 |                   |                                      |                   | format. Converts both velocities and     |
 |                   |                                      |                   | forces. Version-selective conversion     |
 |                   |                                      |                   | with advanced support for atom aliasing  |
 |                   |                                      |                   | in DL POLY files.                        |
-+-------------------+--------------------------------------+-------------------+------------------------------------------+
-| DMol Converter    | DMol module trajectory files         | .xtd, .his        | Converts DMol module trajectory to HDF   |
-|                   |                                      |                   | format. Does not convert velocities.     |
-|                   |                                      |                   | Optimized for DMol files from Materials  |
-|                   |                                      |                   | Studio, ensuring high fidelity data      |
-|                   |                                      |                   | transfer.                                |
 +-------------------+--------------------------------------+-------------------+------------------------------------------+
 | Forcite Converter | Forcite module trajectory files      | .xtd, .trj        | Converts Forcite module trajectory to    |
 |                   |                                      |                   | HDF format. Accommodates both XTD and    |
