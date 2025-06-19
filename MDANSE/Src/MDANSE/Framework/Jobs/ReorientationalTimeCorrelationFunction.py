@@ -37,17 +37,17 @@ class ReorientationalTimeCorrelationFunction(IJob):
     will be sensitive to changes in the molecule's shape.
 
     In principle, reorientational time-correlation functions can be Legendre
-    polynomials of different order. The results of this analysis correspond to
-    the l=1 case.
+    polynomials of different order. By default, this analysis outputs results
+    for l=1 and l=2.
+
     Angle at time T is calculated as the following: \n
     .. math:: \\overrightarrow{vector} =  \\overrightarrow{direction} - \\overrightarrow{origin}
     .. math:: \phi(T = T_{1}-T_{0}) = arcos(  \\overrightarrow{vector(T_{1})} . \\overrightarrow{vector(T_{0})} )
 
-    The result is the
-    #. angular_correlation_legendre_1st: :math:`<cos(\phi(T))>`
+    The result is
+    .. math: C_{l}(T) = <P_{l}[cos(\phi(T))]>
+    where :math:`P_{l}` is the Legendre polynomial of the order l.
 
-    **Usage:** \n
-    This analysis is used to study molecule's orientation and rotation relaxation.
     """
 
     label = "Reorientational Time Correlation Function"
@@ -77,9 +77,9 @@ class ReorientationalTimeCorrelationFunction(IJob):
         "IntegerConfigurator",
         {
             "label": "Maximum Legendre polynomial order to be used",
-            "default": 1,
+            "default": 2,
             "mini": 1,
-            "maxi": 3,
+            "maxi": 4,
         },
     )
     settings["per_axis"] = (
