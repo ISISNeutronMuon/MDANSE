@@ -187,6 +187,7 @@ class PartialChargeWidget(AtomSelectionWidget):
         if kwargs.get("use_list_view", False):
             raise TypeError(f"Cannot use list view with {type(self).__name__}.")
         super().__init__(*args, use_list_view=False, **kwargs)
+        self._field.textChanged.connect(self.updateValue)
 
     def create_helper(self, traj_data: tuple[str, Trajectory]) -> ChargeHelper:
         """Create the dialog for selecting atoms and setting their charges.
@@ -204,3 +205,15 @@ class PartialChargeWidget(AtomSelectionWidget):
         """
         mapper = self._configurator.get_charge_mapper()
         return ChargeHelper(mapper, traj_data, self._field, self._base)
+
+    def get_widget_value(self) -> str:
+        """Return the current text in the input field.
+
+        Returns
+        -------
+        str
+            The JSON selector setting.
+
+        """
+        text = self._field.text()
+        return text if text else self._default_value
