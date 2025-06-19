@@ -18,13 +18,14 @@ import collections
 
 import numpy as np
 from scipy.signal import correlate
+from scipy.special import legendre
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 
 
-class AngularCorrelation(IJob):
-    r"""Calculates the angular correlation of a vector in a molecule.
+class ReorientationalTimeCorrelationFunction(IJob):
+    r"""Correlation of molecule's orientation in time.
 
     The result is a reorientational time-correlation function, which describes
     the change in orientation of a specific direction axis within a molecule.
@@ -38,20 +39,18 @@ class AngularCorrelation(IJob):
     In principle, reorientational time-correlation functions can be Legendre
     polynomials of different order. The results of this analysis correspond to
     the l=1 case.
-
-    **Calculation:** \n
-    angle at time T is calculated as the following: \n
+    Angle at time T is calculated as the following: \n
     .. math:: \\overrightarrow{vector} =  \\overrightarrow{direction} - \\overrightarrow{origin}
     .. math:: \phi(T = T_{1}-T_{0}) = arcos(  \\overrightarrow{vector(T_{1})} . \\overrightarrow{vector(T_{0})} )
 
-    **Output:** \n
+    The result is the
     #. angular_correlation_legendre_1st: :math:`<cos(\phi(T))>`
 
     **Usage:** \n
     This analysis is used to study molecule's orientation and rotation relaxation.
     """
 
-    label = "Angular Correlation"
+    label = "Reorientational Time Correlation Function"
 
     category = (
         "Analysis",
@@ -74,6 +73,15 @@ class AngularCorrelation(IJob):
             "dependencies": {"trajectory": "trajectory"},
         },
     )
+    settings["polynomial_order"] = (
+        "IntegerConfigurator",
+        {
+            "label": "Maximum Legendre polynomial order to be used",
+            "default": 1,
+            "mini": 1,
+            "maxi": 3,
+        },
+    )
     settings["per_axis"] = (
         "BooleanConfigurator",
         {"label": "output contribution per axis", "default": False},
@@ -93,6 +101,7 @@ class AngularCorrelation(IJob):
         self.inner_index2 = self.configuration["molecule_and_axis"]["index2"]
 
         self.numberOfSteps = len(self.molecules)
+        self.legendre_order = self.configuration["polynomial_order"]["value"]
 
         self.masses = np.array(
             self.configuration["trajectory"]["instance"].chemical_system.atom_property(
@@ -120,32 +129,33 @@ class AngularCorrelation(IJob):
             units="au",
         )
 
-        self._outputData.add(
-            "ac",
-            "LineOutputVariable",
-            (self.configuration["frames"]["n_frames"],),
-            axis="time",
-            units="au",
-            main_result=True,
-        )
-
-        if self.configuration["per_axis"]["value"]:
+        for l_order in range(1, self.legendre_order + 1):
             self._outputData.add(
-                "ac_per_axis",
-                "SurfaceOutputVariable",
-                (
-                    self.configuration["trajectory"][
-                        "instance"
-                    ].chemical_system.number_of_molecules(
-                        self.configuration["molecule_and_axis"]["value"],
-                    ),
-                    self.configuration["frames"]["n_frames"],
-                ),
-                axis="axis_index|time",
+                f"rtcf_l={l_order}",
+                "LineOutputVariable",
+                (self.configuration["frames"]["n_frames"],),
+                axis="time",
                 units="au",
                 main_result=True,
-                partial_result=True,
             )
+
+            if self.configuration["per_axis"]["value"]:
+                self._outputData.add(
+                    f"rtcf_l={l_order}_per_axis",
+                    "SurfaceOutputVariable",
+                    (
+                        self.configuration["trajectory"][
+                            "instance"
+                        ].chemical_system.number_of_molecules(
+                            self.configuration["molecule_and_axis"]["value"],
+                        ),
+                        self.configuration["frames"]["n_frames"],
+                    ),
+                    axis="axis_index|time",
+                    units="au",
+                    main_result=True,
+                    partial_result=True,
+                )
 
     def run_step(self, index: int) -> tuple[int, np.ndarray]:
         """Run the analysis for a single molecule.
@@ -214,18 +224,21 @@ class AngularCorrelation(IJob):
             array of the correlation results
 
         """
-        self._outputData["ac"] += x
+        for l_order in range(1, self.legendre_order + 1):
+            poly = legendre(l_order)
+            self._outputData[f"rtcf_l={l_order}"] += poly(x)
 
-        if self.configuration["per_axis"]["value"]:
-            self._outputData["ac_per_axis"][index, :] = x
+            if self.configuration["per_axis"]["value"]:
+                self._outputData[f"rtcf_l={l_order}_per_axis"][index, :] = poly(x)
 
     def finalize(self):
         """Normalise and write out the results."""
-        self._outputData["ac"] /= self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.number_of_molecules(
-            self.configuration["molecule_and_axis"]["value"],
-        )
+        for l_order in range(1, self.legendre_order + 1):
+            self._outputData[f"rtcf_l={l_order}"] /= self.configuration["trajectory"][
+                "instance"
+            ].chemical_system.number_of_molecules(
+                self.configuration["molecule_and_axis"]["value"],
+            )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

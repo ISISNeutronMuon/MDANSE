@@ -29,6 +29,7 @@ def parameters():
     parameters["q_values"] = (0.0, 10.0, 0.1)
     parameters["r_values"] = (0.0, 10.0, 0.1)
     parameters["per_axis"] = False
+    parameters["polynomial_order"] = 1
     parameters["molecule_name"] = "C1_O2"
     parameters["molecule_and_axis"] = ("C1_O2", 0)
     parameters["axis"] = "ab"
@@ -45,7 +46,6 @@ def parameters():
     "job_info",
     [
         ("AreaPerMolecule", ["area_per_molecule"]),
-        ("AngularCorrelation", ["ac"]),
     ], ids=lambda x: x[0],
 )
 def test_structure_analysis(tmp_path, parameters, job_info):
@@ -64,3 +64,23 @@ def test_structure_analysis(tmp_path, parameters, job_info):
     result_file = RESULTS_DIR / f"structure_analysis_{job_info[0]}.mda"
 
     compare_hdf5(out_file, result_file, job_info[1])
+
+
+@pytest.mark.parametrize("polynomial_order", [1,2,3])
+def test_rtcf(tmp_path, parameters, polynomial_order):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+
+    parameters["polynomial_order"] = polynomial_order
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
+
+    job = IJob.create("ReorientationalTimeCorrelationFunction")
+    job.run(parameters, status=True)
+
+    assert out_file.is_file()
+    assert log_file.is_file()
+
+    result_file = RESULTS_DIR / f"structure_analysis_rtcf_l{str(polynomial_order)}.mda"
+
+    compare_hdf5(out_file, result_file, [f"rtcf_l={pord}" for pord in range(1,polynomial_order+1)])

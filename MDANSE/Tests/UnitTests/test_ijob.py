@@ -5,7 +5,6 @@ from MDANSE.Framework.Jobs.IJob import IJob
 
 
 ALL_JOBS = [
-    "AngularCorrelation",
     "AreaPerMolecule",
     "AverageStructure",
     "CenterOfMassesTrajectory",
@@ -34,6 +33,8 @@ ALL_JOBS = [
     "RigidBodyTrajectory",
     "RootMeanSquareDeviation",
     "RootMeanSquareFluctuation",
+    "RotationAutocorrelation",
+    "ReorientationalTimeCorrelationFunction",
     "SolventAccessibleSurface",
     "StructureFactorFromScatteringFunction",
     "Temperature",

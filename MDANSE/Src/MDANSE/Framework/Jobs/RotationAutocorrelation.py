@@ -32,6 +32,8 @@ class RotationAutocorrelation(IJob):
 
     """
 
+    enabled = False
+
     label = "Rotation Autocorrelation"
 
     category = (
