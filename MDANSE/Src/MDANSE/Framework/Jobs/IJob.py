@@ -141,8 +141,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
         self.outputQueue = Queue()
         self.log_queue = Queue()
 
-        self.run_count = 0
-
     def __getstate__(self):
         d = self.__dict__.copy()
         del d["_processes"]
@@ -414,8 +412,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         """
         Run the job.
         """
-        self.run_count += 1
-        if self.run_count > 1:
+        if hasattr(self._status, "state"):
             raise RuntimeError(
                 f"Unable to run an instance of {(type).__name__} with name {self._name} more than once."
             )
