@@ -25,8 +25,6 @@ lammps_ar = DATA_DIR / "lammps_ar.config"
 lammps_fake = DATA_DIR / "lammps_fake.lammps"
 lammps_fake_config = DATA_DIR / "lammps_fake.config"
 vasp_xdatcar = DATA_DIR / "XDATCAR_version5"
-discover_his = DATA_DIR / "sushi.his"
-discover_xtd = DATA_DIR / "sushi.xtd"
 cp2k_pos = DATA_DIR / "CO2GAS-pos-1.xyz"
 cp2k_vel = DATA_DIR / "CO2GAS-vel-1.xyz"
 cp2k_cell = DATA_DIR / "CO2GAS-1.cell"
@@ -126,17 +124,6 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
             "vasp.mdt",
             ("/configuration/coordinates", "/unit_cell", "/time"),
             {"fold": False, "time_step": 1.0, "xdatcar_file": vasp_xdatcar},
-        ),
-        (
-            "discover",
-            "discover.mdt",
-            (
-                "/configuration/coordinates",
-                "/configuration/velocities",
-                "/time",
-                "/charge",
-            ),
-            {"fold": True, "his_file": discover_his, "xtd_file": discover_xtd},
         ),
         (
             "cp2k",
