@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import math
 from collections import defaultdict
 
 import numpy as np
@@ -127,7 +126,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         atm_select = self._configurable[self._dependencies["atom_selection"]]
         atom_types = np.unique(atm_select["elements"])
         return any(
-            math.isnan(self._trajectory.get_atom_property(atom, property_name))
+            np.isnan(self._trajectory.get_atom_property(atom, property_name))
             for atom in atom_types
         )
 
