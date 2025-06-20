@@ -40,8 +40,7 @@ Y      yotta 1e24
 ====== ===== =====
 
 All these prefixes can be used with any of the units from Table 2.
-All these units can also be accessed through the
-:ref:`units-editor`.
+All these units can also be accessed through the Units Editor.
 
 Table 2: A list of all units that can be used in MDANSE.
 
