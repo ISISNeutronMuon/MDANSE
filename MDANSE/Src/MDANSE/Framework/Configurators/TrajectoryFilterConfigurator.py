@@ -24,12 +24,15 @@ from MDANSE.Mathematics.Signal import (
 
 
 class TrajectoryFilterConfigurator(IConfigurator):
-    """This configurator allows the application of a filter to the trajectory of atoms in the simulation.
+    """Defines the filter that will be applied to atom positions.
+
+    The filters are provided by the scipy.signal library.
 
     Attributes
     ----------
     _default : str
         The defaults selection setting.
+
     """
 
     _default_filter = DEFAULT_FILTER
@@ -44,6 +47,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
         -------
         str
             A string representation of the default filter settings dictionary
+
         """
         return cls._default
 
@@ -56,6 +60,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
         ----------
         value : str
             The selection setting in a json readable format.
+
         """
         self._settings = value
 

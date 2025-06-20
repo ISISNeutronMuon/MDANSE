@@ -126,42 +126,6 @@ Inputs:
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
 
 
-.. _converter-reference-DMol:
-
-DMol
-~~~~
-
-Converts a DMol trajectory to an MDT trajectory.
-
-Inputs:
-
-- xtd_file: :ref:`configurator-converter-XTDFileConfigurator` default=INPUT_FILENAME.xtd
-- his_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.his
-- atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
-- fold: :ref:`configurator-converter-BooleanConfigurator` default=False
-- output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
-
-
-.. _converter-reference-Discover:
-
-Discover
-~~~~~~~~
-
-Converts a Discover trajectory to an MDT trajectory.
-
-There are knows problems with the unit cell format in Discover output files,
-and this converter is only included for the users who want to re-run some
-old trajectories that may be of historical interest.
-
-Inputs:
-
-- xtd_file: :ref:`configurator-converter-XTDFileConfigurator` default=INPUT_FILENAME.xtd
-- his_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.his
-- atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
-- fold: :ref:`configurator-converter-BooleanConfigurator` default=False
-- output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
-
-
 .. _converter-reference-Forcite:
 
 Forcite

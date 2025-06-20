@@ -29,6 +29,12 @@ It allows the user to verify and potentially change the way
 atom types from an MD trajectory will be converted to the
 chemical elements used by MDANSE.
 
+Attributes
+----------
+_default : dict
+The default atom map setting JSON string.
+
+
 
 .. _configurator-converter-BooleanConfigurator:
 
@@ -267,6 +273,12 @@ This configurator allows the selection of a specific set of
 atoms on which the analysis will be performed. The defaults setting
 selects all atoms.
 
+Attributes
+----------
+_default : str
+The defaults selection setting.
+
+
 
 .. _configurator-analysis-AtomTransmutationConfigurator:
 
@@ -284,6 +296,12 @@ atoms to deuterium in order to fit with experiments where
 deuteration experiments have been performed for improving the
 contrast and having a better access to the dynamics of a specific
 part of the molecular system.
+
+Attributes
+----------
+_default : str
+The defaults transmutation setting.
+
 
 
 .. _configurator-analysis-BooleanConfigurator:
@@ -468,6 +486,12 @@ Picks a molecule type present in the trajectory.
 If the molecule labels are not available, you can detect the molecules
 using TrajectoryEditor.
 
+Attributes
+----------
+_default : str
+Empty by default.
+
+
 
 .. _configurator-analysis-OptionalFloatConfigurator:
 
@@ -619,6 +643,24 @@ SingleChoiceConfigurator
 default=[]
 
 Selects a single item from multiple choices.
+
+.. _configurator-analysis-TrajectoryFilterConfigurator:
+
+TrajectoryFilterConfigurator
+----------------------------
+
+default={"filter": "Butterworth", "attributes": {"order": 1, "attenuation_type": "lowpass", "cutoff_freq": 25.0}}
+
+Defines the filter that will be applied to atom positions.
+
+The filters are provided by the scipy.signal library.
+
+Attributes
+----------
+_default : str
+The defaults selection setting.
+
+
 
 .. _configurator-analysis-UnitCellConfigurator:
 

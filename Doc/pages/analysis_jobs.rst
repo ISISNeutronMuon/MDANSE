@@ -142,6 +142,7 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - r_values: :ref:`configurator-analysis-DistHistCutoffConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
@@ -172,6 +173,7 @@ Inputs:
 - instrument_resolution: :ref:`configurator-analysis-InstrumentResolutionConfigurator` default=N/A
 - interpolation_order: :ref:`configurator-analysis-InterpolationOrderConfigurator` default=N/A
 - q_vectors: :ref:`configurator-analysis-QVectorsConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=equal
@@ -216,6 +218,7 @@ Inputs:
 - instrument_resolution: :ref:`configurator-analysis-InstrumentResolutionConfigurator` default=N/A
 - interpolation_order: :ref:`configurator-analysis-InterpolationOrderConfigurator` default=N/A
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=atomic_weight
@@ -292,6 +295,7 @@ Inputs:
 - frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
 - instrument_resolution: :ref:`configurator-analysis-InstrumentResolutionConfigurator` default=N/A
 - q_vectors: :ref:`configurator-analysis-QVectorsConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_coherent
@@ -321,10 +325,10 @@ Inputs:
 - frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
 - instrument_resolution: :ref:`configurator-analysis-InstrumentResolutionConfigurator` default=N/A
 - q_vectors: :ref:`configurator-analysis-QVectorsConfigurator` default=N/A
-- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
-- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
-- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_incoherent2
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
@@ -375,8 +379,8 @@ Inputs:
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - q_vectors: :ref:`configurator-analysis-QVectorsConfigurator` default=N/A
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
-- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_incoherent2
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
@@ -402,8 +406,8 @@ Inputs:
 - q_shells: :ref:`configurator-analysis-RangeConfigurator` default=N/A
 - instrument_resolution: :ref:`configurator-analysis-InstrumentResolutionConfigurator` default=N/A
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
-- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_incoherent2
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
@@ -467,8 +471,8 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
-- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
@@ -485,10 +489,10 @@ Maps the volume occupied by atoms over time.
 A Molecular Trace is a time-integrated trace of selected atoms coordinates.
 
 * the minimal and maximal coordinates from the selected atomic trajectories are
-  computed.
+computed.
 * based on these min/max and a spatial resolution, a cartesian grid is constructed.
 * for each atom and for each frame of the selected trajectories, a histogram of
-  presence, called the spatial density, is constructed.
+presence, called the spatial density, is constructed.
 
 The molecular trace can reveal anisotropic vibrations and diffusion pathways.
 
@@ -523,6 +527,7 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - dcsf_input_file: :ref:`configurator-analysis-HDFInputFileConfigurator` default=dcsf.mda
 - disf_input_file: :ref:`configurator-analysis-HDFInputFileConfigurator` default=disf.mda
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
@@ -553,6 +558,7 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - r_values: :ref:`configurator-analysis-DistHistCutoffConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=N/A
@@ -575,8 +581,8 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
-- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
@@ -605,6 +611,7 @@ Inputs:
 - frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
 - instrument_resolution: :ref:`configurator-analysis-InstrumentResolutionConfigurator` default=N/A
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=atomic_weight
@@ -653,8 +660,8 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - reference_frame: :ref:`configurator-analysis-IntegerConfigurator` default=0
-- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
@@ -678,8 +685,8 @@ Inputs:
 
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=each atom
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
-- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
@@ -745,6 +752,7 @@ Inputs:
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - r_values: :ref:`configurator-analysis-DistHistCutoffConfigurator` default=N/A
 - q_values: :ref:`configurator-analysis-RangeConfigurator` default=(0, 500, 1)
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_coherent
@@ -767,6 +775,7 @@ Inputs:
 
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - dcsf_input_file: :ref:`configurator-analysis-HDFInputFileConfigurator` default=dcsf.mda
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
@@ -826,6 +835,36 @@ Inputs:
 - output_files: :ref:`configurator-analysis-OutputTrajectoryConfigurator` default=N/A
 
 
+.. _analysis-reference-TrajectoryFilter:
+
+TrajectoryFilter
+~~~~~~~~~~~~~~~~
+
+Design and apply a filter for the atomic trajectories.
+
+This job outputs a new trajectory, where part of the vibrational
+spectrum of atoms has been removed. Effectively, this allows to
+separate the high- and low-frequency vibrational modes, also in
+disordered systems where lattice-dynamics analysis would be difficult.
+
+The filter is applied in the standard signal-processing approach,
+where the positions of atoms as a function of time are Fourier-transformed
+(producing a position power spectrum), the filter is applied to the spectrum,
+and the modified spectrum is Fourier-transformed back into positions.
+
+Inputs:
+
+- trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
+- frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
+- instrument_resolution: :ref:`configurator-analysis-InstrumentResolutionConfigurator` default=N/A
+- projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
+- trajectory_filter: :ref:`configurator-analysis-TrajectoryFilterConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- weights: :ref:`configurator-analysis-WeightsConfigurator` default=atomic_weight
+- output_files: :ref:`configurator-analysis-OutputTrajectoryConfigurator` default=N/A
+- running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
+
+
 .. _analysis-reference-VanHoveFunctionDistinct:
 
 VanHoveFunctionDistinct
@@ -850,7 +889,9 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
 - r_values: :ref:`configurator-analysis-DistHistCutoffConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
@@ -878,7 +919,9 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
 - r_values: :ref:`configurator-analysis-DistHistCutoffConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
@@ -902,6 +945,7 @@ Inputs:
 - frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
 - interpolation_order: :ref:`configurator-analysis-InterpolationOrderConfigurator` default=N/A
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=N/A
@@ -954,6 +998,7 @@ Inputs:
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - r_values: :ref:`configurator-analysis-DistHistCutoffConfigurator` default=N/A
 - q_values: :ref:`configurator-analysis-RangeConfigurator` default=(0, 500, 1)
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A

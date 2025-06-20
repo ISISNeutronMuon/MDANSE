@@ -34,8 +34,17 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 
 class TrajectoryFilter(IJob):
-    """
-    Design and apply a filter for the atomic trajectories.
+    """Design and apply a filter for the atomic trajectories.
+
+    This job outputs a new trajectory, where part of the vibrational
+    spectrum of atoms has been removed. Effectively, this allows to
+    separate the high- and low-frequency vibrational modes, also in
+    disordered systems where lattice-dynamics analysis would be difficult.
+
+    The filter is applied in the standard signal-processing approach,
+    where the positions of atoms as a function of time are Fourier-transformed
+    (producing a position power spectrum), the filter is applied to the spectrum,
+    and the modified spectrum is Fourier-transformed back into positions.
     """
 
     label = "Trajectory Filter"
@@ -86,9 +95,7 @@ class TrajectoryFilter(IJob):
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
-        """
-        Initialize the input parameters and analysis self variables
-        """
+        """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
         self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
@@ -108,13 +115,13 @@ class TrajectoryFilter(IJob):
         )
 
     def run_step(self, index):
-        """
-        Runs a single step of the job.
+        """Run the filter for a single atom.
 
         Parameters
         ----------
         index : int
             The index of the step.
+
         """
         LOG.debug(f"Running step: {index}")
         trajectory = self.configuration["trajectory"]["instance"]
@@ -133,9 +140,10 @@ class TrajectoryFilter(IJob):
 
         return index, None
 
-    def combine(self, index, x):
-        """
-        Combines returned results of run_step.
+    def combine(self, _index: int, _x: None):
+        """Do nothing.
+
+        Included for compatibility with the IJob workflow.
 
         Parameters
         ----------
@@ -143,14 +151,12 @@ class TrajectoryFilter(IJob):
             The index of the step.
         x : any
             The returned result(s) of run_step
+
         """
         pass
 
     def finalize(self):
-        """
-        Finalizes the calculations (e.g. averaging the total term, output files creations ...).
-        """
-
+        """Write out the new trajectory."""
         # Get filter class and instantiate filter object
         filter_config = json.loads(self.configuration["trajectory_filter"]["value"])
 
@@ -227,7 +233,7 @@ class TrajectoryFilter(IJob):
 
 
 def apply(filter: Filter, trajectories: np.ndarray, apply_offsets: bool) -> np.ndarray:
-    """Applies the filter to the atomic trajectories.
+    """Apply the filter to the atomic trajectories.
 
     Parameter
     ---------
@@ -236,12 +242,14 @@ def apply(filter: Filter, trajectories: np.ndarray, apply_offsets: bool) -> np.n
     trajectories : np.ndarray
         Atomic trajectories array with shape (num atoms, 3, num timesteps).
     apply_offsets : bool
-        If true, we apply an offset to the atomic positions post-filter, representing a correction to preserve initial position.
+        If true, we apply an offset to the atomic positions post-filter, representing
+        a correction to preserve initial position.
 
     Returns
     -------
     np.ndarray
         Filtered atomic trajectories.
+
     """
     output_trajectory_array = np.zeros(trajectories.shape)
 
@@ -275,6 +283,7 @@ def write_filtered_trajectory(
         Coordinates of the filtered atomic trajectories.
     output_trajectory : TrajectoryWriter
         Trajectory writer object to write the output trajectory.
+
     """
     time = parent_configuration["frames"]["time"]
     dt = time[1] - time[0]
@@ -288,7 +297,7 @@ def write_filtered_trajectory(
 
         filtered_configuration = get_output_configuration(
             parent=parent_configuration["trajectory"]["instance"].configuration(
-                parent_configuration["frames"]["value"][0]
+                parent_configuration["frames"]["value"][0],
             ),
             output_chemical_system=output_trajectory.chemical_system,
             output_coordinates=filtered_configuration_coordinates,
@@ -308,7 +317,9 @@ def get_output_configuration(
     output_chemical_system: ChemicalSystem,
     output_coordinates: np.ndarray,
 ):
-    """Returns configuration for filtered trajectory writer, determined by the periodicity of the parent configuration.
+    """Return a configuration for filtered trajectory writer.
+
+    Configuration type depends on the periodicity of the parent configuration.
 
     Parameters
     ----------
@@ -327,7 +338,9 @@ def get_output_configuration(
     """
     if parent.is_periodic:
         return PeriodicRealConfiguration(
-            output_chemical_system, output_coordinates, parent.unit_cell
+            output_chemical_system,
+            output_coordinates,
+            parent.unit_cell,
         )
 
     return RealConfiguration(output_chemical_system, output_coordinates)
