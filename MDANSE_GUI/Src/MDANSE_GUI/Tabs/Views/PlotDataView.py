@@ -13,14 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import time
-from typing import Union
+from __future__ import annotations
 
 from qtpy.QtCore import QMimeData, QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QDrag, QMouseEvent, QStandardItem
 from qtpy.QtWidgets import QAbstractItemView, QApplication, QMenu, QTreeView
 
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem, MDADataStructure
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
@@ -28,6 +28,12 @@ from MDANSE_GUI.Widgets.DataDialog import DataDialog
 
 
 class PlotDataView(QTreeView):
+    """Viewer of the MDA file contents.
+
+    It is used for selecting data from different MDA files that
+    will be plotted together.
+    """
+
     dataset_selected = Signal(object)
     execute_action = Signal(object)
     item_details = Signal(object)
@@ -51,22 +57,13 @@ class PlotDataView(QTreeView):
             return None
         index = self.indexAt(e.pos())
         model = self.model()
-        mda_data_structure = model.inner_object(index)
-        model = PlottingContext()
-        for key in mda_data_structure._file.keys():
-            try:
-                if "main" in mda_data_structure._file[key].attrs["tags"]:
-                    if "partial" in mda_data_structure._file[key].attrs["tags"]:
-                        dataset = SingleDataset(
-                            key, mda_data_structure._file, linestyle="--"
-                        )
-                    else:
-                        dataset = SingleDataset(key, mda_data_structure._file)
-
-                    model.add_dataset(dataset)
-            except KeyError:
-                LOG.error(f"No attribute called Tag found in {key}, skipping")
-        self.fast_plotting_data.emit(model)
+        inner_node = model.inner_object(index)
+        if isinstance(inner_node, MDADataStructure):
+            self.quick_plot_file(inner_node)
+        else:
+            data_nodes = model.itemFromIndex(index).recursive_children()
+            file_node = model.parent_object(index)
+            self.quick_plot_data(data_nodes, file_node)
 
     def mousePressEvent(self, e: QMouseEvent) -> None:
         self.click_position = e.position()
@@ -78,6 +75,8 @@ class PlotDataView(QTreeView):
         index = self.indexAt(event.pos())
         if index.row() == -1:
             # block right click when it's not on a trajectory
+            return
+        if index.parent().data() is not None:
             return
         model = self.model()
         qitem = model.itemFromIndex(index)
@@ -92,11 +91,10 @@ class PlotDataView(QTreeView):
                 packet = text, mda_data_structure.file
             self._data_packet = packet
         menu = QMenu()
-        item = model.itemData(index)
-        self.populateMenu(menu, item)
+        self.populateMenu(menu, index)
         menu.exec_(event.globalPos())
 
-    def populateMenu(self, menu: QMenu, item: QStandardItem):
+    def populateMenu(self, menu: QMenu, index: QModelIndex):
         for action, method in [("Delete", self.deleteNode)]:
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
@@ -105,13 +103,16 @@ class PlotDataView(QTreeView):
     def deleteNode(self):
         model = self.model()
         index = self.currentIndex()
-        mda_data_structure = model.inner_object(index)
+        mda_data_structure = model.parent_object(index)
         try:
             filename = mda_data_structure._file.filename
         except AttributeError:
             filename = mda_data_structure.file
         self.free_name.emit(str(filename))
-        model.removeRow(index.row())
+        parent_node = self.currentIndex()
+        while parent_node.column() > 1:
+            parent_node = parent_node.parent()
+        model.removeRow(parent_node.row())
         self.item_details.emit("")
 
     def on_select_dataset(self, index):
@@ -135,8 +136,65 @@ class PlotDataView(QTreeView):
             except Exception:
                 self.item_details.emit("No additional information included.")
 
+    def quick_plot_file(self, mda_data_structure: MDADataStructure):
+        """Automatically select, format and plot datasets from one file.
+
+        Parameters
+        ----------
+        mda_data_structure : MDADataStructure
+            Object containing and MDA data file.
+
+        """
+        model = PlottingContext()
+        for key in mda_data_structure._file:
+            try:
+                if "main" in mda_data_structure._file[key].attrs["tags"]:
+                    if "partial" in mda_data_structure._file[key].attrs["tags"]:
+                        dataset = SingleDataset(
+                            key, mda_data_structure._file, linestyle="--"
+                        )
+                    else:
+                        dataset = SingleDataset(key, mda_data_structure._file)
+
+                    model.add_dataset(dataset)
+            except KeyError:
+                LOG.error(f"No attribute called Tag found in {key}, skipping")
+        self.fast_plotting_data.emit(model)
+
+    def quick_plot_data(
+        self,
+        data_nodes: list[BasicPlotDataItem],
+        mda_data_structure: MDADataStructure,
+    ):
+        """Plot several datasets in a new plot instance.
+
+        Parameters
+        ----------
+        data_nodes : list[BasicPlotDataItem]
+            Data model items collected for plotting.
+        mda_data_structure : MDADataStructure
+            The common HDF5 file from which the datasets originate.
+
+        """
+        model = PlottingContext()
+        file = mda_data_structure._file
+        for data_node in data_nodes:
+            dataset = SingleDataset(data_node.child_path, file)
+            model.add_dataset(dataset)
+        self.fast_plotting_data.emit(model)
+
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
+        """Respond to an item receiving a click in the view.
+
+        Here it will send the dataset to the DataPlotter model.
+
+        Parameters
+        ----------
+        index : QModelIndex
+            _description_
+
+        """
         model = self.model()
         model_item = model.itemFromIndex(index)
         item_type = model_item._item_type
@@ -161,7 +219,8 @@ class PlotDataView(QTreeView):
         self.item_details.emit(description)  # this should emit the job name
 
     def connect_to_visualiser(
-        self, visualiser: Union[DataPlotter, PlotDataInfo]
+        self,
+        visualiser: DataPlotter | PlotDataInfo,
     ) -> None:
         """Connect to a visualiser.
 
@@ -169,6 +228,7 @@ class PlotDataView(QTreeView):
         ----------
         visualiser : Action or TextInfo
             A visualiser to connect to this view.
+
         """
         if isinstance(visualiser, DataPlotter):
             self.dataset_selected.connect(visualiser.accept_data)
@@ -176,5 +236,5 @@ class PlotDataView(QTreeView):
             self.item_details.connect(visualiser.update_panel)
         else:
             raise NotImplementedError(
-                f"Unable to connect view {type(self)} to visualiser {type(visualiser)}"
+                f"Unable to connect view {type(self)} to visualiser {type(visualiser)}",
             )
