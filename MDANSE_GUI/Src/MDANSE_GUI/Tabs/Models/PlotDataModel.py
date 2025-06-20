@@ -60,9 +60,9 @@ class BasicPlotDataItem(QStandardItem):
         """Return a list composed of this node and all its children."""
         result = [self]
         for child_row in range(self.rowCount()):
-            child = self.takeRow(child_row)
+            child = self.child(child_row, 0)
             if child:
-                result += child[0].recursive_children()
+                result += child.recursive_children()
         return result
 
     def populate(self, data: h5py.File | h5py.Group):
