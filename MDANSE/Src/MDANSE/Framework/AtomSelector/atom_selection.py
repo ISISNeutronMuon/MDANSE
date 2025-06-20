@@ -98,9 +98,9 @@ def select_dummy(
     """
     system = trajectory.chemical_system
     element_list = system.atom_list
-    dummy_types = [
+    dummy_types = {
         type
         for type in set(element_list)
         if trajectory.get_atom_property(type, "dummy")
-    ]
+    }
     return {index for index in system.all_indices if element_list[index] in dummy_types}

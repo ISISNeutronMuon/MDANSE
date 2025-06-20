@@ -32,11 +32,7 @@ traj_2vb1 = os.path.join(
     "Converted",
     "2vb1.mdt"
 )
-traj_with_dummy = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "Converted",
-    "dummy_atoms.mdt"
-)
+traj_with_dummy = Path(__file__).parent / "Converted" / "dummy_atoms.mdt"
 
 @pytest.fixture(scope='module')
 def trajectory(request):
