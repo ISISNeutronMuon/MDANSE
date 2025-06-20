@@ -589,7 +589,7 @@ class MdanseTrajectory:
             except KeyError:
                 if not self.warned_about_complex_numbers:
                     LOG.warning(
-                        "This trajectory file was generated with old MDANSE. If you"
+                        "This trajectory file was generated with old MDANSE. If you "
                         "need complex b, please generate it again.",
                     )
                     self.warned_about_complex_numbers = True
@@ -605,7 +605,7 @@ class MdanseTrajectory:
         value = self._property_cache[(symbol, index)]
         if atom_property == "color":
             value = str_to_num(value)
-            return ";".join(map(str, value.to_bytes(3, 'big')))
+            return ";".join(map(str, int(value).to_bytes(3, "big")))
         if data_type == b"int":
             return int(value)
         if data_type == b"str":

@@ -103,7 +103,13 @@ def find_atoms_in_molecule(
     return result
 
 
-def atomic_trajectory(config: np.ndarray, cell: np.ndarray, rcell: np.ndarray, *, box_coordinates: bool = False) -> np.ndarray:
+def atomic_trajectory(
+    config: np.ndarray,
+    cell: np.ndarray,
+    rcell: np.ndarray,
+    *,
+    box_coordinates: bool = False,
+) -> np.ndarray:
     """For the coordinates of a specific atom, remove all unit cell jumps.
 
     Parameters
