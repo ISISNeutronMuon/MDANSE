@@ -225,7 +225,7 @@ class Trajectory:
         return self._trajectory.to_real_coordinates(box_coordinates, first, last, step)
 
     def read_atomic_trajectory(
-        self, index:int, first:int=0, last:int=None, step:int=1, *, box_coordinates:bool=False
+        self, index: int, first: int = 0, last: int | None = None, step: int = 1, *, box_coordinates: bool = False
     ):
         """Read an atomic trajectory. The trajectory is corrected for box jumps.
 
@@ -584,7 +584,7 @@ class TrajectoryWriter:
             type_dataset = self._h5_file["/atom_database/property_types"]
         if "property_units" not in group:
             unit_dataset = group.create_dataset(
-                "property_units", data=200 * [""], dtype=string_dt
+                "property_units", data=[""] * 200, dtype=string_dt
             )
         else:
             unit_dataset = self._h5_file["/atom_database/property_units"]
@@ -600,7 +600,7 @@ class TrajectoryWriter:
         if "element" in properties.keys():
             if properties["element"] == "dummy":
                 properties["dummy"] = 1
-        new_labels = [str(x) for x in properties.keys()]
+        new_labels = list(properties)
         old_labels = [x.decode("utf-8") for x in label_dataset[:]]
         if ptypes is None:
             ptypes = copy.deepcopy(ATOMS_DATABASE._properties)
@@ -620,7 +620,7 @@ class TrajectoryWriter:
             property_label.decode("utf-8"): index
             for index, property_label in enumerate(label_dataset[:])
         }
-        atom_dataset = group.create_dataset(symbol, data=200 * [-1.0], dtype=complex)
+        atom_dataset = group.create_dataset(symbol, data=[-1.0] * 200, dtype=complex)
         for key, value in properties.items():
             try:
                 numval = complex(value)

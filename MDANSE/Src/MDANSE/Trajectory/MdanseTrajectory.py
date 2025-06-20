@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Optional, Union
 
 import h5py
 import numpy as np
@@ -606,9 +605,7 @@ class MdanseTrajectory:
         value = self._property_cache[(symbol, index)]
         if atom_property == "color":
             value = str_to_num(value)
-            r, value = divmod(value, 65536)
-            g, b = divmod(value, 256)
-            return ";".join([str(int(x)) for x in [r, g, b]])
+            return ";".join(map(str, value.to_bytes(3, 'big')))
         if data_type == b"int":
             return int(value)
         if data_type == b"str":
