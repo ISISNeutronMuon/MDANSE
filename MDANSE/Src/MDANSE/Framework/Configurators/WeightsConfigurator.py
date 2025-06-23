@@ -67,7 +67,6 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             "element",
             "family",
             "group",
-            "series",
             "state",
         ]
         limited_choices = [x for x in full_choices if x not in to_discard]

@@ -15,7 +15,7 @@
 #
 import copy
 import itertools
-import os
+from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Union
 
 if TYPE_CHECKING:
@@ -193,7 +193,7 @@ class SingleDataset:
             Path to the data file from which this data set has been read.
 
         """
-        bare_name = os.path.split(root_name)[-1]
+        bare_name = Path(root_name).name
         self._labels = {
             "minimal": self._name,
             "medium": f"{bare_name}:{self._name}",

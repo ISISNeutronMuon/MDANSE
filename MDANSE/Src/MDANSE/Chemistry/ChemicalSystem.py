@@ -118,7 +118,7 @@ class ChemicalSystem:
             atom_list = [self._atom_types[index] for index in group]
             unique_atoms, counts = np.unique(atom_list, return_counts=True)
             name = "_".join(
-                f"{atom}{count}" for atom, count in zip(unique_atoms, counts),
+                f"{atom}{count}" for atom, count in zip(unique_atoms, counts)
             )
             if name not in self._clusters:
                 self._clusters[name] = [sorted_group]
@@ -163,13 +163,10 @@ class ChemicalSystem:
         set[int]
             An set of matched atom indices.
         """
-        substruct_set = set()
         matches = self.rdkit_mol.GetSubstructMatches(
             Chem.MolFromSmarts(smarts), maxMatches=maxmatches
         )
-        for match in matches:
-            substruct_set.update(match)
-        return substruct_set
+        return {ind for match in matches for ind in match}
 
     @property
     def atom_list(self) -> list[str]:

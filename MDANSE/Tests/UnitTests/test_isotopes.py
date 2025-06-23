@@ -20,7 +20,7 @@ import pytest
 from MDANSE.Chemistry import ATOMS_DATABASE
 
 
-element_list = [atom_symbol for atom_symbol in ATOMS_DATABASE.atoms if all([char.isalpha() for char in atom_symbol])]
+element_list = [atom_symbol for atom_symbol in ATOMS_DATABASE.atoms if atom_symbol.isalpha()]
 monoisotopic = [atom_symbol for atom_symbol in element_list if len(ATOMS_DATABASE.get_isotopes(atom_symbol)) == 1]
 
 @pytest.mark.parametrize('element', monoisotopic)
@@ -54,6 +54,7 @@ def test_b_coherent(element):
     calculated_b_coh = (b_coh_array*abundance_array).sum()
     print(f"{element} {avg_b_coh} {calculated_b_coh}")
     assert np.isclose(avg_b_coh, calculated_b_coh, rtol= 5e-3, atol= 5e-7, equal_nan=True)
+
 
 def test_database_units():
     for key in ATOMS_DATABASE._properties:

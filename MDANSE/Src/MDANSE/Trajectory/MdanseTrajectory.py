@@ -654,10 +654,12 @@ class MdanseTrajectory:
 
     @property
     def chemical_system(self):
-        """Return the chemical system stored in the trajectory.
+        """Return the ChemicalSystem of this trajectory.
+        Returns
+        -------
+        ChemicalSystem
+            Object storing the information about atoms and bonds
 
-        :return: the chemical system
-        :rtype: MDANSE.Chemistry.ChemicalSystem.ChemicalSystem
         """
         return self._chemical_system
 

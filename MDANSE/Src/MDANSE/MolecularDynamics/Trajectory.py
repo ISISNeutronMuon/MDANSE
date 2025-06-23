@@ -406,7 +406,6 @@ averaged_atom_properties = [
     "electron_affinity",
     "atomic_number",
     "group",
-    "series",
 ]
 constant_atom_properties = {
     "equal": 1.0,
@@ -432,7 +431,7 @@ def create_average_atom(
             )
         if property in additive_atom_properties:
             total = np.sum([complex(x[0]) * int(x[1]) for x in temp])
-            total = str(total)
+            total = str_to_num(total)
         elif property in averaged_atom_properties:
             total = sum(complex(x[0]) * int(x[1]) for x in temp) / sum(
                 int(x[1]) for x in temp
