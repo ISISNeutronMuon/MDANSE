@@ -29,9 +29,10 @@ def test_single_isotope(element):
     isotope = ATOMS_DATABASE.get_isotopes(element)[0]
     isotope_dict = ATOMS_DATABASE.get_property_dict(isotope)
     for key in avg_dict:
-        if isinstance(avg_dict[key], (list, dict)):
-            continue
-        if avg_dict[key] == isotope_dict[key]:
+        if (
+            isinstance(avg_dict[key], (list, dict)) 
+            or avg_dict[key] == isotope_dict[key]
+        ):
             continue
         assert np.isclose(avg_dict[key], isotope_dict[key], equal_nan=True)
 
@@ -40,9 +41,10 @@ def test_single_isotope(element):
 def test_b_coherent(element):
     isotopes = ATOMS_DATABASE.get_isotopes(element)
     avg_b_coh = ATOMS_DATABASE.get_atom_property(element, 'b_coherent')
-    if np.isnan(avg_b_coh):
-        return
-    if element in ['Hg', 'Ru', 'Kr', 'Xe', 'Cm', 'Pu']:
+    if (
+        np.isnan(avg_b_coh)
+        or element in {'Hg', 'Ru', 'Kr', 'Xe', 'Cm', 'Pu'}
+    ):
         return
     b_coh_values = [ATOMS_DATABASE.get_atom_property(isotope, 'b_coherent') for isotope in isotopes]
     abundance_values = [ATOMS_DATABASE.get_atom_property(isotope, 'abundance') for isotope in isotopes]

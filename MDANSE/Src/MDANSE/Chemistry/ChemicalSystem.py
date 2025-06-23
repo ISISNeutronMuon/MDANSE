@@ -118,7 +118,7 @@ class ChemicalSystem:
             atom_list = [self._atom_types[index] for index in group]
             unique_atoms, counts = np.unique(atom_list, return_counts=True)
             name = "_".join(
-                [str(unique_atoms[n]) + str(counts[n]) for n in range(len(counts))],
+                f"{atom}{count}" for atom, count in zip(unique_atoms, counts),
             )
             if name not in self._clusters:
                 self._clusters[name] = [sorted_group]
