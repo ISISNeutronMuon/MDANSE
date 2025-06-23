@@ -52,3 +52,7 @@ def test_b_coherent(element):
     calculated_b_coh = (b_coh_array*abundance_array).sum()
     print(f"{element} {avg_b_coh} {calculated_b_coh}")
     assert np.isclose(avg_b_coh, calculated_b_coh, rtol= 5e-3, atol= 5e-7, equal_nan=True)
+
+def test_database_units():
+    for key in ATOMS_DATABASE._properties:
+        assert key in ATOMS_DATABASE._units

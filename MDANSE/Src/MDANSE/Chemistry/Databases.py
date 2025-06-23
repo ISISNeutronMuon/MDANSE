@@ -305,6 +305,8 @@ class AtomsDatabase(_Database):
             The path to the MDANSE atom database. If None, built-in path is used.
 
         """
+        self._properties = defaultdict(lambda: "str")
+        self._units = defaultdict(lambda: "none")
         super()._load(default_database)
 
         self._properties.update(self._data["properties"])
