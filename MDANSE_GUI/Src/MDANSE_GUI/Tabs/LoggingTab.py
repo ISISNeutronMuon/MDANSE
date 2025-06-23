@@ -26,8 +26,8 @@ from MDANSE_GUI.Tabs.Layouts.SinglePanel import SinglePanel
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Widgets.DefaultCombobox import highlight_default_value
 
-log_tab_label = """MDANSE_GUI message log.
-
+log_tab_label = """MDANSE_GUI <b>message log.</b>
+<br><br>
 This tab will display the general logging messages of the graphical interface.
 You can adjust the logging level using the combo box below.
 """

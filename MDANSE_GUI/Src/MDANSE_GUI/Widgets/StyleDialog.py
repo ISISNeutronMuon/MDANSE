@@ -46,16 +46,6 @@ sample_styles = {
     color: rgb(10,200,10);
     padding: 3px;
 }""",
-    "hippie_stylesheet": """QWidget
-{   background-color: qlineargradient(x1:0,y1:0,x2:1,y2:1,stop: 0 #aa1163, stop: 1 #23bb54);
-    border-radius: 10px;
-    border-style: outset;
-    border-width: 3px;
-    border-color: rgb(10,200,50);
-    font: bold 14px;
-    color: rgb(10,200,230);
-    padding: 3px;
-}""",
 }
 
 
@@ -98,7 +88,7 @@ class StyleDialog(QDialog):
         super().__init__(*args, **kwargs)
 
         self._database = None
-
+        self.setWindowTitle("Customise GUI using style sheets (CSS)")
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         self._selector = QComboBox(self)

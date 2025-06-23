@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from pathlib import Path
 from typing import TypeVar
 
 import h5py
@@ -138,7 +139,7 @@ class PlotDataModel(QStandardItemModel):
         else:
             self._nodes[self._next_number] = new_datafile
             new_item = DataFileItem()
-            new_item.setData(f"{filename}", role=Qt.ItemDataRole.DisplayRole)
+            new_item.setData(f"{Path(filename).name}", role=Qt.ItemDataRole.DisplayRole)
             new_item.setData(self._next_number, role=Qt.ItemDataRole.UserRole)
             self._next_number += 1
             self.appendRow(new_item)
