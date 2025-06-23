@@ -61,7 +61,9 @@ def str_to_num(numstr: str) -> float | complex:
 
 
 def color(color_string: str | None = None):
-    """Create a color string for the atom database.
+    """Validate a color string for the atom database.
+
+    Returns the color string for white if the input is None.
 
     Parameters
     ----------
@@ -420,7 +422,9 @@ class AtomsDatabase(_Database):
         symbol = self._data[atom]["symbol"]
 
         return [
-            iname for iname, props in self._data.items() if props["symbol"] == symbol
+            iname
+            for iname, props in self._data.items()
+            if props["symbol"] == symbol and iname != symbol
         ]
 
     @property
@@ -729,9 +733,9 @@ class AtomsDatabase(_Database):
         Parameters
         ----------
         symbol : str
-            _description_
+            Atom symbol (element symbol, followed by mass for isotopes).
         atom_property : str
-            _description_
+            Name of the requested property.
 
         Returns
         -------

@@ -108,10 +108,7 @@ class ChemicalSystem:
 
     def add_labels(self, label_dict: dict[str, list[int]]):
         for key, item in label_dict.items():
-            if key in self._labels:
-                self._labels[key] += item
-            else:
-                self._labels[key] = item
+            self._labels[key] = self._labels.get(key, []) + item
 
     def add_clusters(self, group_list: list[list[int]]):
         for group in group_list:

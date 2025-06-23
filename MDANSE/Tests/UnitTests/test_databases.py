@@ -144,7 +144,7 @@ class TestAtomsDatabase(unittest.TestCase):
         self.assertEqual(["Fe", "H", "H2", "O"], ATOMS_DATABASE.atoms)
 
     def test_get_isotopes_valid(self):
-        self.assertEqual(["H", "H2"], ATOMS_DATABASE.get_isotopes("H"))
+        self.assertEqual(["H2"], ATOMS_DATABASE.get_isotopes("H"))
 
     def test_get_isotopes_unknown_atom(self):
         with self.assertRaises(KeyError):
