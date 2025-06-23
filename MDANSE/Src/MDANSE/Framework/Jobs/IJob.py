@@ -412,7 +412,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         """
         Run the job.
         """
-        if hasattr(self._status, "state"):
+        if isinstance(self._status, JobStatus) and hasattr(self._status, "state"):
             raise RuntimeError(
                 f"Unable to run an instance of job with name {self._name} more than once."
             )
