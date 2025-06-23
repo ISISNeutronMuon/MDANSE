@@ -13,8 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import operator
-from typing import TYPE_CHECKING, Any, Collection, Union, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from MDANSE.Chemistry.Databases import AtomsDatabase
@@ -472,7 +473,7 @@ class TrajectoryWriter:
 
     def __init__(
         self,
-        h5_filename: Union[Path, str],
+        h5_filename: Path | str,
         chemical_system: ChemicalSystem,
         n_steps,
         selected_atoms=None,
@@ -543,8 +544,8 @@ class TrajectoryWriter:
         self,
         symbol: str,
         properties: dict[str, Any],
-        ptypes: Optional[dict[str, str]] = None,
-        punits: Optional[dict[str, str]] = None
+        ptypes: dict[str, str] | None = None,
+        punits: dict[str, str] | None = None
     ):
         """Add the properties of a single atom to the in-file atom database.
 
@@ -889,7 +890,7 @@ class RigidBodyTrajectoryGenerator:
         chemical_entity: list[int],
         reference,
         first: int = 0,
-        last: Optional[int] = None,
+        last: int | None = None,
         step=1,
     ):
         """Constructor.
