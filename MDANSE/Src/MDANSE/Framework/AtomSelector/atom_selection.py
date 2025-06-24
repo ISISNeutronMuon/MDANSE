@@ -77,3 +77,30 @@ def select_atoms(
         new_indices = {index for index in indices if name_list[index] in atom_names}
         selection |= new_indices
     return selection
+
+
+def select_dummy(
+    trajectory: Trajectory,
+    **_kwargs: str,
+) -> set[int]:
+    """Select all atoms with the dummy property.
+
+    Parameters
+    ----------
+    trajectory : Trajectory
+        A trajectory instance to which the selection is applied
+
+    Returns
+    -------
+    set[int]
+        A set of indices which have been selected
+
+    """
+    system = trajectory.chemical_system
+    element_list = system.atom_list
+    dummy_types = {
+        type
+        for type in set(element_list)
+        if trajectory.get_atom_property(type, "dummy")
+    }
+    return {index for index in system.all_indices if element_list[index] in dummy_types}

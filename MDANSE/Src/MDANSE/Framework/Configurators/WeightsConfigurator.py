@@ -108,7 +108,9 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         self["property"] = value
         self.error_status = "OK"
 
-    def get_weights(self, prop: Optional[str] = None):
+    def get_weights(
+        self, *, prop: Optional[str] = None
+    ) -> tuple[dict[str, float], dict[str, float]]:
         """Generate a dictionary of weights.
 
         Parameters
@@ -119,30 +121,31 @@ class WeightsConfigurator(SingleChoiceConfigurator):
 
         Returns
         -------
-        dict[str, float]
+        tuple[dict[str, float], dict[str, float]]
             The dictionary of the weights.
         """
         if not prop:
             prop = self["property"]
 
-        atom_selection_configurator = self._configurable[
-            self._dependencies["atom_selection"]
-        ]
+        atm_select = self._configurable[self._dependencies["atom_selection"]]
 
-        weights = defaultdict(float)
-        for name, elements in itertools.islice(
-            zip(
-                atom_selection_configurator["names"],
-                atom_selection_configurator["elements"],
+        weights = []
+        for n_elements, atm_names, atm_elements in [
+            (atm_select.get_natoms(), atm_select["names"], atm_select["elements"]),
+            (
+                atm_select.get_all_natoms(),
+                atm_select["all_names"],
+                atm_select["all_elements"],
             ),
-            atom_selection_configurator["selection_length"],
-        ):
-            weights[name] += sum(
-                self._trajectory.get_atom_property(element, prop)
-                for element in elements
-            )
+        ]:
+            w = defaultdict(float)
+            for name, elements in zip(atm_names, atm_elements):
+                w[name] += sum(
+                    self._trajectory.get_atom_property(element, prop)
+                    for element in elements
+                )
+            for element, num_atoms in n_elements.items():
+                w[element] /= num_atoms
+            weights.append(w)
 
-        for element, num_atoms in atom_selection_configurator.get_natoms().items():
-            weights[element] /= num_atoms
-
-        return weights
+        return tuple(weights)

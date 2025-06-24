@@ -127,7 +127,10 @@ class StructureFactorFromScatteringFunction(IJob):
         scattering function.
         """
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        norm_natoms = 1.0 / sum(nAtomsPerElement.values())
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = (n_selected / n_total) ** 2
+        norm_natoms = 1.0 / n_total
 
         for pair_str, (label_i, label_j) in self.labels:
             fqt = self.configuration["dcsf_input_file"]["instance"][
@@ -147,14 +150,16 @@ class StructureFactorFromScatteringFunction(IJob):
             self._outputData["ssf_total"][:] += (
                 self._outputData[f"ssf_{pair_str}"][:]
                 * self._outputData[f"ssf_{pair_str}"].scaling_factor
+                / fact
             )
+
+        self._outputData["ssf_total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "ssf",
             "LineOutputVariable",
             dim=2,
-            conc_exp=0.5,
             axis="q",
             units="au",
             main_result=True,

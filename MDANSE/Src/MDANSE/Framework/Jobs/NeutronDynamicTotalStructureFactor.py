@@ -385,13 +385,11 @@ class NeutronDynamicTotalStructureFactor(IJob):
         """
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
 
-        # Compute concentrations
-        nTotalAtoms = 0
-        for val in list(nAtomsPerElement.values()):
-            nTotalAtoms += val
-
-        norm_natoms = 1.0 / nTotalAtoms
+        norm_natoms = 1.0 / n_total
         # Compute coherent functions and structure factor
         for pair_str, (label_i, label_j) in self.pair_labels:
             ele_i = self.configuration["grouping_level"].get_element_from_label(label_i)
@@ -416,11 +414,16 @@ class NeutronDynamicTotalStructureFactor(IJob):
             self._outputData["f(q,t)_coh_total"][:] += (
                 self._outputData[f"f(q,t)_coh_{pair_str}"][:]
                 * self._outputData[f"f(q,t)_coh_{pair_str}"].scaling_factor
+                / fact
             )
             self._outputData["s(q,f)_coh_total"][:] += (
                 self._outputData[f"s(q,f)_coh_{pair_str}"][:]
                 * self._outputData[f"s(q,f)_coh_{pair_str}"].scaling_factor
+                / fact
             )
+
+        self._outputData["f(q,t)_coh_total"].scaling_factor = fact
+        self._outputData["s(q,f)_coh_total"].scaling_factor = fact
 
         # Compute incoherent functions and structure factor
         for label, number in nAtomsPerElement.items():
@@ -437,11 +440,16 @@ class NeutronDynamicTotalStructureFactor(IJob):
             self._outputData["f(q,t)_inc_total"][:] += (
                 self._outputData[f"f(q,t)_inc_{label}"][:]
                 * self._outputData[f"f(q,t)_inc_{label}"].scaling_factor
+                / fact
             )
             self._outputData["s(q,f)_inc_total"][:] += (
                 self._outputData[f"s(q,f)_inc_{label}"][:]
                 * self._outputData[f"s(q,f)_inc_{label}"].scaling_factor
+                / fact
             )
+
+        self._outputData["f(q,t)_inc_total"].scaling_factor = fact
+        self._outputData["s(q,f)_inc_total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
@@ -485,10 +493,12 @@ class NeutronDynamicTotalStructureFactor(IJob):
             self._outputData["f(q,t)_coh_total"][:]
             + self._outputData["f(q,t)_inc_total"][:]
         )
+        self._outputData["f(q,t)_total"].scaling_factor = fact
         self._outputData["s(q,f)_total"][:] = (
             self._outputData["s(q,f)_coh_total"][:]
             + self._outputData["s(q,f)_inc_total"][:]
         )
+        self._outputData["s(q,f)_total"].scaling_factor = fact
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

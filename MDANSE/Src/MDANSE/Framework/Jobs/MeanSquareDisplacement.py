@@ -200,10 +200,21 @@ class MeanSquareDisplacement(IJob):
         for element, number in list(nAtomsPerElement.items()):
             self._outputData[f"msd_{element}"] /= number
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            1,
+        )
         assign_weights(self._outputData, weight_dict, "msd_%s", self.labels)
-        msdTotal = weighted_sum(self._outputData, "msd_%s", self.labels)
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
+
+        msdTotal = weighted_sum(self._outputData, "msd_%s", self.labels) / fact
         self._outputData.add(
             "msd_total",
             "LineOutputVariable",
@@ -212,6 +223,7 @@ class MeanSquareDisplacement(IJob):
             units="nm2",
             main_result=True,
         )
+        self._outputData["msd_total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,

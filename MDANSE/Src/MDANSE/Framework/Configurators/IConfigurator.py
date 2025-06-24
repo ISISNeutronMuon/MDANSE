@@ -13,16 +13,26 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import abc
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
+from warnings import warn
 
 import numpy as np
 from more_itertools import value_chain
 
 from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.MLogging import LOG
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Configurable import Configurable
+
+
+ERROR_LENGTH_MIN = len("OK")
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -36,61 +46,58 @@ class CustomEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
+class ConfiguratorWarning(Warning):
+    """Reports a problem with one of the job inputs.
+
+    This warning is produced when the job is still able to execute,
+    but there are reasons to believe that the results may be scientifically
+    incorrect.
+    """
+
+
 class ConfiguratorError(Error):
-    """
-    This class handles any exception related to Configurator-derived object
-    """
+    """Error raised by a job input parser."""
 
-    def __init__(self, message, configurator=None):
+    def __init__(self, message: str, configurator: IConfigurator = None):
+        """Store the error message and configurator reference.
+
+        Parameters
+        ----------
+        message : str
+            Error message related to one of the job inputs
+        configurator : IConfigurator, optional
+            Reference to the input parser producing the error, by default None
+
         """
-        Initializes the the object.
-
-        :param message: the exception message
-        :type message: str
-        :param configurator: the configurator in which the exception was raised
-        :type configurator: an instance or derived instance of a MDANSE.Framework.Configurators.Configurator object
-        """
-
         self._message = message
-        self._configurator = configurator
+        self.configurator = configurator
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return a readable summary of the error as string.
+
+        Returns
+        -------
+        str
+            Text and source of the error.
+
         """
-        Returns the informal string representation of this object.
-
-        :return: the informal string representation of this object
-        :rtype: str
-        """
-
-        if self._configurator is not None:
+        if self.configurator is not None:
             self._message = (
-                f"Configurator: {self._configurator.name!r} --> {self._message}"
+                f"Configurator: {self.configurator.name!r} --> {self._message}"
             )
 
         return self._message
 
-    @property
-    def configurator(self):
-        """
-        Returns the configurator in which the exception was raised
-
-        :return: the configurator in which the exception was raised
-        :rtype: an instance or derived instance of a MDANSE.Framework.Configurators.Configurator object
-        """
-        return self._configurator
-
 
 class IConfigurator(dict, metaclass=SubclassFactory):
-    """
-    This class implements the base class for configurator objects. A configurator object is a dictionary-derived object that is used
-    to configure one item of a given configuration. Once the input value given for that item is configured, the dictionary is updated
-    with keys/values providing information about this item.
+    """The base class for configurator objects.
 
-    A configurator is not designed to be used as a stand-alone object. It should be used within the scope of a Configurable object that
-    will store a complete configuration for a given task (e.g. job, Q vectors, instrument resolution ...).
+    A configurator is an input parser for a variable required by any subclass
+    of Configurable.
 
-    Usually, configurator objects are self-consistent but for complex ones, it can happen that they depends on other configurators of the
-    configuration.
+    In some cases, a configurator may depend on another configurator.
+    A 'dependencies' keyword argument can be used to list the other
+    configurators that the current one will need to access.
     """
 
     _default = None
@@ -100,24 +107,15 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
     _doc_ = "undocumented"
 
-    def __init__(self, name, **kwargs):
-        """
-        Initializes a configurator object.
+    def __init__(self, name: str, **kwargs):
+        """Create an input parser for an MDANSE job input parameter.
 
-        :param name: the name of this configurator.
-        :type name: str
-        :param dependencies: the other configurators on which this configurator depends on to be configured. \
-        This has to be input as a dictionary that maps the name under which the dependency will be used within \
-        the configurator implementation to the actual name of the configurator on which this configurator is depending on.
-        :type dependencies: (str,str)-dict
-        :param default: the default value of this configurator.
-        :type default: any python object
-        :param label: the label of the panel in which this configurator will be inserted in the MDANSE GUI.
-        :type label: str
-        :param widget: the configurator widget that corresponds to this configurator.
-        :type widget: str
-        """
+        Parameters
+        ----------
+        name : str
+            the key of this object in the Configurable dictionary
 
+        """
         self._name = name
 
         self._printable_attributes = [
@@ -155,15 +153,17 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         self._valid = True
 
         self._error_status = "OK"
+        self._warning_status = ""
 
         self._original_input = ""
 
     def __str__(self) -> str:
+        """Output all the configurator attributes and dict entries as text."""
         return "\n".join(
             value_chain(
                 "",
                 (
-                    f"{label}={str(getattr(self, label, 'Not set'))}"
+                    f"{label}={getattr(self, label, 'Not set')}"
                     for label in self._printable_attributes
                 ),
                 (f"{key}={str(self.get(key, 'Not set'))}" for key in self),
@@ -235,26 +235,47 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
     @property
     def error_status(self):
+        """Details of the configuration error.
+
+        It is set to 'OK' if no errors occurred.
+        """
         return self._error_status
 
     @error_status.setter
     def error_status(self, error_text: str):
-        """Sets the string explaining why the current input
-        cannot be accepted.
+        """Set the error description string.
 
-        If the string is longer than 'OK', the self._valid
+        If the string is longer than 'OK', the self.valid
         flag is set to False.
 
         Parameters
         ----------
         error_text : str
             Text explaining why the current input is invalid
+
         """
         self._error_status = error_text
-        if len(self._error_status) > 2:
-            self._valid = False
-        else:
-            self._valid = True
+        self._valid = error_text == "OK"
+
+    @property
+    def warning_status(self):
+        """Text describing the potential problems with this input value."""
+        return self._warning_status
+
+    @warning_status.setter
+    def warning_status(self, warning_text: str):
+        """Store the warning text and emit a Python warning.
+
+        Parameters
+        ----------
+        warning_text : str
+            Short summary of the problem with this job input.
+
+        """
+        self._warning_status = warning_text
+        if warning_text:
+            LOG.warning(warning_text)
+            warn(warning_text, ConfiguratorWarning)
 
     @property
     def optional(self):

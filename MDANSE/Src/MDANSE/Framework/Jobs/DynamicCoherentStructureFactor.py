@@ -334,8 +334,15 @@ class DynamicCoherentStructureFactor(IJob):
         )
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 2, conc_exp=0.5)
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            2,
+            conc_exp=0.5,
+        )
         assign_weights(self._outputData, weight_dict, "f(q,t)_%s", self.labels)
         assign_weights(self._outputData, weight_dict, "s(q,f)_%s", self.labels)
         if self.add_ideal_results:
@@ -360,9 +367,15 @@ class DynamicCoherentStructureFactor(IJob):
                     axis=1,
                 )
 
-        self._outputData["f(q,t)_total"][:] = weighted_sum(
-            self._outputData, "f(q,t)_%s", self.labels
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
+
+        self._outputData["f(q,t)_total"][:] = (
+            weighted_sum(self._outputData, "f(q,t)_%s", self.labels) / fact
         )
+        self._outputData["f(q,t)_total"].scaling_factor = fact
+
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "f(q,t)",
@@ -373,9 +386,11 @@ class DynamicCoherentStructureFactor(IJob):
             units="au",
         )
 
-        self._outputData["s(q,f)_total"][:] = weighted_sum(
-            self._outputData, "s(q,f)_%s", self.labels
+        self._outputData["s(q,f)_total"][:] = (
+            weighted_sum(self._outputData, "s(q,f)_%s", self.labels) / fact
         )
+        self._outputData["s(q,f)_total"].scaling_factor = fact
+
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "s(q,f)",
@@ -389,9 +404,10 @@ class DynamicCoherentStructureFactor(IJob):
         )
 
         if self.add_ideal_results:
-            self._outputData["s(q,f)_ideal_total"][:] = weighted_sum(
-                self._outputData, "s(q,f)_ideal_%s", self.labels
+            self._outputData["s(q,f)_ideal_total"][:] = (
+                weighted_sum(self._outputData, "s(q,f)_ideal_%s", self.labels) / fact
             )
+            self._outputData["s(q,f)_ideal_total"].scaling_factor = fact
             self.configuration["grouping_level"].add_grouped_totals(
                 self._outputData,
                 "s(q,f)_ideal",

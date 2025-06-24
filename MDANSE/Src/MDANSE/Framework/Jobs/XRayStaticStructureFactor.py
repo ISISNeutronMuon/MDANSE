@@ -268,7 +268,29 @@ class XRayStaticStructureFactor(DistanceHistogram):
                 self.configuration["atom_selection"]["elements"],
             )
         }
-        weight_dict = get_weights(asf, nAtomsPerElement, 2)
+        all_asf = {
+            name: atomic_scattering_factor(
+                ele[0],
+                self._outputData["q"],
+                self.configuration["trajectory"]["instance"],
+            )
+            for name, ele in zip(
+                self.configuration["atom_selection"]["all_names"],
+                self.configuration["atom_selection"]["all_elements"],
+            )
+        }
+        weight_dict = get_weights(
+            asf,
+            all_asf,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            2,
+        )
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = (n_selected / n_total) ** 2
+
         if self.intra:
             assign_weights(
                 self._outputData, weight_dict, "xssf_intra_%s", self.labels_intra
@@ -279,11 +301,13 @@ class XRayStaticStructureFactor(DistanceHistogram):
             xssfIntra = weighted_sum(
                 self._outputData, "xssf_intra_%s", self.labels_intra
             )
-            self._outputData["xssf_intra_total"][:] = xssfIntra
+            self._outputData["xssf_intra_total"][:] = xssfIntra / fact
             xssfInter = weighted_sum(self._outputData, "xssf_inter_%s", self.labels)
-            self._outputData["xssf_inter_total"][:] = xssfInter
-            self._outputData["xssf_total"][:] = xssfIntra + xssfInter
-
+            self._outputData["xssf_inter_total"][:] = xssfInter / fact
+            self._outputData["xssf_total"][:] = (xssfIntra + xssfInter) / fact
+            self._outputData["xssf_intra_total"].scaling_factor = fact
+            self._outputData["xssf_inter_total"].scaling_factor = fact
+            self._outputData["xssf_total"].scaling_factor = fact
             for i in ["_intra", "_inter", ""]:
                 self.configuration["grouping_level"].add_grouped_totals(
                     self._outputData,
@@ -299,9 +323,10 @@ class XRayStaticStructureFactor(DistanceHistogram):
 
         else:
             assign_weights(self._outputData, weight_dict, "xssf_%s", self.labels)
-            self._outputData["xssf_total"][:] = weighted_sum(
-                self._outputData, "xssf_%s", self.labels
+            self._outputData["xssf_total"][:] = (
+                weighted_sum(self._outputData, "xssf_%s", self.labels) / fact
             )
+            self._outputData["xssf_total"].scaling_factor = fact
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

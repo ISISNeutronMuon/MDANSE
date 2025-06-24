@@ -513,9 +513,7 @@ def test_convolution(
     assert len(fw) == len(uw)
 
     # Calculate differences between U(w)H(w) and F(w)
-    error = mean_absolute_error(
-        normalise(model, numerator=100), normalise(fw, model, numerator=100)
-    )
+    error = mean_absolute_error(model, fw)
     assert np.isclose(error, 0, atol=TOLERANCE)
 
 

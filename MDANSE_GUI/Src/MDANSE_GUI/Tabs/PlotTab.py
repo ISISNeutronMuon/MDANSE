@@ -27,7 +27,8 @@ from MDANSE_GUI.Tabs.Views.PlotDetailsView import PlotDetailsView
 from MDANSE_GUI.Tabs.Visualisers.PlotHolder import PlotHolder
 from MDANSE_GUI.Tabs.Visualisers.PlotSettings import PlotSettings
 
-label_text = """This tab manages a single plot.
+label_text = """<b>View and customise the existing plots.</b>
+<br><br>
 You can change the contents and appearance of the plot
 here.
 """

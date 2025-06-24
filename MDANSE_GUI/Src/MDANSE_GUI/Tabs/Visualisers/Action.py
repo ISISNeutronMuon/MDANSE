@@ -328,6 +328,7 @@ class Action(QWidget):
             self.layout.addWidget(buttonbase)
             self._widgets_in_layout["button_base"] = buttonbase
         self.apply_instrument()
+        self.allow_execution()
 
     def check_inputs(self):
         configured = False
@@ -410,14 +411,26 @@ class Action(QWidget):
     @Slot()
     def allow_execution(self):
         allow = True
+        has_warning = False
         for widget in self._widgets:
             if not widget._configurator.valid:
                 allow = False
+                widget.mark_error(widget._configurator.error_status, silent=True)
+            has_warning = has_warning or widget.has_warning
         if self.execute_button is not None:
-            if allow:
-                self.execute_button.setEnabled(True)
+            self.execute_button.setEnabled(allow)
+            if has_warning:
+                self.execute_button.setStyleSheet(
+                    "QWidget { background-color:rgb(220,210,30); font-weight: bold }"
+                )
+                self.execute_button.setToolTip(
+                    "Warning(s) found in input widgets above."
+                )
             else:
-                self.execute_button.setEnabled(False)
+                self.execute_button.setStyleSheet("QWidget { }")
+                self.execute_button.setToolTip(
+                    "Launch the job using the current parameters."
+                )
         if self.post_execute_checkbox is not None:
             if self._job_name == "AverageStructure":
                 self.post_execute_checkbox.setEnabled(False)

@@ -16,6 +16,11 @@
 import numpy as np
 from numpy.typing import ArrayLike
 
+CELL_SIZE_LIMIT = 1e-9
+NO_CELL = "Unit cell definition is missing. Add it using TrajectoryEditor."
+BAD_CELL = "Unit cell definition is invalid. Correct it using TrajectoryEditor."
+CHANGING_CELL = "Unit cell definition changes during the simulation. MANY ANALYSIS TYPES WILL PRODUCE WRONG RESULTS."
+
 
 class UnitCell:
     """

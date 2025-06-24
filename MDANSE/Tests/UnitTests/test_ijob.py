@@ -54,7 +54,6 @@ ALL_JOBS = [
     "DCD",
     "CP2K",
     "Forcite",
-    "Discover",
     "DL_POLY",
     "Gromacs",
     "ImprovedASE",
@@ -66,7 +65,6 @@ ALL_JOBS = [
     "NAMD",
     "XPLOR",
     "DFTB",
-    "DMol",
     "Infrared",
 ]
 

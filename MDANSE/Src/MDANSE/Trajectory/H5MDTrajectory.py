@@ -33,7 +33,13 @@ from MDANSE.MolecularDynamics.Configuration import (
 from MDANSE.MolecularDynamics.TrajectoryUtils import (
     atomic_trajectory,
 )
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.MolecularDynamics.UnitCell import (
+    BAD_CELL,
+    CELL_SIZE_LIMIT,
+    CHANGING_CELL,
+    NO_CELL,
+    UnitCell,
+)
 
 
 class H5MDTrajectory:
@@ -48,6 +54,7 @@ class H5MDTrajectory:
         :param h5_filename: the trajectory filename
         :type h5_filename: str
         """
+        self.unit_cell_warning = ""
 
         self._h5_filename = Path(h5_filename)
 
@@ -270,6 +277,7 @@ class H5MDTrajectory:
             cells = self._h5_file["/particles/all/box/edges/value"][:] * conv_factor
         except KeyError:
             self._unit_cells = None
+            self.unit_cell_warning = NO_CELL
         else:
             if cells.ndim > 1:
                 for cell in cells:
@@ -283,9 +291,17 @@ class H5MDTrajectory:
                         )
                     uc = UnitCell(temp_array)
                     self._unit_cells.append(uc)
+                    if not self.unit_cell_warning and uc.volume < CELL_SIZE_LIMIT:
+                        self.unit_cell_warning = BAD_CELL
             else:
                 temp_array = np.diag(cells)
                 self._unit_cells.append(UnitCell(temp_array))
+        if not self.unit_cell_warning:
+            reference_array = self._unit_cells[0].direct
+            for uc in self._unit_cells[1:]:
+                if not np.allclose(reference_array, uc.direct):
+                    self.unit_cell_warning = CHANGING_CELL
+                    return
 
     def time(self):
         try:

@@ -32,7 +32,13 @@ from MDANSE.MolecularDynamics.Configuration import (
 from MDANSE.MolecularDynamics.TrajectoryUtils import (
     atomic_trajectory,
 )
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.MolecularDynamics.UnitCell import (
+    BAD_CELL,
+    CELL_SIZE_LIMIT,
+    CHANGING_CELL,
+    NO_CELL,
+    UnitCell,
+)
 
 
 class MdanseTrajectory:
@@ -56,6 +62,7 @@ class MdanseTrajectory:
         self._data_types = {}
         self._property_cache = {}
 
+        self.unit_cell_warning = ""
         self._h5_filename = Path(h5_filename)
 
         self._h5_file = h5py.File(self._h5_filename, "r")
@@ -253,6 +260,16 @@ class MdanseTrajectory:
             self._unit_cells = [UnitCell(uc) for uc in self._h5_file["unit_cell"][:]]
         else:
             self._unit_cells = None
+            self.unit_cell_warning = NO_CELL
+        if not self.unit_cell_warning:
+            if self._unit_cells[0].volume < CELL_SIZE_LIMIT:
+                self.unit_cell_warning = BAD_CELL
+                return
+            reference_array = self._unit_cells[0].direct
+            for uc in self._unit_cells[1:]:
+                if not np.allclose(reference_array, uc.direct):
+                    self.unit_cell_warning = CHANGING_CELL
+                    return
 
     def time(self):
         """Return the time array for all the frames."""

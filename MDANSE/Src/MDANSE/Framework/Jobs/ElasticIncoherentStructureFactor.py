@@ -204,12 +204,24 @@ class ElasticIncoherentStructureFactor(IJob):
         for element, number in list(nAtomsPerElement.items()):
             self._outputData[f"eisf_{element}"][:] /= number
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "eisf_%s", self.labels)
-        self._outputData["eisf_total"][:] = weighted_sum(
-            self._outputData, "eisf_%s", self.labels
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            1,
         )
+        assign_weights(self._outputData, weight_dict, "eisf_%s", self.labels)
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
+
+        self._outputData["eisf_total"][:] = (
+            weighted_sum(self._outputData, "eisf_%s", self.labels) / fact
+        )
+        self._outputData["eisf_total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
