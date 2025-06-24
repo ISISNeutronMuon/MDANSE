@@ -101,8 +101,10 @@ class ScatteringLengthDensityProfile(IJob):
             element: [
                 trajectory.get_atom_property(element, "b_coherent"),
                 trajectory.get_atom_property(element, "b_incoherent"),
-                np.sqrt(trajectory.get_atom_property(element, "xs_scattering"))
-                / (4 * np.pi),
+                10
+                * np.sqrt(
+                    trajectory.get_atom_property(element, "xs_scattering") / (4 * np.pi)
+                ),
             ]
             for element in self._elements
         }
@@ -132,7 +134,7 @@ class ScatteringLengthDensityProfile(IJob):
                 axis="r",
                 units="1e-6 / ang2",
                 main_result=True,
-                partial_result=component != "total",
+                partial_result=component != "coherent",
             )
 
         self._extent = 0.0
@@ -166,7 +168,7 @@ class ScatteringLengthDensityProfile(IJob):
         axis_length = np.sqrt(np.sum(axis**2))
         self._extent += axis_length
 
-        slice_volume = conf.unit_cell.volume / self._n_bins
+        slice_volume_ang3 = 1e3 * conf.unit_cell.volume / self._n_bins
 
         dp_per_frame = {}
 
@@ -177,7 +179,7 @@ class ScatteringLengthDensityProfile(IJob):
                 range=(0.0, 1.0),
             )
 
-        return index, (slice_volume, dp_per_frame)
+        return index, (slice_volume_ang3, dp_per_frame)
 
     def combine(self, index: int, data: tuple[float, dict[str, np.ndarray]]) -> None:
         """Combine results together.
@@ -225,7 +227,7 @@ class ScatteringLengthDensityProfile(IJob):
         self._outputData["r"][:] = (r_values[1:] + r_values[:-1]) / 2
 
         for component in ["coherent", "incoherent", "total"]:
-            self._outputData[f"sldp_{component}"] /= self.numberOfSteps
+            self._outputData[f"sldp_{component}"] *= 1e6 / self.numberOfSteps
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
