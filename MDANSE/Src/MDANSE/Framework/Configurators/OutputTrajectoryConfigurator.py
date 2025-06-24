@@ -27,8 +27,13 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 class OutputTrajectoryConfigurator(IConfigurator):
     """Specifies how a trajectory should be output to a file.
 
-    Allows to define the path to the file, precision of the floating point numbers,
-    HDF5 chunk size and compression of the HDF5 datasets.
+    Allows to define:
+
+    - path to the file,
+    - precision of the floating point numbers,
+    - HDF5 chunk size,
+    - compression applied to the HDF5 datasets
+    - logging level of the converter run.
 
     For trajectories, MDANSE supports only the MDT format (HDF5).
     """

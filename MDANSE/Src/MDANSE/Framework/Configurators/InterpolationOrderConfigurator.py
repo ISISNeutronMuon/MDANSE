@@ -20,12 +20,12 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
     """Specifies the order of a numerical derivative used for interpolation.
 
     Normally it is used for calculating atom velocities from their positions.
-    Values from 1 to 5 are allowed. If exact velocities are provided in the
+    Values from 1 to 5 are allowed. If MD engine velocities are provided in the
     trajectory file, you can choose to use them by setting this to 0.
 
     The velocities calculated from atom positions have a tendency to be
-    underestimated compared to the real values in the simulation, and the
-    error in the calculation increases quickly with the size of the trajectory
+    underestimated compared to the values used by the MD engine in the simulation,
+    and the error in the calculation increases quickly with the size of the trajectory
     time step.
 
     """

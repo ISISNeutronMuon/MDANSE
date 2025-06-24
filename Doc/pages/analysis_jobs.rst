@@ -421,9 +421,11 @@ Infrared
 
 Calculates the infrared spectrum of a system of molecules.
 
-The infrared spectrum is a derivative of the dipole autocorrelation function.
+The infrared spectrum is calculated as the autocorrelation of the derivative
+the molecular dipole moments.
+
 This analysis requires molecules to be defined in the system,
-and partial charges to be set to non-zero values.
+and partial charges to be set to non-zero values.    
 
 Inputs:
 
@@ -743,8 +745,8 @@ StaticStructureFactor
 
 Computes the static structure factor for a set of atoms.
 
-The static structure factor is calculated from the pair distribution function.
-The result is defined as S(q) = F_coh(q, t = 0).
+The static structure factor is calculated as a Fourier transform of the partial pair
+distribution function (following the Faber-Ziman definition).
 
 Inputs:
 

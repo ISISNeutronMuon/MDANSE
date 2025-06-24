@@ -203,8 +203,13 @@ default=('OUTPUT_TRAJECTORY', 64, 128, 'none', 'no logs')
 
 Specifies how a trajectory should be output to a file.
 
-Allows to define the path to the file, precision of the floating point numbers,
-HDF5 chunk size and compression of the HDF5 datasets.
+Allows to define:
+
+- path to the file,
+- precision of the floating point numbers,
+- HDF5 chunk size,
+- compression applied to the HDF5 datasets
+- logging level of the converter run.
 
 For trajectories, MDANSE supports only the MDT format (HDF5).
 
@@ -464,12 +469,12 @@ default=3
 Specifies the order of a numerical derivative used for interpolation.
 
 Normally it is used for calculating atom velocities from their positions.
-Values from 1 to 5 are allowed. If exact velocities are provided in the
+Values from 1 to 5 are allowed. If MD engine velocities are provided in the
 trajectory file, you can choose to use them by setting this to 0.
 
 The velocities calculated from atom positions have a tendency to be
-underestimated compared to the real values in the simulation, and the
-error in the calculation increases quickly with the size of the trajectory
+underestimated compared to the values used by the MD engine in the simulation,
+and the error in the calculation increases quickly with the size of the trajectory
 time step.
 
 
@@ -511,21 +516,22 @@ default=('OUTPUT_FILENAME', ['MDAFormat', 'TextFormat', 'FileInMemory'], 'no log
 
 Allows the user to choose the output file for writing.
 
-This configurator allows to define the output directory,
-the basename, and the format(s) of the output file(s)
-resulting from an analysis.
+This configurator allows to define:
 
-Once configured, this configurator will provide a list of files
-built by joining the given output directory, the
-basename and the extensions corresponding to the input file formats.
+- output directory and the base file name,
+- format(s) of the output file(s),
+- logging level of the analysis run.
+
+The list of output files is built by joining the given output directory, the
+base file name and the extensions corresponding to the input file formats.
 
 For analysis, MDANSE currently supports:
+
 1. MDAFormat - an HDF5 file written to the disk,
 2. TextFormat - a tar file containing a text file for each array,
 3. FileInMemory - an HDF5 data object NOT written to the disk.
+
 FileInMemory is not available when running from the GUI.
-To define a new output file format for an analysis, you must inherit
-from MDANSE.Framework.Formats.IFormat.IFormat interface.
 
 
 .. _configurator-analysis-OutputStructureConfigurator:
@@ -533,17 +539,16 @@ from MDANSE.Framework.Formats.IFormat.IFormat interface.
 OutputStructureConfigurator
 ---------------------------
 
-default=('OUTPUT_FILENAME', 'vasp')
+default=('OUTPUT_FILENAME', 'vasp', "no logs")
 
 
-This configurator allows to define the output directory, the basename, and the format(s) of the output file(s)
-resulting from an analysis.
+Defines the name of the output (average) structure file.
 
-Once configured, this configurator will provide a list of files built by joining the given output directory, the
-basename and the extensions corresponding to the input file formats.
+Allows to define:
 
-For analysis, MDANSE currently supports only the HDF and Text formats. To define a new output file format
-for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
+- output directory and file name,
+- output structure file format (supported by ASE io module),
+- logging level of the analysis run.
 
 
 .. _configurator-analysis-OutputTrajectoryConfigurator:
@@ -555,8 +560,13 @@ default=('OUTPUT_TRAJECTORY', 64, 128, 'none', 'no logs')
 
 Specifies how a trajectory should be output to a file.
 
-Allows to define the path to the file, precision of the floating point numbers,
-HDF5 chunk size and compression of the HDF5 datasets.
+Allows to define:
+
+- path to the file,
+- precision of the floating point numbers,
+- HDF5 chunk size,
+- compression applied to the HDF5 datasets
+- logging level of the converter run.
 
 For trajectories, MDANSE supports only the MDT format (HDF5).
 

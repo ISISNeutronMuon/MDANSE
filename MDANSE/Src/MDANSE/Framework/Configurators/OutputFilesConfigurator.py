@@ -25,21 +25,22 @@ from MDANSE.Framework.Formats.IFormat import IFormat
 class OutputFilesConfigurator(IConfigurator):
     """Allows the user to choose the output file for writing.
 
-    This configurator allows to define the output directory,
-    the basename, and the format(s) of the output file(s)
-    resulting from an analysis.
+    This configurator allows to define:
 
-    Once configured, this configurator will provide a list of files
-    built by joining the given output directory, the
-    basename and the extensions corresponding to the input file formats.
+    - output directory and the base file name,
+    - format(s) of the output file(s),
+    - logging level of the analysis run.
+
+    The list of output files is built by joining the given output directory, the
+    base file name and the extensions corresponding to the input file formats.
 
     For analysis, MDANSE currently supports:
+
     1. MDAFormat - an HDF5 file written to the disk,
     2. TextFormat - a tar file containing a text file for each array,
     3. FileInMemory - an HDF5 data object NOT written to the disk.
+
     FileInMemory is not available when running from the GUI.
-    To define a new output file format for an analysis, you must inherit
-    from MDANSE.Framework.Formats.IFormat.IFormat interface.
     """
 
     log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
