@@ -30,7 +30,7 @@ class Infrared(IJob):
     the molecular dipole moments.
 
     This analysis requires molecules to be defined in the system,
-    and partial charges to be set to non-zero values.    
+    and partial charges to be set to non-zero values.
     """
 
     enabled = True
