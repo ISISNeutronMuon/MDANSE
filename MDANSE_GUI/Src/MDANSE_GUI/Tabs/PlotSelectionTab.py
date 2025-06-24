@@ -28,10 +28,12 @@ from MDANSE_GUI.Tabs.Views.PlotDataView import PlotDataView
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
 
-label_text = """Here you can create plots of specific
-data sets. Load the files and assign the data sets
-to a plot. The plotting interface will appear
-in a new tab of the interface.
+label_text = """Load files and <b>assign data sets
+to a plot.</b>
+<br><br>
+The plots created or updated using the buttons below
+will <b>appear in the next tab.</b>
+<br><br>
 DOUBLE CLICK FILE FOR FAST PLOTTING
 """
 

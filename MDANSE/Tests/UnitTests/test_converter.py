@@ -511,6 +511,7 @@ def test_lammps_ix_unwrap(tmp_path, files):
 
     parameters["trajectory_file"] = DATA_DIR / files[1]
     parameters["output_files"] = (out_2, 64, 128, "none", "INFO")
+    converter = Converter.create("LAMMPS")
     converter.run(parameters, status=True)
 
     compare_hdf5(out_1_name, out_2_name, ("/configuration/coordinates",), atol=1e-4)

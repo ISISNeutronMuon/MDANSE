@@ -1,11 +1,12 @@
 
 import os
 
+from pathlib import Path
 import pytest
 import numpy as np
 
 from MDANSE.Framework.AtomSelector.general_selection import select_all, select_none, invert_selection
-from MDANSE.Framework.AtomSelector.atom_selection import select_atoms
+from MDANSE.Framework.AtomSelector.atom_selection import select_atoms, select_dummy
 from MDANSE.Framework.AtomSelector.molecule_selection import select_molecules
 from MDANSE.Framework.AtomSelector.group_selection import select_labels, select_pattern
 from MDANSE.Framework.AtomSelector.spatial_selection import select_positions, select_sphere
@@ -32,7 +33,7 @@ traj_2vb1 = os.path.join(
     "Converted",
     "2vb1.mdt"
 )
-
+traj_with_dummy = Path(__file__).parent / "Converted" / "dummy_atoms.mdt"
 
 @pytest.fixture(scope='module')
 def trajectory(request):
@@ -64,6 +65,14 @@ def test_select_all(trajectory):
 def test_select_none(trajectory):
     selection = select_none(trajectory)
     assert len(selection) == 0
+
+
+def test_select_dummy():
+    trajectory = Trajectory(traj_with_dummy)
+    dummy_selection = select_dummy(trajectory)
+    full_selection = select_all(trajectory)
+    assert len(full_selection) == 5000
+    assert len(dummy_selection) == 500
 
 
 @pytest.mark.parametrize("trajectory", [short_traj, mdmc_traj, com_traj], indirect=True)
