@@ -18,7 +18,6 @@ import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
 class ScatteringLengthDensityProfileError(Error):
@@ -64,15 +63,6 @@ class ScatteringLengthDensityProfile(IJob):
         {"choices": ["a", "b", "c"], "default": "c"},
     )
     settings["dr"] = ("FloatConfigurator", {"default": 0.01, "mini": 1.0e-9})
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-            }
-        },
-    )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
@@ -124,8 +114,15 @@ class ScatteringLengthDensityProfile(IJob):
                 (self._n_bins,),
                 axis="r",
                 units="1 / ang3",
-                main_result=True,
             )
+
+        self._outputData.add(
+            "dp_total",
+            "LineOutputVariable",
+            (self._n_bins,),
+            axis="r",
+            units="1 / ang3",
+        )
 
         for component in ["coherent", "incoherent", "total"]:
             self._outputData.add(
@@ -135,6 +132,7 @@ class ScatteringLengthDensityProfile(IJob):
                 axis="r",
                 units="1e-6 / ang2",
                 main_result=True,
+                partial_result=component != "total",
             )
 
         self._extent = 0.0
@@ -199,7 +197,7 @@ class ScatteringLengthDensityProfile(IJob):
             slen_dict = self.scattering_lengths[element]
             for nb, component in enumerate(["coherent", "incoherent", "total"]):
                 self._outputData[f"sldp_{component}"] += (
-                    slen_dict[element][nb] * hist / slice_volume
+                    slen_dict[nb] * hist / slice_volume
                 )
 
     def finalize(self) -> None:
@@ -211,32 +209,20 @@ class ScatteringLengthDensityProfile(IJob):
 
         for element in n_atoms_per_element:
             self._outputData[f"dp_{element}"] /= self.numberOfSteps
-
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(
-            selected_weights,
-            all_weights,
-            n_atoms_per_element,
-            self.configuration["atom_selection"].get_all_natoms(),
-            1,
-        )
-        assign_weights(self._outputData, weight_dict, "dp_%s", self.labels)
+            self._outputData["dp_total"] += self._outputData[f"dp_{element}"]
 
         n_selected = sum(n_atoms_per_element.values())
         n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
         fact = n_selected / n_total
 
-        dp_total = weighted_sum(self._outputData, "dp_%s", self.labels) / fact
-        self._outputData.add(
-            "dp_total", "LineOutputVariable", dp_total, axis="r", units="au"
-        )
-        self._outputData["dp_total"].scaling_factor = fact
+        self._indices_per_element
 
-        r_values = np.linspace(0, self._extent, self._n_bins + 1)
+        for dset in ["dp_total", "sldp_coherent", "sldp_incoherent", "sldp_total"]:
+            self._outputData[dset] /= fact
+            self._outputData[dset].scaling_factor = fact
+
+        r_values = np.linspace(0, self._extent / self.numberOfSteps, self._n_bins + 1)
         self._outputData["r"][:] = (r_values[1:] + r_values[:-1]) / 2
-
-        for element in self._elements:
-            self._outputData[f"dp_{element}"] /= self.numberOfSteps
 
         for component in ["coherent", "incoherent", "total"]:
             self._outputData[f"sldp_{component}"] /= self.numberOfSteps
