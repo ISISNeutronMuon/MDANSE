@@ -24,6 +24,35 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 
 
+def correlate_legendre(
+    signal: np.ndarray, corr_window: int, poly_order: int
+) -> np.ndarray:
+    """Calculate the
+
+    Parameters
+    ----------
+    signal : np.ndarray
+        An (N,3) array of orientation vectors
+    corr_window : int
+        Size of the moving correlation window
+    poly_order : int
+        Order of the Legendre polynomial
+
+    Returns
+    -------
+    np.ndarray
+        An (N - corr_window + 1,) array of correlation results
+
+    """
+    array_length = len(signal)
+    result_length = array_length - corr_window + 1
+    poly = legendre(poly_order)
+    results = np.zeros(result_length)
+    for t0 in range(corr_window):
+        results += poly(np.dot(signal[t0], signal[t0 : t0 + result_length].T))
+    return results / corr_window
+
+
 class ReorientationalTimeCorrelationFunction(IJob):
     r"""Correlation of molecule's orientation in time.
 
@@ -37,15 +66,21 @@ class ReorientationalTimeCorrelationFunction(IJob):
     will be sensitive to changes in the molecule's shape.
 
     In principle, reorientational time-correlation functions can be Legendre
-    polynomials of different order. By default, this analysis outputs results
-    for l=1 and l=2.
+    polynomials of different order. At the moment, this analysis will calculate
+    all the orders up the maximum Legendre polynomial order specified as one
+    of the input parameters.
 
-    Angle at time T is calculated as the following: \n
-    .. math:: \\overrightarrow{vector} =  \\overrightarrow{direction} - \\overrightarrow{origin}
-    .. math:: \phi(T = T_{1}-T_{0}) = arcos(  \\overrightarrow{vector(T_{1})} . \\overrightarrow{vector(T_{0})} )
+    Angle at time T is calculated as the following:
 
-    The result is
-    .. math: C_{l}(T) = <P_{l}[cos(\phi(T))]>
+    .. math::
+
+       \\overrightarrow{vector} =  \\overrightarrow{direction} - \\overrightarrow{origin}
+
+    .. math::
+
+       \phi(T = T_{1}-T_{0}) = arcos(  \\overrightarrow{vector(T_{1})} . \\overrightarrow{vector(T_{0})} )
+
+    The general result is :math:`C_{l}(T) = \langle P_{l}[cos(\phi(T))] \rangle`,
     where :math:`P_{l}` is the Legendre polynomial of the order l.
 
     """
@@ -100,8 +135,8 @@ class ReorientationalTimeCorrelationFunction(IJob):
         self.inner_index1 = self.configuration["molecule_and_axis"]["index1"]
         self.inner_index2 = self.configuration["molecule_and_axis"]["index2"]
 
-        self.numberOfSteps = len(self.molecules)
         self.legendre_order = self.configuration["polynomial_order"]["value"]
+        self.numberOfSteps = len(self.molecules) * self.legendre_order
 
         self.masses = np.array(
             self.configuration["trajectory"]["instance"].chemical_system.atom_property(
@@ -171,7 +206,9 @@ class ReorientationalTimeCorrelationFunction(IJob):
             Molecule index and the correlation array.
 
         """
-        molecule = self.molecules[index]
+        mol_index = index % len(self.molecules)
+        legendre_order = 1 + index // len(self.molecules)
+        molecule = self.molecules[mol_index]
         masses = self.masses[molecule]
 
         diff = np.empty((self.configuration["frames"]["number"], 3))
@@ -210,8 +247,14 @@ class ReorientationalTimeCorrelationFunction(IJob):
         diff /= modulus[:, np.newaxis]
 
         n_configs = self.configuration["frames"]["n_configs"]
-        ac = correlate(diff, diff[:n_configs], mode="valid") / n_configs
-        return index, ac.T[0]
+        if legendre_order == 1:
+            ac = correlate(diff, diff[:n_configs], mode="valid") / n_configs
+            return index, ac.T[0]
+        else:
+            ac = correlate_legendre(
+                diff, corr_window=n_configs, poly_order=legendre_order
+            )
+            return index, ac
 
     def combine(self, index: int, x: np.ndarray):
         """Add the partial result to the results.
@@ -224,12 +267,12 @@ class ReorientationalTimeCorrelationFunction(IJob):
             array of the correlation results
 
         """
-        for l_order in range(1, self.legendre_order + 1):
-            poly = legendre(l_order)
-            self._outputData[f"rtcf_l={l_order}"] += poly(x)
+        mol_index = index % len(self.molecules)
+        l_order = 1 + index // len(self.molecules)
+        self._outputData[f"rtcf_l={l_order}"] += x
 
-            if self.configuration["per_axis"]["value"]:
-                self._outputData[f"rtcf_l={l_order}_per_axis"][index, :] = poly(x)
+        if self.configuration["per_axis"]["value"]:
+            self._outputData[f"rtcf_l={l_order}_per_axis"][mol_index, :] = x
 
     def finalize(self):
         """Normalise and write out the results."""
