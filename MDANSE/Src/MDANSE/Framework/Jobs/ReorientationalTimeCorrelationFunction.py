@@ -114,7 +114,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
             "label": "Maximum Legendre polynomial order to be used",
             "default": 2,
             "mini": 1,
-            "maxi": 4,
+            "maxi": 6,
         },
     )
     settings["per_axis"] = (
@@ -136,7 +136,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
         self.inner_index2 = self.configuration["molecule_and_axis"]["index2"]
 
         self.legendre_order = self.configuration["polynomial_order"]["value"]
-        self.numberOfSteps = len(self.molecules) * self.legendre_order
+        self.numberOfSteps = len(self.molecules)
 
         self.masses = np.array(
             self.configuration["trajectory"]["instance"].chemical_system.atom_property(
@@ -192,7 +192,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
                     partial_result=True,
                 )
 
-    def run_step(self, index: int) -> tuple[int, np.ndarray]:
+    def run_step(self, index: int) -> tuple[int, list[np.ndarray]]:
         """Run the analysis for a single molecule.
 
         Parameters
@@ -202,13 +202,11 @@ class ReorientationalTimeCorrelationFunction(IJob):
 
         Returns
         -------
-        tuple[int, np.ndarray]
-            Molecule index and the correlation array.
+        tuple[int, list[np.ndarray]]
+            Molecule index and the correlation arrays.
 
         """
-        mol_index = index % len(self.molecules)
-        legendre_order = 1 + index // len(self.molecules)
-        molecule = self.molecules[mol_index]
+        molecule = self.molecules[index]
         masses = self.masses[molecule]
 
         diff = np.empty((self.configuration["frames"]["number"], 3))
@@ -247,32 +245,36 @@ class ReorientationalTimeCorrelationFunction(IJob):
         diff /= modulus[:, np.newaxis]
 
         n_configs = self.configuration["frames"]["n_configs"]
-        if legendre_order == 1:
-            ac = correlate(diff, diff[:n_configs], mode="valid") / n_configs
-            return index, ac.T[0]
-        else:
-            ac = correlate_legendre(
-                diff, corr_window=n_configs, poly_order=legendre_order
-            )
-            return index, ac
+        results = []
+        for legendre_order in range(1, self.legendre_order + 1):
+            if legendre_order == 1:
+                ac = correlate(diff, diff[:n_configs], mode="valid") / n_configs
+                results.append(ac.T[0])
+            else:
+                ac = correlate_legendre(
+                    diff, corr_window=n_configs, poly_order=legendre_order
+                )
+                results.append(ac)
+        return index, results
 
-    def combine(self, index: int, x: np.ndarray):
+    def combine(self, index: int, x: list[np.ndarray]):
         """Add the partial result to the results.
 
         Parameters
         ----------
         index : int
             index of the molecule
-        x : np.ndarray
-            array of the correlation results
+        x : list[np.ndarray]
+            list of arrays of the correlation results
 
         """
-        mol_index = index % len(self.molecules)
-        l_order = 1 + index // len(self.molecules)
-        self._outputData[f"rtcf_l={l_order}"] += x
+        for l_order in range(1, self.legendre_order + 1):
+            self._outputData[f"rtcf_l={l_order}"] += x[l_order - 1]
 
-        if self.configuration["per_axis"]["value"]:
-            self._outputData[f"rtcf_l={l_order}_per_axis"][mol_index, :] = x
+            if self.configuration["per_axis"]["value"]:
+                self._outputData[f"rtcf_l={l_order}_per_axis"][index, :] = x[
+                    l_order - 1
+                ]
 
     def finalize(self):
         """Normalise and write out the results."""
