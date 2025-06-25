@@ -27,7 +27,19 @@ class ScatteringLengthDensityProfileError(Error):
 class ScatteringLengthDensityProfile(IJob):
     """Produces the time-averaged scattering length density profile.
 
-    The result can be used in neutron reflectometry calculations.
+    The main result, named 'sldp' in the output file, is the time-averaged
+    coherent scattering length density profile in units of 10^-6 / Ang^2,
+    as used in neutron reflectometry calculations.
+
+    You may want to export the 'sldp' dataset as text file using the MDANSE_GUI
+    plotter, and load it into your preferred neutron reflectometry software.
+
+    Additionally, the following other profiles are provided in the output:
+
+    - 'sldp_incoherent', the incoherent scattering length profile,
+    - 'sldp_total', the total scattering length profile,
+    - 'dp_{atom_type}', numeric density profiles (number of atoms per volume)
+
     """
 
     label = "Scattering Length Density Profile"
@@ -126,15 +138,14 @@ class ScatteringLengthDensityProfile(IJob):
             units="1 / ang3",
         )
 
-        for component in ["coherent", "incoherent", "total"]:
+        for component in ["", "_incoherent", "_total"]:
             self._outputData.add(
-                f"sldp_{component}",
+                f"sldp{component}",
                 "LineOutputVariable",
                 (self._n_bins,),
                 axis="r",
                 units="1e-6 / ang2",
-                main_result=True,
-                partial_result=component != "coherent",
+                main_result=component == "",
             )
 
         self._extent = 0.0
@@ -197,8 +208,8 @@ class ScatteringLengthDensityProfile(IJob):
         for element, hist in density_profile.items():
             self._outputData[f"dp_{element}"] += hist / slice_volume
             slen_dict = self.scattering_lengths[element]
-            for nb, component in enumerate(["coherent", "incoherent", "total"]):
-                self._outputData[f"sldp_{component}"] += (
+            for nb, component in enumerate(["", "_incoherent", "_total"]):
+                self._outputData[f"sldp{component}"] += (
                     slen_dict[nb] * hist / slice_volume
                 )
 
@@ -219,15 +230,15 @@ class ScatteringLengthDensityProfile(IJob):
 
         self._indices_per_element
 
-        for dset in ["dp_total", "sldp_coherent", "sldp_incoherent", "sldp_total"]:
+        for dset in ["dp_total", "sldp", "sldp_incoherent", "sldp_total"]:
             self._outputData[dset] /= fact
             self._outputData[dset].scaling_factor = fact
 
         r_values = np.linspace(0, self._extent / self.numberOfSteps, self._n_bins + 1)
         self._outputData["r"][:] = (r_values[1:] + r_values[:-1]) / 2
 
-        for component in ["coherent", "incoherent", "total"]:
-            self._outputData[f"sldp_{component}"] *= 1e6 / self.numberOfSteps
+        for component in ["", "_incoherent", "_total"]:
+            self._outputData[f"sldp{component}"] *= 1e6 / self.numberOfSteps
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
