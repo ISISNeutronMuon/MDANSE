@@ -41,20 +41,33 @@ class BasicPlotDataItem(QStandardItem):
 
     @abstractmethod
     def data_path(self):
+        """Return the path to the object inside the HDF5 file."""
         pass
 
     @abstractmethod
     def file_number(self):
+        """Return the model index of the source HDF5 file."""
         pass
 
     @property
     def child_path(self):
+        """Recursively build the HDF5 path to this object."""
         if self.data_parent is None:
             return ""
         else:
             return f"{self.data_parent.child_path}/{self.text()}"
 
+    def recursive_children(self) -> list[BasicPlotDataItem]:
+        """Return a list composed of this node and all its children."""
+        result = [self]
+        for child_row in range(self.rowCount()):
+            child = self.child(child_row, 0)
+            if child:
+                result += child.recursive_children()
+        return result
+
     def populate(self, data: h5py.File | h5py.Group):
+        """Create model items for the children datasets from the HDF5 file."""
         for key in data.keys() - EXCLUDE:
             try:
                 data[key]
@@ -75,51 +88,57 @@ class BasicPlotDataItem(QStandardItem):
 
 
 class DataSetItem(BasicPlotDataItem):
+    """A specialised model item for an end node (dataset)."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._item_type = "dataset"
 
     def data_path(self) -> str:
+        """Recursively build the HDF5 path to this dataset."""
         parent_path = self.parent().data_path()
         own_path = self.data(role=Qt.ItemDataRole.UserRole)
         return f"{parent_path}/{own_path}"
 
     def file_number(self) -> int:
+        """Return the model index of the source data file."""
         return self.parent().file_number()
 
 
 class DataFileItem(BasicPlotDataItem):
+    """A specialised item for a top-level node (data file) in the model."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._item_type = "file"
 
     def data_path(self) -> str:
+        """Return an empty string, since this item is not a dataset."""
         return ""
 
     def file_number(self) -> int:
+        """Return the inner model index of the data file from _nodes dictionary."""
         return self.data(role=Qt.ItemDataRole.UserRole)
 
 
 class MDADataStructure:
+    """Loads plotting-related information from an MDA file."""
+
     def __init__(self, filename: str):
         self._file = h5py.File(filename)
         self._metadata = check_metadata(self._file)
-        self.find_information()
 
     def close(self):
+        """Close the HDF5 file."""
         self._file.close()
-
-    def find_information(self):
-        self._main_dataset = ""
-        self._components = []
-        self._axis_datasets = []
-        self._supporting_datasets = []
 
 
 class PlotDataModel(QStandardItemModel):
-    """Meant to be used with DoublePanel, GeneralView
-    and ItemVisualiser. It stores elements and emits
-    them to the ItemVisualiser."""
+    """Stores plottable items from an MDA file.
+
+    Meant to be used with DoublePanel, GeneralView and ItemVisualiser.
+    It stores elements and emits them to the ItemVisualiser.
+    """
 
     error = Signal(str)
     all_elements = Signal(object)
@@ -132,10 +151,18 @@ class PlotDataModel(QStandardItemModel):
 
     @Slot(str)
     def add_file(self, filename: str):
+        """Add to the model all the plottable datasets from a file.
+
+        Parameters
+        ----------
+        filename : str
+            path to an MDA file
+
+        """
         try:
             new_datafile = MDADataStructure(filename)
         except Exception as e:
-            LOG.error(f"Invalid: {str(e)}")
+            LOG.error(f"Invalid: {e!s}")
         else:
             self._nodes[self._next_number] = new_datafile
             new_item = DataFileItem()
@@ -145,7 +172,20 @@ class PlotDataModel(QStandardItemModel):
             self.appendRow(new_item)
             new_item.populate(new_datafile._file)
 
-    def inner_object(self, index: QModelIndex) -> MDADataStructure:
+    def inner_object(self, index: QModelIndex) -> MDADataStructure | h5py.Dataset:
+        """For a Qt model index, return its corresponding HDF5 object.
+
+        Parameters
+        ----------
+        index : QModelIndex
+            Index of the model item from the Qt model.
+
+        Returns
+        -------
+        MDADataStructure | h5py.Dataset
+            Either a wrapper around the MDA file, or a dataset from the file.
+
+        """
         model_item = self.itemFromIndex(index)
         number = model_item.file_number()
         data_path = model_item.data_path()
@@ -154,7 +194,26 @@ class PlotDataModel(QStandardItemModel):
             return data_structure._file[data_path]
         return data_structure
 
+    def parent_object(self, index: QModelIndex) -> MDADataStructure:
+        """For a Qt index of a dataset, return the wrapper object of the HDF5 file.
+
+        Parameters
+        ----------
+        index : QModelIndex
+            Index of the model item from the Qt model.
+
+        Returns
+        -------
+        MDADataStructure
+            A wrapper around the MDA file.
+
+        """
+        model_item = self.itemFromIndex(index)
+        number = model_item.file_number()
+        return self._nodes[number]
+
     def removeRow(self, row: int, parent: QModelIndex = None):
+        """Delete a row from the model."""
         self.mutex.lock()
         try:
             node_number = self.item(row).data(role=Qt.ItemDataRole.UserRole)

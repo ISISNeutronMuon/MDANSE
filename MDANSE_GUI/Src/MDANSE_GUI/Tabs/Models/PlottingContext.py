@@ -282,7 +282,7 @@ class SingleDataset:
             picked_value = axis_values[index_tuple[axis_index]]
             if len(axis_values) > 1:
                 significant_digit = np.floor(
-                    np.log10(abs(np.mean(axis_values[1:] - axis_values[:-1])))
+                    np.log10(abs(np.mean(axis_values[1:] - axis_values[:-1]))),
                 ).astype(int)
             elif len(axis_values) == 1:
                 significant_digit = np.floor(np.log10(abs(axis_values[0]))).astype(int)
@@ -562,34 +562,34 @@ class PlottingContext(QStandardItemModel):
         result = {}
         for ds_num, row in enumerate(range(self.rowCount())):
             key = self.index(row, plotting_column_index["Dataset"]).data(
-                role=Qt.ItemDataRole.UserRole
+                role=Qt.ItemDataRole.UserRole,
             )
             useit = (
                 self.itemFromIndex(
-                    self.index(row, plotting_column_index["Use it?"])
+                    self.index(row, plotting_column_index["Use it?"]),
                 ).checkState()
                 == Qt.CheckState.Checked
             )
             set_scaling = (
                 self.itemFromIndex(
-                    self.index(row, plotting_column_index["Apply weights?"])
+                    self.index(row, plotting_column_index["Apply weights?"]),
                 ).checkState()
                 == Qt.CheckState.Checked
             )
             data_number_string = self.itemFromIndex(
-                self.index(row, plotting_column_index["Use it?"])
+                self.index(row, plotting_column_index["Use it?"]),
             ).text()
             colour = self.itemFromIndex(
-                self.index(row, plotting_column_index["Colour"])
+                self.index(row, plotting_column_index["Colour"]),
             ).text()
             style = self.itemFromIndex(
-                self.index(row, plotting_column_index["Line style"])
+                self.index(row, plotting_column_index["Line style"]),
             ).text()
             marker = self.itemFromIndex(
-                self.index(row, plotting_column_index["Marker"])
+                self.index(row, plotting_column_index["Marker"]),
             ).text()
             axis = self.itemFromIndex(
-                self.index(row, plotting_column_index["Main axis"])
+                self.index(row, plotting_column_index["Main axis"]),
             ).text()
             if useit:
                 self._datasets[key].set_data_limits(data_number_string)
