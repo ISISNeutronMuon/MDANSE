@@ -439,7 +439,7 @@ In MDANSE, the instrument resolution is calculated as a function of energy,
 and then Fourier-transformed into the time domain and applied to the
 time-dependent signal as follows:
 
-.. math:: TF(f(t) * r(t)) = F(\omega) \otimes R(\omega) = G(\omega)
+.. math:: FT(f(t)r(t)) = F(\omega) * R(\omega) = G(\omega)
 
 where f(t) and r(t) are, respectively, the time-dependent signal and
 instrument resolution. :math:`F(\omega)` and :math:`R(\omega)`
