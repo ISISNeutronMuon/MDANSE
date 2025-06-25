@@ -1,18 +1,19 @@
-import tempfile
 import os
+import tempfile
 from os import path
 
-import numpy as np
 import h5py
+import numpy as np
 import pytest
+from test_helpers.compare_hdf5 import compare_hdf5
+from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from test_helpers.paths import CONV_DIR, RESULTS_DIR
-from test_helpers.compare_hdf5 import compare_hdf5
 
 short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 mdmc_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
 com_traj = CONV_DIR / "com_trajectory.mdt"
+
 
 @pytest.fixture(scope="module")
 def qvector_grid():
@@ -79,11 +80,15 @@ def disf(tmp_path_factory):
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
     ids=lambda x: x[0],
 )
-def test_dcsf(tmp_path, traj_info, qvector_grid):
+def test_dcsf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
     text_file = tmp_path / "output_text.tar"
+    result_file = RESULTS_DIR / f"dcsf_{traj_info[0]}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "atom_selection": None,
@@ -100,15 +105,22 @@ def test_dcsf(tmp_path, traj_info, qvector_grid):
     dcsf = IJob.create("DynamicCoherentStructureFactor")
     dcsf.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
     assert text_file.is_file()
 
-    result_file = RESULTS_DIR / f"dcsf_{traj_info[0]}.mda"
-
-    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)"),
-                 startswith=True, scale_result=True, scale_benchmark=True,
-                 atol=1e-8)
+    compare_hdf5(
+        out_file,
+        result_file,
+        ("f(q,t)", "s(q,f)"),
+        startswith=True,
+        scale_result=True,
+        scale_benchmark=True,
+        atol=1e-8,
+    )
 
 
 @pytest.mark.parametrize(
@@ -116,11 +128,15 @@ def test_dcsf(tmp_path, traj_info, qvector_grid):
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
     ids=lambda x: x[0],
 )
-def test_ccf(tmp_path, traj_info, qvector_grid):
+def test_ccf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
     text_file = tmp_path / "output_text.tar"
+    result_file = RESULTS_DIR / f"ccf_{traj_info[0]}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "atom_selection": None,
@@ -137,15 +153,22 @@ def test_ccf(tmp_path, traj_info, qvector_grid):
     ccf = IJob.create("CurrentCorrelationFunction")
     ccf.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
     assert text_file.is_file()
 
-    result_file = RESULTS_DIR / f"ccf_{traj_info[0]}.mda"
-
-    compare_hdf5(out_file, result_file, ("J(q,f)", "j(q,t)"),
-                 startswith=True, scale_result=True, scale_benchmark=True,
-                 atol=1e-6)
+    compare_hdf5(
+        out_file,
+        result_file,
+        ("J(q,f)", "j(q,t)"),
+        startswith=True,
+        scale_result=True,
+        scale_benchmark=True,
+        atol=1e-6,
+    )
 
 
 def test_output_axis_preview(tmp_path, qvector_grid):
@@ -176,11 +199,15 @@ def test_output_axis_preview(tmp_path, qvector_grid):
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
     ids=lambda x: x[0],
 )
-def test_disf(tmp_path, traj_info, qvector_grid):
+def test_disf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
     text_file = tmp_path / "output_text.tar"
+    result_file = RESULTS_DIR / f"disf_{traj_info[0]}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "atom_selection": None,
@@ -197,14 +224,21 @@ def test_disf(tmp_path, traj_info, qvector_grid):
     disf = IJob.create("DynamicIncoherentStructureFactor")
     disf.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
     assert text_file.is_file()
 
-    result_file = RESULTS_DIR / f"disf_{traj_info[0]}.mda"
-
-    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)"),
-                 startswith=True, scale_result=True, scale_benchmark=True)
+    compare_hdf5(
+        out_file,
+        result_file,
+        ("f(q,t)", "s(q,f)"),
+        startswith=True,
+        scale_result=True,
+        scale_benchmark=True,
+    )
 
 
 @pytest.mark.parametrize(
@@ -212,11 +246,15 @@ def test_disf(tmp_path, traj_info, qvector_grid):
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
     ids=lambda x: x[0],
 )
-def test_eisf(tmp_path, traj_info, qvector_grid):
+def test_eisf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
     text_file = tmp_path / "output_text.tar"
+    result_file = RESULTS_DIR / f"eisf_{traj_info[0]}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "atom_selection": None,
@@ -232,17 +270,21 @@ def test_eisf(tmp_path, traj_info, qvector_grid):
     eisf = IJob.create("ElasticIncoherentStructureFactor")
     eisf.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
     assert text_file.is_file()
 
-    result_file = RESULTS_DIR / f"eisf_{traj_info[0]}.mda"
-    compare_hdf5(out_file,
-                 result_file,
-                 ("eisf",),
-                 startswith=True,
-                 scale_result=True,
-                 scale_benchmark=True)
+    compare_hdf5(
+        out_file,
+        result_file,
+        ("eisf",),
+        startswith=True,
+        scale_result=True,
+        scale_benchmark=True,
+    )
 
 
 @pytest.mark.parametrize(
@@ -250,11 +292,15 @@ def test_eisf(tmp_path, traj_info, qvector_grid):
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
     ids=lambda x: x[0],
 )
-def test_gdisf(tmp_path, traj_info):
+def test_gdisf(generate_benchmarks, tmp_path, traj_info):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
     text_file = tmp_path / "output_text.tar"
+    result_file = RESULTS_DIR / f"gdisf_{traj_info[0]}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "atom_selection": None,
@@ -271,21 +317,25 @@ def test_gdisf(tmp_path, traj_info):
     gdisf = IJob.create("GaussianDynamicIncoherentStructureFactor")
     gdisf.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
     assert text_file.is_file()
 
-    result_file = RESULTS_DIR / f"gdisf_{traj_info[0]}.mda"
-
-    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)", "msd"),
-                 startswith=True)
+    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)", "msd"), startswith=True)
 
 
-def test_ndtsf(tmp_path, disf, dcsf, qvector_grid):
+def test_ndtsf(generate_benchmarks, tmp_path, disf, dcsf, qvector_grid):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
     text_file = tmp_path / "output_text.tar"
+    result_file = RESULTS_DIR / "ndtsf.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "atom_selection": None,
@@ -299,21 +349,27 @@ def test_ndtsf(tmp_path, disf, dcsf, qvector_grid):
     ndtsf = IJob.create("NeutronDynamicTotalStructureFactor")
     ndtsf.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
     assert text_file.is_file()
 
-    result_file = RESULTS_DIR / "ndtsf.mda"
+    compare_hdf5(
+        out_file, result_file, ("f(q,t)", "s(q,f)"), startswith=True, atol=1e-6
+    )
 
-    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)"),
-                 startswith=True, atol=1e-6)
 
-
-def test_ssfsf(tmp_path, dcsf):
+def test_ssfsf(generate_benchmarks, tmp_path, dcsf):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
     text_file = tmp_path / "output_text.tar"
+    result_file = RESULTS_DIR / "sffsf_short_traj.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "dcsf_input_file": dcsf,
@@ -324,25 +380,30 @@ def test_ssfsf(tmp_path, dcsf):
     ssfsf = IJob.create("StructureFactorFromScatteringFunction")
     ssfsf.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
     assert text_file.is_file()
 
-    result_file = RESULTS_DIR / "sffsf_short_traj.mda"
+    compare_hdf5(out_file, result_file, ("ssf_total"), startswith=True, atol=1e-6)
 
-    compare_hdf5(out_file, result_file, ("ssf_total"), startswith=True,
-                 atol=1e-6)
 
 @pytest.mark.parametrize(
     "traj_info",
     [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
     ids=lambda x: x[0],
 )
-def test_sldp(tmp_path, traj_info):
+def test_sldp(generate_benchmarks, tmp_path, traj_info):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
     text_file = tmp_path / "output_text.tar"
+    result_file = RESULTS_DIR / f"sldp_{traj_info[0]}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "atom_selection": None,
@@ -358,11 +419,16 @@ def test_sldp(tmp_path, traj_info):
     sldp = IJob.create("ScatteringLengthDensityProfile")
     sldp.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
     assert text_file.is_file()
 
-    result_file = RESULTS_DIR / f"sldp_{traj_info[0]}.mda"
-
-    compare_hdf5(out_file, result_file, ("sldp", "sldp_incoherent", "sldp_total", "dp_total"),
-                 startswith=True)
+    compare_hdf5(
+        out_file,
+        result_file,
+        ("sldp", "sldp_incoherent", "sldp_total", "dp_total"),
+        startswith=True,
+    )

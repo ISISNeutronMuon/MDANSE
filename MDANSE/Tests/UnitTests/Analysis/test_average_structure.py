@@ -1,8 +1,8 @@
 import pytest
-from MDANSE.MolecularDynamics.Trajectory import \
-    Trajectory
-from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.paths import CONV_DIR
+
+from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
@@ -11,6 +11,7 @@ short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 def trajectory():
     trajectory = Trajectory(short_traj)
     yield trajectory
+
 
 @pytest.mark.parametrize("output_unit", ["Angstrom", "Bohr", "nm", "pm"])
 @pytest.mark.parametrize("output_format", ["vasp", "xyz", "turbomole", "abinit-in"])

@@ -47,19 +47,24 @@ def parameters():
         ("AngularCorrelation", ["ac"]),
     ], ids=lambda x: x[0],
 )
-def test_structure_analysis(tmp_path, parameters, job_info):
+def test_structure_analysis(generate_benchmarks, tmp_path, parameters, job_info):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / f"structure_analysis_{job_info[0]}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
 
     job = IJob.create(job_info[0])
     job.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
-
-    result_file = RESULTS_DIR / f"structure_analysis_{job_info[0]}.mda"
 
     compare_hdf5(out_file, result_file, job_info[1])

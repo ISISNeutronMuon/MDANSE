@@ -1,8 +1,8 @@
 import pytest
-from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
+from MDANSE.Framework.Jobs.IJob import IJob
 
 named_mols = CONV_DIR / "named_molecules.mdt"
 
@@ -41,7 +41,7 @@ def dcsf(tmp_path_factory):
     out_file = temp_name.with_suffix(".mda")
 
     parameters = {
-        "output_files": (temp_name, ("MDAFormat", ), "INFO"),
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "q_vectors": (
             "GridQVectors",
             {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
@@ -63,7 +63,7 @@ def disf(tmp_path_factory):
     out_file = temp_name.with_suffix(".mda")
 
     parameters = {
-        "output_files": (temp_name, ("MDAFormat", ), "INFO"),
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "q_vectors": (
             "GridQVectors",
             {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
@@ -79,49 +79,81 @@ def disf(tmp_path_factory):
     yield out_file
 
 
-@pytest.mark.parametrize("job_info", [
-    ("DensityOfStates", ["dos", "vacf"], "equal", 1e-10, 1e-7),
-    ("MeanSquareDisplacement", ["msd"], "equal", 1e-10, 1e-7),
-    ("VelocityAutoCorrelationFunction", ["vacf"], "equal", 1e-10, 1e-7),
-    ("VanHoveFunctionDistinct", ["g(r,t)"], "equal", 1e-10, 1e-7),
-    ("VanHoveFunctionSelf", ["g(r,t)"], "equal", 1e-10, 1e-7),
-    ("PositionAutoCorrelationFunction", ["pacf"], "equal", 1e-10, 1e-7),
-    ("PositionPowerSpectrum", ["pacf", "pps"], "equal", 1e-10, 1e-7),
-    ("RootMeanSquareDeviation", ["rmsd"], "equal", 1e-10, 1e-7),
-    ("CoordinationNumber", ["cn"], "equal", 1e-10, 1e-7),
-    ("PairDistributionFunction", ["pdf", "rdf", "tcf"], "equal", 1e-10, 1e-7),
-    ("StaticStructureFactor", ["ssf"], "equal", 1e-10, 1e-7),
-    ("XRayStaticStructureFactor", ["xssf"], "equal", 1e-10, 1e-7),
-    ("DynamicCoherentStructureFactor", ["f(q,t)", "s(q,f)"], "b_coherent", 1e-6, 1e-6),
-    ("CurrentCorrelationFunction", ["J(q,f)", "j(q,t)"], "b_coherent", 1e-6, 1e-7),
-    ("DynamicIncoherentStructureFactor", ["f(q,t)", "s(q,f)"], "b_incoherent", 1e-10, 1e-7),
-    ("ElasticIncoherentStructureFactor", ["eisf"], "b_incoherent", 1e-10, 1e-7),
-    ("GaussianDynamicIncoherentStructureFactor", ["f(q,t)", "s(q,f)", "msd"], "b_incoherent", 1e-10, 1e-7),
-], ids=lambda x: x[0])
-def test_analysis(
-        tmp_path, parameters, job_info
-):
+@pytest.mark.parametrize(
+    "job_info",
+    [
+        ("DensityOfStates", ["dos", "vacf"], "equal", 1e-10, 1e-7),
+        ("MeanSquareDisplacement", ["msd"], "equal", 1e-10, 1e-7),
+        ("VelocityAutoCorrelationFunction", ["vacf"], "equal", 1e-10, 1e-7),
+        ("VanHoveFunctionDistinct", ["g(r,t)"], "equal", 1e-10, 1e-7),
+        ("VanHoveFunctionSelf", ["g(r,t)"], "equal", 1e-10, 1e-7),
+        ("PositionAutoCorrelationFunction", ["pacf"], "equal", 1e-10, 1e-7),
+        ("PositionPowerSpectrum", ["pacf", "pps"], "equal", 1e-10, 1e-7),
+        ("RootMeanSquareDeviation", ["rmsd"], "equal", 1e-10, 1e-7),
+        ("CoordinationNumber", ["cn"], "equal", 1e-10, 1e-7),
+        ("PairDistributionFunction", ["pdf", "rdf", "tcf"], "equal", 1e-10, 1e-7),
+        ("StaticStructureFactor", ["ssf"], "equal", 1e-10, 1e-7),
+        ("XRayStaticStructureFactor", ["xssf"], "equal", 1e-10, 1e-7),
+        (
+            "DynamicCoherentStructureFactor",
+            ["f(q,t)", "s(q,f)"],
+            "b_coherent",
+            1e-6,
+            1e-6,
+        ),
+        ("CurrentCorrelationFunction", ["J(q,f)", "j(q,t)"], "b_coherent", 1e-6, 1e-7),
+        (
+            "DynamicIncoherentStructureFactor",
+            ["f(q,t)", "s(q,f)"],
+            "b_incoherent",
+            1e-10,
+            1e-7,
+        ),
+        ("ElasticIncoherentStructureFactor", ["eisf"], "b_incoherent", 1e-10, 1e-7),
+        (
+            "GaussianDynamicIncoherentStructureFactor",
+            ["f(q,t)", "s(q,f)", "msd"],
+            "b_incoherent",
+            1e-10,
+            1e-7,
+        ),
+    ],
+    ids=lambda x: x[0],
+)
+def test_analysis(generate_benchmarks, tmp_path, parameters, job_info):
+    job_type, outputs, weights, atol, rtol = job_info
     temp_name = tmp_path / "output"
     log_file = temp_name.with_suffix(".log")
+    out_file = temp_name.with_suffix(".mda")
+    result_file = RESULTS_DIR / f"grouping_molecule_{job_type}.mda"
 
-    job_type, outputs, weights, atol, rtol = job_info
-    parameters["output_files"] = (temp_name, ("MDAFormat", ), "INFO")
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
+
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     parameters["weights"] = weights
 
     job = IJob.create(job_type)
     job.run(parameters, status=True)
 
-    out_file = temp_name.with_suffix(".mda")
-    result_file = RESULTS_DIR / f"grouping_molecule_{job_type}.mda"
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
-    compare_hdf5(out_file, result_file, tuple(outputs), startswith=True, atol=atol, rtol=rtol)
+    compare_hdf5(
+        out_file, result_file, tuple(outputs), startswith=True, atol=atol, rtol=rtol
+    )
     assert log_file.is_file()
 
 
-def test_rmsf(tmp_path, parameters):
+def test_rmsf(generate_benchmarks, tmp_path, parameters):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / "grouping_each_molecule_RootMeanSquareFluctuation.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters["grouping_level"] = "each molecule"
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
@@ -129,16 +161,23 @@ def test_rmsf(tmp_path, parameters):
     rmsf = IJob.create("RootMeanSquareFluctuation")
     rmsf.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
-    result_file = RESULTS_DIR / "grouping_each_molecule_RootMeanSquareFluctuation.mda"
+
     compare_hdf5(out_file, result_file, "rmsf", startswith=True)
 
 
-def test_ndtsf(tmp_path, disf, dcsf, qvector_grid):
+def test_ndtsf(generate_benchmarks, tmp_path, disf, dcsf, qvector_grid):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / "grouping_molecule_ndtsf.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "atom_selection": None,
@@ -147,36 +186,46 @@ def test_ndtsf(tmp_path, disf, dcsf, qvector_grid):
         "disf_input_file": disf,
         "dcsf_input_file": dcsf,
         "trajectory": named_mols,
-        "output_files": (temp_name, ("MDAFormat", ), "INFO"),
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
     }
 
     ndtsf = IJob.create("NeutronDynamicTotalStructureFactor")
     ndtsf.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
-    result_file = RESULTS_DIR / "grouping_molecule_ndtsf.mda"
-    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)"),
-                 startswith=True, atol=1e-6)
+
+    compare_hdf5(
+        out_file, result_file, ("f(q,t)", "s(q,f)"), startswith=True, atol=1e-6
+    )
 
 
-def test_ssfsf(tmp_path, dcsf):
+def test_ssfsf(generate_benchmarks, tmp_path, dcsf):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / "grouping_molecule_sffsf.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "dcsf_input_file": dcsf,
         "trajectory": named_mols,
         "grouping_level": "molecule",
-        "output_files": (temp_name, ("MDAFormat", ), "INFO"),
+        "output_files": (temp_name, ("MDAFormat",), "INFO"),
     }
 
     ssfsf = IJob.create("StructureFactorFromScatteringFunction")
     ssfsf.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
-    result_file = RESULTS_DIR / "grouping_molecule_sffsf.mda"
-    compare_hdf5(out_file, result_file, "ssf_total", startswith=True,
-                 atol=1e-6)
+
+    compare_hdf5(out_file, result_file, "ssf_total", startswith=True, atol=1e-6)

@@ -1,15 +1,20 @@
 import numpy as np
-from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
+
+from MDANSE.Framework.Jobs.IJob import IJob
 
 short_traj = CONV_DIR / "named_molecules.mdt"
 
 
-def test_dacf_analysis(tmp_path):
+def test_dacf_analysis(generate_benchmarks, tmp_path):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / "dacf_analysis.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "frames": (0, 100, 1, 51),
@@ -36,18 +41,23 @@ def test_dacf_analysis(tmp_path):
     job = IJob.create("DipoleAutoCorrelationFunction")
     job.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
-
-    result_file = RESULTS_DIR / "dacf_analysis.mda"
 
     compare_hdf5(out_file, result_file, ("/dacf",), scale_result=True)
 
 
-def test_ir_analysis(tmp_path):
+def test_ir_analysis(generate_benchmarks, tmp_path):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / "ir_analysis.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "frames": (0, 100, 1, 51),
@@ -76,9 +86,10 @@ def test_ir_analysis(tmp_path):
     job = IJob.create("Infrared")
     job.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
-
-    result_file = RESULTS_DIR / "ir_analysis.mda"
 
     compare_hdf5(out_file, result_file, ("/ddacf", "/ir"), scale_result=True)

@@ -16,10 +16,14 @@ mdmc_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
     ("com_traj", com_traj),
 ], ids=lambda x: x[0],
 )
-def test_temperature(tmp_path, traj_info, interp_order):
+def test_temperature(generate_benchmarks, tmp_path, traj_info, interp_order):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / f"temperature_{traj_info[0]}_{interp_order}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "frames": (0, 10, 1),
@@ -32,14 +36,14 @@ def test_temperature(tmp_path, traj_info, interp_order):
     temp = IJob.create("Temperature")
     temp.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
 
-    result_file = RESULTS_DIR / f"temperature_{traj_info[0]}_{interp_order}.mda"
-
     compare_hdf5(out_file, result_file, ("/kinetic_energy", "/temperature",
                                         "/avg_kinetic_energy", "avg_temperature"))
-
 
 
 @pytest.mark.parametrize("traj_info", [
@@ -49,10 +53,14 @@ def test_temperature(tmp_path, traj_info, interp_order):
 ], ids=lambda x: x[0],
 )
 @pytest.mark.parametrize("output_format", ["MDAFormat", "TextFormat", "FileInMemory"])
-def test_density(tmp_path, traj_info, output_format):
+def test_density(generate_benchmarks, tmp_path, traj_info, output_format):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / f"density_{traj_info[0]}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "frames": (0, 10, 1),
@@ -63,9 +71,11 @@ def test_density(tmp_path, traj_info, output_format):
     den = IJob.create("Density")
     den.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     if output_format == "MDAFormat":
         out_file = temp_name.with_suffix(".mda")
-        result_file = RESULTS_DIR / f"density_{traj_info[0]}.mda"
 
         assert out_file.is_file()
 
