@@ -30,7 +30,8 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     Gaussian approximation is exact for a system of free particles and a system of
     particles undergoing brownian motion. The results of this analysis will be close
     to the Dynamic Incoherent Structure Factor analysis in the limits of very
-    short Q and very long Q, and will differ from it for intermediate Q values.
+    short :math:`\mathbf{q}` and very long :math:`\mathbf{q}`, and will differ from
+    it for intermediate :math:`\mathbf{q}` values.
     """
 
     label = "Gaussian Dynamic Incoherent Structure Factor"

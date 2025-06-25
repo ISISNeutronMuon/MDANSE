@@ -539,8 +539,7 @@ FileInMemory is not available when running from the GUI.
 OutputStructureConfigurator
 ---------------------------
 
-default=('OUTPUT_FILENAME', 'vasp', "no logs")
-
+default=('OUTPUT_FILENAME', 'vasp', 'no logs')
 
 Defines the name of the output (average) structure file.
 
@@ -549,6 +548,7 @@ Allows to define:
 - output directory and file name,
 - output structure file format (supported by ASE io module),
 - logging level of the analysis run.
+
 
 
 .. _configurator-analysis-OutputTrajectoryConfigurator:

@@ -31,7 +31,9 @@ class NeutronDynamicTotalStructureFactor(IJob):
     """Combines the coherent and incoherent dynamic structure factors.
 
     The partial results need to be calculated before using the Dynamic
-    Coherent/Incoherent Structure Factor jobs with the same Q vector setttings.
+    Coherent/Incoherent Structure Factor jobs with the same
+    :math:`\mathbf{q}`-vector settings.
+
     The partial results will be scaled by neutron scattering lengths, producing
     a total result with coherent and incoherent parts on the same scale,
     directly comparable to each other.

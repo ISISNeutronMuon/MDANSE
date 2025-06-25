@@ -33,10 +33,11 @@ class MeanSquareDisplacement(IJob):
     in a study of Brownian motion. The MSD of a particle in this case
     is proportional to the time elapsed:
 
-    .. math:: <r^{2}> = 6Dt + C
+    .. math:: \langle d^{2}(t) \rangle = 6Dt + C
 
-    where :math:`<r^{2}>` is the MSD and t is the time. D and C are constants. The
-    constant D is the so-called diffusion coefficient.
+    where :math:`\langle d^{2}(t) \rangle` is the MSD and :math:`t` is the time.
+    :math:`D` and :math:`C` are constants. The constant :math:`D` is the so-called
+    diffusion coefficient.
 
     More generally the MSD reveals the distance or volume explored by atoms and
     molecules as a function of time. In crystals, the MSD quickly saturates at a

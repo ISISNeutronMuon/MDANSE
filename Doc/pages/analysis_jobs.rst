@@ -111,17 +111,6 @@ Inputs:
 - output_files: :ref:`configurator-analysis-OutputTrajectoryConfigurator` default=N/A
 
 
-.. _analysis-reference-Converter:
-
-Converter
-~~~~~~~~~
-
-Outputs a trajectory in the MDT format.
-
-Inputs:
-
-
-
 .. _analysis-reference-CoordinationNumber:
 
 CoordinationNumber
@@ -280,14 +269,14 @@ Inputs:
 DynamicCoherentStructureFactor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Computes the dynamic coherent structure factor S_coh(Q,w) for a set of atoms.
+Computes the dynamic coherent structure factor :math:`S_{	ext{coh}}(\mathbf{q}, \omega)` for a set of atoms.
 
 It can be compared to experimental data e.g. the energy-integrated, static structure
-factor S_coh(Q) or the dispersion and intensity of phonons.
+factor :math:`S_{	ext{coh}}(q)` or the dispersion and intensity of phonons.
 
 The coherent part is derived from correlations between pairs of atoms.
-This analysis requires the Q vectors to be commensurate with the reciprocal lattice
-of the simulation box.
+This analysis requires the :math:`\mathbf{q}`-vectors to be commensurate
+with the reciprocal lattice of the simulation box.
 
 Inputs:
 
@@ -308,13 +297,13 @@ Inputs:
 DynamicIncoherentStructureFactor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Computes the dynamic incoherent structure factor S_inc(Q,w) for a set of atoms.
+Computes the dynamic incoherent structure factor :math:`S_{	ext{inc}}(\mathbf{q},\omega)` for a set of atoms.
 
 It can be compared to experimental data e.g. the quasielastic scattering due to
 diffusion processes.
 
 This property is derived from the self-correlation of individual atoms over time.
-While it does not require the Q vectors to be commensurate with the simulation
+While it does not require the :math:`\mathbf{q}`-vectors to be commensurate with the simulation
 box reciprocal lattice, a "lattice" vector generator should be chosen if you
 intend to combine the result with the coherent part into the total
 dynamic structure factor.
@@ -342,8 +331,10 @@ Eccentricity
 Computes the eccentricity of a selected set of atoms.
 
 The eccentricity is calculated from the principal moments of
-inertia via the equation sqrt(pm3**2 - pm1**2) / pm3 where pm1 and
-pm3 are the smallest and largest principal moments of inertia
+inertia via the equation
+:math:`\sqrt{	ext{pm3}^{2} - 	ext{pm1}^{2}} / 	ext{pm3}`
+where :math:`	ext{pm1}` and :math:`	ext{pm3}`
+are the smallest and largest principal moments of inertia
 respectively. Therefore, for a spherically symmetric molecule its
 eccentricity will be 0 while for an aspherical molecule like CO2 its
 eccentricity will be 1. This job follows the equations used in rdkit
@@ -397,7 +388,8 @@ Computes the dynamic incoherent structure factor in the Gaussian approximation.
 Gaussian approximation is exact for a system of free particles and a system of
 particles undergoing brownian motion. The results of this analysis will be close
 to the Dynamic Incoherent Structure Factor analysis in the limits of very
-short Q and very long Q, and will differ from it for intermediate Q values.
+short :math:`\mathbf{q}` and very long :math:`\mathbf{q}`, and will differ from
+it for intermediate :math:`\mathbf{q}` values.
 
 Inputs:
 
@@ -425,7 +417,7 @@ The infrared spectrum is calculated as the autocorrelation of the derivative
 the molecular dipole moments.
 
 This analysis requires molecules to be defined in the system,
-and partial charges to be set to non-zero values.    
+and partial charges to be set to non-zero values.
 
 Inputs:
 
@@ -455,10 +447,13 @@ completely random direction from the one before, as analyzed by Albert Einstein
 in a study of Brownian motion. The MSD of a particle in this case
 is proportional to the time elapsed:
 
-.. math:: <r^{2}> = 6Dt + C
+.. math:: \langle d^{2}(t) 
+angle = 6Dt + C
 
-where :math:`<r^{2}>` is the MSD and t is the time. D and C are constants. The
-constant D is the so-called diffusion coefficient.
+where :math:`\langle d^{2}(t) 
+angle` is the MSD and :math:`t` is the time.
+:math:`D` and :math:`C` are constants. The constant :math:`D` is the so-called
+diffusion coefficient.
 
 More generally the MSD reveals the distance or volume explored by atoms and
 molecules as a function of time. In crystals, the MSD quickly saturates at a
@@ -491,10 +486,10 @@ Maps the volume occupied by atoms over time.
 A Molecular Trace is a time-integrated trace of selected atoms coordinates.
 
 * the minimal and maximal coordinates from the selected atomic trajectories are
-  computed.
+computed.
 * based on these min/max and a spatial resolution, a cartesian grid is constructed.
 * for each atom and for each frame of the selected trajectories, a histogram of
-  presence, called the spatial density, is constructed.
+presence, called the spatial density, is constructed.
 
 The molecular trace can reveal anisotropic vibrations and diffusion pathways.
 
@@ -519,7 +514,9 @@ NeutronDynamicTotalStructureFactor
 Combines the coherent and incoherent dynamic structure factors.
 
 The partial results need to be calculated before using the Dynamic
-Coherent/Incoherent Structure Factor jobs with the same Q vector setttings.
+Coherent/Incoherent Structure Factor jobs with the same
+:math:`\mathbf{q}`-vector settings.
+
 The partial results will be scaled by neutron scattering lengths, producing
 a total result with coherent and incoherent parts on the same scale,
 directly comparable to each other.

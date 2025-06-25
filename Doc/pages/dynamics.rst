@@ -452,12 +452,12 @@ the projected VACF
    {C_{\mathbf{vv}\alpha\alpha}{(\hat{\mathbf{q}}, \omega) = \frac{1}{2\pi}} \frac{1}{Nc_{\alpha}}\sum_{j \in \alpha} {\int\mathrm{d} t \,} C_{\mathbf{vv}jj}(\hat{\mathbf{q}}, t) e^{-i \omega t}}.
 
 Provided the VACF decays to zero at long time, the function may be
-integrated mathematically to calculate the diffusion coefficient D, as in:
+integrated mathematically to calculate the diffusion coefficient :math:`D`, as in:
 
 .. math:: 
    :label: vacf6
-
-   D = \\frac{1}{3}\int_{0}^{+\infty}{<v(0) \cdot v(t)>dt}
+   
+   D = \frac{1}{3}\int\limits_{0}^{\infty}\mathrm{d} t \, \langle \mathbf{v}(0) \cdot \mathbf{v}(t) \rangle.
 
 This is a special case of a more general relationship between the VACF and the
 mean square displacement, and belongs to a class of properties known as the
