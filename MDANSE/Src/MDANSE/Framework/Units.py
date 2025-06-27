@@ -243,12 +243,12 @@ class _Unit:
         10 V
         """
         u = copy.deepcopy(self)
-        if isinstance(other, numbers.Number):
+        if isinstance(other, (numbers.Number, numbers.Complex)):
             u._factor /= other
         elif isinstance(other, _Unit):
             u._div_by(other)
         else:
-            raise UnitError("Invalid operand")
+            raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
         return u
 
@@ -281,7 +281,7 @@ class _Unit:
             u._div_by(other)
             u._factor = math.floor(u._factor)
         else:
-            raise UnitError("Invalid operand")
+            raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
         return u
 
@@ -299,14 +299,14 @@ class _Unit:
         """
 
         u = copy.deepcopy(self)
-        if isinstance(other, numbers.Number):
+        if isinstance(other, (numbers.Number, numbers.Complex)):
             u._factor *= other
             return u
         elif isinstance(other, _Unit):
             u._mult_by(other)
             return u
         else:
-            raise UnitError("Invalid operand")
+            raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
     def __pow__(self, n: float):
         """Raise a _Unit to a factor.
@@ -461,11 +461,14 @@ class _Unit:
         if isinstance(other, numbers.Number):
             self._factor /= other
             return self
+        elif isinstance(other, numbers.Complex):
+            self._factor /= other
+            return self
         elif isinstance(other, _Unit):
             self._div_by(other)
             return self
         else:
-            raise UnitError("Invalid operand")
+            raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
     def __ifloordiv__(self, other):
         """Divide _Unit instances and truncate.
@@ -490,11 +493,14 @@ class _Unit:
         if isinstance(other, numbers.Number):
             self._factor *= other
             return self
+        elif isinstance(other, numbers.Complex):
+            self._factor *= other
+            return self
         elif isinstance(other, _Unit):
             self._mult_by(other)
             return self
         else:
-            raise UnitError("Invalid operand")
+            raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
     def __ipow__(self, n):
         self._factor = pow(self._factor, n)
@@ -536,11 +542,14 @@ class _Unit:
         if isinstance(other, numbers.Number):
             u._factor /= other
             return u
+        elif isinstance(other, numbers.Complex):
+            u._factor /= other
+            return u
         elif isinstance(other, _Unit):
             u._div_by(other)
             return u
         else:
-            raise UnitError("Invalid operand")
+            raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
     def __rmul__(self, other):
         """Multiply _Unit instances.  See __mul__."""
@@ -549,11 +558,14 @@ class _Unit:
         if isinstance(other, numbers.Number):
             u._factor *= other
             return u
+        elif isinstance(other, numbers.Complex):
+            u._factor *= other
+            return u
         elif isinstance(other, _Unit):
             u._mult_by(other)
             return u
         else:
-            raise UnitError("Invalid operand")
+            raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
     def __rsub__(self, other):
         """Subtract _Unit instances.  See __sub__."""

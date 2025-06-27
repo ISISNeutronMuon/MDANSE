@@ -23,7 +23,7 @@ from MDANSE.Chemistry import (
 )
 import MDANSE.Chemistry.Databases as Databases
 from MDANSE.Chemistry.Databases import (
-    AtomsDatabaseError,
+    AtomsDatabaseError, ComplexEncoder
 )
 
 
@@ -61,6 +61,12 @@ class TestAtomsDatabase(unittest.TestCase):
             "electronegativity": "float",
             "symbol": "str",
         }
+        self.units = {
+            "family": "none",
+            "nucleon": "none",
+            "electronegativity": "none",
+            "symbol": "none",
+        }
         self.overwrite_database()
 
     @classmethod
@@ -70,40 +76,7 @@ class TestAtomsDatabase(unittest.TestCase):
     def overwrite_database(self):
         ATOMS_DATABASE._data = self.data
         ATOMS_DATABASE._properties = self.properties
-
-    def test__load_default_database(self):
-        with patch(
-            "builtins.open",
-            new_callable=mock_open,
-            read_data=json.dumps(
-                {
-                    "properties": {"family": "str"},
-                    "atoms": {"H": {"family": "non-metal"}},
-                }
-            ),
-        ) as _m:
-            ATOMS_DATABASE._load()
-            self.assertDictEqual({"family": "str"}, ATOMS_DATABASE._properties)
-            self.assertDictEqual({"H": {"family": "non-metal"}}, ATOMS_DATABASE._data)
-
-    def test__load_user_database(self):
-        with patch(
-            "builtins.open",
-            new_callable=mock_open,
-            read_data=json.dumps(
-                {
-                    "properties": {"family": "str"},
-                    "atoms": {"H": {"family": "non-metal"}},
-                }
-            ),
-        ) as m:
-            with patch("pathlib.Path.exists", spec=True):
-                ATOMS_DATABASE._load("user.json")
-                m.assert_called_with(Path("user.json"), encoding="utf-8")
-                self.assertDictEqual({"family": "str"}, ATOMS_DATABASE._properties)
-                self.assertDictEqual(
-                    {"H": {"family": "non-metal"}}, ATOMS_DATABASE._data
-                )
+        ATOMS_DATABASE._units = self.units
 
     def test___contains__(self):
         self.assertFalse("fhsdjfsd" in ATOMS_DATABASE)
@@ -119,7 +92,7 @@ class TestAtomsDatabase(unittest.TestCase):
             },
             ATOMS_DATABASE["H"],
         )
-        with self.assertRaises(AtomsDatabaseError):
+        with self.assertRaises(KeyError):
             _a = ATOMS_DATABASE["INVALID"]
 
     def test___iter__(self):
@@ -158,7 +131,7 @@ class TestAtomsDatabase(unittest.TestCase):
             ATOMS_DATABASE.add_property("symbol", "str")
 
     def test_add_property_invalid_type(self):
-        with self.assertRaises(AtomsDatabaseError):
+        with self.assertRaises(TypeError):
             ATOMS_DATABASE.add_property("new_property", "xxxx")
 
     def test_add_property_valid(self):
@@ -171,10 +144,10 @@ class TestAtomsDatabase(unittest.TestCase):
         self.assertEqual(["Fe", "H", "H2", "O"], ATOMS_DATABASE.atoms)
 
     def test_get_isotopes_valid(self):
-        self.assertEqual(["H", "H2"], ATOMS_DATABASE.get_isotopes("H"))
+        self.assertEqual(["H2"], ATOMS_DATABASE.get_isotopes("H"))
 
     def test_get_isotopes_unknown_atom(self):
-        with self.assertRaises(AtomsDatabaseError):
+        with self.assertRaises(KeyError):
             ATOMS_DATABASE.get_isotopes("INVALID")
 
     def test_properties(self):
@@ -189,48 +162,30 @@ class TestAtomsDatabase(unittest.TestCase):
         )
 
     def test_get_property_invalid_property(self):
-        with self.assertRaises(AtomsDatabaseError):
+        with self.assertRaises(KeyError):
             ATOMS_DATABASE.get_property("INVALID")
 
     def test_get_value_valid(self):
         self.assertEqual("H", ATOMS_DATABASE.get_value("H", "symbol"))
 
     def test_get_value_unknown_atom(self):
-        with self.assertRaises(AtomsDatabaseError):
+        with self.assertRaises(KeyError):
             ATOMS_DATABASE.get_value("INVALID", "symbol")
 
     def test_get_value_unknown_property(self):
-        with self.assertRaises(AtomsDatabaseError):
+        with self.assertRaises(KeyError):
             ATOMS_DATABASE.get_value("H", "INVALID")
-
-    def test_get_value_for_multiple_atoms_valid(self):
-        self.assertEqual(
-            [0, 0, 2, 0, 0, 0, 0],
-            ATOMS_DATABASE.get_values_for_multiple_atoms(
-                ["H", "H", "H2", "O", "O", "O", "H"], "nucleon"
-            ),
-        )
-
-    def test_get_value_for_multiple_atoms_unknown_atom(self):
-        with self.assertRaises(AtomsDatabaseError):
-            ATOMS_DATABASE.get_values_for_multiple_atoms(
-                ["H", "O", "O", "INVALID"], "nucleon"
-            )
-
-    def test_get_value_for_multiple_atoms_unknown_property(self):
-        with self.assertRaises(AtomsDatabaseError):
-            ATOMS_DATABASE.get_values_for_multiple_atoms(["H", "H", "H"], "INVALID")
 
     def test_set_value_valid(self):
         ATOMS_DATABASE.set_value("H", "symbol", "C")
         self.assertEqual("C", ATOMS_DATABASE["H"]["symbol"])
 
     def test_set_value_unknown_atom(self):
-        with self.assertRaises(AtomsDatabaseError):
+        with self.assertRaises(KeyError):
             ATOMS_DATABASE.set_value("INVALID", "symbol", "H")
 
     def test_set_value_unknown_property(self):
-        with self.assertRaises(AtomsDatabaseError):
+        with self.assertRaises(KeyError):
             ATOMS_DATABASE.set_value("H", "INVALID", "H")
 
     def test_set_value_invalid_value_type(self):
@@ -284,21 +239,12 @@ class TestAtomsDatabase(unittest.TestCase):
         )
 
     def test_match_numeric_property_unknown_property(self):
-        with self.assertRaises(AtomsDatabaseError) as e:
+        with self.assertRaises(KeyError):
             ATOMS_DATABASE.match_numeric_property("INVALID", 0)
-        self.assertEqual(
-            "The property INVALID is not registered in the database",
-            str(e.exception)[1:-1],
-        )
 
     def test_match_numeric_property_non_numeric_value(self):
-        with self.assertRaises(AtomsDatabaseError) as e:
+        with self.assertRaises(AtomsDatabaseError):
             ATOMS_DATABASE.match_numeric_property("electronegativity", [])
-        self.assertEqual(
-            "The provided value must be a numeric type, but [] was provided, which is of type "
-            "<class 'list'>. If you are sure that [] is numeric, then your database might be corrupt.",
-            str(e.exception)[1:-1],
-        )
 
     def test_n_atoms(self):
         self.assertEqual(4, ATOMS_DATABASE.n_atoms)
@@ -319,12 +265,12 @@ class TestAtomsDatabase(unittest.TestCase):
     def test_save(self):
         with (
             patch("builtins.open", new_callable=mock_open) as op,
-            patch("json.dump") as dump,
+            patch("json.dumps") as dump,
         ):
             ATOMS_DATABASE.save()
             op.assert_called_with(ATOMS_DATABASE._USER_DATABASE, "w")
             dump.assert_called_with(
-                {"properties": self.properties, "atoms": self.data}, ANY, indent=4
+                {"properties": self.properties, "units": self.units, "atoms": self.data}, indent=4, cls=ComplexEncoder
             )
 
     def test_remove_atom(self):

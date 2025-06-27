@@ -30,10 +30,11 @@ from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
-job_tab_label = """This is the list of jobs
+job_tab_label = """This is the list of <b>analysis tasks</b>
 you can run using MDANSE.
-Pick a job to see additional information.
-Use the button to start a job,
+Pick an analysis name to see additional information.
+<br><br>
+Use a button at the bottom of the panel to start an analysis run,
 or to save the inputs as a script.
 """
 

@@ -264,8 +264,8 @@ class CP2K(Converter):
             ).toval("nm/ps")
         if self.configuration["force_file"]["value"]:
             variables["forces"] = self._forceFile.read_step(index) * measure(
-                1.0, iunit="uma ang / fs2"
-            ).toval("uma nm / ps2")
+                1.0, iunit="Da ang / fs2"
+            ).toval("Da nm / ps2")
 
         real_conf = PeriodicRealConfiguration(
             self._trajectory.chemical_system, coords, unitcell, **variables

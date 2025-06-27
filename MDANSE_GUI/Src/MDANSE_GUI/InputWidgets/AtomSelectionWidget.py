@@ -495,6 +495,9 @@ class SelectionHelper(QDialog):
         self.selection_model.accept_from_widget(
             '{"function_name": "select_all", "operation_type": "union"}'
         )
+        self.selection_model.accept_from_widget(
+            '{"function_name": "select_dummy", "operation_type": "difference"}'
+        )
         self.recalculate_selection()
 
 
@@ -520,6 +523,9 @@ class AtomSelectionWidget(WidgetBase):
             load_button.clicked.connect(self.load_selection_from_file_dialog)
         else:
             self._field = QLineEdit(self._base)
+            default_text = str(self._configurator.default)
+            self._field.setPlaceholderText(default_text)
+            self._field.setText(default_text)
         traj_config = self._configurator._configurable[
             self._configurator._dependencies["trajectory"]
         ]

@@ -214,10 +214,17 @@ class TabbedWindow(QMainWindow):
             ("units", self.launchUnitsEditor),
             ("user", self.launchStyleSelector),
         ]
+        tooltips = {
+            "periodic_table": "Periodic Table of Elements",
+            "element": "Atom Property Editor",
+            "units": "Physical Units defintions",
+            "user": "Customise GUI Style",
+        }
         for key, slot in valid_keys:
             icon = self.resources._icons[key]
             action = QAction(icon, str(key), self._toolBar)
             action.triggered.connect(slot)
+            action.setToolTip(tooltips[key])
             self._actions.append(action)
             self._toolbar_buttons.append((action, key))
             # self._actions.append(self._toolBar.addAction(icon, str(key)))

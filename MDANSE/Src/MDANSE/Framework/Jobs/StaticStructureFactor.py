@@ -261,8 +261,19 @@ class StaticStructureFactor(DistanceHistogram):
             calc_func, self._outputData
         )
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 2)
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            2,
+        )
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = (n_selected / n_total) ** 2
+
         if self.intra:
             assign_weights(
                 self._outputData, weight_dict, "ssf_intra_%s", self.labels_intra
@@ -270,10 +281,13 @@ class StaticStructureFactor(DistanceHistogram):
             assign_weights(self._outputData, weight_dict, "ssf_inter_%s", self.labels)
             assign_weights(self._outputData, weight_dict, "ssf_%s", self.labels)
             ssfIntra = weighted_sum(self._outputData, "ssf_intra_%s", self.labels_intra)
-            self._outputData["ssf_intra_total"][:] = ssfIntra
+            self._outputData["ssf_intra_total"][:] = ssfIntra / fact
             ssfInter = weighted_sum(self._outputData, "ssf_inter_%s", self.labels)
-            self._outputData["ssf_inter_total"][:] = ssfInter
-            self._outputData["ssf_total"][:] = ssfIntra + ssfInter
+            self._outputData["ssf_inter_total"][:] = ssfInter / fact
+            self._outputData["ssf_total"][:] = (ssfIntra + ssfInter) / fact
+            self._outputData["ssf_intra_total"].scaling_factor = fact
+            self._outputData["ssf_inter_total"].scaling_factor = fact
+            self._outputData["ssf_total"].scaling_factor = fact
             for i in ["_intra", "_inter", ""]:
                 self.configuration["grouping_level"].add_grouped_totals(
                     self._outputData,
@@ -288,9 +302,10 @@ class StaticStructureFactor(DistanceHistogram):
                 )
         else:
             assign_weights(self._outputData, weight_dict, "ssf_%s", self.labels)
-            self._outputData["ssf_total"][:] = weighted_sum(
-                self._outputData, "ssf_%s", self.labels
+            self._outputData["ssf_total"][:] = (
+                weighted_sum(self._outputData, "ssf_%s", self.labels) / fact
             )
+            self._outputData["ssf_total"].scaling_factor = fact
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

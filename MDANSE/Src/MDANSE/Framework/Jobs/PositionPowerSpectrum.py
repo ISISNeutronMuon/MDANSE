@@ -259,22 +259,42 @@ class PositionPowerSpectrum(IJob):
                     fft="rfft",
                 )
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 1)
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            1,
+        )
         assign_weights(self._outputData, weight_dict, "pacf_%s", self.labels)
         assign_weights(self._outputData, weight_dict, "pps_%s", self.labels)
         if self.add_ideal_results:
             assign_weights(self._outputData, weight_dict, "pps_ideal_%s", self.labels)
-        self._outputData["pacf_total"][:] = weighted_sum(
-            self._outputData,
-            "pacf_%s",
-            self.labels,
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
+
+        self._outputData["pacf_total"][:] = (
+            weighted_sum(
+                self._outputData,
+                "pacf_%s",
+                self.labels,
+            )
+            / fact
         )
-        self._outputData["pps_total"][:] = weighted_sum(
-            self._outputData,
-            "pps_%s",
-            self.labels,
+        self._outputData["pacf_total"].scaling_factor = fact
+        self._outputData["pps_total"][:] = (
+            weighted_sum(
+                self._outputData,
+                "pps_%s",
+                self.labels,
+            )
+            / fact
         )
+        self._outputData["pps_total"].scaling_factor = fact
+
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "pacf",
@@ -292,11 +312,15 @@ class PositionPowerSpectrum(IJob):
             partial_result=True,
         )
         if self.add_ideal_results:
-            self._outputData["pps_ideal_total"][:] = weighted_sum(
-                self._outputData,
-                "pps_ideal_%s",
-                self.labels,
+            self._outputData["pps_ideal_total"][:] = (
+                weighted_sum(
+                    self._outputData,
+                    "pps_ideal_%s",
+                    self.labels,
+                )
+                / fact
             )
+            self._outputData["pps_ideal_total"].scaling_factor = fact
             self.configuration["grouping_level"].add_grouped_totals(
                 self._outputData,
                 "pps_ideal",

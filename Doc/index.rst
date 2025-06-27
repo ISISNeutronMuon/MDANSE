@@ -20,7 +20,7 @@ The results can be directly compared with
 neutron scattering experiments, particularly inelastic and quasi-elastic
 neutron scattering spectroscopies. MDANSE can analyse MD trajectories 
 produced by different simulation software, including
-CASTEP, VASP, DMOL, Gromacs, DL_POLY, CHARMM, LAMMPS, DFTB and CP2K.
+CASTEP, VASP, Gromacs, DL_POLY, CHARMM, LAMMPS, DFTB and CP2K.
 General-purpose trajectory converters using external libraries
 (ASE, mdtraj and MDAnalysis) are also available in MDANSE.
 The recommended way of working with MDANSE is via the
@@ -73,6 +73,7 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
    pages/trajectory
    pages/correlation
    pages/weights
+   pages/grouping
    pages/atom_selection
    pages/qvectors
    pages/dynamics

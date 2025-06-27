@@ -93,6 +93,9 @@ class TrajectoryInfo(QTextBrowser):
     @Slot(object)
     def update_panel(self, data: tuple):
         fullpath, incoming = data
+        if incoming is None:
+            self.clear()
+            return
         try:
             text = trajectory_summary(incoming)  # this is from a trajectory object
         except AttributeError as err:

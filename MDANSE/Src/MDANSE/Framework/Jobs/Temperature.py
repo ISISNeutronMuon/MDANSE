@@ -22,7 +22,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Signal import differentiate
 
-KB = measure(1.380649e-23, "kg m2/s2 K").toval("uma nm2/ps2 K")
+KB = measure(1.380649e-23, "kg m2/s2 K").toval("Da nm2/ps2 K")
 
 
 class Temperature(IJob):

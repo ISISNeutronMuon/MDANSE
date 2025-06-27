@@ -33,8 +33,11 @@ from MDANSE_GUI.Tabs.Models.PlottingContext import (
 
 
 class DataPlotter(QWidget):
-    """This part of the interface will show the selection of datasets
-    created by the user, and allow the creation of a plot."""
+    """Part of PlotCreator which sends datasets to the plotter.
+
+    This part of the interface will show the selection of datasets
+    created by the user, and allow the creation of a plot.
+    """
 
     error = Signal(str)
     data_for_plotting = Signal(object)
@@ -71,6 +74,7 @@ class DataPlotter(QWidget):
 
     @Slot(object)
     def add_dataset(self, dataset: SingleDataset):
+        """Append a dataset to the current model."""
         if not dataset._valid:
             return
         self._model.add_dataset(dataset)
@@ -84,6 +88,7 @@ class DataPlotter(QWidget):
 
     @Slot()
     def new_plot(self):
+        """Trigger the creation of a new plot in the plotting tab."""
         self.create_new_plot.emit("")
         group = self._settings.group("dialogs")
         try:
@@ -105,6 +110,7 @@ class DataPlotter(QWidget):
 
     @Slot()
     def new_text(self):
+        """Trigger the creation of a new text view in the plotting tab."""
         self.create_new_text.emit("Text view")
         group = self._settings.group("dialogs")
         try:
@@ -126,6 +132,7 @@ class DataPlotter(QWidget):
 
     @Slot()
     def plot_data(self):
+        """Send the data from the internal model to the plotting tab."""
         if len(self._model.datasets()) == 0:
             return
         self.data_for_plotting.emit(self._model)
@@ -149,12 +156,14 @@ class DataPlotter(QWidget):
 
     @Slot(object)
     def accept_data(self, data_set):
+        """Append the incoming data to the inner model."""
         LOG.info(f"Received {data_set}")
         dataset = SingleDataset(data_set[0], data_set[1])
         self.add_dataset(dataset)
 
     @Slot()
     def clear(self):
+        """Remove all the entries from the model."""
         if self._model is None:
             return
         self._model.clear()

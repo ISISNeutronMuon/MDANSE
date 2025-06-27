@@ -13,9 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import itertools
+from __future__ import annotations
+
 from collections import defaultdict
-from typing import Optional
+
+import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
@@ -24,32 +26,37 @@ from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
 
 
 class WeightsConfigurator(SingleChoiceConfigurator):
-    """
-    This configurator allows to select how the properties that depends on atom type will be weighted when computing
-    the total contribution of all atoms.
+    """Select the atom property to be used by the weight scheme.
 
-    Any numeric property defined in MDANSE.Data.ElementsDatabase.ElementsDatabase can be used as a weigh.
+    This configurator allows to select which atom properties will be used as weights
+    when combining the partial contributions into the total result.
+
     """
 
     _default = "equal"
 
-    def __init__(self, name, **kwargs):
-        """
-        Initializes the configurator.
+    def __init__(self, name: str, **kwargs):
+        """Create the configurator.
 
-        :param name: the name of the configurator as it will appear in the configuration.
-        :type name: str
-        """
+        Parameters
+        ----------
+        name : str
+            The parent object (IJob) will use this name for this object.
 
+        """
         self._optional_grouping = {}
         self._aliases = {"mass": "atomic_weight"}
 
         filtered_choices = self.filter_choices()
         SingleChoiceConfigurator.__init__(
-            self, name, choices=filtered_choices, **kwargs
+            self,
+            name,
+            choices=filtered_choices,
+            **kwargs,
         )
 
     def filter_choices(self):
+        """Limit the list of atom properties to usable values."""
         full_choices = ATOMS_DATABASE.numeric_properties + list(self._aliases.keys())
         to_discard = [x for x in full_choices if "energy" in x]
         to_discard += [
@@ -60,7 +67,6 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             "element",
             "family",
             "group",
-            "series",
             "state",
         ]
         limited_choices = [x for x in full_choices if x not in to_discard]
@@ -78,12 +84,14 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         ] + [x for x in limited_choices if "atomic" in x or "radius" in x]
         return limited_choices
 
-    def configure(self, value):
-        """
-        Configure the weight.
+    def configure(self, value: str):
+        """Assign the input value and check validity.
 
-        :param value: the name of the weight to use.
-        :type value: one of the numeric properties of MDANSE.Data.ElementsDatabase.ElementsDatabase
+        Parameters
+        ----------
+        value : str
+            Name of an atom property.
+
         """
         self._original_input = value
         self._trajectory = self._configurable[self._dependencies["trajectory"]][
@@ -96,7 +104,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
 
         value = value.lower()
 
-        if value in self._aliases.keys():
+        if value in self._aliases:
             value = self._aliases[value]
 
         if value not in self._trajectory.properties_in_database:
@@ -105,10 +113,25 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             )
             return
 
+        if self.test_values_for_nan(value):
+            self.error_status = f"Property {value} is NaN for at leas one atom type."
+            return
+
         self["property"] = value
         self.error_status = "OK"
 
-    def get_weights(self, prop: Optional[str] = None):
+    def test_values_for_nan(self, property_name: str) -> bool:
+        """Throw an error early if weights are not usable."""
+        atm_select = self._configurable[self._dependencies["atom_selection"]]
+        atom_types = np.unique(atm_select["elements"])
+        return any(
+            np.isnan(self._trajectory.get_atom_property(atom, property_name))
+            for atom in atom_types
+        )
+
+    def get_weights(
+        self, *, prop: str | None = None
+    ) -> tuple[dict[str, float], dict[str, float]]:
         """Generate a dictionary of weights.
 
         Parameters
@@ -119,30 +142,32 @@ class WeightsConfigurator(SingleChoiceConfigurator):
 
         Returns
         -------
-        dict[str, float]
+        tuple[dict[str, float], dict[str, float]]
             The dictionary of the weights.
+
         """
         if not prop:
             prop = self["property"]
 
-        atom_selection_configurator = self._configurable[
-            self._dependencies["atom_selection"]
-        ]
+        atm_select = self._configurable[self._dependencies["atom_selection"]]
 
-        weights = defaultdict(float)
-        for name, elements in itertools.islice(
-            zip(
-                atom_selection_configurator["names"],
-                atom_selection_configurator["elements"],
+        weights = []
+        for n_elements, atm_names, atm_elements in [
+            (atm_select.get_natoms(), atm_select["names"], atm_select["elements"]),
+            (
+                atm_select.get_all_natoms(),
+                atm_select["all_names"],
+                atm_select["all_elements"],
             ),
-            atom_selection_configurator["selection_length"],
-        ):
-            weights[name] += sum(
-                self._trajectory.get_atom_property(element, prop)
-                for element in elements
-            )
+        ]:
+            w = defaultdict(float)
+            for name, elements in zip(atm_names, atm_elements):
+                w[name] += sum(
+                    self._trajectory.get_atom_property(element, prop)
+                    for element in elements
+                )
+            for element, num_atoms in n_elements.items():
+                w[element] /= num_atoms
+            weights.append(w)
 
-        for element, num_atoms in atom_selection_configurator.get_natoms().items():
-            weights[element] /= num_atoms
-
-        return weights
+        return tuple(weights)

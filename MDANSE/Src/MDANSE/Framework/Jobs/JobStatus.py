@@ -13,35 +13,64 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-import collections
 import time
+from dataclasses import dataclass
+from enum import Enum, auto
+from typing import Optional, TypedDict
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Status import Status
 
 
-class JobState(collections.OrderedDict):
-    pass
+class JobStates(Enum):
+    """Possible states of jobs."""
+
+    STARTING = auto()
+    RUNNING = auto()
+    ABORTED = auto()
+    FAILED = auto()
+    PAUSED = auto()
+    FINISHED = auto()
+
+
+ALLOWED_ACTIONS = {
+    JobStates.RUNNING: {"Pause", "Terminate", "Kill"},
+    JobStates.ABORTED: {"Delete"},
+    JobStates.FAILED: {"Delete"},
+    JobStates.FINISHED: {"Delete"},
+    JobStates.STARTING: {"Pause", "Terminate", "Kill"},
+    JobStates.PAUSED: {"Resume", "Terminate", "Kill"},
+}
+
+
+@dataclass(eq=False)  # With 3.10 add: slots=True, kw_only=True
+class JobInfo:
+    """Current state of job."""
+
+    name: Optional[str] = None
+    pid: int = PLATFORM.pid()
+    type: Optional[str] = None
+    start: Optional[float] = None
+    elapsed: str = "N/A"
+    current_step: int = 0
+    n_steps: int = 0
+    progress: int = 0
+    state: Optional[str] = None
+    traceback: str = ""
+    temporary_file: Optional[str] = None
+    info: str = ""
 
 
 class JobStatus(Status):
     def __init__(self, job):
         Status.__init__(self)
 
-        self._state = JobState()
-        self._state["pid"] = PLATFORM.pid()
-        self._state["type"] = job.__class__.__name__
-        self._state["start"] = str(time.time())
-        self._state["elapsed"] = "N/A"
-        self._state["current_step"] = 0
-        self._state["n_steps"] = 0
-        self._state["progress"] = 0
-        self._state["state"] = "running"
-        self._state["name"] = job.name
-        self._state["traceback"] = ""
-        self._state["temporary_file"] = None
-        self._state["info"] = ""
+        self._state = JobInfo(
+            name=job.name,
+            type=type(job).__name__,
+            start=time.time(),
+            state=JobStates.RUNNING,
+        )
 
         self.save_status()
 
@@ -56,7 +85,7 @@ class JobStatus(Status):
         pass
 
     def start_status(self):
-        self._state["n_steps"] = self.nSteps
+        self._state.n_steps = self.nSteps
 
         self.save_status()
 
@@ -67,12 +96,12 @@ class JobStatus(Status):
         pass
 
     def update_status(self):
-        self._state["elapsed"] = self.elapsedTime
-        self._state["current_step"] = self.currentStep
+        self._state.elapsed = self.elapsedTime
+        self._state.current_step = self.currentStep
         if self._nSteps is not None:
-            self._state["progress"] = 100 * self.currentStep / self.nSteps
+            self._state.progress = 100 * self.currentStep / self.nSteps
         else:
-            self._state["progress"] = 0
+            self._state.progress = 0
 
         self.save_status()
 
