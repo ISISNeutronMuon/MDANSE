@@ -240,10 +240,10 @@ Inputs:
 DynamicCoherentStructureFactor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Computes the dynamic coherent structure factor :math:`S_{	ext{coh}}(\mathbf{q}, \omega)` for a set of atoms.
+Computes the dynamic coherent structure factor :math:`S_{\text{coh}}(\mathbf{q}, \omega)` for a set of atoms.
 
 It can be compared to experimental data e.g. the energy-integrated, static structure
-factor :math:`S_{	ext{coh}}(q)` or the dispersion and intensity of phonons.
+factor :math:`S_{\text{coh}}(q)` or the dispersion and intensity of phonons.
 
 The coherent part is derived from correlations between pairs of atoms.
 This analysis requires the :math:`\mathbf{q}`-vectors to be commensurate
@@ -268,7 +268,7 @@ Inputs:
 DynamicIncoherentStructureFactor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Computes the dynamic incoherent structure factor :math:`S_{	ext{inc}}(\mathbf{q},\omega)` for a set of atoms.
+Computes the dynamic incoherent structure factor :math:`S_{\text{inc}}(\mathbf{q},\omega)` for a set of atoms.
 
 It can be compared to experimental data e.g. the quasielastic scattering due to
 diffusion processes.
@@ -303,8 +303,8 @@ Computes the eccentricity of a selected set of atoms.
 
 The eccentricity is calculated from the principal moments of
 inertia via the equation
-:math:`\sqrt{	ext{pm3}^{2} - 	ext{pm1}^{2}} / 	ext{pm3}`
-where :math:`	ext{pm1}` and :math:`	ext{pm3}`
+:math:`\sqrt{\text{pm3}^{2} - \text{pm1}^{2}} / \text{pm3}`
+where :math:`\text{pm1}` and :math:`\text{pm3}`
 are the smallest and largest principal moments of inertia
 respectively. Therefore, for a spherically symmetric molecule its
 eccentricity will be 0 while for an aspherical molecule like CO2 its
@@ -418,11 +418,9 @@ completely random direction from the one before, as analyzed by Albert Einstein
 in a study of Brownian motion. The MSD of a particle in this case
 is proportional to the time elapsed:
 
-.. math:: \langle d^{2}(t) 
-angle = 6Dt + C
+.. math:: \langle d^{2}(t) \rangle = 6Dt + C
 
-where :math:`\langle d^{2}(t) 
-angle` is the MSD and :math:`t` is the time.
+where :math:`\langle d^{2}(t) \rangle` is the MSD and :math:`t` is the time.
 :math:`D` and :math:`C` are constants. The constant :math:`D` is the so-called
 diffusion coefficient.
 
