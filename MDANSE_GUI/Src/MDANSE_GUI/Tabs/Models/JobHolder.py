@@ -13,24 +13,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import time
 import traceback
 from logging import Handler
 from logging.handlers import QueueListener
 from multiprocessing import Event, Pipe, Queue
+from typing import Optional
 
 from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Framework.Converters import Converter
+from MDANSE.Framework.Jobs.JobStatus import JobInfo, JobStates
 from MDANSE.MLogging import FMT, LOG
-from MDANSE_GUI.Subprocess.JobState import (
-    Aborted,
-    Failed,
-    Finished,
-    Paused,
-    Running,
-    Starting,
-)
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
 from MDANSE_GUI.Subprocess.Subprocess import Connection, Subprocess
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
@@ -39,9 +34,9 @@ from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 class JobThread(QThread):
     def __init__(
         self,
-        job_comm: "JobCommunicator",
-        receiving_end: "Connection",
-        subprocess_reference: "Subprocess",
+        job_comm: JobCommunicator,
+        receiving_end: Connection,
+        subprocess_reference: Subprocess,
     ):
         super().__init__()
         self._job_comm = job_comm
@@ -58,7 +53,7 @@ class JobThread(QThread):
         return retval
 
     def fail(self):
-        self._job_comm.status_update(("COMMUNICATION", False))
+        self._job_comm.status_update(JobInfo(state=JobStates.FAILED))
         self._keep_running = False
         self._timer.stop()
         self.terminate()
@@ -114,34 +109,31 @@ class JobEntry(QObject):
     def __init__(
         self,
         *args,
-        command=None,
-        entry_number=0,
-        pause_event=None,
-        load_afterwards=False,
+        command: Optional[str] = None,
+        entry_number: int = 0,
+        pause_event: Optional[Event] = None,
+        load_afterwards: bool = False,
     ):
         super().__init__(*args)
+
         self._command = command
         self._finished = False
         self._parameters = {}
         self._pause_event = pause_event
         self._load_afterwards = load_afterwards
-        # state pattern
-        self._current_state = Starting(self)
-        self._Starting = Starting(self)
-        self._Finished = Finished(self)
-        self._Aborted = Aborted(self)
-        self._Running = Running(self)
-        self._Failed = Failed(self)
-        self._Paused = Paused(self)
-        # other variables
-        self.percent_complete = 0
-        self.steps_complete = 0
+
+        self.job = JobInfo(
+            name=command,
+            start=time.time(),
+            state=JobStates.STARTING,
+        )
+
+        # Other variables
         self._entry_number = entry_number
-        self.total_steps = 99
         self._prog_item = QStandardItem()
         self._stat_item = QStandardItem()
-        for item in [self._stat_item]:
-            item.setData(entry_number)
+        self._stat_item.setData(entry_number)
+
         self._prog_item.setData(0, role=Qt.ItemDataRole.UserRole)
         self._prog_item.setData("progress", role=Qt.ItemDataRole.DisplayRole)
         self._prog_item.setData(0, role=ProgressDelegate.progress_role)
@@ -149,18 +141,18 @@ class JobEntry(QObject):
         self.handler = JobLogHandler()
 
     def text_summary(self) -> str:
-        result = ""
-        result += f"Job type: {self._command}\n"
-        result += "Parameters:\n"
-        for key, value in self._parameters.items():
-            result += f" - {key} = {value}\n"
-        result += "Status:\n"
-        result += f"Current state: {self._current_state._label}\n"
-        result += f"Percent complete: {self.percent_complete}\n"
-        return result
+        nl = "\n"
+        return f"""\
+Job type: {self._command}
+Parameters:
+{nl.join(" - {} = {}".format(*kv) for kv in self._parameters.items())}
+Status:
+  Current state: {self.job.state.name.title()}
+  Percent complete: {self.job.progress}
+"""
 
     @property
-    def parameters(self):
+    def parameters(self) -> dict:
         return self._parameters
 
     @parameters.setter
@@ -168,12 +160,12 @@ class JobEntry(QObject):
         self._parameters = input
 
     def update_fields(self):
-        self._prog_item.setText(f"{self.percent_complete} percent complete")
-        self._prog_item.setData(self.percent_complete, role=Qt.ItemDataRole.UserRole)
+        self._prog_item.setText(f"{self.job.progress} percent complete")
+        self._prog_item.setData(self.job.progress, role=Qt.ItemDataRole.UserRole)
         self._prog_item.setData(
-            int(self.steps_complete), role=ProgressDelegate.progress_role
+            int(self.job.current_step), role=ProgressDelegate.progress_role
         )
-        self._stat_item.setText(self._current_state._label)
+        self._stat_item.setText(self.job.state.name.title())
 
     @Slot(bool)
     def on_finished(self, success: bool):
@@ -181,12 +173,14 @@ class JobEntry(QObject):
             return
         self._finished = True
         file_name = self.expected_output()
+
         if success:
             if self._load_afterwards:
                 self.for_loading.emit(file_name)
-            self._current_state.finish()
+            self.finish_job()
         else:
-            self._current_state.fail()
+            self.fail_job()
+
         self.free_filename.emit(file_name)
         self.update_fields()
 
@@ -210,19 +204,18 @@ class JobEntry(QObject):
     @Slot(int)
     def on_started(self, target_steps: int):
         LOG.info(f"Item received on_started: {target_steps} total steps")
-        self.total_steps = target_steps
+        self.job.n_steps = target_steps
         self._prog_item.setData(target_steps, role=ProgressDelegate.progress_role + 1)
-        self._current_state.start()
-        self.update_fields()
+        self.start_job()
 
     @Slot(int)
     def on_update(self, completed_steps: int):
         # print(f"completed {completed_steps} out of {self.total_steps} steps")
-        if self.total_steps > 0:
-            self.steps_complete = completed_steps
-            self.percent_complete = round(99 * completed_steps / self.total_steps, 1)
+        if self.job.n_steps > 0:
+            self.job.current_step = completed_steps
+            self.job.progress = round(99 * self.job.current_step / self.job.n_steps, 1)
         else:
-            self.percent_complete = 0
+            self.job.progress = 0
         self.update_fields()
         self._prog_item.emitDataChanged()
 
@@ -230,20 +223,35 @@ class JobEntry(QObject):
     def on_oscillate(self):
         """For jobs with unknown duration, the progress bar will bounce."""
 
+    def start_job(self):
+        self.job.state = JobStates.RUNNING
+        self.update_fields()
+
+    def finish_job(self):
+        self.job.progress = 100
+        self.job.state = JobStates.FINISHED
+        self.update_fields()
+
+    def fail_job(self):
+        self.job.state = JobStates.FAILED
+        self.update_fields()
+
     def pause_job(self):
-        self._current_state.pause()
+        self._pause_event.clear()
+        self.job.state = JobStates.PAUSED
         self.update_fields()
 
     def unpause_job(self):
-        self._current_state.unpause()
+        self._pause_event.set()
+        self.job.state = JobStates.RUNNING
         self.update_fields()
 
     def terminate_job(self):
-        self._current_state.terminate()
+        self.job.state = JobStates.ABORTED
         self.update_fields()
 
     def kill_job(self):
-        self._current_state.kill()
+        self.job.state = JobStates.ABORTED
         self.update_fields()
 
 
@@ -257,7 +265,7 @@ class JobHolder(QStandardItemModel):
     unprotect_filename = Signal(str)
     new_job_started = Signal()
 
-    def __init__(self, parent: QObject = None):
+    def __init__(self, parent: Optional[QObject] = None):
         super().__init__(parent=parent)
         self.lock = QMutex()
         self.existing_threads = {}
@@ -330,10 +338,12 @@ class JobHolder(QStandardItemModel):
                     item_th.for_loading.connect(self.results_for_loading)
                 else:
                     item_th.for_loading.connect(self.trajectory_for_loading)
+
         communicator.target.connect(item_th.on_started)  # int
         communicator.progress.connect(item_th.on_update)  # int
         communicator.finished.connect(item_th.on_finished)  # bool
         communicator.oscillate.connect(item_th.on_oscillate)  # nothing
+
         LOG.info("Watcher thread ready to start!")
         watcher_thread.start()
         try:

@@ -47,7 +47,7 @@ class Subprocess(Process):
     ):
         job_instance = IJob.create(job)
         job_instance.build_configuration()
-        status = JobStatusProcess(pipe, queue_0, queue_1, pause_event)
+        status = JobStatusProcess(job, pipe, queue_0, queue_1, pause_event)
         job_instance._status = status
         self._job_instance = job_instance
 

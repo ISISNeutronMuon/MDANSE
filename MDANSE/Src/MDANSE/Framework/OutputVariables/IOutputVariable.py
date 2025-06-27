@@ -61,6 +61,7 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         *,
         main_result: bool = False,
         partial_result: bool = False,
+        dtype: type = np.float64,
     ):
         """Instantiate a new MDANSE output variable.
 
@@ -86,10 +87,12 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         OutputVariableError
             If dimensions of provided data do not align with those of object.
         """
-        if isinstance(value, tuple):
-            value = np.zeros(value, dtype=np.float64)
+        if isinstance(value, np.ndarray):
+            value = np.array(value, dtype=value.dtype)
+        elif isinstance(value, tuple):
+            value = np.zeros(value, dtype=dtype)
         else:
-            value = np.array(list(value), dtype=np.float64)
+            value = np.array(list(value), dtype=dtype)
 
         if isinstance(axis, str):
             axis = axis.split("|")

@@ -26,8 +26,8 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
-HBAR = measure(1.05457182e-34, "kg m2 / s").toval("uma nm2 / ps")
-HARTREE = measure(27.2113845, "eV").toval("uma nm2 / ps2")
+HBAR = measure(1.05457182e-34, "kg m2 / s").toval("Da nm2 / ps")
+HARTREE = measure(27.2113845, "eV").toval("Da nm2 / ps2")
 BOHR = measure(5.29177210903e-11, "m").toval("nm")
 
 
