@@ -272,10 +272,12 @@ class MdanseTrajectory:
                 self.unit_cell_warning = BAD_CELL
                 return
             reference_array = self._unit_cells[0].direct
-            for uc in self._unit_cells[1:]:
-                if not np.allclose(reference_array, uc.direct):
-                    self.unit_cell_warning = CHANGING_CELL
-                    return
+            if any(
+                not np.allclose(reference_array, uc.direct)
+                for uc in self._unit_cells[1:]
+            ):
+                self.unit_cell_warning = CHANGING_CELL
+                return
 
     def time(self):
         """Return the time array for all the frames."""

@@ -58,7 +58,7 @@ class ConfiguratorWarning(Warning):
 class ConfiguratorError(Error):
     """Error raised by a job input parser."""
 
-    def __init__(self, message: str, configurator: IConfigurator = None):
+    def __init__(self, message: str, configurator: IConfigurator | None = None):
         """Store the error message and configurator reference.
 
         Parameters
@@ -137,11 +137,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         self.label = kwargs.get(
             "label",
-            (
-                self.__class__.label
-                if hasattr(self.__class__, "label")
-                else " ".join(name.split("_")).strip()
-            ),
+            (getattr(type(self), "label", name.replace("_", " ").strip())),
         )
 
         self.optional = kwargs.get("optional", False)
@@ -293,11 +289,9 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         """
         if configured is None:
-            names = [str(key) for key in self.configurable._configuration]
             configured = [
-                name
-                for name in names
-                if self.configurable._configuration[name].is_configured()
+                str(name)
+                for name, prop in self.configurable._configuration.values()
+                if prop.is_configured()
             ]
-
-        return all(c in configured for c in list(self.dependencies.values()))
+        return all(c in configured for c in self.dependencies.values())
