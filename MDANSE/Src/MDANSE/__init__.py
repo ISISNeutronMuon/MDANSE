@@ -21,8 +21,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-from MDANSE.Core.Platform import PLATFORM
-
 import MDANSE.Framework
+from MDANSE.Core.Platform import PLATFORM
 
 PLATFORM.create_directory(PLATFORM.macros_directory())

@@ -22,19 +22,19 @@ from qtpy.QtWidgets import QWidget
 from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
-
+from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
-from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Views.InstrumentList import InstrumentList
 from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import InstrumentDetails
 
-
-label_text = """Here you can browse, edit and add instrument profiles.
+label_text = """Here you can browse, edit and add <b>instrument profiles.</b>
+<br><br>
 If you are trying to reproduce the results of a neutron experiment,
 you will need to set at least the correct instrument resolution
 and q-vector coverage to be used in the analysis.
+<br><br>
 The initial inputs of an analysis in the GUI will be affected
 by the instrument profile you chose. You can still change them
 before starting the analysis, if you had something else in mind.
@@ -126,6 +126,7 @@ class InstrumentTab(GeneralTab):
 
 if __name__ == "__main__":
     import sys
+
     from qtpy.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)

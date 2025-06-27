@@ -19,7 +19,6 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional
 
 import numpy as np
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator, QValidator
 from qtpy.QtWidgets import (
@@ -33,6 +32,7 @@ from qtpy.QtWidgets import (
 )
 from rdkit.Chem import MolFromSmarts
 
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets.CheckableComboBox import CheckableComboBox
 
 if TYPE_CHECKING:

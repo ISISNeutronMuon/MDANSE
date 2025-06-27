@@ -17,10 +17,10 @@
 from typing import Optional
 
 import numpy as np
-from vtk.util.numpy_support import numpy_to_vtk
 import vtk
-from qtpy.QtGui import QStandardItemModel, QStandardItem, QColor
-from qtpy.QtCore import Signal, Slot, QObject, Qt
+from qtpy.QtCore import QObject, Qt, Signal, Slot
+from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
+from vtk.util.numpy_support import numpy_to_vtk
 
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
@@ -180,7 +180,6 @@ class AtomProperties(QStandardItemModel):
         groups = {}
         for unique in unique_atoms:
             groups[unique] = indices[np.where(all_atoms == unique)]
-
         colour_index_list = []
         for atom in unique_atoms:
             if (

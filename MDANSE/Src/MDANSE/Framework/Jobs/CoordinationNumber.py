@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from collections.abc import Iterator
-import itertools as it
 import collections
+import itertools as it
+from collections.abc import Iterator
 
 import numpy as np
 import numpy.typing as npt

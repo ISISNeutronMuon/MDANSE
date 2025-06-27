@@ -17,9 +17,9 @@
 import os
 from pathlib import PurePath
 
-from qtpy.QtCore import QObject, Signal, Slot, Qt, QModelIndex
-from qtpy.QtGui import QStandardItem, QStandardItemModel
 import tomlkit
+from qtpy.QtCore import QModelIndex, QObject, Qt, Signal, Slot
+from qtpy.QtGui import QStandardItem, QStandardItemModel
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
 

@@ -16,8 +16,8 @@
 
 import multiprocessing
 
-from qtpy.QtWidgets import QComboBox, QSpinBox
 from qtpy.QtCore import Slot
+from qtpy.QtWidgets import QComboBox, QSpinBox
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 

@@ -55,7 +55,7 @@ The partial properties can also be scaled without the weights
 .. math::
    :label: partial4
 
-   F_{\text{coh},\alpha\beta}{(\mathbf{q},t) = \frac{1}{N c_{\alpha} c_{\beta}}}{\sum\limits_{j \in \alpha}{\sum\limits_{k \in \beta}\left\langle {\exp\left\lbrack {{- i}\mathbf{q}\cdot\mathbf{r}_{j}\left( 0 \right)} \right\rbrack\exp\left\lbrack {i\mathbf{q}\cdot\mathbf{r}_{k}\left( t \right)} \right\rbrack} \right\rangle}},
+   F_{\text{coh},\alpha\beta}{(\mathbf{q},t) = \frac{1}{N \sqrt{c_{\alpha} c_{\beta}}}}{\sum\limits_{j \in \alpha}{\sum\limits_{k \in \beta}\left\langle {\exp\left\lbrack {{- i}\mathbf{q}\cdot\mathbf{r}_{j}\left( 0 \right)} \right\rbrack\exp\left\lbrack {i\mathbf{q}\cdot\mathbf{r}_{k}\left( t \right)} \right\rbrack} \right\rangle}},
 
 .. math::
    :label: partial5
@@ -93,7 +93,7 @@ Rescaled Weights
 Single Atom-Type Weights
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-MDANSE weights are rescaled so that weights for DISF calculation using the ``b_incoherent2`` will be
+MDANSE weights are rescaled so that weights for DISF calculation using the ``b_incoherent`` will be
 
 .. math::
    :label: single1

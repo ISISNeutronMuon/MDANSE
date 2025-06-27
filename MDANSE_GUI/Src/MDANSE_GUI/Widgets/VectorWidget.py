@@ -15,14 +15,14 @@
 #
 
 
+from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
+from qtpy.QtGui import QDoubleValidator, QIntValidator
 from qtpy.QtWidgets import (
-    QWidget,
-    QLineEdit,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
+    QWidget,
 )
-from qtpy.QtGui import QDoubleValidator, QIntValidator
-from qtpy.QtCore import Signal, Slot, Qt, QSortFilterProxyModel
 
 
 class VectorWidget(QWidget):

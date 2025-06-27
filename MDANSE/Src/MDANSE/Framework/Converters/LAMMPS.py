@@ -22,6 +22,10 @@ from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 import h5py
 import numpy as np
+from more_itertools import consume as drop
+from more_itertools import ilen, take
+from numpy.typing import NDArray
+
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
@@ -34,9 +38,6 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from more_itertools import consume as drop
-from more_itertools import ilen, take
-from numpy.typing import NDArray
 
 if TYPE_CHECKING:
     from MDANSE.Framework.Configurators.ConfigFileConfigurator import (
@@ -52,7 +53,7 @@ LAMMPS_UNITS = {
         "time": "fs",
         "length": "ang",
         "velocity": "ang/fs",
-        "mass": "uma",
+        "mass": "Da",
         "charge_conv": 1.0,
     },
     "metal": {
@@ -60,7 +61,7 @@ LAMMPS_UNITS = {
         "time": "ps",
         "length": "ang",
         "velocity": "ang/ps",
-        "mass": "uma",
+        "mass": "Da",
         "charge_conv": 1.0,
     },
     "si": {
@@ -84,7 +85,7 @@ LAMMPS_UNITS = {
         "time": "fs",
         "length": "Bohr",
         "velocity": "ang/fs",
-        "mass": "uma",
+        "mass": "Da",
         "charge_conv": 1.0,
     },
     "micro": {

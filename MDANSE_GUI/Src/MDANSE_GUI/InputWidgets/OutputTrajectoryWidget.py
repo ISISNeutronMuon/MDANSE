@@ -17,23 +17,21 @@ import os
 import os.path
 from pathlib import PurePath
 
+from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
     QComboBox,
-    QLineEdit,
-    QPushButton,
     QFileDialog,
     QLabel,
+    QLineEdit,
+    QPushButton,
     QSpinBox,
 )
-from qtpy.QtCore import Slot, Qt
 
 from MDANSE.Framework.Configurators.OutputTrajectoryConfigurator import (
     OutputTrajectoryConfigurator,
 )
 from MDANSE.MLogging import LOG
-
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-
 
 dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
 

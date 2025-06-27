@@ -18,8 +18,8 @@ import collections
 
 import numpy as np
 
-from MDANSE.MLogging import LOG
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.MLogging import LOG
 
 
 class InvalidFileError(Exception):

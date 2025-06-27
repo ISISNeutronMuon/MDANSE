@@ -161,7 +161,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
             value_chain(
                 "",
                 (
-                    f"{label}={getattr(self, label, 'Not set')!s}"
+                    f"{label}={getattr(self, label, 'Not set')}"
                     for label in self._printable_attributes
                 ),
                 (f"{key}={self.get(key, 'Not set')!s}" for key in self),
@@ -190,10 +190,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         """
         self._error_status = error_text
-        if len(self._error_status) > ERROR_LENGTH_MIN:
-            self.valid = False
-        else:
-            self.valid = True
+        self.valid = error_text == "OK"
 
     @property
     def warning_status(self):

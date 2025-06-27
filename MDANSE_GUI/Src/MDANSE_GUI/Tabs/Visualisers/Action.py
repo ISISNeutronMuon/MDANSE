@@ -18,6 +18,17 @@ import traceback
 from pathlib import Path
 
 import numpy as np
+from qtpy.QtCore import Signal, Slot
+from qtpy.QtWidgets import (
+    QCheckBox,
+    QFileDialog,
+    QHBoxLayout,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets import (
@@ -63,16 +74,6 @@ from MDANSE_GUI.InputWidgets import (
 )
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 from MDANSE_GUI.Widgets.DelayedButton import DelayedButton
-from qtpy.QtCore import Signal, Slot
-from qtpy.QtWidgets import (
-    QCheckBox,
-    QFileDialog,
-    QHBoxLayout,
-    QPushButton,
-    QTextEdit,
-    QVBoxLayout,
-    QWidget,
-)
 
 widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "FloatConfigurator": FloatWidget,
@@ -120,6 +121,11 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "InstrumentResolutionConfigurator": InstrumentResolutionWidget,
     "PartialChargeConfigurator": PartialChargeWidget,
     "TrajectoryFilterConfigurator": TrajectoryFilterWidget,
+    "UnitCellConfigurator": UnitCellWidget,
+    "MDAnalysisTimeStepConfigurator": MDAnalysisMDTrajTimeStepWidget,
+    "MDTrajTimeStepConfigurator": MDAnalysisMDTrajTimeStepWidget,
+    "MDTrajTrajectoryFileConfigurator": MultiInputFileWidget,
+    "MDTrajTopologyFileConfigurator": MDTrajTopologyFileWidget,
 }
 
 
@@ -148,7 +154,7 @@ class Action(QWidget):
         self.layout = QVBoxLayout(self)
         self.handlers = {}
         self._widgets = []
-        self._widgets_in_layout = []
+        self._widgets_in_layout = {}
 
     def set_settings(self, settings):
         self._settings = settings
@@ -180,7 +186,7 @@ class Action(QWidget):
 
     def clear_panel(self) -> None:
         """Clear the widgets so that it leaves an empty layout"""
-        for widget in self._widgets_in_layout:
+        for widget in self._widgets_in_layout.values():
             self.layout.removeWidget(widget)
             # fixes #448
             # even with the call to deleteLater sometimes the widget
@@ -190,7 +196,7 @@ class Action(QWidget):
             widget.setParent(None)
             widget.deleteLater()
         self._widgets = []
-        self._widgets_in_layout = []
+        self._widgets_in_layout = {}
         self._preview_box = None
 
     def update_panel(self, job_name: str) -> None:
@@ -236,19 +242,20 @@ class Action(QWidget):
             dtype = value[0]
             ddict = value[1]
             configurator = job_instance.configuration[key]
-            ddict.setdefault("label", key)
-            ddict["configurator"] = configurator
-            ddict["source_object"] = self._input_trajectory
-            widget_class = widget_lookup[dtype]
-            input_widget = widget_class(parent=self, **ddict)
-            widget = input_widget._base
-            self.layout.addWidget(widget, stretch=input_widget._relative_size)
-            self._widgets_in_layout.append(widget)
-            self._widgets.append(input_widget)
-            self._trajectory_configurator = input_widget._configurator
+            if key not in self._widgets_in_layout:
+                ddict.setdefault("label", key)
+                ddict["configurator"] = configurator
+                ddict["source_object"] = self._input_trajectory
+                widget_class = widget_lookup[dtype]
+                input_widget = widget_class(parent=self, **ddict)
+                widget = input_widget._base
+                self.layout.addWidget(widget, stretch=input_widget._relative_size)
+                self._widgets_in_layout[key] = widget
+                self._widgets.append(input_widget)
+                self._trajectory_configurator = input_widget._configurator
             LOG.info("Set up input trajectory")
         for key, value in settings.items():
-            if key == "trajectory":
+            if key in self._widgets_in_layout:
                 continue
             dtype = value[0]
             ddict = value[1]
@@ -264,7 +271,7 @@ class Action(QWidget):
                 placeholder = BackupWidget(parent=self, **ddict)
                 widget = placeholder._base
                 self.layout.addWidget(widget, stretch=placeholder._relative_size)
-                self._widgets_in_layout.append(widget)
+                self._widgets_in_layout[key] = widget
                 self._widgets.append(placeholder)
                 LOG.warning(f"Could not find the right widget for {key}")
             else:
@@ -273,7 +280,7 @@ class Action(QWidget):
                 input_widget = widget_class(parent=self, **ddict)
                 widget = input_widget._base
                 self.layout.addWidget(widget, stretch=input_widget._relative_size)
-                self._widgets_in_layout.append(widget)
+                self._widgets_in_layout[key] = widget
                 self._widgets.append(input_widget)
                 input_widget.valid_changed.connect(self.allow_execution)
                 has_preview = callable(
@@ -286,38 +293,40 @@ class Action(QWidget):
             self._has_been_initialised = True
             self.check_inputs()
 
-        if self._use_preview:
+        if self._use_preview and "preview_box" not in self._widgets_in_layout:
             self._preview_box = QTextEdit(self)
             self.layout.addWidget(self._preview_box)
-            self._widgets_in_layout.append(self._preview_box)
+            self._widgets_in_layout["preview_box"] = self._preview_box
 
-        buttonbase = QWidget(self)
-        buttonlayout = QHBoxLayout(buttonbase)
-        buttonbase.setLayout(buttonlayout)
-        self.save_button = QPushButton("Save as script", buttonbase)
-        self.execute_button = DelayedButton("RUN!", buttonbase, delay=3000)
-        self.execute_button.setStyleSheet("font-weight: bold")
-        self.post_execute_checkbox = QCheckBox("Auto-load results", buttonbase)
-        try:
-            default_check_status = (
-                self._parent_tab._settings.group("Execution").get("auto-load") == "True"
-            )
-        except Exception:
-            LOG.debug("Converter tab could not load auto-load settings")
-            default_check_status = False
-        if default_check_status:
-            self.post_execute_checkbox.setChecked(True)
+        if "button_base" not in self._widgets_in_layout:
+            buttonbase = QWidget(self)
+            buttonlayout = QHBoxLayout(buttonbase)
+            buttonbase.setLayout(buttonlayout)
+            self.save_button = QPushButton("Save as script", buttonbase)
+            self.execute_button = DelayedButton("RUN!", buttonbase, delay=3000)
+            self.execute_button.setStyleSheet("font-weight: bold")
+            self.post_execute_checkbox = QCheckBox("Auto-load results", buttonbase)
+            try:
+                default_check_status = (
+                    self._parent_tab._settings.group("Execution").get("auto-load")
+                    == "True"
+                )
+            except Exception:
+                LOG.debug("Converter tab could not load auto-load settings")
+                default_check_status = False
+            if default_check_status:
+                self.post_execute_checkbox.setChecked(True)
 
-        self.save_button.clicked.connect(self.save_dialog)
-        self.execute_button.clicked.connect(self.execute_converter)
-        self.execute_button.needs_updating.connect(self.allow_execution)
+            self.save_button.clicked.connect(self.save_dialog)
+            self.execute_button.clicked.connect(self.execute_converter)
+            self.execute_button.needs_updating.connect(self.allow_execution)
 
-        buttonlayout.addWidget(self.save_button)
-        buttonlayout.addWidget(self.execute_button)
-        buttonlayout.addWidget(self.post_execute_checkbox)
+            buttonlayout.addWidget(self.save_button)
+            buttonlayout.addWidget(self.execute_button)
+            buttonlayout.addWidget(self.post_execute_checkbox)
 
-        self.layout.addWidget(buttonbase)
-        self._widgets_in_layout.append(buttonbase)
+            self.layout.addWidget(buttonbase)
+            self._widgets_in_layout["button_base"] = buttonbase
         self.apply_instrument()
         self.allow_execution()
 
@@ -407,13 +416,9 @@ class Action(QWidget):
             if not widget._configurator.valid:
                 allow = False
                 widget.mark_error(widget._configurator.error_status, silent=True)
-            if widget.has_warning:
-                has_warning = True
+            has_warning = has_warning or widget.has_warning
         if self.execute_button is not None:
-            if allow:
-                self.execute_button.setEnabled(True)
-            else:
-                self.execute_button.setEnabled(False)
+            self.execute_button.setEnabled(allow)
             if has_warning:
                 self.execute_button.setStyleSheet(
                     "QWidget { background-color:rgb(220,210,30); font-weight: bold }"

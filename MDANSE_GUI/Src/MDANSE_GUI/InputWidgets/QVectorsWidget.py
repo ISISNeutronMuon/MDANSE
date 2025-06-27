@@ -14,12 +14,11 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtWidgets import QSizePolicy, QComboBox, QTableView
-from qtpy.QtCore import Slot, Signal, Qt
-from qtpy.QtGui import QStandardItemModel, QStandardItem, QBrush
+from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtGui import QBrush, QStandardItem, QStandardItemModel
+from qtpy.QtWidgets import QComboBox, QSizePolicy, QTableView
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
-
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 

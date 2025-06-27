@@ -14,7 +14,6 @@ ALL_JOBS = [
     "CurrentCorrelationFunction",
     "Density",
     "DensityOfStates",
-    "DensityProfile",
     "DipoleAutoCorrelationFunction",
     "DynamicCoherentStructureFactor",
     "DynamicIncoherentStructureFactor",
@@ -34,6 +33,7 @@ ALL_JOBS = [
     "RigidBodyTrajectory",
     "RootMeanSquareDeviation",
     "RootMeanSquareFluctuation",
+    "ScatteringLengthDensityProfile",
     "SolventAccessibleSurface",
     "StructureFactorFromScatteringFunction",
     "Temperature",
@@ -54,7 +54,6 @@ ALL_JOBS = [
     "DCD",
     "CP2K",
     "Forcite",
-    "Discover",
     "DL_POLY",
     "Gromacs",
     "ImprovedASE",
@@ -66,7 +65,6 @@ ALL_JOBS = [
     "NAMD",
     "XPLOR",
     "DFTB",
-    "DMol",
     "Infrared",
 ]
 

@@ -14,18 +14,18 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import codecs
 import io
 import tarfile
-import codecs
 import time
+from importlib import metadata
 from pathlib import Path
 from typing import TYPE_CHECKING, Union
-from importlib import metadata
 
 import numpy as np
 
-from MDANSE.Framework.Formats.IFormat import IFormat
 from MDANSE import PLATFORM
+from MDANSE.Framework.Formats.IFormat import IFormat
 
 if TYPE_CHECKING:
     from MDANSE.Framework.Jobs.IJob import IJob
@@ -150,7 +150,15 @@ class TextFormat(IFormat):
                 yValues = allData[yData]
                 fileobject.write(f"# 1st row: {yValues.varname} ({yValues.units})\n\n")
 
-            zData = np.zeros((data.shape[0] + 1, data.shape[1] + 1), dtype=np.float64)
+            if np.allclose(np.imag(data), 0.0):
+                zData = np.zeros(
+                    (data.shape[0] + 1, data.shape[1] + 1), dtype=np.float64
+                )
+                data = np.real(data)
+            else:
+                zData = np.zeros(
+                    (data.shape[0] + 1, data.shape[1] + 1), dtype=np.complex128
+                )
             zData[1:, 0] = xValues
             zData[0, 1:] = yValues
             zData[1:, 1:] = data

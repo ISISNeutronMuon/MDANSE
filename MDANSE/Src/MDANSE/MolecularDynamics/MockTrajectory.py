@@ -14,16 +14,16 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import math
 import json
+import math
 from typing import TypeVar
 
 import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Mathematics.Geometry import center_of_mass
-from MDANSE.Framework.Units import measure
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Framework.Units import measure
+from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
@@ -32,7 +32,6 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.TrajectoryUtils import atomic_trajectory
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-
 
 Self = TypeVar("Self", bound="MockTrajectory")
 
@@ -429,7 +428,13 @@ class MockTrajectory:
             return box_coordinates
 
     def read_atomic_trajectory(
-        self, index, first=0, last=None, step=1, box_coordinates=False
+        self,
+        index: int,
+        first: int = 0,
+        last: int = None,
+        step: int = 1,
+        *,
+        box_coordinates: bool = False,
     ):
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
@@ -462,7 +467,7 @@ class MockTrajectory:
                 [self.unit_cell(fnum).inverse for fnum in range(first, last, step)]
             )
             atomic_traj = atomic_trajectory(
-                coords, direct_cells, inverse_cells, box_coordinates
+                coords, direct_cells, inverse_cells, box_coordinates=box_coordinates
             )
             return atomic_traj
         else:

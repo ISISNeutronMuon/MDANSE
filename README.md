@@ -7,7 +7,7 @@ be directly compared with neutron scattering experiments, particularly inelastic
 spectroscopies.
 
 To do this, MDANSE reads trajectories created with MD simulation software
-such as CASTEP, VASP, DMOL, Gromacs, DL_POLY, CHARMM, LAMMPS, PBD, DFTB etc.,
+such as CASTEP, VASP, Gromacs, DL_POLY, CHARMM, LAMMPS, PBD, DFTB etc.,
 and provides both a graphical user interface (GUI) and a command line interface. 
 
 This MDANSE project has been published previously in: \
@@ -79,10 +79,8 @@ into an MDT file (HDF format), which is then used for all calculations. The foll
 
 - CASTEP
 - CHARMM
-- DFTB 
-- Discover 
-- DL_POLY 
-- DMol 
+- DFTB
+- DL_POLY
 - Forcite
 - Gromacs
 - LAMMPS

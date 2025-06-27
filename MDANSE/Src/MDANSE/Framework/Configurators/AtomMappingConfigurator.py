@@ -15,7 +15,7 @@
 #
 import json
 
-from MDANSE.Framework.AtomMapping import fill_remaining_labels, check_mapping_valid
+from MDANSE.Framework.AtomMapping import check_mapping_valid, fill_remaining_labels
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 

@@ -18,9 +18,6 @@ import json
 from enum import Enum
 from pathlib import Path
 
-from MDANSE.Framework.AtomSelector.selector import ReusableSelection
-from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
@@ -38,6 +35,9 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE.Framework.AtomSelector.selector import ReusableSelection
+from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewerWithPicking
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
@@ -495,6 +495,9 @@ class SelectionHelper(QDialog):
         self.selection_model.accept_from_widget(
             '{"function_name": "select_all", "operation_type": "union"}'
         )
+        self.selection_model.accept_from_widget(
+            '{"function_name": "select_dummy", "operation_type": "difference"}'
+        )
         self.recalculate_selection()
 
 
@@ -520,8 +523,11 @@ class AtomSelectionWidget(WidgetBase):
             load_button.clicked.connect(self.load_selection_from_file_dialog)
         else:
             self._field = QLineEdit(self._base)
-        traj_config = self._configurator.configurable[
-            self._configurator.dependencies["trajectory"]
+            default_text = str(self._configurator.default)
+            self._field.setPlaceholderText(default_text)
+            self._field.setText(default_text)
+        traj_config = self._configurator._configurable[
+            self._configurator._dependencies["trajectory"]
         ]
         traj_filename = traj_config["filename"]
         trajectory = traj_config["instance"]

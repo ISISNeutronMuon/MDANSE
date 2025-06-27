@@ -19,8 +19,9 @@ from pathlib import Path
 from typing import Optional
 
 import mdtraj as md
-from MDANSE.Framework.AtomMapping import AtomLabel
 from mdtraj.core.trajectory import _TOPOLOGY_EXTS
+
+from MDANSE.Framework.AtomMapping import AtomLabel
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 

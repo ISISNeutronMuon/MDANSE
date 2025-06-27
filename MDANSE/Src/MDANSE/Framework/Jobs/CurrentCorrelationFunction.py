@@ -536,8 +536,15 @@ class CurrentCorrelationFunction(IJob):
                     fft="rfft",
                 )
 
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 2, conc_exp=0.5)
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            2,
+            conc_exp=0.5,
+        )
         assign_weights(self._outputData, weight_dict, "j(q,t)_long_%s", self.labels)
         assign_weights(self._outputData, weight_dict, "j(q,t)_trans_%s", self.labels)
         assign_weights(self._outputData, weight_dict, "J(q,f)_long_%s", self.labels)
@@ -556,10 +563,16 @@ class CurrentCorrelationFunction(IJob):
                 self.labels,
             )
 
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = n_selected / n_total
+
         jqtLongTotal = weighted_sum(self._outputData, "j(q,t)_long_%s", self.labels)
-        self._outputData["j(q,t)_long_total"][:] = jqtLongTotal
+        self._outputData["j(q,t)_long_total"][:] = jqtLongTotal / fact
+        self._outputData["j(q,t)_long_total"].scaling_factor = fact
         jqtTransTotal = weighted_sum(self._outputData, "j(q,t)_trans_%s", self.labels)
-        self._outputData["j(q,t)_trans_total"][:] = jqtTransTotal
+        self._outputData["j(q,t)_trans_total"][:] = jqtTransTotal / fact
+        self._outputData["j(q,t)_trans_total"].scaling_factor = fact
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "j(q,t)_long",
@@ -610,11 +623,13 @@ class CurrentCorrelationFunction(IJob):
             sqfLongTotal = weighted_sum(
                 self._outputData, "J(q,f)_long_ideal_%s", self.labels
             )
-            self._outputData["J(q,f)_long_ideal_total"][:] = sqfLongTotal
+            self._outputData["J(q,f)_long_ideal_total"][:] = sqfLongTotal / fact
+            self._outputData["J(q,f)_long_ideal_total"].scaling_factor = fact
             sqfTransTotal = weighted_sum(
                 self._outputData, "J(q,f)_trans_ideal_%s", self.labels
             )
-            self._outputData["J(q,f)_trans_ideal_total"][:] = sqfTransTotal
+            self._outputData["J(q,f)_trans_ideal_total"][:] = sqfTransTotal / fact
+            self._outputData["J(q,f)_trans_ideal_total"].scaling_factor = fact
             self.configuration["grouping_level"].add_grouped_totals(
                 self._outputData,
                 "J(q,f)_long_ideal",

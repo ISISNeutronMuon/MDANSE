@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from collections.abc import Iterator
 import collections
 import itertools as it
+from collections.abc import Iterator
 
 import numpy as np
 import numpy.typing as npt
@@ -23,7 +23,6 @@ import numpy.typing as npt
 from MDANSE.Chemistry import ChemicalSystem
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
-
 
 CELL_SIZE_LIMIT = 1e-9
 DETAILED_CELL_MESSAGE = (
@@ -691,8 +690,19 @@ class VanHoveFunctionDistinct(IJob):
         )
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        weights = self.configuration["weights"].get_weights()
-        weight_dict = get_weights(weights, nAtomsPerElement, 2)
+        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.configuration["atom_selection"].get_all_natoms(),
+            2,
+        )
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        fact = (n_selected / n_total) ** 2
+
         if self.intra:
             for i in ["_intra", "_inter", ""]:
                 if i == "_intra":
@@ -701,7 +711,8 @@ class VanHoveFunctionDistinct(IJob):
                     labels = self.labels
                 assign_weights(self._outputData, weight_dict, f"g(r,t){i}_%s", labels)
                 vhs = weighted_sum(self._outputData, f"g(r,t){i}_%s", labels)
-                self._outputData[f"g(r,t){i}_total"][...] = vhs
+                self._outputData[f"g(r,t){i}_total"][...] = vhs / fact
+                self._outputData[f"g(r,t){i}_total"].scaling_factor = fact
                 self.configuration["grouping_level"].add_grouped_totals(
                     self._outputData,
                     f"g(r,t){i}",
@@ -716,7 +727,8 @@ class VanHoveFunctionDistinct(IJob):
         else:
             assign_weights(self._outputData, weight_dict, "g(r,t)_%s", self.labels)
             vhs = weighted_sum(self._outputData, "g(r,t)_%s", self.labels)
-            self._outputData["g(r,t)_total"][...] = vhs
+            self._outputData["g(r,t)_total"][...] = vhs / fact
+            self._outputData["g(r,t)_total"].scaling_factor = fact
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

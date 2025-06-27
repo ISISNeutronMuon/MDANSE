@@ -16,7 +16,6 @@
 
 import ast
 
-
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 

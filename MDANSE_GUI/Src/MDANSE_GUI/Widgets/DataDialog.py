@@ -16,15 +16,15 @@
 from typing import Optional
 
 import numpy as np
+from qtpy.QtCore import QObject, Signal, Slot
 from qtpy.QtWidgets import (
-    QDialog,
-    QPushButton,
-    QVBoxLayout,
-    QHBoxLayout,
     QComboBox,
+    QDialog,
+    QHBoxLayout,
+    QPushButton,
     QTextEdit,
+    QVBoxLayout,
 )
-from qtpy.QtCore import Signal, Slot, QObject
 
 from MDANSE.Framework.Jobs.IJob import IJob
 

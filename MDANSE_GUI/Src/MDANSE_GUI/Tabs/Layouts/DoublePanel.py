@@ -13,16 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtGui import QFont
 from qtpy.QtWidgets import (
-    QWidget,
     QHBoxLayout,
-    QVBoxLayout,
-    QScrollArea,
     QLabel,
     QPushButton,
+    QScrollArea,
     QSplitter,
+    QVBoxLayout,
+    QWidget,
 )
-from qtpy.QtCore import Signal, Slot
 
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 
@@ -117,6 +118,9 @@ class DoublePanel(QWidget):
 
     @Slot(str)
     def set_label_text(self, text: str):
+        self._tab_label.setTextFormat(Qt.TextFormat.RichText)
+        self._tab_label.setWordWrap(True)
+        self._tab_label.setFont(QFont(None, pointSize=16))
         self._tab_label.setText(text)
 
     def add_widget(self, tempwidget: QWidget = None, upper=True):

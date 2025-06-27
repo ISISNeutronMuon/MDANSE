@@ -14,14 +14,12 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import time
-
 from logging.handlers import QueueHandler
-from multiprocessing import Queue, Process, Event
+from multiprocessing import Event, Process, Queue
 from multiprocessing.connection import Connection
 
-from MDANSE.MLogging import LOG
 from MDANSE.Framework.Jobs.IJob import IJob
-
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess
 
 
@@ -49,7 +47,7 @@ class Subprocess(Process):
     ):
         job_instance = IJob.create(job)
         job_instance.build_configuration()
-        status = JobStatusProcess(pipe, queue_0, queue_1, pause_event)
+        status = JobStatusProcess(job, pipe, queue_0, queue_1, pause_event)
         job_instance._status = status
         self._job_instance = job_instance
 

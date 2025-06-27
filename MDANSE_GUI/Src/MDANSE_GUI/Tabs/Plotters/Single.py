@@ -17,8 +17,8 @@ import contextlib
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from MDANSE.MLogging import LOG
 
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:

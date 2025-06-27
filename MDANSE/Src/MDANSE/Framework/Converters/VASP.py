@@ -15,14 +15,14 @@
 #
 import collections
 
-from MDANSE.Core.Error import Error
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Core.Error import Error
+from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from MDANSE.Framework.AtomMapping import get_element_from_mapping
 
 
 class VASPConverterError(Error):

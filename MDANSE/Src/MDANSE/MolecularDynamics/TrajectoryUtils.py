@@ -19,6 +19,7 @@ from collections.abc import Iterable
 from typing import Union
 
 import numpy as np
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
@@ -102,9 +103,14 @@ def find_atoms_in_molecule(
     return result
 
 
-def atomic_trajectory(config, cell, rcell, box_coordinates=False):
-    """For the coordinates of a specific atom, remove all unit cell
-    jumps.
+def atomic_trajectory(
+    config: np.ndarray,
+    cell: np.ndarray,
+    rcell: np.ndarray,
+    *,
+    box_coordinates: bool = False,
+) -> np.ndarray:
+    """For the coordinates of a specific atom, remove all unit cell jumps.
 
     Parameters
     ----------
@@ -121,6 +127,7 @@ def atomic_trajectory(config, cell, rcell, box_coordinates=False):
     -------
     np.ndarray
         The input config but the unit cell jumps removed.
+
     """
     trajectory = np.einsum("ij,ijk->ik", config, rcell)
     sdxyz = trajectory[1:, :] - trajectory[:-1, :]

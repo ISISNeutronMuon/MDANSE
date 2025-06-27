@@ -18,22 +18,22 @@ from collections import defaultdict
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import (
-    QWidget,
     QComboBox,
-    QLineEdit,
-    QPushButton,
     QDialog,
-    QVBoxLayout,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
-    QGridLayout,
+    QLineEdit,
+    QPushButton,
     QScrollArea,
+    QVBoxLayout,
+    QWidget,
 )
-from MDANSE.Framework.AtomMapping import guess_element
-from MDANSE.Chemistry import ATOMS_DATABASE
 
-from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Framework.AtomMapping import guess_element
 from MDANSE_GUI.InputWidgets.InputFileWidget import InputFileWidget
+from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class AtomMappingHelperDialog(QDialog):

@@ -13,19 +13,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import pickle
 import optparse
+import pickle
 import subprocess
 import sys
 import textwrap
 from pathlib import Path
 
-from MDANSE.Core.Error import Error
 from MDANSE import PLATFORM
+from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
-from MDANSE.Framework.Jobs.JobStatus import JobState
+from MDANSE.Framework.Jobs.JobStatus import JobInfo
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class IndentedHelp(optparse.IndentedHelpFormatter):
@@ -141,7 +141,7 @@ class CommandLineParser(optparse.OptionParser):
         # The job file could be opened and unpickled properly
         else:
             # Check that the unpickled object is a JobStatus object
-            if not isinstance(info, JobState):
+            if not isinstance(info, JobInfo):
                 raise CommandLineParserError(f"Invalid contents for job {basename!r}.")
 
             LOG.info("Information about %s job:", basename)
@@ -201,7 +201,7 @@ class CommandLineParser(optparse.OptionParser):
             # The job file could be opened and unpickled properly
             else:
                 # Check that the unpickled object is a JobStatus object
-                if not isinstance(info, JobState):
+                if not isinstance(info, JobInfo):
                     continue
 
                 LOG.info("%-20s [%s]", j.stem, info["state"])

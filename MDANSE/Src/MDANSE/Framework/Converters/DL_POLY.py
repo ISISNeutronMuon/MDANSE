@@ -16,9 +16,12 @@
 from __future__ import annotations
 
 import collections
-from typing import Union, Any
+from typing import Any, Union
 
 import numpy as np
+from more_itertools import consume as drop
+from more_itertools import take
+
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
@@ -29,8 +32,6 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from more_itertools import consume as drop
-from more_itertools import take
 
 
 class HistoryFileError(Error):
@@ -44,7 +45,7 @@ class DL_POLYConverterError(Error):
 class HistoryFile(dict):
     _dist_conversion = measure(1.0, "ang").toval("nm")
     _vel_conversion = measure(1.0, "ang/ps").toval("nm/ps")
-    _grad_conversion = measure(1.0, "uma ang / ps2").toval("uma nm / ps2")
+    _grad_conversion = measure(1.0, "Da ang / ps2").toval("Da nm / ps2")
 
     def __init__(self, filename):
         super().__init__()
@@ -237,7 +238,7 @@ class DL_POLY(Converter):
                 "unit_cell": "nm",
                 "coordinates": "nm",
                 "velocities": "nm/ps",
-                "gradients": "uma nm/ps2",
+                "gradients": "Da nm/ps2",
             },
         )
 

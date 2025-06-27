@@ -54,6 +54,7 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 MDANSE = ["Chemistry/*.json",
+          "Chemistry/*.csv",
           "Framework/*.json"]
 
 [project.scripts]

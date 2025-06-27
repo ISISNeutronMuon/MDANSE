@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from qtpy.QtWidgets import QLineEdit, QLabel, QCheckBox
+from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QDoubleValidator
-from qtpy.QtCore import Slot, Qt
+from qtpy.QtWidgets import QCheckBox, QLabel, QLineEdit
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase

@@ -15,6 +15,7 @@
 #
 
 import typing
+
 import numpy as np
 
 from MDANSE.MolecularDynamics.UnitCell import UnitCell

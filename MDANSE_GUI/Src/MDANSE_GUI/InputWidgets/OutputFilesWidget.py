@@ -17,15 +17,15 @@ import os
 import os.path
 from pathlib import PurePath
 
-from qtpy.QtWidgets import QLineEdit, QPushButton, QFileDialog, QLabel, QComboBox
-from qtpy.QtCore import Slot, Qt
+from qtpy.QtCore import Qt, Slot
+from qtpy.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton
 
 from MDANSE.Framework.Configurators.OutputFilesConfigurator import (
     OutputFilesConfigurator,
 )
 from MDANSE.MLogging import LOG
-
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+
 from .CheckableComboBox import CheckableComboBox
 
 

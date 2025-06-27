@@ -14,18 +14,18 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import json
-import numpy as np
-from enum import Enum
+from abc import ABC, abstractmethod
 from collections import namedtuple
 from copy import copy
+from enum import Enum
 from typing import NamedTuple
-from abc import ABC, abstractmethod
-from scipy import signal, fftpack
 
-from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+import numpy as np
+from scipy import fftpack, signal
+
 from MDANSE.Core.Error import Error
-
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
+from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
 class SignalError(Error):

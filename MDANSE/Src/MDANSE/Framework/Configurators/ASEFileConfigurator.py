@@ -19,6 +19,7 @@ from ase.io import iread, read
 from ase.io.trajectory import Trajectory as ASETrajectory
 
 from MDANSE.Framework.AtomMapping import AtomLabel
+
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 

@@ -18,6 +18,14 @@ from typing import Any, Optional
 
 import numpy as np
 import vtk
+from qtpy import QtWidgets
+from qtpy.QtCore import Signal, Slot
+from qtpy.QtWidgets import QSizePolicy
+from scipy.spatial import cKDTree as KDTree
+from vtk.util import numpy_support
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
+
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.MolecularViewer.AtomProperties import (
@@ -26,13 +34,6 @@ from MDANSE_GUI.MolecularViewer.AtomProperties import (
 )
 from MDANSE_GUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.MolecularViewer.TraceWidget import TRACE_PARAMETERS
-from qtpy import QtWidgets
-from qtpy.QtCore import Signal, Slot
-from qtpy.QtWidgets import QSizePolicy
-from scipy.spatial import cKDTree as KDTree
-from vtk.util import numpy_support
-from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
 
 
 def array_to_3d_imagedata(data: np.ndarray, spacing: tuple[float, float, float]):
