@@ -207,11 +207,9 @@ class ScatteringLengthDensityProfile(IJob):
 
         for element, hist in density_profile.items():
             self._outputData[f"dp_{element}"] += hist / slice_volume
-            slen_dict = self.scattering_lengths[element]
-            for nb, component in enumerate(["", "_incoherent", "_total"]):
-                self._outputData[f"sldp{component}"] += (
-                    slen_dict[nb] * hist / slice_volume
-                )
+            slen_list = self.scattering_lengths[element]
+            for component, scat_len in zip(["", "_incoherent", "_total"], slen_list):
+                self._outputData[f"sldp{component}"] += scat_len * hist / slice_volume
 
     def finalize(self) -> None:
         """
