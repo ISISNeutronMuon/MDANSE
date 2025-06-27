@@ -470,13 +470,14 @@ Specifies the order of a numerical derivative used for interpolation.
 
 Normally it is used for calculating atom velocities from their positions.
 Values from 1 to 5 are allowed. If MD engine velocities are provided in the
-trajectory file, you can choose to use them by setting this to 0.
+trajectory file, you can (and should) choose to use them by setting this to 0.
 
-The velocities calculated from atom positions have a tendency to be
+The velocities calculated from atom positions may differ from the values used
+by the MD engine during the simulation. Additionally, if your MD engine was
+not writing out every frame, the velocities are likely to be
 underestimated compared to the values used by the MD engine in the simulation,
-and the error in the calculation increases quickly with the size of the trajectory
-time step.
-
+and the error in the calculation increases quickly with the number of trajectory
+frames skipped in the MD output.
 
 
 .. _configurator-analysis-MoleculeSelectionConfigurator:
