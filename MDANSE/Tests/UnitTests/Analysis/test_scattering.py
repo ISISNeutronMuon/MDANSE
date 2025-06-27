@@ -332,3 +332,37 @@ def test_ssfsf(tmp_path, dcsf):
 
     compare_hdf5(out_file, result_file, ("ssf_total"), startswith=True,
                  atol=1e-6)
+
+@pytest.mark.parametrize(
+    "traj_info",
+    [("short_traj", short_traj), ("mdmc_traj", mdmc_traj), ("com_traj", com_traj)],
+    ids=lambda x: x[0],
+)
+def test_sldp(tmp_path, traj_info):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+    text_file = tmp_path / "output_text.tar"
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "frames": (0, 10, 1),
+        "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
+        "running_mode": ("single-core",),
+        "trajectory": traj_info[1],
+        "axis": "c",
+        "dr": 0.01,
+    }
+
+    sldp = IJob.create("ScatteringLengthDensityProfile")
+    sldp.run(parameters, status=True)
+
+    assert out_file.is_file()
+    assert log_file.is_file()
+    assert text_file.is_file()
+
+    result_file = RESULTS_DIR / f"sldp_{traj_info[0]}.mda"
+
+    compare_hdf5(out_file, result_file, ("sldp", "sldp_incoherent", "sldp_total", "dp_total"),
+                 startswith=True)

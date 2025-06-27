@@ -215,35 +215,6 @@ Inputs:
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
 
-.. _analysis-reference-DensityProfile:
-
-DensityProfile
-~~~~~~~~~~~~~~
-
-Calculates the averaged (numerical) density profile along a direction.
-
-The Density Profile analysis shows the weighted atomic density heterogeneity in
-the directions of the simulation box axes.
-
-For a lipid membrane, the density variation in the direction perpendicular to
-the membrane is probed in reflectometry measurements.
-
-The Density Profile Analysis can show segregation or cluster order formation,
-for example during the formation of micelles.
-
-Inputs:
-
-- trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
-- frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
-- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
-- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
-- axis: :ref:`configurator-analysis-SingleChoiceConfigurator` default=c
-- dr: :ref:`configurator-analysis-FloatConfigurator` default=0.01
-- weights: :ref:`configurator-analysis-WeightsConfigurator` default=N/A
-- output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
-- running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
-
-
 .. _analysis-reference-DipoleAutoCorrelationFunction:
 
 DipoleAutoCorrelationFunction
@@ -318,7 +289,7 @@ Inputs:
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
-- weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_incoherent2
+- weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_incoherent
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
@@ -373,7 +344,7 @@ Inputs:
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
-- weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_incoherent2
+- weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_incoherent
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
@@ -401,7 +372,7 @@ Inputs:
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
-- weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_incoherent2
+- weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_incoherent
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
@@ -686,6 +657,39 @@ Inputs:
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=each atom
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
+- running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
+
+
+.. _analysis-reference-ScatteringLengthDensityProfile:
+
+ScatteringLengthDensityProfile
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Produces the time-averaged scattering length density profile.
+
+The main result, named 'sldp' in the output file, is the time-averaged
+coherent scattering length density profile in units of 10^-6 / Ang^2,
+as used in neutron reflectometry calculations.
+
+You may want to export the 'sldp' dataset as text file using the MDANSE_GUI
+plotter, and load it into your preferred neutron reflectometry software.
+
+Additionally, the following other profiles are provided in the output:
+
+- 'sldp_incoherent', the incoherent scattering length profile,
+- 'sldp_total', the total scattering length profile,
+- 'dp_{atom_type}', numeric density profiles (number of atoms per volume)
+
+
+Inputs:
+
+- trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
+- frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
+- axis: :ref:`configurator-analysis-SingleChoiceConfigurator` default=c
+- dr: :ref:`configurator-analysis-FloatConfigurator` default=0.01
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 

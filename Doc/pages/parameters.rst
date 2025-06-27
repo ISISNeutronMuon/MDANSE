@@ -693,9 +693,9 @@ WeightsConfigurator
 
 default=equal
 
-Selects the atom property to be used by the weighting scheme.
+Select the atom property to be used by the weight scheme.
 
-This configurator allows to select how the analysis results will
-weighted when computing the total result.
+This configurator allows to select which atom properties will be used as weights
+when combining the partial contributions into the total result.
 
 
