@@ -22,6 +22,12 @@ BAD_CELL = "Unit cell definition is invalid. Correct it using TrajectoryEditor."
 CHANGING_CELL = "Unit cell definition changes during the simulation. MANY ANALYSIS TYPES WILL PRODUCE WRONG RESULTS."
 
 
+CELL_SIZE_LIMIT = 1e-9
+NO_CELL = "Unit cell definition is missing. Add it using TrajectoryEditor."
+BAD_CELL = "Unit cell definition is invalid. Correct it using TrajectoryEditor."
+CHANGING_CELL = "Unit cell definition changes during the simulation. MANY ANALYSIS TYPES WILL PRODUCE WRONG RESULTS."
+
+
 class UnitCell:
     """
     This class stores a unit cell, which is stored row-wise i.e. the a, b and c vectors are

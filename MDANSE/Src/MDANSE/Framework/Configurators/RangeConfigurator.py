@@ -62,17 +62,17 @@ class RangeConfigurator(IConfigurator):
 
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._valueType = valueType
+        self.valueType = valueType
 
-        self._includeLast = includeLast
+        self.includeLast = includeLast
 
-        self._sort = sort
+        self.sort = sort
 
-        self._toList = toList
+        self.toList = toList
 
-        self._mini = mini
+        self.mini = mini
 
-        self._maxi = maxi
+        self.maxi = maxi
 
     def configure(self, value):
         """
@@ -90,33 +90,33 @@ class RangeConfigurator(IConfigurator):
             self.error_status = "Step of a range cannot be 0"
             return
 
-        if self._includeLast:
+        if self.includeLast:
             last += step * 0.01  # less likely to overstep the upper limit
 
         value = np.arange(first, last, step)
         # we add additional check if the points are all within limits
         value = value[np.where(value >= first)]
-        if self._includeLast:
+        if self.includeLast:
             value = value[np.where(value <= last)]
         else:
             value = value[np.where(value < last)]
         # end of the range check
-        value = value.astype(self._valueType)
+        value = value.astype(self.valueType)
 
-        if self._mini is not None:
-            value = value[value >= self._mini]
+        if self.mini is not None:
+            value = value[value >= self.mini]
 
-        if self._maxi is not None:
-            value = value[value < self._maxi]
+        if self.maxi is not None:
+            value = value[value < self.maxi]
 
         if value.size == 0:
             self.error_status = "the input range is empty."
             return
 
-        if self._sort:
+        if self.sort:
             value = np.sort(value)
 
-        if self._toList:
+        if self.toList:
             value = value.tolist()
 
         self["value"] = value
@@ -134,69 +134,3 @@ class RangeConfigurator(IConfigurator):
         except IndexError:
             self["step"] = 1
         self.error_status = "OK"
-
-    @property
-    def valueType(self):
-        """
-        Returns the values type of the range.
-
-        :return: the values type of the range.
-        :rtype: one of int or float
-        """
-
-        return self._valueType
-
-    @property
-    def includeLast(self):
-        """
-        Returns whether or not the range will be closed (True) or opened (False).
-
-        :return: True if the generated range is closed, otherwise False.
-        :rtype: bool
-        """
-
-        return self._includeLast
-
-    @property
-    def toList(self):
-        """
-        Returns whether or not the range will be generated a Numpy array (True) or python list (False).
-
-        :return: True if the generated range is a python list, otherwise it is a Numpy array.
-        :rtype: bool
-        """
-
-        return self._toList
-
-    @property
-    def sort(self):
-        """
-        Returns whether or not the generated values will be sorted in increasing order.
-
-        :return: True if the generated values are sorted in in creasing order, False otherwise.
-        :rtype: bool
-        """
-
-        return self._sort
-
-    @property
-    def mini(self):
-        """
-        Returns the minimum value for the range, None if no limit.
-
-        :return: the minimum value for the range, None if no limit.
-        :rtype: int or float
-        """
-
-        return self._mini
-
-    @property
-    def maxi(self):
-        """
-        Returns the maximum value for the range, None if no limit.
-
-        :return: the maximum value for the range, None if no limit.
-        :rtype: int or float
-        """
-
-        return self._maxi

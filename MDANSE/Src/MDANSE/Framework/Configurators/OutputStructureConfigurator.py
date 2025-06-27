@@ -50,7 +50,7 @@ class OutputStructureConfigurator(IConfigurator):
 
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._formats = [fmt for fmt in ioformats if ioformats[fmt].can_write]
+        self.formats = [fmt for fmt in ioformats if ioformats[fmt].can_write]
         self._forbidden_files = []
 
     def configure(self, value):
@@ -92,24 +92,3 @@ class OutputStructureConfigurator(IConfigurator):
         self["write_logs"] = logs != "no logs"
         self["value"] = self["file"]
         self.error_status = "OK"
-
-    @property
-    def formats(self):
-        """
-        Returns the list of output file formats supported.
-
-        :return: the list of file formats supported.
-        :rtype: list of str
-        """
-        return self._formats
-
-    @property
-    def default(self) -> tuple[str, str]:
-        """
-
-        Returns
-        -------
-        tuple[str, str]
-            A tuple of the default filename and format.
-        """
-        return self._default[0], self._default[1]

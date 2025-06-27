@@ -39,27 +39,19 @@ class XTDFileConfigurator(FileWithAtomDataConfigurator):
 
         self._chemical_system = None
 
-        self._pbc = False
+        self.pbc = False
 
-        self._cell = None
+        self.cell = None
 
         self._configuration = None
 
     @property
     def clusters(self):
-        return self._clusters
+        return self._chemical_system._clusters
 
     @property
     def chemicalSystem(self):
         return self._chemical_system
-
-    @property
-    def pbc(self):
-        return self._pbc
-
-    @property
-    def cell(self):
-        return self._cell
 
     def parse(self):
         """
@@ -74,14 +66,14 @@ class XTDFileConfigurator(FileWithAtomDataConfigurator):
         SPACEGROUP = list(ROOT.iter("SpaceGroup"))
 
         if SPACEGROUP:
-            self._pbc = True
+            self.pbc = True
             SPACEGROUP = SPACEGROUP[0]
-            self._cell = np.empty((3, 3), dtype=np.float64)
-            self._cell[0, :] = SPACEGROUP.attrib["AVector"].split(",")
-            self._cell[1, :] = SPACEGROUP.attrib["BVector"].split(",")
-            self._cell[2, :] = SPACEGROUP.attrib["CVector"].split(",")
-            self._cell *= measure(1.0, "ang").toval("nm")
-            self._cell = UnitCell(self._cell)
+            self.cell = np.empty((3, 3), dtype=np.float64)
+            self.cell[0, :] = SPACEGROUP.attrib["AVector"].split(",")
+            self.cell[1, :] = SPACEGROUP.attrib["BVector"].split(",")
+            self.cell[2, :] = SPACEGROUP.attrib["CVector"].split(",")
+            self.cell *= measure(1.0, "ang").toval("nm")
+            self.cell = UnitCell(self.cell)
 
         self._atoms = collections.OrderedDict()
 
@@ -164,16 +156,14 @@ class XTDFileConfigurator(FileWithAtomDataConfigurator):
         self._chemical_system.add_labels(label_dict)
         self._chemical_system.find_clusters_from_bonds()
 
-        if self._pbc:
+        if self.pbc:
             boxConf = PeriodicBoxConfiguration(
-                self._chemical_system, coordinates, self._cell
+                self._chemical_system, coordinates, self.cell
             )
             real_conf = boxConf.to_real_configuration()
         else:
             coordinates *= measure(1.0, "ang").toval("nm")
-            real_conf = RealConfiguration(
-                self._chemical_system, coordinates, self._cell
-            )
+            real_conf = RealConfiguration(self._chemical_system, coordinates, self.cell)
 
         real_conf.fold_coordinates()
         self._configuration = real_conf

@@ -70,7 +70,7 @@ class McStasParametersConfigurator(IConfigurator):
         """
         self._original_input = value
 
-        instrConfig = self._configurable[self._dependencies["instrument"]]
+        instrConfig = self.configurable[self.dependencies["instrument"]]
 
         exePath = instrConfig["value"]
 

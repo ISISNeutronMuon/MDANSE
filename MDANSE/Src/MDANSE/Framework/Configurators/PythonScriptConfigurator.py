@@ -36,7 +36,7 @@ class PythonScriptConfigurator(InputFileConfigurator):
         # The base class constructor.
         InputFileConfigurator.__init__(self, name, **kwargs)
 
-        self._variables = variables if variables is not None else []
+        self.variables = variables if variables is not None else []
 
     def configure(self, value):
         """
@@ -55,7 +55,7 @@ class PythonScriptConfigurator(InputFileConfigurator):
 
         exec(compile(open(value, "rb").read(), value, "exec"), self.__dict__, namespace)
 
-        for v in self._variables:
+        for v in self.variables:
             if v not in namespace:
                 self.error_status = (
                     f"The variable {v} is not defined in the {value} python script file"
@@ -74,4 +74,4 @@ class PythonScriptConfigurator(InputFileConfigurator):
         :rtype: list of str
         """
 
-        return self._variables
+        return self.variables

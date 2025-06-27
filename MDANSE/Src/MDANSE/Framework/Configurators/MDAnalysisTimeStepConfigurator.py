@@ -31,11 +31,11 @@ class MDAnalysisTimeStepConfigurator(FloatConfigurator):
             pass
 
         if value is None or value == "" or value == 0.0:
-            file_configurator = self._configurable[self._dependencies["topology_file"]]
-            files_configurator = self._configurable[
-                self._dependencies["coordinate_files"]
+            file_configurator = self.configurable[self.dependencies["topology_file"]]
+            files_configurator = self.configurable[
+                self.dependencies["coordinate_files"]
             ]
-            if file_configurator._valid and files_configurator._valid:
+            if file_configurator.valid and files_configurator.valid:
                 try:
                     coord_format = files_configurator["format"]
                     coord_files = files_configurator["filenames"]

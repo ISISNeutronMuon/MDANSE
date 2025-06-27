@@ -51,8 +51,8 @@ class AtomMappingConfigurator(IConfigurator):
             self.error_status = "Unable to load JSON string."
             return
 
-        file_configurator = self._configurable[self._dependencies["input_file"]]
-        if not file_configurator._valid:
+        file_configurator = self.configurable[self.dependencies["input_file"]]
+        if not file_configurator.valid:
             self.error_status = "Input file not selected or valid."
             return
 

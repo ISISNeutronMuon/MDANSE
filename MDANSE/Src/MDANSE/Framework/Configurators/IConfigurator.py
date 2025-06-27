@@ -58,7 +58,7 @@ class ConfiguratorWarning(Warning):
 class ConfiguratorError(Error):
     """Error raised by a job input parser."""
 
-    def __init__(self, message: str, configurator: IConfigurator = None):
+    def __init__(self, message: str, configurator: IConfigurator | None = None):
         """Store the error message and configurator reference.
 
         Parameters
@@ -116,7 +116,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
             the key of this object in the Configurable dictionary
 
         """
-        self._name = name
+        self.name = name
 
         self._printable_attributes = [
             "_name",
@@ -127,30 +127,24 @@ class IConfigurator(dict, metaclass=SubclassFactory):
             "_error_status",
         ]
 
-        self._configurable = kwargs.get("configurable", None)
+        self.configurable = kwargs.get("configurable")
 
-        self._root = kwargs.get("root", None)
+        self.root = kwargs.get("root")
 
-        self._dependencies = kwargs.get("dependencies", {})
+        self.dependencies = kwargs.get("dependencies", {})
 
-        self._default = kwargs.get("default", self.__class__._default)
+        self.default = kwargs.get("default", self.__class__._default)
 
-        self._label = kwargs.get(
+        self.label = kwargs.get(
             "label",
-            (
-                self.__class__._label
-                if hasattr(self.__class__, "_label")
-                else " ".join(name.split("_")).strip()
-            ),
+            (getattr(type(self), "label", name.replace("_", " ").strip())),
         )
 
-        self._widget = kwargs.get("widget", self.__class__)
+        self.optional = kwargs.get("optional", False)
 
-        self._optional = kwargs.get("optional", False)
+        self.configured = False
 
-        self._configured = False
-
-        self._valid = True
+        self.valid = True
 
         self._error_status = "OK"
         self._warning_status = ""
@@ -166,72 +160,9 @@ class IConfigurator(dict, metaclass=SubclassFactory):
                     f"{label}={getattr(self, label, 'Not set')}"
                     for label in self._printable_attributes
                 ),
-                (f"{key}={str(self.get(key, 'Not set'))}" for key in self),
-            )
+                (f"{key}={self.get(key, 'Not set')!s}" for key in self),
+            ),
         )
-
-    @property
-    def configurable(self):
-        return self._configurable
-
-    @property
-    def default(self):
-        """
-        Returns the default value of this configurator.
-
-        :return: the default value of this configurator.
-        :rtype: any Python object
-        """
-
-        return self._default
-
-    @property
-    def dependencies(self):
-        """
-        Returns the dependencies maps of this configurator.
-
-        :return: the dependencies maps of this configurator.
-        :rtype: (str,str)-dict
-        """
-
-        return self._dependencies
-
-    @property
-    def label(self):
-        """
-        Returns the label of this configurator that will be used when inserting its corresponding widget in a configuration panel.
-
-        :return: the label of this configurator.
-        :rtype: str
-        """
-
-        return self._label
-
-    @property
-    def name(self):
-        """
-        Returns the name of this configurator. That name will be used as a key of a Configurable object.
-
-        :return: the name of this configurator.
-        :rtype: str
-        """
-
-        return self._name
-
-    @property
-    def valid(self):
-        """Tells if the current value stored by the configurator
-        is a valid input.
-        There is no benefit in rejecting the entire configuration
-        and killing the GUI just because a value needs to be corrected.
-        Instead the GUI should highlight the values that need correcting.
-
-        Returns
-        -------
-        bool
-            true if the current value stored by the configurator can be used
-        """
-        return self._valid
 
     @property
     def error_status(self):
@@ -255,7 +186,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         """
         self._error_status = error_text
-        self._valid = error_text == "OK"
+        self.valid = error_text == "OK"
 
     @property
     def warning_status(self):
@@ -277,79 +208,90 @@ class IConfigurator(dict, metaclass=SubclassFactory):
             LOG.warning(warning_text)
             warn(warning_text, ConfiguratorWarning)
 
-    @property
-    def optional(self):
-        """
-        Returns the optional state name of this configurator.
-
-        :return: the optional state.
-        :rtype: boolean
-        """
-
-        return self._optional
-
-    @property
-    def root(self):
-        return self._root
-
-    @property
-    def widget(self):
-        """
-        Returns the name of the widget that will be associated to this configurator.
-
-        :return: the name of the configurator-widget.
-        :rtype: str
-        """
-
-        return self._widget
-
     @abc.abstractmethod
-    def configure(self, value):
-        """
-        Configures this configurator with a given value.
+    def configure(self, value: str):
+        """Set the value of this job input variable.
 
-        :param value: the input value to be configured.
-        :type value: depends on the configurator
+        Parameters
+        ----------
+        value : str
+            Text string defining the value of the job variable.
 
-        :note: this is an abstract method.
         """
 
     def to_json(self) -> str:
+        """Encode this input variable as a JSON string.
+
+        Returns
+        -------
+        str
+            JSON representation of the input value of this variable.
+
+        """
         return self._encoder.encode(self._original_input)
 
     def from_json(self, json_input: str):
+        """Set this input value from its JSON representation.
+
+        Parameters
+        ----------
+        json_input : str
+            input value of this variable encoded as a JSON string.
+
+        """
         self.configure(self._decoder.decode(json_input))
 
-    def set_configured(self, configured):
-        self._configured = configured
+    def set_configured(self, configured: bool):
+        """Set the 'configured' flag to the input value.
 
-    def is_configured(self):
-        return self._configured
+        Parameters
+        ----------
+        configured : bool
+            True if this configurator has already parsed its input
 
-    def set_configurable(self, configurable):
-        self._configurable = configurable
-
-    def check_dependencies(self, configured=None):
         """
-        Check that the configurators on which this configurator depends on have already been configured.
+        self.configured = configured
 
-        :param configured: the names of the configurators that have already been configured when configuring this configurator.
-        :type: list of str
+    def is_configured(self) -> bool:
+        """Return True if the input parsing has been completed, False otherwise.
 
-        :return: True if the configurators on which this configurator depends on have already been configured. False otherwise.
-        :rtype: bool
+        Returns
+        -------
+        bool
+            True if the input parsing has been completed
+
         """
+        return self.configured
 
+    def set_configurable(self, configurable: Configurable):
+        """Store a reference to the parent instance of the Configurable class.
+
+        Parameters
+        ----------
+        configurable : Configurable
+            the Configurable instance for which is using this configurator
+
+        """
+        self.configurable = configurable
+
+    def check_dependencies(self, configured: list[str] | None = None) -> bool:
+        """Check if the other Configurators needed by this one are ready.
+
+        Parameters
+        ----------
+        configured : list[str], optional
+            List of job inputs known to have already been configured, by default None
+
+        Returns
+        -------
+        bool
+            True if all dependencies are ready, False otherwise
+
+        """
         if configured is None:
-            names = [str(key) for key in self._configurable._configuration.keys()]
             configured = [
-                name
-                for name in names
-                if self._configurable._configuration[name].is_configured()
+                str(name)
+                for name, prop in self.configurable._configuration.values()
+                if prop.is_configured()
             ]
-
-        for c in list(self._dependencies.values()):
-            if c not in configured:
-                return False
-
-        return True
+        return all(c in configured for c in self.dependencies.values())

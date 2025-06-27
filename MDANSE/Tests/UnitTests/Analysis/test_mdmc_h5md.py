@@ -1,15 +1,17 @@
-import tempfile
 import os
-import pytest
+import tempfile
 
-import numpy as np
 import h5py
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
-from MDANSE.Framework.Jobs.IJob import IJob
-from test_helpers.paths import RESULTS_DIR, CONV_DIR
+import numpy as np
+import pytest
 from test_helpers.compare_hdf5 import compare_hdf5
+from test_helpers.paths import CONV_DIR, RESULTS_DIR
+
+from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 short_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
+
 
 @pytest.fixture(scope="module")
 def trajectory():
@@ -18,8 +20,9 @@ def trajectory():
 
 
 @pytest.mark.parametrize("interp_order", [1, 3])
-def test_h5md_temperature(tmp_path, trajectory, interp_order):
+def test_h5md_temperature(generate_benchmarks, tmp_path, trajectory, interp_order):
     pos = trajectory.coordinates(0)
+    result_file = RESULTS_DIR / f"h5md_temperature_{interp_order}.mda"
 
     print(f"Coordinates span: {pos.min()}, {pos.max()}")
     print(f"Trajectory length: {len(trajectory)}")
@@ -28,6 +31,9 @@ def test_h5md_temperature(tmp_path, trajectory, interp_order):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "frames": (0, 39, 1),
@@ -40,10 +46,14 @@ def test_h5md_temperature(tmp_path, trajectory, interp_order):
     temp = IJob.create("Temperature")
     temp.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
 
-    result_file = RESULTS_DIR / f"h5md_temperature_{interp_order}.mda"
-
-    compare_hdf5(out_file, result_file, ("/kinetic_energy", "/temperature",
-                                        "/avg_kinetic_energy", "/avg_temperature"))
+    compare_hdf5(
+        out_file,
+        result_file,
+        ("/kinetic_energy", "/temperature", "/avg_kinetic_energy", "/avg_temperature"),
+    )

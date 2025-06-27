@@ -83,8 +83,8 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
 
         self["level"] = value
 
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
-        atomSelectionConfig = self._configurable[self._dependencies["atom_selection"]]
+        trajConfig = self.configurable[self.dependencies["trajectory"]]
+        atomSelectionConfig = self.configurable[self.dependencies["atom_selection"]]
         chemical_system = trajConfig["instance"].chemical_system
 
         if value in {"atom", "each atom"}:
@@ -215,7 +215,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         post_label: str
             The label to be added for grouped summed results.
         """
-        tot_n_atms = self._configurable[self._dependencies["atom_selection"]][
+        tot_n_atms = self.configurable[self.dependencies["atom_selection"]][
             "selection_length"
         ]
 
@@ -338,7 +338,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         labels = []
 
         if self["level"] == "atom":
-            atom_selection = self._configurable[self._dependencies["atom_selection"]]
+            atom_selection = self.configurable[self.dependencies["atom_selection"]]
             selected_elements = atom_selection["unique_names"]
             for ele_i, ele_j in self.label_pairs(
                 selected_elements, all_pairs=all_pairs
@@ -390,7 +390,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
             Updates all pairs of labels e.g. OH and HO.
         """
         if self["level"] == "atom":
-            atom_selection = self._configurable[self._dependencies["atom_selection"]]
+            atom_selection = self.configurable[self.dependencies["atom_selection"]]
             selected_elements = atom_selection["unique_names"]
             for ele_i, ele_j in self.label_pairs(
                 selected_elements, all_pairs=all_pairs

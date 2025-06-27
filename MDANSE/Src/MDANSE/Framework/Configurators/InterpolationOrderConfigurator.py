@@ -48,8 +48,8 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
         :param value: the interpolation order to be configured.
         :type value: str one of *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*.
         """
-        frames_configurator = self._configurable[self._dependencies["frames"]]
-        if not frames_configurator._valid:
+        frames_configurator = self.configurable[self.dependencies["frames"]]
+        if not frames_configurator.valid:
             self.error_status = "Frames configurator is not valid."
             return
 
@@ -60,7 +60,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
         IntegerConfigurator.configure(self, value)
 
         if value == 0:
-            trajConfig = self._configurable[self._dependencies["trajectory"]]
+            trajConfig = self.configurable[self.dependencies["trajectory"]]
 
             if "velocities" not in trajConfig["instance"].variables():
                 self.error_status = "the trajectory does not contain any velocities. Use an interpolation order higher than 0"

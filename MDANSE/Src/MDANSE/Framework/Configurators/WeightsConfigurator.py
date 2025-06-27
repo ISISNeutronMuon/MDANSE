@@ -94,7 +94,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
 
         """
         self._original_input = value
-        self._trajectory = self._configurable[self._dependencies["trajectory"]][
+        self._trajectory = self.configurable[self.dependencies["trajectory"]][
             "instance"
         ]
 
@@ -122,7 +122,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
 
     def test_values_for_nan(self, property_name: str) -> bool:
         """Throw an error early if weights are not usable."""
-        atm_select = self._configurable[self._dependencies["atom_selection"]]
+        atm_select = self.configurable[self.dependencies["atom_selection"]]
         atom_types = np.unique(atm_select["elements"])
         return any(
             np.isnan(self._trajectory.get_atom_property(atom, property_name))
@@ -149,7 +149,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         if not prop:
             prop = self["property"]
 
-        atm_select = self._configurable[self._dependencies["atom_selection"]]
+        atm_select = self.configurable[self.dependencies["atom_selection"]]
 
         weights = []
         for n_elements, atm_names, atm_elements in [

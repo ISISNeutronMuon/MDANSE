@@ -48,13 +48,13 @@ class VectorConfigurator(IConfigurator):
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._valueType = valueType
+        self.valueType = valueType
 
-        self._normalize = normalize
+        self.normalize = normalize
 
-        self._notNull = notNull
+        self.notNull = notNull
 
-        self._dimension = dimension
+        self.dimension = dimension
 
     def configure(self, value):
         """
@@ -69,16 +69,16 @@ class VectorConfigurator(IConfigurator):
             self.error_status = "Invalid input type"
             return
 
-        if len(value) != self._dimension:
+        if len(value) != self.dimension:
             self.error_status = "Invalid dimension"
             return
 
-        vector = Vector(np.array(value, dtype=self._valueType))
+        vector = Vector(np.array(value, dtype=self.valueType))
 
-        if self._normalize:
+        if self.normalize:
             vector = vector.normal()
 
-        if self._notNull:
+        if self.notNull:
             if vector.length() == 0.0:
                 self.error_status = "The vector is null"
                 return
@@ -86,47 +86,3 @@ class VectorConfigurator(IConfigurator):
         self["vector"] = vector
         self["value"] = vector
         self.error_status = "OK"
-
-    @property
-    def valueType(self):
-        """
-        Returns the values type of the range.
-
-        :return: the values type of the range.
-        :rtype: one of int or float
-        """
-
-        return self._valueType
-
-    @property
-    def normalize(self):
-        """
-        Returns whether or not the configured vector will be normalized.
-
-        :return: True if the vector has to be normalized, False otherwise.
-        :rtype: bool
-        """
-
-        return self._normalize
-
-    @property
-    def notNull(self):
-        """
-        Returns whether or not a null vector is accepted.
-
-        :return: True if a null vector is not accepted, False otherwise.
-        :rtype: bool
-        """
-
-        return self._notNull
-
-    @property
-    def dimension(self):
-        """
-        Returns the dimension of the vector.
-
-        :return: the dimension of the vector.
-        :rtype: int
-        """
-
-        return self._dimension

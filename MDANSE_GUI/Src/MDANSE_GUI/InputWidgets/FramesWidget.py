@@ -80,7 +80,7 @@ class FramesWidget(WidgetBase):
                 val.setBottom(-abs(self._last_frame))
                 val.setTop(abs(self._last_frame))
         elif self._configurator.check_dependencies():
-            minval, maxval = self._configurator._mini, self._configurator._maxi
+            minval, maxval = self._configurator.mini, self._configurator.maxi
             LOG.info(f"Configurator min/max: {minval}, {maxval}")
             for val in self._validators:
                 val.setBottom(-abs(maxval))

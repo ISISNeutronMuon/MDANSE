@@ -54,7 +54,7 @@ class QVectorsConfigurator(IConfigurator):
         """
         self._original_input = value
 
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
+        trajConfig = self.configurable[self.dependencies["trajectory"]]
         if isinstance(value, tuple):
             try:
                 generator_name, parameters = value
@@ -114,6 +114,6 @@ class QVectorsConfigurator(IConfigurator):
         """
         if not self.is_configured():
             return None, None
-        if not self._valid:
+        if not self.valid:
             return None, None
         return self["shells"], "1/nm"

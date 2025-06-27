@@ -23,10 +23,14 @@ short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
 @pytest.mark.parametrize("running_mode", [("single-core",), ("multicore", -4)],
                          ids=lambda x: x[0])
-def test_basic_meansquare(tmp_path, running_mode):
+def test_basic_meansquare(generate_benchmarks, tmp_path, running_mode):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / "basic_meansquare.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters = {
         "frames": (0, 10, 1, 5),
@@ -38,10 +42,11 @@ def test_basic_meansquare(tmp_path, running_mode):
     msd = IJob.create("MeanSquareDisplacement")
     msd.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
-
-    result_file = RESULTS_DIR / "basic_meansquare.mda"
 
     compare_hdf5(out_file, result_file,
                 [f"/msd_{elem}" for elem in ("Cu", "S", "Sb", "total")])

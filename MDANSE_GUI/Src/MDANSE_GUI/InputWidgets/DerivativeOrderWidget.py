@@ -56,8 +56,8 @@ class DerivativeOrderWidget(WidgetBase):
         for widget in self.parent()._widgets:
             if (
                 widget._configurator
-                is self._configurator._configurable[
-                    self._configurator._dependencies["frames"]
+                is self._configurator.configurable[
+                    self._configurator.dependencies["frames"]
                 ]
             ):
                 widget.value_changed.connect(self.updateValue)

@@ -41,9 +41,9 @@ class MultipleChoicesConfigurator(IConfigurator):
 
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._choices = choices
+        self.choices = choices
 
-        self._nChoices = nChoices
+        self.nChoices = nChoices
 
     def configure(self, value):
         """
@@ -56,46 +56,25 @@ class MultipleChoicesConfigurator(IConfigurator):
         """
         self._original_input = value
 
-        if self._nChoices is not None:
-            if len(value) != self._nChoices:
+        if self.nChoices is not None:
+            if len(value) != self.nChoices:
                 self.error_status = "invalid number of choices."
                 return
 
         indices = []
-        for v in value:
-            try:
-                indices.append(self._choices.index(v))
-            except ValueError:
-                self.error_status = f"{v} item is not a valid choice"
-                return
+        try:
+            indices = [self.choices.index(v) for v in value]
+        except ValueError:
+            self.error_status = (
+                f"{', '.join(set(value) - set(self.choices))} are not valid choices"
+            )
+            return
 
         if not indices:
             self.error_status = "Empty choices selection."
             return
 
         self["indices"] = indices
-        self["choices"] = [self._choices[i] for i in indices]
+        self["choices"] = [self.choices[i] for i in indices]
         self["value"] = self["choices"]
         self.error_status = "OK"
-
-    @property
-    def choices(self):
-        """
-        Returns the list of allowed selection items.
-
-        :return: the list of allowed selection items.
-        :rtype: list
-        """
-
-        return self._choices
-
-    @property
-    def nChoices(self):
-        """
-        Returns the maximum number items that can be selected or None if there is no restriction on this number.
-
-        :return: the maximum number items that can be selected.
-        :rtype: int or None
-        """
-
-        return self._nChoices

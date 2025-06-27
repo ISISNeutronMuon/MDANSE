@@ -49,7 +49,7 @@ class UnitCellConfigurator(IConfigurator):
         self["apply"] = False
 
     def update_trajectory_information(self):
-        traj_config = self._configurable[self._dependencies["trajectory"]]["instance"]
+        traj_config = self.configurable[self.dependencies["trajectory"]]["instance"]
         has_valid_cell = True
         has_changing_cell = True
         try:
@@ -71,17 +71,15 @@ class UnitCellConfigurator(IConfigurator):
             )
 
         if not has_valid_cell:
-            traj_config = self._configurable[self._dependencies["trajectory"]][
-                "instance"
-            ]
-            self._recommended_cell = (
+            traj_config = self.configurable[self.dependencies["trajectory"]]["instance"]
+            self.recommended_cell = (
                 2.0 * np.eye(3) * np.linalg.norm(traj_config.max_span)
             )
             LOG.info(
                 "Setting recommended cell to twice the maximum distance found in the trajectory."
             )
         else:
-            self._recommended_cell = (first_cell + last_cell) / 2.0
+            self.recommended_cell = (first_cell + last_cell) / 2.0
 
     def configure(self, value):
         """

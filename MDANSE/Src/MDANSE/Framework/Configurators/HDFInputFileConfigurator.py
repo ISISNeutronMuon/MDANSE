@@ -44,9 +44,9 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         # The base class constructor.
         InputFileConfigurator.__init__(self, name, **kwargs)
 
-        self._variables = variables if variables is not None else []
+        self.variables = variables if variables is not None else []
         self._units = {}
-        self._wildcard = wildcard
+        self.wildcard = wildcard
 
     def configure(self, value):
         """
@@ -60,7 +60,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         self._original_input = value
 
         InputFileConfigurator.configure(self, value)
-        if not self._valid:
+        if not self.valid:
             return
 
         try:
@@ -70,7 +70,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
             self.error_status = f"can not open {value} HDF file for reading"
             return
 
-        for v in self._variables:
+        for v in self.variables:
             if v in self["instance"]:
                 self[v] = self["instance"][v][:]
                 try:
@@ -83,25 +83,3 @@ class HDFInputFileConfigurator(InputFileConfigurator):
                 )
                 return
         self.error_status = "OK"
-
-    @property
-    def wildcard(self):
-        """
-        Returns the wildcard used to filter the input file.
-
-        :return: the wildcard used to filter the input file.
-        :rtype: str
-        """
-
-        return self._wildcard
-
-    @property
-    def variables(self):
-        """
-        Returns the list of HDF variables that must be present in the HDF file.
-
-        :return: the list of HDF variables that must be present in the HDF file.
-        :rtype: list of str
-        """
-
-        return self._variables

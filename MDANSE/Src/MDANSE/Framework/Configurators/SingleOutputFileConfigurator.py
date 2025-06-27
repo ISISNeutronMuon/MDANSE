@@ -47,7 +47,7 @@ class SingleOutputFileConfigurator(IConfigurator):
 
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._format = (
+        self.format = (
             format if format is not None else SingleOutputFileConfigurator._default[-1]
         )
 
@@ -81,7 +81,7 @@ class SingleOutputFileConfigurator(IConfigurator):
             self.error_status = "no output format specified"
             return
 
-        if format != self._format:
+        if format != self.format:
             self.error_status = (
                 f"the output file format {format} is not a valid output format"
             )
@@ -99,24 +99,3 @@ class SingleOutputFileConfigurator(IConfigurator):
             temp_name = root.with_suffix(root.suffix + self["extension"])
         self["file"] = temp_name
         self.error_status = "OK"
-
-    @property
-    def format(self):
-        """
-        Returns the output file format supported.
-
-        :return: the file format supported.
-        :rtype: str
-        """
-        return self._format
-
-    @property
-    def default(self) -> tuple[str, str]:
-        """
-
-        Returns
-        -------
-        tuple[str, str]
-            A tuple of the default filename and format.
-        """
-        return self._default[0], self.format

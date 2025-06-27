@@ -51,7 +51,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
 
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._format = "MDTFormat"
+        self.format = "MDTFormat"
         self._dtype = np.float64
         self._compression = "none"
         self._forbidden_files = []
@@ -90,8 +90,8 @@ class OutputTrajectoryConfigurator(IConfigurator):
             self._compression = None
 
         self["root"] = root
-        self["format"] = self._format
-        self["extension"] = IFormat.create(self._format).extension
+        self["format"] = self.format
+        self["extension"] = IFormat.create(self.format).extension
         temp_name = root
         if self["extension"] != root.suffix:  # capture most extension lengths
             temp_name = root.with_suffix(root.suffix + self["extension"])
@@ -107,26 +107,3 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self["log_level"] = logs
         self["write_logs"] = logs != "no logs"
         self.error_status = "OK"
-
-    @property
-    def format(self):
-        """
-        Returns the output file format supported.
-
-        :return: the file format supported.
-        :rtype: str
-        """
-        return self._format
-
-    @property
-    def default(self) -> tuple[str, type, str]:
-        """Default output parameters for a trajectory:
-        uncompressed trajectory of 64-bit floating point
-        numbers.
-
-        Returns
-        -------
-        tuple[str, int, str]
-            filename, float format, compression (string)
-        """
-        return self._default[0], self._default[1], "none"

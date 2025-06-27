@@ -40,9 +40,9 @@ class StringConfigurator(IConfigurator):
 
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._evalType = evalType
+        self.evalType = evalType
 
-        self._acceptNullString = acceptNullString
+        self.acceptNullString = acceptNullString
 
     def configure(self, value):
         """
@@ -55,40 +55,18 @@ class StringConfigurator(IConfigurator):
 
         value = str(value)
 
-        if not self._acceptNullString:
+        if not self.acceptNullString:
             if not value.strip():
                 self.error_status = "invalid null string"
                 return
 
-        if self._evalType is not None:
+        if self.evalType is not None:
             value = ast.literal_eval(value)
-            if not isinstance(value, self._evalType):
+            if not isinstance(value, self.evalType):
                 self.error_status = (
-                    f"the string can not be eval to {self._evalType.__name__} type"
+                    f"the string can not be eval to {self.evalType.__name__} type"
                 )
                 return
 
         self["value"] = value
         self.error_status = "OK"
-
-    @property
-    def acceptNullString(self):
-        """
-        Returns whether or not a null (or blank) string is accepted.
-
-        :return: True if a null (or blank) string is accepted as input, False otherwise.
-        :rtype: bool
-        """
-
-        return self._acceptNullString
-
-    @property
-    def evalType(self):
-        """
-        Returns the type to which the string will be evaluated or None if it is let as is.
-
-        :return: the type to which the string will be evaluated or None if it is let as is.
-        :rtype: python object or None
-        """
-
-        return self._evalType

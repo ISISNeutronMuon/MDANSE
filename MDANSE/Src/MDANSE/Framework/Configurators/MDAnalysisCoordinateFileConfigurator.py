@@ -27,7 +27,7 @@ class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
 
     def __init__(self, name, wildcard="All files (*)", **kwargs):
         IConfigurator.__init__(self, name, **kwargs)
-        self._wildcard = wildcard
+        self.wildcard = wildcard
 
     def configure(self, setting: tuple[Union[str, list], str]):
         """
@@ -50,8 +50,8 @@ class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
                 self.error_status = "MDAnalysis coordinate file format not recognised."
                 return
 
-        topology_configurator = self._configurable[self._dependencies["input_file"]]
-        if topology_configurator._valid:
+        topology_configurator = self.configurable[self.dependencies["input_file"]]
+        if topology_configurator.valid:
             try:
                 if len(self["filenames"]) <= 1 or self["format"] is None:
                     _ = mda.Universe(
@@ -74,7 +74,3 @@ class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
             if self["values"]:
                 self.error_status = "Requires valid topology file."
                 return
-
-    @property
-    def wildcard(self):
-        return self._wildcard

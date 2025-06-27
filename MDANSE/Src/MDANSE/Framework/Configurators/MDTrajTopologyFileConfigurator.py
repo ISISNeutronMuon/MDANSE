@@ -35,7 +35,7 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
             The path of the MDTraj topology file can be None if
             topology information is contained in the trajectory files.
         """
-        if not self._configurable[self._dependencies["coordinate_files"]].valid:
+        if not self.configurable[self.dependencies["coordinate_files"]].valid:
             self.error_status = "Trajectory file not valid"
             return
 
@@ -43,8 +43,8 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
             self.error_status = "OK"
             self["filename"] = value
 
-            extension = self._configurable[
-                self._dependencies["coordinate_files"]
+            extension = self.configurable[
+                self.dependencies["coordinate_files"]
             ].extension
 
             supported = list(i[1:] for i in _TOPOLOGY_EXTS)
@@ -74,7 +74,7 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
             super().configure(value)
 
     def parse(self) -> None:
-        coord_files = self._configurable[self._dependencies["coordinate_files"]][
+        coord_files = self.configurable[self.dependencies["coordinate_files"]][
             "filenames"
         ]
         if self["filename"]:
