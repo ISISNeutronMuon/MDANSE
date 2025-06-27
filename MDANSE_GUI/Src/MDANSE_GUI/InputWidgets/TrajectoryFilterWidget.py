@@ -906,7 +906,7 @@ class FilterDesigner(QDialog):
         Any
             Configuration value.
         """
-        config = self.configurator._configurable._configuration
+        config = self.configurator.configurable._configuration
         return config.get(key)
 
     def current_filter_units(self) -> Filter.FrequencyUnits:

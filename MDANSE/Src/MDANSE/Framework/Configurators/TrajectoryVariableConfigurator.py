@@ -38,7 +38,7 @@ class TrajectoryVariableConfigurator(IConfigurator):
         """
         self._original_input = value
 
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
+        trajConfig = self.configurable[self.dependencies["trajectory"]]
 
         if value not in trajConfig["instance"].configuration():
             self.error_status = f"{value} is not registered as a trajectory variable."

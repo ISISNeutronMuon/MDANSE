@@ -35,7 +35,7 @@ class CorrelationFramesConfigurator(FramesConfigurator):
             correlations.
 
         """
-        trajConfig = self._configurable[self._dependencies["trajectory"]]
+        trajConfig = self.configurable[self.dependencies["trajectory"]]
         n_steps = trajConfig["length"]
 
         # if all or None set to default

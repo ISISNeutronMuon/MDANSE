@@ -37,9 +37,9 @@ class InterpolationOrderWidget(WidgetBase):
         self._field = QSpinBox(self._base)
         self._field.setMaximum(5)
         configurator = self._configurator
-        trajectory = configurator._configurable[
-            configurator._dependencies["trajectory"]
-        ]["instance"]
+        trajectory = configurator.configurable[configurator.dependencies["trajectory"]][
+            "instance"
+        ]
         if not trajectory.has_variable("velocities"):
             self._field.setMinimum(1)
             self._field.setValue(3)
@@ -64,8 +64,8 @@ class InterpolationOrderWidget(WidgetBase):
         for widget in self.parent()._widgets:
             if (
                 widget._configurator
-                is self._configurator._configurable[
-                    self._configurator._dependencies["frames"]
+                is self._configurator.configurable[
+                    self._configurator.dependencies["frames"]
                 ]
             ):
                 widget.value_changed.connect(self.updateValue)

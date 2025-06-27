@@ -44,8 +44,8 @@ class MoleculeWidget(WidgetBase):
         else:
             option_list = configurator.choices
             default_option = configurator.default
-        traj_config = self._configurator._configurable[
-            self._configurator._dependencies["trajectory"]
+        traj_config = self._configurator.configurable[
+            self._configurator.dependencies["trajectory"]
         ]
         trajectory = traj_config["instance"]
         unique_molecules = trajectory.chemical_system.unique_molecules()

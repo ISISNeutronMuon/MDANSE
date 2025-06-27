@@ -58,7 +58,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
         """
         self._original_input = value
 
-        framesCfg = self._configurable[self._dependencies["frames"]]
+        framesCfg = self.configurable[self.dependencies["frames"]]
 
         time = framesCfg["time"]
         self["n_frames"] = len(time)
@@ -101,7 +101,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
     def preview_output_axis(self):
         if not self.is_configured():
             return None, None
-        if not self._valid:
+        if not self.valid:
             return None, None
         if "romega" in self:
             return self["romega"], "rad/ps"

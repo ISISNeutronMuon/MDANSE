@@ -25,16 +25,16 @@ class MDAnalysisMDTrajTimeStepWidget(FloatWidget):
         for widget in self.parent()._widgets:
             if (
                 widget._configurator
-                is self._configurator._configurable[
-                    self._configurator._dependencies["topology_file"]
+                is self._configurator.configurable[
+                    self._configurator.dependencies["topology_file"]
                 ]
             ):
                 self._topology_file_widget = widget
                 self._topology_file_widget.value_changed.connect(self.update_from_files)
             if (
                 widget._configurator
-                is self._configurator._configurable[
-                    self._configurator._dependencies["coordinate_files"]
+                is self._configurator.configurable[
+                    self._configurator.dependencies["coordinate_files"]
                 ]
             ):
                 self._coordinates_file_widget = widget
@@ -47,7 +47,7 @@ class MDAnalysisMDTrajTimeStepWidget(FloatWidget):
         files if possible else set it back to the default value.
         """
         self._configurator.configure(None)
-        if self._configurator._valid:
+        if self._configurator.valid:
             self._field.setText(str(self._configurator["value"]))
         else:
             self._field.setText(str(self._default_value))

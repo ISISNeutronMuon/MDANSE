@@ -27,7 +27,7 @@ class MultiInputFileConfigurator(IConfigurator):
 
     def __init__(self, name, wildcard="All files (*)", **kwargs):
         IConfigurator.__init__(self, name, **kwargs)
-        self._wildcard = wildcard
+        self.wildcard = wildcard
 
     def configure(self, setting: Union[str, list]):
         """
@@ -81,7 +81,3 @@ class MultiInputFileConfigurator(IConfigurator):
         self["values"] = values
         self["filenames"] = values
         self.error_status = "OK"
-
-    @property
-    def wildcard(self):
-        return self._wildcard

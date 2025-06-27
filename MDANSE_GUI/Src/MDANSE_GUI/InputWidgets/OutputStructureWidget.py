@@ -55,7 +55,7 @@ class OutputStructureWidget(WidgetBase):
         self._field = QLineEdit(str(guess_name), self._base)
         self._field.setPlaceholderText(str(guess_name))
         self.format_box = QComboBox(self._base)
-        self.format_box.addItems(self._configurator._formats)
+        self.format_box.addItems(self._configurator.formats)
         self.format_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)
@@ -115,7 +115,7 @@ class OutputStructureWidget(WidgetBase):
             self.updateValue()
 
     def get_widget_value(self):
-        self._configurator._forbidden_files = self._session.reserved_filenames()
+        self._configurator.forbidden_files = self._session.reserved_filenames()
         filename = self._field.text()
         if len(filename) < 1:
             filename = self._default_value[0]

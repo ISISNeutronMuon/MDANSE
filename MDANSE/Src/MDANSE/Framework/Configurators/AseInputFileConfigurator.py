@@ -41,7 +41,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
         # The base class constructor.
         InputFileConfigurator.__init__(self, name, **kwargs)
 
-        self._wildcard = wildcard
+        self.wildcard = wildcard
         self["format"] = kwargs.get("format", None)
         self["value"] = ""
 
@@ -63,7 +63,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
         if not value.exists():
             if self.optional:
                 return
-            LOG.error(f"FILE MISSING in {self._name}")
+            LOG.error(f"FILE MISSING in {self.name}")
             self.error_status = f"The file {value} does not exist"
             return
 
@@ -71,7 +71,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
             file_format = None
 
         if file_format is not None and file_format not in self._allowed_formats:
-            LOG.error(f"WRONG FORMAT in {self._name}")
+            LOG.error(f"WRONG FORMAT in {self.name}")
             self.error_status = f"The ASE file format {file_format} is not supported"
             return
 
@@ -79,14 +79,3 @@ class AseInputFileConfigurator(InputFileConfigurator):
         self["filename"] = value
         self["format"] = file_format
         self.error_status = "OK"
-
-    @property
-    def wildcard(self):
-        """
-        Returns the wildcard used to filter the input file.
-
-        :return: the wildcard used to filter the input file.
-        :rtype: str
-        """
-
-        return self._wildcard
