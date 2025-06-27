@@ -292,7 +292,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         if configured is None:
             configured = [
                 str(name)
-                for name, prop in self.configurable._configuration.values()
+                for name, prop in self.configurable._configuration.items()
                 if prop.is_configured()
             ]
         return all(c in configured for c in self.dependencies.values())
