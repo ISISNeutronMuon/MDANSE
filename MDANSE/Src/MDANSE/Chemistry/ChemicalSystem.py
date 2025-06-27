@@ -170,7 +170,7 @@ class ChemicalSystem:
 
     @property
     def atom_list(self) -> list[str]:
-        """Return the indices of all atoms in the ChemicalSystem."""
+        """Return the types of all atoms in the ChemicalSystem."""
         return self._atom_types
 
     @property
@@ -183,7 +183,7 @@ class ChemicalSystem:
     def atom_property(self, atom_property: str) -> list[Any]:
         """Return the values of a specific property, for all atoms in the system."""
         lookup = {}
-        for atom in self.atom_list:
+        for atom in self._unique_elements:
             lookup[atom] = self._database.get_atom_property(atom, atom_property)
         return [lookup[atom] for atom in self.atom_list]
 
