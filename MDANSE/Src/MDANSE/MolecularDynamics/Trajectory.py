@@ -597,9 +597,8 @@ class TrajectoryWriter:
         properties["dummy"] = 0
         if symbol == "Du":
             properties["dummy"] = 1
-        if "element" in properties.keys():
-            if properties["element"] == "dummy":
-                properties["dummy"] = 1
+        if "element" in properties and properties["element"] == "dummy":
+            properties["dummy"] = 1
         new_labels = list(properties)
         old_labels = [x.decode("utf-8") for x in label_dataset[:]]
         if ptypes is None:
@@ -624,9 +623,7 @@ class TrajectoryWriter:
         for key, value in properties.items():
             try:
                 numval = complex(value)
-            except ValueError:
-                continue
-            except TypeError:
+            except (ValueError, TypeError):
                 continue
             else:
                 atom_dataset[mapping[key]] = numval
