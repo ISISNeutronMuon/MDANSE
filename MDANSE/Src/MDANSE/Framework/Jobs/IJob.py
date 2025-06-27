@@ -33,44 +33,38 @@ from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.Framework.Configurable import Configurable
-from MDANSE.Framework.Jobs.JobStatus import JobStatus
+from MDANSE.Framework.Jobs.JobStatus import JobStates, JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.MLogging import FMT, LOG
 
 
 class JobError(Error):
-    """
-    This class handles any exception related to IJob-derived objects
-    """
+    """This class handles any exception related to IJob-derived objects"""
 
-    def __init__(self, job, message=None):
+    def __init__(self, job: "IJob", message: str = ""):
         """
         Initializes the the object.
 
-        :param job: the configurator in which the exception was raised
-        :type job: IJob derived object
+        Parameters
+        ----------
+        job : IJob
+            The job in which the exception was raised.
+        message : str
+            Error report.
         """
 
-        trace = []
+        trace = [" -- ".join(map(str, tb)) for tb in traceback.extract_stack()]
 
-        tback = traceback.extract_stack()
-
-        for tb in tback:
-            trace.append(" -- ".join([str(t) for t in tb]))
-
-        if message is None:
-            message = sys.exc_info()[1]
-
-        self._message = str(message)
-
+        self._message = message
         trace.append(f"\n{self._message}")
 
         trace = "\n".join(trace)
 
         if job._status is not None:
-            job._status._state["state"] = "aborted"
-            job._status._state["traceback"] = trace
-            job._status._state["info"] = str(job)
+            state = job._status.state
+            state.state = JobStates.FAILED
+            state.traceback = trace
+            state.info = str(job)
             job._status.update(force=True)
 
     def __str__(self):
@@ -408,7 +402,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         "remote": _run_remote,
     }
 
-    def run(self, parameters, status=False):
+    def run(self, parameters, status: bool = False):
         """
         Run the job.
         """
@@ -418,7 +412,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             )
 
         try:
-            self._name = f"{self.__class__.__name__}_{IJob.define_unique_name()}"
+            self._name = f"{type(self).__name__}_{IJob.define_unique_name()}"
 
             if status and self._status is None:
                 self._status = self._status_constructor(self)
@@ -431,7 +425,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
             if self._status is not None:
                 self._status.start(self.numberOfSteps)
-                self._status.state["info"] = str(self)
+                self._status.state.info = str(self)
 
             if getattr(self, "numberOfSteps", 0) <= 0:
                 raise JobError(self, f"Invalid number of steps for job {self._name}")
@@ -447,10 +441,10 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
             if self._status is not None:
                 self._status.finish()
-        except Exception:
+        except Exception as err:
             tb = traceback.format_exc()
             LOG.critical(f"Job failed with traceback: {tb}")
-            raise JobError(self, tb)
+            raise JobError(self) from err
 
     @property
     def info(self):

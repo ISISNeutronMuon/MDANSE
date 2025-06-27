@@ -308,7 +308,7 @@ class InfoDisplay(QFrame):
             "Atom",
             "Chemical family",
             "Electron configuration",
-            "Relative atomic mass (uma)",
+            "Relative atomic mass (Da)",
             "Electronegativity",
             "Electron affinity (eV)",
             "Ionization energy (eV)",

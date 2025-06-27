@@ -14,13 +14,15 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import os
+import time
+from contextlib import suppress
 from multiprocessing import Queue
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event
-from typing import Union
 
 from qtpy.QtCore import QObject, Signal, Slot
 
+from MDANSE.Framework.Jobs.JobStatus import JobInfo, JobStates
 from MDANSE.Framework.Status import Status
 from MDANSE.MLogging import LOG
 
@@ -31,26 +33,48 @@ class JobCommunicator(QObject):
     finished = Signal(bool)
     oscillate = Signal()
 
-    def status_update(self, input: tuple[str, Union[bool, int]]):
-        key, value = input
-        if key == "FINISHED":
-            self.finished.emit(value)
-            self.terminate_the_process()
-        elif key == "STEP":
-            self.progress.emit(value)
-        elif key == "STARTED":
-            if value is not None:
-                self.target.emit(value)
+    def status_update(self, state: JobInfo):
+        """Update relevant status windows.
+
+        Parameters
+        ----------
+        state : JobInfo
+            Current state of job.
+
+        Raises
+        ------
+        NotImplementedError
+            Paused is not currently supported in this interface.
+        """
+        if state.state is JobStates.STARTING:
+            if state.n_steps is not None:
+                self.target.emit(state.n_steps)
             else:
                 self.oscillate.emit()
-        elif key == "COMMUNICATION":
-            LOG.info(f"Communication with the subprocess is now {value}")
-            self.finished.emit(value)
+
+        elif state.state is JobStates.RUNNING:
+            self.progress.emit(state.progress)
+
+        elif state.state is JobStates.ABORTED:
+            self.finished.emit(False)
+            self.terminate_the_process()
+
+        elif state.state is JobStates.FAILED:
+            LOG.info(f"Communication with the subprocess is now {False}")
+            self.finished.emit(False)
+            self.terminate_the_process()
+
+        elif state.state is JobStates.PAUSED:
+            raise NotImplementedError()
+
+        elif state.state is JobStates.FINISHED:
+            self.finished.emit(True)
             self.terminate_the_process()
 
     @Slot()
     def terminate_the_process(self):
-        LOG.info(f"JobCommunicator PID: {os.getpid()} started 'terminate_the_process")
+        """Kill a running job."""
+        LOG.info(f"JobCommunicator PID: {os.getpid()} started 'terminate_the_process'")
         try:
             self._process.terminate()
         except Exception:
@@ -65,18 +89,26 @@ class JobCommunicator(QObject):
 class JobStatusProcess(Status):
     def __init__(
         self,
-        pipe: "Connection",
+        job_name: str,
+        pipe: Connection,
         queue_0: Queue,
         queue_1: Queue,
-        pause_event: "Event",
+        pause_event: Event,
         **kwargs,
     ):
         super().__init__()
         self._pipe = pipe
         self._queue_0 = queue_0
         self._queue_1 = queue_1
-        self._state = {}  # for compatibility with JobStatus
-        self._progress_meter = 0
+
+        self._state = JobInfo(
+            name=job_name,
+            type=None,
+            start=time.time(),
+            elapsed="N/A",
+            n_steps=self._nSteps,
+        )
+
         self._pause_event = pause_event
         self._pause_event.set()
 
@@ -84,27 +116,46 @@ class JobStatusProcess(Status):
     def state(self):
         return self._state
 
+    @property
+    def job_state(self) -> JobStates:
+        """Alias for current job state."""
+        return self.state.state
+
+    @job_state.setter
+    def job_state(self, value: JobStates):
+        self.state.state = value
+
     def finish_status(self):
-        self._pipe.send(("FINISHED", True))
+        """Assert finished state."""
+        self.job_state = JobStates.FINISHED
+        self._pipe.send(self.state)
 
     def start_status(self):
-        LOG.info(f"JobStatusProcess PID: {os.getpid()} started 'start_status")
-        try:
-            temp = int(self._nSteps)
-        except Exception:
-            self._pipe.send(("STARTED", None))
-        else:
-            self._pipe.send(("STARTED", temp))
+        """Assert started state."""
+        LOG.info(f"JobStatusProcess PID: {self.state.pid} started 'start_status'")
+
+        with suppress(ValueError):
+            self.state.n_steps = int(self._nSteps)
+
+        self.job_state = JobStates.STARTING
+        self._pipe.send(self.state)
         # self._updateStep = 1
 
     def stop_status(self):
-        self._pipe.send(("FINISHED", False))
+        """Assert aborted state."""
+        self.job_state = JobStates.ABORTED
+        self._pipe.send(self.state)
 
     def update_status(self):
-        self._progress_meter += 1
-        temp = int(self._progress_meter) * self._updateStep
-        self._pipe.send(("STEP", temp))
+        """Assert one step is done."""
+        self.job_state = JobStates.RUNNING
+        self.state.current_step += 1
+        self.state.progress = int(self.state.current_step) * self._updateStep
+        self._pipe.send(self.state)
 
     def fixed_status(self, current_progress: int):
-        temp = int(current_progress) * self._updateStep
-        self._pipe.send(("STEP", temp))
+        """Assert current step is X and done."""
+        self.job_state = JobStates.RUNNING
+        self.state.current_step = current_progress
+        self.state.progress = int(self.state.current_step) * self._updateStep
+        self._pipe.send(self.state)

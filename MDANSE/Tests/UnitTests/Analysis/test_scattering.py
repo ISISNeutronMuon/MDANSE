@@ -65,7 +65,7 @@ def disf(tmp_path_factory):
         ),
         "running_mode": ("single-core",),
         "trajectory": short_traj,
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     disf = IJob.create("DynamicIncoherentStructureFactor")
@@ -191,7 +191,7 @@ def test_disf(tmp_path, traj_info, qvector_grid):
         "q_vectors": qvector_grid,
         "running_mode": ("single-core",),
         "trajectory": traj_info[1],
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     disf = IJob.create("DynamicIncoherentStructureFactor")
@@ -237,7 +237,12 @@ def test_eisf(tmp_path, traj_info, qvector_grid):
     assert text_file.is_file()
 
     result_file = RESULTS_DIR / f"eisf_{traj_info[0]}.mda"
-    compare_hdf5(out_file, result_file, ("eisf",), startswith=True, scale_result=True)
+    compare_hdf5(out_file,
+                 result_file,
+                 ("eisf",),
+                 startswith=True,
+                 scale_result=True,
+                 scale_benchmark=True)
 
 
 @pytest.mark.parametrize(
@@ -260,7 +265,7 @@ def test_gdisf(tmp_path, traj_info):
         "q_shells": (2.0, 12.2, 2.0),
         "running_mode": ("single-core",),
         "trajectory": traj_info[1],
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     gdisf = IJob.create("GaussianDynamicIncoherentStructureFactor")

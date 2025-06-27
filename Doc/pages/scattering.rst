@@ -332,8 +332,8 @@ and
     S_{\text{inc},\alpha\beta}(\mathbf{q},\omega) = \int\mathrm{d}t  \,  F_{\text{inc},\alpha\beta}(\mathbf{q},t) e^{-i\omega t}.
 
 To obtain results relevant to neutron scattering, the
-``b_incoherent2`` weight setting should be used so that the weight will be
-generated using the coherent scattering lengths.
+``b_incoherent`` weight setting should be used so that the weight will be
+generated using the incoherent scattering lengths.
 
 
 .. _elastic-incoherent-structure-factor:
@@ -483,8 +483,8 @@ Neutron Dynamic Total Structure Factor
 This is a combines the coherent and incoherent intermediate scattering
 functions and corresponding dynamic structure factors. It is a fully
 neutron-specific analysis, so that coherent neutron scattering
-lengths ``b_coherent`` and the square of the atomic
-incoherent neutron scattering lengths ``b_incoherent2`` are used to
+lengths ``b_coherent`` and the atomic
+incoherent neutron scattering lengths ``b_incoherent`` are used to
 weight the corresponding coherent and incoherent signals.
 
 In this analysis the total incoherent, total coherent and total

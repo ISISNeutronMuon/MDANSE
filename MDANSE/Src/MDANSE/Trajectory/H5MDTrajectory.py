@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Union
 
 import h5py
 import numpy as np
@@ -48,7 +48,7 @@ class H5MDTrajectory:
     H5MD files created by MDMC.
     """
 
-    def __init__(self, h5_filename: Union[Path, str]):
+    def __init__(self, h5_filename: Path | str):
         """Constructor.
 
         :param h5_filename: the trajectory filename
@@ -238,10 +238,7 @@ class H5MDTrajectory:
         if frame < 0 or frame >= len(self):
             raise IndexError(f"Invalid frame number: {frame}")
 
-        if self._unit_cells is not None:
-            unit_cell = self.unit_cell(frame)
-        else:
-            unit_cell = None
+        unit_cell = self.unit_cell(frame) if self._unit_cells is not None else None
 
         variables = {}
         for k in self.variables():
@@ -463,7 +460,6 @@ class H5MDTrajectory:
         :return: 2D array containing the real coordinates converted from box coordinates.
         :rtype: ndarray
         """
-
         if self._unit_cells is not None:
             real_coordinates = np.empty(box_coordinates.shape, dtype=np.float64)
             comp = 0
@@ -472,29 +468,38 @@ class H5MDTrajectory:
                 real_coordinates[comp, :] = box_coordinates[comp, :] @ direct_cell
                 comp += 1
             return real_coordinates
-        else:
-            return box_coordinates
+        return box_coordinates
 
     def read_atomic_trajectory(
-        self, index, first=0, last=None, step=1, box_coordinates=False
-    ):
+        self,
+        index: int,
+        first: int = 0,
+        last: int | None = None,
+        step: int = 1,
+        *,
+        box_coordinates: bool = False,
+    ) -> np.ndarray:
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
-        :param index: the index of the atom
-        :type index: int
-        :param first: the index of the first frame
-        :type first: int
-        :param last: the index of the last frame
-        :type last: int
-        :param step: the step in frame
-        :type step: int
-        :param box_coordinates: if True, the coordiniates are returned in box coordinates
-        :type step: bool
+        Parameters
+        ----------
+        index : int
+            Atom index.
+        first : int, optional
+            First frame index, by default 0
+        last : int | None, optional
+            Last frame index, by default None
+        step : int, optional
+            Step in time frames, by default 1
+        box_coordinates : bool, optional
+            If True, return fractional coordinates, by default False
 
-        :return: 2D array containing the atomic trajectory for the selected frames
-        :rtype: ndarray
+        Returns
+        -------
+        np.ndarray
+            Coordinates of one atom for specified time frames.
+
         """
-
         if last is None:
             last = len(self)
 
@@ -511,38 +516,53 @@ class H5MDTrajectory:
 
         if self._unit_cells is not None:
             direct_cells = np.array(
-                [self.unit_cell(nf).direct for nf in range(first, last, step)]
+                [self.unit_cell(nf).direct for nf in range(first, last, step)],
             )
             inverse_cells = np.array(
-                [self.unit_cell(nf).inverse for nf in range(first, last, step)]
+                [self.unit_cell(nf).inverse for nf in range(first, last, step)],
             )
-            atomic_traj = atomic_trajectory(
-                coords, direct_cells, inverse_cells, box_coordinates
+            return atomic_trajectory(
+                coords,
+                direct_cells,
+                inverse_cells,
+                box_coordinates=box_coordinates,
             )
-            return atomic_traj
-        else:
-            return coords
+        return coords
 
     def read_configuration_trajectory(
-        self, index, first=0, last=None, step=1, variable="velocities"
-    ):
-        """Read a given configuration variable through the trajectory for a given ato.
+        self,
+        index: int,
+        first: int = 0,
+        last: int | None = None,
+        step: int = 1,
+        variable="velocities",
+    ) -> np.ndarray:
+        """Return trajectory values for one atom for a subset of frames.
 
-        :param index: the index of the atom
-        :type index: int
-        :param first: the index of the first frame
-        :type first: int
-        :param last: the index of the last frame
-        :type last: int
-        :param step: the step in frame
-        :type step: int
-        :param variable: the configuration variable to read
-        :type variable: str
+        Parameters
+        ----------
+        index : int
+            Atom index.
+        first : int, optional
+            First frame index, by default 0
+        last : int | None, optional
+            Last frame index, by default None
+        step : int, optional
+            Step in time frames, by default 1
+        variable : str, optional
+            Value to be read from trajectory, by default "velocities"
 
-        :return: 2D array containing the atomic trajectory for the selected frames
-        :rtype: ndarray
+        Returns
+        -------
+        np.ndarray
+            Value of 'variable' for one atom and selected frames.
+
+        Raises
+        ------
+        KeyError
+            If 'variable' is not in the trajectory file.
+
         """
-
         if last is None:
             last = len(self)
 
@@ -550,13 +570,10 @@ class H5MDTrajectory:
             raise KeyError(f"The variable {variable} is not stored in the trajectory")
 
         grp = self._h5_file["/particles/all"]
-        variable = grp[variable]["value"][first:last:step, index, :].astype(np.float64)
-
-        return variable
+        return grp[variable]["value"][first:last:step, index, :].astype(np.float64)
 
     def has_variable(self, variable: str) -> bool:
-        """Check if the trajectory has a specific variable e.g.
-        velocities.
+        """Check if the trajectory has a specific variable e.g. velocities.
 
         Parameters
         ----------
@@ -567,69 +584,87 @@ class H5MDTrajectory:
         -------
         bool
             True if variable exists.
-        """
-        if variable in self._h5_file["/particles/all"]:
-            return True
-        else:
-            return False
 
-    def get_atom_property(self, atom_symbol: str, property: str):
-        return ATOMS_DATABASE.get_atom_property(atom_symbol, property)
+        """
+        return variable in self._h5_file["/particles/all"]
+
+    def get_atom_property(
+        self, atom_symbol: str, atom_property: str
+    ) -> int | float | complex | str:
+        """Get the value of atom property for the atom type.
+
+        Parameters
+        ----------
+        atom_symbol : str
+            Atom type.
+        atom_property : str
+            Name of the atom property.
+
+        Returns
+        -------
+        int | float | complex | str
+            Value of the atom property as defined in the atom database.
+
+        """
+        return ATOMS_DATABASE.get_atom_property(atom_symbol, atom_property)
 
     def atoms_in_database(self) -> list[str]:
+        """Return the names of atoms defined in the atom property database.
+
+        Here, it defaults to the central atom property database.
+
+        Returns
+        -------
+        list[str]
+            List of atom names that are present in the atom database.
+
+        """
         return ATOMS_DATABASE.atoms
 
     def properties_in_database(self) -> list[str]:
+        """Return the list of atom properties provided by the trajectory.
+
+        Here, it defaults to the central atom property database.
+
+        Returns
+        -------
+        list[str]
+            List of atom property names that can be accessed.
+
+        """
         return ATOMS_DATABASE.properties
 
     @property
-    def chemical_system(self):
-        """Return the chemical system stored in the trajectory.
-
-        :return: the chemical system
-        :rtype: MDANSE.Chemistry.ChemicalSystem.ChemicalSystem
-        """
+    def chemical_system(self) -> ChemicalSystem:
+        """The ChemicalSystem built from the trajectory contents."""
         return self._chemical_system
 
     @property
     def file(self):
-        """Return the trajectory file object.
-
-        :return: the trajectory file object
-        :rtype: HDF5 file object
-        """
-
+        """The file object of the trajectory."""
         return self._h5_file
 
     @property
     def filename(self):
-        """Return the trajectory filename.
-
-        :return: the trajectory filename
-        :rtype: str
-        """
-
+        """The filename of the trajectory."""
         return self._h5_filename
 
-    def variable(self, name: str):
-        """Returns a specific dataset corresponding
-        to a trajectory variable called 'name'.
-        """
-
+    def variable(self, name: str) -> h5py.Dataset:
+        """Return the dataset corresponding to a trajectory variable called 'name'."""
         try:
             grp = self._h5_file["/particles/all/" + name + "/value"]
         except KeyError:
             grp = self._h5_file["/particles/all/" + name]
-
         return grp
 
-    def variables(self):
-        """Return the configuration variables stored in this trajectory.
+    def variables(self) -> list[str]:
+        """Return the names of available variables.
 
-        :return; the configuration variable
-        :rtype: list
+        Returns
+        -------
+        list[str]
+            List of variables present in the file.
+
         """
-
         grp = self._h5_file["/particles/all"]
-
         return list(grp.keys())

@@ -429,13 +429,13 @@ class NeutronDynamicTotalStructureFactor(IJob):
         for label, number in nAtomsPerElement.items():
             ele_i = self.configuration["grouping_level"].get_element_from_label(label)
             bi = self.configuration["trajectory"]["instance"].get_atom_property(
-                ele_i, "b_incoherent2"
+                ele_i, "b_incoherent"
             )
             self._outputData[f"f(q,t)_inc_{label}"].scaling_factor *= (
-                bi * number * norm_natoms
+                bi * bi * number * norm_natoms
             )
             self._outputData[f"s(q,f)_inc_{label}"].scaling_factor *= (
-                bi * number * norm_natoms
+                bi * bi * number * norm_natoms
             )
             self._outputData["f(q,t)_inc_total"][:] += (
                 self._outputData[f"f(q,t)_inc_{label}"][:]

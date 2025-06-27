@@ -73,6 +73,7 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
    pages/trajectory
    pages/correlation
    pages/weights
+   pages/grouping
    pages/atom_selection
    pages/qvectors
    pages/dynamics

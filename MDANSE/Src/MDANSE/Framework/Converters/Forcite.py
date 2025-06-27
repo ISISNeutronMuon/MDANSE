@@ -22,9 +22,7 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
-FORCE_FACTOR = measure(1.0, "kcal_per_mole/ang", equivalent=True).toval(
-    "uma nm/ps2 mol"
-)
+FORCE_FACTOR = measure(1.0, "kcal_per_mole/ang", equivalent=True).toval("Da nm/ps2 mol")
 
 
 class TrjFile(dict):
@@ -386,7 +384,7 @@ class Forcite(Converter):
                 "unit_cell": "nm",
                 "coordinates": "nm",
                 "velocities": "nm/ps",
-                "gradients": "uma nm/ps2",
+                "gradients": "Da nm/ps2",
             },
         )
 

@@ -21,7 +21,7 @@ def test_disf_selection_plus_inverse_results_equal_to_all_selection_results(tmp_
         ),
         "running_mode": ("single-core",),
         "trajectory": mdmc_traj,
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     disf = IJob.create("DynamicIncoherentStructureFactor")

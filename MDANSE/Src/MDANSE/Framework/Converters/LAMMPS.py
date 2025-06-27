@@ -53,7 +53,7 @@ LAMMPS_UNITS = {
         "time": "fs",
         "length": "ang",
         "velocity": "ang/fs",
-        "mass": "uma",
+        "mass": "Da",
         "charge_conv": 1.0,
     },
     "metal": {
@@ -61,7 +61,7 @@ LAMMPS_UNITS = {
         "time": "ps",
         "length": "ang",
         "velocity": "ang/ps",
-        "mass": "uma",
+        "mass": "Da",
         "charge_conv": 1.0,
     },
     "si": {
@@ -85,7 +85,7 @@ LAMMPS_UNITS = {
         "time": "fs",
         "length": "Bohr",
         "velocity": "ang/fs",
-        "mass": "uma",
+        "mass": "Da",
         "charge_conv": 1.0,
     },
     "micro": {

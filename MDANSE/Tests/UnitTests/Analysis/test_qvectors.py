@@ -70,7 +70,7 @@ def test_disf(tmp_path, trajectory, qvector_generator):
         "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "running_mode": ("single-core",),
         "trajectory": short_traj,
-        "weights": "b_incoherent2",
+        "weights": "b_incoherent",
     }
 
     instance = IQVectors.create(qvector_generator, trajectory.configuration())
