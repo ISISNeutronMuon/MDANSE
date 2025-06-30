@@ -57,7 +57,24 @@ class JobTree(QStandardItemModel):
         if parent_class is None:
             parent_class = IJob
         full_dict = parent_class.indirect_subclass_dictionary()
-        for class_name, class_object in full_dict.items():
+        sorted_keys = sorted(full_dict.keys())
+        cat_dicts = {}
+        for class_name in sorted_keys:
+            if not full_dict[class_name].enabled:
+                continue
+            cat_tuple = getattr(full_dict[class_name], "category", None)
+            if cat_tuple and len(cat_tuple) > 1:
+                temp = cat_dicts.get(cat_tuple[0], list())
+                temp.append(cat_tuple[1])
+                cat_dicts[cat_tuple[0]] = temp
+        sorted_cats = sorted(cat_dicts.keys())
+        for cat in sorted_cats:
+            cat_dicts[cat] = sorted(cat_dicts[cat])
+        for cat in sorted_cats:
+            for subcat in cat_dicts[cat]:
+                self.parentsFromCategories((cat, subcat))
+        for class_name in sorted_keys:
+            class_object = full_dict[class_name]
             if class_object.enabled:
                 self.createNode(class_name, class_object, filter)
 
@@ -99,7 +116,7 @@ class JobTree(QStandardItemModel):
 
     def parentsFromCategories(self, category_tuple):
         """Returns the parent node for a node that belongs to the
-        category specified by categore_tuple. Also makes sure that
+        category specified by category_tuple. Also makes sure that
         the parent nodes exist (or creates them if they don't).
 
         Arguments:

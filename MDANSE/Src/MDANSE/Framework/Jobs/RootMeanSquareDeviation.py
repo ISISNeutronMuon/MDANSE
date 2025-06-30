@@ -36,7 +36,7 @@ class RootMeanSquareDeviation(IJob):
 
     category = (
         "Analysis",
-        "Structure",
+        "Dynamics",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]

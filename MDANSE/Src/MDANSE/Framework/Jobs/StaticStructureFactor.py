@@ -36,7 +36,7 @@ class StaticStructureFactor(DistanceHistogram):
 
     category = (
         "Analysis",
-        "Structure",
+        "Scattering",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]

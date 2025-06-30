@@ -58,7 +58,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
 
     category = (
         "Analysis",
-        "Structure",
+        "Scattering",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
