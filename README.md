@@ -100,14 +100,16 @@ experimental data, or used as a prediction of results of a potential experiment.
 The following properties can be computed:
 
 <details><summary>Dynamics</summary><ul>
-<li>Angular correlation</li>
-<li>Density of states</li>
+<li>Density of States</li>
 <li>Mean Square Displacement</li>
 <li>Position Autocorrelation Function</li>
-<li>Velocity Autocorrelation Function</li>
-<li>Current Correlation Function</li>
+<li>Position Power Spectrum</li>
+<li>Reorientational Time Correlation Function</li>
+<li>Root Mean Square Deviation</li>
+<li>Root Mean Square Fluctuation</li>
 <li>van Hove function (self)</li>
 <li>van Hove function (distinct)</li>
+<li>Velocity Autocorrelation Function</li>
 </ul></details>
 
 <details><summary>Infrared</summary><ul>
@@ -116,32 +118,38 @@ The following properties can be computed:
 </ul></details>
 
 <details><summary>Scattering</summary><ul>
+<li>Current Correlation Function</li>
 <li>Dynamic Coherent Structure Factor</li>
 <li>Dynamic Incoherent Structure Factor</li>
 <li>Elastic Incoherent Structure Factor</li>
 <li>Gaussian Dynamic Incoherent Structure Factor</li>
 <li>Neutron Dynamic Total Structure Factor</li>
+<li>Scattering Length Density Profile</li>
+<li>Static Structure Factor</li>
+<li>Structure Factor from Scattering Function</li>
+<li>X-Ray Static Structure Factor</li>
 </ul></details>
 
-<details><summary>Structural</summary><ul>
+<details><summary>Structure</summary><ul>
 <li>Area Per Molecule</li>
+<li>Average Structure</li>
 <li>Coordination Number</li>
-<li>Density Profile</li>
 <li>Eccentricity</li>
 <li>Molecular Trace</li>
 <li>Pair Distribution Function</li>
-<li>Root Mean Square Deviation</li>
-<li>Root Mean Square Fluctuation</li>
 <li>Radius of Gyration</li>
 <li>Solvent Accessible Surface</li>
-<li>Static Structure Factor</li>
 <li>Voronoi (volume per atom)</li>
-<li>X-Ray Static Structure Factor</li>
 </ul></details>
 
 <details><summary>Thermodynamics</summary><ul>
 <li>Density</li>
 <li>Temperature</li>
+</ul></details>
+
+<details><summary>Trajectory</summary><ul>
+<li>Center of Masses Trajectory</li>
+<li>Trajectory Filter</li>
 </ul></details>
 
 Each of these analyses can be controlled using a number of parameters. For example,

@@ -14,7 +14,9 @@ This section contains background theory for following plugins:
 -  :ref:`elastic-incoherent-structure-factor`
 -  :ref:`gaussian-dynamic-incoherent-structure-factor`
 -  :ref:`neutron-dynamic-total-structure-factor`
+-  :ref:`static-structure-factor`
 -  :ref:`structure-factor-from-scattering-function`
+-  :ref:`xray-static-structure-factor`
 
 This section discusses plugins used
 to calculate neutron spectroscopy observables from the trajectory.
@@ -509,6 +511,28 @@ These expressions correspond to the formalism and equations given in
 [Ref47]_ - Chapter 1: “An introduction to neutron scattering” .
 
 
+.. _static-structure-factor:
+
+Static Structure Factor
+'''''''''''''''''''''''
+
+MDANSE computes the partial partial static structure factor (SSF) as the Fourier
+transform of the partial pair distribution function following the Faber-Ziman definition
+
+.. math::
+   :label: ssf1
+
+   S_{\alpha\beta}(q) = 1 + \frac{4\pi\rho}{q}\int\limits_{0}^{\infty}{\mathrm{d}r \,  \left\lbrack {g_{\alpha\beta}}(r)-1 \right\rbrack} r \sin(qr).
+
+The SSF here is related to the coherent intermediate scattering function
+calculated in MDANSE via the following expression
+
+.. math::
+   :label: ssf2
+
+   S_{\alpha\beta}(q) = \delta_{\alpha\beta} + \sqrt{c_{\alpha}c_{\beta}} \left[ F_{\mathrm{coh},\alpha\beta}(q, 0) - 1 \right].
+
+
 .. _structure-factor-from-scattering-function:
 
 Structure Factor From Scattering Function
@@ -523,3 +547,19 @@ scattering function via the following expression
 
 To obtain the total results MDANSE will use the same weights that were
 used in the DCSF calculation.
+
+
+.. _xray-static-structure-factor:
+
+X-ray Static Structure Factor
+'''''''''''''''''''''''''''''
+
+MDANSE's xray static structure factor analysis is tailored for neutron
+and X-ray scattering experiments in material science. It systematically
+investigates material structural properties by analyzing particle
+distribution and ordering. Researchers gain precise insights into
+fundamental aspects like atomic spacing and ordered patterns. MDANSE
+provides fine-grained control over ":math:`r`-values" and ":math:`q`-values," enabling
+customization for probing specific material structural characteristics.
+This tool is invaluable for advancing scientific and industrial research,
+especially in neutron scattering experiments.

@@ -14,13 +14,9 @@ This section contains the following plugins:
 -  :ref:`eccentricity`
 -  :ref:`molecular-trace`
 -  :ref:`pair-distribution-function`
--  :ref:`root-mean-square-deviation`
--  :ref:`root-mean-square-fluctuation`
 -  :ref:`radius-of-gyration`
 -  :ref:`solvent-accessible-surface`
--  :ref:`static-structure-factor`
 -  :ref:`voronoi`
--  :ref:`xray-static-structure-factor`
 
 .. _area-per-molecule:
 
@@ -205,48 +201,6 @@ of nMOLDYN
    {\mathrm{TCF}_{\mathrm{tot}}{(r) = 4}\pi r\rho\left[ {g_{\mathrm{tot}}{(r) - 1}} \right].}
 
 
-.. _root-mean-square-deviation:
-
-Root Mean Square Deviation
-''''''''''''''''''''''''''
-                         
-The root mean-square deviation (RMSD) is perhaps the most popular estimator
-of structural similarity. It quantifies differences between two structures by
-measuring the root mean-square of atomic position differences, revealing
-insights into their structural dissimilarities. It is a numerical measure of
-the difference between two structures. For the RMSD of the atom of type
-:math:`\alpha` can be defined as
-
-.. math::
-   :label: rmsd1
-
-   \mathrm{RMSD}_{\alpha}(t) = \sqrt{ \frac{1}{Nc_{\alpha}} \sum\limits_{j \in \alpha} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{j}(t_{\mathrm{ref}}) \vert^{2} }
-
-where :math:`\mathbf{r}_{j}(t)` and :math:`\mathbf{r}_{j}(t_{\mathrm{ref}})`
-are respectively the position of atom :math:`j` at time :math:`t`
-and :math:`t_{\mathrm{ref}}` where :math:`t_{\mathrm{ref}}` is a reference
-time usually chosen as the zeroth time of the simulation. Typically,
-RMSD is used to quantify the structural evolution of the
-system during the simulation. It can provide precious information about
-the system especially if it reached equilibrium or conversely if major
-structural changes occurred during the simulation.
-
-.. _root-mean-square-fluctuation:
-
-Root Mean Square Fluctuation
-''''''''''''''''''''''''''''
-
-Root mean square fluctuation (RMSF) assesses how the positions of atoms or
-molecules within a system fluctuate over time. Specifically, RMSF measures the
-average magnitude of deviations or fluctuations in atomic positions from their
-mean positions during a simulation. RMSF analysis is valuable for
-understanding the flexibility and stability of molecules within a simulation,
-providing insights into regions where atoms or groups of atoms exhibit
-significant fluctuations. This information can be crucial for studying the
-dynamic behavior of biomolecules, protein-ligand interactions, or any
-molecular system subject to temporal variations.
-
-
 .. _radius-of-gyration:
 
 Radius of Gyration
@@ -291,27 +245,6 @@ molecular surface area, often resulting in a larger reported surface
 area due to increased sensitivity to surface features.
 
 
-.. _static-structure-factor:
-
-Static Structure Factor
-'''''''''''''''''''''''
-
-MDANSE computes the partial partial static structure factor (SSF) as the Fourier
-transform of the partial pair distribution function following the Faber-Ziman definition
-
-.. math::
-   :label: ssf1
-
-   S_{\alpha\beta}(q) = 1 + \frac{4\pi\rho}{q}\int\limits_{0}^{\infty}{\mathrm{d}r \,  \left\lbrack {g_{\alpha\beta}}(r)-1 \right\rbrack} r \sin(qr).
-
-The SSF here is related to the coherent intermediate scattering function
-calculated in MDANSE via the following expression
-
-.. math::
-   :label: ssf2
-
-   S_{\alpha\beta}(q) = \delta_{\alpha\beta} + \sqrt{c_{\alpha}c_{\beta}} \left[ F_{\mathrm{coh},\alpha\beta}(q, 0) - 1 \right].
-
 .. _voronoi:
 
 Voronoi
@@ -328,18 +261,3 @@ the "apply periodic_boundary_condition" parameter is available to ensure
 accurate analysis, particularly for systems extending beyond the simulation
 box. This capability enables users to uncover valuable details about
 molecular structures and dynamics.
-
-.. _xray-static-structure-factor:
-
-X-ray Static Structure Factor
-'''''''''''''''''''''''''''''
-
-MDANSE's xray static structure factor analysis is tailored for neutron
-and X-ray scattering experiments in material science. It systematically
-investigates material structural properties by analyzing particle
-distribution and ordering. Researchers gain precise insights into
-fundamental aspects like atomic spacing and ordered patterns. MDANSE
-provides fine-grained control over ":math:`r`-values" and ":math:`q`-values," enabling
-customization for probing specific material structural characteristics.
-This tool is invaluable for advancing scientific and industrial research,
-especially in neutron scattering experiments.
