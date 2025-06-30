@@ -42,7 +42,7 @@ class ConfigureDescriptor(ABC, Generic[T]):
         *,
         default: T = SENTINEL,
         optional: bool = False,
-        choices: Container[T] = None,
+        choices: Container[T] | None = None,
         exclude: Container[T] = (),
         mutex: Container[str] = (),
         depends: Container[str] = (),

@@ -14,7 +14,14 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import importlib
+from enum import Enum, auto
 from pathlib import Path
+
+
+class OutputFormats(Enum):
+    MDAFormat = auto()
+    TextFormat = auto()
+    FileInMemory = auto()
 
 current_path = Path(__file__).parent
 

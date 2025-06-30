@@ -1,3 +1,4 @@
+from .AtomMappingDesc import AtomMapping
 from .BaseTypesDescriptor import (
     ArrayConfigDesc,
     BooleanConfigDesc,
@@ -9,3 +10,4 @@ from .BaseTypesDescriptor import (
     VectorConfigDesc,
 )
 from .ChoiceConfigDesc import MultipleChoiceConfigDesc, SingleChoiceConfigDesc
+from .OutputFileDescriptors import OutputFileConfigDesc, OutputTrajectoryConfigDesc

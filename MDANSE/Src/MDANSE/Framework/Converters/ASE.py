@@ -18,17 +18,26 @@ import collections
 import numpy as np
 from ase.io import iread, read
 from ase.io.trajectory import Trajectory as ASETrajectory
+
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
-from MDANSE.Framework.ConfigDescriptors import (BooleanConfigDesc,
-                                                FloatConfigDesc,
-                                                IntegerConfigDesc)
+from MDANSE.Framework.ConfigDescriptors import (
+    AtomMapping,
+    BooleanConfigDesc,
+    FloatConfigDesc,
+    IntegerConfigDesc,
+    OutputTrajectoryConfigDesc,
+    PathConfigDesc,
+    SingleChoiceConfigDesc,
+)
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Configuration import (PeriodicRealConfiguration,
-                                                    RealConfiguration)
+from MDANSE.MolecularDynamics.Configuration import (
+    PeriodicRealConfiguration,
+    RealConfiguration,
+)
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -50,36 +59,26 @@ class ASE(Converter):
 
     label = "ASE"
 
-    settings = collections.OrderedDict()
-    settings["trajectory_file"] = (
-        "ASEFileConfigurator",
-        {
-            "label": "An MD trajectory file supported by ASE",
-            "default": "INPUT_FILENAME",
-        },
+    trajectory_file = PathConfigDesc(
+        mode="r",
+        label="An MD trajectory file supported by ASE",
+        default="INPUT_FILENAME",
     )
-    settings["atom_aliases"] = (
-        "AtomMappingConfigurator",
-        {
-            "default": "{}",
-            "label": "Atom mapping",
-            "dependencies": {"input_file": "trajectory_file"},
-        },
+    atom_aliases = AtomMapping(
+        depends=("trajectory_file",), label="Atom mapping", default="{}"
     )
-    settings["time_unit"] = (
-        "SingleChoiceConfigurator",
-        {"label": "Time step unit", "choices": ["fs", "ps", "ns"], "default": "fs"},
+    time_unit = SingleChoiceConfigDesc(
+        ("fs", "ps", "ns"), default="fs", label="Time step unit"
     )
-    time_step = FloatConfigDesc(default=1., mini=1e-9, label="Time step")
-    n_steps = IntegerConfigDesc(default=0, mini=0, label="Number of time steps (0 for automatic detection)")
+    time_step = FloatConfigDesc(default=1.0, mini=1e-9, label="Time step")
+    n_steps = IntegerConfigDesc(
+        default=0, mini=0, label="Number of time steps (0 for automatic detection)"
+    )
     fold = BooleanConfigDesc(label="Fold coordinates into box")
-    settings["output_files"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "label": "MDANSE trajectory (filename, format)",
-            "formats": ["MDTFormat"],
-            "root": "trajectory_file",
-        },
+    output_files = OutputTrajectoryConfigDesc(
+        formats=("MDTFormat",),
+        allowed_formats=("MDTFormat",),
+        label="MDANSE trajectory (filename, format)",
     )
 
     def initialize(self):
@@ -92,16 +91,15 @@ class ASE(Converter):
         self._backup_cell = None
         self._keep_running = True
         self._initial_masses = None
-        self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # The number of steps of the analysis.
         self.numberOfSteps = self.n_steps
 
-        self._timestep = float(self.configuration["time_step"]["value"]) * measure(
-            1.0, self.configuration["time_unit"]["value"]
-        ).toval("ps")
+        self._timestep = float(self.time_step) * measure(1.0, self.time_unit).toval(
+            "ps"
+        )
 
-        self.parse_first_step(self._atomicAliases)
+        self.parse_first_step(self._atomic_aliases)
         LOG.info(f"isPeriodic after parse_first_step: {self._isPeriodic}")
         self._start = 0
 
@@ -110,12 +108,12 @@ class ASE(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["file"],
+            self.output_files.out_file,
             self._chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_files"]["dtype"],
-            chunking_limit=self.configuration["output_files"]["chunk_size"],
-            compression=self.configuration["output_files"]["compression"],
+            positions_dtype=self.output_files.dtype,
+            chunking_limit=self.output_files.chunk_size,
+            compression=self.output_files.compression,
             initial_charges=self._initial_charges,
         )
 
@@ -141,7 +139,7 @@ class ASE(Converter):
             frame = next(self._input)
         else:
             LOG.info("ASE using the slower way")
-            frame = read(self.configuration["trajectory_file"]["value"], index=index)
+            frame = read(self.trajectory_file, index=index)
         time = self._timeaxis[index]
 
         unit_conversion_factor = measure(1.0, "ang").toval("nm")
@@ -243,16 +241,16 @@ class ASE(Converter):
 
     def parse_first_step(self, mapping):
         try:
-            self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
+            self._input = ASETrajectory(self.trajectory_file)
         except Exception:
-            first_frame = read(self.configuration["trajectory_file"]["value"], index=0)
+            first_frame = read(self.trajectory_file, index=0)
             last_iterator = 0
-            generator = iread(self.configuration["trajectory_file"]["value"])
+            generator = iread(self.trajectory_file)
             for _ in generator:
                 last_iterator += 1
             generator.close()
             self._input = iread(
-                self.configuration["trajectory_file"]["value"]  # , index="[:]"
+                self.trajectory_file  # , index="[:]"
             )
             self._total_number_of_steps = last_iterator
             LOG.debug(f"Length found using last_iterator={self._total_number_of_steps}")

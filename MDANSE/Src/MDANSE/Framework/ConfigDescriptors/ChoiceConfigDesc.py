@@ -13,21 +13,25 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from collections.abc import Container
-from typing import Optional, Set, TypeVar, Sequence
+from __future__ import annotations
+
+from collections.abc import Container, Sequence
+from typing import TypeVar
 
 from .AbsConfigDesc import ConfigError, ConfigureDescriptor
 
 T = TypeVar("T")
 
+
 class ChoiceConfigDesc(ConfigureDescriptor):
     """
-    This Configurator allows to input a Float Value.
+    Select an option from a multiple choice set.
     """
+
     def __init__(
         self,
         *,
-        n_choices: int = 1,
+        n_choices: int | None,
         **params,
     ):
         super().__init__(**params)
@@ -36,22 +40,32 @@ class ChoiceConfigDesc(ConfigureDescriptor):
 
     @property
     def n_choices(self) -> int:
-        """
-        Returns the minimum value allowed for an input float.
+        """Returns the minimum value allowed for an input float.
 
-        :return: the minimum value allowed for an input value float.
-        :rtype: int or None
+        Returns
+        -------
+        int
+            the minimum value allowed for an input value float.
         """
-        return self._n_choices
+        return self._n_choices if self._n_choices is not None else len(self.choices)
 
     @n_choices.setter
-    def n_choices(self, value: int):
+    def n_choices(self, value: int | None):
+        if value is None:
+            self._n_choices = value
+            return
+
         if value < 0:
             raise ConfigError(f"Invalid n_choices ({value}) must be >0")
         self._n_choices = value
 
 
-def MultipleChoiceConfigDesc(ChoiceConfigDesc):
+class MultipleChoiceConfigDesc(ChoiceConfigDesc):
+    def validate_choices(self, values: Sequence[T]):
+        return set(values) <= self.choices
+
+    def validate_exclude(self, values: Sequence[T]):
+        return set(values) > self.exclude
 
     def validate(self, values: Sequence[T], *_) -> Sequence[T]:
         self._original_input = values
@@ -61,24 +75,20 @@ def MultipleChoiceConfigDesc(ChoiceConfigDesc):
 
         self.indices = [self._choices.find(value) for value in values]
         if any(index < 0 for index in self.indices):
-            raise ConfigError(f"{', '.join(set(self.choices) - set(values))} are not valid choices.")
+            raise ConfigError(
+                f"{', '.join(set(self.choices) - set(values))} are not valid choices."
+            )
 
         return values
 
 
-
-def SingleChoiceConfigDesc(ChoiceConfigDesc):
-
-    def __init__(self,
-                 choices: Container[T] = None,
-                 **params):
+class SingleChoiceConfigDesc(ChoiceConfigDesc):
+    def __init__(self, choices: Container[T], **params):
         super().__init__(choices=choices, n_choices=1, **params)
 
     def validate(self, value: T, *_) -> T:
         self._original_input = value
 
-        self.index = self._choices.find(value)
-        if self.index < 0:
-            raise ConfigError(f"{value} is not a valid choice.")
+        super().validate(value)
 
         return value

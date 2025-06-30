@@ -38,18 +38,6 @@ __all__ = [
     "VectorConfigDesc",
 ]
 
-
-class FileModes(Enum):
-    MUST_EXIST = auto()
-    MAY_EXIST = auto()
-    MUST_NOT_EXIST = auto()
-
-    R = MUST_EXIST
-    W = MAY_EXIST
-    X = MUST_NOT_EXIST
-    A = MUST_EXIST
-
-
 def _nop(x):
     return x
 
@@ -314,6 +302,16 @@ class PathConfigDesc(ConfigureDescriptor[Path]):
     This configurator allows to input a path value.
     """
 
+    class FileModes(Enum):
+        MUST_EXIST = auto()
+        MAY_EXIST = auto()
+        MUST_NOT_EXIST = auto()
+
+        R = MUST_EXIST
+        W = MAY_EXIST
+        X = MUST_NOT_EXIST
+        A = MUST_EXIST
+
     def __init__(
         self,
         mode: FileModes,
@@ -325,7 +323,7 @@ class PathConfigDesc(ConfigureDescriptor[Path]):
         super().__init__(**params)
 
         self.mode = (
-            FileModes[mode.upper()] if isinstance(mode, str) else FileModes(mode)
+            self.FileModes[mode.upper()] if isinstance(mode, str) else self.FileModes(mode)
         )
 
         self.extension = extensions
@@ -339,11 +337,11 @@ class PathConfigDesc(ConfigureDescriptor[Path]):
 
         super().validate(value)
 
-        if self.mode is FileModes.MAY_EXIST:
+        if self.mode is self.FileModes.MAY_EXIST:
             pass
-        elif self.mode is FileModes.MUST_EXIST and not value.exists():
+        elif self.mode is self.FileModes.MUST_EXIST and not value.exists():
             raise ConfigError(f"File at ({value}) does not exist.")
-        elif self.mode is FileModes.MUST_NOT_EXIST and value.exists():
+        elif self.mode is self.FileModes.MUST_NOT_EXIST and value.exists():
             raise ConfigError(f"File at ({value}) must not exist.")
 
         return value
