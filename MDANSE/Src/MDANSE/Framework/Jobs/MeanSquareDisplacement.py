@@ -22,29 +22,30 @@ from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 
 
 class MeanSquareDisplacement(IJob):
-    """
-    Molecules in liquids and gases do not stay in the same place, but move constantly. This
-    process is called diffusion and it takes place in
-    liquids at equilibrium.
+    """Calculates the mean square displacement (MSD) of atoms in the trajectory.
 
-    During this process, the motion of an individual molecule does not follow a simple path
-    since molecules undergo collisions. The path is to a good approximation to a random walk.
+    The MSD is a representation of diffusion in the system. The motion of an individual
+    atom or molecule does not follow a simple path since particles undergo collisions.
+    The path is to a good approximation to a random walk.
 
-    Mathematically, a random walk is a series of steps where each step is taken in a completely
-    random direction from the one before, as analyzed by Albert Einstein
+    Mathematically, a random walk is a series of steps where each step is taken in a
+    completely random direction from the one before, as analyzed by Albert Einstein
     in a study of Brownian motion. The MSD of a particle in this case
     is proportional to the time elapsed:
 
-    .. math:: <r^{2}> = 6Dt + C
+    .. math:: \langle d^{2}(t) \rangle = 6Dt + C
 
-    where :math:`<r^{2}>` is the MSD and t is the time. D and C are constants. The constant D is
-    the so-called diffusion coefficient.
+    where :math:`\langle d^{2}(t) \rangle` is the MSD and :math:`t` is the time.
+    :math:`D` and :math:`C` are constants. The constant :math:`D` is the so-called
+    diffusion coefficient.
 
-        More generally the MSD reveals the distance or volume explored by atoms and molecules as a function of time.
-        In crystals, the MSD quickly saturates at a constant value which corresponds to the vibrational amplitude.
-        Diffusion in a volume will also have a limiting value of the MSD  which corresponds to the diameter of the volume
-        and the saturation value is reached more slowly.
-        The MSD can also reveal e.g. sub-diffusion regimes for the translational diffusion of lipids in membranes.
+    More generally the MSD reveals the distance or volume explored by atoms and
+    molecules as a function of time. In crystals, the MSD quickly saturates at a
+    constant value which corresponds to the vibrational amplitude.
+    Diffusion in a volume will also have a limiting value of the MSD which corresponds
+    to the diameter of the volume and the saturation value is reached more slowly.
+    The MSD can also reveal e.g. sub-diffusion regimes for the translational
+    diffusion of lipids in membranes.
     """
 
     label = "Mean Square Displacement"

@@ -25,9 +25,16 @@ from MDANSE.MLogging import LOG
 
 
 class PositionPowerSpectrum(IJob):
-    """
-    Power spectrum (using Fast Fourier Transform) of atomic trajectories calculated from the Positional Autocorrelation Function (PACF).
-    This method provides a frequency-domain function for a filter (i.e. lowpass) to operate on, so that a desired range of atomic vibrational modes can be isolated.
+    """Calculates the position power spectrum.
+
+    Power spectrum (using Fast Fourier Transform) of atomic trajectories calculated
+    from the Positional Autocorrelation Function (PACF). The calculation result
+    is similar to the density of states, which is calculated from the velocity
+    autocorrelation function. In fact, PPS and DOS may show the same features
+    in systems where position and velocity are strongly correlated (i.e. solids).
+
+    This calculation is used by TrajectoryFilter to create a preview of the spectrum,
+    so that a desired range of atomic vibrational modes can be isolated.
     """
 
     label = "PositionPowerSpectrum"

@@ -22,10 +22,13 @@ from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 
 
 class Eccentricity(IJob):
-    """Computes the eccentricity for a set of atoms e.g. in a micelle.
+    """Computes the eccentricity of a selected set of atoms.
+
     The eccentricity is calculated from the principal moments of
-    inertia via the equation sqrt(pm3**2 - pm1**2) / pm3 where pm1 and
-    pm3 are the smallest and largest principal moments of inertia
+    inertia via the equation
+    :math:`\sqrt{\text{pm3}^{2} - \text{pm1}^{2}} / \text{pm3}`
+    where :math:`\text{pm1}` and :math:`\text{pm3}`
+    are the smallest and largest principal moments of inertia
     respectively. Therefore, for a spherically symmetric molecule its
     eccentricity will be 0 while for an aspherical molecule like CO2 its
     eccentricity will be 1. This job follows the equations used in rdkit

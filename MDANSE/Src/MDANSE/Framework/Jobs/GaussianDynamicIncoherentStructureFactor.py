@@ -25,8 +25,13 @@ from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 
 
 class GaussianDynamicIncoherentStructureFactor(IJob):
-    """
-    Computes the dynamic incoherent structure factor S_inc(Q,w) for a set of atoms in the Gaussian approximation.
+    """Computes the dynamic incoherent structure factor in the Gaussian approximation.
+
+    Gaussian approximation is exact for a system of free particles and a system of
+    particles undergoing brownian motion. The results of this analysis will be close
+    to the Dynamic Incoherent Structure Factor analysis in the limits of very
+    short :math:`\mathbf{q}` and very long :math:`\mathbf{q}`, and will differ from
+    it for intermediate :math:`\mathbf{q}` values.
     """
 
     label = "Gaussian Dynamic Incoherent Structure Factor"

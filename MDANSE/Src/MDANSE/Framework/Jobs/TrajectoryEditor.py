@@ -31,10 +31,15 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class TrajectoryEditor(IJob):
-    """
-    This job will gradually gain more features. The main intent
-    is to allow the users to modify an existing trajectory, in case
-    some of the information was missing or needed correcting.
+    """Write out a modified version of the input trajectory.
+
+    At the moment, the main applications include:
+
+    - molecule detection,
+    - setting unit cell parameters,
+    - setting partial charges,
+    - removing or transmuting atoms,
+    - removing frames.
     """
 
     label = "Trajectory Editor"

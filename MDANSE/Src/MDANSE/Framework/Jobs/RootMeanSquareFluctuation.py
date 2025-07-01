@@ -21,11 +21,14 @@ from MDANSE.MolecularDynamics.Analysis import mean_square_fluctuation
 
 
 class RootMeanSquareFluctuation(IJob):
-    """
-    The root mean square fluctuation (RMSF) for a set of atoms is similar to the square root
-        of the mean square displacement (MSD), except that it is spatially resolved (by atom/residue/etc)
-        rather than time resolved. It reveals the dynamical heterogeneity of the molecule over the course
-        of a MD simulation.
+    """Calculates the Root Mean Square Fluctuation of atom positions.
+
+    The root mean square fluctuation (RMSF) for a set of atoms is similar to the
+    square root of the mean square displacement (MSD), except that it is spatially
+    resolved (by atom/residue/etc) rather than time resolved. It reveals the
+    dynamical heterogeneity of the molecule over the course of a MD simulation.
+
+    As opposed to most analysis types, the result is a single number per atom index.
     """
 
     label = "Root Mean Square Fluctuation"

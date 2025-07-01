@@ -25,30 +25,30 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 
 class OutputTrajectoryConfigurator(IConfigurator):
-    """
-    This configurator allows to define the output directory, the basename, and the format(s) of the output file(s)
-    resulting from a trajectory conversion.
+    """Specifies how a trajectory should be output to a file.
 
-    Once configured, this configurator will provide a list of files built by joining the given output directory,
-    the basename and the  extensions corresponding to the input file formats.
+    Allows to define:
 
-    For trajectories, MDANSE supports only the HDF format. To define a new output file format for a trajectory
-    conversion, you must inherit from the MDANSE.Framework.Formats.IFormat.IFormat interface.
+    - path to the file,
+    - precision of the floating point numbers,
+    - HDF5 chunk size,
+    - compression applied to the HDF5 datasets
+    - logging level of the converter run.
+
+    For trajectories, MDANSE supports only the MDT format (HDF5).
     """
 
     log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
     _default = ("OUTPUT_TRAJECTORY", 64, 128, "none", "no logs")
 
     def __init__(self, name, format=None, **kwargs):
-        """
-        Initializes the configurator.
+        """Initializes the configurator.
 
         :param name: the name of the configurator as it will appear in the configuration.
         :type name: str
         :param formats: the list of output file formats supported.
         :type formats: list of str
         """
-
         IConfigurator.__init__(self, name, **kwargs)
 
         self.format = "MDTFormat"

@@ -36,10 +36,12 @@ class CASTEPError(Error):
 
 
 class MDFileConfigurator(FileWithAtomDataConfigurator):
-    """
+    """Set a CASTEP .md file as input.
+
     Class representing a .md file format (documentation can be found at
-    https://www.tcm.phy.cam.ac.uk/castep/MD/node13.html). It is used to determine the structure of the file (eg. the
-    length of each section) and to read the information stored in one frame of the trajectory.
+    https://www.tcm.phy.cam.ac.uk/castep/MD/node13.html). It is used to
+    determine the structure of the file (eg. the length of each section)
+    and to read the information stored in one frame of the trajectory.
     """
 
     def parse(self):

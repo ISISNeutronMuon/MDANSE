@@ -29,10 +29,14 @@ class XYZFileError(Error):
 
 
 class XYZFileConfigurator(FileWithAtomDataConfigurator):
-    """This class loads the contents of an XYZ file,
-    which in the case of CP2K may contain either the
-    positions of atoms, or velocities. In either case
-    there will be 3 components per atom.
+    """Reads information from an XYZ file for the CP2K converter.
+
+    This class loads the contents of an XYZ file.
+    This file may contain the atom positions, velocities or forces.
+    In either case there will be 3 components per atom.
+
+    If you have an ExtendedXYZ file, load it with the ASE converter instead.
+
     """
 
     def parse(self):

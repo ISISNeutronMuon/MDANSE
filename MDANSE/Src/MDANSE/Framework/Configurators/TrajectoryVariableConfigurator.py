@@ -19,10 +19,10 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class TrajectoryVariableConfigurator(IConfigurator):
-    """
-    This configurator allows to check that a given variable is actually present in a configuration.
+    """Selects a variable that is present in a trajectory.
 
-    :note: this configurator depends on 'trajectory' configurator to be configured
+    Typically, the choice will be between positions, velocities and forces.
+
     """
 
     _default = "velocities"

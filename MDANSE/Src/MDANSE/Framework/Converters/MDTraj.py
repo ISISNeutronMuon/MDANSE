@@ -29,11 +29,11 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class MDTraj(Converter):
-    """Using MDTraj, read the MD trajectory and write the data out to
-    the MDT file. MDTraj reads MD trajectories by specifying
-    trajectory files and optionally a topology file. Multiple files can
-    be used for the trajectory files so that trajectories will be
-    stitched together.
+    """Converts a trajectory to the MDT format using MDTraj.
+
+    MDTraj reads MD trajectories by specifying trajectory files and optionally
+    a topology file. Multiple files can be used for the trajectory files so that
+    trajectories will be stitched together.
     """
 
     label = "MDTraj"

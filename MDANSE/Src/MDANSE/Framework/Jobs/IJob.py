@@ -83,8 +83,11 @@ def key_generator(keySize, chars=None, prefix=""):
 
 
 class IJob(Configurable, metaclass=SubclassFactory):
-    """
-    This class handles a MDANSE job. In MDANSE any task modeled by a loop can be considered as a MDANSE job.
+    """The parent class for any MDANSE job.
+
+    Both analysis runs and converters inherit from IJob,
+    but typically analysis runs are the only ones that can
+    be run in parallel.
     """
 
     section = "job"

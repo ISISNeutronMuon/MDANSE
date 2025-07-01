@@ -28,22 +28,12 @@ from MDANSE.Mathematics.Arithmetic import weighted_sum
 
 
 class GroupingLevelConfigurator(SingleChoiceConfigurator):
-    """This configurator changes the atom selections and groups
-    atoms together by changing the atoms names or by grouping their
-    indices together.
+    """Define how the partial results will be grouped in the output.
 
-    The grouping levels currently supported are:
-    * 'atom': no changes are made to the atom selection
-    * 'each atom': no changes are made to the atom selection
-    * 'molecule': this changes the atom names in the atom selection so that
-        it includes the molecule name that they are a part of e.g. [H2_O1]_H
-        for water molecules hydrogen atom. Job in mdanse will sum results
-        based on the atom names so that results like f(q,t)_[H2_O1]_H will
-        be obtained.
-    * 'each molecule': this changes the atom selection so that the atom
-        indices for each molecule will be grouped together. Jobs can
-        then run calculations can be run for each group of indices
-        together.
+    'atom' - partial results for each chemical elements are output.
+    'molecule' - for each molecule type, a set of outputs will be created,
+      showing how different elements in that molecule contributed to the
+      total signal.
     """
 
     _default = "atom"

@@ -107,7 +107,7 @@ class PartialChargeMapper:
 
 
 class PartialChargeConfigurator(IConfigurator):
-    """This configurator allows to input partial charges."""
+    """Assigns partial charges to atoms."""
 
     _default = "{}"
 

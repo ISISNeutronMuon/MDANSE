@@ -80,24 +80,34 @@ def solvent_accessible_surface(
 
 
 class SolventAccessibleSurface(IJob):
-    """
-    The Solvent Accessible Surface (SAS) is the surface area of a molecule that is accessible to a solvent.
-    SAS is typically calculated using the 'rolling ball' algorithm developed by Shrake & Rupley in 1973.
+    """Calculates the accessible surface of the selected atoms.
+
+    Please keep in mind that the atoms outside of the selection are still considered to
+    be blocking the accessible surface. If you are interested in the **total** surface
+    of a group of atoms, please remove the other atoms from the trajectory.
+
+    Solvent Accessible Surface is calculated using the 'rolling ball' algorithm
+    developed by Shrake & Rupley in 1973.
 
     * Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
 
-    This algorithm uses a sphere (of solvent) of a particular radius to 'probe' the surface of the molecule.
+    This algorithm uses a sphere (of solvent) of a particular radius to 'probe' the
+    surface of the molecule.
 
     It involves constructing a mesh of points equidistant from each atom of the molecule
-    and uses the number of these points that are solvent accessible to determine the surface area.
-    The points are drawn at a water molecule's estimated radius beyond the van der Waals radius,
-    which is effectively similar to 'rolling a ball' along the surface.
-    All points are checked against the surface of neighboring atoms to determine whether they are buried or accessible.
-    The number of points accessible is multiplied by the portion of surface area each point represents to calculate the SAS.
+    and uses the number of these points that are solvent accessible to determine the
+    surface area. The points are drawn at a water molecule's estimated radius beyond
+    the van der Waals radius, which is effectively similar to 'rolling a ball' along
+    the surface. All points are checked against the surface of neighboring atoms
+    to determine whether they are buried or accessible. The number of points
+    accessible is multiplied by the portion of surface area each point represents
+    to calculate the SAS.
+
     The choice of the 'probe radius' has an effect on the observed surface area -
-    using a smaller probe radius detects more surface details and therefore reports a larger surface.
-    A typical value is 0.14 nm, which is approximately the radius of a water molecule.
-    Another factor that affects the result is the definition of the VDW radii of the atoms in the molecule under study.
+    using a smaller probe radius detects more surface details and therefore reports
+    a larger surface. A typical value is 0.14 nm, which is approximately the radius
+    of a water molecule. Another factor that affects the result is the definition
+    of the VDW radii of the atoms in the molecule under study.
     """
 
     label = "Solvent Accessible Surface"

@@ -24,9 +24,10 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 
 
 class StaticStructureFactor(DistanceHistogram):
-    """
-    Computes the static structure factor from the pair distribution function for a set of atoms.
-    The result is defined as S(q) = F_coh(q, t = 0).
+    """Computes the static structure factor for a set of atoms.
+
+    The static structure factor is calculated as a Fourier transform of the partial pair
+    distribution function (following the Faber-Ziman definition).
     """
 
     label = "Static Structure Factor"

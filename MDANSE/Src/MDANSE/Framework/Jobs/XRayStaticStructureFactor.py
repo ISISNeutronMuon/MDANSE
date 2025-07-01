@@ -46,9 +46,10 @@ def atomic_scattering_factor(element, qvalues, trajectory):
 
 
 class XRayStaticStructureFactor(DistanceHistogram):
-    """
-    Computes the X-ray static structure from the pair distribution function for a set of atoms,
-        taking into account the atomic form factor for X-rays.
+    """Computes the X-ray static structure for a set of atoms.
+
+    Computes the X-ray static structure from the pair distribution function for a
+    set of atoms, taking into account the atomic form factor for X-rays.
     """
 
     label = "XRay Static Structure Factor"

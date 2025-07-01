@@ -20,16 +20,11 @@ from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class HDFTrajectoryConfigurator(InputFileConfigurator):
-    """
-    This configurator allow to input a HDF trajectory file.
+    """Chooses the trajectory to be analysed.
 
-    HDF trajectory file is the format used in MDANSE to store Molecular Dynamics trajectories. It is an HDF5 file
-    that store various data related to the molecular dynamics : atomic positions, velocities, energies, energy gradients etc...
-
-    To use trajectories derived from MD packages different from HDF, it is compulsory to convert them before to a
-    HDF trajectory file.
-
-    :attention: once configured, the HDF trajectory file will be opened for reading.
+    You can use it both with an .mdt file created by an MDANSE converter,
+    or with an H5MD file if it contains complete information about the
+    atom positions, time axis, physical units and atom types.
     """
 
     _default = "INPUT_FILENAME.mdt"

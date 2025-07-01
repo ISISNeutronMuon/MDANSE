@@ -39,7 +39,8 @@ class VoronoiError(Exception):
 
 
 class Voronoi(IJob):
-    """
+    """Performs the Voronoi analysis of available volume per atom.
+
     Computes the volume of each Voronoi cell and corresponding 'neighbourhood'
     statistics for 3d systems. Vornoi diagram and Delaunay tesselation are
     used as implemented in scipy.spatial module. Replicas of atoms from
@@ -49,7 +50,7 @@ class Voronoi(IJob):
     Voronoi analysis is another commonly-used, complementary method for
     characterising the local structure of a system.
 
-    **Acknowledgement:**\n
+    **Acknowledgement:**
     Gael Goret, PELLEGRINI Eric
 
     """

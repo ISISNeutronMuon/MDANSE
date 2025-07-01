@@ -30,9 +30,11 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 
 class CenterOfMassesTrajectory(IJob):
-    """
-    Creates a trajectory from the centre of masses for selected groups of atoms in a given input trajectory.
-        For a molecular system, the centre of mass trajectory will contain only the molecular translations, which are therefore separated from the rotations.
+    """Outputs a trajectory where molecules have been replaced by artificial particles.
+
+    Creates a trajectory from the centre of masses for selected groups of atoms in a
+    given input trajectory. The resulting trajectory will not include the internal
+    vibrations of molecules or the rotational modes.
     """
 
     label = "Center Of Masses Trajectory"

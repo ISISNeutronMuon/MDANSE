@@ -23,6 +23,12 @@ from MDANSE.Mathematics.Geometry import center_of_mass
 
 
 class DipoleAutoCorrelationFunction(IJob):
+    """Calculates the Dipole Autocorrelation Function of a system.
+
+    Partial charges need to be defined in the system for this analysis
+    to produce non-zero results.
+    """
+
     enabled = True
 
     label = "Dipole AutoCorrelation Function"

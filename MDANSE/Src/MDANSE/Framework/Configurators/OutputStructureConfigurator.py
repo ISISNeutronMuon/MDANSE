@@ -23,19 +23,18 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class OutputStructureConfigurator(IConfigurator):
-    """
-    This configurator allows to define the output directory, the basename, and the format(s) of the output file(s)
-    resulting from an analysis.
+    """Defines the name of the output (average) structure file.
 
-    Once configured, this configurator will provide a list of files built by joining the given output directory, the
-    basename and the extensions corresponding to the input file formats.
+    Allows to define:
 
-    For analysis, MDANSE currently supports only the HDF and Text formats. To define a new output file format
-    for an analysis, you must inherit from MDANSE.Framework.Formats.IFormat.IFormat interface.
+    - output directory and file name,
+    - output structure file format (supported by ASE io module),
+    - logging level of the analysis run.
+
     """
 
     log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
-    _default = ("OUTPUT_FILENAME", "vasp")
+    _default = ("OUTPUT_FILENAME", "vasp", "no logs")
     _label = "Output filename and format (filename, format)"
 
     def __init__(self, name, formats=None, **kwargs):

@@ -33,6 +33,12 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class XTDFileConfigurator(FileWithAtomDataConfigurator):
+    """Opens and reads an XTD file.
+
+    The information contained in the XTD file will be used
+    to construct an instance of ChemicalSystem.
+    """
+
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self._atoms = None

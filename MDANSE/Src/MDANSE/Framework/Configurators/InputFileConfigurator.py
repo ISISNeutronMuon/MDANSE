@@ -19,9 +19,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class InputFileConfigurator(IConfigurator):
-    """
-    This Configurator allows to set an input file.
-    """
+    """Uses a file as input. Very general."""
 
     _default = ""
 

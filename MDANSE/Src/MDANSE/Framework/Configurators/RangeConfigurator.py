@@ -22,8 +22,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
 
 
 class RangeConfigurator(IConfigurator):
-    """
-    This configurator allow to input a range of values given 3 parameters : start, stop, step.
+    """Inputs a range of values as 3 parameters : start, stop, step.
 
     By default the values are generated as a NumPy array.
     """

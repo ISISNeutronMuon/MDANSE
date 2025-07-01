@@ -21,9 +21,10 @@ from MDANSE.MLogging import LOG
 
 
 class UnitCellConfigurator(IConfigurator):
-    """
-    This configurator allows to input a unit cell, in order to replace
-    or change the existing cell definition
+    """Input a unit cell definition.
+
+    This is normally used to introduce a cell definition to a trajectory,
+    or to change the existing cell definition.
     """
 
     _default = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], False

@@ -59,9 +59,15 @@ class PlotDataView(QTreeView):
         model = self.model()
         inner_node = model.inner_object(index)
         if isinstance(inner_node, MDADataStructure):
-            self.quick_plot_file(inner_node)
+            data_nodes = model.itemFromIndex(index).recursive_children(
+                recursion_limit=-1
+            )
+            file_node = model.parent_object(index)
+            self.quick_plot_data(data_nodes, file_node, main_only=True)
         else:
-            data_nodes = model.itemFromIndex(index).recursive_children()
+            data_nodes = model.itemFromIndex(index).recursive_children(
+                recursion_limit=1
+            )
             file_node = model.parent_object(index)
             self.quick_plot_data(data_nodes, file_node)
 
@@ -136,35 +142,12 @@ class PlotDataView(QTreeView):
             except Exception:
                 self.item_details.emit("No additional information included.")
 
-    def quick_plot_file(self, mda_data_structure: MDADataStructure):
-        """Automatically select, format and plot datasets from one file.
-
-        Parameters
-        ----------
-        mda_data_structure : MDADataStructure
-            Object containing and MDA data file.
-
-        """
-        model = PlottingContext()
-        for key in mda_data_structure._file:
-            try:
-                if "main" in mda_data_structure._file[key].attrs["tags"]:
-                    if "partial" in mda_data_structure._file[key].attrs["tags"]:
-                        dataset = SingleDataset(
-                            key, mda_data_structure._file, linestyle="--"
-                        )
-                    else:
-                        dataset = SingleDataset(key, mda_data_structure._file)
-
-                    model.add_dataset(dataset)
-            except KeyError:
-                LOG.error(f"No attribute called Tag found in {key}, skipping")
-        self.fast_plotting_data.emit(model)
-
     def quick_plot_data(
         self,
         data_nodes: list[BasicPlotDataItem],
         mda_data_structure: MDADataStructure,
+        *,
+        main_only: bool = False,
     ):
         """Plot several datasets in a new plot instance.
 
@@ -174,12 +157,29 @@ class PlotDataView(QTreeView):
             Data model items collected for plotting.
         mda_data_structure : MDADataStructure
             The common HDF5 file from which the datasets originate.
+        main_only: bool
+            if True, only plot datasets with the 'main' tag
 
         """
         model = PlottingContext()
         file = mda_data_structure._file
         for data_node in data_nodes:
-            dataset = SingleDataset(data_node.child_path, file)
+            if not data_node.child_path:
+                continue
+            if main_only:
+                try:
+                    tags = file[data_node.child_path].attrs["tags"]
+                except KeyError:
+                    continue
+                if "main" not in tags:
+                    continue
+                dataset = SingleDataset(
+                    data_node.child_path,
+                    file,
+                    linestyle="--" if "partial" in tags else "-",
+                )
+            else:
+                dataset = SingleDataset(data_node.child_path, file)
             model.add_dataset(dataset)
         self.fast_plotting_data.emit(model)
 

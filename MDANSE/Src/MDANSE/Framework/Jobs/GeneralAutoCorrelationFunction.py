@@ -22,9 +22,7 @@ from MDANSE.Mathematics.Signal import correlation, normalisation_factor
 
 
 class GeneralAutoCorrelationFunction(IJob):
-    """
-    Computes the autocorrelation for any available trajectory variable.
-    """
+    """Computes the (auto)correlation for any available trajectory variable."""
 
     enabled = False
 

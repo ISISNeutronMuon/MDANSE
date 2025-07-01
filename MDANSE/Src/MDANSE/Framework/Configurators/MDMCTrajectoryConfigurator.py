@@ -17,7 +17,8 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class MDMCTrajectoryConfigurator(IConfigurator):
-    """
+    """Use an MDMC CompactTrajectory IN MEMORY.
+
     This is a replacement for a trajectory stored in and HDF5 file.
     It is intended to be a drop-in replacement for HDFTrajectoryConfigurator,
     even though it is NOT file-based.

@@ -35,10 +35,14 @@ class DynamicCoherentStructureFactorError(Error):
 
 
 class DynamicCoherentStructureFactor(IJob):
-    """Computes the dynamic coherent structure factor S_coh(Q,w) for a set of atoms.
+    """Computes the dynamic coherent structure factor :math:`S_{\text{coh}}(\mathbf{q}, \omega)` for a set of atoms.
 
-    It can be compared to experimental data e.g. the energy-integrated, static structure factor S_coh(Q)
-    or the dispersion and intensity of phonons.
+    It can be compared to experimental data e.g. the energy-integrated, static structure
+    factor :math:`S_{\text{coh}}(q)` or the dispersion and intensity of phonons.
+
+    The coherent part is derived from correlations between pairs of atoms.
+    This analysis requires the :math:`\mathbf{q}`-vectors to be commensurate
+    with the reciprocal lattice of the simulation box.
     """
 
     label = "Dynamic Coherent Structure Factor"

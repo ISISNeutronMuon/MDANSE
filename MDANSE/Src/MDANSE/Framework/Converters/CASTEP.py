@@ -33,9 +33,7 @@ class CASTEPError(Error):
 
 
 class CASTEP(Converter):
-    """
-    Converts a Castep Trajectory into a HDF trajectory file.
-    """
+    """Converts a Castep Trajectory into an MDT trajectory file."""
 
     label = "CASTEP"
 

@@ -21,8 +21,10 @@ from MDANSE.Framework.Jobs.IJob import IJob
 
 
 class StructureFactorFromScatteringFunction(IJob):
-    """Computes the static structure factor from the intermediate
-    scattering function from the dynamic coherent scattering function
+    """Computes the static structure factor from the results of another analysis.
+
+    The static structure factor is calculated from the intermediate
+    scattering function of the dynamic coherent scattering function
     calculation results.
     """
 

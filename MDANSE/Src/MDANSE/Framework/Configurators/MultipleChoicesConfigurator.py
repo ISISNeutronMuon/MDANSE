@@ -19,8 +19,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class MultipleChoicesConfigurator(IConfigurator):
-    """
-    This Configurator allows to select several items among multiple choices.
+    """Allows to select several items from multiple choices.
 
     :attention: all the selected items must belong to the allowed selection list.
     """

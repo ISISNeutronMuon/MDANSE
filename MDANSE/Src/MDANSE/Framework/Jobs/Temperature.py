@@ -26,13 +26,16 @@ KB = measure(1.380649e-23, "kg m2/s2 K").toval("Da nm2/ps2 K")
 
 
 class Temperature(IJob):
-    """
+    """Calculates the temperature of the system for every selected frame.
+
     Computes the time-dependent temperature for a given trajectory.
-        The temperature is determined from the kinetic energy i.e. the atomic velocities
-        which are in turn calculated from the time-dependence of the atomic coordinates.
-        Note that if the time step between frames saved in the trajectory is long (~ps)
-        compared to the time step in the MD simulations (~fs) the
-        velocities are averaged over many configurations and will not give accurate temperatures.
+    The temperature is determined from the kinetic energy i.e. the atomic velocities
+    which are in turn calculated from the time-dependence of the atomic coordinates.
+
+    Note that the velocity calculated from atom positions will be underestimated
+    and the error in the results will be larger for trajectories with
+    a large step between (saved) frames compared to the actual time step of the
+    MD simulations (~fs).
     """
 
     label = "Temperature"

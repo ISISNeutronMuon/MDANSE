@@ -29,8 +29,9 @@ class DensityError(Exception):
 
 
 class Density(IJob):
-    """
-    Computes the atom and mass densities for a given trajectory. These are time dependent if the simulation box volume fluctuates.
+    """Computes the atom and mass densities for a given trajectory.
+
+    These are time dependent if the simulation box volume fluctuates.
     """
 
     label = "Density"

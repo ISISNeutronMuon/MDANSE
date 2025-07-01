@@ -960,9 +960,7 @@ class LAMMPSh5md(LAMMPSReader):
 
 
 class LAMMPS(Converter):
-    """
-    Converts a LAMMPS trajectory to a HDF trajectory.
-    """
+    """Converts a LAMMPS trajectory to an MDT trajectory."""
 
     label = "LAMMPS"
 

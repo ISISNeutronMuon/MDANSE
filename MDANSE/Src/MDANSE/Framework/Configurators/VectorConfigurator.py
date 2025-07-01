@@ -21,9 +21,7 @@ from MDANSE.Mathematics.LinearAlgebra import Vector
 
 
 class VectorConfigurator(IConfigurator):
-    """
-    This configurator allows to input a 3D vector, by giving its 3 components
-    """
+    """Inputs a vector given as 3 floating point numbers."""
 
     _default = [1.0, 0.0, 0.0]
 

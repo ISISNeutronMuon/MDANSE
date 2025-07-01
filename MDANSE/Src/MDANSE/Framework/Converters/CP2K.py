@@ -33,8 +33,9 @@ class CellFileError(Error):
 
 
 class CellFile(dict):
-    """Opens and reads the CP2K output file containing the
-    unit cell size for each simulation step.
+    """Opens and reads the CP2K cell file.
+
+    The CP2K cell output contains the unit cell size for each simulation step.
     """
 
     def __init__(self, filename):
@@ -107,9 +108,7 @@ class CP2KConverterError(Error):
 
 
 class CP2K(Converter):
-    """
-    Converts a CP2K trajectory to an HDF5 trajectory in the MDANSE format.
-    """
+    """Converts a CP2K trajectory to an MDT trajectory."""
 
     label = "CP2K"
 

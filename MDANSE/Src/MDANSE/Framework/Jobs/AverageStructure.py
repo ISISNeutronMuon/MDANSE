@@ -26,17 +26,18 @@ from MDANSE.Framework.Units import measure
 
 
 class AverageStructure(IJob):
-    """<p>Outputs a single structure file containing the atom positions
-    averaged over time. Only makes sense for crystalline systems
+    """Outputs a structure file of the atom positions averaged over time.
+
+    This analysis only makes sense for crystalline systems
     where atoms remain within a finite distance around their
-    equilibrium positions.</p>
-    <p><b> Please run Mean Square Displacement analysis on your
-    trajectory to make sure that the atoms remain around their
-    equilibrium position</b>. Otherwise the time-averaged
-    atom positions will be meaningless. (If your system consists
-    of a crystalline material with migrating guest atoms,
-    you can output just the crystalline part using atom
-    selection.)</p>"""
+    equilibrium positions.
+
+    Please run Mean Square Displacement or Root Mean Square Displacement analysis
+    on your trajectory to make sure that the atoms remain around their equilibrium
+    positions. Otherwise the time-averaged atom positions will be meaningless.
+    If your system consists of a crystalline material with migrating guest atoms,
+    you can output just the crystalline part using a corresponding atom selection.
+    """
 
     label = "Average Structure"
 

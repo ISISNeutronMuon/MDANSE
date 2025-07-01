@@ -19,6 +19,8 @@ from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
 
 
 class MDTrajTimeStepConfigurator(FloatConfigurator):
+    """Inputs the time step value for the MDTraj converter."""
+
     _default = 0.0
 
     def configure(self, value):

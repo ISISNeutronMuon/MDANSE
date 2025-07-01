@@ -18,7 +18,8 @@ from MDANSE.MolecularDynamics.MockTrajectory import MockTrajectory
 
 
 class MockTrajectoryConfigurator(IConfigurator):
-    """
+    """Uses a mock trajectory definition (from JSON) instead of Trajectory.
+
     This is a replacement for a trajectory stored in and HDF5 file.
     It is intended to be a drop-in replacement for HDFTrajectoryConfigurator,
     even though it is NOT based on an HDF5 file.

@@ -17,16 +17,19 @@ from MDANSE.Framework.Configurators.IntegerConfigurator import IntegerConfigurat
 
 
 class InterpolationOrderConfigurator(IntegerConfigurator):
-    """
-    This configurator allows to input the interpolation order to be applied when deriving velocities from atomic coordinates.
+    """Specifies the order of a numerical derivative used for interpolation.
 
-    The allowed value are *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*, the
-    former one will not interpolate the velocities from atomic coordinates but will directly use the velocities stored in the trajectory file.
+    Normally it is used for calculating atom velocities from their positions.
+    Values from 1 to 5 are allowed. If MD engine velocities are provided in the
+    trajectory file, you can (and should) choose to use them by setting this to 0.
 
-    :attention: it is of paramount importance for the trajectory to be sampled with a very low time \
-    step to get accurate velocities interpolated from atomic coordinates.
+    The velocities calculated from atom positions may differ from the values used
+    by the MD engine during the simulation. Additionally, if your MD engine was
+    not writing out every frame, the velocities are likely to be
+    underestimated compared to the values used by the MD engine in the simulation,
+    and the error in the calculation increases quickly with the number of trajectory
+    frames skipped in the MD output.
 
-    :note: this configurator depends on 'trajectory' configurator to be configured.
     """
 
     _default = 3

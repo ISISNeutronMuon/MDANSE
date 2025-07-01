@@ -20,12 +20,17 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 class AtomMappingConfigurator(IConfigurator):
-    """The atom mapping configurator.
+    """The atom mapping configurator for trajectory converters.
+
+    It allows the user to verify and potentially change the way
+    atom types from an MD trajectory will be converted to the
+    chemical elements used by MDANSE.
 
     Attributes
     ----------
     _default : dict
         The default atom map setting JSON string.
+
     """
 
     _default = "{}"

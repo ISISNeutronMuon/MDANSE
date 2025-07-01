@@ -30,23 +30,28 @@ class VASPConverterError(Error):
 
 
 class VASP(Converter):
-    """
-     This converter works for XDATCAR files which contain a *header*
-     specifying the unit cell size and atom types.
+    """Converts a VASP XDATCAR file to an MDT trajectory.
 
-     If your XDATCAR file does not have a header, you can add it manually
-     to the beginning of the file. The header can be copied from
-     the CONTCAR file.
+    This converter works for XDATCAR files which contain a *header*
+    specifying the unit cell size and atom types.
 
-     A valid header should look like this:
+    If your XDATCAR file does not have a header, you can add it manually
+    to the beginning of the file. The header can be copied from
+    the CONTCAR file.
 
-     unknown system
-            1
-      9.050041    0.000000    0.000000
-      0.000000    8.236754    0.000000
-      0.000000    0.000000   11.000452
+    A valid header should look like this:
+
+    unknown system
+           1
+     9.050041    0.000000    0.000000
+     0.000000    8.236754    0.000000
+     0.000000    0.000000   11.000452
     Cu   Rb   Cl    S
     9   4   7   12
+
+    where the last two lines specify the atomic types and the number
+    of the atoms of each type in the same order as they appear in the
+    atom coordinates below.
     """
 
     label = "VASP"

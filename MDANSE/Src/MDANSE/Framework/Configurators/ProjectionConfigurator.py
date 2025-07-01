@@ -21,11 +21,12 @@ from MDANSE.Framework.Projectors.IProjector import IProjector, ProjectorError
 
 
 class ProjectionConfigurator(IConfigurator):
-    """
-    This configurator allows to define a projector for atomic coordinates.
+    """Projects atomic coordinates onto an axis or plane.
 
-    Planar and axial projections are supported by MDANSE while a null projector, that does not project the coordinates, has been introduced
-    in MDANSE.Framework.Projectors.IProjector.IProjector for the sake of homogeneity.
+    Null projector (which does nothing) is the standard choice.
+    The input vector can be used as an axis direction,
+    or as a plane normal vector.
+
     """
 
     _default = None

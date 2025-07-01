@@ -23,6 +23,12 @@ from .MultiInputFileConfigurator import MultiInputFileConfigurator
 
 
 class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
+    """Take one or more filenames of files containing atomic coordinates.
+
+    Several trajectory files can be concatenated using this input,
+    but only if they are all in the same format.
+    """
+
     _default = ("", "AUTO")
 
     def __init__(self, name, wildcard="All files (*)", **kwargs):

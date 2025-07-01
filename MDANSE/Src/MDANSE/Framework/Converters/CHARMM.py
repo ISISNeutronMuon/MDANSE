@@ -19,8 +19,6 @@ from MDANSE.Framework.Converters.DCD import DCD
 
 
 class CHARMM(DCD):
-    """
-    Converts a CHARMM trajectory to a HDF trajectory.
-    """
+    """Converts a CHARMM trajectory to an MDT trajectory."""
 
     label = "CHARMM"

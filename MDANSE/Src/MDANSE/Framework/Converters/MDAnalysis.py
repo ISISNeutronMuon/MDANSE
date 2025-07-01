@@ -30,13 +30,16 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class MDAnalysis(Converter):
-    """Using MDAnalysis, read the MD trajectory and write the data out to
-    the MDT file. MDAnalysis reads MD trajectories by specifying
+    """Converts a trajectory to the MDT format using MDAnalysis.
+
+    MDAnalysis reads MD trajectories by specifying
     topology and coordinate files. Multiple files can be used for the
     coordinate files so that trajectories will be stitched together.
     For supported file formats, the continuous option ensures that
-    duplicated time-frames will not be added, see <a href="https://userguide.mdanalysis.org/stable/reading_and_writing.html">reading and writing</a>.
-    For topology and coordinate files supported by MDAnalysis see <a href="https://userguide.mdanalysis.org/stable/formats/index.html#formats">formats</a>.
+    duplicated time-frames will not be added, see
+    <a href="https://userguide.mdanalysis.org/stable/reading_and_writing.html">reading and writing</a>.
+    For topology and coordinate files supported by MDAnalysis see
+    <a href="https://userguide.mdanalysis.org/stable/formats/index.html#formats">formats</a>.
     """
 
     label = "MDAnalysis"

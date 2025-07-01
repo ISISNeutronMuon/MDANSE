@@ -25,9 +25,16 @@ from MDANSE.Mathematics.Signal import get_spectrum
 
 
 class DynamicIncoherentStructureFactor(IJob):
-    """
-    Computes the dynamic incoherent structure factor S_inc(Q,w) for a set of atoms.
-        It can be compared to experimental data e.g. the quasielastic scattering due to diffusion processes.
+    """Computes the dynamic incoherent structure factor :math:`S_{\text{inc}}(\mathbf{q},\omega)` for a set of atoms.
+
+    It can be compared to experimental data e.g. the quasielastic scattering due to
+    diffusion processes.
+
+    This property is derived from the self-correlation of individual atoms over time.
+    While it does not require the :math:`\mathbf{q}`-vectors to be commensurate with the simulation
+    box reciprocal lattice, a "lattice" vector generator should be chosen if you
+    intend to combine the result with the coherent part into the total
+    dynamic structure factor.
     """
 
     label = "Dynamic Incoherent Structure Factor"

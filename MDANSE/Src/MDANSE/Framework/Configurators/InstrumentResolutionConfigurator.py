@@ -23,28 +23,26 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 
 
 class InstrumentResolutionConfigurator(IConfigurator):
-    """
-    This configurator allows to set an instrument resolution.
+    r"""Defines the resolution function to use for signal broadening.
 
-    The instrument resolution will be used in frequency-dependant analysis (e.g. the vibrational density
-    of states) when performing the fourier transform of its time-dependant counterpart. This allow to
-    convolute of the signal with a resolution function to have a better match with experimental spectrum.
+    The instrument resolution will be used in frequency-dependent analysis
+    (e.g. the vibrational density of states) when performing the Fourier
+    transform of its time-dependent counterpart. The convolution of the signal
+    with a resolution function should be closer to the experimental spectrum.
 
-    In MDANSE, the instrument resolution are defined in omegas space and are internally
-    inverse-fourier-transformed to get a time-dependant version. This time-dependant resolution function will then
-    be multiplied by the time-dependant signal to get the resolution effect according to the Fourier Transform theorem:
+    In MDANSE, the instrument resolution is calculated as a function of energy,
+    and then Fourier-transformed into the time domain and applied to the
+    time-dependent signal as follows:
 
-    .. math:: TF(f(t) * r(t)) = F(\omega) \otimes R(\omega) = G(\omega)
+    .. math:: FT(f(t)r(t)) = F(\omega) * R(\omega) = G(\omega)
 
-    where f(t) and r(t) are respectively the time-dependant signal and instrument resolution and
-    F(\omega) and R(\omega) are their corresponding spectrum. Hence, G(\omega) represents the signal
-    convoluted by the instrument resolution and, as such, represents the quantity to be compared directly with
-    experimental results.
+    where f(t) and r(t) are, respectively, the time-dependent signal and
+    instrument resolution. :math:`F(\omega)` and :math:`R(\omega)`
+    are their corresponding spectra. Hence, :math:`G(\omega)` represents
+    the convolution of the signal and the instrument resolution. This resolution
+    is constant and not energy-dependent, as opposed to the real resolution
+    of most neutron instruments.
 
-    An instrument resolution is represented in MDANSE by a kernel function and a sets of parameters for this function.
-    MDANSE currently supports the aussian, lorentzian, square, triangular and pseudo-voigt kernels.
-
-    :note: this configurator depends on the 'frame' configurator to be configured.
     """
 
     _default = ("gaussian", {"mu": 0.0, "sigma": 10.0})

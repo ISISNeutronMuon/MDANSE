@@ -80,6 +80,8 @@ def check_trajectory(filename: str):
 
 
 class XDATCARFileConfigurator(FileWithAtomDataConfigurator):
+    """Inputs an XDATCAR file (for the VASP converter)."""
+
     def parse(self):
         filename = self["filename"]
         self["instance"] = open(filename, encoding="utf-8")

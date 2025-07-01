@@ -27,6 +27,8 @@ from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 
 class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
+    """Uses MDTraj to read the system topology information from a file."""
+
     def configure(self, value: Optional[str]):
         """
         Parameters
