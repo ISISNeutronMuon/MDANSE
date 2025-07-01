@@ -84,11 +84,17 @@ class CenterOfMassesTrajectory(IJob):
         self.numberOfSteps = self.configuration["frames"]["number"]
         chemical_system = self.configuration["trajectory"]["instance"].chemical_system
 
+        self.cluster_composition = {}
+        original_atom_list = chemical_system.atom_list
         new_element_list = []
         used_up_atoms = set()
         new_chemical_system = ChemicalSystem()
         for cluster_name in chemical_system._clusters.keys():
             for cluster in chemical_system._clusters[cluster_name]:
+                if cluster_name not in self.cluster_composition:
+                    self.cluster_composition[cluster_name] = [
+                        original_atom_list[ind] for ind in cluster
+                    ]
                 new_element_list.append(cluster_name)
                 used_up_atoms.update(set(cluster))
         for index in chemical_system._atom_indices:
@@ -201,6 +207,7 @@ class CenterOfMassesTrajectory(IJob):
         self._output_trajectory.write_atom_database(
             self._unique_atoms,
             self.configuration["trajectory"]["instance"],
+            self.cluster_composition,
             time_averaged_radii,
         )
         # The input trajectory is closed.
