@@ -50,7 +50,7 @@ class OutputStructureConfigurator(IConfigurator):
         IConfigurator.__init__(self, name, **kwargs)
 
         self.formats = [fmt for fmt in ioformats if ioformats[fmt].can_write]
-        self._forbidden_files = []
+        self.forbidden_files = []
 
     def configure(self, value):
         """
@@ -84,7 +84,7 @@ class OutputStructureConfigurator(IConfigurator):
         self["root"] = root
         self["format"] = format
         self["file"] = root
-        if self["file"].absolute() in self._forbidden_files:
+        if self["file"].absolute() in self.forbidden_files:
             self.error_status = f"File {self['file']} is either open or being written into. Please pick another name."
             return
         self["log_level"] = logs

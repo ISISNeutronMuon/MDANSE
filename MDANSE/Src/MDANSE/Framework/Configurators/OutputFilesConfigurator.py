@@ -69,7 +69,7 @@ class OutputFilesConfigurator(IConfigurator):
         self.formats = (
             formats if formats is not None else OutputFilesConfigurator._default[1]
         )
-        self._forbidden_files = []
+        self.forbidden_files = []
 
     def configure(self, value):
         """Configure a set of output files for an analysis.
@@ -117,7 +117,7 @@ class OutputFilesConfigurator(IConfigurator):
             for ext in (IFormat.create(f).extension for f in formats)
         ]
         for file in self["files"]:
-            if file.absolute() in self._forbidden_files:
+            if file.absolute() in self.forbidden_files:
                 self.error_status = f"File {file} is either open or being written into. Please pick another name."
                 return
 
