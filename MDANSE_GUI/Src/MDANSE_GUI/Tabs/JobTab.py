@@ -36,6 +36,13 @@ Pick an analysis name to see additional information.
 <br><br>
 Use a button at the bottom of the panel to start an analysis run,
 or to save the inputs as a script.
+<br><br>
+If you regularly use specific <b>resolution settings</b> or
+<b>Q vector generation parameters</b>, you can save them in
+the instrument tab as an instrument profile, and use them
+in your analysis by setting the "instrument" name to the
+one you defined. The parameters saved under the instrument name
+will be used as initial values when you switch to a new analysis type.
 """
 
 
