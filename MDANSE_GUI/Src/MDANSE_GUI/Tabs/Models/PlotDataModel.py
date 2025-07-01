@@ -57,13 +57,13 @@ class BasicPlotDataItem(QStandardItem):
         else:
             return f"{self.data_parent.child_path}/{self.text()}"
 
-    def recursive_children(self) -> list[BasicPlotDataItem]:
+    def recursive_children(self, recursion_limit: int = 1) -> list[BasicPlotDataItem]:
         """Return a list composed of this node and all its children."""
         result = [self]
         for child_row in range(self.rowCount()):
             child = self.child(child_row, 0)
-            if child:
-                result += child.recursive_children()
+            if recursion_limit and child:
+                result += child.recursive_children(recursion_limit - 1)
         return result
 
     def populate(self, data: h5py.File | h5py.Group):
