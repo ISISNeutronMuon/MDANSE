@@ -34,7 +34,12 @@ to a plot.</b>
 The plots created or updated using the buttons below
 will <b>appear in the next tab.</b>
 <br><br>
-DOUBLE CLICK FILE FOR FAST PLOTTING
+<b>Fast plotting</b> into a new plot is done by <b>double-clicking</b> an item:
+<ul>
+<li>double click a file to plot the main results from that file,</li>
+<li>double click a dataset to plot it,</li>
+<li>double click a group to plot only the datasets directly in the group (skipping the nested ones),</li>
+</ul>
 """
 
 
