@@ -60,7 +60,7 @@ class PlotDataView(QTreeView):
         inner_node = model.inner_object(index)
         if isinstance(inner_node, MDADataStructure):
             data_nodes = model.itemFromIndex(index).recursive_children(
-                recursion_limit=10
+                recursion_limit=-1
             )
             file_node = model.parent_object(index)
             self.quick_plot_data(data_nodes, file_node, main_only=True)
