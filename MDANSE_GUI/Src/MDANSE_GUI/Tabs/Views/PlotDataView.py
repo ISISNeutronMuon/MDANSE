@@ -173,10 +173,11 @@ class PlotDataView(QTreeView):
                     continue
                 if "main" not in tags:
                     continue
-                if "partial" in tags:
-                    dataset = SingleDataset(data_node.child_path, file, linestyle="--")
-                else:
-                    dataset = SingleDataset(data_node.child_path, file)
+                dataset = SingleDataset(
+                    data_node.child_path,
+                    file,
+                    linestyle="--" if "partial" in tags else "-",
+                )
             else:
                 dataset = SingleDataset(data_node.child_path, file)
             model.add_dataset(dataset)
