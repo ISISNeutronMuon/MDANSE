@@ -28,9 +28,13 @@ from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 run_tab_label = """Shows the <b>status of jobs</b>
 which have been started in your session.
 <br><br>
-You can check which jobs were successful,
-and if they failed, you can see the details
-of the error message.
+Select a specific job to see its logged messages. If a job failed, you can see
+the error output this way as well.
+<br><br>
+Right-click a job to open a menu which will allow you to <b>pause</b>/<b>resume</b>
+this job, or <b>terminate</b> it altogether.
+<br><br>
+Jobs which have finished (successfully or not) can be deleted from this table.
 """
 
 
