@@ -72,9 +72,8 @@ class MoleculeAndAxisWidget(MoleculeWidget):
                 numval = int(current_value)
             except (TypeError, ValueError):
                 continue
-            else:
-                if numval in range(n_atoms):
-                    cbox.setCurrentText(current_value)
+            if numval in range(n_atoms):
+                cbox.setCurrentText(current_value)
 
     def enable_combo_boxes(self):
         """Activate or deactivate combo boxes based on other inputs.
@@ -92,21 +91,23 @@ class MoleculeAndAxisWidget(MoleculeWidget):
         if self.index_combo_boxes[0].currentText() == "None":
             self.index_combo_boxes[1].setEnabled(False)
 
-    def get_widget_value(self) -> list[str, int | None, int | None]:
+    @staticmethod
+    def parse_combo_box(cbox: QComboBox) -> int | None:
+        try:
+            return int(cbox.currentText())
+        except (TypeError, ValueError):
+            return None
+
+    def get_widget_value(self) -> tuple[str, int | None, int | None]:
         """Get the molecule name and atom indices.
 
         Returns
         -------
-        list[str, int | None, int | None]
+        tuple[str, int | None, int | None]
             Molecule name, optional atom index 1, optional atom index 2
 
         """
-        result = [super().get_widget_value(), None, None]
-        for nbox, cbox in enumerate(self.index_combo_boxes):
-            try:
-                index = int(cbox.currentText())
-            except (TypeError, ValueError):
-                return result
-            else:
-                result[nbox + 1] = index
-        return result
+        return (
+            super().get_widget_value(),
+            *map(self.parse_combo_box, self.index_combo_boxes),
+        )
