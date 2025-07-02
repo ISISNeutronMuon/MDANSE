@@ -302,7 +302,7 @@ class _Configuration(metaclass=abc.ABCMeta):
         self["coordinates"] = np.array(coords, dtype=float)
 
         for k, v in variables.items():
-            if k == "velocities" or k == "forces":
+            if k in {"velocities", "forces"}:
                 self[k] = np.array(v, dtype=float)
             else:
                 self[k] = v
@@ -475,23 +475,20 @@ class _PeriodicConfiguration(_Configuration):
         """
         if chemical_system is None:
             chemical_system = self._chemical_system
-        else:
-            if (
-                chemical_system.total_number_of_atoms
-                != self.chemical_system.total_number_of_atoms
-            ):
-                raise ConfigurationError(
-                    "Mismatch between the chemical systems; the provided chemical system, "
-                    f"{chemical_system.name}, has {chemical_system.total_number_of_atoms} atoms "
-                    f"which does not match the chemical system of this configuration, "
-                    f"{self.chemical_system.name} which has "
-                    f"{self.chemical_system.total_number_of_atoms} atoms."
-                )
+        elif (
+            chemical_system.total_number_of_atoms
+            != self.chemical_system.total_number_of_atoms
+        ):
+            raise ConfigurationError(
+                "Mismatch between the chemical systems; the provided chemical system, "
+                f"{chemical_system.name}, has {chemical_system.total_number_of_atoms} atoms "
+                f"which does not match the chemical system of this configuration, "
+                f"{self.chemical_system.name} which has "
+                f"{self.chemical_system.total_number_of_atoms} atoms."
+            )
 
         unit_cell = copy.deepcopy(self._unit_cell)
-
         variables = copy.deepcopy(self.variables)
-
         coords = variables.pop("coordinates")
 
         return self.__class__(chemical_system, coords, unit_cell, **variables)
@@ -706,12 +703,11 @@ class RealConfiguration(_Configuration):
         """
         if chemical_system is None:
             chemical_system = self._chemical_system
-        else:
-            if (
-                chemical_system.total_number_of_atoms
-                != self.chemical_system.total_number_of_atoms
-            ):
-                raise ConfigurationError("Mismatch between the chemical systems")
+        elif (
+            chemical_system.total_number_of_atoms
+            != self.chemical_system.total_number_of_atoms
+        ):
+            raise ConfigurationError("Mismatch between the chemical systems")
 
         variables = copy.deepcopy(self.variables)
 

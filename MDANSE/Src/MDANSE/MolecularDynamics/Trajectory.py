@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from MDANSE.Chemistry.Databases import AtomsDatabase
 
+from collections import Counter
 import copy
 import math
 from pathlib import Path
@@ -643,7 +644,8 @@ class TrajectoryWriter:
         self,
         symbols: list[str],
         database: "AtomsDatabase",
-        optional_molecule_radii: dict[str, float] = None,
+        composition_lookup: dict[str, list[str]],
+        optional_molecule_radii: dict[str, float] | None = None,
     ):
         """Write atom properties into the trajectory file.
         
@@ -665,22 +667,7 @@ class TrajectoryWriter:
             if database.has_atom(atom_symbol):
                 property_dict = database.get_property_dict(atom_symbol)
             else:
-                atom_dict = {}
-                molecule_radius = 0.0
-                for token in atom_symbol.split("_"):
-                    symbol = ""
-                    number = ""
-                    noletters = True
-                    for char in token:
-                        if char.isnumeric():
-                            if noletters:
-                                symbol += char
-                            else:
-                                number += char
-                        else:
-                            symbol += char
-                            noletters = False
-                    atom_dict[symbol] = int(number)
+                atom_dict = Counter(composition_lookup[atom_symbol])
                 if optional_molecule_radii is not None:
                     molecule_radius = optional_molecule_radii.get(atom_symbol, 0.0)
                 property_dict = create_average_atom(

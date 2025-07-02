@@ -13,11 +13,10 @@ extend-exclude = [
 
 [lint]
 select = [
-    "E4", "E7", "E9", "F",  # Defaults
-    # "PL",  # Pylint errors
-    # "E",   # Pycodestyle
-    # "W",   # Pycodestyle warnings
-    # "F",   # Pyflakes
+    "PL",  # Pylint errors
+    "E",   # Pycodestyle
+    "W",   # Pycodestyle warnings
+    "F",   # Pyflakes
     # "B",   # Flake8 bugbear
     # "SIM", # Flake8 Simplify
     # "A",   # Flake8 builtins
@@ -40,11 +39,14 @@ select = [
     "T20",   # Print
 ]
 ignore = [
+    "E501",     # Line too long
     "F401",     # Unused import in init
     "E402",     # Import not at top
-    "PLR0913",  # Too many arguments
+    "PLR2004",  # Magic number in comparison
     "PLR0912",  # Too many branches
+    "PLR0913",  # Too many arguments
     "PLR0915",  # Too many statements
+    "PLC0415",  # Top-level imports
 ]
 
 [lint.isort]

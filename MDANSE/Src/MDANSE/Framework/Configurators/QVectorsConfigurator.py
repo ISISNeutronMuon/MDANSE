@@ -55,44 +55,51 @@ class QVectorsConfigurator(IConfigurator):
         self._original_input = value
 
         trajConfig = self.configurable[self.dependencies["trajectory"]]
-        if isinstance(value, tuple):
+        self.error_status = "NONE"
+        try:
+            if not isinstance(value, tuple):
+                raise Exception(f"Q vectors setting must be a tuple {value}")
+
             try:
                 generator_name, parameters = value
             except ValueError:
-                self.error_status = f"Invalid q vectors settings {value}"
-                return
+                raise Exception(f"Invalid q vectors settings {value}")
+
             generator = IQVectors.create(
-                generator_name, trajConfig["instance"].configuration(0)
+                generator_name,
+                trajConfig["instance"].configuration(0),
             )
             try:
                 generator.setup(parameters)
             except Exception:
-                self.error_status = f"Could not configure q vectors using {parameters}"
-                return
+                raise Exception(f"Could not configure q vectors using {parameters}")
 
             try:
                 generator_success = generator.generate()
             except Exception:
-                self.error_status = "Q Vector parameters were parsed correctly, but caused an error. Invalid values?"
-                return
-            else:
-                if not generator_success:
-                    self.error_status = "Q Vector parameters were parsed correctly, but caused an error. Invalid values?"
-                    return
+                raise Exception(
+                    "Q Vector parameters were parsed correctly, but caused an error. Invalid values?"
+                )
+
+            if not generator_success:
+                raise Exception(
+                    "Q Vector parameters were parsed correctly, but caused an error. Invalid values?"
+                )
 
             if "q_vectors" not in generator.configuration:
-                self.error_status = "Wrong inputs for q-vector generation. At the moment there are no valid Q points."
-                return
+                raise Exception(
+                    "Wrong inputs for q-vector generation. At the moment there are no valid Q points."
+                )
             if not generator.configuration["q_vectors"]:
-                self.error_status = "no Q vectors could be generated"
-                return
+                raise Exception("no Q vectors could be generated")
 
             self["parameters"] = parameters
             # self["type"] = generator._type
             self["is_lattice"] = generator.is_lattice
             self["q_vectors"] = generator.configuration["q_vectors"]
-        else:
-            self.error_status = f"Q vectors setting must be a tuple {value}"
+
+        except Exception as err:
+            self.error_status = str(err)
             return
 
         self["shells"] = list(self["q_vectors"].keys())

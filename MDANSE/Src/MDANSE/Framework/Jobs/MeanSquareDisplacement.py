@@ -22,7 +22,7 @@ from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 
 
 class MeanSquareDisplacement(IJob):
-    """Calculates the mean square displacement (MSD) of atoms in the trajectory.
+    r"""Calculates the mean square displacement (MSD) of atoms in the trajectory.
 
     The MSD is a representation of diffusion in the system. The motion of an individual
     atom or molecule does not follow a simple path since particles undergo collisions.

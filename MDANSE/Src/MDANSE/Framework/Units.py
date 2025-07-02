@@ -101,8 +101,8 @@ def get_trailing_digits(string: str) -> tuple[str, int]:
     for i in range(len(string)):
         if string[i:].isdigit():
             return string[:i], int(string[i:])
-    else:
-        return string, 1
+
+    return string, 1
 
 
 class _Unit:
@@ -983,31 +983,26 @@ def _str_to_unit(s: str) -> _Unit:
         if len(splitted_units) == 1:
             units = splitted_units[0].split(" ")
             for u in units:
-                u = u.strip()
-                unit *= _parse_unit(u)
+                unit *= _parse_unit(u.strip())
             unit._uname = s
-
-            return unit
 
         elif len(splitted_units) == 2:
             numerator = splitted_units[0].strip()
             if numerator != "1":
                 numerator = numerator.split(" ")
                 for u in numerator:
-                    u = u.strip()
-                    unit *= _parse_unit(u)
+                    unit *= _parse_unit(u.strip())
 
             denominator = splitted_units[1].strip().split(" ")
             for u in denominator:
-                u = u.strip()
-                unit /= _parse_unit(u)
+                unit /= _parse_unit(u.strip())
 
             unit._uname = s
 
-            return unit
-
         else:
             raise UnitError(f"Invalid unit: {s}")
+
+    return unit
 
 
 class UnitsManager(metaclass=Singleton):

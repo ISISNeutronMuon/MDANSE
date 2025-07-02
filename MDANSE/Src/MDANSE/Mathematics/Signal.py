@@ -514,7 +514,7 @@ class Filter(ABC):
             if units is Filter.FrequencyUnits.CYCLIC:
                 freq_range *= self._angular_to_cyclic
         else:
-            RuntimeError(
+            raise RuntimeError(
                 f"Could not find supplied frequency range around which filter frequency response will be computed. \nPlease set the 'custom_freq_range' attribute on the instance of {type(self)}"
             )
 

@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
+from math import isclose
 
 import mdtraj as md
 
@@ -199,11 +200,10 @@ class MDTraj(Converter):
 
         if self.numberOfSteps == 1:
             time = 0
+        elif isclose(float(self.configuration["time_step"]["value"]), 0.0):
+            time = index * self.traj.timestep
         else:
-            if float(self.configuration["time_step"]["value"]) == 0.0:
-                time = index * self.traj.timestep
-            else:
-                time = index * float(self.configuration["time_step"]["value"])
+            time = index * float(self.configuration["time_step"]["value"])
 
         self._trajectory.dump_configuration(
             conf,

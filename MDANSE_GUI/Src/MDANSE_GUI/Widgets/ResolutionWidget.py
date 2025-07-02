@@ -80,15 +80,15 @@ def convert_parameters(
         Mean of resolution.
     """
     if peak_type == "ideal":
-        return 0.0, 0.0
-    if peak_type == "triangular":
-        return fwhm, centre
-    if peak_type == "square":
-        return fwhm / 2, centre
-    if peak_type == "gaussian":
-        return fwhm / gauss_denum, centre
-    if peak_type == "lorentzian":
-        return fwhm / 2, centre
+        fwhm, centre = 0.0, 0.0
+    elif peak_type == "triangular":
+        pass
+    elif peak_type == "square":
+        fwhm = fwhm / 2
+    elif peak_type == "gaussian":
+        fwhm = fwhm / gauss_denum
+    elif peak_type == "lorentzian":
+        fwhm = fwhm / 2
 
     return fwhm, centre
 
@@ -113,17 +113,17 @@ def revert_parameters(values: dict, peak_type: str) -> tuple[float, float]:
         Peak centre.
     """
     if peak_type == "ideal":
-        return 1.0, 0.0
-    if peak_type == "triangular":
-        return values["sigma"], values["mu"]
-    if peak_type == "square":
-        return values["sigma"] * 2, values["mu"]
-    if peak_type == "gaussian":
-        return values["sigma"] * gauss_denum, values["mu"]
-    if peak_type == "lorentzian":
-        return values["sigma"] * 2, values["mu"]
+        sigma, mu = 1.0, 0.0
+    elif peak_type == "triangular":
+        sigma, mu = values["sigma"], values["mu"]
+    elif peak_type == "square":
+        sigma, mu = values["sigma"] * 2, values["mu"]
+    elif peak_type == "gaussian":
+        sigma, mu = values["sigma"] * gauss_denum, values["mu"]
+    elif peak_type == "lorentzian":
+        sigma, mu = values["sigma"] * 2, values["mu"]
 
-    if "oigt" in peak_type:
+    elif "oigt" in peak_type:
         try:
             sigma = (
                 values["sigma_gaussian"] * gauss_denum + values["sigma_lorentzian"] * 2
@@ -135,8 +135,10 @@ def revert_parameters(values: dict, peak_type: str) -> tuple[float, float]:
         except KeyError:
             mu = 0.0
         return sigma / 2, mu / 2
+    else:
+        sigma, mu = values["sigma"], values["mu"]
 
-    return values["sigma"], values["mu"]
+    return sigma, mu
 
 
 class ResolutionCalculator:

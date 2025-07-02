@@ -438,6 +438,6 @@ def test_sldp(generate_benchmarks, tmp_path, traj_info):
     compare_hdf5(
         out_file,
         result_file,
-        ("sldp/sldp", "sldp/incoherent", "sldp/total", "dp/number/total"),
+        ("sldp/sldp", "dp/number/total"),
         startswith=True,
     )

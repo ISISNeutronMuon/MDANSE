@@ -224,10 +224,10 @@ def superposition_fit(confs):
     pos = np.zeros((3,), np.float64)
     possq = 0.0
     cross = np.zeros((3, 3), np.float64)
-    for w, r_ref, r in confs:
-        w = w / w_sum
-        r_ref = r_ref.array - ref_cms
-        r = r.array
+    for w_in, r_ref_in, r_in in confs:
+        w = w_in / w_sum
+        r_ref = r_ref_in.array - ref_cms
+        r = r_in.array
         pos = pos + w * r
         possq = possq + w * np.add.reduce(r * r) + w * np.add.reduce(r_ref * r_ref)
         cross = cross + w * r[:, np.newaxis] * r_ref[np.newaxis, :]

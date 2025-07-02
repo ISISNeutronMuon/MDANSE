@@ -749,9 +749,7 @@ class AtomsDatabase(_Database):
             return self.get_value(symbol, atom_property)
         except KeyError:
             if atom_property == "dummy":
-                if symbol == "Du":
-                    return 1
-                if self._data[symbol]["element"] == "dummy":
+                if symbol == "Du" or self._data[symbol]["element"] == "dummy":
                     return 1
                 return 0
             return None

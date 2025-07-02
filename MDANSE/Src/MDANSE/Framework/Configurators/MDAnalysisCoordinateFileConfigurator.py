@@ -49,34 +49,33 @@ class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
 
         if format == "AUTO" or not self["filenames"]:
             self["format"] = None
+        elif format in mda._READERS:
+            self["format"] = format
         else:
-            if format in mda._READERS.keys():
-                self["format"] = format
-            else:
-                self.error_status = "MDAnalysis coordinate file format not recognised."
-                return
+            self.error_status = "MDAnalysis coordinate file format not recognised."
+            return
 
         topology_configurator = self.configurable[self.dependencies["input_file"]]
-        if topology_configurator.valid:
-            try:
-                if len(self["filenames"]) <= 1 or self["format"] is None:
-                    _ = mda.Universe(
-                        topology_configurator["filename"],
-                        *self["filenames"],
-                        format=self["format"],
-                        topology_format=topology_configurator["format"],
-                    ).trajectory
-                else:
-                    coord_files = [(i, self["format"]) for i in self["filenames"]]
-                    _ = mda.Universe(
-                        topology_configurator["filename"],
-                        coord_files,
-                        topology_format=topology_configurator["format"],
-                    ).trajectory
-            except Exception as e:
-                self.error_status = f"Unable to create MDAnalysis universe: {e}"
-                return
-        else:
-            if self["values"]:
-                self.error_status = "Requires valid topology file."
-                return
+        if not topology_configurator.valid:
+            self.error_status = "Requires valid topology file."
+            return
+
+        try:
+            if len(self["filenames"]) <= 1 or self["format"] is None:
+                mda.Universe(
+                    topology_configurator["filename"],
+                    *self["filenames"],
+                    format=self["format"],
+                    topology_format=topology_configurator["format"],
+                ).trajectory
+            else:
+                coord_files = [(i, self["format"]) for i in self["filenames"]]
+                mda.Universe(
+                    topology_configurator["filename"],
+                    coord_files,
+                    topology_format=topology_configurator["format"],
+                ).trajectory
+
+        except Exception as e:
+            self.error_status = f"Unable to create MDAnalysis universe: {e}"
+            return

@@ -14,8 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
-import xml.etree.ElementTree as ElementTree
 from collections.abc import Iterable
+from xml.etree import ElementTree
 
 import numpy as np
 
@@ -169,7 +169,9 @@ class XTDFileConfigurator(FileWithAtomDataConfigurator):
             real_conf = boxConf.to_real_configuration()
         else:
             coordinates *= measure(1.0, "ang").toval("nm")
-            real_conf = RealConfiguration(self._chemical_system, coordinates, self.cell)
+            real_conf = RealConfiguration(
+                self._chemical_system, coordinates, unit_cell=self._cell
+            )
 
         real_conf.fold_coordinates()
         self._configuration = real_conf

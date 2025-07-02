@@ -142,6 +142,9 @@ class Vector:
         else:
             return False
 
+    def __hash__(self) -> int:
+        return hash(tuple(self.array))
+
     def x(self):
         """
         @returns: the x coordinate
@@ -304,6 +307,9 @@ class Quaternion:
             return np.all(self.array == other.array)
         else:
             return False
+
+    def __hash__(self) -> int:
+        return hash(tuple(self.array))
 
     def dot(self, other):
         return np.add.reduce(self.array * other.array)
@@ -498,6 +504,9 @@ class Tensor:
             return np.all(self.array == other.array)
         else:
             return False
+
+    def __hash__(self) -> int:
+        return hash(tuple(tuple(row) for row in self.array))
 
     def asVector(self):
         """

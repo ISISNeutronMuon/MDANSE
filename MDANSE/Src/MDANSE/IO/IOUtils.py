@@ -60,11 +60,11 @@ def _strip_inline_comments(
     comment_re = re.compile(f"({'|'.join(comment_char)})")
 
     for line in data:
-        line = comment_re.split(line)[0].rstrip()
-        if not line:
+        new_line = comment_re.split(line, maxsplit=1)[0].rstrip()
+        if not new_line:
             continue
 
-        yield line
+        yield new_line
 
 
 def _strip_initial_comments(
