@@ -161,7 +161,9 @@ class SingleDataset:
 
     @staticmethod
     def axis_true_name(axis_key: str) -> str:
-        return axis_key.rsplit("/", 1)[1].strip()
+        if "/" in axis_key:
+            return axis_key.rsplit("/", 1)[1].strip()
+        return axis_key
 
     def x_axis_label(self, axis_key: str) -> str:
         """Get the axis label to be used as matplotlib label.
