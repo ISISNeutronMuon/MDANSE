@@ -616,7 +616,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         element_map = {
             int(line.split()[0]): match[1].title()
             for line in lines
-            if (match := re.search("# ([A-Z][a-z]{,2})\s*$", line, re.I))
+            if (match := re.search(r"# ([A-Z][a-z]{,2})\s*$", line, re.I))
         }
 
         if element_map and self.setdefault("elements", element_map) != element_map:
@@ -706,10 +706,10 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
             (line,), lines = spy(lines)
 
             # Fix for VMD disobeying spec.
-            if not re.match("\s*\d+\s+atoms", line, re.I):
+            if not re.match(r"\s*\d+\s+atoms", line, re.I):
                 comment += " " + next(lines)
 
-            for desc in re.finditer("(\w+)\s*=\s*(\w+)", comment):
+            for desc in re.finditer(r"(\w+)\s*=\s*(\w+)", comment):
                 self[desc[1]] = desc[2]
             if "units" in self:
                 LOG.info("Units determined to be %r", self["units"])

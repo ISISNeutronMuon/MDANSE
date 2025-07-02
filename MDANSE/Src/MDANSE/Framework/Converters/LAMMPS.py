@@ -398,7 +398,7 @@ class LAMMPScustom(LAMMPSReader):
                 self._item_location["BOX BOUNDS"] = (curr_line + 1, curr_line + 4)
 
             elif line.startswith("ITEM: NUMBER OF ATOMS"):
-                curr_line, n_atoms = next(file)
+                _, n_atoms = next(file)
                 self._nAtoms = int(n_atoms)
 
             elif line.startswith("ITEM: ATOMS"):
@@ -432,10 +432,10 @@ class LAMMPScustom(LAMMPSReader):
                     curr_line + self._nAtoms + 1,
                 )
 
-                for i, (curr_line, line) in enumerate(take(self._nAtoms, file)):
+                for i, (_, atom_line) in enumerate(take(self._nAtoms, file)):
                     temp = {
                         key: self._type_map[key](val)
-                        for key, val in zip(self.keywords, line.split())
+                        for key, val in zip(self.keywords, atom_line.split())
                     }
                     idx = temp.get("id", 1)
 

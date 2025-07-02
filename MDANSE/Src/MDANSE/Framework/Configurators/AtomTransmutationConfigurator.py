@@ -140,13 +140,14 @@ class AtomTransmutationConfigurator(IConfigurator):
         idxs = system._atom_indices
 
         self._nTransmutedAtoms = 0
-        for idx, element in value.items():
-            try:
-                idx = int(idx)
-            except ValueError:
-                self.error_status = "Key of transmutation map should be castable to int"
-                return
 
+        try:
+            value = {int(idx): element for idx, element in value.items()}
+        except ValueError:
+            self.error_status = "Key of transmutation map should be castable to int"
+            return
+
+        for idx, element in value.items():
             if idx not in idxs:
                 self.error_status = "Inputted setting not valid - atom index not found in the current system."
                 return

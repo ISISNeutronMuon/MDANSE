@@ -57,6 +57,9 @@ class UnitCell:
         else:
             return False
 
+    def __hash__(self) -> int:
+        return hash(self._unit_cell)
+
     def __repr__(self) -> str:
         return f"MDANSE.MolecularDynamics.UnitCell.UnitCell({repr(self._unit_cell)})"
 

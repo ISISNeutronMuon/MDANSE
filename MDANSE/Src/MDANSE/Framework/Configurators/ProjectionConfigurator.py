@@ -13,6 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import SupportsFloat
 
 import numpy as np
 
@@ -31,7 +35,7 @@ class ProjectionConfigurator(IConfigurator):
 
     _default = None
 
-    def configure(self, value):
+    def configure(self, value: tuple[str, Sequence[SupportsFloat]]):
         """
         Configure a projector.
 
@@ -45,42 +49,43 @@ class ProjectionConfigurator(IConfigurator):
         self._original_input = value
 
         if value is None:
-            value = ("NullProjector", None)
+            value = ("NullProjector", ())
 
         try:
-            mode, axis = value
-        except (TypeError, ValueError) as e:
-            self.error_status = "Failed to unpack input" + str(e)
-            return
+            try:
+                mode, axis = value
+            except (TypeError, ValueError) as e:
+                raise Exception("Failed to unpack input" + str(e))
 
-        if not isinstance(mode, str):
-            self.error_status = "invalid type for projection mode: must be a string"
-            return
+            if not isinstance(mode, str):
+                raise Exception("invalid type for projection mode: must be a string")
 
-        try:
-            self["projector"] = IProjector.create(mode)
-        except KeyError:
-            self.error_status = f"the projector {mode} is unknown"
-            return
-        else:
+            try:
+                self["projector"] = IProjector.create(mode)
+            except KeyError:
+                raise Exception(f"the projector {mode} is unknown")
+
             if mode == "NullProjector":
                 self.error_status = "OK"
                 return
+
             try:
                 vector = [float(x) for x in axis]
             except ValueError:
-                self.error_status = f"Could not convert {axis} to numbers"
-                return
-            else:
-                if np.allclose(vector, 0):
-                    self.error_status = "Vector of 0 length does not define projection"
-                    return
+                raise Exception(f"Could not convert {axis} to numbers")
+
+            if np.allclose(vector, 0):
+                raise Exception("Vector of 0 length does not define projection")
+
             try:
                 self["projector"].set_axis(vector)
             except ProjectorError:
-                self.error_status = f"Axis {vector} is wrong for this projector"
-                return
-            else:
-                self["axis"] = self["projector"].axis
+                raise Exception(f"Axis {vector} is wrong for this projector")
+
+            self["axis"] = self["projector"].axis
+
+        except Exception as err:
+            self.error_status = str(err)
+            return
 
         self.error_status = "OK"

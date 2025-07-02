@@ -83,32 +83,32 @@ class OutputFilesConfigurator(IConfigurator):
         root, formats, logs = value
         root = Path(root)
 
-        if logs not in self.log_options:
-            self.error_status = "log level option not recognised"
+        try:
+            if logs not in self.log_options:
+                raise Exception("Log level option not recognised.")
+
+            if not root:
+                raise Exception("Empty root name for the output file.")
+
+            if not PLATFORM.is_file_writable(root):
+                raise Exception(f"The file {root} is not writable.")
+
+            if not formats:
+                raise Exception("No output formats specified.")
+
+            for fmt in formats:
+                if fmt not in self.formats:
+                    raise Exception(
+                        f"The output file format {fmt} is not a valid output format."
+                    )
+
+                if fmt not in IFormat.indirect_subclasses():
+                    raise Exception(
+                        f"the output file format {fmt} is not registered as a valid file format."
+                    )
+        except Exception as err:
+            self.err_status = str(err)
             return
-
-        if not root:
-            self.error_status = "empty root name for the output file."
-            return
-
-        if not PLATFORM.is_file_writable(root):
-            self.error_status = f"the file {root} is not writable"
-            return
-
-        if not formats:
-            self.error_status = "no output formats specified"
-            return
-
-        for fmt in formats:
-            if fmt not in self.formats:
-                self.error_status = (
-                    f"the output file format {fmt} is not a valid output format"
-                )
-                return
-
-            if fmt not in IFormat.indirect_subclasses():
-                self.error_status = f"the output file format {fmt} is not registered as a valid file format."
-                return
 
         self["root"] = root
         self["formats"] = formats

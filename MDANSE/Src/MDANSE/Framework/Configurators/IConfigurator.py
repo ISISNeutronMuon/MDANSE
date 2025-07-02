@@ -173,6 +173,9 @@ class IConfigurator(dict, metaclass=SubclassFactory):
             ),
         )
 
+    def repr(self) -> str:
+        return f"{type(self).__name__}{super().__repr__()}"
+
     @property
     def error_status(self):
         """Details of the configuration error.

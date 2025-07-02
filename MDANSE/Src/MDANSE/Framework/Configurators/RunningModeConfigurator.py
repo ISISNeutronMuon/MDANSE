@@ -56,17 +56,11 @@ class RunningModeConfigurator(IConfigurator):
             slots = int(value[1])
             maxSlots = multiprocessing.cpu_count()
 
-            if slots == 0:
+            if slots < 0:
+                slots = min(abs(slots), maxSlots)
+            elif slots == 0 or slots > maxSlots:
                 self.error_status = "invalid number of allocated slots."
                 return
-            elif slots < 0:
-                slots = abs(slots)
-                if slots > maxSlots:
-                    slots = maxSlots
-            else:
-                if slots > maxSlots:
-                    self.error_status = "invalid number of allocated slots."
-                    return
 
         self["mode"] = mode
 

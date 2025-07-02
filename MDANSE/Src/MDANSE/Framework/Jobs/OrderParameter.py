@@ -25,7 +25,7 @@ from MDANSE.Mathematics.Transformation import Rotation
 
 
 class OrderParameter(IJob):
-    """
+    r"""
     The combination of NMR and MD simulation data is very powerful in the study of conformational dynamics of proteins. NMR relaxation
     spectroscopy is a unique approach for a site-specific investigation of both global tumbling and internal motions of proteins.
     The molecular motions modulate the magnetic interactions  between the nuclear spins and lead for each nuclear spin to a relaxation

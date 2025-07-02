@@ -13,9 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from collections.abc import Iterable
+from typing import Literal
+
 from qtpy.QtCore import Slot
 
 from .TextInfo import TextInfo
+
+ErrorTypes = Literal["WARNING", "ERROR", "CRITICAL", "DEBUG", "INFO"]
 
 
 class JobLogInfo(TextInfo):
@@ -24,15 +29,17 @@ class JobLogInfo(TextInfo):
         self.setStyleSheet("font-family: Courier New;")
 
     @Slot(object)
-    def update_panel(self, incoming: object):
+    def update_panel(self, incoming: tuple[Iterable[str], Iterable[ErrorTypes]]):
         msgs, levels = incoming
         text = ""
+
         for msg, level in zip(msgs, levels):
             if level == "WARNING":
                 text += f'<span style="color:orange;">{msg}</span>\n'
-            elif level == "ERROR" or level == "CRITICAL":
+            elif level in {"ERROR", "CRITICAL"}:
                 text += f'<span style="color:red;">{msg}</span>\n'
             else:
                 text += f"<span>{msg}</span>\n"
+
         filtered = self.filter(text)
         self.setHtml(filtered)

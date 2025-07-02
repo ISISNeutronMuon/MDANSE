@@ -61,7 +61,7 @@ class ActionsTree(QTreeView):
         # debug
         text = item.text()
         LOG.info(f"About to execute action {text}")
-        #
+
         number = item.data(Qt.ItemDataRole.UserRole)
         LOG.info(f"Node number is {number}")
         if number is None:

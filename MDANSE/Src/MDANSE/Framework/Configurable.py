@@ -14,6 +14,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
+from typing import Optional
+
+from more_itertools import value_chain
 
 from MDANSE.Core.Error import Error
 from MDANSE.MLogging import LOG
@@ -176,14 +179,12 @@ class Configurable:
             self._configured = True
             return
 
-        if isinstance(parameters, dict):
-            # Loop over the configuration items
-            for k, v in list(self._configuration.items()):
-                # If no input parameter has been set for this item, use its default value.
-                if k not in parameters:
-                    parameters[k] = v.default
-        else:
+        if not isinstance(parameters, dict):
             raise ConfigurationError("Invalid type for configuration parameters")
+
+        # Loop over the configuration items
+        for key, value in self._configuration.items():
+            parameters.setdefault(key, value.default)
 
         toBeConfigured = set(self._configuration.keys())
         configured = set()
@@ -191,7 +192,7 @@ class Configurable:
         while toBeConfigured != configured:
             progress = False
 
-            for name, conf in list(self._configuration.items()):
+            for name, conf in self._configuration.items():
                 if name in configured:
                     continue
 
@@ -203,11 +204,10 @@ class Configurable:
                 if conf.check_dependencies(configured):
                     if not conf.optional:
                         conf.configure(parameters[name])
-                    else:
-                        if parameters[name]:
-                            conf.configure(parameters[name])
-                            if not conf.valid:
-                                self._configuration[name] = False
+                    elif parameters[name]:
+                        conf.configure(parameters[name])
+                        if not conf.valid:
+                            self._configuration[name] = False
 
                     conf.set_configured(True)
 
@@ -229,22 +229,20 @@ class Configurable:
 
         self._configured = True
 
-    def output_configuration(self) -> dict[str, str]:
+    def output_configuration(self) -> Optional[dict[str, str]]:
         if not self._configured:
             return
-        result = {}
-        for name, conf in list(self._configuration.items()):
-            result[name] = conf.to_json()
-        return result
+        return {name: conf.to_json() for name, conf in self._configuration.items()}
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Returns the informations about the current configuration in text form.
 
-        :return: the informations about the current configuration in text form
-        :rtype: str
+        Returns
+        -------
+        str
+            the informations about the current configuration in text form
         """
-
         return "\n".join(
             f"{key}: {value}" for key, value in self._configuration.items()
         )
@@ -278,7 +276,7 @@ class Configurable:
             v["Description"] = v["Description"].strip()
             v["Description"] = v["Description"].splitlines()
             v["Description"] = ["| " + vv.strip() for vv in v["Description"]]
-            sizes[2] = max(sizes[2], max(map(len, v["Description"])))
+            sizes[2] = max(value_chain(sizes[2], map(len, v["Description"])))
 
         data_line = "| " + "| ".join(f"{{}}:<{size}" for size in sizes) + "|\n"
         sep_line = "+" + "+".join("-" * (size + 1) for size in sizes) + "+\n"
