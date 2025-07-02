@@ -446,14 +446,14 @@ def test_convolution(
 
     # Retrieve U(w), check the data is as expected
     original_data = LocalDataset(
-        "pps_total", h5py.File(unfiltered_power_spectrum, "r+")
+        "pps/total", h5py.File(unfiltered_power_spectrum, "r+")
     )
     u_x_axis_name = list(original_data._axes_units.keys())
 
-    assert u_x_axis_name == ["romega"]
+    assert u_x_axis_name == ["pps/axes/romega"]
     assert original_data._axes_units[u_x_axis_name[0]] == "rad/ps"
 
-    u_x_axis = original_data._axes["romega"]
+    u_x_axis = original_data._axes["pps/axes/romega"]
 
     max, precision = filter_config["max_frequency"]
     assert np.round(u_x_axis.min(), 0) == 0
@@ -497,13 +497,13 @@ def test_convolution(
     assert fw_out_file.is_file()
 
     # Retrieve F(w), check the data is as expected
-    filtered_data = LocalDataset("pps_total", h5py.File(fw_out_file, "r+"))
+    filtered_data = LocalDataset("pps/total", h5py.File(fw_out_file, "r+"))
     f_x_axis_name = list(filtered_data._axes_units.keys())
 
-    assert f_x_axis_name == ["romega"]
+    assert f_x_axis_name == ["pps/axes/romega"]
     assert filtered_data._axes_units[f_x_axis_name[0]] == "rad/ps"
 
-    f_x_axis = filtered_data._axes["romega"]
+    f_x_axis = filtered_data._axes["pps/axes/romega"]
 
     assert np.round(f_x_axis.min(), 0) == 0
     assert np.round(f_x_axis.max(), precision) == max

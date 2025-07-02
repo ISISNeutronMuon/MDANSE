@@ -221,6 +221,6 @@ total result from a selection can also be rescaled so that it is a fraction
 of the total results with all atoms selected
 
 .. math::
-   :label: selection4
+   :label: selection6
 
     \mathcal{F}_{\text{coh}}(\mathbf{q},t) = \frac{N_{s}}{N} F_{\text{coh}}(\mathbf{q},t), \qquad  \mathcal{F}_{\text{inc}}(\mathbf{q},t) = \frac{N_{s}}{N} \sum_{\alpha} W_{\alpha} F_{\text{inc},\alpha}(\mathbf{q},t).

@@ -260,8 +260,6 @@ class Forcite(Converter):
 
     label = "Forcite"
 
-    category = ("Converters", "Materials Studio")
-
     settings = collections.OrderedDict()
     settings["xtd_file"] = (
         "XTDFileConfigurator",

@@ -85,7 +85,7 @@ class GeneralAutoCorrelationFunction(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time",
+            "gacf/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
@@ -94,20 +94,20 @@ class GeneralAutoCorrelationFunction(IJob):
         # Will store the mean square displacement evolution.
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                f"gacf_{element}",
+                f"gacf/{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["number"],),
-                axis="time",
+                axis="gacf/axes/time",
                 units="au",
                 main_result=True,
                 partial_result=True,
             )
 
         self._outputData.add(
-            "gacf_total",
+            "gacf/total",
             "LineOutputVariable",
             (self.configuration["frames"]["number"],),
-            axis="time",
+            axis="gacf/axes/time",
             units="au",
             main_result=True,
         )
@@ -149,7 +149,7 @@ class GeneralAutoCorrelationFunction(IJob):
 
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData[f"gacf_{element}"] += x
+        self._outputData[f"gacf/{element}"] += x
 
     def finalize(self):
         """
@@ -160,14 +160,14 @@ class GeneralAutoCorrelationFunction(IJob):
         self.configuration["atom_selection"]["n_atoms_per_element"] = nAtomsPerElement
 
         for element, number in nAtomsPerElement.items():
-            self._outputData[f"gacf_{element}"] /= number
+            self._outputData[f"gacf/{element}"] /= number
 
         weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
-        assign_weights(self._outputData, weight_dict, "gacf_%s", self.labels)
-        gacfTotal = weighted_sum(self._outputData, "gacf_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "gacf/%s", self.labels)
+        gacfTotal = weighted_sum(self._outputData, "gacf/%s", self.labels)
 
-        self._outputData["gacf_total"][:] = gacfTotal
+        self._outputData["gacf/total"][:] = gacfTotal
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

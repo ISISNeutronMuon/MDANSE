@@ -159,6 +159,10 @@ class SingleDataset:
         """
         return self._axes[axis_key] * self._axes_scaling[axis_key]
 
+    @staticmethod
+    def axis_true_name(axis_key: str) -> str:
+        return axis_key.rsplit("/", 1)[1].strip()
+
     def x_axis_label(self, axis_key: str) -> str:
         """Get the axis label to be used as matplotlib label.
 
@@ -173,7 +177,7 @@ class SingleDataset:
             Name of the dataset and the corresponding physical unit.
 
         """
-        return f"{axis_key} ({self._current_units[axis_key]})"
+        return f"{self.axis_true_name(axis_key)} ({self._current_units[axis_key]})"
 
     def set_current_units(self, unit_lookup):
         """Update the unit based on the unit lookup of the PlottingContext."""
@@ -315,8 +319,8 @@ class SingleDataset:
 
     def generate_curve_label(
         self,
-        index_tuple: tuple[int],
-        axis_lookup: tuple[str],
+        index_tuple: list[int],
+        axis_lookup: list[str],
     ) -> str:
         """Get a meaningful label for a subset of data.
 
@@ -324,9 +328,9 @@ class SingleDataset:
 
         Parameters
         ----------
-        index_tuple : tuple[int]
+        index_tuple : list[int]
             indices of the 1D data array position in the ND array
-        axis_lookup : tuple[str]
+        axis_lookup : list[str]
             Names of the axes to use
 
         Returns
@@ -339,6 +343,8 @@ class SingleDataset:
             return ""
         label = "at "
         for axis_index, axis_name in enumerate(axis_lookup):
+            axis_label = self.axis_true_name(axis_name)
+
             axis_values = self.x_axis(axis_name)
             axis_unit = self._current_units[axis_name]
             picked_value = axis_values[index_tuple[axis_index]]
@@ -349,25 +355,25 @@ class SingleDataset:
             elif len(axis_values) == 1:
                 significant_digit = np.floor(np.log10(abs(axis_values[0]))).astype(int)
             else:
-                label += f"{axis_name} has no values, unit {axis_unit}"
+                label += f"{axis_label} has no values, unit {axis_unit}"
                 continue
             if significant_digit < 0:
                 picked_value = round(picked_value, abs(significant_digit) + 2)
             else:
                 picked_value = round(picked_value, 1)
-            label += f"{axis_name}={picked_value} {axis_unit}, "
+            label += f"{axis_label}={picked_value} {axis_unit}, "
         return label.rstrip(", ")
 
     def curves_vs_axis(
         self,
-        x_axis_details: tuple[str],
+        x_axis_details: tuple[str, str],
         max_limit: int = 1,
     ) -> list[np.ndarray]:
         """Prepare a set of curves for plotting.
 
         Parameters
         ----------
-        x_axis_details : tuple[str]
+        x_axis_details : tuple[str, str]
             Name and original unit of the primary plotting axis
         max_limit : int, optional
             Maximum number of curves allowed by plotter, by default 1
@@ -452,7 +458,7 @@ class SingleDataset:
             if number == axis_number:
                 slice_def.append(0)
                 perpendicular_axis = axis_array
-                perpendicular_axis_name = axis_name
+                perpendicular_axis_name = self.axis_true_name(axis_name)
             else:
                 slice_def.append(slice(None))
         if self._data_limits is not None:

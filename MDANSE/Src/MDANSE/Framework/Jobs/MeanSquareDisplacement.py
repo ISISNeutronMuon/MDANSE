@@ -117,7 +117,7 @@ class MeanSquareDisplacement(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time",
+            "msd/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
@@ -126,10 +126,10 @@ class MeanSquareDisplacement(IJob):
         # Will store the mean square displacement evolution.
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                f"msd_{element}",
+                f"msd/{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
-                axis="time",
+                axis="msd/axes/time",
                 units="nm2",
                 main_result=True,
                 partial_result=True,
@@ -189,7 +189,7 @@ class MeanSquareDisplacement(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData[f"msd_{element}"] += result
+        self._outputData[f"msd/{element}"] += result
 
     def finalize(self):
         """
@@ -199,7 +199,7 @@ class MeanSquareDisplacement(IJob):
         # The MSDs per element are averaged.
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in list(nAtomsPerElement.items()):
-            self._outputData[f"msd_{element}"] /= number
+            self._outputData[f"msd/{element}"] /= number
 
         selected_weights, all_weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(
@@ -209,28 +209,28 @@ class MeanSquareDisplacement(IJob):
             self.configuration["atom_selection"].get_all_natoms(),
             1,
         )
-        assign_weights(self._outputData, weight_dict, "msd_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "msd/%s", self.labels)
 
         n_selected = sum(nAtomsPerElement.values())
         n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
         fact = n_selected / n_total
 
-        msdTotal = weighted_sum(self._outputData, "msd_%s", self.labels) / fact
+        msdTotal = weighted_sum(self._outputData, "msd/%s", self.labels) / fact
         self._outputData.add(
-            "msd_total",
+            "msd/total",
             "LineOutputVariable",
             msdTotal,
-            axis="time",
+            axis="msd/axes/time",
             units="nm2",
             main_result=True,
         )
-        self._outputData["msd_total"].scaling_factor = fact
+        self._outputData["msd/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "msd",
             "LineOutputVariable",
-            axis="time",
+            axis="msd/axes/time",
             units="nm2",
             main_result=True,
             partial_result=True,

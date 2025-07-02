@@ -141,7 +141,7 @@ class SolventAccessibleSurface(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time",
+            "sas/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["time"],
             units="ps",
@@ -149,10 +149,10 @@ class SolventAccessibleSurface(IJob):
 
         # Will store the solvent accessible surface.
         self._outputData.add(
-            "sas",
+            "sas/sas",
             "LineOutputVariable",
             (self.configuration["frames"]["number"],),
-            axis="time",
+            axis="sas/axes/time",
             units="nm2",
             main_result=True,
         )
@@ -227,7 +227,7 @@ class SolventAccessibleSurface(IJob):
         """
 
         # The SAS is updated with the value obtained for frame |index|.
-        self._outputData["sas"][index] = x
+        self._outputData["sas/sas"][index] = x
 
     def finalize(self):
         """

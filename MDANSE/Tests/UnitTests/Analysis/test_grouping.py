@@ -85,8 +85,8 @@ def disf(tmp_path_factory):
         ("DensityOfStates", ["dos", "vacf"], "equal", 1e-10, 1e-7),
         ("MeanSquareDisplacement", ["msd"], "equal", 1e-10, 1e-7),
         ("VelocityAutoCorrelationFunction", ["vacf"], "equal", 1e-10, 1e-7),
-        ("VanHoveFunctionDistinct", ["g(r,t)"], "equal", 1e-10, 1e-7),
-        ("VanHoveFunctionSelf", ["g(r,t)"], "equal", 1e-10, 1e-7),
+        ("VanHoveFunctionDistinct", ["vh"], "equal", 1e-10, 1e-7),
+        ("VanHoveFunctionSelf", ["vh"], "equal", 1e-10, 1e-7),
         ("PositionAutoCorrelationFunction", ["pacf"], "equal", 1e-10, 1e-7),
         ("PositionPowerSpectrum", ["pacf", "pps"], "equal", 1e-10, 1e-7),
         ("RootMeanSquareDeviation", ["rmsd"], "equal", 1e-10, 1e-7),
@@ -94,25 +94,13 @@ def disf(tmp_path_factory):
         ("PairDistributionFunction", ["pdf", "rdf", "tcf"], "equal", 1e-10, 1e-7),
         ("StaticStructureFactor", ["ssf"], "equal", 1e-10, 1e-7),
         ("XRayStaticStructureFactor", ["xssf"], "equal", 1e-10, 1e-7),
-        (
-            "DynamicCoherentStructureFactor",
-            ["f(q,t)", "s(q,f)"],
-            "b_coherent",
-            1e-6,
-            1e-6,
-        ),
-        ("CurrentCorrelationFunction", ["J(q,f)", "j(q,t)"], "b_coherent", 1e-6, 1e-7),
-        (
-            "DynamicIncoherentStructureFactor",
-            ["f(q,t)", "s(q,f)"],
-            "b_incoherent",
-            1e-10,
-            1e-7,
-        ),
+        ("DynamicCoherentStructureFactor", ["dcsf"], "b_coherent", 1e-6, 1e-6),
+        ("CurrentCorrelationFunction", ["ccf"], "b_coherent", 1e-6, 1e-7),
+        ("DynamicIncoherentStructureFactor", ["disf"], "b_incoherent", 1e-10, 1e-7),
         ("ElasticIncoherentStructureFactor", ["eisf"], "b_incoherent", 1e-10, 1e-7),
         (
             "GaussianDynamicIncoherentStructureFactor",
-            ["f(q,t)", "s(q,f)", "msd"],
+            ["gdsf", "msd"],
             "b_incoherent",
             1e-10,
             1e-7,
@@ -167,7 +155,7 @@ def test_rmsf(generate_benchmarks, tmp_path, parameters):
     assert out_file.is_file()
     assert log_file.is_file()
 
-    compare_hdf5(out_file, result_file, "rmsf", startswith=True)
+    compare_hdf5(out_file, result_file, "rmsf/rmsf", startswith=True)
 
 
 def test_ndtsf(generate_benchmarks, tmp_path, disf, dcsf, qvector_grid):
@@ -199,7 +187,11 @@ def test_ndtsf(generate_benchmarks, tmp_path, disf, dcsf, qvector_grid):
     assert log_file.is_file()
 
     compare_hdf5(
-        out_file, result_file, ("f(q,t)", "s(q,f)"), startswith=True, atol=1e-6
+        out_file,
+        result_file,
+        ("ndsf/f(q,t)", "ndsf/s(q,f)"),
+        startswith=True,
+        atol=1e-6,
     )
 
 
@@ -228,4 +220,4 @@ def test_ssfsf(generate_benchmarks, tmp_path, dcsf):
     assert out_file.is_file()
     assert log_file.is_file()
 
-    compare_hdf5(out_file, result_file, "ssf_total", startswith=True, atol=1e-6)
+    compare_hdf5(out_file, result_file, "ssf/total", startswith=True, atol=1e-6)

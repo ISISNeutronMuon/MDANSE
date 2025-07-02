@@ -98,7 +98,7 @@ class PositionAutoCorrelationFunction(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time",
+            "pacf/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
@@ -107,10 +107,10 @@ class PositionAutoCorrelationFunction(IJob):
         # Will store the mean square displacement evolution.
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                f"pacf_{element}",
+                f"pacf/{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
-                axis="time",
+                axis="pacf/axes/time",
                 units="nm2",
                 main_result=True,
                 partial_result=True,
@@ -162,7 +162,7 @@ class PositionAutoCorrelationFunction(IJob):
         element = self.configuration["atom_selection"]["names"][index]
 
         # The MSD for element |symbol| is updated.
-        self._outputData[f"pacf_{element}"] += x
+        self._outputData[f"pacf/{element}"] += x
 
     def finalize(self):
         """
@@ -173,7 +173,7 @@ class PositionAutoCorrelationFunction(IJob):
         self.configuration["atom_selection"]["n_atoms_per_element"] = nAtomsPerElement
 
         for element, number in list(nAtomsPerElement.items()):
-            self._outputData[f"pacf_{element}"] /= number
+            self._outputData[f"pacf/{element}"] /= number
 
         selected_weights, all_weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(
@@ -183,28 +183,28 @@ class PositionAutoCorrelationFunction(IJob):
             self.configuration["atom_selection"].get_all_natoms(),
             1,
         )
-        assign_weights(self._outputData, weight_dict, "pacf_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "pacf/%s", self.labels)
 
         n_selected = sum(nAtomsPerElement.values())
         n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
         fact = n_selected / n_total
 
-        pacfTotal = weighted_sum(self._outputData, "pacf_%s", self.labels) / fact
+        pacfTotal = weighted_sum(self._outputData, "pacf/%s", self.labels) / fact
         self._outputData.add(
-            "pacf_total",
+            "pacf/total",
             "LineOutputVariable",
             pacfTotal,
-            axis="time",
+            axis="pacf/axes/time",
             units="nm2",
             main_result=True,
         )
-        self._outputData["pacf_total"].scaling_factor = fact
+        self._outputData["pacf/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "pacf",
             "LineOutputVariable",
-            axis="time",
+            axis="pacf/axes/time",
             units="nm2",
             main_result=True,
             partial_result=True,

@@ -107,7 +107,7 @@ class VelocityAutoCorrelationFunction(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time",
+            "vacf/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
@@ -115,20 +115,20 @@ class VelocityAutoCorrelationFunction(IJob):
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                f"vacf_{element}",
+                f"vacf/{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
-                axis="time",
+                axis="vacf/axes/time",
                 units="nm2/ps2",
                 main_result=True,
                 partial_result=True,
             )
 
         self._outputData.add(
-            "vacf_total",
+            "vacf/total",
             "LineOutputVariable",
             (self.configuration["frames"]["n_frames"],),
-            axis="time",
+            axis="vacf/axes/time",
             units="nm2/ps2",
             main_result=True,
         )
@@ -197,7 +197,7 @@ class VelocityAutoCorrelationFunction(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData[f"vacf_{element}"] += x
+        self._outputData[f"vacf/{element}"] += x
 
     def finalize(self):
         """
@@ -206,7 +206,7 @@ class VelocityAutoCorrelationFunction(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData[f"vacf_{element}"] /= number
+            self._outputData[f"vacf/{element}"] /= number
 
         selected_weights, all_weights = self.configuration["weights"].get_weights()
         weight_dict = get_weights(
@@ -216,21 +216,21 @@ class VelocityAutoCorrelationFunction(IJob):
             self.configuration["atom_selection"].get_all_natoms(),
             1,
         )
-        assign_weights(self._outputData, weight_dict, "vacf_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "vacf/%s", self.labels)
 
         n_selected = sum(nAtomsPerElement.values())
         n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
         fact = n_selected / n_total
 
-        vacfTotal = weighted_sum(self._outputData, "vacf_%s", self.labels)
-        self._outputData["vacf_total"][:] = vacfTotal / fact
-        self._outputData["vacf_total"].scaling_factor = fact
+        vacfTotal = weighted_sum(self._outputData, "vacf/%s", self.labels)
+        self._outputData["vacf/total"][:] = vacfTotal / fact
+        self._outputData["vacf/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "vacf",
             "LineOutputVariable",
-            axis="time",
+            axis="vacf/axes/time",
             units="nm2/ps2",
             main_result=True,
             partial_result=True,

@@ -69,6 +69,12 @@ class AreaPerMolecule(IJob):
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
+    _AXIS_MAP = {
+        "ab": (0, 1),
+        "bc": (1, 2),
+        "ac": (0, 2),
+    }
+
     def initialize(self):
         """
         Initialize the analysis (open trajectory, create output variables ...)
@@ -80,12 +86,7 @@ class AreaPerMolecule(IJob):
 
         # Extract the indices corresponding to the axis selection (a=0,b=1,c=2).
         axis_labels = self.configuration["axis"]["value"]
-        if axis_labels == "ab":
-            self._axisIndexes = [0, 1]
-        elif axis_labels == "bc":
-            self._axisIndexes = [1, 2]
-        else:
-            self._axisIndexes = [0, 2]
+        self._axisIndexes = self._AXIS_MAP[axis_labels]
 
         # The number of molecules that match the input name. Must be > 0.
         self._nMolecules = len(
@@ -99,17 +100,17 @@ class AreaPerMolecule(IJob):
             )
 
         self._outputData.add(
-            "time",
+            "apm/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["time"],
             units="ps",
         )
 
         self._outputData.add(
-            "area_per_molecule",
+            "apm/area_per_molecule",
             "LineOutputVariable",
             (self.configuration["frames"]["number"],),
-            axis="time",
+            axis="apm/axes/time",
             units="1/nm2",
             main_result=True,
         )
@@ -152,7 +153,7 @@ class AreaPerMolecule(IJob):
         Update the output each time a step is performed
         """
 
-        self._outputData["area_per_molecule"][index] = x
+        self._outputData["apm/area_per_molecule"][index] = x
 
     def finalize(self):
         """

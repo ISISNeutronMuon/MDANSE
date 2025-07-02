@@ -69,41 +69,41 @@ class Density(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time",
+            "density/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["time"],
             units="ps",
         )
 
         self._outputData.add(
-            "mass_density",
+            "density/mass/density",
             "LineOutputVariable",
             (self._n_frames,),
-            axis="time",
+            axis="density/axes/time",
             units="g/cm3",
             main_result=True,
         )
         self._outputData.add(
-            "avg_mass_density",
+            "density/mass/avg_density",
             "LineOutputVariable",
             (self._n_frames,),
-            axis="time",
+            axis="density/axes/time",
             units="g/cm3",
             main_result=True,
         )
 
         self._outputData.add(
-            "atomic_density",
+            "density/atomic/density",
             "LineOutputVariable",
             (self._n_frames,),
-            axis="time",
+            axis="density/axes/time",
             units="1/cm3",
         )
         self._outputData.add(
-            "avg_atomic_density",
+            "density/atomic/avg_density",
             "LineOutputVariable",
             (self._n_frames,),
-            axis="time",
+            axis="density/axes/time",
             units="1/cm3",
         )
 
@@ -159,21 +159,21 @@ class Density(IJob):
         @type x: any.
         """
 
-        self._outputData["atomic_density"][index] = x[0]
+        self._outputData["density/atomic/density"][index] = x[0]
 
-        self._outputData["mass_density"][index] = x[1]
+        self._outputData["density/mass/density"][index] = x[1]
 
     def finalize(self):
         """
         Finalize the job.
         """
 
-        norm = np.arange(1, self._outputData["atomic_density"].shape[0] + 1)
-        self._outputData["avg_atomic_density"][:] = (
-            np.cumsum(self._outputData["atomic_density"]) / norm
+        norm = np.arange(1, self._outputData["density/atomic/density"].shape[0] + 1)
+        self._outputData["density/atomic/avg_density"][:] = (
+            np.cumsum(self._outputData["density/atomic/density"]) / norm
         )
-        self._outputData["avg_mass_density"][:] = (
-            np.cumsum(self._outputData["mass_density"]) / norm
+        self._outputData["density/mass/avg_density"][:] = (
+            np.cumsum(self._outputData["density/mass/density"]) / norm
         )
 
         self._outputData.write(

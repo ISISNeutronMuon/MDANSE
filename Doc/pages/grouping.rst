@@ -45,7 +45,7 @@ so the summation run over all carbon atoms and the total is a weight sum
 of all partial components
 
 .. math::
-   :label: atompartial2
+   :label: atompartial4
 
     F_{\text{inc}}(\mathbf{q},t) = W_{\text{C}} F_{\text{inc}, \text{C}}(\mathbf{q},t) + W_{\text{H}} F_{\text{inc}, \text{H}}(\mathbf{q},t) + W_{\text{O}} F_{\text{inc}, \text{O}}(\mathbf{q},t),
 

@@ -132,42 +132,45 @@ class CurrentCorrelationFunction(IJob):
         self._nOmegas = self._instrResolution["n_romegas"]
 
         self._outputData.add(
-            "q",
+            "ccf/axes/q",
             "LineOutputVariable",
             np.array(self.configuration["q_vectors"]["shells"]),
             units="1/nm",
         )
 
         self._outputData.add(
-            "time",
+            "ccf/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
         )
+
         self._outputData.add(
-            "time_window",
+            "ccf/res/time_window",
             "LineOutputVariable",
             self._instrResolution["time_window_positive"],
             units="au",
         )
 
         self._outputData.add(
-            "omega",
+            "ccf/axes/omega",
             "LineOutputVariable",
             self._instrResolution["omega"],
             units="rad/ps",
         )
+
         self._outputData.add(
-            "romega",
+            "ccf/axes/romega",
             "LineOutputVariable",
             self._instrResolution["romega"],
             units="rad/ps",
         )
+
         self._outputData.add(
-            "omega_window",
+            "ccf/res/omega_window",
             "LineOutputVariable",
             self._instrResolution["omega_window"],
-            axis="omega",
+            axis="ccf/axes/omega",
             units="au",
         )
 
@@ -182,96 +185,96 @@ class CurrentCorrelationFunction(IJob):
 
         for pair_str, _ in self.labels:
             self._outputData.add(
-                f"j(q,t)_long_{pair_str}",
+                f"ccf/j(q,t)_long/{pair_str}",
                 "SurfaceOutputVariable",
                 (nQShells, self._nFrames),
-                axis="q|time",
+                axis="ccf/axes/q|ccf/axes/time",
                 units="au",
             )
             self._outputData.add(
-                f"j(q,t)_trans_{pair_str}",
+                f"ccf/j(q,t)_trans/{pair_str}",
                 "SurfaceOutputVariable",
                 (nQShells, self._nFrames),
-                axis="q|time",
+                axis="ccf/axes/q|ccf/axes/time",
                 units="au",
             )
             self._outputData.add(
-                f"J(q,f)_long_{pair_str}",
+                f"ccf/J(q,f)_long/{pair_str}",
                 "SurfaceOutputVariable",
                 (nQShells, self._nOmegas),
-                axis="q|romega",
+                axis="ccf/axes/q|ccf/axes/romega",
                 units="au",
                 main_result=True,
                 partial_result=True,
             )
             self._outputData.add(
-                f"J(q,f)_trans_{pair_str}",
+                f"ccf/J(q,f)_trans/{pair_str}",
                 "SurfaceOutputVariable",
                 (nQShells, self._nOmegas),
-                axis="q|romega",
+                axis="ccf/axes/q|ccf/axes/romega",
                 units="au",
                 main_result=True,
                 partial_result=True,
             )
             if self.add_ideal_results:
                 self._outputData.add(
-                    f"J(q,f)_long_ideal_{pair_str}",
+                    f"ccf/J(q,f)_long/ideal/{pair_str}",
                     "SurfaceOutputVariable",
                     (nQShells, self._nOmegas),
-                    axis="q|romega",
+                    axis="ccf/axes/q|ccf/axes/romega",
                     units="au",
                 )
                 self._outputData.add(
-                    f"J(q,f)_trans_ideal_{pair_str}",
+                    f"ccf/J(q,f)_trans/ideal/{pair_str}",
                     "SurfaceOutputVariable",
                     (nQShells, self._nOmegas),
-                    axis="q|romega",
+                    axis="ccf/axes/q|ccf/axes/romega",
                     units="au",
                 )
 
         self._outputData.add(
-            "j(q,t)_long_total",
+            "ccf/j(q,t)_long/total",
             "SurfaceOutputVariable",
             (nQShells, self._nFrames),
-            axis="q|time",
+            axis="ccf/axes/q|ccf/axes/time",
             units="au",
         )
         self._outputData.add(
-            "j(q,t)_trans_total",
+            "ccf/j(q,t)_trans/total",
             "SurfaceOutputVariable",
             (nQShells, self._nFrames),
-            axis="q|time",
+            axis="ccf/axes/q|ccf/axes/time",
             units="au",
         )
         self._outputData.add(
-            "J(q,f)_long_total",
+            "ccf/J(q,f)_long/total",
             "SurfaceOutputVariable",
             (nQShells, self._nOmegas),
-            axis="q|romega",
+            axis="ccf/axes/q|ccf/axes/romega",
             units="au",
             main_result=True,
         )
         self._outputData.add(
-            "J(q,f)_trans_total",
+            "ccf/J(q,f)_trans/total",
             "SurfaceOutputVariable",
             (nQShells, self._nOmegas),
-            axis="q|romega",
+            axis="ccf/axes/q|ccf/axes/romega",
             units="au",
             main_result=True,
         )
         if self.add_ideal_results:
             self._outputData.add(
-                "J(q,f)_long_ideal_total",
+                "ccf/J(q,f)_long/ideal/total",
                 "SurfaceOutputVariable",
                 (nQShells, self._nOmegas),
-                axis="q|romega",
+                axis="ccf/axes/q|ccf/axes/romega",
                 units="au",
             )
             self._outputData.add(
-                "J(q,f)_trans_ideal_total",
+                "ccf/J(q,f)_trans/ideal/total",
                 "SurfaceOutputVariable",
                 (nQShells, self._nOmegas),
-                axis="q|romega",
+                axis="ccf/axes/q|ccf/axes/romega",
                 units="au",
             )
 
@@ -466,10 +469,10 @@ class CurrentCorrelationFunction(IJob):
         """
         if x is None:
             for pair_str, _ in self.labels:
-                self._outputData[f"j(q,t)_long_{pair_str}"][index, :] = np.zeros(
+                self._outputData[f"ccf/j(q,t)_long/{pair_str}"][index, :] = np.zeros(
                     self._nFrames,
                 )
-                self._outputData[f"j(q,t)_trans_{pair_str}"][index, :] = np.zeros(
+                self._outputData[f"ccf/j(q,t)_trans/{pair_str}"][index, :] = np.zeros(
                     self._nFrames,
                 )
             return
@@ -484,7 +487,7 @@ class CurrentCorrelationFunction(IJob):
                 0,
                 0,
             ] / (3 * n_configs * rho_l[label_i].shape[2])
-            self._outputData[f"j(q,t)_long_{pair_str}"][index, :] += corr_l.real
+            self._outputData[f"ccf/j(q,t)_long/{pair_str}"][index, :] += corr_l.real
             corr_t = correlate(
                 rho_t[label_i], rho_t[label_j][:n_configs], mode="valid"
             )[
@@ -492,7 +495,7 @@ class CurrentCorrelationFunction(IJob):
                 0,
                 0,
             ] / (3 * n_configs * rho_t[label_i].shape[2])
-            self._outputData[f"j(q,t)_trans_{pair_str}"][index, :] += corr_t.real
+            self._outputData[f"ccf/j(q,t)_trans/{pair_str}"][index, :] += corr_t.real
 
     def finalize(self):
         """Normalize, Fourier transform and write the results out."""
@@ -504,36 +507,38 @@ class CurrentCorrelationFunction(IJob):
         for pair_str, (label_i, label_j) in self.labels:
             ni = nAtomsPerElement[label_i]
             nj = nAtomsPerElement[label_j]
-            self._outputData[f"j(q,t)_long_{pair_str}"][:] /= sqrt(ni * nj)
-            self._outputData[f"j(q,t)_trans_{pair_str}"][:] /= sqrt(ni * nj)
-            self._outputData[f"J(q,f)_long_{pair_str}"][:] = get_spectrum(
-                self._outputData[f"j(q,t)_long_{pair_str}"],
+            self._outputData[f"ccf/j(q,t)_long/{pair_str}"][:] /= sqrt(ni * nj)
+            self._outputData[f"ccf/j(q,t)_trans/{pair_str}"][:] /= sqrt(ni * nj)
+            self._outputData[f"ccf/J(q,f)_long/{pair_str}"][:] = get_spectrum(
+                self._outputData[f"ccf/j(q,t)_long/{pair_str}"],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 axis=1,
                 fft="rfft",
             )
-            self._outputData[f"J(q,f)_trans_{pair_str}"][:] = get_spectrum(
-                self._outputData[f"j(q,t)_trans_{pair_str}"],
+            self._outputData[f"ccf/J(q,f)_trans/{pair_str}"][:] = get_spectrum(
+                self._outputData[f"ccf/j(q,t)_trans/{pair_str}"],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 axis=1,
                 fft="rfft",
             )
             if self.add_ideal_results:
-                self._outputData[f"J(q,f)_long_ideal_{pair_str}"][:] = get_spectrum(
-                    self._outputData[f"j(q,t)_long_{pair_str}"],
+                self._outputData[f"ccf/J(q,f)_long/ideal/{pair_str}"][:] = get_spectrum(
+                    self._outputData[f"ccf/j(q,t)_long/{pair_str}"],
                     None,
                     self.configuration["instrument_resolution"]["time_step"],
                     axis=1,
                     fft="rfft",
                 )
-                self._outputData[f"J(q,f)_trans_ideal_{pair_str}"][:] = get_spectrum(
-                    self._outputData[f"j(q,t)_trans_{pair_str}"],
-                    None,
-                    self.configuration["instrument_resolution"]["time_step"],
-                    axis=1,
-                    fft="rfft",
+                self._outputData[f"ccf/J(q,f)_trans/ideal/{pair_str}"][:] = (
+                    get_spectrum(
+                        self._outputData[f"ccf/j(q,t)_trans/{pair_str}"],
+                        None,
+                        self.configuration["instrument_resolution"]["time_step"],
+                        axis=1,
+                        fft="rfft",
+                    )
                 )
 
         selected_weights, all_weights = self.configuration["weights"].get_weights()
@@ -545,21 +550,25 @@ class CurrentCorrelationFunction(IJob):
             2,
             conc_exp=0.5,
         )
-        assign_weights(self._outputData, weight_dict, "j(q,t)_long_%s", self.labels)
-        assign_weights(self._outputData, weight_dict, "j(q,t)_trans_%s", self.labels)
-        assign_weights(self._outputData, weight_dict, "J(q,f)_long_%s", self.labels)
-        assign_weights(self._outputData, weight_dict, "J(q,f)_trans_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "ccf/j(q,t)_long/%s", self.labels)
+        assign_weights(
+            self._outputData, weight_dict, "ccf/j(q,t)_trans/%s", self.labels
+        )
+        assign_weights(self._outputData, weight_dict, "ccf/J(q,f)_long/%s", self.labels)
+        assign_weights(
+            self._outputData, weight_dict, "ccf/J(q,f)_trans/%s", self.labels
+        )
         if self.add_ideal_results:
             assign_weights(
                 self._outputData,
                 weight_dict,
-                "J(q,f)_long_ideal_%s",
+                "ccf/J(q,f)_long/ideal/%s",
                 self.labels,
             )
             assign_weights(
                 self._outputData,
                 weight_dict,
-                "J(q,f)_trans_ideal_%s",
+                "ccf/J(q,f)_trans/ideal/%s",
                 self.labels,
             )
 
@@ -567,53 +576,57 @@ class CurrentCorrelationFunction(IJob):
         n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
         fact = n_selected / n_total
 
-        jqtLongTotal = weighted_sum(self._outputData, "j(q,t)_long_%s", self.labels)
-        self._outputData["j(q,t)_long_total"][:] = jqtLongTotal / fact
-        self._outputData["j(q,t)_long_total"].scaling_factor = fact
-        jqtTransTotal = weighted_sum(self._outputData, "j(q,t)_trans_%s", self.labels)
-        self._outputData["j(q,t)_trans_total"][:] = jqtTransTotal / fact
-        self._outputData["j(q,t)_trans_total"].scaling_factor = fact
+        jqtLongTotal = weighted_sum(self._outputData, "ccf/j(q,t)_long/%s", self.labels)
+        self._outputData["ccf/j(q,t)_long/total"][:] = jqtLongTotal
+        jqtTransTotal = weighted_sum(
+            self._outputData, "ccf/j(q,t)_trans/%s", self.labels
+        )
+        self._outputData["ccf/j(q,t)_trans/total"][:] = jqtTransTotal
+        self._outputData["ccf/j(q,t)_long/total"].scaling_factor = fact
+        self._outputData["ccf/j(q,t)_trans/total"].scaling_factor = fact
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            "j(q,t)_long",
+            "ccf/j(q,t)_long",
             "SurfaceOutputVariable",
             dim=2,
             conc_exp=0.5,
-            axis="q|time",
+            axis="ccf/axes/q|ccf/axes/time",
             units="au",
         )
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            "j(q,t)_trans",
+            "ccf/j(q,t)_trans",
             "SurfaceOutputVariable",
             dim=2,
             conc_exp=0.5,
-            axis="q|time",
+            axis="ccf/axes/q|ccf/axes/time",
             units="au",
         )
 
-        sqfLongTotal = weighted_sum(self._outputData, "J(q,f)_long_%s", self.labels)
-        self._outputData["J(q,f)_long_total"][:] = sqfLongTotal
-        sqfTransTotal = weighted_sum(self._outputData, "J(q,f)_trans_%s", self.labels)
-        self._outputData["J(q,f)_trans_total"][:] = sqfTransTotal
+        sqfLongTotal = weighted_sum(self._outputData, "ccf/J(q,f)_long/%s", self.labels)
+        self._outputData["ccf/J(q,f)_long/total"][:] = sqfLongTotal
+        sqfTransTotal = weighted_sum(
+            self._outputData, "ccf/J(q,f)_trans/%s", self.labels
+        )
+        self._outputData["ccf/J(q,f)_trans/total"][:] = sqfTransTotal
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            "J(q,f)_long",
+            "ccf/J(q,f)_long",
             "SurfaceOutputVariable",
             dim=2,
             conc_exp=0.5,
-            axis="q|romega",
+            axis="ccf/axes/q|ccf/axes/romega",
             units="au",
             main_result=True,
             partial_result=True,
         )
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            "J(q,f)_trans",
+            "ccf/J(q,f)_trans",
             "SurfaceOutputVariable",
             dim=2,
             conc_exp=0.5,
-            axis="q|romega",
+            axis="ccf/axes/q|ccf/axes/romega",
             units="au",
             main_result=True,
             partial_result=True,
@@ -621,31 +634,31 @@ class CurrentCorrelationFunction(IJob):
 
         if self.add_ideal_results:
             sqfLongTotal = weighted_sum(
-                self._outputData, "J(q,f)_long_ideal_%s", self.labels
+                self._outputData, "ccf/J(q,f)_long/ideal/%s", self.labels
             )
-            self._outputData["J(q,f)_long_ideal_total"][:] = sqfLongTotal / fact
-            self._outputData["J(q,f)_long_ideal_total"].scaling_factor = fact
+            self._outputData["ccf/J(q,f)_long/ideal/total"][:] = sqfLongTotal / fact
+            self._outputData["ccf/J(q,f)_long/ideal/total"].scaling_factor = fact
             sqfTransTotal = weighted_sum(
-                self._outputData, "J(q,f)_trans_ideal_%s", self.labels
+                self._outputData, "J(q,f)_trans/ideal/%s", self.labels
             )
-            self._outputData["J(q,f)_trans_ideal_total"][:] = sqfTransTotal / fact
-            self._outputData["J(q,f)_trans_ideal_total"].scaling_factor = fact
+            self._outputData["ccf/J(q,f)_trans/ideal/total"][:] = sqfTransTotal / fact
+            self._outputData["ccf/J(q,f)_trans/ideal/total"].scaling_factor = fact
             self.configuration["grouping_level"].add_grouped_totals(
                 self._outputData,
-                "J(q,f)_long_ideal",
+                "ccf/J(q,f)_long/ideal",
                 "SurfaceOutputVariable",
                 dim=2,
                 conc_exp=0.5,
-                axis="q|romega",
+                axis="ccf/axes/q|ccf/axes/romega",
                 units="au",
             )
             self.configuration["grouping_level"].add_grouped_totals(
                 self._outputData,
-                "J(q,f)_trans_ideal",
+                "ccf/J(q,f)_trans/ideal",
                 "SurfaceOutputVariable",
                 dim=2,
                 conc_exp=0.5,
-                axis="q|romega",
+                axis="ccf/axes/q|ccf/axes/romega",
                 units="au",
             )
 

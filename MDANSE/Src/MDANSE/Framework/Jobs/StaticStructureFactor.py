@@ -36,7 +36,7 @@ class StaticStructureFactor(DistanceHistogram):
 
     category = (
         "Analysis",
-        "Structure",
+        "Scattering",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
@@ -134,7 +134,7 @@ class StaticStructureFactor(DistanceHistogram):
         shellVolumes = shellSurfaces * self.configuration["r_values"]["step"]
 
         self._outputData.add(
-            "q",
+            "ssf/axes/q",
             "LineOutputVariable",
             self.configuration["q_values"]["value"],
             units="1/nm",
@@ -144,10 +144,10 @@ class StaticStructureFactor(DistanceHistogram):
 
         for label, _ in self.labels:
             self._outputData.add(
-                f"ssf_{label}",
+                f"ssf/{label}",
                 "LineOutputVariable",
                 (nq,),
-                axis="q",
+                axis="ssf/axes/q",
                 units="au",
                 main_result=True,
                 partial_result=True,
@@ -155,42 +155,46 @@ class StaticStructureFactor(DistanceHistogram):
         if self.intra:
             for label, _ in self.labels_intra:
                 self._outputData.add(
-                    f"ssf_intra_{label}",
+                    f"ssf/intra/{label}",
                     "LineOutputVariable",
                     (nq,),
-                    axis="q",
+                    axis="ssf/axes/q",
                     units="au",
                 )
             for label, _ in self.labels:
                 self._outputData.add(
-                    f"ssf_inter_{label}",
+                    f"ssf/inter/{label}",
                     "LineOutputVariable",
                     (nq,),
-                    axis="q",
+                    axis="ssf/axes/q",
                     units="au",
                 )
 
         self._outputData.add(
-            "ssf_total",
+            "ssf/total",
             "LineOutputVariable",
             (nq,),
-            axis="q",
+            axis="ssf/axes/q",
             units="au",
             main_result=True,
         )
         if self.intra:
             self._outputData.add(
-                "ssf_intra_total", "LineOutputVariable", (nq,), axis="q", units="au"
-            )
-            self._outputData.add(
-                "ssf_inter_total",
+                "ssf/intra/total",
                 "LineOutputVariable",
                 (nq,),
-                axis="q",
+                axis="ssf/axes/q",
+                units="au",
+            )
+            self._outputData.add(
+                "ssf/inter/total",
+                "LineOutputVariable",
+                (nq,),
+                axis="ssf/axes/q",
                 units="au",
             )
 
-        q = self._outputData["q"]
+        q = self._outputData["ssf/axes/q"]
         r = self.configuration["r_values"]["mid_points"]
 
         fact1 = 4.0 * np.pi * self.averageDensity
@@ -247,13 +251,13 @@ class StaticStructureFactor(DistanceHistogram):
                 pdfIntra = self.h_intra[idi, idj, :] / fact
                 pdfInter = pdfTotal - pdfIntra
                 yield (
-                    "ssf_inter",
+                    "ssf/inter",
                     False,
                     1.0
                     + fact1 * np.sum((r**2) * (pdfInter - 1.0) * sincqr, axis=1) * dr,
                 )
                 yield (
-                    "ssf_intra",
+                    "ssf/intra",
                     True,
                     fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr,
                 )
@@ -277,36 +281,37 @@ class StaticStructureFactor(DistanceHistogram):
 
         if self.intra:
             assign_weights(
-                self._outputData, weight_dict, "ssf_intra_%s", self.labels_intra
+                self._outputData, weight_dict, "ssf/intra/%s", self.labels_intra
             )
-            assign_weights(self._outputData, weight_dict, "ssf_inter_%s", self.labels)
-            assign_weights(self._outputData, weight_dict, "ssf_%s", self.labels)
-            ssfIntra = weighted_sum(self._outputData, "ssf_intra_%s", self.labels_intra)
-            self._outputData["ssf_intra_total"][:] = ssfIntra / fact
-            ssfInter = weighted_sum(self._outputData, "ssf_inter_%s", self.labels)
-            self._outputData["ssf_inter_total"][:] = ssfInter / fact
-            self._outputData["ssf_total"][:] = (ssfIntra + ssfInter) / fact
-            self._outputData["ssf_intra_total"].scaling_factor = fact
-            self._outputData["ssf_inter_total"].scaling_factor = fact
-            self._outputData["ssf_total"].scaling_factor = fact
-            for i in ["_intra", "_inter", ""]:
+            assign_weights(self._outputData, weight_dict, "ssf/inter/%s", self.labels)
+            assign_weights(self._outputData, weight_dict, "ssf/%s", self.labels)
+            ssfIntra = weighted_sum(self._outputData, "ssf/intra/%s", self.labels_intra)
+            self._outputData["ssf/intra/total"][:] = ssfIntra / fact
+            ssfInter = weighted_sum(self._outputData, "ssf/inter/%s", self.labels)
+            self._outputData["ssf/inter/total"][:] = ssfInter / fact
+            self._outputData["ssf/total"][:] = (ssfIntra + ssfInter) / fact
+            self._outputData["ssf/intra/total"].scaling_factor = fact
+            self._outputData["ssf/inter/total"].scaling_factor = fact
+            self._outputData["ssf/total"].scaling_factor = fact
+
+            for i in ("/intra", "/inter", ""):
                 self.configuration["grouping_level"].add_grouped_totals(
                     self._outputData,
                     f"ssf{i}",
                     "LineOutputVariable",
                     dim=2,
-                    intra=i == "_intra",
-                    axis="q",
+                    intra=i == "/intra",
+                    axis="ssf/axes/q",
                     units="au",
                     main_result=i == "",
                     partial_result=i == "",
                 )
         else:
-            assign_weights(self._outputData, weight_dict, "ssf_%s", self.labels)
-            self._outputData["ssf_total"][:] = (
-                weighted_sum(self._outputData, "ssf_%s", self.labels) / fact
+            assign_weights(self._outputData, weight_dict, "ssf/%s", self.labels)
+            self._outputData["ssf/total"][:] = (
+                weighted_sum(self._outputData, "ssf/%s", self.labels) / fact
             )
-            self._outputData["ssf_total"].scaling_factor = fact
+            self._outputData["ssf/total"].scaling_factor = fact
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

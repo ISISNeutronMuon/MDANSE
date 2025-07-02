@@ -125,102 +125,104 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         ]
 
         self._outputData.add(
-            "q",
+            "gdisf/axes/q",
             "LineOutputVariable",
             self.configuration["q_shells"]["value"],
             units="1/nm",
         )
 
-        self._outputData.add("q2", "LineOutputVariable", self._kSquare, units="1/nm2")
+        self._outputData.add(
+            "gdisf/axes/q2", "LineOutputVariable", self._kSquare, units="1/nm2"
+        )
 
         self._outputData.add(
-            "time",
+            "gdisf/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
         )
         self._outputData.add(
-            "time_window",
+            "gdisf/res/time_window",
             "LineOutputVariable",
             self._instrResolution["time_window"],
             units="au",
         )
 
         self._outputData.add(
-            "omega",
+            "gdisf/axes/omega",
             "LineOutputVariable",
             self.configuration["instrument_resolution"]["omega"],
             units="rad/ps",
         )
         self._outputData.add(
-            "omega_window",
+            "gdisf/res/omega_window",
             "LineOutputVariable",
             self._instrResolution["omega_window"],
-            axis="omega",
+            axis="gdisf/axes/omega",
             units="au",
         )
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                f"f(q,t)_{element}",
+                f"gdisf/f(q,t)/{element}",
                 "SurfaceOutputVariable",
                 (self._nQShells, self._nFrames),
-                axis="q|time",
+                axis="gdisf/axes/q|gdisf/axes/time",
                 units="au",
             )
             self._outputData.add(
-                f"s(q,f)_{element}",
+                f"gdisf/s(q,f)/{element}",
                 "SurfaceOutputVariable",
                 (self._nQShells, self._nOmegas),
-                axis="q|omega",
+                axis="gdisf/axes/q|gdisf/axes/omega",
                 units="au",
                 main_result=True,
                 partial_result=True,
             )
             self._outputData.add(
-                f"msd_{element}",
+                f"msd/{element}",
                 "LineOutputVariable",
                 (self._nFrames,),
-                axis="time",
+                axis="gdisf/axes/time",
                 units="nm2",
             )
             if self.add_ideal_results:
                 self._outputData.add(
-                    f"s(q,f)_ideal_{element}",
+                    f"gdisf/s(q,f)/ideal/{element}",
                     "SurfaceOutputVariable",
                     (self._nQShells, self._nOmegas),
-                    axis="q|omega",
+                    axis="gdisf/axes/q|gdisf/axes/omega",
                     units="au",
                 )
 
         self._outputData.add(
-            "f(q,t)_total",
+            "gdisf/f(q,t)/total",
             "SurfaceOutputVariable",
             (self._nQShells, self._nFrames),
-            axis="q|time",
+            axis="gdisf/axes/q|gdisf/axes/time",
             units="au",
         )
         self._outputData.add(
-            "s(q,f)_total",
+            "gdisf/s(q,f)/total",
             "SurfaceOutputVariable",
             (self._nQShells, self._nOmegas),
-            axis="q|omega",
+            axis="gdisf/axes/q|gdisf/axes/omega",
             units="au",
             main_result=True,
         )
         self._outputData.add(
-            "msd_total",
+            "msd/total",
             "LineOutputVariable",
             (self._nFrames,),
-            axis="time",
+            axis="gdisf/axes/time",
             units="nm2",
         )
         if self.add_ideal_results:
             self._outputData.add(
-                "s(q,f)_ideal_total",
+                "gdisf/s(q,f)/ideal/total",
                 "SurfaceOutputVariable",
                 (self._nQShells, self._nOmegas),
-                axis="q|omega",
+                axis="gdisf/axes/q|gdisf/axes/omega",
                 units="au",
             )
 
@@ -279,8 +281,8 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         """
         element = self.configuration["atom_selection"]["names"][index]
         atomicSF, msd = x
-        self._outputData[f"f(q,t)_{element}"] += atomicSF
-        self._outputData[f"msd_{element}"] += msd
+        self._outputData[f"gdisf/f(q,t)/{element}"] += atomicSF
+        self._outputData[f"msd/{element}"] += msd
 
     def finalize(self):
         """
@@ -288,17 +290,17 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         """
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData[f"f(q,t)_{element}"][:] /= number
-            self._outputData[f"s(q,f)_{element}"][:] = get_spectrum(
-                self._outputData[f"f(q,t)_{element}"],
+            self._outputData[f"gdisf/f(q,t)/{element}"][:] /= number
+            self._outputData[f"gdisf/s(q,f)/{element}"][:] = get_spectrum(
+                self._outputData[f"gdisf/f(q,t)/{element}"],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 axis=1,
             )
-            self._outputData[f"msd_{element}"][:] /= number
+            self._outputData[f"msd/{element}"][:] /= number
             if self.add_ideal_results:
-                self._outputData[f"s(q,f)_ideal_{element}"][:] = get_spectrum(
-                    self._outputData[f"f(q,t)_{element}"],
+                self._outputData[f"gdisf/s(q,f)/ideal/{element}"][:] = get_spectrum(
+                    self._outputData[f"gdisf/f(q,t)/{element}"],
                     None,
                     self.configuration["instrument_resolution"]["time_step"],
                     axis=1,
@@ -315,54 +317,55 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             self.configuration["atom_selection"].get_all_natoms(),
             1,
         )
-        assign_weights(self._outputData, weight_dict, "f(q,t)_%s", self.labels)
-        assign_weights(self._outputData, weight_dict, "s(q,f)_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "gdisf/f(q,t)/%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "gdisf/s(q,f)/%s", self.labels)
         if self.add_ideal_results:
             assign_weights(
-                self._outputData, weight_dict, "s(q,f)_ideal_%s", self.labels
+                self._outputData, weight_dict, "gdisf/s(q,f)/ideal/%s", self.labels
             )
 
         n_selected = sum(nAtomsPerElement.values())
         n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
         fact = n_selected / n_total
 
-        self._outputData["f(q,t)_total"][:] = (
-            weighted_sum(self._outputData, "f(q,t)_%s", self.labels) / fact
-        )
-        self._outputData["f(q,t)_total"].scaling_factor = fact
-        self._outputData["s(q,f)_total"][:] = (
-            weighted_sum(self._outputData, "s(q,f)_%s", self.labels) / fact
-        )
-        self._outputData["s(q,f)_total"].scaling_factor = fact
+        self._outputData["gdisf/f(q,t)/total"][:] = (
+            weighted_sum(self._outputData, "gdisf/f(q,t)/%s", self.labels)
+        ) / fact
+        self._outputData["gdisf/s(q,f)/total"][:] = (
+            weighted_sum(self._outputData, "gdisf/s(q,f)/%s", self.labels)
+        ) / fact
+        self._outputData["gdisf/f(q,t)/total"].scaling_factor = fact
+        self._outputData["gdisf/s(q,f)/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            "f(q,t)",
+            "gdisf/f(q,t)",
             "SurfaceOutputVariable",
-            axis="q|time",
+            axis="gdisf/axes/q|gdisf/axes/time",
             units="au",
         )
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            "s(q,f)",
+            "gdisf/s(q,f)",
             "SurfaceOutputVariable",
-            axis="q|omega",
+            axis="gdisf/axes/q|gdisf/axes/omega",
             units="au",
             main_result=True,
             partial_result=True,
         )
 
         if self.add_ideal_results:
-            self._outputData["s(q,f)_ideal_total"][:] = (
-                weighted_sum(self._outputData, "s(q,f)_ideal_%s", self.labels) / fact
+            self._outputData["gdisf/s(q,f)/ideal/total"][:] = (
+                weighted_sum(self._outputData, "gdisf/s(q,f)/ideal/%s", self.labels)
+                / fact
             )
-            self._outputData["s(q,f)_ideal_total"].scaling_factor = fact
+            self._outputData["gdisf/s(q,f)/ideal/total"].scaling_factor = fact
 
             self.configuration["grouping_level"].add_grouped_totals(
                 self._outputData,
-                "s(q,f)_ideal",
+                "gdisf/s(q,f)/ideal",
                 "SurfaceOutputVariable",
-                axis="q|omega",
+                axis="gdisf/axes/q|gdisf/axes/omega",
                 units="au",
             )
 
@@ -378,17 +381,19 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             self.configuration["atom_selection"].get_all_natoms(),
             1,
         )
-        assign_weights(self._outputData, weight_dict, "msd_%s", self.labels)
-        self._outputData["msd_total"][:] = (
-            weighted_sum(self._outputData, "msd_%s", self.labels) / fact
+
+        assign_weights(self._outputData, weight_dict, "msd/%s", self.labels)
+        self._outputData["msd/total"][:] = (
+            weighted_sum(self._outputData, "msd/%s", self.labels) / fact
         )
-        self._outputData["msd_total"].scaling_factor = fact
+
+        self._outputData["msd/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "msd",
             "LineOutputVariable",
-            axis="time",
+            axis="gdisf/axes/time",
             units="nm2",
         )
 

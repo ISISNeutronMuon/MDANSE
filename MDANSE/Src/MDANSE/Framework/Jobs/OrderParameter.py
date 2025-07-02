@@ -113,14 +113,14 @@ class OrderParameter(IJob):
         self.numberOfSteps = self._nAxis
 
         self._outputData.add(
-            "time",
+            "op/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["time"],
             units="ps",
         )
 
         self._outputData.add(
-            "axis_index",
+            "op/axes/axis_index",
             "LineOutputVariable",
             np.arange(self.configuration["axis_selection"]["n_values"]),
             units="au",
@@ -140,40 +140,44 @@ class OrderParameter(IJob):
             self._doRotation = True
 
         self._outputData.add(
-            "p1",
+            "op/p1",
             "LineOutputVariable",
             (self._nFrames,),
-            axis="time",
+            axis="op/axes/time",
             units="au",
             main_result=True,
         )
         self._outputData.add(
-            "p2",
+            "op/p2",
             "LineOutputVariable",
             (self._nFrames,),
-            axis="time",
+            axis="op/axes/time",
             units="au",
             main_result=True,
         )
         self._outputData.add(
-            "s2", "LineOutputVariable", (self._nAxis,), axis="time", units="au"
+            "op/s2",
+            "LineOutputVariable",
+            (self._nAxis,),
+            axis="op/axes/time",
+            units="au",
         )
 
         if self.configuration["per_axis"]["value"]:
             self._outputData.add(
-                "p1_per_axis",
+                "op/p1/per_axis",
                 "SurfaceOutputVariable",
                 (self._nAxis, self._nFrames),
-                axis="axis_index|time",
+                axis="op/axes/axis_index|op/axes/time",
                 units="au",
                 main_result=True,
                 partial_result=True,
             )
             self._outputData.add(
-                "p2_per_axis",
+                "op/p2/per_axis",
                 "SurfaceOutputVariable",
                 (self._nAxis, self._nFrames),
-                axis="axis_index|time",
+                axis="op/axes/axis_index|op/axes/time",
                 units="au",
                 main_result=True,
                 partial_result=True,
@@ -264,21 +268,21 @@ class OrderParameter(IJob):
 
         p1, p2, s2 = x
 
-        self._outputData["p1"] += p1
-        self._outputData["p2"] += p2
-        self._outputData["s2"][index] = s2
+        self._outputData["op/p1"] += p1
+        self._outputData["op/p2"] += p2
+        self._outputData["op/s2"][index] = s2
 
         if self.configuration["per_axis"]["value"]:
-            self._outputData["p1_per_axis"][index, :] = p1
-            self._outputData["p2_per_axis"][index, :] = p2
+            self._outputData["op/p1/per_axis"][index, :] = p1
+            self._outputData["op/p2/per_axis"][index, :] = p2
 
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
-        self._outputData["p1"] /= self._nAxis
-        self._outputData["p2"] /= self._nAxis
+        self._outputData["op/p1"] /= self._nAxis
+        self._outputData["op/p2"] /= self._nAxis
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

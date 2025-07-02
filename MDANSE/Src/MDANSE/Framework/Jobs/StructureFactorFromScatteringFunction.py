@@ -79,26 +79,31 @@ class StructureFactorFromScatteringFunction(IJob):
 
         inputFile = self.configuration["dcsf_input_file"]["instance"]
 
-        self._outputData.add("q", "LineOutputVariable", inputFile["q"][:], units="1/nm")
-        nq = len(inputFile["q"][:])
+        self._outputData.add(
+            "ssf/axes/q",
+            "LineOutputVariable",
+            inputFile["dcsf/axes/q"][:],
+            units="1/nm",
+        )
+        nq = len(inputFile["dcsf/axes/q"][:])
         self.labels = self.configuration["grouping_level"].pair_labels()
 
         for pair_str, _ in self.labels:
             self._outputData.add(
-                f"ssf_{pair_str}",
+                f"ssf/{pair_str}",
                 "LineOutputVariable",
                 (nq,),
-                axis="q",
+                axis="ssf/axes/q",
                 units="au",
                 main_result=True,
                 partial_result=True,
             )
 
         self._outputData.add(
-            "ssf_total",
+            "ssf/total",
             "LineOutputVariable",
             (nq,),
-            axis="q",
+            axis="ssf/axes/q",
             units="au",
             main_result=True,
         )
@@ -136,33 +141,33 @@ class StructureFactorFromScatteringFunction(IJob):
 
         for pair_str, (label_i, label_j) in self.labels:
             fqt = self.configuration["dcsf_input_file"]["instance"][
-                f"f(q,t)_{pair_str}"
+                f"dcsf/f(q,t)/{pair_str}"
             ]
             sqrt_cij = sqrt(
                 nAtomsPerElement[label_i] * nAtomsPerElement[label_j] * norm_natoms**2
             )
             delta_ij = 1 if label_i == label_j else 0
-            self._outputData[f"ssf_{pair_str}"][:] = (
+            self._outputData[f"ssf/{pair_str}"][:] = (
                 1 + (fqt[:, 0] - delta_ij) / sqrt_cij
             )
-            self._outputData[f"ssf_{pair_str}"].scaling_factor = (
+            self._outputData[f"ssf/{pair_str}"].scaling_factor = (
                 fqt.attrs["scaling_factor"] * sqrt_cij
             )
 
-            self._outputData["ssf_total"][:] += (
-                self._outputData[f"ssf_{pair_str}"][:]
-                * self._outputData[f"ssf_{pair_str}"].scaling_factor
+            self._outputData["ssf/total"][:] += (
+                self._outputData[f"ssf/{pair_str}"][:]
+                * self._outputData[f"ssf/{pair_str}"].scaling_factor
                 / fact
             )
 
-        self._outputData["ssf_total"].scaling_factor = fact
+        self._outputData["ssf/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "ssf",
             "LineOutputVariable",
             dim=2,
-            axis="q",
+            axis="ssf/axes/q",
             units="au",
             main_result=True,
             partial_result=True,

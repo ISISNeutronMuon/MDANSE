@@ -113,7 +113,7 @@ class ElasticIncoherentStructureFactor(IJob):
         ]
 
         self._outputData.add(
-            "q",
+            "eisf/axes/q",
             "LineOutputVariable",
             self.configuration["q_vectors"]["shells"],
             units="1/nm",
@@ -121,20 +121,20 @@ class ElasticIncoherentStructureFactor(IJob):
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                f"eisf_{element}",
+                f"eisf/{element}",
                 "LineOutputVariable",
                 (self._nQShells,),
-                axis="q",
+                axis="eisf/axes/q",
                 units="au",
                 main_result=True,
                 partial_result=True,
             )
 
         self._outputData.add(
-            "eisf_total",
+            "eisf/total",
             "LineOutputVariable",
             (self._nQShells,),
-            axis="q",
+            axis="eisf/axes/q",
             units="au",
             main_result=True,
         )
@@ -192,7 +192,7 @@ class ElasticIncoherentStructureFactor(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData[f"eisf_{element}"] += x
+        self._outputData[f"eisf/{element}"] += x
 
     def finalize(self):
         """
@@ -204,8 +204,8 @@ class ElasticIncoherentStructureFactor(IJob):
         )
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        for element, number in list(nAtomsPerElement.items()):
-            self._outputData[f"eisf_{element}"][:] /= number
+        for element, number in nAtomsPerElement.items():
+            self._outputData[f"eisf/{element}"][:] /= number
 
         selected_weights, all_weights = self.configuration["weights"].get_weights()
         for weights in selected_weights, all_weights:
@@ -218,22 +218,22 @@ class ElasticIncoherentStructureFactor(IJob):
             self.configuration["atom_selection"].get_all_natoms(),
             1,
         )
-        assign_weights(self._outputData, weight_dict, "eisf_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "eisf/%s", self.labels)
 
         n_selected = sum(nAtomsPerElement.values())
         n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
         fact = n_selected / n_total
 
-        self._outputData["eisf_total"][:] = (
-            weighted_sum(self._outputData, "eisf_%s", self.labels) / fact
+        self._outputData["eisf/total"][:] = (
+            weighted_sum(self._outputData, "eisf/%s", self.labels) / fact
         )
-        self._outputData["eisf_total"].scaling_factor = fact
+        self._outputData["eisf/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "eisf",
             "LineOutputVariable",
-            axis="q",
+            axis="eisf/axes/q",
             units="au",
             main_result=True,
             partial_result=True,

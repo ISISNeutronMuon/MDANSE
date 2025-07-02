@@ -54,61 +54,60 @@ class PairDistributionFunction(DistanceHistogram):
         """Perform the last steps of the analysis and write out results."""
         npoints = len(self.configuration["r_values"]["mid_points"])
 
-        self._outputData.add(
-            "r",
-            "LineOutputVariable",
-            self.configuration["r_values"]["mid_points"],
-            units="nm",
-        )
-
-        for i in ["pdf", "rdf", "tcf"]:
+        for i in ("pdf", "rdf", "tcf"):
+            self._outputData.add(
+                f"{i}/axes/r",
+                "LineOutputVariable",
+                self.configuration["r_values"]["mid_points"],
+                units="nm",
+            )
             for label, _ in self.labels:
                 self._outputData.add(
-                    f"{i}_{label}",
+                    f"{i}/{label}",
                     "LineOutputVariable",
                     (npoints,),
-                    axis="r",
+                    axis=f"{i}/axes/r",
                     units="au",
                     main_result=i == "pdf",
                     partial_result=i == "pdf",
                 )
             self._outputData.add(
-                f"{i}_total",
+                f"{i}/total",
                 "LineOutputVariable",
                 (npoints,),
-                axis="r",
+                axis=f"{i}/axes/r",
                 units="au",
                 main_result=i == "pdf",
             )
             if self.intra:
                 for label, _ in self.labels_intra:
                     self._outputData.add(
-                        f"{i}_intra_{label}",
+                        f"{i}/intra/{label}",
                         "LineOutputVariable",
                         (npoints,),
-                        axis="r",
+                        axis=f"{i}/axes/r",
                         units="au",
                     )
                 for label, _ in self.labels:
                     self._outputData.add(
-                        f"{i}_inter_{label}",
+                        f"{i}/inter/{label}",
                         "LineOutputVariable",
                         (npoints,),
-                        axis="r",
+                        axis=f"{i}/axes/r",
                         units="au",
                     )
                 self._outputData.add(
-                    f"{i}_intra_total",
+                    f"{i}/intra/total",
                     "LineOutputVariable",
                     (npoints,),
-                    axis="r",
+                    axis=f"{i}/axes/r",
                     units="au",
                 )
                 self._outputData.add(
-                    f"{i}_inter_total",
+                    f"{i}/inter/total",
                     "LineOutputVariable",
                     (npoints,),
-                    axis="r",
+                    axis=f"{i}/axes/r",
                     units="au",
                 )
 
@@ -163,27 +162,27 @@ class PairDistributionFunction(DistanceHistogram):
             fact = 2 * nij * nFrames * shellVolumes
 
             for i, pdf in zip(
-                ["", "_intra", "_inter"],
-                [
+                ("", "/intra", "/inter"),
+                (
                     pdf_total := self.h_total[idi, idj, :] / fact,
                     pdf_intra := self.h_intra[idi, idj, :] / fact
                     if self.intra
                     else None,
                     pdf_total - pdf_intra if self.intra else None,
-                ],
+                ),
             ):
-                yield f"pdf{i}", i == "_intra", pdf
+                yield f"pdf{i}", i == "/intra", pdf
                 yield (
                     f"rdf{i}",
-                    i == "_intra",
+                    i == "/intra",
                     shellSurfaces * self.averageDensity * pdf,
                 )
                 yield (
                     f"tcf{i}",
-                    i == "_intra",
+                    i == "/intra",
                     densityFactor
                     * self.averageDensity
-                    * (pdf if i == "_intra" else pdf - 1),
+                    * (pdf if i == "/intra" else pdf - 1),
                 )
                 if self.indices_intra is None:
                     break
@@ -206,51 +205,48 @@ class PairDistributionFunction(DistanceHistogram):
         factor = (n_selected / n_total) ** 2
 
         if self.intra:
-            for i in ["_intra", "_inter", ""]:
-                if i == "_intra":
+            for i in ("/intra", "/inter", ""):
+                if i == "/intra":
                     labels = self.labels_intra
                 else:
                     labels = self.labels
-                assign_weights(self._outputData, weight_dict, f"pdf{i}_%s", labels)
-                pdf = weighted_sum(self._outputData, f"pdf{i}_%s", labels)
-                self._outputData[f"pdf{i}_total"][:] = pdf / factor
-                self._outputData[f"rdf{i}_total"][:] = (
+                assign_weights(self._outputData, weight_dict, f"pdf{i}/%s", labels)
+                pdf = weighted_sum(self._outputData, f"pdf{i}/%s", labels)
+                self._outputData[f"pdf{i}/total"][:] = pdf / factor
+                self._outputData[f"rdf{i}/total"][:] = (
                     shellSurfaces * self.averageDensity * pdf / factor
                 )
-                self._outputData[f"tcf{i}_total"][:] = (
+                self._outputData[f"tcf{i}/total"][:] = (
                     densityFactor
                     * self.averageDensity
-                    * (pdf / factor if i == "_intra" else (pdf - factor) / factor)
+                    * (pdf / factor if i == "/intra" else (pdf - factor) / factor)
                 )
-                self._outputData[f"pdf{i}_total"].scaling_factor = factor
-                self._outputData[f"rdf{i}_total"].scaling_factor = factor
-                self._outputData[f"tcf{i}_total"].scaling_factor = factor
-
-                for j in ["pdf", "rdf", "tcf"]:
+                for j in ("pdf", "rdf", "tcf"):
+                    self._outputData[f"{j}{i}/total"].scaling_factor = factor
                     self.configuration["grouping_level"].add_grouped_totals(
                         self._outputData,
                         f"{j}{i}",
                         "LineOutputVariable",
                         dim=2,
-                        intra=i == "_intra",
-                        axis="r",
+                        intra=i == "/intra",
+                        axis=f"{j}/axes/r",
                         units="au",
                         main_result=j == "pdf" and i == "",
                         partial_result=j == "pdf" and i == "",
                     )
         else:
-            assign_weights(self._outputData, weight_dict, "pdf_%s", self.labels)
-            pdf = weighted_sum(self._outputData, "pdf_%s", self.labels)
-            self._outputData["pdf_total"][:] = pdf / factor
-            self._outputData["rdf_total"][:] = (
+            assign_weights(self._outputData, weight_dict, "pdf/%s", self.labels)
+            pdf = weighted_sum(self._outputData, "pdf/%s", self.labels)
+            self._outputData["pdf/total"][:] = pdf / factor
+            self._outputData["rdf/total"][:] = (
                 shellSurfaces * self.averageDensity * pdf / factor
             )
-            self._outputData["tcf_total"][:] = (
+            self._outputData["tcf/total"][:] = (
                 densityFactor * self.averageDensity * (pdf - factor) / factor
             )
-            self._outputData["pdf_total"].scaling_factor = factor
-            self._outputData["rdf_total"].scaling_factor = factor
-            self._outputData["tcf_total"].scaling_factor = factor
+            self._outputData["pdf/total"].scaling_factor = factor
+            self._outputData["rdf/total"].scaling_factor = factor
+            self._outputData["tcf/total"].scaling_factor = factor
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

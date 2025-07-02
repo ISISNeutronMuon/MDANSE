@@ -115,7 +115,7 @@ def test_dcsf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
     compare_hdf5(
         out_file,
         result_file,
-        ("f(q,t)", "s(q,f)"),
+        ("dcsf/f(q,t)", "dcsf/s(q,f)"),
         startswith=True,
         scale_result=True,
         scale_benchmark=True,
@@ -163,7 +163,7 @@ def test_ccf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
     compare_hdf5(
         out_file,
         result_file,
-        ("J(q,f)", "j(q,t)"),
+        ("ccf/J(q,f)", "ccf/j(q,t)"),
         startswith=True,
         scale_result=True,
         scale_benchmark=True,
@@ -234,7 +234,7 @@ def test_disf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
     compare_hdf5(
         out_file,
         result_file,
-        ("f(q,t)", "s(q,f)"),
+        ("disf/f(q,t)", "disf/s(q,f)"),
         startswith=True,
         scale_result=True,
         scale_benchmark=True,
@@ -280,7 +280,7 @@ def test_eisf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
     compare_hdf5(
         out_file,
         result_file,
-        ("eisf",),
+        ("eisf/",),
         startswith=True,
         scale_result=True,
         scale_benchmark=True,
@@ -324,7 +324,12 @@ def test_gdisf(generate_benchmarks, tmp_path, traj_info):
     assert log_file.is_file()
     assert text_file.is_file()
 
-    compare_hdf5(out_file, result_file, ("f(q,t)", "s(q,f)", "msd"), startswith=True)
+    compare_hdf5(
+        out_file,
+        result_file,
+        ("gdisf/f(q,t)", "gdisf/s(q,f)", "msd/msd"),
+        startswith=True,
+    )
 
 
 def test_ndtsf(generate_benchmarks, tmp_path, disf, dcsf, qvector_grid):
@@ -357,7 +362,11 @@ def test_ndtsf(generate_benchmarks, tmp_path, disf, dcsf, qvector_grid):
     assert text_file.is_file()
 
     compare_hdf5(
-        out_file, result_file, ("f(q,t)", "s(q,f)"), startswith=True, atol=1e-6
+        out_file,
+        result_file,
+        ("ndsf/f(q,t)", "ndsf/s(q,f)"),
+        startswith=True,
+        atol=1e-6,
     )
 
 
@@ -387,7 +396,7 @@ def test_ssfsf(generate_benchmarks, tmp_path, dcsf):
     assert log_file.is_file()
     assert text_file.is_file()
 
-    compare_hdf5(out_file, result_file, ("ssf_total"), startswith=True, atol=1e-6)
+    compare_hdf5(out_file, result_file, ("ssf/total"), startswith=True, atol=1e-6)
 
 
 @pytest.mark.parametrize(
@@ -429,6 +438,6 @@ def test_sldp(generate_benchmarks, tmp_path, traj_info):
     compare_hdf5(
         out_file,
         result_file,
-        ("sldp", "sldp_incoherent", "sldp_total", "dp_total"),
+        ("sldp/sldp", "sldp/incoherent", "sldp/total", "dp/number/total"),
         startswith=True,
     )

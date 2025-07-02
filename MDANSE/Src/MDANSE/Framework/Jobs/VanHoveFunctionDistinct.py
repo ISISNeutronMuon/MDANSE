@@ -429,13 +429,13 @@ class VanHoveFunctionDistinct(IJob):
             raise ValueError(DETAILED_CELL_MESSAGE)
 
         self._outputData.add(
-            "r",
+            "vh/axes/r",
             "LineOutputVariable",
             self.configuration["r_values"]["mid_points"],
             units="nm",
         )
         self._outputData.add(
-            "time",
+            "vh/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
@@ -443,51 +443,51 @@ class VanHoveFunctionDistinct(IJob):
 
         for label, _ in self.labels:
             self._outputData.add(
-                f"g(r,t)_{label}",
+                f"vh/g(r,t)/{label}",
                 "SurfaceOutputVariable",
                 (self.n_mid_points, self.numberOfSteps),
-                axis="r|time",
+                axis="vh/axes/r|vh/axes/time",
                 units="au",
                 main_result=True,
                 partial_result=True,
             )
         self._outputData.add(
-            "g(r,t)_total",
+            "vh/g(r,t)/total",
             "SurfaceOutputVariable",
             (self.n_mid_points, self.numberOfSteps),
-            axis="r|time",
+            axis="vh/axes/r|vh/axes/time",
             units="au",
             main_result=True,
         )
         if self.intra:
             for label, _ in self.labels_intra:
                 self._outputData.add(
-                    f"g(r,t)_intra_{label}",
+                    f"vh/g(r,t)/intra/{label}",
                     "SurfaceOutputVariable",
                     (self.n_mid_points, self.numberOfSteps),
-                    axis="r|time",
+                    axis="vh/axes/r|vh/axes/time",
                     units="au",
                 )
             for label, _ in self.labels:
                 self._outputData.add(
-                    f"g(r,t)_inter_{label}",
+                    f"vh/g(r,t)/inter/{label}",
                     "SurfaceOutputVariable",
                     (self.n_mid_points, self.numberOfSteps),
-                    axis="r|time",
+                    axis="vh/axes/r|vh/axes/time",
                     units="au",
                 )
             self._outputData.add(
-                "g(r,t)_intra_total",
+                "vh/g(r,t)/intra/total",
                 "SurfaceOutputVariable",
                 (self.n_mid_points, self.numberOfSteps),
-                axis="r|time",
+                axis="vh/axes/r|vh/axes/time",
                 units="au",
             )
             self._outputData.add(
-                "g(r,t)_inter_total",
+                "vh/g(r,t)/inter/total",
                 "SurfaceOutputVariable",
                 (self.n_mid_points, self.numberOfSteps),
-                axis="r|time",
+                axis="vh/axes/r|vh/axes/time",
                 units="au",
             )
 
@@ -677,13 +677,13 @@ class VanHoveFunctionDistinct(IJob):
             fact = 2 * nij * self.n_configs * self.shell_volumes
 
             van_hove_total = self.h_total[idi, idj, ...] / fact[:, np.newaxis]
-            yield "g(r,t)", False, van_hove_total
+            yield "vh/g(r,t)", False, van_hove_total
 
             if self.intra:
                 van_hove_intra = self.h_intra[idi, idj, ...] / fact[:, np.newaxis]
                 van_hove_inter = van_hove_total - van_hove_intra
-                yield "g(r,t)_inter", False, van_hove_inter
-                yield "g(r,t)_intra", True, van_hove_intra
+                yield "vh/g(r,t)/inter", False, van_hove_inter
+                yield "vh/g(r,t)/intra", True, van_hove_intra
 
         self.configuration["grouping_level"].update_pair_results(
             calc_func, self._outputData
@@ -704,31 +704,33 @@ class VanHoveFunctionDistinct(IJob):
         fact = (n_selected / n_total) ** 2
 
         if self.intra:
-            for i in ["_intra", "_inter", ""]:
-                if i == "_intra":
+            for i in ["/intra", "/inter", ""]:
+                if i == "/intra":
                     labels = self.labels_intra
                 else:
                     labels = self.labels
-                assign_weights(self._outputData, weight_dict, f"g(r,t){i}_%s", labels)
-                vhs = weighted_sum(self._outputData, f"g(r,t){i}_%s", labels)
-                self._outputData[f"g(r,t){i}_total"][...] = vhs / fact
-                self._outputData[f"g(r,t){i}_total"].scaling_factor = fact
+                assign_weights(
+                    self._outputData, weight_dict, f"vh/g(r,t){i}/%s", labels
+                )
+                vhs = weighted_sum(self._outputData, f"vh/g(r,t){i}/%s", labels)
+                self._outputData[f"vh/g(r,t){i}/total"][...] = vhs / fact
+                self._outputData[f"vh/g(r,t){i}/total"].scaling_factor = fact
                 self.configuration["grouping_level"].add_grouped_totals(
                     self._outputData,
-                    f"g(r,t){i}",
+                    f"vh/g(r,t){i}",
                     "SurfaceOutputVariable",
                     dim=2,
-                    intra=i == "_intra",
-                    axis="r|time",
+                    intra=i == "/intra",
+                    axis="vh/axes/r|vh/axes/time",
                     units="au",
                     main_result=i == "",
                     partial_result=i == "",
                 )
         else:
-            assign_weights(self._outputData, weight_dict, "g(r,t)_%s", self.labels)
-            vhs = weighted_sum(self._outputData, "g(r,t)_%s", self.labels)
-            self._outputData["g(r,t)_total"][...] = vhs / fact
-            self._outputData["g(r,t)_total"].scaling_factor = fact
+            assign_weights(self._outputData, weight_dict, "vh/g(r,t)/%s", self.labels)
+            vhs = weighted_sum(self._outputData, "vh/g(r,t)/%s", self.labels)
+            self._outputData["vh/g(r,t)/total"][...] = vhs / fact
+            self._outputData["vh/g(r,t)/total"].scaling_factor = fact
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

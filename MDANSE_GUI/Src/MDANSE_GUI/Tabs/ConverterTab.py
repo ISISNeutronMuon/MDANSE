@@ -29,9 +29,9 @@ from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 tab_label = """<b>Convert your trajectory</b> to the MDANSE MDT format.
 <br><br>
-If you cannot find a dedciated converter
-for your MD engine, the ASE converter
-can be tried as a backup option.
+If you cannot find a dedicated converter
+for your MD engine, try one of the general-purpose converters:
+MDAnalysis, MDTraj or ASE.
 """
 
 

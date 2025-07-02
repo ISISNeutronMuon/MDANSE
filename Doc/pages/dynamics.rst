@@ -13,6 +13,8 @@ This section contains background theory for following plugins:
 -  :ref:`analysis-msd`
 -  :ref:`analysis-op`
 -  :ref:`analysis-pacf`
+-  :ref:`root-mean-square-deviation`
+-  :ref:`root-mean-square-fluctuation`
 -  :ref:`analysis-vhf`
 -  :ref:`analysis-vacf`
 
@@ -305,6 +307,49 @@ where
    \Delta \mathbf{r}_{j}\left( t \right) = \mathbf{r}_{j}(t) - \langle \mathbf{r}_{j} \rangle
 
 so that the origin dependence of the PACF function is removed.
+
+
+.. _root-mean-square-deviation:
+
+Root Mean Square Deviation
+''''''''''''''''''''''''''
+                         
+The root mean-square deviation (RMSD) is perhaps the most popular estimator
+of structural similarity. It quantifies differences between two structures by
+measuring the root mean-square of atomic position differences, revealing
+insights into their structural dissimilarities. It is a numerical measure of
+the difference between two structures. For the RMSD of the atom of type
+:math:`\alpha` can be defined as
+
+.. math::
+   :label: rmsd1
+
+   \mathrm{RMSD}_{\alpha}(t) = \sqrt{ \frac{1}{Nc_{\alpha}} \sum\limits_{j \in \alpha} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{j}(t_{\mathrm{ref}}) \vert^{2} }
+
+where :math:`\mathbf{r}_{j}(t)` and :math:`\mathbf{r}_{j}(t_{\mathrm{ref}})`
+are respectively the position of atom :math:`j` at time :math:`t`
+and :math:`t_{\mathrm{ref}}` where :math:`t_{\mathrm{ref}}` is a reference
+time usually chosen as the zeroth time of the simulation. Typically,
+RMSD is used to quantify the structural evolution of the
+system during the simulation. It can provide precious information about
+the system especially if it reached equilibrium or conversely if major
+structural changes occurred during the simulation.
+
+.. _root-mean-square-fluctuation:
+
+Root Mean Square Fluctuation
+''''''''''''''''''''''''''''
+
+Root mean square fluctuation (RMSF) assesses how the positions of atoms or
+molecules within a system fluctuate over time. Specifically, RMSF measures the
+average magnitude of deviations or fluctuations in atomic positions from their
+mean positions during a simulation. RMSF analysis is valuable for
+understanding the flexibility and stability of molecules within a simulation,
+providing insights into regions where atoms or groups of atoms exhibit
+significant fluctuations. This information can be crucial for studying the
+dynamic behavior of biomolecules, protein-ligand interactions, or any
+molecular system subject to temporal variations.
+
 
 .. _analysis-vhf:
 

@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
-from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
+
+from MDANSE.Framework.Jobs.IJob import IJob
 
 short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 com_traj = CONV_DIR / "com_trajectory.mdt"
@@ -10,11 +11,14 @@ mdmc_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
 
 
 @pytest.mark.parametrize("interp_order", [1, 3])
-@pytest.mark.parametrize("traj_info", [
-    ("short_traj", short_traj),
-    ("mdmc_traj", mdmc_traj),
-    ("com_traj", com_traj),
-], ids=lambda x: x[0],
+@pytest.mark.parametrize(
+    "traj_info",
+    [
+        ("short_traj", short_traj),
+        ("mdmc_traj", mdmc_traj),
+        ("com_traj", com_traj),
+    ],
+    ids=lambda x: x[0],
 )
 def test_temperature(generate_benchmarks, tmp_path, traj_info, interp_order):
     temp_name = tmp_path / "output"
@@ -42,15 +46,26 @@ def test_temperature(generate_benchmarks, tmp_path, traj_info, interp_order):
     assert out_file.is_file()
     assert log_file.is_file()
 
-    compare_hdf5(out_file, result_file, ("/kinetic_energy", "/temperature",
-                                        "/avg_kinetic_energy", "avg_temperature"))
+    compare_hdf5(
+        out_file,
+        result_file,
+        (
+            "temp/kinetic_energy",
+            "temp/temperature",
+            "temp/avg_kinetic_energy",
+            "temp/avg_temperature",
+        ),
+    )
 
 
-@pytest.mark.parametrize("traj_info", [
-    ("short_traj", short_traj),
-    ("mdmc_traj", mdmc_traj),
-    ("com_traj", com_traj),
-], ids=lambda x: x[0],
+@pytest.mark.parametrize(
+    "traj_info",
+    [
+        ("short_traj", short_traj),
+        ("mdmc_traj", mdmc_traj),
+        ("com_traj", com_traj),
+    ],
+    ids=lambda x: x[0],
 )
 @pytest.mark.parametrize("output_format", ["MDAFormat", "TextFormat", "FileInMemory"])
 def test_density(generate_benchmarks, tmp_path, traj_info, output_format):
@@ -79,9 +94,17 @@ def test_density(generate_benchmarks, tmp_path, traj_info, output_format):
 
         assert out_file.is_file()
 
-        compare_hdf5(out_file, result_file, ("/atomic_density", "/mass_density",
-                                            "/avg_atomic_density", "/avg_mass_density"),
-                     startswith=True)
+        compare_hdf5(
+            out_file,
+            result_file,
+            (
+                "density/atomic/density",
+                "density/mass/density",
+                "density/atomic/avg_density",
+                "density/mass/avg_density",
+            ),
+            startswith=True,
+        )
 
     elif output_format == "TextFormat":
         out_file = temp_name.parent / (temp_name.stem + "_text.tar")

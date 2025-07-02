@@ -62,16 +62,16 @@ class Eccentricity(IJob):
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         self._outputData.add(
-            "time",
+            "ecc/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["time"],
             units="ps",
         )
         self._outputData.add(
-            "eccentricity",
+            "ecc/eccentricity",
             "LineOutputVariable",
             np.zeros((self.configuration["frames"]["number"]), dtype=np.float64),
-            axis="time",
+            axis="ecc/axes/time",
             main_result=True,
         )
 
@@ -128,7 +128,7 @@ class Eccentricity(IJob):
         eccentricity : float
             The eccentricity for the selected atom at frame_idx.
         """
-        self._outputData["eccentricity"][frame_idx] = eccentricity
+        self._outputData["ecc/eccentricity"][frame_idx] = eccentricity
 
     def finalize(self):
         self._outputData.write(

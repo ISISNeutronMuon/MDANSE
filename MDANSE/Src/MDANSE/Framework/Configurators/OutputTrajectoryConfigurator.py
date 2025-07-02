@@ -54,7 +54,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self.format = "MDTFormat"
         self._dtype = np.float64
         self._compression = "none"
-        self._forbidden_files = []
+        self.forbidden_files = []
         self._chunk_limit = 128
 
     def configure(self, value: tuple):
@@ -97,7 +97,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
             temp_name = root.with_suffix(root.suffix + self["extension"])
         self["file"] = temp_name
 
-        if self["file"].absolute() in self._forbidden_files:
+        if self["file"].absolute() in self.forbidden_files:
             self.error_status = f"File {self['file']} is either open or being written into. Please pick another name."
             return
 

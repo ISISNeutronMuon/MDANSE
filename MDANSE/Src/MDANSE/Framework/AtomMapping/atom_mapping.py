@@ -14,11 +14,13 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import re
-from typing import Union
+from typing import TypeVar, Union
 
 import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
+
+AtLabel = TypeVar("AtLabel", bound="AtomLabel")
 
 
 class AtomLabel:
@@ -46,7 +48,7 @@ class AtomLabel:
         if self.mass is not None:
             self.mass = float(self.mass)
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: AtLabel) -> bool:
         """Used to check if atom labels are equal.
 
         Parameters

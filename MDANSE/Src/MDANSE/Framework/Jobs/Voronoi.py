@@ -84,7 +84,7 @@ class Voronoi(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time",
+            "voronoi/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["time"],
             units="ps",
@@ -230,7 +230,7 @@ class Voronoi(IJob):
             self.neighbourhood[k] = v
 
         self._outputData.add(
-            "mean_volume",
+            "voronoi/mean_volume",
             "LineOutputVariable",
             self.mean_volume,
             units="nm3",
@@ -238,7 +238,7 @@ class Voronoi(IJob):
         )
 
         self._outputData.add(
-            "neighbourhood_histogram",
+            "voronoi/neighbourhood_histogram",
             "LineOutputVariable",
             self.neighbourhood,
             units="au",

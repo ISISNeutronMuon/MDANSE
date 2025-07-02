@@ -118,79 +118,92 @@ class DensityOfStates(IJob):
         ]
 
         self._outputData.add(
-            "time",
+            "dos/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
         )
         self._outputData.add(
-            "time_window",
+            "vacf/axes/time",
+            "LineOutputVariable",
+            self.configuration["frames"]["duration"],
+            units="ps",
+        )
+
+        self._outputData.add(
+            "dos/res/time_window",
             "LineOutputVariable",
             instrResolution["time_window_positive"],
-            axis="time",
+            axis="dos/axes/time",
             units="au",
         )
 
         self._outputData.add(
-            "omega", "LineOutputVariable", instrResolution["omega"], units="rad/ps"
+            "dos/axes/omega",
+            "LineOutputVariable",
+            instrResolution["omega"],
+            units="rad/ps",
         )
         self._outputData.add(
-            "romega", "LineOutputVariable", instrResolution["romega"], units="rad/ps"
+            "dos/axes/romega",
+            "LineOutputVariable",
+            instrResolution["romega"],
+            units="rad/ps",
         )
         self._outputData.add(
-            "omega_window",
+            "dos/res/omega_window",
             "LineOutputVariable",
             instrResolution["omega_window"],
-            axis="omega",
+            axis="dos/axes/omega",
             units="au",
         )
 
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                f"vacf_{element}",
+                f"vacf/{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
-                axis="time",
+                axis="vacf/axes/time",
                 units="nm2/ps2",
             )
             self._outputData.add(
-                f"dos_{element}",
+                f"dos/{element}",
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
-                axis="romega",
+                axis="dos/axes/romega",
                 units="au",
                 main_result=True,
                 partial_result=True,
             )
             if self.add_ideal_results:
                 self._outputData.add(
-                    f"dos_ideal_{element}",
+                    f"dos/ideal/{element}",
                     "LineOutputVariable",
                     (instrResolution["n_romegas"],),
-                    axis="romega",
+                    axis="dos/axes/romega",
                     units="au",
                 )
         self._outputData.add(
-            "vacf_total",
+            "vacf/total",
             "LineOutputVariable",
             (self.configuration["frames"]["n_frames"],),
-            axis="time",
+            axis="dos/axes/time",
             units="nm2/ps2",
         )
         self._outputData.add(
-            "dos_total",
+            "dos/total",
             "LineOutputVariable",
             (instrResolution["n_romegas"],),
-            axis="romega",
+            axis="dos/axes/romega",
             units="au",
             main_result=True,
         )
         if self.add_ideal_results:
             self._outputData.add(
-                "dos_ideal_total",
+                "dos/ideal/total",
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
-                axis="romega",
+                axis="dos/axes/romega",
                 units="au",
             )
 
@@ -258,7 +271,7 @@ class DensityOfStates(IJob):
         # The symbol of the atom.
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData[f"vacf_{element}"] += x
+        self._outputData[f"vacf/{element}"] += x
 
     def finalize(self):
         """
@@ -267,16 +280,16 @@ class DensityOfStates(IJob):
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData[f"vacf_{element}"][:] /= number
-            self._outputData[f"dos_{element}"][:] = get_spectrum(
-                self._outputData[f"vacf_{element}"],
+            self._outputData[f"vacf/{element}"][:] /= number
+            self._outputData[f"dos/{element}"][:] = get_spectrum(
+                self._outputData[f"vacf/{element}"],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 fft="rfft",
             )
             if self.add_ideal_results:
-                self._outputData[f"dos_ideal_{element}"][:] = get_spectrum(
-                    self._outputData[f"vacf_{element}"],
+                self._outputData[f"dos/ideal/{element}"][:] = get_spectrum(
+                    self._outputData[f"vacf/{element}"],
                     None,
                     self.configuration["instrument_resolution"]["time_step"],
                     fft="rfft",
@@ -290,51 +303,51 @@ class DensityOfStates(IJob):
             self.configuration["atom_selection"].get_all_natoms(),
             1,
         )
-        assign_weights(self._outputData, weight_dict, "vacf_%s", self.labels)
-        assign_weights(self._outputData, weight_dict, "dos_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "vacf/%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "dos/%s", self.labels)
         if self.add_ideal_results:
-            assign_weights(self._outputData, weight_dict, "dos_ideal_%s", self.labels)
+            assign_weights(self._outputData, weight_dict, "dos/ideal/%s", self.labels)
 
         n_selected = sum(nAtomsPerElement.values())
         n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
         fact = n_selected / n_total
 
-        self._outputData["vacf_total"][:] = (
-            weighted_sum(self._outputData, "vacf_%s", self.labels) / fact
+        self._outputData["vacf/total"][:] = (
+            weighted_sum(self._outputData, "vacf/%s", self.labels) / fact
         )
-        self._outputData["vacf_total"].scaling_factor = fact
-        self._outputData["dos_total"][:] = (
-            weighted_sum(self._outputData, "dos_%s", self.labels) / fact
+        self._outputData["vacf/total"].scaling_factor = fact
+        self._outputData["dos/total"][:] = (
+            weighted_sum(self._outputData, "dos/%s", self.labels) / fact
         )
-        self._outputData["dos_total"].scaling_factor = fact
+        self._outputData["dos/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "vacf",
             "LineOutputVariable",
-            axis="time",
+            axis="vacf/axes/time",
             units="nm2/ps2",
         )
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
             "dos",
             "LineOutputVariable",
-            axis="romega",
+            axis="dos/axes/romega",
             units="au",
             main_result=True,
             partial_result=True,
         )
 
         if self.add_ideal_results:
-            self._outputData["dos_ideal_total"][:] = (
-                weighted_sum(self._outputData, "dos_ideal_%s", self.labels) / fact
+            self._outputData["dos/ideal/total"][:] = (
+                weighted_sum(self._outputData, "dos/ideal/%s", self.labels) / fact
             )
-            self._outputData["dos_ideal_total"].scaling_factor = fact
+            self._outputData["dos/ideal/total"].scaling_factor = fact
             self.configuration["grouping_level"].add_grouped_totals(
                 self._outputData,
-                "dos_ideal",
+                "dos/ideal",
                 "LineOutputVariable",
-                axis="romega",
+                axis="dos/axes/romega",
                 units="au",
             )
 

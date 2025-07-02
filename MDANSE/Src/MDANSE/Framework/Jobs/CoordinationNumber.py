@@ -96,7 +96,7 @@ class CoordinationNumber(DistanceHistogram):
         npoints = len(self.configuration["r_values"]["mid_points"])
 
         self._outputData.add(
-            "r",
+            "cn/axes/r",
             "LineOutputVariable",
             self.configuration["r_values"]["mid_points"],
             units="nm",
@@ -109,28 +109,28 @@ class CoordinationNumber(DistanceHistogram):
 
         for label, _ in self.labels:
             self._outputData.add(
-                f"cn_{label}",
+                f"cn/{label}",
                 "LineOutputVariable",
                 (npoints,),
-                axis="r",
+                axis="cn/axes/r",
                 units="au",
                 main_result=True,
             )
         if self.intra:
             for label, _ in self.labels_intra:
                 self._outputData.add(
-                    f"cn_intra_{label}",
+                    f"cn/intra/{label}",
                     "LineOutputVariable",
                     (npoints,),
-                    axis="r",
+                    axis="cn/axes/r",
                     units="au",
                 )
             for label, _ in self.labels:
                 self._outputData.add(
-                    f"cn_inter_{label}",
+                    f"cn/inter/{label}",
                     "LineOutputVariable",
                     (npoints,),
-                    axis="r",
+                    axis="cn/axes/r",
                     units="au",
                 )
 
@@ -147,7 +147,7 @@ class CoordinationNumber(DistanceHistogram):
         r2 = self.configuration["r_values"]["mid_points"] ** 2
         dr = self.configuration["r_values"]["step"]
 
-        for k in list(self._concentrations.keys()):
+        for k in self._concentrations:
             self._concentrations[k] /= nFrames
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
@@ -208,8 +208,8 @@ class CoordinationNumber(DistanceHistogram):
                 self.h_intra[idi, idj, :] /= fact
                 cnIntra = np.add.accumulate(self.h_intra[idi, idj, :] * r2) * dr
                 cnInter = cnTotal - cnIntra
-                yield "cn_inter", False, rho_j * cnInter
-                yield "cn_intra", True, rho_j * cnIntra
+                yield "cn/inter", False, rho_j * cnInter
+                yield "cn/intra", True, rho_j * cnIntra
 
         self.configuration["grouping_level"].update_pair_results(
             calc_func, self._outputData, all_pairs=True

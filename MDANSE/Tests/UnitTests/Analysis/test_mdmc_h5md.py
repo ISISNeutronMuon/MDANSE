@@ -31,6 +31,7 @@ def test_h5md_temperature(generate_benchmarks, tmp_path, trajectory, interp_orde
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / f"h5md_temperature_{interp_order}.mda"
 
     if generate_benchmarks:
         temp_name = result_file.with_suffix("")
@@ -55,5 +56,10 @@ def test_h5md_temperature(generate_benchmarks, tmp_path, trajectory, interp_orde
     compare_hdf5(
         out_file,
         result_file,
-        ("/kinetic_energy", "/temperature", "/avg_kinetic_energy", "/avg_temperature"),
+        (
+            "temp/kinetic_energy",
+            "temp/temperature",
+            "temp/avg_kinetic_energy",
+            "temp/avg_temperature",
+        ),
     )

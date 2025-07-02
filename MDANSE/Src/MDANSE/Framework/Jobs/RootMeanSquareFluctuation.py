@@ -35,7 +35,7 @@ class RootMeanSquareFluctuation(IJob):
 
     category = (
         "Analysis",
-        "Structure",
+        "Dynamics",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
@@ -75,23 +75,23 @@ class RootMeanSquareFluctuation(IJob):
         # Will store the indices.
         if self.configuration["grouping_level"]["value"] == "each atom":
             self._outputData.add(
-                "indices",
+                "rmsf/axes/indices",
                 "LineOutputVariable",
                 self.configuration["atom_selection"]["flatten_indices"],
             )
         else:
             self._outputData.add(
-                "indices",
+                "rmsf/axes/indices",
                 "LineOutputVariable",
                 list(range(len(self.configuration["atom_selection"]["names"]))),
             )
 
         # Will store the mean square fluctuation evolution.
         self._outputData.add(
-            "rmsf",
+            "rmsf/rmsf",
             "LineOutputVariable",
             (self.configuration["atom_selection"]["selection_length"],),
-            axis="indices",
+            axis="rmsf/axes/indices",
             units="nm",
             main_result=True,
         )
@@ -132,7 +132,7 @@ class RootMeanSquareFluctuation(IJob):
             #. x (any): The returned result(s) of run_step
         """
 
-        self._outputData["rmsf"][index] = x
+        self._outputData["rmsf/rmsf"][index] = x
 
     def finalize(self):
         """

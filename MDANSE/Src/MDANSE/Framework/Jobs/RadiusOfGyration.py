@@ -64,17 +64,17 @@ class RadiusOfGyration(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time",
+            "rog/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["time"],
             units="ps",
         )
 
         self._outputData.add(
-            "rog",
+            "rog/rog",
             "LineOutputVariable",
             (self.configuration["frames"]["number"],),
-            axis="time",
+            axis="rog/axes/time",
             units="nm",
             main_result=True,
         )
@@ -124,7 +124,7 @@ class RadiusOfGyration(IJob):
             #. x (any): The returned result(s) of run_step
         """
 
-        self._outputData["rog"][index] = x
+        self._outputData["rog/rog"][index] = x
 
     def finalize(self):
         """

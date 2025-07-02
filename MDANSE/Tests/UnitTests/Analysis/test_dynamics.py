@@ -9,6 +9,7 @@ short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 mdmc_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
 com_traj = CONV_DIR / "com_trajectory.mdt"
 
+
 @pytest.mark.parametrize("interp_order", [1, 2, 3])
 def test_vacf(generate_benchmarks, tmp_path, interp_order):
     temp_name = tmp_path / "output"
@@ -18,6 +19,8 @@ def test_vacf(generate_benchmarks, tmp_path, interp_order):
 
     if generate_benchmarks:
         temp_name = result_file.with_suffix("")
+
+    result_file = RESULTS_DIR / f"vacf_{interp_order}.mda"
 
     parameters = {
         "frames": (0, 10, 1, 5),
@@ -39,7 +42,7 @@ def test_vacf(generate_benchmarks, tmp_path, interp_order):
     compare_hdf5(
         out_file,
         result_file,
-        [f"vacf_{elem}" for elem in ("Cu", "S", "Sb", "total")],
+        [f"/vacf/{elem}" for elem in ("Cu", "S", "Sb", "total")],
         scale_result=False,
     )
 
@@ -73,11 +76,12 @@ def test_pps(generate_benchmarks, tmp_path):
         out_file,
         result_file,
         [
-            f"{fn}_{elem}"
+            f"{fn}/{elem}"
             for elem in ("Cu", "S", "Sb", "total")
             for fn in ("pacf", "pps")
         ],
         scale_result=True,
+        scale_benchmark=True,
     )
 
 
@@ -140,7 +144,13 @@ def parameters():
 )
 @pytest.mark.parametrize("output_format", ["MDAFormat", "TextFormat"])
 def test_dynamics_analysis(
-    generate_benchmarks, tmp_path, parameters, traj_info, job_info, running_mode, output_format
+    generate_benchmarks,
+    tmp_path,
+    parameters,
+    traj_info,
+    job_info,
+    running_mode,
+    output_format,
 ):
     job_type, outputs, normalised = job_info
     outputs = tuple(outputs)

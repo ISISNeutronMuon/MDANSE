@@ -49,4 +49,4 @@ def test_basic_meansquare(generate_benchmarks, tmp_path, running_mode):
     assert log_file.is_file()
 
     compare_hdf5(out_file, result_file,
-                [f"/msd_{elem}" for elem in ("Cu", "S", "Sb", "total")])
+                [f"/msd/{elem}" for elem in ("Cu", "S", "Sb", "total")])

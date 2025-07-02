@@ -1,15 +1,11 @@
-import tempfile
-import os
-from os import path
-import pytest
-
 import numpy as np
+import pytest
+from test_helpers.paths import CONV_DIR
 
+from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-from MDANSE.Framework.QVectors.IQVectors import IQVectors
-from MDANSE.Framework.Jobs.IJob import IJob
-from test_helpers.paths import CONV_DIR
 
 short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
@@ -21,16 +17,16 @@ def trajectory():
 
 
 def test_qvectors_for_nonorthogonal_cell():
-    cell = UnitCell([[15,0,0],
-                     [0,16,0],
-                     [8,0,23]])
-    start_vectors = np.array([[1,0,0,1,2],
-                              [0,1,0,1,2],
-                              [0,0,1,1,2]])
+    cell = UnitCell([[15, 0, 0], [0, 16, 0], [8, 0, 23]])
+    start_vectors = np.array([[1, 0, 0, 1, 2], [0, 1, 0, 1, 2], [0, 0, 1, 1, 2]])
     temporary_hkls = IQVectors.qvectors_to_hkl(start_vectors, cell)
     final_vectors = IQVectors.hkl_to_qvectors(temporary_hkls, cell)
-    np.testing.assert_allclose(start_vectors, final_vectors,
-                                       atol=1e-7, rtol=1e-7,)
+    np.testing.assert_allclose(
+        start_vectors,
+        final_vectors,
+        atol=1e-7,
+        rtol=1e-7,
+    )
 
 
 @pytest.mark.parametrize("qvector_generator", IQVectors.indirect_subclasses())

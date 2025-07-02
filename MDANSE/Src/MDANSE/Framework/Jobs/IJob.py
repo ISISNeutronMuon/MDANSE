@@ -498,7 +498,7 @@ class {classname}(IJob):
         self.numberOfSteps = self.configuration['frames']['number']
 
         # Create an output data for the selected frames.
-        self._outputData.add("time", "LineOutputVariable", self.configuration['frames']['time'], units='ps')
+        self._outputData.add("x/axes/time", "LineOutputVariable", self.configuration['frames']['time'], units='ps')
 
 
     def run_step(self, index):

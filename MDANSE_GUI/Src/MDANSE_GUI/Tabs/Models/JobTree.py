@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from collections import defaultdict
+
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
@@ -57,7 +59,21 @@ class JobTree(QStandardItemModel):
         if parent_class is None:
             parent_class = IJob
         full_dict = parent_class.indirect_subclass_dictionary()
-        for class_name, class_object in full_dict.items():
+        sorted_keys = sorted(full_dict)
+        cat_dicts = defaultdict(list)
+        for class_name in sorted_keys:
+            if not full_dict[class_name].enabled:
+                continue
+            cat_tuple = getattr(full_dict[class_name], "category", None)
+            if cat_tuple and len(cat_tuple) > 1:
+                cat_dicts[cat_tuple[0]].append(cat_tuple[1])
+
+        cat_dicts = {cat: sorted(cat_dicts[cat]) for cat in sorted(cat_dicts)}
+        for cat, vals in cat_dicts.items():
+            for subcat in vals:
+                self.parentsFromCategories((cat, subcat))
+        for class_name in sorted_keys:
+            class_object = full_dict[class_name]
             if class_object.enabled:
                 self.createNode(class_name, class_object, filter)
 
@@ -99,7 +115,7 @@ class JobTree(QStandardItemModel):
 
     def parentsFromCategories(self, category_tuple):
         """Returns the parent node for a node that belongs to the
-        category specified by categore_tuple. Also makes sure that
+        category specified by category_tuple. Also makes sure that
         the parent nodes exist (or creates them if they don't).
 
         Arguments:

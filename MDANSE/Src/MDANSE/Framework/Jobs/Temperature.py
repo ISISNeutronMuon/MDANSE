@@ -76,38 +76,38 @@ class Temperature(IJob):
         self._nFrames = self.configuration["frames"]["number"]
 
         self._outputData.add(
-            "time",
+            "temp/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["time"],
             units="ps",
         )
         self._outputData.add(
-            "kinetic_energy",
+            "temp/kinetic_energy",
             "LineOutputVariable",
             (self._nFrames,),
-            axis="time",
+            axis="temp/axes/time",
             units="kJ_per_mole",
         )
         self._outputData.add(
-            "avg_kinetic_energy",
+            "temp/avg_kinetic_energy",
             "LineOutputVariable",
             (self._nFrames,),
-            axis="time",
+            axis="temp/axes/time",
             units="kJ_per_mole",
         )
         self._outputData.add(
-            "temperature",
+            "temp/temperature",
             "LineOutputVariable",
             (self._nFrames,),
-            axis="time",
+            axis="temp/axes/time",
             units="K",
             main_result=True,
         )
         self._outputData.add(
-            "avg_temperature",
+            "temp/avg_temperature",
             "LineOutputVariable",
             (self._nFrames,),
-            axis="time",
+            axis="temp/axes/time",
             units="K",
         )
 
@@ -170,7 +170,7 @@ class Temperature(IJob):
             #. x (any): The returned result(s) of run_step
         """
 
-        self._outputData["kinetic_energy"] += x
+        self._outputData["temp/kinetic_energy"] += x
 
     def finalize(self):
         """
@@ -178,18 +178,18 @@ class Temperature(IJob):
         """
 
         nAtoms = len(self._atoms)
-        self._outputData["kinetic_energy"] /= nAtoms - 1
+        self._outputData["temp/kinetic_energy"] /= nAtoms - 1
 
-        norm = np.arange(1, self._outputData["kinetic_energy"].shape[0] + 1)
-        self._outputData["avg_kinetic_energy"][:] = (
-            np.cumsum(self._outputData["kinetic_energy"]) / norm
+        norm = np.arange(1, self._outputData["temp/kinetic_energy"].shape[0] + 1)
+        self._outputData["temp/avg_kinetic_energy"][:] = (
+            np.cumsum(self._outputData["temp/kinetic_energy"]) / norm
         )
 
-        self._outputData["temperature"][:] = (
-            2.0 * self._outputData["kinetic_energy"] / (3.0 * KB)
+        self._outputData["temp/temperature"][:] = (
+            2.0 * self._outputData["temp/kinetic_energy"] / (3.0 * KB)
         )
-        self._outputData["avg_temperature"][:] = (
-            2.0 * self._outputData["avg_kinetic_energy"] / (3.0 * KB)
+        self._outputData["temp/avg_temperature"][:] = (
+            2.0 * self._outputData["temp/avg_kinetic_energy"] / (3.0 * KB)
         )
 
         self._outputData.write(

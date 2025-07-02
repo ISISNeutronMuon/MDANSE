@@ -98,52 +98,58 @@ class Infrared(IJob):
         )
 
         self._outputData.add(
-            "time",
+            "ir/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
         )
         self._outputData.add(
-            "time_window",
+            "ir/res/time_window",
             "LineOutputVariable",
             instrResolution["time_window_positive"],
-            axis="time",
+            axis="ir/axes/time",
             units="au",
         )
 
         self._outputData.add(
-            "omega", "LineOutputVariable", instrResolution["omega"], units="rad/ps"
+            "ir/axes/omega",
+            "LineOutputVariable",
+            instrResolution["omega"],
+            units="rad/ps",
         )
         self._outputData.add(
-            "romega", "LineOutputVariable", instrResolution["romega"], units="rad/ps"
+            "ir/axes/romega",
+            "LineOutputVariable",
+            instrResolution["romega"],
+            units="rad/ps",
         )
         self._outputData.add(
-            "omega_window",
+            "ir/res/omega_window",
             "LineOutputVariable",
             instrResolution["omega_window"],
-            axis="omega",
+            axis="ir/axes/omega",
             units="au",
         )
 
         self._outputData.add(
-            "ddacf",
+            "ddacf/ddacf",
             "LineOutputVariable",
             (self.configuration["frames"]["n_frames"],),
-            axis="time",
+            axis="ir/axes/time",
         )
         self._outputData.add(
-            "ir",
+            "ir/ir",
             "LineOutputVariable",
             (instrResolution["n_romegas"],),
-            axis="romega",
+            axis="ir/axes/romega",
             main_result=True,
         )
         if self.add_ideal_results:
             self._outputData.add(
-                "ir_ideal",
+                "ir/ideal",
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
-                axis="romega",
+                axis="ir/axes/romega",
             )
 
     def run_step(self, index: int) -> tuple[int, np.ndarray]:
@@ -218,23 +224,23 @@ class Infrared(IJob):
         x : np.ndarray
             d/dt dipole auto-correlation function for a molecule
         """
-        self._outputData["ddacf"] += x
+        self._outputData["ddacf/ddacf"] += x
 
     def finalize(self):
         """Average the d/dt dipole auto-correlation function over the
         number of molecules in the trajectory, fourier transform to
         get the IR spectrum and save the results.
         """
-        self._outputData["ddacf"] /= self.numberOfSteps
-        self._outputData["ir"][:] = get_spectrum(
-            self._outputData["ddacf"],
+        self._outputData["ddacf/ddacf"] /= self.numberOfSteps
+        self._outputData["ir/ir"][:] = get_spectrum(
+            self._outputData["ddacf/ddacf"],
             self.configuration["instrument_resolution"]["time_window"],
             self.configuration["instrument_resolution"]["time_step"],
             fft="rfft",
         )
         if self.add_ideal_results:
-            self._outputData["ir_ideal"][:] = get_spectrum(
-                self._outputData["ddacf"],
+            self._outputData["ir/ideal"][:] = get_spectrum(
+                self._outputData["ddacf/ddacf"],
                 None,
                 self.configuration["instrument_resolution"]["time_step"],
                 fft="rfft",

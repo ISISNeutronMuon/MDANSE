@@ -34,5 +34,5 @@ def test_vacf(generate_benchmarks, tmp_path, interp_order):
     assert log_file.is_file()
 
     compare_hdf5(out_file, result_file,
-                [f"vacf_{elem}" for elem in ("H", "O", "Si", "total")],
+                [f"vacf/{elem}" for elem in ("H", "O", "Si", "total")],
                 scale_result=False)

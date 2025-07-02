@@ -36,7 +36,7 @@ class RootMeanSquareDeviation(IJob):
 
     category = (
         "Analysis",
-        "Structure",
+        "Dynamics",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
@@ -83,7 +83,7 @@ class RootMeanSquareDeviation(IJob):
 
         # Will store the time.
         self._outputData.add(
-            "time",
+            "rmsd/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
@@ -92,19 +92,19 @@ class RootMeanSquareDeviation(IJob):
         # Will initially store the mean square deviation before appling the root
         for element in self.configuration["atom_selection"]["unique_names"]:
             self._outputData.add(
-                f"rmsd_{element}",
+                f"rmsd/{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["number"],),
-                axis="time",
+                axis="rmsd/axes/time",
                 units="nm",
                 main_result=True,
                 partial_result=True,
             )
         self._outputData.add(
-            "rmsd_all",
+            "rmsd/total",
             "LineOutputVariable",
             (self.configuration["frames"]["number"],),
-            axis="time",
+            axis="rmsd/axes/time",
             units="nm",
             main_result=True,
         )
@@ -145,8 +145,8 @@ class RootMeanSquareDeviation(IJob):
 
         element = self.configuration["atom_selection"]["names"][index]
 
-        self._outputData[f"rmsd_{element}"] += x
-        self._outputData["rmsd_all"] += x
+        self._outputData[f"rmsd/{element}"] += x
+        self._outputData["rmsd/total"] += x
 
     def finalize(self):
         """
@@ -158,22 +158,24 @@ class RootMeanSquareDeviation(IJob):
             self._outputData,
             "rmsd",
             "LineOutputVariable",
-            axis="time",
+            axis="rmsd/axes/time",
             units="nm",
             scaling_factor=False,
             post_func=lambda x: np.sqrt(x / n_atms),
-            post_label="all",
+            post_label="total",
             main_result=True,
             partial_result=True,
         )
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData[f"rmsd_{element}"][:] = np.sqrt(
-                self._outputData[f"rmsd_{element}"] / number
+            self._outputData[f"rmsd/{element}"][:] = np.sqrt(
+                self._outputData[f"rmsd/{element}"] / number
             )
 
-        self._outputData["rmsd_all"][:] = np.sqrt(self._outputData["rmsd_all"] / n_atms)
+        self._outputData["rmsd/total"][:] = np.sqrt(
+            self._outputData["rmsd/total"] / n_atms
+        )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

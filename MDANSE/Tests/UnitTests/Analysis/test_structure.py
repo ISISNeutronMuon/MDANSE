@@ -59,21 +59,27 @@ def parameters():
 @pytest.mark.parametrize(
     "job_info",
     [
-        ("SolventAccessibleSurface", ["sas"]),
-        ("RootMeanSquareDeviation", ["rmsd"]),
-        ("RootMeanSquareFluctuation", ["rmsf"]),
-        ("Voronoi", ["mean_volume", "neighbourhood_histogram"]),
-        ("CoordinationNumber", ["cn"]),
-        ("PairDistributionFunction", ["pdf", "rdf", "tcf"]),
-        ("StaticStructureFactor", ["ssf"]),
-        ("XRayStaticStructureFactor", ["xssf"]),
+        ("SolventAccessibleSurface", ["sas/sas"]),
+        ("RootMeanSquareDeviation", ["rmsd/total"]),
+        ("RootMeanSquareFluctuation", ["rmsf/rmsf"]),
+        ("Voronoi", ["voronoi/mean_volume", "voronoi/neighbourhood_histogram"]),
+        ("CoordinationNumber", ["cn/cn"]),
+        ("PairDistributionFunction", ["pdf/total", "rdf/total", "tcf/total"]),
+        ("StaticStructureFactor", ["ssf/total"]),
+        ("XRayStaticStructureFactor", ["xssf/total"]),
     ],
     ids=lambda x: x[0],
 )
 @pytest.mark.parametrize("running_mode", [("single-core", 1)], ids=lambda x: x[0])
 @pytest.mark.parametrize("output_format", ["MDAFormat"])
 def test_structure_analysis(
-    generate_benchmarks, tmp_path, parameters, traj_info, job_info, running_mode, output_format
+    generate_benchmarks,
+    tmp_path,
+    parameters,
+    traj_info,
+    job_info,
+    running_mode,
+    output_format,
 ):
     job_type, outputs = job_info
     temp_name = tmp_path / "output"
@@ -138,9 +144,9 @@ def test_pdf_is_zero_at_low_distances(
 
     print(results.keys())
 
-    assert "pdf_total" in results
-    x_axis = results["r"][:]
-    y_axis = results["pdf_total"][:]
+    assert "pdf/total" in results
+    x_axis = results["pdf/axes/r"][:]
+    y_axis = results["pdf/total"][:]
     banned_range = y_axis[np.where(x_axis < 0.05)]
     assert np.allclose(banned_range, 0.0)
 
@@ -268,6 +274,6 @@ def test_intermolecular_part_is_zero_for_single_molecule(tmp_path, parameters):
 
     print(results.keys())
 
-    assert "pdf_inter_total" in results
-    assert "pdf_intra_total" in results
-    np.testing.assert_allclose(results["pdf_inter_total"], 0.0, equal_nan=True)
+    assert "pdf/inter/total" in results
+    assert "pdf/intra/total" in results
+    np.testing.assert_allclose(results["pdf/inter/total"], 0.0, equal_nan=True)

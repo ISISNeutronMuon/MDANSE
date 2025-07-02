@@ -47,7 +47,7 @@ def test_dacf_analysis(generate_benchmarks, tmp_path):
     assert out_file.is_file()
     assert log_file.is_file()
 
-    compare_hdf5(out_file, result_file, ("/dacf",), scale_result=True)
+    compare_hdf5(out_file, result_file, ("/dacf/dacf",), scale_result=True)
 
 
 def test_ir_analysis(generate_benchmarks, tmp_path):
@@ -92,4 +92,4 @@ def test_ir_analysis(generate_benchmarks, tmp_path):
     assert out_file.is_file()
     assert log_file.is_file()
 
-    compare_hdf5(out_file, result_file, ("/ddacf", "/ir"), scale_result=True)
+    compare_hdf5(out_file, result_file, ("/ddacf/ddacf", "/ir/ir"), scale_result=True)

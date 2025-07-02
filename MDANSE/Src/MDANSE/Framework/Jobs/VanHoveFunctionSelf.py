@@ -174,47 +174,47 @@ class VanHoveFunctionSelf(IJob):
             raise ValueError(DETAILED_CELL_MESSAGE)
 
         self._outputData.add(
-            "r",
+            "vh/axes/r",
             "LineOutputVariable",
             self.configuration["r_values"]["mid_points"],
             units="nm",
         )
         self._outputData.add(
-            "time",
+            "vh/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
         )
         self._outputData.add(
-            "g(r,t)_total",
+            "vh/g(r,t)/total",
             "SurfaceOutputVariable",
             (self.n_mid_points, self.n_frames),
-            axis="r|time",
+            axis="vh/axes/r|vh/axes/time",
             units="au",
             main_result=True,
         )
         self._outputData.add(
-            "4_pi_r2_g(r,t)_total",
+            "vh/4_pi_r2_g(r,t)/total",
             "SurfaceOutputVariable",
             (self.n_mid_points, self.n_frames),
-            axis="r|time",
+            axis="vh/axes/r|vh/axes/time",
             units="au",
         )
         for element in self.selectedElements:
             self._outputData.add(
-                f"g(r,t)_{element}",
+                f"vh/g(r,t)/{element}",
                 "SurfaceOutputVariable",
                 (self.n_mid_points, self.n_frames),
-                axis="r|time",
+                axis="vh/axes/r|vh/axes/time",
                 units="au",
                 main_result=True,
                 partial_result=True,
             )
             self._outputData.add(
-                f"4_pi_r2_g(r,t)_{element}",
+                f"vh/4_pi_r2_g(r,t)/{element}",
                 "SurfaceOutputVariable",
                 (self.n_mid_points, self.n_frames),
-                axis="r|time",
+                axis="vh/axes/r|vh/axes/time",
                 units="au",
             )
 
@@ -299,8 +299,8 @@ class VanHoveFunctionSelf(IJob):
 
         """
         element = self.configuration["atom_selection"]["names"][atm_index]
-        self._outputData[f"g(r,t)_{element}"][:] += histogram
-        self._outputData[f"4_pi_r2_g(r,t)_{element}"][:] += histogram
+        self._outputData[f"vh/g(r,t)/{element}"][:] += histogram
+        self._outputData[f"vh/4_pi_r2_g(r,t)/{element}"][:] += histogram
 
     def finalize(self):
         """Apply scaling to the summed up results.
@@ -309,11 +309,11 @@ class VanHoveFunctionSelf(IJob):
         self part of the Van Hove function.
         """
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        for element, number in list(nAtomsPerElement.items()):
-            self._outputData[f"g(r,t)_{element}"][:] /= (
+        for element, number in nAtomsPerElement.items():
+            self._outputData[f"vh/g(r,t)/{element}"][:] /= (
                 self.shell_volumes[:, np.newaxis] * number**2 * self.n_configs
             )
-            self._outputData[f"4_pi_r2_g(r,t)_{element}"][:] /= (
+            self._outputData[f"vh/4_pi_r2_g(r,t)/{element}"][:] /= (
                 number**2 * self.n_configs * self.configuration["r_values"]["step"]
             )
 
@@ -325,36 +325,38 @@ class VanHoveFunctionSelf(IJob):
             self.configuration["atom_selection"].get_all_natoms(),
             1,
         )
-        assign_weights(self._outputData, weight_dict, "g(r,t)_%s", self.labels)
-        assign_weights(self._outputData, weight_dict, "4_pi_r2_g(r,t)_%s", self.labels)
+        assign_weights(self._outputData, weight_dict, "vh/g(r,t)/%s", self.labels)
+        assign_weights(
+            self._outputData, weight_dict, "vh/4_pi_r2_g(r,t)/%s", self.labels
+        )
 
         n_selected = sum(nAtomsPerElement.values())
         n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
         fact = n_selected / n_total
 
-        self._outputData["g(r,t)_total"][:] = (
-            weighted_sum(self._outputData, "g(r,t)_%s", self.labels) / fact
+        self._outputData["vh/g(r,t)/total"][:] = (
+            weighted_sum(self._outputData, "vh/g(r,t)/%s", self.labels) / fact
         )
-        self._outputData["g(r,t)_total"].scaling_factor = fact
-        self._outputData["4_pi_r2_g(r,t)_total"][:] = (
-            weighted_sum(self._outputData, "4_pi_r2_g(r,t)_%s", self.labels) / fact
+        self._outputData["vh/g(r,t)/total"].scaling_factor = fact
+        self._outputData["vh/4_pi_r2_g(r,t)/total"][:] = (
+            weighted_sum(self._outputData, "vh/4_pi_r2_g(r,t)/%s", self.labels) / fact
         )
-        self._outputData["4_pi_r2_g(r,t)_total"].scaling_factor = fact
+        self._outputData["vh/4_pi_r2_g(r,t)/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            "g(r,t)",
+            "vh/g(r,t)",
             "SurfaceOutputVariable",
-            axis="r|time",
+            axis="vh/axes/r|vh/axes/time",
             units="au",
             main_result=True,
             partial_result=True,
         )
         self.configuration["grouping_level"].add_grouped_totals(
             self._outputData,
-            "4_pi_r2_g(r,t)",
+            "vh/4_pi_r2_g(r,t)",
             "SurfaceOutputVariable",
-            axis="r|time",
+            axis="vh/axes/r|vh/axes/time",
             units="au",
         )
 

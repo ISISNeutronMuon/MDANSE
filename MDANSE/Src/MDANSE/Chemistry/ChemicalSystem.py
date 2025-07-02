@@ -110,6 +110,12 @@ class ChemicalSystem:
         for key, item in label_dict.items():
             self._labels[key] = self._labels.get(key, []) + item
 
+    @staticmethod
+    def _rename_isotopes(element: str):
+        if element[-1].isdigit():
+            return f"[{element}]"
+        return element
+
     def add_clusters(self, group_list: list[list[int]]):
         for group in group_list:
             sorted_group = sorted(set(group))
@@ -117,6 +123,7 @@ class ChemicalSystem:
                 continue
             atom_list = [self._atom_types[index] for index in group]
             unique_atoms, counts = np.unique(atom_list, return_counts=True)
+            unique_atoms = map(self._rename_isotopes, unique_atoms)
             name = "_".join(
                 f"{atom}{count}" for atom, count in zip(unique_atoms, counts)
             )
