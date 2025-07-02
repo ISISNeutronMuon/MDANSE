@@ -4,9 +4,8 @@
    contain the root `toctree` directive.
 
 .. note::
-   This is the documentation of the MDANSE 2.0 release.
-   The documentation, just like the code itself, is still under development.
-   MDANSE 2 is currently (June 2025) approaching its first release.
+   This is the documentation of MDANSE 2.0.
+   MDANSE 2 is currently (July 2025) approaching its first release.
 
 Welcome to MDANSE's documentation!
 ==================================
@@ -18,11 +17,14 @@ is a Python application designed for computing neutron observables
 from molecular dynamics (MD) trajectories.
 The results can be directly compared with
 neutron scattering experiments, particularly inelastic and quasi-elastic
-neutron scattering spectroscopies. MDANSE can analyse MD trajectories 
+neutron scattering spectroscopies.
+
+MDANSE can analyse MD trajectories 
 produced by different simulation software, including
 CASTEP, VASP, Gromacs, DL_POLY, CHARMM, LAMMPS, DFTB and CP2K.
 General-purpose trajectory converters using external libraries
 (ASE, mdtraj and MDAnalysis) are also available in MDANSE.
+
 The recommended way of working with MDANSE is via the
 graphical user interface (GUI) provided by
 the `MDANSE_GUI Python package <https://pypi.org/project/MDANSE-GUI/>`_.

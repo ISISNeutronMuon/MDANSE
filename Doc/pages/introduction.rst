@@ -7,7 +7,8 @@ modeling plays a crucial role in analyzing and interpreting such experiments,
 leading to improvements in existing materials and the design of new ones.
 Atomistic simulations, particularly molecular dynamics (MD) simulations, are
 increasingly employed for these purposes. 
-Many properties, including neutron observables, can be derived from
+
+Many properties, including neutron observables, can be derived
 from MD trajectories. These include mean square displacement,
 vibrational density of states, velocity
 and position auto- and cross-correlation functions and van Hove functions.
