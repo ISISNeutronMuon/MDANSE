@@ -241,9 +241,9 @@ class ElementButton(QToolButton):
         self.setGroupStyleSheet()
         self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
-        self.isotopes = []
+        self.isotopes = [element]
 
-        for iso in ATOMS_DATABASE.get_isotopes(element):
+        for iso in sorted(ATOMS_DATABASE.get_isotopes(element)):
             self.isotopes.append(iso)
 
         self.clicked.connect(self.altContextMenu)

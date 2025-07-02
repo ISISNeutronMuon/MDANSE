@@ -267,6 +267,7 @@ class SelectionHelper(QDialog):
 
         mol_view = MolecularViewerWithPicking()
         mol_view.clicked_atom_index.connect(self.update_from_3d_view)
+        mol_view.picked_atoms_changed.connect(self.update_picked_atom_count)
         self.view_3d = View3D(mol_view)
         self.view_3d.update_panel(traj_data)
 
@@ -461,6 +462,20 @@ class SelectionHelper(QDialog):
         self.selection_model.on_atom_clicked(index)
         self.update_selection_textbox()
 
+    @Slot(object)
+    def update_picked_atom_count(self, molview_selection: set[int]) -> None:
+        """Use the number of selected atoms from 3D view to update the text box.
+
+        Only used for manual selection of atoms.
+
+        Parameters
+        ----------
+        molview_selection : set[int]
+            set of all the selected atom indices, as provided by MolecularViewer
+
+        """
+        self.update_selection_textbox(len(molview_selection))
+
     @Slot()
     def append_selection(self):
         """Add a selection operation from the text input field."""
@@ -481,9 +496,16 @@ class SelectionHelper(QDialog):
             self.view_3d._viewer.change_picked(self.selected)
             self.update_selection_textbox()
 
-    def update_selection_textbox(self) -> None:
-        """Update the selection textbox."""
-        num_sel = len(self.selected)
+    def update_selection_textbox(self, num_atoms_3dview: int | None = None) -> None:
+        """Update the textbox with the current atom selection information.
+
+        Parameters
+        ----------
+        num_atoms_3dview : int | None, optional
+            Number of atoms currently selected in 3D view, by default None
+
+        """
+        num_sel = num_atoms_3dview if num_atoms_3dview else len(self.selected)
         text = [f"Number of atoms selected:\n{num_sel}\n\nSelected atoms:\n"]
         for idx in self.selected:
             text.append(f"{idx}  ({self.atm_full_names[idx]})\n")

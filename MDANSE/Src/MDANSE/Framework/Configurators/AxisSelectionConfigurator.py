@@ -13,65 +13,76 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
-
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Framework.UserDefinitionStore import UD_STORE
+from MDANSE.Framework.Configurators.MoleculeSelectionConfigurator import (
+    MoleculeSelectionConfigurator,
+)
 from MDANSE.MolecularDynamics.TrajectoryUtils import find_atoms_in_molecule
 
 
-class AxisSelectionConfigurator(IConfigurator):
-    """Defines a local axis per molecule.
+class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
+    """Defines a local axis in a molecule.
 
-    For each molecule, the axis is defined using the coordinates
-    of two atoms of the molecule.
+    The input is the name of a molecule type, and one or two indices
+    of atoms within the molecule.
+
+    If the atom indices are not defined, the calculation will use
+    the principal axis of the molecule determined from the moment
+    of inertia.
+
+    If one index is given, the molecule axis will be a vector from
+    the molecule centre to the atom with the given index.
+
+    If two indices are given, the molecule axis will be a vector
+    between the atoms with the two indices.
     """
 
-    _default = None
+    _default = (None, 0)
 
-    def configure(self, value):
-        """
-        Configure an input value.
+    def configure(self, value: tuple[str, str | None, str | None]):
+        """Set the molecule name, and the optional atom indices.
 
-        The value can be:
+        Parameters
+        ----------
+        value : tuple[str, str  |  None, str  |  None]
+            Molecule name, first atom index or None, second atom index or None.
 
-        #. a dict with *'molecule'*, *'endpoint1'* and *'endpoint2'* keys. *'molecule'* key \
-        is the name of the molecule for which the axis selection will be performed and *'endpoint1'* \
-        and *'endpoint2'* keys are the names of two atoms of the molecule along which the axis will be defined
-        #. str: the axis selection will be performed by reading the corresponding user definition.
+        Raises
+        ------
+        ValueError
+            If too many values were included in the input tuple.
 
-        :param configuration: the current configuration
-        :type configuration: MDANSE.Framework.Configurable.Configurable
-        :param value: the input value
-        :type value: tuple or str
         """
         self._original_input = value
-
-        trajConfig = self.configurable[self.dependencies["trajectory"]]
-
-        if UD_STORE.has_definition(trajConfig["basename"], "axis_selection", value):
-            ud = UD_STORE.get_definition(
-                trajConfig["basename"], "axis_selection", value
-            )
-            self.update(ud)
+        self["index1"] = None
+        self["index2"] = None
+        molecule_name = value[0]
+        self["details"] = (
+            f"Axis in molecule {molecule_name} determined from moment of inertia"
+        )
+        super().configure(molecule_name)
+        try:
+            val1 = int(value[1])
+        except (TypeError, ValueError, IndexError):
+            val1 = None
+            val2 = None
         else:
-            self.update(value)
-
-        e1 = find_atoms_in_molecule(
-            trajConfig["instance"].chemical_system,
-            self["molecule"],
-            self["endpoint1"],
-            True,
-        )
-        e2 = find_atoms_in_molecule(
-            trajConfig["instance"].chemical_system,
-            self["molecule"],
-            self["endpoint2"],
-            True,
-        )
-
-        self["value"] = value
-
-        self["endpoints"] = list(zip(e1, e2))
-
-        self["n_axis"] = len(self["endpoints"])
+            try:
+                val2 = int(value[2])
+            except (TypeError, ValueError, IndexError):
+                val2 = None
+                self["details"] = (
+                    f"Axis in molecule {molecule_name} from atom {val1!s} to the centre of mass"
+                )
+            else:
+                self["details"] = (
+                    f"Axis in molecule {molecule_name} from atom {val1!s} to {val2!s}"
+                )
+        if len(value) == 3:
+            self["index1"] = val1
+            self["index2"] = val2
+        elif len(value) == 2:
+            self["index1"] = val1
+        elif len(value) > 3:
+            raise ValueError(f"Too many items in input: {value}")

@@ -13,12 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from typing import Union
 
 import numpy as np
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QComboBox, QPushButton
+from qtpy.QtWidgets import QComboBox, QLabel, QPushButton
 
 from MDANSE_GUI.InputWidgets.MoleculePreviewWidget import MoleculePreviewWidget
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
@@ -27,9 +28,10 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class MoleculeWidget(WidgetBase):
     """MDANSE input widget for selecting a molecule type in a trajectory."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, index_boxes: int = 0, **kwargs):
         """Populate the combo box with valid molecule names."""
         super().__init__(*args, **kwargs)
+        self.index_combo_boxes = []
         configurator = kwargs.get("configurator")
         trajectory_configurator = kwargs.get("trajectory_configurator")
         default_option = ""
@@ -82,6 +84,19 @@ class MoleculeWidget(WidgetBase):
         self.selected_mol = self.mol_dict.get(self.selected_name, None)
         self.field.currentTextChanged.connect(self.updateValue)
         self.field.currentTextChanged.connect(self.molecule_changed)
+        initial_num_atoms = len(
+            self.mol_dict.get(default_option, {}).get("atom_indices", []),
+        )
+        index_elements = ["None"]
+        index_elements.extend(str(x) for x in range(initial_num_atoms))
+        for box_index in range(index_boxes):
+            index_box = QComboBox(self._base)
+            index_box.setEditable(False)
+            index_box.addItems(index_elements)
+            index_box.setCurrentText("None") if box_index else index_box.setCurrentText(
+                "0",
+            )
+            self.index_combo_boxes.append(index_box)
         button = QPushButton(self._base)
         button.setText("Molecule Preview")
         button.clicked.connect(self.button_clicked)
@@ -95,6 +110,9 @@ class MoleculeWidget(WidgetBase):
         self.field.setToolTip(tooltip_text)
         self._field = self.field
         self._layout.addWidget(self.field)
+        for nbox, cbox in enumerate(self.index_combo_boxes):
+            self._layout.addWidget(QLabel(f"Atom {nbox + 1}:"))
+            self._layout.addWidget(cbox)
         self._layout.addWidget(button)
         self._configurator = configurator
         self.valid_changed.connect(self.toggle_button)
@@ -154,7 +172,7 @@ class MoleculeWidget(WidgetBase):
         """Enable the button only if molecules are present."""
         self.view_button.setEnabled(self.field.count())
 
-    def get_widget_value(self) -> Union[str, None]:
+    def get_widget_value(self) -> str | None:
         """Return the currently selected molecule name."""
         mol_key = self._field.currentText()
         if mol_key in self.mol_dict:
