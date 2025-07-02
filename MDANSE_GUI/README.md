@@ -34,7 +34,7 @@ source mdanse_env/bin/activate
 ```
 in a bash console, or
 ```
-mdanse_end\Scripts\activate.bat
+mdanse_env\Scripts\activate.bat
 ```
 if you are using cmd.exe on Windows.
 
@@ -86,7 +86,7 @@ G. Goret, B. Aoun, E. Pellegrini. J Chem Inf Model. (2017) 57(1):1-5.
 ## License
 
 MDANSE_GUI is licensed under GPL-3.0. See
-[LICENSE](https://github.com/ISISNeutronMuon/MDANSE/blob/develop/LICENSE)
+[LICENSE](https://github.com/ISISNeutronMuon/MDANSE/blob/protos/LICENSE)
 for more information.
 
 ## Acknowledgements
