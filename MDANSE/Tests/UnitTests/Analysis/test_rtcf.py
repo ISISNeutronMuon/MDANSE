@@ -73,10 +73,14 @@ def parameters():
 
 
 @pytest.mark.parametrize("polynomial_order", [1,2,3])
-def test_rtcf(tmp_path, parameters, polynomial_order):
+def test_rtcf(generate_benchmarks, tmp_path, parameters, polynomial_order):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
+    result_file = RESULTS_DIR / f"structure_analysis_rtcf_l{str(polynomial_order)}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters["polynomial_order"] = polynomial_order
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
@@ -84,9 +88,11 @@ def test_rtcf(tmp_path, parameters, polynomial_order):
     job = IJob.create("ReorientationalTimeCorrelationFunction")
     job.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     assert out_file.is_file()
     assert log_file.is_file()
 
-    result_file = RESULTS_DIR / f"structure_analysis_rtcf_l{str(polynomial_order)}.mda"
 
     compare_hdf5(out_file, result_file, [f"rtcf/l={pord}" for pord in range(1,polynomial_order+1)])

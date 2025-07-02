@@ -74,11 +74,11 @@ class ReorientationalTimeCorrelationFunction(IJob):
 
     .. math::
 
-       \\overrightarrow{vector} =  \\overrightarrow{direction} - \\overrightarrow{origin}
+       \overrightarrow{vector} =  \overrightarrow{direction} - \overrightarrow{origin}
 
     .. math::
 
-       \phi(T = T_{1}-T_{0}) = arcos(  \\overrightarrow{vector(T_{1})} . \\overrightarrow{vector(T_{0})} )
+       \phi(T = T_{1}-T_{0}) = arcos(  \overrightarrow{vector(T_{1})} . \loverrightarrow{vector(T_{0})} )
 
     The general result is :math:`C_{l}(T) = \langle P_{l}[cos(\phi(T))] \rangle`,
     where :math:`P_{l}` is the Legendre polynomial of the order l.
@@ -192,6 +192,10 @@ class ReorientationalTimeCorrelationFunction(IJob):
                     partial_result=True,
                 )
 
+    @property
+    def legendre_orders(self):
+        return range(1, self.legendre_order + 1)
+
     def run_step(self, index: int) -> tuple[int, list[np.ndarray]]:
         """Run the analysis for a single molecule.
 
@@ -240,13 +244,13 @@ class ReorientationalTimeCorrelationFunction(IJob):
                     diff[i] = eigenvectors[0]
                 continue
             diff[i] = coordinates[self.inner_index1] - ref_pos
-        modulus = np.sqrt(np.sum(diff**2, 1))
+        modulus = np.linalg.norm(diff, axis=1)
 
         diff /= modulus[:, np.newaxis]
 
         n_configs = self.configuration["frames"]["n_configs"]
         results = []
-        for legendre_order in range(1, self.legendre_order + 1):
+        for legendre_order in self.legendre_orders:
             if legendre_order == 1:
                 ac = correlate(diff, diff[:n_configs], mode="valid") / n_configs
                 results.append(ac.T[0])
@@ -268,7 +272,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
             list of arrays of the correlation results
 
         """
-        for l_order in range(1, self.legendre_order + 1):
+        for l_order in self.legendre_orders:
             self._outputData[f"rtcf/l={l_order}"] += x[l_order - 1]
 
             if self.configuration["per_axis"]["value"]:
@@ -278,7 +282,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
 
     def finalize(self):
         """Normalise and write out the results."""
-        for l_order in range(1, self.legendre_order + 1):
+        for l_order in self.legendre_orders:
             self._outputData[f"rtcf/l={l_order}"] /= self.configuration["trajectory"][
                 "instance"
             ].chemical_system.number_of_molecules(

@@ -72,13 +72,15 @@ class RotationAutocorrelation(IJob):
             "instance"
         ].chemical_system._clusters[self.configuration["molecule"]["value"]]
 
-        self._indices = set(
+        self._indices = {
             idx
             for idxs in self._configuration["atom_selection"]["indices"]
             for idx in idxs
-        )
+        }
 
-        self.valid_molecules = [mol for mol in molecules if set(mol) <= self._indices]
+        self.valid_molecules = [
+            mol for mol in molecules if self._indices.issuperset(mol)
+        ]
 
         self.numberOfSteps = len(self.valid_molecules)
 
@@ -115,7 +117,7 @@ class RotationAutocorrelation(IJob):
             units="au",
         )
 
-        for axis in ["x", "y", "z"]:
+        for axis in "xyz":
             self._outputData.add(
                 f"rotation_around_{axis}",
                 "LineOutputVariable",
