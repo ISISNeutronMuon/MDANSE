@@ -9,7 +9,7 @@ The GUI depends on the [MDANSE package](https://www.isis.stfc.ac.uk/Pages/MDANSE
 
 ## Version information
 
-This is the first release candidate of MDANSE_GUI 0.1.0. The set of features it
+This is the first release candidate of MDANSE_GUI 1.0.0. The set of features it
 contains will not change by the time the full release has been made. However,
 there still may be some problems with the code at this stage that need to be
 identified and corrected.
@@ -19,6 +19,8 @@ Please help us develop MDANSE_GUI by reporting any problems you experience when
 using the code.
 The preferred way of reporting problems is by adding them to the
 [GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
+You can also send a message to MDANSE-help@stfc.ac.uk to get in touch
+with MDANSE developers.
 
 ## Quick start: installation
 
