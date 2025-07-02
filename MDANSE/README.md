@@ -86,7 +86,7 @@ Other information including example scripts can be found on the [MDANSE website]
 
 ## What can MDANSE do?
 
-Firstly, MDANSE can interface with MD simulation software.
+Firstly, MDANSE can read the output of MD simulation software.
 It does this by providing converters for different file formats
 into an .MDT file (HDF format), which is then used for all
 calculations. The following MD packages are supported:

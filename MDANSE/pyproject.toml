@@ -4,18 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE"
-version = "2.0.0b3"
+version = "2.0.0rc1"
 description = 'MDANSE Core package - Molecular Dynamics trajectory handling and analysis code'
 readme = "README.md"
 requires-python = ">=3.9"
 license = {file = "LICENSE"}
 keywords = ["molecular dynamics", "science", "simulation", "analysis"]
-authors = [
-  {name = "Maciej Bartkowiak", email = "maciej.bartkowiak@stfc.ac.uk"},
-  {name = "Chi Y. Cheng", email = "chi.cheng@stfc.ac.uk"}
-]
 maintainers = [
-  {name = "Sanghamitra Mukhopadhyay", email = "sanghamitra.mukhopadhyay@stfc.ac.uk"}
+  {name = "Maciej Bartkowiak", email = "maciej.bartkowiak@stfc.ac.uk"},
+  {name = "Chi Y. Cheng", email = "chi.cheng@stfc.ac.uk"},
+  {name = "Jacob Wilkins", email = "jacob.wilkins@stfc.ac.uk"}
 ]
 classifiers = [
         'Development Status :: 4 - Beta',
