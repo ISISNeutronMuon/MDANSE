@@ -36,9 +36,8 @@ class ScatteringLengthDensityProfile(IJob):
 
     Additionally, the following other profiles are provided in the output:
 
-    - 'sldp_incoherent', the incoherent scattering length profile,
-    - 'sldp_total', the total scattering length profile,
     - 'dp_{atom_type}', numeric density profiles (number of atoms per volume)
+    - 'dp_total', numeric density profile for all atoms
 
     """
 
@@ -112,14 +111,7 @@ class ScatteringLengthDensityProfile(IJob):
         self._elements = list(self.configuration["atom_selection"].get_natoms().keys())
 
         self.scattering_lengths = {
-            element: [
-                trajectory.get_atom_property(element, "b_coherent"),
-                trajectory.get_atom_property(element, "b_incoherent"),
-                10
-                * np.sqrt(
-                    trajectory.get_atom_property(element, "xs_scattering") / (4 * np.pi)
-                ),
-            ]
+            element: trajectory.get_atom_property(element, "b_coherent").real
             for element in self._elements
         }
 
@@ -140,15 +132,14 @@ class ScatteringLengthDensityProfile(IJob):
             units="1 / ang3",
         )
 
-        for component in ["/sldp", "/incoherent", "/total"]:
-            self._outputData.add(
-                f"sldp{component}",
-                "LineOutputVariable",
-                (self._n_bins,),
-                axis="dp/axes/r",
-                units="1e-6 / ang2",
-                main_result=component == "",
-            )
+        self._outputData.add(
+            "sldp/sldp",
+            "LineOutputVariable",
+            (self._n_bins,),
+            axis="dp/axes/r",
+            units="1e-6 / ang2",
+            main_result=True,
+        )
 
         self._extent = 0.0
 
@@ -209,11 +200,8 @@ class ScatteringLengthDensityProfile(IJob):
 
         for element, hist in density_profile.items():
             self._outputData[f"dp/number/{element}"] += hist / slice_volume
-            slen_list = self.scattering_lengths[element]
-            for component, scat_len in zip(
-                ["/sldp", "/incoherent", "/total"], slen_list
-            ):
-                self._outputData[f"sldp{component}"] += scat_len * hist / slice_volume
+            slen_coh = self.scattering_lengths[element]
+            self._outputData["sldp/sldp"] += slen_coh * hist / slice_volume
 
     def finalize(self) -> None:
         """
@@ -234,15 +222,14 @@ class ScatteringLengthDensityProfile(IJob):
 
         self._indices_per_element
 
-        for dset in ["dp/number/total", "sldp/sldp", "sldp/incoherent", "sldp/total"]:
+        for dset in ["dp/number/total", "sldp/sldp"]:
             self._outputData[dset] /= fact
             self._outputData[dset].scaling_factor = fact
 
         r_values = np.linspace(0, self._extent / self.numberOfSteps, self._n_bins + 1)
         self._outputData["dp/axes/r"][:] = (r_values[1:] + r_values[:-1]) / 2
 
-        for component in ["/sldp", "/incoherent", "/total"]:
-            self._outputData[f"sldp{component}"] *= 1e6 / self.numberOfSteps
+        self._outputData["sldp/sldp"] *= 1e6 / self.numberOfSteps
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
