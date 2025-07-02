@@ -145,14 +145,14 @@ class ReorientationalTimeCorrelationFunction(IJob):
         )
 
         self._outputData.add(
-            "time",
+            "rtcf/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
         )
 
         self._outputData.add(
-            "axis_index",
+            "rtcf/axes/axis_index",
             "LineOutputVariable",
             np.arange(
                 self.configuration["trajectory"][
@@ -166,17 +166,17 @@ class ReorientationalTimeCorrelationFunction(IJob):
 
         for l_order in range(1, self.legendre_order + 1):
             self._outputData.add(
-                f"rtcf_l={l_order}",
+                f"rtcf/l={l_order}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
-                axis="time",
+                axis="rtcf/axes/time",
                 units="au",
                 main_result=True,
             )
 
             if self.configuration["per_axis"]["value"]:
                 self._outputData.add(
-                    f"rtcf_l={l_order}_per_axis",
+                    f"rtcf/per_axis/l={l_order}",
                     "SurfaceOutputVariable",
                     (
                         self.configuration["trajectory"][
@@ -186,7 +186,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
                         ),
                         self.configuration["frames"]["n_frames"],
                     ),
-                    axis="axis_index|time",
+                    axis="rtcf/axes/axis_index|rtcf/axes/time",
                     units="au",
                     main_result=True,
                     partial_result=True,
@@ -269,17 +269,17 @@ class ReorientationalTimeCorrelationFunction(IJob):
 
         """
         for l_order in range(1, self.legendre_order + 1):
-            self._outputData[f"rtcf_l={l_order}"] += x[l_order - 1]
+            self._outputData[f"rtcf/l={l_order}"] += x[l_order - 1]
 
             if self.configuration["per_axis"]["value"]:
-                self._outputData[f"rtcf_l={l_order}_per_axis"][index, :] = x[
+                self._outputData[f"rtcf/per_axis/l={l_order}"][index, :] = x[
                     l_order - 1
                 ]
 
     def finalize(self):
         """Normalise and write out the results."""
         for l_order in range(1, self.legendre_order + 1):
-            self._outputData[f"rtcf_l={l_order}"] /= self.configuration["trajectory"][
+            self._outputData[f"rtcf/l={l_order}"] /= self.configuration["trajectory"][
                 "instance"
             ].chemical_system.number_of_molecules(
                 self.configuration["molecule_and_axis"]["value"],

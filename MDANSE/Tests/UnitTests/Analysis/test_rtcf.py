@@ -89,4 +89,4 @@ def test_rtcf(tmp_path, parameters, polynomial_order):
 
     result_file = RESULTS_DIR / f"structure_analysis_rtcf_l{str(polynomial_order)}.mda"
 
-    compare_hdf5(out_file, result_file, [f"rtcf_l={pord}" for pord in range(1,polynomial_order+1)])
+    compare_hdf5(out_file, result_file, [f"rtcf/l={pord}" for pord in range(1,polynomial_order+1)])
