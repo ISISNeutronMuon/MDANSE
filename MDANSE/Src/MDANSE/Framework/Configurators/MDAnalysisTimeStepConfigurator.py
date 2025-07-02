@@ -36,7 +36,7 @@ class MDAnalysisTimeStepConfigurator(FloatConfigurator):
         except (TypeError, ValueError):
             pass
 
-        if value is None or value == "" or value == 0.0:
+        if value in {None, "", 0.0}:
             file_configurator = self.configurable[self.dependencies["topology_file"]]
             files_configurator = self.configurable[
                 self.dependencies["coordinate_files"]

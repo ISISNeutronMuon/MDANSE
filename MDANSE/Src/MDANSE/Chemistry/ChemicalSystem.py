@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 from __future__ import annotations
 
 import copy
@@ -42,7 +41,6 @@ class ChemicalSystem:
             text label of this system
         trajectory : Trajectory, optional
             instance of the Trajectory class, by default None
-
         """
         self.name = str(name)
         self._database = ATOMS_DATABASE
@@ -119,14 +117,17 @@ class ChemicalSystem:
     def add_clusters(self, group_list: list[list[int]]):
         for group in group_list:
             sorted_group = sorted(set(group))
+
             if len(sorted_group) < 2:
                 continue
+
             atom_list = [self._atom_types[index] for index in group]
             unique_atoms, counts = np.unique(atom_list, return_counts=True)
             unique_atoms = map(self._rename_isotopes, unique_atoms)
             name = "_".join(
                 f"{atom}{count}" for atom, count in zip(unique_atoms, counts)
             )
+
             if name not in self._clusters:
                 self._clusters[name] = [sorted_group]
             elif sorted_group not in self._clusters[name]:
@@ -313,22 +314,24 @@ class ChemicalSystem:
         for key, value in self._clusters.items():
             clusters_group.create_dataset(key, data=value)
 
-    def load(self, trajectory: str | h5py.File):
+    def load(self, trajectory: h5py.File | str):
         """Read the ChemicalSystem information from the trajectory.
 
         Parameters
         ----------
         trajectory : str | h5py.File
             Filename or a file object of the trajectory.
-
         """
         close_on_end = False
-        if hasattr(trajectory, "keys"):
-            source = trajectory
-        else:
+        if isinstance(trajectory, str):
             close_on_end = True
             source = h5py.File(trajectory)
-        if "composition" not in source:
+        else:
+            source = trajectory
+
+        assert isinstance(source, (h5py.File, dict))
+
+        if "composition" not in source.keys():
             if close_on_end:
                 source.close()
             self.legacy_load(trajectory)
@@ -362,21 +365,21 @@ class ChemicalSystem:
         if close_on_end:
             source.close()
 
-    def legacy_load(self, trajectory: str | h5py.File):
+    def legacy_load(self, trajectory: h5py.File | str):
         """Read the ChemicalSystem from an old (pre-2025) trajectory.
-
         Parameters
         ----------
         trajectory : str | h5py.File
             Filename or a file object of the trajectory.
-
         """
+
         close_on_end = False
-        if hasattr(trajectory, "keys"):
-            source = trajectory
-        else:
+        if isinstance(trajectory, str):
             close_on_end = True
             source = h5py.File(trajectory)
+        else:
+            source = trajectory
+
         self.rdkit_mol = Chem.RWMol()
 
         grp = source["/chemical_system"]

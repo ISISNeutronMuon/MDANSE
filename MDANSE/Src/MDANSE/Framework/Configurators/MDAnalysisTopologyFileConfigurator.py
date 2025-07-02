@@ -42,12 +42,12 @@ class MDAnalysisTopologyFileConfigurator(FileWithAtomDataConfigurator):
         filepath, format = setting
         if format == "AUTO":
             self["format"] = None
+        elif format in mda._PARSERS:
+            self["format"] = format
         else:
-            if format in mda._PARSERS.keys():
-                self["format"] = format
-            else:
-                self.error_status = "MDAnalysis topology file format not recognised."
-                return
+            self.error_status = "MDAnalysis topology file format not recognised."
+            return
+
         super().configure(filepath)
 
     def parse(self) -> None:

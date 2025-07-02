@@ -24,7 +24,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 def parse_dictionary(input: str) -> dict[str, Any]:
-    big_line = input.strip("\{\}[] \n")
+    big_line = input.strip("{}[] \n")
     tokens = big_line.split(",")
     result = {}
     for entry in tokens:
@@ -82,7 +82,7 @@ class McStasOptionsConfigurator(IConfigurator):
             if k == "dir":
                 # If the output directory already exists, defines a 'unique' output directory name because otherwise McStas throws.
                 if Path(v).exists():
-                    v = self._default["dir"]
+                    v = self._default["dir"]  # noqa: PLW2901
                 self["mcstas_output_directory"] = Path(v)
             tmp.append(f"--{k}={v}")
 

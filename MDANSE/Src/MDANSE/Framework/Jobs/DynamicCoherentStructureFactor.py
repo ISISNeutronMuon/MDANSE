@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import collections
 import itertools
 from math import sqrt
@@ -35,7 +37,7 @@ class DynamicCoherentStructureFactorError(Error):
 
 
 class DynamicCoherentStructureFactor(IJob):
-    """Computes the dynamic coherent structure factor :math:`S_{\text{coh}}(\mathbf{q}, \omega)` for a set of atoms.
+    r"""Computes the dynamic coherent structure factor :math:`S_{\text{coh}}(\mathbf{q}, \omega)` for a set of atoms.
 
     It can be compared to experimental data e.g. the energy-integrated, static structure
     factor :math:`S_{\text{coh}}(q)` or the dispersion and intensity of phonons.
@@ -239,7 +241,7 @@ class DynamicCoherentStructureFactor(IJob):
                 ),
             )
 
-    def run_step(self, index: int) -> tuple[int, np.ndarray]:
+    def run_step(self, index: int) -> tuple[int, dict[str, np.ndarray] | None]:
         """Run the analysis for a single Q shell.
 
         Parameters

@@ -167,20 +167,14 @@ class TrjFile(dict):
 
         self._configRecPos = trjfile.tell() - self._headerSize
 
+        rec_count = 3
+
         if self["velocities_written"]:
-            if self["gradients_written"]:
-                # Frame record 8,9,10,11,12,13,14,15,16
-                self._configRec = "!" + (f"!{self['totmov']}{self._fp}8x" * 9)
-            else:
-                # Frame record 8,9,10,11,12,13
-                self._configRec = "!" + (f"{self['totmov']}{self._fp}8x" * 6)
-        else:
-            if self["gradients_written"]:
-                # Frame record 8,9,10,14,15,16
-                self._configRec = "!" + (f"{self['totmov']}{self._fp}8x" * 6)
-            else:
-                # Frame record 8,9,10
-                self._configRec = "!" + (f"{self['totmov']}{self._fp}8x" * 3)
+            rec_count += 3
+        if self["gradients_written"]:
+            rec_count += 3
+
+        self._configRec = "!" + (f"{self['totmov']}{self._fp}8x" * rec_count)
 
         self._configRecSize = struct.calcsize(self._configRec)
         trjfile.read(self._configRecSize)
@@ -226,28 +220,20 @@ class TrjFile(dict):
 
         config = struct.unpack(self._configRec, trjfile.read(self._configRecSize))
 
+        rows = 1 + self["velocities_written"] + self["gradients_written"]
+
+        config = np.transpose(np.reshape(config, (rows, 3, self["totmov"])))
+        xyz = config[:, :, 0] * measure(1.0, "ang").toval("nm")
+
         if self["velocities_written"]:
-            if self["gradients_written"]:
-                config = np.transpose(np.reshape(config, (3, 3, self["totmov"])))
-                xyz = config[:, :, 0] * measure(1.0, "ang").toval("nm")
-                vel = config[:, :, 1] * measure(1.0, "ang/fs").toval("nm/ps")
-                gradients = config[:, :, 2] * FORCE_FACTOR
-            else:
-                config = np.transpose(np.reshape(config, (2, 3, self["totmov"])))
-                xyz = config[:, :, 0] * measure(1.0, "ang").toval("nm")
-                vel = config[:, :, 1] * measure(1.0, "ang/fs").toval("nm/ps")
-                gradients = None
+            vel = config[:, :, 1] * measure(1.0, "ang/fs").toval("nm/ps")
         else:
-            if self["gradients_written"]:
-                config = np.transpose(np.reshape(config, (2, 3, self["totmov"])))
-                xyz = config[:, :, 0] * measure(1.0, "ang").toval("nm")
-                vel = None
-                gradients = config[:, :, 1] * FORCE_FACTOR
-            else:
-                config = np.transpose(np.reshape(config, (1, 3, self["totmov"])))
-                xyz = config[:, :, 0] * measure(1.0, "ang").toval("nm")
-                vel = None
-                gradients = None
+            vel = None
+
+        if self["gradients_written"]:
+            gradients = config[:, :, 2] * FORCE_FACTOR
+        else:
+            gradients = None
 
         return timeStep, cell, xyz, vel, gradients
 

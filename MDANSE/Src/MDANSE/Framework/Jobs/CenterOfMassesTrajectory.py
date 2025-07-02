@@ -176,8 +176,8 @@ class CenterOfMassesTrajectory(IJob):
         if self.configuration["fold"]["value"]:
             com_conf.fold_coordinates()
 
-        for cluster_name in temp_radii.keys():
-            self._molecule_radii[cluster_name].append(np.mean(temp_radii[cluster_name]))
+        for cluster_name, radii in temp_radii.items():
+            self._molecule_radii[cluster_name].append(np.mean(radii))
         # The times corresponding to the running index.
         time = self.configuration["frames"]["time"][index]
 

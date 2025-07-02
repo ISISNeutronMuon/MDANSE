@@ -67,15 +67,13 @@ class AtomLabel:
             If the other object is not an AtomLabel.
         """
         if not isinstance(other, AtomLabel):
-            AssertionError(f"{other} should be an instance of AtomLabel.")
-        if (
+            raise TypeError(f"{other} should be an instance of AtomLabel.")
+
+        return (
             self.grp_label == other.grp_label
             and self.atm_label == other.atm_label
             and self.mass == other.mass
-        ):
-            return True
-        else:
-            return False
+        )
 
     def __hash__(self) -> int:
         """
@@ -265,7 +263,7 @@ def check_mapping_valid(mapping: dict[str, dict[str, str]], labels: list[AtomLab
     bool
         True if the mapping is valid.
     """
-    pattern = re.compile("^([A-Za-z]\w*=[^=;]+(;[A-Za-z]\w*=[^=;]+)*)*$")
+    pattern = re.compile(r"^([A-Za-z]\w*=[^=;]+(;[A-Za-z]\w*=[^=;]+)*)*$")
     if not all(pattern.match(grp_label) for grp_label in mapping):
         return False
 

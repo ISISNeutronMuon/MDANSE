@@ -25,7 +25,7 @@ from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 
 
 class GaussianDynamicIncoherentStructureFactor(IJob):
-    """Computes the dynamic incoherent structure factor in the Gaussian approximation.
+    r"""Computes the dynamic incoherent structure factor in the Gaussian approximation.
 
     Gaussian approximation is exact for a system of free particles and a system of
     particles undergoing brownian motion. The results of this analysis will be close
