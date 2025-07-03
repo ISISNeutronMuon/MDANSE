@@ -19,6 +19,7 @@ from functools import cachedproperty
 
 from ase.io import iread, read
 from ase.io.trajectory import Trajectory as ASETrajectory
+
 from MDANSE.Framework.AtomMapping import AtomLabel
 
 from .BaseTypesDescriptor import PathConfigDesc
@@ -29,7 +30,6 @@ class InputFileDescriptor(PathConfigDesc, ABC):
         self,
         **params,
     ):
-
         super().__init__(mode="r", directory=False, **params)
 
     @abstractmethod

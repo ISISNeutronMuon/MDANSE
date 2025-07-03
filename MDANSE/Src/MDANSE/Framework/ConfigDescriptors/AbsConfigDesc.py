@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Container, Set
+from collections.abc import Container, Iterator
 from typing import Any, Generic, TypeVar
 
 from MDANSE.Core.Error import Error
@@ -41,7 +41,7 @@ class ConfigureDescriptor(ABC, Generic[T]):
         self,
         *,
         default: T = SENTINEL,
-        optional: bool = False,
+        optional: bool | None = None,
         choices: Container[T] | None = None,
         exclude: Container[T] = (),
         mutex: Container[str] = (),
@@ -49,8 +49,8 @@ class ConfigureDescriptor(ABC, Generic[T]):
         label: str = "",
         tooltip: str = "",
     ):
-        self.default = default
-        self.optional = optional
+        self.default: T = default
+        self.optional = optional if optional is not None else default is not SENTINEL
 
         self.choices = choices
         self.exclude = exclude
@@ -58,99 +58,105 @@ class ConfigureDescriptor(ABC, Generic[T]):
         self.mutex = mutex
         self.depends = depends
 
-
         self.label = label
         self.tooltip = tooltip
 
-        self.configured = False
-        self._value = default if default is not SENTINEL else None
+        self.__doc__ = f"""\
+{self.label}
 
-    def __set_name__(self, owner, name):
+{self.tooltip}
+        """
+
+    def __set_name__(self, owner: object, name: str):
         self.name = name
+        self.private_name = "_" + name
+        self.configured_var = self.private_name + "_configured"
+        setattr(owner, self.configured_var, False)
 
-    @property
-    def value(self):
-        if not self.optional and self.value is None:
-            raise ConfigError("Non-optional value has not been set")
+    def __get__(self, owner: object, objtype: type | None = None) -> T:
+        if owner is None:
+            return self
 
-        return self._value
+        if not self.optional and not getattr(owner, self.configured_var):
+            raise ConfigError(f"Non-optional value ({self.name}) has not been set")
 
-    @value.setter
-    def value(self, value):
-        self._value = value
+        value = getattr(owner, self.private_name, SENTINEL)
+        return value if value is not SENTINEL else self.default
 
-    def __get__(self, owner, objtype=None) -> T:
-        return self.value
+    def _bad_mutex(self, owner: object) -> Iterator[bool]:
+        return (getattr(owner, f"_{ex}_configured") for ex in self.mutex)
 
-    @property
-    def _bad_mutex(self, owner):
-        return (getattr(owner, ex).configured for ex in self.mutex)
+    def _bad_deps(self, owner: object) -> Iterator[bool]:
+        return (not getattr(owner, f"_{dep}_configured") for dep in self.depends)
 
-    @property
-    def _bad_deps(self, owner):
-        return (not getattr(owner, dep).configured for dep in self.depends)
+    def __set__(self, owner: object, value):
+        setattr(owner, self.configured_var, False)
+        setattr(owner, self.private_name, SENTINEL)
 
-    def __set__(self, owner, value):
-        self.configured = False
-
-        if any(self._bad_deps):
+        if any(self._bad_deps(owner)):
             raise ConfigError(
                 f"Dependencies ({', '.join(self._bad_deps)}) are not correctly defined."
             )
-        if any(self._bad_mutex):
+        if any(self._bad_mutex(owner)):
             raise ConfigError(
                 f"Mutually exclusive value ({', '.join(self._bad_mutex)}) is also configured."
             )
 
         deps = {dep: getattr(owner, dep).value for dep in self.depends}
 
-        self.value = self.validate(value, deps)
-        self.configured = True
+        setattr(owner, self.private_name, self.validate(value, deps))
+        setattr(owner, self.configured_var, True)
 
     @property
-    def choices(self) -> Set[T]:
+    def choices(self) -> set[T]:
         """
         Returns the set of values allowed for an input.
         """
         return self._choices
 
     @choices.setter
-    def choices(self, value: Container[T]):
+    def choices(self, value: Container[T]) -> None:
         if value is None:
             self._choices = set()
+            return
         self._choices = set(value)
 
     @property
-    def exclude(self) -> Set[int]:
+    def exclude(self) -> set[int]:
         """
         Returns the set of values which are not forbidden.
 
         Returns
         -------
-        Set[int]
+        set[int]
             Forbidden values.
         """
         return self._exclude
 
     @exclude.setter
-    def exclude(self, value: Container[int]):
+    def exclude(self, value: Container[int]) -> None:
         if value is None:
             self._exclude = set()
+            return
         self._exclude = set(value)
 
-    def validate_choices(self, value):
-        return self.choices is not None and value in self.choices
+    def validate_choices(self, value: T) -> bool:
+        return not self.choices or value in self.choices
 
-    def validate_exclude(self, value):
-        return self.exclude and value not in self.exclude
+    def validate_exclude(self, value: T) -> bool:
+        return not self.exclude or value not in self.exclude
 
     @abstractmethod
-    def validate(self, value, *_deps) -> T:
+    def validate(self, value: T, *_deps) -> T:
         """
         Ensure that the passed variable is of the right type.
         """
         if not self.validate_choices(value):
-            raise ConfigError(f"Value ({value}) not in choices ({self.choices!r}).")
+            raise ConfigError(
+                f"Value ({value!r}) not in choices ({', '.join(self.choices)})."
+            )
 
         if not self.validate_exclude(value):
-            raise ConfigError(f"Value ({value}) in excluded values ({self.exclude!r}).")
+            raise ConfigError(
+                f"Value ({value!r}) in excluded values ({', '.join(self.exclude)})."
+            )

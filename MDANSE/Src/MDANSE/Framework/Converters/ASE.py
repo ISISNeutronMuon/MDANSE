@@ -13,11 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import collections
+from contextlib import suppress
+from enum import Enum, auto
 
 import numpy as np
+from ase import Atoms
 from ase.io import iread, read
 from ase.io.trajectory import Trajectory as ASETrajectory
+from more_itertools import ilen
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
@@ -65,21 +68,17 @@ class ASE(Converter):
         default="INPUT_FILENAME",
     )
     atom_aliases = AtomMapping(
-        depends=("trajectory_file",), label="Atom mapping", default="{}"
+        depends=("trajectory_file",), label="Atom mapping", default={}
     )
     time_unit = SingleChoiceConfigDesc(
         ("fs", "ps", "ns"), default="fs", label="Time step unit"
     )
-    time_step = FloatConfigDesc(default=1.0, mini=1e-9, label="Time step")
+    time_step = FloatConfigDesc(default=1.0, minimum=1e-9, label="Time step")
     n_steps = IntegerConfigDesc(
-        default=0, mini=0, label="Number of time steps (0 for automatic detection)"
+        default=0, minimum=0, label="Number of time steps (0 for automatic detection)"
     )
     fold = BooleanConfigDesc(label="Fold coordinates into box")
-    output_files = OutputTrajectoryConfigDesc(
-        formats=("MDTFormat",),
-        allowed_formats=("MDTFormat",),
-        label="MDANSE trajectory (filename, format)",
-    )
+    output_files = OutputTrajectoryConfigDesc()
 
     def initialize(self):
         """
@@ -99,7 +98,7 @@ class ASE(Converter):
             "ps"
         )
 
-        self.parse_first_step(self._atomic_aliases)
+        self.parse_first_step(self.atom_aliases)
         LOG.info(f"isPeriodic after parse_first_step: {self._isPeriodic}")
         self._start = 0
 
@@ -108,7 +107,7 @@ class ASE(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.output_files.out_file,
+            self.output_files.path,
             self._chemical_system,
             self.numberOfSteps,
             positions_dtype=self.output_files.dtype,
@@ -119,13 +118,17 @@ class ASE(Converter):
 
         LOG.info(f"total steps: {self.numberOfSteps}")
 
-    def run_step(self, index):
+    def run_step(self, index: int) -> tuple[int, None]:
         """Runs a single step of the job.
 
-        @param index: the index of the step.
-        @type index: int.
+        Parameters
+        ----------
+        index : int
+            Index of the loop.
 
-        @note: the argument index is the index of the loop note the index of the frame.
+        Returns
+        -------
+        tuple[int, None]
         """
         if not self._keep_running:
             LOG.warning(f"Skipping frame {index}")
@@ -140,6 +143,9 @@ class ASE(Converter):
         else:
             LOG.info("ASE using the slower way")
             frame = read(self.trajectory_file, index=index)
+
+        assert isinstance(frame, Atoms)
+
         time = self._timeaxis[index]
 
         unit_conversion_factor = measure(1.0, "ang").toval("nm")
@@ -147,20 +153,17 @@ class ASE(Converter):
             unitCell = frame.cell.array
             if np.allclose(unitCell, 0.0):
                 LOG.warning(f"Using initial unit cell: {self._backup_cell}")
-                unitCell = self._backup_cell * unit_conversion_factor
+                unitCell = self._backup_cell
             else:
                 LOG.info(f"Unit cell from frame: {unitCell}")
-                unitCell *= unit_conversion_factor
-            unitCell = UnitCell(unitCell)
+
+            unitCell = UnitCell(unitCell * unit_conversion_factor)
 
         coords = frame.get_positions()
         coords *= unit_conversion_factor
 
-        try:
+        if "momenta" in frame.arrays:
             momenta = frame.arrays["momenta"]
-        except KeyError:
-            pass
-        else:
             if self._initial_masses is not None:
                 velocities = momenta / self._initial_masses.reshape((len(momenta), 1))
             else:
@@ -169,30 +172,24 @@ class ASE(Converter):
                 ).reshape((len(momenta), 1))
             variables["velocities"] = velocities * measure(1.0, "ang/fs").toval("nm/ps")
 
-        if self._isPeriodic:
-            try:
+        try:
+            if self._isPeriodic:
                 real_conf = PeriodicRealConfiguration(
                     self._trajectory.chemical_system, coords, unitCell, **variables
                 )
-            except ValueError:
-                self._keep_running = False
-                LOG.warning(
-                    f"Could not create configuration for frame {index}. Will skip the rest"
-                )
-                return index, None
-            if self.fold:
-                real_conf.fold_coordinates()
-        else:
-            try:
+                if self.fold:
+                    real_conf.fold_coordinates()
+            else:
                 real_conf = RealConfiguration(
                     self._trajectory.chemical_system, coords, **variables
                 )
-            except ValueError:
-                self._keep_running = False
-                LOG.warning(
-                    f"Could not create configuration for frame {index}. Will skip the rest"
-                )
-                return index, None
+
+        except ValueError:
+            self._keep_running = False
+            LOG.warning(
+                f"Could not create configuration for frame {index}. Will skip the rest"
+            )
+            return index, None
 
         # A snapshot is created out of the current configuration.
         self._trajectory.dump_configuration(
@@ -201,32 +198,32 @@ class ASE(Converter):
             units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"},
         )
 
-        try:
+        charges = None
+        if "charges" in frame.arrays:
             charges = frame.arrays["charges"]
-        except KeyError:
-            try:
-                charges = frame.get_initial_charges()
-            except Exception:
-                pass
-            else:
-                self._trajectory.write_charges(charges, index)
         else:
+            with suppress(Exception):
+                charges = frame.get_initial_charges()
+
+        if charges is not None:
             self._trajectory.write_charges(charges, index)
 
         return index, None
 
-    def combine(self, index, x):
-        """
-        @param index: the index of the step.
-        @type index: int.
+    def combine(self, _index: int, _x: None):
+        """Dummy combine step.
 
-        @param x:
-        @type x: any.
+        Parameters
+        ----------
+        _index : int
+            Unused.
+        _x : None
+            Unused.
         """
 
         pass
 
-    def finalize(self):
+    def finalize(self) -> None:
         """
         Finalize the job.
         """
@@ -241,25 +238,21 @@ class ASE(Converter):
 
     def parse_first_step(self, mapping):
         try:
+            self._total_number_of_steps = len(self._input)
             self._input = ASETrajectory(self.trajectory_file)
+            first_frame = self._input[0]
+            LOG.debug(
+                "Length found using len(self._input)=%d", self._total_number_of_steps
+            )
         except Exception:
-            first_frame = read(self.trajectory_file, index=0)
-            last_iterator = 0
-            generator = iread(self.trajectory_file)
-            for _ in generator:
-                last_iterator += 1
-            generator.close()
+            self._total_number_of_steps = ilen(iread(self.trajectory_file))
             self._input = iread(
                 self.trajectory_file  # , index="[:]"
             )
-            self._total_number_of_steps = last_iterator
-            LOG.debug(f"Length found using last_iterator={self._total_number_of_steps}")
-        else:
-            first_frame = self._input[0]
-            self._total_number_of_steps = len(self._input)
-            LOG.debug(
-                f"Length found using len(self._input)={self._total_number_of_steps}"
-            )
+            first_frame = read(self.trajectory_file, index=0)
+            LOG.debug("Length found using ilen=%d", self._total_number_of_steps)
+
+        assert isinstance(first_frame, Atoms)
 
         self._timeaxis = self._timestep * np.arange(self._total_number_of_steps)
 
@@ -270,19 +263,14 @@ class ASE(Converter):
             self._backup_cell = first_frame.cell.array
 
         LOG.info(
-            f"The following arrays were found in the trajectory: {list(first_frame.arrays.keys())}"
+            "The following arrays were found in the trajectory: %s", ", ".join(first_frame.arrays)
         )
 
-        if "masses" in first_frame.arrays.keys():
-            self._initial_masses = first_frame.arrays["masses"]
-        else:
-            self._initial_masses = None
+        self._initial_masses = first_frame.arrays.get("masses")
+        self._initial_charges = first_frame.arrays.get("charges")
 
-        try:
-            self._initial_charges = first_frame.arrays["charges"]
-        except KeyError:
+        if self._initial_charges is None:
             LOG.warning("ASE converter could not read partial charges from file.")
-            self._initial_charges = None
 
         element_list = first_frame.get_chemical_symbols()
 

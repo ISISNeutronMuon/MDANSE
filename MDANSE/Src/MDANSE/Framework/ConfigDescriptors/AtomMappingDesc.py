@@ -19,7 +19,7 @@ import json
 from collections.abc import Collection
 from enum import Enum, auto
 from pathlib import Path
-from typing import Literal, cast, reveal_type
+from typing import Literal
 
 from MDANSE.Framework.AtomMapping import check_mapping_valid, fill_remaining_labels
 
@@ -28,7 +28,7 @@ from .AbsConfigDesc import ConfigError, ConfigureDescriptor
 
 class AtomMapping(ConfigureDescriptor[dict]):
     def __init__(self, default: dict[str, dict[str, str]] | str = {}, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(default=default, **kwargs)
 
     def validate(self, value: dict | str, file_info) -> dict:
         if isinstance(value, dict):

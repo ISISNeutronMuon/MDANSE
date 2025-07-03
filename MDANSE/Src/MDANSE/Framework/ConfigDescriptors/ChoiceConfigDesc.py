@@ -73,11 +73,11 @@ class MultipleChoiceConfigDesc(ChoiceConfigDesc):
         if len(values) > self.n_choices:
             raise ConfigError(f"Too many options selected ({values}).")
 
-        self.indices = [self._choices.find(value) for value in values]
-        if any(index < 0 for index in self.indices):
-            raise ConfigError(
-                f"{', '.join(set(self.choices) - set(values))} are not valid choices."
-            )
+        # self.indices = [self._choices.find(value) for value in values]
+        # if any(index < 0 for index in self.indices):
+        #     raise ConfigError(
+        #         f"{', '.join(set(self.choices) - set(values))} are not valid choices."
+        #     )
 
         return values
 

@@ -23,6 +23,14 @@ class OutputFormats(Enum):
     TextFormat = auto()
     FileInMemory = auto()
 
+    MDTFormat = auto()
+
+    @classmethod
+    def _missing_(cls, value: str | int):
+        for member in cls:
+            if (isinstance(value, str) and member.name == value) or (isinstance(value, int) and member.value == value):
+                return member
+
 current_path = Path(__file__).parent
 
 modnames = (
