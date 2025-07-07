@@ -13,12 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-import collections
-import itertools
-import operator
+from operator import itemgetter
 
 import numpy as np
+from more_itertools import map_reduce
 
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
@@ -33,7 +31,7 @@ class GridQVectors(LatticeQVectors):
     the vectors.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["hrange"] = (
         "RangeConfigurator",
         {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
@@ -51,7 +49,7 @@ class GridQVectors(LatticeQVectors):
     def _generate(self):
         hrange = self._configuration["hrange"]["value"]
         krange = self._configuration["krange"]["value"]
-        lrange = self._configuration["krange"]["value"]
+        lrange = self._configuration["lrange"]["value"]
         qstep = self._configuration["qstep"]["value"]
 
         nh = self._configuration["hrange"]["number"]
@@ -76,24 +74,23 @@ class GridQVectors(LatticeQVectors):
         bins = np.arange(minDist, maxDist + qstep / 2, qstep)
         inds = np.digitize(dists, bins) - 1
 
-        dists = bins[inds]
-
-        dists = list(zip(range(len(dists)), dists))
-        dists.sort(key=operator.itemgetter(1))
-        qGroups = itertools.groupby(dists, key=operator.itemgetter(1))
-        qGroups = {k: list(map(operator.itemgetter(0), v)) for k, v in qGroups}
+        dists = enumerate(bins[inds])
+        q_groups = map_reduce(dists, itemgetter(1), itemgetter(0))
+        # Functions rely on ordered dicts for some reason?
+        q_groups = {key: q_groups[key] for key in sorted(q_groups)}
 
         if self._status is not None:
-            self._status.start(len(qGroups))
+            self._status.start(len(q_groups))
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
-        for q, v in qGroups.items():
-            self._configuration["q_vectors"][q] = {}
-            self._configuration["q_vectors"][q]["q"] = q
-            self._configuration["q_vectors"][q]["q_vectors"] = vects[:, v]
-            self._configuration["q_vectors"][q]["n_q_vectors"] = len(v)
-            self._configuration["q_vectors"][q]["hkls"] = hkls[:, v]
+        for q, v in q_groups.items():
+            self._configuration["q_vectors"][q] = {
+                "q": q,
+                "q_vectors": vects[:, v],
+                "n_q_vectors": len(v),
+                "hkls": hkls[:, v],
+            }
 
             if self._status is not None:
                 if self._status.is_stopped():
