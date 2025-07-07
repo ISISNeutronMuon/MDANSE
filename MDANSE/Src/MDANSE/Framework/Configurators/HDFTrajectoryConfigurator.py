@@ -30,6 +30,15 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
     _default = "INPUT_FILENAME.mdt"
     _label = "MDANSE trajectory file"
 
+    def configure_from_instance(self):
+        if self._instance is None:
+            raise RuntimeError(
+                "Running configure_from_instance with no instance defined."
+            )
+        traj_instance = self._instance
+
+        self.extract_information(traj_instance)
+
     def configure(self, value):
         """
         Configure a HDF trajectory file.
@@ -47,7 +56,9 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         except KeyError:
             self.error_status = f"Could not use {value} as input trajectory"
             return
+        self.extract_information(trajectory_instance)
 
+    def extract_information(self, trajectory_instance: Trajectory):
         self["instance"] = trajectory_instance
 
         self["filename"] = PLATFORM.get_path(trajectory_instance.filename)

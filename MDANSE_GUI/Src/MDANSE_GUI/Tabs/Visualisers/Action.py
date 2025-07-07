@@ -29,8 +29,12 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
+    HDFTrajectoryConfigurator,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets import (
     AseInputFileWidget,
     AtomMappingWidget,
@@ -135,7 +139,7 @@ class Action(QWidget):
 
     def __init__(self, *args, use_preview=False, **kwargs):
         self._default_path = None
-        self._input_trajectory = None
+        self._input_traj_path = None
         self._parent_tab = None
         self._trajectory_configurator = None
         self._settings = None
@@ -158,23 +162,29 @@ class Action(QWidget):
     def set_settings(self, settings):
         self._settings = settings
 
-    def set_trajectory(self, trajectory: str) -> None:
+    def set_trajectory(self, trajectory: Trajectory | None) -> None:
         """Set the trajectory path and filename.
 
         Parameters
         ----------
-        path : str or None
-            The path of the trajectory
-        trajectory : str or None
-            The path and filename of the trajectory
+        trajectory : Trajectory
+            An instance of the trajectory class
         """
-        if trajectory == self._input_trajectory:
+        if trajectory is None:
+            self._trajectory_configurator = None
+            return
+        new_path = trajectory.filename
+        if new_path == self._input_traj_path:
             LOG.debug("Skipping set_trajectory, no change.")
             return
         self._job_instance = IJob()
-        self._input_trajectory = trajectory
-        if self._input_trajectory is not None:
-            self._default_path = Path(self._input_trajectory).parent
+        self._trajectory_instance = trajectory
+        self._trajectory_configurator = HDFTrajectoryConfigurator(
+            "Input Trajectory", instance=trajectory
+        )
+        self._input_traj_path = new_path
+        if self._input_traj_path is not None:
+            self._default_path = Path(self._input_traj_path).parent
         else:
             self._default_path = Path().absolute()
         if self._job_name is not None:
@@ -235,7 +245,7 @@ class Action(QWidget):
             settings = self._job_instance.settings
         LOG.info(f"Configuration {job_instance.configuration}")
         if "trajectory" in settings.keys():
-            if self._input_trajectory is None:
+            if self._input_traj_path is None:
                 return
             key, value = "trajectory", settings["trajectory"]
             dtype = value[0]
@@ -244,7 +254,7 @@ class Action(QWidget):
             if key not in self._widgets_in_layout:
                 ddict.setdefault("label", key)
                 ddict["configurator"] = configurator
-                ddict["source_object"] = self._input_trajectory
+                ddict["source_object"] = self._input_traj_path
                 widget_class = widget_lookup[dtype]
                 input_widget = widget_class(parent=self, **ddict)
                 widget = input_widget._base
@@ -261,7 +271,7 @@ class Action(QWidget):
             configurator = job_instance.configuration[key]
             ddict.setdefault("label", key)
             ddict["configurator"] = configurator
-            ddict["source_object"] = self._input_trajectory
+            ddict["source_object"] = self._input_traj_path
             ddict["trajectory_configurator"] = self._trajectory_configurator
             if dtype not in widget_lookup:
                 ddict["tooltip"] = (

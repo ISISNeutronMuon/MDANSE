@@ -37,6 +37,8 @@ class InputFileConfigurator(IConfigurator):
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
 
+        self._instance = kwargs.get("instance")
+
         self.wildcard = wildcard
 
     def configure(self, value):

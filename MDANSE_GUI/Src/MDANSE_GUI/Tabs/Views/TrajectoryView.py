@@ -65,7 +65,7 @@ class TrajectoryView(QListView):
     def item_picked(self, index: QModelIndex):
         model = self.model()
         node_number = model.itemFromIndex(index).data()
-        trajectory = model._nodes[node_number]
+        trajectory = model.get_trajectory(node_number)
         self.item_details.emit(trajectory)
 
     def connect_to_visualiser(self, visualiser: Union[View3D, TrajectoryInfo]) -> None:
