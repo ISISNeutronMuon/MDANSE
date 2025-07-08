@@ -66,7 +66,9 @@ class TrajectoryView(QListView):
         model = self.model()
         node_number = model.itemFromIndex(index).data()
         trajectory = model.get_trajectory(node_number)
-        self.item_details.emit(trajectory)
+        if trajectory is None:
+            return
+        self.item_details.emit((trajectory._filename, trajectory))
 
     def connect_to_visualiser(self, visualiser: Union[View3D, TrajectoryInfo]) -> None:
         """Connect to a visualiser.

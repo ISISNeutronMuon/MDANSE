@@ -53,7 +53,6 @@ class TrajectoryModel(QStandardItemModel):
     @Slot(tuple)
     def append_object(self, input: tuple):
         full_name, label = input
-        self.mutex.lock()
         self._node_numbers.append(self._next_number)
         self._trajectory_paths[self._next_number] = full_name
         self._trajectory_instances[self._next_number] = None
@@ -63,7 +62,6 @@ class TrajectoryModel(QStandardItemModel):
         item = QStandardItem(label)
         item.setData(retval)
         self.appendRow(item)
-        self.mutex.unlock()
         self.summarise_items()
         return retval
 
@@ -80,30 +78,21 @@ class TrajectoryModel(QStandardItemModel):
             and index not in self._loading_threads
         ):
             return result
-        thread = self._loading_threads[index]
-        thread.join()
-        while result is None:
-            result = self._trajectory_instances.get(index)
-            QThread.msleep(200)
-        return result
+        return self._trajectory_instances[index]
 
     @Slot(object)
     def accept_results(self, result_tuple):
-        self.mutex.lock()
         trajectory, index = result_tuple
         self._trajectory_instances[index] = trajectory
-        self.mutex.unlock()
         self.finished_loading.emit(index)
         # self._loading_threads[index].wait()
 
     def summarise_items(self):
         result = []
-        self.mutex.lock()
         for nrow in range(self.rowCount()):
             index = self.index(nrow, 0)
             item = self.itemFromIndex(index)
             result.append([item.text(), item.data()])
-        self.mutex.unlock()
         self.all_elements.emit(result)
 
     def removeRow(self, row: int, parent: QModelIndex = None):

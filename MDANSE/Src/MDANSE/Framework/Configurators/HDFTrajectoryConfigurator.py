@@ -36,6 +36,11 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
                 "Running configure_from_instance with no instance defined."
             )
         traj_instance = self._instance
+        value = traj_instance._filename
+
+        if value == self._original_input:
+            return
+        self._original_input = value
 
         self.extract_information(traj_instance)
 

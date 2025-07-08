@@ -182,6 +182,7 @@ class Action(QWidget):
         self._trajectory_configurator = HDFTrajectoryConfigurator(
             "Input Trajectory", instance=trajectory
         )
+        self._trajectory_configurator.configure_from_instance()
         self._input_traj_path = new_path
         if self._input_traj_path is not None:
             self._default_path = Path(self._input_traj_path).parent
