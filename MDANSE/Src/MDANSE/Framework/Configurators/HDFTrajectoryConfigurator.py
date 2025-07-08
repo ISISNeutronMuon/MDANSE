@@ -42,6 +42,8 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             return
         self._original_input = value
 
+        InputFileConfigurator.configure(self, value)
+
         self.extract_information(traj_instance)
 
     def configure(self, value):

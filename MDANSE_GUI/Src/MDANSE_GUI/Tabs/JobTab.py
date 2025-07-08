@@ -56,6 +56,7 @@ class JobTab(GeneralTab):
         imodel = kwargs.pop("instrument_model", None)
         super().__init__(*args, **kwargs)
         self._current_trajectory = ""
+        self._current_trajectory_index = -1
         self._job_starter = None
         self._own_index = -1
         self._instrument_index = -1
@@ -64,6 +65,7 @@ class JobTab(GeneralTab):
         self._trajectory_combo.currentIndexChanged.connect(self.set_current_trajectory)
         if cmodel is not None:
             self._trajectory_combo.setModel(cmodel)
+        cmodel.finished_loading.connect(self.reload_trajectory)
         self._instrument_combo = QComboBox()
         self._instrument_combo.setEditable(False)
         self._instrument_combo.currentIndexChanged.connect(self.set_current_instrument)
@@ -98,7 +100,14 @@ class JobTab(GeneralTab):
         return results
 
     @Slot(int)
+    def reload_trajectory(self, index: int) -> None:
+        if index != self._current_trajectory_index:
+            return
+        self.set_current_trajectory(index)
+
+    @Slot(int)
     def set_current_trajectory(self, index: int) -> None:
+        self._current_trajectory_index = index
         self._current_trajectory = self._trajectory_combo.currentText()
 
         traj_model = self._trajectory_combo.model()

@@ -142,6 +142,7 @@ class Action(QWidget):
         self._input_traj_path = None
         self._parent_tab = None
         self._trajectory_configurator = None
+        self._trajectory_instance = None
         self._settings = None
         self._job_name = None
         self._job_instance = IJob()
@@ -245,6 +246,7 @@ class Action(QWidget):
             job_instance = self._job_instance
             settings = self._job_instance.settings
         LOG.info(f"Configuration {job_instance.configuration}")
+        LOG.debug(f"{self._input_traj_path} loaded as {self._trajectory_instance}")
         if "trajectory" in settings.keys():
             if self._input_traj_path is None:
                 return
@@ -257,7 +259,9 @@ class Action(QWidget):
                 ddict["configurator"] = configurator
                 ddict["source_object"] = self._input_traj_path
                 widget_class = widget_lookup[dtype]
-                input_widget = widget_class(parent=self, **ddict)
+                input_widget = widget_class(
+                    parent=self, trajectory_instance=self._trajectory_instance, **ddict
+                )
                 widget = input_widget._base
                 self.layout.addWidget(widget, stretch=input_widget._relative_size)
                 self._widgets_in_layout[key] = widget
