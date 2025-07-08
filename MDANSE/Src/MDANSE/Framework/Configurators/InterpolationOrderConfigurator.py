@@ -51,6 +51,9 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
         :param value: the interpolation order to be configured.
         :type value: str one of *'no interpolation'*,*'1st order'*,*'2nd order'*,*'3rd order'*,*'4th order'* or *'5th order'*.
         """
+        if not self.update_needed(value):
+            return
+
         frames_configurator = self.configurable[self.dependencies["frames"]]
         if not frames_configurator.valid:
             self.error_status = "Frames configurator is not valid."

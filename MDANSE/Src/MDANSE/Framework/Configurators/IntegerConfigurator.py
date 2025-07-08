@@ -59,6 +59,9 @@ class IntegerConfigurator(IConfigurator):
         :param value: the integer to be configured.
         :type value: int
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
         self["value"] = self._default
 

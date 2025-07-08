@@ -38,6 +38,9 @@ class RunningModeConfigurator(IConfigurator):
         must be *'multicore'* and 2nd element the number of slots allocated for running the analysis.
         :type value: *'single-core'* or 2-tuple
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         if isinstance(value, str):

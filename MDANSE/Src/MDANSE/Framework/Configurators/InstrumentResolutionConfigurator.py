@@ -56,6 +56,9 @@ class InstrumentResolutionConfigurator(IConfigurator):
         is a dictionary that stores the parameters for this kernel.
         :type value: 2-tuple
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         framesCfg = self.configurable[self.dependencies["frames"]]

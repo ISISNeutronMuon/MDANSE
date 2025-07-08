@@ -36,6 +36,9 @@ class TrajectoryVariableConfigurator(IConfigurator):
         :param value: the name of the trajectory variable as it should appear in the configuration
         :type value: str
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         trajConfig = self.configurable[self.dependencies["trajectory"]]

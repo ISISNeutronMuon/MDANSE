@@ -45,6 +45,9 @@ class ProjectionConfigurator(IConfigurator):
         or ``None`` in the case where no projection is needed.
         :type value: 2-tuple
         """
+        if not self.update_needed(value):
+            return
+
         self["axis"] = None
         self._original_input = value
 

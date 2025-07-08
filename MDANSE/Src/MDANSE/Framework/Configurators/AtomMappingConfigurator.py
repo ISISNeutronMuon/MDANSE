@@ -42,6 +42,9 @@ class AtomMappingConfigurator(IConfigurator):
         value : str
             The atom map setting JSON string.
         """
+        if not self.update_needed(value):
+            return
+
         if value is None:
             value = self._default
         self._original_input = value

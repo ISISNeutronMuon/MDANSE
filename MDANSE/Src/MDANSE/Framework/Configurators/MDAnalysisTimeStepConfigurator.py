@@ -31,6 +31,9 @@ class MDAnalysisTimeStepConfigurator(FloatConfigurator):
         # if the value is not valid then we use the MDAnalysis
         # default values which maybe the time step in the inputted
         # files or 1 ps
+        if not self.update_needed(value):
+            return
+
         try:
             value = float(value)
         except (TypeError, ValueError):

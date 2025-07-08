@@ -109,7 +109,7 @@ class AtomTransmutationConfigurator(IConfigurator):
 
     _default = "{}"
 
-    def configure(self, value: str):
+    def configure(self, value: str):  # noqa: PLR0911
         """Configure an input value.
 
         Parameters
@@ -117,6 +117,8 @@ class AtomTransmutationConfigurator(IConfigurator):
         value : str
             The transmutation setting in a json readable format.
         """
+        if not self.update_needed(value):
+            return
 
         self["value"] = value
         self._original_input = value

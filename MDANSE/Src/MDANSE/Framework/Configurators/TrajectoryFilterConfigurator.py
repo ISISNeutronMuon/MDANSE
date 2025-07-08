@@ -62,6 +62,9 @@ class TrajectoryFilterConfigurator(IConfigurator):
             The selection setting in a json readable format.
 
         """
+        if not self.update_needed(value):
+            return
+
         self._settings = value
 
         try:

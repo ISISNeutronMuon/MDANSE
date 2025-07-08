@@ -43,6 +43,9 @@ class FramesConfigurator(RangeConfigurator):
         :param value: the input value
         :type value: 3-tuple, 'all' or None
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         trajConfig = self.configurable[self.dependencies["trajectory"]]

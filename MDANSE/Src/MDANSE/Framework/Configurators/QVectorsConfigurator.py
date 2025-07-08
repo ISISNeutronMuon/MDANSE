@@ -52,6 +52,9 @@ class QVectorsConfigurator(IConfigurator):
             Class name and dictionary of input parameters
 
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         trajConfig = self.configurable[self.dependencies["trajectory"]]
