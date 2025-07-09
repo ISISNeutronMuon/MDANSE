@@ -312,30 +312,32 @@ intermediate scattering function is a weighted sum of the partial term
 .. math::
    :label: disf1
 
-    S_{\text{inc}}(\mathbf{q},\omega) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} S_{\text{inc},\alpha\beta}(\mathbf{q},\omega),
+    S_{\text{inc}}(\mathbf{q},\omega) = \sum_{\alpha} W_{\alpha} S_{\text{inc},\alpha}(\mathbf{q},\omega),
 
 .. math::
    :label: disf2
 
-    F_{\text{inc}}(\mathbf{q},t) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} F_{\text{inc},\alpha\beta}(\mathbf{q},t)
+    F_{\text{inc}}(\mathbf{q},t) = \sum_{\alpha} W_{\alpha} F_{\text{inc},\alpha}(\mathbf{q},t)
 
 where
 
 .. math::
    :label: disf3
 
-   F_{\text{inc},\alpha\beta}{(\mathbf{q},t) = \frac{1}{N c_{\alpha} }}{\sum\limits_{j \in \alpha}{\left\langle {\exp\left\lbrack {{- i}\mathbf{q}\cdot\mathbf{r}_{j}\left( 0 \right)} \right\rbrack\exp\left\lbrack {i\mathbf{q}\cdot\mathbf{r}_{j}\left( t \right)} \right\rbrack} \right\rangle}}
+   F_{\text{inc},\alpha}{(\mathbf{q},t) = \frac{1}{N c_{\alpha} }}{\sum\limits_{j \in \alpha}{\left\langle {\exp\left\lbrack {{- i}\mathbf{q}\cdot\mathbf{r}_{j}\left( 0 \right)} \right\rbrack\exp\left\lbrack {i\mathbf{q}\cdot\mathbf{r}_{j}\left( t \right)} \right\rbrack} \right\rangle}}
 
 and
 
 .. math::
    :label: disf4
 
-    S_{\text{inc},\alpha\beta}(\mathbf{q},\omega) = \int\mathrm{d}t  \,  F_{\text{inc},\alpha\beta}(\mathbf{q},t) e^{-i\omega t}.
+    S_{\text{inc},\alpha}(\mathbf{q},\omega) = \int\mathrm{d}t  \,  F_{\text{inc},\alpha}(\mathbf{q},t) e^{-i\omega t}.
 
 To obtain results relevant to neutron scattering, the
 ``b_incoherent`` weight setting should be used so that the weight will be
-generated using the incoherent scattering lengths.
+generated using the incoherent scattering lengths. Since the contributions
+to the DISF come from the autocorrelation of the positions of atoms, the
+weights :math:`W_{\alpha}` in that case will be :math:`b_{inc,\alpha}^{2}`.
 
 
 .. _elastic-incoherent-structure-factor:
@@ -351,6 +353,12 @@ for simplicity a system where only one sort of atoms is visible to the neutrons.
 To a very good approximation this is the case for all systems containing a large
 amount of hydrogen atoms, as for biological systems. Incoherent scattering from
 hydrogen dominates by far all other contributions.
+
+Similar to the :ref:`dynamic-incoherent-structure-factor` described above,
+``b_incoherent`` weight setting is used and the weights are
+generated using the incoherent scattering lengths. Again, each atom is correlated
+with itself in the calculation, and the resulting weights :math:`W_{\alpha}`
+are squared, giving :math:`b_{inc,\alpha}^{2}`.
 
 **The Van Hove Function**: The EISF is defined as the limit of the
 incoherent intermediate scattering function for infinite time
@@ -477,6 +485,12 @@ For certain model systems like the ideal gas, the
 harmonic oscillator, and a particle undergoing Einstein diffusion, this
 is exact. For these systems the incoherent intermediate scattering
 function is completely determined by the MSD.
+
+Similar to the :ref:`dynamic-incoherent-structure-factor` described above,
+``b_incoherent`` weight setting is used and the weights are
+generated using the incoherent scattering lengths. Again, each atom is correlated
+with itself in the calculation, and the resulting weights :math:`W_{\alpha}`
+are squared, giving :math:`b_{inc,\alpha}^{2}`.
 
 .. _neutron-dynamic-total-structure-factor:
 

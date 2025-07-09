@@ -74,15 +74,14 @@ class ReorientationalTimeCorrelationFunction(IJob):
 
     .. math::
 
-       \overrightarrow{vector} =  \overrightarrow{direction} - \overrightarrow{origin}
+    \mathbf{n}(t) =  \mathbf{r_{i}}(t) - \mathbf{r_{j}}(t)
 
     .. math::
 
-       \phi(T = T_{1}-T_{0}) = arcos(  \overrightarrow{vector(T_{1})} . \loverrightarrow{vector(T_{0})} )
+    \phi(t = t_{1}-t_{0}) = \arccos( \mathbf{n}(t_{1}) \mathbf{n}(t_{0}))
 
-    The general result is :math:`C_{l}(T) = \langle P_{l}[cos(\phi(T))] \rangle`,
+    The general result is :math:`C_{l}(t) = \langle P_{l}[\cos(\phi(t))] \rangle`,
     where :math:`P_{l}` is the Legendre polynomial of the order l.
-
     """
 
     label = "Reorientational Time Correlation Function"
