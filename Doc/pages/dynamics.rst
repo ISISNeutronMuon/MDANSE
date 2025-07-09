@@ -272,6 +272,11 @@ where
 
 so that the origin dependence of the PACF function is removed.
 
+If `b_coherent` or `b_incoherent` are chosen as weights, the weights
+will be applied as :math:`b_{coh}^{2}` or :math:`b_{inc}^{2}`, to stay
+consistent with the way autocorrelation results are weighted in
+:ref:`dynamic-coherent-structure-factor` and
+:ref:`dynamic-incoherent-structure-factor` calculations.
 
 .. _analysis-rtcf:
 
@@ -501,3 +506,8 @@ This is a special case of a more general relationship between the VACF and the
 mean square displacement, and belongs to a class of properties known as the
 Green-Kubo relations, which relate correlation functions to so-called transport
 coefficients.
+
+If `b_coherent` or `b_incoherent` are chosen as weights, the weights
+will be applied as :math:`b_{coh}^{2}` or :math:`b_{inc}^{2}` in order
+to produce the same result as the VACF in the :ref:`analysis-dos`
+calculation.
