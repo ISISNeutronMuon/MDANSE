@@ -58,9 +58,6 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self._chunk_limit = 128
 
     def configure(self, value: tuple):
-        if not self.update_needed(value):
-            return
-
         self._original_input = value
 
         root, dtype, chunk_size, compression, logs = value

@@ -60,8 +60,6 @@ class OutputStructureConfigurator(IConfigurator):
         is the output directory, 2nd element the basename and 3rd element a list of file formats.
         :type value: 3-tuple
         """
-        if not self.update_needed(value):
-            return
 
         self._original_input = value
 
