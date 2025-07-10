@@ -53,8 +53,7 @@ class TrajectoryView(QListView):
     def deleteNode(self):
         model = self.model()
         index = self.currentIndex()
-        node_number = model.itemFromIndex(index).data()
-        model.removeRow(node_number)
+        model.removeRow(index.row())
         self.item_details.emit(("", None))
 
     @Slot(QModelIndex)
