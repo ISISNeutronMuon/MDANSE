@@ -100,14 +100,13 @@ class JobTab(GeneralTab):
         return results
 
     @Slot(int)
-    def reload_trajectory(self, index: int) -> None:
-        if index != self._current_trajectory_index:
+    def reload_trajectory(self, node_number: int) -> None:
+        if node_number != self._current_trajectory_index:
             return
-        self.set_current_trajectory(index)
+        self.set_trajectory_from_node_number(node_number)
 
     @Slot(int)
     def set_current_trajectory(self, index: int) -> None:
-        self._current_trajectory_index = index
         self._current_trajectory = self._trajectory_combo.currentText()
 
         traj_model = self._trajectory_combo.model()
@@ -117,8 +116,12 @@ class JobTab(GeneralTab):
             self.action.set_trajectory(trajectory=None)
             self.action.clear_panel()
             return
-
         node_number = traj_model.item(index, 0).data()
+        self.set_trajectory_from_node_number(node_number)
+
+    def set_trajectory_from_node_number(self, node_number: int):
+        traj_model = self._trajectory_combo.model()
+        self._current_trajectory_index = node_number
         LOG.info(
             f"Combo model: node_number {node_number} found in item {self._current_trajectory}"
         )

@@ -174,6 +174,7 @@ class Action(QWidget):
         if trajectory is None:
             self._trajectory_configurator = None
             self._trajectory_instance = None
+            self._input_traj_path = None
             self._has_been_initialised = False
             return
         new_path = trajectory.filename
