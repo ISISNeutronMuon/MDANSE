@@ -27,7 +27,6 @@ class TrajectoryView(QListView):
     item_details = Signal(tuple)
     item_name = Signal(str)
     error = Signal(str)
-    free_name = Signal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -55,10 +54,7 @@ class TrajectoryView(QListView):
         model = self.model()
         index = self.currentIndex()
         node_number = model.itemFromIndex(index).data()
-        trajectory, instance = model._nodes[node_number]
-        instance.close()
-        self.free_name.emit(str(trajectory))
-        model.removeRow(index.row())
+        model.removeRow(node_number)
         self.item_details.emit(("", None))
 
     @Slot(QModelIndex)
@@ -67,8 +63,11 @@ class TrajectoryView(QListView):
         node_number = model.itemFromIndex(index).data()
         trajectory = model.get_trajectory(node_number)
         if trajectory is None:
-            return
-        self.item_details.emit((trajectory._filename, trajectory))
+            self.item_details.emit(("", None))
+        elif isinstance(trajectory, str):
+            self.item_details.emit((trajectory, None))
+        else:
+            self.item_details.emit((trajectory._filename, trajectory))
 
     def connect_to_visualiser(self, visualiser: Union[View3D, TrajectoryInfo]) -> None:
         """Connect to a visualiser.

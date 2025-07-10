@@ -109,7 +109,7 @@ class TrajectoryTab(GeneralTab):
             layout=partial(MultiPanel, left_panels=[TrajectoryInfo()]),
             label_text=label_text,
         )
-        the_tab._view.free_name.connect(session.free_filename)
+        the_tab._model.free_name.connect(session.free_filename)
         return the_tab
 
 

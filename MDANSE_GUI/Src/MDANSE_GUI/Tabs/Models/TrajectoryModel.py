@@ -14,9 +14,19 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from qtpy.QtCore import QModelIndex, QMutex, QObject, Qt, QThread, Signal, Slot
+from qtpy.QtCore import (
+    QDeadlineTimer,
+    QModelIndex,
+    QMutex,
+    QObject,
+    Qt,
+    QThread,
+    Signal,
+    Slot,
+)
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
+from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
@@ -40,6 +50,7 @@ class TrajectoryModel(QStandardItemModel):
     error = Signal(str)
     all_elements = Signal(object)
     finished_loading = Signal(int)
+    free_name = Signal(str)
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
@@ -73,16 +84,18 @@ class TrajectoryModel(QStandardItemModel):
 
     def get_trajectory(self, index: int):
         result = None
-        if (
-            index not in self._trajectory_instances
-            and index not in self._loading_threads
-        ):
+        if index not in self._loading_threads:
+            LOG.error("Requesting a missing trajectory with index {}", index)
             return result
+        elif index not in self._trajectory_instances:
+            return f"Loading trajectory {self._trajectory_paths[index]}"
         return self._trajectory_instances[index]
 
     @Slot(object)
     def accept_results(self, result_tuple):
         trajectory, index = result_tuple
+        if index not in self._trajectory_instances:
+            return
         self._trajectory_instances[index] = trajectory
         self.finished_loading.emit(index)
         # self._loading_threads[index].wait()
@@ -101,12 +114,23 @@ class TrajectoryModel(QStandardItemModel):
             node_number = self.item(row).data()
         except AttributeError:
             return
-        self._trajectory_instances.pop(node_number)
-        self._trajectory_paths.pop(node_number)
-        self._node_numbers.pop(self._node_numbers.index(node_number))
         if parent is None:
             super().removeRow(row)
         else:
             super().removeRow(row, parent)
+        instance = self._trajectory_instances.pop(node_number)
+        filename = self._trajectory_paths.pop(node_number)
+        if instance:
+            instance.close()
+        self.free_name.emit(str(filename))
+        self._node_numbers.pop(self._node_numbers.index(node_number))
+        thread: LoaderThread = self._loading_threads.pop(node_number)
+        try:
+            thread.quit()
+            thread.terminate()
+            timer = QDeadlineTimer(300, Qt.TimerType.CoarseTimer)
+            thread.wait(deadline=timer)
+        except Exception as e:
+            LOG.error("While removing a loader thread, an exception occured: {}", e)
         self.mutex.unlock()
         self.summarise_items()
