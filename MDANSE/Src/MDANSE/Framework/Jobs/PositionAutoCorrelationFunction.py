@@ -89,11 +89,10 @@ class PositionAutoCorrelationFunction(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.numberOfSteps = len(self.trajectory.atom_indices)
 
         self.labels = [
-            (element, (element,))
-            for element in self.configuration["atom_selection"].get_natoms()
+            (element, (element,)) for element in self.trajectory.get_natoms()
         ]
 
         # Will store the time.
@@ -105,7 +104,7 @@ class PositionAutoCorrelationFunction(IJob):
         )
 
         # Will store the mean square displacement evolution.
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in self.trajectory.unique_elements:
             self._outputData.add(
                 f"pacf/{element}",
                 "LineOutputVariable",
@@ -132,10 +131,10 @@ class PositionAutoCorrelationFunction(IJob):
         """
 
         # get atom index
-        indices = self.configuration["atom_selection"]["indices"][index]
+        atom_index = self.trajectory.atom_indices[index]
 
-        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
-            indices,
+        series = self.trajectory.read_atomic_trajectory(
+            atom_index,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -159,7 +158,7 @@ class PositionAutoCorrelationFunction(IJob):
         """
 
         # The symbol of the atom.
-        element = self.configuration["atom_selection"]["names"][index]
+        element = self._atoms[self.trajectory.atom_indices[index]]
 
         # The MSD for element |symbol| is updated.
         self._outputData[f"pacf/{element}"] += x
@@ -169,8 +168,7 @@ class PositionAutoCorrelationFunction(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        self.configuration["atom_selection"]["n_atoms_per_element"] = nAtomsPerElement
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         for element, number in list(nAtomsPerElement.items()):
             self._outputData[f"pacf/{element}"] /= number
@@ -182,13 +180,13 @@ class PositionAutoCorrelationFunction(IJob):
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             1,
         )
         assign_weights(self._outputData, weight_dict, "pacf/%s", self.labels)
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = n_selected / n_total
 
         pacfTotal = weighted_sum(self._outputData, "pacf/%s", self.labels) / fact
@@ -219,5 +217,5 @@ class PositionAutoCorrelationFunction(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

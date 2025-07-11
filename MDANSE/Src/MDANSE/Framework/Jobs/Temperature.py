@@ -128,11 +128,9 @@ class Temperature(IJob):
 
         symbol = self._atoms[index]
 
-        mass = self.configuration["trajectory"]["instance"].get_atom_property(
-            symbol, "atomic_weight"
-        )
+        mass = self.trajectory.get_atom_property(symbol, "atomic_weight")
 
-        trajectory = self.configuration["trajectory"]["instance"]
+        trajectory = self.trajectory
 
         if self.configuration["interpolation_order"]["value"] == 0:
             series = trajectory.read_configuration_trajectory(
@@ -199,5 +197,5 @@ class Temperature(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

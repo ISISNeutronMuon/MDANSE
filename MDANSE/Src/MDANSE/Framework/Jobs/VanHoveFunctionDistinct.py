@@ -404,13 +404,13 @@ class VanHoveFunctionDistinct(IJob):
             "instance"
         ].chemical_system.unique_molecules():
             self.indices_intra = intramolecular_lookup_dict(
-                self.configuration["trajectory"]["instance"].chemical_system,
+                self.trajectory.chemical_system,
             )
         else:
             self.indices_intra = None
         self.intra = self.indices_intra is not None
 
-        self.selectedElements = self.configuration["atom_selection"]["unique_names"]
+        self.selectedElements = self.trajectory.unique_elements
         self.nElements = len(self.selectedElements)
         self._elementsPairs = sorted(
             it.combinations_with_replacement(self.selectedElements, 2),
@@ -420,7 +420,7 @@ class VanHoveFunctionDistinct(IJob):
 
         self.n_mid_points = len(self.configuration["r_values"]["mid_points"])
 
-        conf = self.configuration["trajectory"]["instance"].configuration(
+        conf = self.trajectory.configuration(
             self.configuration["frames"]["first"],
         )
         if not hasattr(conf, "unit_cell"):
@@ -491,15 +491,11 @@ class VanHoveFunctionDistinct(IJob):
                 units="au",
             )
 
-        self._indices = [
-            idx
-            for idxs in self.configuration["atom_selection"]["indices"]
-            for idx in idxs
-        ]
+        self._indices = self.trajectory.atom_indices
         self.indexToSymbol = np.array(
             [
                 self.selectedElements.index(name)
-                for name in self.configuration["atom_selection"]["names"]
+                for name in self.trajectory.selection_getter(self.trajectory.atom_types)
             ],
             dtype=np.int32,
         )
@@ -558,13 +554,13 @@ class VanHoveFunctionDistinct(IJob):
         # difference over a number of configuration
         for i in range(self.n_configs):
             frame_index_t0 = self.configuration["frames"]["value"][i]
-            conf_t0 = self.configuration["trajectory"]["instance"].configuration(
+            conf_t0 = self.trajectory.configuration(
                 frame_index_t0,
             )
             coords_t0 = conf_t0.coordinates[self._indices]
 
             frame_index_t1 = self.configuration["frames"]["value"][i + time]
-            conf_t1 = self.configuration["trajectory"]["instance"].configuration(
+            conf_t1 = self.trajectory.configuration(
                 frame_index_t1,
             )
             coords_t1 = conf_t1.coordinates[self._indices]
@@ -659,7 +655,7 @@ class VanHoveFunctionDistinct(IJob):
             results : npt.NDArray
                 The results.
             """
-            n_atms = self.configuration["atom_selection"].get_natoms()
+            n_atms = self.trajectory.get_natoms()
             ni = n_atms[label_i]
             nj = n_atms[label_j]
 
@@ -689,7 +685,7 @@ class VanHoveFunctionDistinct(IJob):
             calc_func, self._outputData
         )
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         selected_weights, all_weights = self.trajectory.get_weights(
             prop=self.configuration["weights"]["property"]
@@ -698,12 +694,12 @@ class VanHoveFunctionDistinct(IJob):
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
         )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = (n_selected / n_total) ** 2
 
         if self.intra:
@@ -741,5 +737,5 @@ class VanHoveFunctionDistinct(IJob):
             str(self),
             self,
         )
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

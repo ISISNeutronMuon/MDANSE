@@ -101,7 +101,7 @@ class StaticStructureFactor(DistanceHistogram):
     def initialize(self):
         frame_index = self.configuration["frames"]["value"][0]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
+        conf = self.trajectory.configuration(frame_index)
         try:
             cell_volume = conf.unit_cell.volume
         except Exception:
@@ -140,7 +140,7 @@ class StaticStructureFactor(DistanceHistogram):
             units="1/nm",
         )
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         for label, _ in self.labels:
             self._outputData.add(
@@ -273,12 +273,12 @@ class StaticStructureFactor(DistanceHistogram):
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
         )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = (n_selected / n_total) ** 2
 
         if self.intra:
@@ -322,5 +322,5 @@ class StaticStructureFactor(DistanceHistogram):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

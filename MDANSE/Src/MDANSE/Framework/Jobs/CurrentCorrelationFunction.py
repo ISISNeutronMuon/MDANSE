@@ -175,7 +175,9 @@ class CurrentCorrelationFunction(IJob):
         )
 
         self._nFrames = self.configuration["frames"]["n_frames"]
-        self._elements = self.configuration["atom_selection"]["unique_names"]
+        self._elements = set(
+            self.trajectory.selection_getter(self.trajectory.atom_types)
+        )
         self.labels = self.configuration["grouping_level"].pair_labels()
 
         self._indicesPerElement = self.trajectory.get_indices()
@@ -283,7 +285,7 @@ class CurrentCorrelationFunction(IJob):
         self._cell_std = 0.0
         try:
             all_cells = [
-                self.configuration["trajectory"]["instance"].unit_cell(frame)._unit_cell
+                self.trajectory.unit_cell(frame)._unit_cell
                 for frame in self.configuration["frames"]["value"]
             ]
         except TypeError:
@@ -313,7 +315,7 @@ class CurrentCorrelationFunction(IJob):
         """
         shell = self.configuration["q_vectors"]["shells"][index]
 
-        trajectory = self.configuration["trajectory"]["instance"]
+        trajectory = self.trajectory
         cell_present = True
         cell_fixed = True
         num_frames = len(self.configuration["frames"]["value"])
@@ -503,7 +505,7 @@ class CurrentCorrelationFunction(IJob):
             self._outputData,
         )
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         for pair_str, (label_i, label_j) in self.labels:
             ni = nAtomsPerElement[label_i]
             nj = nAtomsPerElement[label_j]
@@ -548,7 +550,7 @@ class CurrentCorrelationFunction(IJob):
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
             conc_exp=0.5,
         )
@@ -575,7 +577,7 @@ class CurrentCorrelationFunction(IJob):
             )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = n_selected / n_total
 
         jqtLongTotal = weighted_sum(self._outputData, "ccf/j(q,t)_long/%s", self.labels)
@@ -670,5 +672,5 @@ class CurrentCorrelationFunction(IJob):
             str(self),
             self,
         )
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

@@ -105,7 +105,7 @@ class DensityOfStates(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.numberOfSteps = self.trajectory.get_total_natoms()
 
         instrResolution = self.configuration["instrument_resolution"]
         self.add_ideal_results = (
@@ -113,8 +113,7 @@ class DensityOfStates(IJob):
         )
 
         self.labels = [
-            (element, (element,))
-            for element in self.configuration["atom_selection"].get_natoms()
+            (element, (element,)) for element in self.trajectory.get_natoms()
         ]
 
         self._outputData.add(
@@ -158,7 +157,7 @@ class DensityOfStates(IJob):
             units="au",
         )
 
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in set(self.trajectory.atom_types):
             self._outputData.add(
                 f"vacf/{element}",
                 "LineOutputVariable",
@@ -207,9 +206,7 @@ class DensityOfStates(IJob):
                 units="au",
             )
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.trajectory.atom_types
 
     def run_step(self, index):
         """
@@ -223,14 +220,14 @@ class DensityOfStates(IJob):
             #. atomicVACF (np.array): The calculated velocity auto-correlation function for atom of index=index
         """
         LOG.debug(f"Running step: {index}")
-        trajectory = self.configuration["trajectory"]["instance"]
+        trajectory = self.trajectory
 
         # get atom index
-        indices = self.configuration["atom_selection"]["indices"][index]
+        atom_index = self.trajectory.atom_indices[index]
 
         if self.configuration["interpolation_order"]["value"] == 0:
             series = trajectory.read_configuration_trajectory(
-                indices[0],
+                atom_index,
                 first=self.configuration["frames"]["first"],
                 last=self.configuration["frames"]["last"] + 1,
                 step=self.configuration["frames"]["step"],
@@ -238,7 +235,7 @@ class DensityOfStates(IJob):
             )
         else:
             series = trajectory.read_atomic_trajectory(
-                indices[0],
+                atom_index,
                 first=self.configuration["frames"]["first"],
                 last=self.configuration["frames"]["last"] + 1,
                 step=self.configuration["frames"]["step"],
@@ -269,7 +266,7 @@ class DensityOfStates(IJob):
         """
 
         # The symbol of the atom.
-        element = self.configuration["atom_selection"]["names"][index]
+        element = self._atoms[self.trajectory.atom_indices[index]]
 
         self._outputData[f"vacf/{element}"] += x
 
@@ -278,7 +275,7 @@ class DensityOfStates(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         for element, number in nAtomsPerElement.items():
             self._outputData[f"vacf/{element}"][:] /= number
             self._outputData[f"dos/{element}"][:] = get_spectrum(
@@ -301,7 +298,7 @@ class DensityOfStates(IJob):
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             1,
         )
         assign_weights(self._outputData, weight_dict, "vacf/%s", self.labels)
@@ -310,7 +307,7 @@ class DensityOfStates(IJob):
             assign_weights(self._outputData, weight_dict, "dos/ideal/%s", self.labels)
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = len(self.trajectory.atom_types)
         fact = n_selected / n_total
 
         self._outputData["vacf/total"][:] = (
@@ -359,5 +356,5 @@ class DensityOfStates(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

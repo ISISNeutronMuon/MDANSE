@@ -118,7 +118,7 @@ class RigidBodyTrajectory(IJob):
             dtype=np.float64,
         )
 
-        atoms = self.configuration["trajectory"]["instance"].chemical_system.atom_list
+        atoms = self.trajectory.chemical_system.atom_list
 
         self._groups = []
 
@@ -132,7 +132,7 @@ class RigidBodyTrajectory(IJob):
 
         self.referenceFrame = self.configuration["reference"]["value"]
 
-        trajectory = self.configuration["trajectory"]["instance"]
+        trajectory = self.trajectory
 
         coords = trajectory.coordinates(self.referenceFrame)
         unitCell = trajectory.unit_cell(self.referenceFrame)
@@ -164,7 +164,7 @@ class RigidBodyTrajectory(IJob):
     def run_step(self, index):
         """ """
 
-        trajectory = self.configuration["trajectory"]["instance"]
+        trajectory = self.trajectory
 
         rbt = RigidBodyTrajectoryGenerator(
             trajectory,
@@ -194,7 +194,7 @@ class RigidBodyTrajectory(IJob):
             for group in self._groups
         ]
 
-        trajectory = self.configuration["trajectory"]["instance"]
+        trajectory = self.trajectory
 
         for i in range(self._quaternions.shape[1]):
             current_frame = self.configuration["frames"]["value"][i]

@@ -200,7 +200,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                     "This DCSF file was created before the new scaling scheme. Please calculate it again."
                 )
 
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in self.trajectory.unique_elements:
             if (
                 f"disf/f(q,t)/{element}"
                 not in self.configuration["disf_input_file"]["instance"]
@@ -225,7 +225,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                     "This DISF file was created before the new scaling scheme. Please calculate it again."
                 )
 
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in self.trajectory.unique_elements:
             fqt = self.configuration["disf_input_file"]["instance"][
                 f"disf/f(q,t)/{element}"
             ]
@@ -362,9 +362,9 @@ class NeutronDynamicTotalStructureFactor(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = n_selected / n_total
 
         norm_natoms = 1.0 / n_total
@@ -372,12 +372,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
         for pair_str, (label_i, label_j) in self.pair_labels:
             ele_i = self.configuration["grouping_level"].get_element_from_label(label_i)
             ele_j = self.configuration["grouping_level"].get_element_from_label(label_j)
-            bi = self.configuration["trajectory"]["instance"].get_atom_property(
-                ele_i, "b_coherent"
-            )
-            bj = self.configuration["trajectory"]["instance"].get_atom_property(
-                ele_j, "b_coherent"
-            )
+            bi = self.trajectory.get_atom_property(ele_i, "b_coherent")
+            bj = self.trajectory.get_atom_property(ele_j, "b_coherent")
             sqrt_cij = sqrt(
                 nAtomsPerElement[label_i] * nAtomsPerElement[label_j] * norm_natoms**2
             )
@@ -406,9 +402,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
         # Compute incoherent functions and structure factor
         for label, number in nAtomsPerElement.items():
             ele_i = self.configuration["grouping_level"].get_element_from_label(label)
-            bi = self.configuration["trajectory"]["instance"].get_atom_property(
-                ele_i, "b_incoherent"
-            )
+            bi = self.trajectory.get_atom_property(ele_i, "b_incoherent")
             self._outputData[f"ndsf/f(q,t)_inc/{label}"].scaling_factor *= (
                 bi**2 * number * norm_natoms
             )
@@ -484,7 +478,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             str(self),
             self,
         )
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         self.configuration["disf_input_file"]["instance"].close()
         self.configuration["dcsf_input_file"]["instance"].close()
         super().finalize()

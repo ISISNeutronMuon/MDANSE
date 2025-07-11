@@ -122,8 +122,15 @@ class WeightsConfigurator(SingleChoiceConfigurator):
 
     def test_values_for_nan(self, property_name: str) -> bool:
         """Throw an error early if weights are not usable."""
-        atm_select = self.configurable[self.dependencies["atom_selection"]]
-        atom_types = np.unique(atm_select["elements"])
+        atom_select = self.configurable[self.dependencies["atom_selection"]][
+            "flatten_indices"
+        ]
+        atom_trans = self.configurable[
+            self.dependencies["atom_transmutation"]
+        ].transmutation
+        self._trajectory.set_transmutation(atom_trans)
+        self._trajectory.set_selection(atom_select)
+        atom_types = np.unique(self._trajectory.atom_types)
         return any(
             np.isnan(self._trajectory.get_atom_property(atom, property_name))
             for atom in atom_types

@@ -62,10 +62,16 @@ class Trajectory:
         self._max_span = np.zeros(3)
         self._atom_cache = {}
         self._selection = []
-        self._selection_getter = None
+        self.selection_getter = None
         self._transmutation = {}
         self._transmuted_types = []
 
+    @property
+    def atom_indices(self) -> Sequence[int]:
+        if self._selection:
+            return self._selection
+        return list(range(len(self.atom_types)))
+ 
     @property
     def atom_types(self):
         if self._transmuted_types:
@@ -77,13 +83,17 @@ class Trajectory:
             temp[index] = type
         self._transmuted_types = temp
         return self._transmuted_types
+    
+    @property
+    def unique_elements(self) -> set[str]:
+        return set(self.selection_getter(self.atom_types))
 
     def set_transmutation(self, changed_atoms: dict[int, str]):
         self._transmutation = changed_atoms
 
     def set_selection(self, selected_indices: Sequence[int]):
         self._selection = selected_indices
-        self._selection_getter = itemgetter(*selected_indices)
+        self.selection_getter = itemgetter(*selected_indices)
 
     def get_weights(
         self, *, prop: str | None = None
@@ -104,7 +114,7 @@ class Trajectory:
         """
         weights = []
         for n_elements, atm_elements in [
-            (self.get_natoms(), self._selection_getter(self.atom_types)),
+            (self.get_natoms(), self.selection_getter(self.atom_types)),
             (
                 self.get_all_natoms(),
                 self.atom_types,
@@ -130,7 +140,7 @@ class Trajectory:
         """
         all_atom_types = self.atom_types
         if self._selection:
-            return Counter(self._selection_getter(all_atom_types))
+            return Counter(self.selection_getter(all_atom_types))
         return Counter(all_atom_types)
 
     def get_all_natoms(self) -> dict[str, int]:
@@ -153,7 +163,9 @@ class Trajectory:
             The total number of atoms selected.
 
         """
-        return len(self._selection)
+        if self._selection:
+            return len(self._selection)
+        return len(self.atom_types)
 
     def get_indices(self) -> dict[str, list[int]]:
         """Group atom indices per chemical element.
@@ -165,7 +177,7 @@ class Trajectory:
 
         """
         all_elements = np.array(self.atom_types)
-        unique_elements = set(self._selection_getter(all_elements))
+        unique_elements = set(self.selection_getter(all_elements))
         indices_per_element = {element: list(np.where(all_elements==element)[0]) for element in unique_elements}
         return indices_per_element
 

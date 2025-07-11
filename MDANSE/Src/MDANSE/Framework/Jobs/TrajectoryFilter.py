@@ -98,16 +98,11 @@ class TrajectoryFilter(IJob):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.numberOfSteps = len(self.trajectory.atom_indices)
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.trajectory.atom_types
 
-        self._selected_atoms = [
-            self._atoms[i]
-            for i in np.array(self.configuration["atom_selection"]["indices"]).flat
-        ]
+        self._selected_atoms = self.trajectory.selection_getter(self._atoms)
 
         # This stores the trajectory (position array) of atoms by x, y, z component, to be filtered
         self.atomic_trajectory_array = np.zeros(
@@ -124,13 +119,13 @@ class TrajectoryFilter(IJob):
 
         """
         LOG.debug(f"Running step: {index}")
-        trajectory = self.configuration["trajectory"]["instance"]
+        trajectory = self.trajectory
 
         # get atom index
-        indexes = self.configuration["atom_selection"]["indices"][index]
+        atom_index = self.trajectory.atom_indices[index]
 
-        series = trajectory.read_com_trajectory(
-            indexes,
+        series = trajectory.read_atomic_trajectory(
+            atom_index,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -212,7 +207,7 @@ class TrajectoryFilter(IJob):
         )
 
         # The input trajectory is closed.
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
 
         # The output trajectory is closed.
         write_metadata(self, self._output_trajectory._h5_file)

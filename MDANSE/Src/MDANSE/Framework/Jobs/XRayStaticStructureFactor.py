@@ -192,7 +192,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
                 units="au",
             )
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         def calc_func(
             label_i: str, label_j: str
@@ -259,21 +259,18 @@ class XRayStaticStructureFactor(DistanceHistogram):
         )
 
         asf = {
-            name: atomic_scattering_factor(
-                ele[0],
+            ele: atomic_scattering_factor(
+                ele,
                 self._outputData["xssf/axes/q"],
-                self.configuration["trajectory"]["instance"],
+                self.trajectory,
             )
-            for name, ele in zip(
-                self.configuration["atom_selection"]["names"],
-                self.configuration["atom_selection"]["elements"],
-            )
+            for ele in self.trajectory.selection_getter(self.trajectory.atom_types)
         }
         all_asf = {
             ele: atomic_scattering_factor(
                 ele,
                 self._outputData["xssf/axes/q"],
-                self.configuration["trajectory"]["instance"],
+                self.trajectory,
             )
             for ele in self.trajectory.atom_types
         }
@@ -281,12 +278,12 @@ class XRayStaticStructureFactor(DistanceHistogram):
             asf,
             all_asf,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
         )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = (n_selected / n_total) ** 2
 
         if self.intra:
@@ -333,5 +330,5 @@ class XRayStaticStructureFactor(DistanceHistogram):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

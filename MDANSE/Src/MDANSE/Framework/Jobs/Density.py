@@ -118,7 +118,7 @@ class Density(IJob):
         # get the Frame index
         frame_index = self.configuration["frames"]["value"][index]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
+        conf = self.trajectory.configuration(frame_index)
 
         try:
             cell_volume = conf.unit_cell.volume * measure(1.0, "nm3").toval("cm3")
@@ -138,9 +138,7 @@ class Density(IJob):
         mass_density = (
             sum(
                 [
-                    self.configuration["trajectory"]["instance"].get_atom_property(
-                        s, "atomic_weight"
-                    )
+                    self.trajectory.get_atom_property(s, "atomic_weight")
                     for s in self._symbols
                 ]
             )
@@ -183,5 +181,5 @@ class Density(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

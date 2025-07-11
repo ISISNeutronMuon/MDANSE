@@ -102,23 +102,16 @@ class DistanceHistogram(IJob):
 
         self.numberOfSteps = self.configuration["frames"]["number"]
 
-        self._indices = [
-            idx
-            for idxs in self.configuration["atom_selection"]["indices"]
-            for idx in idxs
-        ]
-        self._indices = np.array(self._indices, dtype=np.int32)
+        self._indices = np.array(self.trajectory.atom_indices, dtype=np.int32)
 
-        if self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.unique_molecules():
+        if self.trajectory.chemical_system.unique_molecules():
             self.indices_intra = intramolecular_lookup_dict(
-                self.configuration["trajectory"]["instance"].chemical_system,
+                self.trajectory.chemical_system,
             )
         else:
             self.indices_intra = None
         self.intra = self.indices_intra is not None
-        self.selectedElements = self.configuration["atom_selection"]["unique_names"]
+        self.selectedElements = sorted(self.trajectory.unique_elements)
         if self.indices_intra is not None and len(self.indices_intra) > len(
             self._indices
         ):
@@ -127,7 +120,7 @@ class DistanceHistogram(IJob):
         self.indexToSymbol = np.array(
             [
                 self.selectedElements.index(name)
-                for name in self.configuration["atom_selection"]["names"]
+                for name in self.trajectory.atom_types[self._indices]
             ],
             dtype=np.int32,
         )
@@ -155,7 +148,7 @@ class DistanceHistogram(IJob):
 
         self.averageDensity = 0.0
 
-        self._nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        self._nAtomsPerElement = self.trajectory.get_natoms()
         self._concentrations = {}
         for k in list(self._nAtomsPerElement.keys()):
             self._concentrations[k] = 0.0
@@ -182,7 +175,7 @@ class DistanceHistogram(IJob):
         # get the Frame index
         frame_index = self.configuration["frames"]["value"][index]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
+        conf = self.trajectory.configuration(frame_index)
         if not hasattr(conf, "unit_cell"):
             raise ValueError(DETAILED_CELL_MESSAGE)
         if conf.unit_cell.volume < CELL_SIZE_LIMIT:

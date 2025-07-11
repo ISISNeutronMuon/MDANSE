@@ -103,7 +103,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.numberOfSteps = len(self.trajectory.atom_indices)
 
         self._nQShells = self.configuration["q_shells"]["number"]
 
@@ -120,8 +120,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         )
 
         self.labels = [
-            (element, (element,))
-            for element in self.configuration["atom_selection"].get_natoms()
+            (element, (element,)) for element in self.trajectory.get_natoms()
         ]
 
         self._outputData.add(
@@ -162,7 +161,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             units="au",
         )
 
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in self.trajectory.unique_elements:
             self._outputData.add(
                 f"gdisf/f(q,t)/{element}",
                 "SurfaceOutputVariable",
@@ -246,10 +245,10 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         """
 
         # get atom index
-        indices = self.configuration["atom_selection"]["indices"][index]
+        atom_index = self.trajectory.atom_indices[index]
 
-        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
-            indices,
+        series = self.trajectory.read_atomic_trajectory(
+            atom_index,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -279,7 +278,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         x : tuple[np.ndarray, np.ndarray]
             A tuple of the GDISF and MSD of an atom.
         """
-        element = self.configuration["atom_selection"]["names"][index]
+        element = self._atoms[self.trajectory.atom_indices[index]]
         atomicSF, msd = x
         self._outputData[f"gdisf/f(q,t)/{element}"] += atomicSF
         self._outputData[f"msd/{element}"] += msd
@@ -288,7 +287,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         for element, number in nAtomsPerElement.items():
             self._outputData[f"gdisf/f(q,t)/{element}"][:] /= number
             self._outputData[f"gdisf/s(q,f)/{element}"][:] = get_spectrum(
@@ -316,7 +315,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             1,
         )
         assign_weights(self._outputData, weight_dict, "gdisf/f(q,t)/%s", self.labels)
@@ -327,7 +326,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = n_selected / n_total
 
         self._outputData["gdisf/f(q,t)/total"][:] = (
@@ -380,7 +379,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             1,
         )
 
@@ -406,5 +405,5 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

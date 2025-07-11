@@ -151,21 +151,21 @@ class VanHoveFunctionSelf(IJob):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.numberOfSteps = len(self.trajectory.atom_indices)
         self.n_configs = self.configuration["frames"]["n_configs"]
         self.n_frames = self.configuration["frames"]["n_frames"]
+        self._atoms = self.trajectory.atom_types
 
-        self.selectedElements = self.configuration["atom_selection"]["unique_names"]
+        self.selectedElements = self.trajectory.unique_elements
         self.nElements = len(self.selectedElements)
 
         self.n_mid_points = len(self.configuration["r_values"]["mid_points"])
 
         self.labels = [
-            (element, (element,))
-            for element in self.configuration["atom_selection"].get_natoms()
+            (element, (element,)) for element in self.trajectory.get_natoms()
         ]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(
+        conf = self.trajectory.configuration(
             self.configuration["frames"]["first"],
         )
         if not hasattr(conf, "unit_cell"):
@@ -234,7 +234,7 @@ class VanHoveFunctionSelf(IJob):
             )
         self.shell_volumes = (4 / 3) * np.pi * np.array(self.shell_volumes)
 
-    def run_step(self, atm_index: int) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
+    def run_step(self, index: int) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
         """Run the analysis for a single atom.
 
         Calculates a distance histograms of an atoms displacement.
@@ -243,7 +243,7 @@ class VanHoveFunctionSelf(IJob):
 
         Parameters
         ----------
-        atm_index : int
+        index : int
             The index of the atom which will be used to generate the
             distance histograms.
 
@@ -258,18 +258,16 @@ class VanHoveFunctionSelf(IJob):
         last = self.configuration["frames"]["last"] + 1
         step = self.configuration["frames"]["step"]
 
-        idx = self.configuration["atom_selection"]["indices"][atm_index][0]
-        series = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
-            idx,
+        atom_index = self.trajectory.atom_indices[index]
+        series = self.trajectory.read_atomic_trajectory(
+            atom_index,
             first=first,
             last=last,
             step=step,
         )
         cell_vols = np.array(
             [
-                self.configuration["trajectory"]["instance"]
-                .configuration(i)
-                .unit_cell.volume
+                self.trajectory.configuration(i).unit_cell.volume
                 for i in range(first, last, step)
             ],
         )
@@ -284,21 +282,21 @@ class VanHoveFunctionSelf(IJob):
             self.n_frames,
         )
 
-        return atm_index, histograms
+        return index, histograms
 
-    def combine(self, atm_index: int, histogram: np.ndarray):
+    def combine(self, index: int, histogram: np.ndarray):
         """Add the results into the histograms for the input time difference.
 
         Parameters
         ----------
-        atm_index : int
+        index : int
             The atom index.
         histogram : np.ndarray
             A histogram of the distances between an atom at
             time t0 and t0 + t.
 
         """
-        element = self.configuration["atom_selection"]["names"][atm_index]
+        element = self._atoms[self.trajectory.atom_indices[index]]
         self._outputData[f"vh/g(r,t)/{element}"][:] += histogram
         self._outputData[f"vh/4_pi_r2_g(r,t)/{element}"][:] += histogram
 
@@ -308,7 +306,7 @@ class VanHoveFunctionSelf(IJob):
         Using the distance histograms calculate, normalize and save the
         self part of the Van Hove function.
         """
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         for element, number in nAtomsPerElement.items():
             self._outputData[f"vh/g(r,t)/{element}"][:] /= (
                 self.shell_volumes[:, np.newaxis] * number**2 * self.n_configs
@@ -324,7 +322,7 @@ class VanHoveFunctionSelf(IJob):
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             1,
         )
         assign_weights(self._outputData, weight_dict, "vh/g(r,t)/%s", self.labels)
@@ -333,7 +331,7 @@ class VanHoveFunctionSelf(IJob):
         )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = n_selected / n_total
 
         self._outputData["vh/g(r,t)/total"][:] = (
@@ -368,5 +366,5 @@ class VanHoveFunctionSelf(IJob):
             str(self),
             self,
         )
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

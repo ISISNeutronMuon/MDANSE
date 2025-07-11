@@ -133,9 +133,9 @@ class StructureFactorFromScatteringFunction(IJob):
         """Calculate the static structure factor from the intermediate
         scattering function.
         """
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = (n_selected / n_total) ** 2
         norm_natoms = 1.0 / n_total
 
@@ -180,6 +180,6 @@ class StructureFactorFromScatteringFunction(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         self.configuration["dcsf_input_file"]["instance"].close()
         super().finalize()

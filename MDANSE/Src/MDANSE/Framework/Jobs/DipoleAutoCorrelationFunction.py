@@ -119,16 +119,14 @@ class DipoleAutoCorrelationFunction(IJob):
                 self.configuration["frames"]["step"],
             )
         ):
-            configuration = self.configuration["trajectory"]["instance"].configuration(
-                frame_index
-            )
+            configuration = self.trajectory.configuration(frame_index)
             masses = [
-                self.configuration["trajectory"]["instance"].get_atom_property(
+                self.trajectory.get_atom_property(
                     self.chemical_system.atom_list[index], "atomic_weight"
                 )
                 for index in molecule
             ]
-            charges = self.configuration["trajectory"]["instance"].charges(frame_index)
+            charges = self.trajectory.charges(frame_index)
             contiguous_configuration = configuration.contiguous_configuration()
             coords = contiguous_configuration.coordinates[molecule]
             com = center_of_mass(coords, masses)
@@ -165,5 +163,5 @@ class DipoleAutoCorrelationFunction(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

@@ -197,7 +197,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             return
         self.trajectory = trajectory["instance"]
         if transmutation is not None:
-            self.trajectory.set_transmutation(transmutation._transmutation)
+            self.trajectory.set_transmutation(transmutation.transmutation)
         if selection is not None:
             self.trajectory.set_selection(selection["flatten_indices"])
 
@@ -301,7 +301,7 @@ if __name__ == "__main__":
                 index = tasks.get_nowait()
             except queue.Empty:
                 if tasks.empty():
-                    self.configuration["trajectory"]["instance"].close()
+                    self.trajectory.close()
                     break
             else:
                 if self._status is not None:

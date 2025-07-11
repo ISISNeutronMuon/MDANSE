@@ -61,30 +61,23 @@ class UnfoldedTrajectory(IJob):
 
         self.numberOfSteps = self.configuration["frames"]["number"]
 
-        atoms = self.configuration["trajectory"]["instance"].chemical_system.atom_list
+        atoms = self.trajectory.atom_types
 
         # The collection of atoms corresponding to the atoms selected for output.
-        indices = [
-            idx
-            for idxs in self.configuration["atom_selection"]["indices"]
-            for idx in idxs
-        ]
+        indices = self.trajectory.atom_indices
         self._selectedAtoms = [atoms[ind] for ind in indices]
         self._selection_indices = indices
 
         # The output trajectory is opened for writing.
         self._outputTraj = TrajectoryWriter(
             self.configuration["output_files"]["file"],
-            self.configuration["trajectory"]["instance"].chemical_system,
+            self.trajectory.chemical_system,
             self.numberOfSteps,
             self._selection_indices,
             positions_dtype=self.configuration["output_files"]["dtype"],
             chunking_limit=self.configuration["output_files"]["chunk_size"],
             compression=self.configuration["output_files"]["compression"],
-            initial_charges=[
-                self.configuration["trajectory"]["instance"].charges(0)[ind]
-                for ind in indices
-            ],
+            initial_charges=[self.trajectory.charges(0)[ind] for ind in indices],
         )
 
     def run_step(self, index):
@@ -101,7 +94,7 @@ class UnfoldedTrajectory(IJob):
         # get the Frame index
         frameIndex = self.configuration["frames"]["value"][index]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
+        conf = self.trajectory.configuration(frameIndex)
 
         conf = conf.continuous_configuration()
 
@@ -110,9 +103,7 @@ class UnfoldedTrajectory(IJob):
         # The time corresponding to the running index.
         time = self.configuration["frames"]["time"][index]
 
-        charge = self.configuration["trajectory"]["instance"].charges(index)[
-            self._selection_indices
-        ]
+        charge = self.trajectory.charges(index)[self._selection_indices]
         # Write the step.
         self._outputTraj.dump_configuration(cloned_conf, time)
 
@@ -134,7 +125,7 @@ class UnfoldedTrajectory(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
         # The input trajectory is closed.
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
 
         # The output trajectory is closed.
         self._outputTraj.close()

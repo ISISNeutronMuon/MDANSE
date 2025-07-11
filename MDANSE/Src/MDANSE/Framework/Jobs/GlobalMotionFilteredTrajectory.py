@@ -85,11 +85,8 @@ class GlobalMotionFilteredTrajectory(IJob):
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         # The collection of atoms corresponding to the atoms selected for output.
-        atoms = self.configuration["trajectory"]["instance"].chemical_system.atom_list
-        self._selected_atoms = []
-        for indices in self.configuration["atom_selection"]["indices"]:
-            for idx in indices:
-                self._selected_atoms.append(atoms[idx])
+        atoms = self.trajectory.atom_types
+        self._selected_atoms = self.trajectory.atom_indices
 
         self._reference_atoms = []
         for indices in self.configuration["reference_selection"]["indices"]:
@@ -98,7 +95,7 @@ class GlobalMotionFilteredTrajectory(IJob):
 
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
-            self.configuration["trajectory"]["instance"].chemical_system,
+            self.trajectory.chemical_system,
             self.numberOfSteps,
             self._selected_atoms.atom_list,
             positions_dtype=self.configuration["output_files"]["dtype"],
@@ -125,7 +122,7 @@ class GlobalMotionFilteredTrajectory(IJob):
         # get the Frame index
         frameIndex = self.configuration["frames"]["value"][index]
 
-        trajectory = self.configuration["trajectory"]["instance"]
+        trajectory = self.trajectory
 
         current_configuration = trajectory.configuration(frameIndex)
         current_configuration = current_configuration.continuous_configuration()
@@ -192,7 +189,7 @@ class GlobalMotionFilteredTrajectory(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
         # The input trajectory is closed.
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
 
         # The output trajectory is closed.
         self._output_trajectory.close()

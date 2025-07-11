@@ -168,11 +168,7 @@ class SolventAccessibleSurface(IJob):
             "instance"
         ].chemical_system.atom_property("vdw_radius")  # should it be covalent?
 
-        self._indices = [
-            idx
-            for idxs in self.configuration["atom_selection"]["indices"]
-            for idx in idxs
-        ]
+        self._indices = self.trajectory.atom_indices
 
     def run_step(self, index):
         """
@@ -186,7 +182,7 @@ class SolventAccessibleSurface(IJob):
         frameIndex = self.configuration["frames"]["value"][index]
 
         # Fetch the configuration.
-        conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
+        conf = self.trajectory.configuration(frameIndex)
 
         # The configuration is made continuous.
         conf = conf.continuous_configuration()
@@ -242,5 +238,5 @@ class SolventAccessibleSurface(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

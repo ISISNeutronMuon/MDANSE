@@ -150,7 +150,7 @@ class CoordinationNumber(DistanceHistogram):
         for k in self._concentrations:
             self._concentrations[k] /= nFrames
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         # symmetrize the data
         for i, j in it.combinations_with_replacement(self.selectedElements, 2):
@@ -222,6 +222,6 @@ class CoordinationNumber(DistanceHistogram):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
 
         super().finalize()

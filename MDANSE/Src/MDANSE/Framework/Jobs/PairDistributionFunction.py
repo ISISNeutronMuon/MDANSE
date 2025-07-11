@@ -121,7 +121,7 @@ class PairDistributionFunction(DistanceHistogram):
 
         shellVolumes = shellSurfaces * self.configuration["r_values"]["step"]
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         def calc_func(
             label_i: str, label_j: str
@@ -198,12 +198,12 @@ class PairDistributionFunction(DistanceHistogram):
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
         )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         factor = (n_selected / n_total) ** 2
 
         if self.intra:
@@ -257,5 +257,5 @@ class PairDistributionFunction(DistanceHistogram):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

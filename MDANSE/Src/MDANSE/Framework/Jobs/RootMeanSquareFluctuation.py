@@ -70,14 +70,14 @@ class RootMeanSquareFluctuation(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.numberOfSteps = len(self.trajectory.atom_indices)
 
         # Will store the indices.
         if self.configuration["grouping_level"]["value"] == "each atom":
             self._outputData.add(
                 "rmsf/axes/indices",
                 "LineOutputVariable",
-                self.configuration["atom_selection"]["flatten_indices"],
+                self.trajectory.atom_indices,
             )
         else:
             self._outputData.add(
@@ -111,10 +111,10 @@ class RootMeanSquareFluctuation(IJob):
             #. rmsf (np.array): the calculated root mean square fluctuation for atom index
         """
         # read the particle trajectory
-        indices = self.configuration["atom_selection"]["indices"][index]
+        atom_index = self.trajectory.atom_indices[index]
 
-        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
-            indices,
+        series = self.trajectory.read_atomic_trajectory(
+            atom_index,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -147,5 +147,5 @@ class RootMeanSquareFluctuation(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

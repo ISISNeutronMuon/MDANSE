@@ -60,30 +60,22 @@ class CroppedTrajectory(IJob):
 
         self.numberOfSteps = self.configuration["frames"]["number"]
 
-        atoms = self.configuration["trajectory"]["instance"].chemical_system.atom_list
+        atoms = self.trajectory.atom_types
+        indices = self.trajectory.atom_indices
 
-        # The collection of atoms corresponding to the atoms selected for output.
-        indices = [
-            idx
-            for idxs in self.configuration["atom_selection"]["indices"]
-            for idx in idxs
-        ]
-        self._selectedAtoms = [atoms[ind] for ind in indices]
+        self._selectedAtoms = self.trajectory.selection_getter(atoms)
         self._selected_indices = indices
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
-            self.configuration["trajectory"]["instance"].chemical_system,
+            self.trajectory.chemical_system,
             self.numberOfSteps,
             self._selected_indices,
             positions_dtype=self.configuration["output_files"]["dtype"],
             chunking_limit=self.configuration["output_files"]["chunk_size"],
             compression=self.configuration["output_files"]["compression"],
-            initial_charges=[
-                self.configuration["trajectory"]["instance"].charges(0)[ind]
-                for ind in indices
-            ],
+            initial_charges=[self.trajectory.charges(0)[ind] for ind in indices],
         )
 
     def run_step(self, index):
@@ -100,15 +92,13 @@ class CroppedTrajectory(IJob):
         # get the Frame index
         frame_index = self.configuration["frames"]["value"][index]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
+        conf = self.trajectory.configuration(frame_index)
 
         cloned_conf = conf.clone(self._output_trajectory.chemical_system)
 
         time = self.configuration["frames"]["time"][index]
 
-        charge = self.configuration["trajectory"]["instance"].charges(index)[
-            self._selected_indices
-        ]
+        charge = self.trajectory.charges(index)[self._selected_indices]
 
         self._output_trajectory.dump_configuration(cloned_conf, time)
 
@@ -130,7 +120,7 @@ class CroppedTrajectory(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
         # The input trajectory is closed.
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
 
         # The output trajectory is closed.
         self._output_trajectory.close()
