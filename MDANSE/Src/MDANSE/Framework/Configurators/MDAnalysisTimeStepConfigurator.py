@@ -29,7 +29,7 @@ class MDAnalysisTimeStepConfigurator(FloatConfigurator):
 
     def configure(self, value):
         # if the value is not valid then we use the MDAnalysis
-        # default values which maybe the time step in the inputted
+        # default values which maybe the time step in the input
         # files or 1 ps
         try:
             value = float(value)

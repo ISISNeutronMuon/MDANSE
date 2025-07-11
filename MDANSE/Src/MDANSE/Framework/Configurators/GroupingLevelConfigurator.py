@@ -170,7 +170,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         Returns
         -------
         str
-            The element of the inputted label.
+            The element of the input label.
         """
         if self["level"] == "atom":
             return label

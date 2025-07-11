@@ -20,9 +20,11 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from MDANSE.Chemistry.Databases import AtomsDatabase
 
-from collections import Counter
+from collections import Counter, defaultdict
+from collections.abc import Sequence
 import copy
 import math
+from operator import itemgetter
 from pathlib import Path
 
 import h5py
@@ -59,6 +61,113 @@ class Trajectory:
         self._min_span = np.zeros(3)
         self._max_span = np.zeros(3)
         self._atom_cache = {}
+        self._selection = []
+        self._selection_getter = None
+        self._transmutation = {}
+        self._transmuted_types = []
+
+    @property
+    def atom_types(self):
+        if self._transmuted_types:
+            return self._transmuted_types
+        if not self._transmutation:
+            return self._trajectory.chemical_system.atom_list
+        temp = copy.deepcopy(self._trajectory.chemical_system.atom_list)
+        for index, type in self._transmutation:
+            temp[index] = type
+        self._transmuted_types = temp
+        return self._transmuted_types
+
+    def set_transmutation(self, changed_atoms: dict[int, str]):
+        self._transmutation = changed_atoms
+
+    def set_selection(self, selected_indices: Sequence[int]):
+        self._selection = selected_indices
+        self._selection_getter = itemgetter(selected_indices)
+
+    def get_weights(
+        self, *, prop: str | None = None
+    ) -> tuple[dict[str, float], dict[str, float]]:
+        """Generate a dictionary of weights.
+
+        Parameters
+        ----------
+        prop : str or None, optional
+            The property to generate the weights from, if None then the
+            property set in this configurator will be used.
+
+        Returns
+        -------
+        tuple[dict[str, float], dict[str, float]]
+            The dictionary of the weights.
+
+        """
+        weights = []
+        for n_elements, atm_elements in [
+            (self.get_natoms(), self._selection_getter(self.atom_types)),
+            (
+                self.get_all_natoms(),
+                self.atom_types,
+            ),
+        ]:
+            w = defaultdict(float)
+            for element in atm_elements:
+                w[element] += self._trajectory.get_atom_property(element, prop)
+            for element, num_atoms in n_elements.items():
+                w[element] /= num_atoms
+            weights.append(w)
+
+        return tuple(weights)
+
+    def get_natoms(self) -> dict[str, int]:
+        """Count the selected atoms, per element.
+
+        Returns
+        -------
+        dict
+            A dictionary of the number of atom per element.
+
+        """
+        all_atom_types = self.atom_types
+        if self._selection:
+            return Counter(self._selection_getter(all_atom_types))
+        return Counter(all_atom_types)
+
+    def get_all_natoms(self) -> dict[str, int]:
+        """Count all atoms, per element.
+
+        Returns
+        -------
+        dict
+            A dictionary of the number of atom per element.
+
+        """
+        return Counter(self.atom_types)
+
+    def get_total_natoms(self) -> int:
+        """Count all the selected atoms.
+
+        Returns
+        -------
+        int
+            The total number of atoms selected.
+
+        """
+        return len(self._selection)
+
+    def get_indices(self) -> dict[str, list[int]]:
+        """Group atom indices per chemical element.
+
+        Returns
+        -------
+        dict[str, list[int]]
+            For each atom type, a list of indices of selected atoms
+
+        """
+        all_elements = np.array(self.atom_types)
+        unique_elements = set(self._selection_getter(all_elements))
+        indices_per_element = {element: list(np.where(all_elements==element)[0]) for element in unique_elements}
+        return indices_per_element
 
     def guess_correct_format(self):
         """This is a placeholder for now. As the number of

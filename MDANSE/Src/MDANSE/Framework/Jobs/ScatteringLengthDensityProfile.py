@@ -107,7 +107,7 @@ class ScatteringLengthDensityProfile(IJob):
             "dp/axes/r", "LineOutputVariable", (self._n_bins,), units="nm"
         )
 
-        self._indices_per_element = self.configuration["atom_selection"].get_indices()
+        self._indices_per_element = self.trajectory.get_indices()
         self._elements = list(self.configuration["atom_selection"].get_natoms().keys())
 
         self.scattering_lengths = {

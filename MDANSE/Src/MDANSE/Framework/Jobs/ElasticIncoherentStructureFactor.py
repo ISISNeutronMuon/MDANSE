@@ -207,7 +207,9 @@ class ElasticIncoherentStructureFactor(IJob):
         for element, number in nAtomsPerElement.items():
             self._outputData[f"eisf/{element}"][:] /= number
 
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        selected_weights, all_weights = self.trajectory.get_weights(
+            self.configuration["weights"]["property"]
+        )
         for weights in selected_weights, all_weights:
             for key, value in weights.items():
                 weights[key] = value**2

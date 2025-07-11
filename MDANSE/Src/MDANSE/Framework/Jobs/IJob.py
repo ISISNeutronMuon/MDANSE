@@ -186,6 +186,20 @@ class IJob(Configurable, metaclass=SubclassFactory):
                     "LineOutputVariable",
                     [index in valid_indices for index in range(array_length)],
                 )
+        self.set_up_trajectory()
+
+    def set_up_trajectory(self):
+        trajectory = self.configuration.get("trajectory")
+        selection = self.configuration.get("atom_selection")
+        transmutation = self.configuration.get("atom_transmutation")
+        grouping = self.configuration.get("grouping_level")
+        if trajectory is None:
+            return
+        self.trajectory = trajectory["instance"]
+        if transmutation is not None:
+            self.trajectory.set_transmutation(transmutation["value"])
+        if selection is not None:
+            self.trajectory.set_selection(selection["flatten_indices"])
 
     @abc.abstractmethod
     def run_step(self, index):

@@ -537,7 +537,7 @@ class VanHoveFunctionDistinct(IJob):
         """Calculate results for a single time step.
 
         Calculates the distance histogram between the configurations
-        at the inputted time difference. The distance histograms are
+        at the input time difference. The distance histograms are
         then used to calculate the distinct part of the van Hove function.
 
         Parameters
@@ -554,7 +554,7 @@ class VanHoveFunctionDistinct(IJob):
         bins_intra = np.zeros((self.nElements, self.nElements, self.n_mid_points))
         bins_total = np.zeros((self.nElements, self.nElements, self.n_mid_points))
 
-        # average the distance histograms at the inputted time
+        # average the distance histograms at the input time
         # difference over a number of configuration
         for i in range(self.n_configs):
             frame_index_t0 = self.configuration["frames"]["value"][i]
@@ -621,7 +621,7 @@ class VanHoveFunctionDistinct(IJob):
             The time difference.
         x : tuple[np.ndarray, np.ndarray]
             A tuple containing a histogram of the distances between
-            configurations at the inputted time difference.
+            configurations at the input time difference.
 
         """
         if self.intra:
@@ -690,7 +690,10 @@ class VanHoveFunctionDistinct(IJob):
         )
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
+
+        selected_weights, all_weights = self.trajectory.get_weights(
+            self.configuration["weights"]["property"]
+        )
         weight_dict = get_weights(
             selected_weights,
             all_weights,

@@ -162,7 +162,7 @@ class DynamicCoherentStructureFactor(IJob):
             units="au",
         )
 
-        self._indicesPerElement = self.configuration["atom_selection"].get_indices()
+        self._indicesPerElement = self.trajectory.get_indices()
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
@@ -340,7 +340,10 @@ class DynamicCoherentStructureFactor(IJob):
         )
 
         nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
+
+        selected_weights, all_weights = self.trajectory.get_weights(
+            self.configuration["weights"]["property"]
+        )
         weight_dict = get_weights(
             selected_weights,
             all_weights,

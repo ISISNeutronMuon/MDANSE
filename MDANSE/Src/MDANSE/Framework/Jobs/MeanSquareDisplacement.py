@@ -201,7 +201,9 @@ class MeanSquareDisplacement(IJob):
         for element, number in list(nAtomsPerElement.items()):
             self._outputData[f"msd/{element}"] /= number
 
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        selected_weights, all_weights = self.trajectory.get_weights(
+            self.configuration["weights"]["property"]
+        )
         weight_dict = get_weights(
             selected_weights,
             all_weights,

@@ -162,7 +162,7 @@ class GeneralAutoCorrelationFunction(IJob):
         for element, number in nAtomsPerElement.items():
             self._outputData[f"gacf/{element}"] /= number
 
-        weights = self.configuration["weights"].get_weights()
+        weights = self.trajectory.get_weights(self.configuration["weights"]["property"])
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "gacf/%s", self.labels)
         gacfTotal = weighted_sum(self._outputData, "gacf/%s", self.labels)
