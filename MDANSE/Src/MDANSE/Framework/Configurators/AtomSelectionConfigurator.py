@@ -70,71 +70,8 @@ class AtomSelectionConfigurator(IConfigurator):
         indices = self.selector.select_in_trajectory(trajConfig["instance"])
 
         self["flatten_indices"] = sorted(indices)
-
-        atoms = trajConfig["instance"].chemical_system.atom_list
-        self["total_number_of_atoms"] = len(atoms)
-        selectedAtoms = [atoms[idx] for idx in self["flatten_indices"]]
-
         self["selection_length"] = len(self["flatten_indices"])
-        self["indices"] = [[idx] for idx in self["flatten_indices"]]
-        self["all_names"] = list(atoms)
-        self["all_elements"] = [[at] for at in atoms]
-        self["elements"] = [[at] for at in selectedAtoms]
-        self["names"] = list(selectedAtoms)
-        self["unique_names"] = sorted(set(self["names"]))
-        self["masses"] = [
-            [trajConfig["instance"].get_atom_property(n, "atomic_weight")]
-            for n in self["names"]
-        ]
         if self["selection_length"] == 0:
             self.error_status = "The atom selection is empty."
             return
         self.error_status = "OK"
-
-    def get_natoms(self) -> dict[str, int]:
-        """Count the selected atoms, per element.
-
-        Returns
-        -------
-        dict
-            A dictionary of the number of atom per element.
-
-        """
-        return Counter(self["names"])
-
-    def get_all_natoms(self) -> dict[str, int]:
-        """Count all atoms, per element.
-
-        Returns
-        -------
-        dict
-            A dictionary of the number of atom per element.
-
-        """
-        return Counter(self["all_names"])
-
-    def get_total_natoms(self) -> int:
-        """Count all the selected atoms.
-
-        Returns
-        -------
-        int
-            The total number of atoms selected.
-
-        """
-        return len(self["names"])
-
-    def get_indices(self) -> dict[str, list[int]]:
-        """Group atom indices per chemical element.
-
-        Returns
-        -------
-        dict[str, list[int]]
-            For each atom type, a list of indices of selected atoms
-
-        """
-        indicesPerElement = defaultdict(list)
-        for i, v in enumerate(self["names"]):
-            indicesPerElement[v].extend(self["indices"][i])
-
-        return indicesPerElement
