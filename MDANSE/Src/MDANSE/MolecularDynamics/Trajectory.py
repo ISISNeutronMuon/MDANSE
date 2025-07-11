@@ -94,6 +94,9 @@ class Trajectory:
     def set_selection(self, selected_indices: Sequence[int]):
         self._selection = selected_indices
         self.selection_getter = itemgetter(*selected_indices)
+    
+    def set_grouping(self, grouping_level: str):
+        self._grouping = grouping_level
 
     def get_weights(
         self, *, prop: str | None = None

@@ -200,6 +200,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
             self.trajectory.set_selection(selection["flatten_indices"])
         if transmutation is not None:
             self.trajectory.set_transmutation(transmutation.transmutation)
+        if grouping is not None:
+            self.trajectory.set_grouping(grouping["level"])
 
     @abc.abstractmethod
     def run_step(self, index):
