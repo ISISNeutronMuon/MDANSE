@@ -73,7 +73,7 @@ class Trajectory:
         if not self._transmutation:
             return self._trajectory.chemical_system.atom_list
         temp = copy.deepcopy(self._trajectory.chemical_system.atom_list)
-        for index, type in self._transmutation:
+        for index, type in self._transmutation.items():
             temp[index] = type
         self._transmuted_types = temp
         return self._transmuted_types
@@ -83,7 +83,7 @@ class Trajectory:
 
     def set_selection(self, selected_indices: Sequence[int]):
         self._selection = selected_indices
-        self._selection_getter = itemgetter(selected_indices)
+        self._selection_getter = itemgetter(*selected_indices)
 
     def get_weights(
         self, *, prop: str | None = None

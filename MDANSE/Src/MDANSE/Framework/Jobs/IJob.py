@@ -197,7 +197,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             return
         self.trajectory = trajectory["instance"]
         if transmutation is not None:
-            self.trajectory.set_transmutation(transmutation["value"])
+            self.trajectory.set_transmutation(transmutation._transmutation)
         if selection is not None:
             self.trajectory.set_selection(selection["flatten_indices"])
 

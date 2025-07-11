@@ -307,7 +307,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                 )
 
         selected_weights, all_weights = self.trajectory.get_weights(
-            self.configuration["weights"]["property"]
+            prop=self.configuration["weights"]["property"]
         )
         for weights in selected_weights, all_weights:
             for key, value in weights.items():
