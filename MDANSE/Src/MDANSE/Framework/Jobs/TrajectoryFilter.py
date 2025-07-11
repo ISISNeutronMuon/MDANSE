@@ -78,6 +78,10 @@ class TrajectoryFilter(IJob):
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
+    settings["atom_transmutation"] = (
+        "AtomTransmutationConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["weights"] = (
         "WeightsConfigurator",
         {

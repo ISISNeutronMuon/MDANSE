@@ -79,8 +79,6 @@ class DistanceHistogram(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "grouping_level": "grouping_level",
             }
         },
     )
@@ -121,7 +119,7 @@ class DistanceHistogram(IJob):
         self.indexToSymbol = np.array(
             [
                 self.selectedElements.index(name)
-                for name in self.trajectory.atom_types[self._indices]
+                for name in self.trajectory.selection_getter(self.trajectory.atom_types)
             ],
             dtype=np.int32,
         )
