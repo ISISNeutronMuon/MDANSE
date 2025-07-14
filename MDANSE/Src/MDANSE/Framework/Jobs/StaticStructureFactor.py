@@ -98,8 +98,9 @@ class StaticStructureFactor(DistanceHistogram):
 
     def initialize(self):
         frame_index = self.configuration["frames"]["value"][0]
+        trajectory = self.configuration.get("trajectory")["instance"]
 
-        conf = self.trajectory.configuration(frame_index)
+        conf = trajectory.configuration(frame_index)
         try:
             cell_volume = conf.unit_cell.volume
         except Exception:

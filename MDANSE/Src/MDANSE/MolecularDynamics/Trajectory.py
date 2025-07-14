@@ -92,6 +92,8 @@ class Trajectory:
     @property
     def atom_names(self):
         if self._grouping_level in {"atom", "each atom"}:
+            if not self._element_from_label:
+                self._element_from_label = {element : element for element in self.unique_elements}
             return self.atom_types
         if not self._atom_names:
             if self._grouping_level == "each molecule":
@@ -121,8 +123,6 @@ class Trajectory:
     
     @property
     def element_from_label(self):
-        if self._grouping_level != "molecule":
-            raise ValueError("Only molecule grouping uses label to element mapping.")
         if not self._element_from_label:
             self.atom_names
         return self._element_from_label

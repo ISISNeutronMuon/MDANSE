@@ -374,9 +374,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         # since GDISF ~ exp(-msd * q2 / 6.0) the MSD isn't weighted in
         # the exp lets save the MSD with equal weights
-        selected_weights, all_weights = self.configuration["weights"].get_weights(
-            prop="equal"
-        )
+        selected_weights, all_weights = self.trajectory.get_weights(prop="equal")
         weight_dict = get_weights(
             selected_weights,
             all_weights,

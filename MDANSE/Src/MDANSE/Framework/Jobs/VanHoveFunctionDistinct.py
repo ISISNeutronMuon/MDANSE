@@ -409,7 +409,7 @@ class VanHoveFunctionDistinct(IJob):
             self.indices_intra = None
         self.intra = self.indices_intra is not None
 
-        self.selectedElements = self.trajectory.unique_elements
+        self.selectedElements = list(self.trajectory.unique_elements)
         self.nElements = len(self.selectedElements)
         self._elementsPairs = sorted(
             it.combinations_with_replacement(self.selectedElements, 2),
