@@ -108,7 +108,9 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
         self.numberOfSteps = 1
 
-        self.pair_labels = self.configuration["grouping_level"].pair_labels()
+        self.pair_labels = self.configuration["grouping_level"].pair_labels(
+            self.trajectory,
+        )
 
         # Check time consistency
         dcsf_time, disf_time = self._get_data_from_files("axes/time")
@@ -368,8 +370,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
         norm_natoms = 1.0 / n_total
         # Compute coherent functions and structure factor
         for pair_str, (label_i, label_j) in self.pair_labels:
-            ele_i = self.configuration["grouping_level"].get_element_from_label(label_i)
-            ele_j = self.configuration["grouping_level"].get_element_from_label(label_j)
+            ele_i = self.trajectory.element_from_label[label_i]
+            ele_j = self.trajectory.element_from_label[label_j]
             bi = self.trajectory.get_atom_property(ele_i, "b_coherent")
             bj = self.trajectory.get_atom_property(ele_j, "b_coherent")
             sqrt_cij = sqrt(
@@ -399,7 +401,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
         # Compute incoherent functions and structure factor
         for label, number in nAtomsPerElement.items():
-            ele_i = self.configuration["grouping_level"].get_element_from_label(label)
+            ele_i = self.trajectory.element_from_label[label]
             bi = self.trajectory.get_atom_property(ele_i, "b_incoherent")
             self._outputData[f"ndsf/f(q,t)_inc/{label}"].scaling_factor *= (
                 bi**2 * number * norm_natoms
@@ -422,6 +424,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
         self._outputData["ndsf/s(q,f)_inc/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ndsf/f(q,t)_inc",
             "SurfaceOutputVariable",
@@ -429,6 +432,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             units="au",
         )
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ndsf/f(q,t)_coh",
             "SurfaceOutputVariable",
@@ -438,6 +442,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             units="au",
         )
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ndsf/s(q,f)_inc",
             "SurfaceOutputVariable",
@@ -447,6 +452,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             partial_result=True,
         )
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ndsf/s(q,f)_coh",
             "SurfaceOutputVariable",

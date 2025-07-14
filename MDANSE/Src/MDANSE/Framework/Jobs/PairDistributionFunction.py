@@ -188,7 +188,7 @@ class PairDistributionFunction(DistanceHistogram):
                     break
 
         self.configuration["grouping_level"].update_pair_results(
-            calc_func, self._outputData
+            self.trajectory, calc_func, self._outputData
         )
 
         selected_weights, all_weights = self.trajectory.get_weights(
@@ -226,6 +226,7 @@ class PairDistributionFunction(DistanceHistogram):
                 for j in ("pdf", "rdf", "tcf"):
                     self._outputData[f"{j}{i}/total"].scaling_factor = factor
                     self.configuration["grouping_level"].add_grouped_totals(
+                        self.trajectory,
                         self._outputData,
                         f"{j}{i}",
                         "LineOutputVariable",

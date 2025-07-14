@@ -414,8 +414,12 @@ class VanHoveFunctionDistinct(IJob):
         self._elementsPairs = sorted(
             it.combinations_with_replacement(self.selectedElements, 2),
         )
-        self.labels = self.configuration["grouping_level"].pair_labels()
-        self.labels_intra = self.configuration["grouping_level"].pair_labels(intra=True)
+        self.labels = self.configuration["grouping_level"].pair_labels(
+            self.trajectory,
+        )
+        self.labels_intra = self.configuration["grouping_level"].pair_labels(
+            self.trajectory, intra=True
+        )
 
         self.n_mid_points = len(self.configuration["r_values"]["mid_points"])
 
@@ -681,7 +685,7 @@ class VanHoveFunctionDistinct(IJob):
                 yield "vh/g(r,t)/intra", True, van_hove_intra
 
         self.configuration["grouping_level"].update_pair_results(
-            calc_func, self._outputData
+            self.trajectory, calc_func, self._outputData
         )
 
         nAtomsPerElement = self.trajectory.get_natoms()
@@ -714,6 +718,7 @@ class VanHoveFunctionDistinct(IJob):
                 self._outputData[f"vh/g(r,t){i}/total"][...] = vhs / fact
                 self._outputData[f"vh/g(r,t){i}/total"].scaling_factor = fact
                 self.configuration["grouping_level"].add_grouped_totals(
+                    self.trajectory,
                     self._outputData,
                     f"vh/g(r,t){i}",
                     "SurfaceOutputVariable",

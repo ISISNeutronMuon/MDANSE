@@ -216,6 +216,7 @@ class MeanSquareDisplacement(IJob):
         self._outputData["msd/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "msd",
             "LineOutputVariable",

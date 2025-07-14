@@ -316,6 +316,7 @@ class PositionPowerSpectrum(IJob):
         self._outputData["pps/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "pacf",
             "LineOutputVariable",
@@ -323,6 +324,7 @@ class PositionPowerSpectrum(IJob):
             units="nm2",
         )
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "pps",
             "LineOutputVariable",
@@ -342,6 +344,7 @@ class PositionPowerSpectrum(IJob):
             )
             self._outputData["pps/ideal/total"].scaling_factor = fact
             self.configuration["grouping_level"].add_grouped_totals(
+                self.trajectory,
                 self._outputData,
                 "pps/ideal",
                 "LineOutputVariable",

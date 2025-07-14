@@ -165,7 +165,9 @@ class DynamicCoherentStructureFactor(IJob):
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
 
-        self.labels = self.configuration["grouping_level"].pair_labels()
+        self.labels = self.configuration["grouping_level"].pair_labels(
+            self.trajectory,
+        )
 
         for pair_str, _ in self.labels:
             self._outputData.add(
@@ -384,6 +386,7 @@ class DynamicCoherentStructureFactor(IJob):
         self._outputData["dcsf/f(q,t)/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "dcsf/f(q,t)",
             "SurfaceOutputVariable",
@@ -399,6 +402,7 @@ class DynamicCoherentStructureFactor(IJob):
         self._outputData["dcsf/s(q,f)/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "dcsf/s(q,f)",
             "SurfaceOutputVariable",
@@ -417,6 +421,7 @@ class DynamicCoherentStructureFactor(IJob):
             )
             self._outputData["dcsf/s(q,f)/ideal/total"].scaling_factor = fact
             self.configuration["grouping_level"].add_grouped_totals(
+                self.trajectory,
                 self._outputData,
                 "dcsf/s(q,f)/ideal",
                 "SurfaceOutputVariable",

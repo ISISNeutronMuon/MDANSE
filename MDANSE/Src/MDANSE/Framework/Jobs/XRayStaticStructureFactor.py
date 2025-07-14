@@ -253,7 +253,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
                 )
 
         self.configuration["grouping_level"].update_pair_results(
-            calc_func, self._outputData
+            self.trajectory, calc_func, self._outputData
         )
 
         asf = {
@@ -303,6 +303,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
             self._outputData["xssf/total"].scaling_factor = fact
             for i in ("/intra", "/inter", ""):
                 self.configuration["grouping_level"].add_grouped_totals(
+                    self.trajectory,
                     self._outputData,
                     f"xssf{i}",
                     "LineOutputVariable",

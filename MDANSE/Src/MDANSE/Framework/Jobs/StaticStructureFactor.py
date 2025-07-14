@@ -261,7 +261,7 @@ class StaticStructureFactor(DistanceHistogram):
                 )
 
         self.configuration["grouping_level"].update_pair_results(
-            calc_func, self._outputData
+            self.trajectory, calc_func, self._outputData
         )
 
         selected_weights, all_weights = self.trajectory.get_weights(
@@ -296,6 +296,7 @@ class StaticStructureFactor(DistanceHistogram):
 
             for i in ("/intra", "/inter", ""):
                 self.configuration["grouping_level"].add_grouped_totals(
+                    self.trajectory,
                     self._outputData,
                     f"ssf{i}",
                     "LineOutputVariable",

@@ -338,6 +338,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._outputData["gdisf/s(q,f)/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "gdisf/f(q,t)",
             "SurfaceOutputVariable",
@@ -345,6 +346,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             units="au",
         )
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "gdisf/s(q,f)",
             "SurfaceOutputVariable",
@@ -362,6 +364,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             self._outputData["gdisf/s(q,f)/ideal/total"].scaling_factor = fact
 
             self.configuration["grouping_level"].add_grouped_totals(
+                self.trajectory,
                 self._outputData,
                 "gdisf/s(q,f)/ideal",
                 "SurfaceOutputVariable",
@@ -390,6 +393,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._outputData["msd/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "msd",
             "LineOutputVariable",

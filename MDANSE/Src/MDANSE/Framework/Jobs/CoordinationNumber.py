@@ -100,9 +100,11 @@ class CoordinationNumber(DistanceHistogram):
             units="nm",
         )
 
-        self.labels = self.configuration["grouping_level"].pair_labels(all_pairs=True)
+        self.labels = self.configuration["grouping_level"].pair_labels(
+            self.trajectory, all_pairs=True
+        )
         self.labels_intra = self.configuration["grouping_level"].pair_labels(
-            intra=True, all_pairs=True
+            self.trajectory, intra=True, all_pairs=True
         )
 
         for label, _ in self.labels:
@@ -210,7 +212,7 @@ class CoordinationNumber(DistanceHistogram):
                 yield "cn/intra", True, rho_j * cnIntra
 
         self.configuration["grouping_level"].update_pair_results(
-            calc_func, self._outputData, all_pairs=True
+            self.trajectory, calc_func, self._outputData, all_pairs=True
         )
 
         self._outputData.write(

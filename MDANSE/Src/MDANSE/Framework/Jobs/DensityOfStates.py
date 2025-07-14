@@ -319,6 +319,7 @@ class DensityOfStates(IJob):
         self._outputData["dos/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "vacf",
             "LineOutputVariable",
@@ -326,6 +327,7 @@ class DensityOfStates(IJob):
             units="nm2/ps2",
         )
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "dos",
             "LineOutputVariable",
@@ -341,6 +343,7 @@ class DensityOfStates(IJob):
             )
             self._outputData["dos/ideal/total"].scaling_factor = fact
             self.configuration["grouping_level"].add_grouped_totals(
+                self.trajectory,
                 self._outputData,
                 "dos/ideal",
                 "LineOutputVariable",

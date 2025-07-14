@@ -18,13 +18,14 @@ from collections.abc import Iterable
 from typing import Callable, Optional
 
 import numpy.typing as npt
-from more_itertools import collapse
+from more_itertools import collapse, value_chain
 
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
 )
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.Mathematics.Arithmetic import weighted_sum
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class GroupingLevelConfigurator(SingleChoiceConfigurator):
@@ -84,81 +85,6 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
 
         self["level"] = value
 
-        trajConfig = self.configurable[self.dependencies["trajectory"]]
-        atomSelectionConfig = self.configurable[self.dependencies["atom_selection"]]
-        chemical_system = trajConfig["instance"].chemical_system
-
-        if value in {"atom", "each atom"}:
-            return
-
-        indices = []
-        elements = []
-        names = []
-        all_elements = []
-        all_names = []
-        masses = []
-        group_names = []
-        group_elements = {}
-        group_n_atms = {}
-        mass_lookup = chemical_system.atom_property("atomic_weight")
-
-        if value == "molecule":
-            if len(trajConfig["instance"].chemical_system.unique_molecules()) == 0:
-                self.error_status = "The trajectory does not contain molecules."
-                return
-
-            for mol_name in chemical_system._clusters:
-                n_atms = 0
-                group_name_elements = []
-                mol_selected = False
-                for mol_number, cluster in enumerate(
-                    chemical_system._clusters[mol_name]
-                ):
-                    for x in cluster:
-                        all_elements.append([chemical_system.atom_list[x]])
-                        all_names.append(f"<{mol_name}>/{chemical_system.atom_list[x]}")
-                        if x not in atomSelectionConfig["flatten_indices"]:
-                            continue
-                        mol_selected = True
-                        indices.append([x])
-                        elements.append([chemical_system.atom_list[x]])
-                        group_name_elements.append(chemical_system.atom_list[x])
-                        names.append(f"<{mol_name}>/{chemical_system.atom_list[x]}")
-                        masses.append([mass_lookup[x]])
-                        n_atms += 1
-                if mol_selected:
-                    group_names.append(mol_name)
-                    group_elements[mol_name] = group_name_elements
-                    group_n_atms[mol_name] = n_atms
-
-            self["name_to_element"] = {
-                name: element[0] for name, element in zip(names, elements)
-            }
-            self["group_names"] = sorted(set(group_names))
-            self["group_elements"] = group_elements
-            self["group_n_atms"] = group_n_atms
-
-        elif value == "each molecule":
-            for mol_name, clusters in chemical_system._clusters.items():
-                for mol_number, cluster in enumerate(clusters):
-                    indices.append(cluster)
-                    elements.append([chemical_system.atom_list[x] for x in cluster])
-                    names.append(f"{mol_name}_mol{mol_number + 1}")
-                    masses.append([mass_lookup[x] for x in cluster])
-
-        atomSelectionConfig["indices"] = indices
-        atomSelectionConfig["flatten_indices"] = list(collapse(indices))
-        atomSelectionConfig["elements"] = elements
-        atomSelectionConfig["masses"] = masses
-        atomSelectionConfig["names"] = names
-        atomSelectionConfig["all_elements"] = all_elements
-        atomSelectionConfig["all_names"] = all_names
-        atomSelectionConfig["selection_length"] = len(names)
-        atomSelectionConfig["unique_names"] = sorted(set(names))
-
-        if atomSelectionConfig["selection_length"] == 0:
-            self.error_status = "This option resulted in nothing being selected in the current trajectory"
-
     def get_element_from_label(self, label: str) -> str:
         """Returns the element for a given label.
 
@@ -176,8 +102,10 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
             return label
         return self["name_to_element"][label]
 
+    @classmethod
     def add_grouped_totals(
-        self,
+        cls,
+        trajectory: Trajectory,
         output_data: OutputData,
         result_name: str,
         data_type: str,
@@ -214,19 +142,23 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         post_label: str
             The label to be added for grouped summed results.
         """
-        tot_n_atms = self.configurable[self.dependencies["atom_selection"]][
-            "selection_length"
-        ]
+        tot_n_atms = len(trajectory.atom_indices)
 
-        if self["level"] == "atom":
+        if trajectory._grouping_level == "atom":
             return
 
         if dim == 1:
-            for grp in self["group_names"]:
-                grp_ele = sorted(set(self["group_elements"][grp]))
-                conc = self["group_n_atms"][grp] / tot_n_atms
+            for grp in trajectory.group_lookup:
+                grp_ele = sorted(
+                    set(
+                        trajectory.atom_types[x]
+                        for x in value_chain(trajectory.chemical_system._clusters[grp])
+                        if x in trajectory._selection
+                    )
+                )
+                conc = trajectory.group_lookup[grp] / tot_n_atms
                 labels = [((grp, ele), "") for ele in grp_ele]
-                group_id = self.GROUP_TEMPLATE.format(result_name, grp, post_label)
+                group_id = cls.GROUP_TEMPLATE.format(result_name, grp, post_label)
 
                 results = (
                     weighted_sum(output_data, result_name + "/<%s>/%s", labels) / conc
@@ -243,9 +175,17 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
                     output_data[group_id].scaling_factor = conc
         elif dim == 2:
             if intra:
-                for grp in self["group_names"]:
-                    eles = sorted(set(self["group_elements"][grp]))
-                    conc = (self["group_n_atms"][grp] / tot_n_atms) ** conc_exp
+                for grp in trajectory.group_lookup:
+                    eles = sorted(
+                        set(
+                            trajectory.atom_types[x]
+                            for x in value_chain(
+                                trajectory.chemical_system._clusters[grp]
+                            )
+                            if x in trajectory._selection
+                        )
+                    )
+                    conc = (trajectory.group_lookup[grp] / tot_n_atms) ** conc_exp
                     labels = [
                         ((grp, *pair), "")
                         for pair in it.combinations_with_replacement(eles, 2)
@@ -256,7 +196,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
                         / conc
                     )
 
-                    group_id = self.GROUP_TEMPLATE.format(result_name, grp, post_label)
+                    group_id = cls.GROUP_TEMPLATE.format(result_name, grp, post_label)
 
                     output_data.add(
                         group_id,
@@ -270,12 +210,28 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
                 return
 
             for grp_i, grp_j in it.combinations_with_replacement(
-                self["group_names"], 2
+                trajectory.group_lookup, 2
             ):
-                eles_i = sorted(set(self["group_elements"][grp_i]))
-                eles_j = sorted(set(self["group_elements"][grp_j]))
-                conc_i = self["group_n_atms"][grp_i] / tot_n_atms
-                conc_j = self["group_n_atms"][grp_j] / tot_n_atms
+                eles_i = sorted(
+                    set(
+                        trajectory.atom_types[x]
+                        for x in value_chain(
+                            trajectory.chemical_system._clusters[grp_i]
+                        )
+                        if x in trajectory._selection
+                    )
+                )
+                eles_j = sorted(
+                    set(
+                        trajectory.atom_types[x]
+                        for x in value_chain(
+                            trajectory.chemical_system._clusters[grp_j]
+                        )
+                        if x in trajectory._selection
+                    )
+                )
+                conc_i = trajectory.group_lookup[grp_i] / tot_n_atms
+                conc_j = trajectory.group_lookup[grp_j] / tot_n_atms
                 if grp_i != grp_j:
                     # for the cross terms we divide by 2 since f(q,t)_OH
                     # includes only OH or HO, it gets summed to the total
@@ -297,7 +253,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
                     / conc
                 )
 
-                group_id = self.PAIR_GROUP_TEMPLATE.format(
+                group_id = cls.PAIR_GROUP_TEMPLATE.format(
                     result_name, grp_i, grp_j, post_label
                 )
 
@@ -313,116 +269,9 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         else:
             raise NotImplementedError("Grouped total for dim > 2 not implemented.")
 
-    def pair_labels(
-        self, *, intra: bool = False, all_pairs: bool = False
-    ) -> list[tuple[str, tuple[str, str]]]:
-        """Generates pair labels.
-
-        Parameters
-        ----------
-        intra : bool
-            Returns the intra label data if true.
-        all_pairs : bool
-            Returns all pairs of labels e.g. OH and HO.
-
-        Returns
-        -------
-        list[tuple[str, tuple[str, str]]]
-            The labels of the results and the labels of the individual
-            atoms in a tuple.
-        """
-        labels = []
-
-        if self["level"] == "atom":
-            atom_selection = self.configurable[self.dependencies["atom_selection"]]
-            selected_elements = atom_selection["unique_names"]
-            for ele_i, ele_j in self.label_pairs(
-                selected_elements, all_pairs=all_pairs
-            ):
-                labels.append((f"{ele_i}{ele_j}", (ele_i, ele_j)))
-            return labels
-
-        if intra:
-            for grp in self["group_names"]:
-                eles = sorted(set(self["group_elements"][grp]))
-                for ele_i, ele_j in self.label_pairs(eles, all_pairs=all_pairs):
-                    pair_label = f"<{grp}>/{ele_i}{ele_j}"
-                    label_i = f"<{grp}>/{ele_i}"
-                    label_j = f"<{grp}>/{ele_j}"
-                    labels.append((pair_label, (label_i, label_j)))
-            return labels
-
-        for grp_i, grp_j in self.label_pairs(self["group_names"], all_pairs=all_pairs):
-            eles_i = sorted(set(self["group_elements"][grp_i]))
-            eles_j = sorted(set(self["group_elements"][grp_j]))
-
-            if grp_i == grp_j and not all_pairs:
-                pairs = it.combinations_with_replacement(eles_i, 2)
-            else:
-                pairs = it.product(eles_i, eles_j)
-            for ele_i, ele_j in pairs:
-                pair_label = f"<{grp_i}><{grp_j}>/{ele_i}{ele_j}"
-                label_i = f"<{grp_i}>/{ele_i}"
-                label_j = f"<{grp_j}>/{ele_j}"
-                labels.append((pair_label, (label_i, label_j)))
-        return labels
-
-    def update_pair_results(
-        self,
-        calc_func: Callable[[str, str], Iterable[tuple[str, bool, npt.NDArray]]],
-        output_data: OutputData,
-        all_pairs: bool = False,
-    ):
-        """Updates the output data with pair results.
-
-        Parameters
-        ----------
-        calc_func : Callable[[str, str], Iterable[tuple[str, bool, npt.NDArray]]]
-            A function which yields the results name, a bool which
-            specifies whether it correspond to intermolecular atom
-            pairs and the results.
-        output_data : OutputData
-            The output data object to write the results to.
-        all_pairs : bool
-            Updates all pairs of labels e.g. OH and HO.
-        """
-        if self["level"] == "atom":
-            atom_selection = self.configurable[self.dependencies["atom_selection"]]
-            selected_elements = atom_selection["unique_names"]
-            for ele_i, ele_j in self.label_pairs(
-                selected_elements, all_pairs=all_pairs
-            ):
-                for name, _, result in calc_func(ele_i, ele_j):
-                    output_data[f"{name}/{ele_i}{ele_j}"][...] = result
-            return
-
-        for grp_i, grp_j in it.combinations_with_replacement(self["group_names"], 2):
-            eles_i = sorted(set(self["group_elements"][grp_i]))
-            eles_j = sorted(set(self["group_elements"][grp_j]))
-            if grp_i == grp_j and not all_pairs:
-                iterable = it.combinations_with_replacement(eles_i, 2)
-            else:
-                iterable = it.product(eles_i, eles_j)
-
-            for ele_i, ele_j in iterable:
-                label_i = f"<{grp_i}>/{ele_i}"
-                label_j = f"<{grp_j}>/{ele_j}"
-                for name, intra, result in calc_func(label_i, label_j):
-                    if intra and grp_i != grp_j:
-                        continue
-
-                    post_label = f"{ele_i}{ele_j}"
-
-                    if intra and grp_i == grp_j:
-                        group_id = self.GROUP_TEMPLATE.format(name, grp_i, post_label)
-                    else:
-                        group_id = self.PAIR_GROUP_TEMPLATE.format(
-                            name, grp_i, grp_j, post_label
-                        )
-                    output_data[group_id][...] = result
-
+    @classmethod
     def label_pairs(
-        self, labels: Iterable[str], *, all_pairs: bool
+        cls, labels: Iterable[str], *, all_pairs: bool
     ) -> list[tuple[str, str]]:
         """
         Parameters
@@ -442,3 +291,142 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         else:
             iterable = it.combinations_with_replacement(labels, 2)
         return sorted(iterable)
+
+    @classmethod
+    def pair_labels(
+        cls, trajectory: Trajectory, *, intra: bool = False, all_pairs: bool = False
+    ) -> list[tuple[str, tuple[str, str]]]:
+        """Generates pair labels.
+
+        Parameters
+        ----------
+        intra : bool
+            Returns the intra label data if true.
+        all_pairs : bool
+            Returns all pairs of labels e.g. OH and HO.
+
+        Returns
+        -------
+        list[tuple[str, tuple[str, str]]]
+            The labels of the results and the labels of the individual
+            atoms in a tuple.
+        """
+        labels = []
+
+        if trajectory._grouping_level == "atom":
+            selected_elements = trajectory.unique_elements
+            for ele_i, ele_j in cls.label_pairs(selected_elements, all_pairs=all_pairs):
+                labels.append((f"{ele_i}{ele_j}", (ele_i, ele_j)))
+            return labels
+
+        if intra:
+            for grp in trajectory.group_lookup:
+                eles = sorted(
+                    set(
+                        trajectory.atom_types[index]
+                        for cluster in trajectory.chemical_system._clusters[grp]
+                        for index in cluster
+                    )
+                )
+                for ele_i, ele_j in cls.label_pairs(eles, all_pairs=all_pairs):
+                    pair_label = f"<{grp}>/{ele_i}{ele_j}"
+                    label_i = f"<{grp}>/{ele_i}"
+                    label_j = f"<{grp}>/{ele_j}"
+                    labels.append((pair_label, (label_i, label_j)))
+            return labels
+
+        for grp_i, grp_j in cls.label_pairs(
+            trajectory.group_lookup.keys(), all_pairs=all_pairs
+        ):
+            eles_i = sorted(
+                set(
+                    trajectory.atom_types[index]
+                    for cluster in trajectory.chemical_system._clusters[grp_i]
+                    for index in cluster
+                )
+            )
+            eles_j = sorted(
+                set(
+                    trajectory.atom_types[index]
+                    for cluster in trajectory.chemical_system._clusters[grp_j]
+                    for index in cluster
+                )
+            )
+
+            if grp_i == grp_j and not all_pairs:
+                pairs = it.combinations_with_replacement(eles_i, 2)
+            else:
+                pairs = it.product(eles_i, eles_j)
+            for ele_i, ele_j in pairs:
+                pair_label = f"<{grp_i}><{grp_j}>/{ele_i}{ele_j}"
+                label_i = f"<{grp_i}>/{ele_i}"
+                label_j = f"<{grp_j}>/{ele_j}"
+                labels.append((pair_label, (label_i, label_j)))
+        return labels
+
+    @classmethod
+    def update_pair_results(
+        cls,
+        trajectory: Trajectory,
+        calc_func: Callable[[str, str], Iterable[tuple[str, bool, npt.NDArray]]],
+        output_data: OutputData,
+        all_pairs: bool = False,
+    ):
+        """Updates the output data with pair results.
+
+        Parameters
+        ----------
+        calc_func : Callable[[str, str], Iterable[tuple[str, bool, npt.NDArray]]]
+            A function which yields the results name, a bool which
+            specifies whether it correspond to intermolecular atom
+            pairs and the results.
+        output_data : OutputData
+            The output data object to write the results to.
+        all_pairs : bool
+            Updates all pairs of labels e.g. OH and HO.
+        """
+        if trajectory._grouping_level == "atom":
+            selected_elements = trajectory.unique_elements
+            for ele_i, ele_j in cls.label_pairs(selected_elements, all_pairs=all_pairs):
+                for name, _, result in calc_func(ele_i, ele_j):
+                    output_data[f"{name}/{ele_i}{ele_j}"][...] = result
+            return
+
+        for grp_i, grp_j in it.combinations_with_replacement(
+            trajectory.group_lookup, 2
+        ):
+            eles_i = sorted(
+                set(
+                    trajectory.atom_types[index]
+                    for cluster in trajectory.chemical_system._clusters[grp_i]
+                    for index in cluster
+                )
+            )
+            eles_j = sorted(
+                set(
+                    trajectory.atom_types[index]
+                    for cluster in trajectory.chemical_system._clusters[grp_j]
+                    for index in cluster
+                )
+            )
+            if grp_i == grp_j and not all_pairs:
+                iterable = it.combinations_with_replacement(eles_i, 2)
+            else:
+                iterable = it.product(eles_i, eles_j)
+
+            for ele_i, ele_j in iterable:
+                label_i = f"<{grp_i}>/{ele_i}"
+                label_j = f"<{grp_j}>/{ele_j}"
+                for name, intra, result in calc_func(label_i, label_j):
+                    if intra and grp_i != grp_j:
+                        continue
+
+                    post_label = f"{ele_i}{ele_j}"
+
+                    if intra and grp_i == grp_j:
+                        group_id = cls.GROUP_TEMPLATE.format(name, grp_i, post_label)
+                    else:
+                        group_id = cls.PAIR_GROUP_TEMPLATE.format(
+                            name, grp_i, grp_j, post_label
+                        )
+                    output_data[group_id][...] = result

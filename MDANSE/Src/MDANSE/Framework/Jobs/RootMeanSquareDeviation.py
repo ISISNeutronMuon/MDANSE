@@ -154,6 +154,7 @@ class RootMeanSquareDeviation(IJob):
         n_atms = self.trajectory.get_total_natoms()
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "rmsd",
             "LineOutputVariable",

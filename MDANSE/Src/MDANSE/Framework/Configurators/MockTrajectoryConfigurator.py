@@ -63,6 +63,7 @@ class MockTrajectoryConfigurator(IConfigurator):
 
         self["length"] = len(self["instance"])
 
-        self["md_time_step"] = self["instance"]._time_step
+        temp = self["instance"].time()
+        self["md_time_step"] = temp[1] - temp[0]
 
-        self["has_velocities"] = self["instance"].has_velocities
+        self["has_velocities"] = self["instance"].has_variable("velocities")

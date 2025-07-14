@@ -84,7 +84,9 @@ class StructureFactorFromScatteringFunction(IJob):
             units="1/nm",
         )
         nq = len(inputFile["dcsf/axes/q"][:])
-        self.labels = self.configuration["grouping_level"].pair_labels()
+        self.labels = self.configuration["grouping_level"].pair_labels(
+            self.trajectory,
+        )
 
         for pair_str, _ in self.labels:
             self._outputData.add(
@@ -161,6 +163,7 @@ class StructureFactorFromScatteringFunction(IJob):
         self._outputData["ssf/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ssf",
             "LineOutputVariable",

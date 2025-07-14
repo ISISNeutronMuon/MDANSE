@@ -227,6 +227,7 @@ class VelocityAutoCorrelationFunction(IJob):
         self._outputData["vacf/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "vacf",
             "LineOutputVariable",

@@ -228,6 +228,7 @@ class ElasticIncoherentStructureFactor(IJob):
         self._outputData["eisf/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "eisf",
             "LineOutputVariable",

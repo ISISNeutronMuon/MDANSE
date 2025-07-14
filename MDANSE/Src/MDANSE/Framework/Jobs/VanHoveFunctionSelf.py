@@ -343,6 +343,7 @@ class VanHoveFunctionSelf(IJob):
         self._outputData["vh/4_pi_r2_g(r,t)/total"].scaling_factor = fact
 
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "vh/g(r,t)",
             "SurfaceOutputVariable",
@@ -352,6 +353,7 @@ class VanHoveFunctionSelf(IJob):
             partial_result=True,
         )
         self.configuration["grouping_level"].add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "vh/4_pi_r2_g(r,t)",
             "SurfaceOutputVariable",
