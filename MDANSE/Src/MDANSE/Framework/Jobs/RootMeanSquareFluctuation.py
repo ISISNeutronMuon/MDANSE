@@ -100,7 +100,7 @@ class RootMeanSquareFluctuation(IJob):
             main_result=True,
         )
 
-        self._atoms = self.trajectory.atom_types
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
         """

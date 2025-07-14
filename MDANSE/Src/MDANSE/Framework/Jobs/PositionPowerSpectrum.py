@@ -154,7 +154,7 @@ class PositionPowerSpectrum(IJob):
             units="au",
         )
 
-        for element in self.trajectory.unique_elements:
+        for element in self.trajectory.unique_names:
             self._outputData.add(
                 f"pacf/{element}",
                 "LineOutputVariable",
@@ -204,9 +204,7 @@ class PositionPowerSpectrum(IJob):
                 units="au",
             )
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
         """

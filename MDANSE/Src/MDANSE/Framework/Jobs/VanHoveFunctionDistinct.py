@@ -409,7 +409,7 @@ class VanHoveFunctionDistinct(IJob):
             self.indices_intra = None
         self.intra = self.indices_intra is not None
 
-        self.selectedElements = list(self.trajectory.unique_elements)
+        self.selectedElements = list(self.trajectory.unique_names)
         self.nElements = len(self.selectedElements)
         self._elementsPairs = sorted(
             it.combinations_with_replacement(self.selectedElements, 2),
@@ -498,7 +498,7 @@ class VanHoveFunctionDistinct(IJob):
         self.indexToSymbol = np.array(
             [
                 self.selectedElements.index(name)
-                for name in self.trajectory.selection_getter(self.trajectory.atom_types)
+                for name in self.trajectory.selection_getter(self.trajectory.atom_names)
             ],
             dtype=np.int32,
         )

@@ -111,9 +111,7 @@ class Temperature(IJob):
             units="K",
         )
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
         """

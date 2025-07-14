@@ -113,7 +113,7 @@ class DynamicIncoherentStructureFactor(IJob):
 
         self._instrResolution = self.configuration["instrument_resolution"]
 
-        self._atoms = self.trajectory.atom_types
+        self._atoms = self.trajectory.atom_names
 
         self._nOmegas = self._instrResolution["n_omegas"]
 
@@ -159,7 +159,7 @@ class DynamicIncoherentStructureFactor(IJob):
             units="au",
         )
 
-        for element in self.trajectory.unique_elements:
+        for element in self.trajectory.unique_names:
             self._outputData.add(
                 f"disf/f(q,t)/{element}",
                 "SurfaceOutputVariable",

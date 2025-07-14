@@ -89,7 +89,7 @@ class RootMeanSquareDeviation(IJob):
         )
 
         # Will initially store the mean square deviation before appling the root
-        for element in self.trajectory.unique_elements:
+        for element in self.trajectory.unique_names:
             self._outputData.add(
                 f"rmsd/{element}",
                 "LineOutputVariable",
@@ -108,9 +108,7 @@ class RootMeanSquareDeviation(IJob):
             main_result=True,
         )
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
         """

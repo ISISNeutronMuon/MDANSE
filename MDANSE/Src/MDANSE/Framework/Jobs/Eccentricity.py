@@ -75,7 +75,7 @@ class Eccentricity(IJob):
             main_result=True,
         )
 
-        self._atoms = self.trajectory.atom_types
+        self._atoms = self.trajectory.atom_names
         self._indices = self.trajectory.atom_indices
         self._selectionMasses = np.array(
             [

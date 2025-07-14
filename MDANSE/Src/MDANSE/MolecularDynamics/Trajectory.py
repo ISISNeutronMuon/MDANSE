@@ -103,6 +103,7 @@ class Trajectory:
                             self._group_lookup[f"{mol_name}_mol{mol_number + 1}"] = cluster
                 self._atom_names = list(self._group_lookup.keys())
             elif self._grouping_level == "molecule":
+                temp_names = {}
                 for mol_name in self.chemical_system._clusters:
                     self._group_lookup.setdefault(mol_name, 0)
                     for mol_number, cluster in enumerate(
@@ -112,13 +113,11 @@ class Trajectory:
                             continue
                         self._group_lookup[mol_name] += len(cluster)
                         for x in cluster:
-                            self._atom_names[x] = (f"<{mol_name}>/{self.atom_types[x]}")
-                for index, element in enumerate(self.atom_types):
-                    if index not in self._atom_names:
-                        self._atom_names[index] = element
-                self._element_from_label = {v: self.atom_types[k] for k, v in self._atom_names.items()}
-                order = np.argsort(self._atom_names.keys())
-                self._atom_names = list(np.array(list(self._atom_names.values()))[order])
+                            temp_names[x] = (f"<{mol_name}>/{self.atom_types[x]}")
+                self._element_from_label = {v: self.atom_types[k] for k, v in temp_names.items()}
+                self._atom_names = copy.deepcopy(self.atom_types)
+                for k, v in temp_names.items():
+                    self._atom_names[k] = v
         return self._atom_names
     
     @property
@@ -167,18 +166,19 @@ class Trajectory:
         tuple[dict[str, float], dict[str, float]]
             The dictionary of the weights.
 
-        """
+        """        
         weights = []
-        for n_elements, atm_elements in [
-            (self.get_natoms(), self.selection_getter(self.atom_types)),
+        for n_elements, atm_names, atm_elements in [
+            (self.get_natoms(), self.selection_getter(self.atom_names), self.selection_getter(self.atom_types)),
             (
                 self.get_all_natoms(),
+                self.atom_names,
                 self.atom_types,
             ),
         ]:
             w = defaultdict(float)
-            for element in atm_elements:
-                w[element] += self._trajectory.get_atom_property(element, prop)
+            for name, element in zip(atm_names, atm_elements):
+                w[name] += self._trajectory.get_atom_property(element, prop)
             for element, num_atoms in n_elements.items():
                 w[element] /= num_atoms
             weights.append(w)
@@ -194,10 +194,10 @@ class Trajectory:
             A dictionary of the number of atom per element.
 
         """
-        all_atom_types = self.atom_types
+        all_atom_names = self.atom_names
         if self._selection:
-            return Counter(self.selection_getter(all_atom_types))
-        return Counter(all_atom_types)
+            return Counter(self.selection_getter(all_atom_names))
+        return Counter(all_atom_names)
 
     def get_all_natoms(self) -> dict[str, int]:
         """Count all atoms, per element.
@@ -208,7 +208,7 @@ class Trajectory:
             A dictionary of the number of atom per element.
 
         """
-        return Counter(self.atom_types)
+        return Counter(self.atom_names)
 
     def get_total_natoms(self) -> int:
         """Count all the selected atoms.
@@ -232,7 +232,7 @@ class Trajectory:
             For each atom type, a list of indices of selected atoms
 
         """
-        all_elements = np.array(self.atom_types)
+        all_elements = np.array(self.atom_names)
         unique_elements = set(self.selection_getter(all_elements))
         indices_per_element = {element: list(np.where(all_elements==element)[0]) for element in unique_elements}
         return indices_per_element

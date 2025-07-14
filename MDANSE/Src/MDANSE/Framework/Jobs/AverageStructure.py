@@ -86,7 +86,7 @@ class AverageStructure(IJob):
 
         self.numberOfSteps = self.trajectory.get_total_natoms()
 
-        self._atoms = self.trajectory.atom_types
+        self._atoms = self.trajectory.atom_names
 
         target_unit = self.configuration["output_units"]["value"]
         if target_unit == "Angstrom":

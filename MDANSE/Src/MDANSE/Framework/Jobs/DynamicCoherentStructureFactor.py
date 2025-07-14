@@ -267,7 +267,7 @@ class DynamicCoherentStructureFactor(IJob):
         ]
 
         rho = {}
-        for element in self.trajectory.unique_elements:
+        for element in self.trajectory.unique_names:
             rho[element] = np.zeros(
                 (self.configuration["frames"]["number"], nQVectors),
                 dtype=np.complex64,

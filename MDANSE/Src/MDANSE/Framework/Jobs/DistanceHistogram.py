@@ -110,7 +110,7 @@ class DistanceHistogram(IJob):
         else:
             self.indices_intra = None
         self.intra = self.indices_intra is not None
-        self.selectedElements = sorted(self.trajectory.unique_elements)
+        self.selectedElements = sorted(self.trajectory.unique_names)
         if self.indices_intra is not None and len(self.indices_intra) > len(
             self._indices
         ):
@@ -119,7 +119,7 @@ class DistanceHistogram(IJob):
         self.indexToSymbol = np.array(
             [
                 self.selectedElements.index(name)
-                for name in self.trajectory.selection_getter(self.trajectory.atom_types)
+                for name in self.trajectory.selection_getter(self.trajectory.atom_names)
             ],
             dtype=np.int32,
         )

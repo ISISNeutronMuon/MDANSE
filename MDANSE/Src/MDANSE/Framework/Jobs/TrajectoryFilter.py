@@ -105,7 +105,7 @@ class TrajectoryFilter(IJob):
 
         self.numberOfSteps = len(self.trajectory.atom_indices)
 
-        self._atoms = self.trajectory.atom_types
+        self._atoms = self.trajectory.atom_names
 
         self._selected_atoms = self.trajectory.selection_getter(self._atoms)
 

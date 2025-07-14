@@ -174,7 +174,7 @@ class CurrentCorrelationFunction(IJob):
 
         self._nFrames = self.configuration["frames"]["n_frames"]
         self._elements = set(
-            self.trajectory.selection_getter(self.trajectory.atom_types)
+            self.trajectory.selection_getter(self.trajectory.atom_names)
         )
         self.labels = self.configuration["grouping_level"].pair_labels(
             self.trajectory,

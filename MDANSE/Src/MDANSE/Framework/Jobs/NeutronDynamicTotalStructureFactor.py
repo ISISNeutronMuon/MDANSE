@@ -200,7 +200,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                     "This DCSF file was created before the new scaling scheme. Please calculate it again."
                 )
 
-        for element in self.trajectory.unique_elements:
+        for element in self.trajectory.unique_names:
             if (
                 f"disf/f(q,t)/{element}"
                 not in self.configuration["disf_input_file"]["instance"]
@@ -225,7 +225,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                     "This DISF file was created before the new scaling scheme. Please calculate it again."
                 )
 
-        for element in self.trajectory.unique_elements:
+        for element in self.trajectory.unique_names:
             fqt = self.configuration["disf_input_file"]["instance"][
                 f"disf/f(q,t)/{element}"
             ]

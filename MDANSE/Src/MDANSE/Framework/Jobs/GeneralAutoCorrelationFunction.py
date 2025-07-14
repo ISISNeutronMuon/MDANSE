@@ -91,7 +91,7 @@ class GeneralAutoCorrelationFunction(IJob):
         )
 
         # Will store the mean square displacement evolution.
-        for element in self.trajectory.unique_elements:
+        for element in self.trajectory.unique_names:
             self._outputData.add(
                 f"gacf/{element}",
                 "LineOutputVariable",

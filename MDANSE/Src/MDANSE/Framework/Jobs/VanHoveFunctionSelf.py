@@ -153,9 +153,9 @@ class VanHoveFunctionSelf(IJob):
         self.numberOfSteps = len(self.trajectory.atom_indices)
         self.n_configs = self.configuration["frames"]["n_configs"]
         self.n_frames = self.configuration["frames"]["n_frames"]
-        self._atoms = self.trajectory.atom_types
+        self._atoms = self.trajectory.atom_names
 
-        self.selectedElements = self.trajectory.unique_elements
+        self.selectedElements = self.trajectory.unique_names
         self.nElements = len(self.selectedElements)
 
         self.n_mid_points = len(self.configuration["r_values"]["mid_points"])

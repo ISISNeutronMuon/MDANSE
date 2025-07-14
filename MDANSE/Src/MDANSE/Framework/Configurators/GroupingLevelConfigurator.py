@@ -312,7 +312,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         labels = []
 
         if trajectory._grouping_level == "atom":
-            selected_elements = trajectory.unique_elements
+            selected_elements = trajectory.unique_names
             for ele_i, ele_j in cls.label_pairs(selected_elements, all_pairs=all_pairs):
                 labels.append((f"{ele_i}{ele_j}", (ele_i, ele_j)))
             return labels
@@ -384,7 +384,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
             Updates all pairs of labels e.g. OH and HO.
         """
         if trajectory._grouping_level == "atom":
-            selected_elements = trajectory.unique_elements
+            selected_elements = trajectory.unique_names
             for ele_i, ele_j in cls.label_pairs(selected_elements, all_pairs=all_pairs):
                 for name, _, result in calc_func(ele_i, ele_j):
                     output_data[f"{name}/{ele_i}{ele_j}"][...] = result

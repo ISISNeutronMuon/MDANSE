@@ -111,7 +111,7 @@ class VelocityAutoCorrelationFunction(IJob):
             units="ps",
         )
 
-        for element in self.trajectory.unique_elements:
+        for element in self.trajectory.unique_names:
             self._outputData.add(
                 f"vacf/{element}",
                 "LineOutputVariable",
@@ -131,9 +131,7 @@ class VelocityAutoCorrelationFunction(IJob):
             main_result=True,
         )
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
         """

@@ -117,7 +117,7 @@ class ElasticIncoherentStructureFactor(IJob):
             units="1/nm",
         )
 
-        for element in self.trajectory.unique_elements:
+        for element in self.trajectory.unique_names:
             self._outputData.add(
                 f"eisf/{element}",
                 "LineOutputVariable",
@@ -137,7 +137,7 @@ class ElasticIncoherentStructureFactor(IJob):
             main_result=True,
         )
 
-        self._atoms = self.trajectory.atom_types
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
         """

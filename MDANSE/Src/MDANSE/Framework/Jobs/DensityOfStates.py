@@ -156,7 +156,7 @@ class DensityOfStates(IJob):
             units="au",
         )
 
-        for element in set(self.trajectory.atom_types):
+        for element in set(self.trajectory.atom_names):
             self._outputData.add(
                 f"vacf/{element}",
                 "LineOutputVariable",
@@ -205,7 +205,7 @@ class DensityOfStates(IJob):
                 units="au",
             )
 
-        self._atoms = self.trajectory.atom_types
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
         """
