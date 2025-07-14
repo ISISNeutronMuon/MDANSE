@@ -152,8 +152,9 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
                 grp_ele = sorted(
                     set(
                         trajectory.atom_types[x]
-                        for x in value_chain(trajectory.chemical_system._clusters[grp])
-                        if x in trajectory._selection
+                        for cluster in trajectory.chemical_system._clusters[grp]
+                        for x in cluster
+                        if x in trajectory.atom_indices
                     )
                 )
                 conc = trajectory.group_lookup[grp] / tot_n_atms
@@ -179,10 +180,9 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
                     eles = sorted(
                         set(
                             trajectory.atom_types[x]
-                            for x in value_chain(
-                                trajectory.chemical_system._clusters[grp]
-                            )
-                            if x in trajectory._selection
+                            for cluster in trajectory.chemical_system._clusters[grp]
+                            for x in cluster
+                            if x in trajectory.atom_indices
                         )
                     )
                     conc = (trajectory.group_lookup[grp] / tot_n_atms) ** conc_exp
@@ -215,19 +215,17 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
                 eles_i = sorted(
                     set(
                         trajectory.atom_types[x]
-                        for x in value_chain(
-                            trajectory.chemical_system._clusters[grp_i]
-                        )
-                        if x in trajectory._selection
+                        for cluster in trajectory.chemical_system._clusters[grp_i]
+                        for x in cluster
+                        if x in trajectory.atom_indices
                     )
                 )
                 eles_j = sorted(
                     set(
                         trajectory.atom_types[x]
-                        for x in value_chain(
-                            trajectory.chemical_system._clusters[grp_j]
-                        )
-                        if x in trajectory._selection
+                        for cluster in trajectory.chemical_system._clusters[grp_j]
+                        for x in cluster
+                        if x in trajectory.atom_indices
                     )
                 )
                 conc_i = trajectory.group_lookup[grp_i] / tot_n_atms
