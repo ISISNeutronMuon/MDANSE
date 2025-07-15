@@ -58,6 +58,7 @@ Symbols and Notation
 :math:`\mathbf{v}(t)`                                   the velocity of an atom at time :math:`t`
 :math:`W_\alpha`                                        weighting factor for atom-type :math:`\alpha`
 :math:`W_{\alpha\beta}`                                 weighting factor for atom-type pair :math:`\alpha\beta`
+:math:`w_\alpha`                                        individual weight for atom-type :math:`\alpha`
 :math:`\omega`                                          angular frequency
 :math:`\Delta \omega`                                   the frequency step
 ======================================================= ===============

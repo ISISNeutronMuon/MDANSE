@@ -594,18 +594,16 @@ polynomials of different order. At the moment, this analysis will calculate
 all the orders up the maximum Legendre polynomial order specified as one
 of the input parameters.
 
-Angle at time T is calculated as the following:
+Angle at time :math:`t` is calculated as the following:
 
 .. math::
-
-\mathbf{n}(t) =  \mathbf{r_{i}}(t) - \mathbf{r_{j}}(t)
+    \hat{\mathbf{n}}(t) =  \frac{\mathbf{r}_{i}(t) - \mathbf{r}_{j}(t)}{\vert \mathbf{r}_{i}(t) - \mathbf{r}_{j}(t) \vert}
 
 .. math::
-
-\phi(t = t_{1}-t_{0}) = \arccos( \mathbf{n}(t_{1}) \mathbf{n}(t_{0}))
+    \phi(t = t_{1}-t_{0}) = \arccos( \hat{\mathbf{n}}(t_{1}) \cdot \hat{\mathbf{n}}(t_{0}))
 
 The general result is :math:`C_{l}(t) = \langle P_{l}[\cos(\phi(t))] \rangle`,
-where :math:`P_{l}` is the Legendre polynomial of the order l.
+where :math:`P_{l}[x]` is the Legendre polynomial of the order :math:`l`.
 
 Inputs:
 

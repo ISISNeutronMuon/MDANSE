@@ -335,10 +335,7 @@ and
 
 To obtain results relevant to neutron scattering, the
 ``b_incoherent`` weight setting should be used so that the weight will be
-generated using the incoherent scattering lengths. Since the contributions
-to the DISF come from the autocorrelation of the positions of atoms, the
-weights :math:`W_{\alpha}` in that case will be :math:`b_{inc,\alpha}^{2}`.
-
+generated using the incoherent scattering lengths.
 
 .. _elastic-incoherent-structure-factor:
 
@@ -356,9 +353,7 @@ hydrogen dominates by far all other contributions.
 
 Similar to the :ref:`dynamic-incoherent-structure-factor` described above,
 ``b_incoherent`` weight setting is used and the weights are
-generated using the incoherent scattering lengths. Again, each atom is correlated
-with itself in the calculation, and the resulting weights :math:`W_{\alpha}`
-are squared, giving :math:`b_{inc,\alpha}^{2}`.
+generated using the incoherent scattering lengths.
 
 **The Van Hove Function**: The EISF is defined as the limit of the
 incoherent intermediate scattering function for infinite time
@@ -488,9 +483,7 @@ function is completely determined by the MSD.
 
 Similar to the :ref:`dynamic-incoherent-structure-factor` described above,
 ``b_incoherent`` weight setting is used and the weights are
-generated using the incoherent scattering lengths. Again, each atom is correlated
-with itself in the calculation, and the resulting weights :math:`W_{\alpha}`
-are squared, giving :math:`b_{inc,\alpha}^{2}`.
+generated using the incoherent scattering lengths.
 
 .. _neutron-dynamic-total-structure-factor:
 

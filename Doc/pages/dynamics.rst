@@ -47,7 +47,7 @@ The DOS can be computed either for the isotropic case or with respect to a
 user-defined axis.
 
 Since the DOS is computed from the unnormalized VACF, the DOS at :math:`\omega=0` gives an
-approximate value for the diffusion constant (see Eq. :math:numref:`pfx7`)
+approximate value for the diffusion constant (see Eq. :math:numref:`vacf6`)
 when an equal weighting scheme is used. The DOS can be
 smoothed by, for example, a Gaussian window applied in the time domain
 [Ref10]_ (see the section :ref:`correlation-frames`); the diffusion
@@ -59,10 +59,16 @@ velocities. In the case that velocities are not available, the velocities will b
 computed by numerical differentiation of the coordinate trajectories
 correcting first for possible jumps due to periodic boundary conditions.
 
-Approximate result of a neturon experiment measuring the vibrational (or phonon)
+The DOS is also related to the DISF, since for isotropic systems
+
+.. math::
+   :label: dos3
+
+   \mathrm{DOS}(\omega) = \lim_{k  \rightarrow 0} \left( \frac{\omega}{k}\right)^2 S_{\text{inc}}(k, \omega)
+
+so that DOS result relevant to neturon experiment measuring the vibrational (or phonon)
 density of states can be calculated by using the ``b_incoherent`` weight setting.
-In that case, the resulting weights :math:`W_{\alpha}`
-are squared, giving :math:`b_{inc,\alpha}^{2}`.
+
 
 .. _analysis-msd:
 
@@ -272,11 +278,6 @@ where
 
 so that the origin dependence of the PACF function is removed.
 
-If `b_coherent` or `b_incoherent` are chosen as weights, the weights
-will be applied as :math:`b_{coh}^{2}` or :math:`b_{inc}^{2}`, to stay
-consistent with the way autocorrelation results are weighted in
-:ref:`dynamic-coherent-structure-factor` and
-:ref:`dynamic-incoherent-structure-factor` calculations.
 
 .. _analysis-rtcf:
 
@@ -293,18 +294,16 @@ polynomials of different order. At the moment, this analysis will calculate
 all the orders up the maximum Legendre polynomial order specified as one
 of the input parameters.
 
-Angle at time T is calculated as the following:
+Angle at time :math:`t` is calculated as the following:
 
 .. math::
-
-   \mathbf{n}(t) =  \mathbf{r_{i}}(t) - \mathbf{r_{j}}(t)
+    \hat{\mathbf{n}}(t) =  \frac{\mathbf{r}_{i}(t) - \mathbf{r}_{j}(t)}{\vert \mathbf{r}_{i}(t) - \mathbf{r}_{j}(t) \vert}
 
 .. math::
-
-   \phi(t = t_{1}-t_{0}) = \arccos( \mathbf{n}(t_{1}) \mathbf{n}(t_{0}))
+    \phi(t = t_{1}-t_{0}) = \arccos( \hat{\mathbf{n}}(t_{1}) \cdot \hat{\mathbf{n}}(t_{0}))
 
 The general result is :math:`C_{l}(t) = \langle P_{l}[\cos(\phi(t))] \rangle`,
-where :math:`P_{l}` is the Legendre polynomial of the order l.
+where :math:`P_{l}[x]` is the Legendre polynomial of the order :math:`l`.
 
 
 .. _root-mean-square-deviation:
@@ -506,8 +505,3 @@ This is a special case of a more general relationship between the VACF and the
 mean square displacement, and belongs to a class of properties known as the
 Green-Kubo relations, which relate correlation functions to so-called transport
 coefficients.
-
-If `b_coherent` or `b_incoherent` are chosen as weights, the weights
-will be applied as :math:`b_{coh}^{2}` or :math:`b_{inc}^{2}` in order
-to produce the same result as the VACF in the :ref:`analysis-dos`
-calculation.
