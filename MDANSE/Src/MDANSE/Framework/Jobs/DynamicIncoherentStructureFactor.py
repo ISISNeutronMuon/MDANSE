@@ -72,7 +72,6 @@ class DynamicIncoherentStructureFactor(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )

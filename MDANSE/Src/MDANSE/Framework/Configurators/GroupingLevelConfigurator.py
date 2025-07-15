@@ -13,19 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import itertools as it
-from collections.abc import Iterable
-from typing import Callable, Optional
-
-import numpy.typing as npt
-from more_itertools import collapse, value_chain
+from typing import Optional
 
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
 )
-from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
-from MDANSE.Mathematics.Arithmetic import weighted_sum
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class GroupingLevelConfigurator(SingleChoiceConfigurator):

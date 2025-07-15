@@ -70,7 +70,6 @@ class StaticStructureFactor(DistanceHistogram):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )

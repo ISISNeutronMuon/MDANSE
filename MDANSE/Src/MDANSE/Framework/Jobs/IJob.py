@@ -189,6 +189,15 @@ class IJob(Configurable, metaclass=SubclassFactory):
         self.set_up_trajectory()
 
     def set_up_trajectory(self):
+        """Apply operations to the trajectory instance, if present.
+
+        Atom selection, atom transmutation and result grouping are all
+        applied to the Trajectory object. If the job works on a trajectory,
+        the Trajectory instance is now saved as an attribute of this IJob
+        instance.
+
+        These operations were previously handled by IConfigurator subclasses.
+        """
         trajectory = self.configuration.get("trajectory")
         selection = self.configuration.get("atom_selection")
         transmutation = self.configuration.get("atom_transmutation")

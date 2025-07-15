@@ -120,7 +120,6 @@ class VanHoveFunctionSelf(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )

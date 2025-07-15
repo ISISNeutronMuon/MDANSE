@@ -56,8 +56,6 @@ class RootMeanSquareDeviation(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
             }
         },
     )
