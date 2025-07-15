@@ -33,14 +33,28 @@ from MDANSE.MolecularDynamics.Trajectory import Trajectory
 class LoaderThread(QThread):
     results = Signal(object)
 
-    def __init__(self, parent, filename: str, index: int):
+    def __init__(
+        self,
+        parent,
+        filename: str,
+        index: int,
+        *,
+        display_item: QStandardItem | None = None,
+        target_label: str | None = None,
+    ):
         super().__init__(parent)
         self._filename = filename
         self._target_index = index
+        self._display_item = display_item
+        self._target_label = target_label
 
     def run(self):
         trajectory = Trajectory(self._filename)
         self.results.emit((trajectory, self._target_index))
+        if self._display_item is not None and self._target_label is not None:
+            self._display_item.setData(
+                self._target_label, role=Qt.ItemDataRole.DisplayRole
+            )
 
 
 class TrajectoryModel(QStandardItemModel):
@@ -68,16 +82,23 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_paths[self._next_number] = full_name
         self._trajectory_instances[self._next_number] = None
         retval = int(self._next_number)
-        self.launch_loader(full_name, self._next_number)
         self._next_number += 1
-        item = QStandardItem(label)
+        item = QStandardItem(f"Loading {label}...")
         item.setData(retval)
         self.appendRow(item)
-        self.summarise_items()
+        self.launch_loader(full_name, retval, display_item=item, target_label=label)
         return retval
 
-    def launch_loader(self, filename: str, index: int):
-        thread = LoaderThread(None, filename, index)
+    def launch_loader(
+        self,
+        filename: str,
+        index: int,
+        display_item: QStandardItem | None = None,
+        target_label: str | None = None,
+    ):
+        thread = LoaderThread(
+            None, filename, index, display_item=display_item, target_label=target_label
+        )
         thread.results.connect(self.accept_results)
         self._loading_threads[index] = thread
         thread.start()
@@ -85,7 +106,7 @@ class TrajectoryModel(QStandardItemModel):
     def get_trajectory(self, index: int):
         result = None
         if index not in self._loading_threads:
-            LOG.error("Requesting a missing trajectory with index {}", index)
+            LOG.error("Requesting a missing trajectory with index %s", index)
             return result
         elif index not in self._trajectory_instances:
             return f"Loading trajectory {self._trajectory_paths[index]}"
@@ -99,14 +120,6 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_instances[index] = trajectory
         self.finished_loading.emit(index)
         # self._loading_threads[index].wait()
-
-    def summarise_items(self):
-        result = []
-        for nrow in range(self.rowCount()):
-            index = self.index(nrow, 0)
-            item = self.itemFromIndex(index)
-            result.append([item.text(), item.data()])
-        self.all_elements.emit(result)
 
     def removeRow(self, row: int, parent: QModelIndex = None):
         self.mutex.lock()
@@ -131,6 +144,5 @@ class TrajectoryModel(QStandardItemModel):
             timer = QDeadlineTimer(300, Qt.TimerType.CoarseTimer)
             thread.wait(deadline=timer)
         except Exception as e:
-            LOG.error("While removing a loader thread, an exception occured: {}", e)
+            LOG.error("While removing a loader thread, an exception occured: %s", e)
         self.mutex.unlock()
-        self.summarise_items()
