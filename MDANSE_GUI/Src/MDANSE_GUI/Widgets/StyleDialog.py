@@ -15,8 +15,9 @@
 
 from typing import Optional
 
-from qtpy.QtCore import QObject, Signal, Slot
+from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtWidgets import (
+    QApplication,
     QComboBox,
     QDialog,
     QPushButton,
@@ -99,6 +100,20 @@ class StyleDialog(QDialog):
         for x in [self._selector, self._display, self._confirm]:
             layout.addWidget(x)
 
+    def is_dark_mode(self) -> bool:
+        """Check if the OS believes it is set to dark mode.
+
+        Returns
+        -------
+        bool
+            True if dark mode is on, False otherwise
+        """
+        style_hints = QApplication.styleHints()
+        colour_scheme = style_hints.colorScheme()
+        if colour_scheme == Qt.ColorScheme.Dark:
+            return True
+        return False
+
     def connectStyleDatabase(self, dbase: StyleDatabase):
         self._database = dbase
         labels = dbase.showStoredLabels()
@@ -112,7 +127,7 @@ class StyleDialog(QDialog):
         text = self._display.document().toPlainText()
         self.new_style.emit(text)
         label = self._selector.currentText()
-        if "dark" in label:
+        if "dark" in label or self.is_dark_mode():
             self.icon_swap.emit(True)
         else:
             self.icon_swap.emit(False)

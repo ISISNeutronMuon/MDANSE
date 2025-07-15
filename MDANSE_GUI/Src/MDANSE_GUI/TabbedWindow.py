@@ -18,7 +18,7 @@ from collections import defaultdict
 from importlib import metadata
 from pathlib import PurePath
 
-from qtpy.QtCore import QMessageLogger, QTimer, QUrl, Signal, Slot
+from qtpy.QtCore import QMessageLogger, Qt, QTimer, QUrl, Signal, Slot
 from qtpy.QtGui import QDesktopServices
 from qtpy.QtWidgets import (
     QAction,
@@ -119,6 +119,15 @@ class TabbedWindow(QMainWindow):
         )
 
         self.tabs.currentChanged.connect(self.tabs.reset_current_color)
+        self.check_dark_mode()
+
+    def check_dark_mode(self):
+        style_hints = QApplication.styleHints()
+        colour_scheme = style_hints.colorScheme()
+        if colour_scheme == Qt.ColorScheme.Dark:
+            self.invertToolbar(dark=True)
+        else:
+            self.invertToolbar(dark=False)
 
     def createCommonModels(self):
         self._trajectory_model = GeneralModel()
