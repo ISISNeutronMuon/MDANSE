@@ -17,6 +17,10 @@ import collections
 import itertools as it
 from math import sqrt
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -84,7 +88,7 @@ class StructureFactorFromScatteringFunction(IJob):
             units="1/nm",
         )
         nq = len(inputFile["dcsf/axes/q"][:])
-        self.labels = self.configuration["grouping_level"].pair_labels(
+        self.labels = pair_labels(
             self.trajectory,
         )
 
@@ -162,7 +166,7 @@ class StructureFactorFromScatteringFunction(IJob):
 
         self._outputData["ssf/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "ssf",

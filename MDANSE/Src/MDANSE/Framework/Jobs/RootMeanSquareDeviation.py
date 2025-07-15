@@ -18,6 +18,9 @@ import collections
 
 import numpy as np
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -151,7 +154,7 @@ class RootMeanSquareDeviation(IJob):
         """
         n_atms = self.trajectory.get_total_natoms()
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "rmsd",

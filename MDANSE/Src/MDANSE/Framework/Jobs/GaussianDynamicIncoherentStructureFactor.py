@@ -18,6 +18,9 @@ import collections
 
 import numpy as np
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
@@ -335,7 +338,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._outputData["gdisf/f(q,t)/total"].scaling_factor = fact
         self._outputData["gdisf/s(q,f)/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "gdisf/f(q,t)",
@@ -343,7 +346,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             axis="gdisf/axes/q|gdisf/axes/time",
             units="au",
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "gdisf/s(q,f)",
@@ -361,7 +364,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             )
             self._outputData["gdisf/s(q,f)/ideal/total"].scaling_factor = fact
 
-            self.configuration["grouping_level"].add_grouped_totals(
+            add_grouped_totals(
                 self.trajectory,
                 self._outputData,
                 "gdisf/s(q,f)/ideal",
@@ -388,7 +391,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         self._outputData["msd/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "msd",

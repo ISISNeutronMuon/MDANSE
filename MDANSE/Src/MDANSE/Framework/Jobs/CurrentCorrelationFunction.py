@@ -14,13 +14,16 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
-import itertools
 from math import sqrt
 from typing import Optional
 
 import numpy as np
 from scipy.signal import correlate
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
@@ -176,7 +179,7 @@ class CurrentCorrelationFunction(IJob):
         self._elements = set(
             self.trajectory.selection_getter(self.trajectory.atom_names)
         )
-        self.labels = self.configuration["grouping_level"].pair_labels(
+        self.labels = pair_labels(
             self.trajectory,
         )
 
@@ -588,7 +591,7 @@ class CurrentCorrelationFunction(IJob):
         self._outputData["ccf/j(q,t)_trans/total"][:] = jqtTransTotal
         self._outputData["ccf/j(q,t)_long/total"].scaling_factor = fact
         self._outputData["ccf/j(q,t)_trans/total"].scaling_factor = fact
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "ccf/j(q,t)_long",
@@ -598,7 +601,7 @@ class CurrentCorrelationFunction(IJob):
             axis="ccf/axes/q|ccf/axes/time",
             units="au",
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "ccf/j(q,t)_trans",
@@ -615,7 +618,7 @@ class CurrentCorrelationFunction(IJob):
             self._outputData, "ccf/J(q,f)_trans/%s", self.labels
         )
         self._outputData["ccf/J(q,f)_trans/total"][:] = sqfTransTotal
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "ccf/J(q,f)_long",
@@ -627,7 +630,7 @@ class CurrentCorrelationFunction(IJob):
             main_result=True,
             partial_result=True,
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "ccf/J(q,f)_trans",
@@ -651,7 +654,7 @@ class CurrentCorrelationFunction(IJob):
             )
             self._outputData["ccf/J(q,f)_trans/ideal/total"][:] = sqfTransTotal / fact
             self._outputData["ccf/J(q,f)_trans/ideal/total"].scaling_factor = fact
-            self.configuration["grouping_level"].add_grouped_totals(
+            add_grouped_totals(
                 self.trajectory,
                 self._outputData,
                 "ccf/J(q,f)_long/ideal",
@@ -661,7 +664,7 @@ class CurrentCorrelationFunction(IJob):
                 axis="ccf/axes/q|ccf/axes/romega",
                 units="au",
             )
-            self.configuration["grouping_level"].add_grouped_totals(
+            add_grouped_totals(
                 self.trajectory,
                 self._outputData,
                 "ccf/J(q,f)_trans/ideal",

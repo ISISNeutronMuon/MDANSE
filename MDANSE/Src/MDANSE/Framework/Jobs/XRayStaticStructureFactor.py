@@ -19,6 +19,10 @@ from collections.abc import Iterator
 import numpy as np
 import numpy.typing as npt
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    update_pair_results,
+)
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
@@ -252,9 +256,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
                     fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr,
                 )
 
-        self.configuration["grouping_level"].update_pair_results(
-            self.trajectory, calc_func, self._outputData
-        )
+        update_pair_results(self.trajectory, calc_func, self._outputData)
 
         asf = {
             name: atomic_scattering_factor(
@@ -305,7 +307,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
             self._outputData["xssf/inter/total"].scaling_factor = fact
             self._outputData["xssf/total"].scaling_factor = fact
             for i in ("/intra", "/inter", ""):
-                self.configuration["grouping_level"].add_grouped_totals(
+                add_grouped_totals(
                     self.trajectory,
                     self._outputData,
                     f"xssf{i}",

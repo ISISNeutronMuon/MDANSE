@@ -21,6 +21,11 @@ import numpy as np
 import numpy.typing as npt
 
 from MDANSE.Chemistry import ChemicalSystem
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+    update_pair_results,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
@@ -414,12 +419,10 @@ class VanHoveFunctionDistinct(IJob):
         self._elementsPairs = sorted(
             it.combinations_with_replacement(self.selectedElements, 2),
         )
-        self.labels = self.configuration["grouping_level"].pair_labels(
+        self.labels = pair_labels(
             self.trajectory,
         )
-        self.labels_intra = self.configuration["grouping_level"].pair_labels(
-            self.trajectory, intra=True
-        )
+        self.labels_intra = pair_labels(self.trajectory, intra=True)
 
         self.n_mid_points = len(self.configuration["r_values"]["mid_points"])
 
@@ -684,9 +687,7 @@ class VanHoveFunctionDistinct(IJob):
                 yield "vh/g(r,t)/inter", False, van_hove_inter
                 yield "vh/g(r,t)/intra", True, van_hove_intra
 
-        self.configuration["grouping_level"].update_pair_results(
-            self.trajectory, calc_func, self._outputData
-        )
+        update_pair_results(self.trajectory, calc_func, self._outputData)
 
         nAtomsPerElement = self.trajectory.get_natoms()
 
@@ -717,7 +718,7 @@ class VanHoveFunctionDistinct(IJob):
                 vhs = weighted_sum(self._outputData, f"vh/g(r,t){i}/%s", labels)
                 self._outputData[f"vh/g(r,t){i}/total"][...] = vhs / fact
                 self._outputData[f"vh/g(r,t){i}/total"].scaling_factor = fact
-                self.configuration["grouping_level"].add_grouped_totals(
+                add_grouped_totals(
                     self.trajectory,
                     self._outputData,
                     f"vh/g(r,t){i}",

@@ -17,6 +17,9 @@ import collections
 
 import numpy as np
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
     CELL_SIZE_LIMIT,
@@ -342,7 +345,7 @@ class VanHoveFunctionSelf(IJob):
         )
         self._outputData["vh/4_pi_r2_g(r,t)/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "vh/g(r,t)",
@@ -352,7 +355,7 @@ class VanHoveFunctionSelf(IJob):
             main_result=True,
             partial_result=True,
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "vh/4_pi_r2_g(r,t)",

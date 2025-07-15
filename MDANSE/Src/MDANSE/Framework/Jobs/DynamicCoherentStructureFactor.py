@@ -16,13 +16,16 @@
 from __future__ import annotations
 
 import collections
-import itertools
 from math import sqrt
 
 import numpy as np
 from scipy.signal import correlate
 
 from MDANSE.Core.Error import Error
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
@@ -165,7 +168,7 @@ class DynamicCoherentStructureFactor(IJob):
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
 
-        self.labels = self.configuration["grouping_level"].pair_labels(
+        self.labels = pair_labels(
             self.trajectory,
         )
 
@@ -385,7 +388,7 @@ class DynamicCoherentStructureFactor(IJob):
         )
         self._outputData["dcsf/f(q,t)/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "dcsf/f(q,t)",
@@ -401,7 +404,7 @@ class DynamicCoherentStructureFactor(IJob):
         )
         self._outputData["dcsf/s(q,f)/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "dcsf/s(q,f)",
@@ -420,7 +423,7 @@ class DynamicCoherentStructureFactor(IJob):
                 / fact
             )
             self._outputData["dcsf/s(q,f)/ideal/total"].scaling_factor = fact
-            self.configuration["grouping_level"].add_grouped_totals(
+            add_grouped_totals(
                 self.trajectory,
                 self._outputData,
                 "dcsf/s(q,f)/ideal",

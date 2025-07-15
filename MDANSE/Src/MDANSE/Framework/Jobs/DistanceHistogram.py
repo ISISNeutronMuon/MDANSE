@@ -15,10 +15,12 @@
 #
 
 import collections
-import itertools
 
 import numpy as np
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    pair_labels,
+)
 from MDANSE.Framework.Jobs.IJob import IJob, JobError
 from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
     CELL_SIZE_LIMIT,
@@ -152,12 +154,10 @@ class DistanceHistogram(IJob):
         for k in list(self._nAtomsPerElement.keys()):
             self._concentrations[k] = 0.0
 
-        self.labels = self.configuration["grouping_level"].pair_labels(
+        self.labels = pair_labels(
             self.trajectory,
         )
-        self.labels_intra = self.configuration["grouping_level"].pair_labels(
-            self.trajectory, intra=True
-        )
+        self.labels_intra = pair_labels(self.trajectory, intra=True)
 
     def run_step(self, index):
         """Run a single step of the analysis.

@@ -16,6 +16,9 @@
 
 import collections
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
@@ -213,7 +216,7 @@ class MeanSquareDisplacement(IJob):
         )
         self._outputData["msd/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "msd",

@@ -18,6 +18,9 @@ import collections
 import numpy as np
 from scipy.signal import correlate
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
@@ -197,7 +200,7 @@ class PositionAutoCorrelationFunction(IJob):
         )
         self._outputData["pacf/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "pacf",

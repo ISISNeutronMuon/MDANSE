@@ -18,6 +18,10 @@ from collections.abc import Iterator
 import numpy as np
 import numpy.typing as npt
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    update_pair_results,
+)
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
@@ -187,9 +191,7 @@ class PairDistributionFunction(DistanceHistogram):
                 if self.indices_intra is None:
                     break
 
-        self.configuration["grouping_level"].update_pair_results(
-            self.trajectory, calc_func, self._outputData
-        )
+        update_pair_results(self.trajectory, calc_func, self._outputData)
 
         selected_weights, all_weights = self.trajectory.get_weights(
             prop=self.configuration["weights"]["property"]
@@ -225,7 +227,7 @@ class PairDistributionFunction(DistanceHistogram):
                 )
                 for j in ("pdf", "rdf", "tcf"):
                     self._outputData[f"{j}{i}/total"].scaling_factor = factor
-                    self.configuration["grouping_level"].add_grouped_totals(
+                    add_grouped_totals(
                         self.trajectory,
                         self._outputData,
                         f"{j}{i}",

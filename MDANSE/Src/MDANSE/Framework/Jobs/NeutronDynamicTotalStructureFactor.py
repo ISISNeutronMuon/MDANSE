@@ -20,6 +20,10 @@ from math import sqrt
 import numpy as np
 
 from MDANSE.Core.Error import Error
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -108,7 +112,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
         self.numberOfSteps = 1
 
-        self.pair_labels = self.configuration["grouping_level"].pair_labels(
+        self.pair_labels = pair_labels(
             self.trajectory,
         )
 
@@ -423,7 +427,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
         self._outputData["ndsf/f(q,t)_inc/total"].scaling_factor = fact
         self._outputData["ndsf/s(q,f)_inc/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "ndsf/f(q,t)_inc",
@@ -431,7 +435,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             axis="ndsf/axes/q|ndsf/axes/time",
             units="au",
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "ndsf/f(q,t)_coh",
@@ -441,7 +445,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             axis="ndsf/axes/q|ndsf/axes/time",
             units="au",
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "ndsf/s(q,f)_inc",
@@ -451,7 +455,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             main_result=True,
             partial_result=True,
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "ndsf/s(q,f)_coh",

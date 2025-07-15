@@ -17,6 +17,9 @@ import collections
 
 from scipy.signal import correlate
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import differentiate, get_spectrum
@@ -318,7 +321,7 @@ class DensityOfStates(IJob):
         )
         self._outputData["dos/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "vacf",
@@ -326,7 +329,7 @@ class DensityOfStates(IJob):
             axis="vacf/axes/time",
             units="nm2/ps2",
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "dos",
@@ -342,7 +345,7 @@ class DensityOfStates(IJob):
                 weighted_sum(self._outputData, "dos/ideal/%s", self.labels) / fact
             )
             self._outputData["dos/ideal/total"].scaling_factor = fact
-            self.configuration["grouping_level"].add_grouped_totals(
+            add_grouped_totals(
                 self.trajectory,
                 self._outputData,
                 "dos/ideal",

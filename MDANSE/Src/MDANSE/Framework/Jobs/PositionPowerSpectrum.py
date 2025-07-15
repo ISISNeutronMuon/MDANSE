@@ -18,6 +18,9 @@ import collections
 import numpy as np
 from scipy.signal import correlate
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
@@ -313,7 +316,7 @@ class PositionPowerSpectrum(IJob):
         )
         self._outputData["pps/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "pacf",
@@ -321,7 +324,7 @@ class PositionPowerSpectrum(IJob):
             axis="pacf/axes/time",
             units="nm2",
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
             self.trajectory,
             self._outputData,
             "pps",
@@ -341,7 +344,7 @@ class PositionPowerSpectrum(IJob):
                 / fact
             )
             self._outputData["pps/ideal/total"].scaling_factor = fact
-            self.configuration["grouping_level"].add_grouped_totals(
+            add_grouped_totals(
                 self.trajectory,
                 self._outputData,
                 "pps/ideal",

@@ -20,6 +20,10 @@ from collections.abc import Iterator
 import numpy as np
 import numpy.typing as npt
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    pair_labels,
+    update_pair_results,
+)
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 
 
@@ -100,12 +104,8 @@ class CoordinationNumber(DistanceHistogram):
             units="nm",
         )
 
-        self.labels = self.configuration["grouping_level"].pair_labels(
-            self.trajectory, all_pairs=True
-        )
-        self.labels_intra = self.configuration["grouping_level"].pair_labels(
-            self.trajectory, intra=True, all_pairs=True
-        )
+        self.labels = pair_labels(self.trajectory, all_pairs=True)
+        self.labels_intra = pair_labels(self.trajectory, intra=True, all_pairs=True)
 
         for label, _ in self.labels:
             self._outputData.add(
@@ -211,7 +211,7 @@ class CoordinationNumber(DistanceHistogram):
                 yield "cn/inter", False, rho_j * cnInter
                 yield "cn/intra", True, rho_j * cnIntra
 
-        self.configuration["grouping_level"].update_pair_results(
+        update_pair_results(
             self.trajectory, calc_func, self._outputData, all_pairs=True
         )
 
