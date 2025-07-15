@@ -184,7 +184,7 @@ prefactor of :math:`1 / N \sqrt{c_{\alpha}c_{\beta}}`.
 Squared Weights
 ^^^^^^^^^^^^^^^
 
-For the DISF, GDISF, and EISF calculations all weights are squared prior
+For the DISF, GDISF, EISF, and VHF (self-part) calculations all weights are squared prior
 to being rescaled. For the DOS, PACF, VACF, and PPS calculations
 the weights are squared prior to being rescaled for only the ``b_coherent``
 or ``b_incoherent`` weights. In most cases the rescaled weights
