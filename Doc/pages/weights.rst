@@ -101,8 +101,10 @@ MDANSE weights are rescaled so that weights for DISF calculation using the ``b_i
    W_{\alpha} = \frac{c_{\alpha} b_{\mathrm{inc},\alpha}^2}{\sum_{\gamma} c_{\gamma} b_{\mathrm{inc},\gamma}^2}
 
 where :math:`b_{\mathrm{inc},\alpha}^2` is the squared incoherent
-scattering length of the atom type :math:`\alpha`. By using these rescaled
-weights the total incoherent intermediate scattering functions becomes
+scattering length of the atom type :math:`\alpha`. Note that the
+weights were squared prior to the rescaling, see :ref:`weighting-scheme-squared`
+for details. By using the rescaled weights the total incoherent intermediate
+scattering functions becomes
 
 .. math::
    :label: single2
@@ -176,3 +178,28 @@ notice that the concentrations :math:`c_{\alpha}c_{\beta}` are not
 square-rooted, this is because the the partial SSF has a prefactor of
 :math:`1 / N c_{\alpha}c_{\beta}` while DCSF and CCF calculations have a
 prefactor of :math:`1 / N \sqrt{c_{\alpha}c_{\beta}}`.
+
+.. _weighting-scheme-squared:
+
+Squared Weights
+^^^^^^^^^^^^^^^
+
+For the DISF, GDISF, EISF, and VHF (self-part) calculations all weights are squared prior
+to being rescaled. For the DOS, PACF, VACF, and PPS calculations
+the weights are squared prior to being rescaled for only the ``b_coherent``
+or ``b_incoherent`` weights. In most cases the rescaled weights
+with single atom-type weights will be
+
+.. math::
+   :label: squared1
+
+   W_{\alpha} = \frac{c_{\alpha} w_{\alpha}}{\sum_{\gamma} c_{\gamma} w_{\gamma}}
+
+while in some cases when the weight are squared
+
+.. math::
+   :label: squared2
+
+   W_{\alpha} = \frac{c_{\alpha} w_{\alpha}^2}{\sum_{\gamma} c_{\gamma} w_{\gamma}^2}
+
+where :math:`w_{\alpha}` is some weight parameter for the atom-type :math:`\alpha`.

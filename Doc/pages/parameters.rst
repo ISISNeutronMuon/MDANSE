@@ -309,6 +309,29 @@ The defaults transmutation setting.
 
 
 
+.. _configurator-analysis-AxisSelectionConfigurator:
+
+AxisSelectionConfigurator
+-------------------------
+
+default=(None, 0)
+
+Defines a local axis in a molecule.
+
+The input is the name of a molecule type, and one or two indices
+of atoms within the molecule.
+
+If the atom indices are not defined, the calculation will use
+the principal axis of the molecule determined from the moment
+of inertia.
+
+If one index is given, the molecule axis will be a vector from
+the molecule centre to the atom with the given index.
+
+If two indices are given, the molecule axis will be a vector
+between the atoms with the two indices.
+
+
 .. _configurator-analysis-BooleanConfigurator:
 
 BooleanConfigurator
@@ -392,10 +415,17 @@ default=atom
 
 Define how the partial results will be grouped in the output.
 
-'atom' - partial results for each chemical elements are output.
-'molecule' - for each molecule type, a set of outputs will be created,
-showing how different elements in that molecule contributed to the
-total signal.
+The grouping levels currently supported are:
+    * 'atom': no changes are made to the atom selection
+    * 'each atom': no changes are made to the atom selection
+    * 'molecule': this changes the atom names in the atom selection so
+      that it includes the molecule name that they are a part of e.g.
+      <H2_O1>/H for a water molecule's hydrogen atom. Job in mdanse will
+      sum results based on the atom names so that results like
+      f(q,t)/<H2_O1>/H will be obtained.
+    * 'each molecule': this changes the atom selection so that the atom
+      indices for each molecule will be grouped together. Jobs can then
+      run calculations can be run for each group of indices together.
 
 
 .. _configurator-analysis-HDFInputFileConfigurator:
@@ -478,6 +508,7 @@ not writing out every frame, the velocities are likely to be
 underestimated compared to the values used by the MD engine in the simulation,
 and the error in the calculation increases quickly with the number of trajectory
 frames skipped in the MD output.
+
 
 
 .. _configurator-analysis-MoleculeSelectionConfigurator:
