@@ -4,42 +4,6 @@ List of analysis types
 ======================
 
 
-.. _analysis-reference-AngularCorrelation:
-
-AngularCorrelation
-~~~~~~~~~~~~~~~~~~
-
-Computes the angular correlation of a vector defined in a molecule.
-
-Vector defined by user, starting at the origin pointing in a particular direction.
-Origin and direction can either be an atom or a centre definition
-(centre of a group of atoms). For example, the origin could be defined by the
-geometric centre of the head group of a surfactant molecule and the direction
-simply by the last atom of the tail or chain. The correlation is calculated for
-the angle formed by the same vector at different simulation frames.
-
-**Calculation:** \n
-angle at time T is calculated as the following: \n
-.. math:: \\overrightarrow{vector} =  \\overrightarrow{direction} - \\overrightarrow{origin}
-.. math:: \phi(T = T_{1}-T_{0}) = arcos(  \\overrightarrow{vector(T_{1})} . \\overrightarrow{vector(T_{0})} )
-
-**Output:** \n
-#. angular_correlation_legendre_1st: :math:`<cos(\phi(T))>`
-#. angular_correlation_legendre_2nd: :math:`<\\frac{1}{2}(3cos(\phi(T))^{2}-1)>`
-
-**Usage:** \n
-This analysis is used to study molecule's orientation and rotation relaxation.
-
-Inputs:
-
-- trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
-- frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
-- molecule_name: :ref:`configurator-analysis-MoleculeSelectionConfigurator` default=
-- per_axis: :ref:`configurator-analysis-BooleanConfigurator` default=False
-- output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
-- running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
-
-
 .. _analysis-reference-AreaPerMolecule:
 
 AreaPerMolecule
@@ -609,6 +573,49 @@ Inputs:
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
 
+.. _analysis-reference-ReorientationalTimeCorrelationFunction:
+
+ReorientationalTimeCorrelationFunction
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Correlation of molecule's orientation in time.
+
+The result is a reorientational time-correlation function, which describes
+the change in orientation of a specific direction axis within a molecule.
+For one index, the axis will be defined by the positions of the atom with
+that index and the molecule's centre of mass.
+For two indices, the axis will be the vector between the atoms with these indices.
+If no indices are given, the shortest axis of the moment of inertia (pm1)
+will be used in the calculation. This will not be tied to specific atoms and
+will be sensitive to changes in the molecule's shape.
+
+In principle, reorientational time-correlation functions can be Legendre
+polynomials of different order. At the moment, this analysis will calculate
+all the orders up the maximum Legendre polynomial order specified as one
+of the input parameters.
+
+Angle at time :math:`t` is calculated as the following:
+
+.. math::
+    \hat{\mathbf{n}}(t) =  \frac{\mathbf{r}_{i}(t) - \mathbf{r}_{j}(t)}{\vert \mathbf{r}_{i}(t) - \mathbf{r}_{j}(t) \vert}
+
+.. math::
+    \phi(t = t_{1}-t_{0}) = \arccos( \hat{\mathbf{n}}(t_{1}) \cdot \hat{\mathbf{n}}(t_{0}))
+
+The general result is :math:`C_{l}(t) = \langle P_{l}[\cos(\phi(t))] \rangle`,
+where :math:`P_{l}[x]` is the Legendre polynomial of the order :math:`l`.
+
+Inputs:
+
+- trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
+- frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
+- molecule_and_axis: :ref:`configurator-analysis-AxisSelectionConfigurator` default=
+- polynomial_order: :ref:`configurator-analysis-IntegerConfigurator` default=2
+- per_axis: :ref:`configurator-analysis-BooleanConfigurator` default=False
+- output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
+- running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
+
+
 .. _analysis-reference-RootMeanSquareDeviation:
 
 RootMeanSquareDeviation
@@ -675,9 +682,8 @@ plotter, and load it into your preferred neutron reflectometry software.
 
 Additionally, the following other profiles are provided in the output:
 
-- 'sldp_incoherent', the incoherent scattering length profile,
-- 'sldp_total', the total scattering length profile,
 - 'dp_{atom_type}', numeric density profiles (number of atoms per volume)
+- 'dp_total', numeric density profile for all atoms
 
 
 Inputs:

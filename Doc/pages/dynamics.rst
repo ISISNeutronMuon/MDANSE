@@ -8,56 +8,15 @@ Analysis: Dynamics
 
 This section contains background theory for following plugins:
 
--  :ref:`analysis-angular-correlation`
 -  :ref:`analysis-dos`
 -  :ref:`analysis-msd`
 -  :ref:`analysis-op`
 -  :ref:`analysis-pacf`
+-  :ref:`analysis-rtcf`
 -  :ref:`root-mean-square-deviation`
 -  :ref:`root-mean-square-fluctuation`
 -  :ref:`analysis-vhf`
 -  :ref:`analysis-vacf`
-
-.. _analysis-angular-correlation:
-
-Angular Correlation
-'''''''''''''''''''
-.. note::
-
-    **This job is under development and may change in future versions
-    of MDANSE. The documentation here is out-dated and only left here
-    for referencing purposes.**
-
-    The angular correlation analysis computes the autocorrelation of a set
-    of vectors describing the extent of a molecule in three orthogonal
-    directions. This kind of analysis can be useful when trying to highlight
-    the fact that a molecule is constrained in a given direction.
-
-    For a given triplet of non-colinear atoms :math:`g=(a_1,a_2,a_3)`, one can
-    derive an orthonormal set of three vectors :math:`v_1`, :math:`v_2`, :math:`v_3` using the
-    following scheme:
-
-    -  :math:`v_{1} = (n_{1} + n_{2}) / \left| {n_{1} + n_{2}} \right|`
-       where :math:`n_1` and :math:`n_2` are respectively the
-       normalized vectors along (:math:`a_1`, :math:`a_2`) and (:math:`a_1`, :math:`a_3`) directions.
-    -  :math:`v_2` is defined as the clockwise normal vector orthogonal to :math:`v_1` that
-       belongs to the plane defined by :math:`a_1`, :math:`a_2` and :math:`a_3` atoms
-    -  :math:`v_{3} = v_{1}\times v_{2}`
-
-    Thus, one can define the following autocorrelation functions for the
-    vectors :math:`v_1`, :math:`v_2` and :math:`v_3` defined on triplet :math:`i`:
-
-    .. math::
-
-       {\mathrm{AC}_{g,i}{(t) = \left\langle {v_{g,i}(0)\cdot v_{g,i}(t)} \right\rangle} \qquad {i = 1,2,3}}
-
-    and the angular correlation averaged over all triplets is:
-
-    .. math::
-
-       {\mathrm{AC}_{i}{(t) = {\sum\limits_{g = 1}^{N_{\mathrm{triplets}}}{\mathrm{AC}_{g,i}(t)}}} \qquad {i = 1,2,3}}
-
-    where :math:`N_{\mathrm{triplets}}` is the number of selected triplets.
 
 
 .. _analysis-dos:
@@ -88,7 +47,7 @@ The DOS can be computed either for the isotropic case or with respect to a
 user-defined axis.
 
 Since the DOS is computed from the unnormalized VACF, the DOS at :math:`\omega=0` gives an
-approximate value for the diffusion constant (see Eq. :math:numref:`pfx7`)
+approximate value for the diffusion constant (see Eq. :math:numref:`vacf6`)
 when an equal weighting scheme is used. The DOS can be
 smoothed by, for example, a Gaussian window applied in the time domain
 [Ref10]_ (see the section :ref:`correlation-frames`); the diffusion
@@ -99,6 +58,17 @@ MDANSE computes the density of states starting from atomic
 velocities. In the case that velocities are not available, the velocities will be
 computed by numerical differentiation of the coordinate trajectories
 correcting first for possible jumps due to periodic boundary conditions.
+
+The DOS is also related to the DISF, since for isotropic systems
+
+.. math::
+   :label: dos3
+
+   \mathrm{DOS}(\omega) = \lim_{k  \rightarrow 0} \left( \frac{\omega}{k}\right)^2 S_{\text{inc}}(k, \omega)
+
+so that DOS result relevant to neturon experiment measuring the vibrational (or phonon)
+density of states can be calculated by using the ``b_incoherent`` weight setting.
+
 
 .. _analysis-msd:
 
@@ -307,6 +277,33 @@ where
    \Delta \mathbf{r}_{j}\left( t \right) = \mathbf{r}_{j}(t) - \langle \mathbf{r}_{j} \rangle
 
 so that the origin dependence of the PACF function is removed.
+
+
+.. _analysis-rtcf:
+
+Reorientational Time Correlation Function
+'''''''''''''''''''''''''''''''''''''''''
+
+Reorientational Time-Correlation Function (RTCF) describes
+the change in orientation of a specific direction axis within a molecule.
+This axis is usually defined as a vector between two specific atoms in
+the molecule, or between one atom and the molecule's centre of mass.
+
+Reorientational time-correlation functions can be Legendre
+polynomials of different order. At the moment, this analysis will calculate
+all the orders up the maximum Legendre polynomial order specified as one
+of the input parameters.
+
+Angle at time :math:`t` is calculated as the following:
+
+.. math::
+    \hat{\mathbf{n}}(t) =  \frac{\mathbf{r}_{i}(t) - \mathbf{r}_{j}(t)}{\vert \mathbf{r}_{i}(t) - \mathbf{r}_{j}(t) \vert}
+
+.. math::
+    \phi(t = t_{1}-t_{0}) = \arccos( \hat{\mathbf{n}}(t_{1}) \cdot \hat{\mathbf{n}}(t_{0}))
+
+The general result is :math:`C_{l}(t) = \langle P_{l}[\cos(\phi(t))] \rangle`,
+where :math:`P_{l}[x]` is the Legendre polynomial of the order :math:`l`.
 
 
 .. _root-mean-square-deviation:

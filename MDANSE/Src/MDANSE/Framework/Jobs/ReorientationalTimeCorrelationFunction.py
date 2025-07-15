@@ -70,19 +70,16 @@ class ReorientationalTimeCorrelationFunction(IJob):
     all the orders up the maximum Legendre polynomial order specified as one
     of the input parameters.
 
-    Angle at time T is calculated as the following:
+    Angle at time :math:`t` is calculated as the following:
 
     .. math::
-
-       \overrightarrow{vector} =  \overrightarrow{direction} - \overrightarrow{origin}
+        \hat{\mathbf{n}}(t) =  \frac{\mathbf{r}_{i}(t) - \mathbf{r}_{j}(t)}{\vert \mathbf{r}_{i}(t) - \mathbf{r}_{j}(t) \vert}
 
     .. math::
+        \phi(t = t_{1}-t_{0}) = \arccos( \hat{\mathbf{n}}(t_{1}) \cdot \hat{\mathbf{n}}(t_{0}))
 
-       \phi(T = T_{1}-T_{0}) = arcos(  \overrightarrow{vector(T_{1})} . \loverrightarrow{vector(T_{0})} )
-
-    The general result is :math:`C_{l}(T) = \langle P_{l}[cos(\phi(T))] \rangle`,
-    where :math:`P_{l}` is the Legendre polynomial of the order l.
-
+    The general result is :math:`C_{l}(t) = \langle P_{l}[\cos(\phi(t))] \rangle`,
+    where :math:`P_{l}[x]` is the Legendre polynomial of the order :math:`l`.
     """
 
     label = "Reorientational Time Correlation Function"
