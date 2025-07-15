@@ -134,10 +134,14 @@ class Trajectory:
 
     @property
     def unique_elements(self) -> set[str]:
-        return set(self.selection_getter(self.atom_types))
+        if self._selection:
+            return set(self.selection_getter(self.atom_types))
+        return set(self.atom_types)
 
     @property
     def unique_names(self) -> set[str]:
+        if self._selection:
+            return set(self.selection_getter(self.atom_names))
         return set(self.atom_names)
 
     def set_transmutation(self, changed_atoms: dict[int, str]):
