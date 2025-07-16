@@ -26,6 +26,7 @@ from qtpy.QtWidgets import (
     QSizePolicy,
     QSlider,
     QSpinBox,
+    QSplitter,
     QStyle,
     QTabWidget,
     QTreeView,
@@ -94,6 +95,10 @@ class ViewerControls(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         _ = QGridLayout(self)
+        self._splitter = QSplitter()
+        self.layout().addWidget(
+            self._splitter, 0, 0, 1, 1
+        )  # row, column, rowSpan, columnSpan
         self._viewer = None
         self._buttons = {}
         self._delegates = {}
@@ -106,7 +111,6 @@ class ViewerControls(QWidget):
         self._visibility = [True, True, True, True]
         self.createSlider()
         self.createButtons(Qt.Orientation.Horizontal)
-        self.createSidePanel()
         self._bkg_dialog = QColorDialog()
         self._projection = True
 
@@ -130,20 +134,17 @@ class ViewerControls(QWidget):
         frame_selector.valueChanged.connect(frame_slider.setValue)
         frame_slider.valueChanged.connect(frame_selector.setValue)
         self._frame_selector = frame_selector
-        self.layout().addWidget(base, 2, 0, 1, 3)  # row, column, rowSpan, columnSpan
+        self.layout().addWidget(base, 1, 0, 1, 1)  # row, column, rowSpan, columnSpan
 
     def setViewer(self, viewer: MolecularViewer):
         self._viewer = viewer
-        self.layout().addWidget(viewer, 0, 0, 2, 2)  # row, column, rowSpan, columnSpan
+        self._splitter.addWidget(viewer)
         self._frame_slider.valueChanged.connect(viewer.set_coordinates)
         viewer.new_max_frames.connect(self._frame_slider.setMaximum)
         viewer.new_max_frames.connect(self._frame_selector.setMaximum)
         viewer.new_max_frames.connect(self.stop_animation)
         # self._database.setViewer(viewer)
         # viewer.setDataModel(viewer._colour_manager)
-        self._atom_details.setModel(viewer._colour_manager)
-        for column_number in range(3):
-            self._atom_details.resizeColumnToContents(column_number)
         viewer._colour_manager.new_atom_properties.connect(viewer.take_atom_properties)
 
     def createButtons(self, orientation: Qt.Orientation):
@@ -155,12 +156,12 @@ class ViewerControls(QWidget):
         if orientation == Qt.Orientation.Horizontal:
             layout = QHBoxLayout(base)
             self.layout().addWidget(
-                base, 3, 0, 1, 3
+                base, 2, 0, 1, 1
             )  # row, column, rowSpan, columnSpan
         elif orientation == Qt.Orientation.Vertical:
             layout = QVBoxLayout(base)
             self.layout().addWidget(
-                base, 0, 2, 2, 1
+                base, 0, 1, 2, 1
             )  # row, column, rowSpan, columnSpan
         for button_name, button_role in button_lookup.items():
             temp = QPushButton(base)
@@ -266,9 +267,10 @@ class ViewerControls(QWidget):
             layout5.addWidget(box)
         layout.addWidget(wrapper5)
         # the database of atom types
-        self.layout().addWidget(
-            absolute_base, 0, 2, 2, 1
-        )  # row, column, rowSpan, columnSpan
+        self._atom_details.setModel(self._viewer._colour_manager)
+        for column_number in range(3):
+            self._atom_details.resizeColumnToContents(column_number)
+        self._splitter.addWidget(absolute_base)
 
     def createTracePanel(self, viewer):
         """Adds widgets for finer control of the playback"""
