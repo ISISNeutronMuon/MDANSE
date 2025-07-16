@@ -113,7 +113,7 @@ class PartialChargeMapper:
         for charge in unique_charges:
             charge_indices = set(np.where(np.isclose(new_charges, charge))[0])
             key = charge_indices.intersection(valid_indices[0])
-            groups[charge] = list(key)
+            groups[charge] = [int(x) for x in key]
         return groups
 
     def get_json_setting(self) -> str:
@@ -169,6 +169,7 @@ class PartialChargeConfigurator(IConfigurator):
                 else:
                     for index in v:
                         processed_values[index] = charge
+                continue
             try:
                 index = int(k)
                 charge = float(v)
@@ -185,16 +186,17 @@ class PartialChargeConfigurator(IConfigurator):
         traj_indices = system._atom_indices
         charge_indices = set(processed_values.keys())
 
+        for index in charge_indices.intersection(traj_indices):
+            self["charges"][index] = processed_values[index]
+
         if not charge_indices.issubset(traj_indices):
             self.warning_status = (
                 "At least one atom index not found in the current system."
             )
             return
 
-        for index in charge_indices.intersection(traj_indices):
-            self["charges"][index] = processed_values[index]
-
         self.error_status = "OK"
+        self.warning_status = ""
 
     def get_charge_mapper(self) -> PartialChargeMapper:
         """
