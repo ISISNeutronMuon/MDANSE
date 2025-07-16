@@ -39,6 +39,8 @@ class TrajectoryView(QListView):
             # block right click when it's not on a trajectory
             return
         model = self.model()
+        if not model.item_is_ready(index.row()):
+            return
         item = model.itemData(index)
         menu = QMenu()
         self.populateMenu(menu, item)

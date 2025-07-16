@@ -121,8 +121,17 @@ class TrajectoryModel(QStandardItemModel):
         self.finished_loading.emit(index)
         # self._loading_threads[index].wait()
 
+    def item_is_ready(self, row: int) -> bool:
+        try:
+            node_number = self.item(row).data()
+        except AttributeError:
+            return False
+        traj = self.get_trajectory(node_number)
+        if isinstance(traj, Trajectory):
+            return True
+        return False
+
     def removeRow(self, row: int, parent: QModelIndex = None):
-        self.mutex.lock()
         try:
             node_number = self.item(row).data()
         except AttributeError:
@@ -145,4 +154,3 @@ class TrajectoryModel(QStandardItemModel):
             thread.wait(deadline=timer)
         except Exception as e:
             LOG.error("While removing a loader thread, an exception occured: %s", e)
-        self.mutex.unlock()
