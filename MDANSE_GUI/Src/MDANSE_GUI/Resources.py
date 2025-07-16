@@ -62,7 +62,7 @@ class Resources:
             iname,
             icon,
         ) in self._icons.items():
-            pixmap = icon.pixmap(QSize(32, 32))
+            pixmap = icon.pixmap(QSize(64, 64))
             original_image: QImage = pixmap.toImage()
             inverted_image: QImage = pixmap.toImage()
             inverted_image.invertPixels()

@@ -18,7 +18,7 @@ from collections import defaultdict
 from importlib import metadata
 from pathlib import PurePath
 
-from qtpy.QtCore import QMessageLogger, Qt, QTimer, QUrl, Signal, Slot
+from qtpy.QtCore import QMessageLogger, QSize, Qt, QTimer, QUrl, Signal, Slot
 from qtpy.QtGui import QDesktopServices
 from qtpy.QtWidgets import (
     QAction,
@@ -217,17 +217,21 @@ class TabbedWindow(QMainWindow):
         self._toolBar = QToolBar("Main MDANSE toolbar", self)
         # self._toolBar.setMovable(True)
         self._toolBar.setObjectName("main toolbar")
+        self._toolBar.setIconSize(QSize(32,32))
+        self._toolBar.setMovable(False)
+        self._toolBar.setMinimumHeight(24)
+        self._toolBar.setMaximumHeight(80)
         valid_keys = [
             ("periodic_table", self.launchPeriodicTable),
             ("element", self.launchElementsEditor),
             ("units", self.launchUnitsEditor),
-            ("user", self.launchStyleSelector),
+            ("user_definitions", self.launchStyleSelector),
         ]
         tooltips = {
             "periodic_table": "Periodic Table of Elements",
             "element": "Atom Property Editor",
             "units": "Physical Units defintions",
-            "user": "Customise GUI Style",
+            "user_definitions": "Customise GUI Style",
         }
         for key, slot in valid_keys:
             icon = self.resources._icons[key]
