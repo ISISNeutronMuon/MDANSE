@@ -217,7 +217,7 @@ class TabbedWindow(QMainWindow):
         self._toolBar = QToolBar("Main MDANSE toolbar", self)
         # self._toolBar.setMovable(True)
         self._toolBar.setObjectName("main toolbar")
-        self._toolBar.setIconSize(QSize(32,32))
+        self._toolBar.setIconSize(QSize(32, 32))
         self._toolBar.setMovable(False)
         self._toolBar.setMinimumHeight(24)
         self._toolBar.setMaximumHeight(80)
