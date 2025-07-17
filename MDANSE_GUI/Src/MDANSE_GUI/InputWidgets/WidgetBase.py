@@ -52,9 +52,11 @@ UNKNOWN_STYLE = (
 )
 STYLES = [ERROR_STYLE, WARNING_STYLE, CONFIGURING_STYLE, UNKNOWN_STYLE]
 
+FLAG_VALS = {0: 4, 1: 1, 2: 2, 3: 3}
+
 
 class ConfigureThread(QThread):
-    results = Signal(tuple[int, str])
+    results = Signal(tuple)
 
     def __init__(
         self,
@@ -76,10 +78,10 @@ class ConfigureThread(QThread):
             msg = "COULD NOT SET THIS VALUE - you may need to change the values in other widgets"
         if not self._config.valid:
             code = 0
-            msg = self._configurator.error_status
+            msg = self._config.error_status
         elif self._config.warning_status:
             code = 1
-            msg = self._configurator.warning_status
+            msg = self._config.warning_status
         else:
             code = -1
             msg = ""
@@ -226,7 +228,7 @@ class WidgetBase(QObject):
             If True, update the widget's error without sending signals
 
         """
-        self.flags[0] = 1
+        self.flags[0] = 4
         self.messages[0] = error_text
         if not silent:
             self.valid_changed.emit()
@@ -242,13 +244,14 @@ class WidgetBase(QObject):
         warning_text : str
             Message displayed on hover-over.
         """
+        self.messages[1] = warning_text
         if warning_text:
             self.flags[1] = 1
-            self.messages[1] = warning_text
             self.valid_changed.emit()
             return
         self.flags[1] = 0
-        self.clear_error()
+        self.update_style()
+        self.valid_changed.emit()
 
     def clear_error(self):
         """Remove error highlighting."""
@@ -262,11 +265,13 @@ class WidgetBase(QObject):
                 self._base.setStyleSheet(STYLES[index])
                 self._base.setToolTip(self.messages[index])
                 return
+        self._base.setStyleSheet("")
+        self._base.setToolTip(self._tooltip)
 
     @abstractmethod
     @Slot()
     def updateValue(self):
-        self.flags[2] = 1
+        self.flags[2] = 2
         self.update_style()
         current_value = self.get_widget_value()
         self.configure_in_a_thread(current_value)
@@ -281,23 +286,26 @@ class WidgetBase(QObject):
         self.background_thread.results.connect(self.finalise_configuration)
         self.background_thread.start()
 
-    @Slot(tuple[int, str])
+    @Slot(tuple)
     def finalise_configuration(self, results: tuple[int, str]):
         code, msg = results
         self.flags[:] = 0
         self.background_thread = None
         if self.latest_value is not None:
-            self.flags[2] = 1
+            self.flags[2] = 2
             current_value = copy.deepcopy(self.latest_value)
             self.latest_value = None
             self.configure_in_a_thread(current_value)
             return
         if code < 0:
             self.update_style()
+            self.valid_changed.emit()
             return
-        self.flags[code] = 1
+        self.flags[code] = FLAG_VALS[code]
         self.messages[code] = msg
         self.update_style()
+        self.value_updated.emit()
+        self.valid_changed.emit()
 
     @abstractmethod
     def get_value(self):

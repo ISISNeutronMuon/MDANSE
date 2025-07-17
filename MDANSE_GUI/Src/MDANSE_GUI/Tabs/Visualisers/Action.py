@@ -466,7 +466,7 @@ class Action(QWidget):
             allow = True
             has_warning = False
             for widget in self._widgets:
-                if widget.flags.sum():
+                if widget.flags.sum() > 1:
                     allow = False
                 has_warning = has_warning or widget.flags[1]
         else:
