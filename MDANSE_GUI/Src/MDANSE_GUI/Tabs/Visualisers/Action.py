@@ -18,7 +18,7 @@ import traceback
 from pathlib import Path
 
 import numpy as np
-from qtpy.QtCore import Signal, Slot
+from qtpy.QtCore import QThread, Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
     QFileDialog,
@@ -132,6 +132,22 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
 }
 
 
+class PreviewThread(QThread):
+    results = Signal(dict)
+
+    def __init__(
+        self, parent, job_instance: IJob, parameter_dictionary: dict[str, str]
+    ):
+        super().__init__(parent)
+        self._job = job_instance
+        self._parameters = parameter_dictionary
+
+    def run(self):
+        self._job.setup(self._parameters, rebuild=False)
+        axes = self._job.preview_output_axis()
+        self.results.emit(axes)
+
+
 class Action(QWidget):
     new_thread_objects = Signal(list)
     run_and_load = Signal(list)
@@ -143,6 +159,8 @@ class Action(QWidget):
         self._parent_tab = None
         self._trajectory_configurator = None
         self._trajectory_instance = None
+        self._preview_thread = None
+        self._pardict_stack = []
         self._settings = None
         self._job_name = None
         self._job_instance = IJob()
@@ -409,31 +427,52 @@ class Action(QWidget):
     @Slot()
     def show_output_prediction(self):
         if self._use_preview:
-            self.allow_execution()
+            self.allow_execution(override=True)
             LOG.info("Show output prediction")
             pardict = self.set_parameters()
-            self._job_instance.setup(pardict, rebuild=False)
-            axes = self._job_instance.preview_output_axis()
-            LOG.info(f"Axes = {axes.keys()}")
-            text = "<p><b>The results will cover the following range:</b></p>"
-            for unit, old_array in axes.items():
-                scale_factor, new_unit = self._parent_tab.conversion_factor(unit)
-                array = np.array(old_array) * scale_factor
-                if len(array) < 6:
-                    text += f"<p>{array} ({new_unit})</p>"
-                else:
-                    text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({new_unit})</p>"
-            self._preview_box.setHtml(text)
+            self.calculate_preview(pardict)
+
+    @Slot(dict)
+    def calculate_preview(self, pardict: dict[str, str]):
+        self._pardict_stack.append(pardict)
+        self._preview_box.setHtml("Calculating the output range prediction...")
+        if self._preview_thread is not None:
+            return
+        else:
+            pardict = self._pardict_stack.pop()
+            self._pardict_stack = []
+            self._preview_thread = PreviewThread(None, self._job_instance, pardict)
+            self._preview_thread.results.connect(self.update_preview_box)
+            self._preview_thread.start()
+
+    @Slot(dict)
+    def update_preview_box(self, axes: dict):
+        LOG.info(f"Axes = {axes.keys()}")
+        text = "<p><b>The results will cover the following range:</b></p>"
+        for unit, old_array in axes.items():
+            scale_factor, new_unit = self._parent_tab.conversion_factor(unit)
+            array = np.array(old_array) * scale_factor
+            if len(array) < 6:
+                text += f"<p>{array} ({new_unit})</p>"
+            else:
+                text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({new_unit})</p>"
+        self._preview_box.setHtml(text)
+        self._preview_thread = None
+        self.allow_execution()
 
     @Slot()
-    def allow_execution(self):
-        allow = True
-        has_warning = False
-        for widget in self._widgets:
-            if not widget._configurator.valid:
-                allow = False
-                widget.mark_error(widget._configurator.error_status, silent=True)
-            has_warning = has_warning or widget.has_warning
+    def allow_execution(self, override: bool = False):
+        if not override:
+            allow = True
+            has_warning = False
+            for widget in self._widgets:
+                if not widget._configurator.valid:
+                    allow = False
+                    widget.mark_error(widget._configurator.error_status, silent=True)
+                has_warning = has_warning or widget.has_warning
+        else:
+            allow = False
+            has_warning = False
         if self.execute_button is not None:
             self.execute_button.setEnabled(allow)
             if has_warning:
