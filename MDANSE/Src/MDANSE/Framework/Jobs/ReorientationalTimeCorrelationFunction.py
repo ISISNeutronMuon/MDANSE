@@ -136,7 +136,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
         self.numberOfSteps = len(self.molecules)
 
         self.masses = np.array(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_property(
+            self.trajectory.chemical_system.atom_property(
                 "atomic_weight",
             ),
         )
@@ -219,7 +219,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
                 self.configuration["frames"]["step"],
             ),
         ):
-            configuration = self.configuration["trajectory"]["instance"].configuration(
+            configuration = self.trajectory.configuration(
                 frame_index,
             )
             coordinates = configuration.contiguous_configuration().coordinates[molecule]
@@ -293,5 +293,5 @@ class ReorientationalTimeCorrelationFunction(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

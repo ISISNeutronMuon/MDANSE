@@ -53,7 +53,6 @@ class RootMeanSquareFluctuation(IJob):
             "default": "each atom",
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             },
         },
     )
@@ -70,21 +69,26 @@ class RootMeanSquareFluctuation(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.group_molecules = (
+            self.configuration["grouping_level"]["value"] != "each atom"
+        )
 
         # Will store the indices.
-        if self.configuration["grouping_level"]["value"] == "each atom":
+        if not self.group_molecules:
             self._outputData.add(
                 "rmsf/axes/indices",
                 "LineOutputVariable",
-                self.configuration["atom_selection"]["flatten_indices"],
+                self.trajectory.atom_indices,
             )
+            self.numberOfSteps = len(self.trajectory.atom_indices)
         else:
             self._outputData.add(
                 "rmsf/axes/indices",
                 "LineOutputVariable",
-                list(range(len(self.configuration["atom_selection"]["names"]))),
+                list(range(len(self.trajectory.group_lookup))),
             )
+            self.numberOfSteps = len(self.trajectory.group_lookup)
+            self.cluster_lookup = list(self.trajectory.group_lookup.values())
 
         # Will store the mean square fluctuation evolution.
         self._outputData.add(
@@ -96,9 +100,7 @@ class RootMeanSquareFluctuation(IJob):
             main_result=True,
         )
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
         """
@@ -111,14 +113,24 @@ class RootMeanSquareFluctuation(IJob):
             #. rmsf (np.array): the calculated root mean square fluctuation for atom index
         """
         # read the particle trajectory
-        indices = self.configuration["atom_selection"]["indices"][index]
+        if not self.group_molecules:
+            atom_index = self.trajectory.atom_indices[index]
 
-        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
-            indices,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
-        )
+            series = self.trajectory.read_atomic_trajectory(
+                atom_index,
+                first=self.configuration["frames"]["first"],
+                last=self.configuration["frames"]["last"] + 1,
+                step=self.configuration["frames"]["step"],
+            )
+        else:
+            cluster_indices = self.cluster_lookup[index]
+
+            series = self.trajectory.read_com_trajectory(
+                cluster_indices,
+                first=self.configuration["frames"]["first"],
+                last=self.configuration["frames"]["last"] + 1,
+                step=self.configuration["frames"]["step"],
+            )
 
         rmsf = mean_square_fluctuation(series, root=True)
 
@@ -147,5 +159,5 @@ class RootMeanSquareFluctuation(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

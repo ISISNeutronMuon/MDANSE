@@ -100,7 +100,7 @@ class Voronoi(IJob):
         # Will store neighbourhood histogram for voronoi regions.
         self.neighbourhood_hist = {}
 
-        first_conf = self.configuration["trajectory"]["instance"].configuration()
+        first_conf = self.trajectory.configuration()
 
         try:
             cell = first_conf.unit_cell.direct
@@ -126,7 +126,7 @@ class Voronoi(IJob):
         # This is the actual index of the frame corresponding to the loop index.
         frameIndex = self.configuration["frames"]["value"][index]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
+        conf = self.trajectory.configuration(frameIndex)
         unit_cell = conf._unit_cell
 
         if self.configuration["pbc"]["value"]:
@@ -251,5 +251,5 @@ class Voronoi(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

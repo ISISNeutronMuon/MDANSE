@@ -51,7 +51,7 @@ class PartialChargeMapper:
         Parameters
         ----------
         selection_dict: dict[str, Union[bool, dict]]
-            The selection setting to get the indices to map the inputted
+            The selection setting to get the indices to map the input
             partial charge.
         charge: float
             The partial charge to map the selected atoms to.
@@ -151,7 +151,9 @@ class PartialChargeConfigurator(IConfigurator):
         idxs = system._atom_indices
 
         if any([int(i) not in idxs for i in value.keys()]):
-            self.error_status = "Inputted setting not valid - atom index not found in the current system."
+            self.error_status = (
+                "Input setting not valid - atom index not found in the current system."
+            )
             return
 
         for idx in idxs:

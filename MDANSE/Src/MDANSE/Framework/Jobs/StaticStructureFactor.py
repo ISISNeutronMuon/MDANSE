@@ -19,6 +19,10 @@ from collections.abc import Iterator
 import numpy as np
 import numpy.typing as npt
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    update_pair_results,
+)
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
@@ -66,7 +70,6 @@ class StaticStructureFactor(DistanceHistogram):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -79,8 +82,6 @@ class StaticStructureFactor(DistanceHistogram):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "grouping_level": "grouping_level",
             }
         },
     )
@@ -100,8 +101,9 @@ class StaticStructureFactor(DistanceHistogram):
 
     def initialize(self):
         frame_index = self.configuration["frames"]["value"][0]
+        trajectory = self.configuration.get("trajectory")["instance"]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
+        conf = trajectory.configuration(frame_index)
         try:
             cell_volume = conf.unit_cell.volume
         except Exception:
@@ -140,7 +142,7 @@ class StaticStructureFactor(DistanceHistogram):
             units="1/nm",
         )
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         for label, _ in self.labels:
             self._outputData.add(
@@ -262,21 +264,21 @@ class StaticStructureFactor(DistanceHistogram):
                     fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr,
                 )
 
-        self.configuration["grouping_level"].update_pair_results(
-            calc_func, self._outputData
-        )
+        update_pair_results(self.trajectory, calc_func, self._outputData)
 
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        selected_weights, all_weights = self.trajectory.get_weights(
+            prop=self.configuration["weights"]["property"]
+        )
         weight_dict = get_weights(
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
         )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = (n_selected / n_total) ** 2
 
         if self.intra:
@@ -295,7 +297,8 @@ class StaticStructureFactor(DistanceHistogram):
             self._outputData["ssf/total"].scaling_factor = fact
 
             for i in ("/intra", "/inter", ""):
-                self.configuration["grouping_level"].add_grouped_totals(
+                add_grouped_totals(
+                    self.trajectory,
                     self._outputData,
                     f"ssf{i}",
                     "LineOutputVariable",
@@ -320,5 +323,5 @@ class StaticStructureFactor(DistanceHistogram):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

@@ -1302,7 +1302,13 @@ def filter_description_string(
 
 
 def power_spectrum(
-    trajectory, frames, projection, atom_selection, weights, instrument_resolution
+    trajectory,
+    frames,
+    projection,
+    atom_selection,
+    atom_transmutation,
+    weights,
+    instrument_resolution,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Returns the position power spectrum and angular frequencies (rad/ps) of a configuration's constituent atomic trajectories.
 
@@ -1328,6 +1334,8 @@ def power_spectrum(
 
     """
     trajectory = trajectory["instance"]
+    trajectory.set_selection(atom_selection["flatten_indices"])
+    trajectory.set_transmutation(atom_transmutation.transmutation)
 
     output = OutputData()
     output.add(

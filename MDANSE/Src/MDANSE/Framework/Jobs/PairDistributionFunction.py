@@ -18,6 +18,10 @@ from collections.abc import Iterator
 import numpy as np
 import numpy.typing as npt
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    update_pair_results,
+)
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
@@ -121,7 +125,7 @@ class PairDistributionFunction(DistanceHistogram):
 
         shellVolumes = shellSurfaces * self.configuration["r_values"]["step"]
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         def calc_func(
             label_i: str, label_j: str
@@ -187,21 +191,21 @@ class PairDistributionFunction(DistanceHistogram):
                 if self.indices_intra is None:
                     break
 
-        self.configuration["grouping_level"].update_pair_results(
-            calc_func, self._outputData
-        )
+        update_pair_results(self.trajectory, calc_func, self._outputData)
 
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        selected_weights, all_weights = self.trajectory.get_weights(
+            prop=self.configuration["weights"]["property"]
+        )
         weight_dict = get_weights(
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
         )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         factor = (n_selected / n_total) ** 2
 
         if self.intra:
@@ -223,7 +227,8 @@ class PairDistributionFunction(DistanceHistogram):
                 )
                 for j in ("pdf", "rdf", "tcf"):
                     self._outputData[f"{j}{i}/total"].scaling_factor = factor
-                    self.configuration["grouping_level"].add_grouped_totals(
+                    add_grouped_totals(
+                        self.trajectory,
                         self._outputData,
                         f"{j}{i}",
                         "LineOutputVariable",
@@ -255,5 +260,5 @@ class PairDistributionFunction(DistanceHistogram):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

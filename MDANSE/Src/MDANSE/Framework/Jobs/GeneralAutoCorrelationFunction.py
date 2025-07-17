@@ -50,7 +50,6 @@ class GeneralAutoCorrelationFunction(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -64,6 +63,7 @@ class GeneralAutoCorrelationFunction(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "atom_transmutation": "atom_transmutation",
             }
         },
     )
@@ -76,11 +76,10 @@ class GeneralAutoCorrelationFunction(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.numberOfSteps = len(self.trajectory.atom_indices)
 
         self.labels = [
-            (element, (element,))
-            for element in self.configuration["atom_selection"].get_natoms()
+            (element, (element,)) for element in self.trajectory.get_natoms()
         ]
 
         # Will store the time.
@@ -92,7 +91,7 @@ class GeneralAutoCorrelationFunction(IJob):
         )
 
         # Will store the mean square displacement evolution.
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in self.trajectory.unique_names:
             self._outputData.add(
                 f"gacf/{element}",
                 "LineOutputVariable",
@@ -123,12 +122,12 @@ class GeneralAutoCorrelationFunction(IJob):
             #. atomicGACF (np.array): the calculated auto-correlation function for the index
         """
 
-        indices = self.configuration["atom_selection"]["indices"][index]
+        atom_index = self.trajectory.atom_indices[index]
 
         series = self.configuration["trajectory"][
             "instance"
         ].read_configuration_trajectory(
-            indices[0],
+            atom_index,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -147,7 +146,7 @@ class GeneralAutoCorrelationFunction(IJob):
             #. x (any): The returned result(s) of run_step
         """
 
-        element = self.configuration["atom_selection"]["names"][index]
+        element = self._atoms[self.trajectory.atom_indices[index]]
 
         self._outputData[f"gacf/{element}"] += x
 
@@ -156,13 +155,14 @@ class GeneralAutoCorrelationFunction(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        self.configuration["atom_selection"]["n_atoms_per_element"] = nAtomsPerElement
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         for element, number in nAtomsPerElement.items():
             self._outputData[f"gacf/{element}"] /= number
 
-        weights = self.configuration["weights"].get_weights()
+        weights = self.trajectory.get_weights(
+            prop=self.configuration["weights"]["property"]
+        )
         weight_dict = get_weights(weights, nAtomsPerElement, 1)
         assign_weights(self._outputData, weight_dict, "gacf/%s", self.labels)
         gacfTotal = weighted_sum(self._outputData, "gacf/%s", self.labels)
@@ -176,5 +176,5 @@ class GeneralAutoCorrelationFunction(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

@@ -17,6 +17,10 @@ import collections
 import itertools as it
 from math import sqrt
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -48,7 +52,6 @@ class StructureFactorFromScatteringFunction(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -61,8 +64,6 @@ class StructureFactorFromScatteringFunction(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "grouping_level": "grouping_level",
             }
         },
     )
@@ -86,7 +87,9 @@ class StructureFactorFromScatteringFunction(IJob):
             units="1/nm",
         )
         nq = len(inputFile["dcsf/axes/q"][:])
-        self.labels = self.configuration["grouping_level"].pair_labels()
+        self.labels = pair_labels(
+            self.trajectory,
+        )
 
         for pair_str, _ in self.labels:
             self._outputData.add(
@@ -133,9 +136,9 @@ class StructureFactorFromScatteringFunction(IJob):
         """Calculate the static structure factor from the intermediate
         scattering function.
         """
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = (n_selected / n_total) ** 2
         norm_natoms = 1.0 / n_total
 
@@ -162,7 +165,8 @@ class StructureFactorFromScatteringFunction(IJob):
 
         self._outputData["ssf/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ssf",
             "LineOutputVariable",
@@ -180,6 +184,6 @@ class StructureFactorFromScatteringFunction(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         self.configuration["dcsf_input_file"]["instance"].close()
         super().finalize()
