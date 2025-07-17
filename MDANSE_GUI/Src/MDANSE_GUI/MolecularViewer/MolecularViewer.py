@@ -149,8 +149,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._atoms_visible = True
         self._bonds_visible = True
-        self._axes_visible = True
         self._cell_visible = True
+        self.current_axes_type = "cartesian"
 
         self._iren.Initialize()
 
@@ -212,12 +212,22 @@ class MolecularViewer(QtWidgets.QWidget):
         """
         self._atoms_visible = flags[0]
         self._bonds_visible = flags[1]
-        self._axes_visible = flags[2]
-        self._cell_visible = flags[3]
-        self.axes_widget.SetEnabled(self._axes_visible)
+        self._cell_visible = flags[2]
         result = self.set_coordinates(self._current_frame)
         if result is False:
             self.update_renderer()
+
+    def _change_axes(self, axes_option: str):
+        """Changes the axes type in the 3D viewer.
+
+        Parameters
+        ----------
+        axes_option : str
+            The axes type that will be used.
+        """
+        self.current_axes_type = axes_option
+        self.update_axes()
+        self.update_renderer()
 
     def trace_from_dialog(self, params: dict[str, Any]):
         """Passes the input parameter dictionary to the method
@@ -501,9 +511,10 @@ class MolecularViewer(QtWidgets.QWidget):
         self._polydata = vtk.vtkPolyData()
         self._uc_polydata = vtk.vtkPolyData()
 
-    def update_all_polydata(self):
+    def update_all_polydata_and_axes(self):
         self.update_polydata()
         self.update_uc_polydata()
+        self.update_axes()
 
     def update_polydata(self):
         """Triggers an update of the VTK actors, making them use the
@@ -635,6 +646,52 @@ class MolecularViewer(QtWidgets.QWidget):
                 line.GetPointIds().SetId(1, j)
                 uc_lines.InsertNextCell(line)
             self._uc_polydata.SetLines(uc_lines)
+
+    def update_axes(self):
+        """Updates the axes depending on the axes type used."""
+        if self.current_axes_type == "none":
+            self.axes_widget.SetEnabled(False)
+            return
+
+        self.axes_widget.SetEnabled(True)
+        identity = vtk.vtkTransform()
+        identity.Identity()
+        self.axes_actor.SetUserTransform(identity)
+        self.axes_actor.SetXAxisLabelText("X")
+        self.axes_actor.SetYAxisLabelText("Y")
+        self.axes_actor.SetZAxisLabelText("Z")
+
+        if self.current_axes_type == "direct":
+            self.axes_actor.SetXAxisLabelText("a")
+            self.axes_actor.SetYAxisLabelText("b")
+            self.axes_actor.SetZAxisLabelText("c")
+        elif self.current_axes_type == "reciprocal":
+            self.axes_actor.SetXAxisLabelText("a*")
+            self.axes_actor.SetYAxisLabelText("b*")
+            self.axes_actor.SetZAxisLabelText("c*")
+        elif self.current_axes_type == "cartesian":
+            return
+
+        if self._reader is None:
+            return
+        uc = self._reader.read_pbc(self._current_frame)
+        if uc is None:
+            return
+
+        if self.current_axes_type == "direct":
+            matrix = uc.direct.copy().T
+        elif self.current_axes_type == "reciprocal":
+            matrix = uc.inverse.copy()
+
+        matrix /= np.linalg.norm(matrix, axis=0)
+        vtk_matrix = vtk.vtkMatrix4x4()
+        for i in range(3):
+            for j in range(3):
+                vtk_matrix.SetElement(i, j, matrix[i, j])
+        vtk_matrix.SetElement(3, 3, 1.0)
+        transform = vtk.vtkTransform()
+        transform.SetMatrix(vtk_matrix)
+        self.axes_actor.SetUserTransform(transform)
 
     def get_atom_index(self, pid):
         """Return the atom index from the vtk data point index.
@@ -773,8 +830,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._current_frame = frame % self._reader.n_frames
 
-        # update the atoms
-        self.update_all_polydata()
+        # update the atoms, unit cell and axes
+        self.update_all_polydata_and_axes()
 
         # Update the view.
         self.update_renderer()
@@ -857,7 +914,7 @@ class MolecularViewer(QtWidgets.QWidget):
         scalars = ndarray_to_vtkarray(colours, radii, numbers)
         self._polydata = vtk.vtkPolyData()
         self._polydata.GetPointData().SetScalars(scalars)
-        self.update_all_polydata()
+        self.update_all_polydata_and_axes()
         self.update_renderer()
 
     def update_renderer(self):
@@ -1034,8 +1091,8 @@ class MolecularViewerWithPicking(MolecularViewer):
         super().reset_all_polydata()
         self._picked_polydata = vtk.vtkPolyData()
 
-    def update_all_polydata(self):
-        super().update_all_polydata()
+    def update_all_polydata_and_axes(self):
+        super().update_all_polydata_and_axes()
         self.update_picked_polydata()
 
     def create_all_actors(self):
