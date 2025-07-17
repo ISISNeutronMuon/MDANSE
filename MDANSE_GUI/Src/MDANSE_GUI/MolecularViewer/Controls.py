@@ -179,9 +179,7 @@ class ViewerControls(QWidget):
     def createSidePanel(self):
         """Adds widgets for finer control of the playback"""
         absolute_base = QTabWidget(self)
-        absolute_base.setSizePolicy(
-            QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
-        )
+        absolute_base.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self._side_base = absolute_base
         base = QWidget(self)
         layout = QVBoxLayout(base)

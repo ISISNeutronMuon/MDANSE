@@ -275,7 +275,7 @@ parameters = {{
 ########################################################
 
 if __name__ == "__main__":
-    {cls.__name__.lower()} = IJob.create({cls.__name__!r}
+    {cls.__name__.lower()} = IJob.create({cls.__name__!r})
     {cls.__name__.lower()}.run(parameters, status=True)
 """)
 

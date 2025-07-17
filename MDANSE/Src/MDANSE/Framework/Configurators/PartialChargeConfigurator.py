@@ -16,6 +16,8 @@
 import json
 from typing import Union
 
+import numpy as np
+
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
@@ -34,12 +36,12 @@ class PartialChargeMapper:
             The chemical system object.
         """
         system = trajectory.chemical_system
-        charges = trajectory.charges(0)
+        self._traj_charges = trajectory.charges(0)[:]
         self._current_trajectory = trajectory
         self._original_map = {}
         for at_num, at in enumerate(system.atom_list):
             try:
-                self._original_map[at_num] = charges[at_num]
+                self._original_map[at_num] = self._traj_charges[at_num]
             except Exception:
                 self._original_map[at_num] = 0.0
         self._new_map = {}
@@ -92,6 +94,28 @@ class PartialChargeMapper:
                 minimal_map[k] = self._new_map[k]
         return minimal_map
 
+    def get_grouped_setting(self) -> dict[tuple[int], float]:
+        """Return a dict of groups of indices with the same charge.
+
+        Returns
+        -------
+        dict[tuple[int], float]
+            The minimal partial charge setting.
+        """
+        groups = {}
+        new_charges = self._traj_charges.copy()
+        for k, v in self._new_map.items():
+            new_charges[k] = v
+        valid_indices = np.where(
+            np.logical_not(np.isclose(new_charges - self._traj_charges, 0.0))
+        )
+        unique_charges = np.unique(new_charges[valid_indices])
+        for charge in unique_charges:
+            charge_indices = set(np.where(np.isclose(new_charges, charge))[0])
+            key = charge_indices.intersection(valid_indices[0])
+            groups[charge] = [int(x) for x in key]
+        return groups
+
     def get_json_setting(self) -> str:
         """
         Returns
@@ -99,7 +123,7 @@ class PartialChargeMapper:
         str
             A json string of the minimal partial charge setting.
         """
-        return json.dumps(self.get_setting())
+        return json.dumps(self.get_grouped_setting())
 
     def reset_setting(self) -> None:
         """Resets the partial charge setting."""
@@ -137,30 +161,45 @@ class PartialChargeConfigurator(IConfigurator):
             self.error_status = "Unable to load JSON string."
             return
 
-        for k in value.keys():
+        processed_values = {}
+        for k, v in value.items():
+            if isinstance(v, list):
+                try:
+                    charge = float(k)
+                except (TypeError, ValueError):
+                    self.error_status = f"Wrong charge {k} in the charge dictionary"
+                    return
+                else:
+                    for index in v:
+                        processed_values[index] = charge
+                continue
             try:
-                int(k)
-            except ValueError:
+                index = int(k)
+                charge = float(v)
+            except (TypeError, ValueError):
                 self.error_status = (
-                    "Setting not valid - keys should be castable to an int."
+                    f"Index/charge pair {k}/{v} is not a valid int/float pair."
                 )
                 return
+            else:
+                processed_values[index] = charge
 
         traj_config = self.configurable[self.dependencies["trajectory"]]
         system = traj_config["instance"].chemical_system
-        idxs = system._atom_indices
+        traj_indices = system._atom_indices
+        charge_indices = set(processed_values.keys())
 
-        if any([int(i) not in idxs for i in value.keys()]):
-            self.error_status = (
-                "Input setting not valid - atom index not found in the current system."
+        for index in charge_indices.intersection(traj_indices):
+            self["charges"][index] = processed_values[index]
+
+        if not charge_indices.issubset(traj_indices):
+            self.warning_status = (
+                "At least one atom index not found in the current system."
             )
             return
 
-        for idx in idxs:
-            if str(idx) in value:
-                self["charges"][idx] = value[str(idx)]
-
         self.error_status = "OK"
+        self.warning_status = ""
 
     def get_charge_mapper(self) -> PartialChargeMapper:
         """
