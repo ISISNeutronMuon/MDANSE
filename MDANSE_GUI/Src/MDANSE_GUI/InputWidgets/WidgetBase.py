@@ -15,10 +15,12 @@
 #
 from __future__ import annotations
 
+import copy
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Literal, Optional
 
-from qtpy.QtCore import QObject, Signal, Slot
+import numpy as np
+from qtpy.QtCore import QObject, QThread, Signal, Slot
 from qtpy.QtWidgets import (
     QGridLayout,
     QGroupBox,
@@ -42,6 +44,46 @@ WARNING_STYLE = (
 ERROR_STYLE = (
     "QWidget#InputWidget { background-color:rgb(180,20,180); font-weight: bold }"
 )
+CONFIGURING_STYLE = (
+    "QWidget#InputWidget { background-color:rgb(80,80,80); font-weight: bold }"
+)
+UNKNOWN_STYLE = (
+    "QWidget#InputWidget { background-color:rgb(220,10,10); font-weight: bold }"
+)
+STYLES = [ERROR_STYLE, WARNING_STYLE, CONFIGURING_STYLE, UNKNOWN_STYLE]
+
+
+class ConfigureThread(QThread):
+    results = Signal(tuple[int, str])
+
+    def __init__(
+        self,
+        parent,
+        configurator: IConfigurator,
+        value: str,
+    ):
+        super().__init__(parent)
+        self._config = configurator
+        self._value = value
+
+    def run(self):
+        if self._value is None or not self._value:
+            self._value = self._config.default
+        try:
+            self._config.configure(self._value)
+        except Exception:
+            code = 0
+            msg = "COULD NOT SET THIS VALUE - you may need to change the values in other widgets"
+        if not self._config.valid:
+            code = 0
+            msg = self._configurator.error_status
+        elif self._config.warning_status:
+            code = 1
+            msg = self._configurator.warning_status
+        else:
+            code = -1
+            msg = ""
+        self.results.emit((code, msg))
 
 
 class WidgetBase(QObject):
@@ -117,7 +159,16 @@ class WidgetBase(QObject):
         self._configurator = configurator
         self._parent_dialog = parent
         self._empty = False
-        self.has_warning = False
+        self.flags = np.array([0, 0, 1, 0])  # Error, Warning, Configuring, Other
+        self.messages = ["", "", "Still setting up", "Unknown problem"]
+        self.background_thread = None
+        self.latest_value = None
+
+    @property
+    def has_warning(self) -> bool:
+        if self.flags[1]:
+            return True
+        return False
 
     def update_labels(self):
         """Update contained labels (dependent on base_type)."""
@@ -175,10 +226,11 @@ class WidgetBase(QObject):
             If True, update the widget's error without sending signals
 
         """
-        self._base.setStyleSheet(ERROR_STYLE)
-        self._base.setToolTip(error_text)
+        self.flags[0] = 1
+        self.messages[0] = error_text
         if not silent:
             self.valid_changed.emit()
+        self.update_style()
 
     def mark_warning(self, warning_text: str):
         """If the input caused a warning, display warning_text and highlight the widget.
@@ -191,38 +243,61 @@ class WidgetBase(QObject):
             Message displayed on hover-over.
         """
         if warning_text:
-            self.has_warning = True
-            self._base.setStyleSheet(WARNING_STYLE)
-            self._base.setToolTip(warning_text)
+            self.flags[1] = 1
+            self.messages[1] = warning_text
             self.valid_changed.emit()
             return
-        self.has_warning = False
+        self.flags[1] = 0
         self.clear_error()
 
     def clear_error(self):
         """Remove error highlighting."""
-        self._base.setStyleSheet("")
-        self._base.setToolTip("")
+        self.flags[0] = 0
         self.valid_changed.emit()
+        self.update_style()
+
+    def update_style(self):
+        for index, value in enumerate(self.flags):
+            if value:
+                self._base.setStyleSheet(STYLES[index])
+                self._base.setToolTip(self.messages[index])
+                return
 
     @abstractmethod
     @Slot()
     def updateValue(self):
+        self.flags[2] = 1
+        self.update_style()
         current_value = self.get_widget_value()
-        if self._empty:
-            self.configure_using_default()
-        try:
-            self._configurator.configure(current_value)
-        except Exception:
-            self.mark_error(
-                "COULD NOT SET THIS VALUE - you may need to change the values in other widgets"
-            )
-        self.value_changed.emit()
-        if not self._configurator.valid:
-            self.mark_error(self._configurator.error_status)
-        else:
-            self.mark_warning(self._configurator.warning_status)
-            self.value_updated.emit()
+        self.configure_in_a_thread(current_value)
+
+    def configure_in_a_thread(self, current_value):
+        if self.background_thread is not None:
+            self.latest_value = current_value
+            return
+        self.background_thread = ConfigureThread(
+            None, self._configurator, current_value
+        )
+        self.background_thread.results.connect(self.finalise_configuration)
+        self.background_thread.start()
+
+    @Slot(tuple[int, str])
+    def finalise_configuration(self, results: tuple[int, str]):
+        code, msg = results
+        self.flags[:] = 0
+        self.background_thread = None
+        if self.latest_value is not None:
+            self.flags[2] = 1
+            current_value = copy.deepcopy(self.latest_value)
+            self.latest_value = None
+            self.configure_in_a_thread(current_value)
+            return
+        if code < 0:
+            self.update_style()
+            return
+        self.flags[code] = 1
+        self.messages[code] = msg
+        self.update_style()
 
     @abstractmethod
     def get_value(self):

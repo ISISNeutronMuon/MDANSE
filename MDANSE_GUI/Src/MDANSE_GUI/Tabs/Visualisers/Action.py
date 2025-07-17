@@ -466,10 +466,9 @@ class Action(QWidget):
             allow = True
             has_warning = False
             for widget in self._widgets:
-                if not widget._configurator.valid:
+                if widget.flags.sum():
                     allow = False
-                    widget.mark_error(widget._configurator.error_status, silent=True)
-                has_warning = has_warning or widget.has_warning
+                has_warning = has_warning or widget.flags[1]
         else:
             allow = False
             has_warning = False
