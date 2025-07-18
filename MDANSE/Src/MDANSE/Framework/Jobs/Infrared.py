@@ -65,7 +65,7 @@ class Infrared(IJob):
         "MoleculeSelectionConfigurator",
         {
             "label": "molecule name",
-            "default": "",
+            "default": "bulk",
             "dependencies": {"trajectory": "trajectory"},
         },
     )
@@ -86,11 +86,31 @@ class Infrared(IJob):
             "instance"
         ].chemical_system
 
-        self.molecules = self.chemical_system._clusters[
-            self.configuration["molecule_name"]["value"]
-        ]
+        self.bulk_mode = False
 
-        self.numberOfSteps = len(self.molecules)
+        if self.configuration["molecule_name"]["value"] == "bulk":
+            self.bulk_mode = True
+            self.molecules = [self.chemical_system._atom_indices]
+            self.numberOfSteps = len(self.chemical_system.atom_list)
+            self.ddipole = np.zeros(
+                (self.configuration["frames"]["number"], 3), dtype=np.float64
+            )
+            self.charges = np.array(
+                [
+                    self.configuration["trajectory"]["instance"].charges(frame_index)
+                    for frame_index in range(
+                        self.configuration["frames"]["first"],
+                        self.configuration["frames"]["last"] + 1,
+                        self.configuration["frames"]["step"],
+                    )
+                ]
+            )
+        else:
+            self.molecules = self.chemical_system._clusters[
+                self.configuration["molecule_name"]["value"]
+            ]
+            self.numberOfSteps = len(self.molecules)
+
         instrResolution = self.configuration["instrument_resolution"]
 
         self.add_ideal_results = (
@@ -166,6 +186,8 @@ class Infrared(IJob):
             The index of the step and the calculated d/dt dipole
             auto-correlation function for a molecule.
         """
+        if self.bulk_mode:
+            return self.run_bulk(index)
         molecule = self.molecules[index]
         ddipole = np.zeros(
             (self.configuration["frames"]["number"], 3), dtype=np.float64
@@ -213,6 +235,30 @@ class Infrared(IJob):
         )
         return index, mol_ddacf.T[0]
 
+    def run_bulk(self, index: int) -> tuple[int, np.ndarray]:
+        """Runs a single step of the job.
+
+        Parameters
+        ----------
+        index : int
+            The index of the atom.
+
+        Returns
+        -------
+        tuple[int, np.ndarray]
+            The index of the step and the calculated d/dt dipole
+            auto-correlation function for a molecule.
+        """
+
+        series = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+            index,
+            self.configuration["frames"]["first"],
+            self.configuration["frames"]["last"] + 1,
+            self.configuration["frames"]["step"],
+        )
+
+        return index, series * self.charges[:, index]
+
     def combine(self, index: int, x: np.ndarray):
         """Add the d/dt dipole auto-correlation function of molecule
         to the results.
@@ -224,14 +270,32 @@ class Infrared(IJob):
         x : np.ndarray
             d/dt dipole auto-correlation function for a molecule
         """
-        self._outputData["ddacf/ddacf"] += x
+        if not self.bulk_mode:
+            self._outputData["ddacf/ddacf"] += x
+            return
+        self.ddipole += x
 
     def finalize(self):
         """Average the d/dt dipole auto-correlation function over the
         number of molecules in the trajectory, fourier transform to
         get the IR spectrum and save the results.
         """
-        self._outputData["ddacf/ddacf"] /= self.numberOfSteps
+
+        if self.bulk_mode:
+            for axis in range(3):
+                self.ddipole[:, axis] = differentiate(
+                    self.ddipole[:, axis],
+                    order=self.configuration["derivative_order"]["value"],
+                    dt=self.configuration["frames"]["time_step"],
+                )
+            n_configs = self.configuration["frames"]["n_configs"]
+            mol_ddacf = correlate(
+                self.ddipole, self.ddipole[:n_configs], mode="valid"
+            ) / (3 * n_configs)
+            self._outputData["ddacf/ddacf"] = mol_ddacf / self.numberOfSteps
+        else:
+            self._outputData["ddacf/ddacf"] /= self.numberOfSteps
+
         self._outputData["ir/ir"][:] = get_spectrum(
             self._outputData["ddacf/ddacf"],
             self.configuration["instrument_resolution"]["time_window"],
