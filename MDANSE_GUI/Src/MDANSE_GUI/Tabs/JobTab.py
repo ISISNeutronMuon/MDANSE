@@ -21,7 +21,6 @@ from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QComboBox, QLabel, QWidget
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.InputWidgets.MoleculeWidget import MoleculeWidget
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel

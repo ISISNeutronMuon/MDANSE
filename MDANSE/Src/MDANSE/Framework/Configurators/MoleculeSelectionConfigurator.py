@@ -42,8 +42,11 @@ class MoleculeSelectionConfigurator(IConfigurator):
         """
 
         IConfigurator.__init__(self, name, **kwargs)
-
-        self.choices = []
+        self.init_choices = []
+        if choices is not None:
+            self.init_choices = [x for x in choices]
+        if kwargs.get("include_bulk", False):
+            self.init_choices += ["bulk"]
 
     def configure(self, value) -> None:
         """
@@ -64,8 +67,8 @@ class MoleculeSelectionConfigurator(IConfigurator):
         if not trajectory_configurator.valid:
             self.error_status = "Input file not selected."
             return
-
-        self.choices = trajectory_configurator[
+        self.choices = [x for x in self.init_choices]
+        self.choices += trajectory_configurator[
             "instance"
         ].chemical_system.unique_molecules()
 

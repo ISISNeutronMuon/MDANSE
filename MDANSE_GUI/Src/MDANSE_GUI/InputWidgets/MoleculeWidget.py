@@ -46,6 +46,8 @@ class MoleculeWidget(WidgetBase):
         else:
             option_list = configurator.choices
             default_option = configurator.default
+        if configurator is not None:
+            option_list += configurator.init_choices
         traj_config = self._configurator.configurable[
             self._configurator.dependencies["trajectory"]
         ]
@@ -175,6 +177,6 @@ class MoleculeWidget(WidgetBase):
     def get_widget_value(self) -> str | None:
         """Return the currently selected molecule name."""
         mol_key = self._field.currentText()
-        if mol_key in self.mol_dict:
+        if mol_key in self.mol_dict or mol_key == "bulk":
             return mol_key
         return None

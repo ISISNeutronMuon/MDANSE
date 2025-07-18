@@ -66,6 +66,7 @@ class Infrared(IJob):
         {
             "label": "molecule name",
             "default": "bulk",
+            "include_bulk": True,
             "dependencies": {"trajectory": "trajectory"},
         },
     )
@@ -257,7 +258,7 @@ class Infrared(IJob):
             self.configuration["frames"]["step"],
         )
 
-        return index, series * self.charges[:, index]
+        return index, series * self.charges[:, index].reshape((len(series), 1))
 
     def combine(self, index: int, x: np.ndarray):
         """Add the d/dt dipole auto-correlation function of molecule
@@ -292,7 +293,7 @@ class Infrared(IJob):
             mol_ddacf = correlate(
                 self.ddipole, self.ddipole[:n_configs], mode="valid"
             ) / (3 * n_configs)
-            self._outputData["ddacf/ddacf"] = mol_ddacf / self.numberOfSteps
+            self._outputData["ddacf/ddacf"][:] = mol_ddacf.T[0] / self.numberOfSteps
         else:
             self._outputData["ddacf/ddacf"] /= self.numberOfSteps
 
