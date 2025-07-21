@@ -16,7 +16,7 @@
 from functools import partial
 
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QWidget
+from qtpy.QtWidgets import QDialog, QWidget
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.LocalSession import LocalSession
@@ -26,6 +26,7 @@ from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 from MDANSE_GUI.Tabs.Views.PlotDetailsView import PlotDetailsView
 from MDANSE_GUI.Tabs.Visualisers.PlotHolder import PlotHolder
 from MDANSE_GUI.Tabs.Visualisers.PlotSettings import PlotSettings
+from MDANSE_GUI.Widgets.PlotSettingsDialog import PlotSettingsEditor
 
 label_text = """<b>View and customise the existing plots.</b>
 <br><br>
@@ -49,6 +50,21 @@ class PlotTab(GeneralTab):
             self.model.regenerate_colours
         )
         self._core._extra_visualiser.make_layout()
+        self.matplotlib_dialog = PlotSettingsEditor(settings=self._settings)
+        self._core.add_button("Change matplotlib settings", self.edit_matplotlib)
+
+    def launch_dialog(self, dialog: QDialog) -> None:
+        if dialog.isVisible():
+            geometry = dialog.saveGeometry()
+            dialog.previous_geometry = geometry
+            dialog.close()
+        else:
+            if hasattr(dialog, "previous_geometry"):
+                dialog.restoreGeometry(dialog.previous_geometry)
+            dialog.show()
+
+    def edit_matplotlib(self):
+        self.launch_dialog(self.matplotlib_dialog)
 
     @classmethod
     def standard_instance(cls):
