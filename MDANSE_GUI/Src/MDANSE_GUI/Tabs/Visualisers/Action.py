@@ -17,6 +17,7 @@ import os
 import traceback
 from pathlib import Path
 
+
 import numpy as np
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
@@ -31,101 +32,15 @@ from qtpy.QtWidgets import (
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.InputWidgets import (
-    AseInputFileWidget,
-    AtomMappingWidget,
-    AtomSelectionWidget,
-    AtomTransmutationWidget,
-    BackupWidget,
-    BooleanWidget,
-    ComboWidget,
-    CorrelationFramesWidget,
-    DerivativeOrderWidget,
-    DistHistCutoffWidget,
-    FloatWidget,
-    FramesWidget,
-    HDFTrajectoryWidget,
-    InputDirectoryWidget,
-    InputFileWidget,
-    InstrumentResolutionWidget,
-    IntegerWidget,
-    InterpolationOrderWidget,
-    MDAnalysisCoordinateFileWidget,
-    MDAnalysisMDTrajTimeStepWidget,
-    MDAnalysisTopologyFileWidget,
-    MDTrajTopologyFileWidget,
-    MoleculeAndAxisWidget,
-    MoleculeWidget,
-    MultiInputFileWidget,
-    MultipleCombosWidget,
-    OptionalFloatWidget,
-    OutputDirectoryWidget,
-    OutputFilesWidget,
-    OutputStructureWidget,
-    OutputTrajectoryWidget,
-    PartialChargeWidget,
-    ProjectionWidget,
-    QVectorsWidget,
-    RangeWidget,
-    RunningModeWidget,
-    StringWidget,
-    TrajectoryFilterWidget,
-    UnitCellWidget,
-    VectorWidget,
-)
+from MDANSE_GUI.InputWidgets import WIDGET_LOOKUP as widget_lookup
+from MDANSE_GUI.InputWidgets import (BackupWidget, InstrumentResolutionWidget,
+                                     OutputFilesWidget, OutputTrajectoryWidget,
+                                     QVectorsWidget)
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 from MDANSE_GUI.Widgets.DelayedButton import DelayedButton
-
-widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
-    "FloatConfigurator": FloatWidget,
-    "OptionalFloatConfigurator": OptionalFloatWidget,
-    "BooleanConfigurator": BooleanWidget,
-    "IntegerConfigurator": IntegerWidget,
-    "CorrelationFramesConfigurator": CorrelationFramesWidget,
-    "FramesConfigurator": FramesWidget,
-    "RangeConfigurator": RangeWidget,
-    "DistHistCutoffConfigurator": DistHistCutoffWidget,
-    "VectorConfigurator": VectorWidget,
-    "HDFInputFileConfigurator": InputFileWidget,
-    "HDFTrajectoryConfigurator": HDFTrajectoryWidget,
-    "DerivativeOrderConfigurator": DerivativeOrderWidget,
-    "InterpolationOrderConfigurator": InterpolationOrderWidget,
-    "OutputFilesConfigurator": OutputFilesWidget,
-    "ASEFileConfigurator": InputFileWidget,
-    "AseInputFileConfigurator": AseInputFileWidget,
-    "ConfigFileConfigurator": InputFileWidget,
-    "MDAnalysisCoordinateFileConfigurator": MDAnalysisCoordinateFileWidget,
-    "InputFileConfigurator": InputFileWidget,
-    "MDAnalysisTopologyFileConfigurator": MDAnalysisTopologyFileWidget,
-    "MDFileConfigurator": InputFileWidget,
-    "FieldFileConfigurator": InputFileWidget,
-    "XDATCARFileConfigurator": InputFileWidget,
-    "XTDFileConfigurator": InputFileWidget,
-    "XYZFileConfigurator": InputFileWidget,
-    "OptionalXYZFileConfigurator": InputFileWidget,
-    "RunningModeConfigurator": RunningModeWidget,
-    "WeightsConfigurator": ComboWidget,
-    "MultipleChoicesConfigurator": MultipleCombosWidget,
-    "MoleculeSelectionConfigurator": MoleculeWidget,
-    "AxisSelectionConfigurator": MoleculeAndAxisWidget,
-    "GroupingLevelConfigurator": ComboWidget,
-    "SingleChoiceConfigurator": ComboWidget,
-    "QVectorsConfigurator": QVectorsWidget,
-    "OutputStructureConfigurator": OutputStructureWidget,
-    "OutputTrajectoryConfigurator": OutputTrajectoryWidget,
-    "ProjectionConfigurator": ProjectionWidget,
-    "AtomSelectionConfigurator": AtomSelectionWidget,
-    "AtomMappingConfigurator": AtomMappingWidget,
-    "AtomTransmutationConfigurator": AtomTransmutationWidget,
-    "InstrumentResolutionConfigurator": InstrumentResolutionWidget,
-    "PartialChargeConfigurator": PartialChargeWidget,
-    "TrajectoryFilterConfigurator": TrajectoryFilterWidget,
-    "UnitCellConfigurator": UnitCellWidget,
-    "MDAnalysisTimeStepConfigurator": MDAnalysisMDTrajTimeStepWidget,
-    "MDTrajTimeStepConfigurator": MDAnalysisMDTrajTimeStepWidget,
-    "MDTrajTrajectoryFileConfigurator": MultiInputFileWidget,
-    "MDTrajTopologyFileConfigurator": MDTrajTopologyFileWidget,
-}
+from qtpy.QtCore import Signal, Slot
+from qtpy.QtWidgets import (QCheckBox, QFileDialog, QHBoxLayout, QPushButton,
+                            QTextEdit, QVBoxLayout, QWidget)
 
 
 class Action(QWidget):
@@ -234,35 +149,39 @@ class Action(QWidget):
             job_instance = self._job_instance
             settings = self._job_instance.settings
         LOG.info(f"Configuration {job_instance.configuration}")
-        if "trajectory" in settings.keys():
+
+        if "trajectory" in settings:
             if self._input_trajectory is None:
                 return
-            key, value = "trajectory", settings["trajectory"]
-            dtype = value[0]
-            ddict = value[1]
+            key, (dtype, ddict) = "trajectory", settings["trajectory"]
+
             configurator = job_instance.configuration[key]
-            if key not in self._widgets_in_layout:
-                ddict.setdefault("label", key)
-                ddict["configurator"] = configurator
-                ddict["source_object"] = self._input_trajectory
-                widget_class = widget_lookup[dtype]
-                input_widget = widget_class(parent=self, **ddict)
-                widget = input_widget._base
-                self.layout.addWidget(widget, stretch=input_widget._relative_size)
-                self._widgets_in_layout[key] = widget
-                self._widgets.append(input_widget)
-                self._trajectory_configurator = input_widget._configurator
+
+            ddict.setdefault("label", key)
+            ddict["configurator"] = configurator
+            ddict["source_object"] = self._input_trajectory
+
+            widget_class = widget_lookup[dtype]
+
+            input_widget = widget_class(parent=self, **ddict)
+            widget = input_widget._base
+
+            self.layout.addWidget(widget, stretch=input_widget._relative_size)
+            self._widgets_in_layout.append(widget)
+            self._widgets.append(input_widget)
+            self._trajectory_configurator = input_widget._configurator
             LOG.info("Set up input trajectory")
-        for key, value in settings.items():
-            if key in self._widgets_in_layout:
+
+        for key, (dtype, ddict) in settings.items():
+            if key == "trajectory":
                 continue
-            dtype = value[0]
-            ddict = value[1]
             configurator = job_instance.configuration[key]
+
             ddict.setdefault("label", key)
             ddict["configurator"] = configurator
             ddict["source_object"] = self._input_trajectory
             ddict["trajectory_configurator"] = self._trajectory_configurator
+
             if dtype not in widget_lookup:
                 ddict["tooltip"] = (
                     "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
@@ -273,6 +192,7 @@ class Action(QWidget):
                 self._widgets_in_layout[key] = widget
                 self._widgets.append(placeholder)
                 LOG.warning(f"Could not find the right widget for {key}")
+
             else:
                 widget_class = widget_lookup[dtype]
                 # expected = {key: ddict[key] for key in widget_class.__init__.__code__.co_varnames}
@@ -288,6 +208,7 @@ class Action(QWidget):
                 if self._use_preview and has_preview:
                     input_widget.value_updated.connect(self.show_output_prediction)
                 LOG.info(f"Set up the right widget for {key}")
+
             # self.handlers[key] = data_handler
             self._has_been_initialised = True
             self.check_inputs()

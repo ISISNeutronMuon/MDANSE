@@ -232,8 +232,14 @@ class WidgetBase(QObject):
     @property
     def default_path(self) -> str:
         """Default path of parent dialog."""
-        return self._parent_dialog.default_path
+        if self._parent_dialog is not None:
+            return self._parent_dialog.default_path
+        else:
+            return self._default_path
 
     @default_path.setter
     def default_path(self, value: str) -> None:
-        self._parent_dialog.default_path = value
+        if self._parent_dialog is not None:
+            self._parent_dialog.default_path = value
+        else:
+            self._default_path = value

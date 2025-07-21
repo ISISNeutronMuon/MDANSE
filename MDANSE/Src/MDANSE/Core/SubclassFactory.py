@@ -14,8 +14,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import difflib
 from typing import TypeVar
+import difflib
+
 
 Self = TypeVar("Self", bound="SubclassFactory")
 # The Self TypeVar is a typing hint indicating that
