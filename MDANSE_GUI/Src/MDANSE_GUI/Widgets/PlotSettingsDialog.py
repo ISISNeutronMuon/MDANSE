@@ -16,9 +16,9 @@
 import traceback
 from typing import Any
 
-from matplotlib import rcParams
-from qtpy.QtCore import QObject, Signal, Slot
-from qtpy.QtGui import QStandardItem, QStandardItemModel
+from matplotlib import rc, rc_file, rcdefaults, rcParams, rcParamsDefault
+from qtpy.QtCore import QObject, Qt, Signal, Slot
+from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
     QApplication,
     QDialog,
@@ -27,7 +27,10 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
 )
 
+from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
+
+ERROR_COLOR = QColor(255, 0, 0)
 
 
 def parse_string(param_str: str) -> Any:
@@ -56,36 +59,50 @@ EXPOSE_KEYS = [
     "font.size",
 ]
 
+BAD_KEYS = [
+    "axes.prop_cycle",
+    "lines.dash_capstyle",
+    "lines.dash_joinstyle",
+    "lines.marker",
+    "lines.solid_capstyle",
+    "lines.solid_joinstyle",
+]
+
 
 class PlotSettingsModel(QStandardItemModel):
-    def __init__(self, *args, par_dict: dict[str, str] | None = None, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.par_dict = rcParams
-        if par_dict is not None:
-            for key, value in par_dict.items():
-                self.par_dict[key] = value
         self.populate_model(self.par_dict)
         self.dataChanged.connect(self.update_values)
-        self.setHorizontalHeaderLabels(["Parameters", "Values"])
+        self.setHorizontalHeaderLabels(["Parameters", "Values", "Default"])
 
     def populate_model(self, par_dict: dict[str, str]):
         for key, value in par_dict.items():
-            if key not in EXPOSE_KEYS:
+            if key in BAD_KEYS:
                 continue
             left_item = QStandardItem(str(key))
             right_item = QStandardItem(str(value))
-            left_item.setEditable(False)
-            self.appendRow([left_item, right_item])
+            def_item = QStandardItem(str(rcParamsDefault[key]))
+            for item in (left_item, def_item):
+                item.setEditable(False)
+            self.appendRow([left_item, right_item, def_item])
+
+    def reset_model(self):
+        for row in range(self.rowCount()):
+            key = self.item(row, 0).text()
+            self.item(row, 1).setText(str(self.par_dict[key]))
 
     @Slot()
     def update_values(self):
         bad_keys = []
+        bad_indices = []
         for row in range(self.rowCount()):
             key = self.item(row, 0).text()
             value = self.item(row, 1).text()
             try:
                 self.par_dict[key] = parse_string(value)
-            except ValueError as err:
+            except ValueError:
                 LOG.error(
                     "Could not set %s to the value %s. Traceback: %s",
                     key,
@@ -93,9 +110,21 @@ class PlotSettingsModel(QStandardItemModel):
                     traceback.format_exc(),
                 )
                 bad_keys.append(key)
+                bad_indices.append(row)
+        self.blockSignals(True)
+        for row in range(self.rowCount()):
+            if row in bad_indices:
+                self.item(row, 1).setData(
+                    ERROR_COLOR, role=Qt.ItemDataRole.BackgroundRole
+                )
+            else:
+                self.item(row, 1).setData(None, role=Qt.ItemDataRole.BackgroundRole)
+        self.blockSignals(False)
 
 
 class PlotSettingsEditor(QDialog):
+    values_changed = Signal()
+
     def __init__(self, *args, settings=None, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -108,16 +137,21 @@ class PlotSettingsEditor(QDialog):
         self.viewer = QTreeView(self)
         self.viewer.setAnimated(True)
         layout.addWidget(self.viewer)
-        if settings:
-            pardict = settings.group("rcParams")._settings
-            self.model = PlotSettingsModel(par_dict=pardict)
+        try:
+            rc_file(PLATFORM.application_directory() / "matplotlibrc")
+        except FileNotFoundError:
+            LOG.warning("MDANSE settings do not contain a matplotlibrc file.")
         else:
-            self.model = PlotSettingsModel()
+            LOG.info("Plotting parameters loaded from MDANSE's matplotlibrc.")
+        self.model = PlotSettingsModel()
         self.viewer.setModel(self.model)
 
         self.writeout_button = QPushButton("Save settings", self)
+        self.reset_button = QPushButton("Reset values", self)
         layout.addWidget(self.writeout_button)
+        layout.addWidget(self.reset_button)
         self.writeout_button.clicked.connect(self.save_changes)
+        self.reset_button.clicked.connect(self.reset_values)
         self.viewer.expanded.connect(self.expand_columns)
         self.viewer.resizeColumnToContents(0)
         self.settings = settings
@@ -129,13 +163,15 @@ class PlotSettingsEditor(QDialog):
 
     def save_changes(self):
         """Save changes to a file."""
-        if self.settings is None:
-            return
-        rcparams_group = self.settings.group("rcParams")
-        rcparams_group.populate(self.model.par_dict, {})
-        for key, item in self.model.par_dict.items():
-            rcparams_group.set(key, item)
-        self.settings.save_values()
+        with open(PLATFORM.application_directory() / "matplotlibrc", "w") as target:
+            for key, item in self.model.par_dict.items():
+                target.write(f"{key}: {item}\n")
+        self.values_changed.emit()
+
+    def reset_values(self):
+        rcdefaults()
+        self.values_changed.emit()
+        self.model.reset_model()
 
 
 if __name__ == "__main__":
