@@ -34,6 +34,8 @@ ERROR_COLOR = QColor(255, 0, 0)
 
 
 def parse_string(param_str: str) -> Any:
+    param_str = str(param_str).replace("\\", "")
+    param_str = param_str.replace("'", "")
     if "[" in param_str:
         toks = param_str.strip("[]").split(",")
         try:
@@ -41,9 +43,19 @@ def parse_string(param_str: str) -> Any:
         except ValueError:
             result = toks
     elif param_str == "None":
-        result = None
+        return None
     else:
         result = param_str
+    return result
+
+
+def convert_to_string(param_str: str) -> Any:
+    result = str(param_str).replace("\\", "")
+    result = result.replace("'", "")
+    if "cycler" in result:
+        result = result.strip("[]")
+    if "['']" in result:
+        result = result.replace["['']", "[]"]
     return result
 
 
@@ -72,8 +84,7 @@ BAD_KEYS = [
 class PlotSettingsModel(QStandardItemModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.par_dict = rcParams
-        self.populate_model(self.par_dict)
+        self.populate_model(rcParams)
         self.dataChanged.connect(self.update_values)
         self.setHorizontalHeaderLabels(["Parameters", "Values", "Default"])
 
@@ -83,6 +94,7 @@ class PlotSettingsModel(QStandardItemModel):
                 continue
             left_item = QStandardItem(str(key))
             right_item = QStandardItem(str(value))
+            right_item.setData(key, role=Qt.ItemDataRole.UserRole)
             def_item = QStandardItem(str(rcParamsDefault[key]))
             for item in (left_item, def_item):
                 item.setEditable(False)
@@ -91,7 +103,7 @@ class PlotSettingsModel(QStandardItemModel):
     def reset_model(self):
         for row in range(self.rowCount()):
             key = self.item(row, 0).text()
-            self.item(row, 1).setText(str(self.par_dict[key]))
+            self.item(row, 1).setText(str(rcParams[key]))
 
     @Slot()
     def update_values(self):
@@ -101,7 +113,7 @@ class PlotSettingsModel(QStandardItemModel):
             key = self.item(row, 0).text()
             value = self.item(row, 1).text()
             try:
-                self.par_dict[key] = parse_string(value)
+                rcParams[key] = parse_string(value)
             except ValueError:
                 LOG.error(
                     "Could not set %s to the value %s. Traceback: %s",
@@ -137,12 +149,8 @@ class PlotSettingsEditor(QDialog):
         self.viewer = QTreeView(self)
         self.viewer.setAnimated(True)
         layout.addWidget(self.viewer)
-        try:
-            rc_file(PLATFORM.application_directory() / "matplotlibrc")
-        except FileNotFoundError:
-            LOG.warning("MDANSE settings do not contain a matplotlibrc file.")
-        else:
-            LOG.info("Plotting parameters loaded from MDANSE's matplotlibrc.")
+        self._changed_keys = {}
+        self.load_settings()
         self.model = PlotSettingsModel()
         self.viewer.setModel(self.model)
 
@@ -155,17 +163,47 @@ class PlotSettingsEditor(QDialog):
         self.viewer.expanded.connect(self.expand_columns)
         self.viewer.resizeColumnToContents(0)
         self.settings = settings
+        self.model.itemChanged.connect(self.register_item_change)
 
     @Slot()
     def expand_columns(self):
         for ncol in range(3):
             self.viewer.resizeColumnToContents(ncol)
 
+    def load_settings(self):
+        settings_file = PLATFORM.application_directory() / "matplotlib.txt"
+        if not settings_file.exists():
+            LOG.info(
+                "File %s does not exist. Using standard matplotlib settings.",
+                str(settings_file),
+            )
+        with open(settings_file) as source:
+            for line in source:
+                no_comment = line.split("#")[0]
+                if ":" not in no_comment:
+                    continue
+                toks = no_comment.split(":")
+                key, value = toks[0], toks[1]
+                try:
+                    rcParams[key] = value
+                except ValueError:
+                    LOG.warning(
+                        "Invald matplotlib setting %s: %s. Skipping", key, value
+                    )
+                else:
+                    self._changed_keys[key] = value
+
+    @Slot("QStandardItem*")
+    def register_item_change(self, item: QStandardItem):
+        key = item.data(Qt.ItemDataRole.UserRole)
+        value = item.text()
+        self._changed_keys[key] = value
+
     def save_changes(self):
         """Save changes to a file."""
-        with open(PLATFORM.application_directory() / "matplotlibrc", "w") as target:
-            for key, item in self.model.par_dict.items():
-                target.write(f"{key}: {item}\n")
+        with open(PLATFORM.application_directory() / "matplotlib.txt", "w") as target:
+            for key, item in self._changed_keys.items():
+                target.write(f"{key}: {convert_to_string(item)}\n")
         self.values_changed.emit()
 
     def reset_values(self):
