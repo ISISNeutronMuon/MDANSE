@@ -298,7 +298,7 @@ class PlotWidget(QWidget):
         else:
             self._normaliser.clear_error()
 
-    def make_canvas(self, width=12.0, height=9.0, dpi=100):
+    def make_canvas(self):
         """Create a matplotlib figure for plotting.
 
         Parameters
@@ -318,7 +318,7 @@ class PlotWidget(QWidget):
         """
         canvas = self
         layout = QVBoxLayout(canvas)
-        figure = mpl.figure(figsize=[width, height], dpi=dpi, frameon=True)
+        figure = mpl.figure()
         figAgg = FigureCanvasQTAgg(figure)
         figAgg.setParent(canvas)
         figAgg.updateGeometry()

@@ -1326,7 +1326,7 @@ class FilterDesigner(QDialog):
             filter_preview.sample_freq,
         )
 
-    def create_graph_canvas(self, fig_width=10.0, fig_height=10.0, dpi=100) -> QWidget:
+    def create_graph_canvas(self) -> QWidget:
         """Create the canvas for the graphing area of the filter designer.
 
         Parameters
@@ -1346,7 +1346,7 @@ class FilterDesigner(QDialog):
         """
         canvas = QWidget(self)
         layout = QVBoxLayout(canvas)
-        figure = mpl.figure(figsize=[fig_width, fig_height], dpi=dpi, frameon=True)
+        figure = mpl.figure()
         figAgg = FigureCanvasQTAgg(figure)
         figAgg.setParent(canvas)
         toolbar = NavigationToolbar2QTAgg(figAgg, canvas)

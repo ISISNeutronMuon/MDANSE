@@ -52,8 +52,7 @@ def parse_string(param_str: str) -> Any:
 def convert_to_string(param_str: str) -> Any:
     result = str(param_str).replace("\\", "")
     result = result.replace("'", "")
-    if "cycler" in result:
-        result = result.strip("[]")
+    result = result.strip("[]")
     if "['']" in result:
         result = result.replace["['']", "[]"]
     return result
@@ -177,6 +176,8 @@ class PlotSettingsEditor(QDialog):
                 "File %s does not exist. Using standard matplotlib settings.",
                 str(settings_file),
             )
+            return
+        rc_file(settings_file)
         with open(settings_file) as source:
             for line in source:
                 no_comment = line.split("#")[0]
@@ -184,14 +185,7 @@ class PlotSettingsEditor(QDialog):
                     continue
                 toks = no_comment.split(":")
                 key, value = toks[0], toks[1]
-                try:
-                    rcParams[key] = value
-                except ValueError:
-                    LOG.warning(
-                        "Invald matplotlib setting %s: %s. Skipping", key, value
-                    )
-                else:
-                    self._changed_keys[key] = value
+                self._changed_keys[key] = value
 
     @Slot("QStandardItem*")
     def register_item_change(self, item: QStandardItem):
