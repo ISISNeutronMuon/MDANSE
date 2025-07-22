@@ -116,10 +116,11 @@ class Trajectory:
                     for mol_number, cluster in enumerate(
                         self.chemical_system._clusters[mol_name],
                     ):
-                        if not set(cluster).issubset(self.atom_indices):
+                        overlap = set(cluster).intersection(self.atom_indices)
+                        if not overlap:
                             continue
-                        self._group_lookup[mol_name] += len(cluster)
-                        for x in cluster:
+                        self._group_lookup[mol_name] += len(overlap)
+                        for x in overlap:
                             temp_names[x] = (f"<{mol_name}>/{self.atom_types[x]}")
                 self._element_from_label = {v: self.atom_types[k] for k, v in temp_names.items()}
                 self._atom_names = copy.deepcopy(self.atom_types)
@@ -144,6 +145,8 @@ class Trajectory:
         """
         if not self._group_lookup:
             self.atom_names
+        if self._grouping_level == "each molecule":
+            return {k: v for k, v in self._group_lookup.items() if len(v) > 0}
         return {k: v for k, v in self._group_lookup.items() if v > 0}
 
     @property
