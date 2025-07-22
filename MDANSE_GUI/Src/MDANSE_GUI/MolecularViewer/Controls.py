@@ -18,10 +18,12 @@ from qtpy.QtCore import QMutex, Qt, QTimer, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
     QColorDialog,
+    QComboBox,
     QDoubleSpinBox,
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
+    QLabel,
     QPushButton,
     QSizePolicy,
     QSlider,
@@ -247,22 +249,33 @@ class ViewerControls(QWidget):
         wrapper4.setLayout(layout4)
         layout.addWidget(wrapper4)
         wrapper5 = QGroupBox("Visible Objects", base)
-        layout5 = QHBoxLayout(wrapper5)
-        atoms_visible = QCheckBox("atoms", wrapper5)
-        bonds_visible = QCheckBox("bonds", wrapper5)
-        axes_visible = QCheckBox("axes", wrapper5)
-        cell_visible = QCheckBox("cell", wrapper5)
+        layout5 = QGridLayout(wrapper5)
+        atoms_visible = QCheckBox("atoms:")
+        atoms_visible.setLayoutDirection(Qt.RightToLeft)
+        bonds_visible = QCheckBox("bonds:")
+        bonds_visible.setLayoutDirection(Qt.RightToLeft)
+        cell_visible = QCheckBox("cell:")
+        cell_visible.setLayoutDirection(Qt.RightToLeft)
+        self.axes_combo = QComboBox()
+        self.axes_combo.addItems(["none", "cartesian", "direct", "reciprocal"])
+        self.axes_combo.setCurrentIndex(1)
+        layout5.addWidget(atoms_visible, 0, 0, 1, 1)
+        layout5.addWidget(bonds_visible, 0, 1, 1, 1)
+        layout5.addWidget(cell_visible, 0, 2, 1, 1)
+        label = QLabel("axes:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        layout5.addWidget(label, 1, 0, 1, 1)
+        layout5.addWidget(self.axes_combo, 1, 1, 1, 2)
         self._visibility_checkboxes = [
             atoms_visible,
             bonds_visible,
-            axes_visible,
             cell_visible,
         ]
         for nw, box in enumerate(self._visibility_checkboxes):
             box.setTristate(False)
             box.setChecked(self._visibility[nw])
             box.stateChanged.connect(self.setVisibility)
-            layout5.addWidget(box)
+        self.axes_combo.currentIndexChanged.connect(self.changeAxes)
         layout.addWidget(wrapper5)
         # the database of atom types
         self._atom_details.setModel(self._viewer._colour_manager)
@@ -314,6 +327,10 @@ class ViewerControls(QWidget):
         for nw, box in enumerate(self._visibility_checkboxes):
             self._visibility[nw] = box.isChecked()
         self._viewer._new_visibility(self._visibility)
+
+    @Slot()
+    def changeAxes(self):
+        self._viewer._change_axes(self.axes_combo.currentText())
 
     @Slot(int)
     def setTimeStep(self, new_value: int):
