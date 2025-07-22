@@ -198,18 +198,14 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
         These operations were previously handled by IConfigurator subclasses.
         """
-        trajectory = self.configuration.get("trajectory")
-        selection = self.configuration.get("atom_selection")
-        transmutation = self.configuration.get("atom_transmutation")
-        grouping = self.configuration.get("grouping_level")
-        if trajectory is None:
+        if (trajectory := self.configuration.get("trajectory")) is None:
             return
         self.trajectory = trajectory["instance"]
-        if selection is not None:
+        if (selection := self.configuration.get("atom_selection")) is not None:
             self.trajectory.set_selection(selection["flatten_indices"])
-        if transmutation is not None:
+        if (transmutation := self.configuration.get("atom_transmutation")) is not None:
             self.trajectory.set_transmutation(transmutation.transmutation)
-        if grouping is not None:
+        if (grouping := self.configuration.get("grouping_level")) is not None:
             self.trajectory.set_grouping(grouping["level"])
 
     @abc.abstractmethod

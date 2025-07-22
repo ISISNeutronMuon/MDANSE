@@ -147,14 +147,14 @@ class AtomTransmutationConfigurator(IConfigurator):
             self.error_status = "Key of transmutation map should be castable to int"
             return
 
-        keys = {index for index in value.keys()}
+        keys = set(value.keys())
         if not keys.issubset(idxs):
             self.error_status = (
                 "Input setting not valid - atom index not found in the current system."
             )
             return
 
-        elements = {element for element in value.values()}
+        elements = set(value.values())
         for element in elements:
             if (element not in traj_config["instance"].atoms_in_database) and (
                 element not in ATOMS_DATABASE.atoms
