@@ -144,7 +144,7 @@ class Trajectory:
         """
         if not self._group_lookup:
             self.atom_names
-        return self._group_lookup
+        return {k: v for k, v in self._group_lookup.items() if v > 0}
 
     @property
     def unique_elements(self) -> set[str]:

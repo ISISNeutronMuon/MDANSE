@@ -135,7 +135,7 @@ class MeanSquareDisplacement(IJob):
                 partial_result=True,
             )
 
-        self._atoms = self.trajectory.selection_getter(self.trajectory.atom_names)
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
         """
