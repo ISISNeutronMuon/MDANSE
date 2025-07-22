@@ -243,6 +243,7 @@ def pair_labels(
                     trajectory.atom_types[index]
                     for cluster in trajectory.chemical_system._clusters[grp]
                     for index in cluster
+                    if index in trajectory.atom_indices
                 )
             )
             for ele_i, ele_j in label_pairs(eles, all_pairs=all_pairs):
@@ -260,6 +261,7 @@ def pair_labels(
                 trajectory.atom_types[index]
                 for cluster in trajectory.chemical_system._clusters[grp_i]
                 for index in cluster
+                if index in trajectory.atom_indices
             )
         )
         eles_j = sorted(
@@ -267,6 +269,7 @@ def pair_labels(
                 trajectory.atom_types[index]
                 for cluster in trajectory.chemical_system._clusters[grp_j]
                 for index in cluster
+                if index in trajectory.atom_indices
             )
         )
 
@@ -316,6 +319,7 @@ def update_pair_results(
                 trajectory.atom_types[index]
                 for cluster in trajectory.chemical_system._clusters[grp_i]
                 for index in cluster
+                if index in trajectory.atom_indices
             )
         )
         eles_j = sorted(
@@ -323,6 +327,7 @@ def update_pair_results(
                 trajectory.atom_types[index]
                 for cluster in trajectory.chemical_system._clusters[grp_j]
                 for index in cluster
+                if index in trajectory.atom_indices
             )
         )
         if grp_i == grp_j and not all_pairs:

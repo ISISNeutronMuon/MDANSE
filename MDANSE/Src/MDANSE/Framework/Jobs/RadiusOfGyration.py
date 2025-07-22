@@ -106,7 +106,9 @@ class RadiusOfGyration(IJob):
         conf = self.trajectory.configuration(frameIndex)
 
         rog = radius_of_gyration(
-            conf["coordinates"][self._indices, :], masses=self._masses, root=True
+            conf["coordinates"][self._indices, :],
+            masses=self._masses[self._indices],
+            root=True,
         )
 
         return index, rog
