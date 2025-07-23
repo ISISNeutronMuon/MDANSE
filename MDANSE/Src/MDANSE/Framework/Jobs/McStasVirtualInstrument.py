@@ -145,19 +145,19 @@ class McStasVirtualInstrument(IJob):
         )
         self._mcStasPhysicalParameters["sigma_abs"] = (
             np.mean(
-                self.trajectory.get_atom_property(s, "xs_absorption") for s in symbols
+                [self.trajectory.get_atom_property(s, "xs_absorption") for s in symbols]
             )
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_coh"] = (
             np.mean(
-                self.trajectory.get_atom_property(s, "xs_coherent") for s in symbols
+                [self.trajectory.get_atom_property(s, "xs_coherent") for s in symbols]
             )
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_inc"] = (
             np.mean(
-                self.trajectory.get_atom_property(s, "xs_incoherent") for s in symbols
+                [self.trajectory.get_atom_property(s, "xs_incoherent") for s in symbols]
             )
             * MCSTAS_UNITS_LUT["nm2"]
         )

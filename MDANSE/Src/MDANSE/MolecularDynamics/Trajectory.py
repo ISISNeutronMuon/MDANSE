@@ -101,8 +101,8 @@ class Trajectory:
         mapping = {element : element for element in self.unique_elements}
         if self._grouping_level == "molecule":
             temp_names = {}
-            for mol_name in self.chemical_system._clusters:
-                for cluster in self.chemical_system._clusters[mol_name]:
+            for mol_name, clusters in self.chemical_system._clusters.items():
+                for cluster in clusters:
                     overlap = set(cluster).intersection(self.atom_indices)
                     for x in overlap:
                         temp_names[f"<{mol_name}>/{self.atom_types[x]}"] = self.atom_types[x]
@@ -126,12 +126,8 @@ class Trajectory:
         elif self._grouping_level == "molecule":
             for mol_name in self.chemical_system._clusters:
                 temp_dict.setdefault(mol_name, 0)
-                for mol_number, cluster in enumerate(
-                    self.chemical_system._clusters[mol_name],
-                ):
+                for cluster in self.chemical_system._clusters[mol_name]:
                     overlap = set(cluster).intersection(self.atom_indices)
-                    if not overlap:
-                        continue
                     temp_dict[mol_name] += len(overlap)
         return {k: v for k, v in temp_dict.items() if v}
 
@@ -142,8 +138,8 @@ class Trajectory:
             return list(self.group_lookup.keys())
         if self._grouping_level == "molecule":
             temp_names = {}
-            for mol_name in self.chemical_system._clusters:
-                for cluster in self.chemical_system._clusters[mol_name]:
+            for mol_name, clusters in self.chemical_system._clusters.items():
+                for cluster in clusters:
                     overlap = set(cluster).intersection(self.atom_indices)
                     for x in overlap:
                         temp_names[x] = (f"<{mol_name}>/{self.atom_types[x]}")
