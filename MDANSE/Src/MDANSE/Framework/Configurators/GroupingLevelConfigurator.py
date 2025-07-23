@@ -81,20 +81,3 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
                 return
 
         self["level"] = value
-
-    def get_element_from_label(self, label: str) -> str:
-        """Returns the element for a given label.
-
-        Parameters
-        ----------
-        label : str
-            The label of the element e.g. <H2_O1>/H
-
-        Returns
-        -------
-        str
-            The element of the input label.
-        """
-        if self["level"] == "atom":
-            return label
-        return self["name_to_element"][label]

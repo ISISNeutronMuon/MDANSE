@@ -24,6 +24,7 @@ import copy
 import math
 from collections import Counter, defaultdict
 from collections.abc import Sequence
+from functools import cached_property
 from operator import itemgetter
 from pathlib import Path
 
@@ -67,7 +68,6 @@ class Trajectory:
         self._max_span = np.zeros(3)
         self._grouping_level = "atom"
         self._group_lookup = {}
-        self._element_from_label = {}
         self._atom_names = {}
         self._atom_cache = {}
         self._selection = []
@@ -75,14 +75,14 @@ class Trajectory:
         self._transmutation = {}
         self._transmuted_types = []
 
-    @property
-    def atom_indices(self) -> Sequence[int]:
+    @cached_property
+    def atom_indices(self) -> list[int]:
         """Indices of the currently selected atoms."""
         if self._selection:
             return self._selection
         return list(range(len(self.atom_types)))
 
-    @property
+    @cached_property
     def atom_types(self) -> Sequence[str]:
         """Chemical elements of ALL atoms, with transmutation applied."""
         if self._transmuted_types:
@@ -95,47 +95,28 @@ class Trajectory:
         self._transmuted_types = temp
         return self._transmuted_types
 
-    @property
-    def atom_names(self) -> Sequence[str]:
-        """Labels of ALL the atoms, after transmutation."""
-        if self._grouping_level in {"atom", "each atom"}:
-            if not self._element_from_label:
-                self._element_from_label = {element : element for element in self.unique_elements}
-            return self.atom_types
-        if not self._atom_names:
-            if self._grouping_level == "each molecule":
-                for mol_name, clusters in self.chemical_system._clusters.items():
-                    for mol_number, cluster in enumerate(clusters):
-                        if set(cluster).issubset(self.atom_indices):
-                            self._group_lookup[f"{mol_name}_mol{mol_number + 1}"] = cluster
-                self._atom_names = list(self._group_lookup.keys())
-            elif self._grouping_level == "molecule":
-                temp_names = {}
-                for mol_name in self.chemical_system._clusters:
-                    self._group_lookup.setdefault(mol_name, 0)
-                    for mol_number, cluster in enumerate(
-                        self.chemical_system._clusters[mol_name],
-                    ):
-                        overlap = set(cluster).intersection(self.atom_indices)
-                        if not overlap:
-                            continue
-                        self._group_lookup[mol_name] += len(overlap)
-                        for x in overlap:
-                            temp_names[x] = (f"<{mol_name}>/{self.atom_types[x]}")
-                self._element_from_label = {v: self.atom_types[k] for k, v in temp_names.items()}
-                self._atom_names = copy.deepcopy(self.atom_types)
-                for k, v in temp_names.items():
-                    self._atom_names[k] = v
-        return self._atom_names
-
-    @property
+    @cached_property
     def element_from_label(self) -> dict[str, str]:
-        """Mapping from atom label to its chemical element name."""
-        if not self._element_from_label:
-            self.atom_names
-        return self._element_from_label
-
-    @property
+        """Maps the full atom labels to the chemical elements.
+        
+        If grouping is used, atom labels may contain the molecule name
+        as well as the chemical element of the atom, and will not match
+        the entries in the atom database. This dictionary allows to get
+        a valid atom database key for each atom in the system.
+        """
+        mapping = {element : element for element in self.unique_elements}
+        if self._grouping_level == "molecule":
+            temp_names = {}
+            for mol_name in self.chemical_system._clusters:
+                self._group_lookup.setdefault(mol_name, 0)
+                for cluster in self.chemical_system._clusters[mol_name]:
+                    overlap = set(cluster).intersection(self.atom_indices)
+                    for x in overlap:
+                        temp_names[f"<{mol_name}>/{self.atom_types[x]}"] = self.atom_types[x]
+            mapping.update(temp_names)
+        return mapping
+    
+    @cached_property
     def group_lookup(self) -> dict[str, int] | dict[str, list[int]]:
         """Dictionary of currently existing groups.
         
@@ -143,11 +124,41 @@ class Trajectory:
         of all atoms belonging to the group, or (for 'each molecule' only)
         a list of atom indices belonging to the individual molecule.
         """
-        if not self._group_lookup:
-            self.atom_names
+        temp_dict = {}
         if self._grouping_level == "each molecule":
-            return {k: v for k, v in self._group_lookup.items() if len(v) > 0}
-        return {k: v for k, v in self._group_lookup.items() if v > 0}
+            for mol_name, clusters in self.chemical_system._clusters.items():
+                for mol_number, cluster in enumerate(clusters):
+                    if set(cluster).issubset(self.atom_indices):
+                        temp_dict[f"{mol_name}_mol{mol_number + 1}"] = cluster
+        elif self._grouping_level == "molecule":
+            for mol_name in self.chemical_system._clusters:
+                temp_dict.setdefault(mol_name, 0)
+                for mol_number, cluster in enumerate(
+                    self.chemical_system._clusters[mol_name],
+                ):
+                    overlap = set(cluster).intersection(self.atom_indices)
+                    if not overlap:
+                        continue
+                    temp_dict[mol_name] += len(overlap)
+        return {k: v for k, v in temp_dict.items() if v}
+
+    @cached_property
+    def atom_names(self) -> Sequence[str]:
+        """Labels of ALL the atoms, after transmutation."""
+        if self._grouping_level == "each molecule":
+            return list(self.group_lookup.keys())
+        if self._grouping_level == "molecule":
+            temp_names = {}
+            for mol_name in self.chemical_system._clusters:
+                for cluster in self.chemical_system._clusters[mol_name]:
+                    overlap = set(cluster).intersection(self.atom_indices)
+                    for x in overlap:
+                        temp_names[x] = (f"<{mol_name}>/{self.atom_types[x]}")
+            atom_names = copy.deepcopy(self.atom_types)
+            for k, v in temp_names.items():
+                atom_names[k] = v
+            return atom_names
+        return self.atom_types
 
     @property
     def unique_elements(self) -> set[str]:
@@ -223,8 +234,8 @@ class Trajectory:
             w = defaultdict(float)
             for name, element in zip(atm_names, atm_elements):
                 w[name] += self._trajectory.get_atom_property(element, prop)
-            for element, num_atoms in n_elements.items():
-                w[element] /= num_atoms
+            for name, num_atoms in n_elements.items():
+                w[name] /= num_atoms
             weights.append(w)
 
         return tuple(weights)
@@ -238,10 +249,9 @@ class Trajectory:
             A dictionary of the number of atom per element.
 
         """
-        all_atom_names = self.atom_names
         if self._selection:
-            return Counter(self.selection_getter(all_atom_names))
-        return Counter(all_atom_names)
+            return Counter(self.selection_getter(self.atom_names))
+        return Counter(self.atom_names)
 
     def get_all_natoms(self) -> dict[str, int]:
         """Count all atoms, per element.
