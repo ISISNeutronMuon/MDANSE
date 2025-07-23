@@ -67,13 +67,10 @@ class Trajectory:
         self._min_span = np.zeros(3)
         self._max_span = np.zeros(3)
         self._grouping_level = "atom"
-        self._group_lookup = {}
-        self._atom_names = {}
         self._atom_cache = {}
         self._selection = []
         self.selection_getter = None
         self._transmutation = {}
-        self._transmuted_types = []
 
     @cached_property
     def atom_indices(self) -> list[int]:
@@ -85,15 +82,12 @@ class Trajectory:
     @cached_property
     def atom_types(self) -> Sequence[str]:
         """Chemical elements of ALL atoms, with transmutation applied."""
-        if self._transmuted_types:
-            return self._transmuted_types
         if not self._transmutation:
             return self._trajectory.chemical_system.atom_list
         temp = copy.deepcopy(self._trajectory.chemical_system.atom_list)
         for index, type in self._transmutation.items():
             temp[index] = type
-        self._transmuted_types = temp
-        return self._transmuted_types
+        return temp
 
     @cached_property
     def element_from_label(self) -> dict[str, str]:
@@ -108,7 +102,6 @@ class Trajectory:
         if self._grouping_level == "molecule":
             temp_names = {}
             for mol_name in self.chemical_system._clusters:
-                self._group_lookup.setdefault(mol_name, 0)
                 for cluster in self.chemical_system._clusters[mol_name]:
                     overlap = set(cluster).intersection(self.atom_indices)
                     for x in overlap:
