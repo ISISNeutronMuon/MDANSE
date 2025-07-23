@@ -64,6 +64,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             self.error_status = f"Could not use {value} as input trajectory"
             return
         self.extract_information(trajectory_instance)
+        self.error_status = "OK"
 
     def extract_information(self, trajectory_instance: Trajectory):
         self["instance"] = trajectory_instance

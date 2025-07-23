@@ -100,6 +100,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
         self["time_window_positive"] = np.fft.ifftshift(self["time_window"])[
             : len(time)
         ]
+        self.error_status = "OK"
 
     def preview_output_axis(self):
         if not self.is_configured():

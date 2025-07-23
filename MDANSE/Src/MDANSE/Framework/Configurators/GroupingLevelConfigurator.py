@@ -84,3 +84,4 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
                 return
 
         self["level"] = value
+        self.error_status = "OK"
