@@ -18,10 +18,12 @@ from qtpy.QtCore import QMutex, Qt, QTimer, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
     QColorDialog,
+    QComboBox,
     QDoubleSpinBox,
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
+    QLabel,
     QPushButton,
     QSizePolicy,
     QSlider,
@@ -106,6 +108,7 @@ class ViewerControls(QWidget):
         self._animation_timer.timeout.connect(self.advance_frame)
         self._mutex = QMutex()
         self._frame_step = 1
+        self._current_step_size = 1
         self._time_per_frame = 80  # in ms
         self._frame_factor = 1  # just a scalar multiplication factor
         self._visibility = [True, True, True, True]
@@ -179,9 +182,7 @@ class ViewerControls(QWidget):
     def createSidePanel(self):
         """Adds widgets for finer control of the playback"""
         absolute_base = QTabWidget(self)
-        absolute_base.setSizePolicy(
-            QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
-        )
+        absolute_base.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self._side_base = absolute_base
         base = QWidget(self)
         layout = QVBoxLayout(base)
@@ -249,22 +250,33 @@ class ViewerControls(QWidget):
         wrapper4.setLayout(layout4)
         layout.addWidget(wrapper4)
         wrapper5 = QGroupBox("Visible Objects", base)
-        layout5 = QHBoxLayout(wrapper5)
-        atoms_visible = QCheckBox("atoms", wrapper5)
-        bonds_visible = QCheckBox("bonds", wrapper5)
-        axes_visible = QCheckBox("axes", wrapper5)
-        cell_visible = QCheckBox("cell", wrapper5)
+        layout5 = QGridLayout(wrapper5)
+        atoms_visible = QCheckBox("atoms:")
+        atoms_visible.setLayoutDirection(Qt.RightToLeft)
+        bonds_visible = QCheckBox("bonds:")
+        bonds_visible.setLayoutDirection(Qt.RightToLeft)
+        cell_visible = QCheckBox("cell:")
+        cell_visible.setLayoutDirection(Qt.RightToLeft)
+        self.axes_combo = QComboBox()
+        self.axes_combo.addItems(["none", "cartesian", "direct", "reciprocal"])
+        self.axes_combo.setCurrentIndex(1)
+        layout5.addWidget(atoms_visible, 0, 0, 1, 1)
+        layout5.addWidget(bonds_visible, 0, 1, 1, 1)
+        layout5.addWidget(cell_visible, 0, 2, 1, 1)
+        label = QLabel("axes:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        layout5.addWidget(label, 1, 0, 1, 1)
+        layout5.addWidget(self.axes_combo, 1, 1, 1, 2)
         self._visibility_checkboxes = [
             atoms_visible,
             bonds_visible,
-            axes_visible,
             cell_visible,
         ]
         for nw, box in enumerate(self._visibility_checkboxes):
             box.setTristate(False)
             box.setChecked(self._visibility[nw])
             box.stateChanged.connect(self.setVisibility)
-            layout5.addWidget(box)
+        self.axes_combo.currentIndexChanged.connect(self.changeAxes)
         layout.addWidget(wrapper5)
         # the database of atom types
         self._atom_details.setModel(self._viewer._colour_manager)
@@ -317,15 +329,21 @@ class ViewerControls(QWidget):
             self._visibility[nw] = box.isChecked()
         self._viewer._new_visibility(self._visibility)
 
+    @Slot()
+    def changeAxes(self):
+        self._viewer._change_axes(self.axes_combo.currentText())
+
     @Slot(int)
     def setTimeStep(self, new_value: int):
         self._time_per_frame = new_value
-        self.animate()
+        if self._animation_timer.isActive():
+            self.animate(self._current_step_size)
 
     @Slot(int)
     def setFrameSkip(self, new_value: int):
         self._frame_factor = new_value
-        self.animate()
+        if self._animation_timer.isActive():
+            self.animate(self._current_step_size)
 
     @Slot(float)
     def setAtomSize(self, new_value: float):
@@ -359,7 +377,8 @@ class ViewerControls(QWidget):
         """
         if self._animation_timer.isActive():
             self._animation_timer.stop()
-        self._frame_step = step_size * self._frame_factor
+        self._current_step_size = step_size
+        self._frame_step = self._current_step_size * self._frame_factor
         self._animation_timer.setInterval(self._time_per_frame)
         self._animation_timer.start()
 

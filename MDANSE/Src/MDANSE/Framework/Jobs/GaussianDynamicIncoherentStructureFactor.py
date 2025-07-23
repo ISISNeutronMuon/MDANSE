@@ -18,6 +18,9 @@ import collections
 
 import numpy as np
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
@@ -66,7 +69,6 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -79,8 +81,6 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "grouping_level": "grouping_level",
             }
         },
     )
@@ -91,6 +91,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "atom_transmutation": "atom_transmutation",
             },
         },
     )
@@ -103,7 +104,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.numberOfSteps = len(self.trajectory.atom_indices)
 
         self._nQShells = self.configuration["q_shells"]["number"]
 
@@ -120,8 +121,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         )
 
         self.labels = [
-            (element, (element,))
-            for element in self.configuration["atom_selection"].get_natoms()
+            (element, (element,)) for element in self.trajectory.get_natoms()
         ]
 
         self._outputData.add(
@@ -162,7 +162,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             units="au",
         )
 
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in self.trajectory.unique_names:
             self._outputData.add(
                 f"gdisf/f(q,t)/{element}",
                 "SurfaceOutputVariable",
@@ -226,9 +226,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                 units="au",
             )
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index: int):
         """Calculates the GDISF and MSD of an atom.
@@ -246,10 +244,10 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         """
 
         # get atom index
-        indices = self.configuration["atom_selection"]["indices"][index]
+        atom_index = self.trajectory.atom_indices[index]
 
-        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
-            indices,
+        series = self.trajectory.read_atomic_trajectory(
+            atom_index,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -279,7 +277,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         x : tuple[np.ndarray, np.ndarray]
             A tuple of the GDISF and MSD of an atom.
         """
-        element = self.configuration["atom_selection"]["names"][index]
+        element = self._atoms[self.trajectory.atom_indices[index]]
         atomicSF, msd = x
         self._outputData[f"gdisf/f(q,t)/{element}"] += atomicSF
         self._outputData[f"msd/{element}"] += msd
@@ -288,7 +286,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         for element, number in nAtomsPerElement.items():
             self._outputData[f"gdisf/f(q,t)/{element}"][:] /= number
             self._outputData[f"gdisf/s(q,f)/{element}"][:] = get_spectrum(
@@ -306,7 +304,9 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
                     axis=1,
                 )
 
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        selected_weights, all_weights = self.trajectory.get_weights(
+            prop=self.configuration["weights"]["property"]
+        )
         for weights in selected_weights, all_weights:
             for key, value in weights.items():
                 weights[key] = value**2
@@ -314,7 +314,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             1,
         )
         assign_weights(self._outputData, weight_dict, "gdisf/f(q,t)/%s", self.labels)
@@ -325,7 +325,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = n_selected / n_total
 
         self._outputData["gdisf/f(q,t)/total"][:] = (
@@ -337,14 +337,16 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         self._outputData["gdisf/f(q,t)/total"].scaling_factor = fact
         self._outputData["gdisf/s(q,f)/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "gdisf/f(q,t)",
             "SurfaceOutputVariable",
             axis="gdisf/axes/q|gdisf/axes/time",
             units="au",
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "gdisf/s(q,f)",
             "SurfaceOutputVariable",
@@ -361,7 +363,8 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             )
             self._outputData["gdisf/s(q,f)/ideal/total"].scaling_factor = fact
 
-            self.configuration["grouping_level"].add_grouped_totals(
+            add_grouped_totals(
+                self.trajectory,
                 self._outputData,
                 "gdisf/s(q,f)/ideal",
                 "SurfaceOutputVariable",
@@ -371,14 +374,12 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         # since GDISF ~ exp(-msd * q2 / 6.0) the MSD isn't weighted in
         # the exp lets save the MSD with equal weights
-        selected_weights, all_weights = self.configuration["weights"].get_weights(
-            prop="equal"
-        )
+        selected_weights, all_weights = self.trajectory.get_weights(prop="equal")
         weight_dict = get_weights(
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             1,
         )
 
@@ -389,7 +390,8 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         self._outputData["msd/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "msd",
             "LineOutputVariable",
@@ -404,5 +406,5 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

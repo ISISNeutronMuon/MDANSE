@@ -20,21 +20,24 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from MDANSE.Chemistry.Databases import AtomsDatabase
 
-from collections import Counter
 import copy
 import math
+from collections import Counter, defaultdict
+from collections.abc import Sequence
+from functools import cached_property
+from operator import itemgetter
 from pathlib import Path
 
 import h5py
 import numpy as np
+
 from MDANSE import PLATFORM
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.Databases import str_to_num
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Chemistry.Databases import str_to_num
 from MDANSE.MolecularDynamics.Configuration import RealConfiguration
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
-
 
 available_formats = {
     "MDANSE": MdanseTrajectory,
@@ -43,9 +46,13 @@ available_formats = {
 
 
 class Trajectory:
-    """This is a wrapper class, allowing us to implement
-    multiple trajectory formats, while keeping the API unchanged
-    for the analysis code.
+    """Stores the current state of the trajectory.
+
+    This class is a wrapper between the actual file-based (immutable)
+    trajectory and the analysis code. The internal self._trajectory
+    object is a file parser/reader. This class stores the information
+    about the choices made by the user using the configuration parameters,
+    such as the atom selection, atom transmutation and grouping.
     """
 
     def __init__(self, filename, trajectory_format=None):
@@ -54,11 +61,224 @@ class Trajectory:
         if self._format is None:
             self.guess_correct_format()
         if self._format is None:
-            self._format = 'MDANSE'
-        self._trajectory = self.open_trajectory(self._format)
+            self._format = "MDANSE"
+        if self._format not in ("mock",):
+            self._trajectory = self.open_trajectory(self._format)
         self._min_span = np.zeros(3)
         self._max_span = np.zeros(3)
+        self._grouping_level = "atom"
         self._atom_cache = {}
+        self._selection = []
+        self.selection_getter = None
+        self._transmutation = {}
+
+    @cached_property
+    def atom_indices(self) -> list[int]:
+        """Indices of the currently selected atoms."""
+        if self._selection:
+            return self._selection
+        return list(range(len(self.atom_types)))
+
+    @cached_property
+    def atom_types(self) -> Sequence[str]:
+        """Chemical elements of ALL atoms, with transmutation applied."""
+        if not self._transmutation:
+            return self._trajectory.chemical_system.atom_list
+        temp = copy.deepcopy(self._trajectory.chemical_system.atom_list)
+        for index, type in self._transmutation.items():
+            temp[index] = type
+        return temp
+
+    @cached_property
+    def element_from_label(self) -> dict[str, str]:
+        """Maps the full atom labels to the chemical elements.
+        
+        If grouping is used, atom labels may contain the molecule name
+        as well as the chemical element of the atom, and will not match
+        the entries in the atom database. This dictionary allows to get
+        a valid atom database key for each atom in the system.
+        """
+        mapping = {element : element for element in self.unique_elements}
+        if self._grouping_level == "molecule":
+            temp_names = {}
+            for mol_name, clusters in self.chemical_system._clusters.items():
+                for cluster in clusters:
+                    overlap = set(cluster).intersection(self.atom_indices)
+                    for x in overlap:
+                        temp_names[f"<{mol_name}>/{self.atom_types[x]}"] = self.atom_types[x]
+            mapping.update(temp_names)
+        return mapping
+    
+    @cached_property
+    def group_lookup(self) -> dict[str, int] | dict[str, list[int]]:
+        """Dictionary of currently existing groups.
+        
+        The keys are names of the group. The values can be the count
+        of all atoms belonging to the group, or (for 'each molecule' only)
+        a list of atom indices belonging to the individual molecule.
+        """
+        temp_dict = {}
+        if self._grouping_level == "each molecule":
+            for mol_name, clusters in self.chemical_system._clusters.items():
+                for mol_number, cluster in enumerate(clusters):
+                    if set(cluster).issubset(self.atom_indices):
+                        temp_dict[f"{mol_name}_mol{mol_number + 1}"] = cluster
+        elif self._grouping_level == "molecule":
+            for mol_name in self.chemical_system._clusters:
+                temp_dict.setdefault(mol_name, 0)
+                for cluster in self.chemical_system._clusters[mol_name]:
+                    overlap = set(cluster).intersection(self.atom_indices)
+                    temp_dict[mol_name] += len(overlap)
+        return {k: v for k, v in temp_dict.items() if v}
+
+    @cached_property
+    def atom_names(self) -> Sequence[str]:
+        """Labels of ALL the atoms, after transmutation."""
+        if self._grouping_level == "each molecule":
+            return list(self.group_lookup.keys())
+        if self._grouping_level == "molecule":
+            temp_names = {}
+            for mol_name, clusters in self.chemical_system._clusters.items():
+                for cluster in clusters:
+                    overlap = set(cluster).intersection(self.atom_indices)
+                    for x in overlap:
+                        temp_names[x] = (f"<{mol_name}>/{self.atom_types[x]}")
+            atom_names = copy.deepcopy(self.atom_types)
+            for k, v in temp_names.items():
+                atom_names[k] = v
+            return atom_names
+        return self.atom_types
+
+    @property
+    def unique_elements(self) -> set[str]:
+        """Set of unique chemical elements in the current selection."""
+        if self._selection:
+            return set(self.selection_getter(self.atom_types))
+        return set(self.atom_types)
+
+    @property
+    def unique_names(self) -> set[str]:
+        """Set of unique atom labels in the current selection."""
+        if self._selection:
+            return set(self.selection_getter(self.atom_names))
+        return set(self.atom_names)
+
+    def set_transmutation(self, changed_atoms: dict[int, str]):
+        """Apply transmutation to atom types in the trajectory.
+
+        Parameters
+        ----------
+        changed_atoms : dict[int, str]
+            Substitution dictionary, as created by AtomTransmutationConfigurator
+        """
+        self._transmutation = changed_atoms
+
+    def set_selection(self, selected_indices: Sequence[int]):
+        """Apply atom selection to the atoms in the trajectory.
+
+        Parameters
+        ----------
+        selected_indices : Sequence[int]
+            Selected atom indices, output by ReusableSelection.
+        """
+        self._selection = selected_indices
+        self.selection_getter = itemgetter(*selected_indices)
+
+    def set_grouping(self, grouping_level: str):
+        """Assign the grouping level to the trajectory.
+
+        Parameters
+        ----------
+        grouping_level : str
+            Grouping level, as output by GroupingLevelConfigurator.
+        """
+        self._grouping_level = grouping_level
+
+    def get_weights(
+        self, *, prop: str | None = None,
+    ) -> tuple[dict[str, float], dict[str, float]]:
+        """Generate a dictionary of weights.
+
+        Parameters
+        ----------
+        prop : str or None, optional
+            The property to generate the weights from, if None then the
+            property set in this configurator will be used.
+
+        Returns
+        -------
+        tuple[dict[str, float], dict[str, float]]
+            The dictionary of the weights.
+
+        """
+        weights = []
+        for n_elements, atm_names, atm_elements in [
+            (self.get_natoms(), self.selection_getter(self.atom_names), self.selection_getter(self.atom_types)),
+            (
+                self.get_all_natoms(),
+                self.atom_names,
+                self.atom_types,
+            ),
+        ]:
+            w = defaultdict(float)
+            for name, element in zip(atm_names, atm_elements):
+                w[name] += self._trajectory.get_atom_property(element, prop)
+            for name, num_atoms in n_elements.items():
+                w[name] /= num_atoms
+            weights.append(w)
+
+        return tuple(weights)
+
+    def get_natoms(self) -> dict[str, int]:
+        """Count the selected atoms, per element.
+
+        Returns
+        -------
+        dict
+            A dictionary of the number of atom per element.
+
+        """
+        if self._selection:
+            return Counter(self.selection_getter(self.atom_names))
+        return Counter(self.atom_names)
+
+    def get_all_natoms(self) -> dict[str, int]:
+        """Count all atoms, per element.
+
+        Returns
+        -------
+        dict
+            A dictionary of the number of atom per element.
+
+        """
+        return Counter(self.atom_names)
+
+    def get_total_natoms(self) -> int:
+        """Count all the selected atoms.
+
+        Returns
+        -------
+        int
+            The total number of atoms selected.
+
+        """
+        if self._selection:
+            return len(self._selection)
+        return len(self.atom_types)
+
+    def get_indices(self) -> dict[str, list[int]]:
+        """Group atom indices per chemical element.
+
+        Returns
+        -------
+        dict[str, list[int]]
+            For each atom type, a list of indices of selected atoms
+
+        """
+        all_elements = np.array(self.atom_names)
+        unique_elements = set(self.selection_getter(all_elements))
+        indices_per_element = {element: list(np.where(all_elements==element)[0]) for element in unique_elements}
+        return indices_per_element
 
     def guess_correct_format(self):
         """This is a placeholder for now. As the number of
@@ -75,7 +295,6 @@ class Trajectory:
 
     def close(self):
         """Close the trajectory."""
-
         self._trajectory.close()
 
     def __getitem__(self, frame):
@@ -110,7 +329,6 @@ class Trajectory:
         :return: the coordinates
         :rtype: ndarray
         """
-
         return self._trajectory.charges(frame)
 
     def coordinates(self, frame):
@@ -122,7 +340,6 @@ class Trajectory:
         :return: the coordinates
         :rtype: ndarray
         """
-
         return self._trajectory.coordinates(frame)
 
     def configuration(self, frame: int = 0):
@@ -134,7 +351,6 @@ class Trajectory:
         :return: the configuration
         :rtype: MDANSE.MolecularDynamics.Configuration.Configuration
         """
-
         return self._trajectory.configuration(frame)
 
     def _load_unit_cells(self):
@@ -153,9 +369,8 @@ class Trajectory:
         :return: the unit cell
         :rtype: ndarray
         """
-
         return self._trajectory.unit_cell(frame)
-    
+
     def unit_cell_warning(self) -> str:
         return self._trajectory.unit_cell_warning
 
@@ -183,7 +398,7 @@ class Trajectory:
         return self._min_span
 
     def read_com_trajectory(
-        self, atom_indices, first=0, last=None, step=1, box_coordinates=False
+        self, atom_indices, first=0, last=None, step=1, box_coordinates=False,
     ):
         """Build the trajectory of the center of mass of a set of atoms.
 
@@ -227,7 +442,7 @@ class Trajectory:
         return self._trajectory.to_real_coordinates(box_coordinates, first, last, step)
 
     def read_atomic_trajectory(
-        self, index: int, first: int = 0, last: int | None = None, step: int = 1, *, box_coordinates: bool = False
+        self, index: int, first: int = 0, last: int | None = None, step: int = 1, *, box_coordinates: bool = False,
     ):
         """Read an atomic trajectory. The trajectory is corrected for box jumps.
 
@@ -245,13 +460,12 @@ class Trajectory:
         :return: 2D array containing the atomic trajectory for the selected frames
         :rtype: ndarray
         """
-
         return self._trajectory.read_atomic_trajectory(
-            index, first=first, last=last, step=step, box_coordinates=box_coordinates
+            index, first=first, last=last, step=step, box_coordinates=box_coordinates,
         )
 
     def read_configuration_trajectory(
-        self, index, first=0, last=None, step=1, variable="velocities"
+        self, index, first=0, last=None, step=1, variable="velocities",
     ):
         """Read a given configuration variable through the trajectory for a given ato.
 
@@ -270,7 +484,7 @@ class Trajectory:
         :rtype: ndarray
         """
         return self._trajectory.read_configuration_trajectory(
-            index, first=first, last=last, step=step, variable=variable
+            index, first=first, last=last, step=step, variable=variable,
         )
 
     def has_variable(self, variable: str) -> bool:
@@ -286,6 +500,7 @@ class Trajectory:
         -------
         bool
             True if variable exists.
+
         """
         return self._trajectory.has_variable(variable)
 
@@ -318,6 +533,7 @@ class Trajectory:
         -------
         Union[int, float, str]
             The atom property.
+
         """
         return {
             property_name: self.get_atom_property(symbol, property_name)
@@ -348,7 +564,6 @@ class Trajectory:
         :return: the trajectory file object
         :rtype: HDF5 file object
         """
-
         return self._trajectory.file
 
     @property
@@ -358,14 +573,12 @@ class Trajectory:
         :return: the trajectory filename
         :rtype: str
         """
-
         return self._trajectory.filename
 
     def variable(self, name: str):
         """Return a variable stored in the trajectory
         under the key 'name'.
         """
-
         return self._trajectory.variable(name)
 
     def variables(self):
@@ -374,7 +587,6 @@ class Trajectory:
         :return; the configuration variable
         :rtype: list
         """
-
         return self._trajectory.variables()
 
 
@@ -419,7 +631,7 @@ atom_radii = [
 
 
 def create_average_atom(
-    atom_dictionary: dict[str, int], database: Trajectory, radius_padding: float = 0.0
+    atom_dictionary: dict[str, int], database: Trajectory, radius_padding: float = 0.0,
 ):
     all_properties = database.properties_in_database
     values = {}
@@ -428,7 +640,7 @@ def create_average_atom(
         total = 0
         for element_name, element_count in atom_dictionary.items():
             temp.append(
-                [database.get_atom_property(element_name, property), element_count]
+                [database.get_atom_property(element_name, property), element_count],
             )
         if property in additive_atom_properties:
             total = np.sum([complex(x[0]) * int(x[1]) for x in temp])
@@ -438,7 +650,7 @@ def create_average_atom(
                 int(x[1]) for x in temp
             )
             total = str_to_num(total)
-        elif property in constant_atom_properties.keys():
+        elif property in constant_atom_properties:
             total = constant_atom_properties[property]
         elif property in atom_radii:
             total = (
@@ -493,7 +705,6 @@ class TrajectoryWriter:
         :param selected_atoms: the selected atoms of the chemical system to write
         :type selected_atoms: list of MDANSE.Chemistry.ChemicalSystem.Atom
         """
-
         self._h5_filename = Path(h5_filename)
         PLATFORM.create_directory(self._h5_filename.parent)
         self._h5_file = h5py.File(self._h5_filename, "w")
@@ -545,7 +756,7 @@ class TrajectoryWriter:
         symbol: str,
         properties: dict[str, Any],
         ptypes: dict[str, str] | None = None,
-        punits: dict[str, str] | None = None
+        punits: dict[str, str] | None = None,
     ):
         """Add the properties of a single atom to the in-file atom database.
 
@@ -573,19 +784,19 @@ class TrajectoryWriter:
         string_dt = h5py.special_dtype(vlen=str)
         if "property_labels" not in group:
             label_dataset = group.create_dataset(
-                "property_labels", data=200 * [""], dtype=string_dt
+                "property_labels", data=200 * [""], dtype=string_dt,
             )
         else:
             label_dataset = self._h5_file["/atom_database/property_labels"]
         if "property_types" not in group:
             type_dataset = group.create_dataset(
-                "property_types", data=200 * [""], dtype=string_dt
+                "property_types", data=200 * [""], dtype=string_dt,
             )
         else:
             type_dataset = self._h5_file["/atom_database/property_types"]
         if "property_units" not in group:
             unit_dataset = group.create_dataset(
-                "property_units", data=[""] * 200, dtype=string_dt
+                "property_units", data=[""] * 200, dtype=string_dt,
             )
         else:
             unit_dataset = self._h5_file["/atom_database/property_units"]
@@ -643,7 +854,7 @@ class TrajectoryWriter:
     def write_atom_database(
         self,
         symbols: list[str],
-        database: "AtomsDatabase",
+        database: AtomsDatabase,
         composition_lookup: dict[str, list[str]],
         optional_molecule_radii: dict[str, float] | None = None,
     ):
@@ -671,11 +882,11 @@ class TrajectoryWriter:
                 if optional_molecule_radii is not None:
                     molecule_radius = optional_molecule_radii.get(atom_symbol, 0.0)
                 property_dict = create_average_atom(
-                    atom_dict, database, radius_padding=molecule_radius
+                    atom_dict, database, radius_padding=molecule_radius,
                 )
             if hasattr(database, "_properties"):
                 self.write_atom_properties(
-                    atom_symbol, property_dict, database._properties
+                    atom_symbol, property_dict, database._properties,
                 )
             else:
                 self.write_atom_properties(atom_symbol, property_dict)
@@ -708,7 +919,6 @@ class TrajectoryWriter:
 
     def _dump_chemical_system(self):
         """Dump the chemical system to the trajectory file."""
-
         self._chemical_system.serialize(self._h5_file)
 
     @property
@@ -744,6 +954,7 @@ class TrajectoryWriter:
             array of float values: atomic charges in proton charge units
         index : int
             number of the simulation frame
+
         """
         variable_charge_dset = self._h5_file.get("/configuration/charges", None)
         if variable_charge_dset is None:
@@ -792,10 +1003,9 @@ class TrajectoryWriter:
         :param units: the units
         :type units: dict
         """
-
         if self._current_index >= self._n_steps:
             raise IndexError(
-                f"The current index {self._current_index} is greater than the actual number of steps of the trajectory {self._n_steps}"
+                f"The current index {self._current_index} is greater than the actual number of steps of the trajectory {self._n_steps}",
             )
 
         if configuration is None:
@@ -848,7 +1058,7 @@ class TrajectoryWriter:
         time_dset = self._h5_file.get("time", None)
         if time_dset is None:
             time_dset = self._h5_file.create_dataset(
-                "time", shape=(self._n_steps,), chunks=(1,), dtype=np.float64
+                "time", shape=(self._n_steps,), chunks=(1,), dtype=np.float64,
             )
             time_dset.attrs["units"] = units.get("time", "")
         time_dset[self._current_index] = time
@@ -891,7 +1101,6 @@ class RigidBodyTrajectoryGenerator:
         :param step: the step in frame
         :type step: int
         """
-
         self._trajectory = trajectory
 
         if last is None:
@@ -911,7 +1120,7 @@ class RigidBodyTrajectoryGenerator:
         cross = np.zeros((n_steps, 3, 3), np.float64)
 
         rcms = self._trajectory.read_com_trajectory(
-            atoms, first, last, step, box_coordinates=True
+            atoms, first, last, step, box_coordinates=True,
         )
 
         # relative coords of the CONTIGUOUS reference

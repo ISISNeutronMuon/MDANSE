@@ -70,7 +70,6 @@ class TrajectoryEditor(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -100,7 +99,7 @@ class TrajectoryEditor(IJob):
         super().initialize()
 
         self.numberOfSteps = self.configuration["frames"]["number"]
-        self._input_trajectory = self.configuration["trajectory"]["instance"]
+        self._input_trajectory = self.trajectory
         self._input_chemical_system = self.configuration["trajectory"][
             "instance"
         ].chemical_system
@@ -112,14 +111,10 @@ class TrajectoryEditor(IJob):
             ]
 
         # The collection of atoms corresponding to the atoms selected for output.
-        indices = [
-            idx
-            for idxs in self.configuration["atom_selection"]["indices"]
-            for idx in idxs
-        ]
+        indices = self.trajectory.atom_indices
         self._indices = indices
         temp_copy = list(self._input_chemical_system.atom_list)
-        indices_per_element = self.configuration["atom_selection"].get_indices()
+        indices_per_element = self.trajectory.get_indices()
         for element, numbers in indices_per_element.items():
             for num in numbers:
                 temp_copy[num] = element
@@ -133,7 +128,7 @@ class TrajectoryEditor(IJob):
             conn = Connectivity(trajectory=self._input_trajectory, selection=indices)
             conn.find_bonds(tolerance=tolerance)
             conn.add_bond_information(new_chemical_system)
-            conf = self.configuration["trajectory"]["instance"].configuration(
+            conf = self.trajectory.configuration(
                 self.configuration["frames"]["value"][0]
             )
             coords = conf.coordinates[indices]
@@ -180,24 +175,20 @@ class TrajectoryEditor(IJob):
         # get the Frame index
         frameIndex = self.configuration["frames"]["value"][index]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
+        conf = self.trajectory.configuration(frameIndex)
         conf = conf.contiguous_configuration(bring_to_centre=True)
-        charges = self.configuration["trajectory"]["instance"].charges(frameIndex)
+        charges = self.trajectory.charges(frameIndex)
         coords = conf.coordinates
 
         variables = {}
-        if self.configuration["trajectory"]["instance"].has_variable("velocities"):
-            variables["velocities"] = (
-                self.configuration["trajectory"]["instance"]
-                .variable("velocities")[frameIndex, self._indices, :]
-                .astype(np.float64)
-            )
-        if self.configuration["trajectory"]["instance"].has_variable("gradients"):
-            variables["gradients"] = (
-                self.configuration["trajectory"]["instance"]
-                .variable("gradients")[frameIndex, self._indices, :]
-                .astype(np.float64)
-            )
+        if self.trajectory.has_variable("velocities"):
+            variables["velocities"] = self.trajectory.variable("velocities")[
+                frameIndex, self._indices, :
+            ].astype(np.float64)
+        if self.trajectory.has_variable("gradients"):
+            variables["gradients"] = self.trajectory.variable("gradients")[
+                frameIndex, self._indices, :
+            ].astype(np.float64)
 
         if conf.is_periodic:
             com_conf = PeriodicRealConfiguration(
@@ -244,7 +235,7 @@ class TrajectoryEditor(IJob):
         """
 
         # The input trajectory is closed.
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
 
         # The output trajectory is closed.
         self._output_trajectory.write_standard_atom_database()

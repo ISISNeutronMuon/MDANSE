@@ -1002,6 +1002,7 @@ class FilterDesigner(QDialog):
                 self.find_configuration_property("frames"),
                 self.find_configuration_property("projection"),
                 self.find_configuration_property("atom_selection"),
+                self.find_configuration_property("atom_transmutation"),
                 self.find_configuration_property("weights"),
                 self.find_configuration_property("instrument_resolution"),
             )

@@ -135,56 +135,34 @@ class McStasVirtualInstrument(IJob):
         # The number of steps is set to 1 as the job is defined as single McStas run.
         self.numberOfSteps = 1
 
-        symbols = self.configuration["trajectory"]["instance"].chemical_system.atom_list
+        symbols = self.trajectory.chemical_system.atom_list
 
         # Compute some parameters used for a proper McStas run
         self._mcStasPhysicalParameters = {"density": 0.0}
         self._mcStasPhysicalParameters["V_rho"] = 0.0
         self._mcStasPhysicalParameters["weight"] = sum(
-            [
-                self.configuration["trajectory"]["instance"].get_atom_property(
-                    s, "atomic_weight"
-                )
-                for s in symbols
-            ]
+            self.trajectory.get_atom_property(s, "atomic_weight") for s in symbols
         )
         self._mcStasPhysicalParameters["sigma_abs"] = (
             np.mean(
-                [
-                    self.configuration["trajectory"]["instance"].get_atom_property(
-                        s, "xs_absorption"
-                    )
-                    for s in symbols
-                ]
+                [self.trajectory.get_atom_property(s, "xs_absorption") for s in symbols]
             )
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_coh"] = (
             np.mean(
-                [
-                    self.configuration["trajectory"]["instance"].get_atom_property(
-                        s, "xs_coherent"
-                    )
-                    for s in symbols
-                ]
+                [self.trajectory.get_atom_property(s, "xs_coherent") for s in symbols]
             )
             * MCSTAS_UNITS_LUT["nm2"]
         )
         self._mcStasPhysicalParameters["sigma_inc"] = (
             np.mean(
-                [
-                    self.configuration["trajectory"]["instance"].get_atom_property(
-                        s, "xs_incoherent"
-                    )
-                    for s in symbols
-                ]
+                [self.trajectory.get_atom_property(s, "xs_incoherent") for s in symbols]
             )
             * MCSTAS_UNITS_LUT["nm2"]
         )
         for frameIndex in self.configuration["frames"]["value"]:
-            configuration = self.configuration["trajectory"]["instance"].configuration(
-                frameIndex
-            )
+            configuration = self.trajectory.configuration(frameIndex)
             cellVolume = configuration._unit_cell.volume
             self._mcStasPhysicalParameters["density"] += (
                 self._mcStasPhysicalParameters["weight"] / cellVolume

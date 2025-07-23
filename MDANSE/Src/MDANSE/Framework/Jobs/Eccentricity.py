@@ -75,21 +75,12 @@ class Eccentricity(IJob):
             main_result=True,
         )
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
-        self._indices = np.array(
-            [
-                idx
-                for idxs in self._configuration["atom_selection"]["indices"]
-                for idx in idxs
-            ]
-        )
+        self._atoms = self.trajectory.atom_names
+        self._indices = self.trajectory.atom_indices
         self._selectionMasses = np.array(
             [
-                m
-                for masses in self._configuration["atom_selection"]["masses"]
-                for m in masses
+                self.trajectory.get_atom_property(element, "atomic_weight")
+                for element in self.trajectory.selection_getter(self._atoms)
             ]
         )
 
@@ -104,7 +95,7 @@ class Eccentricity(IJob):
         """
         frameIndex = self.configuration["frames"]["value"][index]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
+        conf = self.trajectory.configuration(frameIndex)
         conf = conf.contiguous_configuration()
         series = conf["coordinates"][self._indices, :]
 
@@ -138,5 +129,5 @@ class Eccentricity(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

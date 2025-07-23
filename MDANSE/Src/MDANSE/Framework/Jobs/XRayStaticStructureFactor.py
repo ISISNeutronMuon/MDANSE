@@ -19,6 +19,10 @@ from collections.abc import Iterator
 import numpy as np
 import numpy.typing as npt
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    update_pair_results,
+)
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
@@ -88,7 +92,6 @@ class XRayStaticStructureFactor(DistanceHistogram):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -101,8 +104,6 @@ class XRayStaticStructureFactor(DistanceHistogram):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "grouping_level": "grouping_level",
             }
         },
     )
@@ -192,7 +193,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
                 units="au",
             )
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         def calc_func(
             label_i: str, label_j: str
@@ -254,42 +255,37 @@ class XRayStaticStructureFactor(DistanceHistogram):
                     fact1 * np.sum((r**2) * pdfIntra * sincqr, axis=1) * dr,
                 )
 
-        self.configuration["grouping_level"].update_pair_results(
-            calc_func, self._outputData
-        )
+        update_pair_results(self.trajectory, calc_func, self._outputData)
 
         asf = {
             name: atomic_scattering_factor(
-                ele[0],
+                ele,
                 self._outputData["xssf/axes/q"],
-                self.configuration["trajectory"]["instance"],
+                self.trajectory,
             )
             for name, ele in zip(
-                self.configuration["atom_selection"]["names"],
-                self.configuration["atom_selection"]["elements"],
+                self.trajectory.selection_getter(self.trajectory.atom_names),
+                self.trajectory.selection_getter(self.trajectory.atom_types),
             )
         }
         all_asf = {
             name: atomic_scattering_factor(
-                ele[0],
+                ele,
                 self._outputData["xssf/axes/q"],
-                self.configuration["trajectory"]["instance"],
+                self.trajectory,
             )
-            for name, ele in zip(
-                self.configuration["atom_selection"]["all_names"],
-                self.configuration["atom_selection"]["all_elements"],
-            )
+            for name, ele in zip(self.trajectory.atom_names, self.trajectory.atom_types)
         }
         weight_dict = get_weights(
             asf,
             all_asf,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
         )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = (n_selected / n_total) ** 2
 
         if self.intra:
@@ -310,7 +306,8 @@ class XRayStaticStructureFactor(DistanceHistogram):
             self._outputData["xssf/inter/total"].scaling_factor = fact
             self._outputData["xssf/total"].scaling_factor = fact
             for i in ("/intra", "/inter", ""):
-                self.configuration["grouping_level"].add_grouped_totals(
+                add_grouped_totals(
+                    self.trajectory,
                     self._outputData,
                     f"xssf{i}",
                     "LineOutputVariable",
@@ -336,5 +333,5 @@ class XRayStaticStructureFactor(DistanceHistogram):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

@@ -20,6 +20,10 @@ from collections.abc import Iterator
 import numpy as np
 import numpy.typing as npt
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    pair_labels,
+    update_pair_results,
+)
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 
 
@@ -67,7 +71,6 @@ class CoordinationNumber(DistanceHistogram):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -80,8 +83,6 @@ class CoordinationNumber(DistanceHistogram):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "grouping_level": "grouping_level",
             }
         },
     )
@@ -102,10 +103,8 @@ class CoordinationNumber(DistanceHistogram):
             units="nm",
         )
 
-        self.labels = self.configuration["grouping_level"].pair_labels(all_pairs=True)
-        self.labels_intra = self.configuration["grouping_level"].pair_labels(
-            intra=True, all_pairs=True
-        )
+        self.labels = pair_labels(self.trajectory, all_pairs=True)
+        self.labels_intra = pair_labels(self.trajectory, intra=True, all_pairs=True)
 
         for label, _ in self.labels:
             self._outputData.add(
@@ -150,7 +149,7 @@ class CoordinationNumber(DistanceHistogram):
         for k in self._concentrations:
             self._concentrations[k] /= nFrames
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
 
         # symmetrize the data
         for i, j in it.combinations_with_replacement(self.selectedElements, 2):
@@ -211,8 +210,8 @@ class CoordinationNumber(DistanceHistogram):
                 yield "cn/inter", False, rho_j * cnInter
                 yield "cn/intra", True, rho_j * cnIntra
 
-        self.configuration["grouping_level"].update_pair_results(
-            calc_func, self._outputData, all_pairs=True
+        update_pair_results(
+            self.trajectory, calc_func, self._outputData, all_pairs=True
         )
 
         self._outputData.write(
@@ -222,6 +221,6 @@ class CoordinationNumber(DistanceHistogram):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
 
         super().finalize()

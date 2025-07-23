@@ -16,13 +16,16 @@
 from __future__ import annotations
 
 import collections
-import itertools
 from math import sqrt
 
 import numpy as np
 from scipy.signal import correlate
 
 from MDANSE.Core.Error import Error
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
@@ -75,7 +78,6 @@ class DynamicCoherentStructureFactor(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -88,8 +90,6 @@ class DynamicCoherentStructureFactor(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "grouping_level": "grouping_level",
             }
         },
     )
@@ -162,12 +162,14 @@ class DynamicCoherentStructureFactor(IJob):
             units="au",
         )
 
-        self._indicesPerElement = self.configuration["atom_selection"].get_indices()
+        self._indicesPerElement = self.trajectory.get_indices()
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
 
-        self.labels = self.configuration["grouping_level"].pair_labels()
+        self.labels = pair_labels(
+            self.trajectory,
+        )
 
         for pair_str, _ in self.labels:
             self._outputData.add(
@@ -222,7 +224,7 @@ class DynamicCoherentStructureFactor(IJob):
         self._cell_std = 0.0
         try:
             all_cells = [
-                self.configuration["trajectory"]["instance"].unit_cell(frame)._unit_cell
+                self.trajectory.unit_cell(frame)._unit_cell
                 for frame in self.configuration["frames"]["value"]
             ]
         except TypeError:
@@ -260,14 +262,14 @@ class DynamicCoherentStructureFactor(IJob):
         if shell not in self.configuration["q_vectors"]["value"]:
             return index, None
 
-        traj = self.configuration["trajectory"]["instance"]
+        traj = self.trajectory
 
         nQVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"].shape[
             1
         ]
 
         rho = {}
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in self.trajectory.unique_names:
             rho[element] = np.zeros(
                 (self.configuration["frames"]["number"], nQVectors),
                 dtype=np.complex64,
@@ -339,13 +341,16 @@ class DynamicCoherentStructureFactor(IJob):
             self._outputData,
         )
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        nAtomsPerElement = self.trajectory.get_natoms()
+
+        selected_weights, all_weights = self.trajectory.get_weights(
+            prop=self.configuration["weights"]["property"]
+        )
         weight_dict = get_weights(
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
             conc_exp=0.5,
         )
@@ -374,7 +379,7 @@ class DynamicCoherentStructureFactor(IJob):
                 )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = len(self.trajectory.atom_types)
         fact = n_selected / n_total
 
         self._outputData["dcsf/f(q,t)/total"][:] = (
@@ -382,7 +387,8 @@ class DynamicCoherentStructureFactor(IJob):
         )
         self._outputData["dcsf/f(q,t)/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "dcsf/f(q,t)",
             "SurfaceOutputVariable",
@@ -397,7 +403,8 @@ class DynamicCoherentStructureFactor(IJob):
         )
         self._outputData["dcsf/s(q,f)/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "dcsf/s(q,f)",
             "SurfaceOutputVariable",
@@ -415,7 +422,8 @@ class DynamicCoherentStructureFactor(IJob):
                 / fact
             )
             self._outputData["dcsf/s(q,f)/ideal/total"].scaling_factor = fact
-            self.configuration["grouping_level"].add_grouped_totals(
+            add_grouped_totals(
+                self.trajectory,
                 self._outputData,
                 "dcsf/s(q,f)/ideal",
                 "SurfaceOutputVariable",
@@ -432,5 +440,5 @@ class DynamicCoherentStructureFactor(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

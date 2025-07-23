@@ -13,10 +13,29 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import numpy as np
 from qtpy.QtCore import QDir, QSize
-from qtpy.QtGui import QIcon, QPixmap
+from qtpy.QtGui import QIcon, QImage, QPixmap
 
 from MDANSE.MLogging import LOG
+
+
+def qimage_to_array(image: QImage) -> np.ndarray:
+    image.convertToFormat(QImage.Format.Format_RGBA8888)
+    w, h = image.width(), image.height()
+    temp = image.bits()
+    temp.setsize(w * h * 4)
+    return np.frombuffer(temp, np.uint8).reshape((h, w, 4))
+
+
+def mean_rgb(image_array: np.ndarray) -> float:
+    luminance = (
+        0.3 * image_array[:, :, 0]
+        + 0.59 * image_array[:, :, 1]
+        + 0.11 * image_array[:, :, 2]
+    )
+    luminance *= image_array[:, :, 3]
+    return np.mean(luminance)
 
 
 class Resources:
@@ -43,8 +62,15 @@ class Resources:
             iname,
             icon,
         ) in self._icons.items():
-            pixmap = icon.pixmap(QSize(32, 32))
-            image = pixmap.toImage()
-            image.invertPixels()
-            newpixmap = QPixmap.fromImage(image)
-            self._inverted_icons[iname] = QIcon(newpixmap)
+            pixmap = icon.pixmap(QSize(64, 64))
+            original_image: QImage = pixmap.toImage()
+            inverted_image: QImage = pixmap.toImage()
+            inverted_image.invertPixels()
+            newpixmap = QPixmap.fromImage(inverted_image)
+            value_orig = mean_rgb(qimage_to_array(original_image))
+            value_inv = mean_rgb(qimage_to_array(inverted_image))
+            if value_orig < value_inv:
+                self._inverted_icons[iname] = QIcon(newpixmap)
+            else:
+                self._inverted_icons[iname] = QIcon(pixmap)
+                self._icons[iname] = QIcon(newpixmap)

@@ -1,8 +1,11 @@
 import pytest
+import h5py
+
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 named_mols = CONV_DIR / "named_molecules.mdt"
 
@@ -77,6 +80,16 @@ def disf(tmp_path_factory):
     disf.run(parameters, status=True)
 
     yield out_file
+
+
+def test_trajectory_state():
+    traj = Trajectory(named_mols)
+    traj.set_selection(set(range(60))-set(range(12,60,3)))
+    traj.set_transmutation({0:'B', 3:'B', 6: 'B', 9: 'B'})
+    traj.set_grouping("molecule")
+    uniq = traj.unique_elements
+    print(uniq)
+    assert 'C' not in uniq
 
 
 @pytest.mark.parametrize(
@@ -221,3 +234,52 @@ def test_ssfsf(generate_benchmarks, tmp_path, dcsf):
     assert log_file.is_file()
 
     compare_hdf5(out_file, result_file, "ssf/total", startswith=True, atol=1e-6)
+
+
+@pytest.mark.parametrize(
+    "job_info",
+    [
+        ("DensityOfStates", ["dos", "vacf"], "equal", 1e-10, 1e-7),
+        ("PositionPowerSpectrum", ["pacf", "pps"], "equal", 1e-10, 1e-7),
+        ("DynamicCoherentStructureFactor", ["dcsf"], "b_coherent", 1e-6, 1e-6),
+    ],
+    ids=lambda x: x[0],
+)
+def test_selection_grouping_transmutation_combined(generate_benchmarks, tmp_path, parameters, job_info):
+    job_type, outputs, weights, atol, rtol = job_info
+    temp_name = tmp_path / "output"
+    log_file = temp_name.with_suffix(".log")
+    out_file = temp_name.with_suffix(".mda")
+    result_file = RESULTS_DIR / f"grouping_molecule_{job_type}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
+
+    parameters["atom_selection"] = '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_dummy", "operation_type": "difference"}, "2": {"function_name": "select_atoms", "atom_types": ["O"], "operation_type": "intersection"}, "3": {"function_name": "select_atoms", "index_range": [0, 12], "operation_type": "union"}}'
+    parameters['atom_transmutation'] = '{"0": "B", "3": "B", "6": "B", "9": "B"}'
+    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
+    parameters["weights"] = weights
+
+    job = IJob.create(job_type)
+    job.run(parameters, status=True)
+
+    if generate_benchmarks:
+        return
+
+    assert out_file.is_file()
+    assert log_file.is_file()
+
+    h5_file = h5py.File(out_file)
+    for dset_name in outputs:
+        if dset_name == "dcsf":
+            assert f"/{dset_name}/C" not in h5_file
+            assert f"/{dset_name}/s(q,f)/<C1_O2><C1_O2>/CO" not in h5_file
+            assert f"/{dset_name}/s(q,f)/<C1_O2><C1_O2>/CC" not in h5_file
+            assert f"/{dset_name}/s(q,f)/<C1_O2><C1_O2>/OO" in h5_file
+            assert f"/{dset_name}/s(q,f)/<C1_O2><C1_O2>/BO" in h5_file
+            assert f"/{dset_name}/s(q,f)/<C1_O2><C1_O2>/BB" in h5_file
+        else:
+            assert f"/{dset_name}/C" not in h5_file
+            assert f"/{dset_name}/<C1_O2>/O" in h5_file
+            assert f"/{dset_name}/<C1_O2>/B" in h5_file
+

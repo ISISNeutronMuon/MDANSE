@@ -21,6 +21,11 @@ import numpy as np
 import numpy.typing as npt
 
 from MDANSE.Chemistry import ChemicalSystem
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+    update_pair_results,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
@@ -364,7 +369,6 @@ class VanHoveFunctionDistinct(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -377,8 +381,6 @@ class VanHoveFunctionDistinct(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "grouping_level": "grouping_level",
             }
         },
     )
@@ -388,6 +390,7 @@ class VanHoveFunctionDistinct(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "atom_selection": "atom_selection",
+                "atom_transmutation": "atom_transmutation",
             },
         },
     )
@@ -404,23 +407,25 @@ class VanHoveFunctionDistinct(IJob):
             "instance"
         ].chemical_system.unique_molecules():
             self.indices_intra = intramolecular_lookup_dict(
-                self.configuration["trajectory"]["instance"].chemical_system,
+                self.trajectory.chemical_system,
             )
         else:
             self.indices_intra = None
         self.intra = self.indices_intra is not None
 
-        self.selectedElements = self.configuration["atom_selection"]["unique_names"]
+        self.selectedElements = list(self.trajectory.unique_names)
         self.nElements = len(self.selectedElements)
         self._elementsPairs = sorted(
             it.combinations_with_replacement(self.selectedElements, 2),
         )
-        self.labels = self.configuration["grouping_level"].pair_labels()
-        self.labels_intra = self.configuration["grouping_level"].pair_labels(intra=True)
+        self.labels = pair_labels(
+            self.trajectory,
+        )
+        self.labels_intra = pair_labels(self.trajectory, intra=True)
 
         self.n_mid_points = len(self.configuration["r_values"]["mid_points"])
 
-        conf = self.configuration["trajectory"]["instance"].configuration(
+        conf = self.trajectory.configuration(
             self.configuration["frames"]["first"],
         )
         if not hasattr(conf, "unit_cell"):
@@ -491,15 +496,11 @@ class VanHoveFunctionDistinct(IJob):
                 units="au",
             )
 
-        self._indices = [
-            idx
-            for idxs in self.configuration["atom_selection"]["indices"]
-            for idx in idxs
-        ]
+        self._indices = self.trajectory.atom_indices
         self.indexToSymbol = np.array(
             [
                 self.selectedElements.index(name)
-                for name in self.configuration["atom_selection"]["names"]
+                for name in self.trajectory.selection_getter(self.trajectory.atom_names)
             ],
             dtype=np.int32,
         )
@@ -537,7 +538,7 @@ class VanHoveFunctionDistinct(IJob):
         """Calculate results for a single time step.
 
         Calculates the distance histogram between the configurations
-        at the inputted time difference. The distance histograms are
+        at the input time difference. The distance histograms are
         then used to calculate the distinct part of the van Hove function.
 
         Parameters
@@ -554,17 +555,17 @@ class VanHoveFunctionDistinct(IJob):
         bins_intra = np.zeros((self.nElements, self.nElements, self.n_mid_points))
         bins_total = np.zeros((self.nElements, self.nElements, self.n_mid_points))
 
-        # average the distance histograms at the inputted time
+        # average the distance histograms at the input time
         # difference over a number of configuration
         for i in range(self.n_configs):
             frame_index_t0 = self.configuration["frames"]["value"][i]
-            conf_t0 = self.configuration["trajectory"]["instance"].configuration(
+            conf_t0 = self.trajectory.configuration(
                 frame_index_t0,
             )
             coords_t0 = conf_t0.coordinates[self._indices]
 
             frame_index_t1 = self.configuration["frames"]["value"][i + time]
-            conf_t1 = self.configuration["trajectory"]["instance"].configuration(
+            conf_t1 = self.trajectory.configuration(
                 frame_index_t1,
             )
             coords_t1 = conf_t1.coordinates[self._indices]
@@ -621,7 +622,7 @@ class VanHoveFunctionDistinct(IJob):
             The time difference.
         x : tuple[np.ndarray, np.ndarray]
             A tuple containing a histogram of the distances between
-            configurations at the inputted time difference.
+            configurations at the input time difference.
 
         """
         if self.intra:
@@ -659,7 +660,7 @@ class VanHoveFunctionDistinct(IJob):
             results : npt.NDArray
                 The results.
             """
-            n_atms = self.configuration["atom_selection"].get_natoms()
+            n_atms = self.trajectory.get_natoms()
             ni = n_atms[label_i]
             nj = n_atms[label_j]
 
@@ -685,22 +686,23 @@ class VanHoveFunctionDistinct(IJob):
                 yield "vh/g(r,t)/inter", False, van_hove_inter
                 yield "vh/g(r,t)/intra", True, van_hove_intra
 
-        self.configuration["grouping_level"].update_pair_results(
-            calc_func, self._outputData
-        )
+        update_pair_results(self.trajectory, calc_func, self._outputData)
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        nAtomsPerElement = self.trajectory.get_natoms()
+
+        selected_weights, all_weights = self.trajectory.get_weights(
+            prop=self.configuration["weights"]["property"]
+        )
         weight_dict = get_weights(
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
         )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = (n_selected / n_total) ** 2
 
         if self.intra:
@@ -715,7 +717,8 @@ class VanHoveFunctionDistinct(IJob):
                 vhs = weighted_sum(self._outputData, f"vh/g(r,t){i}/%s", labels)
                 self._outputData[f"vh/g(r,t){i}/total"][...] = vhs / fact
                 self._outputData[f"vh/g(r,t){i}/total"].scaling_factor = fact
-                self.configuration["grouping_level"].add_grouped_totals(
+                add_grouped_totals(
+                    self.trajectory,
                     self._outputData,
                     f"vh/g(r,t){i}",
                     "SurfaceOutputVariable",
@@ -738,5 +741,5 @@ class VanHoveFunctionDistinct(IJob):
             str(self),
             self,
         )
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

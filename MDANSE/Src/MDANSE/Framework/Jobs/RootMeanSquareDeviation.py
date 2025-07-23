@@ -18,6 +18,9 @@ import collections
 
 import numpy as np
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -53,8 +56,6 @@ class RootMeanSquareDeviation(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
             }
         },
     )
@@ -67,7 +68,6 @@ class RootMeanSquareDeviation(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -77,7 +77,7 @@ class RootMeanSquareDeviation(IJob):
     def initialize(self):
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.numberOfSteps = len(self.trajectory.atom_indices)
 
         self._referenceIndex = self.configuration["reference_frame"]["value"]
 
@@ -90,7 +90,7 @@ class RootMeanSquareDeviation(IJob):
         )
 
         # Will initially store the mean square deviation before appling the root
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in self.trajectory.unique_names:
             self._outputData.add(
                 f"rmsd/{element}",
                 "LineOutputVariable",
@@ -109,9 +109,7 @@ class RootMeanSquareDeviation(IJob):
             main_result=True,
         )
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
         """
@@ -121,10 +119,10 @@ class RootMeanSquareDeviation(IJob):
         @type index: int.
         """
 
-        indices = self.configuration["atom_selection"]["indices"][index]
+        atom_index = self.trajectory.atom_indices[index]
 
-        series = self.configuration["trajectory"]["instance"].read_com_trajectory(
-            indices,
+        series = self.trajectory.read_atomic_trajectory(
+            atom_index,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -143,7 +141,7 @@ class RootMeanSquareDeviation(IJob):
             #. x (any): The returned result(s) of run_step
         """
 
-        element = self.configuration["atom_selection"]["names"][index]
+        element = self._atoms[self.trajectory.atom_indices[index]]
 
         self._outputData[f"rmsd/{element}"] += x
         self._outputData["rmsd/total"] += x
@@ -152,9 +150,10 @@ class RootMeanSquareDeviation(IJob):
         """
         Finalize the job.
         """
-        n_atms = self.configuration["atom_selection"].get_total_natoms()
+        n_atms = self.trajectory.get_total_natoms()
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "rmsd",
             "LineOutputVariable",
@@ -167,7 +166,7 @@ class RootMeanSquareDeviation(IJob):
             partial_result=True,
         )
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         for element, number in nAtomsPerElement.items():
             self._outputData[f"rmsd/{element}"][:] = np.sqrt(
                 self._outputData[f"rmsd/{element}"] / number
@@ -184,5 +183,5 @@ class RootMeanSquareDeviation(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()
