@@ -301,7 +301,7 @@ class ResolutionWidget(QWidget):
         self._unit_selector.currentTextChanged.connect(self.recalculate_peak)
         self.update_model(self._peak_selector.currentText())
 
-    def make_canvas(self):
+    def make_canvas(self, width=12.0, height=9.0, dpi=100):
         """Creates a matplotlib figure for plotting
 
         Parameters
@@ -320,7 +320,7 @@ class ResolutionWidget(QWidget):
         """
         canvas = QWidget(self)
         layout = QVBoxLayout(canvas)
-        figure = mpl.figure()
+        figure = mpl.figure(figsize=[width, height], dpi=dpi, frameon=True)
         figAgg = FigureCanvasQTAgg(figure)
         figAgg.setParent(canvas)
         figAgg.updateGeometry()
