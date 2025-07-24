@@ -73,6 +73,8 @@ FLOAT_SPINBOX_DECIMALS = 8
 
 
 class BackgroundThread(QThread):
+    """Runs one MDANSE job and returns the requested datasets."""
+
     results = Signal(object)
 
     def __init__(
@@ -84,6 +86,11 @@ class BackgroundThread(QThread):
         self.res_keys = result_keys
 
     def run(self):
+        """Run the job and emit datasets with labels in self.res_keys.
+
+        This will be run automatically after the thread's .start() method
+        has been called.
+        """
         job = IJob.create(self.job_name)
         self.parameters["output_files"] = (
             "OUTPUT_FILENAME",
@@ -97,8 +104,11 @@ class BackgroundThread(QThread):
 
 
 class ConstrainedDoubleSpinBox(QDoubleSpinBox):
-    """Custom QDoubleSpinBox allowing for the application of a function
-    to changed values in order to find an appropriate new value that satisfies the constraint.
+    """A spinbox that only allows values from a specific set.
+
+    This custom QDoubleSpinBox allows for the application of a function
+    to changed values in order to find an appropriate new value that
+    satisfies the constraint.
 
     """
 
@@ -167,8 +177,13 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         self.textChanged.connect(callback)
 
     def setValue(self, val) -> None:
-        """Overrides setValue method of QDoubleSpinBox.
-        Sets a record of the initial value of the spinbox, for determination of direction of change.
+        """Store the input value and change the value in the spin box.
+
+        Overrides setValue method of QDoubleSpinBox.
+        Sets a record of the initial value of the spinbox, for determination
+        of direction of change.
+        Other methods of this class will change the value to the nearest one
+        that is on the grid of allowed values.
 
         Parameters
         ----------
@@ -180,7 +195,9 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         super().setValue(val)
 
     def snap_to_value(self, value: Any) -> None:
-        """Apply the constraint by snapping up/down (depending on the change direction) to the nearest value
+        """Change the value to the nearest allowed value.
+
+        Apply the constraint by snapping up/down (depending on the change direction) to the nearest value
         modulo zero.
 
         Parameters
@@ -200,7 +217,9 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         self.setValue(np.round(new_value, FLOAT_SPINBOX_DECIMALS))
 
     def search_by_function(self, value: Any) -> None:
-        """Apply the constraint formalised in the lambda. The spinbox will search in both directions until the lambda
+        """Apply the constraint formalised in the lambda.
+
+        The spinbox will search in both directions until the lambda
         returns True on the current value.
 
         Parameters
@@ -248,7 +267,7 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
             Value of the spinbox.
 
         Returns
-        ----------
+        -------
         float
             Value of the spinbox.
 
@@ -258,6 +277,7 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
 
 class FilterPreferencesGroup(QObject):
     """Interface for a filter preferences group.
+
     Provides a grid layout of settings for a given filter.
 
     """
@@ -289,7 +309,7 @@ class FilterPreferencesGroup(QObject):
         self._preferences_updated.connect(render_func)
 
     def store_widget(self, name: str, widget: QWidget) -> None:
-        """Stores a widget in self.
+        """Store a widget in self.
 
         Parameters
         ----------
@@ -307,12 +327,17 @@ class FilterPreferencesGroup(QObject):
         self.widgets[name] = widget
 
     def add_combobox(
-        self, key: str, items: tuple = (), tooltip: str = "", enabled: bool = True
+        self,
+        key: str,
+        items: tuple = (),
+        tooltip: str = "",
+        *,
+        enabled: bool = True,
     ) -> QWidget:
         """Produce a combobox for a filter designer preference.
 
         Parameters
-        --------
+        ----------
         key : str
             Preference name.
         items : tuple
@@ -392,7 +417,7 @@ class FilterPreferencesGroup(QObject):
         attenuation_checkbox.setEnabled(True)
         attenuation_checkbox.stateChanged.connect(self.collect_inputs)
         attenuation_checkbox.setToolTip(
-            "Display trajectory power spectrum for comparison"
+            "Display trajectory power spectrum for comparison",
         )
         self.grid.addWidget(attenuation_checkbox, 3, 1)
 
@@ -400,6 +425,12 @@ class FilterPreferencesGroup(QObject):
 
     @Slot(bool)
     def enable_pps(self, enable: bool):
+        """Allow or block another calculation of PositionPowerSpectrum.
+
+        The checkbox will not be possible to uncheck while the calculation
+        is running, and the label text will inform the user that the
+        calculation is in progres..
+        """
         self.pps_checkbox.setEnabled(enable)
         if enable:
             self.pps_label.setText("Show trajectory attenuation")
@@ -430,7 +461,8 @@ class FilterPreferencesGroup(QObject):
 
 class FilterSettingGroup(QObject):
     """Interface for a filter settings group.
-    provides a grid layout of settings for a given filter.
+
+    Provides a grid layout of settings for a given filter.
 
     """
 
@@ -488,7 +520,7 @@ class FilterSettingGroup(QObject):
         self.schema = schema
         self.load_from_schema()
 
-        freq_key = [key for key in self.schema.keys() if key.endswith("_freq")]
+        freq_key = [key for key in self.schema if key.endswith("_freq")]
         initial_value = 1 / (
             self.parent_attributes["time_step_ps"] * self.parent_attributes["n_steps"]
         )
@@ -511,7 +543,7 @@ class FilterSettingGroup(QObject):
             self.attributes[name] = setting_dict["value"]
 
     def store_widget(self, name: str, widget: QWidget) -> None:
-        """Stores a widget in self.
+        """Store a widget in self.
 
         Parameters
         ----------
@@ -524,11 +556,12 @@ class FilterSettingGroup(QObject):
         -------
         QWidget
             Stored widget
+
         """
         self.widgets.update({name: widget})
 
     def retrieve_widget(self, name: str) -> QWidget | None:
-        """Retrieves a widget from self.
+        """Retrieve a widget from self.
 
         Parameters
         ----------
@@ -541,6 +574,7 @@ class FilterSettingGroup(QObject):
         -------
         QWidget
             Stored widget.
+
         """
         return self.widgets.get(name)
 
@@ -557,6 +591,7 @@ class FilterSettingGroup(QObject):
         -------
         Any
             The widget value.
+
         """
         if isinstance(widget, QSpinBox):
             return widget.value()
@@ -580,7 +615,7 @@ class FilterSettingGroup(QObject):
         self._settings_updated.emit(self.attributes)
 
     def as_grid(self) -> QGridLayout:
-        """Creates the filter settings grid layout.
+        """Create the filter settings grid layout.
 
         Parameters
         ----------
@@ -588,7 +623,7 @@ class FilterSettingGroup(QObject):
             Selected filter class (one of [Butterworth, ChebyshevTypeI, ChebyshevTypeII, Elliptical, Bessel, Notch, Peak, Comb]).
 
         Returns
-        ----------
+        -------
         QWidget
             Grid layout for filter settings.
 
@@ -609,7 +644,7 @@ class FilterSettingGroup(QObject):
         return self.grid
 
     def setting_to_widget(self, setting_key: str, val_group: dict) -> QWidget:
-        """Converts the setting dictionary to the corresponding setting widget and sets up connections.
+        """Convert the setting dictionary to the corresponding setting widget and sets up connections.
 
         Parameters
         ----------
@@ -649,7 +684,7 @@ class FilterSettingGroup(QObject):
                     FLOAT_SPINBOX_DECIMALS,
                 )
 
-                max = np.round(
+                vmax = np.round(
                     Filter.nyquist(time_step, units=self.units) - bin_width,
                     FLOAT_SPINBOX_DECIMALS,
                 )
@@ -658,7 +693,7 @@ class FilterSettingGroup(QObject):
                 if Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags:
                     widget = ConstrainedDoubleSpinBox(
                         minimum=bin_width,
-                        maximum=max,
+                        maximum=vmax,
                         step=bin_width,
                         value=bin_width,
                     )
@@ -668,7 +703,7 @@ class FilterSettingGroup(QObject):
                 else:
                     widget = ConstrainedDoubleSpinBox(
                         minimum=bin_width,
-                        maximum=max,
+                        maximum=vmax,
                         step=bin_width,
                         value=bin_width,
                     )
@@ -706,7 +741,9 @@ class FilterSettingGroup(QObject):
 
     @staticmethod
     def generate_grid_indices(n: int):
-        """Returns a generator for a pair of position tuples representing the indices settings grid.
+        """Generate indices for widgets positions on a grid.
+
+        Returns a generator for a pair of position tuples representing the indices settings grid.
         The first element of the tuple is the position of the settings widget label, and the second element is the widget itself.
 
         Parameters
@@ -721,7 +758,8 @@ class FilterSettingGroup(QObject):
 
 class BoundedFilterSettingsGroup(FilterSettingGroup):
     """Interface for a filter settings group, where the filter cutoff frequency is bounded.
-    provides a grid layout of settings for a given filter.
+
+    Provides a grid layout of settings for a given filter.
 
     Attributes
     ----------
@@ -790,7 +828,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         """Toggle the pair of critical frequency inputs on/off.
 
         Parameters
-        --------
+        ----------
         on : bool
             If true, both inputs for upper and lower frequency bounds are enabled, else only one input is enabled.
 
@@ -859,7 +897,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         """Populate the preferences grid layout with the filter designer preference widgets.
 
         Parameters
-        ---------
+        ----------
         grid : QGridLayout
             Grid layout to which preference widgets will be added.
 
@@ -887,6 +925,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
 
 class FilterDesigner(QDialog):
     """Graphical interface for the trajectory filter.
+
     Generates a JSON string that specifies the designed filter.
 
     Attributes
@@ -941,6 +980,7 @@ class FilterDesigner(QDialog):
         -------
         dict[str, str]
             All configuration parameters of TrajectoryFilter
+
         """
         config = self.configurator.configurable._configuration
         return {
@@ -950,7 +990,7 @@ class FilterDesigner(QDialog):
         }
 
     def current_filter_units(self) -> Filter.FrequencyUnits:
-        """Finds the frequency unit enum based on the current filter.
+        """Find the frequency unit enum based on the current filter.
 
         Returns
         -------
@@ -987,7 +1027,6 @@ class FilterDesigner(QDialog):
 
     def create_designer(self) -> None:
         """Create filter designer elements."""
-
         graph_layout = QVBoxLayout()
         settings_layout = QVBoxLayout()
 
@@ -1027,10 +1066,8 @@ class FilterDesigner(QDialog):
 
         Parameters
         ----------
-        key : str
-            Name of the edited preference.
-        value : Any
-            Value of the edited preference.
+        preferences: dict
+            A dictionary of filter settings.
 
         """
         self.preferences.update(preferences)
@@ -1056,28 +1093,46 @@ class FilterDesigner(QDialog):
         return signal.resample(values, to_len) / values.max()
 
     @Slot(object)
-    def accept_results(self, res_dict: dict[str, Any]):
+    def accept_results(self, res_dict: dict[str, np.ndarray]):
+        """Store the results of the calculation inf a background thread.
+
+        Parameters
+        ----------
+        res_dict: dict[str, np.ndarray]
+            A dictionary of {dataset_name: dataset_array} pairs.
+
+        """
         self._trajectory_power_spectrum = list(res_dict.values())
         self.pps_thread = None
         self.render_canvas_assets()
 
     @Slot()
     def unblock_checkbox(self):
+        """Make the checkbox clickable after the calculation thread has finshed."""
         self.preferences_group.enable_pps(True)
 
     def update_pps(self):
+        """Run another PositionPowerSpectrum calculation.
+
+        It will only start a new calculation if the calculation is not running already,
+        there are no results so far, or the input parameters have changed.
+        """
         if (
             self.pps_thread is not None
             or not self.preferences_group.pps_checkbox.isChecked()
         ):
             return
         new_params = self.find_configuration()
-        if self.pps_last_params:
-            if all(self.pps_last_params[k] == new_params[k] for k in new_params):
-                return
+        if self.pps_last_params and all(
+            self.pps_last_params[k] == new_params[k] for k in new_params
+        ):
+            return
         self.pps_last_params.update(new_params)
         self.pps_thread = BackgroundThread(
-            None, "PositionPowerSpectrum", new_params, ["pps/axes/romega", "pps/total"]
+            None,
+            "PositionPowerSpectrum",
+            new_params,
+            ["pps/axes/romega", "pps/total"],
         )
         self.pps_thread.results.connect(self.accept_results)
         self.pps_thread.finished.connect(self.unblock_checkbox)
@@ -1085,14 +1140,17 @@ class FilterDesigner(QDialog):
         self.pps_thread.start()
 
     def set_trajectory_power_spectrum(
-        self, filter: Filter
+        self,
+        tr_filter: Filter,
     ) -> tuple[np.ndarray, np.ndarray]:
-        """Generate an appropriately resampled power spectrum for the input trajectory,
+        """Put curves on the same scale for the plot.
+
+        Generate an appropriately resampled power spectrum for the input trajectory,
         as well as the multiplicative attenuation effect of the designed filter.
 
         Parameters
         ----------
-        filter : Filter
+        tr_filter : Filter
             Filter class for the designed filter.
 
         Returns
@@ -1103,7 +1161,7 @@ class FilterDesigner(QDialog):
             Attenuated power spectrum due to the designed filter response.
 
         """
-        response = filter.freq_response
+        response = tr_filter.freq_response
 
         # Trajectory power spectrum data
         raw_power_spectrum = copy.deepcopy(self._trajectory_power_spectrum)
@@ -1117,15 +1175,15 @@ class FilterDesigner(QDialog):
         )
 
         # Set custom frequency range on filter object
-        filter.custom_freq_range = power_spectrum_freqs
-        filter.freq_response = (filter.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
+        tr_filter.custom_freq_range = power_spectrum_freqs
+        tr_filter.freq_response = (tr_filter.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
 
         # Resample and normalise trajectory power spectrum (y-axis)
         ps = raw_power_spectrum_values / np.max(raw_power_spectrum_values)
 
         attenuation = interp1d(
-            filter.freq_response.frequencies,
-            filter.freq_response.magnitudes,
+            tr_filter.freq_response.frequencies,
+            tr_filter.freq_response.magnitudes,
             fill_value=0.0,
             bounds_error=False,
         )
@@ -1135,7 +1193,7 @@ class FilterDesigner(QDialog):
         return (raw_power_spectrum_freqs, ps, attenuated_ps)
 
     def create_settings_layout(self, widget_area: QVBoxLayout) -> None:
-        """Creates the filter settings vertical layout.
+        """Create the filter settings vertical layout.
 
         Parameters
         ----------
@@ -1162,7 +1220,8 @@ class FilterDesigner(QDialog):
         # Add each of the filter settings grid layout to the stack
         settings_groupbox = QGroupBox("Settings")
         settings_groupbox.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Maximum,
         )
 
         for name, filter_class in FILTER_MAP.items():
@@ -1193,11 +1252,12 @@ class FilterDesigner(QDialog):
         # Add the filter designer preferences stack layout
         preferences_groupbox = QGroupBox("Preferences")
         preferences_groupbox.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Maximum,
         )
 
         self.preferences_group = FilterPreferencesGroup(
-            render_func=self.edit_preferences
+            render_func=self.edit_preferences,
         )
         preferences_groupbox.setLayout(self.preferences_group.as_grid())
 
@@ -1208,7 +1268,7 @@ class FilterDesigner(QDialog):
             {
                 name: FilterPreferencesGroup.visit(widget)
                 for name, widget in self.preferences_group.widgets.items()
-            }
+            },
         )
 
         self.graph_ready = True
@@ -1230,9 +1290,9 @@ class FilterDesigner(QDialog):
         freqs: FrequencyDomain = TrajectoryFilterConfigurator._default_filter.freq_response,
         db_response: bool = False,
         energies: bool = False,
-        trajectory_power_spectrum: tuple[np.ndarray, np.ndarray] = None,
+        trajectory_power_spectrum: tuple[np.ndarray, np.ndarray] | None = None,
     ) -> None:
-        """Renders the graph of the designed filter frequency response.
+        """Render the graph of the designed filter frequency response.
 
         Parameters
         ----------
@@ -1297,7 +1357,7 @@ class FilterDesigner(QDialog):
     def render_graph_text(
         self, polynomial: str, cutoff: float, sample_freq: float
     ) -> None:
-        """Renders the text containing the filter transfer function polynomial, cutoff energy, and simulation sample frequency.
+        """Render the text containing the filter transfer function polynomial, cutoff energy, and simulation sample frequency.
 
         Parameters
         ----------
@@ -1324,7 +1384,7 @@ class FilterDesigner(QDialog):
             self._figure_info.append(f"           {denominator}")
         else:
             self._figure_info.append(
-                "Number of filter coefficients exceeds available display area"
+                "Number of filter coefficients exceeds available display area",
             )
             self._figure_info.append(" ")
             self._figure_info.append(" ")
@@ -1360,11 +1420,14 @@ class FilterDesigner(QDialog):
 
         # Check if we are displaying trajectory power spectral attenuation alongside filter response
         ps, attenuated_ps = None, None
-        if show_attenuation:
-            if self.pps_thread is None and self._trajectory_power_spectrum is not None:
-                ps_axis, ps, attenuated_ps = self.set_trajectory_power_spectrum(
-                    filter_preview
-                )
+        if (
+            show_attenuation
+            and self.pps_thread is None
+            and self._trajectory_power_spectrum is not None
+        ):
+            ps_axis, ps, attenuated_ps = self.set_trajectory_power_spectrum(
+                filter_preview,
+            )
 
         numerator, denominator = (
             filter_preview.to_digital_coeffs()
@@ -1383,12 +1446,15 @@ class FilterDesigner(QDialog):
         )
         self.render_graph_text(
             filter_class.rational_polynomial_string(
-                numerator, denominator, analog=analog_filter
+                numerator,
+                denominator,
+                analog=analog_filter,
             ),
             self.settings["attributes"].get(
                 "cutoff_freq",
                 self.settings["attributes"].get(
-                    "fundamental_freq", DEFAULT_FILTER_CUTOFF
+                    "fundamental_freq",
+                    DEFAULT_FILTER_CUTOFF,
                 ),
             ),
             filter_preview.sample_freq,
@@ -1445,12 +1511,12 @@ class FilterDesigner(QDialog):
         widget_area.addWidget(canvas)
         self.render_canvas_assets()
 
-    def combine_attributes(self, filter: Filter, attributes: dict) -> dict:
+    def combine_attributes(self, tr_filter: Filter, attributes: dict) -> dict:
         """Update the filter attributes with missing attributes, using default values.
 
         Parameters
         ----------
-        filter : Filter
+        tr_filter : Filter
             The filter class for the designed filter.
         attributes: dict
             Dictionary of filter attributes.
@@ -1461,15 +1527,12 @@ class FilterDesigner(QDialog):
             Combined attributes.
 
         """
-        for key, val in filter.default_settings.items():
+        for key, val in tr_filter.default_settings.items():
             attributes.setdefault(key, val["value"])
         return attributes
 
     def apply(self) -> None:
-        """Set the field of the TrajectoryFilterWidget to the currently
-        chosen setting in this widget.
-
-        """
+        """Pass the filter parameters to the main widget."""
         self.configurator.configure(self.settings)
 
         filter_class = FILTER_MAP[self.settings["filter"]]
@@ -1483,7 +1546,8 @@ class FilterDesigner(QDialog):
         self.close()
 
     def create_buttons(self) -> list[QPushButton]:
-        """
+        """Create button widgets needed by the filter interface.
+
         Returns
         -------
         list[QPushButton]
@@ -1539,7 +1603,7 @@ class TrajectoryFilterWidget(WidgetBase):
 
     @Slot()
     def helper_dialog(self) -> None:
-        """Opens the helper dialog."""
+        """Open the helper dialog."""
         if self.filter_designer.isVisible():
             self.filter_designer.close()
         else:
