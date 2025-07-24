@@ -48,6 +48,8 @@ from scipy import signal
 from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
     TrajectoryFilterConfigurator,
 )
+from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.PositionPowerSpectrum import PositionPowerSpectrum
 from MDANSE.Mathematics.Signal import (
     DEFAULT_FILTER_CUTOFF,
     DEFAULT_N_STEPS,
@@ -56,7 +58,6 @@ from MDANSE.Mathematics.Signal import (
     Filter,
     FrequencyDomain,
     filter_description_string,
-    power_spectrum,
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
@@ -68,6 +69,18 @@ DEFAULT_SPINBOX_STEP_FLOAT = 0.1
 
 # Decimal precision for a float spinbox
 FLOAT_SPINBOX_DECIMALS = 8
+
+
+def power_spectrum(parameters):
+    pps = IJob.create("PositionPowerSpectrum")
+    parameters["output_files"] = (
+        "OUTPUT_FILENAME",
+        ["FileInMemory"],
+        "no logs",
+    )
+    pps.run(parameters, status=True)
+    output = pps.results
+    return (output["pps/axes/romega"][:], output["pps/total"][:])
 
 
 class ConstrainedDoubleSpinBox(QDoubleSpinBox):
@@ -893,21 +906,20 @@ class FilterDesigner(QDialog):
         self.set_filter(self.configurator._default_filter.__name__)
         self.create_designer()
 
-    def find_configuration_property(self, key) -> Any:
-        """Find a configurator value from a key string.
-
-        Parameters
-        -------
-        key: str
-            Configuration key to get.
+    def find_configuration(self) -> dict[str, str]:
+        """Find the configuration of the main filter job.
 
         Returns
         -------
-        Any
-            Configuration value.
+        dict[str, str]
+            All configuration parameters of TrajectoryFilter
         """
         config = self.configurator.configurable._configuration
-        return config.get(key)
+        return {
+            k: v._original_input
+            for k, v in config.items()
+            if k in PositionPowerSpectrum.settings
+        }
 
     def current_filter_units(self) -> Filter.FrequencyUnits:
         """Finds the frequency unit enum based on the current filter.
@@ -997,15 +1009,7 @@ class FilterDesigner(QDialog):
 
         # Load trajectory attenuation
         if self.preferences["show_attenuation"] and not self._trajectory_power_spectrum:
-            self._trajectory_power_spectrum = power_spectrum(
-                self.find_configuration_property("trajectory"),
-                self.find_configuration_property("frames"),
-                self.find_configuration_property("projection"),
-                self.find_configuration_property("atom_selection"),
-                self.find_configuration_property("atom_transmutation"),
-                self.find_configuration_property("weights"),
-                self.find_configuration_property("instrument_resolution"),
-            )
+            self._trajectory_power_spectrum = power_spectrum(self.find_configuration())
 
         self.render_canvas_assets()
 
