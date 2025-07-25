@@ -81,10 +81,13 @@ BAD_KEYS = [
 
 
 class PlotSettingsModel(QStandardItemModel):
+    plots_need_updating = Signal()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._row_lookup = {}
         self.populate_model(rcParams)
-        self.dataChanged.connect(self.update_values)
+        self.itemChanged.connect(self.update_single_value)
         self.setHorizontalHeaderLabels(["Parameters", "Values", "Default"])
 
     def populate_model(self, par_dict: dict[str, str]):
@@ -97,12 +100,38 @@ class PlotSettingsModel(QStandardItemModel):
             def_item = QStandardItem(str(rcParamsDefault[key]))
             for item in (left_item, def_item):
                 item.setEditable(False)
+            self._row_lookup[key] = self.rowCount()
             self.appendRow([left_item, right_item, def_item])
 
     def reset_model(self):
         for row in range(self.rowCount()):
             key = self.item(row, 0).text()
             self.item(row, 1).setText(str(rcParams[key]))
+
+    @Slot("QStandardItem*")
+    def update_single_value(self, item: QStandardItem):
+        key = item.data(Qt.ItemDataRole.UserRole)
+        value = item.text()
+        try:
+            rcParams[key] = parse_string(value)
+        except ValueError:
+            LOG.error(
+                "Could not set %s to the value %s. Traceback: %s",
+                key,
+                value,
+                traceback.format_exc(),
+            )
+            mark_error = True
+        else:
+            mark_error = False
+        self.blockSignals(True)
+        row = self._row_lookup.get(key)
+        if mark_error:
+            self.item(row, 1).setData(ERROR_COLOR, role=Qt.ItemDataRole.BackgroundRole)
+        else:
+            self.item(row, 1).setData(None, role=Qt.ItemDataRole.BackgroundRole)
+        self.blockSignals(False)
+        self.plots_need_updating.emit()
 
     @Slot()
     def update_values(self):
@@ -163,6 +192,7 @@ class PlotSettingsEditor(QDialog):
         self.viewer.resizeColumnToContents(0)
         self.settings = settings
         self.model.itemChanged.connect(self.register_item_change)
+        self.model.plots_need_updating.connect(self.values_changed)
 
     @Slot()
     def expand_columns(self):
@@ -198,7 +228,6 @@ class PlotSettingsEditor(QDialog):
         with open(PLATFORM.application_directory() / "matplotlib.txt", "w") as target:
             for key, item in self._changed_keys.items():
                 target.write(f"{key}: {convert_to_string(item)}\n")
-        self.values_changed.emit()
 
     def reset_values(self):
         rcdefaults()

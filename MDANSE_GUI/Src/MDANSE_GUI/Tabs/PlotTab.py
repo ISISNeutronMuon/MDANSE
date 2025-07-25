@@ -32,6 +32,12 @@ label_text = """<b>View and customise the existing plots.</b>
 <br><br>
 You can change the contents and appearance of the plot
 here.
+<br><br>
+The button below allows you to edit most of the configuration parameters
+of the plotting library. Please keep in mind that the parameters which
+affect some basic properties of a figure (such as the dimensions or the
+DPI value) will not affect the existing plots and will only have an effect
+on the plots created after the change.
 """
 
 
