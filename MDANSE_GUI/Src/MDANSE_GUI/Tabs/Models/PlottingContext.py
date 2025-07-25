@@ -438,7 +438,9 @@ class SingleDataset:
                 continue
         return self._curves
 
-    def planes_vs_axis(self, axis_number: int, max_limit: int = 1) -> list[np.ndarray] | np.ndarray | None:
+    def planes_vs_axis(
+        self, axis_number: int, max_limit: int = 1
+    ) -> list[np.ndarray] | np.ndarray | None:
         """Prepare for plotting 2D subsets of an ND array.
 
         Parameters

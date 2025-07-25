@@ -186,9 +186,9 @@ class DataWidget(QWidget):
         try:
             with open(target_path, "w", newline="") as target:
                 writer = csv.writer(
-                        target,
-                        dialect=self._dialect_combo.currentText,
-                    )
+                    target,
+                    dialect=self._dialect_combo.currentText,
+                )
                 for header, data in self._plotter._formatter.datasets_for_csv():
                     for line in header:
                         target.write(line + "\n")
@@ -261,7 +261,9 @@ class DataWidget(QWidget):
             return
         try:
             LOG.debug(
-                "DataWidget will plot %s in %s.", self._plotting_context, self._figure,
+                "DataWidget will plot %s in %s.",
+                self._plotting_context,
+                self._figure,
             )
             self._plotter.plot(
                 self._plotting_context,
