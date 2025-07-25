@@ -648,8 +648,7 @@ class PlottingContext(QStandardItemModel):
 
         for row in range(self.rowCount()):
             row_data = {
-                key: self.itemFromIndex(self.index(row, ind))
-                for key, ind in plotting_column_index.items()
+                key: self.item(row, ind) for key, ind in plotting_column_index.items()
             }
 
             key = self.index(row, plotting_column_index["Dataset"]).data(

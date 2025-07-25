@@ -281,10 +281,10 @@ class DatasetFormatter:
         LOG.debug(f"Data shape: {dataset._data.shape}")
 
         # Add corner nil
-        xaxis = prepend(0.0, new_axes[axis_numbers[0]].flat)
+        xaxis = prepend(0.0, new_axes[axis_numbers[1]].flat)
 
         # Add axes to data
-        data_lines = zip(new_axes[axis_numbers[1]].flat, dataset.data)
+        data_lines = zip(new_axes[axis_numbers[0]].flat, dataset.data)
 
         # Put xaxis in
         temp = prepend(xaxis, data_lines)
