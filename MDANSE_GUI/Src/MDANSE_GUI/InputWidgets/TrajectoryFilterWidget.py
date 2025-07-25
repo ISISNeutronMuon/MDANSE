@@ -16,10 +16,12 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import Sequence
 from typing import Any, Callable
 
 import matplotlib.pyplot as mpl
 import numpy as np
+import numpy.typing as npt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar2QTAgg,
@@ -78,7 +80,11 @@ class BackgroundThread(QThread):
     results = Signal(object)
 
     def __init__(
-        self, parent, job_name: str, parameters: dict[str, str], result_keys: list[str]
+        self,
+        parent,
+        job_name: str,
+        parameters: dict[str, str],
+        result_keys: list[str],
     ):
         super().__init__(parent)
         self.job_name = job_name
@@ -376,7 +382,7 @@ class FilterPreferencesGroup(QObject):
         """Populate the preferences grid layout with the filter designer preference widgets.
 
         Parameters
-        ---------
+        ----------
         grid : QGridLayout
             Grid layout to which preference widgets will be added
 
@@ -432,10 +438,8 @@ class FilterPreferencesGroup(QObject):
         calculation is in progres..
         """
         self.pps_checkbox.setEnabled(enable)
-        if enable:
-            self.pps_label.setText("Show trajectory attenuation")
-        else:
-            self.pps_label.setText("Calculating PPS...")
+        message = "Show trajectory attenuation" if enable else "Calculating PPS..."
+        self.pps_label.setText(message)
 
     @staticmethod
     def visit(widget: QWidget) -> Any:
@@ -934,7 +938,7 @@ class FilterDesigner(QDialog):
         Title of the helper dialog window.
     _canvas_dimensions : dict
         Dimensions of the filter graph canvas.
-    _trajectory_power_spectrum :  tuple[ndarray, ndarray] | None
+    _trajectory_power_spectrum :  Sequence[npt.NDArray[float]] | None
         Trajectory power spectrum as a tuple containing the x-axis values (frequency domain) and the y-axis values (magnitudes).
 
     """
@@ -1093,12 +1097,12 @@ class FilterDesigner(QDialog):
         return signal.resample(values, to_len) / values.max()
 
     @Slot(object)
-    def accept_results(self, res_dict: dict[str, np.ndarray]):
+    def accept_results(self, res_dict: dict[str, npt.NDArray[float]]):
         """Store the results of the calculation inf a background thread.
 
         Parameters
         ----------
-        res_dict: dict[str, np.ndarray]
+        res_dict: dict[str, npt.NDArray[float]]
             A dictionary of {dataset_name: dataset_array} pairs.
 
         """
@@ -1142,7 +1146,7 @@ class FilterDesigner(QDialog):
     def set_trajectory_power_spectrum(
         self,
         tr_filter: Filter,
-    ) -> tuple[np.ndarray, np.ndarray]:
+    ) -> Sequence[npt.NDArray[float]]:
         """Put curves on the same scale for the plot.
 
         Generate an appropriately resampled power spectrum for the input trajectory,
@@ -1155,9 +1159,11 @@ class FilterDesigner(QDialog):
 
         Returns
         -------
-        power_spectrum : np.ndarray
+        raw_power_spectrum_freqs : npt.NDArray[float]
+            Frequency axis of the original PPS result.
+        power_spectrum : npt.NDArray[float]
             Trajectory power spectrum.
-        attenuated_power_spectrum : np.ndarray
+        attenuated_power_spectrum : npt.NDArray[float]
             Attenuated power spectrum due to the designed filter response.
 
         """
@@ -1290,7 +1296,7 @@ class FilterDesigner(QDialog):
         freqs: FrequencyDomain = TrajectoryFilterConfigurator._default_filter.freq_response,
         db_response: bool = False,
         energies: bool = False,
-        trajectory_power_spectrum: tuple[np.ndarray, np.ndarray] | None = None,
+        trajectory_power_spectrum: Sequence[npt.NDArray[float]] | None = None,
     ) -> None:
         """Render the graph of the designed filter frequency response.
 
@@ -1302,7 +1308,7 @@ class FilterDesigner(QDialog):
             Display response (y-axis) in decibels, else magnitude.
         energies : bool
             Display response domain (x-axis) in meV, else frequency in terahertz.
-        trajectory_power_spectrum : tuple[np.ndarray, np.ndarray]
+        trajectory_power_spectrum : Sequence[npt.NDArray[float]]
             Tuple containing trajectory power spectrum and attenuation due to filter.
 
         """
@@ -1337,7 +1343,7 @@ class FilterDesigner(QDialog):
         # Conditionally convert frequencies to energies (meV)
         if energies:
             energy_ticks = np.floor(
-                Filter.freq_to_energy(axes.get_xticks(), self.current_filter_units())
+                Filter.freq_to_energy(axes.get_xticks(), self.current_filter_units()),
             ).astype(int)
             axes.set_xticks(axes.get_xticks(), labels=energy_ticks)
 
@@ -1345,7 +1351,7 @@ class FilterDesigner(QDialog):
 
         frequency_units = self.current_filter_units().value
         axes.set_xlabel(
-            "Energy (meV)" if energies else f"Frequency ({frequency_units})"
+            "Energy (meV)" if energies else f"Frequency ({frequency_units})",
         )
         axes.set_ylabel("Magnitude (dB)" if db_response else "Amplitude")
 
@@ -1355,7 +1361,10 @@ class FilterDesigner(QDialog):
         self._figure.canvas.draw()
 
     def render_graph_text(
-        self, polynomial: str, cutoff: float, sample_freq: float
+        self,
+        polynomial: str,
+        cutoff: float,
+        sample_freq: float,
     ) -> None:
         """Render the text containing the filter transfer function polynomial, cutoff energy, and simulation sample frequency.
 
@@ -1390,7 +1399,7 @@ class FilterDesigner(QDialog):
             self._figure_info.append(" ")
 
         self._figure_info.append(
-            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff, self.current_filter_units()), FLOAT_SPINBOX_DECIMALS)} meV, Sample frequency: {sample_freq} THz"
+            f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff, self.current_filter_units()), FLOAT_SPINBOX_DECIMALS)} meV, Sample frequency: {sample_freq} THz",
         )
 
     def render_canvas_assets(self, attributes: dict | None = None) -> None:
