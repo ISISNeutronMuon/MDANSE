@@ -163,7 +163,7 @@ class Grid(Plotter):
                         temp_curve.set_marker(int(marker))
                 axes.grid(visible=True)
                 axes.set_xlabel(x_axis_label)
-                axes.legend(loc=0)
+                axes.legend()
                 startnum += 1
                 self._active_curves.append(temp_curve)
                 self._backup_curves.append(

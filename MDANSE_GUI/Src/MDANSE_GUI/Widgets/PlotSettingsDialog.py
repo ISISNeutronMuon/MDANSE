@@ -12,16 +12,21 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from __future__ import annotations
 
 import traceback
 from typing import Any
 
 from matplotlib import rc, rc_file, rcdefaults, rcParams, rcParamsDefault
-from qtpy.QtCore import QObject, Qt, Signal, Slot
+from qtpy.QtCore import QObject, QSortFilterProxyModel, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
     QApplication,
+    QComboBox,
     QDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
     QPushButton,
     QTreeView,
     QVBoxLayout,
@@ -34,6 +39,18 @@ ERROR_COLOR = QColor(255, 0, 0)
 
 
 def parse_string(param_str: str) -> Any:
+    """Convert a matplotlib rcParams value to a Python object.
+
+    Parameters
+    ----------
+    param_str : str
+        String obtained from rcParams.values()
+
+    Returns
+    -------
+    Any
+        Typically a string, list[float], list[str] or None
+    """
     param_str = str(param_str).replace("\\", "")
     param_str = param_str.replace("'", "")
     if "[" in param_str:
@@ -49,7 +66,22 @@ def parse_string(param_str: str) -> Any:
     return result
 
 
-def convert_to_string(param_str: str) -> Any:
+def convert_to_string(param_str: str) -> str | None:
+    """Convert a Python string to a matplotlib-friendly representation.
+
+    In matplotlib settings, lists should not have brackets around them,
+    and strings have no quotes.
+
+    Parameters
+    ----------
+    param_str : str
+        String obtained from a Python object (i.e. a value from rcParams)
+
+    Returns
+    -------
+    str | None
+        a simplified string for matplotlib, or None is input is "None"
+    """
     result = str(param_str).replace("\\", "")
     result = result.replace("'", "")
     result = result.strip("[]")
@@ -79,8 +111,24 @@ BAD_KEYS = [
     "lines.solid_joinstyle",
 ]
 
+ALL_MAJOR_KEYS = {key.split(".")[0] for key in rcParams}
+PREFERRED_SORT_KEYS = [
+    "axes",
+    "grid",
+    "figure",
+    "font",
+    "lines",
+    "legend",
+    "savefig",
+    "xtick",
+    "ytick",
+]
+SORT_MAJOR_KEYS = [key for key in sorted(PREFERRED_SORT_KEYS) if key in ALL_MAJOR_KEYS]
+
 
 class PlotSettingsModel(QStandardItemModel):
+    """Interface between matplotlib's rcParams and QTreeView."""
+
     plots_need_updating = Signal()
 
     def __init__(self, *args, **kwargs):
@@ -91,6 +139,16 @@ class PlotSettingsModel(QStandardItemModel):
         self.setHorizontalHeaderLabels(["Parameters", "Values", "Default"])
 
     def populate_model(self, par_dict: dict[str, str]):
+        """Put entries from rcParams into the Qt model.
+
+        Skips a few entries which are difficult to parse, because
+        they require instances of specific matplotlib classes.
+
+        Parameters
+        ----------
+        par_dict : dict[str, str]
+            key:value pairs from rcParams, converted to string.
+        """
         for key, value in par_dict.items():
             if key in BAD_KEYS:
                 continue
@@ -104,12 +162,14 @@ class PlotSettingsModel(QStandardItemModel):
             self.appendRow([left_item, right_item, def_item])
 
     def reset_model(self):
+        """Replace all values with default values."""
         for row in range(self.rowCount()):
             key = self.item(row, 0).text()
             self.item(row, 1).setText(str(rcParams[key]))
 
     @Slot("QStandardItem*")
     def update_single_value(self, item: QStandardItem):
+        """Assign a new value from the model to rcParams."""
         key = item.data(Qt.ItemDataRole.UserRole)
         value = item.text()
         try:
@@ -135,6 +195,7 @@ class PlotSettingsModel(QStandardItemModel):
 
     @Slot()
     def update_values(self):
+        """Assign all values from the model to rcParams."""
         bad_keys = []
         bad_indices = []
         for row in range(self.rowCount()):
@@ -163,6 +224,8 @@ class PlotSettingsModel(QStandardItemModel):
 
 
 class PlotSettingsEditor(QDialog):
+    """Dialog allowing MDANSE to modify matplotlib settings."""
+
     values_changed = Signal()
 
     def __init__(self, *args, settings=None, **kwargs):
@@ -173,14 +236,28 @@ class PlotSettingsEditor(QDialog):
         layout = QVBoxLayout(self)
 
         self.setLayout(layout)
-
         self.viewer = QTreeView(self)
         self.viewer.setAnimated(True)
+        self.filter_combo = QComboBox(self)
+        self.filter_box = QLineEdit(self)
+        layout.addWidget(self.filter_combo)
+        mid_hbox = QHBoxLayout(self)
+        mid_hbox.addWidget(QLabel("Filter entries by:"))
+        mid_hbox.addWidget(self.filter_box)
+        mid_hbox.addWidget(QLabel("Set filter to keyword:"))
+        mid_hbox.addWidget(self.filter_combo)
+        layout.addLayout(mid_hbox)
         layout.addWidget(self.viewer)
         self._changed_keys = {}
         self.load_settings()
         self.model = PlotSettingsModel()
-        self.viewer.setModel(self.model)
+        self.filter_proxy_model = QSortFilterProxyModel()
+        self.filter_proxy_model.setSourceModel(self.model)
+        self.viewer.setModel(self.filter_proxy_model)
+        self.filter_combo.addItems(["all"] + SORT_MAJOR_KEYS)
+        self.filter_combo.setCurrentText("all")
+        self.filter_combo.currentTextChanged.connect(self.filter_box.setText)
+        self.filter_box.textChanged.connect(self.filter_entries)
 
         self.writeout_button = QPushButton("Save settings", self)
         self.reset_button = QPushButton("Reset values", self)
@@ -194,12 +271,28 @@ class PlotSettingsEditor(QDialog):
         self.model.itemChanged.connect(self.register_item_change)
         self.model.plots_need_updating.connect(self.values_changed)
 
+    @Slot(str)
+    def filter_entries(self, search_string: str):
+        """Hide rcParams keys which do not contain the search string.
+
+        Parameters
+        ----------
+        search_string : str
+            String to be found in valid dictionary keys.
+        """
+        if search_string == "all":
+            self.filter_proxy_model.setFilterFixedString("")
+        else:
+            self.filter_proxy_model.setFilterFixedString(search_string)
+
     @Slot()
     def expand_columns(self):
+        """Resize columns to the current amount of text in items."""
         for ncol in range(3):
             self.viewer.resizeColumnToContents(ncol)
 
     def load_settings(self):
+        """Load previously saved plot settings from an MDANSE config file."""
         settings_file = PLATFORM.application_directory() / "matplotlib.txt"
         if not settings_file.exists():
             LOG.info(
@@ -219,17 +312,19 @@ class PlotSettingsEditor(QDialog):
 
     @Slot("QStandardItem*")
     def register_item_change(self, item: QStandardItem):
+        """Note down that an entry has been changed by the user."""
         key = item.data(Qt.ItemDataRole.UserRole)
         value = item.text()
         self._changed_keys[key] = value
 
     def save_changes(self):
-        """Save changes to a file."""
+        """Save the changed settings to an MDANSE config file."""
         with open(PLATFORM.application_directory() / "matplotlib.txt", "w") as target:
             for key, item in self._changed_keys.items():
                 target.write(f"{key}: {convert_to_string(item)}\n")
 
     def reset_values(self):
+        """Bring back all the default matplotlib settings."""
         rcdefaults()
         self.values_changed.emit()
         self.model.reset_model()

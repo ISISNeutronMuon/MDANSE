@@ -242,6 +242,6 @@ class Single(Plotter):
             self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
         axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
         axes.grid(visible=True)
-        axes.legend(loc=0)
+        axes.legend()
         self.check_curve_lengths()
         self.offset_curves()
