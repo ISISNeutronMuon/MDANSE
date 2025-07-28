@@ -184,7 +184,7 @@ class Heatmap(Plotter):
         for ds_index, databundle in enumerate(plotting_context.datasets().values()):
             if nplots >= self._plot_limit:
                 break
-            ds, _, _, _, ds_num, axis_label = databundle
+            ds, _, _, _, ds_num, axis_label, legend_label = databundle
             if ds._n_dim == 1:
                 continue
             elif ds._n_dim == 3:
@@ -216,7 +216,7 @@ class Heatmap(Plotter):
         for ds_index, databundle in enumerate(plotting_context.datasets().values()):
             if ds_index >= self._plot_limit:
                 break
-            dataset, _, _, _, ds_num, axis_label = databundle
+            dataset, _, _, _, ds_num, axis_label, legend_label = databundle
             transposed = False
             primary_axis_number = 0
             limits = []

@@ -18,7 +18,6 @@ from __future__ import annotations
 import contextlib
 import copy
 import itertools
-from functools import reduce
 from pathlib import Path
 from traceback import print_exception
 from typing import TYPE_CHECKING, NamedTuple
@@ -50,6 +49,7 @@ class PlotArgs(NamedTuple):
     marker: str
     row: int
     main_axis: str
+    legend_label: str
 
 
 def get_mpl_markers():
@@ -502,7 +502,7 @@ class SingleDataset:
 
 plotting_column_labels = [
     "Dataset",
-    "Trajectory",
+    "Legend label",
     "Size",
     "Unit",
     "Main axis",
@@ -511,6 +511,7 @@ plotting_column_labels = [
     "Line style",
     "Marker",
     "Apply weights?",
+    "Trajectory",
 ]
 plotting_column_index = {
     label: number for number, label in enumerate(plotting_column_labels)
@@ -672,6 +673,7 @@ class PlottingContext(QStandardItemModel):
                 "marker": row_data["Marker"].text(),
                 "row": row,
                 "main_axis": row_data["Main axis"].text(),
+                "legend_label": row_data["Legend label"].text(),
             }
 
             self._datasets[key].set_data_limits(data_number_string)
@@ -698,31 +700,40 @@ class PlottingContext(QStandardItemModel):
             return
 
         self._datasets[newkey] = new_dataset
-        total_length = reduce(int.__mul__, new_dataset._data.shape)
-        slice_length = int(
-            total_length / len(new_dataset.x_axis(new_dataset.longest_axis()[-1]))
-        )
         items = [
             QStandardItem(str(x))
             for x in [
                 new_dataset._name,
-                new_dataset._filename,
+                new_dataset._labels["medium"],
                 new_dataset._data.shape,
                 new_dataset._data_unit,
                 new_dataset.longest_axis()[-1],
-                f"{0}:{slice_length}:{1}",
+                "",
                 self.next_colour(),
                 new_dataset._linestyle,
                 "",
                 "",
+                new_dataset._filename,
             ]
         ]
 
-        for item in items:
-            item.setData(newkey, role=Qt.ItemDataRole.UserRole)
+        editable_indices = {
+            plotting_column_index[key]
+            for key in [
+                "Legend label",
+                "Main axis",
+                "Use it?",
+                "Colour",
+                "Line style",
+                "Marker",
+                "Apply weights?",
+            ]
+        }
 
-        for item in items[:4]:
-            item.setEditable(False)
+        for item_index, item in enumerate(items):
+            item.setData(newkey, role=Qt.ItemDataRole.UserRole)
+            if item_index not in editable_indices:
+                item.setEditable(False)
 
         temp = items[plotting_column_index["Use it?"]]
         temp.setCheckable(True)

@@ -120,7 +120,7 @@ class Grid(Plotter):
         self.apply_settings(plotting_context)
         nplots = 0
         for databundle in plotting_context.datasets().values():
-            ds, colour, linestyle, marker, _, axis_label = databundle
+            ds, colour, linestyle, marker, _, axis_label, legend_label = databundle
             try:
                 axis_info = ds._axes_units[axis_label], axis_label
             except KeyError:
@@ -134,7 +134,9 @@ class Grid(Plotter):
         for databundle in plotting_context.datasets().values():
             if counter > self._plot_limit:
                 break
-            dataset, colour, linestyle, marker, ds_num, axis_label = databundle
+            dataset, colour, linestyle, marker, ds_num, axis_label, legend_label = (
+                databundle
+            )
             try:
                 best_unit, best_axis = dataset._axes_units[axis_label], axis_label
             except KeyError:
@@ -145,7 +147,7 @@ class Grid(Plotter):
                 counter += 1
                 axes = target.add_subplot(gridsize, gridsize, startnum)
                 self._axes.append(axes)
-                plotlabel = dataset._labels["medium"]
+                plotlabel = legend_label
                 if dataset._curve_labels[key]:
                     plotlabel += ":" + dataset._curve_labels[key]
                 x_axis_label = dataset.x_axis_label(best_axis)

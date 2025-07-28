@@ -174,12 +174,12 @@ class Single(Plotter):
             target.clear()
             target.canvas.draw()
         for databundle in plotting_context.datasets().values():
-            dataset, colour, linestyle, marker, _, axis_label = databundle
+            dataset, colour, linestyle, marker, _, axis_label, legend_label = databundle
             try:
                 best_unit, best_axis = (dataset._axes_units[axis_label], axis_label)
             except KeyError:
                 best_unit, best_axis = dataset.longest_axis()
-            plotlabel = dataset._labels["medium"]
+            plotlabel = legend_label
             x_axis_labels.append(dataset.x_axis_label(best_axis))
             if dataset._n_dim == 1:
                 [temp] = axes.plot(
