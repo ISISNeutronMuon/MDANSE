@@ -161,7 +161,6 @@ class Grid(Plotter):
                 except ValueError:
                     with contextlib.suppress(Exception):
                         temp_curve.set_marker(int(marker))
-                axes.grid(visible=True)
                 axes.set_xlabel(x_axis_label)
                 axes.legend()
                 startnum += 1
