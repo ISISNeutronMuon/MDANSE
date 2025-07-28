@@ -68,15 +68,11 @@ class RotationAutocorrelation(IJob):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        molecules = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system._clusters[self.configuration["molecule"]["value"]]
+        molecules = self.trajectory.chemical_system._clusters[
+            self.configuration["molecule"]["value"]
+        ]
 
-        self._indices = {
-            idx
-            for idxs in self._configuration["atom_selection"]["indices"]
-            for idx in idxs
-        }
+        self._indices = set(self.trajectory.atom_indices)
 
         self.valid_molecules = [
             mol for mol in molecules if self._indices.issuperset(mol)
@@ -85,7 +81,7 @@ class RotationAutocorrelation(IJob):
         self.numberOfSteps = len(self.valid_molecules)
 
         self.masses = np.array(
-            self.configuration["trajectory"]["instance"].chemical_system.atom_property(
+            self.trajectory.chemical_system.atom_property(
                 "atomic_weight",
             ),
         )
@@ -161,7 +157,7 @@ class RotationAutocorrelation(IJob):
                 self.configuration["frames"]["step"],
             ),
         ):
-            configuration = self.configuration["trajectory"]["instance"].configuration(
+            configuration = self.trajectory.configuration(
                 frame_index,
             )
             coordinates = configuration.contiguous_configuration().coordinates[molecule]
@@ -212,5 +208,5 @@ class RotationAutocorrelation(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

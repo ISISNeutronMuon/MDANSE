@@ -65,7 +65,6 @@ class CenterOfMassesTrajectory(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             },
             "default": "molecule",
         },
@@ -82,7 +81,7 @@ class CenterOfMassesTrajectory(IJob):
         super().initialize()
 
         self.numberOfSteps = self.configuration["frames"]["number"]
-        chemical_system = self.configuration["trajectory"]["instance"].chemical_system
+        chemical_system = self.trajectory.chemical_system
 
         self.cluster_composition = {}
         original_atom_list = chemical_system.atom_list
@@ -130,12 +129,12 @@ class CenterOfMassesTrajectory(IJob):
 
         # get the Frame index
         frameIndex = self.configuration["frames"]["value"][index]
-        chemical_system = self.configuration["trajectory"]["instance"].chemical_system
-        atom_database = self.configuration["trajectory"]["instance"]
+        chemical_system = self.trajectory.chemical_system
+        atom_database = self.trajectory
 
         n_coms = self._output_trajectory.chemical_system.number_of_atoms
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
+        conf = self.trajectory.configuration(frameIndex)
         conf = conf.contiguous_configuration()
         temp_radii = {
             cluster_name: [] for cluster_name in chemical_system._clusters.keys()
@@ -206,12 +205,12 @@ class CenterOfMassesTrajectory(IJob):
 
         self._output_trajectory.write_atom_database(
             self._unique_atoms,
-            self.configuration["trajectory"]["instance"],
+            self.trajectory,
             self.cluster_composition,
             time_averaged_radii,
         )
         # The input trajectory is closed.
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         write_metadata(self, self._output_trajectory._h5_file)
 
         # The output trajectory is closed.

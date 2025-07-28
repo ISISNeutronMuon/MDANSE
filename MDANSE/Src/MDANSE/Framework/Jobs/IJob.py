@@ -186,6 +186,27 @@ class IJob(Configurable, metaclass=SubclassFactory):
                     "LineOutputVariable",
                     [index in valid_indices for index in range(array_length)],
                 )
+        self.set_up_trajectory()
+
+    def set_up_trajectory(self):
+        """Apply operations to the trajectory instance, if present.
+
+        Atom selection, atom transmutation and result grouping are all
+        applied to the Trajectory object. If the job works on a trajectory,
+        the Trajectory instance is now saved as an attribute of this IJob
+        instance.
+
+        These operations were previously handled by IConfigurator subclasses.
+        """
+        if (trajectory := self.configuration.get("trajectory")) is None:
+            return
+        self.trajectory = trajectory["instance"]
+        if (selection := self.configuration.get("atom_selection")) is not None:
+            self.trajectory.set_selection(selection["flatten_indices"])
+        if (transmutation := self.configuration.get("atom_transmutation")) is not None:
+            self.trajectory.set_transmutation(transmutation.transmutation)
+        if (grouping := self.configuration.get("grouping_level")) is not None:
+            self.trajectory.set_grouping(grouping["level"])
 
     @abc.abstractmethod
     def run_step(self, index):
@@ -287,7 +308,7 @@ if __name__ == "__main__":
                 index = tasks.get_nowait()
             except queue.Empty:
                 if tasks.empty():
-                    self.configuration["trajectory"]["instance"].close()
+                    self.trajectory.close()
                     break
             else:
                 if self._status is not None:

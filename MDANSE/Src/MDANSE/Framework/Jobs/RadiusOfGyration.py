@@ -79,17 +79,12 @@ class RadiusOfGyration(IJob):
             main_result=True,
         )
 
-        self._indices = [
-            idx
-            for idxs in self.configuration["atom_selection"]["indices"]
-            for idx in idxs
-        ]
+        self._indices = self.trajectory.atom_indices
 
         self._masses = np.array(
             [
-                m
-                for masses in self._configuration["atom_selection"]["masses"]
-                for m in masses
+                self.trajectory.get_atom_property(element, "atomic_weight")
+                for element in self.trajectory.atom_types
             ],
             dtype=np.float64,
         )
@@ -108,10 +103,12 @@ class RadiusOfGyration(IJob):
         # get the Frame index
         frameIndex = self.configuration["frames"]["value"][index]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frameIndex)
+        conf = self.trajectory.configuration(frameIndex)
 
         rog = radius_of_gyration(
-            conf["coordinates"][self._indices, :], masses=self._masses, root=True
+            conf["coordinates"][self._indices, :],
+            masses=self._masses[self._indices],
+            root=True,
         )
 
         return index, rog
@@ -138,5 +135,5 @@ class RadiusOfGyration(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

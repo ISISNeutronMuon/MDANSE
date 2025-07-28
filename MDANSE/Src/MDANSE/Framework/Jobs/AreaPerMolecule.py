@@ -90,7 +90,7 @@ class AreaPerMolecule(IJob):
 
         # The number of molecules that match the input name. Must be > 0.
         self._nMolecules = len(
-            self.configuration["trajectory"]["instance"].chemical_system._clusters[
+            self.trajectory.chemical_system._clusters[
                 self.configuration["molecule_name"]["value"]
             ]
         )
@@ -129,9 +129,7 @@ class AreaPerMolecule(IJob):
         # Get the frame index
         frame_index = self.configuration["frames"]["value"][index]
 
-        configuration = self.configuration["trajectory"]["instance"].configuration(
-            frame_index
-        )
+        configuration = self.trajectory.configuration(frame_index)
 
         try:
             unit_cell = configuration.unit_cell._unit_cell
@@ -166,5 +164,5 @@ class AreaPerMolecule(IJob):
             str(self),
             self,
         )
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

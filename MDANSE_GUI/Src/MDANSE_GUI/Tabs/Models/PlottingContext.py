@@ -13,15 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
+import contextlib
 import copy
 import itertools
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
-
-if TYPE_CHECKING:
-    import h5py
-
-import contextlib
+from traceback import print_exception
+from typing import TYPE_CHECKING, NamedTuple
 
 import matplotlib.pyplot as mpl
 import numpy as np
@@ -34,8 +33,22 @@ from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 
 from MDANSE.MLogging import LOG
 
+if TYPE_CHECKING:
+    import h5py
+
 NUMBERS_FOR_SLICE = 3
 NUMBERS_FOR_RANGE = 2
+
+
+class PlotArgs(NamedTuple):
+    """Arguments for plotting data."""
+
+    dataset: np.ndarray
+    colour: str
+    line_style: str
+    marker: str
+    row: int
+    main_axis: str
 
 
 def get_mpl_markers():
@@ -63,9 +76,7 @@ def get_mpl_colours():
 class SingleDataset:
     """Manages a plottable data set from an .mda file."""
 
-    def __init__(
-        self, name: str, source: Union["h5py.File", None], linestyle: str = "-"
-    ):
+    def __init__(self, name: str, source: h5py.File | None, linestyle: str = "-"):
         self._name = name
         self._use_scaling = True
         self._curves = {}
@@ -110,7 +121,7 @@ class SingleDataset:
         self._axes_tag = source[name].attrs["axis"]
         self.create_axes_tags(self._axes_tag, source)
 
-    def create_axes_tags(self, axes_tag: str, source: "h5py.File"):
+    def create_axes_tags(self, axes_tag: str, source: h5py.File):
         """Find the right axes datasets for the current dataset.
 
         Parameters
@@ -206,7 +217,7 @@ class SingleDataset:
             "full": f"{root_name}:{self._name}",
         }
 
-    def spawn_imaginary_dataset(self) -> Optional["SingleDataset"]:
+    def spawn_imaginary_dataset(self) -> SingleDataset | None:
         """Create another dataset with the imaginary part of the data.
 
         Returns
@@ -284,7 +295,7 @@ class SingleDataset:
         """
         return list(self._axes_units.keys())
 
-    def longest_axis(self) -> str:
+    def longest_axis(self) -> tuple[str, str]:
         """Determine which axis is the longest, to be used as x axis.
 
         Returns
@@ -427,7 +438,9 @@ class SingleDataset:
                 continue
         return self._curves
 
-    def planes_vs_axis(self, axis_number: int, max_limit: int = 1) -> list[np.ndarray]:
+    def planes_vs_axis(
+        self, axis_number: int, max_limit: int = 1
+    ) -> list[np.ndarray] | np.ndarray | None:
         """Prepare for plotting 2D subsets of an ND array.
 
         Parameters
@@ -587,7 +600,7 @@ class PlottingContext(QStandardItemModel):
         self._last_colour_list = list(self._colour_list)
 
     @Slot(object)
-    def accept_external_data(self, other: "PlottingContext"):
+    def accept_external_data(self, other: PlottingContext):
         """Copy the datasets from the input PlottingContext.
 
         Crucial slot for transferring data
@@ -625,51 +638,44 @@ class PlottingContext(QStandardItemModel):
         _, new_unit = self._unit_lookup.conversion_factor(unit)
         return new_unit
 
-    def datasets(self) -> dict:
+    def datasets(self) -> dict[str, PlotArgs]:
         """Collect GUI inputs and return data sets for plotting.
 
         This method only returns data sets with "Use it" box checked.
 
         """
         result = {}
-        for ds_num, row in enumerate(range(self.rowCount())):
+
+        for row in range(self.rowCount()):
+            row_data = {
+                key: self.item(row, ind) for key, ind in plotting_column_index.items()
+            }
+
             key = self.index(row, plotting_column_index["Dataset"]).data(
                 role=Qt.ItemDataRole.UserRole,
             )
-            useit = (
-                self.itemFromIndex(
-                    self.index(row, plotting_column_index["Use it?"]),
-                ).checkState()
-                == Qt.CheckState.Checked
+            useit = row_data["Use it?"].checkState() is Qt.CheckState.Checked
+            self._datasets[key]._use_scaling = (
+                row_data["Apply weights?"].checkState() is Qt.CheckState.Checked
             )
-            set_scaling = (
-                self.itemFromIndex(
-                    self.index(row, plotting_column_index["Apply weights?"]),
-                ).checkState()
-                == Qt.CheckState.Checked
-            )
-            data_number_string = self.itemFromIndex(
-                self.index(row, plotting_column_index["Use it?"]),
-            ).text()
-            colour = self.itemFromIndex(
-                self.index(row, plotting_column_index["Colour"]),
-            ).text()
-            style = self.itemFromIndex(
-                self.index(row, plotting_column_index["Line style"]),
-            ).text()
-            marker = self.itemFromIndex(
-                self.index(row, plotting_column_index["Marker"]),
-            ).text()
-            axis = self.itemFromIndex(
-                self.index(row, plotting_column_index["Main axis"]),
-            ).text()
-            if useit:
-                self._datasets[key].set_data_limits(data_number_string)
-                self._datasets[key].set_current_units(self._unit_lookup)
-                result[key] = (self._datasets[key], colour, style, marker, ds_num, axis)
-            else:
+
+            if not useit:
                 self._datasets[key]._data_limits = None
-            self._datasets[key]._use_scaling = set_scaling
+                continue
+
+            data_number_string = row_data["Use it?"].text()
+
+            plot_args = {
+                "colour": row_data["Colour"].text(),
+                "line_style": row_data["Line style"].text(),
+                "marker": row_data["Marker"].text(),
+                "row": row,
+                "main_axis": row_data["Main axis"].text(),
+            }
+
+            self._datasets[key].set_data_limits(data_number_string)
+            self._datasets[key].set_current_units(self._unit_lookup)
+            result[key] = PlotArgs(self._datasets[key], **plot_args)
 
         return result
 
@@ -682,13 +688,14 @@ class PlottingContext(QStandardItemModel):
             a SingleDataset instance
 
         """
-        if new_dataset is None:
+        if new_dataset is None or not new_dataset._valid:
             return
-        if not new_dataset._valid:
-            return
+
         newkey = f"{new_dataset._filename}:{new_dataset._name}"
+
         if newkey in self._datasets:
             return
+
         self._datasets[newkey] = new_dataset
         items = [
             QStandardItem(str(x))
@@ -705,20 +712,27 @@ class PlottingContext(QStandardItemModel):
                 "",
             ]
         ]
+
         for item in items:
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
+
         for item in items[:4]:
             item.setEditable(False)
+
         temp = items[plotting_column_index["Use it?"]]
         temp.setCheckable(True)
         temp.setCheckState(Qt.CheckState.Checked)
+
         temp = items[plotting_column_index["Apply weights?"]]
         temp.setEditable(False)
         temp.setCheckable(True)
         temp.setCheckState(Qt.CheckState.Checked)
+
         self.itemChanged.connect(self.needs_an_update)
+
         temp = items[plotting_column_index["Colour"]]
         temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
+
         self.appendRow(items)
         self.add_dataset(new_dataset.spawn_imaginary_dataset())
 

@@ -195,14 +195,14 @@ class OrderParameter(IJob):
 
         e1, e2 = self.configuration["axis_selection"]["atoms"][index]
 
-        serie1 = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+        serie1 = self.trajectory.read_atomic_trajectory(
             e1,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
         )
 
-        serie2 = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+        serie2 = self.trajectory.read_atomic_trajectory(
             e2,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
@@ -291,5 +291,5 @@ class OrderParameter(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

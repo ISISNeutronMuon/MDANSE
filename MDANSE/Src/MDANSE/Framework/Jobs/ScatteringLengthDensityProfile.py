@@ -89,8 +89,8 @@ class ScatteringLengthDensityProfile(IJob):
         self._dr = self.configuration["dr"]["value"]
 
         self.axis_index = self.configuration["axis"]["index"]
-        trajectory = self.configuration["trajectory"]["instance"]
-        first_conf = self.configuration["trajectory"]["instance"].configuration()
+        trajectory = self.trajectory
+        first_conf = self.trajectory.configuration()
 
         try:
             axis = first_conf.unit_cell.direct[self.axis_index, :]
@@ -107,8 +107,8 @@ class ScatteringLengthDensityProfile(IJob):
             "dp/axes/r", "LineOutputVariable", (self._n_bins,), units="nm"
         )
 
-        self._indices_per_element = self.configuration["atom_selection"].get_indices()
-        self._elements = list(self.configuration["atom_selection"].get_natoms().keys())
+        self._indices_per_element = self.trajectory.get_indices()
+        self._elements = list(self.trajectory.get_natoms().keys())
 
         self.scattering_lengths = {
             element: trajectory.get_atom_property(element, "b_coherent").real
@@ -162,7 +162,7 @@ class ScatteringLengthDensityProfile(IJob):
         # get the Frame index
         frame_index = self.configuration["frames"]["value"][index]
 
-        conf = self.configuration["trajectory"]["instance"].configuration(frame_index)
+        conf = self.trajectory.configuration(frame_index)
 
         box_coords = conf.to_box_coordinates()
         box_coords = box_coords - np.floor(box_coords)
@@ -208,7 +208,7 @@ class ScatteringLengthDensityProfile(IJob):
         Finalize the job.
         """
 
-        n_atoms_per_element = self.configuration["atom_selection"].get_natoms()
+        n_atoms_per_element = self.trajectory.get_natoms()
 
         for element in n_atoms_per_element:
             self._outputData[f"dp/number/{element}"] /= self.numberOfSteps
@@ -217,7 +217,7 @@ class ScatteringLengthDensityProfile(IJob):
             ]
 
         n_selected = sum(n_atoms_per_element.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = n_selected / n_total
 
         self._indices_per_element
@@ -238,5 +238,5 @@ class ScatteringLengthDensityProfile(IJob):
             self,
         )
 
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

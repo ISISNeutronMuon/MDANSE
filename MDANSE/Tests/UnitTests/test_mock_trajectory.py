@@ -140,7 +140,7 @@ def test_from_json(full_trajectory):
         0.1,
     )
     instance = MockTrajectory.from_json(mock_json)
-    assert full_trajectory._atom_types == instance._atom_types
+    assert full_trajectory._atom_types == instance.atom_types
     print(full_trajectory.coordinates(25) - instance.coordinates(25))
     assert np.allclose(full_trajectory.coordinates(25), instance.coordinates(25))
     assert not np.allclose(full_trajectory.coordinates(25), instance.coordinates(22))

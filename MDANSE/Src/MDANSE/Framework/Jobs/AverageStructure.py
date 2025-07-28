@@ -84,11 +84,9 @@ class AverageStructure(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["atom_selection"]["selection_length"]
+        self.numberOfSteps = self.trajectory.get_total_natoms()
 
-        self._atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._atoms = self.trajectory.atom_names
 
         target_unit = self.configuration["output_units"]["value"]
         if target_unit == "Angstrom":
@@ -98,8 +96,6 @@ class AverageStructure(IJob):
 
         self._ase_atoms = Atoms()
 
-        trajectory = self.configuration["trajectory"]["instance"]
-
         frame_range = range(
             self.configuration["frames"]["first"],
             self.configuration["frames"]["last"] + 1,
@@ -108,7 +104,7 @@ class AverageStructure(IJob):
 
         try:
             unit_cells = [
-                trajectory.unit_cell(frame)._unit_cell for frame in frame_range
+                self.trajectory.unit_cell(frame)._unit_cell for frame in frame_range
             ]
         except Exception:
             raise ValueError(
@@ -130,30 +126,19 @@ class AverageStructure(IJob):
         """
 
         # get selected atom indices sublist
-        indices = self.configuration["atom_selection"]["indices"][index]
-        if len(indices) == 1:
-            series = self.configuration["trajectory"][
-                "instance"
-            ].read_atomic_trajectory(
-                indices[0],
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
-            )
-
-        else:
-            series = self.configuration["trajectory"]["instance"].read_com_trajectory(
-                indices,
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
-            )
+        atom_index = self.trajectory.atom_indices[index]
+        series = self.trajectory.read_atomic_trajectory(
+            atom_index,
+            first=self.configuration["frames"]["first"],
+            last=self.configuration["frames"]["last"] + 1,
+            step=self.configuration["frames"]["step"],
+        )
 
         return index, np.mean(series, axis=0) * self._conversion_factor
 
     def combine(self, index, x):
         # The symbol of the atom.
-        element = self.configuration["atom_selection"]["names"][index]
+        element = self._atoms[self.trajectory.atom_indices[index]]
 
         try:
             the_atom = Atom(element, x)
@@ -167,7 +152,7 @@ class AverageStructure(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
-        # trajectory = self.configuration["trajectory"]["instance"]
+        # trajectory = self.trajectory
 
         # frame_range = range(
         #     self.configuration["frames"]["first"],

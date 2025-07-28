@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import json
-from typing import Union
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
@@ -122,7 +121,8 @@ class AtomTransmutationConfigurator(IConfigurator):
         self._original_input = value
 
         # if the input value is None, do not perform any transmutation
-        if value is None or value == "":
+        if value in {None, "", "{}"}:
+            self.transmutation = {}
             return
 
         if not isinstance(value, str):
@@ -137,7 +137,7 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         traj_config = self.configurable[self.dependencies["trajectory"]]
         system = traj_config["instance"].chemical_system
-        idxs = system._atom_indices
+        idxs = range(system.total_number_of_atoms)
 
         self._nTransmutedAtoms = 0
 
@@ -147,11 +147,15 @@ class AtomTransmutationConfigurator(IConfigurator):
             self.error_status = "Key of transmutation map should be castable to int"
             return
 
-        for idx, element in value.items():
-            if idx not in idxs:
-                self.error_status = "Inputted setting not valid - atom index not found in the current system."
-                return
+        keys = set(value.keys())
+        if not keys.issubset(idxs):
+            self.error_status = (
+                "Input setting not valid - atom index not found in the current system."
+            )
+            return
 
+        elements = set(value.values())
+        for element in elements:
             if (element not in traj_config["instance"].atoms_in_database) and (
                 element not in ATOMS_DATABASE.atoms
             ):
@@ -160,52 +164,9 @@ class AtomTransmutationConfigurator(IConfigurator):
                 )
                 return
 
-            self.transmute(idx, element)
-
-        atomSelConfigurator = self.configurable[self.dependencies["atom_selection"]]
-        atomSelConfigurator["unique_names"] = sorted(set(atomSelConfigurator["names"]))
+        self["value"] = value
+        self.transmutation = value
         self.error_status = "OK"
-
-    def transmute(self, idx: int, element: str) -> None:
-        """Transmute the atom index to the chosen element.
-
-        Parameters
-        ----------
-        idx : int
-            The index of the atom to transmute.
-        element : str
-            The element to transmute the atom to.
-        """
-        atomSelConfigurator = self.configurable[self.dependencies["atom_selection"]]
-
-        try:
-            idxInSelection = atomSelConfigurator["flatten_indices"].index(idx)
-        except ValueError:
-            pass
-        else:
-            if (
-                "grouping_level" in self.dependencies
-                and "atom"
-                != self.configurable[self.dependencies["grouping_level"]]["level"]
-            ):
-                group_config = self.configurable[self.dependencies["grouping_level"]]
-                prev_element = atomSelConfigurator["elements"][idxInSelection][0]
-                group_name = atomSelConfigurator["names"][idxInSelection][
-                    : -(len(prev_element) + 1)
-                ]
-                atomSelConfigurator["names"][idxInSelection] = (
-                    group_name + "_" + element
-                )
-                group_config["group_elements"][group_name].remove(prev_element)
-                group_config["group_elements"][group_name].append(element)
-            else:
-                atomSelConfigurator["names"][idxInSelection] = element
-            atomSelConfigurator["elements"][idxInSelection] = [element]
-            traj_config = self.configurable[self.dependencies["trajectory"]]
-            atomSelConfigurator["masses"][idxInSelection] = [
-                traj_config["instance"].get_atom_property(element, "atomic_weight")
-            ]
-            self._nTransmutedAtoms += 1
 
     def get_transmuter(self) -> AtomTransmuter:
         """

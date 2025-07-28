@@ -20,6 +20,10 @@ from math import sqrt
 import numpy as np
 
 from MDANSE.Core.Error import Error
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -65,7 +69,6 @@ class NeutronDynamicTotalStructureFactor(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -78,8 +81,6 @@ class NeutronDynamicTotalStructureFactor(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "grouping_level": "grouping_level",
             }
         },
     )
@@ -110,7 +111,9 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
         self.numberOfSteps = 1
 
-        self.pair_labels = self.configuration["grouping_level"].pair_labels()
+        self.pair_labels = pair_labels(
+            self.trajectory,
+        )
 
         # Check time consistency
         dcsf_time, disf_time = self._get_data_from_files("axes/time")
@@ -200,7 +203,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                     "This DCSF file was created before the new scaling scheme. Please calculate it again."
                 )
 
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in self.trajectory.unique_names:
             if (
                 f"disf/f(q,t)/{element}"
                 not in self.configuration["disf_input_file"]["instance"]
@@ -225,7 +228,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                     "This DISF file was created before the new scaling scheme. Please calculate it again."
                 )
 
-        for element in self.configuration["atom_selection"]["unique_names"]:
+        for element in self.trajectory.unique_names:
             fqt = self.configuration["disf_input_file"]["instance"][
                 f"disf/f(q,t)/{element}"
             ]
@@ -362,22 +365,18 @@ class NeutronDynamicTotalStructureFactor(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = n_selected / n_total
 
         norm_natoms = 1.0 / n_total
         # Compute coherent functions and structure factor
         for pair_str, (label_i, label_j) in self.pair_labels:
-            ele_i = self.configuration["grouping_level"].get_element_from_label(label_i)
-            ele_j = self.configuration["grouping_level"].get_element_from_label(label_j)
-            bi = self.configuration["trajectory"]["instance"].get_atom_property(
-                ele_i, "b_coherent"
-            )
-            bj = self.configuration["trajectory"]["instance"].get_atom_property(
-                ele_j, "b_coherent"
-            )
+            ele_i = self.trajectory.element_from_label[label_i]
+            ele_j = self.trajectory.element_from_label[label_j]
+            bi = self.trajectory.get_atom_property(ele_i, "b_coherent")
+            bj = self.trajectory.get_atom_property(ele_j, "b_coherent")
             sqrt_cij = sqrt(
                 nAtomsPerElement[label_i] * nAtomsPerElement[label_j] * norm_natoms**2
             )
@@ -405,10 +404,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
         # Compute incoherent functions and structure factor
         for label, number in nAtomsPerElement.items():
-            ele_i = self.configuration["grouping_level"].get_element_from_label(label)
-            bi = self.configuration["trajectory"]["instance"].get_atom_property(
-                ele_i, "b_incoherent"
-            )
+            ele_i = self.trajectory.element_from_label[label]
+            bi = self.trajectory.get_atom_property(ele_i, "b_incoherent")
             self._outputData[f"ndsf/f(q,t)_inc/{label}"].scaling_factor *= (
                 bi**2 * number * norm_natoms
             )
@@ -429,14 +426,16 @@ class NeutronDynamicTotalStructureFactor(IJob):
         self._outputData["ndsf/f(q,t)_inc/total"].scaling_factor = fact
         self._outputData["ndsf/s(q,f)_inc/total"].scaling_factor = fact
 
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ndsf/f(q,t)_inc",
             "SurfaceOutputVariable",
             axis="ndsf/axes/q|ndsf/axes/time",
             units="au",
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ndsf/f(q,t)_coh",
             "SurfaceOutputVariable",
@@ -445,7 +444,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
             axis="ndsf/axes/q|ndsf/axes/time",
             units="au",
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ndsf/s(q,f)_inc",
             "SurfaceOutputVariable",
@@ -454,7 +454,8 @@ class NeutronDynamicTotalStructureFactor(IJob):
             main_result=True,
             partial_result=True,
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ndsf/s(q,f)_coh",
             "SurfaceOutputVariable",
@@ -484,7 +485,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             str(self),
             self,
         )
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         self.configuration["disf_input_file"]["instance"].close()
         self.configuration["dcsf_input_file"]["instance"].close()
         super().finalize()

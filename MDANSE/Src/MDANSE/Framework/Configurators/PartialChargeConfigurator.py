@@ -53,7 +53,7 @@ class PartialChargeMapper:
         Parameters
         ----------
         selection_dict: dict[str, Union[bool, dict]]
-            The selection setting to get the indices to map the inputted
+            The selection setting to get the indices to map the input
             partial charge.
         charge: float
             The partial charge to map the selected atoms to.

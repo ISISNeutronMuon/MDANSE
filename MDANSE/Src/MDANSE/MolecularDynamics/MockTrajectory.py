@@ -30,6 +30,7 @@ from MDANSE.MolecularDynamics.Configuration import (
     _Configuration,
     contiguous_coordinates_real,
 )
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.MolecularDynamics.TrajectoryUtils import atomic_trajectory
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -226,6 +227,9 @@ class MockTrajectory:
         """Only added for compatibility with Trajectory"""
         pass
 
+    def time(self) -> np.ndarray:
+        return self._time_axis
+
     def coordinates(self, frame: int) -> np.ndarray:
         """Returns the atom coordinates at the specified frame
 
@@ -298,11 +302,9 @@ class MockTrajectory:
     def get_atom_property(self, atom_symbol: str, property: str):
         return ATOMS_DATABASE.get_atom_property(atom_symbol, property)
 
-    @property
     def atoms_in_database(self) -> list[str]:
         return ATOMS_DATABASE.atoms
 
-    @property
     def properties_in_database(self) -> list[str]:
         return ATOMS_DATABASE.properties
 
@@ -547,6 +549,17 @@ class MockTrajectory:
         """
         return "velocities" in self._variables.keys()
 
+    def has_variable(self, variable: str) -> bool:
+        """True if the trajectory contains atom velocities,
+        False otherwise.
+
+        Returns
+        -------
+        bool
+            True if velocities are stored in MockTrajectory
+        """
+        return variable in self._variables.keys()
+
     def variables(self):
         """Return the configuration variables stored in this trajectory.
         Most likely empty for MockTrajectory, but does not have to be.
@@ -560,7 +573,7 @@ class MockTrajectory:
         return list(grp.keys())
 
     @classmethod
-    def from_json(cls, filename: str) -> Self:
+    def from_json(cls, filename: str) -> Trajectory:
         """Builds and returns an instance of MockTrajectory
         using the parameters in a JSON file.
 
@@ -572,8 +585,8 @@ class MockTrajectory:
 
         Returns
         -------
-        Self
-            a MockTrajectory instance
+        Trajectory
+            a Trajectory instance with a MockTrajectory as internal object
         """
         with open(filename, encoding="utf-8") as source:
             struct = json.load(source)
@@ -586,4 +599,6 @@ class MockTrajectory:
             temp["polarisation"] = np.array(temp["polarisation"])
             temp["propagation_vector"] = np.array(temp["propagation_vector"])
             instance.modulate_structure(**temp)
-        return instance
+        wrapper = Trajectory(None, trajectory_format="mock")
+        wrapper._trajectory = instance
+        return wrapper

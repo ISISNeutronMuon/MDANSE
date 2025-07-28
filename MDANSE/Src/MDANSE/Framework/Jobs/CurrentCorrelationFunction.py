@@ -14,13 +14,16 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
-import itertools
 from math import sqrt
 from typing import Optional
 
 import numpy as np
 from scipy.signal import correlate
 
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
@@ -87,7 +90,6 @@ class CurrentCorrelationFunction(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
             }
         },
     )
@@ -100,8 +102,6 @@ class CurrentCorrelationFunction(IJob):
         {
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "grouping_level": "grouping_level",
             }
         },
     )
@@ -175,10 +175,14 @@ class CurrentCorrelationFunction(IJob):
         )
 
         self._nFrames = self.configuration["frames"]["n_frames"]
-        self._elements = self.configuration["atom_selection"]["unique_names"]
-        self.labels = self.configuration["grouping_level"].pair_labels()
+        self._elements = set(
+            self.trajectory.selection_getter(self.trajectory.atom_names)
+        )
+        self.labels = pair_labels(
+            self.trajectory,
+        )
 
-        self._indicesPerElement = self.configuration["atom_selection"].get_indices()
+        self._indicesPerElement = self.trajectory.get_indices()
         self.add_ideal_results = (
             self.configuration["instrument_resolution"]["kernel"] != "ideal"
         )
@@ -283,7 +287,7 @@ class CurrentCorrelationFunction(IJob):
         self._cell_std = 0.0
         try:
             all_cells = [
-                self.configuration["trajectory"]["instance"].unit_cell(frame)._unit_cell
+                self.trajectory.unit_cell(frame)._unit_cell
                 for frame in self.configuration["frames"]["value"]
             ]
         except TypeError:
@@ -313,7 +317,7 @@ class CurrentCorrelationFunction(IJob):
         """
         shell = self.configuration["q_vectors"]["shells"][index]
 
-        trajectory = self.configuration["trajectory"]["instance"]
+        trajectory = self.trajectory
         cell_present = True
         cell_fixed = True
         num_frames = len(self.configuration["frames"]["value"])
@@ -503,7 +507,7 @@ class CurrentCorrelationFunction(IJob):
             self._outputData,
         )
 
-        nAtomsPerElement = self.configuration["atom_selection"].get_natoms()
+        nAtomsPerElement = self.trajectory.get_natoms()
         for pair_str, (label_i, label_j) in self.labels:
             ni = nAtomsPerElement[label_i]
             nj = nAtomsPerElement[label_j]
@@ -541,12 +545,14 @@ class CurrentCorrelationFunction(IJob):
                     )
                 )
 
-        selected_weights, all_weights = self.configuration["weights"].get_weights()
+        selected_weights, all_weights = self.trajectory.get_weights(
+            prop=self.configuration["weights"]["property"]
+        )
         weight_dict = get_weights(
             selected_weights,
             all_weights,
             nAtomsPerElement,
-            self.configuration["atom_selection"].get_all_natoms(),
+            self.trajectory.get_all_natoms(),
             2,
             conc_exp=0.5,
         )
@@ -573,7 +579,7 @@ class CurrentCorrelationFunction(IJob):
             )
 
         n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.configuration["atom_selection"].get_all_natoms().values())
+        n_total = sum(self.trajectory.get_all_natoms().values())
         fact = n_selected / n_total
 
         jqtLongTotal = weighted_sum(self._outputData, "ccf/j(q,t)_long/%s", self.labels)
@@ -584,7 +590,8 @@ class CurrentCorrelationFunction(IJob):
         self._outputData["ccf/j(q,t)_trans/total"][:] = jqtTransTotal
         self._outputData["ccf/j(q,t)_long/total"].scaling_factor = fact
         self._outputData["ccf/j(q,t)_trans/total"].scaling_factor = fact
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ccf/j(q,t)_long",
             "SurfaceOutputVariable",
@@ -593,7 +600,8 @@ class CurrentCorrelationFunction(IJob):
             axis="ccf/axes/q|ccf/axes/time",
             units="au",
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ccf/j(q,t)_trans",
             "SurfaceOutputVariable",
@@ -609,7 +617,8 @@ class CurrentCorrelationFunction(IJob):
             self._outputData, "ccf/J(q,f)_trans/%s", self.labels
         )
         self._outputData["ccf/J(q,f)_trans/total"][:] = sqfTransTotal
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ccf/J(q,f)_long",
             "SurfaceOutputVariable",
@@ -620,7 +629,8 @@ class CurrentCorrelationFunction(IJob):
             main_result=True,
             partial_result=True,
         )
-        self.configuration["grouping_level"].add_grouped_totals(
+        add_grouped_totals(
+            self.trajectory,
             self._outputData,
             "ccf/J(q,f)_trans",
             "SurfaceOutputVariable",
@@ -643,7 +653,8 @@ class CurrentCorrelationFunction(IJob):
             )
             self._outputData["ccf/J(q,f)_trans/ideal/total"][:] = sqfTransTotal / fact
             self._outputData["ccf/J(q,f)_trans/ideal/total"].scaling_factor = fact
-            self.configuration["grouping_level"].add_grouped_totals(
+            add_grouped_totals(
+                self.trajectory,
                 self._outputData,
                 "ccf/J(q,f)_long/ideal",
                 "SurfaceOutputVariable",
@@ -652,7 +663,8 @@ class CurrentCorrelationFunction(IJob):
                 axis="ccf/axes/q|ccf/axes/romega",
                 units="au",
             )
-            self.configuration["grouping_level"].add_grouped_totals(
+            add_grouped_totals(
+                self.trajectory,
                 self._outputData,
                 "ccf/J(q,f)_trans/ideal",
                 "SurfaceOutputVariable",
@@ -668,5 +680,5 @@ class CurrentCorrelationFunction(IJob):
             str(self),
             self,
         )
-        self.configuration["trajectory"]["instance"].close()
+        self.trajectory.close()
         super().finalize()

@@ -122,52 +122,16 @@ class WeightsConfigurator(SingleChoiceConfigurator):
 
     def test_values_for_nan(self, property_name: str) -> bool:
         """Throw an error early if weights are not usable."""
-        atm_select = self.configurable[self.dependencies["atom_selection"]]
-        atom_types = np.unique(atm_select["elements"])
+        atom_select = self.configurable[self.dependencies["atom_selection"]][
+            "flatten_indices"
+        ]
+        atom_trans = self.configurable[
+            self.dependencies["atom_transmutation"]
+        ].transmutation
+        self._trajectory.set_transmutation(atom_trans)
+        self._trajectory.set_selection(atom_select)
+        atom_types = np.unique(self._trajectory.atom_types)
         return any(
             np.isnan(self._trajectory.get_atom_property(atom, property_name))
             for atom in atom_types
         )
-
-    def get_weights(
-        self, *, prop: str | None = None
-    ) -> tuple[dict[str, float], dict[str, float]]:
-        """Generate a dictionary of weights.
-
-        Parameters
-        ----------
-        prop : str or None, optional
-            The property to generate the weights from, if None then the
-            property set in this configurator will be used.
-
-        Returns
-        -------
-        tuple[dict[str, float], dict[str, float]]
-            The dictionary of the weights.
-
-        """
-        if not prop:
-            prop = self["property"]
-
-        atm_select = self.configurable[self.dependencies["atom_selection"]]
-
-        weights = []
-        for n_elements, atm_names, atm_elements in [
-            (atm_select.get_natoms(), atm_select["names"], atm_select["elements"]),
-            (
-                atm_select.get_all_natoms(),
-                atm_select["all_names"],
-                atm_select["all_elements"],
-            ),
-        ]:
-            w = defaultdict(float)
-            for name, elements in zip(atm_names, atm_elements):
-                w[name] += sum(
-                    self._trajectory.get_atom_property(element, prop)
-                    for element in elements
-                )
-            for element, num_atoms in n_elements.items():
-                w[element] /= num_atoms
-            weights.append(w)
-
-        return tuple(weights)

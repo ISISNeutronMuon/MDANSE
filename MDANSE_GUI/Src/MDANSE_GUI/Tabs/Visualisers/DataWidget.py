@@ -14,8 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import csv
-import os
-from pathlib import PurePath
+from pathlib import Path
 from traceback import format_exc
 from typing import TYPE_CHECKING
 
@@ -56,12 +55,16 @@ class DataWidget(QWidget):
         self._sliderpack = None
         self._plotting_context = None
         self._slider_max = 100
-        self._current_path = PurePath(os.path.abspath("."))
+        self._current_path = Path.cwd()
+
         layout = QVBoxLayout(self)
+
         self.setLayout(layout)
+
         self.make_toolbar()
         self.make_canvas()
         self.make_bottom_bar()
+
         self.set_plotter("Text")
         self.update_plotter_params()
 
@@ -71,22 +74,29 @@ class DataWidget(QWidget):
         self._preview_widget = QCheckBox(self)
         self._preview_widget.setChecked(True)
         self._preview_widget.checkStateChanged.connect(self.update_plotter_params)
+
         self._separator_widget = QLineEdit(" ", self)
         self._separator_widget.textChanged.connect(self.update_plotter_params)
+
         self._comment_widget = QLineEdit("#", self)
         self._comment_widget.textChanged.connect(self.update_plotter_params)
+
         self._precision_widget = QSpinBox(self)
         self._precision_widget.setValue(5)
         self._precision_widget.valueChanged.connect(self.update_plotter_params)
+
         self._lines_widget = QSpinBox(self)
         self._lines_widget.setValue(10)
         self._lines_widget.valueChanged.connect(self.update_plotter_params)
+
         self._columns_widget = QSpinBox(self)
         self._columns_widget.setValue(10)
         self._columns_widget.valueChanged.connect(self.update_plotter_params)
+
         # populate the layout
         column = 0
         row = 0
+
         for label_text, widget in [
             ("Preview only (truncate)", self._preview_widget),
             ("Preview lines:", self._lines_widget),
@@ -106,25 +116,31 @@ class DataWidget(QWidget):
     def make_bottom_bar(self):
         layout = QHBoxLayout()
         self.layout().addLayout(layout)
+
         layout.addWidget(QLabel("Output file:"))
         self._output_widget = QLineEdit("", self)
         self._output_widget.textChanged.connect(self.check_file_writable)
         layout.addWidget(self._output_widget)
+
         self._browse_button = QPushButton("Browse", self)
         self._browse_button.clicked.connect(self.output_file_dialog)
+
         layout.addWidget(self._browse_button)
         tooltip = (
             "CSV dialect option, as implemented by the Python CSV module. "
             "It should mainly affect delimiters and newline characters. "
             "Most of the time there is no need to change it."
         )
+
         templabel = QLabel("CSV dialect:", self)
         templabel.setToolTip(tooltip)
         layout.addWidget(templabel)
+
         self._dialect_combo = QComboBox(self)
         self._dialect_combo.addItems(csv.list_dialects())
         self._dialect_combo.setToolTip(tooltip)
         layout.addWidget(self._dialect_combo)
+
         self._output_button = QPushButton("Save file", self)
         self._output_button.clicked.connect(self.save_to_file)
         layout.addWidget(self._output_button)
@@ -146,13 +162,16 @@ class DataWidget(QWidget):
             str(self._current_path),  # the initial search path
             "Comma-separated values (*.csv);;Output file name (*)",  # text string specifying the file name filter.
         )
-        if len(new_value[0]) > 0:
-            self._output_widget.setText(str(PurePath(new_value[0])))
-            self._current_path = PurePath(os.path.split(new_value[0])[0])
+
+        if new_value[0]:
+            new_path = Path(new_value[0])
+            self._output_widget.setText(str(new_path))
+            self._current_path = new_path.parent
 
     @Slot()
     def save_to_file(self):
-        target_path = PurePath(self._output_widget.text())
+        target_path = Path(self._output_widget.text())
+
         try:
             nsets = len(self._plotter._pc_backup.datasets())
         except AttributeError:
@@ -162,22 +181,21 @@ class DataWidget(QWidget):
         else:
             if nsets == 0:  # do not create a file if there are no data
                 return
+
+        PLATFORM.create_directory(target_path.parent)
         try:
-            PLATFORM.create_directory(os.path.dirname(self._output_widget.text()))
-            target = open(target_path, "w", newline="")
-        except Exception:
-            LOG.error(f"Could not open file for writing: {target_path}")
-        else:
-            writer = csv.writer(
-                target,
-                dialect=self._dialect_combo.currentText,
-            )
-            for header, data in self._plotter._formatter.datasets_for_csv():
-                for line in header:
-                    target.write(line + "\n")
-                for row in data:
-                    writer.writerow(row)
-            target.close()
+            with open(target_path, "w", newline="") as target:
+                writer = csv.writer(
+                    target,
+                    dialect=self._dialect_combo.currentText,
+                )
+                for header, data in self._plotter._formatter.datasets_for_csv():
+                    for line in header:
+                        target.write(line + "\n")
+                    for row in data:
+                        writer.writerow(row)
+        except Exception as err:
+            LOG.error("Could not write data file (%s): %s", target_path, err)
 
     # @Slot(object)
     # def slider_change(self, new_values: object):
@@ -211,6 +229,7 @@ class DataWidget(QWidget):
         separator_char = self._separator_widget.text()
         preview_lines = self._lines_widget.value()
         preview_columns = self._columns_widget.value()
+
         self._plotter.adjust_formatter(
             preview=is_preview,
             preview_lines=preview_lines,
@@ -242,7 +261,9 @@ class DataWidget(QWidget):
             return
         try:
             LOG.debug(
-                f"DataWidget will plot {self._plotting_context} in {self._figure}."
+                "DataWidget will plot %s in %s.",
+                self._plotting_context,
+                self._figure,
             )
             self._plotter.plot(
                 self._plotting_context,
@@ -252,10 +273,10 @@ class DataWidget(QWidget):
             )
             for _, databundle in self._plotting_context.datasets().items():
                 dataset, _, _, _, _, _ = databundle
-                self._current_path = PurePath(os.path.split(dataset._filename)[0])
+                self._current_path = Path(dataset._filename).parent
                 break
-        except Exception as e:
-            LOG.error(f"DataWidget error: {e}traceback {format_exc()}")
+        except Exception as err:
+            LOG.error("DataWidget error: %s traceback %s", err, format_exc())
 
     def make_canvas(self):
         """Creates a matplotlib figure for plotting

@@ -52,3 +52,4 @@ class View3D(QWidget):
         except AttributeError:
             self.error.emit(f"3D View could not visualise {fullpath}")
             self._viewer.clear_trajectory()
+            self._viewer.clear_atom_labels()

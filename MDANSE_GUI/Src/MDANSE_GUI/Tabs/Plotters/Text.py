@@ -13,11 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
+from collections.abc import Iterable
 from functools import reduce
-from itertools import product
+from itertools import islice
+from itertools import product as cart_prod
+from math import prod as product
 from typing import TYPE_CHECKING
 
 import numpy as np
+from more_itertools import collapse, prepend, transpose
 
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
@@ -50,7 +56,7 @@ class DatasetFormatter:
         self._comment = "#"
         self._separator = " "
 
-    def take_new_input(self, pc: "PlottingContext"):
+    def take_new_input(self, pc: PlottingContext):
         """Assign the input PlottingContext to the plotter.
 
         The plotting context is passed from the GUI and
@@ -72,53 +78,30 @@ class DatasetFormatter:
         """
         self._plotting_context = pc
         self._new_text = []
+
         if self._plotting_context is None:
             return ["No data selected"]
+
         for name, databundle in self._plotting_context.datasets().items():
-            dataset, _, _, _, _, axis_label = databundle
-            if dataset._n_dim == 1:
-                header, data = self.process_1D_data(
-                    dataset, separator=self._separator, is_preview=self._is_preview
-                )
-                self._new_text.append(
-                    self.join_for_gui(header, data, separator=self._separator)
-                )
-            elif dataset._n_dim == 2:
-                header, data = self.process_2D_data(
-                    dataset,
-                    separator=self._separator,
-                    is_preview=self._is_preview,
-                    main_axis=axis_label,
-                )
-                self._new_text.append(
-                    self.join_for_gui(header, data, separator=self._separator),
-                )
-            else:
-                header, data = self.process_ND_data(
-                    dataset,
-                    separator=self._separator,
-                    is_preview=self._is_preview,
-                )
-                self._new_text.append(
-                    self.join_for_gui(header, data, separator=self._separator),
-                )
+            header, data = self.process_data(
+                databundle.dataset,
+                main_axis=databundle.main_axis,
+            )
+            self._new_text.append(
+                self.join_for_gui(header, data, separator=self._separator)
+            )
+
         return self._new_text
 
     def datasets_for_csv(self):
         """Return the datasets to be saved in a text file."""
         if self._plotting_context is None:
             return ["No data selected"]
-        for databundle in self._plotting_context.datasets().values():
-            dataset, _, _, _, _, _ = databundle
-            if dataset._n_dim == 1:
-                header, data = self.process_1D_data(dataset, separator=self._separator)
-            elif dataset._n_dim == 2:
-                header, data = self.process_2D_data(dataset, separator=self._separator)
-            else:
-                header, data = self.process_ND_data(dataset, separator=self._separator)
-            yield header, data
 
-    def make_dataset_header(self, dataset: "SingleDataset", comment_character="#"):
+        for databundle in self._plotting_context.datasets().values():
+            yield self.process_data(databundle.dataset, separator=self._separator)
+
+    def make_dataset_header(self, dataset: SingleDataset, comment_character="#"):
         """Return the dataset informartion as text.
 
         Extracts information related to the input dataset, and converts them
@@ -137,37 +120,58 @@ class DatasetFormatter:
             list of header lines
 
         """
-        lines = []
-        lines.append(f"{comment_character} Dataset name: {dataset._name}")
-        lines.append(f"{comment_character} from file {dataset._filename}")
-        lines.append(
+        lines = [
+            f"{comment_character} Dataset name: {dataset._name}",
+            f"{comment_character} from file {dataset._filename}",
             f"{comment_character} Contains axes: "
-            + ", ".join([str(axis) for axis in dataset.available_x_axes()]),
-        )
-        lines.append(f"{comment_character} data unit is {dataset._data_unit}")
+            + ", ".join(map(str, dataset.available_x_axes())),
+            f"{comment_character} data unit is {dataset._data_unit}",
+        ]
         return lines, comment_character
 
     def join_for_gui(
         self,
         header_lines: list[str],
-        data_array: np.ndarray,
-        separator=" ",
+        data_array: Iterable[Iterable[float]],
+        separator: str = " ",
     ):
         """Combine the header text with the data array into a string."""
-        text_data = "\n".join(
-            [
-                separator.join([str(round(x, self._rounding_prec)) for x in line])
-                for line in data_array
-            ]
-        )
         if self._is_preview:
+            data = islice(data_array, self._preview_lines)
+            data = map(lambda x: islice(x, self._preview_columns), data)
+        else:
+            data = data_array
+
+        text_data = "\n".join(
+            separator.join(str(round(x, self._rounding_prec)) for x in line)
+            for line in data
+        )
+
+        # If not empty
+        if self._is_preview and next(data_array, None) is not None:
             text_data += "\n..."
+
         new_header = "\n".join(header_lines)
         return new_header + "\n" + text_data
 
-    def process_1D_data(
-        self, dataset: "SingleDataset", separator=" ", is_preview=False
+    def process_data(
+        self,
+        dataset: SingleDataset,
+        main_axis: str | None = None,
     ):
+        """Wrapper for approriately handling ND data."""
+
+        if dataset._n_dim == 1:
+            return self.process_1D_data(dataset)
+        if dataset._n_dim == 2:
+            return self.process_2D_data(dataset, main_axis=main_axis)
+
+        return self.process_ND_data(dataset)
+
+    def process_1D_data(
+        self,
+        dataset: SingleDataset,
+    ) -> tuple[list[str], Iterable[Iterable[float]]]:
         """Turn a 1D array into text.
 
         Formats a 1D array as a 2-column table with a commented header.
@@ -177,16 +181,16 @@ class DatasetFormatter:
         Parameters
         ----------
         dataset : SingleDataset
-            A SingleDataset read from an .MDA file (HDF5)
+            A SingleDataset read from an .MDA file (HDF5).
         separator : str, optional
-            character(s) separating numbers in the output table, by default " "
-        is_preview : bool
-            if True, limit the number of lines and column in the output
+            Character(s) separating numbers in the output table, by default " ".
 
         Returns
         -------
-        str
-            a data table with 2 columns in text format
+        list[str]
+            Header lines.
+        np.ndarray
+            A data table with 2 columns.
 
         """
         header_lines, _ = self.make_dataset_header(
@@ -194,134 +198,109 @@ class DatasetFormatter:
         )
         best_unit, best_axis = dataset.longest_axis()
         xaxis_unit = self._plotting_context.get_conversion_factor(best_unit)
+
         try:
             conversion_factor = measure(1.0, best_unit, equivalent=True).toval(
                 xaxis_unit
             )
         except Exception:
-            return f"Could not convert {best_unit} to {xaxis_unit}."
-        else:
-            header_lines.append(f"{self._comment} units of x axis here: {xaxis_unit}")
-            header_lines.append(
-                f"{self._comment} col1:{best_axis}:{xaxis_unit} col2:data:{dataset._data_unit}"
-            )
-            if is_preview:
-                temp = np.vstack(
-                    [
-                        dataset._axes[best_axis][: self._preview_lines]
-                        * conversion_factor,
-                        dataset.data[: self._preview_lines],
-                    ]
-                ).T
-            else:
-                temp = np.vstack(
-                    [dataset._axes[best_axis] * conversion_factor, dataset.data]
-                ).T
-            return header_lines, temp
+            conversion_factor = 1.0
+            # return f"Could not convert {best_unit} to {xaxis_unit}."
+
+        header_lines.append(f"{self._comment} units of x axis here: {xaxis_unit}")
+        header_lines.append(
+            f"{self._comment} col1:{best_axis}:{xaxis_unit} col2:data:{dataset._data_unit}"
+        )
+
+        return header_lines, zip(
+            dataset._axes[best_axis] * conversion_factor, dataset.data
+        )
 
     def process_2D_data(
         self,
-        dataset: "SingleDataset",
-        separator=" ",
-        is_preview=False,
-        main_axis=None,
-    ):
+        dataset: SingleDataset,
+        *,
+        main_axis: str | None = None,
+    ) -> tuple[list[str], Iterable[Iterable[float]]]:
         """Convert a 2D data array into text.
 
         Parameters
         ----------
         dataset : SingleDataset
-            A SingleDataset read from an .MDA file (HDF5)
+            A SingleDataset read from an .MDA file (HDF5).
         separator : str, optional
-            character(s) separating numbers in the output table, by default " "
-        is_preview : bool
-            if True, limit the number of lines and column in the output
+            Character(s) separating numbers in the output table, by default " ".
+        main_axis : str or None
+            Main axis to plot.
 
         Returns
         -------
-        str
-            a data table with 2 columns in text format
+        list[str]
+            Header lines.
+        2D Iterator or Iterators
+            A data table
+
+            0. Axes->
+            A  0,0 1,0 2,0 3,0 ...
+            x  0,1 ⋱   2,1 3,1 ...
+            e  0,2   ⋱
+            s  0,3 1,3 ...
+            |  ⋮
+            v
 
         """
         header_lines, comment_char = self.make_dataset_header(
             dataset, comment_character=self._comment
         )
+
         new_axes = {}
         new_axes_units = {}
         axis_numbers = {}
-        flip_array = False
-        for n, ax_key in enumerate(dataset.available_x_axes()):
-            if main_axis is not None:
-                if n > 0 and ax_key == main_axis:
-                    flip_array = True
+
+        flip_array = (
+            main_axis is not None and main_axis in dataset.available_x_axes()[1:]
+        )
+
         for n, ax_key in enumerate(dataset.available_x_axes()):
             axis = dataset._axes[ax_key]
             axis_unit = dataset._axes_units[ax_key]
             new_unit = self._plotting_context.get_conversion_factor(axis_unit)
             conv_factor = measure(1.0, axis_unit, equivalent=True).toval(new_unit)
-            new_axes[ax_key] = conv_factor * axis
+
+            new_axes[ax_key] = axis * conv_factor
             new_axes_units[ax_key] = new_unit
             axis_numbers[n] = ax_key
+
             LOG.debug(f"process_2D_data: axis {ax_key} has length {len(axis)}")
-            if not flip_array:
-                if n == 0:
-                    header_lines.append(
-                        f"{comment_char} first column is {ax_key} in units {new_unit}"
-                    )
-                else:
-                    header_lines.append(
-                        f"{comment_char} first row is {ax_key} in units {new_unit}"
-                    )
-            elif n == 0:
-                header_lines.append(
-                    f"{comment_char} first row is {ax_key} in units {new_unit}"
-                )
-            else:
-                header_lines.append(
-                    f"{comment_char} first column is {ax_key} in units {new_unit}"
-                )
+
+            rc = "column" if n == flip_array else "row"
+            header_lines.append(
+                f"{comment_char} first {rc} is {ax_key} in units {new_unit}"
+            )
+
         LOG.debug(f"Data shape: {dataset._data.shape}")
-        if is_preview:
-            nlines = self._preview_lines
-            ncols = self._preview_columns
-            nlines = min(nlines, len(new_axes[axis_numbers[0]]))
-            ncols = min(ncols, len(new_axes[axis_numbers[1]]))
-            temp = np.hstack(
-                [
-                    new_axes[axis_numbers[0]][:nlines].reshape((nlines, 1)),
-                    dataset.data[:nlines, :ncols],
-                ]
-            )
-            temp = np.vstack(
-                [
-                    np.concatenate([[0], new_axes[axis_numbers[1]][:ncols]]).reshape(
-                        (1, ncols + 1)
-                    ),
-                    temp,
-                ]
-            )
-        else:
-            temp = np.hstack(
-                [
-                    new_axes[axis_numbers[0]].reshape((dataset._data.shape[0], 1)),
-                    dataset.data,
-                ]
-            )
-            temp = np.vstack(
-                [
-                    np.concatenate([[0], new_axes[axis_numbers[1]]]).reshape(
-                        (1, dataset._data.shape[1] + 1)
-                    ),
-                    temp,
-                ]
-            )
-        if not flip_array:
-            return header_lines, temp
-        return header_lines, temp.T
+
+        # Add corner nil
+        xaxis = prepend(0.0, new_axes[axis_numbers[1]].flat)
+
+        # Add axes to data
+        data_lines = zip(new_axes[axis_numbers[0]].flat, dataset.data)
+
+        # Put xaxis in
+        temp = prepend(xaxis, data_lines)
+
+        # Flatten each row
+        temp = map(collapse, temp)
+
+        if flip_array:
+            return header_lines, transpose(temp)
+
+        return header_lines, temp
 
     def process_ND_data(
-        self, dataset: "SingleDataset", separator=" ", is_preview=False
-    ):
+        self,
+        dataset: SingleDataset,
+    ) -> tuple[list[str], Iterable[Iterable[float]]]:
         """Convert an N-dimensional array into text.
 
         Parameters
@@ -335,8 +314,10 @@ class DatasetFormatter:
 
         Returns
         -------
-        str
-            Data as text
+        list[str]
+            Header lines.
+        Iterable[Iterable[float]]
+            Data table of x,y,z,... data
 
         """
         header_lines, comment_char = self.make_dataset_header(
@@ -345,43 +326,38 @@ class DatasetFormatter:
         new_axes = {}
         new_axes_units = {}
         axis_numbers = {}
+
         for n, ax_key in enumerate(dataset.available_x_axes()):
-            axis = dataset._axes[ax_key]
             axis_unit = dataset._axes_units[ax_key]
             new_unit = self._plotting_context.get_conversion_factor(axis_unit)
             conv_factor = measure(1.0, axis_unit, equivalent=True).toval(new_unit)
+
+            axis = dataset._axes[ax_key]
             new_axes[ax_key] = conv_factor * axis
             new_axes_units[ax_key] = new_unit
             axis_numbers[n] = ax_key
-            LOG.debug(f"process_ND_data: axis {ax_key} has length {len(axis)}")
-        for ax_num, ax_key in enumerate(new_axes.keys()):
+            LOG.debug("process_ND_data: axis %s has length %d.", ax_key, len(axis))
+
+        for ax_num, ax_key in enumerate(new_axes):
             header_lines.append(
                 f"{comment_char} {ax_num} column is {ax_key} in units {new_axes_units[ax_key]}"
             )
+
         LOG.debug(f"Data shape: {dataset._data.shape}")
-        temp = []
-        _ncols = len(new_axes) + 1
+
         ax_lengths = [len(new_axes[ax_num]) for ax_num in axis_numbers.values()]
         LOG.debug(f"Axis lengths: {ax_lengths}")
         LOG.debug(f"Axis sequence: {axis_numbers}")
-        total_lines = reduce(lambda x, y: x * y, ax_lengths)
-        if is_preview:
-            counter = 0
-            nlines = self._preview_lines
-        else:
-            counter = 0
-            nlines = total_lines
-        all_indices = product(*[range(ax_lengths[n]) for n in axis_numbers])
-        while counter < nlines:
-            array_index = all_indices.__next__()
-            xvals = [
-                new_axes[axis_numbers[axis_number]][index]
-                for axis_number, index in enumerate(array_index)
-            ]
-            yval = dataset.data[array_index]
-            temp.append(xvals + [yval])
-            counter += 1
-        return header_lines, np.vstack(temp)
+
+        # Attach axis indices
+        temp = zip(
+            cart_prod(*(new_axes[ind] for ind in axis_numbers.values())),
+            dataset.data.ravel(),
+        )
+        # Flatten each row
+        temp = map(collapse, temp)
+
+        return header_lines, temp
 
 
 class Text(Plotter):
@@ -408,7 +384,7 @@ class Text(Plotter):
         self._pc_backup = None
         self.height_max, self.length_max = 0.0, 0.0
 
-    def clear(self, figure: "QTextBrowser" = None):
+    def clear(self, figure: QTextBrowser = None):
         """Clear the output text widget.
 
         Optionally sets the input to be the new
@@ -448,7 +424,7 @@ class Text(Plotter):
         self._formatter._comment = comment
         self.plot(self._pc_backup, self._figure)
 
-    def get_figure(self, figure: "QTextBrowser" = None):
+    def get_figure(self, figure: QTextBrowser = None):
         """Get the widget which will display the text.
 
         Used for both updating and getting the output widget
@@ -477,7 +453,7 @@ class Text(Plotter):
         LOG.debug("Text.get_figure finished")
         return target
 
-    def apply_settings(self, plotting_context: "PlottingContext", colours=None):
+    def apply_settings(self, plotting_context: PlottingContext, colours=None):
         """Do nothing.
 
         Not relevant to the Text plotter, added for compatibility
@@ -494,8 +470,8 @@ class Text(Plotter):
 
     def plot(
         self,
-        plotting_context: "PlottingContext",
-        figure: "QTextBrowser" = None,
+        plotting_context: PlottingContext,
+        figure: QTextBrowser = None,
         colours=None,
         update_only=False,
         toolbar=None,
