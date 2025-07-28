@@ -18,6 +18,7 @@ from __future__ import annotations
 import contextlib
 import copy
 import itertools
+from functools import reduce
 from pathlib import Path
 from traceback import print_exception
 from typing import TYPE_CHECKING, NamedTuple
@@ -697,6 +698,10 @@ class PlottingContext(QStandardItemModel):
             return
 
         self._datasets[newkey] = new_dataset
+        total_length = reduce(int.__mul__, new_dataset._data.shape)
+        slice_length = int(
+            total_length / len(new_dataset.x_axis(new_dataset.longest_axis()[-1]))
+        )
         items = [
             QStandardItem(str(x))
             for x in [
@@ -705,7 +710,7 @@ class PlottingContext(QStandardItemModel):
                 new_dataset._data.shape,
                 new_dataset._data_unit,
                 new_dataset.longest_axis()[-1],
-                "",
+                f"{0}:{slice_length}:{1}",
                 self.next_colour(),
                 new_dataset._linestyle,
                 "",
