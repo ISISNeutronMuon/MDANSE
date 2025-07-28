@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import h5py
@@ -44,9 +46,9 @@ class FileInMemory(IFormat):
     def write(
         cls,
         filename: str,
-        data: dict[str, "IOutputVariable"],
+        data: dict[str, IOutputVariable],
         header: str = "",
-        run_instance: "IJob" = None,
+        run_instance: IJob = None,
         extension: str = extensions[0],
     ) -> h5py.File:
         """Write the MDA data structure to an in-memory HDF object.

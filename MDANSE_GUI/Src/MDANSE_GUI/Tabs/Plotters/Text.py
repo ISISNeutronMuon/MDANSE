@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterator
 from functools import reduce
 from itertools import islice
 from itertools import product as cart_prod
@@ -132,7 +132,7 @@ class DatasetFormatter:
     def join_for_gui(
         self,
         header_lines: list[str],
-        data_array: Iterable[Iterable[float]],
+        data_array: Iterator[Iterator[float]],
         separator: str = " ",
     ):
         """Combine the header text with the data array into a string."""
@@ -171,7 +171,7 @@ class DatasetFormatter:
     def process_1D_data(
         self,
         dataset: SingleDataset,
-    ) -> tuple[list[str], Iterable[Iterable[float]]]:
+    ) -> tuple[list[str], Iterator[Iterator[float]]]:
         """Turn a 1D array into text.
 
         Formats a 1D array as a 2-column table with a commented header.
@@ -221,7 +221,7 @@ class DatasetFormatter:
         dataset: SingleDataset,
         *,
         main_axis: str | None = None,
-    ) -> tuple[list[str], Iterable[Iterable[float]]]:
+    ) -> tuple[list[str], Iterator[Iterator[float]]]:
         """Convert a 2D data array into text.
 
         Parameters
@@ -300,7 +300,7 @@ class DatasetFormatter:
     def process_ND_data(
         self,
         dataset: SingleDataset,
-    ) -> tuple[list[str], Iterable[Iterable[float]]]:
+    ) -> tuple[list[str], Iterator[Iterator[float]]]:
         """Convert an N-dimensional array into text.
 
         Parameters
@@ -316,7 +316,7 @@ class DatasetFormatter:
         -------
         list[str]
             Header lines.
-        Iterable[Iterable[float]]
+        Iterator[Iterator[float]]
             Data table of x,y,z,... data
 
         """

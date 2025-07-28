@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import csv
 from pathlib import Path
 from traceback import format_exc
@@ -206,7 +208,7 @@ class DataWidget(QWidget):
     # def set_slider_values(self, reset_needed: bool):
     #     """Not used for text output."""
 
-    def set_context(self, new_context: "PlottingContext"):
+    def set_context(self, new_context: PlottingContext):
         self._plotting_context = new_context
         self._plotting_context._figure = self._figure
         self.unique_id = id(self)

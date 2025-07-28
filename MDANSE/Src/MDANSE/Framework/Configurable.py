@@ -13,8 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import collections
-from typing import Optional
 
 from more_itertools import value_chain
 
@@ -229,9 +230,9 @@ class Configurable:
 
         self._configured = True
 
-    def output_configuration(self) -> Optional[dict[str, str]]:
+    def output_configuration(self) -> dict[str, str] | None:
         if not self._configured:
-            return
+            return None
         return {name: conf.to_json() for name, conf in self._configuration.items()}
 
     def __str__(self) -> str:

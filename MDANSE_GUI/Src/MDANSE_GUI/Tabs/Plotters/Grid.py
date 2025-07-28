@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import contextlib
 import math
 from itertools import islice
@@ -85,8 +87,8 @@ class Grid(Plotter):
 
     def plot(
         self,
-        plotting_context: "PlottingContext",
-        figure: "Figure" = None,
+        plotting_context: PlottingContext,
+        figure: Figure = None,
         update_only=False,
         toolbar=None,
     ):

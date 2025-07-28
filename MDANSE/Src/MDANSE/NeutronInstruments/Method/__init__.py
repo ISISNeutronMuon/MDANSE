@@ -25,6 +25,8 @@ in a different set of equations depending on the type of an experiment
 performed. Initially, the plan is to start with time-of-flight diffraction,
 direct and indirect spectrometry."""
 
+from __future__ import annotations
+
 from .NullMethod import NullMethod as NullMethod
 from .ScatteringMethod import ScatteringMethod as ScatteringMethod
 from .TOFDiffraction import TOFDiffraction as TOFDiffraction

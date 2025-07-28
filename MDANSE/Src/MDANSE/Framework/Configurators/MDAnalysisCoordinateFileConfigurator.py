@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
+from __future__ import annotations
 
 import MDAnalysis as mda
 
@@ -35,7 +35,7 @@ class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
         IConfigurator.__init__(self, name, **kwargs)
         self.wildcard = wildcard
 
-    def configure(self, setting: tuple[Union[str, list], str]):
+    def configure(self, setting: tuple[str | list[str], str]):
         """
         Parameters
         ----------

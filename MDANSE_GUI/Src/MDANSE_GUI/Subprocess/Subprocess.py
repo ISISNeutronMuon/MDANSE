@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import time
 from logging.handlers import QueueHandler
 from multiprocessing import Event, Process, Queue
@@ -41,9 +43,9 @@ class Subprocess(Process):
         self,
         job: str,
         pipe: Connection,
-        queue_0: "Queue",
-        queue_1: "Queue",
-        pause_event: "Event",
+        queue_0: Queue,
+        queue_1: Queue,
+        pause_event: Event,
     ):
         job_instance = IJob.create(job)
         job_instance.build_configuration()

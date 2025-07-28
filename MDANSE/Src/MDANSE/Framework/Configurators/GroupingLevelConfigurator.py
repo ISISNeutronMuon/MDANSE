@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Optional
+from __future__ import annotations
 
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
@@ -41,7 +41,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
 
     _default = "atom"
 
-    def __init__(self, name: str, choices: Optional[list[str]] = None, **kwargs):
+    def __init__(self, name: str, choices: list[str] | None = None, **kwargs):
         """
         Parameters
         ----------

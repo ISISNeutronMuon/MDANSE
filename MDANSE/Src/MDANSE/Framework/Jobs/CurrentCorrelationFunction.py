@@ -13,9 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import collections
 from math import sqrt
-from typing import Optional
 
 import numpy as np
 from scipy.signal import correlate
@@ -459,7 +460,7 @@ class CurrentCorrelationFunction(IJob):
 
         return index, (rho_l, rho_t)
 
-    def combine(self, index: int, x: Optional[tuple[np.ndarray, np.ndarray]]):
+    def combine(self, index: int, x: tuple[np.ndarray, np.ndarray] | None):
         """Calculate the correlation functions of the current densities.
 
         Parameters

@@ -13,13 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import re
 from collections import namedtuple
 from collections.abc import Iterable, Sequence
 from itertools import starmap
 from pathlib import Path
 from string import ascii_uppercase as upcase
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal
 
 import numpy as np
 from more_itertools import first, first_true, split_before, spy
@@ -509,7 +511,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         raise LAMMPSConfigFileError("Cannot guess atom type.")
 
     def atoms_parser(
-        self, lines: Iterable[str], atom_type: Optional[AtomTypes] = None
+        self, lines: Iterable[str], atom_type: AtomTypes | None = None
     ) -> dict:
         """Parse atoms block.
 
@@ -673,7 +675,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
     _is_block = re.compile("^[A-Z]").match
 
     @staticmethod
-    def scan(filename: Union[Path, str]) -> list[str]:
+    def scan(filename: Path | str) -> list[str]:
         """Scan file to work out which blocks are present.
 
         Parameters
@@ -693,7 +695,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
                 if ConfigFileConfigurator._is_block(line)
             ]
 
-    def parse(self, filename: Optional[Union[Path, str]] = None) -> None:
+    def parse(self, filename: Path | str | None = None) -> None:
         """Parse file and store data in self."""
         self._filename = self["filename"] if filename is None else filename
 

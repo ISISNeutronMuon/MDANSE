@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import math
 from typing import TYPE_CHECKING, Any
 
@@ -49,7 +51,7 @@ class Heatmap(Plotter):
         self._slice_axis = 2
         self._plot_limit = 1
 
-    def clear(self, figure: "Figure" = None):
+    def clear(self, figure: Figure = None):
         """Clear the figure."""
         target = self._figure if figure is None else figure
         if target is None:
@@ -68,7 +70,7 @@ class Heatmap(Plotter):
         """Confirm that sliders are coupled in heatmap mode."""
         return True
 
-    def get_figure(self, figure: "Figure" = None):
+    def get_figure(self, figure: Figure = None):
         """Return current figure which will be used for plotting."""
         target = self._figure if figure is None else figure
         if target is None:
@@ -144,8 +146,8 @@ class Heatmap(Plotter):
 
     def plot(
         self,
-        plotting_context: "PlottingContext",
-        figure: "Figure" = None,
+        plotting_context: PlottingContext,
+        figure: Figure = None,
         update_only=False,
         toolbar=None,
     ):

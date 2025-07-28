@@ -22,5 +22,7 @@ an additional weight factor scaling the relative contributions of
 different neutron wavelength to the total observed scattering signal.
 """
 
+from __future__ import annotations
+
 from .FlatSpectrum import FlatSpectrum as FlatSpectrum
 from .Spectrum import Spectrum as Spectrum

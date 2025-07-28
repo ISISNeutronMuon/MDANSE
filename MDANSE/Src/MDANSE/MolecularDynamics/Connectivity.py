@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from itertools import product
-from typing import Optional
 
 import numpy as np
 from numpy.typing import NDArray
@@ -35,7 +35,7 @@ class Connectivity:
         self,
         *args,
         trajectory: Trajectory,
-        selection: Optional[list[int]] = None,
+        selection: list[int] | None = None,
         **kwargs,
     ):
         self._chemical_system = trajectory.chemical_system
@@ -145,7 +145,7 @@ class Connectivity:
             tree2 = KDTree(coordinates + offset.reshape((1, 3)))
             yield num, tree1.sparse_distance_matrix(tree2, max_distance=max_distance)
 
-    def find_bonds(self, frames: Optional[list[int]] = None, tolerance: float = 0.04):
+    def find_bonds(self, frames: list[int] | None = None, tolerance: float = 0.04):
         """Checks several frames of the trajectory for the presence of atom pairs
         close enough to each other to form chemical bonds. The detected bonds
         are stored internally.

@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from enum import Enum, auto
@@ -241,12 +243,12 @@ class LAMMPSReader(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_time_steps(filename: Union[Path, str]) -> int:
+    def get_time_steps(filename: Path | str) -> int:
         """Get number of timesteps in file.
 
         Parameters
         ----------
-        filename : Union[str, Path]
+        filename : Path | str
             File to parse.
 
         Returns
@@ -256,12 +258,12 @@ class LAMMPSReader(ABC):
         """
 
     @abstractmethod
-    def open_file(self, filename: Union[Path, str]) -> None:
+    def open_file(self, filename: Path | str) -> None:
         """Open file for reading as LAMMPS format.
 
         Parameters
         ----------
-        filename : Union[str, Path]
+        filename : Path | str
             File to open for reading.
         """
 
@@ -321,12 +323,12 @@ class LAMMPScustom(LAMMPSReader):
     )
 
     @staticmethod
-    def get_time_steps(filename: Union[str, Path]) -> int:
+    def get_time_steps(filename: Path | str) -> int:
         """Get number of timesteps in file.
 
         Parameters
         ----------
-        filename : Union[str, Path]
+        filename : Path | str
             File to parse.
 
         Returns
@@ -337,12 +339,12 @@ class LAMMPScustom(LAMMPSReader):
         with open(filename, encoding="utf-8") as file:
             return ilen(filter(lambda line: line.startswith("ITEM: TIMESTEP"), file))
 
-    def open_file(self, filename: Union[str, Path]) -> None:
+    def open_file(self, filename: Path | str) -> None:
         """Open file for reading as LAMMPS custom format.
 
         Parameters
         ----------
-        filename : Union[str, Path]
+        filename : Path | str
             File to open for reading.
         """
         self._file = open(filename, encoding="utf-8")
@@ -475,7 +477,7 @@ class LAMMPScustom(LAMMPSReader):
 
         return chemical_system
 
-    def run_step(self, index: int) -> tuple[int, Optional[int]]:
+    def run_step(self, index: int) -> tuple[int, int | None]:
         """Runs a single step of the conversion job.
 
         Parameters
@@ -625,12 +627,12 @@ class LAMMPSxyz(LAMMPSReader):
         self._full_cell = None
 
     @staticmethod
-    def get_time_steps(filename: Union[Path, str]) -> int:
+    def get_time_steps(filename: Path | str) -> int:
         """Get number of timesteps in file.
 
         Parameters
         ----------
-        filename : Union[str, Path]
+        filename : Path | str
             File to parse.
 
         Returns
@@ -641,12 +643,12 @@ class LAMMPSxyz(LAMMPSReader):
         with open(filename, encoding="utf-8") as file:
             return sum(1 for line in file if len(line.split()) == 1)
 
-    def open_file(self, filename: Union[Path, str]) -> None:
+    def open_file(self, filename: Path | str) -> None:
         """Open file for reading as LAMMPS custom format.
 
         Parameters
         ----------
-        filename : Union[str, Path]
+        filename : Path | str
             File to open for reading.
         """
         self._file = open(filename, encoding="utf-8")
@@ -750,7 +752,7 @@ class LAMMPSxyz(LAMMPSReader):
 
         return chemical_system
 
-    def run_step(self, index) -> tuple[int, Optional[int]]:
+    def run_step(self, index) -> tuple[int, int | None]:
         """Runs a single step of the conversion job.
 
         Parameters
@@ -810,12 +812,12 @@ class LAMMPSh5md(LAMMPSReader):
         self._charges_variable = None
 
     @staticmethod
-    def get_time_steps(filename: Union[str, Path]) -> int:
+    def get_time_steps(filename: Path | str) -> int:
         """Get number of timesteps in file.
 
         Parameters
         ----------
-        filename : Union[str, Path]
+        filename : Path | str
             File to parse.
 
         Returns
@@ -826,18 +828,18 @@ class LAMMPSh5md(LAMMPSReader):
         with h5py.File(filename, "r") as file:
             return len(file["/particles/all/position/time"])
 
-    def open_file(self, filename: Union[str, Path]):
+    def open_file(self, filename: Path | str):
         """Open file for reading as LAMMPS h5md format.
 
         Parameters
         ----------
-        filename : Union[str, Path]
+        filename : Path | str
             File to open for reading.
         """
         self._file = h5py.File(filename, "r")
 
     def parse_first_step(
-        self, aliases: dict[str, dict[str, str]], config: "ConfigFileConfigurator"
+        self, aliases: dict[str, dict[str, str]], config: ConfigFileConfigurator
     ) -> ChemicalSystem:
         """Parse first step to determine output sizes and data.
 

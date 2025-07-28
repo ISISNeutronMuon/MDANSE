@@ -13,8 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import re
-from typing import TypeVar, Union
+from typing import TypeVar
 
 import numpy as np
 
@@ -85,7 +87,7 @@ class AtomLabel:
         return hash((self.atm_label, self.grp_label, self.mass))
 
 
-def guess_element(atm_label: str, mass: Union[float, int, None] = None) -> str:
+def guess_element(atm_label: str, mass: float | int | None = None) -> str:
     """From an input atom label find a match to an element in the atom
     database.
 

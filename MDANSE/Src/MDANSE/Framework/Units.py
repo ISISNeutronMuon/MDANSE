@@ -13,13 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import copy
 import json
 import math
 import numbers
 from collections import defaultdict
 from functools import singledispatchmethod
-from typing import Optional
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
@@ -754,7 +755,7 @@ class _Unit:
         """
         return self._dimension == other._dimension
 
-    def get_equivalence_factor(self, other) -> Optional[float]:
+    def get_equivalence_factor(self, other) -> float | None:
         """Returns the equivalence factor if other unit is equivalent.
 
         Equivalent units are units whose dimension are related through a constant
@@ -1038,7 +1039,7 @@ class UnitsManager(metaclass=Singleton):
         if uname in UnitsManager._UNITS:
             del UnitsManager._UNITS[uname]
 
-    def get_unit(self, uname) -> Optional[_Unit]:
+    def get_unit(self, uname) -> _Unit | None:
         return UnitsManager._UNITS.get(uname, None)
 
     def has_unit(self, uname) -> bool:

@@ -13,10 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import json
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from qtpy.QtCore import Signal, Slot
@@ -121,7 +122,7 @@ class BasicSelectionWidget(QGroupBox):
 
     def __init__(
         self,
-        parent: Optional[QWidget] = None,
+        parent: QWidget | None = None,
         *,
         widget_label: str = "Atom selection widget",
         add_standard_widgets: bool = True,
@@ -188,7 +189,7 @@ class GUISelection(BasicSelectionWidget):
 
     def __init__(
         self,
-        parent: Optional[QWidget] = None,
+        parent: QWidget | None = None,
         *,
         widget_label: str = "Manual Selection",
     ):
@@ -534,7 +535,7 @@ class PositionSelection(BasicSelectionWidget):
         self,
         parent=None,
         trajectory: Trajectory = None,
-        molecular_viewer: "MolecularViewer" = None,
+        molecular_viewer: MolecularViewer = None,
         widget_label="Select by position",
     ):
         """Create the widgets for select_atoms.
@@ -617,7 +618,7 @@ class SphereSelection(BasicSelectionWidget):
         self,
         parent=None,
         trajectory: Trajectory = None,
-        molecular_viewer: "MolecularViewer" = None,
+        molecular_viewer: MolecularViewer = None,
         widget_label="Select in a sphere",
     ):
         """Create the widgets for select_atoms.

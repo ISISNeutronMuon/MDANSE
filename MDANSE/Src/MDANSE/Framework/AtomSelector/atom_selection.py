@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Optional
 
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
@@ -23,9 +23,9 @@ from MDANSE.MolecularDynamics.Trajectory import Trajectory
 def select_atoms(
     trajectory: Trajectory,
     *,
-    index_list: Optional[Sequence[int]] = None,
-    index_range: Optional[Sequence[int]] = None,
-    index_slice: Optional[Sequence[int]] = None,
+    index_list: Sequence[int] | None = None,
+    index_range: Sequence[int] | None = None,
+    index_slice: Sequence[int] | None = None,
     atom_types: Sequence[str] = (),
     atom_names: Sequence[str] = (),
     **_kwargs: str,

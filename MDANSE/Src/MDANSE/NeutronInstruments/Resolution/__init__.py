@@ -23,5 +23,7 @@ Typically, for an Inelastic Neutron Scattering instrument, the
 resolution will depend on the source-sample and sample-detector
 distances, the chopper speeds, and the Ei/Ef ratio."""
 
+from __future__ import annotations
+
 from .IdealResolution import IdealResolution as IdealResolution
 from .Resolution import Resolution as Resolution

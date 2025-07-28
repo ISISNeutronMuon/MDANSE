@@ -13,8 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from itertools import count, groupby
-from typing import Union
 
 from qtpy.QtCore import QEvent, QObject, Qt
 from qtpy.QtGui import QStandardItem
@@ -53,7 +54,7 @@ class CheckableComboBox(QComboBox):
         self.lineEdit().setText("")
         return result
 
-    def eventFilter(self, a0: Union[QObject, None], a1: Union[QEvent, None]) -> bool:
+    def eventFilter(self, a0: QObject | None, a1: QEvent | None) -> bool:
         """Updates the check state of the items and the lineEdit.
 
         Parameters

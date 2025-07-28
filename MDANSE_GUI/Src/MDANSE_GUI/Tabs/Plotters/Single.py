@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import contextlib
 from typing import TYPE_CHECKING, Any
 
@@ -40,14 +42,14 @@ class Single(Plotter):
         self._curve_limit_per_dataset = 12
         self.height_max, self.length_max = 0.0, 0.0
 
-    def clear(self, figure: "Figure" = None):
+    def clear(self, figure: Figure = None):
         """Clear the figure."""
         target = self._figure if figure is None else figure
         if target is None:
             return
         target.clear()
 
-    def get_figure(self, figure: "Figure" = None):
+    def get_figure(self, figure: Figure = None):
         """Return the figure instance used for plotting."""
         target = self._figure if figure is None else figure
         if target is None:
@@ -133,8 +135,8 @@ class Single(Plotter):
 
     def plot(
         self,
-        plotting_context: "PlottingContext",
-        figure: "Figure" = None,
+        plotting_context: PlottingContext,
+        figure: Figure = None,
         update_only=False,
         toolbar=None,
     ):

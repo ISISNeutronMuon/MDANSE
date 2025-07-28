@@ -60,7 +60,7 @@ class JobInfo:
     current_step: int = 0
     n_steps: int = 0
     progress: float = 0
-    state: str | None = None
+    state: JobStates | str | None = None
     traceback: str = ""
     temporary_file: str | None = None
     info: str = ""

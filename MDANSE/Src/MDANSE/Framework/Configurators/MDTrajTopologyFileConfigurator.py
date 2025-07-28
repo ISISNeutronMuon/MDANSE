@@ -13,10 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import traceback
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Optional
 
 import mdtraj as md
 from mdtraj.core.trajectory import _TOPOLOGY_EXTS
@@ -29,7 +30,7 @@ from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
     """Uses MDTraj to read the system topology information from a file."""
 
-    def configure(self, value: Optional[str]):
+    def configure(self, value: str | None):
         """
         Parameters
         ----------

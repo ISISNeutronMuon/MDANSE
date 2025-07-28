@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from .FileInMemory import FileInMemory as FileInMemory
 from .HDFFormat import HDFFormat as HDFFormat
 from .IFormat import IFormat as IFormat

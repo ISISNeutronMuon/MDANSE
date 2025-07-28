@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import typing
 
@@ -28,7 +29,7 @@ from MDANSE_GUI.MolecularViewer.readers.i_reader import IReader
 
 
 class HDF5Wrapper(IReader):
-    def __init__(self, fname, trajectory: "Trajectory", chemical: "ChemicalSystem"):
+    def __init__(self, fname, trajectory: Trajectory, chemical: ChemicalSystem):
         super().__init__(fname)
         self._n_atoms = chemical.number_of_atoms
         self._n_frames = len(trajectory)

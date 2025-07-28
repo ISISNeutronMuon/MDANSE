@@ -13,10 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import h5py
 
@@ -83,7 +84,7 @@ class ReusableSelection:
     def set_selection(
         self,
         *,
-        number: Optional[int] = None,
+        number: int | None = None,
         function_parameters: dict[str, Any],
     ):
         """Append a new selection operation, or overwrite an existing one.
@@ -251,7 +252,7 @@ class ReusableSelection:
                 raise TypeError(f"Selection {v0} is not a dictionary.")
             self.set_selection(number=k0, function_parameters=v0)
 
-    def load_from_json_file(self, filename: Union[Path, str]):
+    def load_from_json_file(self, filename: Path | str):
         """Load a selection from a JSON text file.
 
         Parameters
@@ -267,7 +268,7 @@ class ReusableSelection:
                     raise TypeError(f"Selection {v0} is not a dictionary.")
                 self.set_selection(number=k0, function_parameters=v0)
 
-    def save_to_json_file(self, filename: Union[Path, str]):
+    def save_to_json_file(self, filename: Path | str):
         """Output all the operations as a JSON string.
 
         For the purpose of storing the selection independent of the

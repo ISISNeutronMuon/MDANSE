@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from matplotlib import rcParams
@@ -162,7 +164,7 @@ class PlotterTemplate(metaclass=SubclassFactory):
             return
         self._slider_reference.collect_values()
 
-    def clear(self, figure: "Figure" = None):
+    def clear(self, figure: Figure = None):
         if figure is None:
             target = self._figure
         else:
@@ -180,7 +182,7 @@ class PlotterTemplate(metaclass=SubclassFactory):
     def sliders_coupled(self) -> bool:
         return False
 
-    def get_figure(self, figure: "Figure" = None):
+    def get_figure(self, figure: Figure = None):
         if figure is None:
             target = self._figure
         else:
@@ -191,7 +193,7 @@ class PlotterTemplate(metaclass=SubclassFactory):
         target.clear()
         return target
 
-    def apply_settings(self, plotting_context: "PlottingContext", colours=None):
+    def apply_settings(self, plotting_context: PlottingContext, colours=None):
         if colours is not None:
             self._current_colours = colours
         if plotting_context.set_axes() is None:
@@ -234,8 +236,8 @@ class PlotterTemplate(metaclass=SubclassFactory):
 
     def plot(
         self,
-        plotting_context: "PlottingContext",
-        figure: "Figure" = None,
+        plotting_context: PlottingContext,
+        figure: Figure = None,
         update_only=False,
         toolbar=None,
     ):

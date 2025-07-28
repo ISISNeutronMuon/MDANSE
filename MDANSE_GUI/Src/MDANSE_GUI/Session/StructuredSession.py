@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import os
 from pathlib import PurePath
@@ -162,7 +163,7 @@ class UserSettingsModel(QStandardItemModel):
                 LOG.debug(group.as_toml())
 
     @Slot("QStandardItem*")
-    def on_value_changed(self, item: "QStandardItem"):
+    def on_value_changed(self, item: QStandardItem):
         item_key = item.text()
         index = item.index()
         column = index.column()
@@ -307,7 +308,7 @@ class SettingsFile:
         )
         return result
 
-    def group(self, group_name: str) -> "SettingsGroup":
+    def group(self, group_name: str) -> SettingsGroup:
         try:
             group = self._groups[group_name]
         except KeyError:

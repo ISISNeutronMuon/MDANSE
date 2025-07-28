@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Optional
+from __future__ import annotations
 
 from MDANSE.Framework.Configurators.IntegerConfigurator import IntegerConfigurator
 
@@ -36,7 +36,7 @@ class DerivativeOrderConfigurator(IntegerConfigurator):
         """
         IntegerConfigurator.__init__(self, name, **kwargs)
 
-    def configure(self, value: Optional[int]) -> None:
+    def configure(self, value: int | None) -> None:
         """Configure the input interpolation order.
 
         Parameters

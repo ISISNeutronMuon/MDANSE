@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
@@ -32,7 +33,7 @@ class IFormat(metaclass=SubclassFactory):
     """
 
     @classmethod
-    def write(cls, filename, data, header="", run_instance: "IJob" = None):
+    def write(cls, filename, data, header="", run_instance: IJob | None = None):
         """
         Write a set of output variables into filename using a given file format.
 

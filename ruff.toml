@@ -51,3 +51,4 @@ ignore = [
 
 [lint.isort]
 known-first-party = ["MDANSE", "MDANSE_GUI"]
+required-imports = ["from __future__ import annotations"]

@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from .ASE import ASE as ASE
 from .CASTEP import CASTEP as CASTEP
 from .CHARMM import CHARMM as CHARMM

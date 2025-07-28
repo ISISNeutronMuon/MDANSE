@@ -20,5 +20,7 @@ we can limit the range of accessible Q vectors to those that
 a specific instrument can access.
 """
 
+from __future__ import annotations
+
 from .Coverage import Coverage as Coverage
 from .TotalCoverage import TotalCoverage as TotalCoverage

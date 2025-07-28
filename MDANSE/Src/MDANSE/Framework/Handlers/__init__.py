@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from .ColorizingStreamHandler import ColorizingStreamHandler as ColorizingStreamHandler
 from .IHandler import IHandler as IHandler
 from .LogfileHandler import LogfileHandler as LogfileHandler

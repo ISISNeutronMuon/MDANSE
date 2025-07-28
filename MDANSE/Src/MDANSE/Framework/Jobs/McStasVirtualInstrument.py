@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import collections
 import io
 import shutil
@@ -20,7 +22,6 @@ import subprocess
 import tempfile
 from functools import partial
 from pathlib import Path
-from typing import Union
 
 import numpy as np
 
@@ -321,7 +322,7 @@ class McStasVirtualInstrument(IJob):
             i += 1
         return key
 
-    def convert(self, sim_dir: Union[Path, str]):
+    def convert(self, sim_dir: Path | str):
         """
         Convert McStas data set to netCDF File Format
         """

@@ -12,7 +12,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+from __future__ import annotations
 
 from qtpy.QtCore import QObject, QTimer, Signal, Slot
 from qtpy.QtGui import QColor, QIcon
@@ -25,7 +25,7 @@ class NotificationTabWidget(QTabWidget):
         self._normal_colours = {}
         self._special_color = QColor(250, 10, 50)
 
-    def addTab(self, widget: "QObject", name: str) -> int:
+    def addTab(self, widget: QObject, name: str) -> int:
         object_id = super().addTab(widget, name)
         self._normal_colours[object_id] = self.tabBar().tabTextColor(object_id)
         widget._tab_reference.set_my_id(object_id)

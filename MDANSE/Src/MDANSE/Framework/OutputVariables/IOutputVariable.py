@@ -13,10 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import collections
 from collections.abc import Sequence
-from typing import Union
 
 import numpy as np
 import numpy.typing as npt
@@ -54,9 +54,9 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
 
     def __new__(
         cls,
-        value: Union[tuple[int, ...], npt.ArrayLike],
+        value: tuple[int, ...] | npt.ArrayLike,
         varname: str,
-        axis: Union[str, Sequence[str], None] = None,
+        axis: str | Sequence[str] | None = None,
         units: str = "unitless",
         *,
         main_result: bool = False,

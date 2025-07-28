@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import itertools
 from collections.abc import Iterable
 from typing import Union
@@ -80,7 +82,7 @@ def adjust_weights(
     n_atms: int,
     dim: int,
     conc_exp: float = 1.0,
-) -> tuple[dict[Union[str, tuple[str]], float], float]:
+) -> tuple[dict[str | tuple[str], float], float]:
     """Combine the weights based on whether they will be used for nth-body
     property and adjust them based on their atom concentrations.
 

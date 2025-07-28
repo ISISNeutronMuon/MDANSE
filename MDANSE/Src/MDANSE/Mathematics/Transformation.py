@@ -18,6 +18,8 @@
 Linear transformations in 3D space
 """
 
+from __future__ import annotations
+
 from math import atan2
 
 import numpy as np

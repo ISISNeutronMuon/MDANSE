@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
+from __future__ import annotations
 
 from qtpy.QtCore import QModelIndex, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QStandardItem
@@ -70,7 +70,7 @@ class TrajectoryView(QListView):
         else:
             self.item_details.emit((trajectory._filename, trajectory))
 
-    def connect_to_visualiser(self, visualiser: Union[View3D, TrajectoryInfo]) -> None:
+    def connect_to_visualiser(self, visualiser: View3D | TrajectoryInfo) -> None:
         """Connect to a visualiser.
 
         Parameters

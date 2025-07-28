@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import numpy as np
 from numpy.typing import ArrayLike
 
@@ -51,7 +53,7 @@ class UnitCell:
 
         self._inverse_unit_cell = np.linalg.pinv(self._unit_cell)
 
-    def __eq__(self, other: "UnitCell") -> bool:
+    def __eq__(self, other: UnitCell) -> bool:
         if isinstance(other, UnitCell):
             return np.allclose(self._unit_cell, other._unit_cell)
         else:

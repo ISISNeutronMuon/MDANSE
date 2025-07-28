@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
+from __future__ import annotations
 
 from qtpy.QtCore import QMimeData, QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QDrag, QMouseEvent
@@ -85,7 +85,7 @@ class ActionsTree(QTreeView):
             job_description = "No further information"
         self.item_details.emit(job_description)  # this should emit the job name
 
-    def connect_to_visualiser(self, visualiser: Union[Action, TextInfo]) -> None:
+    def connect_to_visualiser(self, visualiser: Action | TextInfo) -> None:
         """Connect to a visualiser.
 
         Parameters

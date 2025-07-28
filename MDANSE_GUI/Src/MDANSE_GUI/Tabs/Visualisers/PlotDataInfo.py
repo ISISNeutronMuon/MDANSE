@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -42,7 +44,7 @@ class PlotDataInfo(QTextBrowser):
         filtered = self.filter(text)
         self.setHtml(filtered)
 
-    def summarise_chemical_system(self, cs: "ChemicalSystem"):
+    def summarise_chemical_system(self, cs: ChemicalSystem):
         text = "\n ==== Chemical System summary ==== \n"
         atoms, counts = np.unique(cs.atom_list, return_counts=True)
         for ind in range(len(atoms)):

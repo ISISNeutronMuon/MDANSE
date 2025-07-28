@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Optional
 
 import numpy as np
 from scipy.spatial import KDTree
@@ -27,8 +27,8 @@ def select_positions(
     trajectory: Trajectory,
     *,
     frame_number: int = 0,
-    position_minimum: Optional[Sequence[float]] = None,
-    position_maximum: Optional[Sequence[float]] = None,
+    position_minimum: Sequence[float] | None = None,
+    position_maximum: Sequence[float] | None = None,
     **_kwargs: str,
 ) -> set[int]:
     """Select atoms based on their positions at a specified frame number.

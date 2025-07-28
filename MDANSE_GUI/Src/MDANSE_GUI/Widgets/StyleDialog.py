@@ -12,8 +12,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-from typing import Optional
+from __future__ import annotations
 
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtWidgets import (
@@ -54,7 +53,7 @@ class StyleDatabase(QObject):
     stored_style = Signal(str)
     stored_labels = Signal(list)
 
-    def __init__(self, parent: Optional["QObject"] = ...) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self._styles = sample_styles
 

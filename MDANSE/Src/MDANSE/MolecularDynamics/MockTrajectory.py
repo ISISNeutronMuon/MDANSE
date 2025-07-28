@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import json
 import math
@@ -259,7 +260,7 @@ class MockTrajectory:
 
         return self._coordinates[scaled_index].astype(np.float64)
 
-    def configuration(self, frame: int) -> "_Configuration":
+    def configuration(self, frame: int) -> _Configuration:
         """An MDANSE Configuration at the specified frame number.
 
         Parameters

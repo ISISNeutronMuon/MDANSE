@@ -31,5 +31,7 @@ types will have to be modified to incorporate the instrument
 effects in the calculation.
 """
 
+from __future__ import annotations
+
 from .IdealInstrument import IdealInstrument as IdealInstrument
 from .NeutronInstrument import NeutronInstrument as NeutronInstrument

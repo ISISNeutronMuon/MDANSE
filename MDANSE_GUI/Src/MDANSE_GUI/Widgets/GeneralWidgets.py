@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import copy
 from collections.abc import Iterable
 from pathlib import PurePath
@@ -194,7 +196,7 @@ class InputGroup(QObject):
     final_value = Signal(object)
     string_value = Signal(str)
 
-    def __init__(self, parent: Union[QObject, None] = ...) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self.fields = []
         self.values = []
@@ -541,7 +543,7 @@ class InputVariable(QObject):
 
         self.input_widget = None
 
-    def returnValue(self) -> Union[float, int, str]:
+    def returnValue(self) -> float | int | str:
         """
         Returns
         -------
@@ -597,7 +599,7 @@ class InputDialog(QDialog):
     got_values = Signal(dict)
 
     def __init__(
-        self, *args, fields: Iterable["InputVariable"] = None, title: str = "", **kwargs
+        self, *args, fields: Iterable[InputVariable] = None, title: str = "", **kwargs
     ):
         super().__init__(*args, **kwargs)
 

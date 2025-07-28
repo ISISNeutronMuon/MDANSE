@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
 from qtpy.QtGui import (
     QBrush,
@@ -392,7 +394,7 @@ class ElementModel(QStandardItemModel):
             self.setHorizontalHeaderItem(i, item)
 
     @Slot("QStandardItem*")
-    def write_to_database(self, item: "QStandardItem"):
+    def write_to_database(self, item: QStandardItem):
         data = item.data()
         text = item.text()
         viewer = self.parent().viewer

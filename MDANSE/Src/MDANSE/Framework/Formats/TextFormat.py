@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import codecs
 import io
@@ -31,7 +32,7 @@ if TYPE_CHECKING:
     from MDANSE.Framework.Jobs.IJob import IJob
 
 
-def length_stringio(input: "io.BytesIO") -> int:
+def length_stringio(input: io.BytesIO) -> int:
     result = input.getbuffer().nbytes
     return result
 
@@ -49,10 +50,10 @@ class TextFormat(IFormat):
     @classmethod
     def write(
         cls,
-        filename: Union[Path, str],
+        filename: Path | str,
         data,
         header: str = "",
-        run_instance: "IJob" = None,
+        run_instance: IJob = None,
     ):
         """
         Write a set of output variables into a set of Text files.

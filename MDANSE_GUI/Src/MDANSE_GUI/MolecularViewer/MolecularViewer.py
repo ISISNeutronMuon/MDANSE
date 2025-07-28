@@ -13,8 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import copy
-from typing import Any, Optional
+from typing import Any
 
 import more_itertools
 import numpy as np
@@ -333,7 +335,7 @@ class MolecularViewer(QtWidgets.QWidget):
             self._iren.Render()
             self.changed_trace.emit()
 
-    def _draw_isosurface(self, index: int, params: Optional[dict[str, Any]] = None):
+    def _draw_isosurface(self, index: int, params: dict[str, Any] | None = None):
         """Calculates the total volume used by an atom in the trajectory
         and draws an isosurface around it.
 

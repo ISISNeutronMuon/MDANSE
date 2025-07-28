@@ -13,8 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-from typing import Optional
+from __future__ import annotations
 
 import numpy as np
 import vtk
@@ -91,14 +90,12 @@ class AtomEntry(QObject):
 class AtomProperties(QStandardItemModel):
     new_atom_properties = Signal(object)
 
-    def __init__(self, *args, init_colours: Optional[list] = None, **kwargs):
+    def __init__(self, *args, init_colours: list | None = None, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._lut = vtk.vtkColorTransferFunction()
-        if init_colours is None:
-            self._colour_list = RGB_COLOURS
-        else:
-            self._colour_list = init_colours
+        self._colour_list = init_colours if init_colours is not None else RGB_COLOURS
+
         self.rebuild_colours()
         self.setHorizontalHeaderLabels(["Element", "Colour", "Radius"])
         self.itemChanged.connect(self.onNewValues)
@@ -150,7 +147,7 @@ class AtomProperties(QStandardItemModel):
         self,
         atoms: list[str],
         element_database: Trajectory,
-        dummy_size: Optional[float] = None,
+        dummy_size: float | None = None,
     ) -> list[int]:
         """Puts colours into the list based on chemical elements list
         and a database with colour values.

@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import abc
 from typing import TYPE_CHECKING
 
@@ -61,7 +63,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
     def qvectors_to_hkl(
         self,
         vector_array: np.array,
-        unit_cell: "UnitCell",
+        unit_cell: UnitCell,
     ) -> np.ndarray:
         """Recalculate Q vectors to HKL Miller indices.
 
@@ -84,7 +86,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
         return np.dot(unit_cell.direct, vector_array) / (2 * np.pi)
 
     @classmethod
-    def hkl_to_qvectors(self, hkls: np.array, unit_cell: "UnitCell") -> np.ndarray:
+    def hkl_to_qvectors(self, hkls: np.array, unit_cell: UnitCell) -> np.ndarray:
         """Convert an array of HKL values to scattering vectors.
 
         Uses a unit cell object to get the lattice vectors for conversion.
@@ -104,7 +106,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
         """
         return 2 * np.pi * np.dot(unit_cell.inverse, hkls)
 
-    def write_vectors_to_file(self, output_data: "OutputData"):
+    def write_vectors_to_file(self, output_data: OutputData):
         """Write the vectors to output file as an array.
 
         Writes a summary of the generated vectors to the output

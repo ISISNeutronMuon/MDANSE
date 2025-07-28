@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -211,7 +213,7 @@ class PlotWidget(QWidget):
         self.make_canvas()
         self.set_plotter("Single")
 
-    def set_context(self, new_context: "PlottingContext"):
+    def set_context(self, new_context: PlottingContext):
         """Assign a data model to the plot widget."""
         self._plotting_context = new_context
         self._plotting_context._figure = self._figure

@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
@@ -51,7 +51,7 @@ class OutputFilesConfigurator(IConfigurator):
     )
     _label = "Output filename and formats (filename, [format, ...])"
 
-    def __init__(self, name: str, formats: Optional[list[str]] = None, **kwargs):
+    def __init__(self, name: str, formats: list[str] | None = None, **kwargs):
         """Initialise the values of the output file name parser.
 
         Parameters

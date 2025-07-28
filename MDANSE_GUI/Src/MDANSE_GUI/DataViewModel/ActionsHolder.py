@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import typing
+from __future__ import annotations
 
 from qtpy.QtCore import QMutex, QObject, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
@@ -56,8 +56,8 @@ class ActionsSuperModel(QObject):
 
     def __init__(
         self,
-        viewer: typing.Optional["QTreeView"] = None,
-        parent: typing.Optional["QObject"] = None,
+        viewer: QTreeView | None = None,
+        parent: QObject | None = None,
     ) -> None:
         super().__init__(parent)
 
@@ -100,7 +100,7 @@ class ActionsSuperModel(QObject):
         LOG.info(f"Build the following models: {self.models.keys()}")
         self.current_model = self.models["IJob"]
 
-    def copyNodeIntoModel(self, thing: typing.Any, model: ActionsHolder):
+    def copyNodeIntoModel(self, thing: object, model: ActionsHolder):
         node_parents = thing.category
         rootnode = None
         for name in node_parents:

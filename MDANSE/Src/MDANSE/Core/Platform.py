@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import abc
 import ctypes
@@ -24,11 +25,8 @@ import platform
 import re
 import subprocess
 from pathlib import Path
-from typing import Optional, Union
 
 from MDANSE.Core.Error import Error
-
-PathLike = Union[Path, str]
 
 
 class PlatformError(Error):
@@ -112,7 +110,7 @@ class Platform(metaclass=abc.ABCMeta):
 
         return self.package_directory() / "Doc" / "help" / "html"
 
-    def full_dotted_module(self, obj) -> Optional[str]:
+    def full_dotted_module(self, obj) -> str | None:
         """
         Returns the fully dotted name of a module given the module object itself or a class stored in this module.
 
@@ -139,7 +137,7 @@ class Platform(metaclass=abc.ABCMeta):
 
         return ".".join(relativePath.with_suffix("").parts)
 
-    def change_directory(self, directory: PathLike) -> None:
+    def change_directory(self, directory: Path | str) -> None:
         """
         Change the current directory to a new directory.
 
@@ -150,7 +148,7 @@ class Platform(metaclass=abc.ABCMeta):
         os.chdir(directory)
 
     @classmethod
-    def is_file_writable(cls, filepath: PathLike) -> bool:
+    def is_file_writable(cls, filepath: Path | str) -> bool:
         """Check if the directories can be created and a file can be
         written into it.
 
@@ -172,7 +170,7 @@ class Platform(metaclass=abc.ABCMeta):
 
         return False
 
-    def create_directory(self, path: PathLike) -> None:
+    def create_directory(self, path: Path | str) -> None:
         """
         Creates a directory.
 
@@ -191,7 +189,7 @@ class Platform(metaclass=abc.ABCMeta):
             ) from err
 
     @classmethod
-    def get_path(cls, path: PathLike) -> Path:
+    def get_path(cls, path: Path | str) -> Path:
         """
         Return a normalized and absolute version of a given path
 

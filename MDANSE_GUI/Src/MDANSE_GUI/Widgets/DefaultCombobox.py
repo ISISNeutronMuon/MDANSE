@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
     from qtpy.QtWidgets import QComboBox
 
 
-def highlight_default_value(field: "QComboBox") -> None:
+def highlight_default_value(field: QComboBox) -> None:
     """Takes the input QComboBox widget and changes the font of the currently
     selected item to bold typeface. This is meant to indicate to the users
     which option was originally selected.

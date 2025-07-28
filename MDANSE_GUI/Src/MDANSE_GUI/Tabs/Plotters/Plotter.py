@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import copy
 import enum
 from typing import TYPE_CHECKING, Any
@@ -109,7 +111,7 @@ class Plotter(metaclass=SubclassFactory):
             return
         self._slider_reference.collect_values()
 
-    def clear(self, figure: "Figure" = None):
+    def clear(self, figure: Figure = None):
         """Clear the figure, usually before plotting again.
 
         Parameters
@@ -136,7 +138,7 @@ class Plotter(metaclass=SubclassFactory):
         """Check if the slider values depend on each other."""
         return False
 
-    def get_figure(self, figure: "Figure" = None):
+    def get_figure(self, figure: Figure = None):
         """Get the reference to the current figure, if present."""
         target = self._figure if figure is None else figure
         if target is None:
@@ -145,7 +147,7 @@ class Plotter(metaclass=SubclassFactory):
         target.clear()
         return target
 
-    def apply_settings(self, plotting_context: "PlottingContext"):
+    def apply_settings(self, plotting_context: PlottingContext):
         """Check that the plotting context can be used."""
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
@@ -249,8 +251,8 @@ class Plotter(metaclass=SubclassFactory):
 
     def plot(
         self,
-        plotting_context: "PlottingContext",
-        figure: "Figure" = None,
+        plotting_context: PlottingContext,
+        figure: Figure = None,
         update_only=False,
         toolbar=None,
     ):

@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
 import copy
 from contextlib import suppress
@@ -118,7 +119,7 @@ class TraceWidget(QWidget):
         self._iso_percentile = initial_parameters["trace_cutoff"]
         self.populate_layout()
 
-    def initialise_values(self, viewer: "MolecularViewer"):
+    def initialise_values(self, viewer: MolecularViewer):
         """An instance of MolecularViewer will be saved as
         an internal attribute to allow this widget to
         access attributes and call methods directly.

@@ -13,8 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
 
-from typing import Any, Union
+from typing import Any
 
 import rdkit.Chem as chem
 import rdkit.Chem.AllChem as allchem
@@ -32,7 +33,7 @@ class MoleculePreviewWidget(QDialog):
 
     def __init__(
         self,
-        parent: Union[QObject, None],
+        parent: QObject | None,
         molecule_information: dict[str, Any],
         molecule_name: str,
         atom_database: Trajectory,
@@ -83,7 +84,7 @@ class MoleculePreviewWidget(QDialog):
         info_text += f"Number of such molecules in trajectory: {self.mol_info['no_of_molecules']}\n"
         self.text_label.setText(info_text)
 
-    def prepare_rdkit_molecule(self) -> Union[chem.RWMol, None]:
+    def prepare_rdkit_molecule(self) -> chem.RWMol | None:
         """Create an rdkit molecule from the selected atoms."""
         if len(self.mol_info["atom_indices"]) > self.max_atom_limit:
             self.image_label.clear()

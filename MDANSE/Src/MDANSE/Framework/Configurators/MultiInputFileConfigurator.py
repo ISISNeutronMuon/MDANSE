@@ -13,8 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import ast
-from typing import Union
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
@@ -29,7 +30,7 @@ class MultiInputFileConfigurator(IConfigurator):
         IConfigurator.__init__(self, name, **kwargs)
         self.wildcard = wildcard
 
-    def configure(self, setting: Union[str, list]):
+    def configure(self, setting: str | list[str]):
         """
         Parameters
         ----------

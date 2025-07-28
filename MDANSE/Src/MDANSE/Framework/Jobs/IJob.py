@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import abc
 import multiprocessing
 import os
@@ -28,7 +30,7 @@ from logging import FileHandler
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 from more_itertools import consumer, first_true
 
@@ -61,7 +63,7 @@ except ImportError:
 class JobError(Error):
     """This class handles any exception related to IJob-derived objects"""
 
-    def __init__(self, job: "IJob", message: str = ""):
+    def __init__(self, job: IJob, message: str = ""):
         """
         Initializes the the object.
 
@@ -245,7 +247,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
     @classmethod
     def save(
-        cls, jobFile: Union[str, Path], parameters: Optional[dict[str, Any]] = None
+        cls, jobFile: Path | str, parameters: dict[str, Any] | None = None
     ) -> None:
         """Save a job file for a given job.
 
