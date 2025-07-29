@@ -164,7 +164,12 @@ class Grid(Plotter):
                     with contextlib.suppress(Exception):
                         temp_curve.set_marker(int(marker))
                 axes.set_xlabel(x_axis_label)
-                axes.legend()
+                if plotting_context.use_legend:
+                    axes.legend()
+                if plotting_context.use_grid:
+                    axes.grid(True)
+                else:
+                    axes.grid(False)
                 startnum += 1
                 self._active_curves.append(temp_curve)
                 self._backup_curves.append(

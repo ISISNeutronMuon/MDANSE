@@ -537,6 +537,8 @@ class PlottingContext(QStandardItemModel):
         self._colour_map = kwargs.get("colormap", "viridis")
         self._last_colour = 0
         self._unit_lookup = unit_lookup
+        self.use_legend = True
+        self.use_grid = True
         self.setHorizontalHeaderLabels(plotting_column_labels)
 
     def generate_colour(self, number: int) -> str:

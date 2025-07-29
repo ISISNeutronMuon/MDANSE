@@ -336,7 +336,12 @@ class Heatmap(Plotter):
             axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
             axes.set_ylabel(", ".join(np.unique(y_axis_labels)))
             self._backup_images[ds_num] = image
-        # axes.grid(True)
+        if plotting_context.use_legend:
+            axes.legend()
+        if plotting_context.use_grid:
+            axes.grid(True)
+        else:
+            axes.grid(False)
         self.check_curve_lengths()
         self.request_slider_values()
         target.canvas.draw()
