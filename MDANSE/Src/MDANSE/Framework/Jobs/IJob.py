@@ -23,11 +23,14 @@ import string
 import sys
 import time
 import traceback
+from collections.abc import Sequence
 from logging import FileHandler
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
 from typing import Any, Optional, Union
+
+from more_itertools import consumer, first_true
 
 from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
@@ -36,6 +39,23 @@ from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStates, JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.MLogging import FMT, LOG
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    LOG.debug("TQDM not installed, no progress bars")
+
+    class tqdm:
+        """Return dummy function for tqdm."""
+
+        def __init__(self, x, *_args, **_kwargs):
+            self.x = x
+
+        def __iter__(self):
+            return iter(self.x)
+
+        def update(self, *_args, **_kwargs):
+            pass
 
 
 class JobError(Error):
@@ -71,15 +91,20 @@ class JobError(Error):
         return self._message
 
 
-def key_generator(keySize, chars=None, prefix=""):
-    if chars is None:
-        chars = string.ascii_lowercase + string.digits
+@consumer
+def key_generator(
+    keySize: int, chars: Sequence[str] = string.ascii_lowercase + string.digits
+):
+    prefix = ""
 
-    key = "".join(random.choice(chars) for _ in range(keySize))
-    if prefix:
-        key = f"{prefix}_{key}"
+    while True:
+        key = "".join(random.choices(chars, k=keySize))
+        if prefix:
+            key = f"{prefix}_{key}"
 
-    return key
+        new_prefix = yield key
+        if new_prefix is not None:
+            prefix = new_prefix
 
 
 class IJob(Configurable, metaclass=SubclassFactory):
@@ -91,28 +116,23 @@ class IJob(Configurable, metaclass=SubclassFactory):
     """
 
     section = "job"
-
+    key_gen = key_generator(6)
     ancestor = []
 
-    @staticmethod
-    def define_unique_name():
+    @classmethod
+    def define_unique_name(cls):
         """
         Sets a name for the job that is not already in use by another running job.
         """
 
-        prefix = f"{PLATFORM.username()[:4]}_{PLATFORM.pid():d}"
+        cls.key_gen.send(f"{PLATFORM.username()[:4]}_{PLATFORM.pid():d}")
 
         # The list of the registered jobs.
-        registeredJobs = [
+        registeredJobs = {
             f.name for f in PLATFORM.temporary_files_directory().glob("*")
-        ]
+        }
 
-        while True:
-            # Followed by 4 random letters.
-            name = key_generator(6, prefix=prefix)
-
-            if name not in registeredJobs:
-                break
+        name = first_true(cls.key_gen, pred=lambda x: x not in registeredJobs)
 
         return name
 
@@ -172,6 +192,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 )
         except KeyError:
             LOG.error("IJob did not find 'write_logs' in output_files")
+
         if selection := self.configuration.get("atom_selection"):
             try:
                 array_length = selection["total_number_of_atoms"]
@@ -284,18 +305,6 @@ if __name__ == "__main__":
             else:
                 self._status.update()
 
-    def _run_singlecore(self):
-        LOG.info(f"Single-core run: expects {self.numberOfSteps} steps")
-        for index in range(self.numberOfSteps):
-            if self._status is not None:
-                if hasattr(self._status, "_pause_event"):
-                    self._status._pause_event.wait()
-            idx, result = self.run_step(index)
-            if self._status is not None:
-                self._status.update()
-            self.combine(idx, result)
-        LOG.info("Single-core job completed all the steps")
-
     def process_tasks_queue(self, tasks, outputs, log_queues):
         queue_handlers = []
         for log_queue in log_queues:
@@ -322,7 +331,28 @@ if __name__ == "__main__":
 
         return True
 
-    def _run_multicore(self):
+    def _run_singlecore(self, *, prog: bool = False):
+        LOG.info(f"Single-core run: expects {self.numberOfSteps} steps")
+
+        steps = range(self.numberOfSteps)
+        if prog:
+            steps = tqdm(
+                steps, unit="steps", total=self.numberOfSteps, desc=type(self).__name__
+            )
+
+        for index in steps:
+            if self._status is not None:
+                if hasattr(self._status, "_pause_event"):
+                    self._status._pause_event.wait()
+
+            idx, result = self.run_step(index)
+            if self._status is not None:
+                self._status.update()
+
+            self.combine(idx, result)
+        LOG.info("Single-core job completed all the steps")
+
+    def _run_multicore(self, *, prog: bool = False):
         if hasattr(self._status, "_queue_0"):
             self._status._queue_0.put("started")
 
@@ -356,7 +386,14 @@ if __name__ == "__main__":
             p.daemon = False
             p.start()
 
-        n_results = 0
+        steps = range(self.numberOfSteps + 1)
+        if prog:
+            steps = tqdm(
+                steps, total=self.numberOfSteps, unit="steps", desc=type(self).__name__
+            )
+        steps = iter(steps)
+
+        n_results = next(steps)
         while n_results != self.numberOfSteps:
             self._run_multicore_check_terminate(listener)
             if self._status is not None:
@@ -367,7 +404,7 @@ if __name__ == "__main__":
                 time.sleep(0.1)
                 continue
             else:
-                n_results += 1
+                n_results = next(steps)
                 self.combine(index, result)
 
         if self._status is not None:
@@ -411,7 +448,7 @@ if __name__ == "__main__":
                 while True:
                     time.sleep(10)
 
-    def _run_remote(self):
+    def _run_remote(self, *, prog: bool = False):
         raise NotImplementedError(
             "Currently there is no replacement for the old Pyro remote runs."
         )
@@ -422,7 +459,7 @@ if __name__ == "__main__":
         "remote": _run_remote,
     }
 
-    def run(self, parameters, status: bool = False):
+    def run(self, parameters, status: bool = False, prog_bar: bool = False):
         """
         Run the job.
         """
@@ -455,7 +492,7 @@ if __name__ == "__main__":
             else:
                 mode = "single-core"
 
-            IJob._runner[mode](self)
+            IJob._runner[mode](self, prog=prog_bar)
 
             self.finalize()
 
