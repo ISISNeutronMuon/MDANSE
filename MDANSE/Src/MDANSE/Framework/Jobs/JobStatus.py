@@ -13,10 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import time
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Optional, TypedDict
+from typing import Literal, TypedDict
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Status import Status
@@ -47,17 +49,19 @@ ALLOWED_ACTIONS = {
 class JobInfo:
     """Current state of job."""
 
-    name: Optional[str] = None
+    name: str | None = None
     pid: int = PLATFORM.pid()
-    type: Optional[str] = None
-    start: Optional[float] = None
-    elapsed: str = "N/A"
+    type: str | None = None
+    start: float | None = None
+    elapsed: float | Literal["N/A"] = "N/A"
+    rate: float | Literal["N/A"] = "N/A"
+    pct_rate: float | Literal["N/A"] = "N/A"
     current_step: int = 0
     n_steps: int = 0
-    progress: int = 0
-    state: Optional[str] = None
+    progress: float = 0
+    state: str | None = None
     traceback: str = ""
-    temporary_file: Optional[str] = None
+    temporary_file: str | None = None
     info: str = ""
 
 
@@ -102,7 +106,11 @@ class JobStatus(Status):
             self._state.progress = 100 * self.currentStep / self.nSteps
         else:
             self._state.progress = 0
-
+        try:
+            self._state.rate = self._state.current_step / self._state.elapsed
+            self._state.pct_rate = self._state.progress / self._state.elapsed
+        except TypeError:
+            self._state.rate = self._state.pct_rate = "N/A"
         self.save_status()
 
     def fixed_status(self, current_progress: int):

@@ -13,12 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import time
 import traceback
 from logging import Handler
 from logging.handlers import QueueListener
-from multiprocessing import Event, Pipe, Queue
-from typing import Optional
+from multiprocessing import Event, Pipe, Process, Queue
+from typing import Any, NamedTuple
 
 from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
@@ -109,9 +111,9 @@ class JobEntry(QObject):
     def __init__(
         self,
         *args,
-        command: Optional[str] = None,
+        command: str | None = None,
         entry_number: int = 0,
-        pause_event: Optional[Event] = None,
+        pause_event: Event | None = None,
         load_afterwards: bool = False,
     ):
         super().__init__(*args)
@@ -140,8 +142,30 @@ class JobEntry(QObject):
         self._prog_item.setData(100, role=ProgressDelegate.progress_role + 1)
         self.handler = JobLogHandler()
 
+    @staticmethod
+    def _sec_fmt(time: float) -> str:
+        """Format a time in seconds sensibly."""
+        if not isinstance(time, float):
+            return "N/A"
+
+        hr, min = divmod(time, 3600)
+        min, sec = divmod(min, 60)
+
+        if hr:
+            return f"{hr:.0f}hr {min:.0f}m {sec:.0f}s"
+        if min:
+            return f"{min:.0f}m {sec:.0f}s"
+
+        return f"{sec:.0f}s"
+
     def text_summary(self) -> str:
         nl = "\n"
+
+        try:
+            comp_time = (self.job.n_steps - self.job.current_step) / self.job.rate
+        except TypeError:
+            comp_time = "N/A"
+
         return f"""\
 Job type: {self._command}
 Parameters:
@@ -149,6 +173,11 @@ Parameters:
 Status:
   Current state: {self.job.state.name.title()}
   Percent complete: {self.job.progress}
+  Percent rate: {self.job.pct_rate} %/s
+  Steps: {self.job.current_step}/{self.job.n_steps}
+  Step rate: {self.job.rate} steps/s
+  Elapsed time: {self._sec_fmt(time.time() - self.job.start)}
+  Estimated remaining time: {self._sec_fmt(comp_time)}
 """
 
     @property
@@ -160,10 +189,17 @@ Status:
         self._parameters = input
 
     def update_fields(self):
-        self._prog_item.setText(f"{self.job.progress} percent complete")
+        self._prog_item.setText(
+            f"{self.job.progress} percent complete ({self.job.pct_rate} %/s)"
+        )
         self._prog_item.setData(self.job.progress, role=Qt.ItemDataRole.UserRole)
         self._prog_item.setData(
-            int(self.job.current_step), role=ProgressDelegate.progress_role
+            int(self.job.current_step),
+            role=ProgressDelegate.progress_role,
+        )
+        self._prog_item.setData(
+            self.job.pct_rate,
+            role=ProgressDelegate.progress_role + 2,
         )
         self._stat_item.setText(self.job.state.name.title())
 
@@ -211,11 +247,16 @@ Status:
     @Slot(int)
     def on_update(self, completed_steps: int):
         # print(f"completed {completed_steps} out of {self.total_steps} steps")
+        self.job.elapsed = time.time() - self.job.start
         if self.job.n_steps > 0:
             self.job.current_step = completed_steps
             self.job.progress = round(99 * self.job.current_step / self.job.n_steps, 1)
+            self.job.rate = self.job.current_step / self.job.elapsed
+            self.job.pct_rate = self.job.progress / self.job.elapsed
+
         else:
             self.job.progress = 0
+
         self.update_fields()
         self._prog_item.emitDataChanged()
 
@@ -265,7 +306,7 @@ class JobHolder(QStandardItemModel):
     unprotect_filename = Signal(str)
     new_job_started = Signal()
 
-    def __init__(self, parent: Optional[QObject] = None):
+    def __init__(self, parent: QObject | None = None):
         super().__init__(parent=parent)
         self.lock = QMutex()
         self.existing_threads = {}

@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from contextlib import suppress
 
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtGui import QColor
@@ -145,6 +146,7 @@ class ProgressDelegate(QItemDelegate):
     def paint(self, painter, option, index):
         progress = index.data(self.progress_role)
         progress_max = max(index.data(self.progress_role + 1), 1)
+        rate = index.data(self.progress_role + 2)
         try:
             int(progress)
         except Exception:
@@ -155,5 +157,8 @@ class ProgressDelegate(QItemDelegate):
         opt.maximum = progress_max
         opt.progress = progress
         opt.text = f"{progress / progress_max:.2%}"
+        with suppress(Exception):
+            opt.text += f" ({round(float(rate), 2)} %/s)"
+
         opt.textVisible = True
         QApplication.style().drawControl(QStyle.CE_ProgressBar, opt, painter)
