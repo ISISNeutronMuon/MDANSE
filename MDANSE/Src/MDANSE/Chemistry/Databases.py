@@ -587,18 +587,22 @@ class AtomsDatabase(_Database):
         """
         # A delimiter line.
         delimiter = "-" * 70
-        tab_fmt = " {:<20}{!s:>50}"
+        tab_fmt = "{:<20}{!s:>40}{!s:>10}"
 
         info = [
             delimiter,
             f"{atom:^70}",
-            tab_fmt.format("property", "value"),
+            tab_fmt.format("property", "value", "unit"),
             delimiter,
         ]
 
         # The values for all element's properties
         for pname in sorted(self._properties):
-            info.append(tab_fmt.format(pname, self._data[atom].get(pname, None)))
+            info.append(
+                tab_fmt.format(
+                    pname, self._data[atom].get(pname), self._units.get(pname)
+                )
+            )
 
         info.append(delimiter)
         info = "\n".join(info)

@@ -15,14 +15,10 @@
 #
 from __future__ import annotations
 
-import optparse
-import pickle
-import subprocess
 import sys
-import textwrap
+from optparse import IndentedHelpFormatter, OptionGroup, OptionParser
 from pathlib import Path
 
-from MDANSE import PLATFORM
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Jobs.JobStatus import JobInfo
@@ -30,125 +26,18 @@ from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
-class IndentedHelp(optparse.IndentedHelpFormatter):
-    """This class modify slightly the help formatter of the optparse.OptionParser class.
-
-    This allows to take into account the line feed properly.
-
-    @note: code taken as it is from an implementation made by Tim Chase
-    (http://groups.google.com/group/comp.lang.python/browse_thread/thread/6df6e6b541a15bc2/09f28e26af0699b1)
-    """
-
-    def format_description(self, description):
-        if not description:
-            return ""
-        desc_width = self.width - self.current_indent
-        indent = " " * self.current_indent
-        bits = description.splitlines()
-        formatted_bits = (
-            textwrap.fill(
-                bit, desc_width, initial_indent=indent, subsequent_indent=indent
-            )
-            for bit in bits
-        )
-        result = "\n".join(formatted_bits) + "\n"
-
-        return result
-
-    def format_option(self, option):
-        indent = " " * self.current_indent
-        result = ""
-        opts = self.option_strings[option]
-        opt_width = self.help_position - self.current_indent - 2
-        if len(opts) > opt_width:
-            opts = f"{indent}{opts}\n"
-            indent_first = self.help_position
-        else:  # start help on same line as opts
-            opts = f"{indent}{opts}  "
-            indent_first = 0
-        result += opts
-        if option.help:
-            help_text = self.expand_default(option)
-            # Everything is the same up through here
-            help_lines = [
-                textwrap.wrap(para, self.help_width) for para in help_text.splitlines()
-            ]
-            # Everything is the same after here
-            result += f"{indent_first}{help_lines[0]}\n"
-            result += (
-                "\n".join(
-                    f"{' ' * self.help_position}{line}" for line in help_lines[1:]
-                )
-                + "\n"
-            )
-        elif not opts.endswith("\n"):
-            result += "\n"
-
-        return result
-
-
 class CommandLineParserError(Error):
     pass
 
 
-class CommandLineParser(optparse.OptionParser):
+class CommandLineParser(OptionParser):
     """A sublcass of OptionParser.
 
     Creates the MDANSE commad line parser.
     """
 
     def __init__(self, *args, **kwargs):
-        optparse.OptionParser.__init__(self, *args, **kwargs)
-
-    def check_job(self, option, opt_str, value, parser):
-        """Display the jobs list
-
-        @param option: the option that triggered the callback.
-        @type option: optparse.Option instance
-
-        @param opt_str: the option string seen on the command line.
-        @type opt_str: str
-
-        @param value: the argument for the option.
-        @type value: str
-
-        @param parser: the MDANSE option parser.
-        @type parser: instance of MDANSEOptionParser
-        """
-
-        if len(parser.rargs) != 1:
-            raise CommandLineParserError(
-                f"Invalid number of arguments for {opt_str!r} option"
-            )
-
-        basename = parser.rargs[0]
-
-        filename = PLATFORM.temporary_files_directory() / basename
-
-        if not filename.exists():
-            raise CommandLineParserError("Invalid job name")
-
-        # Open the job temporary file
-        try:
-            f = open(filename, "rb")
-            info = pickle.load(f)
-            f.close()
-
-        # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint
-        except Exception:
-            raise CommandLineParserError(
-                f"The job {basename!r} could not be opened properly."
-            )
-
-        # The job file could be opened and unpickled properly
-        else:
-            # Check that the unpickled object is a JobStatus object
-            if not isinstance(info, JobInfo):
-                raise CommandLineParserError(f"Invalid contents for job {basename!r}.")
-
-            LOG.info("Information about %s job:", basename)
-            for k, v in info.items():
-                LOG.info("%-20s [%s]", k, v)
+        super().__init__(*args, **kwargs)
 
     def display_element_info(self, option, opt_str, value, parser):
         if len(parser.rargs) != 1:
@@ -161,52 +50,11 @@ class CommandLineParser(optparse.OptionParser):
         from MDANSE.Chemistry import ATOMS_DATABASE
 
         try:
-            LOG.info(ATOMS_DATABASE.info(element))
+            print(ATOMS_DATABASE.info(element))  # noqa: T201
         except ValueError:
             raise CommandLineParserError(
                 f"The entry {element!r} is not registered in the database"
             )
-
-    def display_jobs_list(self, option, opt_str, value, parser):
-        """Display the jobs list
-
-        @param option: the option that triggered the callback.
-        @type option: optparse.Option instance
-
-        @param opt_str: the option string seen on the command line.
-        @type opt_str: str
-
-        @param value: the argument for the option.
-        @type value: str
-
-        @param parser: the MDANSE option parser.
-        @type parser: instance of MDANSEOptionParser
-        """
-
-        if len(parser.rargs) != 0:
-            raise CommandLineParserError(
-                f"Invalid number of arguments for {opt_str!r} option"
-            )
-
-        jobs = PLATFORM.temporary_files_directory().glob("*")
-
-        for j in jobs:
-            # Open the job temporary file
-            try:
-                with j.open("rb") as f:
-                    info = pickle.load(f)
-
-            # If the file could not be opened/unpickled for whatever reason, try at the next checkpoint
-            except Exception:
-                continue
-
-            # The job file could be opened and unpickled properly
-            else:
-                # Check that the unpickled object is a JobStatus object
-                if not isinstance(info, JobInfo):
-                    continue
-
-                LOG.info("%-20s [%s]", j.stem, info["state"])
 
     def display_trajectory_contents(self, option, opt_str, value, parser):
         """Displays trajectory contents
@@ -226,7 +74,7 @@ class CommandLineParser(optparse.OptionParser):
 
         trajName = parser.rargs[0]
         inputTraj = Trajectory(trajName)
-        LOG.info(str(inputTraj))
+        print(str(inputTraj))  # noqa: T201
 
     def error(self, msg):
         """Called when an error occured in the command line.
@@ -252,46 +100,16 @@ class CommandLineParser(optparse.OptionParser):
         """
 
         if len(parser.rargs) == 0:
-            LOG.info("Registered jobs:")
+            print("Registered jobs:")  # noqa: T201
             for interfaceName in IJob.indirect_subclasses():
-                LOG.info("\t- %s", interfaceName)
+                print("\t- %s", interfaceName)  # noqa: T201
         elif len(parser.rargs) == 1:
             val = parser.rargs[0]
-            LOG.info(IJob.create(val).info())
+            print(IJob.create(val).info())  # noqa: T201
         else:
             raise CommandLineParserError(
                 f"Invalid number of arguments for {opt_str!r} option"
             )
-
-    def run_job(self, option, opt_str, value, parser):
-        """Run job file(s).
-
-        @param option: the option that triggered the callback.
-        @type option: optparse.Option instance
-
-        @param opt_str: the option string seen on the command line.
-        @type opt_str: str
-
-        @param value: the argument for the option.
-        @type value: str
-
-        @param parser: the MDANSE option parser.
-        @type parser: instance of MDANSEOptionParser
-        """
-
-        if len(parser.rargs) != 1:
-            raise CommandLineParserError(
-                f"Invalid number of arguments for {opt_str!r} option"
-            )
-
-        filename = Path(parser.rargs[0])
-
-        if not filename.exists():
-            raise CommandLineParserError(
-                f"The job file {filename!r} could not be executed"
-            )
-
-        subprocess.Popen([sys.executable, filename])
 
     def save_job(self, option, opt_str, value, parser):
         """
@@ -335,7 +153,7 @@ class CommandLineParser(optparse.OptionParser):
             raise CommandLineParserError(f"The job {name!r} is not a valid MDANSE job")
         # Otherwise, print some information about the saved template.
         else:
-            LOG.info("Saved template for job %r as %r", name, filename)
+            print("Saved template for job %r as %r", name, filename)  # noqa: T201
 
     def save_job_template(self, option, opt_str, value, parser):
         """
@@ -377,11 +195,11 @@ def main():
 
     # Creates the option parser.
     parser = CommandLineParser(
-        formatter=IndentedHelp(), version=f"MDANSE {MDANSE.__version__} "
+        formatter=IndentedHelpFormatter(), version=f"MDANSE {MDANSE.__version__} "
     )
 
     # Creates a first the group of general options.
-    group = optparse.OptionGroup(parser, "General options")
+    group = OptionGroup(parser, "General options")
     group.add_option(
         "-d",
         "--database",
@@ -408,26 +226,11 @@ def main():
     parser.add_option_group(group)
 
     # Creates a second group of job-specific options.
-    group = optparse.OptionGroup(parser, "Job managing options")
+    group = OptionGroup(parser, "Job managing options")
 
     # Add the goup to the parser.
     parser.add_option_group(group)
 
-    group.add_option(
-        "--jc",
-        action="callback",
-        callback=parser.check_job,
-        help="Check the status of a given job.",
-    )
-    group.add_option(
-        "--jl",
-        action="callback",
-        callback=parser.display_jobs_list,
-        help="Display the jobs list.",
-    )
-    group.add_option(
-        "--jr", action="callback", callback=parser.run_job, help="Run MDANSE job(s)."
-    )
     group.add_option(
         "--js",
         action="callback",
