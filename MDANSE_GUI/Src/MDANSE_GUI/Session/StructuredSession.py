@@ -398,6 +398,7 @@ class StructuredSession(QObject):
         except KeyError:
             sf = self.connect_settings_file(name)
         sf.load_from_file()
+
         try:
             setting_groups = gui_element.grouped_settings()
         except AttributeError:
@@ -405,9 +406,8 @@ class StructuredSession(QObject):
                 f"GUI element {gui_element} did not have a grouped_settings method."
             )
         else:
-            LOG.debug(f"Initialising values in {setting_groups[0]}")
-            for group in setting_groups:
-                gname, settings, comments = group[0], group[1], group[2]
+            for gname, (settings, comments) in setting_groups.items():
+                LOG.debug(f"Initialising values in {gname}")
                 sf.extend_settings(gname, settings, comments)
                 sf.check_settings(gname, settings, comments)
             sf.save_values()

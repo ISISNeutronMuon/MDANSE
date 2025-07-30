@@ -49,12 +49,14 @@ will be used as initial values when you switch to a new analysis type.
 class JobTab(GeneralTab):
     """The tab for choosing and starting a new job."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self, *args, action=None, combo_model=None, instrument_model=None, **kwargs
+    ):
         self._needs_updating = False
-        self.action = kwargs.pop("action")
-        cmodel = kwargs.pop("combo_model", None)
-        imodel = kwargs.pop("instrument_model", None)
+        self.action = action
+
         super().__init__(*args, **kwargs)
+
         self._current_trajectory = ""
         self._job_starter = None
         self._own_index = -1
@@ -62,17 +64,22 @@ class JobTab(GeneralTab):
         self._trajectory_combo = QComboBox()
         self._trajectory_combo.setEditable(False)
         self._trajectory_combo.currentIndexChanged.connect(self.set_current_trajectory)
-        if cmodel is not None:
-            self._trajectory_combo.setModel(cmodel)
+
+        if combo_model is not None:
+            self._trajectory_combo.setModel(combo_model)
+
         self._instrument_combo = QComboBox()
         self._instrument_combo.setEditable(False)
         self._instrument_combo.currentIndexChanged.connect(self.set_current_instrument)
-        if imodel is not None:
-            self._instrument_combo.setModel(imodel)
+
+        if instrument_model is not None:
+            self._instrument_combo.setModel(instrument_model)
+
         self._core.add_widget(QLabel("Trajectory:"))
         self._core.add_widget(self._trajectory_combo)
         self._core.add_widget(QLabel("Instrument:"), upper=False)
         self._core.add_widget(self._instrument_combo, upper=False)
+
         self.action._parent_tab = self
         self._visualiser._parent_tab = self
 
@@ -85,17 +92,14 @@ class JobTab(GeneralTab):
         self.action.run_and_load.connect(self._job_starter.startProcessAndLoad)
 
     def grouped_settings(self):
-        results = super().grouped_settings()
-        results += [
-            [
-                "Execution",
+        return super().grouped_settings() | {
+            "Execution": (
                 {"auto-load": "True"},
                 {
                     "auto-load": "Unless manually switched off, the GUI will try to load the job results when the job is finished."
                 },
-            ]
-        ]
-        return results
+            ),
+        }
 
     @Slot(int)
     def set_current_trajectory(self, index: int) -> None:

@@ -13,8 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import os
 from pathlib import PurePath
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QMessageLogger, QObject, Signal, Slot
 from qtpy.QtWidgets import QListView
@@ -24,6 +27,12 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.LocalSession import LocalSession
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+if TYPE_CHECKING:
+    from qtpy.QtWidgets import QAbstractItemView
+
+    from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
+    from MDANSE_GUI.Tabs.Layouts.SinglePanel import SinglePanel
 
 
 class GeneralTab(QObject):
@@ -41,23 +50,37 @@ class GeneralTab(QObject):
 
     notify_user = Signal(int)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        *args,
+        name: str = "Unnamed GUI part",
+        session: LocalSession | None = None,
+        settings: None = None,
+        model: QObject | None = None,
+        visualiser=None,
+        view: QAbstractItemView | None = None,
+        logger=None,
+        layout: SinglePanel | DoublePanel | MultiPanel = DoublePanel,
+        label_text: str = "An abstract GUI element",
+        **kwargs,
+    ):
         self._my_tab_id = -1
-        self._name = kwargs.pop("name", "Unnamed GUI part")
-        self._session = kwargs.pop("session", LocalSession())
-        _ = kwargs.pop("settings", None)
+        self._name = name
+        self._session = session if session is not None else LocalSession()
         self._settings = self._session.obtain_settings(self)
+
         try:
             self._global_settings = self._session.main_settings()
         except AttributeError:
             self._global_settings = None
-        self._model = kwargs.pop("model", None)
-        self._visualiser = kwargs.pop("visualiser", TextInfo())
-        self._view = kwargs.pop("view", QListView())
-        self._logger = kwargs.pop("logger", QMessageLogger())
-        layout = kwargs.pop("layout", DoublePanel)
-        label_text = kwargs.pop("label_text", "An abstract GUI element")
+
+        self._model = model
+        self._visualiser = visualiser if visualiser is not None else TextInfo()
+        self._view = view if view is not None else QListView()
+        self._logger = logger if logger is not None else QMessageLogger()
+
         super().__init__(*args, **kwargs)
+
         self._core = layout(
             **{
                 "data_side": self._view,
@@ -77,7 +100,7 @@ class GeneralTab(QObject):
     def tab_notification(self):
         self.notify_user.emit(self._my_tab_id)
 
-    def grouped_settings(self):
+    def grouped_settings(self) -> dict[str, tuple[dict[str, str], dict[str, str]]]:
         """This method tells the Session object what settings
         this Tab will store in its settings file,
         and what each of the settings means.
@@ -89,26 +112,32 @@ class GeneralTab(QObject):
 
         Returns
         -------
-        List[str, Dict[str, str], Dict[str, str]]
+        dict[str, tuple[dict[str, str], dict[str, str]]]
         """
-        group1 = [
-            "Generic settings",  # name of the group of settings
-            {"path": os.path.abspath(".")},  # a dictionary of settings
-            {
-                "path": "The path last used by this GUI element."
-            },  # a dictionary of comments
-        ]
-        group2 = [
-            "units",  # name of the group of settings
-            {"energy": "meV", "time": "fs", "distance": "ang", "reciprocal": "1/ang"},
-            {
-                "energy": "The unit of energy preferred by the user.",
-                "time": "The unit of time preferred by the user.",
-                "distance": "The unit of distance preferred by the user",
-                "reciprocal": "The momentum (transfer) unit preferred by the user",
-            },
-        ]
-        return [group1, group2]
+
+        return {
+            "Generic settings": (
+                {"path": os.path.abspath(".")},  # a dictionary of settings
+                {
+                    "path": "The path last used by this GUI element."
+                },  # a dictionary of comments
+            ),
+            "units":  # name of the group of settings
+            (
+                {
+                    "energy": "meV",
+                    "time": "fs",
+                    "distance": "ang",
+                    "reciprocal": "1/ang",
+                },
+                {
+                    "energy": "The unit of energy preferred by the user.",
+                    "time": "The unit of time preferred by the user.",
+                    "distance": "The unit of distance preferred by the user",
+                    "reciprocal": "The momentum (transfer) unit preferred by the user",
+                },
+            ),
+        }
 
     def connect_units(self):
         if self._visualiser is not None:

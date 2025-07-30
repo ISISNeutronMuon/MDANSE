@@ -13,12 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import time
 import traceback
+from itertools import count
 from logging import Handler
 from logging.handlers import QueueListener
-from multiprocessing import Event, Pipe, Queue
-from typing import Optional
+from multiprocessing import Event, Pipe, Process, Queue
+from typing import Any, NamedTuple
 
 from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
@@ -109,16 +112,16 @@ class JobEntry(QObject):
     def __init__(
         self,
         *args,
-        command: Optional[str] = None,
+        command: str | None = None,
         entry_number: int = 0,
-        pause_event: Optional[Event] = None,
+        pause_event: Event | None = None,
         load_afterwards: bool = False,
     ):
         super().__init__(*args)
 
         self._command = command
         self._finished = False
-        self._parameters = {}
+        self.parameters = {}
         self._pause_event = pause_event
         self._load_afterwards = load_afterwards
 
@@ -145,19 +148,11 @@ class JobEntry(QObject):
         return f"""\
 Job type: {self._command}
 Parameters:
-{nl.join(" - {} = {}".format(*kv) for kv in self._parameters.items())}
+{nl.join(" - {} = {}".format(*kv) for kv in self.parameters.items())}
 Status:
   Current state: {self.job.state.name.title()}
   Percent complete: {self.job.progress}
 """
-
-    @property
-    def parameters(self) -> dict:
-        return self._parameters
-
-    @parameters.setter
-    def parameters(self, input: dict):
-        self._parameters = input
 
     def update_fields(self):
         self._prog_item.setText(f"{self.job.progress} percent complete")
@@ -186,20 +181,20 @@ Status:
 
     def expected_output(self) -> str:
         try:
-            len(self._parameters["output_files"][1])
+            len(self.parameters["output_files"][1])
         except TypeError:  # job is a converter
-            file_name = self._parameters["output_files"][0]
+            file_name = self.parameters["output_files"][0]
             if ".mdt" not in file_name[-5:]:
                 file_name += ".mdt"
             return file_name
         else:  # job is an analysis
-            if "MDAFormat" in self._parameters["output_files"][1]:
-                file_name = self._parameters["output_files"][0]
+            if "MDAFormat" in self.parameters["output_files"][1]:
+                file_name = self.parameters["output_files"][0]
                 if ".mda" not in file_name[-5:]:
                     file_name += ".mda"
                 return file_name
             else:
-                return self._parameters["output_files"][0]
+                return self.parameters["output_files"][0]
 
     @Slot(int)
     def on_started(self, target_steps: int):
@@ -265,36 +260,31 @@ class JobHolder(QStandardItemModel):
     unprotect_filename = Signal(str)
     new_job_started = Signal()
 
-    def __init__(self, parent: Optional[QObject] = None):
+    def __init__(self, parent: QObject | None = None):
         super().__init__(parent=parent)
         self.lock = QMutex()
-        self.existing_threads = {}
-        self.existing_processes = {}
-        self.existing_jobs = {}
-        self.existing_listeners = {}
-        self._next_number = 0
+        self.jobs: dict[int, Job] = {}
+        self.job_number = count()
         self.setHorizontalHeaderLabels(["Job", "Progress", "Status"])
 
     @Slot(str)
     def reportError(self, err: str):
         LOG.error(err)
 
-    @property
-    def next_number(self):
-        retval = int(self._next_number)
-        self._next_number += 1
-        return retval
-
     @Slot(list)
-    def startProcess(self, job_vars: list, load_afterwards=False):
+    def startProcess(
+        self, job_vars: tuple[str, dict[str, Any]], load_afterwards: bool = False
+    ):
         log_queue = Queue()
 
         main_pipe, child_pipe = Pipe()
         pause_event = Event()
-        entry_number = self.next_number
+        entry_number = next(self.job_number)
+
+        job_name, job_params = job_vars
 
         item_th = JobEntry(
-            command=job_vars[0],
+            command=job_name,
             entry_number=entry_number,
             pause_event=pause_event,
             load_afterwards=load_afterwards,
@@ -304,8 +294,8 @@ class JobHolder(QStandardItemModel):
 
         try:
             subprocess_ref = Subprocess(
-                job_name=job_vars[0],
-                job_parameters=job_vars[1],
+                job_name=job_name,
+                job_parameters=job_params,
                 pipe=child_pipe,
                 pause_event=pause_event,
                 log_queue=log_queue,
@@ -325,15 +315,15 @@ class JobHolder(QStandardItemModel):
         communicator = JobCommunicator()
         watcher_thread = JobThread(communicator, main_pipe, subprocess_ref)
         communicator.moveToThread(watcher_thread)
-        entry_number = self.next_number
-        item_th.parameters = job_vars[1]
+        entry_number = next(self.job_number)
+        item_th.parameters = job_params
         item_th.free_filename.connect(self.unprotect_filename)
         if load_afterwards:
-            if job_vars[0] in Converter.subclasses():
+            if job_name in Converter.subclasses():
                 item_th.for_loading.connect(self.trajectory_for_loading)
             else:
                 try:
-                    int(job_vars[1]["output_files"][1])
+                    int(job_params["output_files"][1])
                 except Exception:
                     item_th.for_loading.connect(self.results_for_loading)
                 else:
@@ -347,9 +337,10 @@ class JobHolder(QStandardItemModel):
         LOG.info("Watcher thread ready to start!")
         watcher_thread.start()
         try:
-            task_name = str(job_vars[0])
+            task_name = str(job_name)
         except Exception:
             task_name = "This should have been a job name"
+
         name_item = QStandardItem(task_name)
         name_item.setData(entry_number, role=Qt.ItemDataRole.UserRole)
         self.protect_filename.emit(item_th.expected_output())
@@ -364,12 +355,24 @@ class JobHolder(QStandardItemModel):
         # nrows = self.rowCount()
         # index = self.indexFromItem(item_th._item)
         # print(f"Index: {index}")
-        self.existing_processes[entry_number] = subprocess_ref
-        self.existing_threads[entry_number] = watcher_thread
-        self.existing_jobs[entry_number] = item_th
-        self.existing_listeners[entry_number] = listener
+        self.jobs[entry_number] = Job(
+            entry=item_th,
+            process=subprocess_ref,
+            thread=watcher_thread,
+            listener=listener,
+        )
+
         LOG.info("Subprocess ready to start!")
         subprocess_ref.start()
 
     def startProcessAndLoad(self, job_vars: list):
         self.startProcess(job_vars, load_afterwards=True)
+
+
+class Job(NamedTuple):
+    """Details of a job."""
+
+    entry: JobEntry
+    thread: JobThread
+    process: Process
+    listener: QueueListener

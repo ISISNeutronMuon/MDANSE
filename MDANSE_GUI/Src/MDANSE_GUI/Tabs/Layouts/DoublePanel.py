@@ -39,15 +39,16 @@ class DoublePanel(QWidget):
     def __init__(
         self,
         *args,
+        data_side=None,
+        visualiser_side=None,
+        tab_reference=None,
         **kwargs,
     ):
         self._model = None
         self._view = None
         self._visualiser = None
 
-        data_side = kwargs.pop("data_side", None)
-        visualiser_side = kwargs.pop("visualiser_side", None)
-        self._tab_reference = kwargs.pop("tab_reference", None)
+        self._tab_reference = tab_reference
 
         super().__init__(*args, **kwargs)
 
