@@ -101,11 +101,28 @@ class CommandLineParser(OptionParser):
 
         if len(parser.rargs) == 0:
             print("Registered jobs:")  # noqa: T201
-            for interfaceName in IJob.indirect_subclasses():
-                print("\t- %s", interfaceName)  # noqa: T201
+            converters = []
+            analyses = []
+            for job_name in IJob.indirect_subclasses():
+                instance = IJob.create(job_name)
+                if instance.category[0] == "Converters":
+                    converters.append(job_name)
+                else:
+                    analyses.append(
+                        list(getattr(instance, "category", [])) + [job_name]
+                    )
+            output = "\n".join(
+                [
+                    "==Converter==",
+                    *sorted(converters),
+                    "==Analysis==",
+                    *sorted(" -> ".join(analysis[1:]) for analysis in analyses),
+                ]
+            )
+            print(output)  # noqa: T201
         elif len(parser.rargs) == 1:
             val = parser.rargs[0]
-            print(IJob.create(val).info())  # noqa: T201
+            print(IJob.create(val).info)  # noqa: T201
         else:
             raise CommandLineParserError(
                 f"Invalid number of arguments for {opt_str!r} option"
@@ -247,7 +264,7 @@ def main():
     )
 
     # The command line is parsed.
-    options, _ = parser.parse_args()
+    _, _ = parser.parse_args()
 
 
 if __name__ == "__main__":

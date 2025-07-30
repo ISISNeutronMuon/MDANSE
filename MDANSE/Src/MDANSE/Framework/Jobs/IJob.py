@@ -521,8 +521,14 @@ class IJob(Configurable, metaclass=SubclassFactory):
             raise JobError(self) from err
 
     @property
-    def info(self):
-        return str(self)
+    def info(self) -> str:
+        return (
+            self.__doc__
+            + "\nInput Parameters\n================\n"
+            + "\n".join(
+                sorted(f"{key}: {value}" for key, value in self.settings.items())
+            )
+        )
 
     @classmethod
     def save_template(cls, shortname, classname):
