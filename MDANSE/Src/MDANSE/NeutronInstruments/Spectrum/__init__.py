@@ -22,23 +22,5 @@ an additional weight factor scaling the relative contributions of
 different neutron wavelength to the total observed scattering signal.
 """
 
-import importlib
-from pathlib import Path
-
-current_path = Path(__file__).parent
-
-modnames = (
-    fname.stem for fname in current_path.glob("*.py") if fname.stem != "__init__"
-)
-globdict = globals()
-
-for name in modnames:
-    try:
-        tempmod = importlib.import_module(
-            "." + name, "MDANSE.NeutronInstruments.Spectrum"
-        )
-    except ModuleNotFoundError:
-        continue
-    tempobject = getattr(tempmod, name)
-    globdict[name] = tempobject
-    del tempmod  # optionally delete the reference to the parent module
+from .FlatSpectrum import FlatSpectrum as FlatSpectrum
+from .Spectrum import Spectrum as Spectrum
