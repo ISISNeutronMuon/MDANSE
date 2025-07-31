@@ -20,23 +20,5 @@ we can limit the range of accessible Q vectors to those that
 a specific instrument can access.
 """
 
-import importlib
-from pathlib import Path
-
-current_path = Path(__file__).parent
-
-modnames = (
-    fname.stem for fname in current_path.glob("*.py") if fname.stem != "__init__"
-)
-globdict = globals()
-
-for name in modnames:
-    try:
-        tempmod = importlib.import_module(
-            "." + name, "MDANSE.NeutronInstruments.Coverage"
-        )
-    except ModuleNotFoundError:
-        continue
-    tempobject = getattr(tempmod, name)
-    globdict[name] = tempobject
-    del tempmod  # optionally delete the reference to the parent module
+from .Coverage import Coverage as Coverage
+from .TotalCoverage import TotalCoverage as TotalCoverage

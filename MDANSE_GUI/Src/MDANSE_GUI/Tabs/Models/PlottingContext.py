@@ -13,38 +13,56 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import copy
-import itertools
+from collections.abc import Iterable
+from contextlib import suppress
+from itertools import islice, product
+from math import prod
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
-
-if TYPE_CHECKING:
-    import h5py
-
-import contextlib
+from traceback import print_exception
+from typing import TYPE_CHECKING, NamedTuple
 
 import matplotlib.pyplot as mpl
 import numpy as np
+import numpy.typing as npt
 from matplotlib import rcParams
 from matplotlib.colors import to_hex as mpl_to_hex
 from matplotlib.lines import lineStyles
 from matplotlib.markers import MarkerStyle
+from more_itertools import nth_product
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 
 from MDANSE.MLogging import LOG
 
+if TYPE_CHECKING:
+    import h5py
+
 NUMBERS_FOR_SLICE = 3
 NUMBERS_FOR_RANGE = 2
 
 
+class PlotArgs(NamedTuple):
+    """Arguments for plotting data."""
+
+    dataset: np.ndarray
+    colour: str
+    line_style: str
+    marker: str
+    row: int
+    main_axis: str
+
+
 def get_mpl_markers():
     """Return valid point markers provided by matplotlib."""
-    unique_keys = list(set(MarkerStyle.markers.keys()))
     return {
-        key: MarkerStyle.markers[key]
-        for key in unique_keys
-        if key not in ["", " ", "none"] + [str(x) for x in range(10)]
+        key: mark
+        for key, mark in MarkerStyle.markers.items()
+        if isinstance(key, str)
+        and key.lower() not in {"", " ", "none"}
+        and not key.isdigit()
     }
 
 
@@ -63,9 +81,7 @@ def get_mpl_colours():
 class SingleDataset:
     """Manages a plottable data set from an .mda file."""
 
-    def __init__(
-        self, name: str, source: Union["h5py.File", None], linestyle: str = "-"
-    ):
+    def __init__(self, name: str, source: h5py.File | None, linestyle: str = "-"):
         self._name = name
         self._use_scaling = True
         self._curves = {}
@@ -82,8 +98,10 @@ class SingleDataset:
         self._current_units = {}
         self._axes_scaling = {}
         self._axes_order = []
+
         if not source:
             return
+
         self._filename = source.filename
         self.create_labels(self._filename)
         try:
@@ -96,21 +114,26 @@ class SingleDataset:
             self._valid = False
             LOG.debug(f"{name} is not plottable")
             return
+
         temp_array = np.imag(self._data)
         if not np.allclose(temp_array, 0.0):
             self._imaginary_data = temp_array
+
         self._data = np.real(self._data)
-        with contextlib.suppress(KeyError):
+
+        with suppress(KeyError):
             try:
                 self._scaling_factor = float(source[name].attrs["scaling_factor"])
             except TypeError:
                 self._scaling_factor = np.array(source[name].attrs["scaling_factor"])
+
         self._data_unit = source[name].attrs["units"]
         self._n_dim = len(self._data.shape)
         self._axes_tag = source[name].attrs["axis"]
+
         self.create_axes_tags(self._axes_tag, source)
 
-    def create_axes_tags(self, axes_tag: str, source: "h5py.File"):
+    def create_axes_tags(self, axes_tag: str, source: h5py.File):
         """Find the right axes datasets for the current dataset.
 
         Parameters
@@ -206,7 +229,7 @@ class SingleDataset:
             "full": f"{root_name}:{self._name}",
         }
 
-    def spawn_imaginary_dataset(self) -> Optional["SingleDataset"]:
+    def spawn_imaginary_dataset(self) -> SingleDataset | None:
         """Create another dataset with the imaginary part of the data.
 
         Returns
@@ -232,6 +255,46 @@ class SingleDataset:
             setattr(new_dataset, attr, copy.deepcopy(getattr(self, attr)))
         return new_dataset
 
+    @staticmethod
+    def parse_token(token: str, max_len: int) -> Iterable[int]:
+        """Parse a token component into an appropriate value for dimension slicing.
+
+        Parameters
+        ----------
+        token : str
+            Token to parse.
+        max_len : int
+            Size of array for un-ended slices.
+
+        Returns
+        -------
+        Iterable[int]
+            Parsed values.
+
+        Examples
+        --------
+        >>> parse_token("3:5", 10)
+        range(3, 5)
+        >>> parse_token("3:60:2", 5)
+        range(3, 5, 2)
+        >>> parse_token("8", 10)
+        (8, )
+        >>> parse_token("6-8", 10)
+        range(6, 8)
+        """
+        if ":" in token:
+            slice_parts = map(int, token.split(":"))
+            slc = slice(*slice_parts).indices(max_len)
+
+            return range(*slc)
+        elif "-" in token:
+            start, stop = map(int, token.split("-"))
+
+            return range(start, stop + 1)
+
+        else:
+            return (int(token),)
+
     def set_data_limits(self, limit_string: str):
         """Parse the string used for selecting a subset of data.
 
@@ -241,37 +304,25 @@ class SingleDataset:
             Data row indices, given as a list, range or slice.
 
         """
-        complete_subset_list = []
+        complete_subset = {}
+
+        axes = map(len, self.dep_axes.values())
+
+        max_len = prod(axes)
+
+        def add_ord(val: Iterable[int]) -> None:
+            complete_subset.update(dict.fromkeys(val, None))
+
         for token in limit_string.split(";"):
-            if ":" in token:
-                try:
-                    slice_parts = [int(x) for x in token.split(":")]
-                except Exception:
-                    continue
-                if len(slice_parts) <= NUMBERS_FOR_SLICE:
-                    complete_subset_list += list(range(*slice_parts))
-            elif "-" in token:
-                try:
-                    slice_parts = [int(x) for x in token.split("-")]
-                except Exception:
-                    continue
-                if len(slice_parts) == NUMBERS_FOR_RANGE:
-                    complete_subset_list += list(range(slice_parts[0], slice_parts[1]))
-            elif "," in token:
-                try:
-                    slice_parts = [int(x) for x in token.split(",")]
-                except Exception:
-                    continue
-                complete_subset_list += list(slice_parts)
-            else:
-                try:
-                    complete_subset_list += [int(token)]
-                except Exception:
-                    continue
-        if len(complete_subset_list) == 0:
-            self._data_limits = None
-        else:
-            self._data_limits = np.unique(complete_subset_list).astype(int)
+            try:
+                add_ord(self.parse_token(token, max_len))
+            except Exception as err:
+                LOG.error(
+                    "Ignoring invalid token (%r) in set_data_limits.\n %s", token, err
+                )
+                continue
+
+        self._data_limits = list(complete_subset.keys()) if complete_subset else None
 
     def available_x_axes(self) -> list[str]:
         """Get a list of axis names used by this data set.
@@ -284,7 +335,7 @@ class SingleDataset:
         """
         return list(self._axes_units.keys())
 
-    def longest_axis(self) -> str:
+    def longest_axis(self) -> tuple[str, str]:
         """Determine which axis is the longest, to be used as x axis.
 
         Returns
@@ -304,6 +355,12 @@ class SingleDataset:
                 best_unit = aunit
                 best_axis = aname
         return best_unit, best_axis
+
+    @property
+    def dep_axes(self) -> dict[str, npt.NDArray]:
+        """Axes which are likely to be dependent."""
+        _, la = self.longest_axis()
+        return {aname: axis for aname, axis in self._axes.items() if aname != la}
 
     @property
     def data(self):
@@ -350,6 +407,7 @@ class SingleDataset:
             axis_values = self.x_axis(axis_name)
             axis_unit = self._current_units[axis_name]
             picked_value = axis_values[index_tuple[axis_index]]
+
             if len(axis_values) > 1:
                 significant_digit = np.floor(
                     np.log10(abs(np.mean(axis_values[1:] - axis_values[:-1]))),
@@ -359,10 +417,12 @@ class SingleDataset:
             else:
                 label += f"{axis_label} has no values, unit {axis_unit}"
                 continue
+
             if significant_digit < 0:
                 picked_value = round(picked_value, abs(significant_digit) + 2)
             else:
                 picked_value = round(picked_value, 1)
+
             label += f"{axis_label}={picked_value} {axis_unit}, "
         return label.rstrip(", ")
 
@@ -388,46 +448,50 @@ class SingleDataset:
         """
         self._curves = {}
         self._curve_labels = {}
-        current_dim = 0
+
         data_shape = self._data.shape
         x_axis_unit, x_axis_name = x_axis_details
         slicer = []
         indexer = []
         label_lookup = []
         axis_lengths = [len(self._axes[name]) for name in self._axes_order]
+
         if not np.allclose(data_shape, axis_lengths):
             raise ValueError("Array shape does not match the order of the axes")
-        for axis_name in self._axes_order:
+
+        for current_dim, axis_name in enumerate(self._axes_order):
             axis_unit = self._axes_units[axis_name]
             if axis_unit == x_axis_unit and axis_name == x_axis_name:
                 slicer.append([slice(None)])
-            else:
-                indices = np.arange(data_shape[current_dim])
-                slicer.append(indices)
-                indexer.append(indices)
-                label_lookup.append(axis_name)
-            current_dim += 1
-        nd_indices = list(itertools.product(*indexer))
-        slicers = list(itertools.product(*slicer))
-        if self._data_limits is not None:
-            curve_indices = self._data_limits
-        else:
-            curve_indices = range(max_limit)
-        for counter, index in enumerate(curve_indices):
-            if counter >= max_limit:
-                break
-            try:
-                index_tuple = tuple(nd_indices[index])
-                self._curves[index_tuple] = self.data[slicers[index]].squeeze()
-                self._curve_labels[index_tuple] = self.generate_curve_label(
-                    index_tuple,
-                    label_lookup,
-                )
-            except IndexError:
                 continue
+
+            indices = np.arange(data_shape[current_dim])
+            slicer.append(indices)
+            indexer.append(indices)
+            label_lookup.append(axis_name)
+
+        for index in self.curve_ind(max_limit):
+            index_tuple = nth_product(index, *indexer)
+            index_slicer = nth_product(index, *slicer)
+
+            self._curves[index_tuple] = self.data[index_slicer].squeeze()
+            self._curve_labels[index_tuple] = self.generate_curve_label(
+                index_tuple,
+                label_lookup,
+            )
+
         return self._curves
 
-    def planes_vs_axis(self, axis_number: int, max_limit: int = 1) -> list[np.ndarray]:
+    def curve_ind(self, limits: int, /):
+        return (
+            islice(self._data_limits, limits)
+            if self._data_limits is not None
+            else range(limits)
+        )
+
+    def planes_vs_axis(
+        self, axis_number: int, max_limit: int = 1
+    ) -> list[np.ndarray] | np.ndarray | None:
         """Prepare for plotting 2D subsets of an ND array.
 
         Parameters
@@ -446,16 +510,19 @@ class SingleDataset:
         self._planes = {}
         self._plane_labels = {}
         _found = -1
-        total_ndim = len(self._data.shape)
+        total_ndim = self._data.ndim
+
         if total_ndim == 1:
             return None
         if total_ndim == 2:
             return self.data
+
         data_shape = self._data.shape
         number_of_planes = data_shape[axis_number]
         perpendicular_axis = None
         perpendicular_axis_name = ""
         slice_def = []
+
         for number, (axis_name, axis_array) in enumerate(self._axes.items()):
             if number == axis_number:
                 slice_def.append(0)
@@ -463,26 +530,17 @@ class SingleDataset:
                 perpendicular_axis_name = self.axis_true_name(axis_name)
             else:
                 slice_def.append(slice(None))
-        if self._data_limits is not None:
-            for counter, plane_number in enumerate(self._data_limits):
-                if counter >= max_limit or plane_number >= number_of_planes:
-                    break
-                fixed_argument = perpendicular_axis[plane_number]
-                slice_def[axis_number] = plane_number
-                self._planes[plane_number] = self.data[tuple(slice_def)]
-                self._plane_labels[plane_number] = (
-                    f"{perpendicular_axis_name}={fixed_argument}"
-                )
-        else:
-            for plane_number in range(max_limit):
-                if plane_number >= number_of_planes:
-                    break
-                fixed_argument = perpendicular_axis[plane_number]
-                slice_def[axis_number] = plane_number
-                self._planes[plane_number] = self.data[tuple(slice_def)]
-                self._plane_labels[plane_number] = (
-                    f"{perpendicular_axis_name}={fixed_argument}"
-                )
+
+        for plane_number in self.curve_ind(max_limit):
+            if plane_number >= number_of_planes:
+                break
+            fixed_argument = perpendicular_axis[plane_number]
+            slice_def[axis_number] = plane_number
+            self._planes[plane_number] = self.data[tuple(slice_def)]
+            self._plane_labels[plane_number] = (
+                f"{perpendicular_axis_name}={fixed_argument}"
+            )
+
         return None
 
 
@@ -587,7 +645,7 @@ class PlottingContext(QStandardItemModel):
         self._last_colour_list = list(self._colour_list)
 
     @Slot(object)
-    def accept_external_data(self, other: "PlottingContext"):
+    def accept_external_data(self, other: PlottingContext):
         """Copy the datasets from the input PlottingContext.
 
         Crucial slot for transferring data
@@ -625,51 +683,44 @@ class PlottingContext(QStandardItemModel):
         _, new_unit = self._unit_lookup.conversion_factor(unit)
         return new_unit
 
-    def datasets(self) -> dict:
+    def datasets(self) -> dict[str, PlotArgs]:
         """Collect GUI inputs and return data sets for plotting.
 
         This method only returns data sets with "Use it" box checked.
 
         """
         result = {}
-        for ds_num, row in enumerate(range(self.rowCount())):
+
+        for row in range(self.rowCount()):
+            row_data = {
+                key: self.item(row, ind) for key, ind in plotting_column_index.items()
+            }
+
             key = self.index(row, plotting_column_index["Dataset"]).data(
                 role=Qt.ItemDataRole.UserRole,
             )
-            useit = (
-                self.itemFromIndex(
-                    self.index(row, plotting_column_index["Use it?"]),
-                ).checkState()
-                == Qt.CheckState.Checked
+            useit = row_data["Use it?"].checkState() is Qt.CheckState.Checked
+            self._datasets[key]._use_scaling = (
+                row_data["Apply weights?"].checkState() is Qt.CheckState.Checked
             )
-            set_scaling = (
-                self.itemFromIndex(
-                    self.index(row, plotting_column_index["Apply weights?"]),
-                ).checkState()
-                == Qt.CheckState.Checked
-            )
-            data_number_string = self.itemFromIndex(
-                self.index(row, plotting_column_index["Use it?"]),
-            ).text()
-            colour = self.itemFromIndex(
-                self.index(row, plotting_column_index["Colour"]),
-            ).text()
-            style = self.itemFromIndex(
-                self.index(row, plotting_column_index["Line style"]),
-            ).text()
-            marker = self.itemFromIndex(
-                self.index(row, plotting_column_index["Marker"]),
-            ).text()
-            axis = self.itemFromIndex(
-                self.index(row, plotting_column_index["Main axis"]),
-            ).text()
-            if useit:
-                self._datasets[key].set_data_limits(data_number_string)
-                self._datasets[key].set_current_units(self._unit_lookup)
-                result[key] = (self._datasets[key], colour, style, marker, ds_num, axis)
-            else:
+
+            if not useit:
                 self._datasets[key]._data_limits = None
-            self._datasets[key]._use_scaling = set_scaling
+                continue
+
+            data_number_string = row_data["Use it?"].text()
+
+            plot_args = {
+                "colour": row_data["Colour"].text(),
+                "line_style": row_data["Line style"].text(),
+                "marker": row_data["Marker"].text(),
+                "row": row,
+                "main_axis": row_data["Main axis"].text(),
+            }
+
+            self._datasets[key].set_data_limits(data_number_string)
+            self._datasets[key].set_current_units(self._unit_lookup)
+            result[key] = PlotArgs(self._datasets[key], **plot_args)
 
         return result
 
@@ -682,13 +733,13 @@ class PlottingContext(QStandardItemModel):
             a SingleDataset instance
 
         """
-        if new_dataset is None:
+        if new_dataset is None or not new_dataset._valid:
             return
-        if not new_dataset._valid:
-            return
+
         newkey = f"{new_dataset._filename}:{new_dataset._name}"
         if newkey in self._datasets:
             return
+
         self._datasets[newkey] = new_dataset
         items = [
             QStandardItem(str(x))
@@ -705,20 +756,27 @@ class PlottingContext(QStandardItemModel):
                 "",
             ]
         ]
-        for item in items:
+
+        fixed = {"Dataset", "Trajectory", "Size", "Unit", "Apply weights?"}
+
+        for key, item in zip(plotting_column_labels, items):
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
-        for item in items[:4]:
-            item.setEditable(False)
-        temp = items[plotting_column_index["Use it?"]]
-        temp.setCheckable(True)
-        temp.setCheckState(Qt.CheckState.Checked)
-        temp = items[plotting_column_index["Apply weights?"]]
-        temp.setEditable(False)
-        temp.setCheckable(True)
-        temp.setCheckState(Qt.CheckState.Checked)
+            item.setEditable(key not in fixed)
+
+        for key in ("Use it?", "Apply weights?"):
+            item = items[plotting_column_index[key]]
+            item.setCheckable(True)
+            item.setCheckState(Qt.CheckState.Checked)
+
+        items[plotting_column_index["Use it?"]].setText(
+            f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1"
+        )
+
         self.itemChanged.connect(self.needs_an_update)
+
         temp = items[plotting_column_index["Colour"]]
         temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
+
         self.appendRow(items)
         self.add_dataset(new_dataset.spawn_imaginary_dataset())
 

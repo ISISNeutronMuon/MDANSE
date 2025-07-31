@@ -23,23 +23,5 @@ Typically, for an Inelastic Neutron Scattering instrument, the
 resolution will depend on the source-sample and sample-detector
 distances, the chopper speeds, and the Ei/Ef ratio."""
 
-import importlib
-from pathlib import Path
-
-current_path = Path(__file__).parent
-
-modnames = (
-    fname.stem for fname in current_path.glob("*.py") if fname.stem != "__init__"
-)
-globdict = globals()
-
-for name in modnames:
-    try:
-        tempmod = importlib.import_module(
-            "." + name, "MDANSE.NeutronInstruments.Resolution"
-        )
-    except ModuleNotFoundError:
-        continue
-    tempobject = getattr(tempmod, name)
-    globdict[name] = tempobject
-    del tempmod  # optionally delete the reference to the parent module
+from .IdealResolution import IdealResolution as IdealResolution
+from .Resolution import Resolution as Resolution

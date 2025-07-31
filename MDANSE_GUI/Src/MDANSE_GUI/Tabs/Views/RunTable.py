@@ -15,8 +15,8 @@
 #
 from typing import Union
 
-from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QStandardItem
+from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QContextMenuEvent, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import QAbstractItemView, QMenu, QMessageBox, QTableView
 
 from MDANSE.Framework.Jobs.JobStatus import ALLOWED_ACTIONS
@@ -24,6 +24,8 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+PROGBAR_COLUMN = 1
 
 
 class RunTable(QTableView):
@@ -36,14 +38,25 @@ class RunTable(QTableView):
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
         self._progbar = ProgressDelegate()
-        self.setItemDelegateForColumn(1, self._progbar)
+        self.setItemDelegateForColumn(PROGBAR_COLUMN, self._progbar)
         vh = self.verticalHeader()
         vh.setVisible(False)
 
-    def setModel(self, model: QAbstractItemModel) -> None:
+    def setModel(self, model: QStandardItemModel) -> None:
         result = super().setModel(model)
-        self.model().dataChanged.connect(self.resizeColumnsToContents)
+        model.itemChanged.connect(self.selective_resize)
+        model.new_job_started.connect(self.name_column_resize)
         return result
+
+    @Slot()
+    def name_column_resize(self):
+        self.resizeColumnToContents(0)
+
+    @Slot("QStandardItem*")
+    def selective_resize(self, item: QStandardItem):
+        if (colind := item.column()) == PROGBAR_COLUMN:
+            return
+        self.resizeColumnToContents(colind)
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())

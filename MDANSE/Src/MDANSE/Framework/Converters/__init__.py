@@ -13,24 +13,20 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import importlib
-from pathlib import Path
-
-from MDANSE.MLogging import LOG
-
-current_path = Path(__file__).parent
-
-modnames = (
-    fname.stem for fname in current_path.glob("*.py") if fname.stem != "__init__"
-)
-globdict = globals()
-
-for name in modnames:
-    try:
-        tempmod = importlib.import_module("." + name, "MDANSE.Framework.Converters")
-    except ModuleNotFoundError:
-        LOG.error(f"Could not find {name} in MDANSE.Framework.Converters")
-        continue
-    tempobject = getattr(tempmod, name)
-    globdict[name] = tempobject
-    del tempmod  # optionally delete the reference to the parent module
+from .ASE import ASE as ASE
+from .CASTEP import CASTEP as CASTEP
+from .CHARMM import CHARMM as CHARMM
+from .Converter import Converter as Converter
+from .CP2K import CP2K as CP2K
+from .DCD import DCD as DCD
+from .DFTB import DFTB as DFTB
+from .DL_POLY import DL_POLY as DL_POLY
+from .Forcite import Forcite as Forcite
+from .Gromacs import Gromacs as Gromacs
+from .ImprovedASE import ImprovedASE as ImprovedASE
+from .LAMMPS import LAMMPS as LAMMPS
+from .MDAnalysis import MDAnalysis as MDAnalysis
+from .MDTraj import MDTraj as MDTraj
+from .NAMD import NAMD as NAMD
+from .VASP import VASP as VASP
+from .XPLOR import XPLOR as XPLOR

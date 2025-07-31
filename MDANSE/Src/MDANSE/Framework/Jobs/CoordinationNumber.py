@@ -152,15 +152,17 @@ class CoordinationNumber(DistanceHistogram):
         nAtomsPerElement = self.trajectory.get_natoms()
 
         # symmetrize the data
-        for i, j in it.combinations_with_replacement(self.selectedElements, 2):
-            idi = self.selectedElements.index(i)
-            idj = self.selectedElements.index(j)
-            if i != j:
-                if self.indices_intra is not None:
-                    self.h_intra[idi, idj] += self.h_intra[idj, idi]
-                    self.h_intra[idj, idi] = self.h_intra[idi, idj]
-                self.h_total[idi, idj] += self.h_total[idj, idi]
-                self.h_total[idj, idi] = self.h_total[idi, idj]
+        for (idi, i), (idj, j) in it.combinations_with_replacement(
+            enumerate(self.selectedElements), 2
+        ):
+            if i == j:
+                continue
+
+            if self.indices_intra is not None:
+                self.h_intra[idi, idj] += self.h_intra[idj, idi]
+                self.h_intra[idj, idi] = self.h_intra[idi, idj]
+            self.h_total[idi, idj] += self.h_total[idj, idi]
+            self.h_total[idj, idi] = self.h_total[idi, idj]
 
         def calc_func(
             label_i: str, label_j: str

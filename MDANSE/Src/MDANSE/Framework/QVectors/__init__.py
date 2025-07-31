@@ -14,21 +14,21 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import importlib
-from pathlib import Path
-
-current_path = Path(__file__).parent
-
-modnames = (
-    fname.stem for fname in current_path.glob("*.py") if fname.stem != "__init__"
+from .ApproximateDispersionQVectors import (
+    ApproximateDispersionQVectors as ApproximateDispersionQVectors,
 )
-globdict = globals()
-
-for name in modnames:
-    try:
-        tempmod = importlib.import_module("." + name, "MDANSE.Framework.QVectors")
-    except ModuleNotFoundError:
-        continue
-    tempobject = getattr(tempmod, name)
-    globdict[name] = tempobject
-    del tempmod  # optionally delete the reference to the parent module
+from .CircularLatticeQVectors import CircularLatticeQVectors as CircularLatticeQVectors
+from .CircularQVectors import CircularQVectors as CircularQVectors
+from .DispersionLatticeQVectors import (
+    DispersionLatticeQVectors as DispersionLatticeQVectors,
+)
+from .GridQVectors import GridQVectors as GridQVectors
+from .IQVectors import IQVectors as IQVectors
+from .LatticeQVectors import LatticeQVectors as LatticeQVectors
+from .LinearLatticeQVectors import LinearLatticeQVectors as LinearLatticeQVectors
+from .LinearQVectors import LinearQVectors as LinearQVectors
+from .MillerIndicesQVectors import MillerIndicesQVectors as MillerIndicesQVectors
+from .SphericalLatticeQVectors import (
+    SphericalLatticeQVectors as SphericalLatticeQVectors,
+)
+from .SphericalQVectors import SphericalQVectors as SphericalQVectors

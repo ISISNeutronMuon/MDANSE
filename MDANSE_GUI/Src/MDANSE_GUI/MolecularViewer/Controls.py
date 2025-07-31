@@ -249,20 +249,23 @@ class ViewerControls(QWidget):
         layout4.addWidget(size_factor)
         wrapper4.setLayout(layout4)
         layout.addWidget(wrapper4)
+
         wrapper5 = QGroupBox("Visible Objects", base)
         layout5 = QGridLayout(wrapper5)
+
         atoms_visible = QCheckBox("atoms:")
         atoms_visible.setLayoutDirection(Qt.RightToLeft)
         bonds_visible = QCheckBox("bonds:")
         bonds_visible.setLayoutDirection(Qt.RightToLeft)
         cell_visible = QCheckBox("cell:")
         cell_visible.setLayoutDirection(Qt.RightToLeft)
-        self.axes_combo = QComboBox()
-        self.axes_combo.addItems(["none", "cartesian", "direct", "reciprocal"])
-        self.axes_combo.setCurrentIndex(1)
         layout5.addWidget(atoms_visible, 0, 0, 1, 1)
         layout5.addWidget(bonds_visible, 0, 1, 1, 1)
         layout5.addWidget(cell_visible, 0, 2, 1, 1)
+
+        self.axes_combo = QComboBox()
+        self.axes_combo.addItems(["none", "cartesian", "direct", "reciprocal"])
+        self.axes_combo.setCurrentIndex(1)
         label = QLabel("axes:")
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout5.addWidget(label, 1, 0, 1, 1)
@@ -272,11 +275,21 @@ class ViewerControls(QWidget):
             bonds_visible,
             cell_visible,
         ]
+
+        self.labels_combo = QComboBox()
+        self.labels_combo.addItems(["none", "index", "label", "atom", "molecule"])
+        label = QLabel("labels:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        layout5.addWidget(label, 2, 0, 1, 1)
+        layout5.addWidget(self.labels_combo, 2, 1, 1, 2)
+
         for nw, box in enumerate(self._visibility_checkboxes):
             box.setTristate(False)
             box.setChecked(self._visibility[nw])
             box.stateChanged.connect(self.setVisibility)
         self.axes_combo.currentIndexChanged.connect(self.changeAxes)
+        self.labels_combo.currentIndexChanged.connect(self.changeLabels)
+
         layout.addWidget(wrapper5)
         # the database of atom types
         self._atom_details.setModel(self._viewer._colour_manager)
@@ -332,6 +345,10 @@ class ViewerControls(QWidget):
     @Slot()
     def changeAxes(self):
         self._viewer._change_axes(self.axes_combo.currentText())
+
+    @Slot()
+    def changeLabels(self):
+        self._viewer._change_atom_labels(self.labels_combo.currentText())
 
     @Slot(int)
     def setTimeStep(self, new_value: int):
