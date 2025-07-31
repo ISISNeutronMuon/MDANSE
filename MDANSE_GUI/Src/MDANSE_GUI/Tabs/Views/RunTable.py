@@ -45,11 +45,16 @@ class RunTable(QTableView):
     def setModel(self, model: QStandardItemModel) -> None:
         result = super().setModel(model)
         model.itemChanged.connect(self.selective_resize)
+        model.new_job_started.connect(self.name_column_resize)
         return result
+
+    @Slot()
+    def name_column_resize(self):
+        self.resizeColumnToContents(0)
 
     @Slot("QStandardItem*")
     def selective_resize(self, item: QStandardItem):
-        if colind := item.column() == PROGBAR_COLUMN:
+        if (colind := item.column()) == PROGBAR_COLUMN:
             return
         self.resizeColumnToContents(colind)
 
