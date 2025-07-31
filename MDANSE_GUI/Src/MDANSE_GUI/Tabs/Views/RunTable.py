@@ -15,8 +15,8 @@
 #
 from typing import Union
 
-from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QStandardItem
+from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QContextMenuEvent, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import QAbstractItemView, QMenu, QMessageBox, QTableView
 
 from MDANSE.Framework.Jobs.JobStatus import ALLOWED_ACTIONS
@@ -42,18 +42,16 @@ class RunTable(QTableView):
         vh = self.verticalHeader()
         vh.setVisible(False)
 
-    def setModel(self, model: QAbstractItemModel) -> None:
+    def setModel(self, model: QStandardItemModel) -> None:
         result = super().setModel(model)
-        self.model().dataChanged.connect(self.selective_resize)
+        model.itemChanged.connect(self.selective_resize)
         return result
 
-    @Slot()
-    def selective_resize(self):
-        columns = (
-            ind for ind in range(self.model().columnCount()) if ind != PROGBAR_COLUMN
-        )
-        for colnum in columns:
-            self.resizeColumnToContents(colnum)
+    @Slot("QStandardItem*")
+    def selective_resize(self, item: QStandardItem):
+        if colind := item.column() == PROGBAR_COLUMN:
+            return
+        self.resizeColumnToContents(colind)
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
