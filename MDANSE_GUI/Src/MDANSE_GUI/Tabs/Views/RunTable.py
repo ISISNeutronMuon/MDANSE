@@ -25,6 +25,8 @@ from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
+PROGBAR_COLUMN = 1
+
 
 class RunTable(QTableView):
     item_details = Signal(object)
@@ -36,14 +38,22 @@ class RunTable(QTableView):
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
         self._progbar = ProgressDelegate()
-        self.setItemDelegateForColumn(1, self._progbar)
+        self.setItemDelegateForColumn(PROGBAR_COLUMN, self._progbar)
         vh = self.verticalHeader()
         vh.setVisible(False)
 
     def setModel(self, model: QAbstractItemModel) -> None:
         result = super().setModel(model)
-        self.model().dataChanged.connect(self.resizeColumnsToContents)
+        self.model().dataChanged.connect(self.selective_resize)
         return result
+
+    @Slot()
+    def selective_resize(self):
+        columns = (
+            ind for ind in range(self.model().columnCount()) if ind != PROGBAR_COLUMN
+        )
+        for colnum in columns:
+            self.resizeColumnToContents(colnum)
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
