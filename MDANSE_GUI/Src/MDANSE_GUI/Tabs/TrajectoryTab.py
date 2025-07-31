@@ -49,6 +49,7 @@ class TrajectoryTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDT Trajectories", self.load_trajectories)
+        self._model.finished_loading.connect(self.tab_notification)
 
     @Slot()
     def load_trajectories(self):

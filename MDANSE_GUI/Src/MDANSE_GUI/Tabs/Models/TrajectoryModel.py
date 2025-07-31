@@ -106,7 +106,7 @@ class TrajectoryModel(QStandardItemModel):
     def get_trajectory(self, index: int):
         result = None
         if index not in self._loading_threads:
-            LOG.error("Requesting a missing trajectory with index %s", index)
+            LOG.info("Requesting a missing trajectory with index %s", index)
             return result
         elif index not in self._trajectory_instances:
             return f"Loading trajectory {self._trajectory_paths[index]}"
