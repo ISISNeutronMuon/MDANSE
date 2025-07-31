@@ -13,21 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import importlib
-from pathlib import Path
-
-current_path = Path(__file__).parent
-
-modnames = (
-    fname.stem for fname in current_path.glob("*.py") if fname.stem != "__init__"
-)
-globdict = globals()
-
-for name in modnames:
-    try:
-        tempmod = importlib.import_module("." + name, "MDANSE.Framework.Formats")
-    except ModuleNotFoundError:
-        continue
-    tempobject = getattr(tempmod, name)
-    globdict[name] = tempobject
-    del tempmod  # optionally delete the reference to the parent module
+from .FileInMemory import FileInMemory as FileInMemory
+from .HDFFormat import HDFFormat as HDFFormat
+from .IFormat import IFormat as IFormat
+from .MDAFormat import MDAFormat as MDAFormat
+from .MDTFormat import MDTFormat as MDTFormat
+from .TextFormat import TextFormat as TextFormat

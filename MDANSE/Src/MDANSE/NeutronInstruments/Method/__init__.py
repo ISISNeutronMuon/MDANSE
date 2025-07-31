@@ -25,23 +25,6 @@ in a different set of equations depending on the type of an experiment
 performed. Initially, the plan is to start with time-of-flight diffraction,
 direct and indirect spectrometry."""
 
-import importlib
-from pathlib import Path
-
-current_path = Path(__file__).parent
-
-modnames = (
-    fname.stem for fname in current_path.glob("*.py") if fname.stem != "__init__"
-)
-globdict = globals()
-
-for name in modnames:
-    try:
-        tempmod = importlib.import_module(
-            "." + name, "MDANSE.NeutronInstruments.Method"
-        )
-    except ModuleNotFoundError:
-        continue
-    tempobject = getattr(tempmod, name)
-    globdict[name] = tempobject
-    del tempmod  # optionally delete the reference to the parent module
+from .NullMethod import NullMethod as NullMethod
+from .ScatteringMethod import ScatteringMethod as ScatteringMethod
+from .TOFDiffraction import TOFDiffraction as TOFDiffraction

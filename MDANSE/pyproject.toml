@@ -39,6 +39,9 @@ dependencies = [
     "more-itertools",
 ]
 
+[project.optional-dependencies]
+cli=["tqdm"]
+
 # dynamic = ["version", "description"]
 
 [project.urls]
