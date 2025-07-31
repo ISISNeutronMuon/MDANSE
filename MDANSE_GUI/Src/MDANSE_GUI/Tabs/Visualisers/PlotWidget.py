@@ -353,7 +353,7 @@ class PlotWidget(QWidget):
         normaliser.new_values.connect(self.normaliser_change)
         self._sliderpack = slider
         self._normaliser = normaliser
-        # New widgets, next to the toolbar
+        # Matplotlib control widgets, next to the toolbar.
         temp_hlayout = QHBoxLayout()
         temp_hlayout.addWidget(toolbar)
         legend_box = QCheckBox(text="Legend")
@@ -362,7 +362,7 @@ class PlotWidget(QWidget):
         grid_box.clicked.connect(self.use_grid)
         temp_hlayout.addWidget(legend_box)
         temp_hlayout.addWidget(grid_box)
-        # Done!
+        # The following widgets are placed below the plot.
         layout.addLayout(temp_hlayout)
         layout.addWidget(slider)
         layout.addWidget(normaliser)

@@ -65,9 +65,9 @@ class PlotDataView(QTreeView):
             file_node = model.parent_object(index)
             self.quick_plot_data(data_nodes, file_node, main_only=True)
         else:
-            data_nodes = model.itemFromIndex(index).recursive_children(
-                recursion_limit=1
-            )
+            if (current_item := model.itemFromIndex(index)) is None:
+                return
+            data_nodes = current_item.recursive_children(recursion_limit=1)
             file_node = model.parent_object(index)
             self.quick_plot_data(data_nodes, file_node)
 

@@ -33,6 +33,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE import PLATFORM
+from MDANSE.IO.IOUtils import strip_comments
 from MDANSE.MLogging import LOG
 
 ERROR_COLOR = QColor(255, 0, 0)
@@ -51,9 +52,9 @@ def parse_string(param_str: str) -> Any:
     Any
         Typically a string, list[float], list[str] or None
     """
-    param_str = str(param_str).replace("\\", "")
+    param_str = str(param_str).strip().replace("\\", "")
     param_str = param_str.replace("'", "")
-    if "[" in param_str:
+    if param_str.startswith("["):
         toks = param_str.strip("[]").split(",")
         try:
             result = [float(x) for x in toks]
@@ -138,7 +139,7 @@ class PlotSettingsModel(QStandardItemModel):
         self.itemChanged.connect(self.update_single_value)
         self.setHorizontalHeaderLabels(["Parameters", "Values", "Default"])
 
-    def populate_model(self, par_dict: dict[str, str]):
+    def populate_model(self, par_dict: dict[str, Any]):
         """Put entries from rcParams into the Qt model.
 
         Skips a few entries which are difficult to parse, because
@@ -146,13 +147,13 @@ class PlotSettingsModel(QStandardItemModel):
 
         Parameters
         ----------
-        par_dict : dict[str, str]
+        par_dict : dict[str, Any]
             key:value pairs from rcParams, converted to string.
         """
         for key, value in par_dict.items():
             if key in BAD_KEYS:
                 continue
-            left_item = QStandardItem(str(key))
+            left_item = QStandardItem(key)
             right_item = QStandardItem(str(value))
             right_item.setData(key, role=Qt.ItemDataRole.UserRole)
             def_item = QStandardItem(str(rcParamsDefault[key]))
@@ -301,13 +302,11 @@ class PlotSettingsEditor(QDialog):
             )
             return
         rc_file(settings_file)
-        with open(settings_file) as source:
-            for line in source:
-                no_comment = line.split("#")[0]
-                if ":" not in no_comment:
+        with settings_file.open(encoding="utf-8") as source:
+            for line in strip_comments(source):
+                if ":" not in line:
                     continue
-                toks = no_comment.split(":")
-                key, value = toks[0], toks[1]
+                key, value = line.split(":", maxsplit=1)
                 self._changed_keys[key] = value
 
     @Slot("QStandardItem*")
@@ -319,7 +318,9 @@ class PlotSettingsEditor(QDialog):
 
     def save_changes(self):
         """Save the changed settings to an MDANSE config file."""
-        with open(PLATFORM.application_directory() / "matplotlib.txt", "w") as target:
+        with (PLATFORM.application_directory() / "matplotlib.txt").open(
+            mode="w", encoding="utf-8"
+        ) as target:
             for key, item in self._changed_keys.items():
                 target.write(f"{key}: {convert_to_string(item)}\n")
 

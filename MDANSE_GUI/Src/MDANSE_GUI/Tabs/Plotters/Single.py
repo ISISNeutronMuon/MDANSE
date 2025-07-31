@@ -174,26 +174,29 @@ class Single(Plotter):
             target.clear()
             target.canvas.draw()
         for databundle in plotting_context.datasets().values():
-            dataset, colour, linestyle, marker, _, axis_label, legend_label = databundle
+            dataset = databundle.dataset
             try:
-                best_unit, best_axis = (dataset._axes_units[axis_label], axis_label)
+                best_unit, best_axis = (
+                    dataset._axes_units[databundle.main_axis],
+                    databundle.main_axis,
+                )
             except KeyError:
                 best_unit, best_axis = dataset.longest_axis()
-            plotlabel = legend_label
+            plotlabel = databundle.legend_label
             x_axis_labels.append(dataset.x_axis_label(best_axis))
             if dataset._n_dim == 1:
                 [temp] = axes.plot(
                     dataset.x_axis(best_axis),
                     dataset.data,
-                    linestyle=linestyle,
+                    linestyle=databundle.line_style,
                     label=plotlabel,
-                    color=colour,
+                    color=databundle.colour,
                 )
                 try:
-                    temp.set_marker(marker)
+                    temp.set_marker(databundle.marker)
                 except ValueError:
                     with contextlib.suppress(Exception):
-                        temp.set_marker(int(marker))
+                        temp.set_marker(int(databundle.marker))
                 self._active_curves.append(temp)
                 self._backup_curves.append([temp.get_xdata(), temp.get_ydata()])
                 self.height_max = max(self.height_max, temp.get_ydata().max())
@@ -243,9 +246,6 @@ class Single(Plotter):
         axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
         if plotting_context.use_legend:
             axes.legend()
-        if plotting_context.use_grid:
-            axes.grid(True)
-        else:
-            axes.grid(False)
+        axes.grid(plotting_context.use_grid)
         self.check_curve_lengths()
         self.offset_curves()

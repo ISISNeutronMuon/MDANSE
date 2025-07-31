@@ -82,7 +82,7 @@ class DatasetFormatter:
         if self._plotting_context is None:
             return ["No data selected"]
 
-        for name, databundle in self._plotting_context.datasets().items():
+        for databundle in self._plotting_context.datasets().values():
             header, data = self.process_data(
                 databundle.dataset,
                 main_axis=databundle.main_axis,
