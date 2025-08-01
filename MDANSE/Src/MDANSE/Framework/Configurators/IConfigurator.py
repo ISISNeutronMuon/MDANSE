@@ -244,9 +244,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         bool
             If True, self.configure(new_input) needs to be run
         """
-        if self.configured and self._original_input == new_input:
-            return False
-        return True
+        return not self.configured or self._original_input != new_input
 
     def to_json(self) -> str:
         """Encode this input variable as a JSON string.

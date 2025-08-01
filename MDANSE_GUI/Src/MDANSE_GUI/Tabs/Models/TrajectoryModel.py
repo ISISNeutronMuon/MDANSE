@@ -14,6 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import itertools
+
 from qtpy.QtCore import (
     QDeadlineTimer,
     QModelIndex,
@@ -73,16 +75,15 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_paths = {}
         self._trajectory_instances = {}
         self._loading_threads = {}
-        self._next_number = 0
+        self._next_number = itertools.count()
 
     @Slot(tuple)
-    def append_object(self, input: tuple):
+    def append_object(self, input: tuple) -> int:
         full_name, label = input
-        self._node_numbers.append(self._next_number)
-        self._trajectory_paths[self._next_number] = full_name
-        self._trajectory_instances[self._next_number] = None
-        retval = int(self._next_number)
-        self._next_number += 1
+        retval = next(self._next_number)
+        self._node_numbers.append(retval)
+        self._trajectory_paths[retval] = full_name
+        self._trajectory_instances[retval] = None
         item = QStandardItem(f"Loading {label}...")
         item.setData(retval)
         self.appendRow(item)
@@ -95,7 +96,7 @@ class TrajectoryModel(QStandardItemModel):
         index: int,
         display_item: QStandardItem | None = None,
         target_label: str | None = None,
-    ):
+    ) -> None:
         thread = LoaderThread(
             None, filename, index, display_item=display_item, target_label=target_label
         )
@@ -103,17 +104,17 @@ class TrajectoryModel(QStandardItemModel):
         self._loading_threads[index] = thread
         thread.start()
 
-    def get_trajectory(self, index: int):
+    def get_trajectory(self, index: int) -> None | str | Trajectory:
         result = None
         if index not in self._loading_threads:
             LOG.info("Requesting a missing trajectory with index %s", index)
             return result
-        elif index not in self._trajectory_instances:
+        if index not in self._trajectory_instances:
             return f"Loading trajectory {self._trajectory_paths[index]}"
         return self._trajectory_instances[index]
 
     @Slot(object)
-    def accept_results(self, result_tuple):
+    def accept_results(self, result_tuple) -> None:
         trajectory, index = result_tuple
         if index not in self._trajectory_instances:
             return
@@ -131,15 +132,12 @@ class TrajectoryModel(QStandardItemModel):
             return True
         return False
 
-    def removeRow(self, row: int, parent: QModelIndex = None):
+    def removeRow(self, row: int, parent: QModelIndex = QModelIndex()) -> bool:
         try:
             node_number = self.item(row).data()
         except AttributeError:
-            return
-        if parent is None:
-            super().removeRow(row)
-        else:
-            super().removeRow(row, parent)
+            return False
+        retcode = super().removeRow(row, parent)
         instance = self._trajectory_instances.pop(node_number)
         filename = self._trajectory_paths.pop(node_number)
         if instance:
@@ -154,3 +152,4 @@ class TrajectoryModel(QStandardItemModel):
             thread.wait(deadline=timer)
         except Exception as e:
             LOG.error("While removing a loader thread, an exception occured: %s", e)
+        return retcode

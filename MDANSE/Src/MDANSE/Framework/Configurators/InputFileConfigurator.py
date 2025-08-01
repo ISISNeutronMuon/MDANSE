@@ -16,6 +16,7 @@
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class InputFileConfigurator(IConfigurator):
@@ -23,7 +24,13 @@ class InputFileConfigurator(IConfigurator):
 
     _default = ""
 
-    def __init__(self, name, wildcard="All files (*)", **kwargs):
+    def __init__(
+        self,
+        name,
+        wildcard="All files (*)",
+        instance: Trajectory | None = None,
+        **kwargs,
+    ):
         """
         Initializes the configurator object.
 
@@ -37,7 +44,7 @@ class InputFileConfigurator(IConfigurator):
         # The base class constructor.
         IConfigurator.__init__(self, name, **kwargs)
 
-        self._instance = kwargs.get("instance")
+        self._instance = instance
 
         self.wildcard = wildcard
 
