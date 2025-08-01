@@ -59,18 +59,15 @@ class ConverterTab(GeneralTab):
     def update_action_on_tab_activation(self):
         self.action.test_file_outputs()
 
-    def grouped_settings(self):
-        results = super().grouped_settings()
-        results += [
-            [
-                "Execution",
+    def grouped_settings(self) -> dict[str, tuple[dict[str, str], dict[str, str]]]:
+        return super().grouped_settings() | {
+            "Execution": (
                 {"auto-load": "True"},
                 {
                     "auto-load": "Unless manually switched off, the GUI will try to load the job results when the job is finished."
                 },
-            ]
-        ]
-        return results
+            )
+        }
 
     @classmethod
     def standard_instance(cls):

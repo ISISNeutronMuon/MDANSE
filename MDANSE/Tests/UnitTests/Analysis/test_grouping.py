@@ -142,7 +142,8 @@ def test_analysis(generate_benchmarks, tmp_path, parameters, job_info):
 
     assert out_file.is_file()
     compare_hdf5(
-        out_file, result_file, tuple(outputs), startswith=True, atol=atol, rtol=rtol
+        out_file, result_file, tuple(outputs), startswith=True, atol=atol, rtol=rtol,
+        compare_axis=True
     )
     assert log_file.is_file()
 
@@ -168,7 +169,7 @@ def test_rmsf(generate_benchmarks, tmp_path, parameters):
     assert out_file.is_file()
     assert log_file.is_file()
 
-    compare_hdf5(out_file, result_file, "rmsf/rmsf", startswith=True)
+    compare_hdf5(out_file, result_file, "rmsf/rmsf", startswith=True, compare_axis=True)
 
 
 def test_ndtsf(generate_benchmarks, tmp_path, disf, dcsf, qvector_grid):
@@ -205,6 +206,7 @@ def test_ndtsf(generate_benchmarks, tmp_path, disf, dcsf, qvector_grid):
         ("ndsf/f(q,t)", "ndsf/s(q,f)"),
         startswith=True,
         atol=1e-6,
+        compare_axis=True,
     )
 
 
@@ -233,7 +235,10 @@ def test_ssfsf(generate_benchmarks, tmp_path, dcsf):
     assert out_file.is_file()
     assert log_file.is_file()
 
-    compare_hdf5(out_file, result_file, "ssf/total", startswith=True, atol=1e-6)
+    compare_hdf5(
+        out_file, result_file, "ssf/total", startswith=True, atol=1e-6,
+        compare_axis=True
+    )
 
 
 @pytest.mark.parametrize(

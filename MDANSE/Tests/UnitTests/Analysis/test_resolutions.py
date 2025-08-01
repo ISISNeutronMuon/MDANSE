@@ -110,7 +110,8 @@ def test_dos(generate_benchmarks, tmp_path, trajectory, resolution_generator):
                  result_file,
                  keys,
                  scale_result=True,
-                 scale_benchmark=True)
+                 scale_benchmark=True,
+                 compare_axis=True)
 
 
 def test_dos_is_reproducible(tmp_path, trajectory):
@@ -157,9 +158,11 @@ def test_dos_is_reproducible(tmp_path, trajectory):
                  temp_name2.with_suffix(".mda"),
                  keys,
                  scale_result=True,
-                 scale_benchmark=True)
+                 scale_benchmark=True,
+                 compare_axis=True)
     compare_hdf5(temp_name1.with_suffix(".mda"),
                  temp_name3.with_suffix(".mda"),
                  keys,
                  scale_result=True,
-                 scale_benchmark=True)
+                 scale_benchmark=True,
+                 compare_axis=True)

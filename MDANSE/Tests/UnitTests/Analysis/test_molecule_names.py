@@ -68,5 +68,5 @@ def test_structure_analysis(generate_benchmarks, tmp_path, parameters, job_info)
     assert out_file.is_file()
     assert log_file.is_file()
 
-    compare_hdf5(out_file, result_file, job_info[1])
+    compare_hdf5(out_file, result_file, job_info[1], compare_axis=True)
 

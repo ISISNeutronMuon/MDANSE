@@ -55,6 +55,7 @@ def test_temperature(generate_benchmarks, tmp_path, traj_info, interp_order):
             "temp/avg_kinetic_energy",
             "temp/avg_temperature",
         ),
+        compare_axis=True,
     )
 
 
@@ -104,6 +105,7 @@ def test_density(generate_benchmarks, tmp_path, traj_info, output_format):
                 "density/mass/avg_density",
             ),
             startswith=True,
+            compare_axis=True,
         )
 
     elif output_format == "TextFormat":

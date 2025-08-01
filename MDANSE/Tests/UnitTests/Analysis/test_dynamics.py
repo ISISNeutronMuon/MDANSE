@@ -44,6 +44,7 @@ def test_vacf(generate_benchmarks, tmp_path, interp_order):
         result_file,
         [f"/vacf/{elem}" for elem in ("Cu", "S", "Sb", "total")],
         scale_result=False,
+        compare_axis=True,
     )
 
 
@@ -82,6 +83,7 @@ def test_pps(generate_benchmarks, tmp_path):
         ],
         scale_result=True,
         scale_benchmark=True,
+        compare_axis=True,
     )
 
 
@@ -178,7 +180,8 @@ def test_dynamics_analysis(
         assert out_file.is_file()
 
         compare_hdf5(
-            out_file, result_file, outputs, startswith=True, scale_result=normalised
+            out_file, result_file, outputs, startswith=True, scale_result=normalised,
+            compare_axis=True
         )
 
     elif output_format == "TextFormat":

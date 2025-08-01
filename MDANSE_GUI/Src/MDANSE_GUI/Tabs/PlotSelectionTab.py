@@ -51,19 +51,16 @@ class PlotSelectionTab(GeneralTab):
         self._visualiser._unit_lookup = self
 
     def grouped_settings(self):
-        results = super().grouped_settings()
-        results += [
-            [
-                "dialogs",
+        return super().grouped_settings() | {
+            "dialogs": (
                 {"new_plot": "True", "data_plotted": "True", "new_text": "True"},
                 {
                     "new_plot": "Show a pop-up dialog EVERY TIME a new plot is created",
                     "data_plotted": "Show a pop-up dialog EVERY TIME a data set is plotted",
                     "new_text": "Show a pop-up dialog EVERY TIME a new data view is created",
                 },
-            ]
-        ]
-        return results
+            )
+        }
 
     @Slot()
     def load_files(self):

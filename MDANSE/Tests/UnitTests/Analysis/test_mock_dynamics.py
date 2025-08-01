@@ -35,4 +35,4 @@ def test_vacf(generate_benchmarks, tmp_path, interp_order):
 
     compare_hdf5(out_file, result_file,
                 [f"vacf/{elem}" for elem in ("H", "O", "Si", "total")],
-                scale_result=False)
+                scale_result=False, compare_axis=True)

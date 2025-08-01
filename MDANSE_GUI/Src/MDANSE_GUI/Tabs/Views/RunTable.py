@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from typing import Union
+from __future__ import annotations
 
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QStandardItem, QStandardItemModel
@@ -21,6 +21,7 @@ from qtpy.QtWidgets import QAbstractItemView, QMenu, QMessageBox, QTableView
 
 from MDANSE.Framework.Jobs.JobStatus import ALLOWED_ACTIONS
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.Tabs.Models.JobHolder import Job, JobHolder
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
@@ -69,9 +70,9 @@ class RunTable(QTableView):
         self.populateMenu(menu, item)
         menu.exec_(event.globalPos())
 
-    def populateMenu(self, menu: QMenu, item: QStandardItem):
-        entry, _, _, _ = self.getJobObjects()
-        job_state = entry.job.state
+    def populateMenu(self, menu: QMenu, item: QStandardItem) -> None:
+        job = self.getJobObjects()
+        job_state = job.entry.job.state
         for action, method in [
             ("Delete", self.deleteNode),
             ("Pause", self.pauseJob),
@@ -83,8 +84,8 @@ class RunTable(QTableView):
             temp_action.triggered.connect(method)
             temp_action.setEnabled(action in ALLOWED_ACTIONS[job_state])
 
-    def getJobObjects(self):
-        model = self.model()
+    def getJobObjects(self) -> Job | None:
+        model: JobHolder = self.model()
         index = self.currentIndex()
         item_row = index.row()
         entry_number = model.index(item_row, 0).data(role=Qt.ItemDataRole.UserRole)
@@ -92,20 +93,15 @@ class RunTable(QTableView):
             entry_number = int(entry_number)
         except ValueError:
             LOG.error(f"Could not use {entry_number} as int")
-            return
-        job_entry, job_watcher_thread, job_process, log_listener = (
-            model.existing_jobs[entry_number],
-            model.existing_threads[entry_number],
-            model.existing_processes[entry_number],
-            model.existing_listeners[entry_number],
-        )
-        return job_entry, job_watcher_thread, job_process, log_listener
+            return None
+
+        return model.jobs[entry_number]
 
     @Slot()
-    def deleteNode(self):
-        entry, watcher, process, listener = self.getJobObjects()
+    def deleteNode(self) -> None:
+        job = self.getJobObjects()
         try:
-            process.close()
+            job.process.close()
         except ValueError:
             LOG.error("The process is still running!")
         else:
@@ -116,24 +112,24 @@ class RunTable(QTableView):
             self.jobs_logs.emit(([], []))
 
     @Slot()
-    def pauseJob(self):
-        entry, _, _, _ = self.getJobObjects()
-        entry.pause_job()
+    def pauseJob(self) -> None:
+        job = self.getJobObjects()
+        job.entry.pause_job()
 
     @Slot()
-    def unpauseJob(self):
-        entry, _, _, _ = self.getJobObjects()
-        entry.unpause_job()
+    def unpauseJob(self) -> None:
+        job = self.getJobObjects()
+        job.entry.unpause_job()
 
     @Slot()
-    def killJob(self):
-        entry, _, process, listener = self.getJobObjects()
-        process.kill()
-        entry.kill_job()
-        listener.stop()
+    def killJob(self) -> None:
+        job = self.getJobObjects()
+        job.process.kill()
+        job.entry.kill_job()
+        job.listener.stop()
 
     @Slot()
-    def terminateJob(self):
+    def terminateJob(self) -> None:
         confirmation_box = QMessageBox(
             QMessageBox.Icon.Question,
             "You are about to terminate a job",
@@ -144,25 +140,25 @@ class RunTable(QTableView):
         result = confirmation_box.exec()
         LOG.info(f"QMessageBox result = {result}")
         if result == QMessageBox.StandardButton.Yes:
-            entry, _, process, listener = self.getJobObjects()
+            job = self.getJobObjects()
             # process is not alive, the job probably finished already
-            if process.is_alive():
-                process.terminate()
-                process.join()
-                entry.terminate_job()
-                listener.stop()
+            if job.process.is_alive():
+                job.process.terminate()
+                job.process.join()
+                job.entry.terminate_job()
+                job.listener.stop()
 
     @Slot(QModelIndex)
-    def item_picked(self, index: QModelIndex):
+    def item_picked(self, index: QModelIndex) -> None:
         model = self.model()
         index = self.currentIndex()
         item_row = index.row()
         node_number = model.index(item_row, 0).data(role=Qt.ItemDataRole.UserRole)
-        job_entry = model.existing_jobs[node_number]
+        job_entry = model.jobs[node_number].entry
         self.item_details.emit(job_entry.text_summary())
         self.jobs_logs.emit(job_entry.handler.msgs_and_levels())
 
-    def connect_to_visualiser(self, visualiser: Union[TextInfo, JobLogInfo]) -> None:
+    def connect_to_visualiser(self, visualiser: TextInfo | JobLogInfo) -> None:
         """Connect to a visualiser.
 
         Parameters

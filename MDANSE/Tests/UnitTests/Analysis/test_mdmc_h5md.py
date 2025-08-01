@@ -62,4 +62,5 @@ def test_h5md_temperature(generate_benchmarks, tmp_path, trajectory, interp_orde
             "temp/avg_kinetic_energy",
             "temp/avg_temperature",
         ),
+        compare_axis=True,
     )

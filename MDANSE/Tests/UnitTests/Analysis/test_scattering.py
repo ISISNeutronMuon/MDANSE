@@ -120,6 +120,7 @@ def test_dcsf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
         scale_result=True,
         scale_benchmark=True,
         atol=1e-8,
+        compare_axis=True,
     )
 
 
@@ -168,6 +169,7 @@ def test_ccf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
         scale_result=True,
         scale_benchmark=True,
         atol=1e-6,
+        compare_axis=True,
     )
 
 
@@ -238,6 +240,7 @@ def test_disf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
         startswith=True,
         scale_result=True,
         scale_benchmark=True,
+        compare_axis=True,
     )
 
 
@@ -284,6 +287,7 @@ def test_eisf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
         startswith=True,
         scale_result=True,
         scale_benchmark=True,
+        compare_axis=True,
     )
 
 
@@ -329,6 +333,7 @@ def test_gdisf(generate_benchmarks, tmp_path, traj_info):
         result_file,
         ("gdisf/f(q,t)", "gdisf/s(q,f)", "msd/msd"),
         startswith=True,
+        compare_axis=True,
     )
 
 
@@ -367,6 +372,7 @@ def test_ndtsf(generate_benchmarks, tmp_path, disf, dcsf, qvector_grid):
         ("ndsf/f(q,t)", "ndsf/s(q,f)"),
         startswith=True,
         atol=1e-6,
+        compare_axis=True,
     )
 
 
@@ -396,7 +402,10 @@ def test_ssfsf(generate_benchmarks, tmp_path, dcsf):
     assert log_file.is_file()
     assert text_file.is_file()
 
-    compare_hdf5(out_file, result_file, ("ssf/total"), startswith=True, atol=1e-6)
+    compare_hdf5(
+        out_file, result_file, ("ssf/total"), startswith=True, atol=1e-6,
+        compare_axis=True
+    )
 
 
 @pytest.mark.parametrize(
@@ -440,4 +449,5 @@ def test_sldp(generate_benchmarks, tmp_path, traj_info):
         result_file,
         ("sldp/sldp", "dp/number/total"),
         startswith=True,
+        compare_axis=True,
     )

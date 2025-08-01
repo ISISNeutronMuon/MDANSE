@@ -105,7 +105,7 @@ def test_structure_analysis(
 
         assert out_file.is_file()
 
-        compare_hdf5(out_file, result_file, tuple(outputs), startswith=True)
+        compare_hdf5(out_file, result_file, tuple(outputs), startswith=True, compare_axis=True)
 
     elif output_format == "TextFormat":
         out_file = temp_name.parent / (temp_name.stem + "_text.tar")

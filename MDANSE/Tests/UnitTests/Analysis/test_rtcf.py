@@ -95,4 +95,9 @@ def test_rtcf(generate_benchmarks, tmp_path, parameters, polynomial_order):
     assert log_file.is_file()
 
 
-    compare_hdf5(out_file, result_file, [f"rtcf/l={pord}" for pord in range(1,polynomial_order+1)])
+    compare_hdf5(
+        out_file,
+        result_file,
+        [f"rtcf/l={pord}" for pord in range(1,polynomial_order+1)],
+        compare_axis=True
+    )
