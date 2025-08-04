@@ -67,6 +67,14 @@ unit_lookup = {
     "N/A": "arbitrary",
 }
 
+INTERNAL_UNITS = {
+    "energy": "Da nm2 / ps2",
+    "velocities": "nm/ps",
+    "gradients": "Da nm / ps2",
+    "time": "ps",
+    "length": "nm",
+}
+
 
 class UnitError(Exception):
     pass
