@@ -53,6 +53,7 @@ class JobInfo:
     pid: int = PLATFORM.pid()
     type: str | None = None
     start: float | None = None
+    end: float | None = None
     elapsed: float | Literal["N/A"] = "N/A"
     rate: float | Literal["N/A"] = "N/A"
     pct_rate: float | Literal["N/A"] = "N/A"
@@ -79,7 +80,7 @@ class JobStatus(Status):
         self.save_status()
 
     def finish_status(self):
-        pass
+        self.state.end = time.time()
 
     @property
     def state(self):

@@ -164,8 +164,13 @@ class JobEntry(QObject):
 
         try:
             comp_time = (self.job.n_steps - self.job.current_step) / self.job.rate
-        except TypeError:
+        except (TypeError, ZeroDivisionError):
             comp_time = "N/A"
+
+        if self.job.end:
+            elapsed_time = self.job.end - self.job.start
+        else:
+            elapsed_time = time.time() - self.job.start
 
         return f"""\
 Job type: {self._command}
@@ -177,7 +182,7 @@ Status:
   Percent rate: {self.job.pct_rate} %/s
   Steps: {self.job.current_step}/{self.job.n_steps}
   Step rate: {self.job.rate} steps/s
-  Elapsed time: {self._sec_fmt(time.time() - self.job.start)}
+  Elapsed time: {self._sec_fmt(elapsed_time)}
   Estimated remaining time: {self._sec_fmt(comp_time)}
 """
 
@@ -202,6 +207,7 @@ Status:
             return
         self._finished = True
         file_name = self.expected_output()
+        self.job.end = time.time()
 
         if success:
             if self._load_afterwards:

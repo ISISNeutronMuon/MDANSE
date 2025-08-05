@@ -128,6 +128,7 @@ class JobStatusProcess(Status):
     def finish_status(self):
         """Assert finished state."""
         self.job_state = JobStates.FINISHED
+        self.state.end = time.time()
         self._pipe.send(self.state)
 
     def start_status(self):

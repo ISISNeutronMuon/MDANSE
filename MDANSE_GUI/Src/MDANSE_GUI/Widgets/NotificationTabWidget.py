@@ -34,7 +34,7 @@ class NotificationTabWidget(QTabWidget):
 
     @Slot(int)
     def set_special_color(self, tab_index: int):
-        if tab_index != self.currentIndex:
+        if tab_index != self.currentIndex():
             self.tabBar().setTabTextColor(tab_index, self._special_color)
             self.tabBar().setTabIcon(
                 tab_index, QIcon.fromTheme(QIcon.ThemeIcon.DialogInformation)
