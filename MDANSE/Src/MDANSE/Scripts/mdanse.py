@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from optparse import IndentedHelpFormatter, OptionGroup, OptionParser
+from argparse import ArgumentParser
 from pathlib import Path
 
 import MDANSE
@@ -44,6 +44,8 @@ def show_trajectory_contents(trajectory_path: str | Path | None):
 
 
 def show_jobs(input_job_name: str | None = None):
+    if input_job_name is None:
+        return
     if not input_job_name:
         print("Registered jobs:")  # noqa: T201
         converters = []
@@ -80,68 +82,32 @@ def save_job(
     job.save(script_name)
 
 
-def produce_output(options: Values, args: list[str]):
+def produce_output(options: dict[str, str], args: list[str]):
+    print(options)
     show_element_info(options.element)
     show_trajectory_contents(options.trajectory)
     show_jobs(options.job)
 
 
 def main():
-    parser = OptionParser(
-        formatter=IndentedHelpFormatter(), version=f"MDANSE {MDANSE.__version__} "
+    parser = ArgumentParser(
+        prog="MDANSE CLI",
+        description="This is the command line interface of MDANSE "
+        "(Molecular Dynamics Analysis for Neutron Scattering Experiments).",
+        epilog="Please report any problems with MDANSE as issues on https://github.com/ISISNeutronMuon/MDANSE",
     )
-    param_group = OptionGroup(
-        parser, "Input Parameters", "Here you can input atom or file names."
+    parser.add_argument("-t", "--traj")
+    subparsers = parser.add_subparsers(title="MDANSE CLI Commands")
+    element = subparsers.add_parser(
+        "element", help="View chemical element information."
     )
-    param_group.add_option(
-        "-e",
-        "--element",
-        action="store",
-        type="str",
-        dest="element",
-        help="Name of the chemical element to be displayed.",
+    trajectory = subparsers.add_parser(
+        "traj", help="View contents of a trajectory file."
     )
-    param_group.add_option(
-        "-j",
-        "--job",
-        action="store",
-        type="str",
-        dest="job",
-        help="Name of the MDANSE converter or analysis to be used.",
-    )
-    param_group.add_option(
-        "-t",
-        "--traj",
-        action="store",
-        type="str",
-        dest="trajectory",
-        help="Name of the trajectory file which will be used.",
-    )
-    parser.add_option_group(param_group)
-    command_group = OptionGroup(
-        parser, "Commands", "These options tell MDANSE what to do."
-    )
-    command_group.add_option(
-        "-s",
-        action="store_true",
-        dest="save_script",
-        default=False,
-        help="Save a job script with default parameters for the specified trajectory.",
-        metavar="MDANSE_SCRIPT",
-    )
-    command_group.add_option(
-        "-i",
-        action="store_true",
-        dest="show_info",
-        default=False,
-        help="Save a job template.",
-        metavar="MDANSE_SCRIPT",
-    )
-    parser.add_option_group(command_group)
+    analysis = subparsers.add_parser("analysis")
+    param_group = parser.add_argument_group("Input parameters")
 
-    # The command line is parsed.
-    options, args = parser.parse_args()
-    produce_output(options, args)
+    parser.parse_args()
 
 
 if __name__ == "__main__":
