@@ -2,16 +2,17 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from MDANSE.Framework.Configurators.ConfigFileConfigurator import \
-    ConfigFileConfigurator
-from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import \
-    HDFTrajectoryConfigurator
-from MDANSE.Framework.Converters.Converter import Converter
-from MDANSE.Framework.Converters.LAMMPS import BoxStyle
-from MDANSE.Framework.Jobs.IJob import JobError
 from more_itertools import run_length
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, DATA_DIR
+
+from MDANSE.Framework.Configurators.ConfigFileConfigurator import ConfigFileConfigurator
+from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
+    HDFTrajectoryConfigurator,
+)
+from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Converters.LAMMPS import BoxStyle
+from MDANSE.Framework.Jobs.IJob import JobError
 
 lammps_config = DATA_DIR / "lammps_test.config"
 lammps_lammps = DATA_DIR / "lammps_test.lammps"
@@ -54,24 +55,39 @@ h2o_xtd = DATA_DIR / "H2O.xtd"
 md_pdb = DATA_DIR / "md.pdb"
 md_xtc = DATA_DIR / "md.xtc"
 gromacs_nvt = (DATA_DIR / "gromacs-nvt.pdb", DATA_DIR / "gromacs-nvt.xtc")
+ase_janus = DATA_DIR / "ase_janus.extxyz"
 
 
-def _converter_test(tmp_path, converter_type, result, compare, parameters, compression):
+def _converter_test(
+    generate_benchmarks,
+    tmp_path,
+    converter_type,
+    result,
+    compare,
+    parameters,
+    compression,
+):
     temp_name = tmp_path / "output"
     out_name = temp_name.with_suffix(".mdt")
     log_name = temp_name.with_suffix(".log")
-    result_name = CONV_DIR / result
+    result_file = CONV_DIR / result
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
 
     parameters["output_files"] = (temp_name, 64, 128, compression, "INFO")
 
     converter = Converter.create(converter_type)
     converter.run(parameters, status=True)
 
+    if generate_benchmarks:
+        return
+
     traj_conf = HDFTrajectoryConfigurator("trajectory")
     traj_conf.configure(out_name)
     traj_conf["instance"].close()
 
-    compare_hdf5(out_name, result_name, compare, atol=1e-6)
+    compare_hdf5(out_name, result_file, compare, atol=1e-6)
 
     assert out_name.is_file()
     assert log_name.is_file()
@@ -109,7 +125,13 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
         (
             "LAMMPS",
             "lammps_fake.mdt",
-            ("/configuration/coordinates", "/configuration/gradients", "/configuration/velocities", "/unit_cell", "/time"),
+            (
+                "/configuration/coordinates",
+                "/configuration/gradients",
+                "/configuration/velocities",
+                "/unit_cell",
+                "/time",
+            ),
             {
                 "config_file": lammps_fake_config,
                 "mass_tolerance": 0.05,
@@ -208,6 +230,23 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
             ),
             {
                 "trajectory_file": xyz_traj,
+                "fold": False,
+                "n_steps": 0,
+                "time_step": 50.0,
+                "time_unit": "fs",
+            },
+        ),
+        (
+            "ase",
+            "ase_janus.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/unit_cell",
+                "/time",
+            ),
+            {
+                "trajectory_file": ase_janus,
                 "fold": False,
                 "n_steps": 0,
                 "time_step": 50.0,
@@ -387,16 +426,31 @@ def _converter_test(tmp_path, converter_type, result, compare, parameters, compr
 )
 @pytest.mark.parametrize("compression", ["none", "gzip", "lzf"])
 def test_build_mdt_file_and_load(
-    tmp_path, converter_type, result, compare, parameters, compression
+    generate_benchmarks,
+    tmp_path,
+    converter_type,
+    result,
+    compare,
+    parameters,
+    compression,
 ):
-    _converter_test(tmp_path, converter_type, result, compare, parameters, compression)
+    _converter_test(
+        generate_benchmarks,
+        tmp_path,
+        converter_type,
+        result,
+        compare,
+        parameters,
+        compression,
+    )
 
 
 @pytest.mark.parametrize(
     "unit_system", ["real", "metal", "si", "cgs", "electron", "micro", "nano"]
 )
-def test_lammps_mdt_conversion_unit_system(tmp_path, unit_system):
+def test_lammps_mdt_conversion_unit_system(generate_benchmarks, tmp_path, unit_system):
     _converter_test(
+        generate_benchmarks,
         tmp_path,
         "LAMMPS",
         f"lammps_{unit_system}.mdt",
@@ -419,9 +473,10 @@ def test_lammps_mdt_conversion_unit_system(tmp_path, unit_system):
     [(lammps_custom, "custom"), (lammps_xyz, "xyz"), (lammps_h5md, "h5md")],
 )
 def test_lammps_mdt_conversion_trajectory_format(
-    tmp_path, trajectory_file, trajectory_format
+    generate_benchmarks, tmp_path, trajectory_file, trajectory_format
 ):
     _converter_test(
+        generate_benchmarks,
         tmp_path,
         "LAMMPS",
         f"lammps_moly_{trajectory_format}.mdt",
@@ -445,9 +500,10 @@ def test_lammps_mdt_conversion_trajectory_format(
     (ase_traj, xyz_traj, vasp_xdatcar),
 )
 def test_improvedase_mdt_conversion_file_exists_and_loads_up_successfully(
-    tmp_path, trajectory
+    generate_benchmarks, tmp_path, trajectory
 ):
     _converter_test(
+        generate_benchmarks,
         tmp_path,
         "improvedase",
         "ase.mdt",  # Dummy
@@ -734,7 +790,8 @@ def test_lammps_ix_unwrap(tmp_path, files):
                 "unit_cell": [[5.73, 0.0, 0.0], [0.0, 5.73, 0.0], [0.0, 0.0, 5.73]],
             },
         ),
-    ], ids=lambda x: x.name if isinstance(x, Path) else None,
+    ],
+    ids=lambda x: x.name if isinstance(x, Path) else None,
 )
 def test_lammps_config_parser(config_file, expected):
     conf = ConfigFileConfigurator("dummy_in")

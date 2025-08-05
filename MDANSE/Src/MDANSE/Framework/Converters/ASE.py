@@ -315,7 +315,8 @@ class ASE(Converter):
             self._backup_cell = first_frame.cell.array
 
         LOG.info(
-            "The following arrays were found in the trajectory: %s", ", ".join(first_frame.arrays),
+            "The following arrays were found in the trajectory: %s",
+            ", ".join(first_frame.arrays),
         )
 
         self._initial_masses = first_frame.arrays.get("masses")
