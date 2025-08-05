@@ -231,6 +231,21 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         """
 
+    def update_needed(self, new_input: str) -> bool:
+        """Check if the configurator needs to be set up again.
+
+        Parameters
+        ----------
+        new_input : str
+            Input parameters as string
+
+        Returns
+        -------
+        bool
+            If True, self.configure(new_input) needs to be run
+        """
+        return not self.configured or self._original_input != new_input
+
     def to_json(self) -> str:
         """Encode this input variable as a JSON string.
 

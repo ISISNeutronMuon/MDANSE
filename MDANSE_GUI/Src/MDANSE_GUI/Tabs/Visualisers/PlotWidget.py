@@ -26,9 +26,11 @@ from matplotlib.backends.backend_qt5agg import (
 )
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QDoubleSpinBox,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
     QVBoxLayout,
     QWidget,
@@ -275,6 +277,22 @@ class PlotWidget(QWidget):
             self._plotter = Plotter()
         self._plotter.plot_blank()
 
+    @Slot()
+    def use_legend(self, bool_flag: bool | None = None):
+        if bool_flag is None:
+            bool_flag = self._legend_box.isChecked()
+        if self._plotting_context:
+            self._plotting_context.use_legend = bool_flag
+            self._plotting_context.needs_an_update.emit()
+
+    @Slot()
+    def use_grid(self, bool_flag: bool | None = None):
+        if bool_flag is None:
+            bool_flag = self._grid_box.isChecked()
+        if self._plotting_context:
+            self._plotting_context.use_grid = bool_flag
+            self._plotting_context.needs_an_update.emit()
+
     def plot_data(self, update_only=False):
         """Use the internal plotter instance to create a plot.
 
@@ -307,7 +325,7 @@ class PlotWidget(QWidget):
         else:
             self._normaliser.clear_error()
 
-    def make_canvas(self, width=12.0, height=9.0, dpi=100):
+    def make_canvas(self):
         """Create a matplotlib figure for plotting.
 
         Parameters
@@ -327,7 +345,7 @@ class PlotWidget(QWidget):
         """
         canvas = self
         layout = QVBoxLayout(canvas)
-        figure = mpl.figure(figsize=[width, height], dpi=dpi, frameon=True)
+        figure = mpl.figure()
         figAgg = FigureCanvasQTAgg(figure)
         figAgg.setParent(canvas)
         figAgg.updateGeometry()
@@ -344,9 +362,23 @@ class PlotWidget(QWidget):
         normaliser.new_values.connect(self.normaliser_change)
         self._sliderpack = slider
         self._normaliser = normaliser
+        # Matplotlib control widgets, next to the toolbar.
+        temp_hlayout = QHBoxLayout()
+        temp_hlayout.addWidget(toolbar)
+        legend_box = QCheckBox(text="Legend")
+        grid_box = QCheckBox(text="Grid")
+        legend_box.clicked.connect(self.use_legend)
+        grid_box.clicked.connect(self.use_grid)
+        temp_hlayout.addWidget(legend_box)
+        temp_hlayout.addWidget(grid_box)
+        # The following widgets are placed below the plot.
+        layout.addLayout(temp_hlayout)
         layout.addWidget(slider)
         layout.addWidget(normaliser)
-        layout.addWidget(toolbar)
+        self._legend_box = legend_box
+        self._grid_box = grid_box
+        self._legend_box.setChecked(True)
+        self._grid_box.setChecked(True)
         self._figure = figure
         self._toolbar = toolbar
         plot_selector = QComboBox(self)

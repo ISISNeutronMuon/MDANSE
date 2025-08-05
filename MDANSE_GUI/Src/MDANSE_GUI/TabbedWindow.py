@@ -41,6 +41,7 @@ from MDANSE_GUI.Tabs.JobTab import JobTab
 from MDANSE_GUI.Tabs.LoggingTab import GuiLogHandler, LoggingTab
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
+from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Tabs.RunTab import RunTab
@@ -130,7 +131,7 @@ class TabbedWindow(QMainWindow):
             self.invertToolbar(dark=False)
 
     def createCommonModels(self):
-        self._trajectory_model = GeneralModel()
+        self._trajectory_model = TrajectoryModel()
         self._instrument_model = GeneralModel()
         self._job_holder = JobHolder()
         self._gui_log_handler = GuiLogHandler()

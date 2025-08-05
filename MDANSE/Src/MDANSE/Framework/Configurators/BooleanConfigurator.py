@@ -50,6 +50,9 @@ class BooleanConfigurator(IConfigurator):
         :param value: the input value
         :type value: one of True/False, 'true'/'false', 'yes'/'no', 'y'/'n', '1'/'0', 1/0
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         if value not in self._shortCuts:

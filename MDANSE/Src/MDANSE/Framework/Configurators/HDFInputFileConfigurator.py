@@ -55,6 +55,9 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         :param value: the path for the HDF file.
         :type value: str
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         InputFileConfigurator.configure(self, value)

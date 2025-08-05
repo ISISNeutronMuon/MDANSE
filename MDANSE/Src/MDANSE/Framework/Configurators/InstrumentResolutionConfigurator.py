@@ -56,6 +56,9 @@ class InstrumentResolutionConfigurator(IConfigurator):
         is a dictionary that stores the parameters for this kernel.
         :type value: 2-tuple
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         framesCfg = self.configurable[self.dependencies["frames"]]
@@ -97,6 +100,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
         self["time_window_positive"] = np.fft.ifftshift(self["time_window"])[
             : len(time)
         ]
+        self.error_status = "OK"
 
     def preview_output_axis(self):
         if not self.is_configured():

@@ -66,6 +66,9 @@ class McStasOptionsConfigurator(IConfigurator):
         :param value: the McStas options.
         :type value: dict
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         options = self._default.copy()

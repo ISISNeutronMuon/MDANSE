@@ -52,6 +52,9 @@ class AseInputFileConfigurator(InputFileConfigurator):
         :param value: the input file.
         :type value: str
         """
+        if not self.update_needed(values):
+            return
+
         self._original_input = values
         try:
             value, file_format = values

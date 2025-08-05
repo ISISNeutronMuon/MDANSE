@@ -44,6 +44,9 @@ class DerivativeOrderConfigurator(IntegerConfigurator):
         value : int or None
             The interpolation order to use.
         """
+        if not self.update_needed(value):
+            return
+
         frames_configurator = self.configurable[self.dependencies["frames"]]
         if not frames_configurator.valid:
             self.error_status = "Frames configurator is not valid."

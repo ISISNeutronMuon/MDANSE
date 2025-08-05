@@ -271,8 +271,8 @@ class DataWidget(QWidget):
                 update_only=None,
                 toolbar=None,
             )
-            for _, databundle in self._plotting_context.datasets().items():
-                dataset, _, _, _, _, _ = databundle
+            for databundle in self._plotting_context.datasets().values():
+                dataset = databundle.dataset
                 self._current_path = Path(dataset._filename).parent
                 break
         except Exception as err:

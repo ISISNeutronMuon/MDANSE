@@ -89,6 +89,9 @@ class UnitCellConfigurator(IConfigurator):
         :param value: the vector components.
         :type value: (np.ndarray, bool) tuple
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
         self["apply"] = value[1]
         if self["apply"]:

@@ -184,13 +184,13 @@ class Heatmap(Plotter):
         for ds_index, databundle in enumerate(plotting_context.datasets().values()):
             if nplots >= self._plot_limit:
                 break
-            ds, _, _, _, ds_num, axis_label = databundle
+            ds = databundle.dataset
             if ds._n_dim == 1:
                 continue
             elif ds._n_dim == 3:
                 replacement_axis_number = None
                 for number, axis_name in enumerate(ds._axes.keys()):
-                    if axis_name == axis_label:
+                    if axis_name == databundle.main_axis:
                         replacement_axis_number = number
                 if replacement_axis_number is None:
                     ds.planes_vs_axis(self._slice_axis, max_limit=self._plot_limit)
@@ -202,11 +202,11 @@ class Heatmap(Plotter):
             else:
                 nplots += 1
             try:
-                self._backup_scale_interpolators[ds_num](51.2)
+                self._backup_scale_interpolators[databundle.row](51.2)
             except Exception:
                 percentiles = np.linspace(0, 100.0, 21)
                 results = [np.percentile(ds._data, perc) for perc in percentiles]
-                self._backup_scale_interpolators[ds_num] = interp1d(
+                self._backup_scale_interpolators[databundle.row] = interp1d(
                     percentiles,
                     results,
                 )
@@ -216,13 +216,13 @@ class Heatmap(Plotter):
         for ds_index, databundle in enumerate(plotting_context.datasets().values()):
             if ds_index >= self._plot_limit:
                 break
-            dataset, _, _, _, ds_num, axis_label = databundle
+            dataset = databundle.dataset
             transposed = False
             primary_axis_number = 0
             limits = []
             x_axis_labels, y_axis_labels = [], []
             for number, axis_name in enumerate(ds._axes.keys()):
-                if axis_name == axis_label:
+                if axis_name == databundle.main_axis:
                     primary_axis_number = number
             if dataset._n_dim == 1:
                 continue
@@ -283,9 +283,11 @@ class Heatmap(Plotter):
                 colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
                 colorbar.set_label(dataset._data_unit)
                 xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
-            self._backup_arrays[ds_num] = np.nan_to_num(all_datasets[xnum][::-1, :])
+            self._backup_arrays[databundle.row] = np.nan_to_num(
+                all_datasets[xnum][::-1, :]
+            )
             if update_only:
-                interpolator = self._backup_scale_interpolators[ds_num]
+                interpolator = self._backup_scale_interpolators[databundle.row]
                 last_minmax = [
                     interpolator(self._slider_values[0]),
                     interpolator(self._slider_values[1]),
@@ -296,26 +298,26 @@ class Heatmap(Plotter):
                     LOG.error(
                         f"Matplotlib could not set colorbar limits to {last_minmax}",
                     )
-                self._backup_limits[ds_num] = [
+                self._backup_limits[databundle.row] = [
                     xlimits[0],
                     xlimits[1],
                     ylimits[0],
                     ylimits[1],
                 ]
                 xlim = axes.get_xlim()
-                self._backup_limits[ds_num][0] = xlim[0]
-                self._backup_limits[ds_num][1] = xlim[1]
+                self._backup_limits[databundle.row][0] = xlim[0]
+                self._backup_limits[databundle.row][1] = xlim[1]
                 ylim = axes.get_ylim()
-                self._backup_limits[ds_num][2] = ylim[0]
-                self._backup_limits[ds_num][3] = ylim[1]
+                self._backup_limits[databundle.row][2] = ylim[0]
+                self._backup_limits[databundle.row][3] = ylim[1]
             else:
-                self._backup_limits[ds_num] = [
+                self._backup_limits[databundle.row] = [
                     xlimits[0],
                     xlimits[1],
                     ylimits[0],
                     ylimits[1],
                 ]
-                interpolator = self._backup_scale_interpolators[ds_num]
+                interpolator = self._backup_scale_interpolators[databundle.row]
                 last_minmax = [
                     interpolator(self._slider_values[0]),
                     interpolator(self._slider_values[1]),
@@ -326,8 +328,11 @@ class Heatmap(Plotter):
                     LOG.error(
                         f"Matplotlib could not set colorbar limits to {last_minmax}",
                     )
-                self._backup_minmax[ds_num] = [dataset._data.min(), dataset._data.max()]
-                self._backup_limits[ds_num] = [
+                self._backup_minmax[databundle.row] = [
+                    dataset._data.min(),
+                    dataset._data.max(),
+                ]
+                self._backup_limits[databundle.row] = [
                     xlimits[0],
                     xlimits[1],
                     ylimits[0],
@@ -335,8 +340,10 @@ class Heatmap(Plotter):
                 ]
             axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
             axes.set_ylabel(", ".join(np.unique(y_axis_labels)))
-            self._backup_images[ds_num] = image
-        # axes.grid(True)
+            self._backup_images[databundle.row] = image
+        if plotting_context.use_legend:
+            axes.legend()
+        axes.grid(plotting_context.use_grid)
         self.check_curve_lengths()
         self.request_slider_values()
         target.canvas.draw()

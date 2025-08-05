@@ -13,31 +13,35 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from __future__ import annotations
+
 import os
 from pathlib import PurePath
 
 from qtpy.QtWidgets import QLabel
 
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class HDFTrajectoryWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, trajectory_instance: Trajectory | None = None, **kwargs):
         super().__init__(*args, **kwargs)
-        source_object = kwargs.get("source_object", None)
-        try:
-            filename = source_object
-        except AttributeError:
-            filename = None
-        if filename is not None:
+        filename = kwargs.get("source_object", None)
+        if trajectory_instance:
+            self._configurator._instance = trajectory_instance
+            self._configurator.configure_from_instance()
+            filename = trajectory_instance.filename
+        elif filename is not None:
             self._configurator.configure(str(filename))
+        if not filename:
+            label = QLabel("No Trajectory available", self._base)
+            self._layout.addWidget(label)
+        else:
             label = QLabel(str(filename), self._base)
             self._layout.addWidget(label)
             trajectory_path, _ = os.path.split(filename)
             self.default_path = PurePath(trajectory_path)
-        else:
-            label = QLabel("No Trajectory available", self._base)
-            self._layout.addWidget(label)
         self.default_labels()
         self.update_labels()
         if self._tooltip:

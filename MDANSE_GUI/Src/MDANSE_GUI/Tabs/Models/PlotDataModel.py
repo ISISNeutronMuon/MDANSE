@@ -200,6 +200,8 @@ class PlotDataModel(QStandardItemModel):
 
         """
         model_item = self.itemFromIndex(index)
+        if model_item is None:
+            return
         number = model_item.file_number()
         data_path = model_item.data_path()
         data_structure = self._nodes[number]

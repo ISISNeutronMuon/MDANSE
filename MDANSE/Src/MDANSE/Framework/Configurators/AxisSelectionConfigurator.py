@@ -54,6 +54,9 @@ class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
             If too many values were included in the input tuple.
 
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
         self["index1"] = None
         self["index2"] = None

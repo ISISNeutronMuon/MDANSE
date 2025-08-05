@@ -52,6 +52,9 @@ class MockTrajectoryConfigurator(IConfigurator):
         :param value: a JSON file with a MockTrajectory definition
         :type value: str
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         self["value"] = value

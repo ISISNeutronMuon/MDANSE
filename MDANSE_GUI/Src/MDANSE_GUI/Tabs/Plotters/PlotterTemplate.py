@@ -57,7 +57,15 @@ class PlotterTemplate(metaclass=SubclassFactory):
             self._scale_factors,
         ) = ({}, {}, {}, {}, {}, {}, {})
         for name, databundle in self._plotting_context.datasets().items():
-            dataset, colour, linestyle, marker, dataset_number, axis_label = databundle
+            (
+                dataset,
+                colour,
+                linestyle,
+                marker,
+                dataset_number,
+                axis_label,
+                legend_label,
+            ) = databundle
             self._datasets[dataset_number] = dataset
             self._colours[dataset_number] = colour
             self._linestyles[dataset_number] = linestyle

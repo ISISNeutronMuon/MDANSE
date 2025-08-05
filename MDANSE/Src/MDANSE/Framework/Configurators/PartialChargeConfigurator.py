@@ -142,6 +142,9 @@ class PartialChargeConfigurator(IConfigurator):
         value
             The partial charge setting in the json format.
         """
+        if not self.update_needed(value):
+            return
+
         self["charges"] = {}
 
         if value is None or value == "":

@@ -95,6 +95,7 @@ class TrajectoryInfo(QTextBrowser):
         fullpath, incoming = data
         if incoming is None:
             self.clear()
+            self.setHtml(fullpath)
             return
         try:
             text = trajectory_summary(incoming)  # this is from a trajectory object

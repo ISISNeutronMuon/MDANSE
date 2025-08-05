@@ -49,6 +49,7 @@ class TrajectoryTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDT Trajectories", self.load_trajectories)
+        self._model.finished_loading.connect(self.tab_notification)
 
     @Slot()
     def load_trajectories(self):
@@ -70,13 +71,8 @@ class TrajectoryTab(GeneralTab):
         fname = str(PurePath(some_fname))
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
-            try:
-                data = Trajectory(fname)
-            except Exception as e:
-                self._core.error.emit(repr(e))
-            else:
-                self._core._model.append_object(((fname, data), short_name))
-                self._session.protect_filename(fname)
+            self._core._model.append_object((fname, short_name))
+            self._session.protect_filename(fname)
 
     @classmethod
     def standard_instance(cls):
@@ -114,7 +110,7 @@ class TrajectoryTab(GeneralTab):
             layout=partial(MultiPanel, left_panels=[TrajectoryInfo()]),
             label_text=label_text,
         )
-        the_tab._view.free_name.connect(session.free_filename)
+        the_tab._model.free_name.connect(session.free_filename)
         return the_tab
 
 

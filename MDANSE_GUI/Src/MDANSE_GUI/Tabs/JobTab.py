@@ -58,16 +58,16 @@ class JobTab(GeneralTab):
         super().__init__(*args, **kwargs)
 
         self._current_trajectory = ""
+        self._current_trajectory_index = -1
         self._job_starter = None
         self._own_index = -1
         self._instrument_index = -1
         self._trajectory_combo = QComboBox()
         self._trajectory_combo.setEditable(False)
         self._trajectory_combo.currentIndexChanged.connect(self.set_current_trajectory)
-
         if combo_model is not None:
             self._trajectory_combo.setModel(combo_model)
-
+        combo_model.finished_loading.connect(self.reload_trajectory)
         self._instrument_combo = QComboBox()
         self._instrument_combo.setEditable(False)
         self._instrument_combo.currentIndexChanged.connect(self.set_current_instrument)
@@ -102,6 +102,12 @@ class JobTab(GeneralTab):
         }
 
     @Slot(int)
+    def reload_trajectory(self, node_number: int) -> None:
+        if node_number != self._current_trajectory_index:
+            return
+        self.set_trajectory_from_node_number(node_number)
+
+    @Slot(int)
     def set_current_trajectory(self, index: int) -> None:
         self._current_trajectory = self._trajectory_combo.currentText()
 
@@ -112,16 +118,21 @@ class JobTab(GeneralTab):
             self.action.set_trajectory(trajectory=None)
             self.action.clear_panel()
             return
-
         node_number = traj_model.item(index, 0).data()
+        self.set_trajectory_from_node_number(node_number)
+
+    def set_trajectory_from_node_number(self, node_number: int):
+        traj_model = self._trajectory_combo.model()
+        self._current_trajectory_index = node_number
         LOG.info(
             f"Combo model: node_number {node_number} found in item {self._current_trajectory}"
         )
         # The combobox was changed we need to update the action
         # widgets with the new trajectory
-        self.action.set_trajectory(
-            trajectory=str(PurePath(os.path.abspath(traj_model._nodes[node_number][0])))
-        )
+        traj_instance = traj_model.get_trajectory(node_number)
+        if traj_instance is None or isinstance(traj_instance, str):
+            return
+        self.action.set_trajectory(trajectory=traj_instance)
         current_item = self._core.current_item()
         if current_item is not None:
             # we only update the widget if a job is selected from the

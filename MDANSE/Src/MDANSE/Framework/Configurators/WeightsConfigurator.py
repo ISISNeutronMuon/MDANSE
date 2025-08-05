@@ -93,6 +93,9 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             Name of an atom property.
 
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
         self._trajectory = self.configurable[self.dependencies["trajectory"]][
             "instance"

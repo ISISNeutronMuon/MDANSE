@@ -15,6 +15,7 @@
 #
 import contextlib
 import math
+from itertools import islice
 from typing import TYPE_CHECKING, Any
 
 from MDANSE.Framework.Units import measure
@@ -120,9 +121,9 @@ class Grid(Plotter):
         self.apply_settings(plotting_context)
         nplots = 0
         for databundle in plotting_context.datasets().values():
-            ds, colour, linestyle, marker, _, axis_label = databundle
+            ds = databundle.dataset
             try:
-                axis_info = ds._axes_units[axis_label], axis_label
+                axis_info = ds._axes_units[databundle.main_axis], databundle.main_axis
             except KeyError:
                 axis_info = ds.longest_axis()
             curves = ds.curves_vs_axis(axis_info, max_limit=self._plot_limit)
@@ -134,36 +135,37 @@ class Grid(Plotter):
         for databundle in plotting_context.datasets().values():
             if counter > self._plot_limit:
                 break
-            dataset, colour, linestyle, marker, ds_num, axis_label = databundle
+            dataset = databundle.dataset
             try:
-                best_unit, best_axis = dataset._axes_units[axis_label], axis_label
+                _, best_axis = (
+                    dataset._axes_units[databundle.main_axis],
+                    databundle.main_axis,
+                )
             except KeyError:
-                best_unit, best_axis = dataset.longest_axis()
-            for key, curve in dataset._curves.items():
-                if counter > self._plot_limit:
-                    break
-                counter += 1
+                _, best_axis = dataset.longest_axis()
+            for key, curve in islice(dataset._curves.items(), self._plot_limit):
                 axes = target.add_subplot(gridsize, gridsize, startnum)
                 self._axes.append(axes)
-                plotlabel = dataset._labels["medium"]
+                plotlabel = databundle.legend_label
                 if dataset._curve_labels[key]:
                     plotlabel += ":" + dataset._curve_labels[key]
                 x_axis_label = dataset.x_axis_label(best_axis)
                 [temp_curve] = axes.plot(
                     dataset.x_axis(best_axis),
                     curve,
-                    linestyle=linestyle,
-                    color=colour,
+                    linestyle=databundle.line_style,
+                    color=databundle.colour,
                     label=plotlabel,
                 )
                 try:
-                    temp_curve.set_marker(marker)
+                    temp_curve.set_marker(databundle.marker)
                 except ValueError:
                     with contextlib.suppress(Exception):
-                        temp_curve.set_marker(int(marker))
-                axes.grid(visible=True)
+                        temp_curve.set_marker(int(databundle.marker))
                 axes.set_xlabel(x_axis_label)
-                axes.legend(loc=0)
+                if plotting_context.use_legend:
+                    axes.legend()
+                axes.grid(plotting_context.use_grid)
                 startnum += 1
                 self._active_curves.append(temp_curve)
                 self._backup_curves.append(

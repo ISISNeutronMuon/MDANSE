@@ -13,7 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import os
+from __future__ import annotations
+
 import traceback
 from pathlib import Path
 
@@ -29,8 +30,12 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
+    HDFTrajectoryConfigurator,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets import (
     AseInputFileWidget,
     AtomMappingWidget,
@@ -135,9 +140,10 @@ class Action(QWidget):
 
     def __init__(self, *args, use_preview=False, **kwargs):
         self._default_path = None
-        self._input_trajectory = None
+        self._input_traj_path = None
         self._parent_tab = None
         self._trajectory_configurator = None
+        self._trajectory_instance = None
         self._settings = None
         self._job_name = None
         self._job_instance = IJob()
@@ -158,23 +164,33 @@ class Action(QWidget):
     def set_settings(self, settings):
         self._settings = settings
 
-    def set_trajectory(self, trajectory: str) -> None:
+    def set_trajectory(self, trajectory: Trajectory | None) -> None:
         """Set the trajectory path and filename.
 
         Parameters
         ----------
-        path : str or None
-            The path of the trajectory
-        trajectory : str or None
-            The path and filename of the trajectory
+        trajectory : Trajectory
+            An instance of the trajectory class
         """
-        if trajectory == self._input_trajectory:
+        if trajectory is None:
+            self._trajectory_configurator = None
+            self._trajectory_instance = None
+            self._input_traj_path = None
+            self._has_been_initialised = False
+            return
+        new_path = trajectory.filename
+        if new_path == self._input_traj_path:
             LOG.debug("Skipping set_trajectory, no change.")
             return
         self._job_instance = IJob()
-        self._input_trajectory = trajectory
-        if self._input_trajectory is not None:
-            self._default_path = Path(self._input_trajectory).parent
+        self._trajectory_instance = trajectory
+        self._trajectory_configurator = HDFTrajectoryConfigurator(
+            "Input Trajectory", instance=trajectory
+        )
+        self._trajectory_configurator.configure_from_instance()
+        self._input_traj_path = new_path
+        if self._input_traj_path is not None:
+            self._default_path = Path(self._input_traj_path).parent
         else:
             self._default_path = Path().absolute()
         if self._job_name is not None:
@@ -234,8 +250,9 @@ class Action(QWidget):
             job_instance = self._job_instance
             settings = self._job_instance.settings
         LOG.info(f"Configuration {job_instance.configuration}")
+        LOG.debug(f"{self._input_traj_path} loaded as {self._trajectory_instance}")
         if "trajectory" in settings.keys():
-            if self._input_trajectory is None:
+            if self._input_traj_path is None:
                 return
             key, value = "trajectory", settings["trajectory"]
             dtype = value[0]
@@ -244,9 +261,11 @@ class Action(QWidget):
             if key not in self._widgets_in_layout:
                 ddict.setdefault("label", key)
                 ddict["configurator"] = configurator
-                ddict["source_object"] = self._input_trajectory
+                ddict["source_object"] = self._input_traj_path
                 widget_class = widget_lookup[dtype]
-                input_widget = widget_class(parent=self, **ddict)
+                input_widget = widget_class(
+                    parent=self, trajectory_instance=self._trajectory_instance, **ddict
+                )
                 widget = input_widget._base
                 self.layout.addWidget(widget, stretch=input_widget._relative_size)
                 self._widgets_in_layout[key] = widget
@@ -261,7 +280,7 @@ class Action(QWidget):
             configurator = job_instance.configuration[key]
             ddict.setdefault("label", key)
             ddict["configurator"] = configurator
-            ddict["source_object"] = self._input_trajectory
+            ddict["source_object"] = self._input_traj_path
             ddict["trajectory_configurator"] = self._trajectory_configurator
             if dtype not in widget_lookup:
                 ddict["tooltip"] = (

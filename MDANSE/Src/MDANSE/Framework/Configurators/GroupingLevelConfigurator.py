@@ -65,6 +65,9 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         value : str
             The level of granularity at which the atoms should be grouped
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         if value is None:
@@ -81,3 +84,4 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
                 return
 
         self["level"] = value
+        self.error_status = "OK"

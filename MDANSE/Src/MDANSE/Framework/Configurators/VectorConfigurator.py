@@ -61,6 +61,9 @@ class VectorConfigurator(IConfigurator):
         :param value: the vector components.
         :type value: sequence-like object
         """
+        if not self.update_needed(value):
+            return
+
         self._original_input = value
 
         if not isinstance(value, (list, tuple)):
