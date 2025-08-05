@@ -305,6 +305,10 @@ class SingleDataset:
             Data row indices, given as a list, range or slice.
 
         """
+        if not limit_string:
+            self._data_limits = None
+            return
+
         complete_subset = {}
 
         axes = map(len, self.dep_axes.values())
@@ -323,7 +327,7 @@ class SingleDataset:
                 )
                 continue
 
-        self._data_limits = list(complete_subset.keys()) if complete_subset else None
+        self._data_limits = list(complete_subset.keys()) if complete_subset else []
 
     def available_x_axes(self) -> list[str]:
         """Get a list of axis names used by this data set.
@@ -476,10 +480,9 @@ class SingleDataset:
             return self._curves
 
         for index in self.curve_ind(max_limit):
-            index_tuple = nth_product(index, *indexer)
-            index_slicer = nth_product(index, *slicer)
-
             try:
+                index_tuple = nth_product(index, *indexer)
+                index_slicer = nth_product(index, *slicer)
                 self._curves[index_tuple] = self.data[index_slicer].squeeze()
             except IndexError:
                 LOG.warning(

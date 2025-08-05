@@ -227,6 +227,9 @@ class Single(Plotter):
                         return
         if len(self._backup_curves) > 1:
             self.enable_slider(allow_slider=True)
+        elif len(self._backup_curves) == 0:
+            self.plot_blank()
+            return
         if update_only:
             try:
                 axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))

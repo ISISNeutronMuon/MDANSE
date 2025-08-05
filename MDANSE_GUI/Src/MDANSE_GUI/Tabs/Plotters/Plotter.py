@@ -284,8 +284,10 @@ class Plotter(metaclass=SubclassFactory):
         figure = self.get_figure()
         axes = figure.add_subplot(111)
         if draw_cross:
-            axes.axline([0, 0], [1, 1], "k-")
-            axes.axline([0, 1], [1, 0], "k-")
-        axes.set_title("One of the plotting parameters was not valid.")
-        axes.set_xlabel("Please check the settings value which you changed last.")
+            axes.axline([0, 0], [1, 1], color="k", linestyle="-")
+            axes.axline([0, 1], [1, 0], color="k", linestyle="-")
+        axes.set_title("The data sets you selected could not be plotted.")
+        axes.set_xlabel(
+            "If you expected a plot, please check the settings you changed last."
+        )
         figure.canvas.draw()

@@ -284,7 +284,7 @@ class PlotWidget(QWidget):
             bool_flag = self._legend_box.isChecked()
         if self._plotting_context:
             self._plotting_context.use_legend = bool_flag
-            self._plotting_context.needs_an_update.emit()
+            self._plotting_context.ask_for_update()
 
     @Slot()
     def use_grid(self, bool_flag: bool | None = None):
@@ -292,7 +292,7 @@ class PlotWidget(QWidget):
             bool_flag = self._grid_box.isChecked()
         if self._plotting_context:
             self._plotting_context.use_grid = bool_flag
-            self._plotting_context.needs_an_update.emit()
+            self._plotting_context.ask_for_update()
 
     def plot_data(self, update_only=False):
         """Use the internal plotter instance to create a plot.

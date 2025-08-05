@@ -268,6 +268,10 @@ class Heatmap(Plotter):
                 limits = limits[2:] + limits[:2]
             for xnum in range(len(all_datasets)):
                 if startnum > self._plot_limit:
+                    LOG.warning(
+                        "Datasets above the current limit of %s will be ignored",
+                        self._plot_limit,
+                    )
                     break
                 axes = target.add_subplot(gridsize, gridsize, startnum)
                 startnum += 1
@@ -341,9 +345,10 @@ class Heatmap(Plotter):
             axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
             axes.set_ylabel(", ".join(np.unique(y_axis_labels)))
             self._backup_images[databundle.row] = image
-        if plotting_context.use_legend:
-            axes.legend()
-        axes.grid(plotting_context.use_grid)
+        if startnum > 1:
+            if plotting_context.use_legend:
+                axes.legend()
+            axes.grid(plotting_context.use_grid)
         self.check_curve_lengths()
         self.request_slider_values()
         target.canvas.draw()

@@ -133,8 +133,6 @@ class Grid(Plotter):
         startnum = 1
         counter = 0
         for databundle in plotting_context.datasets().values():
-            if counter > self._plot_limit:
-                break
             dataset = databundle.dataset
             try:
                 _, best_axis = (
@@ -144,6 +142,13 @@ class Grid(Plotter):
             except KeyError:
                 _, best_axis = dataset.longest_axis()
             for key, curve in islice(dataset._curves.items(), self._plot_limit):
+                counter += 1
+                if counter > self._plot_limit:
+                    LOG.warning(
+                        "Curves above the current limit of %s will be ignored",
+                        self._plot_limit,
+                    )
+                    break
                 axes = target.add_subplot(gridsize, gridsize, startnum)
                 self._axes.append(axes)
                 plotlabel = databundle.legend_label
@@ -171,6 +176,9 @@ class Grid(Plotter):
                 self._backup_curves.append(
                     [temp_curve.get_xdata(), temp_curve.get_ydata()],
                 )
+        if counter == 0:
+            self.plot_blank()
+            return
         self.apply_settings(plotting_context)
         self.check_curve_lengths()
         target.canvas.draw()
