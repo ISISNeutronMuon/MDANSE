@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+import traceback
+
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QTabBar, QTabWidget, QVBoxLayout
 
@@ -58,8 +60,10 @@ class PlotHolder(QTabWidget):
         if not tab_name:
             tab_name = f"New plot {self._last_number}"
             self._last_number += 1
-        plotting_context = PlottingContext(unit_lookup=self._unit_lookup)
-        plotting_context.needs_an_update.connect(self.update_plots)
+        plotting_context = PlottingContext(
+            unit_lookup=self._unit_lookup, unique_number=self._last_number
+        )
+        plotting_context.needs_an_update.connect(self.update_plot)
         plotter = PlotWidget(self)
         plotter.set_context(plotting_context)
         tab_id = self.addTab(plotter, tab_name)
@@ -75,7 +79,7 @@ class PlotHolder(QTabWidget):
         tab_name = f"New text view {self._last_number}"
         self._last_number += 1
         plotting_context = PlottingContext(unit_lookup=self._unit_lookup)
-        plotting_context.needs_an_update.connect(self.update_plots)
+        plotting_context.needs_an_update.connect(self.update_plot)
         plotter = DataWidget(self)
         plotter.set_context(plotting_context)
         tab_id = self.addTab(plotter, tab_name)
@@ -124,11 +128,6 @@ class PlotHolder(QTabWidget):
             LOG.error(f"PlotWidget is missing for tab {tab_id}")
             LOG.error(self._plotter)
 
-    @Slot(object)
-    def update_plot_details(self, input):
-        """This will change the line colour, thickness, etc.
-        At the moment it doesn't do anything."""
-
     @Slot()
     def update_plots(self):
         """This will change the line colour, thickness, etc.
@@ -136,5 +135,20 @@ class PlotHolder(QTabWidget):
         for plotter in self._plotter:
             try:
                 plotter.plot_data(update_only=True)
-            except Exception as e:
-                LOG.error(f"Plotting failed: {e}")
+            except Exception:
+                LOG.error("Plotting failed: %s", traceback.format_exc())
+                plotter.plot_blank()
+
+    @Slot(int)
+    def update_plot(self, plot_number: int):
+        """This will change the line colour, thickness, etc.
+        At the moment it doesn't do anything."""
+        for plotter in self._plotter:
+            if plot_number != plotter.unique_id:
+                continue
+            try:
+                plotter.plot_data(update_only=True)
+            except Exception:
+                LOG.error("Plotting failed: %s", traceback.format_exc())
+                plotter.plot_blank()
+                return

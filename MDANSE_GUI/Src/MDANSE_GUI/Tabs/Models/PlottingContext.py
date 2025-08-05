@@ -470,15 +470,25 @@ class SingleDataset:
             indexer.append(indices)
             label_lookup.append(axis_name)
 
+        if not indexer:
+            LOG.warning("Empty selection for data set %s", self._name)
+            return self._curves
+
         for index in self.curve_ind(max_limit):
             index_tuple = nth_product(index, *indexer)
             index_slicer = nth_product(index, *slicer)
 
-            self._curves[index_tuple] = self.data[index_slicer].squeeze()
-            self._curve_labels[index_tuple] = self.generate_curve_label(
-                index_tuple,
-                label_lookup,
-            )
+            try:
+                self._curves[index_tuple] = self.data[index_slicer].squeeze()
+            except IndexError:
+                LOG.warning(
+                    "Skipping the plot of dataset %s at index %s", self._name, index
+                )
+            else:
+                self._curve_labels[index_tuple] = self.generate_curve_label(
+                    index_tuple,
+                    label_lookup,
+                )
 
         return self._curves
 
@@ -564,15 +574,16 @@ plotting_column_index = {
 class PlottingContext(QStandardItemModel):
     """Data model storing data and user input used for plotting."""
 
-    needs_an_update = Signal()
+    needs_an_update = Signal(int)
 
-    def __init__(self, *args, unit_lookup=None, **kwargs):
+    def __init__(self, *args, unit_lookup=None, unique_number: int = -1, **kwargs):
         super().__init__(*args, **kwargs)
         self._datasets = {}
         self._current_axis = [None, None, None]
         self._figure = None
         self._ndim_lowest = 1
         self._ndim_highest = 3
+        self.unique_id = unique_number
         self._all_xunits = []
         self._best_xunits = []
         self._colour_list = get_mpl_colours()
@@ -772,13 +783,17 @@ class PlottingContext(QStandardItemModel):
             f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1"
         )
 
-        self.itemChanged.connect(self.needs_an_update)
+        self.itemChanged.connect(self.ask_for_update)
 
         temp = items[plotting_column_index["Colour"]]
         temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
 
         self.appendRow(items)
         self.add_dataset(new_dataset.spawn_imaginary_dataset())
+
+    @Slot()
+    def ask_for_update(self):
+        self.needs_an_update.emit(self.unique_id)
 
     def set_axes(self):
         """Check that axis information can be found for datasets."""
@@ -805,7 +820,6 @@ class PlottingContext(QStandardItemModel):
         self._best_xunits = longest_axes
         self._all_xunits = all_axes
         self._unit_to_axname = unit_to_axname
-        # self.needs_an_update.emit()
         return "Configured!"
 
     @Slot()

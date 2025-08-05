@@ -197,7 +197,7 @@ class PlotWidget(QWidget):
     reset_slider_values = Signal(bool)
     change_slider_coupling = Signal(bool)
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, unique_number: int = -1, **kwargs) -> None:
         """Create an empty plot with the default plotter."""
         super().__init__(*args, **kwargs)
         self._plotter = None
@@ -205,6 +205,7 @@ class PlotWidget(QWidget):
         self._normaliser = None
         self._plotting_context = None
         self._slider_max = 100
+        self.unique_id = -1
         self.make_canvas()
         self.set_plotter("Single")
 
@@ -212,6 +213,7 @@ class PlotWidget(QWidget):
         """Assign a data model to the plot widget."""
         self._plotting_context = new_context
         self._plotting_context._figure = self._figure
+        self.unique_id = new_context.unique_id
 
     @Slot(str)
     def set_plotter(self, plotter_option: str):
@@ -265,6 +267,13 @@ class PlotWidget(QWidget):
     def available_plotters(self) -> list[str]:
         """List all the plotters supported by this widget."""
         return [str(x) for x in Plotter.indirect_subclasses() if str(x) != "Text"]
+
+    def plot_blank(self):
+        """Show a blank plot to indicate that plotting failed."""
+        LOG.debug("PlotWidget is about to call self._plotter.plot_blank()")
+        if self._plotter is None:
+            self._plotter = Plotter()
+        self._plotter.plot_blank()
 
     def plot_data(self, update_only=False):
         """Use the internal plotter instance to create a plot.

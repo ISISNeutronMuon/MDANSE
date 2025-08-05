@@ -50,11 +50,4 @@ class PlotDetailsView(QTreeView):
         )
 
     def connect_to_visualiser(self, visualiser) -> None:
-        """Connect to a visualiser.
-
-        Parameters
-        ----------
-        visualiser : Action or TextInfo
-            A visualiser to connect to this view.
-        """
-        self.details_changed.connect(visualiser.update_plot_details)
+        """Dummy method. The PlottingContext model is connected to the plotter directly."""

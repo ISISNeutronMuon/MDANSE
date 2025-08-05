@@ -74,10 +74,6 @@ class PlotSettings(QWidget):
             )
         self.plot_settings_changed.emit()
 
-    @Slot(object)
-    def update_plot_details(self, input):
-        """Dummy method, for compatibility only"""
-
     @Slot()
     def update_units(self):
         unit_group = self._settings.group("units")
