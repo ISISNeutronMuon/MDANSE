@@ -61,7 +61,7 @@ class PlotHolder(QTabWidget):
             tab_name = f"New plot {self._last_number}"
             self._last_number += 1
         plotting_context = PlottingContext(
-            unit_lookup=self._unit_lookup, unique_number=self._last_number
+            unit_lookup=self._unit_lookup,
         )
         plotting_context.needs_an_update.connect(self.update_plot)
         plotter = PlotWidget(self)
@@ -130,8 +130,9 @@ class PlotHolder(QTabWidget):
 
     @Slot()
     def update_plots(self):
-        """This will change the line colour, thickness, etc.
-        At the moment it doesn't do anything."""
+        """Update all plots.
+
+        This is typically needed if the global matplotlib settings have been changed."""
         for plotter in self._plotter:
             try:
                 plotter.plot_data(update_only=True)
@@ -139,16 +140,23 @@ class PlotHolder(QTabWidget):
                 LOG.error("Plotting failed: %s", traceback.format_exc())
                 plotter.plot_blank()
 
-    @Slot(int)
+    @Slot("quint64")
     def update_plot(self, plot_number: int):
-        """This will change the line colour, thickness, etc.
-        At the moment it doesn't do anything."""
+        """Update the plot in a specific PlotWidget.
+
+        Updates the plot only in the PlotWidget matching the object ID of the
+        PlottingContext which requested the update.
+
+        Parameters
+        ----------
+        plot_number : int
+            Object id of the PlottingContext in which the settings got changed.
+        """
         for plotter in self._plotter:
-            if plot_number != plotter.unique_id:
-                continue
-            try:
-                plotter.plot_data(update_only=True)
-            except Exception:
-                LOG.error("Plotting failed: %s", traceback.format_exc())
-                plotter.plot_blank()
-                return
+            if plotter.unique_id == plot_number:
+                try:
+                    plotter.plot_data(update_only=True)
+                except Exception:
+                    LOG.error("Plotting failed: %s", traceback.format_exc())
+                    plotter.plot_blank()
+                    return

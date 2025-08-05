@@ -279,15 +279,13 @@ class Plotter(metaclass=SubclassFactory):
         self._axes = [axes]
         self.apply_settings(plotting_context)
 
-    def plot_blank(self, draw_cross: bool = True):
+    def plot_blank(self, *, draw_cross: bool = True):
         """Inform the user that no data could be plotted."""
         figure = self.get_figure()
         axes = figure.add_subplot(111)
         if draw_cross:
-            axes.plot([0, 1], [0, 1], "k-")
-            axes.plot([0, 1], [1, 0], "k-")
-            axes.set_xlim(0, 1)
-            axes.set_ylim(0, 1)
+            axes.axline([0, 0], [1, 1], "k-")
+            axes.axline([0, 1], [1, 0], "k-")
         axes.set_title("One of the plotting parameters was not valid.")
         axes.set_xlabel("Please check the settings value which you changed last.")
         figure.canvas.draw()

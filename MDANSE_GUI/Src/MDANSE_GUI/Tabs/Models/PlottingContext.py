@@ -483,7 +483,9 @@ class SingleDataset:
                 self._curves[index_tuple] = self.data[index_slicer].squeeze()
             except IndexError:
                 LOG.warning(
-                    "Skipping the plot of dataset %s at index %s", self._name, index
+                    "Skipping: in dataset %s, index %s is out of bounds",
+                    self._name,
+                    index,
                 )
             else:
                 self._curve_labels[index_tuple] = self.generate_curve_label(
@@ -576,16 +578,15 @@ plotting_column_index = {
 class PlottingContext(QStandardItemModel):
     """Data model storing data and user input used for plotting."""
 
-    needs_an_update = Signal(int)
+    needs_an_update = Signal("quint64")
 
-    def __init__(self, *args, unit_lookup=None, unique_number: int = -1, **kwargs):
+    def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._datasets = {}
         self._current_axis = [None, None, None]
         self._figure = None
         self._ndim_lowest = 1
         self._ndim_highest = 3
-        self.unique_id = unique_number
         self._all_xunits = []
         self._best_xunits = []
         self._colour_list = get_mpl_colours()
@@ -593,6 +594,7 @@ class PlottingContext(QStandardItemModel):
         self._colour_map = kwargs.get("colormap", "viridis")
         self._last_colour = 0
         self._unit_lookup = unit_lookup
+        self.plot_widget_id = -1
         self.use_legend = True
         self.use_grid = True
         self.setHorizontalHeaderLabels(plotting_column_labels)
@@ -799,7 +801,7 @@ class PlottingContext(QStandardItemModel):
 
     @Slot()
     def ask_for_update(self):
-        self.needs_an_update.emit(self.unique_id)
+        self.needs_an_update.emit(self.plot_widget_id)
 
     def set_axes(self):
         """Check that axis information can be found for datasets."""

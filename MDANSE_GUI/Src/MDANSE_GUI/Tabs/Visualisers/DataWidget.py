@@ -56,6 +56,7 @@ class DataWidget(QWidget):
         self._plotting_context = None
         self._slider_max = 100
         self._current_path = Path.cwd()
+        self.unique_id = -1
 
         layout = QVBoxLayout(self)
 
@@ -208,6 +209,8 @@ class DataWidget(QWidget):
     def set_context(self, new_context: "PlottingContext"):
         self._plotting_context = new_context
         self._plotting_context._figure = self._figure
+        self.unique_id = id(self)
+        self._plotting_context.plot_widget_id = self.unique_id
 
     @Slot(str)
     def set_plotter(self, plotter_option: str):
