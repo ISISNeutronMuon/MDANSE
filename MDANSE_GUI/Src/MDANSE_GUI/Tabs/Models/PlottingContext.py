@@ -454,6 +454,11 @@ class SingleDataset:
         self._curves = {}
         self._curve_labels = {}
 
+        if self._data.ndim == 1:
+            self._curves[(0,)] = self.data
+            self._curve_labels[(0,)] = ""
+            return self.data
+
         data_shape = self._data.shape
         x_axis_unit, x_axis_name = x_axis_details
         slicer = []
