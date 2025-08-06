@@ -14,16 +14,20 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 import collections
+from contextlib import suppress
+from math import sqrt
 
 import numpy as np
+from ase import Atoms
 from ase.io import iread, read
 from ase.io.trajectory import Trajectory as ASETrajectory
+from more_itertools import ilen
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
-from MDANSE.Framework.Units import measure
+from MDANSE.Framework.Units import INTERNAL_UNITS, UnitError, measure
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
@@ -95,6 +99,14 @@ class ASE(Converter):
         },
     )
 
+    UNIT_CONV = {
+        "energy": measure(1.0, "eV").toval("Da nm2 / ps2"),
+        "forces": measure(1.0, "eV/ang").toval("Da nm / ps2"),
+        "time": measure(1.0, "fs").toval("ps"),
+        "velocities": measure(1.0, "ang/fs").toval("nm/ps"),
+        "length": measure(1.0, "ang").toval("nm"),
+    }
+
     def initialize(self):
         """
         Initialize the job.
@@ -155,34 +167,36 @@ class ASE(Converter):
         else:
             LOG.info("ASE using the slower way")
             frame = read(self.configuration["trajectory_file"]["value"], index=index)
+
+        assert isinstance(frame, Atoms)
         time = self._timeaxis[index]
 
-        unit_conversion_factor = measure(1.0, "ang").toval("nm")
         if self._isPeriodic:
             unitCell = frame.cell.array
             if np.allclose(unitCell, 0.0):
                 LOG.warning(f"Using initial unit cell: {self._backup_cell}")
-                unitCell = self._backup_cell * unit_conversion_factor
+                unitCell = self._backup_cell * self.units["length"]
             else:
                 LOG.info(f"Unit cell from frame: {unitCell}")
-                unitCell *= unit_conversion_factor
+                unitCell *= self.units["length"]
             unitCell = UnitCell(unitCell)
 
         coords = frame.get_positions()
-        coords *= unit_conversion_factor
+        coords *= self.units["length"]
 
-        try:
-            momenta = frame.arrays["momenta"]
-        except KeyError:
-            pass
-        else:
-            if self._initial_masses is not None:
-                velocities = momenta / self._initial_masses.reshape((len(momenta), 1))
-            else:
-                velocities = momenta / np.array(
+        if (momenta := frame.arrays.get("momenta")) is not None:
+            masses = (
+                self._initial_masses.reshape((len(momenta), 1))
+                if self._initial_masses is not None
+                else np.array(
                     self._chemical_system.atom_property("atomic_weight")
                 ).reshape((len(momenta), 1))
-            variables["velocities"] = velocities * measure(1.0, "ang/fs").toval("nm/ps")
+            )
+            variables["velocities"] = (
+                (momenta * self.units["momenta"]) / masses
+                if "momenta" in self.units
+                else (momenta / masses) * self.units["velocities"]
+            )
 
         if self._isPeriodic:
             try:
@@ -259,15 +273,12 @@ class ASE(Converter):
             self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
         except Exception:
             first_frame = read(self.configuration["trajectory_file"]["value"], index=0)
-            last_iterator = 0
-            generator = iread(self.configuration["trajectory_file"]["value"])
-            for _ in generator:
-                last_iterator += 1
-            generator.close()
             self._input = iread(
                 self.configuration["trajectory_file"]["value"]  # , index="[:]"
             )
-            self._total_number_of_steps = last_iterator
+            self._total_number_of_steps = ilen(
+                iread(self.configuration["trajectory_file"]["value"])
+            )
             LOG.debug(f"Length found using last_iterator={self._total_number_of_steps}")
         else:
             first_frame = self._input[0]
@@ -276,28 +287,43 @@ class ASE(Converter):
                 f"Length found using len(self._input)={self._total_number_of_steps}"
             )
 
+        assert isinstance(first_frame, Atoms)
+
+        unit_conv = {}
+        if "units" in first_frame.info:
+            for key, val in first_frame.info["units"].items():
+                if (key, val) == ("momenta", "(eV*u)^0.5"):
+                    unit_conv["momenta"] = sqrt(
+                        measure(1.0, "eV Da").toval("Da2 nm2/ps2")
+                    )
+
+                if key not in INTERNAL_UNITS:
+                    continue
+
+                with suppress(UnitError, KeyError):
+                    unit_conv[key] = measure(1.0, val).toval(INTERNAL_UNITS[key])
+        self.units = collections.ChainMap(unit_conv, self.UNIT_CONV)
+
         self._timeaxis = self._timestep * np.arange(self._total_number_of_steps)
 
         if self._isPeriodic is None:
             self._isPeriodic = np.all(first_frame.get_pbc())
-        LOG.info(f"PBC in first frame = {first_frame.get_pbc()}")
+
+        LOG.info("PBC in first frame = %s", first_frame.get_pbc())
+
         if self._isPeriodic:
             self._backup_cell = first_frame.cell.array
 
         LOG.info(
-            f"The following arrays were found in the trajectory: {list(first_frame.arrays.keys())}"
+            "The following arrays were found in the trajectory: %s",
+            ", ".join(first_frame.arrays),
         )
 
-        if "masses" in first_frame.arrays.keys():
-            self._initial_masses = first_frame.arrays["masses"]
-        else:
-            self._initial_masses = None
+        self._initial_masses = first_frame.arrays.get("masses")
+        self._initial_charges = first_frame.arrays.get("charges")
 
-        try:
-            self._initial_charges = first_frame.arrays["charges"]
-        except KeyError:
+        if self._initial_charges is None:
             LOG.warning("ASE converter could not read partial charges from file.")
-            self._initial_charges = None
 
         element_list = first_frame.get_chemical_symbols()
 
