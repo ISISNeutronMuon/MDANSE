@@ -20,18 +20,22 @@ from pathlib import Path
 
 import MDANSE
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Chemistry.Databases import atom_info
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MolecularDynamics.Trajectory import (
+    Trajectory,
+    chemical_system_summary,
+    trajectory_summary,
+)
 
 
 class CommandLineParserError(Error):
     pass
 
 
-def show_element_info(args: Namespace):
-    element = args.element_name
+def show_element_info(element):
     if element:
         print(ATOMS_DATABASE.info(element))  # noqa: T201
 
@@ -40,9 +44,11 @@ def show_trajectory_contents(args: Namespace):
     trajectory_path = args.file_name
     if not trajectory_path:
         return
-    trajName = Path.cwd() / trajectory_path
-    inputTraj = Trajectory(trajName)
-    print(str(inputTraj))  # noqa: T201
+    trajectory_name = Path.cwd() / trajectory_path
+    instance = Trajectory(trajectory_name)
+    result = trajectory_summary(instance)
+    result += chemical_system_summary(instance.chemical_system)
+    print(result)  # noqa: T201
 
 
 def show_jobs(input_job_name: str | None = None):
@@ -84,6 +90,27 @@ def save_job(
     job.save(script_name)
 
 
+def execute_element(args: Namespace):
+    element = args.element_name
+    database = Trajectory(args.traj) if args.traj else ATOMS_DATABASE
+    match_str = args.search
+    list_flag = args.list
+    if list_flag:
+        print(list_flag)
+        print(database)
+        if hasattr(database, "atoms_in_database"):
+            std_output = database.atoms_in_database
+        else:
+            std_output = database.atoms
+    elif match_str:
+        std_output = [name for name in database.atoms if match_str in name]
+    elif element != "Xx":
+        std_output = atom_info(element, database=database)
+    else:
+        std_output = f"Nothing to do for atom {element}."
+    print(std_output)  # noqa: T201
+
+
 def build_parsers() -> ArgumentParser:
     parser = ArgumentParser(
         prog="mdanse",
@@ -100,10 +127,11 @@ def build_parsers() -> ArgumentParser:
         "When you convert trajectories, the properties of the relevant atoms are written into the trajectory file. "
         "This command can be used to list, find and view atom properties in specific files.",
     )
-    element.set_defaults(func=show_element_info)
+    element.set_defaults(func=execute_element)
     element.add_argument(
         "element_name",
         help="Symbol of the chemical element or isotope, e.g. Au, Li7, etc.",
+        default="Xx",
     )
     element.add_argument(
         "-t", "--traj", help="Use this trajectory file as atom database."
@@ -174,7 +202,7 @@ def main():
 
     args: Namespace = parser.parse_args()
     if not vars(args):
-        parser.print_usage()
+        parser.print_help()
     else:
         args.func(args)
 

@@ -33,6 +33,7 @@ from MDANSE import PLATFORM
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Chemistry.Databases import str_to_num
+from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MolecularDynamics.Configuration import _Configuration
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
@@ -48,6 +49,68 @@ available_formats = {
 }
 ValidFormats = Literal["MDANSE", "H5MD"]
 SLICE_ALL = np.s_[:]
+
+
+def trajectory_summary(traj: Trajectory):
+    val = []
+    try:
+        time_axis = traj.time()
+    except Exception:
+        timeline = "No time information!\n"
+    else:
+        if len(time_axis) < 1:
+            timeline = "N/A\n"
+        elif len(time_axis) < 5:
+            timeline = f"{time_axis}\n"
+        else:
+            timeline = f"[{time_axis[0]}, {time_axis[1]}, ..., {time_axis[-1]}]\n"
+
+    val.append("Path:")
+    val.append(f"{traj.filename}\n")
+    val.append("Number of steps:")
+    val.append(f"{len(traj)}\n")
+    val.append("Configuration:")
+    val.append(f"\tIs periodic: {traj.unit_cell(0) is not None}\n")
+    try:
+        val.append(f"First unit cell (nm):\n{traj.unit_cell(0)._unit_cell}\n")
+    except Exception:
+        val.append("No unit cell information\n")
+    val.append("Frame times (1st, 2nd, ..., last) in ps:")
+    val.append(timeline)
+    val.append("Variables:")
+    for k in traj.variables():
+        v = traj.variable(k)
+        try:
+            val.append(f"\t- {k}: {v.shape}")
+        except AttributeError:
+            try:
+                val.append(f"\t- {k}: {v['value'].shape}")
+            except KeyError:
+                continue
+
+    val.append("\nConversion history:")
+    metadata = check_metadata(traj.file)
+    if metadata:
+        for k, v in metadata.items():
+            val.append(f"{k}: {v}")
+
+    val.append("\nMolecular types found:")
+    for molname, mollist in traj.chemical_system._clusters.items():
+        val.append(f"Molecule: {molname}; Count: {len(mollist)}")
+
+    val = "\n".join(val)
+
+    return val
+
+def chemical_system_summary(cs: ChemicalSystem) -> str:
+    text = "\n ==== Chemical System summary ==== \n"
+    atoms, counts = np.unique(cs.atom_list, return_counts=True)
+    for ind in range(len(atoms)):
+        text += f"Element: {atoms[ind]}; Count: {counts[ind]}\n"
+    for molname, mollist in cs._clusters.items():
+        text += f"Molecule: {molname}; Count: {len(mollist)}\n"
+    text += " ===== \n"
+    return text
 
 
 class Trajectory:

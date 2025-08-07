@@ -84,6 +84,58 @@ def color(color_string: str | None = None):
     return color_string
 
 
+def atom_info(atom: str, database: AtomsDatabase | None = None) -> str:
+    """Return as string all the information about the input atom.
+
+    Parameters
+    ----------
+    atom : str
+        Atom type.
+
+    Returns
+    -------
+    str
+        Multi-line list of all the atom properties.
+
+    """
+    if database is None:
+        database = ATOMS_DATABASE
+    if isinstance(database, AtomsDatabase):
+        atoms = database.atoms
+        properties = database.properties
+        units = database.units
+    else:
+        atoms = database.atoms_in_database
+        properties = database.properties_in_database
+        units = defaultdict(lambda: "none")
+
+    if atom not in atoms:
+        raise KeyError(f"Atom {atom} is not in the atom database {database}.")
+    property_dict = {
+        prop_name: database.get_atom_property(atom, prop_name)
+        for prop_name in properties
+    }
+    # A delimiter line.
+    delimiter = "-" * 70
+    tab_fmt = "{:<20}{!s:>40}{!s:>10}"
+
+    info = [
+        delimiter,
+        f"{atom:^70}",
+        tab_fmt.format("property", "value", "unit"),
+        delimiter,
+    ]
+
+    # The values for all element's properties
+    for pname in sorted(properties):
+        info.append(tab_fmt.format(pname, property_dict.get(pname), units.get(pname)))
+
+    info.append(delimiter)
+    info = "\n".join(info)
+
+    return info
+
+
 class _Database(metaclass=Singleton):
     """Base class for all the databases."""
 
@@ -425,6 +477,11 @@ class AtomsDatabase(_Database):
     def properties(self) -> list[str]:
         """Return the names of the properties stored in the atoms database."""
         return sorted(self._properties.keys())
+
+    @property
+    def units(self) -> dict[str, str]:
+        """Return the dictionary mapping properties to their physical units."""
+        return self._units
 
     def get_property(self, pname: str) -> dict[str, str | int | float | list]:
         """Return the values of a property for all atoms.
