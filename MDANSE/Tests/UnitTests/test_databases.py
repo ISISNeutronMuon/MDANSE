@@ -23,8 +23,9 @@ from MDANSE.Chemistry import (
 )
 import MDANSE.Chemistry.Databases as Databases
 from MDANSE.Chemistry.Databases import (
-    AtomsDatabaseError, ComplexEncoder
+    AtomsDatabaseError
 )
+from MDANSE.IO.IOUtils import MDANSEEncoder
 
 
 class TestAtomsDatabase(unittest.TestCase):
@@ -270,7 +271,7 @@ class TestAtomsDatabase(unittest.TestCase):
             ATOMS_DATABASE.save()
             op.assert_called_with(ATOMS_DATABASE._USER_DATABASE, "w")
             dump.assert_called_with(
-                {"properties": self.properties, "units": self.units, "atoms": self.data}, indent=4, cls=ComplexEncoder
+                {"properties": self.properties, "units": self.units, "atoms": self.data}, indent=4, cls=MDANSEEncoder
             )
 
     def test_remove_atom(self):

@@ -26,18 +26,10 @@ from MDANSE.Core.Error import Error
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
 from MDANSE.Framework.Units import measure
+from MDANSE.IO.IOUtils import MDANSEEncoder
 from MDANSE.MLogging import LOG
 
 TOLERANCE_IMG = 1e-13
-
-
-class ComplexEncoder(json.JSONEncoder):
-    """Custom JSON encoder to encode complex numbers as strings."""
-
-    def default(self, obj):
-        if isinstance(obj, complex):
-            return str(obj)
-        return super().default(obj)
 
 
 def str_to_num(numstr: str) -> float | complex:
@@ -234,7 +226,7 @@ class AtomsDatabase(_Database):
         "color": color,
     }
 
-    _encoder = ComplexEncoder()
+    _encoder = MDANSEEncoder()
 
     def __init__(self):
         self._properties = defaultdict(lambda: "str")
@@ -723,7 +715,7 @@ class AtomsDatabase(_Database):
         d = {"properties": self._properties, "units": self._units, "atoms": self._data}
 
         with open(AtomsDatabase._USER_DATABASE, "w") as fout:
-            fout.write(json.dumps(d, indent=4, cls=ComplexEncoder))
+            fout.write(json.dumps(d, indent=4, cls=MDANSEEncoder))
 
     def get_atom_property(
         self,

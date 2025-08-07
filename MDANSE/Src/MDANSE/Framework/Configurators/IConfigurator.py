@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import abc
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING
 from warnings import warn
 
@@ -26,6 +25,7 @@ from more_itertools import value_chain
 
 from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.IO.IOUtils import MDANSEEncoder
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
@@ -33,17 +33,6 @@ if TYPE_CHECKING:
 
 
 ERROR_LENGTH_MIN = len("OK")
-
-
-class CustomEncoder(json.JSONEncoder):
-    """Custom JSON encoder to encode paths as strings."""
-
-    def default(self, obj):
-        if isinstance(obj, Path):
-            return str(obj)
-        if isinstance(obj, np.ndarray):
-            return "\n".join(str(row) for row in obj)
-        return super().default(obj)
 
 
 class ConfiguratorWarning(Warning):
@@ -110,7 +99,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
     _default = None
 
-    _encoder = CustomEncoder()
+    _encoder = MDANSEEncoder()
     _decoder = json.decoder.JSONDecoder()
 
     _doc_ = "undocumented"

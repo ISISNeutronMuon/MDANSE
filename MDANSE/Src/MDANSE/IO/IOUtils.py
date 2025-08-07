@@ -15,9 +15,24 @@
 #
 from __future__ import annotations
 
+import json
 import re
 from collections.abc import Iterable, Iterator
 from itertools import filterfalse
+from pathlib import Path
+
+import numpy as np
+
+
+class MDANSEEncoder(json.JSONEncoder):
+    """Custom JSON encoder to encode paths as strings."""
+
+    def default(self, obj):
+        if isinstance(obj, (Path, complex)):
+            return str(obj)
+        elif isinstance(obj, np.ndarray):
+            return "\n".join(map(str, obj))
+        return super().default(obj)
 
 
 def _strip_inline_comments(
