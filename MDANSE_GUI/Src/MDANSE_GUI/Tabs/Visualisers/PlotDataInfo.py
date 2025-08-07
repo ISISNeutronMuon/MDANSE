@@ -44,16 +44,6 @@ class PlotDataInfo(QTextBrowser):
         filtered = self.filter(text)
         self.setHtml(filtered)
 
-    def summarise_chemical_system(self, cs: ChemicalSystem):
-        text = "\n ==== Chemical System summary ==== \n"
-        atoms, counts = np.unique(cs.atom_list, return_counts=True)
-        for ind in range(len(atoms)):
-            text += f"Element: {atoms[ind]}; Count: {counts[ind]}\n"
-        for molname, mollist in cs._clusters.items():
-            text += f"Molecule: {molname}; Count: {len(mollist)}"
-        text += " ===== \n"
-        return text
-
     def filter(self, some_text: str, line_break="<br />"):
         new_text = ""
         if self._header:

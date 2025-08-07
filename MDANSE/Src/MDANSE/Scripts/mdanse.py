@@ -18,10 +18,14 @@ from __future__ import annotations
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
+import h5py
+
 import MDANSE
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.Databases import atom_info
 from MDANSE.Core.Error import Error
+from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import (
@@ -40,6 +44,17 @@ def show_element_info(element):
         print(ATOMS_DATABASE.info(element))  # noqa: T201
 
 
+def get_hdf5_contents(file_object: h5py.File):
+    key_list = []
+
+    def save_key(name, obj):
+        if isinstance(obj, h5py.Dataset):
+            key_list.append(name)
+
+    file_object.visititems(save_key)
+    return key_list
+
+
 def show_trajectory_contents(args: Namespace):
     trajectory_path = args.file_name
     if not trajectory_path:
@@ -48,33 +63,60 @@ def show_trajectory_contents(args: Namespace):
     instance = Trajectory(trajectory_name)
     result = trajectory_summary(instance)
     result += chemical_system_summary(instance.chemical_system)
+    traj_arrays = get_hdf5_contents(instance.file)
+    result += "====DATA ARRAYS====\n"
+    result += "\n".join(
+        f"{name}: type={instance.file[name].dtype}, shape={instance.file[name].shape}"
+        for name in traj_arrays
+    )
     print(result)  # noqa: T201
 
 
-def show_jobs(input_job_name: str | None = None):
-    if input_job_name is None:
-        return
-    if not input_job_name:
-        print("Registered jobs:")  # noqa: T201
-        converters = []
+def show_results_contents(filename: str, *, verbose: bool) -> str:
+    text = str(filename) + "\n"
+    with h5py.File(filename) as source:
+        text += "===HEADER===\n"
+        if verbose:
+            for attr in source.attrs:
+                text += f"{attr}: {source.attrs[attr]}\n"
+        else:
+            for attr in source.attrs:
+                text += f"{attr}\n"
+                for line in source.attrs[attr].split("\n"):
+                    if "=" in line:
+                        text += line[:80] + "\n"
+        text += "===DATASETS===\n"
+        for key in get_hdf5_contents(source):
+            text += f"{key}: type={source[key].dtype}, shape={source[key].shape}\n"
+        if not verbose:
+            text += (
+                "\n The header output was truncated. Use --verbose for full output\n"
+            )
+    print(text)  # noqa: T201
+
+
+def show_jobs(*, show_converters: bool = False):
+    if show_converters:
+        converters = Converter.indirect_subclasses()
+        output = "\n".join(
+            [
+                "==Converters==",
+                *sorted(converters),
+            ]
+        )
+    else:
         analyses = []
         for job_name in IJob.indirect_subclasses():
             instance = IJob.create(job_name)
-            if instance.category[0] == "Converters":
-                converters.append(job_name)
-            else:
+            if instance.category[0] != "Converters" and instance.enabled:
                 analyses.append(list(getattr(instance, "category", [])) + [job_name])
         output = "\n".join(
             [
-                "==Converter==",
-                *sorted(converters),
                 "==Analysis==",
                 *sorted(" -> ".join(analysis[1:]) for analysis in analyses),
             ]
         )
-        print(output)  # noqa: T201
-    else:
-        print(IJob.create(input_job_name).info)  # noqa: T201
+    print(output)  # noqa: T201
 
 
 def save_job(
@@ -96,8 +138,6 @@ def execute_element(args: Namespace):
     match_str = args.search
     list_flag = args.list
     if list_flag:
-        print(list_flag)
-        print(database)
         if hasattr(database, "atoms_in_database"):
             std_output = database.atoms_in_database
         else:
@@ -109,6 +149,22 @@ def execute_element(args: Namespace):
     else:
         std_output = f"Nothing to do for atom {element}."
     print(std_output)  # noqa: T201
+
+
+def execute_converter(args: Namespace):
+    if args.list:
+        show_jobs(show_converters=True)
+        return
+
+
+def execute_analysis(args: Namespace):
+    if args.list:
+        show_jobs()
+        return
+
+
+def execute_results(args: Namespace):
+    show_results_contents(args.file_name, verbose=args.verbose)
 
 
 def build_parsers() -> ArgumentParser:
@@ -127,7 +183,6 @@ def build_parsers() -> ArgumentParser:
         "When you convert trajectories, the properties of the relevant atoms are written into the trajectory file. "
         "This command can be used to list, find and view atom properties in specific files.",
     )
-    element.set_defaults(func=execute_element)
     element.add_argument(
         "element_name",
         help="Symbol of the chemical element or isotope, e.g. Au, Li7, etc.",
@@ -140,7 +195,11 @@ def build_parsers() -> ArgumentParser:
         "-s", "--search", help="Find chemical elements with matching names."
     )
     element.add_argument(
-        "-l", "--list", help="List all the chemical elements in the database."
+        "-l",
+        "--list",
+        action="store_true",
+        default=False,
+        help="List all the chemical elements in the database.",
     )
     # Set up trajectory options.
     trajectory = subparsers.add_parser(
@@ -152,7 +211,6 @@ def build_parsers() -> ArgumentParser:
     trajectory.add_argument(
         "file_name", help="Path to the trajectory file, e.g. converted_dlpoly_run.mdt"
     )
-    trajectory.set_defaults(func=show_trajectory_contents)
     # Set up results options.
     results = subparsers.add_parser(
         "results",
@@ -163,18 +221,33 @@ def build_parsers() -> ArgumentParser:
     results.add_argument(
         "file_name", help="Path to the results file, e.g. dcsf_h2o_200K.mda"
     )
-    results.set_defaults(func=show_trajectory_contents)
+    results.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        default=False,
+        help="Show the full contents each header entry. False by default.",
+    )
     # Set up converter options.
     converter = subparsers.add_parser(
-        "converter",
+        "convert",
         help="Create a script to convert MD output into an MDANSE .mdt file.",
     )
-    converter.add_argument("-l", "--list", help="List all the converter types.")
+    converter.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        default=False,
+        help="List all the converter types.",
+    )
     converter.add_argument(
         "-n", "--name", help="Name of the specific converter to be used."
     )
     converter.add_argument(
-        "-o", "--output", help="Use this file name for the output Python script."
+        "-o",
+        "--output",
+        default="converter_script.py",
+        help="Use this file name for the output Python script.",
     )
     # Set up analysis options.
     analysis = subparsers.add_parser(
@@ -183,7 +256,13 @@ def build_parsers() -> ArgumentParser:
         description="This command allows you to check what analysis types are available in MDANSE "
         "and to create analysis scripts for a given analysis type and trajectory file.",
     )
-    analysis.add_argument("-l", "--list", help="List all the analysis types.")
+    analysis.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        default=False,
+        help="List all the analysis types.",
+    )
     analysis.add_argument(
         "-n", "--name", help="Name of the specific analysis to be used."
     )
@@ -191,9 +270,20 @@ def build_parsers() -> ArgumentParser:
         "-t", "--traj", help="Use this trajectory file as analysis input."
     )
     analysis.add_argument(
-        "-o", "--output", help="Use this file name for the output Python script."
+        "-o",
+        "--output",
+        default="analyis_script.py",
+        help="Use this file name for the output Python script.",
     )
-    # Everything has been set up.
+    # Add handler functions to parsers:
+    for subparser, function in [
+        (element, execute_element),
+        (trajectory, show_trajectory_contents),
+        (converter, execute_converter),
+        (analysis, execute_analysis),
+        (results, execute_results),
+    ]:
+        subparser.set_defaults(func=function)
     return parser
 
 
