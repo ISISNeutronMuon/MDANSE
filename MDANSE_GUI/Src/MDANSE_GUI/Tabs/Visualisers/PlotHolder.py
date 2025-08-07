@@ -15,6 +15,7 @@
 #
 import traceback
 
+from more_itertools import first_true
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QTabBar, QTabWidget, QVBoxLayout
 
@@ -152,11 +153,13 @@ class PlotHolder(QTabWidget):
         plot_number : int
             Object id of the PlottingContext in which the settings got changed.
         """
-        for plotter in self._plotter:
-            if plotter.unique_id == plot_number:
-                try:
-                    plotter.plot_data(update_only=True)
-                except Exception:
-                    LOG.error("Plotting failed: %s", traceback.format_exc())
-                    plotter.plot_blank()
-                    return
+        plotter = first_true(
+            self._plotter, pred=lambda plot: plot.unique_id == plot_number
+        )
+        if plotter is None:
+            return
+        try:
+            plotter.plot_data(update_only=True)
+        except Exception:
+            LOG.error("Plotting failed: %s", traceback.format_exc())
+            plotter.plot_blank()

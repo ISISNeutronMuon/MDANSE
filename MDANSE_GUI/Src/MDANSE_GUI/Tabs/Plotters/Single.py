@@ -227,7 +227,7 @@ class Single(Plotter):
                         return
         if len(self._backup_curves) > 1:
             self.enable_slider(allow_slider=True)
-        elif len(self._backup_curves) == 0:
+        elif not self._backup_curves:
             self.plot_blank()
             return
         if update_only:

@@ -327,7 +327,7 @@ class SingleDataset:
                 )
                 continue
 
-        self._data_limits = list(complete_subset.keys()) if complete_subset else []
+        self._data_limits = list(complete_subset)
 
     def available_x_axes(self) -> list[str]:
         """Get a list of axis names used by this data set.

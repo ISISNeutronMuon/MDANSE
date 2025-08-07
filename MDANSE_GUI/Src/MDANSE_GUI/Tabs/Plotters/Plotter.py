@@ -280,7 +280,13 @@ class Plotter(metaclass=SubclassFactory):
         self.apply_settings(plotting_context)
 
     def plot_blank(self, *, draw_cross: bool = True):
-        """Inform the user that no data could be plotted."""
+        """Inform the user that no data could be plotted.
+
+        Parameters
+        ----------
+        draw_cross : bool, optional
+            If True, plot two intersecting lines to indicate visually that plotting was not possible, by default True
+        """
         figure = self.get_figure()
         axes = figure.add_subplot(111)
         if draw_cross:
