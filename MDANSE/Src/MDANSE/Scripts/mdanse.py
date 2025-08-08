@@ -15,7 +15,8 @@
 #
 from __future__ import annotations
 
-from argparse import ArgumentParser, Namespace
+import textwrap
+from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from pathlib import Path
 
 import h5py
@@ -119,6 +120,26 @@ def show_jobs(*, show_converters: bool = False):
     print(output)  # noqa: T201
 
 
+def show_single_job(job_name: str):
+    if job_name in IJob.indirect_subclasses():
+        instance = IJob.create(job_name)
+    elif job_name in Converter.indirect_subclasses():
+        instance = Converter.create(job_name)
+    else:
+        raise KeyError(f"{job_name} is not a converter or analysis included in MDANSE.")
+    result = f"{job_name}\n"
+    result += "".join(len(job_name) * ["~"]) + "\n\n"
+    if instance.__doc__:
+        result += "\n".join(str(x).lstrip() for x in instance.__doc__.split("\n"))
+    if not result.endswith("\n"):
+        result += "\n"
+    result += "\nInputs:\n\n"
+    for iname, itype in instance.settings.items():
+        defval = itype[1].get("default", "N/A")
+        result += f"- {iname}: default={defval}\n"
+    print(result)  # noqa: T201
+
+
 def save_job(
     input_job_name: str | None,
     trajectory_path: str | Path | None = None,
@@ -130,6 +151,18 @@ def save_job(
     if not script_name:
         script_name = f"script_template_{input_job_name}.py"
     job.save(script_name)
+    LOG.info("Script has been saved as %s", script_name)
+
+
+def save_converter(
+    input_job_name: str | None,
+    script_name: str | Path | None = None,
+):
+    job = Converter.create(input_job_name)
+    if not script_name:
+        script_name = f"script_template_{input_job_name}.py"
+    job.save(script_name, parent_class="Converter")
+    LOG.info("Script has been saved as %s", script_name)
 
 
 def execute_element(args: Namespace):
@@ -155,12 +188,22 @@ def execute_converter(args: Namespace):
     if args.list:
         show_jobs(show_converters=True)
         return
+    if args.name and args.output:
+        save_converter(args.name, script_name=args.output)
+        return
+    if args.name:
+        show_single_job(args.name)
 
 
 def execute_analysis(args: Namespace):
     if args.list:
         show_jobs()
         return
+    if args.name and args.output:
+        save_job(args.name, trajectory_path=args.traj, script_name=args.output)
+        return
+    if args.name:
+        show_single_job(args.name)
 
 
 def execute_results(args: Namespace):
@@ -170,11 +213,148 @@ def execute_results(args: Namespace):
 def build_parsers() -> ArgumentParser:
     parser = ArgumentParser(
         prog="mdanse",
-        description="This is the command line interface of MDANSE "
-        "(Molecular Dynamics Analysis for Neutron Scattering Experiments).",
+        formatter_class=RawDescriptionHelpFormatter,
+        description=textwrap.dedent(
+            """
+        This is the command line interface of MDANSE
+        (Molecular Dynamics Analysis for Neutron Scattering Experiments).
+        The usual MDANSE workflow consists of converting the trajectory,
+        running an analysis and viewing the results.
+
+        Find out more about specific subcommands by running:
+        mdanse convert -h
+        mdanse analysis -h
+        mdanse traj -h
+        mdanse results -h
+        mdanse element -h
+        """
+        ),
         epilog="Please report any problems with MDANSE as issues on https://github.com/ISISNeutronMuon/MDANSE",
     )
-    subparsers = parser.add_subparsers(title="MDANSE CLI Commands")
+    subparsers = parser.add_subparsers(
+        title="MDANSE CLI Commands",
+        help="Run each command with -h to see input options.",
+    )
+    # Set up converter options.
+    converter = subparsers.add_parser(
+        "convert",
+        help="Create a script to convert MD output into an MDANSE .mdt file.",
+        formatter_class=RawDescriptionHelpFormatter,
+        description=textwrap.dedent(
+            """
+        MDANSE converts trajectories from different formats
+        to a binary HDF5 file with an .mdt extension.
+        Different converters are available in MDANSE,
+        depending on the MD engine used to run the simulation.
+
+        Examples:
+        ---------
+            mdanse convert -l
+                Shows the list of all the available converters.
+            mdanse convert -n CP2K
+                Shows the description of the CP2K converter.
+            mdanse convert -n CP2K -o mdanse_cp2k_script.py
+                Saves a CP2K conversion script with default input values as mdanse_cp2K_script.py
+        """
+        ),
+    )
+    converter.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        default=False,
+        help="List all the converter types.",
+    )
+    converter.add_argument(
+        "-n", "--name", help="Name of the specific converter to be used."
+    )
+    converter.add_argument(
+        "-o",
+        "--output",
+        help="Use this file name for the output Python script.",
+    )
+    # Set up analysis options.
+    analysis = subparsers.add_parser(
+        "analysis",
+        help="Create a script to analyse an MD trajectory.",
+        formatter_class=RawDescriptionHelpFormatter,
+        description=textwrap.dedent(
+            """
+        MDANSE can perform different analysis types on .mdt trajectories.
+        mdanse analysis commands let you view the available analysis types,
+        and create analysis scripts which you can run after adjusting the parameters.
+
+        Examples:
+        ---------
+            mdanse analysis -l
+                Shows the list of all the available analysis types.
+            mdanse analysis -n DensityOfStates
+                Shows the description of the density of states analysis.
+            mdanse analysis -n DensityOfStates -o mdanse_dos_script.py
+                Saves a density of states script with default input values as mdanse_dos_script.py
+        """
+        ),
+    )
+    analysis.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        default=False,
+        help="List all the analysis types.",
+    )
+    analysis.add_argument(
+        "-n", "--name", help="Name of the specific analysis to be used."
+    )
+    analysis.add_argument(
+        "-t", "--traj", help="Use this trajectory file as analysis input."
+    )
+    analysis.add_argument(
+        "-o",
+        "--output",
+        default="analyis_script.py",
+        help="Use this file name for the output Python script.",
+    )
+    # Set up trajectory options.
+    trajectory = subparsers.add_parser(
+        "traj",
+        help="View contents of a trajectory file.",
+        description="MDANSE stores trajectories as binary HDF5 files (.mdt). "
+        "This command allows you to view the contents of a trajectory file.",
+    )
+    trajectory.add_argument(
+        "file_name", help="Path to the trajectory file, e.g. converted_dlpoly_run.mdt"
+    )
+    # Set up results options.
+    results = subparsers.add_parser(
+        "results",
+        help="View contents of a result file.",
+        formatter_class=RawDescriptionHelpFormatter,
+        description=textwrap.dedent(
+            """
+        MDANSE results are normally writted to an HDF5 file with an .mda extension.
+        These are binary files, and cannot be viewed immediately with a text editor.
+        mdanse results command can be used to quickly check what information has
+        been written to an .mda file.
+
+        Examples:
+        ---------
+            mdanse results dos_BaTiO3_250K.mda
+                Shows the names of header entries and datasets in the file dos_BaTiO3_250K.mda
+            mdanse results -v dos_BaTiO3_250K.mda
+                Shows the full header information and dataset names in the file dos_BaTiO3_250K.mda
+        """
+        ),
+    )
+    results.add_argument(
+        "file_name", help="Path to the results file, e.g. dcsf_h2o_200K.mda"
+    )
+    results.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        default=False,
+        help="Show the full contents each header entry. False by default.",
+    )
     # Set up element options.
     element = subparsers.add_parser(
         "element",
@@ -201,80 +381,6 @@ def build_parsers() -> ArgumentParser:
         default=False,
         help="List all the chemical elements in the database.",
     )
-    # Set up trajectory options.
-    trajectory = subparsers.add_parser(
-        "traj",
-        help="View contents of a trajectory file.",
-        description="MDANSE stores trajectories as binary HDF5 files (.mdt). "
-        "This command allows you to view the contents of a trajectory file.",
-    )
-    trajectory.add_argument(
-        "file_name", help="Path to the trajectory file, e.g. converted_dlpoly_run.mdt"
-    )
-    # Set up results options.
-    results = subparsers.add_parser(
-        "results",
-        help="View contents of a result file.",
-        description="This command allows you to check what analysis types are available in MDANSE "
-        "and to create analysis scripts for a given analysis type and trajectory file.",
-    )
-    results.add_argument(
-        "file_name", help="Path to the results file, e.g. dcsf_h2o_200K.mda"
-    )
-    results.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        default=False,
-        help="Show the full contents each header entry. False by default.",
-    )
-    # Set up converter options.
-    converter = subparsers.add_parser(
-        "convert",
-        help="Create a script to convert MD output into an MDANSE .mdt file.",
-    )
-    converter.add_argument(
-        "-l",
-        "--list",
-        action="store_true",
-        default=False,
-        help="List all the converter types.",
-    )
-    converter.add_argument(
-        "-n", "--name", help="Name of the specific converter to be used."
-    )
-    converter.add_argument(
-        "-o",
-        "--output",
-        default="converter_script.py",
-        help="Use this file name for the output Python script.",
-    )
-    # Set up analysis options.
-    analysis = subparsers.add_parser(
-        "analysis",
-        help="Create a script to analyse an MD trajectory.",
-        description="This command allows you to check what analysis types are available in MDANSE "
-        "and to create analysis scripts for a given analysis type and trajectory file.",
-    )
-    analysis.add_argument(
-        "-l",
-        "--list",
-        action="store_true",
-        default=False,
-        help="List all the analysis types.",
-    )
-    analysis.add_argument(
-        "-n", "--name", help="Name of the specific analysis to be used."
-    )
-    analysis.add_argument(
-        "-t", "--traj", help="Use this trajectory file as analysis input."
-    )
-    analysis.add_argument(
-        "-o",
-        "--output",
-        default="analyis_script.py",
-        help="Use this file name for the output Python script.",
-    )
     # Add handler functions to parsers:
     for subparser, function in [
         (element, execute_element),
@@ -288,6 +394,7 @@ def build_parsers() -> ArgumentParser:
 
 
 def main():
+    LOG.setLevel("INFO")
     parser = build_parsers()
 
     args: Namespace = parser.parse_args()
