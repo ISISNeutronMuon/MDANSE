@@ -128,7 +128,10 @@ def atom_info(atom: str, database: AtomsDatabase | None = None) -> str:
 
     # The values for all element's properties
     for pname in sorted(properties):
-        info.append(tab_fmt.format(pname, property_dict.get(pname), units.get(pname)))
+        if pname.strip():
+            info.append(
+                tab_fmt.format(pname, property_dict.get(pname), units.get(pname))
+            )
 
     info.append(delimiter)
     info = "\n".join(info)

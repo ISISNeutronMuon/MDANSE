@@ -166,7 +166,7 @@ def save_converter(
 
 
 def execute_element(args: Namespace):
-    element = args.element_name
+    element = args.name
     database = Trajectory(args.traj) if args.traj else ATOMS_DATABASE
     match_str = args.search
     list_flag = args.list
@@ -176,11 +176,15 @@ def execute_element(args: Namespace):
         else:
             std_output = database.atoms
     elif match_str:
-        std_output = [name for name in database.atoms if match_str in name]
-    elif element != "Xx":
+        std_output = [name for name in database.atoms if element in name]
+        if not std_output:
+            std_output = (
+                f"No element names containing the string '{element}' were found."
+            )
+    elif database.has_atom(element):
         std_output = atom_info(element, database=database)
     else:
-        std_output = f"Nothing to do for atom {element}."
+        std_output = f"Element {element} is not the atom database."
     print(std_output)  # noqa: T201
 
 
@@ -196,6 +200,10 @@ def execute_converter(args: Namespace):
 
 
 def execute_analysis(args: Namespace):
+    if args.traj:
+        raise NotImplementedError(
+            "Setting up a script for a specific trajectory is not possible at the moment."
+        )
     if args.list:
         show_jobs()
         return
@@ -318,8 +326,20 @@ def build_parsers() -> ArgumentParser:
     trajectory = subparsers.add_parser(
         "traj",
         help="View contents of a trajectory file.",
-        description="MDANSE stores trajectories as binary HDF5 files (.mdt). "
-        "This command allows you to view the contents of a trajectory file.",
+        formatter_class=RawDescriptionHelpFormatter,
+        description=textwrap.dedent(
+            """
+        MDANSE stores trajectories as binary HDF5 files (.mdt).
+        'mdanse traj' allows you to view the contents of a trajectory file.
+        The information includes chemical composition, number of steps,
+        data arrays in the file (positions, velocities, etc.).
+
+        Examples:
+        ---------
+            mdanse traj hexane_CP2K_157K.mdt
+                Shows information about the trajectory hexane_CP2K_157K.mdt
+        """
+        ),
     )
     trajectory.add_argument(
         "file_name", help="Path to the trajectory file, e.g. converted_dlpoly_run.mdt"
@@ -359,20 +379,42 @@ def build_parsers() -> ArgumentParser:
     element = subparsers.add_parser(
         "element",
         help="View chemical element information.",
-        description="MDANSE stores chemical element properties in a central database. "
-        "When you convert trajectories, the properties of the relevant atoms are written into the trajectory file. "
-        "This command can be used to list, find and view atom properties in specific files.",
+        formatter_class=RawDescriptionHelpFormatter,
+        description=textwrap.dedent(
+            """
+        MDANSE has its own database of chemical elements, which
+        can be modified and extended by users.
+        When you convert trajectories, the properties of the relevant atoms
+        are written into the trajectory file from the current version of
+        the database.
+        You can view the atom properties in the database and in the trajectory
+        files using the 'mdanse element' command.
+
+        Examples:
+        ---------
+            mdanse element -n Au
+                Shows the properties of gold (Au) stored in the MDANSE database.
+            mdanse element --traj some_AuAg_alloy.mdt -n Au
+                Shows the properties of gold (Au) stored in the trajectory file.
+            mdanse element -s Li
+                Shows all the elements with 'Li' in their name (e.g. Li, Li6, Li7)
+        """
+        ),
     )
     element.add_argument(
-        "element_name",
+        "-n",
+        "--name",
         help="Symbol of the chemical element or isotope, e.g. Au, Li7, etc.",
-        default="Xx",
     )
     element.add_argument(
         "-t", "--traj", help="Use this trajectory file as atom database."
     )
     element.add_argument(
-        "-s", "--search", help="Find chemical elements with matching names."
+        "-s",
+        "--search",
+        action="store_true",
+        default=False,
+        help="Find chemical elements with matching names.",
     )
     element.add_argument(
         "-l",
