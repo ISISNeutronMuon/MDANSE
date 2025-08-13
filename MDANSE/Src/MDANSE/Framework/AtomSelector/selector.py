@@ -247,26 +247,34 @@ class ReusableSelection:
 
         """
         json_setting = json.loads(json_string)
-        for k0, v0 in json_setting.items():
-            if not isinstance(v0, dict):
-                raise TypeError(f"Selection {v0} is not a dictionary.")
-            self.set_selection(number=k0, function_parameters=v0)
+        self.load_from_dict(json_setting)
 
     def load_from_json_file(self, filename: Path | str):
         """Load a selection from a JSON text file.
 
         Parameters
         ----------
-        filename : Union[Path, str]
+        filename : Path | str
             name of a text file containing just a selection in JSON format
 
         """
         with open(filename) as source:
             json_setting = json.load(source)
-            for k0, v0 in json_setting.items():
-                if not isinstance(v0, dict):
-                    raise TypeError(f"Selection {v0} is not a dictionary.")
-                self.set_selection(number=k0, function_parameters=v0)
+            self.load_from_dict(json_setting)
+
+    def load_from_dict(self, value: dict) -> None:
+        """Load a selection from a dictionary.
+
+        Parameters
+        ----------
+        value : dict
+            Dictionary of substitutions.
+
+        """
+        for k0, v0 in value.items():
+            if not isinstance(v0, dict):
+                raise TypeError(f"Selection {v0} is not a dictionary.")
+            self.set_selection(number=k0, function_parameters=v0)
 
     def save_to_json_file(self, filename: Path | str):
         """Output all the operations as a JSON string.
