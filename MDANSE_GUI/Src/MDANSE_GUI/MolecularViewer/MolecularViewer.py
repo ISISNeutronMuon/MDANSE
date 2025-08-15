@@ -334,7 +334,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         coords = self._reader.read_atom_trajectory(index)
         idxs1 = np.linspace(0, 1, num=coords.shape[0])
-        idxs2 = np.linspace(0, 1, num=1000)
+        idxs2 = np.linspace(0, 1, num=coords.shape[0] * 10)
 
         f_x = CubicSpline(idxs1, coords[:, 0])
         f_y = CubicSpline(idxs1, coords[:, 1])
@@ -359,7 +359,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         tubeFilter = vtk.vtkTubeFilter()
         tubeFilter.SetInputData(polyData)
-        tubeFilter.SetRadius(radius / 2)
+        tubeFilter.SetRadius(0.01)
         tubeFilter.SetNumberOfSides(50)
         tubeFilter.Update()
 
