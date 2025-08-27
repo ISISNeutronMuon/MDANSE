@@ -54,6 +54,7 @@ class ASE(Converter):
     standard input file names.
     """
 
+    category = ("Converters", "General")
     label = "ASE"
 
     settings = collections.OrderedDict()

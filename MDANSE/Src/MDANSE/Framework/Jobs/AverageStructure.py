@@ -43,10 +43,7 @@ class AverageStructure(IJob):
 
     label = "Average Structure"
 
-    category = (
-        "Analysis",
-        "Structure",
-    )
+    category = ("Trajectory",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 

@@ -39,6 +39,7 @@ class MDTraj(Converter):
     trajectories will be stitched together.
     """
 
+    category = ("Converters", "General")
     label = "MDTraj"
     settings = collections.OrderedDict()
 

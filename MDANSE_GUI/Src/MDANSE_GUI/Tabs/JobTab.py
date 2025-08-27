@@ -212,7 +212,7 @@ class JobTab(GeneralTab):
             session=session,
             settings=settings,
             logger=logger,
-            model=kwargs.get("model", JobTree(filter="Analysis")),
+            model=kwargs.get("model", JobTree(filter="Converters")),
             combo_model=kwargs.get("combo_model", None),
             instrument_model=kwargs.get("instrument_model", None),
             view=ActionsTree(),
@@ -232,6 +232,7 @@ class JobTab(GeneralTab):
             action=action,
         )
         action.set_settings(the_tab._settings)
+        the_tab._view.expand(the_tab._model.index(0, 0))
         return the_tab
 
 

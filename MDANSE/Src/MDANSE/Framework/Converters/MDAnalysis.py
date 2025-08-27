@@ -44,6 +44,7 @@ class MDAnalysis(Converter):
     <a href="https://userguide.mdanalysis.org/stable/formats/index.html#formats">formats</a>.
     """
 
+    category = ("Converters", "General")
     label = "MDAnalysis"
     settings = collections.OrderedDict()
     settings["topology_file"] = (

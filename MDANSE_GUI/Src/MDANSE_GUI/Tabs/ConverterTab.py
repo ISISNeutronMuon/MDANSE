@@ -112,7 +112,7 @@ class ConverterTab(GeneralTab):
             session=session,
             settings=settings,
             logger=logger,
-            model=kwargs.get("model", JobTree(parent_class=Converter)),
+            model=kwargs.get("model", JobTree(parent_class=Converter, hidden_levels=1)),
             view=ActionsTree(),
             visualiser=action,
             layout=partial(
@@ -130,6 +130,7 @@ class ConverterTab(GeneralTab):
             action=action,
         )
         action.set_settings(the_tab._settings)
+        the_tab._view.expandAll()
         return the_tab
 
 

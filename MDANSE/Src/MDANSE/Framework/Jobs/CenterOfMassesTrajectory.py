@@ -40,10 +40,7 @@ class CenterOfMassesTrajectory(IJob):
 
     label = "Center Of Masses Trajectory"
 
-    category = (
-        "Analysis",
-        "Trajectory",
-    )
+    category = ("Trajectory",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 

@@ -20,6 +20,7 @@ from collections import defaultdict
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
@@ -36,11 +37,17 @@ class JobTree(QStandardItemModel):
     doc_string = Signal(str)
     error = Signal(str)
 
-    def __init__(self, *args, **kwargs):
-        parent_class = kwargs.pop("parent_class", IJob)
+    def __init__(
+        self,
+        *args,
+        parent_class: IJob | Converter = IJob,
+        hidden_levels: int = 0,
+        **kwargs,
+    ):
         filter = kwargs.pop("filter", None)
         super().__init__(*args, **kwargs)
 
+        self._hidden_levels = hidden_levels
         self._nodes = {}  # dict of {number: QStandardItem}
         self._docstrings = {}  # dict of {number: str}
         self._values = {}  # dict of {number: str}
@@ -72,8 +79,9 @@ class JobTree(QStandardItemModel):
 
         cat_dicts = {cat: sorted(cat_dicts[cat]) for cat in sorted(cat_dicts)}
         for cat, vals in cat_dicts.items():
-            for subcat in vals:
-                self.parentsFromCategories((cat, subcat))
+            if filter and cat not in filter:
+                for subcat in vals:
+                    self.parentsFromCategories((cat, subcat))
         for class_name in sorted_keys:
             class_object = full_dict[class_name]
             if class_object.enabled:
@@ -104,13 +112,14 @@ class JobTree(QStandardItemModel):
         except TypeError:
             pass
         if hasattr(thing, "category"):
+            trimmed_category = thing.category[self._hidden_levels :]
             if filter:
-                if filter in thing.category:
-                    parent = self.parentsFromCategories(thing.category)
+                if filter not in thing.category:
+                    parent = self.parentsFromCategories(trimmed_category)
                 else:
                     return
             else:
-                parent = self.parentsFromCategories(thing.category)
+                parent = self.parentsFromCategories(trimmed_category)
         else:
             parent = self.invisibleRootItem()
         parent.appendRow(new_node)
