@@ -32,10 +32,7 @@ class UnfoldedTrajectory(IJob):
 
     enabled = False
 
-    category = (
-        "Analysis",
-        "Trajectory",
-    )
+    category = ("Trajectory",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 

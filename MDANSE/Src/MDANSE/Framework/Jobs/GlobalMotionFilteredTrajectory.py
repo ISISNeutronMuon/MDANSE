@@ -51,10 +51,7 @@ class GlobalMotionFilteredTrajectory(IJob):
 
     label = "Global Motion Filtered Trajectory"
 
-    category = (
-        "Analysis",
-        "Trajectory",
-    )
+    category = ("Trajectory",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 

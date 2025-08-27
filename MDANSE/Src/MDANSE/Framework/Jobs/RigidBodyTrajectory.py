@@ -50,7 +50,6 @@ class RigidBodyTrajectory(IJob):
     label = "Rigid Body Trajectory"
 
     category = (
-        "Analysis",
         "Trajectory",
     )
 
