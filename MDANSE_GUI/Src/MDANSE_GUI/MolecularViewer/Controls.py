@@ -266,7 +266,7 @@ class ViewerControls(QWidget):
 
         self.axes_combo = QComboBox()
         self.axes_combo.addItems(["none", "cartesian", "direct", "reciprocal"])
-        self.axes_combo.setCurrentIndex(1)
+        self.axes_combo.setCurrentIndex(0)
         label = QLabel("axes:")
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout5.addWidget(label, 1, 0, 1, 1)

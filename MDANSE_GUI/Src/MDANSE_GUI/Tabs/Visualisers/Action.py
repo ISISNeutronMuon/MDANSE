@@ -308,8 +308,8 @@ class Action(QWidget):
                     input_widget.value_updated.connect(self.show_output_prediction)
                 LOG.info(f"Set up the right widget for {key}")
             # self.handlers[key] = data_handler
-            self._has_been_initialised = True
-            self.check_inputs()
+        self._has_been_initialised = True
+        self.check_inputs()
 
         if self._use_preview and "preview_box" not in self._widgets_in_layout:
             self._preview_box = QTextEdit(self)
@@ -348,7 +348,7 @@ class Action(QWidget):
         self.apply_instrument()
         self.allow_execution()
 
-    def check_inputs(self):
+    def check_inputs(self) -> bool:
         configured = False
         iterations = 0
         while not configured:
@@ -357,8 +357,9 @@ class Action(QWidget):
                 widget.value_from_configurator()
                 configured = configured and widget._configurator.is_configured()
             iterations += 1
-            if iterations > 5:
+            if iterations > 3:
                 break
+        return configured
 
     @Slot()
     def test_file_outputs(self):

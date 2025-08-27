@@ -41,6 +41,7 @@ class View3D(QWidget):
         layout.addWidget(controls)
         self._viewer = viewer
         self._controls = controls
+        self._controls.toggle_projection()
 
     @Slot(tuple)
     def update_panel(self, data: tuple):
