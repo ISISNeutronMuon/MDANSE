@@ -54,12 +54,6 @@ class ActionsTree(QTreeView):
         LOG.info(f"tree: clicked on {text}")
         self.jobname_selected.emit(text)
 
-    @Slot(DataTreeItem)
-    def showValidActions(self, item: DataTreeItem):
-        LOG.info(f"Creating model from {item}")
-        new_model = ActionsHolder(item)
-        self.setModel(new_model)
-
     @Slot(QModelIndex)
     def item_picked(self, index: QModelIndex):
         model = self.model()

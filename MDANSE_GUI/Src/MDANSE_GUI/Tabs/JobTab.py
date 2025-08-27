@@ -232,7 +232,7 @@ class JobTab(GeneralTab):
             action=action,
         )
         action.set_settings(the_tab._settings)
-        the_tab._view.expandToDepth(0)
+        the_tab._view.expand(the_tab._model.index(0, 0))
         return the_tab
 
 
