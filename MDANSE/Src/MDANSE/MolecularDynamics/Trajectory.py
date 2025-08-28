@@ -105,8 +105,8 @@ def trajectory_summary(traj: Trajectory):
 def chemical_system_summary(cs: ChemicalSystem) -> str:
     text = "\n ==== Chemical System summary ==== \n"
     atoms, counts = np.unique(cs.atom_list, return_counts=True)
-    for ind in range(len(atoms)):
-        text += f"Element: {atoms[ind]}; Count: {counts[ind]}\n"
+    for atom, count in zip(atoms, counts):
+        text += f"Element: {atom}; Count: {count}\n"
     for molname, mollist in cs._clusters.items():
         text += f"Molecule: {molname}; Count: {len(mollist)}\n"
     text += " ===== \n"

@@ -31,6 +31,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.IO.AtomInfo import atom_info
 
 # from MDANSE.GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 
@@ -278,7 +279,7 @@ class ElementButton(QToolButton):
 
     @Slot(str)
     def popIstopeInfo(self, isotope: str):
-        infotext = ATOMS_DATABASE.info(isotope)
+        infotext = atom_info(isotope, database=ATOMS_DATABASE)
         PopupTextbox(self, input_text=infotext)
 
     def contextMenuEvent(self, event):

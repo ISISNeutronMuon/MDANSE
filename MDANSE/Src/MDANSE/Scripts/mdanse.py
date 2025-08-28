@@ -23,11 +23,11 @@ import h5py
 
 import MDANSE
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.Databases import atom_info
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.IO.AtomInfo import atom_info
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import (
     Trajectory,
@@ -128,7 +128,7 @@ def show_single_job(job_name: str):
     else:
         raise KeyError(f"{job_name} is not a converter or analysis included in MDANSE.")
     result = f"{job_name}\n"
-    result += "".join(len(job_name) * ["~"]) + "\n\n"
+    result += "~" * len(job_name) + "\n\n"
     if instance.__doc__:
         result += "\n".join(str(x).lstrip() for x in instance.__doc__.split("\n"))
     if not result.endswith("\n"):
@@ -255,8 +255,8 @@ def build_parsers() -> ArgumentParser:
         Different converters are available in MDANSE,
         depending on the MD engine used to run the simulation.
 
-        Examples:
-        ---------
+        Examples
+        --------
             mdanse convert -l
                 Shows the list of all the available converters.
             mdanse convert -n CP2K

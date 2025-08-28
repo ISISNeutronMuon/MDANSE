@@ -20,7 +20,7 @@ import json
 from collections import defaultdict
 from collections.abc import ItemsView
 from pathlib import Path
-from typing import Any, Optional, SupportsComplex, Union
+from typing import Any, SupportsComplex
 
 from MDANSE.Core.Error import Error
 from MDANSE.Core.Platform import PLATFORM
@@ -82,61 +82,6 @@ def color(color_string: str | None = None):
         raise ValueError(f"{color_string} is not a valid color string.")
 
     return color_string
-
-
-def atom_info(atom: str, database: AtomsDatabase | None = None) -> str:
-    """Return as string all the information about the input atom.
-
-    Parameters
-    ----------
-    atom : str
-        Atom type.
-
-    Returns
-    -------
-    str
-        Multi-line list of all the atom properties.
-
-    """
-    if database is None:
-        database = ATOMS_DATABASE
-    if isinstance(database, AtomsDatabase):
-        atoms = database.atoms
-        properties = database.properties
-        units = database.units
-    else:
-        atoms = database.atoms_in_database
-        properties = database.properties_in_database
-        units = defaultdict(lambda: "none")
-
-    if atom not in atoms:
-        raise KeyError(f"Atom {atom} is not in the atom database {database}.")
-    property_dict = {
-        prop_name: database.get_atom_property(atom, prop_name)
-        for prop_name in properties
-    }
-    # A delimiter line.
-    delimiter = "-" * 70
-    tab_fmt = "{:<20}{!s:>40}{!s:>10}"
-
-    info = [
-        delimiter,
-        f"{atom:^70}",
-        tab_fmt.format("property", "value", "unit"),
-        delimiter,
-    ]
-
-    # The values for all element's properties
-    for pname in sorted(properties):
-        if pname.strip():
-            info.append(
-                tab_fmt.format(pname, property_dict.get(pname), units.get(pname))
-            )
-
-    info.append(delimiter)
-    info = "\n".join(info)
-
-    return info
 
 
 class _Database(metaclass=Singleton):
@@ -630,44 +575,6 @@ class AtomsDatabase(_Database):
 
         """
         return pname in self._properties
-
-    def info(self, atom: str) -> str:
-        """Return as string all the information about the input atom.
-
-        Parameters
-        ----------
-        atom : str
-            Atom type.
-
-        Returns
-        -------
-        str
-            Multi-line list of all the atom properties.
-
-        """
-        # A delimiter line.
-        delimiter = "-" * 70
-        tab_fmt = "{:<20}{!s:>40}{!s:>10}"
-
-        info = [
-            delimiter,
-            f"{atom:^70}",
-            tab_fmt.format("property", "value", "unit"),
-            delimiter,
-        ]
-
-        # The values for all element's properties
-        for pname in sorted(self._properties):
-            info.append(
-                tab_fmt.format(
-                    pname, self._data[atom].get(pname), self._units.get(pname)
-                )
-            )
-
-        info.append(delimiter)
-        info = "\n".join(info)
-
-        return info
 
     def match_numeric_property(
         self,

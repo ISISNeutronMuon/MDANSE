@@ -13,19 +13,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-import json
-from pathlib import Path
 import unittest
-from unittest.mock import patch, mock_open, ANY
+from unittest.mock import patch, mock_open
 
 from MDANSE.Chemistry import (
     ATOMS_DATABASE,
 )
-import MDANSE.Chemistry.Databases as Databases
 from MDANSE.Chemistry.Databases import (
     AtomsDatabaseError
 )
 from MDANSE.IO.IOUtils import MDANSEEncoder
+from MDANSE.IO.AtomInfo import atom_info
 
 
 class TestAtomsDatabase(unittest.TestCase):
@@ -202,22 +200,16 @@ class TestAtomsDatabase(unittest.TestCase):
         self.assertFalse(ATOMS_DATABASE.has_property("INVALID"))
 
     def test_info(self):
-        info_text = ATOMS_DATABASE.info("H")
-        properties = []
-        for nline, line in enumerate(info_text.split('\n')):
-            if nline == 1:
-                self.assertEqual(line.strip(), "H")
-            elif nline ==2:
-                tokens = line.split()
-                for keyword in {"property", "value", "unit"}:
-                    self.assertIn(keyword, tokens)
-            elif nline > 3:
-                tokens = line.split()
-                if len(tokens) > 2:
-                    properties.append(tokens[0])
-        for keyword in self.properties:
-            self.assertIn(keyword, properties)
-
+        info_text = atom_info("H", database=ATOMS_DATABASE)
+        lines = iter(info_text.splitlines())
+        next(lines)
+        self.assertEqual(next(lines).strip(), "H")
+        self.assertTrue({"property", "value", "unit"}.issubset(next(lines).split()))
+        
+        properties = {
+            tokens[0] for line in lines if len(tokens := line.split()) > 2
+        }
+        self.assertTrue(set(self.properties) <= properties)
 
     def test_items(self):
         for (expected_atom, expected_data), (atom, data) in zip(
