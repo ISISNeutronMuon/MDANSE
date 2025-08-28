@@ -202,8 +202,9 @@ class ResolutionCalculator:
             except ValueError:
                 self._fwhm_value = 0.0
             else:
-                self.set_peak_parameter(mu * factor, "mu")
-                self.set_peak_parameter(sigma * factor, "sigma")
+                if "deal" not in self._resolution_name:
+                    self.set_peak_parameter(mu * factor, "mu")
+                    self.set_peak_parameter(sigma * factor, "sigma")
         extra_width = abs(self._fwhm_value)
         if extra_width <= 1e-14:
             extra_width = 1
