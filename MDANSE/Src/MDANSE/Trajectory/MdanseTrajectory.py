@@ -496,7 +496,11 @@ class MdanseTrajectory(TrajectoryFile):
         """
         if "atom_database" not in self._h5_file:
             return ATOMS_DATABASE.atoms
-        return list(self._h5_file["/atom_database"].keys())
+        return [
+            key
+            for key in self._h5_file["/atom_database"].keys()
+            if "property_" not in key
+        ]
 
     def properties_in_database(self) -> list[str]:
         """Return the list of all the properties in the trajectory's database.
