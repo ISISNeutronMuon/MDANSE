@@ -77,6 +77,17 @@ it directly from GitHub using pip:
 python3 -m pip install "git+https://github.com/ISISNeutronMuon/MDANSE@protos#egg=MDANSE&subdirectory=MDANSE"
 python3 -m pip install "git+https://github.com/ISISNeutronMuon/MDANSE@protos#egg=MDANSE_GUI&subdirectory=MDANSE_GUI"
 ```
+## Installation: optional dependencies
+
+If you prefer running MDANSE via scripts in the command line instead of using
+the GUI, you can install MDANSE with additional dependencies for CLI runs.
+This can be done using the command
+```
+pip install MDANSE[cli]
+```
+At the moment, the only additional package that will be added is
+``tqdm``, which will then be used to display
+progress bars for MDANSE scripts running in the shell.
 
 ## Quick start: the workflow
 
