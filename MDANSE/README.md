@@ -72,6 +72,19 @@ pip install --upgrade pip
 ```
 and try again.
 
+### Optional dependencies
+
+Most users prefer to install [MDANSE_GUI](https://pypi.org/project/MDANSE-GUI/) alongside MDANSE,
+and use the GUI to convert, analyse and view trajectories and to visualise results.
+
+Users who prefer running MDANSE scripts in the command line can include optional dependencies
+by installing MDANSE with
+```
+pip install mdanse[cli]
+```
+This will install [tqdm](https://pypi.org/project/tqdm/), which will then be used to display
+a progress bar when an MDANSE script is running in the shell.
+
 ## Quick start: workflow
 
 The typical workflow of MDANSE:

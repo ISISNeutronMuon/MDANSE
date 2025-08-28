@@ -59,6 +59,22 @@ Use ``pip`` to install the MDANSE package from the specified GitHub repository:
 The MDANSE package contains all the code needed to perform trajectory conversion
 and analysis using MDANSE, but none of the visualisation tools.
 
+Optional Dependencies
+'''''''''''''''''''''
+
+If you intend to use MDANSE in the command line rather than in the GUI, you can
+include optional dependencies targeted specifically at Command Line Interface (CLI)
+users:
+
+.. code-block:: bash
+
+   pip install "MDANSE[cli]"
+
+At the moment, this is equivalent to running ``pip install MDANSE tqdm``.
+You can run MDANSE scripts in the command line independent of whether ``tqdm``
+is installed or not, but if ``tqdm`` is present, it will be used to provide
+a CLI progress bar for MDANSE jobs.
+
 Install MDANSE_GUI Package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
