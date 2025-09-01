@@ -41,12 +41,16 @@ class InterpolationOrderWidget(WidgetBase):
         trajectory = configurator.configurable[configurator.dependencies["trajectory"]][
             "instance"
         ]
+        label = QLabel("Interpolation order", self._base)
+        self.numerator = QLabel("st order")
         if not trajectory.has_variable("velocities"):
             self._field.setMinimum(1)
             self._field.setValue(3)
-        label = QLabel("Interpolation order", self._base)
-        self.numerator = QLabel("st order")
-        self.adjust_numerator_and_update(3)
+            self.adjust_numerator_and_update(3)
+        else:
+            self._field.setMinimum(0)
+            self._field.setValue(0)
+            self.adjust_numerator_and_update(0)
 
         self._layout.addWidget(label)
         self._layout.addWidget(self._field)
