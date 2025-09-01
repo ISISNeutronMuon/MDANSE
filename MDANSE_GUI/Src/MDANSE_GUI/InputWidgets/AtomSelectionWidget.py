@@ -558,16 +558,25 @@ class AtomSelectionWidget(WidgetBase):
         trajectory = traj_config["instance"]
         self._trajectory_path = Path(traj_filename).parent
         self.selection_model = SelectionModel(trajectory)
+        self.selection_model.clear()
+        self.selection_model.accept_from_widget(
+            '{"function_name": "select_all", "operation_type": "union"}'
+        )
+        self.selection_model.accept_from_widget(
+            '{"function_name": "select_dummy", "operation_type": "difference"}'
+        )
         if use_list_view:
             self._field.setModel(self.selection_model)
-        self.helper = self.create_helper((traj_filename, trajectory))
+        self.helper = None
+        self.helper_settings = (traj_filename, trajectory)
+        self.helper_save_button = False
         helper_button = QPushButton(self._push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
         self._layout.addWidget(self._field)
         self._layout.addWidget(helper_button)
         if use_list_view:
             self._layout.addWidget(load_button)
-            self.helper.create_optional_save_button()
+            self.helper_save_button = True
         self.update_labels()
         self.updateValue()
         self._field.setToolTip(self._tooltip_text)
@@ -597,6 +606,10 @@ class AtomSelectionWidget(WidgetBase):
     @Slot()
     def helper_dialog(self) -> None:
         """Open the helper dialog."""
+        if self.helper is None:
+            self.helper = self.create_helper(self.helper_settings)
+            if self.helper_save_button:
+                self.helper.create_optional_save_button()
         if self.helper.isVisible():
             geometry = self.helper.saveGeometry()
             self.helper.previous_geometry = geometry
