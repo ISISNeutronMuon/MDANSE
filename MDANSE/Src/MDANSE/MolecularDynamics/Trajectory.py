@@ -151,11 +151,11 @@ class Trajectory:
     def atom_types(self) -> Sequence[str]:
         """Chemical elements of ALL atoms, with transmutation applied."""
         if not self._transmutation:
-            return always_iterable(self._trajectory.chemical_system.atom_list)
+            return self._trajectory.chemical_system.atom_list
         temp = copy.deepcopy(self._trajectory.chemical_system.atom_list)
         for index, type in self._transmutation.items():
             temp[index] = type
-        return always_iterable(temp)
+        return temp
 
     @cached_property
     def element_from_label(self) -> dict[str, str]:
@@ -286,12 +286,12 @@ class Trajectory:
         weights = []
         for n_elements, atm_names, atm_elements in [
             (self.get_natoms(),
-             always_iterable(self.selection_getter(self.atom_names)),
-             always_iterable(self.selection_getter(self.atom_types))),
+             self.selection_getter(self.atom_names),
+             self.selection_getter(self.atom_types)),
             (
                 self.get_all_natoms(),
-                always_iterable(self.atom_names),
-                always_iterable(self.atom_types),
+                self.atom_names,
+                self.atom_types,
             ),
         ]:
             w = defaultdict(float)
@@ -313,7 +313,7 @@ class Trajectory:
 
         """
         if self._selection:
-            return Counter(self.selection_getter(self.atom_names))
+            return Counter(always_iterable(self.selection_getter(self.atom_names)))
         return Counter(self.atom_names)
 
     def get_all_natoms(self) -> dict[str, int]:
