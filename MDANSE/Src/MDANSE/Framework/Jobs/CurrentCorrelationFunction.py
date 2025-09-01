@@ -19,6 +19,7 @@ import collections
 from math import sqrt
 
 import numpy as np
+from more_itertools import always_iterable
 from scipy.signal import correlate
 
 from MDANSE.Framework.AtomGrouping.grouping import (
@@ -177,7 +178,9 @@ class CurrentCorrelationFunction(IJob):
 
         self._nFrames = self.configuration["frames"]["n_frames"]
         self._elements = set(
-            self.trajectory.selection_getter(self.trajectory.atom_names)
+            always_iterable(
+                self.trajectory.selection_getter(self.trajectory.atom_names)
+            )
         )
         self.labels = pair_labels(
             self.trajectory,

@@ -21,6 +21,7 @@ import json
 
 import h5py
 import numpy as np
+from more_itertools import always_iterable
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Formats.HDFFormat import write_metadata
@@ -106,7 +107,9 @@ class TrajectoryFilter(IJob):
 
         self._atoms = self.trajectory.atom_names
 
-        self._selected_atoms = self.trajectory.selection_getter(self._atoms)
+        self._selected_atoms = list(
+            always_iterable(self.trajectory.selection_getter(self._atoms))
+        )
 
         # This stores the trajectory (position array) of atoms by x, y, z component, to be filtered
         self.atomic_trajectory_array = np.zeros(

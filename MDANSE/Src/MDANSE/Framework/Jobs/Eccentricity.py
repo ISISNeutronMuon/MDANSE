@@ -18,6 +18,7 @@ from __future__ import annotations
 import collections
 
 import numpy as np
+from more_itertools import always_iterable
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
@@ -82,7 +83,9 @@ class Eccentricity(IJob):
         self._selectionMasses = np.array(
             [
                 self.trajectory.get_atom_property(element, "atomic_weight")
-                for element in self.trajectory.selection_getter(self._atoms)
+                for element in always_iterable(
+                    self.trajectory.selection_getter(self._atoms)
+                )
             ]
         )
 

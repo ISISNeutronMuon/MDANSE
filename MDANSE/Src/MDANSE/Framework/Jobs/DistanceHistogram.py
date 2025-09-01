@@ -18,6 +18,7 @@ from __future__ import annotations
 import collections
 
 import numpy as np
+from more_itertools import always_iterable
 
 from MDANSE.Framework.AtomGrouping.grouping import (
     pair_labels,
@@ -121,7 +122,9 @@ class DistanceHistogram(IJob):
         self.indexToSymbol = np.array(
             [
                 self.selectedElements.index(name)
-                for name in self.trajectory.selection_getter(self.trajectory.atom_names)
+                for name in always_iterable(
+                    self.trajectory.selection_getter(self.trajectory.atom_names)
+                )
             ],
             dtype=np.int32,
         )
