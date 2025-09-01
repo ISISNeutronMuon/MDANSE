@@ -160,7 +160,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atoms_visible = True
         self._bonds_visible = True
         self._cell_visible = True
-        self.current_axes_type = "none"
+        self.current_axes_type = "cartesian"
         self.atom_label_type = "none"
 
         self._iren.Initialize()
