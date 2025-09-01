@@ -20,6 +20,7 @@ import math
 from collections import Counter, defaultdict
 from collections.abc import Sequence
 from functools import cached_property
+from more_itertools import always_iterable
 from operator import itemgetter
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -150,11 +151,11 @@ class Trajectory:
     def atom_types(self) -> Sequence[str]:
         """Chemical elements of ALL atoms, with transmutation applied."""
         if not self._transmutation:
-            return self._trajectory.chemical_system.atom_list
+            return always_iterable(self._trajectory.chemical_system.atom_list)
         temp = copy.deepcopy(self._trajectory.chemical_system.atom_list)
         for index, type in self._transmutation.items():
             temp[index] = type
-        return temp
+        return always_iterable(temp)
 
     @cached_property
     def element_from_label(self) -> dict[str, str]:
@@ -222,15 +223,15 @@ class Trajectory:
     def unique_elements(self) -> set[str]:
         """Set of unique chemical elements in the current selection."""
         if self._selection:
-            return set(self.selection_getter(self.atom_types))
-        return set(self.atom_types)
+            return set(always_iterable(self.selection_getter(self.atom_types)))
+        return set(always_iterable(self.atom_types))
 
     @property
     def unique_names(self) -> set[str]:
         """Set of unique atom labels in the current selection."""
         if self._selection:
-            return set(self.selection_getter(self.atom_names))
-        return set(self.atom_names)
+            return set(always_iterable(self.selection_getter(self.atom_names)))
+        return set(always_iterable(self.atom_names))
 
     def set_transmutation(self, changed_atoms: dict[int, str]):
         """Apply transmutation to atom types in the trajectory.
@@ -284,15 +285,13 @@ class Trajectory:
         """
         weights = []
         for n_elements, atm_names, atm_elements in [
-            (
-                self.get_natoms(),
-                self.selection_getter(self.atom_names),
-                self.selection_getter(self.atom_types),
-            ),
+            (self.get_natoms(),
+             always_iterable(self.selection_getter(self.atom_names)),
+             always_iterable(self.selection_getter(self.atom_types))),
             (
                 self.get_all_natoms(),
-                self.atom_names,
-                self.atom_types,
+                always_iterable(self.atom_names),
+                always_iterable(self.atom_types),
             ),
         ]:
             w = defaultdict(float)
@@ -351,11 +350,8 @@ class Trajectory:
 
         """
         all_elements = np.array(self.atom_names)
-        unique_elements = set(self.selection_getter(all_elements))
-        indices_per_element = {
-            element: list(np.where(all_elements == element)[0])
-            for element in unique_elements
-        }
+        unique_elements = set(always_iterable(self.selection_getter(all_elements)))
+        indices_per_element = {element: list(np.where(all_elements==element)[0]) for element in unique_elements}
         return indices_per_element
 
     def guess_correct_format(self) -> ValidFormats:
