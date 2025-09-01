@@ -286,8 +286,8 @@ class Trajectory:
         weights = []
         for n_elements, atm_names, atm_elements in [
             (self.get_natoms(),
-             self.selection_getter(self.atom_names),
-             self.selection_getter(self.atom_types)),
+             always_iterable(self.selection_getter(self.atom_names)),
+             always_iterable(self.selection_getter(self.atom_types))),
             (
                 self.get_all_natoms(),
                 self.atom_names,
