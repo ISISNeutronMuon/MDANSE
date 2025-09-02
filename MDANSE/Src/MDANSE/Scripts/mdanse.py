@@ -116,7 +116,7 @@ def show_jobs(*, show_converters: bool = False):
         for job_name in IJob.indirect_subclasses():
             instance = IJob.create(job_name)
             if instance.category[0] != "Converters" and instance.enabled:
-                analyses.append(list(getattr(instance, "category", [])) + [job_name])
+                analyses.append([*getattr(instance, "category", []), job_name])
         output = "\n".join(
             [
                 "==Analysis==",
@@ -253,7 +253,6 @@ def _converter_parser(subparsers: _SubParsersAction) -> Any:
         "-l",
         "--list",
         action="store_true",
-        default=False,
         help="List all the converter types.",
     )
     converter.add_argument(
@@ -294,7 +293,6 @@ def _analysis_parser(subparsers: _SubParsersAction) -> Any:
         "-l",
         "--list",
         action="store_true",
-        default=False,
         help="List all the analysis types.",
     )
     analysis.add_argument(
@@ -367,7 +365,6 @@ def _results_parser(subparsers: _SubParsersAction) -> Any:
         "-v",
         "--verbose",
         action="store_true",
-        default=False,
         help="Show the full contents each header entry. False by default.",
     )
     return results
@@ -412,14 +409,12 @@ def _element_parser(subparsers: _SubParsersAction) -> Any:
         "-s",
         "--search",
         action="store_true",
-        default=False,
         help="Find chemical elements with matching names.",
     )
     element.add_argument(
         "-l",
         "--list",
         action="store_true",
-        default=False,
         help="List all the chemical elements in the database.",
     )
     return element
