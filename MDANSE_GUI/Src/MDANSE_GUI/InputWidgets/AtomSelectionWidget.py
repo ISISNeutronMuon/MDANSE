@@ -580,6 +580,7 @@ class AtomSelectionWidget(WidgetBase):
         self.update_labels()
         self.updateValue()
         self._field.setToolTip(self._tooltip_text)
+        self.selection_model.selection_changed.connect(self.updateValue)
 
     def create_helper(
         self,
