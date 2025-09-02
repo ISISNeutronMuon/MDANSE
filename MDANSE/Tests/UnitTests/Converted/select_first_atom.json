@@ -1,0 +1,1 @@
+{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_dummy", "operation_type": "difference"}, "2": {"function_name": "select_atoms", "index_list": [0], "operation_type": "intersection"}}
