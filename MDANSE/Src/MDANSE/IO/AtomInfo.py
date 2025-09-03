@@ -45,7 +45,7 @@ def atom_info(atom: str, database: AtomsDatabase | Trajectory | None = None) -> 
         units = database.units
     else:
         atoms = database.atoms_in_database
-        properties = database.properties_in_database
+        properties = database.properties
         units = defaultdict(lambda: "none")
 
     if atom not in atoms:

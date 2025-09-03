@@ -717,7 +717,7 @@ class Trajectory:
         """
         return {
             property_name: self.get_atom_property(symbol, property_name)
-            for property_name in self.properties_in_database
+            for property_name in self.properties
         }
 
     @property
@@ -735,7 +735,7 @@ class Trajectory:
         return self._trajectory.atoms_in_database()
 
     @property
-    def properties_in_database(self) -> list[str]:
+    def properties(self) -> list[str]:
         """Return the list of atom properties provided by the trajectory.
 
         Here, it defaults to the central atom property database.
@@ -746,7 +746,7 @@ class Trajectory:
             List of atom property names that can be accessed.
 
         """
-        return self._trajectory.properties_in_database()
+        return self._trajectory.properties()
 
     @property
     def chemical_system(self) -> ChemicalSystem:
@@ -846,7 +846,7 @@ def create_average_atom(
     database: Trajectory,
     radius_padding: float = 0.0,
 ):
-    all_properties = database.properties_in_database
+    all_properties = database.properties
     values = {}
     for property in all_properties:
         temp = []

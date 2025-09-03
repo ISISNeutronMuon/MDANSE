@@ -502,7 +502,7 @@ class MdanseTrajectory(TrajectoryFile):
             if "property_" not in key
         ]
 
-    def properties_in_database(self) -> list[str]:
+    def properties(self) -> list[str]:
         """Return the list of all the properties in the trajectory's database.
 
         Returns

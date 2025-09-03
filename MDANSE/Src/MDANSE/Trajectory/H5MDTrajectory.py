@@ -510,7 +510,7 @@ class H5MDTrajectory(TrajectoryFile):
         """
         return ATOMS_DATABASE.atoms
 
-    def properties_in_database(self) -> list[str]:
+    def properties(self) -> list[str]:
         """Return the list of atom properties provided by the trajectory.
 
         Here, it defaults to the central atom property database.

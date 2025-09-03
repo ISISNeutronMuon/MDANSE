@@ -59,35 +59,25 @@ class Configurable:
         if settings is not None:
             self.set_settings(settings)
 
-        if trajectory_input == "mdmc":
-            self.mdmc_trajectory_input()
-        elif trajectory_input == "mock":
-            self.mock_trajectory_input()
+        self.trajectory_type = trajectory_input
 
-    def mdmc_trajectory_input(self):
-        """Remove the hdf_trajectory (file-based) from settings,
-        and introduce an MDMC trajectory instead.
-        """
-        for key, value in self.settings.items():
-            if key == "trajectory":
-                if value[0] == "HDFTrajectoryConfigurator":
-                    self.settings[key] = ("MDMCTrajectoryConfigurator", {})
-
-    def mock_trajectory_input(self):
-        """Remove the hdf_trajectory (file-based) from settings,
-        and introduce a mock trajectory instead.
-        """
-        for key, value in self.settings.items():
-            if key == "trajectory":
-                if value[0] == "HDFTrajectoryConfigurator":
-                    self.settings[key] = ("MockTrajectoryConfigurator", {})
+    def replace_trajectory(self) -> tuple[str, dict[str, str]]:
+        """Return a replacement configurator type for trajectory, if requested."""
+        if self.trajectory_type == "mdmc":
+            return ("MDMCTrajectoryConfigurator", {})
+        if self.trajectory_type == "mock":
+            return ("MockTrajectoryConfigurator", {})
 
     def build_configuration(self):
         from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
         self._configuration.clear()
 
-        for name, (typ, kwds) in list(self.settings.items()):
+        for name, (orig_typ, orig_kwds) in list(self.settings.items()):
+            if name == "trajectory" and self.trajectory_type != "mdanse":
+                typ, kwds = self.replace_trajectory()
+            else:
+                typ, kwds = orig_typ, orig_kwds
             try:
                 self._configuration[name] = IConfigurator.create(
                     typ, name, configurable=self, **kwds

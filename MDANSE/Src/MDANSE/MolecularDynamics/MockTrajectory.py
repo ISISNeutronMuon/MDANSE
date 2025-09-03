@@ -308,7 +308,7 @@ class MockTrajectory:
     def atoms_in_database(self) -> list[str]:
         return ATOMS_DATABASE.atoms
 
-    def properties_in_database(self) -> list[str]:
+    def properties(self) -> list[str]:
         return ATOMS_DATABASE.properties
 
     def unit_cell(self, frame: int) -> UnitCell:

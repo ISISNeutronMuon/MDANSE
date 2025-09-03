@@ -110,7 +110,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         if value in self._aliases:
             value = self._aliases[value]
 
-        if value not in self._trajectory.properties_in_database:
+        if value not in self._trajectory.properties:
             self.error_status = (
                 f"weight {value} is not registered as a valid numeric property."
             )

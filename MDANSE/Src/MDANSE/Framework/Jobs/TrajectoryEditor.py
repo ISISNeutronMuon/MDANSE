@@ -54,7 +54,7 @@ class TrajectoryEditor(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "default": (0, -1, 1)},
+        {"dependencies": {"trajectory": "trajectory"}, "default": (0, 1, 1)},
     )
     settings["unit_cell"] = (
         "UnitCellConfigurator",
