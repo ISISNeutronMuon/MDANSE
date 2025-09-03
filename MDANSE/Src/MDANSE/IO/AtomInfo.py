@@ -40,13 +40,12 @@ def atom_info(atom: str, database: AtomsDatabase | Trajectory | None = None) -> 
     if database is None:
         database = ATOMS_DATABASE
     if isinstance(database, AtomsDatabase):
-        atoms = database.atoms
-        properties = database.properties
         units = database.units
     else:
-        atoms = database.atoms_in_database
-        properties = database.properties
         units = defaultdict(lambda: "none")
+
+    properties = database.properties
+    atoms = database.atoms
 
     if atom not in atoms:
         raise KeyError(f"Atom {atom} is not in the atom database {database}.")

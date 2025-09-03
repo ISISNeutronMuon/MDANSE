@@ -305,7 +305,7 @@ class MockTrajectory:
     def get_atom_property(self, atom_symbol: str, atom_property: str):
         return ATOMS_DATABASE.get_atom_property(atom_symbol, atom_property)
 
-    def atoms_in_database(self) -> list[str]:
+    def atoms(self) -> list[str]:
         return ATOMS_DATABASE.atoms
 
     def properties(self) -> list[str]:

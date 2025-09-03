@@ -160,7 +160,7 @@ class AtomTransmutationConfigurator(IConfigurator):
 
         elements = set(value.values())
         for element in elements:
-            if (element not in traj_config["instance"].atoms_in_database) and (
+            if (element not in traj_config["instance"].atoms) and (
                 element not in ATOMS_DATABASE.atoms
             ):
                 self.error_status = (

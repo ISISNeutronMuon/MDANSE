@@ -178,10 +178,7 @@ def execute_element(args: Namespace):
     match_str = args.search
     list_flag = args.list
     if list_flag:
-        if hasattr(database, "atoms_in_database"):
-            std_output = database.atoms_in_database
-        else:
-            std_output = database.atoms
+        std_output = database.atoms
     elif match_str:
         std_output = [name for name in database.atoms if element in name]
         if not std_output:

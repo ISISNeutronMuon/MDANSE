@@ -699,7 +699,7 @@ class Trajectory:
         return self._atom_cache[(atom_symbol, atom_property)]
 
     def has_atom(self, symbol: str):
-        return symbol in self.atoms_in_database
+        return symbol in self.atoms
 
     def get_property_dict(self, symbol: str) -> dict[str, Any]:
         """Returns a dictionary of all the properties of an atom type.
@@ -721,7 +721,7 @@ class Trajectory:
         }
 
     @property
-    def atoms_in_database(self) -> list[str]:
+    def atoms(self) -> list[str]:
         """Return the names of atoms defined in the atom property database.
 
         Here, it defaults to the central atom property database.
