@@ -222,6 +222,19 @@ class MolecularViewer(QtWidgets.QWidget):
 
     @Slot()
     def save_to_file(self, filename: str | None = None):
+        upscaler = vtk.vtkRenderLargeImage()
+        upscaler.SetInput(self._renderer)
+        upscaler.SetMagnification(4)
+
+        outputFilename = filename if filename else "/Users/maciej.bartkowiak/talk/for_printing/vtk_screenshot2"
+
+        writer = vtk.vtkPNGWriter()
+        writer.SetFilePrefix(outputFilename)
+        writer.SetInputConnection(upscaler.GetOutputPort())
+        writer.Write()
+
+    @Slot()
+    def save_to_file_lowres(self, filename: str | None = None):
         pdfExporter = vtk.vtkGL2PSExporter()
         pdfExporter.SetRenderWindow(self._iren._RenderWindow)
 
