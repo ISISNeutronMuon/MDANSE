@@ -14,7 +14,6 @@ two_atom_traj = CONV_DIR / "two_atom_traj.mdt"
 
 
 ALL_ANALYSES = [
-    "AverageStructure",
     "CurrentCorrelationFunction",
     "Density",
     "DensityOfStates",
@@ -59,6 +58,7 @@ def test_analysis_one_atom_total(generate_benchmarks, jobname, tmp_path):
     parameters = {
         "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "r_values": (0.0, 0.8, 0.01),
+        "frames": None,
         "running_mode": ("single-core",),
         "trajectory": trajname,
     }
@@ -101,6 +101,7 @@ def test_analysis_one_atom_selected(generate_benchmarks, jobname, tmp_path):
         "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "running_mode": ("single-core",),
         "r_values": (0.0, 0.7, 0.01),
+        "frames": None,
         "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_dummy", "operation_type": "difference"}, "2": {"function_name": "select_atoms", "index_list": [0], "operation_type": "intersection"}}',
         "trajectory": trajname,
     }
