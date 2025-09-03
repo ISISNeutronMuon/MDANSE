@@ -282,7 +282,6 @@ class Heatmap(Plotter):
                     all_datasets[xnum][::-1, :],
                     extent=limits,
                     aspect="auto",
-                    interpolation=None,
                     cmap=plotting_context.colormap,
                 )
                 axes.set_title(all_labels[xnum])
