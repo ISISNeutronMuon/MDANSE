@@ -220,6 +220,21 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.axes_actors = []
 
+    @Slot()
+    def save_to_file(self, filename: str | None = None):
+        pdfExporter = vtk.vtkGL2PSExporter()
+        pdfExporter.SetRenderWindow(self._iren._RenderWindow)
+
+        outputFilename = (
+            filename
+            if filename
+            else "/Users/maciej.bartkowiak/talk/for_printing/vtk_screenshot2"
+        )
+
+        pdfExporter.SetFileFormatToPDF()
+        pdfExporter.SetFilePrefix(outputFilename)
+        pdfExporter.Write()
+
     def update_axes(self):
         def add_arrow(color, direction):
             rot = R.align_vectors(direction, [1, 0, 0])[0].as_matrix()

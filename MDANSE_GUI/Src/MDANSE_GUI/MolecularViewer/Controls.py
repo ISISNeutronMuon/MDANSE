@@ -194,10 +194,13 @@ class ViewerControls(QWidget):
         layout0 = QHBoxLayout(wrapper0)
         bkg_button = QPushButton("Background", wrapper0)
         proj_button = QPushButton("Toggle projection", wrapper0)
+        save_button = QPushButton("Save image", wrapper0)
         bkg_button.clicked.connect(self.set_background_colour)
         proj_button.clicked.connect(self.toggle_projection)
+        save_button.clicked.connect(self.save_screenshot)
         layout0.addWidget(bkg_button)
         layout0.addWidget(proj_button)
+        layout0.addWidget(save_button)
         layout.addWidget(wrapper0)
         # the table of chemical elements
         wrapper1 = QGroupBox("Atom properties", base)
@@ -327,6 +330,10 @@ class ViewerControls(QWidget):
             colour = dialog.currentColor()
             rgb = colour.red() / 255, colour.green() / 255, colour.blue() / 255
             self._viewer._renderer.SetBackground(rgb)
+
+    @Slot()
+    def save_screenshot(self):
+        self._viewer.save_to_file()
 
     @Slot()
     def toggle_projection(self):
