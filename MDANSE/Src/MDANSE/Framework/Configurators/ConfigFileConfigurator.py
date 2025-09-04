@@ -243,7 +243,7 @@ ATOM_TYPES_MAP = {
 
 ATOM_TYPES_MAP.update(
     {
-        f"{key}_w_image": value + ("ix", "iy", "iz")
+        f"{key}_w_image": (*value, "ix", "iy", "iz")
         for key, value in ATOM_TYPES_MAP.items()
     }
 )
@@ -618,7 +618,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         element_map = {
             int(line.split()[0]): match[1].title()
             for line in lines
-            if (match := re.search(r"# ([A-Z][a-z]{,2})\s*$", line, re.I))
+            if (match := re.search(r"# ([A-Z][a-z]{,2})\s*$", line, re.IGNORECASE))
         }
 
         if element_map and self.setdefault("elements", element_map) != element_map:
@@ -708,7 +708,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
             (line,), lines = spy(lines)
 
             # Fix for VMD disobeying spec.
-            if not re.match(r"\s*\d+\s+atoms", line, re.I):
+            if not re.match(r"\s*\d+\s+atoms", line, re.IGNORECASE):
                 comment += " " + next(lines)
 
             for desc in re.finditer(r"(\w+)\s*=\s*(\w+)", comment):

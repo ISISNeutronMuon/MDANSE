@@ -131,7 +131,7 @@ class Grid(Plotter):
             curves = ds.curves_vs_axis(axis_info, max_limit=self._plot_limit)
             nplots += len(curves)
         nplots = min(nplots, self._plot_limit)
-        gridsize = int(math.ceil(nplots**0.5))
+        gridsize = math.ceil(nplots**0.5)
         startnum = 1
         counter = 0
         for databundle in plotting_context.datasets().values():

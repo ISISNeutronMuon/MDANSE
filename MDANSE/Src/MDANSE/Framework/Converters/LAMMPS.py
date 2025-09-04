@@ -869,7 +869,7 @@ class LAMMPSh5md(LAMMPSReader):
         self._nAtoms = len(self._file["/particles/all/position/value"][0])
 
         if len(atom_types) < self._nAtoms:
-            atom_types = int(round(self._nAtoms / len(atom_types))) * list(atom_types)
+            atom_types = round(self._nAtoms / len(atom_types)) * list(atom_types)
 
         self._fractionalCoordinates = False
         cell_edges = self._file["/particles/all/box/edges/value"][0]

@@ -193,8 +193,7 @@ class DataWidget(QWidget):
                     dialect=self._dialect_combo.currentText,
                 )
                 for header, data in self._plotter._formatter.datasets_for_csv():
-                    for line in header:
-                        target.write(line + "\n")
+                    target.writelines(line + "\n" for line in header)
                     for row in data:
                         writer.writerow(row)
         except Exception as err:

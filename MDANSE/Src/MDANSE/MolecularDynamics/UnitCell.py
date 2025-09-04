@@ -48,7 +48,7 @@ class UnitCell:
 
         if self._unit_cell.shape != (3, 3):
             raise ValueError(
-                f"the unit cell must have a shape of 3×3 but {self._unit_cell.shape} was provided."
+                f"the unit cell must have a shape of 3x3 but {self._unit_cell.shape} was provided."
             )
 
         self._inverse_unit_cell = np.linalg.pinv(self._unit_cell)
@@ -63,7 +63,7 @@ class UnitCell:
         return hash(self._unit_cell)
 
     def __repr__(self) -> str:
-        return f"MDANSE.MolecularDynamics.UnitCell.UnitCell({repr(self._unit_cell)})"
+        return f"MDANSE.MolecularDynamics.UnitCell.UnitCell({self._unit_cell!r})"
 
     @property
     def a_vector(self) -> np.ndarray:

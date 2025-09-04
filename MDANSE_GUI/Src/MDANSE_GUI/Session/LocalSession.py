@@ -96,7 +96,7 @@ class LocalSession(QObject):
         return [self._units, self._colours]
 
     @Slot()
-    def save(self, fname: str = None):
+    def save(self, fname: str | None = None):
         all_items = {}
         all_items["paths"] = self._paths
         all_items["units"] = self._units
@@ -117,7 +117,7 @@ class LocalSession(QObject):
         else:
             self._filename = fname
 
-    def load(self, fname: str = None):
+    def load(self, fname: str | None = None):
         if fname is None:
             fname = os.path.join(PLATFORM.application_directory(), "gui_session.json")
         try:

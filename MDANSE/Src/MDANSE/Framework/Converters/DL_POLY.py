@@ -96,7 +96,7 @@ class HistoryFile(dict):
         for _ in range(self["natms"]):
             atom = iter(take(lines_per_atom, self["instance"]))
             atom_info = next(atom)
-            spec, ind, mass, charge, *_rsd = atom_info.split()
+            _spec, ind, mass, charge, *_rsd = atom_info.split()
             ind = int(ind) - 1
             mass = float(mass)
             charge = float(charge)

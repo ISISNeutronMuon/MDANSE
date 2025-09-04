@@ -468,7 +468,7 @@ class Action(QWidget):
             currentpath = Path().absolute()
         else:
             currentpath = Path(self._parent_tab.get_path(self._job_name + "_script"))
-        result, ftype = QFileDialog.getSaveFileName(
+        result, _ftype = QFileDialog.getSaveFileName(
             self,
             "Save job as a Python script",
             str(currentpath),

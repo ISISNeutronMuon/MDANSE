@@ -123,7 +123,7 @@ class InstrumentResolutionWidget(WidgetBase):
                 self._defaults[index] = 0.0
 
     @Slot(str)
-    def change_function(self, function: str, optional_parameters: dict = None):
+    def change_function(self, function: str, optional_parameters: dict | None = None):
         # need to disconnect textChanged otherwise updateValue will
         # be called multiple times as the field data will be changed
         # during the function change

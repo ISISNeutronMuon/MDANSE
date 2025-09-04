@@ -110,7 +110,7 @@ class Eccentricity(IJob):
         mass = np.array(self._selectionMasses)
 
         moi = moment_of_inertia(series, com, mass)
-        pm1, pm2, pm3 = np.linalg.eigvalsh(moi)
+        pm1, _pm2, pm3 = np.linalg.eigvalsh(moi)
         eccentricity = np.sqrt(pm3**2 - pm1**2) / pm3
         return index, eccentricity
 

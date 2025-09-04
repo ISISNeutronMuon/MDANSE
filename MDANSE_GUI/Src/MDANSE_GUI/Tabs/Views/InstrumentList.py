@@ -205,7 +205,7 @@ class InstrumentList(QListView):
                 new_instrument._name_is_fixed = True
 
     @Slot()
-    def save_to_file(self, filename: str = None):
+    def save_to_file(self, filename: str | None = None):
         if filename is None:
             filename = os.path.join(
                 PLATFORM.application_directory(), "InstrumentDefinitions.toml"

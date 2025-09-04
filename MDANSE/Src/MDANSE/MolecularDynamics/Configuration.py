@@ -200,7 +200,7 @@ def continuous_coordinates(
         others = reduce(list.__add__, temp_dict.values(), [])
         for atom in others:
             atom_pool.pop(atom_pool.index(atom))
-        segment = [last_atom] + others
+        segment = [last_atom, *others]
         segments.append(sorted(segment))
     return contiguous_coordinates_real(coords, cell, rcell, segments)
 
@@ -270,8 +270,8 @@ def padded_coordinates(
                 extra_arrays.append(new_points)
                 extra_indices.append(new_indices)
         if len(extra_arrays) > 0:
-            coords = np.vstack([coords] + extra_arrays)
-            all_indices = np.concatenate([all_indices] + extra_indices)
+            coords = np.vstack([coords, *extra_arrays])
+            all_indices = np.concatenate([all_indices, *extra_indices])
     return coords, all_indices
 
 

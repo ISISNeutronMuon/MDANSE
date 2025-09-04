@@ -1032,8 +1032,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
         # Hack for reducing objects resolution when the system is big
         self._resolution = int(np.sqrt(3000000.0 / self._n_atoms))
-        self._resolution = 10 if self._resolution > 10 else self._resolution
-        self._resolution = 4 if self._resolution < 4 else self._resolution
+        self._resolution = min(self._resolution, 10)
+        self._resolution = max(self._resolution, 4)
 
         self._atom_colours = self._colour_manager.reinitialise_from_database(
             self._atoms, self._element_database, self.dummy_size

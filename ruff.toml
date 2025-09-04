@@ -31,8 +31,8 @@ select = [
     # "ARG", # Flake8 unused args
     # "PTH", # Flake8 use pathlib
     "I",   # Isort
-    # "RUF", # Ruff specific
-    # "FURB",# Refurb
+    "RUF", # Ruff specific
+    "FURB",# Refurb
     # "PERF",# Perflint
     # "D",   # Pydocstyle
     "UP",  # Pyupgrade
@@ -47,6 +47,7 @@ ignore = [
     "PLR0913",  # Too many arguments
     "PLR0915",  # Too many statements
     "PLC0415",  # Top-level imports
+    "RUF012",   # Unannotated ClassVar
 ]
 
 [lint.isort]

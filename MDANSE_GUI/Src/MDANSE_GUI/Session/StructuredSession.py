@@ -256,7 +256,7 @@ class SettingsGroup:
 
 
 class SettingsFile:
-    def __init__(self, name, settings_path: str = None):
+    def __init__(self, name, settings_path: str | None = None):
         if settings_path is None:
             settings_path = PLATFORM.application_directory()
         self._top_name = name
@@ -333,7 +333,7 @@ class SettingsFile:
 
     def check_settings(self, group_name, values, comments):
         group = self.group(group_name)
-        unused_values, unused_comments = group.compare(values, comments)
+        unused_values, _unused_comments = group.compare(values, comments)
         for val in unused_values:
             LOG.warning(
                 f"Unnecessary entry {val} in file {self._filename}, group {group._name}"
@@ -365,7 +365,7 @@ class StructuredSession(QObject):
         for _, config in self._configs.items():
             config.save_values()
 
-    def load(self, fname: str = None):
+    def load(self, fname: str | None = None):
         """Included for compatibility with LocalSession only.
         Now each component loads its own config separately."""
 

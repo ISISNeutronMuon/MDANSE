@@ -23,7 +23,7 @@ from .InputFileWidget import InputFileWidget
 
 class MDAnalysisTopologyFileWidget(InputFileWidget):
     def __init__(self, *args, format_options=sorted(mda._PARSERS.keys()), **kwargs):
-        self.format_options = ["AUTO"] + list(format_options)
+        self.format_options = ["AUTO", *format_options]
         super().__init__(*args, **kwargs)
 
     def add_widgets_to_layout(self):

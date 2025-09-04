@@ -92,7 +92,7 @@ class TextFormat(IFormat):
                 tempStr.write(f"run type: {run_instance.__class__.__name__}\n")
                 tempStr.write(f"MDANSE version: {metadata.version('MDANSE')}\n")
                 for key, value in inputs.items():
-                    tempStr.write(f"parameters[{str(key)}] = {str(value)}\n")
+                    tempStr.write(f"parameters[{key}] = {value}\n")
                 tempStr.write("\n\n")
                 real_buffer.seek(0)
                 info = tarfile.TarInfo(name="job_parameters.txt")

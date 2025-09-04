@@ -233,7 +233,7 @@ class InputFactory:
     using the same methods.
     """
 
-    reserved_keywords = [
+    reserved_keywords = (
         "kind",
         "default",
         "label",
@@ -243,7 +243,7 @@ class InputFactory:
         "choices",
         "file_association",
         "file_direction",
-    ]
+    )
 
     def createInputField(*args, **kwargs):
         """Creates an input field for the specified kind of variable.
@@ -302,7 +302,7 @@ class InputFactory:
         be constructed.
         """
         kind = kwargs.get("kind", "String")
-        base, layout = InputFactory.createBase(
+        base, _layout = InputFactory.createBase(
             label=f"<b>MISSING TYPE</b>:{kind}",
             tooltip="This is not handled by the MDANSE GUI correctly! Please report the problem to the authors.",
         )
@@ -525,7 +525,7 @@ class InputFactory:
 class InputVariable(QObject):
     """A general-purpose input field, used by the InputDialog."""
 
-    def __init__(self, *args, input_dict: dict = None, **kwargs):
+    def __init__(self, *args, input_dict: dict | None = None, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.label = "Variable"
@@ -602,7 +602,7 @@ class InputDialog(QDialog):
     got_values = Signal(dict)
 
     def __init__(
-        self, *args, fields: Iterable[InputVariable] = None, title: str = "", **kwargs
+        self, *args, fields: Iterable[InputVariable] = (), title: str = "", **kwargs
     ):
         super().__init__(*args, **kwargs)
 

@@ -66,7 +66,7 @@ class PlotterTemplate(metaclass=SubclassFactory):
                 marker,
                 dataset_number,
                 axis_label,
-                legend_label,
+                _legend_label,
             ) = databundle
             self._datasets[dataset_number] = dataset
             self._colours[dataset_number] = colour
@@ -80,9 +80,9 @@ class PlotterTemplate(metaclass=SubclassFactory):
         for dataset_number, dataset in self._datasets:
             axis_label = self._labels[dataset_number]
             try:
-                best_unit, best_axis = (dataset._axes_units[axis_label], axis_label)
+                best_unit, _best_axis = (dataset._axes_units[axis_label], axis_label)
             except KeyError:
-                best_unit, best_axis = dataset.longest_axis()
+                best_unit, _best_axis = dataset.longest_axis()
             _plotlabel = dataset._labels["medium"]
             xaxis_unit = self._plotting_context.get_conversion_factor(best_unit)
             try:

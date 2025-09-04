@@ -74,7 +74,7 @@ class DataTreeItem(QStandardItem):
         if parent is None:
             return [self.mdanse_tag]
         else:
-            return parent.ancestors() + [self.mdanse_tag]
+            return [*parent.ancestors(), self.mdanse_tag]
 
 
 class TrajectoryItem(DataTreeItem):

@@ -126,7 +126,7 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
 
                 for atom in block:
                     spec, mass, charge, *rep_froz = (atom + " 1 0").split()
-                    repeat, frozen = map(int, rep_froz[:2])
+                    repeat, _frozen = map(int, rep_froz[:2])
 
                     current_slice = np.s_[curr : curr + repeat]
                     specs[current_slice] = spec

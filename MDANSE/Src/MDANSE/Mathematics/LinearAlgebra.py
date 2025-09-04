@@ -529,7 +529,7 @@ class Tensor:
         """
         if is_tensor(other):
             a = self.array
-            b = np.transpose(other.array, list(range(1, other.rank)) + [0])
+            b = np.transpose(other.array, [*range(1, other.rank), 0])
             return Tensor(np.inner(a, b), 1)
         else:
             return Tensor(self.array * other, 1)

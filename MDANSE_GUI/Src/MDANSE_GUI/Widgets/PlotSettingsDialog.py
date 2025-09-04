@@ -255,7 +255,7 @@ class PlotSettingsEditor(QDialog):
         self.filter_proxy_model = QSortFilterProxyModel()
         self.filter_proxy_model.setSourceModel(self.model)
         self.viewer.setModel(self.filter_proxy_model)
-        self.filter_combo.addItems(["all"] + SORT_MAJOR_KEYS)
+        self.filter_combo.addItems(["all", *SORT_MAJOR_KEYS])
         self.filter_combo.setCurrentText("all")
         self.filter_combo.currentTextChanged.connect(self.filter_box.setText)
         self.filter_box.textChanged.connect(self.filter_entries)

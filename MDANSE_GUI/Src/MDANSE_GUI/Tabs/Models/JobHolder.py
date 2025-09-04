@@ -353,7 +353,7 @@ class JobHolder(QStandardItemModel):
             )
             return
 
-        handlers = [item_th.handler] + LOG.handlers
+        handlers = [item_th.handler, *LOG.handlers]
         listener = QueueListener(log_queue, *handlers, respect_handler_level=True)
         listener.start()
 

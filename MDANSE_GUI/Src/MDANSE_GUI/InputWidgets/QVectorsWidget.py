@@ -34,7 +34,9 @@ class VectorModel(QStandardItemModel):
         self._trajectory = trajectory
 
     @Slot(str)
-    def switch_qvector_type(self, vector_type: str, optional_settings: dict = None):
+    def switch_qvector_type(
+        self, vector_type: str, optional_settings: dict | None = None
+    ):
         self.clear()
         self._defaults = []
         self._generator = IQVectors.create(

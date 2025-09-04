@@ -87,7 +87,7 @@ class MinimalPDBReader:
         -------
         list[float]
             Unit cell as a,b,c,α,β,γ.
-        """
+        """  # noqa: RUF002 -- Deliberate alpha/beta
         fail_count = 0
 
         with open(filename, encoding="utf-8") as source:

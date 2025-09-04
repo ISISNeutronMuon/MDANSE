@@ -115,7 +115,7 @@ class XDATCARFileConfigurator(FileWithAtomDataConfigurator):
 
     def read_step(self, step):
         if step > 0 and not self._has_fixed_cell:
-            unit_cell, atoms, atom_numbers, system_name = read_modern_header(
+            unit_cell, _atoms, _atom_numbers, _system_name = read_modern_header(
                 self["instance"]
             )
         else:

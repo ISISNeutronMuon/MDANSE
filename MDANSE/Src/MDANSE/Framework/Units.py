@@ -21,6 +21,7 @@ import math
 import numbers
 from collections import defaultdict
 from functools import singledispatchmethod
+from typing import ClassVar
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
@@ -1005,7 +1006,7 @@ def _str_to_unit(s: str) -> _Unit:
 class UnitsManager(metaclass=Singleton):
     """Database dictionary for handling units."""
 
-    _UNITS = {}
+    _UNITS: ClassVar[dict[str, _Unit]] = {}
 
     _DEFAULT_DATABASE = (
         PLATFORM.base_directory() / "MDANSE" / "Framework" / "units.json"

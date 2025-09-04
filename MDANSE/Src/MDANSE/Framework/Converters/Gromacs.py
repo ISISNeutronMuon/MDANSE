@@ -146,9 +146,9 @@ class Gromacs(Converter):
 
         # The x, y and z values of the current frame.
         if self._xtc:
-            coords, times, steps, box = self._xdr_file.read(1)
+            coords, times, _steps, box = self._xdr_file.read(1)
         else:
-            coords, times, steps, box, __, velocities, forces = self._xdr_file._read(
+            coords, times, _steps, box, __, velocities, forces = self._xdr_file._read(
                 1,
                 None,
                 get_velocities=self._read_velocities,

@@ -213,7 +213,7 @@ class Heatmap(Plotter):
                     results,
                 )
         nplots = min(nplots, self._plot_limit)
-        gridsize = int(math.ceil(nplots**0.5))
+        gridsize = math.ceil(nplots**0.5)
         startnum = 1
         for ds_index, databundle in enumerate(plotting_context.datasets().values()):
             if ds_index >= self._plot_limit:
