@@ -80,7 +80,7 @@ class Configurable:
 
         self._configuration.clear()
 
-        for name, (orig_class_name, orig_kwds) in list(self.settings.items()):
+        for name, (orig_class_name, orig_kwds) in self.settings.items():
             if name == "trajectory" and self.trajectory_type != "mdanse":
                 class_name, kwds = self.replace_trajectory()
             else:
