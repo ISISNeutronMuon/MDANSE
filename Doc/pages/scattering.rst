@@ -14,6 +14,7 @@ This section contains background theory for following plugins:
 -  :ref:`elastic-incoherent-structure-factor`
 -  :ref:`gaussian-dynamic-incoherent-structure-factor`
 -  :ref:`neutron-dynamic-total-structure-factor`
+-  :ref:`scattering-length-density-profile`
 -  :ref:`static-structure-factor`
 -  :ref:`structure-factor-from-scattering-function`
 -  :ref:`xray-static-structure-factor`
@@ -517,6 +518,18 @@ In this analysis the total incoherent, total coherent and total
 These expressions correspond to the formalism and equations given in
 [Ref47]_ - Chapter 1: “An introduction to neutron scattering” .
 
+.. _scattering-length-density-profile:
+
+Scattering Length Density Profile
+'''''''''''''''''''''''''''''''''
+
+Calculates the time-averaged scattering length density profile of the system
+along one of the simulation box axes. This results is typically used for
+further calculations in other software packages for neutron reflectometry.
+
+The result is the time-averaged coherent scattering length density profile
+given in units of :math:`10^{-6} \mathrm{Å}^{-2}`, as used in neutron
+reflectometry calculations.
 
 .. _static-structure-factor:
 

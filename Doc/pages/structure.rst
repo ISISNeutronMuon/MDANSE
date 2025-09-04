@@ -10,7 +10,6 @@ This section contains the following plugins:
 
 -  :ref:`area-per-molecule`
 -  :ref:`coordination-number`
--  :ref:`density-profile`
 -  :ref:`eccentricity`
 -  :ref:`molecular-trace`
 -  :ref:`pair-distribution-function`
@@ -65,21 +64,6 @@ In MDANSE the CN is defined as
 
 where :math:`g_{\alpha\beta}(r)` is the partial pair distribution function,
 see Section :ref:`pair-distribution-function` for details.
-
-.. _density-profile:
-
-Density Profile
-'''''''''''''''
-
-The density profile analysis in MDANSE calculates the spatial
-distribution of particles or molecules along a specified axis within a
-simulation box. This analysis provides valuable insights into how the density of
-particles or molecules varies across the system along the chosen axis. By
-dividing the axis into segments or bins and specifying the size of each bin
-using the parameter :math:`dr`, the density profile reveals how particles are
-distributed within the system. It is a useful tool for understanding the spatial
-arrangement and concentration of particles, making it valuable for identifying
-regions of interest and tracking changes over time in molecular simulations.
 
 .. _eccentricity:
 
