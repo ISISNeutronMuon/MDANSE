@@ -105,6 +105,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._element_database = None
 
         self._iren = QVTKRenderWindowInteractor(self)
+        self._iren._RenderWindow.SetMultiSamples(4)
 
         def dummy_method(self, ev=None):
             pass
@@ -114,6 +115,7 @@ class MolecularViewer(QtWidgets.QWidget):
         # the main render which includes the trajectory
         self._renderer = vtk.vtkRenderer()
         self._renderer.SetLayer(0)
+        self._renderer.UseFXAAOn()
         # create another renderer for the atoms labels, we want the
         # labels to be ontop of the atoms so they can be read more
         # easily
@@ -226,7 +228,11 @@ class MolecularViewer(QtWidgets.QWidget):
         upscaler.SetInput(self._renderer)
         upscaler.SetMagnification(4)
 
-        outputFilename = filename if filename else "/Users/maciej.bartkowiak/talk/for_printing/vtk_screenshot2"
+        outputFilename = (
+            filename
+            if filename
+            else "/Users/maciej.bartkowiak/talk/for_printing/vtk_screenshot2"
+        )
 
         writer = vtk.vtkPNGWriter()
         writer.SetFilePrefix(outputFilename)
@@ -545,7 +551,8 @@ class MolecularViewer(QtWidgets.QWidget):
             uc_mapper.SetInputData(self._uc_polydata)
         uc_mapper.ScalarVisibilityOn()
         uc_actor = vtk.vtkLODActor()
-        uc_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
+        uc_actor.SetNumberOfCloudPoints(10000)
+        uc_actor.GetProperty().SetLineWidth(6 * self._scale_factor)
         uc_actor.SetMapper(uc_mapper)
         return uc_actor
 
@@ -581,7 +588,7 @@ class MolecularViewer(QtWidgets.QWidget):
         line_mapper.ScalarVisibilityOn()
         line_mapper.ColorByArrayComponent("scalars", 1)
         line_actor = vtk.vtkLODActor()
-        line_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
+        line_actor.GetProperty().SetLineWidth(6 * self._scale_factor)
         line_actor.SetMapper(line_mapper)
         line_actor.GetProperty().SetAmbient(0.2)
         line_actor.GetProperty().SetDiffuse(0.5)
@@ -1060,7 +1067,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         # Hack for reducing objects resolution when the system is big
         self._resolution = int(np.sqrt(3000000.0 / self._n_atoms))
-        self._resolution = 10 if self._resolution > 10 else self._resolution
+        self._resolution = 30 if self._resolution > 30 else self._resolution
         self._resolution = 4 if self._resolution < 4 else self._resolution
 
         self._atom_colours = self._colour_manager.reinitialise_from_database(
