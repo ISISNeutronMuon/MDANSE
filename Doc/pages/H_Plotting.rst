@@ -48,15 +48,25 @@ Viewing the Results
 Quick Plot
 ----------
 
-Double-click the name of a file in the Plot Creator tab.
-The main result from that file will be plotted in the Plot Holder tab.
-For each analysis type, MDANSE marks several datasets as "main" results
+Once a file has been loaded into the Plot Creator tab, a quick plot
+can be created by double-clicking a entry. All new plots will appear in
+the next GUI tab, called "Plot Holder".
+
+Double-clicking a single
+dataset will create a new plot of this dataset in the Plot Holder tab.
+Double-clicking a data group will create a plot of all the datasets
+directly in the group (but not recursively in other groups inside this one.)
+
+Finally, double-clicking a file name will create a plot of the main results
+contained inside the file. For each analysis type, MDANSE marks several
+datasets as "main" results
 and as "partial" results. The datasets with the tag "main" will be shown
 in a quick plot, and those with the tag "partial" will additionally be
 set to the dashed line style.
 
-If you need to visualise some other data set which is not considered to
-be the main result, you will have to manually add it to plot selection.
+If you need to combine different datasets in a single plot, especially
+datasets originating from different files, you will have to select
+the plot contents manually.
 
 Manual Plotting
 ---------------
@@ -163,6 +173,47 @@ Changing the main axis will result in an updated plot
 Customising the Plot
 ~~~~~~~~~~~~~~~~~~~~
 
+Matplotlib settings
+-------------------
+
+Analysis results are plotted using the matplotlib library.
+It offers many options of customising the plots, including
+some like the figure dimensions and DPI value which have
+to be set before a new plot is created. 
+
+MDANSE saves the matplotlib parameters in its own configuration
+file, and offers a simple interface for modifying the settings.
+Plot Creator tab includes a button for accessing the plot settings
+(:numref:`figure-matplotlib-button`).
+
+.. _figure-matplotlib-button:
+
+.. figure:: ./Pictures/matplotlib_settings_button.png
+   :align: center
+
+   This button ("Change matplotlib settings") opens the plot settings dialog.
+
+For each configuration entry, both the current value and the default
+value are shown. Changes to the current values are applied immediately,
+and should affect the existing plots wherever possible. The configuration
+dialog is shown in :numref:`figure-matplotlib-settings`. Here, the filter
+field has been used to find the entries containing the word "figure",
+and the user has changed the figure DPI value from 100 to 300.
+
+.. _figure-matplotlib-settings:
+
+.. figure:: ./Pictures/matplotlib_settings.png
+   :align: center
+
+   This change will affect only the new plots and not the existing ones.
+
+If the changes introduced here should become permanent, it is possible
+to save them using the "save settings" button. They will be stored in
+MDANSE configuration and loaded automatically next time MDANSE_GUI
+is started. To completely undo all the changes, you can use the other button,
+"reset values", which sets all the parameters back
+to the matplotlib default values.
+
 Global settings
 ---------------
 
@@ -184,8 +235,11 @@ The side panel of the Plot Holder (:numref:`figure-plot-dos-details`)
 contains the settings affecting the appearance of the individual curves.
 Specifically:
 
+- the "Legend label" is the text that will be used for this curve
+  in the plot legend,
 - the "Use it?" checkbox can be unchecked to remove a curve
-  from the plot,
+  from the plot; the text input field next to it can be used
+  to select a subset of 1D curves from a 2D or 3D dataset.
 - the "Marker" field changes the point marker used for a data set,
 - the "Line style" field changes between solid, dashed and dotted lines,
 - the "Colour" field can change the colour of a curve,
@@ -199,11 +253,10 @@ type would make it difficult to distinguish between specific curves.
 
 .. _figure-plot-dos-details:
 
-.. figure:: ./Pictures/plot_dos_details.png
+.. figure:: ./Pictures/plot_details.png
    :align: center
 
-   These settings have been applied to the plot in
-   :numref:`figure-plot-dos-single`.
+   These settings will automatically update the plot when changed.
 
 Additionally, the plots in MDANSE are created using matplotlib,
 and the can use the standard matplotlib toolbar to switch the

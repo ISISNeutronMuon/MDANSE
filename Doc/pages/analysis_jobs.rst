@@ -419,10 +419,10 @@ Maps the volume occupied by atoms over time.
 A Molecular Trace is a time-integrated trace of selected atoms coordinates.
 
 * the minimal and maximal coordinates from the selected atomic trajectories are
-computed.
+  computed.
 * based on these min/max and a spatial resolution, a cartesian grid is constructed.
 * for each atom and for each frame of the selected trajectories, a histogram of
-presence, called the spatial density, is constructed.
+  presence, called the spatial density, is constructed.
 
 The molecular trace can reveal anisotropic vibrations and diffusion pathways.
 
