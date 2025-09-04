@@ -23,7 +23,7 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class MultipleCombosWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        configurator = kwargs.get("configurator", None)
+        configurator = kwargs.get("configurator")
         if configurator is None:
             option_list = kwargs.get("choices", [])
             number_of_boxes = 1

@@ -50,10 +50,9 @@ class SettingsView(QTreeView):
 
     def inner_model(self):
         model = self.model()
-        try:
+        with suppress(AttributeError):
             model = model.sourceModel()
-        except AttributeError:
-            pass
+
         return model
 
     @Slot()
@@ -118,9 +117,7 @@ class UserSettingsEditor(QDialog):
     def update_combo(self):
         self.filename_widget.clear()
         if self._session is not None:
-            self.filename_widget.addItems(
-                [str(x) for x in self._session._configs.keys()]
-            )
+            self.filename_widget.addItems([str(x) for x in self._session._configs])
             self.filename_widget.setCurrentText(self._session._main_config_name)
 
     @Slot()

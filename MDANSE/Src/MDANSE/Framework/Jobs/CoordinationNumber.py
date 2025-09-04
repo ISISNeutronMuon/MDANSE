@@ -194,10 +194,7 @@ class CoordinationNumber(DistanceHistogram):
             idi = self.selectedElements.index(label_i)
             idj = self.selectedElements.index(label_j)
 
-            if label_i == label_j:
-                nij = ni**2 / 2.0
-            else:
-                nij = ni * nj
+            nij = ni**2 / 2.0 if label_i == label_j else ni * nj
 
             fact = 2 * nij * nFrames * shellVolumes
 

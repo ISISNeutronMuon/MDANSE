@@ -79,8 +79,5 @@ class RunningModeWidget(WidgetBase):
     def get_widget_value(self):
         mode = self.mode_box.currentText()
         numproc = self._field.value()
-        if mode == "single-core":
-            value = (mode,)
-        else:
-            value = (mode, numproc)
-        return value
+
+        return (mode,) if mode == "single-core" else (mode, numproc)

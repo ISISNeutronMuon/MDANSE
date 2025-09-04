@@ -82,13 +82,7 @@ class VectorModel(QStandardItemModel):
         return params
 
     def parse_vtype(self, vtype: str, value: str, vname: str):
-        if vtype == "RangeConfigurator":
-            inner_type = self._generator.settings[vname][1]["valueType"]
-            tempstring = value.strip("()[] ")
-            result = [inner_type(x) for x in tempstring.split(",")]
-            if len(result) == 3:
-                return result
-        elif vtype == "VectorConfigurator":
+        if vtype in ("RangeConfigurator", "VectorConfigurator"):
             inner_type = self._generator.settings[vname][1]["valueType"]
             tempstring = value.strip("()[] ")
             result = [inner_type(x) for x in tempstring.split(",")]
@@ -109,7 +103,7 @@ class QVectorsWidget(WidgetBase):
         kwargs["layout_type"] = "QVBoxLayout"
         super().__init__(*args, **kwargs)
         self._relative_size = 3
-        trajectory_configurator = kwargs.get("trajectory_configurator", None)
+        trajectory_configurator = kwargs.get("trajectory_configurator")
         trajectory = None
         if trajectory_configurator is not None:
             trajectory = trajectory_configurator["instance"]

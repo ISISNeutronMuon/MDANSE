@@ -78,10 +78,12 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         SingleChoiceConfigurator.configure(self, value)
 
         trajConfig = self.configurable[self.dependencies["trajectory"]]
-        if value == "molecule":
-            if len(trajConfig["instance"].chemical_system.unique_molecules()) == 0:
-                self.error_status = "The trajectory does not contain molecules."
-                return
+        if (
+            value == "molecule"
+            and len(trajConfig["instance"].chemical_system.unique_molecules()) == 0
+        ):
+            self.error_status = "The trajectory does not contain molecules."
+            return
 
         self["level"] = value
         self.error_status = "OK"

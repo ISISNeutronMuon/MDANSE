@@ -76,20 +76,23 @@ class GeneralInput(QObject):
     def __init__(self, *args, data_type=None, **kwargs):
         new_kwargs = copy.copy(kwargs)
         for kkey in InputFactory.reserved_keywords:
-            if kkey in new_kwargs.keys():
+            if kkey in new_kwargs:
                 new_kwargs.pop(kkey)
         super().__init__(*args, **{})
 
-        self.default_path = kwargs.get("path", None)
+        self.default_path = kwargs.get("path")
         self.data_type = data_type
-        self.default_value = kwargs.get("default", None)
+        self.default_value = kwargs.get("default")
         self.current_value = self.default_value
-        self.file_association = kwargs.get("file_association", None)
+        self.file_association = kwargs.get("file_association")
         self.file_direction = kwargs.get("file_direction", "none")
         self.file_format = kwargs.get("format", "")
-        if self.file_association is not None:
-            if len(self.file_association) < 1 and len(self.file_format) > 1:
-                self.file_association = "*." + self.file_format
+        if (
+            self.file_association is not None
+            and not self.file_association
+            and self.file_format
+        ):
+            self.file_association = "*." + self.file_format
         if self.file_direction == "in":
             self.file_dialog = QFileDialog.getOpenFileName
         elif self.file_direction == "out":
@@ -282,9 +285,9 @@ class InputFactory:
         Returns:
             [base, layout] pair of QWidget and associated layout
         """
-        parent = kwargs.get("parent", None)
-        label_text = kwargs.get("label", None)
-        tooltip_text = kwargs.get("tooltip", None)
+        parent = kwargs.get("parent")
+        label_text = kwargs.get("label")
+        tooltip_text = kwargs.get("tooltip")
         base = QWidget(parent)
         layout = QHBoxLayout(base)
         base.setLayout(layout)
@@ -400,7 +403,7 @@ class InputFactory:
         """
         kind = kwargs.get("kind", "Boolean")
         default_value = kwargs.get("default", False)
-        tooltip_text = kwargs.get("tooltip", None)
+        tooltip_text = kwargs.get("tooltip")
         LOG.info(kind)
         LOG.info(default_value)
         LOG.info(tooltip_text)
@@ -422,9 +425,9 @@ class InputFactory:
         to filter out invalid inputs.
         """
         kind = kwargs.get("kind", "str")
-        default_value = kwargs.get("default", None)
-        tooltip_text = kwargs.get("tooltip", None)
-        minval = kwargs.get("mini", None)
+        default_value = kwargs.get("default")
+        tooltip_text = kwargs.get("tooltip")
+        minval = kwargs.get("mini")
         LOG.info(kind)
         LOG.info(default_value)
         LOG.info(tooltip_text)
@@ -458,10 +461,10 @@ class InputFactory:
         to filter out invalid inputs.
         """
         kind = kwargs.get("kind", "String")
-        default_value = kwargs.get("default", None)
-        tooltip_text = kwargs.get("tooltip", None)
-        minval = kwargs.get("mini", None)
-        number_of_fields = kwargs.get("howmany", None)
+        default_value = kwargs.get("default")
+        tooltip_text = kwargs.get("tooltip")
+        minval = kwargs.get("mini")
+        number_of_fields = kwargs.get("howmany")
         if number_of_fields is None:
             number_of_fields = len(default_value)
         LOG.info(kind)
@@ -497,7 +500,7 @@ class InputFactory:
         a list of possible values, we create a ComboBox"""
         kind = kwargs.get("kind", "String")
         default_value = kwargs.get("default", False)
-        tooltip_text = kwargs.get("tooltip", None)
+        tooltip_text = kwargs.get("tooltip")
         option_list = kwargs.get("choices", [])
         LOG.info(kind)
         LOG.info(default_value)

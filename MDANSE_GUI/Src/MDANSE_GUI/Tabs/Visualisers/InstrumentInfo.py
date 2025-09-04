@@ -28,7 +28,7 @@ from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_tex
 class SimpleInstrument:
     sample_options = ["isotropic", "crystal"]
     technique_options = ["QENS", "INS"]
-    resolution_options = [str(x) for x in widget_text_map.keys()]
+    resolution_options = [str(x) for x in widget_text_map]
     qvector_options = [str(x) for x in IQVectors.indirect_subclasses()]
     energy_units = ["meV", "1/cm", "THz"]
     momentum_units = ["1/ang", "1/nm", "1/Bohr"]

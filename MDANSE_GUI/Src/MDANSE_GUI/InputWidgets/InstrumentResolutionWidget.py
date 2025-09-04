@@ -94,7 +94,7 @@ class InstrumentResolutionWidget(WidgetBase):
                 val.setTop(1.0)
             field.setValidator(val)
             self._defaults.append(0.0)
-        self._type_combo.addItems([str(x) for x in init_parameters.keys()])
+        self._type_combo.addItems([str(x) for x in init_parameters])
         self._type_combo.setEditable(False)
         self._type_combo.currentTextChanged.connect(self.change_function)
         for field in self._fields:
@@ -129,16 +129,16 @@ class InstrumentResolutionWidget(WidgetBase):
         # during the function change
         [field.textChanged.disconnect() for field in self._fields]
         if optional_parameters is None:
-            if function in init_parameters.keys():
+            if function in init_parameters:
                 new_params = init_parameters[function]
             else:
                 new_params = init_parameters[widget_text_map[function]]
         else:
             new_params = optional_parameters
         self._type_combo.blockSignals(True)
-        if function in widget_text_map.keys():
+        if function in widget_text_map:
             self._type_combo.setCurrentText(widget_text_map[function])
-        elif function in reverse_text_map.keys():
+        elif function in reverse_text_map:
             self._type_combo.setCurrentText(reverse_text_map[function])
         else:
             self._type_combo.setCurrentText(function)
@@ -165,12 +165,12 @@ class InstrumentResolutionWidget(WidgetBase):
 
     @Slot(dict)
     def set_parameters_from_dialog(self, input: dict):
-        peak_function = input.get("function", None)
+        peak_function = input.get("function")
         if peak_function is None:
             return
         self._type_combo.setCurrentText(peak_function)
         temp_parameters = init_parameters[peak_function]
-        for key in temp_parameters.keys():
+        for key in temp_parameters:
             temp_parameters[key] = input.get(key, 0.0)
         self.set_field_values(temp_parameters)
 

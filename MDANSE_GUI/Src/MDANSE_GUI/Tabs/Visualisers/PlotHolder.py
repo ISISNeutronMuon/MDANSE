@@ -104,10 +104,9 @@ class PlotHolder(QTabWidget):
             self._context.pop(tab_id)
         if tab_id < len(self._plotter):
             self._plotter.pop(tab_id)
-        if self._current_id == tab_id:
-            if len(valid_id_values) > 0:
-                self._current_id = valid_id_values[0]
-                self.setCurrentIndex(self._current_id)
+        if self._current_id == tab_id and valid_id_values:
+            self._current_id = valid_id_values[0]
+            self.setCurrentIndex(self._current_id)
         self.removeTab(tab_id)
 
     @property

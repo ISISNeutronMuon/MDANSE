@@ -61,7 +61,8 @@ def get_byte_order(filename):
     byteOrder = None
 
     # The DCD file is opened for reading in binary mode.
-    data = open(filename, "rb").read(4)
+    with open(filename, "rb") as inp:
+        data = inp.read(4)
 
     # Check for low and big endianness byte orders.
     for order in ["<", ">"]:
@@ -91,7 +92,7 @@ class FortranBinaryFile:
         @param byte_order: the byte order to read the binary file.
         @type byte_order: string being one '@', '=', '<', '>' or '!'.
         """
-        self.file = open(filename, "rb")
+        self.file = open(filename, "rb")  # noqa: SIM115
         self.byteOrder = get_byte_order(filename)
 
     def __iter__(self):

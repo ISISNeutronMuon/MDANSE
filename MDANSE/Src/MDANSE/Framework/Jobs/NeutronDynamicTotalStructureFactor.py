@@ -199,7 +199,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 "scaling_factor"
                 not in self.configuration["dcsf_input_file"]["instance"][
                     f"dcsf/s(q,f)/{pair_str}"
-                ].attrs.keys()
+                ].attrs
             ):
                 raise NeutronDynamicTotalStructureFactorError(
                     "This DCSF file was created before the new scaling scheme. Please calculate it again."
@@ -224,7 +224,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
                 "scaling_factor"
                 not in self.configuration["disf_input_file"]["instance"][
                     f"disf/s(q,f)/{element}"
-                ].attrs.keys()
+                ].attrs
             ):
                 raise NeutronDynamicTotalStructureFactorError(
                     "This DISF file was created before the new scaling scheme. Please calculate it again."

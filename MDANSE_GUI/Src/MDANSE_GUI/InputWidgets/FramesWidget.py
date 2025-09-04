@@ -25,7 +25,7 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class FramesWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, layout_type="QGridLayout", **kwargs)
-        trajectory_configurator = kwargs.get("trajectory_configurator", None)
+        trajectory_configurator = kwargs.get("trajectory_configurator")
         if trajectory_configurator is not None:
             try:
                 self._last_frame = trajectory_configurator["length"]

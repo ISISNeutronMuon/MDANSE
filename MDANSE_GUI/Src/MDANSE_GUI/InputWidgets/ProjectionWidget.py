@@ -24,7 +24,7 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class ProjectionWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        _source_object = kwargs.get("source_object", None)
+        _source_object = kwargs.get("source_object")
         bgroup = QButtonGroup(self._base)
         for id, blabel in enumerate(["None", "Axial", "Planar"]):
             rbutton = QRadioButton(blabel, parent=self._base)

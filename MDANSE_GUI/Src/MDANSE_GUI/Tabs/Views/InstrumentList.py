@@ -62,7 +62,7 @@ class InstrumentList(QListView):
         instrument = self.model()._nodes[item[257]]
         if instrument is None:
             return
-        if instrument._name in self._backup_instruments.keys():
+        if instrument._name in self._backup_instruments:
             has_backup = True
         for action, method in [
             ("Delete instrument", self.deleteNode),
@@ -142,10 +142,8 @@ class InstrumentList(QListView):
             return
         new_instrument = SimpleInstrument()
         LOG.debug(f"New instrument, name: {new_instrument._name}")
-        if optional_name is None:
-            new_name = new_instrument._name
-        else:
-            new_name = optional_name
+        new_name = new_instrument._name if optional_name is None else optional_name
+
         model.append_object_and_embed((new_instrument, new_name))
         self._all_instruments.add(new_name)
         new_instrument.update_item()
@@ -174,7 +172,7 @@ class InstrumentList(QListView):
         except ParseError:
             LOG.error(f"File {filename} could not be parsed - TOML error")
             return
-        for key in tomldoc.keys():
+        for key in tomldoc:
             if key in self._all_instruments:
                 LOG.warning(
                     f"{key} already on instrument list. Overwriting from {filename}"

@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import collections
+from contextlib import suppress
 
 import numpy as np
 from ase.io import iread, read
@@ -204,10 +205,9 @@ class ImprovedASE(Converter):
         """
 
         self._input.close()
-        try:
+        with suppress(Exception):
             self._extra_input.close()
-        except Exception:
-            pass
+
         # Close the output trajectory.
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()
@@ -218,16 +218,12 @@ class ImprovedASE(Converter):
         element_list = None
 
         if self._fractionalCoordinates is None:
-            try:
+            with suppress(Exception):
                 self._fractionalCoordinates = np.all(ase_object.get_pbc())
-            except Exception:
-                pass
 
         if self._masses is None:
-            try:
+            with suppress(Exception):
                 self._masses = ase_object.get_masses()
-            except Exception:
-                pass
 
         if self.configuration["elements_from_mass"]["value"]:
             tolerance = self.configuration["mass_tolerance"]["value"]
@@ -236,10 +232,8 @@ class ImprovedASE(Converter):
             else:
                 element_list = elements_from_masses(self._masses, tolerance=tolerance)
         else:
-            try:
+            with suppress(Exception):
                 element_list = ase_object.get_chemical_symbols()
-            except Exception:
-                pass
         if element_list is None:
             return
         else:

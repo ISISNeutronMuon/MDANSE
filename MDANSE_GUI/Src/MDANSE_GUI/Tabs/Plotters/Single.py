@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import contextlib
+from itertools import islice
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -207,11 +208,9 @@ class Single(Plotter):
                 multi_curves = dataset.curves_vs_axis(
                     (best_unit, best_axis), max_limit=self._curve_limit_per_dataset
                 )
-                counter = 0
-                for key, value in multi_curves.items():
-                    counter += 1
-                    if counter >= self._curve_limit_per_dataset:
-                        break
+                for key, value in islice(
+                    multi_curves.items(), self._curve_limit_per_dataset
+                ):
                     try:
                         [temp] = axes.plot(
                             dataset.x_axis(best_axis),

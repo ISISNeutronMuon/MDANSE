@@ -46,7 +46,7 @@ class AtomLabel:
             for k, v in kwargs.items():
                 self.grp_label += f"{k}={str(v).translate(translation)};"
             self.grp_label = self.grp_label[:-1]
-        self.mass = kwargs.get("mass", None)
+        self.mass = kwargs.get("mass")
         if self.mass is not None:
             self.mass = float(self.mass)
 
@@ -245,7 +245,7 @@ def mapping_to_labels(mapping: dict[str, dict[str, str]]) -> list[AtomLabel]:
         if grp_label:
             for k, v in [i.split("=") for i in grp_label.split(";")]:
                 kwargs[k] = v
-        for atm_label in atm_map.keys():
+        for atm_label in atm_map:
             labels.append(AtomLabel(atm_label, **kwargs))
     return labels
 

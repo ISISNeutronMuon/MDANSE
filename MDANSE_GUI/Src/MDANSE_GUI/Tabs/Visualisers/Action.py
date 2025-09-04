@@ -251,7 +251,7 @@ class Action(QWidget):
             settings = self._job_instance.settings
         LOG.info(f"Configuration {job_instance.configuration}")
         LOG.debug(f"{self._input_traj_path} loaded as {self._trajectory_instance}")
-        if "trajectory" in settings.keys():
+        if "trajectory" in settings:
             if self._input_traj_path is None:
                 return
             key, value = "trajectory", settings["trajectory"]

@@ -24,7 +24,7 @@ from MDANSE_GUI.Widgets.DefaultCombobox import highlight_default_value
 class ComboWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        configurator = kwargs.get("configurator", None)
+        configurator = kwargs.get("configurator")
         if configurator is None:
             option_list = kwargs.get("choices", [])
         else:

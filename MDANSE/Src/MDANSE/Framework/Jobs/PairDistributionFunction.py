@@ -212,10 +212,7 @@ class PairDistributionFunction(DistanceHistogram):
 
         if self.intra:
             for i in ("/intra", "/inter", ""):
-                if i == "/intra":
-                    labels = self.labels_intra
-                else:
-                    labels = self.labels
+                labels = self.labels_intra if i == "/intra" else self.labels
                 assign_weights(self._outputData, weight_dict, f"pdf{i}/%s", labels)
                 pdf = weighted_sum(self._outputData, f"pdf{i}/%s", labels)
                 self._outputData[f"pdf{i}/total"][:] = pdf / factor

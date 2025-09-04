@@ -51,7 +51,7 @@ class HistoryFile(dict):
         super().__init__()
 
         self["filename"] = filename
-        self["instance"] = open(filename, encoding="utf-8")
+        self["instance"] = open(filename, encoding="utf-8")  # noqa: SIM115
 
         drop(self["instance"], 1)
         tagline = self["instance"].readline()

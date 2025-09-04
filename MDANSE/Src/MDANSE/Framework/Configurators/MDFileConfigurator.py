@@ -47,7 +47,7 @@ class MDFileConfigurator(FileWithAtomDataConfigurator):
     """
 
     def parse(self):
-        self["instance"] = open(self["filename"], "rb")  # Open the provided file.
+        self["instance"] = open(self["filename"], "rb")  # noqa: SIM115
 
         # Skip over the header
         while True:

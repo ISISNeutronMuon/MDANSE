@@ -165,10 +165,7 @@ class PlotterTemplate(metaclass=SubclassFactory):
         self._slider_reference.collect_values()
 
     def clear(self, figure: Figure = None):
-        if figure is None:
-            target = self._figure
-        else:
-            target = figure
+        target = self._figure if figure is None else figure
         if target is None:
             return
         target.clear()
@@ -183,10 +180,7 @@ class PlotterTemplate(metaclass=SubclassFactory):
         return False
 
     def get_figure(self, figure: Figure = None):
-        if figure is None:
-            target = self._figure
-        else:
-            target = figure
+        target = self._figure if figure is None else figure
         if target is None:
             LOG.error(f"PlottingContext can't plot to {target}")
             return

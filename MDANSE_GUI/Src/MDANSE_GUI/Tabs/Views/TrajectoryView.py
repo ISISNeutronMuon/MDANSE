@@ -78,7 +78,7 @@ class TrajectoryView(QListView):
         visualiser : View3D or TrajectoryInfo
             A visualiser to connect to this view.
         """
-        if isinstance(visualiser, View3D) or isinstance(visualiser, TrajectoryInfo):
+        if isinstance(visualiser, (View3D, TrajectoryInfo)):
             self.item_details.connect(visualiser.update_panel)
         else:
             raise NotImplementedError(

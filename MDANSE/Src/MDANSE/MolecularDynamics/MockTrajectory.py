@@ -548,7 +548,7 @@ class MockTrajectory:
         bool
             True if velocities are stored in MockTrajectory
         """
-        return "velocities" in self._variables.keys()
+        return "velocities" in self._variables
 
     def has_variable(self, variable: str) -> bool:
         """True if the trajectory contains atom velocities,
@@ -559,7 +559,7 @@ class MockTrajectory:
         bool
             True if velocities are stored in MockTrajectory
         """
-        return variable in self._variables.keys()
+        return variable in self._variables
 
     def variables(self):
         """Return the configuration variables stored in this trajectory.

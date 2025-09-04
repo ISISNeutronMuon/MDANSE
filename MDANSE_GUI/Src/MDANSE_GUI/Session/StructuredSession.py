@@ -149,18 +149,16 @@ class UserSettingsModel(QStandardItemModel):
     ):
         group = self._settings.group(group_name)
         group._group_comment = new_value
-        if column_number == 1:
-            if not group.set(item_name, new_value):
-                LOG.warning(
-                    f"Modify item: could not set item {item_name} to value {new_value} in group {group_name}"
-                )
-                LOG.debug(group.as_toml())
-        elif column_number == 2:
-            if not group.set_comment(item_name, new_value):
-                LOG.warning(
-                    f"Modify item: could not set comment {item_name} to value {new_value} in group {group_name}"
-                )
-                LOG.debug(group.as_toml())
+        if column_number == 1 and not group.set(item_name, new_value):
+            LOG.warning(
+                f"Modify item: could not set item {item_name} to value {new_value} in group {group_name}"
+            )
+            LOG.debug(group.as_toml())
+        elif column_number == 2 and not group.set_comment(item_name, new_value):
+            LOG.warning(
+                f"Modify item: could not set comment {item_name} to value {new_value} in group {group_name}"
+            )
+            LOG.debug(group.as_toml())
 
     @Slot("QStandardItem*")
     def on_value_changed(self, item: QStandardItem):
@@ -248,7 +246,7 @@ class SettingsGroup:
     def as_toml(self):
         results = tomlkit.table()
         results.comment(self._group_comment)
-        for key in self._settings.keys():
+        for key in self._settings:
             results[key] = self._settings[key]
             results[key].comment(self._comments.get(key, "---"))
         return results
@@ -280,11 +278,11 @@ class SettingsFile:
             LOG.warning(f"File {self._filename} could not be parsed.")
             return False
         else:
-            for key in self._tomldoc.keys():
+            for key in self._tomldoc:
                 table = self._tomldoc[key]
                 group = self._groups.get(key, SettingsGroup(key))
                 temp_values, temp_comments = {}, {}
-                for inner_key in table.keys():
+                for inner_key in table:
                     temp_values[inner_key] = table[inner_key]
                     temp_comments[inner_key] = table[inner_key].trivia.comment
                 group.populate(temp_values, temp_comments)

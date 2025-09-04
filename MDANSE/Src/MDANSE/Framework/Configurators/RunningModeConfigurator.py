@@ -45,10 +45,7 @@ class RunningModeConfigurator(IConfigurator):
 
         self._original_input = value
 
-        if isinstance(value, str):
-            mode = value
-        else:
-            mode = value[0].lower()
+        mode = value if isinstance(value, str) else value[0].lower()
 
         if mode not in self.availablesModes:
             self.error_status = f"{mode} is not a valid running mode."

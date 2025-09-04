@@ -75,7 +75,7 @@ class MainAxisCombo(QItemDelegate):
         model = index.model()
         key = index.model().data(index, Qt.ItemDataRole.UserRole)
         dataset = model._datasets[key]
-        self._items = [str(x) for x in dataset._axes.keys()]
+        self._items = [str(x) for x in dataset._axes]
         combo.addItems(self._items)
         combo.currentIndexChanged.connect(self.currentIndexChanged)
         return combo
@@ -87,7 +87,7 @@ class MainAxisCombo(QItemDelegate):
 
 class MplStyleCombo(QItemDelegate):
     def __init__(self, *args, mpl_items=None, **kwargs) -> None:
-        self._items = list([str(x) for x in mpl_items.keys()])
+        self._items = list([str(x) for x in mpl_items])
         super().__init__(*args, **kwargs)
 
     def setEditorData(self, editor, index):

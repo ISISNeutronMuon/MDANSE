@@ -57,8 +57,7 @@ def check_trajectory(filename: str):
         empty_found = 0
         direct_configuration_found = 0
 
-        for line in source:
-            lines_read += 1
+        for lines_read, line in enumerate(source):
             if lines_read > 2 * total_atom_number + 10:
                 break
             if system_name in line:
@@ -86,7 +85,7 @@ class XDATCARFileConfigurator(FileWithAtomDataConfigurator):
 
     def parse(self):
         filename = self["filename"]
-        self["instance"] = open(filename, encoding="utf-8")
+        self["instance"] = open(filename, encoding="utf-8")  # noqa: SIM115
 
         lines_read = sum(1 for _ in self["instance"])
 

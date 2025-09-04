@@ -180,7 +180,7 @@ class Connectivity:
                     frame_number=frame_number, max_distance=total_max_length
                 ):
                     for key, value in dist.items():
-                        if key not in distances.keys():
+                        if key not in distances:
                             distances[key] = value
         bonds = []
         bond_mapping = {atom_number: [] for atom_number in range(len(self._elements))}

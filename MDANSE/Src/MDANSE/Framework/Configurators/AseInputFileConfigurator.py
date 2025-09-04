@@ -26,7 +26,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
     """Sets an input file for the ASE-based converters."""
 
     _default = ""
-    _allowed_formats = ["guess"] + [str(x) for x in all_formats.keys()]
+    _allowed_formats = ["guess"] + [str(x) for x in all_formats]
 
     def __init__(self, name, wildcard="All files (*)", **kwargs):
         """
@@ -43,7 +43,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
         InputFileConfigurator.__init__(self, name, **kwargs)
 
         self.wildcard = wildcard
-        self["format"] = kwargs.get("format", None)
+        self["format"] = kwargs.get("format")
         self["value"] = ""
 
     def configure(self, values):

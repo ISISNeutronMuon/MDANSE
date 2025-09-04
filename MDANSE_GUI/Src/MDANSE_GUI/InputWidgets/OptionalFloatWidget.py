@@ -65,10 +65,7 @@ class OptionalFloatWidget(WidgetBase):
         self.update_labels()
         self._field.setEnabled(False)
         self.updateValue()
-        if self._tooltip:
-            tooltip_text = self._tooltip
-        else:
-            tooltip_text = "A single floating-point number"
+        tooltip_text = self._tooltip or "A single floating-point number"
         field.setToolTip(tooltip_text)
 
     @Slot()

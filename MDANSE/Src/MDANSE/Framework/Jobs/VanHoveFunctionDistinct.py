@@ -171,9 +171,7 @@ def van_hove_distinct(
                     ]
                     bin_numbers, bin_counts = np.unique(bins_subset, return_counts=True)
                     for bin, counts in zip(bin_numbers, bin_counts):
-                        if bin < 0:
-                            continue
-                        elif bin >= nbins:
+                        if bin < 0 or bin >= nbins:
                             continue
                         else:
                             total[type_sub, type_ref, bin] += counts
@@ -185,9 +183,7 @@ def van_hove_distinct(
                     ]
                     bin_numbers, bin_counts = np.unique(bins_subset, return_counts=True)
                     for bin, counts in zip(bin_numbers, bin_counts):
-                        if bin < 0:
-                            continue
-                        elif bin >= nbins:
+                        if bin < 0 or bin >= nbins:
                             continue
                         else:
                             intra[type_sub, type_ref, bin] += counts
@@ -286,9 +282,7 @@ def van_hove_distinct_all_inter(
                     ]
                     bin_numbers, bin_counts = np.unique(bins_subset, return_counts=True)
                     for bin, counts in zip(bin_numbers, bin_counts):
-                        if bin < 0:
-                            continue
-                        elif bin >= nbins:
+                        if bin < 0 or bin >= nbins:
                             continue
                         else:
                             total[type_sub, type_ref, bin] += counts
@@ -712,10 +706,7 @@ class VanHoveFunctionDistinct(IJob):
 
         if self.intra:
             for i in ["/intra", "/inter", ""]:
-                if i == "/intra":
-                    labels = self.labels_intra
-                else:
-                    labels = self.labels
+                labels = self.labels_intra if i == "/intra" else self.labels
                 assign_weights(
                     self._outputData, weight_dict, f"vh/g(r,t){i}/%s", labels
                 )

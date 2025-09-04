@@ -40,7 +40,7 @@ def single_search(parent_class: type, name: str, case_sensitive: bool = False):
     Returns:
         A class (type) or None
     """
-    for skey in parent_class._registered_subclasses.keys():
+    for skey in parent_class._registered_subclasses:
         if case_sensitive:
             lhand = skey
             rhand = name
@@ -69,7 +69,7 @@ def recursive_search(parent_class: type, name: str):
     if return_type is not None:
         return return_type
     else:
-        for child in parent_class._registered_subclasses.keys():
+        for child in parent_class._registered_subclasses:
             return_type = recursive_search(
                 parent_class._registered_subclasses[child], name
             )

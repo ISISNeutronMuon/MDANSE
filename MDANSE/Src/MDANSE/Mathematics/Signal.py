@@ -720,7 +720,7 @@ class Filter(ABC):
 
         """
         settings = type(self).__dict__["default_settings"]
-        for setting in settings.keys():
+        for setting in settings:
             description += f"""
   # {setting}
   {settings[setting]["description"]}

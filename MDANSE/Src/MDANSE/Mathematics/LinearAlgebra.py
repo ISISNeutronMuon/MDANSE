@@ -434,9 +434,10 @@ class Tensor:
         @type elements: C{Numeric.array} or C{list}
         """
         self.array = np.array(elements)
-        if nocheck is None:
-            if not np.logical_and.reduce(np.equal(np.array(self.array.shape), 3)):
-                raise ValueError("Tensor must have length 3 along any axis")
+        if nocheck is None and not np.logical_and.reduce(
+            np.equal(np.array(self.array.shape), 3)
+        ):
+            raise ValueError("Tensor must have length 3 along any axis")
         self.rank = len(self.array.shape)
 
     def __repr__(self):

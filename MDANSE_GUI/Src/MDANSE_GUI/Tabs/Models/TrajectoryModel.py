@@ -129,9 +129,7 @@ class TrajectoryModel(QStandardItemModel):
         except AttributeError:
             return False
         traj = self.get_trajectory(node_number)
-        if isinstance(traj, Trajectory):
-            return True
-        return False
+        return isinstance(traj, Trajectory)
 
     def removeRow(self, row: int, parent: QModelIndex = QModelIndex()) -> bool:
         try:

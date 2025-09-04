@@ -23,7 +23,7 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class BackupWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        _source_object = kwargs.get("source_object", None)
+        _source_object = kwargs.get("source_object")
         self._field = QLineEdit(str(self._configurator.default))
         self._field.setPlaceholderText(str(self._configurator.default))
         self._layout.addWidget(self._field)

@@ -71,20 +71,17 @@ class OptionalFloatConfigurator(IConfigurator):
             self.error_status = f"Wrong value {value[1]} in {self}"
             return
 
-        if self.choices:
-            if value[1] not in self.choices:
-                self.error_status = "the input value is not a valid choice."
-                return
+        if self.choices and value[1] not in self.choices:
+            self.error_status = "the input value is not a valid choice."
+            return
 
-        if self.mini is not None:
-            if value[1] < self.mini:
-                self.error_status = f"the input value is lower than {self.mini}"
-                return
+        if self.mini is not None and value[1] < self.mini:
+            self.error_status = f"the input value is lower than {self.mini}"
+            return
 
-        if self.maxi is not None:
-            if value[1] > self.maxi:
-                self.error_status = f"the input value is higher than {self.maxi}"
-                return
+        if self.maxi is not None and value[1] > self.maxi:
+            self.error_status = f"the input value is higher than {self.maxi}"
+            return
 
         self.error_status = "OK"
         self["value"] = value[1]

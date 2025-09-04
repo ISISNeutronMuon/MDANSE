@@ -43,7 +43,7 @@ class OutputTrajectoryWidget(WidgetBase):
         super().__init__(*args, layout_type="QGridLayout", **kwargs)
         default_value = self._configurator.default
         try:
-            self._parent = kwargs.get("parent", None)
+            self._parent = kwargs.get("parent")
             self.default_path = PurePath(self._parent._default_path)
         except KeyError:
             self.default_path = PurePath(os.path.abspath("."))
@@ -56,7 +56,7 @@ class OutputTrajectoryWidget(WidgetBase):
         else:
             self._session = self._parent._parent_tab._session
         try:
-            self._parent = kwargs.get("parent", None)
+            self._parent = kwargs.get("parent")
             jobname = str(self._parent._job_instance.label).replace(" ", "")
             guess_name = str(
                 PurePath(os.path.join(self.default_path, jobname + "_trajectory1"))

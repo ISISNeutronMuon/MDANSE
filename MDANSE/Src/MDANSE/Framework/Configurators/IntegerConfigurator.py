@@ -71,25 +71,23 @@ class IntegerConfigurator(IConfigurator):
             self.error_status = "Wrong input for an integer" + str(e)
             return
 
-        if self.choices:
-            if value not in self.choices:
-                self.error_status = "the input value is not a valid choice."
-                return
+        if self.choices and value not in self.choices:
+            self.error_status = "the input value is not a valid choice."
+            return
 
-        if self.mini is not None:
-            if value < self.mini:
-                self.error_status = f"the input value is lower than {self.mini}"
-                return
+        if self.mini is not None and value < self.mini:
+            self.error_status = f"the input value is lower than {self.mini}"
+            return
 
-        if self.maxi is not None:
-            if value > self.maxi:
-                self.error_status = f"the input value is higher than {self.maxi}"
-                return
+        if self.maxi is not None and value > self.maxi:
+            self.error_status = f"the input value is higher than {self.maxi}"
+            return
 
-        if self._exclude:
-            if value in self._exclude:
-                self.error_status = f"the input value is forbidden; forbidden values are {self._exclude}"
-                return
+        if self._exclude and value in self._exclude:
+            self.error_status = (
+                f"the input value is forbidden; forbidden values are {self._exclude}"
+            )
+            return
 
         self["value"] = value
         self.error_status = "OK"

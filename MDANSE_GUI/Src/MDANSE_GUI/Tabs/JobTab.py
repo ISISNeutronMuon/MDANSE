@@ -213,8 +213,8 @@ class JobTab(GeneralTab):
             settings=settings,
             logger=logger,
             model=kwargs.get("model", JobTree(filter="Converters")),
-            combo_model=kwargs.get("combo_model", None),
-            instrument_model=kwargs.get("instrument_model", None),
+            combo_model=kwargs.get("combo_model"),
+            instrument_model=kwargs.get("instrument_model"),
             view=ActionsTree(),
             visualiser=action,
             layout=partial(

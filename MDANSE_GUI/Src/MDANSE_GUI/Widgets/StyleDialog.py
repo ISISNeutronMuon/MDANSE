@@ -75,7 +75,7 @@ class StyleDatabase(QObject):
 
     @Slot()
     def showStoredLabels(self) -> list[str]:
-        temp = [str(x) for x in self._styles.keys()]
+        temp = [str(x) for x in self._styles]
         self.stored_labels.emit(temp)
         return temp
 
@@ -109,9 +109,7 @@ class StyleDialog(QDialog):
         """
         style_hints = QApplication.styleHints()
         colour_scheme = style_hints.colorScheme()
-        if colour_scheme == Qt.ColorScheme.Dark:
-            return True
-        return False
+        return colour_scheme == Qt.ColorScheme.Dark
 
     def connectStyleDatabase(self, dbase: StyleDatabase):
         self._database = dbase

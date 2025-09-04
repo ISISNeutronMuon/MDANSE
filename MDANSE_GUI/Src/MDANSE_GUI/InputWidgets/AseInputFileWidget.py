@@ -32,13 +32,11 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class AseInputFileWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        configurator = kwargs.get("configurator", None)
-        if configurator is not None:
-            default_value = configurator.default
-        else:
-            default_value = ""
+        configurator = kwargs.get("configurator")
+        default_value = configurator.default if configurator is not None else ""
+
         try:
-            parent = kwargs.get("parent", None)
+            parent = kwargs.get("parent")
             self.default_path = PurePath(parent.default_path)
         except KeyError:
             self.default_path = PurePath(os.path.abspath("."))
@@ -47,10 +45,8 @@ class AseInputFileWidget(WidgetBase):
             self.default_path = PurePath(os.path.abspath("."))
             LOG.error("AttributeError in InputFileWidget - can't get default path.")
         default_value = kwargs.get("default", "")
-        if self._tooltip:
-            tooltip_text = self._tooltip
-        else:
-            tooltip_text = "Specify a path to an existing file."
+
+        tooltip_text = self._tooltip or "Specify a path to an existing file."
         self._qt_file_association = kwargs.get("wildcard", "")
         combo = QComboBox(self._base)
         combo.addItems(AseInputFileConfigurator._allowed_formats)

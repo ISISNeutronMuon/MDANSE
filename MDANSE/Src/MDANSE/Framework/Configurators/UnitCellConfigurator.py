@@ -60,9 +60,11 @@ class UnitCellConfigurator(IConfigurator):
         except Exception:
             has_valid_cell = False
         else:
-            if first_cell is None:
-                has_valid_cell = False
-            elif np.allclose(first_cell, 0.0) or np.allclose(last_cell, 0.0):
+            if (
+                first_cell is None
+                or np.allclose(first_cell, 0.0)
+                or np.allclose(last_cell, 0.0)
+            ):
                 has_valid_cell = False
             elif np.allclose(first_cell, last_cell):
                 has_changing_cell = False

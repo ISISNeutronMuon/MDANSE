@@ -338,7 +338,7 @@ class ChemicalSystem:
 
         assert isinstance(source, (h5py.File, dict))
 
-        if "composition" not in source.keys():
+        if "composition" not in source:
             if close_on_end:
                 source.close()
             self.legacy_load(trajectory)

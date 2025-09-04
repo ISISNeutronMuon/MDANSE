@@ -149,7 +149,7 @@ class MDAnalysis(Converter):
             else:
                 tag = None
             if tag:
-                if tag in label_dict.keys():
+                if tag in label_dict:
                     label_dict[tag] += [at_number]
                 else:
                     label_dict[tag] = [at_number]

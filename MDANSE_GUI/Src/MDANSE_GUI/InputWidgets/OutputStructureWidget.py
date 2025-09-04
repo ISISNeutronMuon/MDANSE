@@ -34,7 +34,7 @@ class OutputStructureWidget(WidgetBase):
         super().__init__(*args, layout_type="QGridLayout", **kwargs)
         default_value = self._configurator.default
         try:
-            parent = kwargs.get("parent", None)
+            parent = kwargs.get("parent")
             self.default_path = PurePath(parent.default_path)
         except KeyError:
             self.default_path = PurePath(os.path.abspath("."))
@@ -45,7 +45,7 @@ class OutputStructureWidget(WidgetBase):
                 "AttributeError in OutputTrajectoryWidget - can't get default path."
             )
         try:
-            parent = kwargs.get("parent", None)
+            parent = kwargs.get("parent")
             guess_name = str(PurePath(os.path.join(self.default_path, "POSCAR")))
         except Exception:
             guess_name = str(PurePath(default_value[0]))

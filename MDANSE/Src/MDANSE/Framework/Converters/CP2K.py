@@ -41,7 +41,7 @@ class CellFile(dict):
     """
 
     def __init__(self, filename):
-        self["instance"] = open(filename, encoding="utf-8")
+        self["instance"] = open(filename, encoding="utf-8")  # noqa: SIM115
 
         # Skip the first line
         self["instance"].readline()

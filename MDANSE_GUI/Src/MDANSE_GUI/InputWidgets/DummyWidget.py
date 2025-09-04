@@ -23,7 +23,7 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class DummyWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        _source_object = kwargs.get("source_object", None)
+        _source_object = kwargs.get("source_object")
         self._layout.addWidget(QLabel("content is missing here", self._base))
         self._configurator = {"value": "Oops!"}
         self.default_labels()

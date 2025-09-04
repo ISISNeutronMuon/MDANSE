@@ -200,46 +200,47 @@ class McStasVirtualInstrument(IJob):
         sqwInput = ""
         self.outFile = {}
         for typ in sqw:
-            fout = tempfile.NamedTemporaryFile(mode="w", delete=False)
-            # for debugging, we use a real file here:
-            # fout = open(
-            #     "/Users/maciej.bartkowiak/an_example/mcstas/Persistent_file_for_"
-            #     + typ
-            #     + ".sqw",
-            #     "w",
-            # )
+            with tempfile.NamedTemporaryFile(mode="w", delete=False) as fout:
+                # for debugging, we use a real file here:
+                # fout = open(
+                #     "/Users/maciej.bartkowiak/an_example/mcstas/Persistent_file_for_"
+                #     + typ
+                #     + ".sqw",
+                #     "w",
+                # )
 
-            fout.write("# Physical parameters:\n")
-            for k, v in list(self._mcStasPhysicalParameters.items()):
-                fout.write(f"# {k} {v} \n")
+                fout.write("# Physical parameters:\n")
+                for k, v in list(self._mcStasPhysicalParameters.items()):
+                    fout.write(f"# {k} {v} \n")
 
-            fout.write(f"# Temperature {self.configuration['temperature']['value']} \n")
-            fout.write("#\n")
+                fout.write(
+                    f"# Temperature {self.configuration['temperature']['value']} \n"
+                )
+                fout.write("#\n")
 
-            for var in self.configuration[typ].variables:
-                fout.write(f"# {var}\n")
+                for var in self.configuration[typ].variables:
+                    fout.write(f"# {var}\n")
 
-                data = self.configuration[typ][var][:]
-                LOG.info(f"In {typ} the variable {var} has shape {data.shape}")
-                LOG.info(f"Values of {var}: min={data.min()}, max = {data.max()}")
-                data_unit = self.configuration[typ]._units[var]
-                try:
-                    data *= MCSTAS_UNITS_LUT[data_unit]
-                except KeyError:
-                    LOG.error(
-                        f"Could not find the physical unit {data_unit} in the lookup table."
-                    )
+                    data = self.configuration[typ][var][:]
+                    LOG.info(f"In {typ} the variable {var} has shape {data.shape}")
+                    LOG.info(f"Values of {var}: min={data.min()}, max = {data.max()}")
+                    data_unit = self.configuration[typ]._units[var]
+                    try:
+                        data *= MCSTAS_UNITS_LUT[data_unit]
+                    except KeyError:
+                        LOG.error(
+                            f"Could not find the physical unit {data_unit} in the lookup table."
+                        )
 
-                np.savetxt(fout, np.atleast_2d(data), delimiter=" ", newline="\n")
+                    np.savetxt(fout, np.atleast_2d(data), delimiter=" ", newline="\n")
 
-            fout.close()
-            self.outFile[typ] = fout.name
-            # self.outFile[typ] = (
-            #     "/Users/maciej.bartkowiak/an_example/mcstas/Persistent_file_for_"
-            #     + typ
-            #     + ".sqw"
-            # )
-            sqwInput += f"{typ}={fout.name} "
+                self.outFile[typ] = fout.name
+                # self.outFile[typ] = (
+                #     "/Users/maciej.bartkowiak/an_example/mcstas/Persistent_file_for_"
+                #     + typ
+                #     + ".sqw"
+                # )
+                sqwInput += f"{typ}={fout.name} "
 
         # sys.exit(0)
 
@@ -341,7 +342,7 @@ class McStasVirtualInstrument(IJob):
         isBegin = partial(_startswith, "begin")
         isCompFilename = partial(_startswith, "filename:")
         # First, determine if this is single or overview plot...
-        SimFile = list(filter(isBegin, open(sim_file).readlines()))
+        SimFile = list(filter(isBegin, open(sim_file).readlines()))  # noqa: SIM115
         Datfile = 0
         if SimFile == []:
             FS = self.read_monitor(sim_file)
@@ -352,7 +353,7 @@ class McStasVirtualInstrument(IJob):
                 Datfile = 1
 
         # Get filenames from the sim file
-        MonFiles = list(filter(isCompFilename, open(sim_file).readlines()))
+        MonFiles = list(filter(isCompFilename, open(sim_file).readlines()))  # noqa: SIM115
         L = len(MonFiles)
         FSlist = []
         # Scan or overview?
@@ -361,7 +362,7 @@ class McStasVirtualInstrument(IJob):
             if Datfile == 0:
                 isFilename = partial(_startswith, "filename")
 
-                Scanfile = list(filter(isFilename, open(sim_file).readlines()))
+                Scanfile = list(filter(isFilename, open(sim_file).readlines()))  # noqa: SIM115
                 Scanfile = Scanfile[0].split(": ")
                 Scanfile = sim_dir / Scanfile[1].strip()
                 # Proceed to load scan datafile
@@ -466,7 +467,7 @@ class McStasVirtualInstrument(IJob):
 
         # Read header
         isHeader = partial(_startswith, "#")
-        f = open(simFile)
+        f = open(simFile)  # noqa: SIM115
         Lines = f.readlines()
         Header = list(filter(isHeader, Lines))
         f.close()

@@ -29,7 +29,7 @@ FORCE_FACTOR = measure(1.0, "kcal_per_mole/ang", equivalent=True).toval("Da nm/p
 
 class TrjFile(dict):
     def __init__(self, trjfilename):
-        self["instance"] = open(trjfilename, "rb")
+        self["instance"] = open(trjfilename, "rb")  # noqa: SIM115
 
         self.parse_header()
 

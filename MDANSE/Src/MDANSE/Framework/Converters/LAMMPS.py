@@ -17,10 +17,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from contextlib import suppress
 from enum import Enum, auto
 from itertools import count
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Literal
 
 import h5py
 import numpy as np
@@ -347,7 +348,7 @@ class LAMMPScustom(LAMMPSReader):
         filename : Path | str
             File to open for reading.
         """
-        self._file = open(filename, encoding="utf-8")
+        self._file = open(filename, encoding="utf-8")  # noqa: SIM115
         self._start = 0
 
     def parse_first_step(
@@ -651,7 +652,7 @@ class LAMMPSxyz(LAMMPSReader):
         filename : Path | str
             File to open for reading.
         """
-        self._file = open(filename, encoding="utf-8")
+        self._file = open(filename, encoding="utf-8")  # noqa: SIM115
 
     def read_step(self) -> tuple[int, NDArray[int], NDArray[float]]:
         """Read an XYZ file step.
@@ -876,10 +877,8 @@ class LAMMPSh5md(LAMMPSReader):
         self._full_cell = np.diag(cell_edges)
         self._full_cell *= measure(1.0, self.units["length"]).toval("nm")
 
-        try:
+        with suppress(Exception):
             self._charges_fixed = self._file["/particles/all/charge"][:]
-        except Exception:
-            pass
 
         self._rankToName = {}
         chemical_system = ChemicalSystem()

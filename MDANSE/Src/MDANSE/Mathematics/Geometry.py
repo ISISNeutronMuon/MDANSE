@@ -297,10 +297,7 @@ def superposition_fit(confs):
     v = v[i]
     if v[0] < 0:
         v = -v
-    if e[i] <= 0.0:
-        rms = 0.0
-    else:
-        rms = np.sqrt(e[i])
+    rms = 0.0 if e[i] <= 0.0 else np.sqrt(e[i])
 
     from MDANSE.Mathematics.LinearAlgebra import Quaternion, Vector
 

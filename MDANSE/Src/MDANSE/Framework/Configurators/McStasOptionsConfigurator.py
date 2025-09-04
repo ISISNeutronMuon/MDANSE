@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import tempfile
 import time
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
@@ -36,10 +37,8 @@ def parse_dictionary(input: str) -> dict[str, Any]:
         try:
             value = int(value)
         except Exception:
-            try:
+            with suppress(Exception):
                 value = float(value)
-            except Exception:
-                pass
         result[key] = value
     return result
 

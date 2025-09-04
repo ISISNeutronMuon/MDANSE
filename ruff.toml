@@ -18,7 +18,7 @@ select = [
     "W",   # Pycodestyle warnings
     "F",   # Pyflakes
     # "B",   # Flake8 bugbear
-    # "SIM", # Flake8 Simplify
+    "SIM", # Flake8 Simplify
     # "A",   # Flake8 builtins
     # "COM", # Flake8 commas
     # "ISC", # Flake8 implicit string concat

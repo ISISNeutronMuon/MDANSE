@@ -27,7 +27,7 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class HDFTrajectoryWidget(WidgetBase):
     def __init__(self, *args, trajectory_instance: Trajectory | None = None, **kwargs):
         super().__init__(*args, **kwargs)
-        filename = kwargs.get("source_object", None)
+        filename = kwargs.get("source_object")
         if trajectory_instance:
             self._configurator._instance = trajectory_instance
             self._configurator.configure_from_instance()
