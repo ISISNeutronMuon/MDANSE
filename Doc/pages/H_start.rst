@@ -104,6 +104,34 @@ Make sure that you are starting MDANSE from a shell/console
 in which you have activated the Python virtual environment,
 as described above in section :ref:`venv_for_mdanse`.
 
+Run MDANSE in the shell
+~~~~~~~~~~~~~~~~~~~~~~~
+
+As an alternative to using the GUI, MDANSE package provides
+a script that can be used in the command line. To find out
+more about the valid input commands, type
+
+.. code-block:: bash
+
+   mdanse -h
+
+This will show the help message of the MDANSE CLI and give
+you the list of available subcommands.
+
+The currently implemented commands allow you to display the
+contents of MDANSE trajectory files (.mdt) and the contents
+of MDANSE analysis results (.mda), view the atom database
+entries for different chemical elements, and to create
+Python scripts for trajectory conversion and analysis.
+At the moment the scripts contain only default values which
+then need to be replaced with values relevant to the input
+files you intend to use, so creating scripts in the GUI
+is still easier for now.
+
+Make sure that you are starting MDANSE from a shell/console
+in which you have activated the Python virtual environment,
+as described above in section :ref:`venv_for_mdanse`.
+
 MDANSE Scripts
 ~~~~~~~~~~~~~~
 
