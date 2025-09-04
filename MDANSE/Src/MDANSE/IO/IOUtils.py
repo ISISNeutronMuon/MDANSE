@@ -32,7 +32,7 @@ class MDANSEEncoder(json.JSONEncoder):
     """Custom JSON encoder to encode paths as strings."""
 
     def default(self, obj):
-        if isinstance(obj, (Path, complex)):
+        if isinstance(obj, Path | complex):
             return str(obj)
         elif isinstance(obj, np.ndarray):
             return "\n".join(map(str, obj))

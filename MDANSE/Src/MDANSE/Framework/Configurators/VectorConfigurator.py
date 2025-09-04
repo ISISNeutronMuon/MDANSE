@@ -67,7 +67,7 @@ class VectorConfigurator(IConfigurator):
 
         self._original_input = value
 
-        if not isinstance(value, (list, tuple)):
+        if not isinstance(value, list | tuple):
             self.error_status = "Invalid input type"
             return
 

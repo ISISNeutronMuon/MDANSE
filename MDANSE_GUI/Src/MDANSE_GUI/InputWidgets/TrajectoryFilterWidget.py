@@ -16,8 +16,8 @@
 from __future__ import annotations
 
 import copy
-from collections.abc import Sequence
-from typing import Any, Callable
+from collections.abc import Callable, Sequence
+from typing import Any
 
 import matplotlib.pyplot as mpl
 import numpy as np

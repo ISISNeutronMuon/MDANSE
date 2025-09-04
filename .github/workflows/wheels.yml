@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         # os: [ubuntu-20.04, windows-2019, macOS-11, ubuntu-latest, windows-latest, macOS-latest]
     if: |
       !contains( github.ref, 'legacy' )
@@ -47,7 +47,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         # os: [ubuntu-20.04, windows-2019, macOS-11, ubuntu-latest, windows-latest, macOS-latest]
     if: |
       !contains( github.ref, 'legacy' )
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      
+
       - uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.os }}_python${{ matrix.python-version }}_wheel
@@ -84,4 +84,3 @@ jobs:
           name: ${{ matrix.os }}_python${{ matrix.python-version }}_GUI_wheel
           path: ./MDANSE_GUI/dist/*.whl
           retention-days: 30
-

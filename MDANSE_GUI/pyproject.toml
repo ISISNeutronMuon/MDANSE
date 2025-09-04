@@ -7,7 +7,7 @@ name = "MDANSE_GUI"
 version = "1.0.0rc2"
 description = 'MDANSE GUI package - the graphical interface for MDANSE'
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {file = "LICENSE"}
 keywords = ["molecular dynamics", "science", "simulation", "analysis"]
 maintainers = [

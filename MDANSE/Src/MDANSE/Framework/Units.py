@@ -252,7 +252,7 @@ class _Unit:
         10 V
         """
         u = copy.deepcopy(self)
-        if isinstance(other, (numbers.Number, numbers.Complex)):
+        if isinstance(other, numbers.Number | numbers.Complex):
             u._factor /= other
         elif isinstance(other, _Unit):
             u._div_by(other)
@@ -308,7 +308,7 @@ class _Unit:
         """
 
         u = copy.deepcopy(self)
-        if isinstance(other, (numbers.Number, numbers.Complex)):
+        if isinstance(other, numbers.Number | numbers.Complex):
             u._factor *= other
             return u
         elif isinstance(other, _Unit):
@@ -467,7 +467,7 @@ class _Unit:
         __div__
         """
 
-        if isinstance(other, (numbers.Number, numbers.Complex)):
+        if isinstance(other, numbers.Number | numbers.Complex):
             self._factor /= other
             return self
         elif isinstance(other, _Unit):
@@ -496,7 +496,7 @@ class _Unit:
         __mul__
         """
 
-        if isinstance(other, (numbers.Number, numbers.Complex)):
+        if isinstance(other, numbers.Number | numbers.Complex):
             self._factor *= other
             return self
         elif isinstance(other, _Unit):
@@ -542,7 +542,7 @@ class _Unit:
 
     def __rdiv__(self, other):
         u = copy.deepcopy(self)
-        if isinstance(other, (numbers.Number, numbers.Complex)):
+        if isinstance(other, numbers.Number | numbers.Complex):
             u._factor /= other
             return u
         elif isinstance(other, _Unit):
@@ -555,7 +555,7 @@ class _Unit:
         """Multiply _Unit instances.  See __mul__."""
 
         u = copy.deepcopy(self)
-        if isinstance(other, (numbers.Number, numbers.Complex)):
+        if isinstance(other, numbers.Number | numbers.Complex):
             u._factor *= other
             return u
         elif isinstance(other, _Unit):

@@ -367,7 +367,7 @@ class Action(QWidget):
             return
         self.check_inputs()
         for widget in self._widgets:
-            if isinstance(widget, (OutputFilesWidget, OutputTrajectoryWidget)):
+            if isinstance(widget, OutputFilesWidget | OutputTrajectoryWidget):
                 widget.updateValue()
         self.allow_execution()
 

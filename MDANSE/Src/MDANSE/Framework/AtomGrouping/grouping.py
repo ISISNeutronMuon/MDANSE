@@ -16,8 +16,7 @@
 from __future__ import annotations
 
 import itertools as it
-from collections.abc import Iterable
-from typing import Callable
+from collections.abc import Callable, Iterable
 
 import numpy.typing as npt
 
@@ -280,7 +279,7 @@ def add_grouped_totals_2D(
             output_data[group_id].scaling_factor = conc
 
 
-def label_pairs(labels: Iterable[str], *, all_pairs: bool) -> list[tuple[str, str]]:
+def label_pairs(labels: Iterable[str], *, all_pairs: bool) -> Iterable[tuple[str, str]]:
     """
     Parameters
     ----------

@@ -330,13 +330,13 @@ class ChemicalSystem:
             Filename or a file object of the trajectory.
         """
         close_on_end = False
-        if isinstance(trajectory, (Path, str)):
+        if isinstance(trajectory, Path | str):
             close_on_end = True
             source = h5py.File(trajectory)
         else:
             source = trajectory
 
-        assert isinstance(source, (h5py.File, dict))
+        assert isinstance(source, h5py.File | dict)
 
         if "composition" not in source:
             if close_on_end:
