@@ -5,7 +5,7 @@
 
 .. note::
    This is the documentation of MDANSE 2.0.
-   MDANSE 2 is currently (July 2025) approaching its first release.
+   MDANSE 2 is currently (September 2025) approaching its first release.
 
 Welcome to MDANSE's documentation!
 ==================================

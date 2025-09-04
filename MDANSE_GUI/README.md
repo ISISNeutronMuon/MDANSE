@@ -9,7 +9,7 @@ The GUI depends on the [MDANSE package](https://www.isis.stfc.ac.uk/Pages/MDANSE
 
 ## Version information
 
-This is the first release candidate of MDANSE_GUI 1.0.0. The set of features it
+This is the second release candidate of MDANSE_GUI 1.0.0. The set of features it
 contains will not change by the time the full release has been made. However,
 there still may be some problems with the code at this stage that need to be
 identified and corrected.

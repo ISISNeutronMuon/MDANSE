@@ -28,7 +28,7 @@ The final version in the 1.5.x series can still be found in the **legacy**
 branch, but is not being actively developed or supported.
 
 The current version of MDANSE is currently approaching the first release,
-as the first release candidate has been created. The set of features it
+and the second release candidate has been created. The set of features it
 contains will not change by the time the full release has been made. However,
 there still may be some problems with the code at this stage that need to be
 identified and corrected. You can help the developers by reporting problems

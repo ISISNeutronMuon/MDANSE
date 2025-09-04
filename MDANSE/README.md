@@ -30,7 +30,7 @@ J Chem Inf Model. 57(1):1-5 (2017).
 
 ## Version information
 
-This is the first release candidate of MDANSE 2.0.0. The set of features it
+This is the second release candidate of MDANSE 2.0.0. The set of features it
 contains will not change by the time the full release has been made. However,
 there still may be some problems with the code at this stage that need to be
 identified and corrected. Please help us develop MDANSE by reporting any
