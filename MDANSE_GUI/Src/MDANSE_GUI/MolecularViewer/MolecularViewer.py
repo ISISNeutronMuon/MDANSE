@@ -212,6 +212,24 @@ class MolecularViewer(QtWidgets.QWidget):
         self.dummy_size = 0.0
 
         self.reset_camera = False
+        self._video_writer = None
+        self.video_filename = "mdanse_3d_film.avi"
+
+    @Slot()
+    def start_recording(self):
+        if self._video_writer is None:
+            windowToImageFilter = vtk.vtkWindowToImageFilter()
+            windowToImageFilter.SetInput(self._iren.GetRenderWindow())
+            windowToImageFilter.SetInputBufferTypeToRGBA()
+            windowToImageFilter.ReadFrontBufferOff()
+            windowToImageFilter.Update()
+            self._video_writer = vtk.vtkOggTheoraWriter(file_name=self.video_filename)
+            self._video_writer.SetInputConnection(windowToImageFilter.GetOutputPort())
+            self._video_writer.writer.Start()
+
+    def stop_recording(self):
+        self._video_writer.End()
+        self._video_writer = None
 
     def clear_axes(self):
         if not self.axes_actors:
@@ -764,6 +782,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_polydata()
         self.update_uc_polydata()
         self.update_axes()
+        if self._video_writer is not None:
+            self._video_writer.Write()
 
     def update_polydata(self):
         """Triggers an update of the VTK actors, making them use the
