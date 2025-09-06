@@ -385,10 +385,10 @@ class NeutronDynamicTotalStructureFactor(IJob):
             pre_fac = 1 if label_i == label_j else 2
             self._outputData[f"ndsf/f(q,t)_coh/{pair_str}"].scaling_factor *= (
                 pre_fac * bi * bj * sqrt_cij
-            )
+            ).real
             self._outputData[f"ndsf/s(q,f)_coh/{pair_str}"].scaling_factor *= (
                 pre_fac * bi * bj * sqrt_cij
-            )
+            ).real
 
             self._outputData["ndsf/f(q,t)_coh/total"][:] += (
                 self._outputData[f"ndsf/f(q,t)_coh/{pair_str}"][:]
