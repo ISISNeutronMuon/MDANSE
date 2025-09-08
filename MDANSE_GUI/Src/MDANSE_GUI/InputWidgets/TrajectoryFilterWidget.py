@@ -1185,18 +1185,14 @@ class FilterDesigner(QDialog):
         tr_filter.freq_response = (tr_filter.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
 
         # Resample and normalise trajectory power spectrum (y-axis)
-        ps = raw_power_spectrum_values / np.max(raw_power_spectrum_values)
-
-        attenuation = interp1d(
-            tr_filter.freq_response.frequencies,
-            tr_filter.freq_response.magnitudes,
-            fill_value=0.0,
-            bounds_error=False,
+        ps = self.resample_and_normalise(
+            values=raw_power_spectrum_values, to_len=len(response.frequencies)
         )
-        # Compute power spectral attenuation due to filter (multiplicative)
-        attenuated_ps = ps * attenuation(raw_power_spectrum_freqs)
 
-        return (raw_power_spectrum_freqs, ps, attenuated_ps)
+        # Compute power spectral attenuation due to filter (multiplicative)
+        attenuated_ps = ps * tr_filter.freq_response.magnitudes
+
+        return (ps, attenuated_ps)
 
     def create_settings_layout(self, widget_area: QVBoxLayout) -> None:
         """Create the filter settings vertical layout.
@@ -1326,15 +1322,15 @@ class FilterDesigner(QDialog):
 
         # Conditionally display trajectory power spectral attenuation
         if trajectory_power_spectrum:
-            psx, ps, attenuated_ps = trajectory_power_spectrum
+            ps, attenuated_ps = trajectory_power_spectrum
             axes.plot(
-                psx,
+                x,
                 20 * np.log10(abs(ps)) if db_response else ps,
                 label="Trajectory response",
                 color="grey",
             )
             axes.plot(
-                psx,
+                x,
                 20 * np.log10(abs(attenuated_ps)) if db_response else attenuated_ps,
                 label="Attenuation",
                 color="black",
@@ -1434,7 +1430,7 @@ class FilterDesigner(QDialog):
             and self.pps_thread is None
             and self._trajectory_power_spectrum is not None
         ):
-            ps_axis, ps, attenuated_ps = self.set_trajectory_power_spectrum(
+            ps, attenuated_ps = self.set_trajectory_power_spectrum(
                 filter_preview,
             )
 
@@ -1449,7 +1445,7 @@ class FilterDesigner(QDialog):
             filter_preview.freq_response,
             db_response=db_response,
             energies=energies,
-            trajectory_power_spectrum=(ps_axis, ps, attenuated_ps)
+            trajectory_power_spectrum=(ps, attenuated_ps)
             if ps is not None and attenuated_ps is not None
             else None,
         )
