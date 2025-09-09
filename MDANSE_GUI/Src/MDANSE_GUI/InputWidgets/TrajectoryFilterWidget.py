@@ -1170,22 +1170,19 @@ class FilterDesigner(QDialog):
         response = tr_filter.freq_response
 
         # Trajectory power spectrum data
-        raw_power_spectrum = copy.deepcopy(self._trajectory_power_spectrum)
-        raw_power_spectrum_freqs, raw_power_spectrum_values = raw_power_spectrum
+        freqs, values = copy.deepcopy(self._trajectory_power_spectrum)
 
-        # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain
-        power_spectrum_freqs = np.linspace(
-            raw_power_spectrum_freqs.min(),
-            raw_power_spectrum_freqs.max(),
+        # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain, setting
+        # custom frequency range on filter object
+        tr_filter.custom_freq_range = np.linspace(
+            freqs.min(),
+            freqs.max(),
             len(response.frequencies),
         )
-
-        # Set custom frequency range on filter object
-        tr_filter.custom_freq_range = power_spectrum_freqs
         tr_filter.freq_response = (tr_filter.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
 
-        # Resample and normalise trajectory power spectrum (y-axis)
-        ps = raw_power_spectrum_values / np.max(raw_power_spectrum_values)
+        # Normalise trajectory power spectrum (y-axis)
+        normalised = values / np.max(values)
 
         attenuation = interp1d(
             tr_filter.freq_response.frequencies,
@@ -1193,10 +1190,11 @@ class FilterDesigner(QDialog):
             fill_value=0.0,
             bounds_error=False,
         )
-        # Compute power spectral attenuation due to filter (multiplicative)
-        attenuated_ps = ps * attenuation(raw_power_spectrum_freqs)
 
-        return (raw_power_spectrum_freqs, ps, attenuated_ps)
+        if self.current_filter_units() == Filter.FrequencyUnits.CYCLIC:
+            freqs /= (2*np.pi)
+
+        return (freqs, normalised, normalised * attenuation(freqs))
 
     def create_settings_layout(self, widget_area: QVBoxLayout) -> None:
         """Create the filter settings vertical layout.
