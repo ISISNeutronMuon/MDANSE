@@ -1192,7 +1192,7 @@ class FilterDesigner(QDialog):
         )
 
         if self.current_filter_units() == Filter.FrequencyUnits.CYCLIC:
-            freqs /= (2*np.pi)
+            freqs /= 2 * np.pi
 
         return (freqs, normalised, normalised * attenuation(freqs))
 
