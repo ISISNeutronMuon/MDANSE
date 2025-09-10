@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import json
 import numpy as np
 import pytest
 from more_itertools import run_length
@@ -13,7 +14,9 @@ from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Converters.LAMMPS import BoxStyle
 from MDANSE.Framework.Jobs.IJob import JobError
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
+mdtraj_small = DATA_DIR / "1gip.pdb"
 lammps_config = DATA_DIR / "lammps_test.config"
 lammps_lammps = DATA_DIR / "lammps_test.lammps"
 lammps_moly = DATA_DIR / "structure_moly.lammps"
@@ -808,3 +811,110 @@ def test_lammps_config_parser(config_file, expected):
             np.testing.assert_allclose(conf[key], expected[key])
         else:
             assert conf.get(key) == expected.get(key)
+
+
+
+@pytest.mark.parametrize(
+    "converter_type,atom_alias,parameters",
+    (
+        (
+            "LAMMPS",
+            '{"mass=14.0067": {"1": "Os"}}',
+            {
+                "config_file": lammps_config,
+                "mass_tolerance": 0.05,
+                "n_steps": 0,
+                "smart_mass_association": True,
+                "time_step": 1.0,
+                "trajectory_file": lammps_lammps,
+            },
+        ),
+        (
+            "VASP",
+            '{"": {"O": "Os", "Mo": "Os", "Bi": "Os"}}',
+            {"fold": False, "time_step": 1.0, "xdatcar_file": vasp_xdatcar},
+        ),
+        (
+            "cp2k",
+            '{"": {"O": "Os", "C": "Os"}}',
+            {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": None},
+        ),
+        (
+            "ase",
+            '{"": {"Cu": "Os"}}',
+            {
+                "trajectory_file": ase_traj,
+                "fold": False,
+                "n_steps": 0,
+                "time_step": 50.0,
+                "time_unit": "fs",
+            },
+        ),
+        (
+            "DL_POLY",
+            '{"molecule=Argon;mass=39.948": {"Ar": "Os"}}',
+            {
+                "field_file": dlp_field_v4,
+                "fold": False,
+                "history_file": dlp_history_v4,
+            },
+        ),
+        (
+            "CASTEP",
+            '{"": {"C": "Os", "Fe": "Os", "O": "Os", "H": "Os", "N": "Os"}}',
+            {"castep_file": pbanew_md, "fold": False},
+        ),
+        (
+            "DFTB",
+            '{"type=h1o_ff": {"H": "Os"}, "type=o2*_ff": {"O": "Os"}}',
+            {
+                "fold": True,
+                "trj_file": h2o_trj,
+                "xtd_file": h2o_xtd,
+            },
+        ),
+        (
+            "Forcite",
+            '{"type=h1o_ff": {"H": "Os"}, "type=o2*_ff": {"O": "Os"}}',
+            {
+                "fold": False,
+                "trj_file": h2o_trj,
+                "xtd_file": h2o_xtd,
+            },
+        ),
+        (
+            "MDAnalysis",
+            '{"name=O;type=O;mass=15.999": {"O": "Os"}, "name=C;type=C;mass=12.011": {"C": "Os"}}',
+            {
+                "topology_file": (cp2k_pos, "AUTO"),
+                "coordinate_files": ([], "AUTO"),
+            },
+        ),  # Does not work with Path
+        (
+            "MDTraj",
+            json.dumps({"symbol=H;residue=DA;number=1;mass=1.007947": {"H2": "Os", "H2''": "Os", "H61": "Os", "H3'": "Os", "H2'": "Os", "H62": "Os", "H4'": "Os", "H5''": "Os", "H1'": "Os", "H8": "Os", "H5'": "Os"}, "symbol=C;residue=DT;number=6;mass=12.01078": {"C2'": "Os", "C4": "Os", "C6": "Os", "C7": "Os", "C5'": "Os", "C1'": "Os", "C3'": "Os", "C5": "Os", "C4'": "Os", "C2": "Os"}, "symbol=C;residue=DG;number=6;mass=12.01078": {"C4": "Os", "C5'": "Os", "C6": "Os", "C4'": "Os", "C2": "Os", "C3'": "Os", "C5": "Os", "C1'": "Os", "C2'": "Os", "C8": "Os"}, "symbol=C;residue=DC;number=6;mass=12.01078": {"C1'": "Os", "C3'": "Os", "C5": "Os", "C4'": "Os", "C2'": "Os", "C4": "Os", "C2": "Os", "C6": "Os", "C5'": "Os"}, "symbol=C;residue=DA;number=6;mass=12.01078": {"C1'": "Os", "C3'": "Os", "C5": "Os", "C4'": "Os", "C2'": "Os", "C2": "Os", "C4": "Os", "C8": "Os", "C6": "Os", "C5'": "Os"}, "symbol=H;residue=DT;number=1;mass=1.007947": {"H73": "Os", "H4'": "Os", "H71": "Os", "H3": "Os", "H2'": "Os", "H1'": "Os", "H6": "Os", "H3'": "Os", "H2''": "Os", "H5''": "Os", "H5'": "Os", "H72": "Os"}, "symbol=H;residue=DC;number=1;mass=1.007947": {"H41": "Os", "H5'": "Os", "H4'": "Os", "H2'": "Os", "H2''": "Os", "H42": "Os", "H1'": "Os", "H5''": "Os", "H5": "Os", "H6": "Os", "H3'": "Os", "HO5'": "Os"}, "symbol=O;residue=DT;number=8;mass=15.99943": {"OP1": "Os", "OP2": "Os", "O2": "Os", "O3'": "Os", "O5'": "Os", "O4'": "Os", "O4": "Os"}, "symbol=H;residue=DG;number=1;mass=1.007947": {"H1'": "Os", "H5''": "Os", "HO3'": "Os", "H4'": "Os", "H21": "Os", "H1": "Os", "H2'": "Os", "H2''": "Os", "H5'": "Os", "H8": "Os", "H3'": "Os", "H22": "Os"}, "symbol=O;residue=DA;number=8;mass=15.99943": {"O5'": "Os", "OP1": "Os", "O3'": "Os", "O4'": "Os", "OP2": "Os"}, "symbol=N;residue=DA;number=7;mass=14.00672": {"N3": "Os", "N7": "Os", "N6": "Os", "N1": "Os", "N9": "Os"}, "symbol=N;residue=DC;number=7;mass=14.00672": {"N4": "Os", "N3": "Os", "N1": "Os"}, "symbol=N;residue=DT;number=7;mass=14.00672": {"N3": "Os", "N1": "Os"}, "symbol=N;residue=DG;number=7;mass=14.00672": {"N2": "Os", "N9": "Os", "N3": "Os", "N7": "Os", "N1": "Os"}, "symbol=O;residue=DC;number=8;mass=15.99943": {"O5'": "Os", "O2": "Os", "OP1": "Os", "O3'": "Os", "O4'": "Os", "OP2": "Os"}, "symbol=P;residue=DA;number=15;mass=30.9737622": {"P": "Os"}, "symbol=P;residue=DG;number=15;mass=30.9737622": {"P": "Os"}, "symbol=O;residue=DG;number=8;mass=15.99943": {"O4'": "Os", "OP1": "Os", "OP2": "Os", "O6": "Os", "O5'": "Os", "O3'": "Os"}, "symbol=P;residue=DT;number=15;mass=30.9737622": {"P": "Os"}, "symbol=P;residue=DC;number=15;mass=30.9737622": {"P": "Os"}}),
+            {
+                "coordinate_files": [str(mdtraj_small)],  # Does not work with Path
+                "time_step": 1.0,
+            },
+        ),
+    ),
+)
+def test_atom_aliases_work(
+    tmp_path,
+    converter_type,
+    atom_alias,
+    parameters,
+):
+    temp_name = tmp_path / "output"
+
+    parameters["output_files"] = (temp_name, 32, 128, "none", "INFO")
+    parameters["atom_aliases"] = atom_alias
+
+    converter = Converter.create(converter_type)
+    converter.run(parameters, status=True)
+
+    output_traj = Trajectory(temp_name.with_suffix(".mdt"))
+    atom_list = output_traj.atom_types
+
+    assert all(x == 'Os' for x in atom_list)
