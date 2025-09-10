@@ -819,7 +819,7 @@ def test_lammps_config_parser(config_file, expected):
     (
         (
             "LAMMPS",
-            '{"mass=14.0067": {"1": "Os"}}',
+            '{"mass=12.0107": {"3": "Os", "8": "Os", "11": "Os", "9": "Os", "2": "Os"}, "mass=14.0067": {"7": "Os", "1": "Os"}, "mass=15.9994": {"4": "Os", "10": "Os"}, "mass=1.0079": {"12": "Os", "6": "Os", "5": "Os", "13": "Os"}}',
             {
                 "config_file": lammps_config,
                 "mass_tolerance": 0.05,

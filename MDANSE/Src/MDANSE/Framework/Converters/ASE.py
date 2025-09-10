@@ -328,7 +328,10 @@ class ASE(Converter):
         if self._initial_charges is None:
             LOG.warning("ASE converter could not read partial charges from file.")
 
-        element_list = first_frame.get_chemical_symbols()
+        element_list = [
+            get_element_from_mapping(mapping, symbol)
+            for symbol in first_frame.get_chemical_symbols()
+        ]
 
         self._nAtoms = len(element_list)
 

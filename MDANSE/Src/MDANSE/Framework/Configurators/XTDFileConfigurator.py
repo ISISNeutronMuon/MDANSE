@@ -152,7 +152,12 @@ class XTDFileConfigurator(FileWithAtomDataConfigurator):
         coordinates = np.array(
             [atom["xyz"] for atom in self._atoms.values()], dtype=np.float64
         )
-        element_list = [atom["element"] for atom in self._atoms.values()]
+        element_list = []
+
+        for info in self._atoms.values():
+            symbol = info["element"]
+            element = get_element_from_mapping(aliases, symbol, type=info["atom_name"])
+            element_list.append(element)
         name_list = [atom["atom_name"] for atom in self._atoms.values()]
         unique_labels = set(name_list)
         label_dict = {label: [] for label in unique_labels}
