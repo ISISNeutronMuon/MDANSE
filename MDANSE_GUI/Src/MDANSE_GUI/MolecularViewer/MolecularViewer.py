@@ -233,9 +233,10 @@ class MolecularViewer(QtWidgets.QWidget):
             windowToImageFilter.SetInputBufferTypeToRGBA()
             windowToImageFilter.ReadFrontBufferOff()
             windowToImageFilter.Update()
-            self._video_writer = vtk.vtkOggTheoraWriter(file_name=self.video_filename)
+            self._video_writer = vtk.vtkOggTheoraWriter()
+            self._video_writer.SetFileName(self.video_filename)
             self._video_writer.SetInputConnection(windowToImageFilter.GetOutputPort())
-            self._video_writer.writer.Start()
+            self._video_writer.Start()
 
     def stop_recording(self):
         self._video_writer.End()
