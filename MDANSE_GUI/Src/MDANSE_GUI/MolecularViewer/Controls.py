@@ -38,6 +38,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
+from MDANSE_GUI.MolecularViewer.Save3DViewWidget import Save3DViewWidget
 from MDANSE_GUI.MolecularViewer.TraceWidget import TraceWidget
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
 
@@ -313,6 +314,19 @@ class ViewerControls(QWidget):
         self._trace_widget.initialise_values(viewer)
         layout.addWidget(self._trace_widget)
         return self._trace_widget
+
+    def createSave3DViewPanel(self, viewer):
+        """Adds widgets for finer control of the playback"""
+        base = QWidget(self)
+        base.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        layout = QVBoxLayout(base)
+        base.setLayout(layout)
+        self._side_base.addTab(base, "Save View")
+        # colour changes
+        self._save_widget = Save3DViewWidget(viewer)
+        self._save_widget.initialise_values(viewer)
+        layout.addWidget(self._save_widget)
+        return self._save_widget
 
     @Slot()
     def set_background_colour(self):
