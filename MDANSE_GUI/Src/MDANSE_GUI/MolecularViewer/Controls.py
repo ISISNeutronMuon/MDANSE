@@ -321,7 +321,7 @@ class ViewerControls(QWidget):
         base.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         layout = QVBoxLayout(base)
         base.setLayout(layout)
-        self._side_base.addTab(base, "Save View")
+        self._side_base.addTab(base, "Image/Video export")
         # colour changes
         self._save_widget = Save3DViewWidget(viewer)
         self._save_widget.initialise_values(viewer)

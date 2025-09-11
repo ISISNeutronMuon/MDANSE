@@ -214,6 +214,16 @@ class MolecularViewer(QtWidgets.QWidget):
         self.reset_camera = False
         self._video_writer = None
         self.video_filename = "mdanse_3d_film.avi"
+        self.image_filename = "mdanse_image.png"
+
+    @Slot(str)
+    def set_video_filename(self, new_filename: str):
+        self.video_filename = new_filename
+
+    @Slot(str)
+    def set_image_filename(self, new_filename: str):
+        self.image_filename = new_filename
+        self.save_to_file()
 
     @Slot()
     def start_recording(self):
@@ -241,36 +251,20 @@ class MolecularViewer(QtWidgets.QWidget):
         self.axes_actors = []
 
     @Slot()
-    def save_to_file(self, filename: str | None = None):
+    def save_to_file(self):
         upscaler = vtk.vtkRenderLargeImage()
         upscaler.SetInput(self._renderer)
         upscaler.SetMagnification(4)
 
         outputFilename = (
-            filename
-            if filename
-            else "/Users/maciej.bartkowiak/talk/for_printing/vtk_screenshot2"
+            self.image_filename if self.image_filename else "vtk_screenshot.png"
         )
 
         writer = vtk.vtkPNGWriter()
         writer.SetFilePrefix(outputFilename)
+        writer.SetFileName(outputFilename+".png" if ".png" not in outputFilename else outputFilename)
         writer.SetInputConnection(upscaler.GetOutputPort())
         writer.Write()
-
-    @Slot()
-    def save_to_file_lowres(self, filename: str | None = None):
-        pdfExporter = vtk.vtkGL2PSExporter()
-        pdfExporter.SetRenderWindow(self._iren._RenderWindow)
-
-        outputFilename = (
-            filename
-            if filename
-            else "/Users/maciej.bartkowiak/talk/for_printing/vtk_screenshot2"
-        )
-
-        pdfExporter.SetFileFormatToPDF()
-        pdfExporter.SetFilePrefix(outputFilename)
-        pdfExporter.Write()
 
     def update_axes(self):
         def add_arrow(color, direction):
@@ -1033,6 +1027,22 @@ class MolecularViewer(QtWidgets.QWidget):
         self._trace_dialog.new_atom_trace.connect(self.trace_from_dialog)
         self._trace_dialog.remove_atom_trace.connect(self.delete_isosurface_from_dialog)
         self.changed_trace.connect(self._trace_dialog.update_limits)
+
+    def create_save_dialog(self, viewer_controls):
+        """Creates and connects an additional panel of the GUI which contains
+        an instance of TraceWidget.
+
+        Parameters
+        ----------
+        viewer_controls : ViewerControls
+            instance of the ViewerControls widget from View3D
+        """
+        self._save_dialog = viewer_controls.createSave3DViewPanel(self)
+        self._save_dialog.new_image_filename.connect(self.set_image_filename)
+        self._save_dialog.new_video_filename.connect(self.set_video_filename)
+        self._save_dialog.save_image.connect(self.save_to_file)
+        self._save_dialog.start_recording.connect(self.start_recording)
+        self._save_dialog.stop_recording.connect(self.stop_recording)
 
     @property
     def renderer(self):
