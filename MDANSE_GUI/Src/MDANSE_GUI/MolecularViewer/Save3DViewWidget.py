@@ -36,6 +36,20 @@ REC_BUTTON_ENABLED = "Start recording"
 REC_BUTTON_DISABLED = "Recording every new frame"
 
 
+def increment_filename_number(current_path: Path) -> str:
+    toks = str(current_path.parent / current_path.stem).split("_")
+    if len(toks) > 1:
+        try:
+            lastnum = int(toks[-1])
+        except (ValueError, TypeError):
+            new_name = "_".join(toks) + "_1"
+        else:
+            new_name = "_".join(toks[:-1]) + f"_{lastnum + 1}"
+    elif len(toks) == 1:
+        new_name = toks[0] + "_1"
+    return new_name
+
+
 class Save3DViewWidget(QWidget):
     new_image_filename = Signal(str)
     new_video_filename = Signal(str)
@@ -76,7 +90,7 @@ class Save3DViewWidget(QWidget):
         layout.addWidget(self._image_filename_edit)
         layout.addWidget(self._image_browse_button)
         layout.addWidget(self._save_image_button)
-        self._save_image_button.clicked.connect(self.increment_image_number)
+        self._save_image_button.clicked.connect(self.save_and_increment_image_number)
         self._image_browse_button.clicked.connect(self.set_image_name_from_dialog)
         return base
 
@@ -99,6 +113,10 @@ class Save3DViewWidget(QWidget):
         self._start_recording_button.clicked.connect(self.toggle_widgets_on_rec_start)
         self._stop_recording_button.clicked.connect(self.toggle_widgets_on_rec_stop)
         self._video_browse_button.clicked.connect(self.set_video_name_from_dialog)
+        self._save_image_button.setEnabled(False)
+        self._start_recording_button.setEnabled(False)
+        self._video_filename_edit.textChanged.connect(self.check_video_name)
+        self._image_filename_edit.textChanged.connect(self.check_image_name)
         return base
 
     def populate_layout(self):
@@ -107,19 +125,11 @@ class Save3DViewWidget(QWidget):
         layout.addWidget(self.create_video_widgets())
 
     @Slot()
-    def increment_image_number(self):
+    def save_and_increment_image_number(self):
         image_name = Path(self._image_filename_edit.text())
         self.new_image_filename.emit(str(image_name))
-        toks = str(image_name.stem).split("_")
-        if len(toks) > 1:
-            try:
-                lastnum = int(toks[-1])
-            except (ValueError, TypeError):
-                new_name = "_".join(toks) + "_1"
-            else:
-                new_name = "_".join(toks[:-1]) + f"_{lastnum + 1}"
-        elif len(toks) == 1:
-            new_name = toks[0] + "_1"
+        new_name = increment_filename_number(image_name)
+        new_name = str(Path(new_name).with_suffix(".png"))
         self._image_filename_edit.setText(new_name)
 
     def update_path(self):
@@ -153,6 +163,7 @@ class Save3DViewWidget(QWidget):
     @Slot()
     def toggle_widgets_on_rec_start(self):
         self._video_filename_edit.setEnabled(False)
+        self._video_browse_button.setEnabled(False)
         self._start_recording_button.setText(REC_BUTTON_DISABLED)
         self._start_recording_button.setEnabled(False)
         self._stop_recording_button.setEnabled(True)
@@ -160,6 +171,29 @@ class Save3DViewWidget(QWidget):
     @Slot()
     def toggle_widgets_on_rec_stop(self):
         self._video_filename_edit.setEnabled(True)
+        self._video_browse_button.setEnabled(True)
         self._start_recording_button.setText(REC_BUTTON_ENABLED)
         self._start_recording_button.setEnabled(True)
         self._stop_recording_button.setEnabled(False)
+        video_name = self._video_filename_edit.text()
+        new_name = increment_filename_number(Path(video_name))
+        new_name = str(Path(new_name).with_suffix(".avi"))
+        self._video_filename_edit.setText(new_name)
+
+    @Slot(str)
+    def check_image_name(self, filename: str):
+        if filename:
+            fpath = Path(filename)
+            if not fpath.exists():
+                self._save_image_button.setEnabled(True)
+                return
+        self._save_image_button.setEnabled(False)
+
+    @Slot(str)
+    def check_video_name(self, filename: str):
+        if filename:
+            fpath = Path(filename)
+            if not fpath.exists():
+                self._start_recording_button.setEnabled(True)
+                return
+        self._start_recording_button.setEnabled(False)

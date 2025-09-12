@@ -263,7 +263,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
         writer = vtk.vtkPNGWriter()
         writer.SetFilePrefix(outputFilename)
-        writer.SetFileName(outputFilename+".png" if ".png" not in outputFilename else outputFilename)
+        writer.SetFileName(
+            outputFilename + ".png" if ".png" not in outputFilename else outputFilename
+        )
         writer.SetInputConnection(upscaler.GetOutputPort())
         writer.Write()
 
