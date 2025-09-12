@@ -87,10 +87,10 @@ class AtomLabel:
         return hash((self.atm_label, self.grp_label, self.mass))
 
     def __repr__(self) -> str:
+        grps = self.grp_label.split(";") if self.grp_label else []
+        grps = map(lambda x: x.split("="), grps)
         cont = ", ".join(
-            f"{key}={val!r}"
-            for key, val in (("atom", self.atm_label), ("group", self.grp_label))
-            if val
+            f"{key}={val!r}" for key, val in (("atm_label", self.atm_label), *grps)
         )
         return f"{type(self).__name__}({cont})"
 
