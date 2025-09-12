@@ -18,10 +18,14 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Iterable, Iterator
+from functools import singledispatch
 from itertools import filterfalse
 from pathlib import Path
+from typing import Any
 
 import numpy as np
+
+from MDANSE.MLogging import LOG
 
 
 class MDANSEEncoder(json.JSONEncoder):
@@ -33,6 +37,40 @@ class MDANSEEncoder(json.JSONEncoder):
         elif isinstance(obj, np.ndarray):
             return "\n".join(map(str, obj))
         return super().default(obj)
+
+
+@singledispatch
+def json_handler(value) -> dict[Any, Any]:
+    if not value:
+        return {}
+
+    raise TypeError(f"Do not know how to process {type(value).__name__} as JSON")
+
+
+@json_handler.register(dict)
+def _(value: dict[Any, Any]) -> dict[Any, Any]:
+    # Already a dict
+    return value
+
+
+@json_handler.register(str)
+def _(value: str) -> dict[Any, Any]:
+    try:
+        return json.loads(value)
+    except json.decoder.JSONDecodeError:
+        LOG.warning("Cannot process string as json, trying as file path.")
+        return json_handler(Path(value))
+
+
+@json_handler.register(Path)
+def _(value: Path) -> dict[Any, Any]:
+    try:
+        with value.open(encoding="utf-8") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Unable to open ({value}) as json file .")
+    except Exception as err:
+        raise ValueError("Unable to load JSON string.") from err
 
 
 def _strip_inline_comments(

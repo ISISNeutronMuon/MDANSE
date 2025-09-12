@@ -104,7 +104,7 @@ class SelectionModel(QStandardItemModel):
             item = self.itemFromIndex(index)
             json_string = item.text()
             total_dict[row] = json.loads(json_string)
-        self._selection.load_from_json(json.dumps(total_dict))
+        self._selection.load(json.dumps(total_dict))
         self._current_selection = self._selection.select_in_trajectory(self._trajectory)
         if last_operation:
             try:
@@ -116,7 +116,7 @@ class SelectionModel(QStandardItemModel):
             except json.JSONDecodeError:
                 return SelectionValidity.MALFORMED_SELECTION
             if valid:
-                self._selection.load_from_json(json_string)
+                self._selection.load(json_string)
                 return SelectionValidity.VALID_SELECTION
             return SelectionValidity.USELESS_SELECTION
         return None
@@ -641,7 +641,7 @@ class AtomSelectionWidget(WidgetBase):
         except OSError:
             LOG.info("File %s could not be read as an HDF5 file", fname)
             try:
-                temp_selection.load_from_json_file(fname)
+                temp_selection.load(fname)
             except (json.JSONDecodeError, UnicodeDecodeError):
                 LOG.info("File %s could not be read using JSON decoder", fname)
                 LOG.warning("Selection will NOT be loaded from %s", fname)

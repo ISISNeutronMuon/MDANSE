@@ -63,14 +63,14 @@ class AtomSelectionConfigurator(IConfigurator):
             return
 
         try:
-            self.selector.load_from_json(value)
+            self.selector.load(value)
         except JSONDecodeError:
             self.error_status = "Invalid JSON string."
             return
 
         self["value"] = value
 
-        self.selector.load_from_json(value)
+        self.selector.load(value)
         indices = self.selector.select_in_trajectory(trajConfig["instance"])
 
         self["flatten_indices"] = sorted(indices)

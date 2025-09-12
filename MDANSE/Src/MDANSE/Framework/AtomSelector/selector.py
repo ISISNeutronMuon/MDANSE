@@ -34,6 +34,7 @@ from MDANSE.Framework.AtomSelector.spatial_selection import (
     select_positions,
     select_sphere,
 )
+from MDANSE.IO.IOUtils import json_handler
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
@@ -175,7 +176,7 @@ class ReusableSelection:
             True if the operation changes selection, False otherwise
 
         """
-        function_parameters = json.loads(json_string)
+        function_parameters = json_handler(json_string)
         if not self.operations:
             return True
         operation_type = function_parameters.get("operation_type", "union")
@@ -234,7 +235,7 @@ class ReusableSelection:
         """
         return json.dumps(self.operations)
 
-    def load_from_json(self, json_string: str):
+    def load(self, json: Path | str | dict | None) -> None:
         """Populate the operations sequence from the input string.
 
         Loads the atom selection operations from a JSON string.
@@ -242,39 +243,20 @@ class ReusableSelection:
 
         Parameters
         ----------
-        json_string : str
-            A sequence of selection operations, encoded as a JSON string
+        json : Path or str or dict or None
+            A sequence of selection operations.
 
         """
-        json_setting = json.loads(json_string)
-        self.load_from_dict(json_setting)
-
-    def load_from_json_file(self, filename: Path | str):
-        """Load a selection from a JSON text file.
-
-        Parameters
-        ----------
-        filename : Path | str
-            name of a text file containing just a selection in JSON format
-
-        """
-        with open(filename) as source:
-            json_setting = json.load(source)
-            self.load_from_dict(json_setting)
-
-    def load_from_dict(self, value: dict) -> None:
-        """Load a selection from a dictionary.
-
-        Parameters
-        ----------
-        value : dict
-            Dictionary of substitutions.
-
-        """
+        value = json_handler(json)
         for k0, v0 in value.items():
             if not isinstance(v0, dict):
                 raise TypeError(f"Selection {v0} is not a dictionary.")
             self.set_selection(number=k0, function_parameters=v0)
+
+    # Legacy interface
+    load_from_json = load
+    load_from_json_file = load
+    load_from_dict = load
 
     def save_to_json_file(self, filename: Path | str):
         """Output all the operations as a JSON string.
@@ -308,5 +290,5 @@ class ReusableSelection:
                 LOG.warning(f"atom selection string not found in file {filename}")
                 json_string = "{}"
             else:
-                json_string = json.loads(byte_string.decode())
-            self.load_from_json(json_string)
+                json_string = byte_string.decode()
+            self.load(json_string)

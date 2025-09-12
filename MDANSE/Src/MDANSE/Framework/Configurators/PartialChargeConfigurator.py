@@ -61,7 +61,7 @@ class PartialChargeMapper:
             The partial charge to map the selected atoms to.
         """
         selector = ReusableSelection()
-        selector.load_from_json(selection_string)
+        selector.load(selection_string)
         indices = selector.select_in_trajectory(self._current_trajectory)
         for idx in indices:
             self._new_map[idx] = charge

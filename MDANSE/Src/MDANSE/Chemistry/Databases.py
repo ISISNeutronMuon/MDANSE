@@ -26,7 +26,7 @@ from MDANSE.Core.Error import Error
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
 from MDANSE.Framework.Units import measure
-from MDANSE.IO.IOUtils import MDANSEEncoder
+from MDANSE.IO.IOUtils import MDANSEEncoder, json_handler
 from MDANSE.MLogging import LOG
 
 TOLERANCE_IMG = 1e-13
@@ -132,11 +132,8 @@ class _Database(metaclass=Singleton):
 
         database_path = user_database if user_database.exists() else default_database
 
-        with open(default_database, encoding="utf-8") as f:
-            self._default_data = json.load(f)
-
-        with open(database_path, encoding="utf-8") as f:
-            self._data = json.load(f)
+        self._default_data = json_handler(default_database)
+        self._data = json_handler(database_path)
 
     def items(self) -> ItemsView[str, dict]:
         """Return the iterator over the items of the data dict.
