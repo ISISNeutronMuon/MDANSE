@@ -34,7 +34,7 @@ def select_molecules(
 
     Returns
     -------
-    Set[int]
+    set[int]
         Set of indices of atoms belonging to molecules from molecule_names
     """
     selection = set()

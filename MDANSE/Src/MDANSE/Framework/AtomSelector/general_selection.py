@@ -30,7 +30,7 @@ def select_all(trajectory: Trajectory, **_kwargs: str) -> set[int]:
 
     Returns
     -------
-    Set[int]
+    set[int]
         Set of all the atom indices
 
     """
@@ -47,7 +47,7 @@ def select_none(_trajectory: Trajectory, **_kwargs: str) -> set[int]:
 
     Returns
     -------
-    Set[int]
+    set[int]
         An empty set.
 
     """
@@ -68,12 +68,12 @@ def invert_selection(
     ----------
     trajectory : Trajectory
         a trajectory containing atoms to be selected
-    selection : Set[int]
+    selection : set[int]
         set of indices to be excluded from the set of all indices
 
     Returns
     -------
-    Set[int]
+    set[int]
         set of all the indices in the trajectory which were not in the input selection
 
     """

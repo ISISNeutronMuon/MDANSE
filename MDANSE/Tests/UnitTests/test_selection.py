@@ -1,4 +1,3 @@
-
 import os
 
 from pathlib import Path
@@ -12,28 +11,13 @@ from MDANSE.Framework.AtomSelector.group_selection import select_labels, select_
 from MDANSE.Framework.AtomSelector.spatial_selection import select_positions, select_sphere
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
+from test_helpers.paths import CONV_DIR
 
-short_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "Converted",
-    "short_trajectory_after_changes.mdt",
-)
-mdmc_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "Converted",
-    "Ar_mdmc_h5md.h5",
-)
-com_traj = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "Converted",
-    "com_trajectory.mdt",
-)
-traj_2vb1 = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    "Converted",
-    "2vb1.mdt"
-)
-traj_with_dummy = Path(__file__).parent / "Converted" / "dummy_atoms.mdt"
+short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
+mdmc_traj = CONV_DIR / "Ar_mdmc_h5md.h5"
+com_traj = CONV_DIR / "com_trajectory.mdt"
+traj_2vb1 = CONV_DIR / "2vb1.mdt"
+traj_with_dummy = CONV_DIR / "dummy_atoms.mdt"
 
 @pytest.fixture(scope='module')
 def trajectory(request):

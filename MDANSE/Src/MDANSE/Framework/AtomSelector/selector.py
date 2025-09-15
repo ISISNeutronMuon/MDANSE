@@ -64,7 +64,7 @@ class ReusableSelection:
 
     """
 
-    def __init__(self) -> None:
+    def __init__(self):
         """Create an empty selection.
 
         Parameters

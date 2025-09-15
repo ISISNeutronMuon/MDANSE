@@ -49,7 +49,7 @@ def select_positions(
     Returns
     -------
     set[int]
-        indicies of atoms with coordinates within limits
+        indices of atoms with coordinates within limits
 
     """
     coordinates = trajectory.coordinates(frame_number)

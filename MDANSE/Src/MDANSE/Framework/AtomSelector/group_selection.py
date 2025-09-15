@@ -40,7 +40,7 @@ def select_labels(
 
     Returns
     -------
-    Set[int]
+    set[int]
         Set of atom indices corresponding to the selected labels
 
     """
@@ -69,7 +69,7 @@ def select_pattern(
 
     Returns
     -------
-    Set[int]
+    set[int]
         Set of atom indices matched by rdkit
 
     """
