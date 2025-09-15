@@ -1,10 +1,18 @@
-# MDANSE 
+# MDANSE
+
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mdanse)](https://pypi.org/project/MDANSE/)
+[![PyPI - Version](https://img.shields.io/pypi/v/mdanse?label=mdanse)](https://pypi.org/project/MDANSE/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/mdanse?label=mdanse)](https://pypi.org/project/MDANSE/)
+[![PyPI - Version](https://img.shields.io/pypi/v/mdanse_gui?label=mdanse_gui)](https://pypi.org/project/MDANSE/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/mdanse_gui?label=mdanse_gui)](https://pypi.org/project/MDANSE/)
+[![Read the Docs](https://img.shields.io/readthedocs/mdanse)](https://mdanse.readthedocs.io/en/protos/)
+
 
 ## Molecular Dynamics Analysis for Neutron Scattering Experiments
 
 MDANSE is a Python package designed for analysing molecular dynamics (MD)
 trajectories. One of its functions is calculating the expected results
-of neutron scattering experiments. The results can be directly compared with neutron scattering experiment results, particularly inelastic and quasi-elastic neutron scattering 
+of neutron scattering experiments. The results can be directly compared with neutron scattering experiment results, particularly inelastic and quasi-elastic neutron scattering
 spectroscopies.
 
 MDANSE contains a family of converters which can be used to transform MD
@@ -103,7 +111,7 @@ The most complete user documentation of MDANSE can be found on
 [our Read the Docs page](https://mdanse.readthedocs.io/en/protos).
 
 Other information including example scripts can be found on the
-[MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx) 
+[MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx)
 while the most recent tutorials are stored in the
 [MDANSE-Examples repository](https://github.com/ISISNeutronMuon/MDANSE-Examples).
 
@@ -226,21 +234,21 @@ and [MDTraj](https://github.com/mdtraj/mdtraj).
 For more information see:
 
 >nMoldyn 3: Using task farming for a parallel spectroscopy-oriented analysis of molecular dynamics simulations.
-K. Hinsen, E. Pellegrini, S. Stachura, G.R. Kneller J. Comput. Chem. (2012) 33:2043-2048 [https://doi.org/10.1002/jcc.23035][https://doi.org/10.1002/jcc.23035]. 
+K. Hinsen, E. Pellegrini, S. Stachura, G.R. Kneller J. Comput. Chem. (2012) 33:2043-2048 [https://doi.org/10.1002/jcc.23035][https://doi.org/10.1002/jcc.23035].
 
 We are grateful to all the people who have helped in some way or
-another to improve nMOLDYN and/or MDANSE along those years. 
+another to improve nMOLDYN and/or MDANSE along those years.
 Apart from the main developers mentioned above, we would like
-to acknowledge explicitly the contributions done in the past 
+to acknowledge explicitly the contributions done in the past
 by Bachir Aoun, Vania Calandrini, Paolo Calligari, Gael Goret,
 Remi Perenon and Rastislav Turanyi.
 
 The MDANSE project is supported by ISIS Neutron and Muon Source, Science
 and Technology Facilities Council, UKRI.
 In the past, it was supported by Ada Lovelace Centre
-and the Institut Laue-Langevin (Grenoble, France). 
-Past financial support from the French Agence Nationale de la Recherche (ANR) through contracts 
-No. ANR-2010-COSI-001-01 and ANR-06-CIS6-012-01, and the Horizon 2020 Framework Programme of 
+and the Institut Laue-Langevin (Grenoble, France).
+Past financial support from the French Agence Nationale de la Recherche (ANR) through contracts
+No. ANR-2010-COSI-001-01 and ANR-06-CIS6-012-01, and the Horizon 2020 Framework Programme of
 the European Union under project number 654000 is also acknowledged.
 
 ## Joining the project
