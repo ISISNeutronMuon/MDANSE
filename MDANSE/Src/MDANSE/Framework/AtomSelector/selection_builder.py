@@ -57,8 +57,13 @@ class SelectionBuilder:
     def __init__(self, basis: dict | str | Path | None = None):
         self.ops = self.load(basis) if basis else []
 
-    def __getitem__(self, key: int) -> tuple[str, dict[str, Any]]:
-        return self.ops[key]
+    def __getitem__(self, key: int | slice) -> tuple[str, dict[str, Any]]:
+        new = type(self)()
+        if isinstance(key, int):
+            new.ops = [self.ops[key]]
+        else:
+            new.ops = self.ops[key]
+        return new
 
     def __delitem__(self, key: int) -> None:
         del self.ops[key]
@@ -79,6 +84,7 @@ class SelectionBuilder:
 
         """
         self.ops = [self[ind] for ind in new_order]
+        return self
 
     def load(self, source: dict | str | Path):
         """Load a selection builder from a dump.
@@ -171,10 +177,12 @@ class SelectionBuilder:
     def select_all(self) -> None:
         """Select all the atoms in the trajectory."""
         self.ops.append(("select_all", {}))
+        return self
 
     def select_none(self) -> None:
         """Set an empty selection."""
         self.ops.append(("select_none", {}))
+        return self
 
     def invert_selection(self) -> None:
         """Invert the current selection for the input trajectory.
@@ -183,6 +191,7 @@ class SelectionBuilder:
         and were not included in the input selection.
         """
         self.ops.append(("invert_selection", {}))
+        return self
 
     def select_atoms(
         self,
@@ -229,6 +238,7 @@ class SelectionBuilder:
         )
 
         self.ops.append(("select_atoms", kwargs | {"operation_type": operation_type}))
+        return self
 
     def select_dummy(
         self,
@@ -270,6 +280,7 @@ class SelectionBuilder:
                 },
             )
         )
+        return self
 
     def select_labels(
         self,
@@ -298,6 +309,7 @@ class SelectionBuilder:
                 },
             )
         )
+        return self
 
     def select_pattern(
         self,
@@ -328,6 +340,7 @@ class SelectionBuilder:
                 },
             )
         )
+        return self
 
     def select_positions(
         self,
@@ -361,6 +374,7 @@ class SelectionBuilder:
         self.ops.append(
             ("select_positions", kwargs | {"operation_type": operation_type})
         )
+        return self
 
     def select_sphere(
         self,
@@ -393,6 +407,7 @@ class SelectionBuilder:
             "sphere_radius": sphere_radius,
         }
         self.ops.append(("select_sphere", kwargs | {"operation_type": operation_type}))
+        return self
 
     def save(self, filename: Path | str):
         """Output all the operations as a JSON string.

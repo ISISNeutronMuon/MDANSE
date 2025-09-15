@@ -1,4 +1,3 @@
-
 .. _atom-selection:
 
 Atom Selection
@@ -43,7 +42,7 @@ narrow the selection down to only the carbon atoms in these amino
 acids (:numref:`atom-selection-deeper`). Note that in the second and
 third lines of the selection we apply the intersection operation,
 which is an equivalent of the logical AND operator. As a result,
-we end up having selected atoms which are carbon atoms AND 
+we end up having selected atoms which are carbon atoms AND
 belong to alanine or arginine amino acids.
 
 .. _atom-selection-deeper:
@@ -104,6 +103,107 @@ for a different analysis run or for a different trajectory.
   For sets A and B, their difference :math:`A \setminus B` contains only those elements that belong
   to A and at the same time do not belong to B.
 
+Selection Builder
+-----------------
+
+If using the CLI or scripts to build selections, using a
+:class:`ReusableSelection` can be inconvenient.  To ease this process
+the :class:`SelectionBuilder` exists, this provides an interface to
+iteratively build, restructure and test selections.
+
+Each of the operations can be added to the selection by calling the
+requisite function on the ``SelectionBuilder``.
+
+.. code-block:: Python
+
+   >>> from MDANSE.Framework.AtomSelector.selection_builder import SelectionBuilder
+
+   >>> selection = SelectionBuilder()
+   # Select all atoms.
+   >>> selection.select_all()
+   SelectionBuilder(
+       0: select_all()
+   )
+   # Drop first 10 atoms from selection.
+   >>> selection.select_atoms(index_range=(0, 10), operation_type="difference")
+   SelectionBuilder(
+       0: select_all()
+       1: select_atoms(index_range=(0, 10), operation_type='difference')
+   )
+
+It should be noted that the ``SelectionBuilder`` by design has no
+concept of a trajectory to operate on. In order to ``apply`` it, it is
+necessary to provide a ``Trajectory``. This will dynamically create a
+new ``ReusableSelection`` and apply it to the ``Trajectory``.
+
+.. code-block:: Python
+
+   >>> from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+   >>> data = Trajectory("example.mdt")
+   >>> selection.apply(data)
+   # {10, 11, 12, ...}
+
+The ``SelectionBuilder`` is designed to be intuitive to use and
+helpful to the user. This means that when building a selection it can
+be useful to see what operations have been performed. ``print``-ing a
+``SelectionBuilder`` will show a short summary of its operations.
+``print``-ing the ``repr`` (or running a function in the Python interpreter) will
+display all the details in the terminal.
+
+.. code-block:: Python
+
+   >>> print(selection)
+   SelectionBuilder(
+       0: select_all(...)
+       1: select_atoms(...)
+   )
+   >>> print(repr(selection))
+   SelectionBuilder(
+       0: select_all()
+       1: select_atoms(index_range=(0, 10), operation_type='difference')
+   )
+
+If you wish to modify an existing selection, it is possible to build a
+``SelectionBuilder`` from an existing JSON string or file and then
+modify it.
+
+.. code-block:: Python
+
+   >>> selection = SelectionBuilder("example.json")
+   >>> print(selection)
+   SelectionBuilder(
+       0: select_all(...)
+       1: select_atoms(...)
+       2: select_none(...)
+       3: select_sphere(...)
+       4: invert_selection(...)
+   )
+   >>> del selection[2]
+   >>> print(selection)
+   SelectionBuilder(
+       0: select_all(...)
+       1: select_atoms(...)
+       2: select_sphere(...)
+       3: invert_selection(...)
+   )
+   >>> selection.reorder([0, 3, 2, 1, 3])
+   ...
+   >>> print(selection)
+   SelectionBuilder(
+       0: select_all(...)
+       1: invert_selection(...)
+       2: select_sphere(...)
+       3: select_atoms(...)
+       4: invert_selection(...)
+   )
+   >>> print(selection[:3])
+   SelectionBuilder(
+       0: select_all(...)
+       1: invert_selection(...)
+       2: select_sphere(...)
+   )
+
 Selection Criteria
 ------------------
 
@@ -121,7 +221,7 @@ as
   the format of first:last:step.
 
 **Chemical Element**: You can specify a selection using specific chemical elements.
-All atoms of the requested types will be selected. 
+All atoms of the requested types will be selected.
 
 **Atom Name**: An atom is not guaranteed to have a distinct name, and by default
 it is assign a name that is the same as its chemical element.
