@@ -62,6 +62,7 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         main_result: bool = False,
         partial_result: bool = False,
         dtype: type = np.float64,
+        custom_field: list[int] | None = None,
     ):
         """Instantiate a new MDANSE output variable.
 
@@ -121,6 +122,8 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         obj.axis = "|".join(axis)
 
         obj.scaling_factor = 1.0
+
+        obj.custom_field = custom_field if custom_field else []
 
         data_tags = []
         if main_result:

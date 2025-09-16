@@ -20,17 +20,41 @@ import collections
 import numpy as np
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
-from MDANSE.Mathematics.Geometry import random_points_on_sphere
+from MDANSE.Mathematics.Geometry import GAUSS_WIDTH_FACTOR
+
+
+def spherical_vectors(q: float, q_width: float, n_vecs: int):
+    qmin = max(0.01 * abs(q), q - q_width / 2)
+    qmax = q + q_width / 2
+    all_radii = []
+    while len(all_radii) < n_vecs:
+        temp_radii = np.random.normal(q, 0.5 * q_width / GAUSS_WIDTH_FACTOR, 2 * n_vecs)
+        all_radii.extend(
+            temp_radii[
+                np.where(np.logical_and((temp_radii >= qmin), (temp_radii <= qmax)))
+            ]
+        )
+    radii = np.array(all_radii)[:n_vecs]
+    theta = np.arccos(2 * np.random.ranf(n_vecs) - 1)
+    phi = 2 * np.pi * np.random.ranf(n_vecs)
+    return np.vstack(
+        (
+            radii * np.sin(theta) * np.cos(phi),
+            radii * np.sin(theta) * np.sin(phi),
+            radii * np.cos(theta),
+        )
+    )
 
 
 class SphericalQVectors(IQVectors):
     """Generates vectors randomly on a sphere.
 
-    Vectors within one shell are generated within
-    a tolerance limit around a central |Q| value.
-    Most calculations will produce one data point
-    for |Q| by averaging the results over all
-    vectors in the shell.
+    Most calculations will produce one data point for |Q| by averaging the
+    results over all vectors in the shell.
+
+    The vector lengths in a single shell assume a normal distribution with the
+    FWHM of 'width'/2 and limited to the range of (q - width/2, q + width/2)
+    around the shell centre defined by the 'shells' input.
     """
 
     settings = collections.OrderedDict()
@@ -53,7 +77,7 @@ class SphericalQVectors(IQVectors):
 
         width = self._configuration["width"]["value"]
 
-        nVectors = self._configuration["n_vectors"]["value"]
+        nvecs_per_shell = self._configuration["n_vectors"]["value"]
 
         self._configuration["q_vectors"] = collections.OrderedDict()
 
@@ -61,17 +85,19 @@ class SphericalQVectors(IQVectors):
             self._status.start(len(self._configuration["shells"]["value"]))
 
         for q in self._configuration["shells"]["value"]:
-            fact = q * np.sign(
-                np.random.uniform(-0.5, 0.5, nVectors)
-            ) + width * np.random.uniform(-0.5, 0.5, nVectors)
-
-            v = random_points_on_sphere(radius=1.0, nPoints=nVectors)
+            q_vectors = spherical_vectors(q, width, nvecs_per_shell)
 
             self._configuration["q_vectors"][q] = {}
-            self._configuration["q_vectors"][q]["q_vectors"] = fact * v
-            self._configuration["q_vectors"][q]["n_q_vectors"] = nVectors
+            self._configuration["q_vectors"][q]["q_vectors"] = q_vectors
+            self._configuration["q_vectors"][q]["n_q_vectors"] = nvecs_per_shell
+            self._configuration["q_vectors"][q]["weights"] = np.ones(nvecs_per_shell)
             self._configuration["q_vectors"][q]["q"] = q
-            self._configuration["q_vectors"][q]["hkls"] = None
+            if self._unit_cell is not None:
+                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
+                    q_vectors, self._unit_cell
+                )
+            else:
+                self._configuration["q_vectors"][q]["hkls"] = None
 
             if self._status is not None:
                 if self._status.is_stopped():

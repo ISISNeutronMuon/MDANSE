@@ -265,6 +265,8 @@ class DynamicCoherentStructureFactor(IJob):
         if shell not in self.configuration["q_vectors"]["value"]:
             return index, None
 
+        qvec_weights = self.configuration["q_vectors"]["value"][shell]["weights"]
+
         traj = self.trajectory
 
         nQVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"].shape[
@@ -312,7 +314,8 @@ class DynamicCoherentStructureFactor(IJob):
             for element, idxs in self._indicesPerElement.items():
                 selectedCoordinates = np.take(coords, idxs, axis=0)
                 rho[element][i, :] = np.sum(
-                    np.exp(1j * np.dot(selectedCoordinates, qVectors)),
+                    np.exp(1j * np.dot(selectedCoordinates, qVectors))
+                    * np.sqrt(qvec_weights[None, :]),
                     axis=0,
                 )
         if not cell_present:
@@ -324,18 +327,20 @@ class DynamicCoherentStructureFactor(IJob):
                 f"The unit cell is VARIABLE with the standard deviation of {self._cell_std}. This analysis should not be used with NPT runs! PLEASE CHECK YOUR RESULTS CAREFULLY."
             )
 
-        return index, rho
+        return index, (rho, np.sum(qvec_weights))
 
     def combine(self, index: int, x: np.ndarray):
         """Add partial results to the final array."""
         if x is not None:
+            norm = x[1]
+            rho = x[0]
             n_configs = self.configuration["frames"]["n_configs"]
             for pair_str, (label_i, label_j) in self.labels:
                 # F_ab(Q,t) = F_ba(Q,t) this is valid as long as
                 # n_configs is sufficiently large
-                corr = correlate(x[label_i], x[label_j][:n_configs], mode="valid").T[
-                    0
-                ] / (n_configs * x[label_i].shape[1])
+                corr = correlate(
+                    rho[label_i], rho[label_j][:n_configs], mode="valid"
+                ).T[0] / (n_configs * norm)
                 self._outputData[f"dcsf/f(q,t)/{pair_str}"][index, :] += corr.real
 
     def finalize(self):

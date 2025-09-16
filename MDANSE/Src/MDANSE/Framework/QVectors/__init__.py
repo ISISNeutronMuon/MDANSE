@@ -15,13 +15,13 @@
 #
 from __future__ import annotations
 
-from .ApproximateDispersionQVectors import (
-    ApproximateDispersionQVectors as ApproximateDispersionQVectors,
-)
 from .CircularLatticeQVectors import CircularLatticeQVectors as CircularLatticeQVectors
 from .CircularQVectors import CircularQVectors as CircularQVectors
 from .DispersionLatticeQVectors import (
     DispersionLatticeQVectors as DispersionLatticeQVectors,
+)
+from .DispersionQVectors import (
+    DispersionQVectors as DispersionQVectors,
 )
 from .GridQVectors import GridQVectors as GridQVectors
 from .IQVectors import IQVectors as IQVectors

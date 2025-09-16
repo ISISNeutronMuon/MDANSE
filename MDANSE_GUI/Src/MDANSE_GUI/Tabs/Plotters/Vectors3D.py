@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
-class Vectors(Plotter):
+class Vectors3D(Plotter):
     """Plots all the datasets in the same figure."""
 
     def __init__(self) -> None:
@@ -103,65 +103,29 @@ class Vectors(Plotter):
         if toolbar is not None:
             self._toolbar = toolbar
         self._figure = target
-        error_lims = None
         self._normalisation_errors = []
         self._axes = []
         self.apply_settings(plotting_context)
-        x_axis_labels = []
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
         if not plotting_context.datasets():
             target.clear()
             target.canvas.draw()
-        single_plot_stack = [222, 221]
-        label_stack = [
-            "Unique",
-            "Total",
-        ]
-        for databundle in plotting_context.datasets().values():
+        single_plot_stack = [221, 222, 223, 224]
+        first_shared_axes = target.add_subplot(single_plot_stack[0])
+        for ds_index, databundle in enumerate(plotting_context.datasets().values()):
             dataset = databundle.dataset
             try:
-                best_unit, best_axis = (
+                _, best_axis = (
                     dataset._axes_units[databundle.main_axis],
                     databundle.main_axis,
                 )
             except KeyError:
-                best_unit, best_axis = dataset.longest_axis()
+                _, best_axis = dataset.longest_axis()
             plotlabel = databundle.legend_label
-            x_axis_labels.append(dataset.x_axis_label(best_axis))
-            if dataset._name == "Available vectors":
-                axes = target.add_subplot(single_plot_stack.pop())
-                if dataset._n_dim == 2:
-                    temp_curves = []
-                    for value in dataset.data.T:
-                        [temp] = axes.plot(
-                            dataset.x_axis(best_axis),
-                            value,
-                            label=label_stack.pop(),
-                        )
-                        temp_curves.append(temp)
-                        if not label_stack:
-                            break
-                else:
-                    temp_curves = axes.plot(
-                        dataset.x_axis(best_axis),
-                        dataset.data,
-                        linestyle=databundle.line_style,
-                        label=plotlabel,
-                        color=databundle.colour,
-                    )
-                for temp in temp_curves:
-                    try:
-                        temp.set_marker(databundle.marker)
-                    except ValueError:
-                        with contextlib.suppress(Exception):
-                            temp.set_marker(int(databundle.marker))
-                self._axes.append(axes)
-                axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
-                axes.set_title(dataset._name)
-            elif dataset._name == "|q| - <|q|>":
-                axes = target.add_subplot(single_plot_stack.pop())
+            if ds_index < 3:
+                axes = first_shared_axes
                 temp_curves = axes.plot(
                     dataset.x_axis(best_axis),
                     dataset.data,
@@ -169,19 +133,6 @@ class Vectors(Plotter):
                     label=plotlabel,
                     color=databundle.colour,
                 )
-                if dataset._yerror is not None:
-                    axes.errorbar(
-                        dataset.x_axis(best_axis),
-                        dataset.data,
-                        fmt=databundle.marker,
-                        yerr=dataset._yerror,
-                        color=temp_curves[0].get_color(),
-                    )
-                    max_error = np.max(dataset._yerror)
-                    error_lims = (
-                        np.min(dataset.data) - max_error,
-                        np.max(dataset.data) + max_error,
-                    )
                 for temp in temp_curves:
                     try:
                         temp.set_marker(databundle.marker)
@@ -189,52 +140,61 @@ class Vectors(Plotter):
                         with contextlib.suppress(Exception):
                             temp.set_marker(int(databundle.marker))
                 self._axes.append(axes)
-                axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
+                axes.set_xlabel(dataset.x_axis_label(best_axis))
                 axes.set_title(dataset._name)
-            elif dataset._name == "Shell population":
-                axes = target.add_subplot(212)
-                multi_curves = dataset.curves_vs_axis(
-                    (best_unit, best_axis), max_limit=self._curve_limit_per_dataset
+            elif ds_index < 4:
+                axes = target.add_subplot(
+                    single_plot_stack[ds_index - 2], projection="3d"
                 )
-                x_axis = dataset.x_axis(best_axis)
-                bottom = np.zeros(len(x_axis))
-                width = 0.8 * abs(np.mean(x_axis[1:] - x_axis[:-1]))
+                temp_curves = axes.scatter(
+                    dataset.x_axis("q_x"),
+                    dataset.x_axis("q_y"),
+                    dataset.data,
+                    marker=databundle.marker,
+                    label=plotlabel,
+                    color=databundle.colour,
+                )
                 self._axes.append(axes)
-                add_legend_placeholder = (
-                    len(multi_curves) > self._legend_limit_for_histogram
+                axes.set_xlabel(dataset.x_axis_label("q_x"))
+                axes.set_ylabel(dataset.x_axis_label("q_y"))
+                axes.set_title(dataset._name)
+            else:
+                dataset = databundle.dataset
+                try:
+                    _, best_axis = (
+                        dataset._axes_units[databundle.main_axis],
+                        databundle.main_axis,
+                    )
+                except KeyError:
+                    _, best_axis = dataset.longest_axis()
+                plotlabel = databundle.legend_label
+                axes = target.add_subplot(single_plot_stack[ds_index - 2])
+                angles, counts = np.unique(
+                    dataset.x_axis(best_axis), return_counts=True
                 )
-                add_last_entry = False
-                axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
-                for bar_index, (key, value) in enumerate(multi_curves.items()):
-                    legend_label = plotlabel + ":" + dataset._curve_labels[key]
+                temp_curves = axes.plot(
+                    angles,
+                    counts,
+                    linestyle=databundle.line_style,
+                    label=plotlabel,
+                    color=databundle.colour,
+                )
+                for temp in temp_curves:
                     try:
-                        axes.bar(
-                            x_axis,
-                            value,
-                            label=legend_label
-                            if bar_index < self._legend_limit_for_histogram
-                            or add_last_entry
-                            else None,
-                            bottom=bottom,
-                            width=width,
-                            edgecolor="black",
-                        )
-                        bottom += value
+                        temp.set_marker(databundle.marker)
                     except ValueError:
-                        LOG.error(f"Plotting failed for {plotlabel} using {best_axis}")
-                        LOG.error(f"x_axis={dataset._axes[best_axis]}")
-                        LOG.error(f"values={value}")
-                        return
-                    else:
-                        if (
-                            add_legend_placeholder
-                            and bar_index == len(multi_curves) - 2
-                        ):
-                            add_legend_placeholder = False
-                            add_last_entry = True
-                            axes.bar(
-                                x_axis, 0, label="...", color=target.get_facecolor()
-                            )
+                        with contextlib.suppress(Exception):
+                            temp.set_marker(int(databundle.marker))
+                _ = axes.hist(
+                    dataset.x_axis(best_axis),
+                    18,
+                    facecolor="none",
+                    linewidth=2,
+                    edgecolor="k",
+                )
+                self._axes.append(axes)
+                axes.set_xlabel(dataset.x_axis_label(best_axis))
+                axes.set_title(dataset._name)
         for axes in self._axes:
             if update_only:
                 try:
@@ -258,8 +218,6 @@ class Vectors(Plotter):
             axes.grid(plotting_context.use_grid)
             axes.relim()
             axes.autoscale()
-        if error_lims is not None:
-            self._axes[1].set_ylim(*error_lims)
         if self._toolbar is not None:
             self._toolbar.update()
         target.canvas.draw()

@@ -79,7 +79,7 @@ class QVectorsConfigurator(IConfigurator):
 
             generator = IQVectors.create(
                 generator_name,
-                trajConfig["instance"].configuration(0),
+                trajConfig["instance"].unit_cell(0),
             )
             try:
                 generator.setup(parameters)

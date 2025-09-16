@@ -26,11 +26,13 @@ from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 class GridQVectors(LatticeQVectors):
     """Generates vectors on a grid.
 
-    Vectors are generated from HKL values based on
-    the definition of the unit cell.
+    Vectors are generated from HKL values based on the definition of the unit cell.
 
-    No symmetry considerations are used when generating
-    the vectors.
+    As opposed to MillerIndicesQVectors, this generator will use ALL the vectors
+    in the specified range, assigning each one of them to one of the shells.
+
+    The qstep parameter defines the size of the bin used for grouping vectors
+    into shells based on their length.
     """
 
     settings = {}
@@ -91,6 +93,7 @@ class GridQVectors(LatticeQVectors):
                 "q": q,
                 "q_vectors": vects[:, v],
                 "n_q_vectors": len(v),
+                "weights": np.ones_like(v),
                 "hkls": hkls[:, v],
             }
 

@@ -831,7 +831,7 @@ At the moment, the main applications include:
 Inputs:
 
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
-- frames: :ref:`configurator-analysis-FramesConfigurator` default=(0, -1, 1)
+- frames: :ref:`configurator-analysis-FramesConfigurator` default=(0, 1, 1)
 - unit_cell: :ref:`configurator-analysis-UnitCellConfigurator` default=(array([[1., 0., 0.],
        [0., 1., 0.],
        [0., 0., 1.]]), False)
@@ -867,6 +867,7 @@ Inputs:
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
 - trajectory_filter: :ref:`configurator-analysis-TrajectoryFilterConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=atomic_weight
 - output_files: :ref:`configurator-analysis-OutputTrajectoryConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A

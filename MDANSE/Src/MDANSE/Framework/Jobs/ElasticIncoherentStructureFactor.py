@@ -173,11 +173,12 @@ class ElasticIncoherentStructureFactor(IJob):
                 continue
 
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
+            qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
 
             a = np.average(np.exp(1j * np.dot(series, qVectors)), axis=0)
             a = np.abs(a) ** 2
 
-            atomicEISF[i] = np.average(a)
+            atomicEISF[i] = np.average(a, weights=qvec_weights)
 
         return index, atomicEISF
 

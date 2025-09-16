@@ -244,10 +244,11 @@ class DynamicIncoherentStructureFactor(IJob):
         n_configs = self.configuration["frames"]["n_configs"]
         for q in self.configuration["q_vectors"]["shells"]:
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
+            qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
 
-            rho = np.exp(1j * np.dot(series, qVectors))
+            rho = np.exp(1j * np.dot(series, qVectors)) * np.sqrt(qvec_weights[None, :])
             res = correlate(rho, rho[:n_configs], mode="valid").T[0] / (
-                n_configs * rho.shape[1]
+                n_configs * np.sum(qvec_weights)
             )
 
             disf_per_q_shell[q] += res.real

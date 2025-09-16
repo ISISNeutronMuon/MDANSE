@@ -19,10 +19,11 @@ import abc
 from typing import TYPE_CHECKING
 
 import numpy as np
+import numpy.typing as npt
 
-from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.Framework.Configurable import Configurable
+from MDANSE.Mathematics.Geometry import GAUSS_WIDTH_FACTOR
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
@@ -35,10 +36,10 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
 
     is_lattice = False
 
-    def __init__(self, atom_configuration, status=None):
+    def __init__(self, unit_cell: UnitCell | None, status=None):
         Configurable.__init__(self)
 
-        self._atom_configuration = atom_configuration
+        self._unit_cell = unit_cell
 
         self._status = status
 
@@ -106,6 +107,85 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
         """
         return 2 * np.pi * np.dot(unit_cell.inverse, hkls)
 
+    @classmethod
+    def sampled_indices(
+        self,
+        q_lengths: npt.NDArray[float],
+        q: float,
+        half_width: float,
+        nvecs_per_shell: int,
+    ) -> list[int]:
+        """Return array indices based on normal distribution of vectors lengths around q.
+
+        The vectors are picked randomly with a probability decreasing with the difference
+        between the actual and requested q. The sampling process continues until the
+        desired number of vectors has been picked.
+
+        Please keep in mind that the distribution of the vector lengths will not be
+        a Gaussian function if nvecs_per_shell is too close to the total length
+        of the input vector array.
+
+        Parameters
+        ----------
+        q_lengths : npt.NDArray[float]
+            A 1D array of vector lengths.
+        q : float
+            The requested mean value of |q| for the normal distribution.
+        half_width : float
+            Half of the q vector generator shell width
+        nvecs_per_shell : int
+            Number of q vectors to be picked.
+
+        Returns
+        -------
+        list[int]
+            List of indices sampling the vectors from the input array.
+        """
+        subset = []
+        gauss_half_width = half_width / GAUSS_WIDTH_FACTOR
+        distribution = np.exp(-0.5 * ((q_lengths - q) / (gauss_half_width)) ** 2)
+        # spherical_correction = 1 / q_lengths**2
+        scaling = distribution  # * spherical_correction
+        scaling /= np.max(scaling)
+        while len(subset) < nvecs_per_shell:
+            index = np.unique(np.random.randint(0, len(q_lengths), nvecs_per_shell))
+            index = index[np.where(np.logical_not(np.in1d(index, subset)))]
+            rand_pool = np.random.ranf(len(index))
+            subset.extend(index[np.where(scaling[index] > rand_pool)])
+        return subset[:nvecs_per_shell]
+
+    @classmethod
+    def lattice_vectors_with_weights(
+        self,
+        start_shape: npt.NDArray[float],
+        unit_cell: UnitCell,
+    ) -> tuple[npt.NDArray[float], npt.NDArray[float]]:
+        """Return HKL vectors from the input q-vector array.
+
+        An arbitrary shape will be scaled by values between qmin and qmax
+        to populate all the integer-index HKL values in the shell.
+
+        Parameters
+        ----------
+        start_shape : npt.NDArray[float]
+            Q-vector array representing a specific geometric shape.
+        unit_cell : UnitCell
+            The unit cell of the system, for conversion to HKL values.
+
+        Returns
+        -------
+        tuple[npt.NDArray[float], npt.NDArray[float]]
+            Unique Q-vectors as HKL values, number of times each vector appeared.
+        """
+        hkl_fractional = self.qvectors_to_hkl(start_shape, unit_cell)
+        hkl_rounded, weights = np.unique(
+            np.round(hkl_fractional), return_counts=True, axis=1
+        )
+        zero_vector_index = np.where(np.linalg.norm(hkl_rounded, axis=0) < 1e-15)[0]
+        return self.hkl_to_qvectors(
+            np.delete(hkl_rounded, zero_vector_index, axis=1), unit_cell
+        ), np.delete(weights, zero_vector_index)
+
     def write_vectors_to_file(self, output_data: OutputData):
         """Write the vectors to output file as an array.
 
@@ -141,6 +221,16 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
                 qvector_info[q]["q_vectors"],
                 units="1/nm",
                 axis="vector_generator/coordinates|index",
+            )
+
+        for nq, q in enumerate(q_values):
+            current = f"vector_generator/shell_{nq}/weights"
+            output_data.add(
+                current,
+                "LineOutputVariable",
+                qvector_info[q]["weights"],
+                units="au",
+                axis="index",
             )
 
         for nq, q in enumerate(q_values):

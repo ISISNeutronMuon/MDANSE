@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from MDANSE_GUI.Tabs.Views.PlotDataView import (
-    convert_vectors_to_datasets,
+    vector_q_statistics_datasets,
     shell_to_modq,
 )
 
@@ -41,7 +41,7 @@ def test_shell_to_modq_lengths(file_qvec):
         assert np.allclose(modq, SHELL_MODQ[n], atol=0.01, rtol=0.05)
 
 
-def test_convert_vectors_to_datasets_vecperq(file_qvec):
-    nvec_per_q, _, _ = convert_vectors_to_datasets(file_qvec)
+def test_vector_q_statistics_datasets_vecperq(file_qvec):
+    nvec_per_q, _, _ = vector_q_statistics_datasets(file_qvec)
     assert len(nvec_per_q.data) == len(SHELL_MODQ)
     assert all(nvec_per_q.data == VEC_PER_SHELL)

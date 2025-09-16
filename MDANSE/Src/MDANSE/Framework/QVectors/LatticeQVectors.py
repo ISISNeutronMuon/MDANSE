@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class LatticeQVectors(IQVectors):
@@ -23,15 +24,8 @@ class LatticeQVectors(IQVectors):
 
     is_lattice = True
 
-    def __init__(self, atom_configuration, status=None):
-        super().__init__(atom_configuration, status)
+    def __init__(self, unit_cell: UnitCell | None, status=None):
+        super().__init__(unit_cell, status)
 
-        if atom_configuration is None:
-            raise ValueError("No configuration set for the chemical system")
-
-        if not atom_configuration.is_periodic:
-            raise ValueError(
-                "The universe must be periodic for building lattice-based Q vectors"
-            )
-
-        self._unit_cell = atom_configuration.unit_cell
+        if unit_cell is None:
+            raise ValueError("The trajectory does not contain unit cell information.")

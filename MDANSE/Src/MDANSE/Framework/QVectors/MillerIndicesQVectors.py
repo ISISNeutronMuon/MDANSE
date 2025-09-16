@@ -102,6 +102,7 @@ class MillerIndicesQVectors(LatticeQVectors):
                 self._configuration["q_vectors"][q] = {}
                 self._configuration["q_vectors"][q]["q_vectors"] = vects[:, hits]
                 self._configuration["q_vectors"][q]["n_q_vectors"] = nHits
+                self._configuration["q_vectors"][q]["weights"] = np.ones(nHits)
                 self._configuration["q_vectors"][q]["q"] = q
                 self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
                     vects[:, hits], self._unit_cell

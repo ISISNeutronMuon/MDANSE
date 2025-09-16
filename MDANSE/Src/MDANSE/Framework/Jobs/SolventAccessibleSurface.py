@@ -445,7 +445,7 @@ class SolventAccessibleSurface(IJob):
         self.spherePoints = np.array(
             generate_sphere_points(self.configuration["n_sphere_points"]["value"]),
             dtype=np.float64,
-        )
+        ).T
 
         # A mapping between the atom indices and covalent_radius radius for the whole universe.
         if self.configuration["radius_type"]["value"] == "van der Waals":

@@ -1,22 +1,32 @@
 
+import numpy as np
+
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 configurators = sorted(IConfigurator.indirect_subclasses())
 converters = sorted(Converter.indirect_subclasses())
 jobs = sorted(IJob.indirect_subclasses())
+generators = sorted(set(IQVectors.indirect_subclasses()) - {"IQVectors", "LatticeQVectors"})
 
 job_inputs = {}
 converter_inputs = {}
+qvector_inputs = {}
 job_page = []
 converter_page = []
 input_page = []
+qvector_page = []
 
 def make_configurator_doc(conf: str, parent: str) -> str:
     result = ""
-    temp = IConfigurator.create(conf, 'dummy')
+    try:
+        temp = IConfigurator.create(conf, 'dummy')
+    except TypeError:
+        temp = IConfigurator.create(conf, 'dummy', parser=None)
     result += f"\n.. _configurator-{parent}-{conf}:\n\n"
     result += f"{conf}\n"
     result += "".join(len(conf)*['-'])+'\n'
@@ -76,9 +86,40 @@ for job in converters:
         result += f"- {iname}: :ref:`configurator-converter-{conf}` default={defval}\n"
     converter_page.append(result)
 
-with open("pages/converters.rst", 'w') as target:
-    target.write(".. _converter-list:\n")
-    target.write("\n")
+
+for qvecs in generators:
+    result = ""
+    temp: IQVectors = IQVectors.create(qvecs, unit_cell=UnitCell(np.eye(3)))
+    if not temp.enabled:
+        continue
+    result += f"\n.. _qvectors-reference-{qvecs}:\n\n"
+    result += f"{qvecs}\n"
+    result += "~" * len(qvecs) + "\n\n"
+    if temp.__doc__:
+        result += "\n".join(map(str.lstrip, temp.__doc__.splitlines()))
+    else:
+        print(f"bad docstring in {conf}")
+    if not result.endswith('\n'):
+        result += '\n'
+    result += "\nInputs:\n\n"
+    for iname, (conf, params) in temp.settings.items():
+        defval = params.get("default", "N/A")
+        job_inputs[conf] = make_configurator_doc(conf, "analysis")
+        result += f"- {iname}: :ref:`configurator-analysis-{conf}` default={defval}\n"
+    qvector_page.append(result)
+
+
+with open("pages/vector_generators.rst", "w") as target:
+    target.write("""\
+.. _vector-generator-list:
+
+List of q-vector generators
+===========================
+""")
+    target.write("\n".join(qvector_page) + "\n")
+
+with open("pages/converters.rst", "w") as target:
+    target.write(".. _converter-list:\n\n")
     target.write("List of trajectory converters\n")
     target.write("=============================\n\n")
     for entry in converter_page:

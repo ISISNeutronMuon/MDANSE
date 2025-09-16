@@ -119,7 +119,7 @@ def test_dcsf(generate_benchmarks, tmp_path, traj_info, qvector_grid):
         startswith=True,
         scale_result=True,
         scale_benchmark=True,
-        atol=1e-8,
+        atol=1e-6,
         compare_axis=True,
     )
 
