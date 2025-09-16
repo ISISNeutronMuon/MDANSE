@@ -35,7 +35,7 @@ class JobLogInfo(TextInfo):
         msgs, levels = incoming
         text = ""
 
-        for msg, level in zip(msgs, levels):
+        for msg, level in zip(msgs, levels, strict=True):
             if level == "WARNING":
                 text += f'<span style="color:orange;">{msg}</span>\n'
             elif level in {"ERROR", "CRITICAL"}:

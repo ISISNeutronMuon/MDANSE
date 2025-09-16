@@ -127,7 +127,7 @@ class Density(IJob):
             raise DensityError(
                 "Density cannot be computed for chemical system without a defined simulation box. "
                 "You can add a box using TrajectoryEditor."
-            )
+            ) from None
         if abs(cell_volume) < 1e-31:
             raise DensityError(
                 f"Non-physical cell volume: {cell_volume}. Density will not be calculated."

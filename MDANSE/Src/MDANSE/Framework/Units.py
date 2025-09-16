@@ -578,7 +578,7 @@ class _Unit:
 
             positive_units = []
             negative_units = []
-            for uname, uval in zip(_UNAMES, unit._dimension):
+            for uname, uval in zip(_UNAMES, unit._dimension, strict=True):
                 if uval == 0:
                     continue
 

@@ -481,7 +481,7 @@ class FilterSettingGroup(QObject):
         parent_attributes: dict,
         schema: dict,
         render_func: Callable,
-        flags: set = set(),
+        flags: set = frozenset(),
     ):
         """
         Parameters
@@ -788,7 +788,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         parent_attributes: dict,
         schema: dict,
         render_func: Callable,
-        flags: set = set(),
+        flags: set = frozenset(),
     ):
         """
         Parameters

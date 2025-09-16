@@ -112,7 +112,7 @@ class Voronoi(IJob):
             raise VoronoiError(
                 "Voronoi analysis cannot be computed if simulation box is not defined. "
                 "You can add a box using TrajectoryEditor."
-            )
+            ) from None
 
         self.dim = 3
 

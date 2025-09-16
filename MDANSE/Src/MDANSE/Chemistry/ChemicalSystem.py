@@ -127,7 +127,8 @@ class ChemicalSystem:
             unique_atoms, counts = np.unique(atom_list, return_counts=True)
             unique_atoms = map(self._rename_isotopes, unique_atoms)
             name = "_".join(
-                f"{atom}{count}" for atom, count in zip(unique_atoms, counts)
+                f"{atom}{count}"
+                for atom, count in zip(unique_atoms, counts, strict=True)
             )
 
             if name not in self._clusters:

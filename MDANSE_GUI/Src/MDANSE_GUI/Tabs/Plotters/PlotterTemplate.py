@@ -122,7 +122,7 @@ class PlotterTemplate(metaclass=SubclassFactory):
         axes = self._figure.add_subplot(111)
         wrapper = AxesWrapper(axes)
         self._unique_axes.append(wrapper)
-        for dataset_number, dataset in self._datasets.items():
+        for dataset_number in self._datasets:
             self._axes[dataset_number] = wrapper
 
     def populate_plots(self):

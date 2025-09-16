@@ -62,7 +62,7 @@ class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
 
         try:
             if len(self["filenames"]) <= 1 or self["format"] is None:
-                mda.Universe(
+                _ = mda.Universe(
                     topology_configurator["filename"],
                     *self["filenames"],
                     format=self["format"],
@@ -70,7 +70,7 @@ class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
                 ).trajectory
             else:
                 coord_files = [(i, self["format"]) for i in self["filenames"]]
-                mda.Universe(
+                _ = mda.Universe(
                     topology_configurator["filename"],
                     coord_files,
                     topology_format=topology_configurator["format"],

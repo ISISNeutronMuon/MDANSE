@@ -191,14 +191,14 @@ class RotationAutocorrelation(IJob):
             array of the correlation results
 
         """
-        for ax_ind, axis in enumerate(["x", "y", "z"]):
+        for ax_ind, axis in "xyz":
             self._outputData[f"{axis}_rotation_ac"] += x[0][ax_ind]
             self._outputData[f"rotation_around_{axis}"] += x[1][:, ax_ind]
 
     def finalize(self):
         """Normalise and write out the results."""
 
-        for ax_ind, axis in enumerate(["x", "y", "z"]):
+        for axis in "xyz":
             self._outputData[f"{axis}_rotation_ac"] /= self.numberOfSteps
             self._outputData[f"rotation_around_{axis}"] /= self.numberOfSteps
 

@@ -15,8 +15,9 @@
 #
 from __future__ import annotations
 
-from itertools import count, groupby
+from itertools import compress, count, groupby
 
+from more_itertools import consecutive_groups
 from qtpy.QtCore import QEvent, QObject, Qt
 from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import QComboBox
@@ -174,12 +175,14 @@ class CheckableComboBox(QComboBox):
 
     def update_line_edit(self) -> None:
         """Updates the lineEdit text of the combobox."""
-        text = [i for i, j in zip(self.text, self.checked) if j]
+        text = list(compress(self.text, self.checked))
         if self.item_text_castable_to_int:
-            vals = [int(i) for i in text]
+            vals = map(int, text)
             # changes for example 1,2,3,5,6,7,9,10 -> 1-3,5-7,9-10
-            gr = (list(x) for _, x in groupby(vals, lambda x, c=count(): next(c) - x))
-            text = ",".join("-".join(map(str, (g[0], g[-1])[: len(g)])) for g in gr)
+            gr = consecutive_groups(vals)
+            text = ",".join(
+                "-".join(map(str, (g[0], g[-1]))) if len(g) > 1 else g for g in gr
+            )
             self.lineEdit().setText(text)
         else:
             self.lineEdit().setText(",".join(text))
@@ -194,10 +197,7 @@ class CheckableComboBox(QComboBox):
         """
         for i in range(self.n_items):
             text = self.text[i]
-            if text == default:
-                self.set_item_checked_state(i, True)
-            else:
-                self.set_item_checked_state(i, False)
+            self.set_item_checked_state(i, text == default)
         self.update_line_edit()
 
     def checked_values(self) -> list[str]:
@@ -207,8 +207,4 @@ class CheckableComboBox(QComboBox):
         list[str]
             List of items texts that are checked.
         """
-        result = []
-        for i in range(self.n_items):
-            if self.checked[i]:
-                result.append(self.text[i])
-        return result
+        return [self.text[i] for i in range(self.n_items) if self.checked[i]]

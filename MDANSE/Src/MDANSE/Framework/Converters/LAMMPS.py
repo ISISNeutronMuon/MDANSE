@@ -438,7 +438,11 @@ class LAMMPScustom(LAMMPSReader):
                 for i, (_, atom_line) in enumerate(take(self._nAtoms, file)):
                     temp = {
                         key: self._type_map[key](val)
-                        for key, val in zip(self.keywords, atom_line.split())
+                        for key, val in zip(
+                            self.keywords,
+                            atom_line.split(),
+                            strict=False,
+                        )
                     }
                     idx = temp.get("id", 1)
 
@@ -545,7 +549,7 @@ class LAMMPScustom(LAMMPSReader):
         for i, line in enumerate(take(self._nAtoms, file), 1):
             temp = {
                 key: self._type_map[key](val)
-                for key, val in zip(self.keywords, line.split())
+                for key, val in zip(self.keywords, line.split(), strict=False)
             }
             idx = temp.get("id", i) - 1  # MDANSE 0-indexed
             coords[idx, :] = np.array(

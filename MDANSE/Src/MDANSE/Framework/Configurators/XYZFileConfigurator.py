@@ -53,8 +53,10 @@ class XYZFileConfigurator(FileWithAtomDataConfigurator):
 
         try:
             self["n_atoms"] = int(self["instance"].readline().strip())
-        except ValueError:
-            raise XYZFileError(f"Could not read the number of atoms in {filename} file")
+        except ValueError as err:
+            raise XYZFileError(
+                f"Could not read the number of atoms in {filename} file"
+            ) from err
 
         self._nAtomsLineSize = self["instance"].tell()
         self["instance"].readline()
@@ -105,10 +107,10 @@ class XYZFileConfigurator(FileWithAtomDataConfigurator):
             raise XYZFileError("Could not fetch the time step from XYZ file")
         try:
             timeStep = float(matches[0])
-        except ValueError:
+        except ValueError as err:
             raise XYZFileError(
                 "Could not cast the timestep to a floating point number."
-            )
+            ) from err
         else:
             return timeStep
 

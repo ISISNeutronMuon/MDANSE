@@ -40,7 +40,9 @@ class HDF5Wrapper(IReader):
         self._atom_types = chemical.atom_list
         self._atom_names = [
             f"{element}_{index}"
-            for element, index in zip(chemical.atom_list, chemical._atom_indices)
+            for element, index in zip(
+                chemical.atom_list, chemical._atom_indices, strict=True
+            )
         ]
 
     def read_frame(self, frame: int) -> np.ndarray:

@@ -57,16 +57,16 @@ class ProjectionConfigurator(IConfigurator):
         try:
             try:
                 mode, axis = value
-            except (TypeError, ValueError) as e:
-                raise Exception("Failed to unpack input" + str(e))
+            except (TypeError, ValueError) as err:
+                raise Exception("Failed to unpack input") from err
 
             if not isinstance(mode, str):
                 raise Exception("invalid type for projection mode: must be a string")
 
             try:
                 self["projector"] = IProjector.create(mode)
-            except KeyError:
-                raise Exception(f"the projector {mode} is unknown")
+            except KeyError as err:
+                raise Exception(f"the projector {mode} is unknown") from err
 
             if mode == "NullProjector":
                 self.error_status = "OK"
@@ -74,16 +74,16 @@ class ProjectionConfigurator(IConfigurator):
 
             try:
                 vector = [float(x) for x in axis]
-            except ValueError:
-                raise Exception(f"Could not convert {axis} to numbers")
+            except ValueError as err:
+                raise Exception(f"Could not convert {axis} to numbers") from err
 
             if np.allclose(vector, 0):
                 raise Exception("Vector of 0 length does not define projection")
 
             try:
                 self["projector"].set_axis(vector)
-            except ProjectorError:
-                raise Exception(f"Axis {vector} is wrong for this projector")
+            except ProjectorError as err:
+                raise Exception(f"Axis {vector} is wrong for this projector") from err
 
             self["axis"] = self["projector"].axis
 

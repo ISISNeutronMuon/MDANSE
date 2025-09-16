@@ -41,7 +41,7 @@ class PartialChargeMapper:
         self._traj_charges = trajectory.charges(0)[:]
         self._current_trajectory = trajectory
         self._original_map = {}
-        for at_num, at in enumerate(system.atom_list):
+        for at_num, _ in enumerate(system.atom_list):
             try:
                 self._original_map[at_num] = self._traj_charges[at_num]
             except Exception:

@@ -20,9 +20,11 @@ from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton
 
 from .InputFileWidget import InputFileWidget
 
+AVAILABLE_PARSERS = sorted(mda._PARSERS.keys())
+
 
 class MDAnalysisTopologyFileWidget(InputFileWidget):
-    def __init__(self, *args, format_options=sorted(mda._PARSERS.keys()), **kwargs):
+    def __init__(self, *args, format_options=AVAILABLE_PARSERS, **kwargs):
         self.format_options = ["AUTO", *format_options]
         super().__init__(*args, **kwargs)
 

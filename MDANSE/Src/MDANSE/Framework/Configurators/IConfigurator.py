@@ -207,7 +207,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         self._warning_status = warning_text
         if warning_text:
             LOG.warning(warning_text)
-            warn(warning_text, ConfiguratorWarning)
+            warn(warning_text, ConfiguratorWarning, stacklevel=1)
 
     @abc.abstractmethod
     def configure(self, value: str):

@@ -66,8 +66,8 @@ class QVectorsConfigurator(IConfigurator):
 
             try:
                 generator_name, parameters = value
-            except ValueError:
-                raise Exception(f"Invalid q vectors settings {value}")
+            except ValueError as err:
+                raise Exception(f"Invalid q vectors settings {value}") from err
 
             generator = IQVectors.create(
                 generator_name,
@@ -75,15 +75,17 @@ class QVectorsConfigurator(IConfigurator):
             )
             try:
                 generator.setup(parameters)
-            except Exception:
-                raise Exception(f"Could not configure q vectors using {parameters}")
+            except Exception as err:
+                raise Exception(
+                    f"Could not configure q vectors using {parameters}"
+                ) from err
 
             try:
                 generator_success = generator.generate()
-            except Exception:
+            except Exception as err:
                 raise Exception(
                     "Q Vector parameters were parsed correctly, but caused an error. Invalid values?"
-                )
+                ) from err
 
             if not generator_success:
                 raise Exception(

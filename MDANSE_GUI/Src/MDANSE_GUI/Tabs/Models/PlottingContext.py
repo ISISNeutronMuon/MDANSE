@@ -786,7 +786,7 @@ class PlottingContext(QStandardItemModel):
 
         fixed = {"Dataset", "Trajectory", "Size", "Unit", "Apply weights?"}
 
-        for key, item in zip(plotting_column_labels, items):
+        for key, item in zip(plotting_column_labels, items, strict=True):
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
             item.setEditable(key not in fixed)
 

@@ -730,7 +730,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
 
         elem_range = range(1, self["n_atom_types"] + 1)
 
-        self.setdefault("elements", dict(zip(elem_range, map(str, elem_range))))
+        self.setdefault("elements", {elem: str(elem) for elem in elem_range})
         self.setdefault("charges", np.zeros(self["n_atoms"]))
 
     def atom_labels(self) -> Iterable[AtomLabel]:
@@ -742,7 +742,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         """
         conts = sorted(self.keys() & {"elements", "mass"})
         if conts == ["elements", "mass"]:
-            for elem, mass in zip(self["elements"].values(), self["mass"]):
+            for elem, mass in zip(self["elements"].values(), self["mass"], strict=True):
                 yield AtomLabel(elem, mass=mass)
         elif conts == ["elements"]:
             for elem in self["elements"].values():

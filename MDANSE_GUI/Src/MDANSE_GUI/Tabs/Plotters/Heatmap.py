@@ -183,7 +183,7 @@ class Heatmap(Plotter):
             LOG.debug("Axis check failed.")
             return
         nplots = 0
-        for ds_index, databundle in enumerate(plotting_context.datasets().values()):
+        for databundle in plotting_context.datasets().values():
             if nplots >= self._plot_limit:
                 break
             ds = databundle.dataset

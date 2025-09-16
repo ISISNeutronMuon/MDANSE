@@ -16,6 +16,9 @@
 from __future__ import annotations
 
 import collections
+from functools import partial
+
+from more_itertools import run_length
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
@@ -106,14 +109,17 @@ class VASP(Converter):
         self.numberOfSteps = int(self._xdatcarFile["n_frames"])
 
         self._chemical_system = ChemicalSystem()
-        element_list = []
 
-        for symbol, number in zip(
-            self._xdatcarFile["atoms"], self._xdatcarFile["atom_numbers"]
-        ):
-            for i in range(number):
-                element = get_element_from_mapping(self._atomicAliases, symbol)
-                element_list.append(element)
+        atoms = (
+            get_element_from_mapping(self._atomicAliases, atom)
+            for atom in self._xdatcarFile["atoms"]
+        )
+
+        element_list = list(
+            run_length.decode(
+                zip(atoms, self._xdatcarFile["atom_numbers"], strict=True)
+            )
+        )
         self._chemical_system.initialise_atoms(element_list)
 
         # A trajectory is opened for writing.

@@ -90,7 +90,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
     def _get_data_from_files(self, props: str):
         out = {}
-        for file, prop in zip(("dcsf", "disf"), self._expand(props)):
+        for file, prop in zip(("dcsf", "disf"), self._expand(props), strict=True):
             try:
                 out[file] = self.configuration[f"{file}_input_file"]["instance"][prop][
                     :
@@ -98,7 +98,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
             except KeyError:
                 raise NeutronDynamicTotalStructureFactorError(
                     f"No `{prop}` found in {file} input file"
-                )
+                ) from None
         return tuple(out.values())
 
     @staticmethod

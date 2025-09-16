@@ -260,7 +260,7 @@ def superposition_fit(confs):
     """
     w_sum = 0.0
     wr_sum = np.zeros((3,), np.float64)
-    for w, r_ref, r in confs:
+    for w, r_ref, _ in confs:
         w_sum += w
         wr_sum += w * r_ref.array
     ref_cms = wr_sum / w_sum

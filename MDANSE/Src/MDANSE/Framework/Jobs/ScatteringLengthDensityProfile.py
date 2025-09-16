@@ -99,7 +99,7 @@ class ScatteringLengthDensityProfile(IJob):
             raise ScatteringLengthDensityProfileError(
                 "Density profile cannot be computed without a simulation box. "
                 "You can add a box using TrajectoryEditor."
-            )
+            ) from None
 
         axis_length = np.sqrt(np.sum(axis**2))
         self._n_bins = int(axis_length / self._dr) + 1
@@ -220,8 +220,6 @@ class ScatteringLengthDensityProfile(IJob):
         n_selected = sum(n_atoms_per_element.values())
         n_total = sum(self.trajectory.get_all_natoms().values())
         fact = n_selected / n_total
-
-        self._indices_per_element
 
         for dset in ["dp/number/total", "sldp/sldp"]:
             self._outputData[dset] /= fact

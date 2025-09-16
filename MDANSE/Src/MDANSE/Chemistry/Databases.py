@@ -759,7 +759,7 @@ class AtomsDatabase(_Database):
         try:
             del self._properties[label]
         except KeyError:
-            raise AtomsDatabaseError(f"Atom property {label} does not exist.")
+            raise AtomsDatabaseError(f"Atom property {label} does not exist.") from None
 
         for atm in self.atoms:
             del self._data[atm][label]

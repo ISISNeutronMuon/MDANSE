@@ -213,7 +213,7 @@ class DatasetFormatter:
         )
 
         return header_lines, zip(
-            dataset._axes[best_axis] * conversion_factor, dataset.data
+            dataset._axes[best_axis] * conversion_factor, dataset.data, strict=True
         )
 
     def process_2D_data(
@@ -284,7 +284,7 @@ class DatasetFormatter:
         xaxis = prepend(0.0, new_axes[axis_numbers[1]].flat)
 
         # Add axes to data
-        data_lines = zip(new_axes[axis_numbers[0]].flat, dataset.data)
+        data_lines = zip(new_axes[axis_numbers[0]].flat, dataset.data, strict=True)
 
         # Put xaxis in
         temp = prepend(xaxis, data_lines)
@@ -353,6 +353,7 @@ class DatasetFormatter:
         temp = zip(
             cart_prod(*(new_axes[ind] for ind in axis_numbers.values())),
             dataset.data.ravel(),
+            strict=True,
         )
         # Flatten each row
         temp = map(collapse, temp)

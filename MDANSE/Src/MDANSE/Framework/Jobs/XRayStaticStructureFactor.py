@@ -273,6 +273,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
                 always_iterable(
                     self.trajectory.selection_getter(self.trajectory.atom_types)
                 ),
+                strict=True,
             )
         }
         all_asf = {
@@ -281,7 +282,9 @@ class XRayStaticStructureFactor(DistanceHistogram):
                 self._outputData["xssf/axes/q"],
                 self.trajectory,
             )
-            for name, ele in zip(self.trajectory.atom_names, self.trajectory.atom_types)
+            for name, ele in zip(
+                self.trajectory.atom_names, self.trajectory.atom_types, strict=True
+            )
         }
         weight_dict = get_weights(
             asf,

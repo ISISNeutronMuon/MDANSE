@@ -1255,7 +1255,6 @@ FILTER_MAP = {filter_class.__name__: filter_class for filter_class in FILTERS}
 
 # Default filter type is Butterworth
 DEFAULT_FILTER = Butterworth
-
 # Default simulation time step in picoseconds
 DEFAULT_TIME_STEP = 0.005
 
@@ -1282,8 +1281,12 @@ def filter_default_attributes(filter=DEFAULT_FILTER):
     }
 
 
+DEFAULT_FILTER_PARAMS = filter_default_attributes(DEFAULT_FILTER)
+
+
 def filter_description_string(
-    filter=DEFAULT_FILTER, settings=filter_default_attributes(DEFAULT_FILTER)
+    filter=DEFAULT_FILTER,
+    settings=DEFAULT_FILTER_PARAMS,
 ) -> str:
     """Convert a filter class and filter settings dictionary to a string.
 

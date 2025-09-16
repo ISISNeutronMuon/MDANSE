@@ -101,7 +101,7 @@ class HistoryFile(dict):
             mass = float(mass)
             charge = float(charge)
             charges[ind] = float(charge)
-            for arr, val in zip(data.values(), atom):
+            for arr, val in zip(data.values(), atom, strict=True):
                 arr[ind] = np.array(val.split(), dtype=np.float64)
 
         data["positions"] *= self._dist_conversion

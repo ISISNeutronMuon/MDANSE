@@ -176,6 +176,7 @@ class PairDistributionFunction(DistanceHistogram):
                     else None,
                     pdf_total - pdf_intra if self.intra else None,
                 ),
+                strict=True,
             ):
                 yield f"pdf{i}", i == "/intra", pdf
                 yield (

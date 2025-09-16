@@ -60,4 +60,4 @@ jobs:
         run: python -m pip install vermin
 
       - name: Run Vermin
-        run: vermin -t=3.9 --lint --quiet --no-parse-comments MDANSE/ MDANSE_GUI/
+        run: vermin -t=3.10 --lint --quiet --no-parse-comments MDANSE/ MDANSE_GUI/

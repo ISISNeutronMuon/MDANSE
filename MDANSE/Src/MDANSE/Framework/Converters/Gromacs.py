@@ -98,7 +98,7 @@ class Gromacs(Converter):
                 if self._read_velocities < 0 or self._read_forces < 0:
                     raise RuntimeError(
                         "Could not determine whether velocities or forces are present!"
-                    )
+                    ) from None
 
             # The TRRTrajectoryFile object returns ints for these values, so turn them into bools
             self._read_velocities, self._read_forces = (

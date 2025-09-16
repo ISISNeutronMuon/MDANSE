@@ -391,7 +391,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         for i in range(self.numberOfSteps):
             inputQueue.put(i)
 
-        for i in range(self.configuration["running_mode"]["slots"]):
+        for _ in range(self.configuration["running_mode"]["slots"]):
             self._run_multicore_check_terminate(listener)
             p = multiprocessing.Process(
                 target=self.process_tasks_queue,

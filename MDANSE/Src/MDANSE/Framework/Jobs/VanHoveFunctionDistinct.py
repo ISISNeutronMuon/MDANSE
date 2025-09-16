@@ -170,7 +170,7 @@ def van_hove_distinct(
                         np.ix_(type_indices_sub[type_sub], type_indices_ref[type_ref])
                     ]
                     bin_numbers, bin_counts = np.unique(bins_subset, return_counts=True)
-                    for bin, counts in zip(bin_numbers, bin_counts):
+                    for bin, counts in zip(bin_numbers, bin_counts, strict=True):
                         if bin < 0 or bin >= nbins:
                             continue
                         else:
@@ -182,7 +182,7 @@ def van_hove_distinct(
                         np.ix_(type_indices_sub[type_sub], type_indices_ref[type_ref])
                     ]
                     bin_numbers, bin_counts = np.unique(bins_subset, return_counts=True)
-                    for bin, counts in zip(bin_numbers, bin_counts):
+                    for bin, counts in zip(bin_numbers, bin_counts, strict=True):
                         if bin < 0 or bin >= nbins:
                             continue
                         else:
@@ -281,7 +281,7 @@ def van_hove_distinct_all_inter(
                         np.ix_(type_indices_sub[type_sub], type_indices_ref[type_ref])
                     ]
                     bin_numbers, bin_counts = np.unique(bins_subset, return_counts=True)
-                    for bin, counts in zip(bin_numbers, bin_counts):
+                    for bin, counts in zip(bin_numbers, bin_counts, strict=True):
                         if bin < 0 or bin >= nbins:
                             continue
                         else:

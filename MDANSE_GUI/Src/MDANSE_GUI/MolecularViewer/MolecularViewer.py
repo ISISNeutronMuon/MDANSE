@@ -109,7 +109,7 @@ class MolecularViewer(QtWidgets.QWidget):
         def dummy_method(self, ev=None):
             pass
 
-        setattr(self._iren, "keyPressEvent", dummy_method)
+        self._iren.keyPressEvent = dummy_method
 
         # the main render which includes the trajectory
         self._renderer = vtk.vtkRenderer()
@@ -657,7 +657,9 @@ class MolecularViewer(QtWidgets.QWidget):
             return
 
         atom_label_actors = []
-        for label, coord in zip(labels, self._reader.read_frame(self._current_frame)):
+        for label, coord in zip(
+            labels, self._reader.read_frame(self._current_frame), strict=True
+        ):
             text = vtk.vtkVectorText()
             text.SetText(f"{label}")
 
@@ -685,7 +687,9 @@ class MolecularViewer(QtWidgets.QWidget):
             return
 
         for follower, coord in zip(
-            self.atom_label_actors, self._reader.read_frame(self._current_frame)
+            self.atom_label_actors,
+            self._reader.read_frame(self._current_frame),
+            strict=True,
         ):
             follower.SetPosition(*coord)
 

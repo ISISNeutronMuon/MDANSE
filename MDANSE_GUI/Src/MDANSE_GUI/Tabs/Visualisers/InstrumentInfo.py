@@ -130,8 +130,8 @@ class SimpleInstrument:
         _q_step, _q_min, _q_max, _q_width = self.sanitize_numbers()
         try:
             conversion_factor = measure(1.0, iunit=self._q_unit).toval("1/nm")
-        except Exception:
-            raise ValueError(f"Could not convert unit: {self._q_unit}")
+        except Exception as err:
+            raise ValueError(f"Could not convert unit: {self._q_unit}") from err
         else:
             conversion_factor = float(conversion_factor)
         if "shells" in qvec_generator._configuration:

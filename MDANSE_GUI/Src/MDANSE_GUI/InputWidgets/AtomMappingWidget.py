@@ -138,7 +138,7 @@ class AtomMappingHelperDialog(QDialog):
 
     def auto_fill(self) -> None:
         """Autofill the comboboxes using a simple guess."""
-        for i, (_, w1, w2) in enumerate(self.mapping_widgets):
+        for i, (_, _, w2) in enumerate(self.mapping_widgets):
             try:
                 label = self.labels[i]
                 guess = guess_element(label.atm_label, mass=label.mass)

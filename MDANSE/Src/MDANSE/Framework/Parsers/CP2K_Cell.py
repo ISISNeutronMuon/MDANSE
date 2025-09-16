@@ -49,10 +49,10 @@ class CP2KCellFile:
 
                 try:
                     time_steps.append(float(words[1]))
-                except ValueError:
+                except ValueError as err:
                     raise CellFileError(
                         f"Cannot cast time step {words[1]} to a floating point number"
-                    )
+                    ) from err
 
         if len(time_steps) == 1:
             self.time_step = 0.0

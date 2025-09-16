@@ -132,7 +132,7 @@ class FortranBinaryFile:
         try:
             data = self.next_record()
         except StopIteration:
-            raise EndOfFile()
+            raise EndOfFile() from None
         if repeat:
             unit = struct.calcsize(self.byteOrder + fmt)
             assert len(data) % unit == 0
@@ -267,7 +267,7 @@ class DCDFile(FortranBinaryFile, dict):
         try:
             return self.read_step()
         except EndOfFile:
-            raise StopIteration
+            raise StopIteration from None
 
 
 class DCD(Converter):

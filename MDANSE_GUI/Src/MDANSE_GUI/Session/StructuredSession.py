@@ -75,7 +75,7 @@ class UserSettingsModel(QStandardItemModel):
         )
 
     def populate_model(self):
-        for number, groupname in enumerate(self._settings.keys()):
+        for groupname in self._settings.keys():  # noqa: SIM118 - SettingsFile not dict
             group = self._settings.group(groupname)
             section = group._name
             section_item = QStandardItem(section)

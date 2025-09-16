@@ -37,6 +37,8 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 Self = TypeVar("Self", bound="MockTrajectory")
 
+DEFAULT_BOX = 10.0 * np.eye(3)
+
 
 class MockTrajectory:
     """For testing purposes, MockTrajectory can replace a trajectory.
@@ -52,7 +54,7 @@ class MockTrajectory:
         atoms_in_box: tuple = ("Si",),
         time_step: float = 1.0,
         box_repetitions: tuple = (2, 3, 1),
-        box_size: np.ndarray = 10.0 * np.eye(3),
+        box_size: np.ndarray = DEFAULT_BOX,
         pbc: bool = False,
     ):
         self._number_of_frames = number_of_frames
@@ -232,7 +234,7 @@ class MockTrajectory:
         return self._time_axis
 
     def coordinates(
-        self, frame: int, atom_indices: slice | int = slice(None)
+        self, frame: int, atom_indices: slice | int = np.s_[:]
     ) -> np.ndarray:
         """Returns the atom coordinates at the specified frame
 
