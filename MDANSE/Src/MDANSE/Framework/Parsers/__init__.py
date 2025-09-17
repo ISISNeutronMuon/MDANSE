@@ -27,6 +27,7 @@ from .LAMMPS import LAMMPSh5md as LAMMPSh5md
 from .LAMMPS import LAMMPSReader as LAMMPSReader
 from .LAMMPS import LAMMPSxyz as LAMMPSxyz
 from .LAMMPSConfig import LAMMPSConfigFile as LAMMPSConfigFile
+from .pdb import PDBFile as PDBFile
 from .trj import TrjFile as TrjFile
 from .XDatCar import XDATCARFile as XDATCARFile
 from .xtd import XTDFile as XTDFile

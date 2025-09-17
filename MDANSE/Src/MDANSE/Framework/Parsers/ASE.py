@@ -28,6 +28,8 @@ from MDANSE.Framework.AtomMapping import AtomLabel
 
 from .Parser import Parser
 
+SLICE_ALL = slice(None)
+
 
 class ASEParser(Parser):
     def __init__(self, filename: Path | str, format: str | None = None):
@@ -50,10 +52,7 @@ class ASEParser(Parser):
     def __getitem__(self, key: int | slice | str) -> list[Atoms] | Atoms:
         return read(self.filename, index=key, format=self.format)
 
-    def frame_subset(
-        self,
-        selection: slice | str = slice(None, None, None),
-    ) -> Iterable[Atoms]:
+    def frame_subset(self, selection: slice | str = SLICE_ALL) -> Iterable[Atoms]:
         """Return an iterator over a slice of frames."""
         return iread(self.filename, index=selection, format=self.format)
 

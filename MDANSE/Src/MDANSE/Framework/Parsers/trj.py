@@ -207,7 +207,7 @@ class TrjFile(Parser):
 
     def read_frame(self, parser: binary_file_reader):
         accum = {}
-        iter = zip(self.frame_data, parser)
+        iter = zip(self.frame_data, parser, strict=False)
         for typ, rec in iter:
             if typ.startswith(("pos", "vel", "force")):
                 key = typ.split("_")[0]

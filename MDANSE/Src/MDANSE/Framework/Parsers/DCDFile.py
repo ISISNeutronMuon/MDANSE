@@ -28,6 +28,7 @@ from more_itertools import chunked, one
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Parsers.FortranUnformat import binary_file_reader
+from MDANSE.Framework.Parsers.Parser import Parser
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -47,13 +48,16 @@ class DCDFileError(Error):
     pass
 
 
-class DCDFile:
-    def __init__(self, filename: Path | str):
-        self.filename = Path(filename)
+class DCDFile(Parser):
+    def __init__(self, filename: Path | str, **kwargs):
+        super().__init__(filename)
         self._byte_order = self.get_byte_order(filename)
 
         dtype = np.dtype(np.float64)
         self._dtype = dtype.newbyteorder(self._byte_order)
+        with self.filename.open("rb") as in_file:
+            reader = binary_file_reader(in_file, self._byte_order)
+            self.read_header(reader)
 
     @staticmethod
     def get_byte_order(filename: Path | str) -> Literal[">", "<"]:
@@ -120,7 +124,7 @@ class DCDFile:
         data = next(reader)
 
         # Read the number of atoms.
-        self.n_atoms = one(struct.unpack(self._byte_order + "i", data))
+        self._n_atoms = one(struct.unpack(self._byte_order + "i", data))
 
     def read_step(self, reader) -> tuple[UnitCell | None, npt.NDArray[float]]:
         """
@@ -165,6 +169,14 @@ class DCDFile:
             reader.send(1)
 
         return unit_cell, config
+
+    @property
+    def n_atoms(self) -> int:
+        return self._n_atoms
+
+    @property
+    def element_list(self) -> list[str]:
+        return ["Unknown"] * self.n_atoms
 
     @property
     def frames(self) -> Iterator:

@@ -154,4 +154,4 @@ class XDATCARFile(Parser):
         Collection[str]
             Elements in
         """
-        return list(run_length.decode(zip(self.atoms, self.atom_counts)))
+        return list(run_length.decode(zip(self.atoms, self.atom_counts, strict=True)))

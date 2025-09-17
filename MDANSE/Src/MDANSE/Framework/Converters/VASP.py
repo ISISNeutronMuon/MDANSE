@@ -112,17 +112,11 @@ class VASP(Converter):
         self.numberOfSteps = self.trajectory_file.n_frames
 
         self._chemical_system = ChemicalSystem()
+        element_list = [
+            get_element_from_mapping(self._atomicAliases, symbol)
+            for symbol in self.trajectory_file.element_list
+        ]
 
-        atoms = (
-            get_element_from_mapping(self._atomicAliases, atom)
-            for atom in self._xdatcarFile["atoms"]
-        )
-
-        element_list = list(
-            run_length.decode(
-                zip(atoms, self._xdatcarFile["atom_numbers"], strict=True)
-            )
-        )
         self._chemical_system.initialise_atoms(element_list)
 
         # A trajectory is opened for writing.

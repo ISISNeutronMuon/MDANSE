@@ -259,7 +259,7 @@ class FieldFile:
             An atom label.
         """
         for molecule in self.molecules:
-            for atm_label, mass in zip(molecule.species, molecule.masses):
+            for atm_label, mass in zip(molecule.species, molecule.masses, strict=True):
                 yield AtomLabel(atm_label, molecule=molecule.name, mass=mass)
 
     def get_atom_charges(self) -> np.ndarray:
@@ -304,7 +304,7 @@ class FieldFile:
                 get_element_from_mapping(
                     aliases, name, molecule=molecule.name, mass=mass
                 )
-                for name, mass in zip(molecule.species, molecule.masses)
+                for name, mass in zip(molecule.species, molecule.masses, strict=True)
             ]
             curr_name_list = molecule.species
             curr_cluster = np.arange(molecule.n_atoms, dtype=int)
@@ -312,7 +312,7 @@ class FieldFile:
             # Bonds 0-indexed in RDKit
             curr_bonds = np.array(molecule.bonds, dtype=int) - 1
 
-            for i in range(1, molecule.n_mols + 1):
+            for _ in range(molecule.n_mols):
                 element_list.extend(curr_element_list)
                 name_list.extend(curr_name_list)
                 bonds.extend(map(tuple, curr_bonds + curr_n))

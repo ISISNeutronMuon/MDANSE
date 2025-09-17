@@ -22,6 +22,7 @@ import numpy as np
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Parsers import DCDFile, PDBFile
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
@@ -35,240 +36,6 @@ RECSCALE32BIT = 1
 RECSCALE64BIT = 2
 
 
-class DCDFileError(Error):
-    pass
-
-
-class ByteOrderError(Error):
-    pass
-
-
-class InputOutputError(Error):
-    pass
-
-
-class EndOfFile(Error):
-    pass
-
-
-class FortranBinaryFileError(Error):
-    pass
-
-
-def get_byte_order(filename):
-    # Identity the byte order of the file by trial-and-error
-    byteOrder = None
-
-    # The DCD file is opened for reading in binary mode.
-    with open(filename, "rb") as inp:
-        data = inp.read(4)
-
-    # Check for low and big endianness byte orders.
-    for order in ["<", ">"]:
-        reclen = struct.unpack(order + "i", data)[0]
-        if reclen == 84:
-            byteOrder = order
-            break
-
-        if byteOrder is None:
-            raise ByteOrderError(f"Invalid byte order. {filename} not a valid DCD file")
-
-    return byteOrder
-
-
-class FortranBinaryFile:
-    """Sets up a Fortran binary file reader.
-
-    @note: written by Konrad Hinsen.
-    """
-
-    def __init__(self, filename):
-        """The constructor.
-
-        @param filename: the input file.
-        @type filename: string.
-
-        @param byte_order: the byte order to read the binary file.
-        @type byte_order: string being one '@', '=', '<', '>' or '!'.
-        """
-        self.file = open(filename, "rb")  # noqa: SIM115
-        self.byteOrder = get_byte_order(filename)
-
-    def __iter__(self):
-        return self
-
-    def next_record(self):
-        data = self.file.read(struct.calcsize("i"))
-        if not data:
-            raise StopIteration
-        reclen = struct.unpack(self.byteOrder + "i", data)[0]
-        data = self.file.read(reclen)
-        reclen2 = struct.unpack(
-            self.byteOrder + "i", self.file.read(struct.calcsize("i"))
-        )[0]
-        if reclen != reclen2:
-            FortranBinaryFileError("Invalid block")
-
-        return data
-
-    def skip_record(self):
-        data = self.file.read(struct.calcsize("i"))
-        reclen = struct.unpack(self.byteOrder + "i", data)[0]
-        self.file.seek(reclen, 1)
-        reclen2 = struct.unpack(self.byteOrder + "i", self.file.read(4))[0]
-        assert reclen == reclen2
-
-    def get_record(self, fmt, repeat=False):
-        """Reads a record of the binary file.
-
-        @param format: the format corresponding to the binray structure to read.
-        @type format: string.
-
-        @param repeat: if True, will repeat the reading.
-        @type repeat: bool.
-        """
-
-        try:
-            data = self.next_record()
-        except StopIteration:
-            raise EndOfFile() from None
-        if repeat:
-            unit = struct.calcsize(self.byteOrder + fmt)
-            assert len(data) % unit == 0
-            fmt = (len(data) / unit) * fmt
-        try:
-            return struct.unpack(self.byteOrder + fmt, data)
-        except:
-            raise
-
-
-class DCDFile(FortranBinaryFile, dict):
-    def __init__(self, filename):
-        FortranBinaryFile.__init__(self, filename)
-
-        self["filename"] = filename
-
-        self.read_header()
-
-    def read_header(self):
-        # Read a block
-        data = self.next_record()
-
-        if data[:4] != b"CORD":
-            raise DCDFileError("Unrecognized DCD format")
-
-        temp = struct.unpack(self.byteOrder + "20i", data[4:])
-
-        self["charmm"] = temp[-1]
-
-        if self["charmm"]:
-            temp = struct.unpack(self.byteOrder + "9if10i", data[4:])
-        else:
-            temp = struct.unpack(self.byteOrder + "9id9i", data[4:])
-
-        # Store the number of sets of coordinates
-        self["nset"] = self["n_frames"] = temp[0]
-
-        # Store the starting time step
-        self["istart"] = temp[1]
-
-        # Store the number of timesteps between dcd saves
-        self["nsavc"] = temp[2]
-
-        # Stores the number of fixed atoms
-        self["namnf"] = temp[8]
-
-        # Stop if there are fixed atoms.
-        if self["namnf"] > 0:
-            raise DCDFileError("Can not handle fixed atoms yet.")
-
-        self["delta"] = temp[9]
-
-        # The time step is in AKMA time
-        self["time_step"] = (
-            self["nsavc"] * self["delta"] * measure(1.0, "akma_time").toval("ps")
-        )
-
-        self["has_pbc_data"] = temp[10]
-
-        self["has_4d"] = temp[11]
-
-        # Read a block
-        data = self.next_record()
-
-        nLines = struct.unpack(self.byteOrder.encode() + b"I", data[0:4])[0]
-
-        self["title"] = []
-        for i in range(nLines):
-            temp = struct.unpack(
-                self.byteOrder + "80c", data[4 + 80 * i : 4 + 80 * (i + 1)]
-            )
-            self["title"].append(b"".join(temp).strip())
-
-        self["title"] = b"\n".join(self["title"])
-
-        # Read a block
-        data = self.next_record()
-
-        # Read the number of atoms.
-        self["natoms"] = struct.unpack(self.byteOrder.encode() + b"I", data)[0]
-
-    def read_step(self):
-        """
-        Reads a frame of the DCD file.
-        """
-
-        if self["has_pbc_data"]:
-            unitCell = np.array(self.get_record("6d"), dtype=np.float64)
-            unitCell = unitCell[[0, 2, 5, 1, 3, 4]]
-            # The unit cell is converted from ang to nm
-            unitCell[0:3] *= measure(1.0, "ang").toval("nm")
-            # This file was generated by CHARMM, or by NAMD > 2.5, with the angle
-            # cosines of the periodic cell angles written to the DCD file.
-            # This formulation improves rounding behavior for orthogonal cells
-            # so that the angles end up at precisely 90 degrees, unlike acos().
-            # See https://github.com/MDAnalysis/mdanalysis/wiki/FileFormats for info
-            if np.all(abs(unitCell[3:]) <= 1):
-                unitCell[3:] = PI_2 - np.arcsin(unitCell[3:])
-            else:
-                # assume the angles are stored in degrees (NAMD <= 2.5)
-                unitCell[3:] = np.deg2rad(unitCell[3:])
-
-        else:
-            unitCell = None
-
-        fmt = f"{self['natoms']}f"
-        config = np.empty((self["natoms"], 3), dtype=np.float64)
-        config[:, 0] = np.array(self.get_record(fmt), dtype=np.float64)
-        config[:, 1] = np.array(self.get_record(fmt), dtype=np.float64)
-        config[:, 2] = np.array(self.get_record(fmt), dtype=np.float64)
-        config *= measure(1.0, "ang").toval("nm")
-
-        if self["has_4d"]:
-            self.skip_record()
-
-        return unitCell, config
-
-    def skip_step(self):
-        """Skips a frame of the DCD file."""
-        nrecords = 3
-        if self["has_pbc_data"]:
-            nrecords += 1
-        if self["has_4d"]:
-            nrecords += 1
-        for _ in range(nrecords):
-            self["binary"].skip_record()
-
-    def __iter__(self):
-        return self
-
-    def next_step(self):
-        try:
-            return self.read_step()
-        except EndOfFile:
-            raise StopIteration from None
-
-
 class DCD(Converter):
     """Converts a DCD trajectory to an MDT trajectory."""
 
@@ -276,19 +43,21 @@ class DCD(Converter):
 
     settings = collections.OrderedDict()
     settings["pdb_file"] = (
-        "PDBFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "PDB files (*.pdb);;All files (*)",
             "default": "INPUT_FILENAME.pdb",
             "label": "Input PDB file",
+            "parser": PDBFile,
         },
     )
     settings["dcd_file"] = (
-        "InputFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "DCD files (*.dcd);;All files (*)",
             "default": "INPUT_FILENAME.dcd",
             "label": "Input DCD file",
+            "parser": DCDFile,
         },
     )
     settings["atom_aliases"] = (
@@ -322,17 +91,15 @@ class DCD(Converter):
         """
         super().initialize()
 
-        self.configuration["dcd_file"]["instance"] = DCDFile(
-            self.configuration["dcd_file"]["filename"]
-        )
-
         # The number of steps of the analysis.
-        self.numberOfSteps = self.configuration["dcd_file"]["instance"]["n_frames"]
+        self.numberOfSteps = self.configuration["dcd_file"].instance.n_frames
+
+        self.frames = self.configuration["dcd_file"].instance.frames
 
         # Create all chemical entities from the PDB file.
-        self._chemical_system = self.configuration["pdb_file"].build_chemical_system(
-            self.configuration["atom_aliases"]["value"]
-        )
+        self._chemical_system = self.configuration[
+            "pdb_file"
+        ].instance.build_chemical_system(self.configuration["atom_aliases"]["value"])
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
@@ -355,9 +122,7 @@ class DCD(Converter):
         """
 
         # The x, y and z values of the current frame.
-        unit_cell, config = self.configuration["dcd_file"]["instance"].read_step()
-        unit_cell = get_basis_vectors_from_cell_parameters(unit_cell)
-        unit_cell = UnitCell(unit_cell)
+        unit_cell, config = next(self.frames)
 
         conf = PeriodicRealConfiguration(
             self._trajectory._chemical_system, config, unit_cell
