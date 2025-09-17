@@ -24,16 +24,16 @@ from string import ascii_uppercase as upcase
 from typing import Any, Literal
 
 import numpy as np
-from more_itertools import first, first_true, split_before, spy
+from more_itertools import first, split_before, spy
 from numpy.typing import NDArray
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
-from MDANSE.Framework.Converters.LAMMPS import BoxStyle
+from MDANSE.Framework.Parsers.LAMMPS import BoxStyle
 from MDANSE.IO.IOUtils import strip_comments
 from MDANSE.MLogging import LOG
 
-from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
+from .Parser import Parser
 
 
 class LAMMPSConfigFileError(Error):
@@ -320,12 +320,16 @@ def int_list_parser(lines, *_) -> dict[str, tuple[int, ...]]:
     }
 
 
-class ConfigFileConfigurator(FileWithAtomDataConfigurator):
+class LAMMPSConfigFile(Parser, dict):
     """Parse the result of a LAMMPS ``write_data``.
 
     Provides necessary initial details if not included in
     trajectory.
     """
+
+    def __init__(self, filename: Path | str | None = None):
+        self.filename = filename
+        self.parse()
 
     @staticmethod
     def header_parser(lines: Iterable[str]) -> dict[str, Any]:
@@ -692,16 +696,16 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
             return [
                 line.strip()
                 for line in strip_comments(source_file)
-                if ConfigFileConfigurator._is_block(line)
+                if LAMMPSConfigFile._is_block(line)
             ]
 
     def parse(self, filename: Path | str | None = None) -> None:
         """Parse file and store data in self."""
-        self._filename = self["filename"] if filename is None else filename
+        self.filename = self.filename if filename is None else filename
 
-        self._known_blocks = self.scan(self._filename)
+        self._known_blocks = self.scan(self.filename)
 
-        with open(self._filename, encoding="utf-8") as source_file:
+        with open(self.filename, encoding="utf-8") as source_file:
             lines = map(str.strip, source_file)
 
             comment = next(lines)
@@ -733,6 +737,7 @@ class ConfigFileConfigurator(FileWithAtomDataConfigurator):
         self.setdefault("elements", {elem: str(elem) for elem in elem_range})
         self.setdefault("charges", np.zeros(self["n_atoms"]))
 
+    @property
     def atom_labels(self) -> Iterable[AtomLabel]:
         """
         Yields

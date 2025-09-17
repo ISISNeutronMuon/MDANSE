@@ -30,7 +30,6 @@ from .AxisSelectionConfigurator import (
     AxisSelectionConfigurator as AxisSelectionConfigurator,
 )
 from .BooleanConfigurator import BooleanConfigurator as BooleanConfigurator
-from .ConfigFileConfigurator import ConfigFileConfigurator as ConfigFileConfigurator
 from .CorrelationFramesConfigurator import (
     CorrelationFramesConfigurator as CorrelationFramesConfigurator,
 )

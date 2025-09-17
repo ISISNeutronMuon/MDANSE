@@ -18,6 +18,7 @@ from __future__ import annotations
 import collections
 
 from MDANSE.Framework.Converters.Forcite import Forcite
+from MDANSE.Framework.Parsers import TrjFile, XTDFile
 
 
 class DFTB(Forcite):
@@ -27,19 +28,21 @@ class DFTB(Forcite):
 
     settings = collections.OrderedDict()
     settings["xtd_file"] = (
-        "XTDFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "XTD files (*.xtd);;All files (*)",
             "default": "INPUT_FILENAME.xtd",
             "label": "The XTD file",
+            "parser": XTDFile,
         },
     )
     settings["trj_file"] = (
-        "InputFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "TRJ files (*.trj);;All files (*)",
             "default": "INPUT_FILENAME.trj",
             "label": "The TRJ file",
+            "parser": TrjFile,
         },
     )
     settings["atom_aliases"] = (

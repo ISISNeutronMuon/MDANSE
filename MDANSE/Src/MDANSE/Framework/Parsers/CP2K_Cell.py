@@ -15,21 +15,22 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from pathlib import Path
 
 import numpy as np
 from more_itertools import ilen, take
 
 from MDANSE.Core.Error import Error
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+from .Parser import Parser
 
 
 class CellFileError(Error):
     pass
 
 
-class CP2KCellFile:
+class CP2KCellFile(Parser):
     """Opens and reads the CP2K cell file.
 
     The CP2K cell output contains the unit cell size for each simulation step.
@@ -58,6 +59,10 @@ class CP2KCellFile:
             self.time_step = 0.0
         else:
             self.time_step = time_steps[1] - time_steps[0]
+
+    @property
+    def element_list(self) -> Collection[str]:
+        return ("du",)
 
     @property
     def frames(self) -> Iterator:
