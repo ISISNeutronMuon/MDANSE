@@ -86,15 +86,13 @@ class McStasParametersConfigurator(IConfigurator):
         parameters_bytes = s.communicate()[0]
         parameters_string = parameters_bytes.decode(encoding="utf-8")
 
-        instrParameters = dict(
-            [
-                (v[0], [v[1], v[2]])
-                for v in re.findall(
-                    r"\s*(\w+)\s*\((\w+)\)\s*\[default='(\S+)'\]", parameters_string
-                )
-                if v[0] not in self._exclude
-            ]
-        )
+        instrParameters = {
+            v[0]: [v[1], v[2]]
+            for v in re.findall(
+                r"\s*(\w+)\s*\((\w+)\)\s*\[default='(\S+)'\]", parameters_string
+            )
+            if v[0] not in self._exclude
+        }
 
         val = {}
         parsed = parse_dictionary(value)

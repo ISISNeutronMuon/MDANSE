@@ -44,8 +44,8 @@ def solvent_accessible_surface(
             coords[idx] + sphere_points * (vdwRadii[idx] + probe_radius_value)
         )
         distance_dict = sphere_tree.sparse_distance_matrix(tree, max_distance=max_dist)
-        pair_array = np.array([pair for pair in distance_dict.keys()])  # noqa: SIM118 -- dok_matrix not dict
-        value_array = np.array([value for value in distance_dict.values()])
+        pair_array = np.array(list(distance_dict.keys()))
+        value_array = np.array(list(distance_dict.values()))
         combined_array = np.hstack(
             [pair_array, value_array.reshape((len(value_array), 1))]
         )[np.where(pair_array[:, 1] != idx)]

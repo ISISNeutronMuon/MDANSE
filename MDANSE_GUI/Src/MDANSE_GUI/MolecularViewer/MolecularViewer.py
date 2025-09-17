@@ -1236,7 +1236,7 @@ class MolecularViewerWithPicking(MolecularViewer):
             self._picked_polydata.SetPoints(atoms)
             return
 
-        picked = np.array(sorted(list(self.picked_atoms)))
+        picked = np.array(sorted(self.picked_atoms))
         coords = self._reader.read_frame(self._current_frame)
         atoms.SetData(numpy_support.numpy_to_vtk(coords[picked]))
         self._picked_polydata.SetPoints(atoms)
@@ -1308,7 +1308,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         picked_colours = []
         picked_radii = []
         picked_numbers = []
-        for i in sorted(list(self.picked_atoms)):
+        for i in sorted(self.picked_atoms):
             picked_colours.append(colours[i])
             picked_radii.append(radii[i])
             picked_numbers.append(numbers[i])

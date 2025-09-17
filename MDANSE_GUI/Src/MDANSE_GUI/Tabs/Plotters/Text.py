@@ -138,7 +138,7 @@ class DatasetFormatter:
         """Combine the header text with the data array into a string."""
         if self._is_preview:
             data = islice(data_array, self._preview_lines)
-            data = map(lambda x: islice(x, self._preview_columns), data)
+            data = (islice(x, self._preview_columns) for x in data)
         else:
             data = data_array
 

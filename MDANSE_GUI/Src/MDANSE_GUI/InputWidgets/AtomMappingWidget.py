@@ -151,7 +151,7 @@ class AtomMappingHelperDialog(QDialog):
         """Convert the selection in the mapping widgets to a JSON string
         and set the field.
         """
-        settings = defaultdict(lambda: dict())
+        settings = defaultdict(dict)
         for w0, w1, w2 in self.mapping_widgets:
             settings[w0.text().replace("\n", ";")][w1.text()] = w2.currentText()
         self._field.setText(json.dumps(settings))

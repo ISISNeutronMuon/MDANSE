@@ -53,7 +53,7 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
                 self.dependencies["coordinate_files"]
             ].extension
 
-            supported = list(i[1:] for i in _TOPOLOGY_EXTS)
+            supported = [i[1:] for i in _TOPOLOGY_EXTS]
             if extension not in supported:
                 self.error_status = (
                     f"Trajectory file does not contain topology information. "
@@ -73,7 +73,7 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
 
         else:
             extension = "".join(Path(value).suffixes)[1:]
-            supported = list(i[1:] for i in _TOPOLOGY_EXTS)
+            supported = [i[1:] for i in _TOPOLOGY_EXTS]
             if extension not in supported:
                 self.error_status = f"File '{extension}' not supported. Should be one of the following: {supported}"
                 return
@@ -84,12 +84,10 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
             "filenames"
         ]
         if self["filename"]:
-            self.atoms = [
-                at for at in md.load(coord_files, top=self["filename"]).topology.atoms
-            ]
+            self.atoms = list(md.load(coord_files, top=self["filename"]).topology.atoms)
 
         else:
-            self.atoms = [at for at in md.load(coord_files).topology.atoms]
+            self.atoms = list(md.load(coord_files).topology.atoms)
 
     def atom_labels(self) -> Iterable[AtomLabel]:
         """

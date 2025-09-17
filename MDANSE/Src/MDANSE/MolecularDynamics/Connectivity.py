@@ -170,7 +170,7 @@ class Connectivity:
             pair: (self._radii[pair[0]] + self._radii[pair[1]]) + tolerance
             for pair in pairs
         }
-        total_max_length = np.max([x for x in maxbonds.values()])
+        total_max_length = max(maxbonds.values())
         for _, frame_number in enumerate(samples):
             distances = self.internal_distances(
                 frame_number=frame_number, max_distance=total_max_length

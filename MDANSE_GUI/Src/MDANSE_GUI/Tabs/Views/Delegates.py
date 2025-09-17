@@ -87,7 +87,7 @@ class MainAxisCombo(QItemDelegate):
 
 class MplStyleCombo(QItemDelegate):
     def __init__(self, *args, mpl_items=None, **kwargs) -> None:
-        self._items = list([str(x) for x in mpl_items])
+        self._items = [str(x) for x in mpl_items]
         super().__init__(*args, **kwargs)
 
     def setEditorData(self, editor, index):

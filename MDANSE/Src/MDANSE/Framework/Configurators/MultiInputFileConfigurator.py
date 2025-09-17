@@ -62,8 +62,8 @@ class MultiInputFileConfigurator(IConfigurator):
             else:
                 values = []
 
-        if type(values) is list:
-            if not all([type(value) is str for value in values]):
+        if isinstance(values, list):
+            if not all(isinstance(value, str) for value in values):
                 self.error_status = "Input values should be a list of str"
                 return
         else:

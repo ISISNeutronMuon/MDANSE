@@ -88,10 +88,10 @@ class RGBValidator(QValidator):
                 else:
                     state = QValidator.State.Invalid
             else:
-                if any([x > 255 for x in rgb]) or len(rgb) > 3:
+                if any(x > 255 for x in rgb) or len(rgb) > 3:
                     state = QValidator.State.Invalid
                 elif len(rgb) == 3:
-                    if all([(x >= 0) and (x < 256) for x in rgb]):
+                    if all(0 <= x < 256 for x in rgb):
                         state = QValidator.State.Acceptable
                 else:
                     state = QValidator.State.Intermediate
@@ -215,7 +215,7 @@ class TraceWidget(QWidget):
             The current contents of the colour input QLineEdit
         """
         tokens = colour_string.split(",")
-        non_empty = all([len(token) > 0 for token in tokens])
+        non_empty = all(token for token in tokens)
         colour_count = len(tokens)
         self.add_trace_button.setEnabled(non_empty and colour_count == 3)
 

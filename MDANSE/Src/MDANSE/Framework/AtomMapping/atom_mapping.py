@@ -88,7 +88,7 @@ class AtomLabel:
 
     def __repr__(self) -> str:
         grps = self.grp_label.split(";") if self.grp_label else []
-        grps = map(lambda x: x.split("="), grps)
+        grps = (x.split("=") for x in grps)
         cont = ", ".join(
             f"{key}={val!r}" for key, val in (("atm_label", self.atm_label), *grps)
         )
