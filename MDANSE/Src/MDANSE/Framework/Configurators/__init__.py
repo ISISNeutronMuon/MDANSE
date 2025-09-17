@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-from .ASEFileConfigurator import ASEFileConfigurator as ASEFileConfigurator
 from .AseInputFileConfigurator import (
     AseInputFileConfigurator as AseInputFileConfigurator,
 )
@@ -39,7 +38,6 @@ from .DerivativeOrderConfigurator import (
 from .DistHistCutoffConfigurator import (
     DistHistCutoffConfigurator as DistHistCutoffConfigurator,
 )
-from .FieldFileConfigurator import FieldFileConfigurator as FieldFileConfigurator
 from .FileWithAtomDataConfigurator import (
     FileWithAtomDataConfigurator as FileWithAtomDataConfigurator,
 )
@@ -81,7 +79,6 @@ from .MDAnalysisTimeStepConfigurator import (
 from .MDAnalysisTopologyFileConfigurator import (
     MDAnalysisTopologyFileConfigurator as MDAnalysisTopologyFileConfigurator,
 )
-from .MDFileConfigurator import MDFileConfigurator as MDFileConfigurator
 from .MDMCTrajectoryConfigurator import (
     MDMCTrajectoryConfigurator as MDMCTrajectoryConfigurator,
 )
@@ -108,9 +105,6 @@ from .MultipleChoicesConfigurator import (
 )
 from .OptionalFloatConfigurator import (
     OptionalFloatConfigurator as OptionalFloatConfigurator,
-)
-from .OptionalXYZFileConfigurator import (
-    OptionalXYZFileConfigurator as OptionalXYZFileConfigurator,
 )
 from .OutputFilesConfigurator import OutputFilesConfigurator as OutputFilesConfigurator
 from .OutputStructureConfigurator import (
@@ -141,6 +135,3 @@ from .TrajectoryVariableConfigurator import (
 from .UnitCellConfigurator import UnitCellConfigurator as UnitCellConfigurator
 from .VectorConfigurator import VectorConfigurator as VectorConfigurator
 from .WeightsConfigurator import WeightsConfigurator as WeightsConfigurator
-from .XDATCARFileConfigurator import XDATCARFileConfigurator as XDATCARFileConfigurator
-from .XTDFileConfigurator import XTDFileConfigurator as XTDFileConfigurator
-from .XYZFileConfigurator import XYZFileConfigurator as XYZFileConfigurator
