@@ -18,12 +18,15 @@ from __future__ import annotations
 import logging
 import os
 import sys
+import textwrap
 import time
+from argparse import ArgumentParser
 
 from qtpy.QtCore import QLocale, QSettings, Qt, QTimer
 from qtpy.QtGui import QIcon, QPixmap
 from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory
 
+import MDANSE_GUI
 from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.TabbedWindow import TabbedWindow
 
@@ -39,7 +42,32 @@ sys.excepthook = catch_exceptions
 # end of exception handling part.
 
 
+def build_parser():
+    parser = ArgumentParser(
+        prog="mdanse_gui",
+        description=textwrap.dedent(
+            """
+    This is the GUI interface of MDANSE
+    (Molecular Dynamics Analysis for Neutron Scattering Experiments).
+    The usual MDANSE workflow consists of converting the trajectory,
+    running an analysis and viewing the results.
+    """
+        ),
+        epilog="Please report any problems with MDANSE_GUI as issues on https://github.com/ISISNeutronMuon/MDANSE",
+    )
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"%(prog)s v{MDANSE_GUI.__version__}",
+    )
+    return parser
+
+
 def startGUI(some_args):
+    pars = build_parser()
+    pars.parse_args(some_args)
+
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel("INFO")
     stream_handler.setFormatter(FMT)

@@ -438,6 +438,9 @@ def build_parsers() -> ArgumentParser:
         ),
         epilog="Please report any problems with MDANSE as issues on https://github.com/ISISNeutronMuon/MDANSE",
     )
+    parser.add_argument(
+        "-V", "--version", action="version", version=f"%(prog)s v{MDANSE.__version__}"
+    )
     subparsers = parser.add_subparsers(
         title="MDANSE CLI Commands",
         help="Run each command with -h to see input options.",
