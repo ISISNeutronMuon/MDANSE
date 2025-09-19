@@ -27,7 +27,8 @@ from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 
 def solvent_accessible_surface(
     coords: np.ndarray,
-    indexes: list[int],
+    indices: list[int],
+    grouping_map: list[int],
     vdwRadii: np.ndarray,
     sphere_points: np.ndarray,
     probe_radius_value: float,
@@ -39,12 +40,15 @@ def solvent_accessible_surface(
     max_dist = np.max(vdwRadii) + probe_radius_value
     min_dist = np.min(vdwRadii) + probe_radius_value
     sphere_indices = set(range(len(sphere_points)))
-    for idx in indexes:
+    occupations = dict.fromkeys(set(grouping_map), 0)
+    for idx in indices:
         sphere_tree = KDTree(
             coords[idx] + sphere_points * (vdwRadii[idx] + probe_radius_value)
         )
         distance_dict = sphere_tree.sparse_distance_matrix(tree, max_distance=max_dist)
-        pair_array = np.array(list(distance_dict.keys()))
+        pair_array = np.array(
+            list(distance_dict.keys())
+        )  # pairs of (sphere index, atom index)
         value_array = np.array(list(distance_dict.values()))
         combined_array = np.hstack(
             [pair_array, value_array.reshape((len(value_array), 1))]
@@ -70,14 +74,21 @@ def solvent_accessible_surface(
                 ]
             )
         free_for_sure.update(uncertain - confirmed)
-        sas += (
-            len(free_for_sure)
-            / len(sphere_points)
-            * 4
-            * np.pi
-            * (vdwRadii[idx] + probe_radius_value) ** 2
+        blocked_for_sure = list(sphere_indices - free_for_sure)
+        blocked_per_atom = collections.Counter(
+            grouping_map[at_index]
+            for at_index in combined_array[
+                np.where(np.in1d(combined_array[:, 0], blocked_for_sure))
+            ][:, 1].astype(int)
+            if at_index < len(grouping_map)
         )
-    return sas
+        scale_factor = (
+            4 * np.pi * (vdwRadii[idx] + probe_radius_value) ** 2 / len(sphere_points)
+        )
+        sas += len(free_for_sure) * scale_factor
+        for at_type, point_count in blocked_per_atom.items():
+            occupations[at_type] += point_count * scale_factor
+    return sas, occupations
 
 
 class SolventAccessibleSurface(IJob):
@@ -130,6 +141,14 @@ class SolventAccessibleSurface(IJob):
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+            }
+        },
+    )
     settings["n_sphere_points"] = ("IntegerConfigurator", {"mini": 1, "default": 1000})
     settings["probe_radius"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.14})
     settings["output_files"] = ("OutputFilesConfigurator", {})
@@ -139,6 +158,8 @@ class SolventAccessibleSurface(IJob):
         super().initialize()
 
         self.numberOfSteps = self.configuration["frames"]["number"]
+        self.type_mapping = {}
+        self.molecule_mapping = {}
 
         # Will store the time.
         self._outputData.add(
@@ -150,13 +171,48 @@ class SolventAccessibleSurface(IJob):
 
         # Will store the solvent accessible surface.
         self._outputData.add(
-            "sas/sas",
+            "sas/total",
             "LineOutputVariable",
             (self.configuration["frames"]["number"],),
             axis="sas/axes/time",
             units="nm2",
             main_result=True,
         )
+        self._outputData.add(
+            "sas/free",
+            "LineOutputVariable",
+            (self.configuration["frames"]["number"],),
+            axis="sas/axes/time",
+            units="nm2",
+            main_result=True,
+        )
+        all_indices = self.trajectory.chemical_system.all_indices
+        self.grouping_indices = len(all_indices) * [0]
+        loose_atoms = []
+        if self.configuration["grouping_level"]["value"] == "molecule":
+            for mol_name in self.trajectory.chemical_system.unique_molecules():
+                self._outputData.add(
+                    f"sas/blocked_{mol_name}",
+                    "LineOutputVariable",
+                    (self.configuration["frames"]["number"],),
+                    axis="sas/axes/time",
+                    units="nm2",
+                    main_result=True,
+                )
+                for mol_instance in self.trajectory.chemical_system._clusters[mol_name]:
+                    all_indices -= set(mol_instance)
+        for atom_name in {
+            self.trajectory.chemical_system.atom_list[index] for index in all_indices
+        }:
+            self._outputData.add(
+                f"sas/blocked_{atom_name}",
+                "LineOutputVariable",
+                (self.configuration["frames"]["number"],),
+                axis="sas/axes/time",
+                units="nm2",
+                main_result=True,
+            )
+            loose_atoms.append(atom_name)
 
         # Generate the sphere points that will be used to evaluate the sas per atom.
         self.spherePoints = np.array(
@@ -167,9 +223,27 @@ class SolventAccessibleSurface(IJob):
         # A mapping between the atom indices and covalent_radius radius for the whole universe.
         self.vdwRadii = self.configuration["trajectory"][
             "instance"
-        ].chemical_system.atom_property("vdw_radius")  # should it be covalent?
+        ].chemical_system.atom_property("vdw_radius")
 
-        self._indices = self.trajectory.atom_indices
+        self.selected_indices = self.trajectory.atom_indices
+        self.all_indices = self.trajectory.chemical_system.all_indices
+        atom_types = self.trajectory.chemical_system.atom_list
+        self.type_mapping = {
+            atom_type: index + 1 for index, atom_type in enumerate(loose_atoms)
+        }
+        for index in all_indices:
+            self.grouping_indices[index] = self.type_mapping[atom_types[index]]
+
+        if self.configuration["grouping_level"]["value"] == "molecule":
+            self.molecule_mapping = {
+                mol_name: -index - 1
+                for index, mol_name in enumerate(
+                    self.trajectory.chemical_system.unique_molecules()
+                )
+            }
+            for mol_name in self.trajectory.chemical_system.unique_molecules():
+                for index in self.trajectory.chemical_system._clusters[mol_name]:
+                    self.grouping_indices[index] = self.molecule_mapping[mol_name]
 
     def run_step(self, index):
         """
@@ -204,15 +278,16 @@ class SolventAccessibleSurface(IJob):
             temp_vdw_radii = self.vdwRadii
 
         # Loop over the indices of the selected atoms for the sas calculation.
-        sas = solvent_accessible_surface(
+        sas_and_occupations = solvent_accessible_surface(
             coords,
-            self._indices,
+            self.selected_indices,
+            self.grouping_indices,
             temp_vdw_radii,
             self.spherePoints,
             self.configuration["probe_radius"]["value"],
         )
 
-        return index, sas
+        return index, sas_and_occupations
 
     def combine(self, index, x):
         """
@@ -222,9 +297,20 @@ class SolventAccessibleSurface(IJob):
         @param x: the output of run_step method.
         @type x: no specific type.
         """
-
+        sas, occupations = x
         # The SAS is updated with the value obtained for frame |index|.
-        self._outputData["sas/sas"][index] = x
+        self._outputData["sas/total"][index] = sas
+        self._outputData["sas/free"][index] = sas - sum(occupations.values())
+        for atom_name, atom_index in self.type_mapping.items():
+            surface = occupations.get(atom_index)
+            self._outputData[f"sas/blocked_{atom_name}"][index] = (
+                surface if surface else 0.0
+            )
+        for mol_name, mol_index in self.molecule_mapping.items():
+            surface = occupations.get(mol_index)
+            self._outputData[f"sas/blocked_{mol_name}"][index] = (
+                surface if surface else 0.0
+            )
 
     def finalize(self):
         """
