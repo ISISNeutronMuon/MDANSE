@@ -101,6 +101,11 @@ class PlotDataView(QTreeView):
         menu.exec_(event.globalPos())
 
     def populateMenu(self, menu: QMenu, index: QModelIndex):
+        for action, method in [("Vector summary", self.plot_vectors)]:
+            temp_action = menu.addAction(action)
+            temp_action.triggered.connect(method)
+            temp_action.setEnabled(self.model().itemFromIndex(index).has_vectors)
+        menu.addSeparator()
         for action, method in [("Delete", self.deleteNode)]:
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
@@ -141,6 +146,16 @@ class PlotDataView(QTreeView):
                 self.item_details.emit(text)
             except Exception:
                 self.item_details.emit("No additional information included.")
+
+    def plot_vectors(
+        self,
+    ):
+        source_model = self.model()
+        index = self.currentIndex()
+        mda_data_structure = source_model.parent_object(index)
+        file = mda_data_structure._file
+        LOG.debug("Running plot_vectors on file %s", file)
+        model = PlottingContext()
 
     def quick_plot_data(
         self,
