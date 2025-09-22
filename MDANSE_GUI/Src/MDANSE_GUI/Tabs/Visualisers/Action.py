@@ -438,6 +438,7 @@ class Action(QWidget):
             has_warning = has_warning or widget.has_warning
         if self.execute_button is not None:
             self.execute_button.setEnabled(allow)
+            self.save_button.setEnabled(allow)
             if has_warning:
                 self.execute_button.setStyleSheet(
                     "QWidget { background-color:rgb(220,210,30); font-weight: bold }"
