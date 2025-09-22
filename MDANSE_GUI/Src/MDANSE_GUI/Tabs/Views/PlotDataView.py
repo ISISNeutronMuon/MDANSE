@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+import h5py
+import numpy as np
 from qtpy.QtCore import QMimeData, QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QDrag, QMouseEvent, QStandardItem
 from qtpy.QtWidgets import QAbstractItemView, QApplication, QMenu, QTreeView
@@ -25,6 +27,40 @@ from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDatase
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
 from MDANSE_GUI.Widgets.DataDialog import DataDialog
+
+
+def shell_to_modq(shell_index: int, parent: h5py.Dataset):
+    qvectors = parent[f"shell_{shell_index}/qvector_array"][:]
+    return np.linalg.norm(qvectors, axis=1)
+
+
+def convert_vectors_to_datasets(file: h5py.File, main_dstet: str = "vector_generator"):
+    parent_dset = file[main_dstet]
+    qvals = parent_dset["q"][:]
+    nshells = len(qvals)
+    modq_per_shell = [shell_to_modq(n, parent_dset) for n in range(nshells)]
+    qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
+    nvecs_per_shell = len(modq_per_shell[nshells - 1])
+    qstep = np.min(np.abs(qvals[1:] - qvals[:-1])) / max(5, int(nvecs_per_shell / 10))
+    common_bins = np.arange(
+        max(0.0, qmin - qstep / 2), qmax + qstep / 2 + 0.1 * qstep, qstep
+    )
+    qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
+    xvals = (common_bins[:-1] + common_bins[1:]) / 2
+    nvec_per_q = SingleDataset("Qvecs per shell", None)
+    nvec_per_q.init_manually(
+        np.array([len(qvecs) for qvecs in modq_per_shell]),
+        plot_axes={"|q|": qvals},
+        axes_units={"|q|": "1/nm"},
+    )
+    vecs_per_qbin = SingleDataset("Vector statistics", None)
+    vecs_per_qbin.init_manually(
+        np.vstack(qmod_histograms),
+        data_unit="counts",
+        plot_axes={"|q|": qvals, "q_bin": xvals},
+        axes_units={"|q|": "1/nm", "q_bin": "1/nm"},
+    )
+    return nvec_per_q, vecs_per_qbin
 
 
 class PlotDataView(QTreeView):
@@ -154,8 +190,11 @@ class PlotDataView(QTreeView):
         index = self.currentIndex()
         mda_data_structure = source_model.parent_object(index)
         file = mda_data_structure._file
-        LOG.debug("Running plot_vectors on file %s", file)
+        LOG.debug("Running plot_vectors on file %s", file.filename)
         model = PlottingContext()
+        for qvec_dataset in convert_vectors_to_datasets(file):
+            model.add_dataset(qvec_dataset)
+        self.fast_plotting_data.emit(model)
 
     def quick_plot_data(
         self,

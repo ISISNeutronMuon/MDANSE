@@ -103,6 +103,20 @@ class SingleDataset:
         if not source:
             return
 
+        self.init_from_file(name, source)
+
+    def init_from_file(self, name: str, source: h5py.File) -> None:
+        """Finish reading plotting axes from the input file.
+
+        If you are setting data manually, use init_manually instead.
+
+        Parameters
+        ----------
+        name : str
+            Data set name in the file.
+        source : h5py.File
+            File object containing the data. A .mda HDF5 file.
+        """
         self._filename = source.filename
         self.create_labels(self._filename)
         try:
@@ -133,6 +147,62 @@ class SingleDataset:
         self._axes_tag = source[name].attrs["axis"]
 
         self.create_axes_tags(self._axes_tag, source)
+
+    def init_manually(
+        self,
+        data: npt.NDArray[float],
+        data_unit: str = "none",
+        scaling_factor: float = 1.0,
+        plot_axes: dict[str, npt.NDArray[float]] | None = None,
+        axes_units: dict[str, str] | None = None,
+    ) -> None:
+        """Set data for plotting without using a data file.
+
+        Makes it possible to create custom datasets for the MDANSE plotter.
+
+        Parameters
+        ----------
+        data : npt.NDArray[float]
+            The data to be plotted. An N-dimensional array, N<=3
+        data_unit : str, optional
+            Physical unit of the values in the data array
+        scaling_factor : float, optional
+            Data will be scaled by this factor if requested, by default 1.0
+        plot_axes : dict[str, npt.NDArray[float]] | None, optional
+            Dictionary of axis_name: axis_array pairs, by default None
+        axes_units : dict[str, str] | None, optional
+            Dictionary of axis_name: axis_unit pairs, by default None
+        """
+        self._filename = "no file"
+        self._labels = {
+            "minimal": self._name,
+            "medium": self._name,
+            "full": self._name,
+        }
+        self._data = np.real(data)
+        self._scaling_factor = scaling_factor
+
+        self._data_unit = data_unit
+        self._n_dim = len(self._data.shape)
+        if plot_axes is None:
+            for ax_number, npoints in enumerate(self._data.shape):
+                axis_key = f"index{ax_number}"
+                self._axes[axis_key] = np.arange(npoints)
+                self._axes_units[axis_key] = "N/A"
+                self._axes_order.append(axis_key)
+                self._axes_scaling[axis_key] = 1.0
+                self._current_units[axis_key] = self._axes_units[axis_key]
+            self._axes_tag = "|".join([str(x) for x in self._axes])
+            return
+        for axis_key, axis_array in plot_axes.items():
+            self._axes_tag = "|".join([str(x) for x in plot_axes])
+            self._axes[axis_key] = axis_array
+            self._axes_units[axis_key] = (
+                "N/A" if axes_units is None else axes_units[axis_key]
+            )
+            self._axes_order.append(axis_key)
+            self._axes_scaling[axis_key] = 1.0
+            self._current_units[axis_key] = self._axes_units[axis_key]
 
     def create_axes_tags(self, axes_tag: str, source: h5py.File):
         """Find the right axes datasets for the current dataset.
