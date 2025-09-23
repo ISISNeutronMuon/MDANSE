@@ -17,36 +17,69 @@ from __future__ import annotations
 
 import h5py
 import numpy as np
-from qtpy.QtCore import QMimeData, QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QDrag, QMouseEvent, QStandardItem
-from qtpy.QtWidgets import QAbstractItemView, QApplication, QMenu, QTreeView
+import numpy.typing as npt
+from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QContextMenuEvent, QMouseEvent
+from qtpy.QtWidgets import QAbstractItemView, QMenu, QTreeView
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem, MDADataStructure
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
-from MDANSE_GUI.Widgets.DataDialog import DataDialog
 
-QSTEP_PADDING = 2.0
+BIN_STEP_PADDING = 2.0
 
 
-def shell_to_modq(shell_index: int, parent: h5py.Dataset):
+def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[float]:
+    """Finds the vector shell dataset and returns arrays of q vector lengths.
+
+    Parameters
+    ----------
+    shell_index : int
+        Index of the MDANSE q vector shell in the HDF5 data structure.
+    parent : h5py.Dataset
+        HDF5 object holding the shell_N keys, where N is shell_index.
+
+    Returns
+    -------
+    npt.NDArray[float]
+        A 1D array of q-vector lengths.
+    """
     qvectors = parent[f"shell_{shell_index}/qvector_array"][:]
     return np.linalg.norm(qvectors, axis=0)
 
 
-def convert_vectors_to_datasets(file: h5py.File, main_dstet: str = "vector_generator"):
+def convert_vectors_to_datasets(
+    file: h5py.File, main_dstet: str = "vector_generator"
+) -> tuple[SingleDataset, SingleDataset]:
+    """Create plottable SingleDataset instances showing |q| of generated vectors.
+
+    Parameters
+    ----------
+    file : h5py.File
+        HDF5 file object, typically an .mda file.
+    main_dstet : str, optional
+        Name of the group with q vector shells, by default "vector_generator".
+
+    Returns
+    -------
+    tuple[SingleDataset, SingleDataset]
+        1D array of vector count vs. |q|, 2D histogram of q vector counts per shell.
+    """
     parent_dset = file[main_dstet]
     qvals = parent_dset["q"][:]
     nshells = len(qvals)
     modq_per_shell = [shell_to_modq(n, parent_dset) for n in range(nshells)]
     qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
-    qstep = np.min([np.std(one_shell) for one_shell in modq_per_shell])
+    q_step = np.mean(np.abs(qvals[1:] - qvals[:-1]))
+    bin_step = max(
+        np.min([np.std(one_shell) for one_shell in modq_per_shell]), 0.05 * q_step
+    )
     common_bins = np.arange(
-        max(0.0, qmin - QSTEP_PADDING * qstep),
-        qmax + (QSTEP_PADDING + 0.1) * qstep,
-        qstep,
+        max(0.0, min(qmin - BIN_STEP_PADDING * bin_step, qmin - q_step)),
+        qmax + max((BIN_STEP_PADDING + 0.1) * bin_step, q_step),
+        bin_step,
     )
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
     xvals = (common_bins[:-1] + common_bins[1:]) / 2

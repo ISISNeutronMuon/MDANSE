@@ -1,11 +1,7 @@
 import pytest
-import tempfile
-import os
 
 import h5py
 import numpy as np
-
-from qtpy import QtGui, QtCore, QtWidgets
 
 from MDANSE_GUI.Tabs.Views.PlotDataView import convert_vectors_to_datasets, shell_to_modq
 
