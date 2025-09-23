@@ -28,10 +28,12 @@ from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
 from MDANSE_GUI.Widgets.DataDialog import DataDialog
 
+QSTEP_PADDING = 2.0
+
 
 def shell_to_modq(shell_index: int, parent: h5py.Dataset):
     qvectors = parent[f"shell_{shell_index}/qvector_array"][:]
-    return np.linalg.norm(qvectors, axis=1)
+    return np.linalg.norm(qvectors, axis=0)
 
 
 def convert_vectors_to_datasets(file: h5py.File, main_dstet: str = "vector_generator"):
@@ -40,10 +42,11 @@ def convert_vectors_to_datasets(file: h5py.File, main_dstet: str = "vector_gener
     nshells = len(qvals)
     modq_per_shell = [shell_to_modq(n, parent_dset) for n in range(nshells)]
     qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
-    nvecs_per_shell = len(modq_per_shell[nshells - 1])
-    qstep = np.min(np.abs(qvals[1:] - qvals[:-1])) / max(5, int(nvecs_per_shell / 10))
+    qstep = np.min([np.std(one_shell) for one_shell in modq_per_shell])
     common_bins = np.arange(
-        max(0.0, qmin - qstep / 2), qmax + qstep / 2 + 0.1 * qstep, qstep
+        max(0.0, qmin - QSTEP_PADDING * qstep),
+        qmax + (QSTEP_PADDING + 0.1) * qstep,
+        qstep,
     )
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
     xvals = (common_bins[:-1] + common_bins[1:]) / 2
