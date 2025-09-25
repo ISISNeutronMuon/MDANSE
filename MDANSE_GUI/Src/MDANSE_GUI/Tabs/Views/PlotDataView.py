@@ -83,13 +83,15 @@ def convert_vectors_to_datasets(
     )
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
     xvals = (common_bins[:-1] + common_bins[1:]) / 2
-    nvec_per_q = SingleDataset("Qvecs per shell", None)
+    nvec_per_q = SingleDataset(
+        "Total vectors per shell", None, linestyle=":", marker="o"
+    )
     nvec_per_q.init_manually(
         np.array([len(qvecs) for qvecs in modq_per_shell]),
         plot_axes={"|q|": qvals},
         axes_units={"|q|": "1/nm"},
     )
-    vecs_per_qbin = SingleDataset("Vector statistics", None)
+    vecs_per_qbin = SingleDataset("Shell population", None)
     vecs_per_qbin.init_manually(
         np.vstack(qmod_histograms),
         data_unit="counts",
@@ -112,7 +114,7 @@ class PlotDataView(QTreeView):
     error = Signal(str)
     fast_plotting_data = Signal(object)
     free_name = Signal(str)
-    fast_plotting_data = Signal(object)
+    fast_plotting_vectors = Signal(object)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -230,7 +232,7 @@ class PlotDataView(QTreeView):
         model = PlottingContext()
         for qvec_dataset in convert_vectors_to_datasets(file):
             model.add_dataset(qvec_dataset)
-        self.fast_plotting_data.emit(model)
+        self.fast_plotting_vectors.emit(model)
 
     def quick_plot_data(
         self,

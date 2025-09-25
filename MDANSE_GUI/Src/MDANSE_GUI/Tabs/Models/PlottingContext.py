@@ -82,12 +82,19 @@ def get_mpl_colours():
 class SingleDataset:
     """Manages a plottable data set from an .mda file."""
 
-    def __init__(self, name: str, source: h5py.File | None, linestyle: str = "-"):
+    def __init__(
+        self,
+        name: str,
+        source: h5py.File | None,
+        linestyle: str = "-",
+        marker: str | None = None,
+    ):
         self._name = name
         self._use_scaling = True
         self._curves = {}
         self._curve_labels = {}
         self._linestyle = linestyle
+        self._marker = marker
         self._planes = {}
         self._plane_labels = {}
         self._data_limits = None
@@ -848,7 +855,7 @@ class PlottingContext(QStandardItemModel):
                 "",
                 self.next_colour(),
                 new_dataset._linestyle,
-                "",
+                new_dataset._marker if new_dataset._marker else "",
                 "",
                 new_dataset._filename,
             ]

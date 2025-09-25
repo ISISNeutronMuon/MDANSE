@@ -392,4 +392,5 @@ class PlotWidget(QWidget):
         plot_selector.addItems(self.available_plotters())
         plot_selector.setCurrentText("Single")
         plot_selector.currentTextChanged.connect(self.set_plotter)
+        self.plot_selector = plot_selector
         self.set_plotter(plot_selector.currentText())
