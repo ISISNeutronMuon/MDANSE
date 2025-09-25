@@ -74,13 +74,9 @@ def convert_vectors_to_datasets(
     qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
     q_step = np.mean(np.abs(qvals[1:] - qvals[:-1]))
     bin_step = max(
-        np.min([np.std(one_shell) for one_shell in modq_per_shell]), 0.05 * q_step
+        0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell]), 0.05 * q_step
     )
-    common_bins = np.arange(
-        max(0.0, min(qmin - BIN_STEP_PADDING * bin_step, qmin - q_step)),
-        qmax + max((BIN_STEP_PADDING + 0.1) * bin_step, q_step),
-        bin_step,
-    )
+    common_bins = np.arange(max(0.0, qmin), qmax + 1.1 * bin_step, bin_step)
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
     xvals = (common_bins[:-1] + common_bins[1:]) / 2
     nvec_per_q = SingleDataset(
