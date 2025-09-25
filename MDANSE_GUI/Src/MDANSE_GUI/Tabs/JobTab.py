@@ -30,7 +30,7 @@ from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
-from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+from MDANSE_GUI.Tabs.Visualisers.TextInfo import MathInfo
 
 job_tab_label = """This is the list of <b>analysis tasks</b>
 you can run using MDANSE.
@@ -182,7 +182,7 @@ class JobTab(GeneralTab):
             layout=partial(
                 MultiPanel,
                 left_panels=[
-                    TextInfo(
+                    MathInfo(
                         header="MDANSE Analysis",
                         footer="Look up our Read The Docs page:"
                         + "https://mdanse.readthedocs.io/en/protos/",
@@ -220,7 +220,7 @@ class JobTab(GeneralTab):
             layout=partial(
                 MultiPanel,
                 left_panels=[
-                    TextInfo(
+                    MathInfo(
                         header="MDANSE Analysis",
                         footer="Look up our "
                         + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
@@ -253,7 +253,7 @@ if __name__ == "__main__":
         layout=partial(
             MultiPanel,
             left_panels=[
-                TextInfo(
+                MathInfo(
                     header="MDANSE Analysis",
                     footer="Look up our "
                     + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'

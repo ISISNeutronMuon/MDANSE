@@ -17,6 +17,8 @@ from __future__ import annotations
 
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QTextBrowser
+from .MathRenderer import MathRenderer, MathExpression
+from typing import List, Any
 
 
 class TextInfo(QTextBrowser):
@@ -47,3 +49,45 @@ class TextInfo(QTextBrowser):
         if self._footer:
             new_text += line_break + self._footer
         return new_text
+
+
+class MathInfo(TextInfo):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def is_expression(arg: Any) -> bool:
+        return isinstance(arg, MathExpression)
+
+    @staticmethod
+    def scan(text: str) -> List[Any]:
+        # Instantiate renderer object
+        renderer = MathRenderer(text)
+
+        # Scan text for existence of raw LaTex expressions
+        scanned = renderer.scan()
+
+        # Iterate over scanned text, rendering LaTex substrings if image not already cached
+        for token in scanned:
+            if MathInfo.is_expression(token):
+                if not MathRenderer.cached(token.get()):
+                    renderer.render(token.get())
+
+        return scanned
+
+    def filter(self, some_text: str, line_break="<br />"):
+        filtered = super().filter(some_text, line_break)
+        scanned = self.scan(filtered)
+
+        html_substrings = []
+        for token in scanned:
+            if self.is_expression(token):
+                image = MathRenderer.from_cache(token.get())
+                html_substrings.append(
+                    f'<div style="text-align:center; margin:4px 0;">'
+                    f'<img src="data:image/png;base64, {image}"></div>'
+                )
+            else:
+                html_substrings.append(f"<p>{token}</p>")
+
+        return "".join(html_substrings)
