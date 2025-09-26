@@ -1,6 +1,7 @@
-import re
-import io
 import base64
+import io
+import re
+
 from matplotlib import pyplot as plt
 
 
