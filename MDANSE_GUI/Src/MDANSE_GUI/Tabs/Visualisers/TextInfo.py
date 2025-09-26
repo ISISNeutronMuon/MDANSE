@@ -17,8 +17,7 @@ from __future__ import annotations
 
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QTextBrowser
-from .MathRenderer import MathRenderer, MathExpression
-from typing import List, Any
+from .MathRenderer import MathRenderer
 
 
 class TextInfo(QTextBrowser):
@@ -56,11 +55,7 @@ class MathInfo(TextInfo):
         super().__init__(*args, **kwargs)
 
     @staticmethod
-    def is_expression(arg: Any) -> bool:
-        return isinstance(arg, MathExpression)
-
-    @staticmethod
-    def scan(text: str) -> List[Any]:
+    def scan(text: str) -> dict[str, bool]:
         # Instantiate renderer object
         renderer = MathRenderer(text)
 
@@ -68,10 +63,10 @@ class MathInfo(TextInfo):
         scanned = renderer.scan()
 
         # Iterate over scanned text, rendering LaTex substrings if image not already cached
-        for token in scanned:
-            if MathInfo.is_expression(token):
-                if not MathRenderer.cached(token.get()):
-                    renderer.render(token.get())
+        for token, is_expression in scanned.items():
+            if is_expression:
+                if not MathRenderer.cached(token):
+                    renderer.render(token)
 
         return scanned
 
@@ -80,9 +75,9 @@ class MathInfo(TextInfo):
         scanned = self.scan(filtered)
 
         html_substrings = []
-        for token in scanned:
-            if self.is_expression(token):
-                image = MathRenderer.from_cache(token.get())
+        for token, is_expression in scanned.items():
+            if is_expression:
+                image = MathRenderer.from_cache(token)
                 html_substrings.append(
                     f'<div style="text-align:center; margin:4px 0;">'
                     f'<img src="data:image/png;base64, {image}"></div>'

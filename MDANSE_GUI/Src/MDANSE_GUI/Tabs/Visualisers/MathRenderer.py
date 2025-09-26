@@ -2,7 +2,6 @@ import re
 import io
 import base64
 from matplotlib import pyplot as plt
-from typing import List, Any
 
 
 class MathRenderer:
@@ -23,12 +22,12 @@ class MathRenderer:
     def ignore(text: str) -> bool:
         return text in MathRenderer.ignores
 
-    def scan(self) -> List[Any]:
+    def scan(self) -> dict[str, bool]:
         # Use regex matching to find expressions
         pattern = r"(:math:`.*?`)"
         substrings = re.split(pattern, self.raw_text)
 
-        scanned = []
+        scanned = dict()
         for s in substrings:
             if not s:
                 # This is not a string - skip
@@ -45,10 +44,10 @@ class MathRenderer:
             if s.startswith(":math:`") and s.endswith("`"):
                 # This is a raw LaTex expression string - instantiate object to identify it as such
                 expr = s[len(":math:`") : -1]
-                scanned.append(MathExpression(expr))
+                scanned.update({expr: True})
             else:
                 # Normal text string
-                scanned.append(s)
+                scanned.update({s: False})
 
         return scanned
 
@@ -85,11 +84,3 @@ class MathRenderer:
     @classmethod
     def from_cache(cls, key):
         return cls.cache[key]
-
-
-class MathExpression:
-    def __init__(self, expr: str):
-        self.expr = expr
-
-    def get(self) -> str:
-        return self.expr
