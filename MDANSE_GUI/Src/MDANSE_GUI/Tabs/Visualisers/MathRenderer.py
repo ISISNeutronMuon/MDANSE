@@ -85,5 +85,5 @@ class MathRenderer:
         return result
 
     @classmethod
-    def from_cache(cls, key):
+    def from_cache(cls, key) -> str:
         return cls.cache[key]
