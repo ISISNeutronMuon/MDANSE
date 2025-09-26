@@ -40,8 +40,8 @@ class MathRenderer:
             raw_expr = s[len(":math:") :]
             if self.ignore(raw_expr):
                 # We ignore rendering this
-                s = MathRenderer.replace_ignored(raw_expr)
-                substrings[-1] = s + substrings[-1]
+                prefix = MathRenderer.replace_ignored(raw_expr)
+                substrings[-1] = prefix + substrings[-1]
                 continue
 
             if s.startswith(":math:`") and s.endswith("`"):
