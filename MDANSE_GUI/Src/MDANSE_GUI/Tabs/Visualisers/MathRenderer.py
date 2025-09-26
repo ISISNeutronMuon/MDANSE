@@ -81,7 +81,7 @@ class MathRenderer:
 
     @classmethod
     def cached(cls, key) -> bool:
-        result = key in cls.cache.keys()
+        result = key in cls.cache
         return result
 
     @classmethod
