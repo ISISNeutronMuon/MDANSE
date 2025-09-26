@@ -123,6 +123,9 @@ from .OutputTrajectoryConfigurator import (
 from .PartialChargeConfigurator import (
     PartialChargeConfigurator as PartialChargeConfigurator,
 )
+from .PDBFileConfigurator import (
+    PDBFileConfigurator as PDBFileConfigurator,
+)
 from .ProjectionConfigurator import ProjectionConfigurator as ProjectionConfigurator
 from .QVectorsConfigurator import QVectorsConfigurator as QVectorsConfigurator
 from .RangeConfigurator import RangeConfigurator as RangeConfigurator

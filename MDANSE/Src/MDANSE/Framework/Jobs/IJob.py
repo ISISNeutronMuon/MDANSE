@@ -492,10 +492,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 self._status = self._status_constructor(self)
 
             self.setup(parameters)
+            self.check_status()
 
             self.initialize()
-
-            self.check_status()
 
             if self._status is not None:
                 self._status.start(self.numberOfSteps)

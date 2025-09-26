@@ -23,7 +23,6 @@ import numpy as np
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Units import measure
-from MDANSE.IO.MinimalPDBReader import MinimalPDBReader
 from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import (
@@ -277,7 +276,7 @@ class DCD(Converter):
 
     settings = collections.OrderedDict()
     settings["pdb_file"] = (
-        "InputFileConfigurator",
+        "PDBFileConfigurator",
         {
             "wildcard": "PDB files (*.pdb);;All files (*)",
             "default": "INPUT_FILENAME.pdb",
@@ -290,6 +289,14 @@ class DCD(Converter):
             "wildcard": "DCD files (*.dcd);;All files (*)",
             "default": "INPUT_FILENAME.dcd",
             "label": "Input DCD file",
+        },
+    )
+    settings["atom_aliases"] = (
+        "AtomMappingConfigurator",
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "pdb_file"},
         },
     )
     settings["time_step"] = (
@@ -323,8 +330,9 @@ class DCD(Converter):
         self.numberOfSteps = self.configuration["dcd_file"]["instance"]["n_frames"]
 
         # Create all chemical entities from the PDB file.
-        pdb_reader = MinimalPDBReader(self.configuration["pdb_file"]["filename"])
-        self._chemical_system = pdb_reader._chemical_system
+        self._chemical_system = self.configuration["pdb_file"].build_chemical_system(
+            self.configuration["atom_aliases"]["value"]
+        )
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
