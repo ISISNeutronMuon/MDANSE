@@ -12,7 +12,7 @@ class MathRenderer:
     cache = {}
 
     # Ignore the following expression
-    ignores = {"`\mathbf{q}`": "q"}
+    ignores = {r"`\mathbf{q}`": "q"}
 
     def __init__(self, text: str) -> None:
         self.raw_text = text
