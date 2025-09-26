@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 
 class MathRenderer:
     # Cache mapping the raw LaTex expression to its rendered image form
-    cache = dict()
+    cache = {}
 
     # Ignore the following expression
     ignores = {"`\mathbf{q}`": "q"}
@@ -30,7 +30,7 @@ class MathRenderer:
         pattern = r"(:math:`.*?`)"
         substrings = re.split(pattern, self.raw_text)
 
-        scanned = dict()
+        scanned = {}
         for s in substrings:
             if not s:
                 # This is not a string - skip
