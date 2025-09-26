@@ -56,7 +56,7 @@ class MathInfo(TextInfo):
         super().__init__(*args, **kwargs)
 
     @staticmethod
-    def scan(text: str) -> dict[str, bool]:
+    def scan(text: str) -> list[tuple[str, bool]]:
         # Instantiate renderer object
         renderer = MathRenderer(text)
 
@@ -64,7 +64,7 @@ class MathInfo(TextInfo):
         scanned = renderer.scan()
 
         # Iterate over scanned text, rendering LaTex substrings if image not already cached
-        for token, is_expression in scanned.items():
+        for token, is_expression in scanned:
             if is_expression and not MathRenderer.cached(token):
                 renderer.render(token)
 
@@ -75,7 +75,7 @@ class MathInfo(TextInfo):
         scanned = self.scan(filtered)
 
         html_substrings = []
-        for token, is_expression in scanned.items():
+        for token, is_expression in scanned:
             if is_expression:
                 image = MathRenderer.from_cache(token)
                 html_substrings.append(

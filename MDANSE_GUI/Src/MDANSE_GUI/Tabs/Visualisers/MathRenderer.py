@@ -25,12 +25,12 @@ class MathRenderer:
     def ignore(text: str) -> bool:
         return text in MathRenderer.ignores
 
-    def scan(self) -> dict[str, bool]:
+    def scan(self) -> list[tuple[str, bool]]:
         # Use regex matching to find expressions
         pattern = r"(:math:`.*?`)"
         substrings = re.split(pattern, self.raw_text)
 
-        scanned = {}
+        scanned = []
         for s in substrings:
             if not s:
                 # This is not a string - skip
@@ -47,10 +47,10 @@ class MathRenderer:
             if s.startswith(":math:`") and s.endswith("`"):
                 # This is a raw LaTex expression string - instantiate object to identify it as such
                 expr = s[len(":math:`") : -1]
-                scanned.update({expr: True})
+                scanned.append((expr, True))
             else:
                 # Normal text string
-                scanned.update({s: False})
+                scanned.append((s, False))
 
         return scanned
 
