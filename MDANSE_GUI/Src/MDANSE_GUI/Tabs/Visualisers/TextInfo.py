@@ -64,9 +64,8 @@ class MathInfo(TextInfo):
 
         # Iterate over scanned text, rendering LaTex substrings if image not already cached
         for token, is_expression in scanned.items():
-            if is_expression:
-                if not MathRenderer.cached(token):
-                    renderer.render(token)
+            if is_expression and not MathRenderer.cached(token):
+                renderer.render(token)
 
         return scanned
 
