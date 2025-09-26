@@ -106,6 +106,8 @@ class SingleDataset:
         self._current_units = {}
         self._axes_scaling = {}
         self._axes_order = []
+        self._xerror = None
+        self._yerror = None
 
         if not source:
             return
@@ -162,6 +164,8 @@ class SingleDataset:
         scaling_factor: float = 1.0,
         plot_axes: dict[str, npt.NDArray[float]] | None = None,
         axes_units: dict[str, str] | None = None,
+        yerror: npt.NDArray[float] | None = None,
+        xerror: npt.NDArray[float] | None = None,
     ) -> None:
         """Set data for plotting without using a data file.
 
@@ -188,6 +192,8 @@ class SingleDataset:
         }
         self._data = np.real(data)
         self._scaling_factor = scaling_factor
+        self._xerror = xerror
+        self._yerror = yerror
 
         self._data_unit = data_unit
         self._n_dim = len(self._data.shape)

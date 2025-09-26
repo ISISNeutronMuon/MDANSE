@@ -79,13 +79,39 @@ def convert_vectors_to_datasets(
     common_bins = np.arange(max(0.0, qmin), qmax + 1.1 * bin_step, bin_step)
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
     xvals = (common_bins[:-1] + common_bins[1:]) / 2
-    nvec_per_q = SingleDataset(
-        "Total vectors per shell", None, linestyle=":", marker="o"
-    )
-    nvec_per_q.init_manually(
-        np.array([len(qvecs) for qvecs in modq_per_shell]),
+    nvec_per_q = SingleDataset("Available vectors", None, linestyle=":", marker="o")
+    if not all(
+        "custom_field" in parent_dset[f"shell_{shell_index}/qvector_array"].attrs
+        for shell_index in range(nshells)
+    ):
+        nvec_per_q.init_manually(
+            np.array([len(qvecs) for qvecs in modq_per_shell]),
+            plot_axes={"|q|": qvals},
+            axes_units={"|q|": "1/nm"},
+        )
+    else:
+        nvec_per_q.init_manually(
+            np.array(
+                [
+                    [
+                        int(x)
+                        for x in parent_dset[
+                            f"shell_{shell_index}/qvector_array"
+                        ].attrs["custom_field"]
+                    ]
+                    for shell_index in range(nshells)
+                ]
+            ),
+            plot_axes={"|q|": qvals},
+            axes_units={"|q|": "1/nm"},
+        )
+    real_q_ideal_q = SingleDataset("Mean |q|", None, linestyle="-", marker=".")
+    real_q_ideal_q.init_manually(
+        np.array([np.mean(qvecs) for qvecs in modq_per_shell]),
         plot_axes={"|q|": qvals},
         axes_units={"|q|": "1/nm"},
+        data_unit="1/nm",
+        yerror=np.array([np.std(qvecs) for qvecs in modq_per_shell]),
     )
     vecs_per_qbin = SingleDataset("Shell population", None)
     vecs_per_qbin.init_manually(
@@ -94,7 +120,7 @@ def convert_vectors_to_datasets(
         plot_axes={"|q|": qvals, "q_bin": xvals},
         axes_units={"|q|": "1/nm", "q_bin": "1/nm"},
     )
-    return nvec_per_q, vecs_per_qbin
+    return nvec_per_q, real_q_ideal_q, vecs_per_qbin
 
 
 class PlotDataView(QTreeView):
