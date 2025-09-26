@@ -61,7 +61,7 @@ class MathRenderer:
         # Create a figure containing the rendered LaTex expression
         fig, ax = plt.subplots(figsize=(0.01, 0.01))
         ax.axis("off")
-        fig.text(0, 0, MathRenderer.mask(expression), fontsize=10)
+        fig.text(0, 0, MathRenderer.mask(expression), fontsize=6)
 
         # Save the image as bytes
         buffer = io.BytesIO()
