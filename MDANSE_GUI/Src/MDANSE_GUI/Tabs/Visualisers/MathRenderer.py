@@ -12,7 +12,7 @@ class MathRenderer:
     cache = {}
 
     # Ignore the following expression
-    ignores = {r"`\mathbf{q}`": "q"}
+    ignores = {r"\mathbf{q}": "q"}
 
     def __init__(self, text: str) -> None:
         self.raw_text = text
@@ -66,7 +66,7 @@ class MathRenderer:
         pattern = r"(:math:`.*?`)"
         substrings = re.split(pattern, text)
         scanned = []
-        for s in substrings:
+        for index, s in enumerate(substrings):
             if s.startswith(":math:"):
                 expr = s[len(":math:`"):-1]
                 scanned.append((expr, True))
@@ -115,7 +115,7 @@ class MathRenderer:
         # Create a figure containing the rendered LaTex expression
         fig, ax = plt.subplots(figsize=(0.01, 0.01))
         ax.axis("off")
-        fig.text(0, 0, MathRenderer.mask(expression), fontsize=6)
+        fig.text(0, 0, MathRenderer.mask(expression), fontsize=7)
 
         # Save the image as bytes
         buffer = io.BytesIO()

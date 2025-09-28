@@ -78,11 +78,15 @@ class MathInfo(TextInfo):
         for token, is_expression in scanned:
             if is_expression:
                 image = MathRenderer.from_cache(token)
-                html_substrings.append(
-                    f'<div style="text-align:center; margin:4px 0;">'
-                    f'<img src="data:image/png;base64, {image}"></div>'
-                )
+                if len(token) < 10:
+                    # This is a small expression, inline rendered expression
+                    html_substrings.append(f'<span style="vertical-align:middle;"><img src="data:image/png;base64,{image}" style="height:1em; display:inline;"></span>')
+                else:
+                    # This is a large expression, it gets its own line
+                    html_substrings.append(f'<div style="text-align:left; margin:2px 0; padding:0;"><img src="data:image/png;base64,{image}" style="vertical-align:middle;"></div>')
             else:
-                html_substrings.append(f"<p>{token}</p>")
+                # Format plain text
+                text = token.replace("\n", "<br>")
+                html_substrings.append(f'<span style="margin:0; padding:0;">{text}</span>')
 
         return "".join(html_substrings)
