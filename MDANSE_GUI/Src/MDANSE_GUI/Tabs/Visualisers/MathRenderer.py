@@ -100,6 +100,7 @@ class MathRenderer:
                     # We have reached the end of the section containing math expressions
                     rest = "".join(substrings[index:])
                     scanned.append((rest, False))
+                    break
                 else:
                     # Html substring contains plain text only
                     scanned.append((s, False))
