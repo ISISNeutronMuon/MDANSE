@@ -27,7 +27,7 @@ class MathRenderer:
 
     @staticmethod
     def containsMultiLineBlockExpression(text: str) -> bool:
-        return text == ".. math::" or text == r"<br />.. math::<br />"
+        return text in {".. math::", r"<br />.. math::<br />"}
 
     @staticmethod
     def containsBlockExpression(text: str) -> bool:
@@ -41,11 +41,13 @@ class MathRenderer:
 
     @staticmethod
     def processBlockExpression(text: str) -> list[tuple[str, bool]]:
-        return [(text[len(".. math:: "):], True)]
+        return [(text[len(".. math:: ") :], True)]
 
     @staticmethod
-    def processMultiLineBlockExpression(strings: list[str], n: int) -> tuple[list[tuple[str, bool]], int]:
-        substrings = strings[n+1:]
+    def processMultiLineBlockExpression(
+        strings: list[str], n: int
+    ) -> tuple[list[tuple[str, bool]], int]:
+        substrings = strings[n + 1 :]
         group = []
         for s in substrings:
             if (not s) or (s == r"<br /><br />"):
@@ -66,9 +68,9 @@ class MathRenderer:
         pattern = r"(:math:`.*?`)"
         substrings = re.split(pattern, text)
         scanned = []
-        for index, s in enumerate(substrings):
+        for s in substrings:
             if s.startswith(":math:"):
-                expr = s[len(":math:`"):-1]
+                expr = s[len(":math:`") : -1]
                 scanned.append((expr, True))
             else:
                 scanned.append((s, False))
