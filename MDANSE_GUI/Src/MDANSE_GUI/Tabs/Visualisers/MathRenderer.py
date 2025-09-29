@@ -113,15 +113,28 @@ class MathRenderer:
         return f"${text}$"
 
     @staticmethod
-    def render(expression: str) -> None:
+    def render(expression: str, dark: bool = False) -> None:
         # Create a figure containing the rendered LaTex expression
         fig, ax = plt.subplots(figsize=(0.01, 0.01))
         ax.axis("off")
-        fig.text(0, 0, MathRenderer.mask(expression), fontsize=7)
+        fig.text(
+            0,
+            0,
+            MathRenderer.mask(expression),
+            fontsize=7,
+            color="white" if dark else "black",
+        )
 
         # Save the image as bytes
         buffer = io.BytesIO()
-        plt.savefig(buffer, format="png", bbox_inches="tight", pad_inches=0.1, dpi=150)
+        plt.savefig(
+            buffer,
+            format="png",
+            bbox_inches="tight",
+            pad_inches=0.1,
+            dpi=150,
+            transparent=dark,
+        )
         plt.close(fig)
         buffer.seek(0)
         image = base64.b64encode(buffer.read()).decode("utf-8")

@@ -15,8 +15,8 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import Signal, Slot
-from qtpy.QtWidgets import QTextBrowser
+from qtpy.QtCore import Signal, Slot, Qt
+from qtpy.QtWidgets import QTextBrowser, QApplication
 
 from .MathRenderer import MathRenderer
 
@@ -66,7 +66,10 @@ class MathInfo(TextInfo):
         # Iterate over scanned text, rendering LaTex substrings if image not already cached
         for token, is_expression in scanned:
             if is_expression and not MathRenderer.cached(token):
-                renderer.render(token)
+                renderer.render(
+                    token,
+                    QApplication.styleHints().colorScheme() == Qt.ColorScheme.Dark,
+                )
 
         return scanned
 
