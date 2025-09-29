@@ -102,7 +102,7 @@ class XTDFile(Parser):
         self._bonds = []
 
         for node in root.iter("Bond"):
-            if "imageOf" in node.attrib:
+            if "ImageOf" in node.attrib:
                 continue
 
             idx1, idx2 = self._get_comma_prop(node, "Connects", int, atoms_mapping)
@@ -113,14 +113,14 @@ class XTDFile(Parser):
 
         self._clusters = [
             [
-                p
-                for p in self._get_comma_prop(
+                prop
+                for prop in self._get_comma_prop(
                     node, "Children", int, atoms_mapping, skip_missing=True
                 )
-                if p is not None
+                if prop is not None
             ]
             for node in root.iter("Molecule")
-            if "imageOf" not in node.attrib
+            if "ImageOf" not in node.attrib
         ]
 
     @staticmethod

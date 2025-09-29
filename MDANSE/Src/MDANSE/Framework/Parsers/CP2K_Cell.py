@@ -37,7 +37,7 @@ class CP2KCellFile(Parser):
     """
 
     def __init__(self, filename: Path | str):
-        self.filename = filename
+        self.filename = Path(filename).expanduser()
 
         with self.filename.open(encoding="utf8") as in_file:
             # Skip the first line
