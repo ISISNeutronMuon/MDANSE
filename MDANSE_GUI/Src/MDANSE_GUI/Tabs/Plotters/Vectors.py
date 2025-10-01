@@ -50,14 +50,14 @@ class Vectors(Plotter):
         """Return generic slider limit values."""
         return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
 
-    def clear(self, figure: Figure = None):
+    def clear(self, figure: Figure | None = None):
         """Clear the figure."""
         target = self._figure if figure is None else figure
         if target is None:
             return
         target.clear()
 
-    def get_figure(self, figure: Figure = None):
+    def get_figure(self, figure: Figure | None = None):
         """Return the figure instance used for plotting."""
         target = self._figure if figure is None else figure
         if target is None:
@@ -79,17 +79,17 @@ class Vectors(Plotter):
 
     def check_curve_lengths(self):
         """Find the maximum number of elements in the x axes of the plot data."""
-        self.curve_length_limit = 0
-        for num, _ in enumerate(self._active_curves):
-            xdata = self._backup_curves[num][0]
-            self.curve_length_limit = max(self.curve_length_limit, len(xdata))
+        self.curve_length_limit = max(
+            len(self._backup_curves[num][0])
+            for num, _ in enumerate(self._active_curves)
+        )
 
     def plot(
         self,
         plotting_context: PlottingContext,
-        figure: Figure = None,
-        update_only=False,
-        toolbar=None,
+        figure: Figure | None = None,
+        update_only: bool = False,
+        toolbar: type | None = None,
     ):
         """Plot all datasets in the same figure.
 
@@ -121,7 +121,7 @@ class Vectors(Plotter):
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
-        if len(plotting_context.datasets()) == 0:
+        if not plotting_context.datasets():
             target.clear()
             target.canvas.draw()
         single_plot_stack = [222, 221]
