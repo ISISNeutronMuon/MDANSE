@@ -15,28 +15,59 @@
 #
 from __future__ import annotations
 
-import glob
-import importlib
-import os
-
-current_path, _ = os.path.split(__file__)
-
-modnames = []
-fnames = glob.glob(current_path + "/*.py")
-for fname in fnames:
-    _, newname = os.path.split(fname)
-    newname = newname.split(".py")[0]
-    modnames.append(newname)
-globdict = globals()
-
-
-for name in modnames:
-    if name in ["__init__"]:
-        continue
-    try:
-        tempmod = importlib.import_module("." + name, "MDANSE_GUI.InputWidgets")
-    except ModuleNotFoundError:
-        continue
-    tempobject = getattr(tempmod, name)
-    globdict[name] = tempobject
-    del tempmod  # optionally delete the reference to the parent module
+from .AseInputFileWidget import AseInputFileWidget as AseInputFileWidget
+from .AtomMappingWidget import AtomMappingWidget as AtomMappingWidget
+from .AtomSelectionWidget import AtomSelectionWidget as AtomSelectionWidget
+from .AtomTransmutationWidget import AtomTransmutationWidget as AtomTransmutationWidget
+from .BackupWidget import BackupWidget as BackupWidget
+from .BooleanWidget import BooleanWidget as BooleanWidget
+from .CheckableComboBox import CheckableComboBox as CheckableComboBox
+from .ComboWidget import ComboWidget as ComboWidget
+from .CorrelationFramesWidget import CorrelationFramesWidget as CorrelationFramesWidget
+from .DerivativeOrderWidget import DerivativeOrderWidget as DerivativeOrderWidget
+from .DistHistCutoffWidget import DistHistCutoffWidget as DistHistCutoffWidget
+from .DummyWidget import DummyWidget as DummyWidget
+from .FloatWidget import FloatWidget as FloatWidget
+from .FramesWidget import FramesWidget as FramesWidget
+from .HDFTrajectoryWidget import HDFTrajectoryWidget as HDFTrajectoryWidget
+from .InputDirectoryWidget import InputDirectoryWidget as InputDirectoryWidget
+from .InputFileWidget import InputFileWidget as InputFileWidget
+from .InstrumentResolutionWidget import (
+    InstrumentResolutionWidget as InstrumentResolutionWidget,
+)
+from .IntegerWidget import IntegerWidget as IntegerWidget
+from .InterpolationOrderWidget import (
+    InterpolationOrderWidget as InterpolationOrderWidget,
+)
+from .MDAnalysisCoordinateFileWidget import (
+    MDAnalysisCoordinateFileWidget as MDAnalysisCoordinateFileWidget,
+)
+from .MDAnalysisMDTrajTimeStepWidget import (
+    MDAnalysisMDTrajTimeStepWidget as MDAnalysisMDTrajTimeStepWidget,
+)
+from .MDAnalysisTopologyFileWidget import (
+    MDAnalysisTopologyFileWidget as MDAnalysisTopologyFileWidget,
+)
+from .MDTrajTopologyFileWidget import (
+    MDTrajTopologyFileWidget as MDTrajTopologyFileWidget,
+)
+from .MoleculeAndAxisWidget import MoleculeAndAxisWidget as MoleculeAndAxisWidget
+from .MoleculePreviewWidget import MoleculePreviewWidget as MoleculePreviewWidget
+from .MoleculeWidget import MoleculeWidget as MoleculeWidget
+from .MultiInputFileWidget import MultiInputFileWidget as MultiInputFileWidget
+from .MultipleCombosWidget import MultipleCombosWidget as MultipleCombosWidget
+from .OptionalFloatWidget import OptionalFloatWidget as OptionalFloatWidget
+from .OutputDirectoryWidget import OutputDirectoryWidget as OutputDirectoryWidget
+from .OutputFilesWidget import OutputFilesWidget as OutputFilesWidget
+from .OutputStructureWidget import OutputStructureWidget as OutputStructureWidget
+from .OutputTrajectoryWidget import OutputTrajectoryWidget as OutputTrajectoryWidget
+from .PartialChargeWidget import PartialChargeWidget as PartialChargeWidget
+from .ProjectionWidget import ProjectionWidget as ProjectionWidget
+from .QVectorsWidget import QVectorsWidget as QVectorsWidget
+from .RangeWidget import RangeWidget as RangeWidget
+from .RunningModeWidget import RunningModeWidget as RunningModeWidget
+from .StringWidget import StringWidget as StringWidget
+from .TrajectoryFilterWidget import TrajectoryFilterWidget as TrajectoryFilterWidget
+from .UnitCellWidget import UnitCellWidget as UnitCellWidget
+from .VectorWidget import VectorWidget as VectorWidget
+from .WidgetBase import WidgetBase as WidgetBase

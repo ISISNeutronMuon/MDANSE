@@ -15,30 +15,8 @@
 #
 from __future__ import annotations
 
-import glob
-import importlib
-import os
-
-from MDANSE.MLogging import LOG
-
-current_path, _ = os.path.split(__file__)
-
-modnames = []
-fnames = glob.glob(current_path + "/*.py")
-for fname in fnames:
-    _, newname = os.path.split(fname)
-    newname = newname.split(".py")[0]
-    modnames.append(newname)
-globdict = globals()
-
-for name in modnames:
-    if name in ["__init__", "PlotterTemplate"]:
-        continue
-    try:
-        tempmod = importlib.import_module("." + name, "MDANSE_GUI.Tabs.Plotters")
-    except ModuleNotFoundError:
-        LOG.error(f"Could not find {name} in MDANSE_GUI.Tabs.Plotters")
-    else:
-        tempobject = getattr(tempmod, name)
-        globdict[name] = tempobject
-        del tempmod  # optionally delete the reference to the parent module
+from .Grid import Grid as Grid
+from .Heatmap import Heatmap as Heatmap
+from .Plotter import Plotter as Plotter
+from .Single import Single as Single
+from .Text import Text as Text
