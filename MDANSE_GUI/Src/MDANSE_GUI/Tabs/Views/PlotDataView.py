@@ -72,7 +72,7 @@ def convert_vectors_to_datasets(
     nshells = len(qvals)
     modq_per_shell = [shell_to_modq(n, parent_dset) for n in range(nshells)]
     qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
-    q_step = np.mean(np.abs(qvals[1:] - qvals[:-1]))
+    q_step = np.mean(np.abs(np.diff(qvals)))
     bin_step = max(
         0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell]), 0.05 * q_step
     )
