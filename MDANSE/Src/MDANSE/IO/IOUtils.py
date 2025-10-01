@@ -32,6 +32,7 @@ from MDANSE.MLogging import LOG
 class UCEnum(Enum):
     @classmethod
     def _missing_(cls, value):
+        value = "_".join(value.split())
         return vars(cls).get(value.upper())
 
 

@@ -18,6 +18,7 @@ from __future__ import annotations
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
 )
+from MDANSE.MolecularDynamics.Trajectory import GroupingLevels
 
 
 class GroupingLevelConfigurator(SingleChoiceConfigurator):
@@ -85,5 +86,5 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
             self.error_status = "The trajectory does not contain molecules."
             return
 
-        self["level"] = value
+        self["level"] = GroupingLevels(value)
         self.error_status = "OK"
