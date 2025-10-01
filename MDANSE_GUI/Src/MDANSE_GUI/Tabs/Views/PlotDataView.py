@@ -78,7 +78,7 @@ def convert_vectors_to_datasets(
     )
     common_bins = np.arange(max(0.0, qmin), qmax + 1.1 * bin_step, bin_step)
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
-    xvals = (common_bins[:-1] + common_bins[1:]) / 2
+    xvals = common_bins[1:] - np.diff(common_bins) / 2
     nvec_per_q = SingleDataset("Available vectors", None, linestyle=":", marker="o")
     if not all(
         "custom_field" in parent_dset[f"shell_{shell_index}/qvector_array"].attrs

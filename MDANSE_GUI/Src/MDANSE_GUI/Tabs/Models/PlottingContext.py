@@ -16,12 +16,12 @@
 from __future__ import annotations
 
 import copy
+import functools
 from collections.abc import Iterable
 from contextlib import suppress
-from itertools import islice, product
+from itertools import islice
 from math import prod
 from pathlib import Path
-from traceback import print_exception
 from typing import TYPE_CHECKING, NamedTuple
 
 import matplotlib.pyplot as mpl
@@ -88,6 +88,7 @@ class SingleDataset:
         source: h5py.File | None,
         linestyle: str = "-",
         marker: str | None = None,
+        **kwargs,
     ):
         self._name = name
         self._use_scaling = True
@@ -112,9 +113,14 @@ class SingleDataset:
         if not source:
             return
 
-        self.init_from_file(name, source)
+        self.configure(source, **kwargs)
 
-    def init_from_file(self, name: str, source: h5py.File) -> None:
+    @functools.singledispatchmethod
+    def configure(self, source: h5py.File | None, **kwargs) -> None:
+        """Create plotting information depending on the input."""
+
+    @configure.register(h5py.File)
+    def _(self, source: h5py.File, **kwargs) -> None:
         """Finish reading plotting axes from the input file.
 
         If you are setting data manually, use init_manually instead.
@@ -126,6 +132,7 @@ class SingleDataset:
         source : h5py.File
             File object containing the data. A .mda HDF5 file.
         """
+        name = kwargs.get("name", "plot data")
         self._filename = source.filename
         self.create_labels(self._filename)
         try:
@@ -157,15 +164,11 @@ class SingleDataset:
 
         self.create_axes_tags(self._axes_tag, source)
 
-    def init_manually(
+    @configure.register(None)
+    def _(
         self,
-        data: npt.NDArray[float],
-        data_unit: str = "none",
-        scaling_factor: float = 1.0,
-        plot_axes: dict[str, npt.NDArray[float]] | None = None,
-        axes_units: dict[str, str] | None = None,
-        yerror: npt.NDArray[float] | None = None,
-        xerror: npt.NDArray[float] | None = None,
+        source, **kwargs,
+
     ) -> None:
         """Set data for plotting without using a data file.
 
@@ -184,6 +187,14 @@ class SingleDataset:
         axes_units : dict[str, str] | None, optional
             Dictionary of axis_name: axis_unit pairs, by default None
         """
+        data: npt.NDArray[float],
+        data_unit: str = "none",
+        scaling_factor: float = 1.0,
+        plot_axes: dict[str, npt.NDArray[float]] | None = None,
+        axes_units: dict[str, str] | None = None,
+        yerror: npt.NDArray[float] | None = None,
+        xerror: npt.NDArray[float] | None = None,
+
         self._filename = "no file"
         self._labels = {
             "minimal": self._name,
