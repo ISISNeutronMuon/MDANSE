@@ -105,9 +105,7 @@ def _converter_test(
             ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
             {
                 "config_file": lammps_config,
-                "mass_tolerance": 0.05,
                 "n_steps": 0,
-                "smart_mass_association": True,
                 "time_step": 1.0,
                 "trajectory_file": lammps_lammps,
             },
@@ -118,9 +116,7 @@ def _converter_test(
             ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
             {
                 "config_file": lammps_cao_config,
-                "mass_tolerance": 0.05,
                 "n_steps": 0,
-                "smart_mass_association": True,
                 "time_step": 1.0,
                 "trajectory_file": lammps_cao_run,
             },
@@ -137,9 +133,7 @@ def _converter_test(
             ),
             {
                 "config_file": lammps_fake_config,
-                "mass_tolerance": 0.05,
                 "n_steps": 0,
-                "smart_mass_association": True,
                 "time_step": 1.0,
                 "trajectory_file": lammps_fake,
             },
@@ -461,9 +455,7 @@ def test_lammps_mdt_conversion_unit_system(generate_benchmarks, tmp_path, unit_s
         ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
         {
             "config_file": lammps_config,
-            "mass_tolerance": 0.05,
             "n_steps": 0,
-            "smart_mass_association": True,
             "time_step": 1.0,
             "trajectory_file": lammps_lammps,
             "lammps_units": unit_system,
@@ -487,9 +479,7 @@ def test_lammps_mdt_conversion_trajectory_format(
         ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
         {
             "config_file": lammps_moly,
-            "mass_tolerance": 0.05,
             "n_steps": 0,
-            "smart_mass_association": True,
             "time_step": 1.0,
             "trajectory_file": trajectory_file,
             "trajectory_format": trajectory_format,
@@ -529,10 +519,8 @@ def test_lammps_mdt_conversion_raise_exception_with_incorrect_format(tmp_path):
 
     parameters = {
         "config_file": lammps_config,
-        "mass_tolerance": 0.05,
         "n_steps": 0,
         "output_files": (temp_name, ["IncorrectFormat"], "INFO"),
-        "smart_mass_association": True,
         "time_step": 1.0,
         "trajectory_file": lammps_lammps,
     }
@@ -559,10 +547,8 @@ def test_lammps_ix_unwrap(tmp_path, files):
 
     parameters = {
         "config_file": DATA_DIR / "POSCAR.lmp",
-        "mass_tolerance": 0.05,
         "n_steps": 0,
         "output_files": (out_1, 64, 128, "none", "INFO"),
-        "smart_mass_association": True,
         "time_step": 1.0,
     }
 
@@ -822,9 +808,7 @@ def test_lammps_config_parser(config_file, expected):
             '{"mass=12.0107": {"3": "Os", "8": "Os", "11": "Os", "9": "Os", "2": "Os"}, "mass=14.0067": {"7": "Os", "1": "Os"}, "mass=15.9994": {"4": "Os", "10": "Os"}, "mass=1.0079": {"12": "Os", "6": "Os", "5": "Os", "13": "Os"}}',
             {
                 "config_file": lammps_config,
-                "mass_tolerance": 0.05,
                 "n_steps": 0,
-                "smart_mass_association": True,
                 "time_step": 1.0,
                 "trajectory_file": lammps_lammps,
             },
