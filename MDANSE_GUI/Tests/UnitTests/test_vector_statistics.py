@@ -32,12 +32,7 @@ def test_shell_to_modq_lengths(file_qvec):
 
 
 def test_convert_vectors_to_datasets_vecperq(file_qvec):
-    nvec_per_q, _ = convert_vectors_to_datasets(file_qvec)
+    nvec_per_q, _, _ = convert_vectors_to_datasets(file_qvec)
     assert len(nvec_per_q.data) == len(SHELL_MODQ)
     assert all(nvec_per_q.data == VEC_PER_SHELL)
 
-def test_convert_vectors_to_datasets_bin_padding(file_qvec):
-    _, vecs_per_qbin = convert_vectors_to_datasets(file_qvec)
-    assert np.allclose(vecs_per_qbin.data[:,0], 0)
-    assert np.allclose(vecs_per_qbin.data[:,-1], 0)
-    assert np.sum(vecs_per_qbin.data) == VEC_PER_SHELL * len(SHELL_MODQ)

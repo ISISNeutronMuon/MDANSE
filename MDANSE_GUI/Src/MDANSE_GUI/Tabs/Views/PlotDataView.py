@@ -72,26 +72,32 @@ def convert_vectors_to_datasets(
     nshells = len(qvals)
     modq_per_shell = [shell_to_modq(n, parent_dset) for n in range(nshells)]
     qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
-    q_step = np.mean(np.abs(np.diff(qvals)))
-    bin_step = max(
-        0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell]), 0.05 * q_step
-    )
+    q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 1.0
+    bin_step = 0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell])
+    bin_step = 0.2 * q_step if abs(bin_step) < 1e-09 else max(bin_step, 0.05 * q_step)
     common_bins = np.arange(max(0.0, qmin), qmax + 1.1 * bin_step, bin_step)
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
     xvals = common_bins[1:] - np.diff(common_bins) / 2
-    nvec_per_q = SingleDataset("Available vectors", None, linestyle=":", marker="o")
     if not all(
         "custom_field" in parent_dset[f"shell_{shell_index}/qvector_array"].attrs
         for shell_index in range(nshells)
     ):
-        nvec_per_q.init_manually(
-            np.array([len(qvecs) for qvecs in modq_per_shell]),
+        nvec_per_q = SingleDataset(
+            "Available vectors",
+            None,
+            linestyle=":",
+            marker="o",
+            data=np.array([len(qvecs) for qvecs in modq_per_shell]),
             plot_axes={"|q|": qvals},
             axes_units={"|q|": "1/nm"},
         )
     else:
-        nvec_per_q.init_manually(
-            np.array(
+        nvec_per_q = SingleDataset(
+            "Available vectors",
+            None,
+            linestyle=":",
+            marker="o",
+            data=np.array(
                 [
                     [
                         int(x)
@@ -105,17 +111,21 @@ def convert_vectors_to_datasets(
             plot_axes={"|q|": qvals},
             axes_units={"|q|": "1/nm"},
         )
-    real_q_ideal_q = SingleDataset("Mean |q|", None, linestyle="-", marker=".")
-    real_q_ideal_q.init_manually(
-        np.array([np.mean(qvecs) for qvecs in modq_per_shell]),
+    real_q_ideal_q = SingleDataset(
+        "Mean |q|",
+        None,
+        linestyle="-",
+        marker=".",
+        data=np.array([np.mean(qvecs) for qvecs in modq_per_shell]),
         plot_axes={"|q|": qvals},
         axes_units={"|q|": "1/nm"},
         data_unit="1/nm",
         yerror=np.array([np.std(qvecs) for qvecs in modq_per_shell]),
     )
-    vecs_per_qbin = SingleDataset("Shell population", None)
-    vecs_per_qbin.init_manually(
-        np.vstack(qmod_histograms),
+    vecs_per_qbin = SingleDataset(
+        "Shell population",
+        None,
+        data=np.vstack(qmod_histograms),
         data_unit="counts",
         plot_axes={"|q|": qvals, "q_bin": xvals},
         axes_units={"|q|": "1/nm", "q_bin": "1/nm"},

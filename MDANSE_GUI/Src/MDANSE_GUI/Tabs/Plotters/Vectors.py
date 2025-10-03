@@ -37,8 +37,6 @@ class Vectors(Plotter):
         """Initialise all ploting parameters to default values."""
         super().__init__()
         self._figure = None
-        self._active_curves = []
-        self._backup_curves = []
         self._backup_limits = []
         self._curve_limit_per_dataset = 12
 
@@ -77,13 +75,6 @@ class Vectors(Plotter):
         """
         super().change_normalisation(new_value)
 
-    def check_curve_lengths(self):
-        """Find the maximum number of elements in the x axes of the plot data."""
-        self.curve_length_limit = max(
-            len(self._backup_curves[num][0])
-            for num, _ in enumerate(self._active_curves)
-        )
-
     def plot(
         self,
         plotting_context: PlottingContext,
@@ -112,8 +103,6 @@ class Vectors(Plotter):
         if toolbar is not None:
             self._toolbar = toolbar
         self._figure = target
-        self._active_curves = []
-        self._backup_curves = []
         self._normalisation_errors = []
         self._axes = []
         self.apply_settings(plotting_context)
@@ -219,23 +208,23 @@ class Vectors(Plotter):
                         LOG.error(f"x_axis={dataset._axes[best_axis]}")
                         LOG.error(f"values={value}")
                         return
-        if update_only:
-            try:
-                axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
-            except ValueError:
-                LOG.error(
-                    f"Matplotlib could not set x limits to {self._backup_limits[0]}, {self._backup_limits[1]}"
-                )
-            try:
-                axes.set_ylim((self._backup_limits[2], self._backup_limits[3]))
-            except ValueError:
-                LOG.error(
-                    f"Matplotlib could not set y limits to {self._backup_limits[2]}, {self._backup_limits[3]}"
-                )
-        else:
-            xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
-            self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
-        self.check_curve_lengths()
+        for axes in self._axes:
+            if update_only:
+                try:
+                    axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
+                except ValueError:
+                    LOG.error(
+                        f"Matplotlib could not set x limits to {self._backup_limits[0]}, {self._backup_limits[1]}"
+                    )
+                try:
+                    axes.set_ylim((self._backup_limits[2], self._backup_limits[3]))
+                except ValueError:
+                    LOG.error(
+                        f"Matplotlib could not set y limits to {self._backup_limits[2]}, {self._backup_limits[3]}"
+                    )
+            else:
+                xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
+                self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
         for axes in self._axes:
             if plotting_context.use_legend:
                 axes.legend()

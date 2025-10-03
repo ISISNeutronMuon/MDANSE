@@ -24,6 +24,7 @@ from math import prod
 from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple
 
+import h5py
 import matplotlib.pyplot as mpl
 import numpy as np
 import numpy.typing as npt
@@ -110,17 +111,14 @@ class SingleDataset:
         self._xerror = None
         self._yerror = None
 
-        if not source:
-            return
-
         self.configure(source, **kwargs)
 
     @functools.singledispatchmethod
     def configure(self, source: h5py.File | None, **kwargs) -> None:
         """Create plotting information depending on the input."""
 
-    @configure.register(h5py.File)
-    def _(self, source: h5py.File, **kwargs) -> None:
+    @configure.register
+    def _(self, source: h5py.File) -> None:
         """Finish reading plotting axes from the input file.
 
         If you are setting data manually, use init_manually instead.
@@ -132,18 +130,17 @@ class SingleDataset:
         source : h5py.File
             File object containing the data. A .mda HDF5 file.
         """
-        name = kwargs.get("name", "plot data")
         self._filename = source.filename
         self.create_labels(self._filename)
         try:
-            self._data = source[name][:]
+            self._data = source[self._name][:]
         except KeyError:
-            LOG.debug(f"{name} is not a data set in the file")
+            LOG.debug(f"{self._name} is not a data set in the file")
             self._valid = False
             return
         except TypeError:
             self._valid = False
-            LOG.debug(f"{name} is not plottable")
+            LOG.debug(f"{self._name} is not plottable")
             return
 
         temp_array = np.imag(self._data)
@@ -154,21 +151,29 @@ class SingleDataset:
 
         with suppress(KeyError):
             try:
-                self._scaling_factor = float(source[name].attrs["scaling_factor"])
+                self._scaling_factor = float(source[self._name].attrs["scaling_factor"])
             except TypeError:
-                self._scaling_factor = np.array(source[name].attrs["scaling_factor"])
+                self._scaling_factor = np.array(
+                    source[self._name].attrs["scaling_factor"]
+                )
 
-        self._data_unit = source[name].attrs["units"]
+        self._data_unit = source[self._name].attrs["units"]
         self._n_dim = len(self._data.shape)
-        self._axes_tag = source[name].attrs["axis"]
+        self._axes_tag = source[self._name].attrs["axis"]
 
         self.create_axes_tags(self._axes_tag, source)
 
-    @configure.register(None)
+    @configure.register
     def _(
         self,
-        source, **kwargs,
-
+        _source: None,
+        data: npt.NDArray[float],
+        data_unit: str = "none",
+        scaling_factor: float = 1.0,
+        plot_axes: dict[str, npt.NDArray[float]] | None = None,
+        axes_units: dict[str, str] | None = None,
+        yerror: npt.NDArray[float] | None = None,
+        xerror: npt.NDArray[float] | None = None,
     ) -> None:
         """Set data for plotting without using a data file.
 
@@ -187,13 +192,6 @@ class SingleDataset:
         axes_units : dict[str, str] | None, optional
             Dictionary of axis_name: axis_unit pairs, by default None
         """
-        data: npt.NDArray[float],
-        data_unit: str = "none",
-        scaling_factor: float = 1.0,
-        plot_axes: dict[str, npt.NDArray[float]] | None = None,
-        axes_units: dict[str, str] | None = None,
-        yerror: npt.NDArray[float] | None = None,
-        xerror: npt.NDArray[float] | None = None,
 
         self._filename = "no file"
         self._labels = {
