@@ -22,6 +22,7 @@ from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QMouseEvent
 from qtpy.QtWidgets import QAbstractItemView, QMenu, QTreeView
 
+from MDANSE.Framework.Configurators.QVectorsConfigurator import QVectorsConfigurator
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem, MDADataStructure
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
@@ -51,7 +52,7 @@ def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[float]:
 
 
 def convert_vectors_to_datasets(
-    file: h5py.File, main_dstet: str = "vector_generator"
+    source: h5py.File | QVectorsConfigurator, main_dstet: str = "vector_generator"
 ) -> tuple[SingleDataset, SingleDataset]:
     """Create plottable SingleDataset instances showing |q| of generated vectors.
 
@@ -64,40 +65,21 @@ def convert_vectors_to_datasets(
 
     Returns
     -------
-    tuple[SingleDataset, SingleDataset]
+    Iterable[SingleDataset]
         1D array of vector count vs. |q|, 2D histogram of q vector counts per shell.
     """
-    parent_dset = file[main_dstet]
-    qvals = parent_dset["q"][:]
-    nshells = len(qvals)
-    modq_per_shell = [shell_to_modq(n, parent_dset) for n in range(nshells)]
-    qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
-    q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 1.0
-    bin_step = 0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell])
-    bin_step = 0.2 * q_step if abs(bin_step) < 1e-09 else max(bin_step, 0.05 * q_step)
-    common_bins = np.arange(max(0.0, qmin), qmax + 1.1 * bin_step, bin_step)
-    qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
-    xvals = common_bins[1:] - np.diff(common_bins) / 2
-    if not all(
-        "custom_field" in parent_dset[f"shell_{shell_index}/qvector_array"].attrs
-        for shell_index in range(nshells)
-    ):
-        nvec_per_q = SingleDataset(
-            "Available vectors",
-            None,
-            linestyle=":",
-            marker="o",
-            data=np.array([len(qvecs) for qvecs in modq_per_shell]),
-            plot_axes={"|q|": qvals},
-            axes_units={"|q|": "1/nm"},
-        )
-    else:
-        nvec_per_q = SingleDataset(
-            "Available vectors",
-            None,
-            linestyle=":",
-            marker="o",
-            data=np.array(
+    if isinstance(source, h5py.File):
+        parent_dset = source[main_dstet]
+        qvals = parent_dset["q"][:]
+        nshells = len(qvals)
+        modq_per_shell = [shell_to_modq(n, parent_dset) for n in range(nshells)]
+        if not all(
+            "custom_field" in parent_dset[f"shell_{shell_index}/qvector_array"].attrs
+            for shell_index in range(nshells)
+        ):
+            available_vectors = np.array([len(qvecs) for qvecs in modq_per_shell])
+        else:
+            available_vectors = np.array(
                 [
                     [
                         int(x)
@@ -107,25 +89,51 @@ def convert_vectors_to_datasets(
                     ]
                     for shell_index in range(nshells)
                 ]
-            ),
-            plot_axes={"|q|": qvals},
-            axes_units={"|q|": "1/nm"},
+            )
+    elif isinstance(source, QVectorsConfigurator):
+        qvals = np.array(source["shells"])
+        nshells = len(qvals)
+        modq_per_shell = [
+            np.linalg.norm(source["q_vectors"][qvals[n]]["q_vectors"], axis=0)
+            for n in range(nshells)
+        ]
+        available_vectors = np.array(
+            [source["q_vectors"][qvals[n]]["n_q_vectors"] for n in range(nshells)]
         )
+    mean_q = np.array([np.mean(qvecs) for qvecs in modq_per_shell])
+    mean_q_yerr = np.array([np.std(qvecs) for qvecs in modq_per_shell])
+    qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
+    q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 1.0
+    bin_step = 0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell])
+    bin_step = 0.2 * q_step if abs(bin_step) < 1e-09 else max(bin_step, 0.05 * q_step)
+    common_bins = np.arange(max(0.0, qmin), qmax + 1.1 * bin_step, bin_step)
+    qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
+    stacked_histograms = np.vstack(qmod_histograms)
+    xvals = common_bins[1:] - np.diff(common_bins) / 2
+    nvec_per_q = SingleDataset(
+        "Available vectors",
+        None,
+        linestyle=":",
+        marker="o",
+        data=available_vectors,
+        plot_axes={"|q|": qvals},
+        axes_units={"|q|": "1/nm"},
+    )
     real_q_ideal_q = SingleDataset(
         "Mean |q|",
         None,
         linestyle="-",
         marker=".",
-        data=np.array([np.mean(qvecs) for qvecs in modq_per_shell]),
+        data=mean_q,
         plot_axes={"|q|": qvals},
         axes_units={"|q|": "1/nm"},
         data_unit="1/nm",
-        yerror=np.array([np.std(qvecs) for qvecs in modq_per_shell]),
+        yerror=mean_q_yerr,
     )
     vecs_per_qbin = SingleDataset(
         "Shell population",
         None,
-        data=np.vstack(qmod_histograms),
+        data=stacked_histograms,
         data_unit="counts",
         plot_axes={"|q|": qvals, "q_bin": xvals},
         axes_units={"|q|": "1/nm", "q_bin": "1/nm"},

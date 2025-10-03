@@ -206,6 +206,7 @@ class PlotWidget(QWidget):
 
     def __init__(self, *args, **kwargs) -> None:
         """Create an empty plot with the default plotter."""
+        plotter_type = kwargs.pop("plotter_type", "Single")
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None
@@ -214,7 +215,9 @@ class PlotWidget(QWidget):
         self._slider_max = 100
         self.unique_id = -1
         self.make_canvas()
-        self.set_plotter("Single")
+        self.set_plotter(plotter_type)
+        if plotter_type != "Single":
+            self.plot_selector.setCurrentText(plotter_type)
 
     def set_context(self, new_context: PlottingContext):
         """Assign a data model to the plot widget."""

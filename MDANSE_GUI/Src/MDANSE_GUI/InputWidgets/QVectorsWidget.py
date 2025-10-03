@@ -15,12 +15,22 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import QBrush, QStandardItem, QStandardItemModel
-from qtpy.QtWidgets import QComboBox, QSizePolicy, QTableView
+from qtpy.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QPushButton,
+    QSizePolicy,
+    QTableView,
+    QVBoxLayout,
+)
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
+from MDANSE_GUI.Tabs.Views.PlotDataView import convert_vectors_to_datasets
+from MDANSE_GUI.Tabs.Visualisers.PlotWidget import PlotWidget
 
 
 class VectorModel(QStandardItemModel):
@@ -100,6 +110,45 @@ class VectorModel(QStandardItemModel):
         return "failed"
 
 
+class VectorViewer(QDialog):
+    """A pop-up dialog for plotting vector distribution previews.
+
+    Attributes
+    ----------
+    _helper_title : str
+        The title of the helper dialog window.
+
+    """
+
+    _helper_title = "Q Vector Viewer"
+
+    def __init__(
+        self,
+        parent: QObject,
+        *args,
+        **kwargs,
+    ):
+        """Create the selection dialog.
+
+        Parameters
+        ----------
+        parent : QObject
+            parent object in the Qt object hierarchy
+        *args : Any, ...
+            catches all the arguments that may be passed to the QDialog constructor
+        **kwargs : dict[str, Any]
+            catches all the keyword arguments passed to the QDialog constructor
+
+        """
+        super().__init__(parent, *args, **kwargs)
+        self.setWindowTitle(self._helper_title)
+        self.setWindowFlags(Qt.Window)
+        layout = QVBoxLayout()
+        self.plot_widget = PlotWidget(self, plotter_type="Vectors")
+        layout.addWidget(self.plot_widget)
+        self.setLayout(layout)
+
+
 class QVectorsWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         kwargs["layout_type"] = "QVBoxLayout"
@@ -109,12 +158,16 @@ class QVectorsWidget(WidgetBase):
         trajectory = None
         if trajectory_configurator is not None:
             trajectory = trajectory_configurator["instance"]
+        self.helper = None
         self._selector = QComboBox(self._base)
         self._selector.addItems(IQVectors.indirect_subclasses())
         self._model = VectorModel(self._base, trajectory=trajectory)
         self._view = QTableView(self._base)
+        self._preview_button = QPushButton("Preview vectors")
+        self._preview_button.clicked.connect(self.helper_dialog)
         self._layout.addWidget(self._selector)
         self._layout.addWidget(self._view)
+        self._layout.addWidget(self._preview_button)
         self._view.setModel(self._model)
         self._selector.currentTextChanged.connect(self._model.switch_qvector_type)
         self._selector.setCurrentIndex(1)
@@ -134,6 +187,7 @@ class QVectorsWidget(WidgetBase):
         policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
         self._view.setSizePolicy(policy)
         self._view.horizontalHeader().hide()
+        self.value_changed.connect(self.preview_vectors)
 
     def type_change_update(self):
         # need to disconnect itemChanged otherwise updateValue will
@@ -142,6 +196,7 @@ class QVectorsWidget(WidgetBase):
         self._model.itemChanged.disconnect()
         self.updateValue()
         self._model.itemChanged.connect(self.updateValue)
+        self.preview_vectors()
 
     @Slot(bool)
     def validate_model_parameters(self, all_are_correct: bool):
@@ -158,3 +213,52 @@ class QVectorsWidget(WidgetBase):
 
     def configure_using_default(self):
         """This is too complex to have a default value"""
+
+    def create_helper(
+        self,
+    ) -> VectorViewer:
+        """Create the selection dialog.
+
+        It will be populated with selection widget which can be used
+        to create the complete atom selection string.
+
+        Parameters
+        ----------
+        traj_data : tuple[str, Trajectory]
+            A tuple of the trajectory data used to load the 3D viewer.
+
+        Returns
+        -------
+        SelectionHelper
+            Create and return the selection helper QDialog.
+
+        """
+        return VectorViewer(self._base)
+
+    @Slot()
+    def helper_dialog(self) -> None:
+        """Open the helper dialog."""
+        if self.helper is None:
+            self.helper = self.create_helper()
+        if self.helper.isVisible():
+            geometry = self.helper.saveGeometry()
+            self.helper.previous_geometry = geometry
+            self.helper.close()
+        else:
+            if hasattr(self.helper, "previous_geometry"):
+                self.helper.restoreGeometry(self.helper.previous_geometry)
+            self.helper.show()
+            self.preview_vectors()
+
+    @Slot()
+    def preview_vectors(self):
+        if self.helper is None:
+            self.helper = self.create_helper()
+        if not self.helper.isVisible():
+            return
+        model = PlottingContext()
+        for qvec_dataset in convert_vectors_to_datasets(self._configurator):
+            model.add_dataset(qvec_dataset)
+        self.helper.plot_widget.set_plotter("Vectors")
+        self.helper.plot_widget.set_context(model)
+        self.helper.plot_widget.plot_data()
