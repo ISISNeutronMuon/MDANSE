@@ -21,7 +21,7 @@ from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget
 
 from MDANSE.Framework.Converters.Converter import Converter
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
@@ -72,35 +72,11 @@ class ConverterTab(GeneralTab):
         }
 
     @classmethod
-    def standard_instance(cls):
-        action = Action()
-        the_tab = cls(
-            window,
-            name="AvailableJobs",
-            model=JobTree(parent_class=Converter),
-            view=ActionsTree(),
-            visualiser=action,
-            layout=partial(
-                MultiPanel,
-                left_panels=[
-                    TextInfo(
-                        header="MDANSE Converter",
-                        footer="Look up our Read The Docs page:"
-                        + "https://mdanse.readthedocs.io/en/protos/",
-                    )
-                ],
-            ),
-            label_text=tab_label,
-            action=action,
-        )
-        return the_tab
-
-    @classmethod
     def gui_instance(
         cls,
         parent: QWidget,
         name: str,
-        session: LocalSession,
+        session: Session,
         settings,
         logger,
         **kwargs,
@@ -132,37 +108,3 @@ class ConverterTab(GeneralTab):
         action.set_settings(the_tab._settings)
         the_tab._view.expandAll()
         return the_tab
-
-
-if __name__ == "__main__":
-    import sys
-
-    from qtpy.QtWidgets import QApplication, QMainWindow
-
-    app = QApplication(sys.argv)
-    window = QMainWindow()
-    action = Action()
-    the_tab = ConverterTab(
-        window,
-        name="AvailableJobs",
-        model=JobTree(parent_class=Converter),
-        view=ActionsTree(),
-        visualiser=action,
-        layout=partial(
-            MultiPanel,
-            left_panels=[
-                TextInfo(
-                    header="MDANSE Converters",
-                    footer="Look up our "
-                    + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                    + " page.",
-                )
-            ],
-        ),
-        label_text=tab_label,
-        action=action,
-    )
-    the_tab._current_trajectory = "/Users/maciej.bartkowiak/an_example/BLAH.mdt"
-    window.setCentralWidget(the_tab._core)
-    window.show()
-    app.exec()

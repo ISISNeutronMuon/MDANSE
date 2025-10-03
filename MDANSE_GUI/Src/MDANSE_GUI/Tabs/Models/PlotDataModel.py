@@ -25,7 +25,7 @@ from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Session.LocalSession import json_decoder
+from MDANSE_GUI.Session.Session import json_decoder
 
 Self = TypeVar("Self", bound="BasicPlotDataItem")
 EXCLUDE = {"metadata"}

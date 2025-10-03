@@ -24,7 +24,7 @@ from qtpy.QtWidgets import QFileDialog, QWidget
 
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewerExtended
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
@@ -77,35 +77,11 @@ class TrajectoryTab(GeneralTab):
             self._session.protect_filename(fname)
 
     @classmethod
-    def standard_instance(cls):
-        the_tab = cls(
-            window,
-            name="Trajectories",
-            session=LocalSession(),
-            model=GeneralModel(),
-            view=TrajectoryView(),
-            visualiser=View3D(MolecularViewerExtended()),
-            layout=partial(
-                MultiPanel,
-                left_panels=[
-                    TrajectoryInfo(
-                        header="MDANSE Trajectory",
-                        footer="Look up our "
-                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                        + " page.",
-                    )
-                ],
-            ),
-            label_text=label_text,
-        )
-        return the_tab
-
-    @classmethod
     def gui_instance(
         cls,
         parent: QWidget,
         name: str,
-        session: LocalSession,
+        session: Session,
         settings,
         logger,
         **kwargs,
@@ -134,16 +110,3 @@ class TrajectoryTab(GeneralTab):
         )
         the_tab._model.free_name.connect(session.free_filename)
         return the_tab
-
-
-if __name__ == "__main__":
-    import sys
-
-    from qtpy.QtWidgets import QApplication, QMainWindow
-
-    app = QApplication(sys.argv)
-    window = QMainWindow()
-    the_tab = TrajectoryTab.standard_instance()
-    window.setCentralWidget(the_tab._core)
-    window.show()
-    app.exec()

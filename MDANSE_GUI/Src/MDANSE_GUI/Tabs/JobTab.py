@@ -24,7 +24,7 @@ from qtpy.QtWidgets import QComboBox, QLabel, QWidget
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.MoleculeWidget import MoleculeWidget
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
@@ -171,36 +171,11 @@ class JobTab(GeneralTab):
             self._needs_updating = False
 
     @classmethod
-    def standard_instance(cls):
-        action = Action()
-        the_tab = cls(
-            window,
-            name="AvailableJobs",
-            model=JobTree(),
-            view=ActionsTree(),
-            visualiser=Action(),
-            layout=partial(
-                MultiPanel,
-                left_panels=[
-                    TextInfo(
-                        header="MDANSE Analysis",
-                        footer="Look up our Read The Docs page:"
-                        + "https://mdanse.readthedocs.io/en/protos/",
-                    )
-                ],
-            ),
-            label_text=job_tab_label,
-            action=action,
-        )
-        action._parent_tab = the_tab
-        return the_tab
-
-    @classmethod
     def gui_instance(
         cls,
         parent: QWidget,
         name: str,
-        session: LocalSession,
+        session: Session,
         settings,
         logger,
         **kwargs,
@@ -234,37 +209,3 @@ class JobTab(GeneralTab):
         action.set_settings(the_tab._settings)
         the_tab._view.expand(the_tab._model.index(0, 0))
         return the_tab
-
-
-if __name__ == "__main__":
-    import sys
-
-    from qtpy.QtWidgets import QApplication, QMainWindow
-
-    app = QApplication(sys.argv)
-    window = QMainWindow()
-    action = Action()
-    the_tab = JobTab(
-        window,
-        name="AvailableJobs",
-        model=JobTree(),
-        view=ActionsTree(),
-        visualiser=action,
-        layout=partial(
-            MultiPanel,
-            left_panels=[
-                TextInfo(
-                    header="MDANSE Analysis",
-                    footer="Look up our "
-                    + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                    + " page.",
-                )
-            ],
-        ),
-        label_text=job_tab_label,
-        action=action,
-    )
-    the_tab.update_trajectory_list(["/Users/maciej.bartkowiak/an_example/BLAH.mdt"])
-    window.setCentralWidget(the_tab._core)
-    window.show()
-    app.exec()

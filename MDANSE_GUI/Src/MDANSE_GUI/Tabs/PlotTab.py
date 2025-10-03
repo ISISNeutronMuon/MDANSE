@@ -21,7 +21,7 @@ from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QDialog, QWidget
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
@@ -76,28 +76,11 @@ class PlotTab(GeneralTab):
         self.launch_dialog(self.matplotlib_dialog)
 
     @classmethod
-    def standard_instance(cls):
-        plt_settings = PlotSettings()
-        the_tab = cls(
-            window,
-            name="Plotting",
-            session=LocalSession(),
-            model=PlottingContext(),
-            view=PlotDetailsView(),
-            visualiser=PlotHolder(),
-            layout=partial(
-                MultiPanel, left_panels=[plt_settings], extra_visualiser=plt_settings
-            ),
-            label_text=label_text,
-        )
-        return the_tab
-
-    @classmethod
     def gui_instance(
         cls,
         parent: QWidget,
         name: str,
-        session: LocalSession,
+        session: Session,
         settings,
         logger,
         **kwargs,
@@ -143,16 +126,3 @@ class PlotTab(GeneralTab):
     @Slot(int)
     def switch_model(self, tab_id):
         self._view.setModel(self.model)
-
-
-if __name__ == "__main__":
-    import sys
-
-    from qtpy.QtWidgets import QApplication, QMainWindow
-
-    app = QApplication(sys.argv)
-    window = QMainWindow()
-    the_tab = PlotTab.standard_instance()
-    window.setCentralWidget(the_tab._core)
-    window.show()
-    app.exec()

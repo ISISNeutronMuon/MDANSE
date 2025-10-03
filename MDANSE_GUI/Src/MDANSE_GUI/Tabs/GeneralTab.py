@@ -24,7 +24,7 @@ from qtpy.QtWidgets import QListView
 
 from MDANSE.Framework.Units import measure, unit_lookup
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Session.Session import LocalSession, Session
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
@@ -54,7 +54,7 @@ class GeneralTab(QObject):
         self,
         *args,
         name: str = "Unnamed GUI part",
-        session: LocalSession | None = None,
+        session: Session | None = None,
         settings: None = None,
         model: QObject | None = None,
         visualiser=None,
@@ -159,7 +159,7 @@ class GeneralTab(QObject):
         Tuple[float, str]
             factor F and text label str
             Conversion factor F for converting from the input unit
-            to the unit saved by the LocalSession instance.
+            to the unit saved by the Session instance.
             The conversion will be done outside of this
             function, following the formula:
             converted_value = F * input_value

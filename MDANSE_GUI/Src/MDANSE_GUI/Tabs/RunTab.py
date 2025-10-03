@@ -19,7 +19,7 @@ from functools import partial
 
 from qtpy.QtWidgets import QWidget
 
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
@@ -47,31 +47,11 @@ class RunTab(GeneralTab):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def standard_instance(cls):
-        the_tab = cls(
-            window,
-            name="RunMonitor",
-            model=JobHolder(),
-            view=RunTable(),
-            visualiser=TextInfo(
-                header="MDANSE Jobs",
-                footer="Look up our Read The Docs page:"
-                + "https://mdanse.readthedocs.io/en/protos/",
-            ),
-            layout=partial(
-                MultiPanel,
-                right_panels=[JobLogInfo(header="MDANSE Logs")],
-            ),
-            label_text=run_tab_label,
-        )
-        return the_tab
-
-    @classmethod
     def gui_instance(
         cls,
         parent: QWidget,
         name: str,
-        session: LocalSession,
+        session: Session,
         settings,
         logger,
         **kwargs,
@@ -102,24 +82,3 @@ class RunTab(GeneralTab):
         the_tab._model.unprotect_filename.connect(session.free_filename)
         the_tab._model.new_job_started.connect(the_tab.tab_notification)
         return the_tab
-
-
-if __name__ == "__main__":
-    import sys
-
-    from qtpy.QtWidgets import QApplication, QMainWindow, QVBoxLayout
-
-    app = QApplication(sys.argv)
-    window = QMainWindow()
-    the_tab = RunTab(
-        window,
-        name="RunningJobs",
-        model=JobHolder(),
-        view=RunTable(),
-        visualiser=TextInfo(),
-        layout=partial(MultiPanel, right_panels=[JobLogInfo()]),
-        label_text=run_tab_label,
-    )
-    window.setCentralWidget(the_tab._core)
-    window.show()
-    app.exec()
