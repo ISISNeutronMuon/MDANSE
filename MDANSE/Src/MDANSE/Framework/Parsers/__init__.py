@@ -15,5 +15,20 @@
 #
 from __future__ import annotations
 
+from .ASE import ASEParser as ASEParser
+from .CASTEP_MD import CASTEPMDFile as CASTEPMDFile
 from .CP2K_Cell import CP2KCellFile as CP2KCellFile
+from .DCDFile import DCDFile as DCDFile
+from .DLPoly import FieldFile as DLPField
+from .DLPoly import HistoryFile as DLPHistory
+from .FortranUnformat import binary_file_reader as binary_file_reader
+from .LAMMPS import LAMMPScustom as LAMMPScustom
+from .LAMMPS import LAMMPSh5md as LAMMPSh5md
+from .LAMMPS import LAMMPSReader as LAMMPSReader
+from .LAMMPS import LAMMPSxyz as LAMMPSxyz
+from .LAMMPSConfig import LAMMPSConfigFile as LAMMPSConfigFile
+from .pdb import PDBFile as PDBFile
+from .trj import TrjFile as TrjFile
+from .XDatCar import XDATCARFile as XDATCARFile
+from .xtd import XTDFile as XTDFile
 from .xyz import XYZFile as XYZFile

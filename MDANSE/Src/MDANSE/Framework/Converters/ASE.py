@@ -29,6 +29,7 @@ from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Parsers import ASEParser
 from MDANSE.Framework.Units import INTERNAL_UNITS, UnitError, measure
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
@@ -59,10 +60,11 @@ class ASE(Converter):
 
     settings = collections.OrderedDict()
     settings["trajectory_file"] = (
-        "ASEFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "label": "An MD trajectory file supported by ASE",
             "default": "INPUT_FILENAME",
+            "parser": ASEParser,
         },
     )
     settings["atom_aliases"] = (
@@ -116,6 +118,7 @@ class ASE(Converter):
         """
         super().initialize()
 
+        self.trajectory_file = self.configuration["trajectory_file"].instance
         self._isPeriodic = None
         self._backup_cell = None
         self._keep_running = True
@@ -133,7 +136,7 @@ class ASE(Converter):
         LOG.info(f"isPeriodic after parse_first_step: {self._isPeriodic}")
         self._start = 0
 
-        if self.numberOfSteps < 1:
+        if not self.numberOfSteps:
             self.numberOfSteps = self._total_number_of_steps
 
         # A trajectory is opened for writing.
@@ -149,13 +152,17 @@ class ASE(Converter):
 
         LOG.info(f"total steps: {self.numberOfSteps}")
 
-    def run_step(self, index):
+    def run_step(self, index: int) -> tuple[int, None]:
         """Runs a single step of the job.
 
-        @param index: the index of the step.
-        @type index: int.
+        Parameters
+        ----------
+        index : int
+            Index of the loop.
 
-        @note: the argument index is the index of the loop note the index of the frame.
+        Returns
+        -------
+        tuple[int, None]
         """
         if not self._keep_running:
             LOG.warning(f"Skipping frame {index}")
@@ -169,9 +176,10 @@ class ASE(Converter):
             frame = next(self._input)
         else:
             LOG.info("ASE using the slower way")
-            frame = read(self.configuration["trajectory_file"]["value"], index=index)
+            frame = self.trajectory_file[index]
 
         assert isinstance(frame, Atoms)
+
         time = self._timeaxis[index]
 
         if self._isPeriodic:
@@ -201,30 +209,24 @@ class ASE(Converter):
                 else (momenta / masses) * self.units["velocities"]
             )
 
-        if self._isPeriodic:
-            try:
+        try:
+            if self._isPeriodic:
                 real_conf = PeriodicRealConfiguration(
                     self._trajectory.chemical_system, coords, unitCell, **variables
                 )
-            except ValueError:
-                self._keep_running = False
-                LOG.warning(
-                    f"Could not create configuration for frame {index}. Will skip the rest"
-                )
-                return index, None
-            if self._configuration["fold"]["value"]:
-                real_conf.fold_coordinates()
-        else:
-            try:
+                if self._configuration["fold"]["value"]:
+                    real_conf.fold_coordinates()
+            else:
                 real_conf = RealConfiguration(
                     self._trajectory.chemical_system, coords, **variables
                 )
-            except ValueError:
-                self._keep_running = False
-                LOG.warning(
-                    f"Could not create configuration for frame {index}. Will skip the rest"
-                )
-                return index, None
+
+        except ValueError:
+            self._keep_running = False
+            LOG.warning(
+                f"Could not create configuration for frame {index}. Will skip the rest"
+            )
+            return index, None
 
         # A snapshot is created out of the current configuration.
         self._trajectory.dump_configuration(
@@ -233,32 +235,32 @@ class ASE(Converter):
             units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"},
         )
 
-        try:
+        charges = None
+        if "charges" in frame.arrays:
             charges = frame.arrays["charges"]
-        except KeyError:
-            try:
-                charges = frame.get_initial_charges()
-            except Exception:
-                pass
-            else:
-                self._trajectory.write_charges(charges, index)
         else:
+            with suppress(Exception):
+                charges = frame.get_initial_charges()
+
+        if charges is not None:
             self._trajectory.write_charges(charges, index)
 
         return index, None
 
-    def combine(self, index, x):
-        """
-        @param index: the index of the step.
-        @type index: int.
+    def combine(self, _index: int, _x: None):
+        """Dummy combine step.
 
-        @param x:
-        @type x: any.
+        Parameters
+        ----------
+        _index : int
+            Unused.
+        _x : None
+            Unused.
         """
 
         pass
 
-    def finalize(self):
+    def finalize(self) -> None:
         """
         Finalize the job.
         """
@@ -273,22 +275,17 @@ class ASE(Converter):
 
     def parse_first_step(self, mapping):
         try:
-            self._input = ASETrajectory(self.configuration["trajectory_file"]["value"])
-        except Exception:
-            first_frame = read(self.configuration["trajectory_file"]["value"], index=0)
-            self._input = iread(
-                self.configuration["trajectory_file"]["value"]  # , index="[:]"
-            )
-            self._total_number_of_steps = ilen(
-                iread(self.configuration["trajectory_file"]["value"])
-            )
-            LOG.debug(f"Length found using last_iterator={self._total_number_of_steps}")
-        else:
-            first_frame = self._input[0]
             self._total_number_of_steps = len(self._input)
+            self._input = self.trajectory_file.as_trajectory
+            first_frame = self._input[0]
             LOG.debug(
-                f"Length found using len(self._input)={self._total_number_of_steps}"
+                "Length found using len(self._input)=%d", self._total_number_of_steps
             )
+        except Exception:
+            self._total_number_of_steps = ilen(self.trajectory_file.frames)
+            self._input = self.trajectory_file.frames
+            first_frame = self.trajectory_file[0]
+            LOG.debug("Length found using ilen=%d", self._total_number_of_steps)
 
         assert isinstance(first_frame, Atoms)
 

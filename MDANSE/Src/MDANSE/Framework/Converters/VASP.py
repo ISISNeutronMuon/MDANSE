@@ -24,6 +24,7 @@ from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Parsers import XDATCARFile
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
@@ -63,11 +64,12 @@ class VASP(Converter):
 
     settings = collections.OrderedDict()
     settings["xdatcar_file"] = (
-        "XDATCARFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "XDATCAR files (XDATCAR*);;All files (*)",
             "default": "INPUT_FILENAME",
             "label": "Input XDATCAR file",
+            "parser": XDATCARFile,
         },
     )
     settings["atom_aliases"] = (
@@ -103,23 +105,18 @@ class VASP(Converter):
 
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
-        self._xdatcarFile = self.configuration["xdatcar_file"]
+        self.trajectory_file = self.configuration["xdatcar_file"].instance
+        self.frames = self.trajectory_file.frames
 
         # The number of steps of the analysis.
-        self.numberOfSteps = int(self._xdatcarFile["n_frames"])
+        self.numberOfSteps = self.trajectory_file.n_frames
 
         self._chemical_system = ChemicalSystem()
+        element_list = [
+            get_element_from_mapping(self._atomicAliases, symbol)
+            for symbol in self.trajectory_file.element_list
+        ]
 
-        atoms = (
-            get_element_from_mapping(self._atomicAliases, atom)
-            for atom in self._xdatcarFile["atoms"]
-        )
-
-        element_list = list(
-            run_length.decode(
-                zip(atoms, self._xdatcarFile["atom_numbers"], strict=True)
-            )
-        )
         self._chemical_system.initialise_atoms(element_list)
 
         # A trajectory is opened for writing.
@@ -141,10 +138,11 @@ class VASP(Converter):
         @note: the argument index is the index of the loop note the index of the frame.
         """
 
-        # Read the current step in the xdatcar file.
-        coords = self._xdatcarFile.read_step(index)
+        frame = next(self.frames)
 
-        unitCell = UnitCell(self._xdatcarFile["cell_shape"])
+        # Read the current step in the xdatcar file.
+        coords = frame["coords"]
+        unitCell = frame["unit_cell"]
 
         conf = PeriodicBoxConfiguration(
             self._trajectory.chemical_system, coords, unitCell
@@ -159,9 +157,9 @@ class VASP(Converter):
 
         # Compute the actual time
         time = (
-            self._xdatcarFile["step_number"]
+            frame["step"]
             * self.configuration["time_step"]["value"]
-            * measure(1.0, "fs").toval("ps")
+            * self.trajectory_file.UNIT_CONV["time"]
         )
 
         # Dump the configuration to the output trajectory
@@ -188,8 +186,6 @@ class VASP(Converter):
         """
         Finalize the job.
         """
-
-        self._xdatcarFile.close()
 
         # Close the output trajectory.
         self._trajectory.write_standard_atom_database()

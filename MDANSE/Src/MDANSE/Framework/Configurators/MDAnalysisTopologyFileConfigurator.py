@@ -34,6 +34,9 @@ class MDAnalysisTopologyFileConfigurator(FileWithAtomDataConfigurator):
 
     _default = ("", "AUTO")
 
+    def __init__(self, *args, parser: None = None, **kwargs):
+        super().__init__(*args, parser=self.parse, **kwargs)
+
     def configure(self, setting: str) -> None:
         """
         Parameters
@@ -52,7 +55,7 @@ class MDAnalysisTopologyFileConfigurator(FileWithAtomDataConfigurator):
 
         super().configure(filepath)
 
-    def parse(self) -> None:
+    def parse(self, _) -> None:
         # TODO currently MDAnalysis guesses the atom types and masses.
         #  There is a PR https://github.com/MDAnalysis/mdanalysis/pull/3753
         #  which will give us more control over what is guessed. We may
@@ -61,6 +64,10 @@ class MDAnalysisTopologyFileConfigurator(FileWithAtomDataConfigurator):
         self.atoms = mda.Universe(
             self["filename"], topology_format=self["format"]
         ).atoms
+
+    @property
+    def labels(self) -> Iterable[AtomLabel]:
+        return list(set(self.atom_labels()))
 
     def atom_labels(self) -> Iterable[AtomLabel]:
         """

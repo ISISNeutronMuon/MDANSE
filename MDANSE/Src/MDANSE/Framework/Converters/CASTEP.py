@@ -17,21 +17,15 @@ from __future__ import annotations
 
 import collections
 
+import numpy as np
+
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
-from MDANSE.Framework.Units import measure
+from MDANSE.Framework.Parsers import CASTEPMDFile
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
-
-HBAR = measure(1.05457182e-34, "kg m2 / s").toval("Da nm2 / ps")
-HARTREE = measure(27.2113845, "eV").toval("Da nm2 / ps2")
-BOHR = measure(5.29177210903e-11, "m").toval("nm")
-
-
-class CASTEPError(Error):
-    pass
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class CASTEP(Converter):
@@ -41,11 +35,12 @@ class CASTEP(Converter):
 
     settings = collections.OrderedDict()
     settings["castep_file"] = (
-        "MDFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "MD files (*.md);;All files (*)",
             "default": "INPUT_FILENAME.md",
             "label": "Input MD file",
+            "parser": CASTEPMDFile,
         },
     )
     settings["atom_aliases"] = (
@@ -75,23 +70,22 @@ class CASTEP(Converter):
         """
         super().initialize()
 
-        self._atomicAliases = self.configuration["atom_aliases"]["value"]
+        self.atom_aliases = self.configuration["atom_aliases"]["value"]
 
         # Create a representation of md file
-        self._castepFile = self.configuration["castep_file"]
+        self.trajectory_file = self.configuration["castep_file"].instance
+        self.frames = self.trajectory_file.frames
 
         # Save the number of steps
-        self.numberOfSteps = self._castepFile["n_frames"]
+        self.numberOfSteps = self.trajectory_file.n_frames
 
         # Create a bound universe
         self._chemical_system = ChemicalSystem()
 
-        element_list = []
-        # Populate the universe with atoms based on how many of each atom is in the read trajectory
-        for symbol, number in self._castepFile["atoms"]:
-            for _ in range(number):
-                element = get_element_from_mapping(self._atomicAliases, symbol)
-                element_list.append(element)
+        element_list = [
+            get_element_from_mapping(self.atom_aliases, symbol)
+            for symbol in self.trajectory_file.element_list
+        ]
 
         self._chemical_system.initialise_atoms(element_list)
 
@@ -105,28 +99,29 @@ class CASTEP(Converter):
             compression=self.configuration["output_files"]["compression"],
         )
 
-    def run_step(self, index):
+    def run_step(self, index: int) -> tuple[int, None]:
         """Runs a single step of the job.
 
-        @param index: the index of the step.
-        @type index: int.
+        Parameters
+        ----------
+        index : int
+            Index of the loop.
 
-        :return: The index of the step and None
-        :rtype: (int, None)-tuple
-
-        @note: the argument index is the index of the loop not the index of the frame.
+        Returns
+        -------
+        tuple[int, None]
         """
+        frame = next(self.frames)
 
-        # Retrieve the number of atoms
-        nAtoms = self._castepFile["n_atoms"]
+        # Read the information in the frame
+        time_step = frame["time"]
 
-        # Read the informatino in the frame
-        time_step, unit_cell, config = self._castepFile.read_step(index)
-
-        coords = config[0:nAtoms, :]
-        variables = {}
-        variables["velocities"] = config[nAtoms : 2 * nAtoms, :]
-        variables["gradients"] = config[2 * nAtoms : 3 * nAtoms, :]
+        unit_cell = UnitCell(np.vstack(frame["h"]))
+        coords = np.vstack(tuple(arr[1] for arr in frame["R"]))
+        variables = {
+            "velocities": np.vstack(tuple(arr[1] for arr in frame["V"])),
+            "gradients": np.vstack(tuple(arr[1] for arr in frame["F"])),
+        }
 
         conf = PeriodicRealConfiguration(
             self._trajectory.chemical_system, coords, unit_cell, **variables
@@ -150,22 +145,20 @@ class CASTEP(Converter):
         return index, None
 
     def combine(self, index, x):
-        """
-        @param index: the index of the step.
-        @type index: int.
+        """Dummy combine step.
 
-        @param x:
-        @type x: any.
+        Parameters
+        ----------
+        _index : int
+            Unused.
+        _x : None
+            Unused.
         """
-
-        pass
 
     def finalize(self):
         """
         Finalize the job.
         """
-
-        self._castepFile.close()  # Close the .md file.
 
         # Close the output trajectory.
         self._trajectory.write_standard_atom_database()

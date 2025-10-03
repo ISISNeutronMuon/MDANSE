@@ -16,19 +16,24 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import NamedTuple
+from os import SEEK_SET
+from pathlib import Path
+from typing import NamedTuple, TextIO
 
 import numpy as np
-from more_itertools import first_true, split_at, split_before, take
+from more_itertools import consume as drop
+from more_itertools import first, first_true, ilen, split_at, split_before, take
 from numpy.typing import NDArray
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
+from MDANSE.Framework.Units import measure
 from MDANSE.IO.IOUtils import strip_comments
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
-from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
+from .Parser import Parser
 
 
 class Molecule(NamedTuple):
@@ -45,33 +50,120 @@ class FieldFileError(Error):
     pass
 
 
-class FieldFileConfigurator(FileWithAtomDataConfigurator):
+class HistoryFile(Parser):
+    UNIT_CONV = {
+        "length": measure(1.0, "ang").toval("nm"),
+        "positions": measure(1.0, "ang").toval("nm"),
+        "velocities": measure(1.0, "ang/ps").toval("nm/ps"),
+        "gradients": measure(1.0, "Da ang / ps2").toval("Da nm / ps2"),
+    }
+
+    n_frames = None
+
+    def __init__(self, filename: Path | str):
+        super().__init__(filename)
+
+        self.filename = filename
+
+        self._first_step = None
+        self._time_step = None
+
+        with open(self.filename, encoding="utf-8") as file:
+            tmp = split_before(file, lambda line: line.startswith("timestep"))
+            self.read_header(next(tmp))
+
+            frame = self.parse_step(first(tmp))
+            self.atoms = frame["spec"]
+
+            self.n_frames = ilen(tmp) + 1
+
+    def read_header(self, data: list[str]):
+        # Drop comment
+
+        self.keytrj, self.imcon, self.natm = map(int, data[1].split()[:3])
+
+    def parse_step(self, step: list[str]):
+        accum = {}
+        accum["true_step"] = int(step[0].split()[1])
+
+        if self._first_step is None:
+            self._first_step = accum["true_step"]
+            self._time_step = float(step[0].split()[5])
+
+        accum["step"] = accum["true_step"] - self._first_step
+        accum["time"] = accum["step"] * self._time_step
+
+        if self.imcon:
+            cell = np.array([line.split() for line in step[1:4]], dtype=np.float64).T
+            cell *= self.UNIT_CONV["length"]
+            accum["unit_cell"] = UnitCell(cell)
+        else:
+            accum["unit_cell"] = None
+
+        accum["spec"] = [None] * self.natm
+        accum["ind"] = np.empty(self.natm, dtype=int)
+        accum["charge"] = np.empty(self.natm, dtype=float)
+        for i, line in enumerate(map(str.split, step[4 :: self.keytrj + 2])):
+            spec, ind, _mass, charge, *_rsd = line
+            ref = int(ind) - 1
+            accum["ind"][i] = int(ind)
+            accum["spec"][ref] = spec
+            accum["charge"][ref] = float(charge)
+
+        keys = ("positions", "velocities", "gradients")[: self.keytrj + 1]
+
+        for i, key in enumerate(keys, 1):
+            accum[key] = np.array(
+                list(map(str.split, step[4 + i :: self.keytrj + 2])), dtype=float
+            )
+
+        ref = accum["ind"] - 1
+        for key in keys:
+            accum[key] = accum[key][ref, :] * self.UNIT_CONV[key]
+
+        return accum
+
+    @property
+    def element_list(self) -> list[str]:
+        return self.atoms
+
+    @property
+    def frames(self):
+        with open(self.filename, encoding="utf-8") as file:
+            drop(file, 2)
+
+            steps = split_before(file, lambda line: line.startswith("timestep"))
+            yield from map(self.parse_step, steps)
+
+
+class FieldFile:
     """The DL_POLY field file configurator."""
 
-    def parse(self):
+    def __init__(self, filename):
         # The FIELD file is opened for reading, its contents stored into |lines| and then closed.
-        with open(self["filename"]) as unit:
+        self.filename = filename
+        with open(self.filename, encoding="utf-8") as unit:
             lines = strip_comments(unit)
 
-            self["title"] = next(lines)
-            self["units"] = next(lines)
+            self.title = next(lines)
+            self.units = next(lines)
 
             # Extract the number of molecular types
-            self["n_molecular_types"] = int(next(lines).rsplit(maxsplit=1)[-1])
+            self.n_molecular_types = int(next(lines).rsplit(maxsplit=1)[-1])
 
             molecules = split_at(
                 lines,
                 lambda line: line.upper() == "FINISH",
-                maxsplit=self["n_molecular_types"],
+                maxsplit=self.n_molecular_types,
             )
 
-            self["molecules"] = [
+            self.molecules = [
                 self.parse_molecule(molecule)
-                for molecule in take(self["n_molecular_types"], molecules)
+                for molecule in take(self.n_molecular_types, molecules)
             ]
             molecules = iter(next(molecules))
 
-        if self["n_molecular_types"] != len(self["molecules"]):
+        if self.n_molecular_types != len(self.molecules):
             raise FieldFileError("Error in the definition of the molecular types")
 
     MOLECULAR_KEYS = (
@@ -154,6 +246,11 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
             bonds=bonds,
         )
 
+    @property
+    def labels(self) -> list[AtomLabel]:
+        return list(self.atom_labels)
+
+    @property
     def atom_labels(self) -> Iterable[AtomLabel]:
         """
         Yields
@@ -161,7 +258,7 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
         AtomLabel
             An atom label.
         """
-        for molecule in self["molecules"]:
+        for molecule in self.molecules:
             for atm_label, mass in zip(molecule.species, molecule.masses, strict=True):
                 yield AtomLabel(atm_label, molecule=molecule.name, mass=mass)
 
@@ -174,8 +271,7 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
             array of floats, one value per atom
         """
         charge_groups = [
-            np.repeat(molecule.charges, molecule.n_mols)
-            for molecule in self["molecules"]
+            np.repeat(molecule.charges, molecule.n_mols) for molecule in self.molecules
         ]
 
         return np.concatenate(charge_groups)
@@ -203,7 +299,7 @@ class FieldFileConfigurator(FileWithAtomDataConfigurator):
         bonds = []
         curr_n = 0
 
-        for molecule in self["molecules"]:
+        for molecule in self.molecules:
             curr_element_list = [
                 get_element_from_mapping(
                     aliases, name, molecule=molecule.name, mass=mass

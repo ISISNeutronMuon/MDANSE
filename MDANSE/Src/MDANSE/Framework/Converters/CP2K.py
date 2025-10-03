@@ -52,35 +52,41 @@ class CP2K(Converter):
 
     settings = collections.OrderedDict()
     settings["pos_file"] = (
-        "XYZFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "XYZ files (*.xyz);;All files (*)",
             "default": "INPUT_FILENAME.xyz",
             "label": "Positions file (XYZ)",
+            "parser": XYZFile,
         },
     )
     settings["vel_file"] = (
-        "OptionalXYZFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "XYZ files (*.xyz);;All files (*)",
             "default": "",
             "label": "Velocity file (XYZ, optional)",
+            "parser": XYZFile,
+            "optional": True,
         },
     )
     settings["force_file"] = (
-        "OptionalXYZFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "XYZ files (*.xyz);;All files (*)",
             "default": "",
             "label": "Force file (XYZ, optional)",
+            "parser": XYZFile,
+            "optional": True,
         },
     )
     settings["cell_file"] = (
-        "InputFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "Cell files (*.cell);;All files (*)",
             "default": "INPUT_FILENAME.cell",
             "label": "CP2K unit cell file (.cell)",
+            "parser": CP2KCellFile,
         },
     )
     settings["atom_aliases"] = (
@@ -112,17 +118,15 @@ class CP2K(Converter):
         super().initialize()
 
         self.files = {
-            "coordinates": XYZFile(self.configuration["pos_file"]["filename"]),
-            "cell": CP2KCellFile(self.configuration["cell_file"]["filename"]),
+            "coordinates": self.configuration["pos_file"].instance,
+            "cell": self.configuration["cell_file"].instance,
         }
 
-        if self.configuration["vel_file"]["filename"]:
-            self.files["velocities"] = XYZFile(
-                self.configuration["vel_file"]["filename"]
-            )
+        if vfile := self.configuration["vel_file"].instance:
+            self.files["velocities"] = vfile
 
-        if self.configuration["force_file"]["filename"]:
-            self.files["forces"] = XYZFile(self.configuration["force_file"]["filename"])
+        if ffile := self.configuration["force_file"].instance:
+            self.files["forces"] = ffile
 
         for attr in ("time_step", "n_frames"):
             if not all_equal(getattr(file, attr) for file in self.files.values()):

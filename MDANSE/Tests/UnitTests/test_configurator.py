@@ -21,7 +21,6 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
 file_wd = os.path.dirname(os.path.realpath(__file__))
-cp2k_pos = os.path.join(file_wd, "Data", "CO2GAS-pos-1.xyz")
 
 
 class TestConfigurator(unittest.TestCase):
@@ -102,15 +101,3 @@ class TestConfigurator(unittest.TestCase):
         )
         self.assertTrue(numpy.array_equal(data[:, 1], proj[:, 1]))
         self.assertTrue(numpy.array_equal(data[:, 2], proj[:, 2]))
-
-
-def test_XYZFileConfigurator_with_cp2k_pos():
-    from MDANSE.Framework.Configurators.XYZFileConfigurator import XYZFileConfigurator
-
-    xyz_file = XYZFileConfigurator("test")
-    xyz_file["filename"] = cp2k_pos
-    xyz_file.parse()
-    assert len(xyz_file["atoms"]) == 60
-    assert xyz_file["n_frames"] == 100
-    coords = xyz_file.read_step(0)
-    assert len(coords) == 60

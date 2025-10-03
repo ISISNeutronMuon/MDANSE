@@ -127,6 +127,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         # if the input value is None, do not perform any transmutation
         if value in {None, "", "{}"}:
             self.transmutation = {}
+            self.error_status = "OK"
             return
 
         if not isinstance(value, str):
