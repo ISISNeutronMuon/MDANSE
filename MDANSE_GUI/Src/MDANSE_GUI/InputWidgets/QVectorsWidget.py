@@ -18,8 +18,11 @@ from __future__ import annotations
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import QBrush, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
+    QAbstractScrollArea,
     QComboBox,
     QDialog,
+    QHBoxLayout,
+    QLabel,
     QPushButton,
     QSizePolicy,
     QTableView,
@@ -159,15 +162,19 @@ class QVectorsWidget(WidgetBase):
         if trajectory_configurator is not None:
             trajectory = trajectory_configurator["instance"]
         self.helper = None
+        top_bar_layout = QHBoxLayout()
+        top_bar_layout.addWidget(QLabel("Generator type:"), stretch=0)
         self._selector = QComboBox(self._base)
         self._selector.addItems(IQVectors.indirect_subclasses())
         self._model = VectorModel(self._base, trajectory=trajectory)
         self._view = QTableView(self._base)
-        self._preview_button = QPushButton("Preview vectors")
+        self._preview_button = QPushButton("Preview vector distribution")
         self._preview_button.clicked.connect(self.helper_dialog)
-        self._layout.addWidget(self._selector)
+        top_bar_layout.addWidget(self._selector, stretch=1)
+        top_bar_layout.addStretch(1)
+        top_bar_layout.addWidget(self._preview_button)
+        self._layout.addLayout(top_bar_layout)
         self._layout.addWidget(self._view)
-        self._layout.addWidget(self._preview_button)
         self._view.setModel(self._model)
         self._selector.currentTextChanged.connect(self._model.switch_qvector_type)
         self._selector.setCurrentIndex(1)
@@ -187,6 +194,9 @@ class QVectorsWidget(WidgetBase):
         policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
         self._view.setSizePolicy(policy)
         self._view.horizontalHeader().hide()
+        self._view.setSizeAdjustPolicy(
+            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents
+        )
         self.value_changed.connect(self.preview_vectors)
 
     def type_change_update(self):
