@@ -151,6 +151,10 @@ class VectorViewer(QDialog):
         layout.addWidget(self.plot_widget)
         self.setLayout(layout)
 
+    @Slot()
+    def update_plot(self):
+        self.plot_widget.plot_data(update_only=True)
+
 
 class QVectorsWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
@@ -227,23 +231,16 @@ class QVectorsWidget(WidgetBase):
     def create_helper(
         self,
     ) -> VectorViewer:
-        """Create the selection dialog.
+        """Create the vector plotting dialog.
 
-        It will be populated with selection widget which can be used
-        to create the complete atom selection string.
-
-        Parameters
-        ----------
-        traj_data : tuple[str, Trajectory]
-            A tuple of the trajectory data used to load the 3D viewer.
-
-        Returns
-        -------
-        SelectionHelper
-            Create and return the selection helper QDialog.
-
+        The PlotWidget is modified compared to the normal plotter,
+        not allowing the user to change the plotting mode from 'vectors'.
         """
-        return VectorViewer(self._base)
+        dialog_instance = VectorViewer(self._base)
+        dialog_instance.plot_widget.plot_selector.setVisible(False)
+        dialog_instance.plot_widget._normaliser.setVisible(False)
+        dialog_instance.plot_widget._sliderpack.setVisible(False)
+        return dialog_instance
 
     @Slot()
     def helper_dialog(self) -> None:
@@ -262,6 +259,9 @@ class QVectorsWidget(WidgetBase):
 
     @Slot()
     def preview_vectors(self):
+        """Build the data sets and plot them in the dialog window.
+
+        If the dialog is not open, this function exits immediately."""
         if self.helper is None:
             self.helper = self.create_helper()
         if not self.helper.isVisible():
@@ -272,3 +272,4 @@ class QVectorsWidget(WidgetBase):
         self.helper.plot_widget.set_plotter("Vectors")
         self.helper.plot_widget.set_context(model)
         self.helper.plot_widget.plot_data()
+        model.needs_an_update.connect(self.helper.update_plot)

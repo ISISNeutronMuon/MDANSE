@@ -38,7 +38,8 @@ class Vectors(Plotter):
         super().__init__()
         self._figure = None
         self._backup_limits = []
-        self._curve_limit_per_dataset = 12
+        self._curve_limit_per_dataset = 36
+        self._legend_limit_for_histogram = 6
 
     def slider_labels(self) -> list[str]:
         """Return labels to show that sliders are not used."""
@@ -189,15 +190,21 @@ class Vectors(Plotter):
                 bottom = np.zeros(len(x_axis))
                 width = 0.8 * abs(np.mean(x_axis[1:] - x_axis[:-1]))
                 self._axes.append(axes)
+                add_legend_placeholder = (
+                    len(multi_curves) > self._legend_limit_for_histogram
+                )
+                add_last_entry = False
                 axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
-                for key, value in islice(
-                    multi_curves.items(), self._curve_limit_per_dataset
-                ):
+                for bar_index, (key, value) in enumerate(multi_curves.items()):
+                    legend_label = plotlabel + ":" + dataset._curve_labels[key]
                     try:
                         axes.bar(
                             x_axis,
                             value,
-                            label=plotlabel + ":" + dataset._curve_labels[key],
+                            label=legend_label
+                            if bar_index < self._legend_limit_for_histogram
+                            or add_last_entry
+                            else None,
                             bottom=bottom,
                             width=width,
                             edgecolor="black",
@@ -208,6 +215,16 @@ class Vectors(Plotter):
                         LOG.error(f"x_axis={dataset._axes[best_axis]}")
                         LOG.error(f"values={value}")
                         return
+                    else:
+                        if (
+                            add_legend_placeholder
+                            and bar_index == len(multi_curves) - 2
+                        ):
+                            add_legend_placeholder = False
+                            add_last_entry = True
+                            axes.bar(
+                                x_axis, 0, label="...", color=target.get_facecolor()
+                            )
         for axes in self._axes:
             if update_only:
                 try:
