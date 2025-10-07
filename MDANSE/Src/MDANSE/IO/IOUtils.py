@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Iterable, Iterator
+from enum import Enum
 from functools import singledispatch
 from itertools import filterfalse
 from pathlib import Path
@@ -26,6 +27,21 @@ from typing import Any
 import numpy as np
 
 from MDANSE.MLogging import LOG
+
+
+class UCEnum(Enum):
+    """Uppercase enumerated type.
+
+    Parses unknown strings as uppercase underscore separated params.
+    """
+
+    @classmethod
+    def _missing_(cls, value):
+        if not isinstance(value, str):
+            return NotImplemented
+
+        value = "_".join(value.split())
+        return vars(cls).get(value.upper())
 
 
 class MDANSEEncoder(json.JSONEncoder):

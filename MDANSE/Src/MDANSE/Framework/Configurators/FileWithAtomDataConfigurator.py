@@ -16,16 +16,40 @@
 from __future__ import annotations
 
 import traceback
-from abc import abstractmethod
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
+from typing import Any
 
 from MDANSE.Framework.AtomMapping import AtomLabel
+from MDANSE.Framework.Parsers import Parser
 
 from .InputFileConfigurator import InputFileConfigurator
 
 
 class FileWithAtomDataConfigurator(InputFileConfigurator):
-    """Parent class for handling files that contain atom information."""
+    """
+    Class for handling files that contain atom information.
+
+    Returns the parsed structure in the ``instance`` attribute.
+
+    If this is ``optional`` and undefined, ``instance`` will instead be
+    ``None`` for easy checking.
+
+    Parameters
+    ----------
+    parser : type[Parser] or Callable
+        Routine or object to parse data into relevant form.
+
+    Notes
+    -----
+    For old behaviour any object subclassing this can pass ``self.parse`` into the
+    ``parser`` argument.
+    """
+
+    def __init__(self, *args, parser: type[Parser] | Callable[[str], Parser], **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.instance = None
+        self.parser = parser
 
     def configure(self, filepath: str) -> None:
         """
@@ -36,33 +60,44 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
         """
         self._original_input = filepath
         super().configure(filepath)
+
         if self.error_status != "OK":
             return
+
+        if self.optional and not filepath:
+            self._original_input = filepath
+            self["value"] = filepath
+            self["filename"] = filepath
+            self.instance = None
+            self.error_status = "OK"
+            return
+
         try:
-            self.parse()
+            self.instance = self.parser(filepath)
         except Exception as e:
             self.error_status = f"File parsing error {e}: {traceback.format_exc()}"
             return
 
-        self.labels = self.unique_labels()
-        if len(self.labels) == 0:
+        if not self.labels:
             self.error_status = "Unable to generate atom labels"
             return
 
-    @abstractmethod
-    def parse(self) -> None:
-        """Parse the file."""
-        pass
+    @property
+    def frames(self) -> Iterable[Any]:
+        """Yield frames."""
+        return self.instance.frames
 
-    @abstractmethod
+    @property
     def atom_labels(self) -> Iterable[AtomLabel]:
         """Yields atom labels"""
+        return self.instance.atom_labels
 
-    def unique_labels(self) -> list[AtomLabel]:
+    @property
+    def labels(self) -> list[AtomLabel]:
         """
         Returns
         -------
         list[AtomLabel]
             An ordered list of atom labels.
         """
-        return list(set(self.atom_labels()))
+        return self.instance.labels

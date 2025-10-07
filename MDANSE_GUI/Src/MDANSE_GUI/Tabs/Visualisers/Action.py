@@ -15,11 +15,12 @@
 #
 from __future__ import annotations
 
+import math
 import traceback
 from pathlib import Path
 
 import numpy as np
-from qtpy.QtCore import Signal, Slot
+from qtpy.QtCore import QTimer, Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
     QFileDialog,
@@ -96,18 +97,11 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "DerivativeOrderConfigurator": DerivativeOrderWidget,
     "InterpolationOrderConfigurator": InterpolationOrderWidget,
     "OutputFilesConfigurator": OutputFilesWidget,
-    "ASEFileConfigurator": InputFileWidget,
-    "AseInputFileConfigurator": AseInputFileWidget,
-    "ConfigFileConfigurator": InputFileWidget,
-    "MDAnalysisCoordinateFileConfigurator": MDAnalysisCoordinateFileWidget,
     "InputFileConfigurator": InputFileWidget,
+    "AseInputFileConfigurator": AseInputFileWidget,
+    "MDAnalysisCoordinateFileConfigurator": MDAnalysisCoordinateFileWidget,
     "MDAnalysisTopologyFileConfigurator": MDAnalysisTopologyFileWidget,
-    "MDFileConfigurator": InputFileWidget,
-    "FieldFileConfigurator": InputFileWidget,
-    "XDATCARFileConfigurator": InputFileWidget,
-    "XTDFileConfigurator": InputFileWidget,
-    "XYZFileConfigurator": InputFileWidget,
-    "OptionalXYZFileConfigurator": InputFileWidget,
+    "FileWithAtomDataConfigurator": InputFileWidget,
     "RunningModeConfigurator": RunningModeWidget,
     "WeightsConfigurator": ComboWidget,
     "MultipleChoicesConfigurator": MultipleCombosWidget,
@@ -426,6 +420,17 @@ class Action(QWidget):
                 else:
                     text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({new_unit})</p>"
             self._preview_box.setHtml(text)
+            # need to use singleshot to ensure we get the right height
+            QTimer.singleShot(
+                0,
+                lambda: self._preview_box.setFixedHeight(
+                    math.ceil(
+                        self._preview_box.document().size().height()
+                        + self._preview_box.contentsMargins().top()
+                        + self._preview_box.contentsMargins().bottom()
+                    )
+                ),
+            )
 
     @Slot()
     def allow_execution(self):
@@ -438,6 +443,7 @@ class Action(QWidget):
             has_warning = has_warning or widget.has_warning
         if self.execute_button is not None:
             self.execute_button.setEnabled(allow)
+            self.save_button.setEnabled(allow)
             if has_warning:
                 self.execute_button.setStyleSheet(
                     "QWidget { background-color:rgb(220,210,30); font-weight: bold }"

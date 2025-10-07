@@ -1,29 +1,17 @@
-import numpy as np
 import pytest
-from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.IO.MinimalPDBReader import MinimalPDBReader as PDBReader
 from rdkit.Chem.rdchem import GetPeriodicTable, Mol
 from rdkit.Chem.rdmolfiles import MolFromPDBFile
 from rdkit.Chem.rdmolops import GetMolFrags, SanitizeMol
 from test_helpers.paths import DATA_DIR
 
+
 fname = DATA_DIR / "CO2GAS-dump-1.pdb"
-
-
-@pytest.fixture()
-def chem_from_pdb():
-    reader = PDBReader(fname)
-    yield reader._chemical_system
 
 
 @pytest.fixture()
 def mol_from_rdkit():
     mol = MolFromPDBFile(fname)
     yield mol
-
-
-def test_loader(chem_from_pdb: ChemicalSystem):
-    assert chem_from_pdb.number_of_atoms == 60
 
 
 def test_rdkit(mol_from_rdkit: Mol):

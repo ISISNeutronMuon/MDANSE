@@ -30,6 +30,9 @@ from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
     """Uses MDTraj to read the system topology information from a file."""
 
+    def __init__(self, *args, parser: None = None, **kwargs):
+        super().__init__(*args, parser=self.parse, **kwargs)
+
     def configure(self, value: str | None):
         """
         Parameters
@@ -62,12 +65,11 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
                 return
 
             try:
-                self.parse()
+                self.parse("")
             except Exception as e:
                 self.error_status = f"File parsing error {e}: {traceback.format_exc()}"
                 return
 
-            self.labels = self.unique_labels()
             if len(self.labels) == 0:
                 self.error_status = "Unable to generate atom labels"
 
@@ -79,7 +81,7 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
                 return
             super().configure(value)
 
-    def parse(self) -> None:
+    def parse(self, _) -> None:
         coord_files = self.configurable[self.dependencies["coordinate_files"]][
             "filenames"
         ]
@@ -88,6 +90,10 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
 
         else:
             self.atoms = list(md.load(coord_files).topology.atoms)
+
+    @property
+    def labels(self) -> Iterable[AtomLabel]:
+        return list(set(self.atom_labels()))
 
     def atom_labels(self) -> Iterable[AtomLabel]:
         """

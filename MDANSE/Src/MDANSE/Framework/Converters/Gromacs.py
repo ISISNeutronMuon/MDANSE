@@ -24,7 +24,7 @@ from mdtraj.formats.xtc import XTCTrajectoryFile
 
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
-from MDANSE.IO.MinimalPDBReader import MinimalPDBReader
+from MDANSE.Framework.Parsers import PDBFile
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -41,11 +41,12 @@ class Gromacs(Converter):
 
     settings = collections.OrderedDict()
     settings["pdb_file"] = (
-        "InputFileConfigurator",
+        "FileWithAtomDataConfigurator",
         {
             "wildcard": "PDB files (*.pdb);;All files (*)",
             "default": "INPUT_FILENAME.pdb",
             "label": "Input PDB file",
+            "parser": PDBFile,
         },
     )
     settings["xtc_file"] = (
@@ -54,6 +55,14 @@ class Gromacs(Converter):
             "wildcard": "XTC files (*.xtc);;TRR files (*.trr);;All files (*)",
             "default": "INPUT_FILENAME.xtc",
             "label": "xtc or trr file",
+        },
+    )
+    settings["atom_aliases"] = (
+        "AtomMappingConfigurator",
+        {
+            "default": "{}",
+            "label": "Atom mapping",
+            "dependencies": {"input_file": "pdb_file"},
         },
     )
     settings["fold"] = (
@@ -120,8 +129,9 @@ class Gromacs(Converter):
         self.numberOfSteps = len(self._xdr_file)
 
         # Create all chemical entities from the PDB file.
-        pdb_reader = MinimalPDBReader(self.configuration["pdb_file"]["filename"])
-        chemical_system = pdb_reader._chemical_system
+        chemical_system = self.configuration["pdb_file"].instance.build_chemical_system(
+            self.configuration["atom_aliases"]["value"]
+        )
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(

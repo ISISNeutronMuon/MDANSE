@@ -22,7 +22,7 @@ import numpy.typing as npt
 
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.Mathematics.Arithmetic import weighted_sum
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MolecularDynamics.Trajectory import GroupingLevels, Trajectory
 
 GROUP_TEMPLATE = "{}/<{}>/{}"
 PAIR_GROUP_TEMPLATE = "{}/<{}><{}>/{}"
@@ -68,7 +68,7 @@ def add_grouped_totals(
     post_label: str
         The label to be added for grouped summed results.
     """
-    if trajectory._grouping_level == "atom":
+    if trajectory._grouping_level == GroupingLevels.ATOM:
         return
 
     if dim == 1:
@@ -322,7 +322,7 @@ def pair_labels(
     """
     labels = []
 
-    if trajectory._grouping_level == "atom":
+    if trajectory._grouping_level == GroupingLevels.ATOM:
         selected_elements = trajectory.unique_names
         for ele_i, ele_j in label_pairs(selected_elements, all_pairs=all_pairs):
             labels.append((f"{ele_i}{ele_j}", (ele_i, ele_j)))
@@ -396,7 +396,7 @@ def update_pair_results(
     all_pairs : bool
         Updates all pairs of labels e.g. OH and HO.
     """
-    if trajectory._grouping_level == "atom":
+    if trajectory._grouping_level == GroupingLevels.ATOM:
         selected_elements = trajectory.unique_names
         for ele_i, ele_j in label_pairs(selected_elements, all_pairs=all_pairs):
             for name, _, result in calc_func(ele_i, ele_j):

@@ -85,7 +85,17 @@ class TrajectoryTab(GeneralTab):
             model=GeneralModel(),
             view=TrajectoryView(),
             visualiser=View3D(MolecularViewerExtended()),
-            layout=partial(MultiPanel, left_panels=[TrajectoryInfo()]),
+            layout=partial(
+                MultiPanel,
+                left_panels=[
+                    TrajectoryInfo(
+                        header="MDANSE Trajectory",
+                        footer="Look up our "
+                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                        + " page.",
+                    )
+                ],
+            ),
             label_text=label_text,
         )
         return the_tab
@@ -109,7 +119,17 @@ class TrajectoryTab(GeneralTab):
             model=kwargs.get("model", GeneralModel()),
             view=TrajectoryView(),
             visualiser=View3D(MolecularViewerExtended()),
-            layout=partial(MultiPanel, left_panels=[TrajectoryInfo()]),
+            layout=partial(
+                MultiPanel,
+                left_panels=[
+                    TrajectoryInfo(
+                        header="MDANSE Trajectory",
+                        footer="Look up our "
+                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                        + " page.",
+                    )
+                ],
+            ),
             label_text=label_text,
         )
         the_tab._model.free_name.connect(session.free_filename)

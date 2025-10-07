@@ -15,21 +15,16 @@
 #
 from __future__ import annotations
 
-import os
+from pathlib import Path
 
 from qtpy.QtCore import QDir
 from qtpy.QtGui import QIcon
 
 
 class PyQtIcons:
-    def __init__(self, path):
+    def __init__(self, path: Path | str):
         self.res_dir = QDir(path)
-        self._icons = {}
-        self.res_dir.setNameFilters(["*.png"])
-        files = self.res_dir.entryList()
-        for f in files:
-            label = ".".join(str(f).split(".")[:-1])
-            self._icons[label] = QIcon(self.res_dir.filePath(f))
+        self._icons = {pth.stem: QIcon(str(pth)) for pth in path.glob("*.png")}
 
 
 ICONS = PyQtIcons(".")

@@ -98,7 +98,17 @@ class PlotSelectionTab(GeneralTab):
             model=PlotDataModel(),
             view=PlotDataView(),
             visualiser=DataPlotter(),
-            layout=partial(MultiPanel, left_panels=[PlotDataInfo()]),
+            layout=partial(
+                MultiPanel,
+                left_panels=[
+                    PlotDataInfo(
+                        header="MDANSE Plotting",
+                        footer="Look up our "
+                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                        + " page.",
+                    )
+                ],
+            ),
             label_text=label_text,
         )
         return the_tab
@@ -122,7 +132,17 @@ class PlotSelectionTab(GeneralTab):
             model=kwargs.get("model", PlotDataModel()),
             view=PlotDataView(),
             visualiser=DataPlotter(),
-            layout=partial(MultiPanel, left_panels=[PlotDataInfo()]),
+            layout=partial(
+                MultiPanel,
+                left_panels=[
+                    PlotDataInfo(
+                        header="MDANSE Plotting",
+                        footer="Look up our "
+                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                        + " page.",
+                    )
+                ],
+            ),
             label_text=label_text,
         )
         the_tab._visualiser._unit_lookup = the_tab

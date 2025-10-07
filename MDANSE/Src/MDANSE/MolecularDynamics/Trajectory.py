@@ -19,6 +19,7 @@ import copy
 import math
 from collections import Counter, defaultdict
 from collections.abc import Sequence
+from enum import auto
 from functools import cached_property
 from more_itertools import always_iterable
 from operator import itemgetter
@@ -35,6 +36,7 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Chemistry.Databases import str_to_num
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
+from MDANSE.IO.IOUtils import UCEnum
 from MDANSE.MolecularDynamics.Configuration import _Configuration
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
@@ -50,6 +52,16 @@ available_formats = {
 }
 ValidFormats = Literal["MDANSE", "H5MD"]
 SLICE_ALL = np.s_[:]
+
+
+class GroupingLevels(UCEnum):
+    ATOM = auto()
+    MOLECULE = auto()
+    EACH_MOLECULE = auto()
+    EACH_ATOM = auto()
+
+    def __repr__(self) -> str:
+        return self.name.title()
 
 
 def trajectory_summary(traj: Trajectory):
@@ -103,10 +115,11 @@ def trajectory_summary(traj: Trajectory):
 
     return val
 
+
 def chemical_system_summary(cs: ChemicalSystem) -> str:
     text = "\n ==== Chemical System summary ==== \n"
     atoms, counts = np.unique(cs.atom_list, return_counts=True)
-    for atom, count in zip(atoms, counts):
+    for atom, count in zip(atoms, counts, strict=False):
         text += f"Element: {atom}; Count: {count}\n"
     for molname, mollist in cs._clusters.items():
         text += f"Molecule: {molname}; Count: {len(mollist)}\n"
@@ -134,7 +147,7 @@ class Trajectory:
             self._trajectory = self.open_trajectory(self._format)
         self._min_span = None
         self._max_span = None
-        self._grouping_level = "atom"
+        self._grouping_level = GroupingLevels.ATOM
         self._atom_cache = {}
         self._selection = []
         self.selection_getter = None
@@ -167,7 +180,7 @@ class Trajectory:
         a valid atom database key for each atom in the system.
         """
         mapping = {element: element for element in self.unique_elements}
-        if self._grouping_level == "molecule":
+        if self._grouping_level == GroupingLevels.MOLECULE:
             temp_names = {}
             for mol_name, clusters in self.chemical_system._clusters.items():
                 for cluster in clusters:
@@ -188,25 +201,28 @@ class Trajectory:
         a list of atom indices belonging to the individual molecule.
         """
         temp_dict = {}
-        if self._grouping_level == "each molecule":
+
+        if self._grouping_level == GroupingLevels.EACH_MOLECULE:
             for mol_name, clusters in self.chemical_system._clusters.items():
                 for mol_number, cluster in enumerate(clusters):
                     if set(cluster).issubset(self.atom_indices):
                         temp_dict[f"{mol_name}_mol{mol_number + 1}"] = cluster
-        elif self._grouping_level == "molecule":
+
+        elif self._grouping_level == GroupingLevels.MOLECULE:
             for mol_name in self.chemical_system._clusters:
                 temp_dict.setdefault(mol_name, 0)
                 for cluster in self.chemical_system._clusters[mol_name]:
                     overlap = set(cluster).intersection(self.atom_indices)
                     temp_dict[mol_name] += len(overlap)
+
         return {k: v for k, v in temp_dict.items() if v}
 
     @cached_property
     def atom_names(self) -> Sequence[str]:
         """Labels of ALL the atoms, after transmutation."""
-        if self._grouping_level == "each molecule":
+        if self._grouping_level == GroupingLevels.EACH_MOLECULE:
             return list(self.group_lookup.keys())
-        if self._grouping_level == "molecule":
+        if self._grouping_level == GroupingLevels.MOLECULE:
             temp_names = {}
             for mol_name, clusters in self.chemical_system._clusters.items():
                 for cluster in clusters:
@@ -295,7 +311,7 @@ class Trajectory:
             ),
         ]:
             w = defaultdict(float)
-            for name, element in zip(atm_names, atm_elements):
+            for name, element in zip(atm_names, atm_elements, strict=False):
                 w[name] += self._trajectory.get_atom_property(element, prop)
             for name, num_atoms in n_elements.items():
                 w[name] /= num_atoms

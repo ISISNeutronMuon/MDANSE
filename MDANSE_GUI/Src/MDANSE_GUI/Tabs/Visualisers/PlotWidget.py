@@ -357,7 +357,7 @@ class PlotWidget(QWidget):
         figAgg.updateGeometry()
         toolbar = NavigationToolbar2QTAgg(figAgg, canvas)
         toolbar.update()
-        layout.addWidget(figAgg)
+        layout.addWidget(figAgg, stretch=1)
         normaliser = NormalisationWidget(self)
         slider = SliderPack(self)
         self.change_slider_labels.connect(slider.new_slider_labels)

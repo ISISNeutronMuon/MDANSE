@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import abc
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from warnings import warn
 
 import numpy as np
@@ -104,7 +104,18 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
     _doc_ = "undocumented"
 
-    def __init__(self, name: str, **kwargs):
+    def __init__(
+        self,
+        name: str,
+        *,
+        configurable: Configurable | None = None,
+        root: None = None,
+        dependencies: dict[str, str] | None = None,
+        default: Any | None = None,
+        label: str | None = None,
+        optional: bool = False,
+        **kwargs,
+    ):
         """Create an input parser for an MDANSE job input parameter.
 
         Parameters
@@ -125,20 +136,23 @@ class IConfigurator(dict, metaclass=SubclassFactory):
             "_warning_status",
         ]
 
-        self.configurable = kwargs.get("configurable")
+        self.configurable = configurable
 
-        self.root = kwargs.get("root")
+        self.root = root
 
-        self.dependencies = kwargs.get("dependencies", {})
+        self.dependencies = dependencies or {}
+        self.dependents = set()
+        if self.configurable is not None:
+            for v in self.dependencies.values():
+                self.configurable[v].dependents.add(name)
 
-        self.default = kwargs.get("default", self.__class__._default)
+        self.default = default or type(self)._default
 
-        self.label = kwargs.get(
-            "label",
-            (getattr(type(self), "label", name.replace("_", " ").strip())),
+        self.label = label or getattr(
+            type(self), "label", name.replace("_", " ").strip()
         )
 
-        self.optional = kwargs.get("optional", False)
+        self.optional = optional
 
         self.configured = False
 
@@ -233,7 +247,13 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         bool
             If True, self.configure(new_input) needs to be run
         """
-        return not self.configured or self._original_input != new_input
+        update = not self.configured or self._original_input != new_input
+        if update:
+            # now we need to tell all configurators that dependent on
+            # this configurator that they need to be updated
+            for dependent in self.dependents:
+                self.configurable[dependent].configured = False
+        return update
 
     def to_json(self) -> str:
         """Encode this input variable as a JSON string.
