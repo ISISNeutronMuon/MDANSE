@@ -18,6 +18,7 @@ from __future__ import annotations
 import collections
 
 import numpy as np
+import numpy.typing as npt
 from scipy.spatial import KDTree
 
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -25,70 +26,153 @@ from MDANSE.Mathematics.Geometry import generate_sphere_points
 from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 
 
+def compare_trees(
+    sphere_tree: KDTree,
+    atom_tree: KDTree,
+    sphere_indices: set[int],
+    vdw_radii: npt.NDArray[float],
+    max_dist: float,
+    min_dist: float,
+    atom_index: int | None,
+    probe_radius: float,
+) -> tuple[set[int], list[int]]:
+    """Count how many points from sphere_tree are blocked by atom_tree.
+
+    The assumption is that each point in atom_tree is blocking a volume within
+    a van der Waals radius around itself.
+
+    Parameters
+    ----------
+    sphere_tree : KDTree
+        Sampling points on a sphere around a reference point (atom) in a KDTree.
+    atom_tree : KDTree
+        Atom positions in a KDTree.
+    sphere_indices : set[int]
+        Set of indices of all the points on the sphere.
+    vdw_radii : npt.NDArray[float]
+        Array of van der Waals radii for all the point in atom_tree.
+    max_dist : float
+        Distance between points above which blocking is not possible.
+    min_dist : float
+        Distanbe between point below which blocking is certain.
+    atom_index : int | None
+        Index of the reference atom (i.e. centre of sphere_tree) in atom_tree.
+    probe_radius : float
+        Radius of the assumed probe particle that should fit on the surface.
+
+    Returns
+    -------
+    tuple[set[int], set[int]]
+        Indices of free sphere points, indices of blocked sphere points.
+    """
+    distance_dict = sphere_tree.sparse_distance_matrix(atom_tree, max_distance=max_dist)
+    pair_array = np.array(
+        list(distance_dict.keys())
+    )  # pairs of (sphere index, atom index)
+    value_array = np.array(list(distance_dict.values()))
+    combined_array = (
+        np.hstack([pair_array, value_array.reshape((len(value_array), 1))])[
+            np.where(pair_array[:, 1] != atom_index)
+        ]
+        if atom_index is not None
+        else np.hstack([pair_array, value_array.reshape((len(value_array), 1))])
+    )
+    blocked_for_sure = set(
+        combined_array[:, 0][np.where(combined_array[:, 2] <= min_dist)]
+    )
+    free_for_sure = sphere_indices - set(combined_array[:, 0])
+    uncertain = sphere_indices - free_for_sure - blocked_for_sure
+    confirmed = set()
+    if len(uncertain) > 0:
+        uncertain_lines = np.array(
+            [line for line in combined_array if line[0] in uncertain]
+        )
+        neighbour_radii = np.array(
+            [vdw_radii[int(line[1])] for line in uncertain_lines]
+        )
+        confirmed = set(
+            uncertain_lines[:, 0][
+                np.where(uncertain_lines[:, 2] < neighbour_radii + probe_radius)
+            ]
+        )
+    free_for_sure.update(uncertain - confirmed)
+    blocked_for_sure = sphere_indices - free_for_sure
+    return free_for_sure, blocked_for_sure
+
+
 def solvent_accessible_surface(
-    coords: np.ndarray,
-    indices: list[int],
-    grouping_map: list[int],
-    vdwRadii: np.ndarray,
-    sphere_points: np.ndarray,
+    coords: npt.NDArray[float],
+    all_indices: npt.NDArray[int],
+    selected_indices: list[int],
+    vdw_radii: npt.NDArray[float],
+    sphere_points: npt.NDArray[float],
     probe_radius_value: float,
 ):
-    # Computes the Solvent Accessible Surface Based on the algorithm published by Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
+    """Calculate the total surface are of a group of atoms, and how much is blocked.
 
-    sas = 0.0
-    tree = KDTree(coords)
-    max_dist = np.max(vdwRadii) + probe_radius_value
-    min_dist = np.min(vdwRadii) + probe_radius_value
+    Coordinates of all atoms are used in this analysis. The selected atoms are the
+    ones for which the surface area is calculated. The atoms that are not in the
+    selection are still considered in the analysis, since they can block the
+    accessible surface.
+
+    Parameters
+    ----------
+    coords : np.ndarray
+        Coordinates of all atoms plus their copies in padding region.
+    indices : list[int]
+        Indices of atoms belonging to the selection.
+    vdwRadii : np.ndarray
+        For each atom, its van der Waals radius.
+    sphere_points : np.ndarray
+        Coordinates of points on a sphere.
+    probe_radius_value : float
+        Radius of the probe particle.
+
+    Returns
+    -------
+    float, npt.NDArray[float]
+        Total surface, blocked surface per atom
+    """
+    # Computes the Solvent Accessible Surface Based on the algorithm published by Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
+    total_sas = 0.0
+    current_sas = 0.0
+    atom_tree = KDTree(coords)
+    max_dist = np.max(vdw_radii) + probe_radius_value
+    min_dist = np.min(vdw_radii) + probe_radius_value
     sphere_indices = set(range(len(sphere_points)))
-    occupations = dict.fromkeys(set(grouping_map), 0)
-    for idx in indices:
+    for idx in selected_indices:
         sphere_tree = KDTree(
-            coords[idx] + sphere_points * (vdwRadii[idx] + probe_radius_value)
+            coords[idx] + sphere_points * (vdw_radii[idx] + probe_radius_value)
         )
-        distance_dict = sphere_tree.sparse_distance_matrix(tree, max_distance=max_dist)
-        pair_array = np.array(
-            list(distance_dict.keys())
-        )  # pairs of (sphere index, atom index)
-        value_array = np.array(list(distance_dict.values()))
-        combined_array = np.hstack(
-            [pair_array, value_array.reshape((len(value_array), 1))]
-        )[np.where(pair_array[:, 1] != idx)]
-        blocked_for_sure = set(
-            combined_array[:, 0][np.where(combined_array[:, 2] <= min_dist)]
+        inner_selection = np.where(np.isin(all_indices, set(selected_indices) - {idx}))
+        inner_tree = KDTree(coords[inner_selection])
+        inner_vdw = vdw_radii[inner_selection]
+        total_free, _ = compare_trees(
+            sphere_tree,
+            inner_tree,
+            sphere_indices,
+            inner_vdw,
+            max_dist,
+            min_dist,
+            None,
+            probe_radius_value,
         )
-        free_for_sure = sphere_indices - set(combined_array[:, 0])
-        uncertain = sphere_indices - free_for_sure - blocked_for_sure
-        confirmed = set()
-        if len(uncertain) > 0:
-            uncertain_lines = np.array(
-                [line for line in combined_array if line[0] in uncertain]
-            )
-            neighbour_radii = np.array(
-                [vdwRadii[int(line[1])] for line in uncertain_lines]
-            )
-            confirmed = set(
-                uncertain_lines[:, 0][
-                    np.where(
-                        uncertain_lines[:, 2] < neighbour_radii + probe_radius_value
-                    )
-                ]
-            )
-        free_for_sure.update(uncertain - confirmed)
-        blocked_for_sure = list(sphere_indices - free_for_sure)
-        blocked_per_atom = collections.Counter(
-            grouping_map[at_index]
-            for at_index in combined_array[
-                np.where(np.in1d(combined_array[:, 0], blocked_for_sure))
-            ][:, 1].astype(int)
-            if at_index < len(grouping_map)
+        free_for_sure, _ = compare_trees(
+            sphere_tree,
+            atom_tree,
+            sphere_indices,
+            vdw_radii,
+            max_dist,
+            min_dist,
+            idx,
+            probe_radius_value,
         )
         scale_factor = (
-            4 * np.pi * (vdwRadii[idx] + probe_radius_value) ** 2 / len(sphere_points)
+            4 * np.pi * (vdw_radii[idx] + probe_radius_value) ** 2 / len(sphere_points)
         )
-        sas += len(free_for_sure) * scale_factor
-        for at_type, point_count in blocked_per_atom.items():
-            occupations[at_type] += point_count * scale_factor
-    return sas, occupations
+        total_sas += len(total_free) * scale_factor
+        current_sas += len(free_for_sure) * scale_factor
+    return total_sas, current_sas
 
 
 class SolventAccessibleSurface(IJob):
@@ -280,8 +364,8 @@ class SolventAccessibleSurface(IJob):
         # Loop over the indices of the selected atoms for the sas calculation.
         sas_and_occupations = solvent_accessible_surface(
             coords,
+            atom_indices,
             self.selected_indices,
-            self.grouping_indices,
             temp_vdw_radii,
             self.spherePoints,
             self.configuration["probe_radius"]["value"],
@@ -297,10 +381,10 @@ class SolventAccessibleSurface(IJob):
         @param x: the output of run_step method.
         @type x: no specific type.
         """
-        sas, occupations = x
+        total_sas, current_sas = x
         # The SAS is updated with the value obtained for frame |index|.
-        self._outputData["sas/total"][index] = sas
-        self._outputData["sas/free"][index] = sas - sum(occupations.values())
+        self._outputData["sas/total"][index] = total_sas
+        self._outputData["sas/free"][index] = current_sas
         for atom_name, atom_index in self.type_mapping.items():
             surface = occupations.get(atom_index)
             self._outputData[f"sas/blocked_{atom_name}"][index] = (
