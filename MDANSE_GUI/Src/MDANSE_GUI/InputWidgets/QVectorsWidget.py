@@ -271,5 +271,7 @@ class QVectorsWidget(WidgetBase):
             model.add_dataset(qvec_dataset)
         self.helper.plot_widget.set_plotter("Vectors")
         self.helper.plot_widget.set_context(model)
+        self.helper.plot_widget.use_grid()
+        self.helper.plot_widget.use_legend()
         self.helper.plot_widget.plot_data()
         model.needs_an_update.connect(self.helper.update_plot)
