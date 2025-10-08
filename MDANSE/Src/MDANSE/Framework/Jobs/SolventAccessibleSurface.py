@@ -144,7 +144,9 @@ def solvent_accessible_surface(
         sphere_tree = KDTree(
             coords[idx] + sphere_points * (vdw_radii[idx] + probe_radius_value)
         )
-        inner_selection = np.where(np.isin(all_indices, set(selected_indices) - {idx}))
+        inner_selection = np.where(
+            np.isin(all_indices, list(set(selected_indices) - {idx}))
+        )
         inner_tree = KDTree(coords[inner_selection])
         inner_vdw = vdw_radii[inner_selection]
         total_free, _ = compare_trees(
@@ -275,27 +277,11 @@ class SolventAccessibleSurface(IJob):
         loose_atoms = []
         if self.configuration["grouping_level"]["value"] == "molecule":
             for mol_name in self.trajectory.chemical_system.unique_molecules():
-                self._outputData.add(
-                    f"sas/blocked_{mol_name}",
-                    "LineOutputVariable",
-                    (self.configuration["frames"]["number"],),
-                    axis="sas/axes/time",
-                    units="nm2",
-                    main_result=True,
-                )
                 for mol_instance in self.trajectory.chemical_system._clusters[mol_name]:
                     all_indices -= set(mol_instance)
         for atom_name in {
             self.trajectory.chemical_system.atom_list[index] for index in all_indices
         }:
-            self._outputData.add(
-                f"sas/blocked_{atom_name}",
-                "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
-                axis="sas/axes/time",
-                units="nm2",
-                main_result=True,
-            )
             loose_atoms.append(atom_name)
 
         # Generate the sphere points that will be used to evaluate the sas per atom.
@@ -356,7 +342,9 @@ class SolventAccessibleSurface(IJob):
                 unit_cell,
                 padding_thickness,
             )
-            temp_vdw_radii = [self.vdwRadii[atom_index] for atom_index in atom_indices]
+            temp_vdw_radii = np.array(
+                [self.vdwRadii[atom_index] for atom_index in atom_indices]
+            )
         else:
             coords = conf["coordinates"]
             temp_vdw_radii = self.vdwRadii
@@ -385,16 +373,6 @@ class SolventAccessibleSurface(IJob):
         # The SAS is updated with the value obtained for frame |index|.
         self._outputData["sas/total"][index] = total_sas
         self._outputData["sas/free"][index] = current_sas
-        for atom_name, atom_index in self.type_mapping.items():
-            surface = occupations.get(atom_index)
-            self._outputData[f"sas/blocked_{atom_name}"][index] = (
-                surface if surface else 0.0
-            )
-        for mol_name, mol_index in self.molecule_mapping.items():
-            surface = occupations.get(mol_index)
-            self._outputData[f"sas/blocked_{mol_name}"][index] = (
-                surface if surface else 0.0
-            )
 
     def finalize(self):
         """
