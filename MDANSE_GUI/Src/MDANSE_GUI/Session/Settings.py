@@ -190,14 +190,17 @@ class Settings(Generic[T], QStandardItemModel):
 
 class LocalSettings(Settings[dict[str, Any]]):
     def load_settings(self, settings: Path | str | dict[str, Any]) -> None:
-        self._settings = SettingsDict()
         if isinstance(settings, (Path, str)):
+            self._settings = SettingsDict(str(settings))
             path = Path(settings)
 
             if path.exists():
                 self._settings.load_from_file(path)
         elif isinstance(settings, dict):
+            self._settings = SettingsDict(settings.get("name", "dict"))
             self._settings.load_from_dict(settings)
+        else:
+            self._settings = {}
 
 
 class UserSettingsModel(Settings[Path | str]):
@@ -276,7 +279,7 @@ class SettingsGroup:
         return self._settings
 
 
-class AbstractSettings:
+class SettingsContainer:
     def __init__(self, name: str):
         self._top_name = name
         self._groups = {}
@@ -367,7 +370,7 @@ class AbstractSettings:
             )
 
 
-class SettingsDict(AbstractSettings):
+class SettingsDict(SettingsContainer):
     def save_values(self, filename: Path | str | None = None):
         if filename is not None:
             super().save_values(filename)
@@ -391,7 +394,7 @@ class SettingsDict(AbstractSettings):
         return result
 
 
-class SettingsFile(AbstractSettings):
+class SettingsFile(SettingsContainer):
     def __init__(self, name: str, settings_path: Path | str = DEFAULT_SETTINGS_PATH):
         super().__init__(name)
         self._filename = (settings_path / name).with_suffix(".toml")

@@ -82,11 +82,9 @@ class GeneralTab(QObject):
         super().__init__(*args, **kwargs)
 
         self._core = layout(
-            **{
-                "data_side": self._view,
-                "visualiser_side": self._visualiser,
-                "tab_reference": self,
-            }
+            data_side=self._view,
+            visualiser_side=self._visualiser,
+            tab_reference=self,
         )
         if self._model is not None:
             self._core.set_model(self._model)

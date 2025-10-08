@@ -126,7 +126,6 @@ class Session(QObject):
     def main_settings(self):
         return self._configs[self._main_config_name]
 
-    @property
     def reserved_filenames(self) -> list[Path]:
         return self._reserved_filenames
 
@@ -187,6 +186,7 @@ class LocalSession(Session):
     def __init__(self, *args, filename: str = "mdanse_general_settings", **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._main_config_name = filename
         self._filename = filename
         self._parameters = {}
         self._state = None
