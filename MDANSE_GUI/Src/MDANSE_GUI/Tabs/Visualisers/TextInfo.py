@@ -15,8 +15,10 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import Signal, Slot
-from qtpy.QtWidgets import QTextBrowser
+from qtpy.QtCore import Signal, Slot, Qt
+from qtpy.QtWidgets import QTextBrowser, QApplication
+
+from .MathRenderer import MathRenderer
 
 
 class TextInfo(QTextBrowser):
@@ -47,3 +49,53 @@ class TextInfo(QTextBrowser):
         if self._footer:
             new_text += line_break + self._footer
         return new_text
+
+
+class MathInfo(TextInfo):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def scan(text: str) -> list[tuple[str, bool]]:
+        # Instantiate renderer object
+        renderer = MathRenderer(text)
+
+        # Scan text for existence of raw LaTex expressions
+        scanned = renderer.scan()
+
+        # Iterate over scanned text, rendering LaTex substrings if image not already cached
+        for token, is_expression in scanned:
+            if is_expression and not MathRenderer.cached(token):
+                renderer.render(
+                    token,
+                    QApplication.styleHints().colorScheme() == Qt.ColorScheme.Dark,
+                )
+
+        return scanned
+
+    def filter(self, some_text: str, line_break="<br />"):
+        filtered = super().filter(some_text, line_break)
+        scanned = self.scan(filtered)
+
+        html_substrings = []
+        for token, is_expression in scanned:
+            if is_expression:
+                image = MathRenderer.from_cache(token)
+                if len(token) < 10:
+                    # This is a small expression, inline rendered expression
+                    html_substrings.append(
+                        f'<span style="vertical-align:middle;"><img src="data:image/png;base64,{image}" style="height:1em; display:inline;"></span>'
+                    )
+                else:
+                    # This is a large expression, it gets its own line
+                    html_substrings.append(
+                        f'<div style="text-align:left; margin:2px 0; padding:0;"><img src="data:image/png;base64,{image}" style="vertical-align:middle;"></div>'
+                    )
+            else:
+                # Format plain text
+                text = token.replace("\n", "<br>")
+                html_substrings.append(
+                    f'<span style="margin:0; padding:0;">{text}</span>'
+                )
+
+        return "".join(html_substrings)
