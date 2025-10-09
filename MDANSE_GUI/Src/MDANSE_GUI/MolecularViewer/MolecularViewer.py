@@ -62,6 +62,7 @@ class MolecularViewer(QtWidgets.QWidget):
     of molecular structures, currently implemented in VTK."""
 
     new_max_frames = Signal(int)
+    frame_changed = Signal()
     changed_trace = Signal()
 
     def __init__(self):
@@ -986,6 +987,17 @@ class MolecularViewer(QtWidgets.QWidget):
         self._trace_dialog.remove_atom_trace.connect(self.delete_isosurface_from_dialog)
         self.changed_trace.connect(self._trace_dialog.update_limits)
 
+    def create_property_viewer_dialog(self, viewer_controls):
+        """Creates and connects an additional panel of the GUI which contains
+        an instance of PropertyWidget.
+
+        Parameters
+        ----------
+        viewer_controls : ViewerControls
+            instance of the ViewerControls widget from View3D
+        """
+        self._property_dialog = viewer_controls.create_property_viewer(self)
+
     @property
     def renderer(self):
         return self._renderer
@@ -1010,6 +1022,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         # Update the view.
         self.update_renderer()
+        self.frame_changed.emit()
 
     def set_reader(self, reader):
         """Sets the input object to be the new source of atom data for
@@ -1085,6 +1098,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._colour_manager.onNewValues()
         self.new_max_frames.emit(self._n_frames - 1)
         self._trace_dialog.update_limits()
+        self._property_dialog.extract_props(self._reader._trajectory)
 
     @Slot(object)
     def take_atom_properties(self, data):

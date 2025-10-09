@@ -38,6 +38,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
+from MDANSE_GUI.MolecularViewer.PropertyWidget import PropertyWidget
 from MDANSE_GUI.MolecularViewer.TraceWidget import TraceWidget
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
 
@@ -189,6 +190,7 @@ class ViewerControls(QWidget):
         layout = QVBoxLayout(base)
         base.setLayout(layout)
         self._side_base.addTab(base, "Controls")
+
         # colour changes
         wrapper0 = QGroupBox("Colour settings", base)
         layout0 = QHBoxLayout(wrapper0)
@@ -199,6 +201,7 @@ class ViewerControls(QWidget):
         layout0.addWidget(bkg_button)
         layout0.addWidget(proj_button)
         layout.addWidget(wrapper0)
+
         # the table of chemical elements
         wrapper1 = QGroupBox("Atom properties", base)
         layout1 = QHBoxLayout(wrapper1)
@@ -213,6 +216,7 @@ class ViewerControls(QWidget):
         layout1.addWidget(self._atom_details)
         wrapper1.setLayout(layout1)
         layout.addWidget(wrapper1)
+
         # the widget selecting time per animation frame
         wrapper2 = QGroupBox("Time per frame (ms)", base)
         layout2 = QHBoxLayout(wrapper2)
@@ -225,6 +229,7 @@ class ViewerControls(QWidget):
         layout2.addWidget(frame_time_selector)
         wrapper2.setLayout(layout2)
         layout.addWidget(wrapper2)
+
         # the widget for frame skipping
         wrapper3 = QGroupBox("Show every N frames", base)
         layout3 = QHBoxLayout(wrapper3)
@@ -237,6 +242,7 @@ class ViewerControls(QWidget):
         layout3.addWidget(frame_skip)
         wrapper3.setLayout(layout3)
         layout.addWidget(wrapper3)
+
         # the widget for atom size scaling
         wrapper4 = QGroupBox("Atom size scaling", base)
         layout4 = QHBoxLayout(wrapper4)
@@ -310,6 +316,19 @@ class ViewerControls(QWidget):
         self._trace_widget.initialise_values(viewer)
         layout.addWidget(self._trace_widget)
         return self._trace_widget
+
+    def create_property_viewer(self, viewer):
+        """Adds widget for viewing trajectory properties."""
+        base = QWidget(self)
+        base.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        layout = QVBoxLayout(base)
+        base.setLayout(layout)
+        self._side_base.addTab(base, "Property viewer")
+        # colour changes
+        self._property_widget = PropertyWidget(viewer)
+        # self._property_widget.initialise_values(viewer)
+        layout.addWidget(self._property_widget)
+        return self._property_widget
 
     @Slot()
     def set_background_colour(self):
