@@ -315,8 +315,11 @@ The root mean-square deviation (RMSD) is perhaps the most popular estimator
 of structural similarity. It quantifies differences between two structures by
 measuring the root mean-square of atomic position differences, revealing
 insights into their structural dissimilarities. It is a numerical measure of
-the difference between two structures. For the RMSD of the atom of type
-:math:`\alpha` can be defined as
+the difference between two structures. Typically, RMSD is used to quantify
+the structural evolution of the system during the simulation. It can be used
+to verify if the simulated system has reached equilibrium or,
+conversely, if major structural changes occurred during the simulation.
+The RMSD for the atom of type :math:`\alpha` can be defined as
 
 .. math::
    :label: rmsd1
@@ -326,27 +329,34 @@ the difference between two structures. For the RMSD of the atom of type
 where :math:`\mathbf{r}_{j}(t)` and :math:`\mathbf{r}_{j}(t_{\mathrm{ref}})`
 are respectively the position of atom :math:`j` at time :math:`t`
 and :math:`t_{\mathrm{ref}}` where :math:`t_{\mathrm{ref}}` is a reference
-time usually chosen as the zeroth time of the simulation. Typically,
-RMSD is used to quantify the structural evolution of the
-system during the simulation. It can provide precious information about
-the system especially if it reached equilibrium or conversely if major
-structural changes occurred during the simulation.
+time usually chosen as the zeroth time of the simulation. As with other
+analysis jobs in MDANSE, the RMSD results can be grouped. The grouping is slightly
+different to all other analysis calculations; see :ref:`grouping-rmsd` for
+more details.
 
 .. _root-mean-square-fluctuation:
 
 Root Mean Square Fluctuation
 ''''''''''''''''''''''''''''
 
-Root mean square fluctuation (RMSF) assesses how the positions of atoms or
-molecules within a system fluctuate over time. Specifically, RMSF measures the
-average magnitude of deviations or fluctuations in atomic positions from their
-mean positions during a simulation. RMSF analysis is valuable for
-understanding the flexibility and stability of molecules within a simulation,
-providing insights into regions where atoms or groups of atoms exhibit
-significant fluctuations. This information can be crucial for studying the
-dynamic behavior of biomolecules, protein-ligand interactions, or any
-molecular system subject to temporal variations.
+The root mean square fluctuation (RMSF) measures the average magnitude of
+deviations or fluctuations in atomic positions from their mean positions during
+a simulation. RMSF analysis is valuable for understanding the flexibility and
+stability of different components of the system, providing insights into regions
+where atoms or groups of atoms exhibit significant fluctuations. This information
+can be crucial for studying the dynamic behavior of biomolecules, protein-ligand
+interactions, or any molecular systems subject to temporal variations. Unlike
+other job types in MDANSE, the RMSF is only calculated for each atom
 
+.. math::
+   :label: rmsf1
+
+   \mathrm{RMSF}_{j} = \sqrt{\langle \vert \mathbf{r}_{j} - \langle \mathbf{r}_{j} \rangle \vert^2 \rangle}
+
+so that :math:`\mathrm{RMSF}_{j}` is the RMSF for the atom :math:`j`. As with other
+analysis jobs in MDANSE, the RMSF results can be grouped. This grouping is slightly
+different to all other analysis calculations; see :ref:`grouping-rmsf` for more
+details.
 
 .. _analysis-vhf:
 

@@ -15,18 +15,18 @@
 #
 from __future__ import annotations
 
-import math
 import traceback
 from pathlib import Path
 
 import numpy as np
-from qtpy.QtCore import QTimer, Signal, Slot
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
     QFileDialog,
+    QGroupBox,
     QHBoxLayout,
+    QLabel,
     QPushButton,
-    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -78,6 +78,7 @@ from MDANSE_GUI.InputWidgets import (
     TrajectoryFilterWidget,
     UnitCellWidget,
     VectorWidget,
+    WeightsWidget,
 )
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 from MDANSE_GUI.Widgets.DelayedButton import DelayedButton
@@ -103,7 +104,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "MDAnalysisTopologyFileConfigurator": MDAnalysisTopologyFileWidget,
     "FileWithAtomDataConfigurator": InputFileWidget,
     "RunningModeConfigurator": RunningModeWidget,
-    "WeightsConfigurator": ComboWidget,
+    "WeightsConfigurator": WeightsWidget,
     "MultipleChoicesConfigurator": MultipleCombosWidget,
     "MoleculeSelectionConfigurator": MoleculeWidget,
     "AxisSelectionConfigurator": MoleculeAndAxisWidget,
@@ -306,9 +307,11 @@ class Action(QWidget):
         self.check_inputs()
 
         if self._use_preview and "preview_box" not in self._widgets_in_layout:
-            self._preview_box = QTextEdit(self)
-            self.layout.addWidget(self._preview_box)
-            self._widgets_in_layout["preview_box"] = self._preview_box
+            box = QGroupBox("results preview")
+            self._preview_box = QLabel(self)
+            QHBoxLayout(box).addWidget(self._preview_box)
+            self.layout.addWidget(box)
+            self._widgets_in_layout["preview_box"] = box
 
         if "button_base" not in self._widgets_in_layout:
             buttonbase = QWidget(self)
@@ -419,18 +422,7 @@ class Action(QWidget):
                     text += f"<p>{array} ({new_unit})</p>"
                 else:
                     text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({new_unit})</p>"
-            self._preview_box.setHtml(text)
-            # need to use singleshot to ensure we get the right height
-            QTimer.singleShot(
-                0,
-                lambda: self._preview_box.setFixedHeight(
-                    math.ceil(
-                        self._preview_box.document().size().height()
-                        + self._preview_box.contentsMargins().top()
-                        + self._preview_box.contentsMargins().bottom()
-                    )
-                ),
-            )
+            self._preview_box.setText(text)
 
     @Slot()
     def allow_execution(self):

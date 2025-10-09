@@ -20,8 +20,6 @@ import math
 from collections import Counter, defaultdict
 from collections.abc import Sequence
 from enum import auto
-from functools import cached_property
-from more_itertools import always_iterable
 from operator import itemgetter
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -57,8 +55,6 @@ SLICE_ALL = np.s_[:]
 class GroupingLevels(UCEnum):
     ATOM = auto()
     MOLECULE = auto()
-    EACH_MOLECULE = auto()
-    EACH_ATOM = auto()
 
     def __repr__(self) -> str:
         return self.name.title()
@@ -153,14 +149,14 @@ class Trajectory:
         self.selection_getter = None
         self._transmutation = {}
 
-    @cached_property
+    @property
     def atom_indices(self) -> list[int]:
         """Indices of the currently selected atoms."""
         if self._selection:
             return self._selection
         return list(range(len(self.atom_types)))
 
-    @cached_property
+    @property
     def atom_types(self) -> Sequence[str]:
         """Chemical elements of ALL atoms, with transmutation applied."""
         if not self._transmutation:
@@ -170,7 +166,7 @@ class Trajectory:
             temp[index] = type
         return temp
 
-    @cached_property
+    @property
     def element_from_label(self) -> dict[str, str]:
         """Maps the full atom labels to the chemical elements.
 
@@ -192,36 +188,46 @@ class Trajectory:
             mapping.update(temp_names)
         return mapping
 
-    @cached_property
+    @property
     def group_lookup(self) -> dict[str, int] | dict[str, list[int]]:
         """Dictionary of currently existing groups.
 
         The keys are names of the group. The values can be the count
-        of all atoms belonging to the group, or (for 'each molecule' only)
-        a list of atom indices belonging to the individual molecule.
+        of all atoms belonging to the group.
         """
         temp_dict = {}
-
-        if self._grouping_level == GroupingLevels.EACH_MOLECULE:
-            for mol_name, clusters in self.chemical_system._clusters.items():
-                for mol_number, cluster in enumerate(clusters):
-                    if set(cluster).issubset(self.atom_indices):
-                        temp_dict[f"{mol_name}_mol{mol_number + 1}"] = cluster
-
-        elif self._grouping_level == GroupingLevels.MOLECULE:
-            for mol_name in self.chemical_system._clusters:
-                temp_dict.setdefault(mol_name, 0)
-                for cluster in self.chemical_system._clusters[mol_name]:
-                    overlap = set(cluster).intersection(self.atom_indices)
-                    temp_dict[mol_name] += len(overlap)
-
+        for mol_name in self.chemical_system._clusters:
+            temp_dict.setdefault(mol_name, 0)
+            for cluster in self.chemical_system._clusters[mol_name]:
+                overlap = set(cluster).intersection(self.atom_indices)
+                temp_dict[mol_name] += len(overlap)
         return {k: v for k, v in temp_dict.items() if v}
 
-    @cached_property
+    def group_elements(self, grp_name):
+        """The elements in the group with the name grp_name.
+
+        Parameters
+        ----------
+        grp_name : str
+            The group name.
+
+        Returns
+        -------
+        set
+            The set of the uniques elements in the group grp_name.
+        """
+        return sorted(
+            {
+                self.atom_types[x]
+                for cluster in self.chemical_system._clusters[grp_name]
+                for x in cluster
+                if x in self.atom_indices
+            }
+        )
+
+    @property
     def atom_names(self) -> Sequence[str]:
         """Labels of ALL the atoms, after transmutation."""
-        if self._grouping_level == GroupingLevels.EACH_MOLECULE:
-            return list(self.group_lookup.keys())
         if self._grouping_level == GroupingLevels.MOLECULE:
             temp_names = {}
             for mol_name, clusters in self.chemical_system._clusters.items():

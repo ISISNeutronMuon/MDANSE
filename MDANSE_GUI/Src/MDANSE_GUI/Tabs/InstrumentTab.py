@@ -24,7 +24,7 @@ from qtpy.QtWidgets import QWidget
 from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
@@ -88,25 +88,11 @@ class InstrumentTab(GeneralTab):
                 self._core._model.append_object(((fname, data), short_name))
 
     @classmethod
-    def standard_instance(cls):
-        the_tab = cls(
-            window,
-            name="Instruments",
-            session=LocalSession(),
-            model=GeneralModel(),
-            view=InstrumentList(),
-            visualiser=InstrumentDetails(),
-            layout=DoublePanel,
-            label_text=label_text,
-        )
-        return the_tab
-
-    @classmethod
     def gui_instance(
         cls,
         parent: QWidget,
         name: str,
-        session: LocalSession,
+        session: Session,
         settings,
         logger,
         **kwargs,
@@ -124,16 +110,3 @@ class InstrumentTab(GeneralTab):
             label_text=label_text,
         )
         return the_tab
-
-
-if __name__ == "__main__":
-    import sys
-
-    from qtpy.QtWidgets import QApplication, QMainWindow
-
-    app = QApplication(sys.argv)
-    window = QMainWindow()
-    the_tab = InstrumentTab.standard_instance()
-    window.setCentralWidget(the_tab._core)
-    window.show()
-    app.exec()

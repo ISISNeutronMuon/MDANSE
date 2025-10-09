@@ -15,11 +15,13 @@
 #
 from __future__ import annotations
 
-import os
-from pathlib import PurePath
+from abc import ABC, abstractmethod
+from collections.abc import Iterable
+from pathlib import Path
+from typing import Any, Generic, TypeVar
 
 import tomlkit
-from qtpy.QtCore import QModelIndex, QObject, Qt, Signal, Slot
+from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
@@ -27,18 +29,19 @@ from tomlkit.toml_file import TOMLFile
 from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
 
+T = TypeVar("T")
+DEFAULT_SETTINGS_PATH = PLATFORM.application_directory()
 
-class UserSettingsModel(QStandardItemModel):
-    file_loaded = Signal(str)
 
-    def __init__(self, *args, settings_filename: str = "", **kwargs):
+class Settings(Generic[T], QStandardItemModel):
+    def __init__(self, *args, settings: T | None = None, **kwargs):
         super().__init__(*args, **kwargs)
-        if settings_filename:
-            self._settings = SettingsFile(settings_filename)
-            self._settings.load_from_file()
+
+        if settings is not None:
+            self.load_settings(settings)
         else:
-            LOG.warning("Called UserSettingsModel without settings_filename")
-            return
+            self._settings = {}
+
         self._entries_present = {}
         self._groups_present = {}
         self.populate_model()
@@ -49,8 +52,10 @@ class UserSettingsModel(QStandardItemModel):
         self.dataChanged.connect(self.save_new_value)
         # self.scan_model()
 
+    @abstractmethod
+    def load_settings(self, settings: T) -> None: ...
+
     def refresh(self):
-        # self._settings.load_from_file()
         self.populate_model()
 
     @Slot()
@@ -75,17 +80,18 @@ class UserSettingsModel(QStandardItemModel):
         )
 
     def populate_model(self):
-        for groupname in self._settings.keys():  # noqa: SIM118 - SettingsFile not dict
-            group = self._settings.group(groupname)
+        for group in self._settings.values():
             section = group._name
             section_item = QStandardItem(section)
             section_item.setData(section)
             section_item.setEditable(False)
             section_comment = group._group_comment
             section_comment_item = QStandardItem(section_comment)
+
             if section not in self._groups_present:
                 self.appendRow([section_item, QStandardItem(), section_comment_item])
                 self._groups_present[section] = section_comment_item.index()
+
             for key, value in group.as_dict().items():
                 key_item, value_item = QStandardItem(key), QStandardItem(value)
                 key_item.setData(key)
@@ -182,6 +188,29 @@ class UserSettingsModel(QStandardItemModel):
         self._settings.save_values()
 
 
+class LocalSettings(Settings[dict[str, Any]]):
+    def load_settings(self, settings: Path | str | dict[str, Any]) -> None:
+        if isinstance(settings, (Path, str)):
+            self._settings = SettingsDict(str(settings))
+            path = Path(settings)
+
+            if path.exists():
+                self._settings.load_from_file(path)
+        elif isinstance(settings, dict):
+            self._settings = SettingsDict(settings.get("name", "dict"))
+            self._settings.load_from_dict(settings)
+        else:
+            self._settings = {}
+
+
+class UserSettingsModel(Settings[Path | str]):
+    file_loaded = Signal(str)
+
+    def load_settings(self, settings_filename: Path | str) -> None:
+        self._settings = SettingsFile(settings_filename)
+        self._settings.load_from_file()
+
+
 class SettingsGroup:
     def __init__(self, group_name: str) -> None:
         self._name = group_name
@@ -234,13 +263,8 @@ class SettingsGroup:
             self._comments[key] = comments.get(key, "---")
 
     def compare(self, settings: dict, comments: dict):
-        obsolete_values, obsolete_comments = [], []
-        for key in self._settings:
-            if key not in settings:
-                obsolete_values.append(key)
-        for key in self._comments:
-            if key not in comments:
-                obsolete_comments.append(key)
+        obsolete_values = self._settings.keys() - settings.keys()
+        obsolete_comments = self._comments.keys() - comments.keys()
         return obsolete_values, obsolete_comments
 
     def as_toml(self):
@@ -255,83 +279,89 @@ class SettingsGroup:
         return self._settings
 
 
-class SettingsFile:
-    def __init__(self, name, settings_path: str | None = None):
-        if settings_path is None:
-            settings_path = PLATFORM.application_directory()
+class SettingsContainer:
+    def __init__(self, name: str):
         self._top_name = name
-        self._filename = os.path.join(settings_path, name + ".toml")
-        self._tomldoc = None
-        self._file = TOMLFile(self._filename)
         self._groups = {}
         self._defaults = {}
-        self.load_from_file()
 
-    def load_from_file(self) -> bool:
-        file = TOMLFile(self._filename)
+    def group(self, group_name: str) -> SettingsGroup:
+        return self._groups.setdefault(group_name, SettingsGroup(group_name))
+
+    @property
+    def groups(self) -> dict[str, SettingsGroup]:
+        return self._groups
+
+    def keys(self):
+        return self.groups.keys()
+
+    def items(self):
+        return self.groups.items()
+
+    def values(self):
+        return self.groups.values()
+
+    def __iter__(self):
+        return iter(self.groups)
+
+    def load_settings(self, filename: dict | Path | str | None = None) -> bool:
+        if isinstance(filename, dict):
+            self.load_from_dict(filename)
+        elif not filename or isinstance(filename, (Path, str)):
+            self.load_from_file(filename)
+
+    def load_from_file(self, filename: Path | str | None = None) -> bool:
+        filename = filename if filename is not None else self._filename
+
         try:
-            self._tomldoc = file.read()
+            tomldoc = TOMLFile(filename).read()
         except FileNotFoundError:
-            LOG.warning(f"File {self._filename} does not exists.")
+            LOG.warning(f"File {self._filename} does not exist.")
             return False
         except ParseError:
             LOG.warning(f"File {self._filename} could not be parsed.")
             return False
-        else:
-            for key in self._tomldoc:
-                table = self._tomldoc[key]
-                group = self._groups.get(key, SettingsGroup(key))
-                temp_values, temp_comments = {}, {}
-                for inner_key in table:
-                    temp_values[inner_key] = table[inner_key]
-                    temp_comments[inner_key] = table[inner_key].trivia.comment
-                group.populate(temp_values, temp_comments)
-                self._groups[key] = group
-            return True
 
-    def keys(self):
-        return self._groups.keys()
+        for key, table in tomldoc.items():
+            group = self.group(key)
+            temp_values, temp_comments = {}, {}
+            for inner_key in table:
+                temp_values[inner_key] = table[inner_key]
+                temp_comments[inner_key] = table[inner_key].trivia.comment
+            group.populate(temp_values, temp_comments)
+        return True
 
-    @property
-    def groups(self):
-        return self._groups
+    def load_from_dict(self, settings: dict[str, dict[str, Any]]):
+        for key, table in settings.items():
+            group = self.group(key)
+            group.populate(table, {})
 
-    def default_value(self, group: str, key: str):
-        try:
-            result = self._defaults[(group, key)]
-        except KeyError:
-            result = None
-        LOG.warning(
-            f"Bad entry in {self._filename} for {group}->{key}? Default value {result} requested."
-        )
-        return result
-
-    def group(self, group_name: str) -> SettingsGroup:
-        try:
-            group = self._groups[group_name]
-        except KeyError:
-            group = SettingsGroup(group_name)
-            self._groups[group_name] = group
-        return group
-
-    def save_values(self):
+    def save_values(self, filename: Path | str | None = None) -> None:
         newdoc = tomlkit.document()
         for gr in self._groups.values():
             newdoc[gr._name] = gr.as_toml()
-        file = TOMLFile(self._filename)
+
+        out_file = self._filename if filename is None else filename
+        file = TOMLFile(out_file)
         file.write(newdoc)
 
-    def overwrite_settings(self, group_name, values, comments):
+    def overwrite_settings(
+        self, group_name: str, values: Iterable[Any], comments: Iterable[str]
+    ):
         group = self.group(group_name)
         group.populate(values, comments)
 
-    def extend_settings(self, group_name, values, comments):
+    def extend_settings(
+        self, group_name: str, values: Iterable[Any], comments: Iterable[str]
+    ):
         group = self.group(group_name)
         group.update(values, comments)
         for key, value in values.items():
             self._defaults[(group_name, key)] = value
 
-    def check_settings(self, group_name, values, comments):
+    def check_settings(
+        self, group_name: str, values: Iterable[Any], comments: Iterable[str]
+    ):
         group = self.group(group_name)
         unused_values, _unused_comments = group.compare(values, comments)
         for val in unused_values:
@@ -340,124 +370,40 @@ class SettingsFile:
             )
 
 
-class StructuredSession(QObject):
-    """Stores settings of different parts of the GUI."""
+class SettingsDict(SettingsContainer):
+    def save_values(self, filename: Path | str | None = None):
+        if filename is not None:
+            super().save_values(filename)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._models = {}
-        self._configs = {}
-        self._reserved_filenames = []
-        self._state = None
-        self._main_config_name = "mdanse_general_settings"
-        self._filename = kwargs.get("filename", self._main_config_name)
-        self.populate_defaults()
+    def load_settings(self, filename: dict | Path | str | None = None) -> bool:
+        if isinstance(filename, dict):
+            self.load_from_dict(filename)
+        elif isinstance(filename, (Path, str)):
+            self.load_from_file(filename)
 
-    def connect_settings_file(self, name: str):
-        model = UserSettingsModel(settings_filename=name)
-        sf = model._settings
-        self._configs[name] = sf
-        self._models[name] = model
-        return sf
+    def load_from_file(self, filename: Path | str):
+        super().load_from_file(filename)
 
-    @Slot()
-    def save(self):
-        for _, config in self._configs.items():
-            config.save_values()
-
-    def load(self, fname: str | None = None):
-        """Included for compatibility with LocalSession only.
-        Now each component loads its own config separately."""
-
-    def reserved_filenames(self) -> list[str]:
-        return self._reserved_filenames
-
-    @Slot(str)
-    def protect_filename(self, some_filename: str):
-        new_filename = PurePath(os.path.abspath(some_filename))
-        self._reserved_filenames.append(new_filename)
-
-    @Slot(str)
-    def free_filename(self, some_filename: str):
-        filename = PurePath(os.path.abspath(some_filename))
-        if filename in self._reserved_filenames:
-            index = self._reserved_filenames.index(filename)
-            self._reserved_filenames.pop(index)
-
-    def main_settings(self):
-        return self._configs[self._main_config_name]
-
-    def obtain_settings(self, gui_element):
-        try:
-            name = gui_element._name
-        except AttributeError:
-            name = self._main_config_name
-        try:
-            sf = self._configs[name]
-        except KeyError:
-            sf = self.connect_settings_file(name)
-        sf.load_from_file()
-
-        try:
-            setting_groups = gui_element.grouped_settings()
-        except AttributeError:
-            LOG.debug(
-                f"GUI element {gui_element} did not have a grouped_settings method."
+    def default_value(self, group: str, key: str):
+        result = self._defaults.get((group, key))
+        if result is None:
+            LOG.warning(
+                f"Missing entry in {type(self).__name__} for {group}->{key}? Default value {result} requested."
             )
-        else:
-            for gname, (settings, comments) in setting_groups.items():
-                LOG.debug(f"Initialising values in {gname}")
-                sf.extend_settings(gname, settings, comments)
-                sf.check_settings(gname, settings, comments)
-            sf.save_values()
-        return sf
 
-    def settings_model(self, settings_filename: str = ""):
-        if settings_filename not in self._models:
-            LOG.debug(f"session connecting to {settings_filename} for the first time")
-            self.connect_settings_file(settings_filename)
-        model = self._models[settings_filename]
-        LOG.debug(f"session re-using the model {settings_filename}")
-        self._configs[settings_filename].load_from_file()
-        model.refresh()
-        return model
+        return result
 
-    def populate_defaults(self):
-        gs = self.connect_settings_file(self._main_config_name)
-        gs.load_from_file()
-        paths = gs.group("paths")
-        paths.set_group_comment("Lookup of working directory paths for the main GUI")
-        units = gs.group("units")
-        units.set_group_comment(
-            "The GUI will, where possible and indicated, use these physical units."
-        )
-        paths.add(
-            "root_directory",
-            os.path.expanduser("~"),
-            "Starting path for any file search",
-        )
-        units.add("energy", "meV", "The unit of energy preferred by the user.")
-        units.add("time", "fs", "The unit of time preferred by the user.")
-        units.add("distance", "ang", "The unit of distance preferred by the user")
-        units.add(
-            "reciprocal", "1/ang", "The momentum (transfer) unit preferred by the user"
-        )
-        gs.save_values()
-        self._configs[self._main_config_name] = gs
 
-    def get_path(self, key: str) -> str:
-        settings = self._configs[self._main_config_name]
-        group = settings["paths"]
-        value = group.get(key, os.path.abspath("."))
-        return value
+class SettingsFile(SettingsContainer):
+    def __init__(self, name: str, settings_path: Path | str = DEFAULT_SETTINGS_PATH):
+        super().__init__(name)
+        self._filename = (settings_path / name).with_suffix(".toml")
 
-    def set_path(self, key: str, value: str):
-        settings = self._configs[self._main_config_name]
-        group = settings["paths"]
-        group.set(key, value)
+    def default_value(self, group: str, key: str):
+        result = self._defaults.get((group, key))
+        if result is None:
+            LOG.warning(
+                f"Bad entry in {self._filename} for {group}->{key}? Default value {result} requested."
+            )
 
-    def get_unit(self, key: str) -> str:
-        settings = self._configs[self._main_config_name]
-        group = settings["units"]
-        value = group.get(key, "N/A")
-        return value
+        return result

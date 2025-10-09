@@ -58,15 +58,6 @@ class CenterOfMassesTrajectory(IJob):
         "BooleanConfigurator",
         {"default": False, "label": "Fold coordinates in to box"},
     )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            },
-            "default": "molecule",
-        },
-    )
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {"format": "MDTFormat"},

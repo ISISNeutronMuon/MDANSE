@@ -15,14 +15,23 @@
 #
 from __future__ import annotations
 
+from .ComboWidget import ComboWidget
 
-class LocalSettings:
+
+class WeightsWidget(ComboWidget):
     def __init__(self, *args, **kwargs):
-        self._settings = {}
+        super().__init__(*args, **kwargs)
 
-    def get(self, key: str):
-        temp = self._settings.get(key, None)
-        return temp
-
-    def set(self, key: str, value: str):
-        self._settings[key] = value
+        for widget in self.parent()._widgets:
+            if (
+                widget._configurator
+                is self._configurator.configurable[
+                    self._configurator.dependencies["atom_selection"]
+                ]
+            ) or (
+                widget._configurator
+                is self._configurator.configurable[
+                    self._configurator.dependencies["atom_transmutation"]
+                ]
+            ):
+                widget.value_changed.connect(self.updateValue)

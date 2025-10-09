@@ -132,14 +132,7 @@ def add_grouped_totals_1D(
     tot_n_atms = len(trajectory.atom_indices)
 
     for grp in trajectory.group_lookup:
-        grp_ele = sorted(
-            {
-                trajectory.atom_types[x]
-                for cluster in trajectory.chemical_system._clusters[grp]
-                for x in cluster
-                if x in trajectory.atom_indices
-            }
-        )
+        grp_ele = trajectory.group_elements(grp)
         conc = trajectory.group_lookup[grp] / tot_n_atms
         labels = [((grp, ele), "") for ele in grp_ele]
         group_id = GROUP_TEMPLATE.format(result_name, grp, post_label)
@@ -198,14 +191,7 @@ def add_grouped_totals_2D(
 
     if intra:
         for grp in trajectory.group_lookup:
-            eles = sorted(
-                {
-                    trajectory.atom_types[x]
-                    for cluster in trajectory.chemical_system._clusters[grp]
-                    for x in cluster
-                    if x in trajectory.atom_indices
-                }
-            )
+            eles = trajectory.group_elements(grp)
             conc = (trajectory.group_lookup[grp] / tot_n_atms) ** conc_exp
             labels = [
                 ((grp, *pair), "") for pair in it.combinations_with_replacement(eles, 2)
@@ -229,22 +215,8 @@ def add_grouped_totals_2D(
         return
 
     for grp_i, grp_j in it.combinations_with_replacement(trajectory.group_lookup, 2):
-        eles_i = sorted(
-            {
-                trajectory.atom_types[x]
-                for cluster in trajectory.chemical_system._clusters[grp_i]
-                for x in cluster
-                if x in trajectory.atom_indices
-            }
-        )
-        eles_j = sorted(
-            {
-                trajectory.atom_types[x]
-                for cluster in trajectory.chemical_system._clusters[grp_j]
-                for x in cluster
-                if x in trajectory.atom_indices
-            }
-        )
+        eles_i = trajectory.group_elements(grp_i)
+        eles_j = trajectory.group_elements(grp_j)
         conc_i = trajectory.group_lookup[grp_i] / tot_n_atms
         conc_j = trajectory.group_lookup[grp_j] / tot_n_atms
         conc = (conc_i * conc_j) ** conc_exp
@@ -330,14 +302,7 @@ def pair_labels(
 
     if intra:
         for grp in trajectory.group_lookup:
-            eles = sorted(
-                {
-                    trajectory.atom_types[index]
-                    for cluster in trajectory.chemical_system._clusters[grp]
-                    for index in cluster
-                    if index in trajectory.atom_indices
-                }
-            )
+            eles = trajectory.group_elements(grp)
             for ele_i, ele_j in label_pairs(eles, all_pairs=all_pairs):
                 pair_label = f"<{grp}>/{ele_i}{ele_j}"
                 label_i = f"<{grp}>/{ele_i}"
@@ -346,22 +311,8 @@ def pair_labels(
         return labels
 
     for grp_i, grp_j in label_pairs(trajectory.group_lookup, all_pairs=all_pairs):
-        eles_i = sorted(
-            {
-                trajectory.atom_types[index]
-                for cluster in trajectory.chemical_system._clusters[grp_i]
-                for index in cluster
-                if index in trajectory.atom_indices
-            }
-        )
-        eles_j = sorted(
-            {
-                trajectory.atom_types[index]
-                for cluster in trajectory.chemical_system._clusters[grp_j]
-                for index in cluster
-                if index in trajectory.atom_indices
-            }
-        )
+        eles_i = trajectory.group_elements(grp_i)
+        eles_j = trajectory.group_elements(grp_j)
 
         if grp_i == grp_j and not all_pairs:
             pairs = it.combinations_with_replacement(eles_i, 2)
@@ -404,22 +355,8 @@ def update_pair_results(
         return
 
     for grp_i, grp_j in it.combinations_with_replacement(trajectory.group_lookup, 2):
-        eles_i = sorted(
-            {
-                trajectory.atom_types[index]
-                for cluster in trajectory.chemical_system._clusters[grp_i]
-                for index in cluster
-                if index in trajectory.atom_indices
-            }
-        )
-        eles_j = sorted(
-            {
-                trajectory.atom_types[index]
-                for cluster in trajectory.chemical_system._clusters[grp_j]
-                for index in cluster
-                if index in trajectory.atom_indices
-            }
-        )
+        eles_i = trajectory.group_elements(grp_i)
+        eles_j = trajectory.group_elements(grp_j)
         if grp_i == grp_j and not all_pairs:
             iterable = it.combinations_with_replacement(eles_i, 2)
         else:

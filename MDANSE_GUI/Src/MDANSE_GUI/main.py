@@ -61,12 +61,17 @@ def build_parser():
         action="version",
         version=f"%(prog)s v{MDANSE_GUI.__version__}",
     )
+    parser.add_argument(
+        "--no-splash",
+        action="store_true",
+        help="Do not display splash screen on startup.",
+    )
     return parser
 
 
 def startGUI(some_args):
     pars = build_parser()
-    pars.parse_args(some_args)
+    args = pars.parse_args(some_args)
 
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel("INFO")
@@ -90,21 +95,26 @@ def startGUI(some_args):
     )
 
     path = os.path.dirname(os.path.abspath(__file__))
-    splash_img = QPixmap(os.path.join(path, "Resources/splash.png"))
-    splash_img.setDevicePixelRatio(2)
-    splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
-    splash.show()
-    t0 = time.time()
+
+    if not args.no_splash:
+        splash_img = QPixmap(os.path.join(path, "Resources/splash.png"))
+        splash_img.setDevicePixelRatio(2)
+        splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
+        splash.show()
+        t0 = time.time()
+
     root = TabbedWindow(
         parent=None, title="MDANSE for Python 3", settings=settings, app_instance=app
     )
     root.show()
-    t1 = time.time()
-    # only allow the splash screen to stay up for maximum of 2s if the
-    # GUI loads fast but closes immediately if GUI was slow to load
-    QTimer.singleShot(
-        max([0, round(2000 - 1000 * (t1 - t0))]), lambda: splash.finish(root)
-    )
+
+    if not args.no_splash:
+        t1 = time.time()
+        # only allow the splash screen to stay up for maximum of 2s if the
+        # GUI loads fast but closes immediately if GUI was slow to load
+        QTimer.singleShot(
+            max([0, round(2000 - 1000 * (t1 - t0))]), lambda: splash.finish(root)
+        )
 
     app.exec()  # once this is done, the GUI has its event loop running.
     # no more Python scripting now, we are in the event loop.

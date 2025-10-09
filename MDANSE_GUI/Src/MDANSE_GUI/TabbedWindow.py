@@ -36,7 +36,7 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
 from MDANSE_GUI.Resources import Resources
-from MDANSE_GUI.Session.StructuredSession import StructuredSession
+from MDANSE_GUI.Session.Session import StructuredSession
 from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
 from MDANSE_GUI.Tabs.InstrumentTab import InstrumentTab
 from MDANSE_GUI.Tabs.JobTab import JobTab

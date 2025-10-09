@@ -156,6 +156,8 @@ Other Groupings Schemes
 In this section includes some analysis calculations with a group
 setting which does follow the above mechanism.
 
+.. _grouping-rmsd:
+
 Root Mean Square Deviation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -180,13 +182,15 @@ and RMSD of the hydrogen atoms in water is
     \text{RMSD}^{\text{H2O}}_{\text{H}}(t) = \sqrt{ \frac{1}{Nc^{\text{H2O}}_{\text{H}}} \sum\limits_{j \in (\text{H}\, \cap \, \text{H2O})} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{j}(t_{\mathrm{ref}}) \vert^{2} }.
 
 
+.. _grouping-rmsf:
+
 Root Mean Square Fluctuation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The root mean square fluctuation (RMSF) analysis does not average
-results but instead calculates them on an per-atom or per-molecule basis.
-As a result the group setting in the RMSF function has two options:
-``each atom`` or ``each molecule``. With the ``each atom`` option RMSF
-are calculated for each atom in the system. With the ``each molecule``
-option the RMSF is calculated from the center of masses of each molecule
-in the system.
+results but instead calculates them for individual atoms and groups them together.
+With the ``atom`` option, the RMSF results will be split up into datasets,
+with one dataset per each atom type. With the ``molecule`` option, the RMSF
+results will be split up into groups of datasets, with one group per molecule type.
+A group will contain results for each atom type in the molecule,
+as well as the results for all atoms in the molecule.
