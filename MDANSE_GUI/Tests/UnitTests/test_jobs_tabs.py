@@ -29,6 +29,7 @@ ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.enabled}
     ids=["Converter", "IJob"],
 )
 def test_jobtree(typ, exp):
+    """Test job tree contains all enabled jobs."
     tree = JobTree(parent_class=typ)
     assert {item.text() for item in tree._nodes.values()} == set(exp)
 
