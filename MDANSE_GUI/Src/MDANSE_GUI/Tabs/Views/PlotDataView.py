@@ -15,16 +15,15 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import QMimeData, QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QDrag, QMouseEvent, QStandardItem
-from qtpy.QtWidgets import QAbstractItemView, QApplication, QMenu, QTreeView
+from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QContextMenuEvent, QMouseEvent
+from qtpy.QtWidgets import QAbstractItemView, QMenu, QTreeView
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem, MDADataStructure
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
-from MDANSE_GUI.Widgets.DataDialog import DataDialog
 
 
 class PlotDataView(QTreeView):
@@ -48,7 +47,6 @@ class PlotDataView(QTreeView):
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.click_position = None
         self.clicked.connect(self.on_select_dataset)
-        # self.data_dialog = DataDialog(self)
         self._data_packet = None
 
     def mouseDoubleClickEvent(self, e: QMouseEvent) -> None:

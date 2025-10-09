@@ -97,11 +97,6 @@ class TrajectoryItem(DataTreeItem):
         self.setText(os.path.split(self.filename)[1])
 
 
-class AnalysisItem(DataTreeItem):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
 class DataTreeModel(QStandardItemModel):
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)

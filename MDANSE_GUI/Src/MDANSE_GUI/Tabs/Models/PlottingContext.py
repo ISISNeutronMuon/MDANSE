@@ -18,10 +18,9 @@ from __future__ import annotations
 import copy
 from collections.abc import Iterable
 from contextlib import suppress
-from itertools import islice, product
+from itertools import islice
 from math import prod
 from pathlib import Path
-from traceback import print_exception
 from typing import TYPE_CHECKING, NamedTuple
 
 import matplotlib.pyplot as mpl

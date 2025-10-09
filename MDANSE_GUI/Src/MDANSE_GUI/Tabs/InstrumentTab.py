@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import os
-from functools import partial
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QWidget

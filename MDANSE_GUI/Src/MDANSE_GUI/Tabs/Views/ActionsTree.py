@@ -15,13 +15,11 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import QMimeData, QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QDrag, QMouseEvent
-from qtpy.QtWidgets import QAbstractItemView, QApplication, QTreeView
+from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
+from qtpy.QtGui import QMouseEvent
+from qtpy.QtWidgets import QAbstractItemView, QTreeView
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.DataViewModel.ActionsHolder import ActionsHolder
-from MDANSE_GUI.DataViewModel.TrajectoryHolder import DataTreeItem
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 

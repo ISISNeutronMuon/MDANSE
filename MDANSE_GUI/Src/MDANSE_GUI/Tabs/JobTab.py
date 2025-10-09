@@ -15,15 +15,12 @@
 #
 from __future__ import annotations
 
-import os
 from functools import partial
-from pathlib import PurePath
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QComboBox, QLabel, QWidget
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.InputWidgets.MoleculeWidget import MoleculeWidget
 from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
