@@ -104,6 +104,7 @@ def solvent_accessible_surface(
     coords: npt.NDArray[float],
     all_indices: npt.NDArray[int],
     selected_indices: list[int],
+    grouping_indices: npt.NDArray[int],
     vdw_radii: npt.NDArray[float],
     sphere_points: npt.NDArray[float],
     probe_radius_value: float,
@@ -140,6 +141,11 @@ def solvent_accessible_surface(
     max_dist = np.max(vdw_radii) + probe_radius_value
     min_dist = np.min(vdw_radii) + probe_radius_value
     sphere_indices = set(range(len(sphere_points)))
+    blockers = np.unique(grouping_indices)
+    blocking_indices = {
+        blocker: set(np.where(grouping_indices == blocker)[0]) for blocker in blockers
+    }
+    blocked_sas = dict.fromkeys(blockers, 0.0)
     for idx in selected_indices:
         sphere_tree = KDTree(
             coords[idx] + sphere_points * (vdw_radii[idx] + probe_radius_value)
@@ -174,7 +180,21 @@ def solvent_accessible_surface(
         )
         total_sas += len(total_free) * scale_factor
         current_sas += len(free_for_sure) * scale_factor
-    return total_sas, current_sas
+        for blocker, indices in blocking_indices.items():
+            blocking_selection = np.where(np.isin(all_indices, list(indices - {idx})))
+            tree = KDTree(coords[blocking_selection])
+            _, blocked_for_sure = compare_trees(
+                sphere_tree,
+                tree,
+                sphere_indices,
+                vdw_radii[blocking_selection],
+                max_dist,
+                min_dist,
+                idx,
+                probe_radius_value,
+            )
+            blocked_sas[blocker] += len(blocked_for_sure) * scale_factor
+    return total_sas, current_sas, blocked_sas
 
 
 class SolventAccessibleSurface(IJob):
@@ -246,6 +266,7 @@ class SolventAccessibleSurface(IJob):
         self.numberOfSteps = self.configuration["frames"]["number"]
         self.type_mapping = {}
         self.molecule_mapping = {}
+        self.grouping_keys = {}
 
         # Will store the time.
         self._outputData.add(
@@ -273,12 +294,16 @@ class SolventAccessibleSurface(IJob):
             main_result=True,
         )
         all_indices = self.trajectory.chemical_system.all_indices
+        atom_types = self.trajectory.chemical_system.atom_list
         self.grouping_indices = len(all_indices) * [0]
         loose_atoms = []
+        atoms_in_molecule = {}
         if self.configuration["grouping_level"]["value"] == "molecule":
             for mol_name in self.trajectory.chemical_system.unique_molecules():
+                atoms_in_molecule.setdefault(mol_name, set())
                 for mol_instance in self.trajectory.chemical_system._clusters[mol_name]:
                     all_indices -= set(mol_instance)
+                    atoms_in_molecule[mol_name].update(atom_types[mol_instance])
         for atom_name in {
             self.trajectory.chemical_system.atom_list[index] for index in all_indices
         }:
@@ -301,19 +326,36 @@ class SolventAccessibleSurface(IJob):
         self.type_mapping = {
             atom_type: index + 1 for index, atom_type in enumerate(loose_atoms)
         }
-        for index in all_indices:
-            self.grouping_indices[index] = self.type_mapping[atom_types[index]]
+        self.grouping_keys = {
+            arb_index: atom_type for atom_type, arb_index in self.type_mapping.items()
+        }
 
+        next_index = max(self.type_mapping.values()) + 1
         if self.configuration["grouping_level"]["value"] == "molecule":
-            self.molecule_mapping = {
-                mol_name: -index - 1
-                for index, mol_name in enumerate(
-                    self.trajectory.chemical_system.unique_molecules()
-                )
-            }
             for mol_name in self.trajectory.chemical_system.unique_molecules():
-                for index in self.trajectory.chemical_system._clusters[mol_name]:
-                    self.grouping_indices[index] = self.molecule_mapping[mol_name]
+                for atom_name in atoms_in_molecule[mol_name]:
+                    new_key = f"<{mol_name}>/{atom_name}"
+                    self.type_mapping[new_key] = next_index
+                    self.grouping_keys[next_index] = new_key
+                    next_index += 1
+        for result_key in self.type_mapping:
+            self._outputData.add(
+                f"sas/taken/{result_key}",
+                "LineOutputVariable",
+                (self.configuration["frames"]["number"],),
+                axis="sas/axes/time",
+                units="nm2",
+                main_result=False,
+            )
+        self.grouping_indices = [self.type_mapping[atom] for atom in atom_types]
+        if self.configuration["grouping_level"]["value"] == "molecule":
+            for mol_name in self.trajectory.chemical_system.unique_molecules():
+                for mol_instance in self.trajectory.chemical_system._clusters[mol_name]:
+                    for at_index in mol_instance:
+                        self.grouping_indices[at_index] = self.type_mapping[
+                            f"<{mol_name}>/{atom_types[at_index]}"
+                        ]
+        self.grouping_indices = np.array(self.grouping_indices)
 
     def run_step(self, index):
         """
@@ -354,6 +396,7 @@ class SolventAccessibleSurface(IJob):
             coords,
             atom_indices,
             self.selected_indices,
+            self.grouping_indices,
             temp_vdw_radii,
             self.spherePoints,
             self.configuration["probe_radius"]["value"],
@@ -369,10 +412,14 @@ class SolventAccessibleSurface(IJob):
         @param x: the output of run_step method.
         @type x: no specific type.
         """
-        total_sas, current_sas = x
+        total_sas, current_sas, blocked_sas = x
         # The SAS is updated with the value obtained for frame |index|.
         self._outputData["sas/total"][index] = total_sas
         self._outputData["sas/free"][index] = current_sas
+        for type_index, surface in blocked_sas.items():
+            self._outputData[f"sas/taken/{self.grouping_keys[type_index]}"][index] = (
+                surface
+            )
 
     def finalize(self):
         """
