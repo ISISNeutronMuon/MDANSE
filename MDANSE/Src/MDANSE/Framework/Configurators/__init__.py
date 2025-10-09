@@ -61,15 +61,6 @@ from .IntegerConfigurator import IntegerConfigurator as IntegerConfigurator
 from .InterpolationOrderConfigurator import (
     InterpolationOrderConfigurator as InterpolationOrderConfigurator,
 )
-from .McStasInstrumentConfigurator import (
-    McStasInstrumentConfigurator as McStasInstrumentConfigurator,
-)
-from .McStasOptionsConfigurator import (
-    McStasOptionsConfigurator as McStasOptionsConfigurator,
-)
-from .McStasParametersConfigurator import (
-    McStasParametersConfigurator as McStasParametersConfigurator,
-)
 from .MDAnalysisCoordinateFileConfigurator import (
     MDAnalysisCoordinateFileConfigurator as MDAnalysisCoordinateFileConfigurator,
 )

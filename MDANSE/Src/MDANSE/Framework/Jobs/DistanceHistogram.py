@@ -23,7 +23,7 @@ from more_itertools import always_iterable
 from MDANSE.Framework.AtomGrouping.grouping import (
     pair_labels,
 )
-from MDANSE.Framework.Jobs.IJob import IJob, JobError
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
     CELL_SIZE_LIMIT,
     DETAILED_CELL_MESSAGE,
@@ -31,7 +31,6 @@ from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
     van_hove_distinct,
     van_hove_distinct_all_inter,
 )
-from MDANSE.MolecularDynamics.TrajectoryUtils import atom_index_to_molecule_index
 
 
 class DistanceHistogram(IJob):

@@ -141,30 +141,3 @@ class TestTrajectory(unittest.TestCase):
 
         t.close()
 
-    def test_read_com_trajectory(self):
-        tf = tempfile.NamedTemporaryFile().name
-        tw = TrajectoryWriter(tf, self._chemical_system, 1)
-
-        allCoordinates = []
-        allUnitCells = []
-        allTimes = []
-        for i in range(1):
-            allTimes.append(i)
-            allUnitCells.append([[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]])
-            allCoordinates.append(
-                [[0.0, 0.0, 0.0], [8.0, 8.0, 8.0], [4.0, 4.0, 4.0], [2.0, 2.0, 2.0]]
-            )
-            conf = PeriodicRealConfiguration(
-                self._chemical_system, allCoordinates[-1], UnitCell(allUnitCells[-1])
-            )
-            tw.dump_configuration(conf, i)
-
-        tw.close()
-
-        t = Trajectory(tf)
-        com_trajectory = t.read_com_trajectory(
-            list(range(self._chemical_system.total_number_of_atoms)), 0, 1, 1
-        )
-        print(com_trajectory)
-        self.assertTrue(np.allclose(com_trajectory, [[3.5, 3.5, 3.5]], rtol=1.0e-6))
-        t.close()

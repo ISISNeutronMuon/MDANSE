@@ -67,17 +67,6 @@ def test_static_coordinates(static_trajectory):
     assert np.all(conf2["coordinates"] == conf3["coordinates"])
 
 
-def test_com_trajectory(static_trajectory):
-    """Centre of Mass (COM) trajectory should be identical
-    to the static trajectory, since the atoms never moved"""
-    com_trajectory = static_trajectory.read_com_trajectory(
-        list(range(static_trajectory._num_atoms_in_box)), 0, 10, 1
-    )
-    conf_static = static_trajectory[3]
-    conf_com = com_trajectory[3]
-    assert np.all(conf_static["coordinates"] == conf_com)
-
-
 def test_modulation_single_atom(static_trajectory):
     static_trajectory.modulate_structure(
         np.array([[1.0, 1.0, 0.0]]), np.array([0.0, 0.0, 0.0]), 5, 0.2

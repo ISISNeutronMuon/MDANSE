@@ -21,7 +21,6 @@ from .CenterOfMassesTrajectory import (
     CenterOfMassesTrajectory as CenterOfMassesTrajectory,
 )
 from .CoordinationNumber import CoordinationNumber as CoordinationNumber
-from .CroppedTrajectory import CroppedTrajectory as CroppedTrajectory
 from .CurrentCorrelationFunction import (
     CurrentCorrelationFunction as CurrentCorrelationFunction,
 )
@@ -47,19 +46,14 @@ from .GaussianDynamicIncoherentStructureFactor import (
 from .GeneralAutoCorrelationFunction import (
     GeneralAutoCorrelationFunction as GeneralAutoCorrelationFunction,
 )
-from .GlobalMotionFilteredTrajectory import (
-    GlobalMotionFilteredTrajectory as GlobalMotionFilteredTrajectory,
-)
 from .IJob import IJob as IJob
 from .Infrared import Infrared as Infrared
 from .JobStatus import JobStatus as JobStatus
-from .McStasVirtualInstrument import McStasVirtualInstrument as McStasVirtualInstrument
 from .MeanSquareDisplacement import MeanSquareDisplacement as MeanSquareDisplacement
 from .MolecularTrace import MolecularTrace as MolecularTrace
 from .NeutronDynamicTotalStructureFactor import (
     NeutronDynamicTotalStructureFactor as NeutronDynamicTotalStructureFactor,
 )
-from .OrderParameter import OrderParameter as OrderParameter
 from .PairDistributionFunction import (
     PairDistributionFunction as PairDistributionFunction,
 )
@@ -71,7 +65,6 @@ from .RadiusOfGyration import RadiusOfGyration as RadiusOfGyration
 from .ReorientationalTimeCorrelationFunction import (
     ReorientationalTimeCorrelationFunction as ReorientationalTimeCorrelationFunction,
 )
-from .RigidBodyTrajectory import RigidBodyTrajectory as RigidBodyTrajectory
 from .RootMeanSquareDeviation import RootMeanSquareDeviation as RootMeanSquareDeviation
 from .RootMeanSquareFluctuation import (
     RootMeanSquareFluctuation as RootMeanSquareFluctuation,
@@ -90,7 +83,6 @@ from .StructureFactorFromScatteringFunction import (
 from .Temperature import Temperature as Temperature
 from .TrajectoryEditor import TrajectoryEditor as TrajectoryEditor
 from .TrajectoryFilter import TrajectoryFilter as TrajectoryFilter
-from .UnfoldedTrajectory import UnfoldedTrajectory as UnfoldedTrajectory
 from .VanHoveFunctionDistinct import VanHoveFunctionDistinct as VanHoveFunctionDistinct
 from .VanHoveFunctionSelf import VanHoveFunctionSelf as VanHoveFunctionSelf
 from .VelocityAutoCorrelationFunction import (

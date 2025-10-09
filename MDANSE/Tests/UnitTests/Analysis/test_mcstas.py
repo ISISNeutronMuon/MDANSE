@@ -36,17 +36,3 @@ def parameters():
     parameters["weights"] = "equal"
     return parameters
 
-
-@pytest.mark.xfail(reason="Need platform-specific compiled McStas instrument.")
-def test_mcstas(tmp_path, parameters):
-    temp_name = tmp_path / "output"
-    out_file = temp_name.with_suffix(".mda")
-    log_file = temp_name.with_suffix(".log")
-
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-
-    job = IJob.create("McStasVirtualInstrument")
-    job.run(parameters, status=True)
-
-    assert out_file.is_file()
-    assert log_file.is_file()
