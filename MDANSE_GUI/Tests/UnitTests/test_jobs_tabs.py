@@ -38,6 +38,11 @@ def test_jobtree(typ, exp):
     "index", enumerate(sorted(ENABLED_CONVERTERS), 1), ids=lambda x: x[1]
 )
 def test_converter_widgets_load(qapp, qtbot, caplog, index):
+    """
+    Test there are no major errors in constructing job widgets.
+    
+    This includes raises in the construction of widgets and missing widgets.
+    """
     window = QMainWindow()
 
     widget = ConverterTab.gui_instance(
