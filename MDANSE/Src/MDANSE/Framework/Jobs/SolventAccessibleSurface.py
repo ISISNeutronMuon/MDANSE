@@ -34,7 +34,6 @@ def compare_trees(
     vdw_radii: npt.NDArray[float],
     max_dist: float,
     min_dist: float,
-    atom_index: int | None,
     probe_radius: float,
 ) -> set[int]:
     """Count how many points from sphere_tree are blocked by atom_tree.
@@ -56,8 +55,6 @@ def compare_trees(
         Distance between points above which blocking is not possible.
     min_dist : float
         Distanbe between point below which blocking is certain.
-    atom_index : int | None
-        Index of the reference atom (i.e. centre of sphere_tree) in atom_tree.
     probe_radius : float
         Radius of the assumed probe particle that should fit on the surface.
 
@@ -73,13 +70,7 @@ def compare_trees(
     value_array = np.array(list(distance_dict.values()))
     if not len(value_array):
         return sphere_indices
-    combined_array = (
-        np.hstack([pair_array, value_array.reshape((len(value_array), 1))])[
-            np.where(pair_array[:, 1] != atom_index)
-        ]
-        if atom_index is not None
-        else np.hstack([pair_array, value_array.reshape((len(value_array), 1))])
-    )
+    combined_array = np.hstack([pair_array, value_array.reshape((len(value_array), 1))])
     blocked_for_sure = set(
         combined_array[:, 0][np.where(combined_array[:, 2] <= min_dist)]
     )
@@ -144,7 +135,7 @@ def solvent_accessible_surface(
     selected_set = set(selected_indices)
     blockers = np.unique(grouping_indices)
     blocking_indices = {
-        blocker: set(np.where(grouping_indices == blocker)[0]) for blocker in blockers
+        blocker: set(np.where(grouping_indices == blocker)[0]) - selected_set for blocker in blockers
     }
     blocked_sas = dict.fromkeys(blockers, 0.0)
     for idx in selected_indices:
@@ -162,7 +153,6 @@ def solvent_accessible_surface(
             inner_vdw,
             max_dist,
             min_dist,
-            None,
             probe_radius_value,
         )
         scale_factor = (
@@ -180,15 +170,14 @@ def solvent_accessible_surface(
                 new_free = compare_trees(
                     sphere_tree,
                     tree,
-                    sphere_indices,
+                    set(range(len(still_free))),
                     vdw_radii[blocking_selection],
                     max_dist,
                     min_dist,
-                    idx,
                     probe_radius_value,
                 )
                 blocked_sas[blocker] += (len(still_free) - len(new_free)) * scale_factor
-                still_free = new_free
+                still_free = copy.copy(new_free)
                 if not len(still_free):
                     break
     return total_sas, blocked_sas
