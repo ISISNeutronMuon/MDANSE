@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import collections
+import copy
 
 import numpy as np
 import numpy.typing as npt
@@ -35,7 +36,7 @@ def compare_trees(
     min_dist: float,
     atom_index: int | None,
     probe_radius: float,
-) -> tuple[set[int], list[int]]:
+) -> set[int]:
     """Count how many points from sphere_tree are blocked by atom_tree.
 
     The assumption is that each point in atom_tree is blocking a volume within
@@ -62,7 +63,7 @@ def compare_trees(
 
     Returns
     -------
-    tuple[set[int], set[int]]
+    set[int]
         Indices of free sphere points, indices of blocked sphere points.
     """
     distance_dict = sphere_tree.sparse_distance_matrix(atom_tree, max_distance=max_dist)
@@ -70,6 +71,8 @@ def compare_trees(
         list(distance_dict.keys())
     )  # pairs of (sphere index, atom index)
     value_array = np.array(list(distance_dict.values()))
+    if not len(value_array):
+        return sphere_indices
     combined_array = (
         np.hstack([pair_array, value_array.reshape((len(value_array), 1))])[
             np.where(pair_array[:, 1] != atom_index)
@@ -96,8 +99,7 @@ def compare_trees(
             ]
         )
     free_for_sure.update(uncertain - confirmed)
-    blocked_for_sure = sphere_indices - free_for_sure
-    return free_for_sure, blocked_for_sure
+    return free_for_sure
 
 
 def solvent_accessible_surface(
@@ -136,26 +138,24 @@ def solvent_accessible_surface(
     """
     # Computes the Solvent Accessible Surface Based on the algorithm published by Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
     total_sas = 0.0
-    current_sas = 0.0
-    atom_tree = KDTree(coords)
     max_dist = np.max(vdw_radii) + probe_radius_value
     min_dist = np.min(vdw_radii) + probe_radius_value
     sphere_indices = set(range(len(sphere_points)))
+    selected_set = set(selected_indices)
     blockers = np.unique(grouping_indices)
     blocking_indices = {
         blocker: set(np.where(grouping_indices == blocker)[0]) for blocker in blockers
     }
     blocked_sas = dict.fromkeys(blockers, 0.0)
     for idx in selected_indices:
-        sphere_tree = KDTree(
-            coords[idx] + sphere_points * (vdw_radii[idx] + probe_radius_value)
+        sphere_coords = coords[idx] + sphere_points * (
+            vdw_radii[idx] + probe_radius_value
         )
-        inner_selection = np.where(
-            np.isin(all_indices, list(set(selected_indices) - {idx}))
-        )
+        sphere_tree = KDTree(sphere_coords)
+        inner_selection = np.where(np.isin(all_indices, list(selected_set - {idx})))
         inner_tree = KDTree(coords[inner_selection])
         inner_vdw = vdw_radii[inner_selection]
-        total_free, _ = compare_trees(
+        total_free = compare_trees(
             sphere_tree,
             inner_tree,
             sphere_indices,
@@ -165,36 +165,33 @@ def solvent_accessible_surface(
             None,
             probe_radius_value,
         )
-        free_for_sure, _ = compare_trees(
-            sphere_tree,
-            atom_tree,
-            sphere_indices,
-            vdw_radii,
-            max_dist,
-            min_dist,
-            idx,
-            probe_radius_value,
-        )
         scale_factor = (
             4 * np.pi * (vdw_radii[idx] + probe_radius_value) ** 2 / len(sphere_points)
         )
         total_sas += len(total_free) * scale_factor
-        current_sas += len(free_for_sure) * scale_factor
+        still_free = copy.copy(total_free)
         for blocker, indices in blocking_indices.items():
-            blocking_selection = np.where(np.isin(all_indices, list(indices - {idx})))
-            tree = KDTree(coords[blocking_selection])
-            _, blocked_for_sure = compare_trees(
-                sphere_tree,
-                tree,
-                sphere_indices,
-                vdw_radii[blocking_selection],
-                max_dist,
-                min_dist,
-                idx,
-                probe_radius_value,
+            blocking_selection = np.where(
+                np.isin(all_indices, list(indices - {idx} - selected_set))
             )
-            blocked_sas[blocker] += len(blocked_for_sure) * scale_factor
-    return total_sas, current_sas, blocked_sas
+            if len(blocking_selection[0]):
+                sphere_tree = KDTree(sphere_coords[list(still_free)])
+                tree = KDTree(coords[blocking_selection])
+                new_free = compare_trees(
+                    sphere_tree,
+                    tree,
+                    sphere_indices,
+                    vdw_radii[blocking_selection],
+                    max_dist,
+                    min_dist,
+                    idx,
+                    probe_radius_value,
+                )
+                blocked_sas[blocker] += (len(still_free) - len(new_free)) * scale_factor
+                still_free = new_free
+                if not len(still_free):
+                    break
+    return total_sas, blocked_sas
 
 
 class SolventAccessibleSurface(IJob):
@@ -294,7 +291,7 @@ class SolventAccessibleSurface(IJob):
             main_result=True,
         )
         all_indices = self.trajectory.chemical_system.all_indices
-        atom_types = self.trajectory.chemical_system.atom_list
+        atom_types = np.array(self.trajectory.chemical_system.atom_list)
         self.grouping_indices = len(all_indices) * [0]
         loose_atoms = []
         atoms_in_molecule = {}
@@ -324,13 +321,15 @@ class SolventAccessibleSurface(IJob):
         self.all_indices = self.trajectory.chemical_system.all_indices
         atom_types = self.trajectory.chemical_system.atom_list
         self.type_mapping = {
-            atom_type: index + 1 for index, atom_type in enumerate(loose_atoms)
+            atom_type: index + 1 for index, atom_type in enumerate(atom_types)
         }
         self.grouping_keys = {
             arb_index: atom_type for atom_type, arb_index in self.type_mapping.items()
         }
 
-        next_index = max(self.type_mapping.values()) + 1
+        next_index = (
+            max(self.type_mapping.values()) + 1 if len(self.type_mapping) else 1
+        )
         if self.configuration["grouping_level"]["value"] == "molecule":
             for mol_name in self.trajectory.chemical_system.unique_molecules():
                 for atom_name in atoms_in_molecule[mol_name]:
@@ -339,14 +338,15 @@ class SolventAccessibleSurface(IJob):
                     self.grouping_keys[next_index] = new_key
                     next_index += 1
         for result_key in self.type_mapping:
-            self._outputData.add(
-                f"sas/taken/{result_key}",
-                "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
-                axis="sas/axes/time",
-                units="nm2",
-                main_result=False,
-            )
+            if "/" in result_key or result_key in loose_atoms:
+                self._outputData.add(
+                    f"sas/taken/{result_key}",
+                    "LineOutputVariable",
+                    (self.configuration["frames"]["number"],),
+                    axis="sas/axes/time",
+                    units="nm2",
+                    main_result=False,
+                )
         self.grouping_indices = [self.type_mapping[atom] for atom in atom_types]
         if self.configuration["grouping_level"]["value"] == "molecule":
             for mol_name in self.trajectory.chemical_system.unique_molecules():
@@ -412,14 +412,16 @@ class SolventAccessibleSurface(IJob):
         @param x: the output of run_step method.
         @type x: no specific type.
         """
-        total_sas, current_sas, blocked_sas = x
+        total_sas, blocked_sas = x
         # The SAS is updated with the value obtained for frame |index|.
         self._outputData["sas/total"][index] = total_sas
-        self._outputData["sas/free"][index] = current_sas
+        free_sas = total_sas
         for type_index, surface in blocked_sas.items():
             self._outputData[f"sas/taken/{self.grouping_keys[type_index]}"][index] = (
                 surface
             )
+            free_sas -= surface
+        self._outputData["sas/free"][index] = free_sas
 
     def finalize(self):
         """
