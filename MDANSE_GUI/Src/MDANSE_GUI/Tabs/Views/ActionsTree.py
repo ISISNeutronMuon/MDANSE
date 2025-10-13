@@ -47,7 +47,7 @@ class ActionsTree(QTreeView):
             return None
         return super().mousePressEvent(e)
 
-    def on_select_action(self, index):
+    def on_select_action(self, index: QModelIndex):
         model = self.model()
         item = model.itemFromIndex(index)
         text = item.text()

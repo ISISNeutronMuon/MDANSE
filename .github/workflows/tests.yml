@@ -14,10 +14,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
-        # os: [ubuntu-20.04, windows-2019, macOS-11, ubuntu-latest, windows-latest, macOS-latest]
 
-    if: |
-      !contains( github.ref, 'legacy' )
+    if: ${{ !contains( github.ref, 'legacy' ) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,14 +23,51 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install pytest
-        run: python -m pip install pytest pytest-timeout
-
       - name: Install MDANSE
         working-directory: MDANSE
-        run: python -m pip install .
+        run: python -m pip install ".[test]"
 
       - name: Run unit tests
         working-directory: MDANSE
+        run: pytest
+
+
+  test_GUI:
+    name: (${{ matrix.os }}-${{ matrix.python-version }}) Build MDANSE_GUI and run_gui tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+       os: [ubuntu-latest, windows-latest, macOS-latest]
+       python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Disable mandb
+        if: ${{ matrix.os  == 'ubuntu-latest' }}
         run: |
-          pytest
+          # Disable mandb
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - uses: pyvista/setup-headless-display-action@v3
+        if: ${{ matrix.os  == 'ubuntu-latest' }}
+        with:
+          qt: true
+
+      - name: Install MDANSE
+        working-directory: MDANSE
+        run: python -m pip install ".[test]"
+
+      - name: Install MDANSE_GUI
+        working-directory: MDANSE_GUI
+        run: python -m pip install ".[test]"
+
+      - name: Run GUI unit tests
+        working-directory: MDANSE_GUI
+        run: pytest
