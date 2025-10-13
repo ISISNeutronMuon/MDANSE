@@ -43,9 +43,6 @@ from .ElasticIncoherentStructureFactor import (
 from .GaussianDynamicIncoherentStructureFactor import (
     GaussianDynamicIncoherentStructureFactor as GaussianDynamicIncoherentStructureFactor,
 )
-from .GeneralAutoCorrelationFunction import (
-    GeneralAutoCorrelationFunction as GeneralAutoCorrelationFunction,
-)
 from .IJob import IJob as IJob
 from .Infrared import Infrared as Infrared
 from .JobStatus import JobStatus as JobStatus

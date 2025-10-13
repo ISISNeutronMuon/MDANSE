@@ -26,7 +26,6 @@ from .ComboWidget import ComboWidget as ComboWidget
 from .CorrelationFramesWidget import CorrelationFramesWidget as CorrelationFramesWidget
 from .DerivativeOrderWidget import DerivativeOrderWidget as DerivativeOrderWidget
 from .DistHistCutoffWidget import DistHistCutoffWidget as DistHistCutoffWidget
-from .DummyWidget import DummyWidget as DummyWidget
 from .FloatWidget import FloatWidget as FloatWidget
 from .FramesWidget import FramesWidget as FramesWidget
 from .HDFTrajectoryWidget import HDFTrajectoryWidget as HDFTrajectoryWidget
