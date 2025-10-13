@@ -144,6 +144,7 @@ class ViewerControls(QWidget):
     def setViewer(self, viewer: MolecularViewer):
         self._viewer = viewer
         self._splitter.addWidget(viewer)
+        self._splitter.setCollapsible(0, False)
         self._frame_slider.valueChanged.connect(viewer.set_coordinates)
         viewer.new_max_frames.connect(self._frame_slider.setMaximum)
         viewer.new_max_frames.connect(self._frame_selector.setMaximum)
@@ -184,7 +185,7 @@ class ViewerControls(QWidget):
     def createSidePanel(self):
         """Adds widgets for finer control of the playback"""
         absolute_base = QTabWidget(self)
-        absolute_base.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        absolute_base.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
         self._side_base = absolute_base
         base = QWidget(self)
         layout = QVBoxLayout(base)
@@ -325,7 +326,8 @@ class ViewerControls(QWidget):
         base.setLayout(layout)
         self._side_base.addTab(base, "Property viewer")
         # colour changes
-        self._property_widget = PropertyWidget(viewer)
+        self._property_widget = PropertyWidget(viewer, self._side_base.indexOf(base))
+        self._side_base.currentChanged.connect(self._property_widget._active)
         # self._property_widget.initialise_values(viewer)
         layout.addWidget(self._property_widget)
         return self._property_widget
