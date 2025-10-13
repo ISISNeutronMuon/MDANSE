@@ -77,69 +77,6 @@ INTERPOLATION_ORDER[5] = np.array(
 )
 
 
-def correlation(x, y=None, axis=0, sumOverAxis=None, average=None):
-    """Returns the numerical correlation between two signals.
-
-    :param x: the first signal.
-    :type x: NumPy array
-
-    :param y: if not None, the correlation is performed between `x` and `y`. If None, the autocorrelation of `x` will be computed.
-    :type y: NumPy array or None
-
-    :param axis: the axis along which the correlation will be computed.
-    :type axis: int
-
-    :param sumOverAxis: if not None, the computed correlations will be sum over a given axis.
-    :type sumOverAxis: int or None
-
-    :param average: if not None, the computed correlations will be averaged over a given axis.
-    :type average: int or None
-
-    :return: the result of the numerical correlation.
-    :rtype: NumPy array
-
-    :note: The correlation is computed using the FCA algorithm.
-    """
-
-    x = np.array(x)
-
-    n = x.shape[axis]
-
-    X = np.fft.fft(x, 2 * n, axis=axis)
-
-    if y is not None:
-        y = np.array(y)
-        Y = np.fft.fft(y, 2 * n, axis=axis)
-    else:
-        Y = X
-
-    s = [slice(None)] * x.ndim
-
-    s[axis] = slice(0, n, 1)  # the total lenght along 'axis' direction is 2*n
-    # s selects all elements along all other directions,
-    # and only half the elements along the 'axis' direction.
-
-    s = tuple(s)
-
-    corr = np.real(np.fft.ifft(np.conjugate(X) * Y, axis=axis)[s])
-
-    norm = n - np.arange(n)
-
-    s = [np.newaxis] * x.ndim
-    s[axis] = slice(None)
-
-    s = tuple(s)
-
-    corr = corr / norm[s]
-
-    if sumOverAxis is not None:
-        corr = np.sum(corr, axis=sumOverAxis)
-    elif average is not None:
-        corr = np.average(corr, axis=average)
-
-    return corr
-
-
 def normalisation_factor(x: np.ndarray, axis: int = 0) -> np.ndarray:
     """Normalizes the signal by dividing x by the zeroth elements
     along the input axis.
