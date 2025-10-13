@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import time
 import traceback
+from pathlib import Path
 from itertools import count
 from logging import Handler
 from logging.handlers import QueueListener
@@ -26,6 +27,7 @@ from typing import Any, NamedTuple
 from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
+from MDANSE.Framework.Formats import MDAFormat
 from MDANSE.Framework.Converters import Converter
 from MDANSE.Framework.Jobs.JobStatus import JobInfo, JobStates
 from MDANSE.MLogging import FMT, LOG
@@ -316,6 +318,21 @@ class JobHolder(QStandardItemModel):
     def reportError(self, err: str):
         LOG.error(err)
 
+    @staticmethod
+    def safe_mda_file_name(filename: str = "") -> str:
+        path = Path(filename)
+        name = path.name
+        parts = name.split('.')
+
+        if (len(parts) > 1):
+            if (parts[-1] == MDAFormat.extension.strip(".")):
+                name = "_".join(parts[0:-1])
+            else:
+                name = "_".join(parts)
+                name += MDAFormat.extension
+
+        return str(path.parent / name)
+
     @Slot(list)
     def startProcess(
         self, job_vars: tuple[str, dict[str, Any]], load_afterwards: bool = False
@@ -361,6 +378,9 @@ class JobHolder(QStandardItemModel):
         watcher_thread = JobThread(communicator, main_pipe, subprocess_ref)
         communicator.moveToThread(watcher_thread)
         entry_number = next(self.job_number)
+        output_files = job_params["output_files"]
+        if "MDAFormat" in output_files[1]:
+            job_params["output_files"] = (self.safe_mda_file_name(output_files[0]), output_files[1], output_files[2])
         item_th.parameters = job_params
         item_th.free_filename.connect(self.unprotect_filename)
         if load_afterwards:
