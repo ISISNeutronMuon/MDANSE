@@ -133,9 +133,10 @@ def solvent_accessible_surface(
     min_dist = np.min(vdw_radii) + probe_radius_value
     sphere_indices = set(range(len(sphere_points)))
     selected_set = set(selected_indices)
-    blockers = np.unique(grouping_indices)
+    blockers = set(grouping_indices) - {0}
     blocking_indices = {
-        blocker: set(np.where(grouping_indices == blocker)[0]) - selected_set for blocker in blockers
+        blocker: set(np.where(grouping_indices == blocker)[0]) - selected_set
+        for blocker in blockers
     }
     blocked_sas = dict.fromkeys(blockers, 0.0)
     for idx in selected_indices:
@@ -279,7 +280,7 @@ class SolventAccessibleSurface(IJob):
             units="nm2",
             main_result=True,
         )
-        all_indices = self.trajectory.chemical_system.all_indices
+        all_indices = copy.deepcopy(self.trajectory.chemical_system.all_indices)
         atom_types = np.array(self.trajectory.chemical_system.atom_list)
         self.grouping_indices = len(all_indices) * [0]
         loose_atoms = []
@@ -307,10 +308,9 @@ class SolventAccessibleSurface(IJob):
         ].chemical_system.atom_property("vdw_radius")
 
         self.selected_indices = self.trajectory.atom_indices
-        self.all_indices = self.trajectory.chemical_system.all_indices
         atom_types = self.trajectory.chemical_system.atom_list
         self.type_mapping = {
-            atom_type: index + 1 for index, atom_type in enumerate(atom_types)
+            atom_type: index + 1 for index, atom_type in enumerate(set(atom_types))
         }
         self.grouping_keys = {
             arb_index: atom_type for atom_type, arb_index in self.type_mapping.items()
@@ -345,6 +345,7 @@ class SolventAccessibleSurface(IJob):
                             f"<{mol_name}>/{atom_types[at_index]}"
                         ]
         self.grouping_indices = np.array(self.grouping_indices)
+        self.grouping_indices[self.selected_indices] = 0
 
     def run_step(self, index):
         """
