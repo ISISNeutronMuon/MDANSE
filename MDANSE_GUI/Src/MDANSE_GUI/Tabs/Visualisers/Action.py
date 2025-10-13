@@ -75,6 +75,7 @@ from MDANSE_GUI.InputWidgets import (
     TrajectoryFilterWidget,
     UnitCellWidget,
     VectorWidget,
+    WeightsWidget,
 )
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 from MDANSE_GUI.Widgets.DelayedButton import DelayedButton
@@ -100,7 +101,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "MDAnalysisTopologyFileConfigurator": MDAnalysisTopologyFileWidget,
     "FileWithAtomDataConfigurator": InputFileWidget,
     "RunningModeConfigurator": RunningModeWidget,
-    "WeightsConfigurator": ComboWidget,
+    "WeightsConfigurator": WeightsWidget,
     "MultipleChoicesConfigurator": MultipleCombosWidget,
     "MoleculeSelectionConfigurator": MoleculeWidget,
     "AxisSelectionConfigurator": MoleculeAndAxisWidget,

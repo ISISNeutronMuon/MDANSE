@@ -397,7 +397,7 @@ class SettingsDict(SettingsContainer):
 class SettingsFile(SettingsContainer):
     def __init__(self, name: str, settings_path: Path | str = DEFAULT_SETTINGS_PATH):
         super().__init__(name)
-        self._filename = (settings_path / name).with_suffix(".toml")
+        self._filename = (Path(settings_path) / name).with_suffix(".toml")
 
     def default_value(self, group: str, key: str):
         result = self._defaults.get((group, key))

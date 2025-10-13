@@ -16,10 +16,12 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from contextlib import suppress
 
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
+from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 
@@ -42,9 +44,9 @@ class JobTree(QStandardItemModel):
         *args,
         parent_class: IJob | Converter = IJob,
         hidden_levels: int = 0,
+        filter: str | None = None,
         **kwargs,
     ):
-        filter = kwargs.pop("filter", None)
         super().__init__(*args, **kwargs)
 
         self._hidden_levels = hidden_levels
@@ -61,15 +63,16 @@ class JobTree(QStandardItemModel):
 
         self.populateTree(parent_class=parent_class, filter=filter)
 
-    def populateTree(self, parent_class=None, filter=None):
+    def populateTree(
+        self, parent_class: type[SubclassFactory] = IJob, filter: str | None = None
+    ):
         """This function starts the recursive process of scanning
         the registry tree. Only called once on startup.
         """
-        if parent_class is None:
-            parent_class = IJob
         full_dict = parent_class.indirect_subclass_dictionary()
         sorted_keys = sorted(full_dict)
         cat_dicts = defaultdict(list)
+
         for class_name in sorted_keys:
             if not full_dict[class_name].enabled:
                 continue
@@ -82,8 +85,10 @@ class JobTree(QStandardItemModel):
             if filter and cat not in filter:
                 for subcat in vals:
                     self.parentsFromCategories((cat, subcat))
+
         for class_name in sorted_keys:
             class_object = full_dict[class_name]
+
             if class_object.enabled:
                 self.createNode(class_name, class_object, filter)
 
@@ -105,12 +110,10 @@ class JobTree(QStandardItemModel):
         self._nodes[new_number] = new_node
         self._values[new_number] = thing
         self._docstrings[new_number] = thing.__doc__
-        try:
+
+        with suppress(AttributeError, TypeError):
             self._docstrings[new_number] += "\n" + thing.build_doc(use_html_table=True)
-        except AttributeError:
-            pass
-        except TypeError:
-            pass
+
         if hasattr(thing, "category"):
             trimmed_category = thing.category[self._hidden_levels :]
             if filter:
@@ -122,6 +125,7 @@ class JobTree(QStandardItemModel):
                 parent = self.parentsFromCategories(trimmed_category)
         else:
             parent = self.invisibleRootItem()
+
         parent.appendRow(new_node)
 
     def parentsFromCategories(self, category_tuple):

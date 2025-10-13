@@ -133,7 +133,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
         ].transmutation
         self._trajectory.set_transmutation(atom_trans)
         self._trajectory.set_selection(atom_select)
-        atom_types = np.unique(self._trajectory.atom_types)
+        atom_types = self._trajectory.unique_elements
         return any(
             np.isnan(self._trajectory.get_atom_property(atom, property_name))
             for atom in atom_types
