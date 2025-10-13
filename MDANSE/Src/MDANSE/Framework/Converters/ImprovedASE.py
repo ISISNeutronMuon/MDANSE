@@ -101,7 +101,7 @@ class ImprovedASE(Converter):
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
-            "label": "MDANSE trajectory (filename, format)",
+            "label": "MDANSE trajectory (filename, datatype, chunk size, compression, logfile output)",
             "formats": ["MDTFormat"],
             "root": "trajectory_file",
         },

@@ -62,6 +62,6 @@ class DFTB(Forcite):
         {
             "formats": ["MDTFormat"],
             "root": "xtd_file",
-            "label": "MDANSE trajectory (filename, format)",
+            "label": "MDANSE trajectory (filename, datatype, chunk size, compression, logfile output)",
         },
     )

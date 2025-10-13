@@ -58,7 +58,10 @@ class TrajectoryEditor(IJob):
     )
     settings["unit_cell"] = (
         "UnitCellConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "default": (np.eye(3), False)},
+        {
+            "dependencies": {"trajectory": "trajectory"},
+            "default": ([[1, 0, 0], [0, 1, 0], [0, 0, 1]], False),
+        },
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
@@ -88,7 +91,10 @@ class TrajectoryEditor(IJob):
     )
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
-        {"format": "MDTFormat"},
+        {
+            "label": "MDANSE trajectory (filename, datatype, chunk size, compression, logfile output)",
+            "format": "MDTFormat",
+        },
     )
 
     def initialize(self):
@@ -104,7 +110,9 @@ class TrajectoryEditor(IJob):
         ].chemical_system
 
         if self.configuration["unit_cell"]["apply"]:
-            self._new_unit_cell = UnitCell(self.configuration["unit_cell"]["value"])
+            self._new_unit_cell = UnitCell(
+                np.array(self.configuration["unit_cell"]["value"])
+            )
             self._input_trajectory._trajectory._unit_cells = [
                 self._new_unit_cell for _ in range(len(self._input_trajectory))
             ]
