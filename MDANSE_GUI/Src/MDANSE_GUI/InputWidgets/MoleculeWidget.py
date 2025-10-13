@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-from typing import Union
-
 import numpy as np
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QComboBox, QLabel, QPushButton

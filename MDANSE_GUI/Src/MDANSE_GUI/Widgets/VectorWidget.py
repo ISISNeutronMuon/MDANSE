@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator, QIntValidator
 from qtpy.QtWidgets import (
     QHBoxLayout,
