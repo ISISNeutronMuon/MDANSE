@@ -311,7 +311,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 # string and format it
                 try:
                     json_data = json.loads(str_v)
-                    repr_v = '"""' + json.dumps(json_data, indent=4) + '"""'
+                    repr_v = f'"""{json.dumps(json_data, indent=4)}"""'
                     repr_v = repr_v.replace("\n", "\n    ")
                 except json.decoder.JSONDecodeError:
                     repr_v = repr(v)
