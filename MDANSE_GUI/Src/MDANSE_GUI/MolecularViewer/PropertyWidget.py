@@ -4,15 +4,13 @@ from collections import ChainMap
 from collections.abc import Callable, Sequence
 from enum import Enum, auto
 from functools import partial
-from itertools import count
 from typing import Any
 
-import h5py
-from more_itertools import prepend
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import QComboBox, QTableView, QVBoxLayout, QWidget
 
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
@@ -156,7 +154,8 @@ class PropertyWidget(QWidget):
                 self.curr_selection = self._trajectory_props
 
         self._last_prop = None
-        self._prop_selection.addItems(self.curr_selection.keys())
+
+        self._prop_selection.addItems(sorted(filter(None, self.curr_selection)))
 
     @staticmethod
     def _make_items(*items: Any) -> list[QStandardItem]:
@@ -190,7 +189,7 @@ class PropertyWidget(QWidget):
             idx = QStandardItem(str(label))
             self._prop_model.setHorizontalHeaderItem(i, idx)
 
-    def _set_vert_labels(self, *items: str) -> None:
+    def _set_vert_labels(self, *items) -> None:
         """Set vertical labels.
 
         Parameters
@@ -198,7 +197,7 @@ class PropertyWidget(QWidget):
         *items : str
             Labels to use, if not specified atom-indices are used.
         """
-        if items is None:
+        if not items:
             items = range(self.viewer._n_atoms)
 
         for i, label in enumerate(items):
@@ -239,8 +238,14 @@ class PropertyWidget(QWidget):
                     items = self._make_items(atom_name, prop)
                     self._prop_model.appendRow(items)
 
-                self._set_horiz_labels("name", name)
+                header = (
+                    name
+                    if (unit := self._trajectory.units.get(prop_name, "none")) == "none"
+                    else f"{name} ({unit})"
+                )
+                self._set_horiz_labels("name", header)
                 self._set_vert_labels()
+
             case ("trajectory", "charges"):
                 self.update = _Update.TRAJECTORY_ATOM_PROP
 
@@ -281,7 +286,7 @@ class PropertyWidget(QWidget):
                     self._prop_model.appendRow(items)
 
                 self._set_horiz_labels("x", "y", "z")
-                self._set_vert_labels("x", "y", "z")
+                self._set_vert_labels("a", "b", "c")
 
             case ("trajectory", _):
                 n_frames = Const(self.viewer._n_frames)
@@ -365,7 +370,7 @@ class PropertyWidget(QWidget):
                         self._prop_model.item(i, j).setText(str(elem))
             case _Update.TRAJECTORY_ATOM_PROP:
                 for i, elem in enumerate(data):
-                    self._prop_model.item(1, i).setText(str(elem))
+                    self._prop_model.item(i, 1).setText(str(elem))
 
             case _Update.RAW_ATOM_PROP:
                 for i, row in enumerate(data[frame, :, ...]):
