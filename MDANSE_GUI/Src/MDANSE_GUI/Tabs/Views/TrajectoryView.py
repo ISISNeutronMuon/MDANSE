@@ -19,6 +19,7 @@ from qtpy.QtCore import QModelIndex, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QStandardItem
 from qtpy.QtWidgets import QAbstractItemView, QListView, QMenu
 
+from MDANSE_GUI.Tabs.Models.TrajectoryModel import LoadStatus
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
 
@@ -32,6 +33,7 @@ class TrajectoryView(QListView):
         super().__init__(*args, **kwargs)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.clicked.connect(self.item_picked)
+        self.context_menu_item = None
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
@@ -39,14 +41,15 @@ class TrajectoryView(QListView):
             # block right click when it's not on a trajectory
             return
         model = self.model()
-        if not model.item_is_ready(index.row()):
+        if model.item_status(index.row()) in (LoadStatus.EMPTY, LoadStatus.LOADING):
             return
-        item = model.itemData(index)
+        item = model.itemFromIndex(index)
         menu = QMenu()
         self.populateMenu(menu, item)
         menu.exec_(event.globalPos())
 
     def populateMenu(self, menu: QMenu, item: QStandardItem):
+        self.context_menu_item = item
         for action, method in [("Delete", self.deleteNode)]:
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
@@ -54,7 +57,7 @@ class TrajectoryView(QListView):
     @Slot()
     def deleteNode(self):
         model = self.model()
-        index = self.currentIndex()
+        index = self.context_menu_item.index()
         model.removeRow(index.row())
         self.item_details.emit(("", None))
 
