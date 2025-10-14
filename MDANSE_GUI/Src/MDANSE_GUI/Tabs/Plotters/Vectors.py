@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import contextlib
-from itertools import islice
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -243,8 +242,8 @@ class Vectors(Plotter):
                 xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
                 self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
         for axes in self._axes:
-            if plotting_context.use_legend:
-                axes.legend()
+            legend = axes.legend()
+            legend.set_visible(plotting_context.use_legend)
             axes.grid(plotting_context.use_grid)
             axes.relim()
             axes.autoscale()

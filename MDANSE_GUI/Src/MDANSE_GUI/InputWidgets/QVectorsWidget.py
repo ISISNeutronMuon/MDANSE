@@ -266,6 +266,9 @@ class QVectorsWidget(WidgetBase):
             self.helper = self.create_helper()
         if not self.helper.isVisible():
             return
+        if self._configurator.error_status != "OK":
+            self.helper.plot_widget._plotter.plot_blank()
+            return
         model = PlottingContext()
         for qvec_dataset in convert_vectors_to_datasets(self._configurator):
             model.add_dataset(qvec_dataset)
@@ -275,3 +278,8 @@ class QVectorsWidget(WidgetBase):
         self.helper.plot_widget.use_legend()
         self.helper.plot_widget.plot_data()
         model.needs_an_update.connect(self.helper.update_plot)
+
+    def updateValue(self):
+        temp = super().updateValue()
+        self._preview_button.setEnabled(self._configurator.error_status == "OK")
+        return temp
