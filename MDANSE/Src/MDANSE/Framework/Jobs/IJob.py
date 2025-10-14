@@ -304,8 +304,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
             if (
                 isinstance(v, str)
                 and len(str_v) > 40
-                and str_v[0] == "{"
-                and str_v[-1] == "}"
+                and str_v.startswith("{")
+                and str_v.endswith("}")
             ):
                 # if it's a long json string then try to make a multiline
                 # string and format it
