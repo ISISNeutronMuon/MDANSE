@@ -301,7 +301,12 @@ class IJob(Configurable, metaclass=SubclassFactory):
         param_str = ""
         for k, (v, label) in parameters.items():
             str_v = str(v)
-            if len(str_v) > 40 and str_v[0] == "{" and str_v[-1] == "}":
+            if (
+                isinstance(v, str)
+                and len(str_v) > 40
+                and str_v[0] == "{"
+                and str_v[-1] == "}"
+            ):
                 # if it's a long json string then try to make a multiline
                 # string and format it
                 try:
