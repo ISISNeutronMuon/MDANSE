@@ -63,7 +63,9 @@ def compare_trees(
     set[int]
         Indices of free sphere points, indices of blocked sphere points.
     """
-    distance_dict = sphere_tree.sparse_distance_matrix(atom_tree, max_distance=max_dist)
+    distance_dict = sphere_tree.sparse_distance_matrix(
+        atom_tree, max_distance=1.5 * max_dist
+    )
     pair_array = np.array(
         list(distance_dict.keys())
     )  # pairs of (sphere index, atom index)
@@ -129,6 +131,7 @@ def solvent_accessible_surface(
     """
     # Computes the Solvent Accessible Surface Based on the algorithm published by Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
     total_sas = 0.0
+    skin_sas = 0.0
     max_dist = np.max(vdw_radii) + probe_radius_value
     min_dist = np.min(vdw_radii) + probe_radius_value
     sphere_indices = set(range(len(sphere_points)))
@@ -159,7 +162,9 @@ def solvent_accessible_surface(
         scale_factor = (
             4 * np.pi * (vdw_radii[idx] + probe_radius_value) ** 2 / len(sphere_points)
         )
+        fixed_scale_factor = 4 * np.pi * (vdw_radii[idx]) ** 2 / len(sphere_points)
         total_sas += len(total_free) * scale_factor
+        skin_sas += len(total_free) * fixed_scale_factor
         still_free = copy.copy(total_free)
         for blocker, indices in blocking_indices.items():
             blocking_selection = np.where(
@@ -181,7 +186,7 @@ def solvent_accessible_surface(
                 still_free = copy.copy(new_free)
                 if not len(still_free):
                     break
-    return total_sas, blocked_sas
+    return total_sas, blocked_sas, skin_sas
 
 
 class SolventAccessibleSurface(IJob):
@@ -280,6 +285,15 @@ class SolventAccessibleSurface(IJob):
             units="nm2",
             main_result=True,
         )
+        self._outputData.add(
+            "sas/total_closest",
+            "LineOutputVariable",
+            (self.configuration["frames"]["number"],),
+            axis="sas/axes/time",
+            units="nm2",
+            main_result=True,
+            partial_result=True,
+        )
         all_indices = copy.deepcopy(self.trajectory.chemical_system.all_indices)
         atom_types = np.array(self.trajectory.chemical_system.atom_list)
         self.grouping_indices = len(all_indices) * [0]
@@ -366,8 +380,8 @@ class SolventAccessibleSurface(IJob):
         unit_cell = conf._unit_cell
 
         if conf.is_periodic:
-            padding_thickness = 1.05 * max(
-                self.configuration["probe_radius"]["value"], np.max(self.vdwRadii)
+            padding_thickness = 1.05 * (
+                self.configuration["probe_radius"]["value"] + np.max(self.vdwRadii)
             )
             coords, atom_indices = padded_coordinates(
                 conf["coordinates"],
@@ -402,9 +416,10 @@ class SolventAccessibleSurface(IJob):
         @param x: the output of run_step method.
         @type x: no specific type.
         """
-        total_sas, blocked_sas = x
+        total_sas, blocked_sas, skin_sas = x
         # The SAS is updated with the value obtained for frame |index|.
         self._outputData["sas/total"][index] = total_sas
+        self._outputData["sas/total_closest"][index] = skin_sas
         free_sas = total_sas
         for type_index, surface in blocked_sas.items():
             self._outputData[f"sas/taken/{self.grouping_keys[type_index]}"][index] = (
