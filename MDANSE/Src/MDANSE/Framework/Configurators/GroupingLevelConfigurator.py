@@ -18,6 +18,7 @@ from __future__ import annotations
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
 )
+from MDANSE.MolecularDynamics.Trajectory import GroupingLevels
 
 
 class GroupingLevelConfigurator(SingleChoiceConfigurator):
@@ -25,15 +26,11 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
 
     The grouping levels currently supported are:
         * 'atom': no changes are made to the atom selection
-        * 'each atom': no changes are made to the atom selection
         * 'molecule': this changes the atom names in the atom selection so
           that it includes the molecule name that they are a part of e.g.
           <H2_O1>/H for a water molecule's hydrogen atom. Job in mdanse will
           sum results based on the atom names so that results like
           f(q,t)/<H2_O1>/H will be obtained.
-        * 'each molecule': this changes the atom selection so that the atom
-          indices for each molecule will be grouped together. Jobs can then
-          run calculations can be run for each group of indices together.
     """
 
     GROUP_TEMPLATE = "{}/<{}>/{}"
@@ -85,5 +82,5 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
             self.error_status = "The trajectory does not contain molecules."
             return
 
-        self["level"] = value
+        self["level"] = GroupingLevels(value)
         self.error_status = "OK"

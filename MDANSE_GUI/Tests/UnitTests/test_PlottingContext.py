@@ -1,6 +1,7 @@
 import pytest
 import tempfile
 import os
+from pathlib import Path
 
 import h5py
 import numpy as np
@@ -9,8 +10,10 @@ from qtpy import QtGui, QtCore, QtWidgets
 
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 
-file_1d_name = "super_dos.mda"
-file_2d_name = "disf_argon.mda"
+WORK_DIR = Path(__file__).parent
+
+file_1d_name = WORK_DIR / "super_dos.mda"
+file_2d_name = WORK_DIR / "disf_argon.mda"
 
 
 @pytest.fixture()

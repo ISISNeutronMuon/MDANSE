@@ -45,7 +45,8 @@ dependencies = [
 
 [project.optional-dependencies]
 cli=["tqdm"]
-
+test=["pytest", "pytest-timeout"]
+lint=["ruff<0.14"]
 # dynamic = ["version", "description"]
 
 [project.urls]

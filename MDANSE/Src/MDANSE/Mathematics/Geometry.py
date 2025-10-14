@@ -165,20 +165,6 @@ def random_points_on_sphere(radius=1.0, nPoints=100):
     return points
 
 
-def random_points_on_disk(axis, radius=1.0, nPoints=100):
-    axis = Vector(axis).normal().array
-
-    points = np.random.uniform(-radius, radius, 3 * nPoints)
-    points = points.reshape((3, nPoints))
-
-    proj = np.dot(axis, points)
-    proj = np.dot(axis[:, np.newaxis], proj[np.newaxis, :])
-
-    points -= proj
-
-    return points
-
-
 def random_points_on_circle(axis, radius=1.0, nPoints=100):
     axis = Vector(axis).normal().array
 

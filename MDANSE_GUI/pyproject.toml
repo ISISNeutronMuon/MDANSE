@@ -42,7 +42,9 @@ dependencies = [
     "tomlkit"
 ]
 
-# dynamic = ["version", "description"]
+[project.optional-dependencies]
+test=["pytest", "pytest-timeout", "pytest-qt"]
+lint=["ruff<0.14"]
 
 [project.urls]
 homepage = "https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx"
@@ -62,3 +64,10 @@ mdanse_elements_database = "MDANSE_GUI.Scripts.mdanse_elements_database:main"
 mdanse_gui = "MDANSE_GUI.Scripts.mdanse_gui:main"
 mdanse_periodic_table = "MDANSE_GUI.Scripts.mdanse_periodic_table:main"
 mdanse_units_editor = "MDANSE_GUI.Scripts.mdanse_units_editor:main"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = "Tests"
+addopts = "--import-mode=importlib"
+timeout = 240
+qt_api = "pyqt6"

@@ -22,7 +22,7 @@ from pathlib import PurePath
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.PlotDataModel import PlotDataModel
@@ -90,25 +90,11 @@ class PlotSelectionTab(GeneralTab):
             self._session.protect_filename(fname)
 
     @classmethod
-    def standard_instance(cls):
-        the_tab = cls(
-            window,
-            name="Plotting",
-            session=LocalSession(),
-            model=PlotDataModel(),
-            view=PlotDataView(),
-            visualiser=DataPlotter(),
-            layout=partial(MultiPanel, left_panels=[PlotDataInfo()]),
-            label_text=label_text,
-        )
-        return the_tab
-
-    @classmethod
     def gui_instance(
         cls,
         parent: QWidget,
         name: str,
-        session: LocalSession,
+        session: Session,
         settings,
         logger,
         **kwargs,
@@ -122,22 +108,19 @@ class PlotSelectionTab(GeneralTab):
             model=kwargs.get("model", PlotDataModel()),
             view=PlotDataView(),
             visualiser=DataPlotter(),
-            layout=partial(MultiPanel, left_panels=[PlotDataInfo()]),
+            layout=partial(
+                MultiPanel,
+                left_panels=[
+                    PlotDataInfo(
+                        header="MDANSE Plotting",
+                        footer="Look up our "
+                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                        + " page.",
+                    )
+                ],
+            ),
             label_text=label_text,
         )
         the_tab._visualiser._unit_lookup = the_tab
         the_tab._view.free_name.connect(session.free_filename)
         return the_tab
-
-
-if __name__ == "__main__":
-    import sys
-
-    from qtpy.QtWidgets import QApplication, QMainWindow
-
-    app = QApplication(sys.argv)
-    window = QMainWindow()
-    the_tab = PlotSelectionTab.standard_instance()
-    window.setCentralWidget(the_tab._core)
-    window.show()
-    app.exec()

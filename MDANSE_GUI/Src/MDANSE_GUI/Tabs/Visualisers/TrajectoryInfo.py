@@ -16,11 +16,8 @@
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING
 
-import numpy as np
-from qtpy.QtCore import Signal, Slot
-from qtpy.QtWidgets import QTextBrowser
+from qtpy.QtCore import Slot
 
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import (
@@ -28,25 +25,15 @@ from MDANSE.MolecularDynamics.Trajectory import (
     trajectory_summary,
 )
 
-if TYPE_CHECKING:
-    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from .TextInfo import TextInfo
 
 
-class TrajectoryInfo(QTextBrowser):
-    error = Signal(str)
-
-    def __init__(self, *args, **kwargs):
-        self._header = kwargs.pop("header", "")
-        self._footer = kwargs.pop("footer", "")
-        super().__init__(*args, **kwargs)
-        self.setOpenExternalLinks(True)
-
+class TrajectoryInfo(TextInfo):
     @Slot(object)
     def update_panel(self, data: tuple):
         fullpath, incoming = data
         if incoming is None:
-            self.clear()
-            self.setHtml(fullpath)
+            self.setHtml(self.filter(fullpath))
             return
         try:
             text = trajectory_summary(incoming)  # this is from a trajectory object
@@ -57,26 +44,13 @@ class TrajectoryInfo(QTextBrowser):
                 err,
                 traceback.format_exc(),
             )
-            self.clear()
+            self.setHtml("")
             return
         try:
             cs = incoming.chemical_system
         except AttributeError:
             LOG.error("Trajectory %s has no chemical system", incoming)
         else:
-            text += self.summarise_chemical_system(cs)
+            text += chemical_system_summary(cs)
         filtered = self.filter(text)
         self.setHtml(filtered)
-
-    def summarise_chemical_system(self, cs: ChemicalSystem):
-        return chemical_system_summary(cs)
-
-    def filter(self, some_text: str, line_break="<br />"):
-        new_text = ""
-        if self._header:
-            new_text += self._header + line_break
-        if some_text is not None:
-            new_text += line_break.join([x.strip() for x in some_text.split("\n")])
-        if self._footer:
-            new_text += line_break + self._footer
-        return new_text

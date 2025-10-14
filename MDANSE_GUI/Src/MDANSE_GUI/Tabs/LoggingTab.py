@@ -21,7 +21,7 @@ from qtpy.QtCore import Slot, qInstallMessageHandler
 from qtpy.QtWidgets import QComboBox, QWidget
 
 from MDANSE.MLogging import FMT, LOG
-from MDANSE_GUI.Session.LocalSession import LocalSession
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.SinglePanel import SinglePanel
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
@@ -96,22 +96,11 @@ class LoggingTab(GeneralTab):
         self._visualiser.append_text(f"Qt log message (type={m_type})=" + m_text)
 
     @classmethod
-    def standard_instance(cls):
-        the_tab = cls(
-            window,
-            name="Logger",
-            visualiser=TextInfo(),
-            layout=SinglePanel,
-            label_text=log_tab_label,
-        )
-        return the_tab
-
-    @classmethod
     def gui_instance(
         cls,
         parent: QWidget,
         name: str,
-        session: LocalSession,
+        session: Session,
         settings,
         logger,
         **kwargs,
@@ -127,22 +116,3 @@ class LoggingTab(GeneralTab):
             label_text=log_tab_label,
         )
         return the_tab
-
-
-if __name__ == "__main__":
-    import sys
-
-    from qtpy.QtWidgets import QApplication, QMainWindow, QVBoxLayout
-
-    app = QApplication(sys.argv)
-    window = QMainWindow()
-    the_tab = LoggingTab(
-        window,
-        name="RunningJobs",
-        visualiser=TextInfo(),
-        layout=SinglePanel,
-        label_text=log_tab_label,
-    )
-    window.setCentralWidget(the_tab._core)
-    window.show()
-    app.exec()

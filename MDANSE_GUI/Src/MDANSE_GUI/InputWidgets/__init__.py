@@ -70,4 +70,5 @@ from .StringWidget import StringWidget as StringWidget
 from .TrajectoryFilterWidget import TrajectoryFilterWidget as TrajectoryFilterWidget
 from .UnitCellWidget import UnitCellWidget as UnitCellWidget
 from .VectorWidget import VectorWidget as VectorWidget
+from .WeightsWidget import WeightsWidget as WeightsWidget
 from .WidgetBase import WidgetBase as WidgetBase

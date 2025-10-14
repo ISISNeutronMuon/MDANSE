@@ -170,7 +170,7 @@ def test_rmsf(generate_benchmarks, tmp_path, parameters, traj_info):
         temp_name = result_file.with_suffix("")
 
     parameters["trajectory"] = traj_info[1]
-    parameters["grouping_level"] = "each molecule"
+    parameters["grouping_level"] = "molecule"
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
 
     rmsf = IJob.create("RootMeanSquareFluctuation")

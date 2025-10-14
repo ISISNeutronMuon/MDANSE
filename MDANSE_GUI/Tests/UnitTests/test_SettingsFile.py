@@ -6,7 +6,7 @@ import h5py
 import numpy as np
 
 
-from MDANSE_GUI.Session.StructuredSession import SettingsFile, SettingsGroup
+from MDANSE_GUI.Session.Settings import SettingsFile, SettingsGroup
 
 
 @pytest.fixture(scope="module")

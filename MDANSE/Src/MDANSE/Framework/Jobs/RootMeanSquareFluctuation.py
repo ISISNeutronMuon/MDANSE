@@ -26,8 +26,8 @@ class RootMeanSquareFluctuation(IJob):
 
     The root mean square fluctuation (RMSF) for a set of atoms is similar to the
     square root of the mean square displacement (MSD), except that it is spatially
-    resolved (by atom/residue/etc) rather than time resolved. It reveals the
-    dynamical heterogeneity of the molecule over the course of a MD simulation.
+    resolved rather than time resolved. It reveals the dynamical heterogeneity
+    of the molecule over the course of an MD simulation.
 
     As opposed to most analysis types, the result is a single number per atom index.
     """
@@ -50,8 +50,8 @@ class RootMeanSquareFluctuation(IJob):
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
         {
-            "choices": ["each atom", "each molecule"],
-            "default": "each atom",
+            "choices": ["atom", "molecule"],
+            "default": "atom",
             "dependencies": {
                 "trajectory": "trajectory",
             },
@@ -65,92 +65,111 @@ class RootMeanSquareFluctuation(IJob):
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
-        """
-        Initialize the input parameters and analysis self variables
-        """
+        """Initialize the input parameters and analysis self variables"""
         super().initialize()
+        self.numberOfSteps = len(self.trajectory.atom_indices)
 
-        self.group_molecules = (
-            self.configuration["grouping_level"]["value"] != "each atom"
-        )
+        self.group_molecules = self.configuration["grouping_level"]["value"] != "atom"
+        self.ele_idxs = {}
 
-        # Will store the indices.
-        if not self.group_molecules:
-            self._outputData.add(
-                "rmsf/axes/indices",
-                "LineOutputVariable",
-                self.trajectory.atom_indices,
-            )
-            self.numberOfSteps = len(self.trajectory.atom_indices)
-        else:
-            self._outputData.add(
-                "rmsf/axes/indices",
-                "LineOutputVariable",
-                list(range(len(self.trajectory.group_lookup))),
-            )
-            self.numberOfSteps = len(self.trajectory.group_lookup)
-            self.cluster_lookup = list(self.trajectory.group_lookup.values())
+        self._names = self.trajectory.atom_names
 
-        # Will store the mean square fluctuation evolution.
         self._outputData.add(
-            "rmsf/rmsf",
+            "rmsf/axes/indices/all",
+            "LineOutputVariable",
+            self.trajectory.atom_indices,
+        )
+        self._outputData.add(
+            "rmsf/all",
             "LineOutputVariable",
             (self.numberOfSteps,),
-            axis="rmsf/axes/indices",
+            axis="rmsf/axes/indices/all",
             units="nm",
             main_result=True,
         )
 
-        self._atoms = self.trajectory.atom_names
+        for names in self.trajectory.unique_names:
+            idxs = [i for i in self.trajectory.atom_indices if names == self._names[i]]
+            self.ele_idxs[names] = idxs
+            self._outputData.add(
+                f"rmsf/axes/indices/{names}",
+                "LineOutputVariable",
+                idxs,
+            )
+            self._outputData.add(
+                f"rmsf/{names}",
+                "LineOutputVariable",
+                (len(idxs),),
+                axis=f"rmsf/axes/indices/{names}",
+                units="nm",
+            )
 
     def run_step(self, index):
+        """Runs a single step of the job.
+
+        Parameters
+        ----------
+        index : int
+            The atom index.
+
+        Returns
+        -------
+        set[int, float]
+            The atom index and the calculated root mean square
+            fluctuation for that atom.
         """
-        Runs a single step of the job.\n
-
-        :Parameters:
-            #. index (int): The index of the step.
-        :Returns:
-            #. index (int): The index of the step.
-            #. rmsf (np.array): the calculated root mean square fluctuation for atom index
-        """
-        # read the particle trajectory
-        if not self.group_molecules:
-            atom_index = self.trajectory.atom_indices[index]
-
-            series = self.trajectory.read_atomic_trajectory(
-                atom_index,
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
-            )
-        else:
-            cluster_indices = self.cluster_lookup[index]
-
-            series = self.trajectory.read_com_trajectory(
-                cluster_indices,
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
-            )
-
+        atom_index = self.trajectory.atom_indices[index]
+        series = self.trajectory.read_atomic_trajectory(
+            atom_index,
+            first=self.configuration["frames"]["first"],
+            last=self.configuration["frames"]["last"] + 1,
+            step=self.configuration["frames"]["step"],
+        )
         rmsf = mean_square_fluctuation(series, root=True)
-
         return index, rmsf
 
     def combine(self, index, x):
-        """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
-        """
+        """Combines returned results of run_step.
 
-        self._outputData["rmsf/rmsf"][index] = x
+        Parameters
+        ----------
+        index : int
+            The atom index.
+        x : float
+            The RMSF results for the atom.
+        """
+        self._outputData["rmsf/all"][index] = x
+        name = self._names[index]
+        idxs = self.ele_idxs[name]
+        self._outputData[f"rmsf/{name}"][idxs.index(index)] = x
 
     def finalize(self):
+        """Finalizes the calculations (e.g. averaging the total term, output
+        files creations ...).
         """
-        Finalizes the calculations (e.g. averaging the total term, output files creations ...).
-        """
+        if self.group_molecules:
+            for grp in self.trajectory.group_lookup:
+                eles = self.trajectory.group_elements(grp)
+                idxs = []
+                for ele in eles:
+                    idxs += self.ele_idxs[f"<{grp}>/{ele}"]
+                idxs = sorted(idxs)
+                self._outputData.add(
+                    f"rmsf/axes/indices/<{grp}>/all",
+                    "LineOutputVariable",
+                    idxs,
+                )
+                self._outputData.add(
+                    f"rmsf/<{grp}>/all",
+                    "LineOutputVariable",
+                    (len(idxs),),
+                    axis=f"rmsf/axes/indices/<{grp}>/all",
+                    units="nm",
+                )
+                for i, idx in enumerate(idxs):
+                    self._outputData[f"rmsf/<{grp}>/all"][i] = self._outputData[
+                        "rmsf/all"
+                    ][idx]
 
         # Write the output variables.
         self._outputData.write(
