@@ -181,7 +181,7 @@ class TrajectoryModel(QStandardItemModel):
         retcode = super().removeRow(row, parent)
         instance = self._trajectory_instances.pop(node_number)
         filename = self._trajectory_paths.pop(node_number)
-        _ = self._trajectory_status.pop(node_number)
+        self._trajectory_status.pop(node_number)
         if instance:
             instance.close()
         self.free_name.emit(str(filename))

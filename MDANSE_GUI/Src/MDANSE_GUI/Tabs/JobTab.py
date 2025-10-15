@@ -19,7 +19,14 @@ from functools import partial
 
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QFontMetrics
-from qtpy.QtWidgets import QApplication, QComboBox, QLabel, QProxyStyle, QStyle, QWidget
+from qtpy.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QLabel,
+    QProxyStyle,
+    QSizePolicy,
+    QWidget,
+)
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.Session import Session
@@ -44,6 +51,8 @@ in your analysis by setting the "instrument" name to the
 one you defined. The parameters saved under the instrument name
 will be used as initial values when you switch to a new analysis type.
 """
+
+COMBO_BOX_LENGTH = 32
 
 
 class ComboStyle(QProxyStyle):
@@ -78,16 +87,23 @@ class JobTab(GeneralTab):
         self._instrument_index = -1
         self._trajectory_combo = QComboBox()
         self._trajectory_combo.setEditable(False)
-        self._combo_style = ComboStyle(
-            QApplication.style().name(), metrics=self._trajectory_combo.fontMetrics()
+        self._trajectory_combo.setMinimumContentsLength(COMBO_BOX_LENGTH)
+        self._trajectory_combo.setSizePolicy(
+            QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred
         )
-        self._trajectory_combo.setStyle(self._combo_style)
+        self._trajectory_combo.setStyle(
+            ComboStyle(
+                QApplication.style().name(),
+                metrics=self._trajectory_combo.fontMetrics(),
+            )
+        )
         self._trajectory_combo.currentIndexChanged.connect(self.set_current_trajectory)
         if combo_model is not None:
             self._trajectory_combo.setModel(combo_model)
         combo_model.finished_loading.connect(self.reload_trajectory)
         self._instrument_combo = QComboBox()
         self._instrument_combo.setEditable(False)
+        self._instrument_combo.setMinimumContentsLength(COMBO_BOX_LENGTH)
         self._instrument_combo.currentIndexChanged.connect(self.set_current_instrument)
 
         if instrument_model is not None:
