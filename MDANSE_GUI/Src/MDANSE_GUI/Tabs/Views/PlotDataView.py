@@ -103,7 +103,7 @@ def convert_vectors_to_datasets(
     mean_q = np.array([np.mean(qvecs) for qvecs in modq_per_shell])
     mean_q_yerr = np.array([np.std(qvecs) for qvecs in modq_per_shell])
     qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
-    q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 1.0
+    q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 0.1
     bin_step = 0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell])
     bin_step = 0.2 * q_step if abs(bin_step) < 1e-09 else max(bin_step, 0.05 * q_step)
     common_bins = np.arange(max(0.0, qmin), qmax + 1.1 * bin_step, bin_step)

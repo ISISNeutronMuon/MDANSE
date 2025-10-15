@@ -1,14 +1,24 @@
-import pytest
+from __future__ import annotations
+
+from pathlib import Path
 
 import h5py
 import numpy as np
+import pytest
 
-from MDANSE_GUI.Tabs.Views.PlotDataView import convert_vectors_to_datasets, shell_to_modq
+from MDANSE_GUI.Tabs.Views.PlotDataView import (
+    convert_vectors_to_datasets,
+    shell_to_modq,
+)
 
-file_name = "qvec_dcsf.mda"
+WORK_DIR = Path(__file__).parent
+
+file_name = WORK_DIR / "qvec_dcsf.mda"
+
 
 VEC_PER_SHELL = 20
 SHELL_MODQ = (10, 20, 30, 40, 50)
+
 
 @pytest.fixture()
 def file_qvec():
@@ -35,4 +45,3 @@ def test_convert_vectors_to_datasets_vecperq(file_qvec):
     nvec_per_q, _, _ = convert_vectors_to_datasets(file_qvec)
     assert len(nvec_per_q.data) == len(SHELL_MODQ)
     assert all(nvec_per_q.data == VEC_PER_SHELL)
-
