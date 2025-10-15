@@ -270,12 +270,14 @@ def make_grouping_indices(
     grouping_indices = len(all_indices) * [0]
     grouping_indices = [type_mapping[atom] for atom in atom_types]
     if grouping_level == "molecule":
+        reference_set = set(all_indices) - set(selected_indices)
         for mol_name in set(cs_clusters.keys()):
             for mol_instance in cs_clusters[mol_name]:
-                for at_index in mol_instance:
-                    grouping_indices[at_index] = type_mapping[
-                        f"<{mol_name}>/{atom_types[at_index]}"
-                    ]
+                if reference_set.issuperset(mol_instance):
+                    for at_index in mol_instance:
+                        grouping_indices[at_index] = type_mapping[
+                            f"<{mol_name}>/{atom_types[at_index]}"
+                        ]
     grouping_indices = np.array(grouping_indices)
     grouping_indices[selected_indices] = 0
     return grouping_indices

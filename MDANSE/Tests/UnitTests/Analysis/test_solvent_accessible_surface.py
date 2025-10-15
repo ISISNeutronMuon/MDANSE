@@ -11,9 +11,13 @@ from test_helpers.paths import CONV_DIR
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Jobs.SolventAccessibleSurface import (
     compare_trees,
+    create_type_mapping,
+    identify_loose_atoms,
+    make_grouping_indices,
     solvent_accessible_surface,
 )
 from MDANSE.Mathematics.Geometry import generate_sphere_points
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 N_SPHERE_POINTS = 500
 
@@ -74,6 +78,22 @@ def sas_co2_molecules(tmp_path_factory):
     with h5py.File(out_file) as results:
         sas_values = {"total": results["sas/total"][:], "free": results["sas/free"][:]}
     return sas_values
+
+
+@pytest.fixture(scope="module")
+def atoms_in_molecule():
+    traj_instance = Trajectory(CONV_DIR / "fake_co2_molecules.mdt")
+    molecule_atoms, _ = identify_loose_atoms(traj_instance, "molecule")
+    traj_instance.close()
+    return molecule_atoms
+
+
+@pytest.fixture(scope="module")
+def loose_atoms():
+    traj_instance = Trajectory(CONV_DIR / "fake_co2_molecules.mdt")
+    _, loose_atoms = identify_loose_atoms(traj_instance, "atom")
+    traj_instance.close()
+    return loose_atoms
 
 
 def capsule_surface(radii: Sequence[float], length: float) -> float:
@@ -142,6 +162,92 @@ def test_compare_trees_blocks_half(sphere_tree, atom_tree):
         0.1,  # probe particle radius
     )
     assert len(free_sphere_points) == int(N_SPHERE_POINTS / 2)
+
+
+def test_identify_loose_atoms_atom_grouping():
+    traj_instance = Trajectory(CONV_DIR / "fake_co2_molecules.mdt")
+    molecule_atoms, loose_atoms = identify_loose_atoms(traj_instance, "atom")
+    traj_instance.close()
+    assert len(molecule_atoms) == 0
+    for atom in ["O", "C"]:
+        assert atom in loose_atoms
+
+
+def test_identify_loose_atoms_atom_grouping():
+    traj_instance = Trajectory(CONV_DIR / "fake_co2_molecules.mdt")
+    molecule_atoms, loose_atoms = identify_loose_atoms(traj_instance, "molecule")
+    traj_instance.close()
+    assert len(loose_atoms) == 0
+    for atom in ["O", "C"]:
+        assert atom in molecule_atoms["C1_O2"]
+
+
+def test_create_type_mapping_atom_grouping():
+    type_mapping, grouping_keys = create_type_mapping(
+        ["C", "O", "O", "C", "O", "O"],
+        "atom",
+    )
+    for atom in ["C", "O"]:
+        assert atom in type_mapping
+    for key, value in type_mapping.items():
+        assert grouping_keys[value] == key
+
+
+def test_create_type_mapping_molecule_grouping(atoms_in_molecule):
+    type_mapping, grouping_keys = create_type_mapping(
+        ["C", "O", "O", "C", "O", "O"],
+        "molecule",
+        ["C1_O2"],
+        atoms_in_molecule=atoms_in_molecule,
+    )
+    for atom in ["C", "O"]:
+        assert atom in type_mapping
+    for key, value in type_mapping.items():
+        assert grouping_keys[value] == key
+
+
+def test_make_grouping_indices_atom_grouping():
+    selection = list(range(3))
+    grouping_indices = make_grouping_indices(
+        list(range(6)),
+        selection,
+        ["C", "O", "O", "C", "O", "O"],
+        {"O": 1, "C": 2},
+        "atom",
+        {"C1_O2": [[0, 1, 2], [3, 4, 5]]},
+    )
+    np.testing.assert_allclose(grouping_indices[selection], 0)
+    np.testing.assert_allclose(grouping_indices, [0, 0, 0, 2, 1, 1])
+
+
+def test_make_grouping_indices_molecule_grouping():
+    selection = list(range(3))
+    grouping_indices = make_grouping_indices(
+        list(range(6)),
+        selection,
+        ["C", "O", "O", "C", "O", "O"],
+        {"O": 1, "C": 2, "<C1_O2>/O": 3, "<C1_O2>/C": 4},
+        "molecule",
+        {"C1_O2": [[0, 1, 2], [3, 4, 5]]},
+    )
+    print(grouping_indices)
+    np.testing.assert_allclose(grouping_indices[selection], 0)
+    np.testing.assert_allclose(grouping_indices, [0, 0, 0, 4, 3, 3])
+
+
+def test_make_grouping_indices_molecule_grouping_incomplete_selection():
+    selection = list(range(2))
+    grouping_indices = make_grouping_indices(
+        list(range(6)),
+        selection,
+        ["C", "O", "O", "C", "O", "O"],
+        {"O": 1, "C": 2, "<C1_O2>/O": 3, "<C1_O2>/C": 4},
+        "molecule",
+        {"C1_O2": [[0, 1, 2], [3, 4, 5]]},
+    )
+    print(grouping_indices)
+    np.testing.assert_allclose(grouping_indices[selection], 0)
+    np.testing.assert_allclose(grouping_indices, [0, 0, 1, 4, 3, 3])
 
 
 def test_sas_blocked_is_positive_for_same_atoms():
