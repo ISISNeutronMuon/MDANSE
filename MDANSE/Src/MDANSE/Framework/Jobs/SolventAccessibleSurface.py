@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import collections
 import copy
+from collections.abc import Sequence
 
 import numpy as np
 import numpy.typing as npt
@@ -25,6 +26,7 @@ from scipy.spatial import KDTree
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import generate_sphere_points
 from MDANSE.MolecularDynamics.Configuration import padded_coordinates
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 def compare_trees(
@@ -189,6 +191,130 @@ def solvent_accessible_surface(
     return total_sas, blocked_sas, skin_sas
 
 
+def create_type_mapping(
+    atom_types: Sequence[str],
+    grouping_level: str,
+    molecule_names: Sequence[str] | None = None,
+    atoms_in_molecule: dict[str, Sequence[str]] | None = None,
+) -> tuple[dict[str, int], dict[int, str]]:
+    """Create the arbitrary indices used for grouping in the SAS analysis.
+
+    This function returns two dictionaries, one mapping atom type strings
+    to numbers, and other mapping numbers to string keys that are also
+    used in the analysis output data.
+
+    Parameters
+    ----------
+    atom_types : Sequence[str]
+        List of all atom types given as str, one entry per atom.
+    grouping_level : str
+        Either "atom" or "molecule".
+    molecule_names : Sequence[str] | None, optional
+        Unique molecule names, not needed for "atom" grouping, by default None
+    atoms_in_molecule : dict[str, Sequence[str]] | None, optional
+        Atom types in each molecule type, not needed for "atom" grouping, by default None
+
+    Returns
+    -------
+    tuple[dict[str, int], dict[int, str]]
+        Two dicts: {atom_type: unique_number} pairs and {unique_number: output_data_key} pairs.
+    """
+    type_mapping = {
+        atom_type: index + 1 for index, atom_type in enumerate(set(atom_types))
+    }
+    grouping_keys = {
+        arb_index: atom_type for atom_type, arb_index in type_mapping.items()
+    }
+
+    next_index = max(type_mapping.values()) + 1 if type_mapping else 1
+    if grouping_level == "molecule":
+        for mol_name in molecule_names:
+            for atom_name in atoms_in_molecule[mol_name]:
+                new_key = f"<{mol_name}>/{atom_name}"
+                type_mapping[new_key] = next_index
+                grouping_keys[next_index] = new_key
+                next_index += 1
+    return type_mapping, grouping_keys
+
+
+def make_grouping_indices(
+    all_indices: Sequence[int],
+    selected_indices: Sequence[int],
+    atom_types: Sequence[str],
+    type_mapping: dict[str, int],
+    grouping_level: str,
+    cs_clusters: dict[str, list[int]],
+) -> npt.NDArray[int]:
+    """Assign each atom the number of its corresponding dataset in the output data.
+
+    Parameters
+    ----------
+    all_indices : Sequence[int]
+        List of all atom indices.
+    selected_indices : Sequence[int]
+        List of indices in the atom selection
+    atom_types : Sequence[str]
+        List of chemical element symbols for each atom
+    type_mapping : dict[str, int]
+        The dictionary of unique indices for every atom type.
+    grouping_level : str
+        Either "atom" or "molecule"
+    cs_clusters : dict[str, list[int]]
+        The _clusters object from Trajectory.chemical_system.
+
+    Returns
+    -------
+    npt.NDArray[int]
+        For each atom, a number representing its group in the output data.
+    """
+    grouping_indices = len(all_indices) * [0]
+    grouping_indices = [type_mapping[atom] for atom in atom_types]
+    if grouping_level == "molecule":
+        for mol_name in set(cs_clusters.keys()):
+            for mol_instance in cs_clusters[mol_name]:
+                for at_index in mol_instance:
+                    grouping_indices[at_index] = type_mapping[
+                        f"<{mol_name}>/{atom_types[at_index]}"
+                    ]
+    grouping_indices = np.array(grouping_indices)
+    grouping_indices[selected_indices] = 0
+    return grouping_indices
+
+
+def identify_loose_atoms(
+    trajectory: Trajectory, grouping_level: str
+) -> tuple[dict[str, list[str]], Sequence[str]]:
+    """Find all the atoms that need to be included in the output outside of molecules.
+
+    Parameters
+    ----------
+    trajectory : Trajectory
+        The current trajectory with all the selection/transmutation applied.
+    grouping_level : str
+        Either "atom" or "molecule"
+
+    Returns
+    -------
+    tuple[dict[str, list[str]], Sequence[str]]
+        Dictionary of atom types in each molecule type, list of atom types outside molecules
+    """
+    all_indices = copy.deepcopy(trajectory.chemical_system.all_indices)
+    atom_types = np.array(trajectory.chemical_system.atom_list)
+    loose_atoms = []
+    atoms_in_molecule = {}
+    if grouping_level == "molecule":
+        for mol_name in trajectory.chemical_system.unique_molecules():
+            atoms_in_molecule.setdefault(mol_name, set())
+            for mol_instance in trajectory.chemical_system._clusters[mol_name]:
+                all_indices -= set(mol_instance)
+                atoms_in_molecule[mol_name].update(atom_types[mol_instance])
+    for atom_name in {
+        trajectory.chemical_system.atom_list[index] for index in all_indices
+    }:
+        loose_atoms.append(atom_name)
+    return atoms_in_molecule, loose_atoms
+
+
 class SolventAccessibleSurface(IJob):
     """Calculates the accessible surface of the selected atoms.
 
@@ -294,21 +420,10 @@ class SolventAccessibleSurface(IJob):
             main_result=True,
             partial_result=True,
         )
-        all_indices = copy.deepcopy(self.trajectory.chemical_system.all_indices)
-        atom_types = np.array(self.trajectory.chemical_system.atom_list)
-        self.grouping_indices = len(all_indices) * [0]
-        loose_atoms = []
-        atoms_in_molecule = {}
-        if self.configuration["grouping_level"]["value"] == "molecule":
-            for mol_name in self.trajectory.chemical_system.unique_molecules():
-                atoms_in_molecule.setdefault(mol_name, set())
-                for mol_instance in self.trajectory.chemical_system._clusters[mol_name]:
-                    all_indices -= set(mol_instance)
-                    atoms_in_molecule[mol_name].update(atom_types[mol_instance])
-        for atom_name in {
-            self.trajectory.chemical_system.atom_list[index] for index in all_indices
-        }:
-            loose_atoms.append(atom_name)
+
+        atoms_in_molecule, loose_atoms = identify_loose_atoms(
+            self.trajectory, self.configuration["grouping_level"]["value"]
+        )
 
         # Generate the sphere points that will be used to evaluate the sas per atom.
         self.spherePoints = np.array(
@@ -323,23 +438,14 @@ class SolventAccessibleSurface(IJob):
 
         self.selected_indices = self.trajectory.atom_indices
         atom_types = self.trajectory.chemical_system.atom_list
-        self.type_mapping = {
-            atom_type: index + 1 for index, atom_type in enumerate(set(atom_types))
-        }
-        self.grouping_keys = {
-            arb_index: atom_type for atom_type, arb_index in self.type_mapping.items()
-        }
 
-        next_index = (
-            max(self.type_mapping.values()) + 1 if len(self.type_mapping) else 1
+        self.type_mapping, self.grouping_keys = create_type_mapping(
+            atom_types,
+            self.configuration["grouping_level"]["value"],
+            molecule_names=set(self.trajectory.chemical_system._clusters),
+            atoms_in_molecule=atoms_in_molecule,
         )
-        if self.configuration["grouping_level"]["value"] == "molecule":
-            for mol_name in self.trajectory.chemical_system.unique_molecules():
-                for atom_name in atoms_in_molecule[mol_name]:
-                    new_key = f"<{mol_name}>/{atom_name}"
-                    self.type_mapping[new_key] = next_index
-                    self.grouping_keys[next_index] = new_key
-                    next_index += 1
+
         for result_key in self.type_mapping:
             if "/" in result_key or result_key in loose_atoms:
                 self._outputData.add(
@@ -350,16 +456,14 @@ class SolventAccessibleSurface(IJob):
                     units="nm2",
                     main_result=False,
                 )
-        self.grouping_indices = [self.type_mapping[atom] for atom in atom_types]
-        if self.configuration["grouping_level"]["value"] == "molecule":
-            for mol_name in self.trajectory.chemical_system.unique_molecules():
-                for mol_instance in self.trajectory.chemical_system._clusters[mol_name]:
-                    for at_index in mol_instance:
-                        self.grouping_indices[at_index] = self.type_mapping[
-                            f"<{mol_name}>/{atom_types[at_index]}"
-                        ]
-        self.grouping_indices = np.array(self.grouping_indices)
-        self.grouping_indices[self.selected_indices] = 0
+        self.grouping_indices = make_grouping_indices(
+            self.trajectory.chemical_system.all_indices,
+            self.selected_indices,
+            atom_types,
+            self.type_mapping,
+            self.configuration["grouping_level"]["value"],
+            self.trajectory.chemical_system._clusters,
+        )
 
     def run_step(self, index):
         """
