@@ -41,7 +41,6 @@ dependencies = [
     "mdtraj",
     "networkx",
     "more-itertools",
-    "black",
 ]
 
 [project.optional-dependencies]

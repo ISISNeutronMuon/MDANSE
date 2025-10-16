@@ -33,7 +33,6 @@ from multiprocessing import Queue
 from pathlib import Path
 from typing import Any
 
-import black
 from more_itertools import consumer, first_true
 
 from MDANSE import PLATFORM
@@ -58,8 +57,7 @@ RUNSCRIPT = """\
 ########################################################
 
 parameters = {{
-{param_str}
-}}
+{param_str}}}
 
 ########################################################
 # Setup and run the analysis                           #
@@ -322,15 +320,14 @@ class IJob(Configurable, metaclass=SubclassFactory):
             )
 
         with open(jobFile, "w") as f:
-            script = RUNSCRIPT.format(
+            f.write(RUNSCRIPT.format(
                 executable=sys.executable,
                 import_line=cls.runscript_import_line,
                 param_str=param_str,
                 parent=cls.runscript_import_line.split(" ")[-1],
                 var_name=cls.__name__.lower(),
                 job_name=cls.__name__,
-            )
-            f.write(black.format_str(script, mode=black.Mode()))
+            ))
 
         os.chmod(jobFile, stat.S_IRWXU)
 
