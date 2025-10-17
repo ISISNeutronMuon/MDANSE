@@ -19,6 +19,7 @@ import abc
 import json
 import multiprocessing
 import os
+import pprint
 import queue
 import random
 import stat
@@ -301,7 +302,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             str_v = str(v)
             if (
                 isinstance(v, str)
-                and len(str_v) > 40
+                and len(str_v) > 72
                 and str_v.startswith("{")
                 and str_v.endswith("}")
             ):
@@ -309,27 +310,28 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 # string and format it
                 try:
                     json_data = json.loads(str_v)
-                    repr_v = f'"""{json.dumps(json_data, indent=4)}"""'
-                    repr_v = repr_v.replace("\n", "\n    ")
+                    param = f'"""{json.dumps(json_data, indent=4)}"""'
+                    param = param.replace("\n", "\n    ")
                 except json.decoder.JSONDecodeError:
-                    repr_v = repr(v)
+                    param = repr(v)
+            elif isinstance(v, (tuple, list, dict)):
+                param = pprint.pformat(v, indent=0, width=72)
+                param = param.replace("\n", "\n        ")
             else:
-                repr_v = repr(v)
+                param = repr(v)
             param_str += (
-                f"    {k!r}: {repr_v},  " + ("# " + label if label else "") + "\n"
+                f"    {k!r}: {param},  " + ("# " + label if label else "") + "\n"
             )
 
         with open(jobFile, "w") as f:
-            f.write(
-                RUNSCRIPT.format(
-                    executable=sys.executable,
-                    import_line=cls.runscript_import_line,
-                    param_str=param_str,
-                    parent=cls.runscript_import_line.split(" ")[-1],
-                    var_name=cls.__name__.lower(),
-                    job_name=cls.__name__,
-                )
-            )
+            f.write(RUNSCRIPT.format(
+                executable=sys.executable,
+                import_line=cls.runscript_import_line,
+                param_str=param_str,
+                parent=cls.runscript_import_line.split(" ")[-1],
+                var_name=cls.__name__.lower(),
+                job_name=cls.__name__,
+            ))
 
         os.chmod(jobFile, stat.S_IRWXU)
 
