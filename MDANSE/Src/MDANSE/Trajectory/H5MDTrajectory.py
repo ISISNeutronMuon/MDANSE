@@ -143,6 +143,9 @@ class H5MDTrajectory(TrajectoryFile):
         self._h5_filename = Path(h5_filename)
 
         self._h5_file = h5py.File(self._h5_filename, "r")
+
+        self._load_unit_cells()
+
         particle_types = self._h5_file["/particles/all/species"]
         particle_lookup = h5py.check_enum_dtype(
             self._h5_file["/particles/all/species"].dtype
@@ -174,10 +177,14 @@ class H5MDTrajectory(TrajectoryFile):
             )
             return
 
+        if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
+            configuration = self.configuration(0)
+            contiguous_configuration = configuration.contiguous_configuration()
+            coords = contiguous_configuration.coordinates
+            self._chemical_system.set_bond_orders(coords)
+
         self._variables_to_skip = set()
         self._load_units()
-
-        self._load_unit_cells()
 
     def _load_units(self) -> None:
         """Load units from h5 file."""

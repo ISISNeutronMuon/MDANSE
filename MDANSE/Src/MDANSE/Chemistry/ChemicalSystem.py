@@ -26,8 +26,11 @@ import networkx as nx
 import numpy as np
 from more_itertools import padded
 from rdkit import Chem
+from rdkit.Chem import rdDetermineBonds
+from rdkit.Geometry import Point3D
 
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 
 
@@ -105,6 +108,25 @@ class ChemicalSystem:
             self.rdkit_mol.AddBond(
                 int(pair[0]), int(pair[1]), Chem.rdchem.BondType.UNSPECIFIED
             )
+
+    def set_bond_orders(self, coords: np.ndarray):
+        """Set the bond types for the bonds in the rdkit_mol.
+
+        Parameters
+        ----------
+        coords : np.ndarray
+            The coordinates of the system to determine the bond types
+            from.
+        """
+        coord_ang = coords * measure(1.0, "nm").toval("ang")
+        conf = Chem.Conformer(coord_ang.shape[0])
+        for i, (x, y, z) in enumerate(coord_ang):
+            conf.SetAtomPosition(i, Point3D(x, y, z))
+        self.rdkit_mol.AddConformer(conf)
+        try:
+            rdDetermineBonds.DetermineBondOrders(self.rdkit_mol, charge=0)
+        except Exception as e:
+            LOG.error(f"Error determining bond order: {e}")
 
     def add_labels(self, label_dict: dict[str, list[int]]):
         for key, item in label_dict.items():

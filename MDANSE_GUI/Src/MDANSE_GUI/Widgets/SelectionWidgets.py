@@ -479,12 +479,13 @@ class PatternSelection(BasicSelectionWidget):
 
         """
         self.pattern_dictionary = {
-            "primary amine": "[#7X3;H2;!$([#7][#6X3][!#6]);!$([#7][#6X2][!#6])](~[H])~[H]",
-            "hydroxy": "[#8;H1,H2]~[H]",
-            "methyl": "[#6;H3](~[H])(~[H])~[H]",
+            "primary amine": "[NX3;H2;!$(NC=[!#6]);!$(NC#[!#6])]([H])[H]",
+            "hydroxy": "[OX2H][H]",
+            "methyl": "[CX4H3]([H])([H])[H]",
             "phosphate": "[#15X4](~[#8])(~[#8])(~[#8])~[#8]",
             "sulphate": "[#16X4](~[#8])(~[#8])(~[#8])~[#8]",
-            "thiol": "[#16X2;H1]~[H]",
+            "thiol": "[#16X2H1][H]",
+            "water": "[OX2H2]([H])[H]"
         }
         super().__init__(parent, widget_label=widget_label)
 

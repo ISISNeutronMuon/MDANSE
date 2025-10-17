@@ -74,12 +74,18 @@ class MdanseTrajectory(TrajectoryFile):
         self._has_database = "atom_database" in self._h5_file
         self._has_atoms = []
 
+        # Load all the unit cells
+        self._load_unit_cells()
+
         # Load the chemical system
         self._chemical_system = ChemicalSystem(self._h5_filename.stem, self)
         self._chemical_system.load(self._h5_file)
 
-        # Load all the unit cells
-        self._load_unit_cells()
+        if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
+            configuration = self.configuration(0)
+            contiguous_configuration = configuration.contiguous_configuration()
+            coords = contiguous_configuration.coordinates
+            self._chemical_system.set_bond_orders(coords)
 
     @classmethod
     def file_is_right(cls, filename: Path | str) -> bool:
