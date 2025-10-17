@@ -81,7 +81,7 @@ def compare_trees(
     free_for_sure = sphere_indices - set(combined_array[:, 0])
     uncertain = sphere_indices - free_for_sure - blocked_for_sure
     confirmed = set()
-    if len(uncertain) > 0:
+    if uncertain:
         uncertain_lines = np.array(
             [line for line in combined_array if line[0] in uncertain]
         )
@@ -269,8 +269,8 @@ def make_grouping_indices(
     grouping_indices = [type_mapping[atom] for atom in atom_types]
     if grouping_level == "molecule":
         reference_set = set(all_indices) - set(selected_indices)
-        for mol_name in set(cs_clusters.keys()):
-            for mol_instance in cs_clusters[mol_name]:
+        for mol_name, mol_clusters in cs_clusters.items():
+            for mol_instance in mol_clusters:
                 if reference_set.issuperset(mol_instance):
                     for at_index in mol_instance:
                         grouping_indices[at_index] = type_mapping[
@@ -300,7 +300,6 @@ def identify_loose_atoms(
     """
     all_indices = copy.deepcopy(trajectory.chemical_system.all_indices)
     atom_types = np.array(trajectory.chemical_system.atom_list)
-    loose_atoms = []
     atoms_in_molecule = {}
     if grouping_level == "molecule":
         for mol_name in trajectory.chemical_system.unique_molecules():
@@ -308,10 +307,9 @@ def identify_loose_atoms(
             for mol_instance in trajectory.chemical_system._clusters[mol_name]:
                 all_indices -= set(mol_instance)
                 atoms_in_molecule[mol_name].update(atom_types[mol_instance])
-    for atom_name in {
-        trajectory.chemical_system.atom_list[index] for index in all_indices
-    }:
-        loose_atoms.append(atom_name)
+    loose_atoms = list(
+        {trajectory.chemical_system.atom_list[index] for index in all_indices}
+    )
     return atoms_in_molecule, loose_atoms
 
 
