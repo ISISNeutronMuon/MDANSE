@@ -17,8 +17,16 @@ from __future__ import annotations
 
 from functools import partial
 
-from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QComboBox, QLabel, QWidget
+from qtpy.QtCore import Qt, Slot
+from qtpy.QtGui import QFontMetrics
+from qtpy.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QLabel,
+    QProxyStyle,
+    QSizePolicy,
+    QWidget,
+)
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.Session import Session
@@ -44,6 +52,22 @@ one you defined. The parameters saved under the instrument name
 will be used as initial values when you switch to a new analysis type.
 """
 
+COMBO_BOX_LENGTH = 32
+
+
+class ComboStyle(QProxyStyle):
+    """Style stopping the QComboBox from expanding to the longest string length."""
+
+    def __init__(self, *args, metrics: QFontMetrics | None = None, **kwargs):
+        self.metrics = metrics
+        super().__init__(*args, **kwargs)
+
+    def drawItemText(self, painter, rect, flags, pal, enabled, text, textRole):
+        elided_text = self.metrics.elidedText(text, Qt.TextElideMode.ElideRight, 200)
+        return super().drawItemText(
+            painter, rect, flags, pal, enabled, elided_text, textRole
+        )
+
 
 class JobTab(GeneralTab):
     """The tab for choosing and starting a new job."""
@@ -63,12 +87,23 @@ class JobTab(GeneralTab):
         self._instrument_index = -1
         self._trajectory_combo = QComboBox()
         self._trajectory_combo.setEditable(False)
+        self._trajectory_combo.setMinimumContentsLength(COMBO_BOX_LENGTH)
+        self._trajectory_combo.setSizePolicy(
+            QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred
+        )
+        self._trajectory_combo.setStyle(
+            ComboStyle(
+                QApplication.style().name(),
+                metrics=self._trajectory_combo.fontMetrics(),
+            )
+        )
         self._trajectory_combo.currentIndexChanged.connect(self.set_current_trajectory)
         if combo_model is not None:
             self._trajectory_combo.setModel(combo_model)
         combo_model.finished_loading.connect(self.reload_trajectory)
         self._instrument_combo = QComboBox()
         self._instrument_combo.setEditable(False)
+        self._instrument_combo.setMinimumContentsLength(COMBO_BOX_LENGTH)
         self._instrument_combo.currentIndexChanged.connect(self.set_current_instrument)
 
         if instrument_model is not None:
