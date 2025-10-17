@@ -133,7 +133,7 @@ def solvent_accessible_surface(
     """
     # Computes the Solvent Accessible Surface Based on the algorithm published by Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
     total_sas = 0.0
-    skin_sas = 0.0
+    free_sas = 0.0
     max_dist = np.max(vdw_radii) + probe_radius_value
     min_dist = np.min(vdw_radii) + probe_radius_value
     sphere_indices = set(range(len(sphere_points)))
@@ -164,31 +164,29 @@ def solvent_accessible_surface(
         scale_factor = (
             4 * np.pi * (vdw_radii[idx] + probe_radius_value) ** 2 / len(sphere_points)
         )
-        fixed_scale_factor = 4 * np.pi * (vdw_radii[idx]) ** 2 / len(sphere_points)
         total_sas += len(total_free) * scale_factor
-        skin_sas += len(total_free) * fixed_scale_factor
-        still_free = copy.copy(total_free)
+        final_free = copy.copy(total_free)
+        sphere_tree = KDTree(sphere_coords[list(total_free)])
         for blocker, indices in blocking_indices.items():
             blocking_selection = np.where(
                 np.isin(all_indices, list(indices - {idx} - selected_set))
             )
             if len(blocking_selection[0]):
-                sphere_tree = KDTree(sphere_coords[list(still_free)])
                 tree = KDTree(coords[blocking_selection])
                 new_free = compare_trees(
                     sphere_tree,
                     tree,
-                    set(range(len(still_free))),
+                    set(range(len(total_free))),
                     vdw_radii[blocking_selection],
                     max_dist,
                     min_dist,
                     probe_radius_value,
                 )
-                blocked_sas[blocker] += (len(still_free) - len(new_free)) * scale_factor
-                still_free = copy.copy(new_free)
-                if not len(still_free):
-                    break
-    return total_sas, blocked_sas, skin_sas
+                blocked_points = total_free - new_free
+                blocked_sas[blocker] += (len(blocked_points)) * scale_factor
+                final_free -= blocked_points
+        free_sas += len(final_free) * scale_factor
+    return total_sas, free_sas, blocked_sas
 
 
 def create_type_mapping(
@@ -413,15 +411,6 @@ class SolventAccessibleSurface(IJob):
             units="nm2",
             main_result=True,
         )
-        self._outputData.add(
-            "sas/total_closest",
-            "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
-            axis="sas/axes/time",
-            units="nm2",
-            main_result=True,
-            partial_result=True,
-        )
 
         atoms_in_molecule, loose_atoms = identify_loose_atoms(
             self.trajectory, self.configuration["grouping_level"]["value"]
@@ -522,16 +511,13 @@ class SolventAccessibleSurface(IJob):
         @param x: the output of run_step method.
         @type x: no specific type.
         """
-        total_sas, blocked_sas, skin_sas = x
+        total_sas, free_sas, blocked_sas = x
         # The SAS is updated with the value obtained for frame |index|.
         self._outputData["sas/total"][index] = total_sas
-        self._outputData["sas/total_closest"][index] = skin_sas
-        free_sas = total_sas
         for type_index, surface in blocked_sas.items():
             self._outputData[f"sas/taken/{self.grouping_keys[type_index]}"][index] = (
                 surface
             )
-            free_sas -= surface
         self._outputData["sas/free"][index] = free_sas
 
     def finalize(self):

@@ -280,7 +280,7 @@ def test_sas_blocked_is_positive_for_same_atoms():
         probe_radius,
     )
     assert results[0] > 0.0
-    assert all(res > 0 for res in results[1].values())
+    assert all(res > 0 for res in results[2].values())
 
 
 def test_sas_blocked_is_nonnegative_for_different_atoms():
@@ -313,7 +313,7 @@ def test_sas_blocked_is_nonnegative_for_different_atoms():
         probe_radius,
     )
     assert results[0] > 0.0
-    assert all(res >= 0 for res in results[1].values())
+    assert all(res >= 0 for res in results[2].values())
 
 
 @pytest.mark.parametrize("key_name", ("total", "free"))
