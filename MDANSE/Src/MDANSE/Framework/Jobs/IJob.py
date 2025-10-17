@@ -324,14 +324,16 @@ class IJob(Configurable, metaclass=SubclassFactory):
             )
 
         with open(jobFile, "w") as f:
-            f.write(RUNSCRIPT.format(
-                executable=sys.executable,
-                import_line=cls.runscript_import_line,
-                param_str=param_str,
-                parent=cls.runscript_import_line.split(" ")[-1],
-                var_name=cls.__name__.lower(),
-                job_name=cls.__name__,
-            ))
+            f.write(
+                RUNSCRIPT.format(
+                    executable=sys.executable,
+                    import_line=cls.runscript_import_line,
+                    param_str=param_str,
+                    parent=cls.runscript_import_line.split(" ")[-1],
+                    var_name=cls.__name__.lower(),
+                    job_name=cls.__name__,
+                )
+            )
 
         os.chmod(jobFile, stat.S_IRWXU)
 
