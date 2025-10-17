@@ -22,7 +22,6 @@ from pathlib import PurePath
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewerExtended
 from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
