@@ -48,6 +48,7 @@ def sas_co2_atoms(tmp_path_factory):
         "n_sphere_points": str(N_SPHERE_POINTS),  # n_sphere_points
         "output_files": (temp_name, ["MDAFormat"], "no logs"),  # output_files
         "probe_radius": "0.0001",  # probe_radius
+        "calculate_blocked_surface": True,
         "running_mode": ("single-core",),  # running_mode
         "trajectory": CONV_DIR / "fake_co2_molecules.mdt",  # trajectory
     }
@@ -70,6 +71,7 @@ def sas_co2_molecules(tmp_path_factory):
         "n_sphere_points": str(N_SPHERE_POINTS),  # n_sphere_points
         "output_files": (temp_name, ["MDAFormat"], "no logs"),  # output_files
         "probe_radius": "0.0001",  # probe_radius
+        "calculate_blocked_surface": True,
         "running_mode": ("single-core",),  # running_mode
         "trajectory": CONV_DIR / "fake_co2_molecules.mdt",  # trajectory
     }
@@ -278,6 +280,7 @@ def test_sas_blocked_is_positive_for_same_atoms():
         vdw_radii,
         sphere_points,
         probe_radius,
+        calculate_blocking=True,
     )
     assert results[0] > 0.0
     assert all(res > 0 for res in results[2].values())
@@ -311,6 +314,7 @@ def test_sas_blocked_is_nonnegative_for_different_atoms():
         vdw_radii,
         sphere_points,
         probe_radius,
+        calculate_blocking=True,
     )
     assert results[0] > 0.0
     assert all(res >= 0 for res in results[2].values())

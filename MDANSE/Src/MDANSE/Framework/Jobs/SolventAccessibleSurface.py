@@ -105,6 +105,8 @@ def solvent_accessible_surface(
     vdw_radii: npt.NDArray[float],
     sphere_points: npt.NDArray[float],
     probe_radius_value: float,
+    *,
+    calculate_blocking: bool = False,
 ):
     """Calculate the total surface are of a group of atoms, and how much is blocked.
 
@@ -165,27 +167,31 @@ def solvent_accessible_surface(
             4 * np.pi * (vdw_radii[idx] + probe_radius_value) ** 2 / len(sphere_points)
         )
         total_sas += len(total_free) * scale_factor
-        final_free = copy.copy(total_free)
-        sphere_tree = KDTree(sphere_coords[list(total_free)])
-        for blocker, indices in blocking_indices.items():
-            blocking_selection = np.where(
-                np.isin(all_indices, list(indices - {idx} - selected_set))
-            )
-            if len(blocking_selection[0]):
-                tree = KDTree(coords[blocking_selection])
-                new_free = compare_trees(
-                    sphere_tree,
-                    tree,
-                    set(range(len(total_free))),
-                    vdw_radii[blocking_selection],
-                    max_dist,
-                    min_dist,
-                    probe_radius_value,
+        if calculate_blocking:
+            final_free = copy.copy(total_free)
+            free_sphere_tree = KDTree(sphere_coords[list(total_free)])
+            sphere_mapping = dict(enumerate(total_free))
+            for blocker, indices in blocking_indices.items():
+                blocking_selection = np.where(
+                    np.isin(all_indices, list(indices - {idx} - selected_set))
                 )
-                blocked_points = total_free - new_free
-                blocked_sas[blocker] += (len(blocked_points)) * scale_factor
-                final_free -= blocked_points
-        free_sas += len(final_free) * scale_factor
+                if len(blocking_selection[0]):
+                    blocking_tree = KDTree(coords[blocking_selection])
+                    remaining_free = compare_trees(
+                        free_sphere_tree,
+                        blocking_tree,
+                        set(range(len(total_free))),
+                        vdw_radii[blocking_selection],
+                        max_dist,
+                        min_dist,
+                        probe_radius_value,
+                    )
+                    blocked_points = total_free - {
+                        sphere_mapping[simple_index] for simple_index in remaining_free
+                    }
+                    blocked_sas[blocker] += (len(blocked_points)) * scale_factor
+                    final_free -= blocked_points
+            free_sas += len(final_free) * scale_factor
     return total_sas, free_sas, blocked_sas
 
 
@@ -373,12 +379,28 @@ class SolventAccessibleSurface(IJob):
     )
     settings["n_sphere_points"] = ("IntegerConfigurator", {"mini": 1, "default": 1000})
     settings["probe_radius"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.14})
+    settings["radius_type"] = (
+        "SingleChoiceConfigurator",
+        {
+            "label": "Use van der Waals radius (adsorption) or covalent radius (chemisorption)",
+            "choices": ["van der Waals", "covalent"],
+            "default": "van der Waals",
+        },
+    )
+    settings["calculate_blocked_surface"] = (
+        "BooleanConfigurator",
+        {
+            "default": False,
+            "label": "Run additional calculations to check which atoms outside the selection are blocking the surface of the selected atoms.",
+        },
+    )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         super().initialize()
 
+        self.check_blocking = self.configuration["calculate_blocked_surface"]["value"]
         self.numberOfSteps = self.configuration["frames"]["number"]
         self.type_mapping = {}
         self.molecule_mapping = {}
@@ -401,14 +423,6 @@ class SolventAccessibleSurface(IJob):
             units="nm2",
             main_result=True,
         )
-        self._outputData.add(
-            "sas/free",
-            "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
-            axis="sas/axes/time",
-            units="nm2",
-            main_result=True,
-        )
 
         atoms_in_molecule, loose_atoms = identify_loose_atoms(
             self.trajectory, self.configuration["grouping_level"]["value"]
@@ -421,9 +435,18 @@ class SolventAccessibleSurface(IJob):
         )
 
         # A mapping between the atom indices and covalent_radius radius for the whole universe.
-        self.vdwRadii = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_property("vdw_radius")
+        if self.configuration["radius_type"]["value"] == "van der Waals":
+            self.vdwRadii = self.configuration["trajectory"][
+                "instance"
+            ].chemical_system.atom_property("vdw_radius")
+        elif self.configuration["radius_type"]["value"] == "covalent":
+            self.vdwRadii = self.configuration["trajectory"][
+                "instance"
+            ].chemical_system.atom_property("covalent_radius")
+        else:
+            raise NotImplementedError(
+                f"Property {self.configuration['radius_type']['value']} cannot be used as radius in the SAS calculation."
+            )
 
         self.selected_indices = self.trajectory.atom_indices
         atom_types = self.trajectory.chemical_system.atom_list
@@ -435,16 +458,25 @@ class SolventAccessibleSurface(IJob):
             atoms_in_molecule=atoms_in_molecule,
         )
 
-        for result_key in self.type_mapping:
-            if "/" in result_key or result_key in loose_atoms:
-                self._outputData.add(
-                    f"sas/taken/{result_key}",
-                    "LineOutputVariable",
-                    (self.configuration["frames"]["number"],),
-                    axis="sas/axes/time",
-                    units="nm2",
-                    main_result=False,
-                )
+        if self.check_blocking:
+            self._outputData.add(
+                "sas/free",
+                "LineOutputVariable",
+                (self.configuration["frames"]["number"],),
+                axis="sas/axes/time",
+                units="nm2",
+                main_result=True,
+            )
+            for result_key in self.type_mapping:
+                if "/" in result_key or result_key in loose_atoms:
+                    self._outputData.add(
+                        f"sas/taken/{result_key}",
+                        "LineOutputVariable",
+                        (self.configuration["frames"]["number"],),
+                        axis="sas/axes/time",
+                        units="nm2",
+                        main_result=False,
+                    )
         self.grouping_indices = make_grouping_indices(
             self.trajectory.chemical_system.all_indices,
             self.selected_indices,
@@ -497,6 +529,7 @@ class SolventAccessibleSurface(IJob):
             temp_vdw_radii,
             self.spherePoints,
             self.configuration["probe_radius"]["value"],
+            calculate_blocking=self.check_blocking,
         )
 
         return index, sas_and_occupations
@@ -512,11 +545,12 @@ class SolventAccessibleSurface(IJob):
         total_sas, free_sas, blocked_sas = x
         # The SAS is updated with the value obtained for frame |index|.
         self._outputData["sas/total"][index] = total_sas
-        for type_index, surface in blocked_sas.items():
-            self._outputData[f"sas/taken/{self.grouping_keys[type_index]}"][index] = (
-                surface
-            )
-        self._outputData["sas/free"][index] = free_sas
+        if self.check_blocking:
+            for type_index, surface in blocked_sas.items():
+                self._outputData[f"sas/taken/{self.grouping_keys[type_index]}"][
+                    index
+                ] = surface
+            self._outputData["sas/free"][index] = free_sas
 
     def finalize(self):
         """
