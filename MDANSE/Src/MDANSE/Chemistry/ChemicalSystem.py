@@ -63,6 +63,13 @@ class ChemicalSystem:
         self._clusters = {}
 
         self.rdkit_mol = Chem.RWMol()
+        # rdkit DetermineBondOrders doesn't work with dummy atoms. we
+        # avoid adding them to the rdkit_mol but will need to map from
+        # the rdkit atom indexes to the ones in MDANSE
+        self._rdkit_map = {}
+        self._rdkit_map_inv = {}
+        self._dummy_idxs = []
+
         self._unique_elements = set()
 
     def __str__(self):
@@ -86,28 +93,37 @@ class ChemicalSystem:
             list of atom text labels from trajectory, by default None
 
         """
-        self._atom_indices = [
-            self.add_atom(self._database.get_atom_property(symbol, "atomic_number"))
-            for symbol in element_list
-        ]
+        self._atom_indices = list(range(len(element_list)))
+        for i, symbol in enumerate(element_list):
+            idx = self.add_atom(self._database.get_atom_property(symbol, "atomic_number"))
+            if idx is not None:
+                self._rdkit_map[i] = idx
+        self._rdkit_map_inv = {v: k for k, v in self._rdkit_map.items()}
         self._atom_types = [str(x) for x in element_list]
         self._total_number_of_atoms = len(self._atom_indices)
         self._unique_elements.update(set(element_list))
         if name_list is not None:
             self._atom_names = [str(x) for x in name_list]
+        self._dummy_idxs = [
+            i for i, at in enumerate(self._atom_types)
+            if self._database.get_atom_property(at, "dummy") == 1
+        ]
 
-    def add_atom(self, atm_num: int) -> int:
-        rdkit_atm = Chem.Atom(atm_num) if atm_num is not None else Chem.Atom(0)
-        rdkit_atm.SetNumExplicitHs(0)
-        rdkit_atm.SetNoImplicit(True)
-        return self.rdkit_mol.AddAtom(rdkit_atm)
+    def add_atom(self, atm_num: int) -> int | None:
+        if atm_num is not None and atm_num > 0:
+            rdkit_atm = Chem.Atom(atm_num)
+            rdkit_atm.SetNumExplicitHs(0)
+            rdkit_atm.SetNoImplicit(True)
+            return self.rdkit_mol.AddAtom(rdkit_atm)
+        else:
+            return None
 
     def add_bonds(self, pair_list: Iterable[tuple[SupportsInt, SupportsInt]]):
         self._bonds.extend(pair_list)
         for pair in pair_list:
-            self.rdkit_mol.AddBond(
-                int(pair[0]), int(pair[1]), Chem.rdchem.BondType.UNSPECIFIED
-            )
+            i = self._rdkit_map[int(pair[0])]
+            j = self._rdkit_map[int(pair[1])]
+            self.rdkit_mol.AddBond(i, j, Chem.rdchem.BondType.UNSPECIFIED)
 
     def set_bond_orders(self, coords: np.ndarray):
         """Set the bond types for the bonds in the rdkit_mol.
@@ -119,9 +135,10 @@ class ChemicalSystem:
             from.
         """
         coord_ang = coords * measure(1.0, "nm").toval("ang")
-        conf = Chem.Conformer(coord_ang.shape[0])
+        conf = Chem.Conformer(len(self._rdkit_map))
         for i, (x, y, z) in enumerate(coord_ang):
-            conf.SetAtomPosition(i, Point3D(x, y, z))
+            if i not in self._dummy_idxs:
+                conf.SetAtomPosition(self._rdkit_map[i], Point3D(x, y, z))
         self.rdkit_mol.AddConformer(conf)
         try:
             rdDetermineBonds.DetermineBondOrders(self.rdkit_mol, charge=0)
@@ -199,7 +216,7 @@ class ChemicalSystem:
         matches = self.rdkit_mol.GetSubstructMatches(
             Chem.MolFromSmarts(smarts), maxMatches=maxmatches
         )
-        return {ind for match in matches for ind in match}
+        return {self._rdkit_map_inv[ind] for match in matches for ind in match}
 
     @property
     def atom_list(self) -> list[str]:
