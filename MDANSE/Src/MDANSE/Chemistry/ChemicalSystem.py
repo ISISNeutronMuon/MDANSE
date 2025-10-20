@@ -155,9 +155,6 @@ class ChemicalSystem:
 
                 submolecule = Chem.RWMol()
                 for i in cluster_no_dummes:
-                    atm = self.rdkit_mol.GetAtomWithIdx(i)
-                    if atm.GetAtomicNum() == 0:
-                        continue
                     new_idx = submolecule.AddAtom(self.rdkit_mol.GetAtomWithIdx(i))
                     mapping[i] = new_idx
                 bond_idxs = []
