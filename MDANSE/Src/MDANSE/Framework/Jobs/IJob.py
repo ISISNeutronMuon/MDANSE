@@ -156,10 +156,10 @@ def _format_params(parameters: dict) -> str:
     for k, (v, label) in parameters.items():
         str_v = str(v)
         if (
-                isinstance(v, str)
-                and len(str_v) > 72
-                and str_v.startswith("{")
-                and str_v.endswith("}")
+            isinstance(v, str)
+            and len(str_v) > 72
+            and str_v.startswith("{")
+            and str_v.endswith("}")
         ):
             # if it's a long json string then try to make a multiline
             # string and format it
@@ -174,10 +174,7 @@ def _format_params(parameters: dict) -> str:
             param = param.replace("\n", "\n        ")
         else:
             param = repr(v)
-        param_str += (
-                f"    {k!r}: {param},  " + (
-            "# " + label if label else "") + "\n"
-        )
+        param_str += f"    {k!r}: {param},  " + ("# " + label if label else "") + "\n"
     return param_str
 
 
