@@ -29,18 +29,18 @@ class TextInfo(QTextBrowser):
         self._footer = kwargs.pop("footer", "")
         super().__init__(*args, **kwargs)
         self.setOpenExternalLinks(True)
-        self.setHtml(self.filter(""))
+        self.setHtml(self.filter_text(""))
 
     @Slot(object)
     def update_panel(self, incoming: object):
-        filtered = self.filter(incoming)
+        filtered = self.filter_text(incoming)
         self.setHtml(filtered)
 
     @Slot(str)
     def append_text(self, new_text: str):
         self.append(new_text)
 
-    def filter(self, some_text: str, line_break="<br />"):
+    def filter_text(self, some_text: str, line_break="<br />"):
         new_text = ""
         if self._header:
             new_text += self._header + line_break
@@ -73,8 +73,8 @@ class MathInfo(TextInfo):
 
         return scanned
 
-    def filter(self, some_text: str, line_break="<br />"):
-        filtered = super().filter(some_text, line_break)
+    def filter_text(self, some_text: str, line_break="<br />"):
+        filtered = super().filter_text(some_text, line_break)
         scanned = self.scan(filtered)
 
         html_substrings = []
