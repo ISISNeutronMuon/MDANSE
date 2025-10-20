@@ -18,7 +18,7 @@ from __future__ import annotations
 import copy
 import math
 from collections import Counter, defaultdict
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from enum import auto
 import html
 from operator import itemgetter
@@ -425,6 +425,11 @@ class Trajectory:
 
     def __len__(self):
         return len(self._trajectory)
+
+    @property
+    def units(self) -> Mapping[str, str]:
+        """Mapping of property labels to units."""
+        return self._trajectory.units
 
     def charges(self, frame: int) -> npt.NDArray[float]:
         """Return the electrical charge of atoms at a given frame.

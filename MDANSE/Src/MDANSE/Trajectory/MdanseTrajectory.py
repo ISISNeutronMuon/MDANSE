@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from collections import ChainMap, defaultdict
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 
 import h5py
@@ -502,6 +504,23 @@ class MdanseTrajectory(TrajectoryFile):
         return [
             key for key in self._h5_file["/atom_database"] if "property_" not in key
         ]
+
+    @property
+    def units(self) -> Mapping[str, str]:
+        """Mapping of property labels to units."""
+        if "atom_database/property_units" not in self._h5_file:
+            return ATOMS_DATABASE.units
+
+        return ChainMap(
+            dict(
+                zip(
+                    self._h5_file["/atom_database/property_labels"].asstr(),
+                    self._h5_file["/atom_database/property_units"].asstr(),
+                    strict=True,
+                ),
+            ),
+            ATOMS_DATABASE.units,
+        )
 
     def properties(self) -> list[str]:
         """Return the list of all the properties in the trajectory's database.
