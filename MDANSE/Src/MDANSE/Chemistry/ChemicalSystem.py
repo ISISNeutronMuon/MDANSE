@@ -18,6 +18,7 @@ from __future__ import annotations
 import copy
 from collections.abc import Iterable
 from functools import reduce
+import itertools as it
 from pathlib import Path
 from typing import Any, SupportsInt
 
@@ -93,39 +94,40 @@ class ChemicalSystem:
             list of atom text labels from trajectory, by default None
 
         """
-        self._atom_indices = list(range(len(element_list)))
-        for i, symbol in enumerate(element_list):
-            idx = self.add_atom(self._database.get_atom_property(symbol, "atomic_number"))
-            if idx is not None:
-                self._rdkit_map[i] = idx
-        self._rdkit_map_inv = {v: k for k, v in self._rdkit_map.items()}
+        self._atom_indices = [
+            self.add_atom(self._database.get_atom_property(symbol, "atomic_number"))
+            for symbol in element_list
+        ]
         self._atom_types = [str(x) for x in element_list]
         self._total_number_of_atoms = len(self._atom_indices)
         self._unique_elements.update(set(element_list))
         if name_list is not None:
             self._atom_names = [str(x) for x in name_list]
         self._dummy_idxs = [
-            i for i, at in enumerate(self._atom_types)
+            i
+            for i, at in enumerate(self._atom_types)
             if self._database.get_atom_property(at, "dummy") == 1
         ]
 
     def add_atom(self, atm_num: int) -> int | None:
-        if atm_num is not None and atm_num > 0:
-            rdkit_atm = Chem.Atom(atm_num)
-            rdkit_atm.SetNumExplicitHs(0)
-            rdkit_atm.SetNoImplicit(True)
-            return self.rdkit_mol.AddAtom(rdkit_atm)
-        else:
-            return None
+        rdkit_atm = Chem.Atom(atm_num) if atm_num is not None else Chem.Atom(0)
+        rdkit_atm.SetNumExplicitHs(0)
+        rdkit_atm.SetNoImplicit(True)
+        return self.rdkit_mol.AddAtom(rdkit_atm)
 
     def add_bonds(self, pair_list: Iterable[tuple[SupportsInt, SupportsInt]]):
         self._bonds.extend(pair_list)
         for pair in pair_list:
-            i = self._rdkit_map[int(pair[0])]
-            j = self._rdkit_map[int(pair[1])]
-            self.rdkit_mol.AddBond(i, j, Chem.rdchem.BondType.UNSPECIFIED)
+            i, j = int(pair[0]), int(pair[1])
+            if i not in self._dummy_idxs and j not in self._dummy_idxs:
+                # Ignore the bonds to any dummy atoms. This means that
+                # the SMARTS pattern match will ignore any bonds to
+                # dummy atoms. E.g. [OX2] will match oxygen atoms connected
+                # to two other real atoms even if it is also connected to
+                # dummy atoms.
+                self.rdkit_mol.AddBond(i, j, Chem.rdchem.BondType.UNSPECIFIED)
 
-    def set_bond_orders(self, coords: np.ndarray):
+    def set_bond_orders(self, coords: np.ndarray, max_iterations=100):
         """Set the bond types for the bonds in the rdkit_mol.
 
         Parameters
@@ -133,17 +135,71 @@ class ChemicalSystem:
         coords : np.ndarray
             The coordinates of the system to determine the bond types
             from.
+        max_iterations : int
+            The maximum iterations that will be used in DetermineBondOrders,
+            stops it from running forever which can happen for large molecules.
         """
+        uniq_submols = {}
         coord_ang = coords * measure(1.0, "nm").toval("ang")
-        conf = Chem.Conformer(len(self._rdkit_map))
-        for i, (x, y, z) in enumerate(coord_ang):
-            if i not in self._dummy_idxs:
-                conf.SetAtomPosition(self._rdkit_map[i], Point3D(x, y, z))
-        self.rdkit_mol.AddConformer(conf)
-        try:
-            rdDetermineBonds.DetermineBondOrders(self.rdkit_mol, charge=0)
-        except Exception as e:
-            LOG.error(f"Error determining bond order: {e}")
+
+        # Calling rdDetermineBonds.DetermineBondOrders for a large system
+        # is quite computationally expensive. It's better to call this
+        # function for unique molecules and then copy over all the bond
+        # types for all others. We also need to remove dummy atom before
+        # using rdDetermineBonds.DetermineBondOrders because it can't
+        # deal with them well.
+        for cluster_name in self._clusters:
+            for cluster in self._clusters[cluster_name]:
+                cluster_no_dummes = [i for i in cluster if i not in self._dummy_idxs]
+                mapping = {}
+
+                submolecule = Chem.RWMol()
+                for i in cluster_no_dummes:
+                    atm = self.rdkit_mol.GetAtomWithIdx(i)
+                    if atm.GetAtomicNum() == 0:
+                        continue
+                    new_idx = submolecule.AddAtom(self.rdkit_mol.GetAtomWithIdx(i))
+                    mapping[i] = new_idx
+                bond_idxs = []
+                for i, j in it.combinations(cluster_no_dummes, 2):
+                    bond = self.rdkit_mol.GetBondBetweenAtoms(i, j)
+                    if bond is None:
+                        continue
+                    k = bond.GetBeginAtomIdx()
+                    l = bond.GetEndAtomIdx()
+                    submolecule.AddBond(
+                        mapping[k], mapping[l], Chem.rdchem.BondType.UNSPECIFIED
+                    )
+                    bond_idxs.append(bond.GetIdx())
+
+                # canonical=False should deal molecules in the same
+                # cluster_name group which do not have the same atom ordering
+                smiles = Chem.MolToSmiles(submolecule, canonical=False)
+
+                if smiles in uniq_submols:
+                    submolecule = uniq_submols[smiles]
+                else:
+                    conf = Chem.Conformer(len(cluster_no_dummes))
+                    for i, j in enumerate(cluster_no_dummes):
+                        if j not in self._dummy_idxs:
+                            x, y, z = coord_ang[j]
+                            conf.SetAtomPosition(i, Point3D(x, y, z))
+                    submolecule.AddConformer(conf)
+                    try:
+                        LOG.info(f"Determining bond orders for submolecule {smiles}")
+                        rdDetermineBonds.DetermineBondOrders(
+                            submolecule, charge=0, maxIterations=max_iterations
+                        )
+                    except Exception as e:
+                        LOG.error(
+                            f"Error determining bond orders for submolecule {smiles}: {e}"
+                        )
+                    uniq_submols[smiles] = submolecule
+
+                for i, j in enumerate(bond_idxs):
+                    submol_bond = submolecule.GetBondWithIdx(i)
+                    mol_bond = self.rdkit_mol.GetBondWithIdx(j)
+                    mol_bond.SetBondType(submol_bond.GetBondType())
 
     def add_labels(self, label_dict: dict[str, list[int]]):
         for key, item in label_dict.items():
@@ -216,7 +272,7 @@ class ChemicalSystem:
         matches = self.rdkit_mol.GetSubstructMatches(
             Chem.MolFromSmarts(smarts), maxMatches=maxmatches
         )
-        return {self._rdkit_map_inv[ind] for match in matches for ind in match}
+        return {ind for match in matches for ind in match}
 
     @property
     def atom_list(self) -> list[str]:
