@@ -35,9 +35,7 @@ class MathRenderer:
 
     @staticmethod
     def containsInlineExpressions(text: str) -> bool:
-        pattern = r"(:math:`.*?`)"
-        substrings = re.split(pattern, text)
-        return len(substrings) > 1
+        return re.search(r"(:math:`.*?`)", text) is not None
 
     @staticmethod
     def processBlockExpression(text: str) -> list[tuple[str, bool]]:
