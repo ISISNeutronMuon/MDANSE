@@ -207,7 +207,7 @@ class H5MDTrajectory(TrajectoryFile):
         """Mapping of property labels to units."""
         return ChainMap(
             self._units,
-            {"b_incoherent": "Ang", "b_coherent": "Ang"},
+            {"b_incoherent": "ang", "b_coherent": "ang"},
             ATOMS_DATABASE.units,
         )
 
