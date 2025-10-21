@@ -144,7 +144,6 @@ class H5MDTrajectory(TrajectoryFile):
 
         self._h5_file = h5py.File(self._h5_filename, "r")
 
-
         particle_types = self._h5_file["/particles/all/species"]
         particle_lookup = h5py.check_enum_dtype(
             self._h5_file["/particles/all/species"].dtype
