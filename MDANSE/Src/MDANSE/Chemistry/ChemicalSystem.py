@@ -147,20 +147,20 @@ class ChemicalSystem:
         # has two possible valences 3 or 4 when determining the bond types,
         # DetermineBondOrders will check all possible combinations of valences
         # see https://github.com/rdkit/rdkit/blob/master/Code/GraphMol/DetermineBonds/DetermineBonds.cpp
-        num_valences = {
-            1: 1,
-            5: 2,
-            6: 1,
-            7: 2,
-            8: 3,
-            9: 1,
-            14: 1,
-            15: 2,
-            16: 3,
-            17: 1,
-            32: 1,
-            35: 1,
-            53: 1,
+        atomic_valences = {
+            1: [1],
+            5: [3, 4],
+            6: [4],
+            7: [3, 4],
+            8: [2, 1, 3],
+            9: [1],
+            14: [4],
+            15: [5, 3],
+            16: [6, 3, 2],
+            17: [1],
+            32: [4],
+            35: [1],
+            53: [1],
         }
 
         uniq_submols = {}
@@ -180,7 +180,7 @@ class ChemicalSystem:
                 unsupported = [
                     self._element_list[i]
                     for i, j in enumerate(atm_nums)
-                    if j not in num_valences
+                    if j not in atomic_valences
                 ]
                 if len(unsupported) > 0:
                     LOG.warning(
@@ -192,12 +192,17 @@ class ChemicalSystem:
                     )
                     continue
 
-                cluster_num_valences_combo = np.prod(
-                    [num_valences[i] for i in atm_nums], dtype=object
-                )
-                if cluster_num_valences_combo > max_valence_combo:
+                atm_num_valences = []
+                for i, j in enumerate(cluster_no_dummes):
+                    num_bonds = self.rdkit_mol.GetAtomWithIdx(j).GetDegree()
+                    atm_num_valences.append(
+                        len([k for k in atomic_valences[atm_nums[i]] if num_bonds <= k])
+                    )
+
+                num_valences_combo = np.prod(atm_num_valences, dtype=object)
+                if num_valences_combo > max_valence_combo:
                     LOG.warning(
-                        f"Number of valence combinations {cluster_num_valences_combo} "
+                        f"Number of valence combinations {num_valences_combo} "
                         f"is very large - skipping bond type determination. "
                         f"SMARTS pattern matching will not work as expected. "
                         f"Bond types set to UNSPECIFIED use bond type wildcard "
