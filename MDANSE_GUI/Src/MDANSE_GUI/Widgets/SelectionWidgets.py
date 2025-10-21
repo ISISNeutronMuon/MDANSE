@@ -485,7 +485,7 @@ class PatternSelection(BasicSelectionWidget):
             "phosphate": "[#15X4](~[#8])(~[#8])(~[#8])~[#8]",
             "sulphate": "[#16X4](~[#8])(~[#8])(~[#8])~[#8]",
             "thiol": "[#16X2H1][H]",
-            "water": "[OX2H2]([H])[H]"
+            "water": "[OX2H2]([H])[H]",
         }
         super().__init__(parent, widget_label=widget_label)
 

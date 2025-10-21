@@ -222,9 +222,9 @@ class ChemicalSystem:
                     if bond is None:
                         continue
                     k = bond.GetBeginAtomIdx()
-                    l = bond.GetEndAtomIdx()
+                    m = bond.GetEndAtomIdx()
                     submolecule.AddBond(
-                        mapping[k], mapping[l], Chem.rdchem.BondType.UNSPECIFIED
+                        mapping[k], mapping[m], Chem.rdchem.BondType.UNSPECIFIED
                     )
                     bond_idxs.append(bond.GetIdx())
 
