@@ -56,7 +56,9 @@ class ChemicalSystem:
         self._total_number_of_atoms = 0
         self._atom_types = []
         self._atom_names = None
+        self._atom_numbers = []
         self._atom_indices = []
+        self._element_list = []
         self._labels = {}  # arbitrary tag attached to atoms (e.g. residue name)
 
         self._bonds = []
@@ -94,10 +96,12 @@ class ChemicalSystem:
             list of atom text labels from trajectory, by default None
 
         """
-        self._atom_indices = [
-            self.add_atom(self._database.get_atom_property(symbol, "atomic_number"))
+        self._element_list = element_list
+        self._atom_numbers = [
+            self._database.get_atom_property(symbol, "atomic_number")
             for symbol in element_list
         ]
+        self._atom_indices = [self.add_atom(num) for num in self._atom_numbers]
         self._atom_types = [str(x) for x in element_list]
         self._total_number_of_atoms = len(self._atom_indices)
         self._unique_elements.update(set(element_list))
@@ -127,7 +131,7 @@ class ChemicalSystem:
                 # dummy atoms.
                 self.rdkit_mol.AddBond(i, j, Chem.rdchem.BondType.UNSPECIFIED)
 
-    def set_bond_orders(self, coords: np.ndarray, max_iterations=100):
+    def set_bond_orders(self, coords: np.ndarray, max_valence_combo=100):
         """Set the bond types for the bonds in the rdkit_mol.
 
         Parameters
@@ -135,10 +139,30 @@ class ChemicalSystem:
         coords : np.ndarray
             The coordinates of the system to determine the bond types
             from.
-        max_iterations : int
-            The maximum iterations that will be used in DetermineBondOrders,
-            stops it from running forever which can happen for large molecules.
+        max_valence_combo: int
+            The maximum number of max valence combinations.
         """
+
+        # number of possible valences that an atom could have e.g. nitrogen
+        # has two possible valences 3 or 4 when determining the bond types,
+        # DetermineBondOrders will check all possible combinations of valences
+        # see https://github.com/rdkit/rdkit/blob/master/Code/GraphMol/DetermineBonds/DetermineBonds.cpp
+        num_valences = {
+            1: 1,
+            5: 2,
+            6: 1,
+            7: 2,
+            8: 3,
+            9: 1,
+            14: 1,
+            15: 2,
+            16: 3,
+            17: 1,
+            32: 1,
+            35: 1,
+            53: 1,
+        }
+
         uniq_submols = {}
         coord_ang = coords * measure(1.0, "nm").toval("ang")
 
@@ -147,10 +171,40 @@ class ChemicalSystem:
         # function for unique molecules and then copy over all the bond
         # types for all others. We also need to remove dummy atom before
         # using rdDetermineBonds.DetermineBondOrders because it can't
-        # deal with them well.
+        # deal with them.
         for cluster_name in self._clusters:
-            for cluster in self._clusters[cluster_name]:
+            for idx, cluster in enumerate(self._clusters[cluster_name]):
                 cluster_no_dummes = [i for i in cluster if i not in self._dummy_idxs]
+
+                atm_nums = [self._atom_numbers[i] for i in cluster_no_dummes]
+                unsupported = [
+                    self._element_list[i]
+                    for i, j in enumerate(atm_nums)
+                    if j not in num_valences
+                ]
+                if len(unsupported) > 0:
+                    LOG.warning(
+                        f"Bond type determination for molecule {cluster_name} "
+                        f"with index {idx} contains the following unsupported "
+                        f"atoms: {unsupported}. SMARTS pattern matching will "
+                        f"not work as expected. Bond types set to UNSPECIFIED "
+                        f"use bond type wildcard ~ to match bonds in this molecule."
+                    )
+                    continue
+
+                cluster_num_valences_combo = np.prod(
+                    [num_valences[i] for i in atm_nums], dtype=object
+                )
+                if cluster_num_valences_combo > max_valence_combo:
+                    LOG.warning(
+                        f"Number of valence combinations {cluster_num_valences_combo} "
+                        f"is very large - skipping bond type determination. "
+                        f"SMARTS pattern matching will not work as expected. "
+                        f"Bond types set to UNSPECIFIED use bond type wildcard "
+                        f"~ to match bonds in this molecule."
+                    )
+                    continue
+
                 mapping = {}
 
                 submolecule = Chem.RWMol()
@@ -183,13 +237,22 @@ class ChemicalSystem:
                             conf.SetAtomPosition(i, Point3D(x, y, z))
                     submolecule.AddConformer(conf)
                     try:
-                        LOG.info(f"Determining bond orders for submolecule {smiles}")
+                        LOG.info(
+                            f"Determining bond orders for molecule "
+                            f"{cluster_name} with index {idx}"
+                        )
                         rdDetermineBonds.DetermineBondOrders(
-                            submolecule, charge=0, maxIterations=max_iterations
+                            submolecule,
+                            charge=0,
+                            maxIterations=max_valence_combo + 1,
                         )
                     except Exception as e:
                         LOG.error(
-                            f"Error determining bond orders for submolecule {smiles}: {e}"
+                            f"Error determining bond orders for molecule "
+                            f"{cluster_name} with index {idx}: {e}. SMARTS "
+                            f"pattern matching will not work as expected. Bond "
+                            f"types set to UNSPECIFIED use bond type wildcard "
+                            f"~ to match bonds in this molecule."
                         )
                     uniq_submols[smiles] = submolecule
 
