@@ -16,9 +16,9 @@
 from __future__ import annotations
 
 import copy
+import itertools as it
 from collections.abc import Iterable
 from functools import reduce
-import itertools as it
 from pathlib import Path
 from typing import Any, SupportsInt
 
