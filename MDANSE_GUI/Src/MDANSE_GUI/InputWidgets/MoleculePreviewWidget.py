@@ -99,11 +99,11 @@ class MoleculePreviewWidget(QDialog):
             mapping[index] = new_index
         for bond in self.mol_info["bond_list"]:
             i, j = mapping[bond[0]], mapping[bond[1]]
-            bond = large_molecule.GetBondBetweenAtoms(bond[0], bond[1])
-            if bond is None:
+            rdkit_bond = large_molecule.GetBondBetweenAtoms(bond[0], bond[1])
+            if rdkit_bond is None:
                 submolecule.AddBond(i, j, chem.rdchem.BondType.UNSPECIFIED)
             else:
-                submolecule.AddBond(i, j, bond.GetBondType())
+                submolecule.AddBond(i, j, rdkit_bond.GetBondType())
         allchem.Compute2DCoords(submolecule)
         return submolecule
 
