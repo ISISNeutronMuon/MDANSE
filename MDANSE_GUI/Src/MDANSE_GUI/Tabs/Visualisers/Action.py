@@ -35,6 +35,7 @@ from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
     HDFTrajectoryConfigurator,
 )
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets import (
@@ -418,10 +419,7 @@ class Action(QWidget):
             for unit, old_array in axes.items():
                 scale_factor, new_unit = self._parent_tab.conversion_factor(unit)
                 array = np.array(old_array) * scale_factor
-                if len(array) < 6:
-                    text += f"<p>{array} ({new_unit})</p>"
-                else:
-                    text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({new_unit})</p>"
+                text += f"<p>[{summarise_array(array)}] ({new_unit})</p>"
             self._preview_box.setText(text)
 
     @Slot()
