@@ -24,6 +24,7 @@ import vtk
 from qtpy import QtWidgets
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QSizePolicy
+from scipy.interpolate import CubicSpline
 from scipy.spatial import cKDTree as KDTree
 from scipy.spatial.transform import Rotation as R
 from vtk.util import numpy_support
@@ -53,41 +54,8 @@ def array_to_3d_imagedata(data: np.ndarray, spacing: tuple[float, float, float])
     else:
         image.AllocateScalars(vtk.VTK_DOUBLE, 1)
 
-    for (i, j, k), val in np.ndenumerate(data):
-        image.SetScalarComponentFromDouble(i, j, k, 0, val)
-
+    image.GetPointData().SetScalars(numpy_support.numpy_to_vtk(data.ravel("F")))
     return image
-
-
-def smear_grid(grid: np.ndarray, fine_sampling: int) -> np.ndarray:
-    """Include atom radius effect in the array of atom counts on a grid.
-
-    Parameters
-    ----------
-    grid : np.ndarray
-        a 3D histogram of atom positions over time
-    fine_sampling : int
-        the fraction of the atom radius defining the binning grid
-
-    Returns
-    -------
-    np.ndarray
-        a 3D histogram of the volume taken by the atom
-    """
-    if fine_sampling < 2:
-        return grid
-    final_histogram = grid.copy()
-    for _ in range(1, fine_sampling):
-        n = 1
-        new_histogram = np.zeros_like(grid)
-        new_histogram[:, :, n:] += final_histogram[:, :, :-n]
-        new_histogram[:, :, :-n] += final_histogram[:, :, n:]
-        new_histogram[:, n:, :] += final_histogram[:, :-n, :]
-        new_histogram[:, :-n, :] += final_histogram[:, n:, :]
-        new_histogram[n:, :, :] += final_histogram[:-n, :, :]
-        new_histogram[:-n, :, :] += final_histogram[n:, :, :]
-        final_histogram += new_histogram
-    return final_histogram
 
 
 class MolecularViewer(QtWidgets.QWidget):
@@ -412,32 +380,68 @@ class MolecularViewer(QtWidgets.QWidget):
         LOG.info(f"Computing isosurface of atom {index}")
         if params is None:
             params = copy.copy(TRACE_PARAMETERS)
-        fine_sampling = params.get("fine_sampling", 5)
+
+        traj_sampling = params.get("traj_samples", 1000)
+        smearing_factor = params.get("smearing_factor", 1)
+        grid_step = params.get("grid_sampling", 0.02)
         rgb = params.get("surface_colour", (0, 0.5, 0.75))
         opacity = params.get("surface_opacity", 0.5)
-        trace_cutoff = params.get("trace_cutoff", 90)
+        trace_isovalue = params.get("trace_isovalue", 0.5)
 
+        # interpolate the trajectory and sample to reduce the number of
+        # positions that will be evaluated or if there are only a few
+        # positions then interpolate to ensure that the atom trace
+        # is continuous
         coords = self._reader.read_atom_trajectory(index)
+        idxs1 = np.linspace(0, 1, num=coords.shape[0])
+        idxs2 = np.linspace(0, 1, num=traj_sampling)
+        f_x = CubicSpline(idxs1, coords[:, 0])
+        f_y = CubicSpline(idxs1, coords[:, 1])
+        f_z = CubicSpline(idxs1, coords[:, 2])
+        coords = np.stack((f_x(idxs2), f_y(idxs2), f_z(idxs2)), axis=-1)
+
         element = self._reader._atom_types[index]
-        radius = self._reader._trajectory.get_atom_property(element, "covalent_radius")
+        radius = smearing_factor * self._reader._trajectory.get_atom_property(
+            element, "vdw_radius"
+        )
+
         upper_limit = np.max(coords, axis=0) + radius
         lower_limit = np.min(coords, axis=0) - radius
-        grid_step = radius / fine_sampling
-
         span = upper_limit - lower_limit
         grid_steps = list((span // grid_step).astype(int))
-        gdim = tuple(grid_steps[0:3])
-        grid = np.zeros(gdim, dtype=np.int32)
 
-        indices = ((coords - lower_limit.reshape((1, 3))) // grid_step).astype(int)
-        unique_indices, counts = np.unique(indices, return_counts=True, axis=0)
-        grid[tuple(unique_indices.T)] += counts
-        self._atomic_trace_histogram = smear_grid(grid, fine_sampling)
-
-        self._image = array_to_3d_imagedata(
-            self._atomic_trace_histogram, (grid_step, grid_step, grid_step)
+        xs = np.linspace(lower_limit[0], upper_limit[0], grid_steps[0])
+        ys = np.linspace(lower_limit[1], upper_limit[1], grid_steps[1])
+        zs = np.linspace(lower_limit[2], upper_limit[2], grid_steps[2])
+        grid = np.stack(list(np.meshgrid(xs, ys, zs, indexing="ij")), axis=-1).reshape(
+            -1, 3
         )
-        isovalue = np.percentile(self._atomic_trace_histogram, trace_cutoff)
+
+        tree = KDTree(grid)
+        contacts = tree.query_ball_point(coords, radius, workers=-1)
+        n_dists = sum([len(i) for i in contacts])
+
+        js = np.zeros(n_dists, dtype=int)
+        ks = np.zeros(n_dists, dtype=int)
+        start = 0
+        for i, idxs in enumerate(contacts):
+            n_idxs = len(idxs)
+            if n_idxs == 0:
+                continue
+            js[start : start + n_idxs] = i
+            ks[start : start + n_idxs] = idxs
+            start += n_idxs
+
+        diff = coords[js] - grid[ks]
+        sq_dist = np.sum(diff**2, axis=-1)
+        exp_res = np.exp(-sq_dist / (2 * (radius / 3) ** 2))
+
+        vals = np.zeros(grid.shape[0])
+        np.add.at(vals, ks, exp_res)
+        vals = vals / np.max(vals)
+        vals = vals.reshape(grid_steps)
+
+        self._image = array_to_3d_imagedata(vals, (grid_step, grid_step, grid_step))
 
         new_isocontour = vtk.vtkMarchingContourFilter()
         new_isocontour.UseScalarTreeOn()
@@ -446,7 +450,7 @@ class MolecularViewer(QtWidgets.QWidget):
             new_isocontour.SetInput(self.image)
         else:
             new_isocontour.SetInputData(self._image)
-        new_isocontour.SetValue(0, isovalue)
+        new_isocontour.SetValue(0, trace_isovalue)
 
         self._depthSort = vtk.vtkDepthSortPolyData()
         self._depthSort.SetInputConnection(new_isocontour.GetOutputPort())

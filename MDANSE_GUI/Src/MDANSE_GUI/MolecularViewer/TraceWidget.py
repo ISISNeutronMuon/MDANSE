@@ -37,10 +37,12 @@ if TYPE_CHECKING:
 
 TRACE_PARAMETERS = {
     "atom_number": 0,
-    "fine_sampling": 3,
+    "traj_sampling": 1000,
+    "smearing_factor": 1,
+    "grid_sampling": 0.02,
     "surface_colour": (0, 0.5, 0.75),
     "surface_opacity": 0.5,
-    "trace_cutoff": 5,
+    "trace_isovalue": 0.5,
     "surface_number": -1,
 }
 
@@ -114,7 +116,7 @@ class TraceWidget(QWidget):
         initial_parameters = copy.copy(TRACE_PARAMETERS)
         self._opacity = initial_parameters["surface_opacity"]
         self._color = initial_parameters["surface_colour"]
-        self._iso_percentile = initial_parameters["trace_cutoff"]
+        self._trace_isovalue = initial_parameters["trace_isovalue"]
         self.populate_layout()
 
     def initialise_values(self, viewer: MolecularViewer):
@@ -141,8 +143,10 @@ class TraceWidget(QWidget):
         self.remove_trace_button.clicked.connect(self.remove_trace)
         self._atom_spinbox = QSpinBox(self)
         self._surface_spinbox = QSpinBox(self)
-        self._fraction_spinbox = QSpinBox(self)
-        self._grid_spinbox = QSpinBox(self)
+        self._fraction_spinbox = QDoubleSpinBox(self)
+        self._sampling_spinbox = QSpinBox(self)
+        self._smearing_spinbox = QDoubleSpinBox(self)
+        self._grid_spinbox = QDoubleSpinBox(self)
         self._opacity_spinbox = QDoubleSpinBox(self)
         self._colour_lineedit = QLineEdit("0,128,192", self)
         self._colour_lineedit.setPlaceholderText("0,128,192 (red,green,blue)")
@@ -158,18 +162,31 @@ class TraceWidget(QWidget):
             sbox.setMinimum(0)
             sbox.setValue(0)
         self.update_limits()
-        self._fraction_spinbox.setMaximum(100)
-        self._fraction_spinbox.setValue(5)
-        self._grid_spinbox.setMaximum(10)
-        self._grid_spinbox.setMinimum(1)
-        self._grid_spinbox.setValue(3)
+        self._fraction_spinbox.setMaximum(1)
+        self._fraction_spinbox.setValue(0.5)
+        self._fraction_spinbox.setSingleStep(0.01)
+        self._smearing_spinbox.setMaximum(10)
+        self._smearing_spinbox.setMinimum(0.01)
+        self._smearing_spinbox.setValue(1)
+        self._smearing_spinbox.setSingleStep(0.2)
+        self._sampling_spinbox.setMinimum(100)
+        self._sampling_spinbox.setMaximum(1000000)
+        self._sampling_spinbox.setValue(1000)
+        self._sampling_spinbox.setSingleStep(1)
+        self._grid_spinbox.setDecimals(3)
+        self._grid_spinbox.setMaximum(0.1)
+        self._grid_spinbox.setMinimum(0.001)
+        self._grid_spinbox.setValue(0.02)
+        self._grid_spinbox.setSingleStep(0.001)
         self._opacity_spinbox.setMaximum(1.0)
         self._opacity_spinbox.setValue(0.5)
         self._opacity_spinbox.setSingleStep(0.01)
         for label, widget in [
             ("Selected atom index: ", self._atom_spinbox),
-            ("Sampling step (1=coarse, 10=fine)", self._grid_spinbox),
-            ("Trace percentile for isovalue", self._fraction_spinbox),
+            ("Number of trajectory samples", self._sampling_spinbox),
+            ("Position smearing (larger=more smearing)", self._smearing_spinbox),
+            ("Grid step (0.050=coarse, 0.005=fine) / nm", self._grid_spinbox),
+            ("Trace isovalue", self._fraction_spinbox),
             ("Isosurface opacity", self._opacity_spinbox),
             ("Isosurface colour (R,G,B)", self._colour_lineedit),
         ]:
@@ -245,8 +262,10 @@ class TraceWidget(QWidget):
             params["surface_colour"] = [
                 float(x) / 256 for x in self._colour_lineedit.text().split(",")
             ]
-        params["trace_cutoff"] = self._fraction_spinbox.value()
-        params["fine_sampling"] = self._grid_spinbox.value()
+        params["traj_samples"] = self._sampling_spinbox.value()
+        params["trace_isovalue"] = self._fraction_spinbox.value()
+        params["smearing_factor"] = self._smearing_spinbox.value()
+        params["grid_sampling"] = self._grid_spinbox.value()
         params["surface_opacity"] = self._opacity_spinbox.value()
         return params
 
