@@ -140,7 +140,7 @@ class ChemicalSystem:
             The coordinates of the system to determine the bond types
             from.
         max_valence_combo: int
-            The maximum number of max valence combinations.
+            The maximum number of valence combinations.
         """
 
         # number of possible valences that an atom could have e.g. nitrogen
