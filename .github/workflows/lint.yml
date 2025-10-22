@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint-mdanse:
     runs-on: ubuntu-latest
