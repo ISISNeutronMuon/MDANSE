@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import json
 import re
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Sequence
 from enum import Enum
 from functools import singledispatch
 from itertools import filterfalse
@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from more_itertools import value_chain
 
 from MDANSE.MLogging import LOG
 
@@ -236,7 +237,7 @@ def strip_comments(
     >>> _ = inp.seek(0)
     >>> x = strip_comments(inp, comment_char={"//", "#"})
     >>> '|'.join(x)
-    'Hello|End of line # comment'
+    'Hello|End of line'
     """
     if not isinstance(comment_char, set):
         comment_char = set(comment_char)
@@ -246,3 +247,41 @@ def strip_comments(
     )
 
     return strip_function(data, comment_char=comment_char)
+
+
+def summarise_array(array: Sequence, *, maxlen: int = 6, show: int = 3) -> str:
+    """
+    Return a summarised string of the array.
+
+    Long arrays are elided with ``...``.
+    Short arrays are left as-is.
+
+    Parameters
+    ----------
+    array : Sequence
+        Array to summarise.
+    maxlen : int
+        Maximum length before elision (min 4).
+    show : int
+        Number of elements to show.
+
+    Returns
+    -------
+    str
+        Summarised array.
+
+    Examples
+    --------
+    >>> summarise_array(range(10))
+    '0, 1, 2, ..., 9'
+    >>> summarise_array(range(4))
+    '0, 1, 2, 3'
+    >>> summarise_array(range(10), maxlen=15)
+    '0, 1, 2, 3, 4, 5, 6, 7, 8, 9'
+    >>> summarise_array(range(10), show=6)
+    '0, 1, 2, 3, 4, 5, ..., 9'
+    """
+    if len(array) <= maxlen or len(array) < show + 1:
+        return ", ".join(map(str, array))
+
+    return ", ".join(map(str, value_chain(array[:show], "...", array[-1])))

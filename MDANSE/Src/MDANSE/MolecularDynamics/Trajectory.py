@@ -34,7 +34,7 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Chemistry.Databases import str_to_num
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
-from MDANSE.IO.IOUtils import UCEnum
+from MDANSE.IO.IOUtils import UCEnum, summarise_array
 from MDANSE.MolecularDynamics.Configuration import _Configuration
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
@@ -69,10 +69,8 @@ def trajectory_summary(traj: Trajectory):
     else:
         if len(time_axis) < 1:
             timeline = "N/A\n"
-        elif len(time_axis) < 5:
-            timeline = f"{time_axis}\n"
         else:
-            timeline = f"[{time_axis[0]}, {time_axis[1]}, ..., {time_axis[-1]}]\n"
+            timeline = f"[{summarise_array(time_axis, maxlen=5)}]\n"
 
     val.append("Path:")
     val.append(f"{traj.filename}\n")
@@ -307,9 +305,11 @@ class Trajectory:
         """
         weights = []
         for n_elements, atm_names, atm_elements in [
-            (self.get_natoms(),
-             always_iterable(self.selection_getter(self.atom_names)),
-             always_iterable(self.selection_getter(self.atom_types))),
+            (
+                self.get_natoms(),
+                always_iterable(self.selection_getter(self.atom_names)),
+                always_iterable(self.selection_getter(self.atom_types)),
+            ),
             (
                 self.get_all_natoms(),
                 self.atom_names,
@@ -373,7 +373,10 @@ class Trajectory:
         """
         all_elements = np.array(self.atom_names)
         unique_elements = set(always_iterable(self.selection_getter(all_elements)))
-        indices_per_element = {element: list(np.where(all_elements==element)[0]) for element in unique_elements}
+        indices_per_element = {
+            element: list(np.where(all_elements == element)[0])
+            for element in unique_elements
+        }
         return indices_per_element
 
     def guess_correct_format(self) -> ValidFormats:
