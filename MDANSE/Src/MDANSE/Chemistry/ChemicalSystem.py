@@ -198,7 +198,8 @@ class ChemicalSystem:
                     num_bonds = self.rdkit_mol.GetAtomWithIdx(j).GetDegree()
                     atm_num_valences.append(
                         quantify(
-                            atomic_valences[atm_num], pred=lambda k, nb=num_bonds: nb <= k
+                            atomic_valences[atm_num],
+                            pred=lambda k, nb=num_bonds: nb <= k,
                         )
                     )
 
