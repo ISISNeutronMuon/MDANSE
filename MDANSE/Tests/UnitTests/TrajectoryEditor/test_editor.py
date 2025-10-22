@@ -64,7 +64,7 @@ def test_jumps_removed_correctly():
      ("chemical_system.number_of_atoms", "__len__()",
       ("unit_cell(0)._unit_cell", np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))),
      {"trajectory": short_traj, "frames": (0, 501, 1),
-      "unit_cell": (np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]), True)},
+      "unit_cell": ([[1, 2, 3], [4, 5, 6], [7, 8, 9]], True)},
      ),
 
     (("/configuration/coordinates", "/time"),
