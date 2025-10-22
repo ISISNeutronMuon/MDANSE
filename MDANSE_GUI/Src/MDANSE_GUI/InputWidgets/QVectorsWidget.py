@@ -183,7 +183,7 @@ class QVectorsWidget(WidgetBase):
         self._selector.currentTextChanged.connect(self._model.switch_qvector_type)
         self._selector.setCurrentIndex(1)
         self._model.itemChanged.connect(self.updateValue)
-        self._model.type_changed.connect(self.type_change_update)
+        self._model.type_changed.connect(self.updateValue)
         self.updateValue()
         if self._tooltip:
             tooltip_text = self._tooltip
@@ -202,15 +202,6 @@ class QVectorsWidget(WidgetBase):
             QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents
         )
         self.value_changed.connect(self.preview_vectors)
-
-    def type_change_update(self):
-        # need to disconnect itemChanged otherwise updateValue will
-        # be called multiple times as the item data has been changed
-        # during the type update
-        self._model.itemChanged.disconnect()
-        self.updateValue()
-        self._model.itemChanged.connect(self.updateValue)
-        self.preview_vectors()
 
     @Slot(bool)
     def validate_model_parameters(self, all_are_correct: bool):

@@ -69,6 +69,7 @@ def convert_vectors_to_datasets(
         1D array of vector count vs. |q|, 2D histogram of q vector counts per shell.
     """
     if isinstance(source, h5py.File):
+        filename = source.filename
         parent_dset = source[main_dstet]
         qvals = parent_dset["q"][:]
         nshells = len(qvals)
@@ -91,6 +92,7 @@ def convert_vectors_to_datasets(
                 ]
             )
     elif isinstance(source, QVectorsConfigurator):
+        filename = None
         qvals = np.array(source["shells"])
         nshells = len(qvals)
         modq_per_shell = [
@@ -118,6 +120,7 @@ def convert_vectors_to_datasets(
         data=available_vectors,
         plot_axes={"|q|": qvals},
         axes_units={"|q|": "1/nm"},
+        optional_filename=filename,
     )
     real_q_ideal_q = SingleDataset(
         "Mean |q|",
@@ -129,6 +132,7 @@ def convert_vectors_to_datasets(
         axes_units={"|q|": "1/nm"},
         data_unit="1/nm",
         yerror=mean_q_yerr,
+        optional_filename=filename,
     )
     vecs_per_qbin = SingleDataset(
         "Shell population",
@@ -137,6 +141,7 @@ def convert_vectors_to_datasets(
         data_unit="counts",
         plot_axes={"|q|": qvals, "q_bin": xvals},
         axes_units={"|q|": "1/nm", "q_bin": "1/nm"},
+        optional_filename=filename,
     )
     return nvec_per_q, real_q_ideal_q, vecs_per_qbin
 

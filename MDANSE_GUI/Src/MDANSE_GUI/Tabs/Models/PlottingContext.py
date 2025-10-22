@@ -174,6 +174,7 @@ class SingleDataset:
         axes_units: dict[str, str] | None = None,
         yerror: npt.NDArray[float] | None = None,
         xerror: npt.NDArray[float] | None = None,
+        optional_filename: str | None = None,
     ) -> None:
         """Set data for plotting without using a data file.
 
@@ -193,7 +194,7 @@ class SingleDataset:
             Dictionary of axis_name: axis_unit pairs, by default None
         """
 
-        self._filename = "no file"
+        self._filename = optional_filename if optional_filename else "no file"
         self._labels = {
             "minimal": self._name,
             "medium": self._name,
