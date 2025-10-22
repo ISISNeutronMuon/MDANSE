@@ -56,9 +56,7 @@ class ChemicalSystem:
         self._total_number_of_atoms = 0
         self._atom_types = []
         self._atom_names = None
-        self._atom_numbers = []
         self._atom_indices = []
-        self._element_list = []
         self._labels = {}  # arbitrary tag attached to atoms (e.g. residue name)
 
         self._bonds = []
@@ -71,7 +69,7 @@ class ChemicalSystem:
         # the rdkit atom indexes to the ones in MDANSE
         self._rdkit_map = {}
         self._rdkit_map_inv = {}
-        self._dummy_idxs = []
+        self._rdkit_dummy_atms = []
 
         self._unique_elements = set()
 
@@ -96,24 +94,22 @@ class ChemicalSystem:
             list of atom text labels from trajectory, by default None
 
         """
-        self._element_list = element_list
-        self._atom_numbers = [
-            self._database.get_atom_property(symbol, "atomic_number")
+        self._atom_indices = [
+            self.add_atom(self._database.get_atom_property(symbol, "atomic_number"))
             for symbol in element_list
         ]
-        self._atom_indices = [self.add_atom(num) for num in self._atom_numbers]
         self._atom_types = [str(x) for x in element_list]
         self._total_number_of_atoms = len(self._atom_indices)
         self._unique_elements.update(set(element_list))
         if name_list is not None:
             self._atom_names = [str(x) for x in name_list]
-        self._dummy_idxs = [
-            i
-            for i, at in enumerate(self._atom_types)
-            if self._database.get_atom_property(at, "dummy") == 1
-        ]
 
-    def add_atom(self, atm_num: int) -> int | None:
+        self._rdkit_dummy_atms = []
+        for atom in self.rdkit_mol.GetAtoms():
+            if atom.GetAtomicNum() == 0:
+                self._rdkit_dummy_atms.append(atom.GetIdx())
+
+    def add_atom(self, atm_num: int) -> int:
         rdkit_atm = Chem.Atom(atm_num) if atm_num is not None else Chem.Atom(0)
         rdkit_atm.SetNumExplicitHs(0)
         rdkit_atm.SetNoImplicit(True)
@@ -123,7 +119,7 @@ class ChemicalSystem:
         self._bonds.extend(pair_list)
         for pair in pair_list:
             i, j = int(pair[0]), int(pair[1])
-            if i not in self._dummy_idxs and j not in self._dummy_idxs:
+            if i not in self._rdkit_dummy_atms and j not in self._rdkit_dummy_atms:
                 # Ignore the bonds to any dummy atoms. This means that
                 # the SMARTS pattern match will ignore any bonds to
                 # dummy atoms. E.g. [OX2] will match oxygen atoms connected
@@ -165,6 +161,8 @@ class ChemicalSystem:
 
         uniq_submols = {}
         coord_ang = coords * measure(1.0, "nm").toval("ang")
+        element_list = [atm.GetSymbol() for atm in self.rdkit_mol.GetAtoms()]
+        atom_numbers = [atm.GetAtomicNum() for atm in self.rdkit_mol.GetAtoms()]
 
         # Calling rdDetermineBonds.DetermineBondOrders for a large system
         # is quite computationally expensive. It's better to call this
@@ -174,11 +172,11 @@ class ChemicalSystem:
         # deal with them.
         for cluster_name in self._clusters:
             for idx, cluster in enumerate(self._clusters[cluster_name]):
-                cluster_no_dummes = [i for i in cluster if i not in self._dummy_idxs]
+                cluster_no_dummes = [i for i in cluster if i not in self._rdkit_dummy_atms]
 
-                atm_nums = [self._atom_numbers[i] for i in cluster_no_dummes]
+                atm_nums = [atom_numbers[i] for i in cluster_no_dummes]
                 unsupported = [
-                    self._element_list[i]
+                    element_list[i]
                     for i, j in enumerate(atm_nums)
                     if j not in atomic_valences
                 ]
@@ -237,7 +235,7 @@ class ChemicalSystem:
                 else:
                     conf = Chem.Conformer(len(cluster_no_dummes))
                     for i, j in enumerate(cluster_no_dummes):
-                        if j not in self._dummy_idxs:
+                        if j not in self._rdkit_dummy_atms:
                             x, y, z = coord_ang[j]
                             conf.SetAtomPosition(i, Point3D(x, y, z))
                     submolecule.AddConformer(conf)
