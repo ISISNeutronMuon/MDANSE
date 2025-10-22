@@ -25,7 +25,7 @@ from typing import Any, SupportsInt
 import h5py
 import networkx as nx
 import numpy as np
-from more_itertools import padded
+from more_itertools import padded, quantify
 from rdkit import Chem
 from rdkit.Chem import rdDetermineBonds
 from rdkit.Geometry import Point3D
@@ -194,10 +194,12 @@ class ChemicalSystem:
                     continue
 
                 atm_num_valences = []
-                for i, j in enumerate(cluster_no_dummies):
+                for atm_num, j in zip(atm_nums, cluster_no_dummies, strict=False):
                     num_bonds = self.rdkit_mol.GetAtomWithIdx(j).GetDegree()
                     atm_num_valences.append(
-                        len([k for k in atomic_valences[atm_nums[i]] if num_bonds <= k])
+                        quantify(
+                            atomic_valences[atm_num], pred=lambda k: num_bonds <= k
+                        )
                     )
 
                 num_valences_combo = np.prod(atm_num_valences, dtype=object)
