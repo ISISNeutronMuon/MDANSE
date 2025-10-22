@@ -265,20 +265,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
         except KeyError:
             LOG.error("IJob did not find 'write_logs' in output_files")
 
-        if selection := self.configuration.get("atom_selection"):
-            try:
-                array_length = selection["total_number_of_atoms"]
-            except KeyError:
-                LOG.warning(
-                    "Job could not find total number of atoms in atom selection."
-                )
-            else:
-                valid_indices = selection["flatten_indices"]
-                self._outputData.add(
-                    "selected_atoms",
-                    "LineOutputVariable",
-                    [index in valid_indices for index in range(array_length)],
-                )
         self.set_up_trajectory()
 
     def set_up_trajectory(self):
@@ -296,6 +282,13 @@ class IJob(Configurable, metaclass=SubclassFactory):
         self.trajectory = trajectory["instance"]
         if (selection := self.configuration.get("atom_selection")) is not None:
             self.trajectory.set_selection(selection["flatten_indices"])
+            array_length = self.trajectory.chemical_system._total_number_of_atoms
+            valid_indices = selection["flatten_indices"]
+            self._outputData.add(
+                "selected_atoms",
+                "LineOutputVariable",
+                [index in valid_indices for index in range(array_length)],
+            )
         if (transmutation := self.configuration.get("atom_transmutation")) is not None:
             self.trajectory.set_transmutation(transmutation.transmutation)
         if (grouping := self.configuration.get("grouping_level")) is not None:
@@ -444,7 +437,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         steps = iter(steps)
 
         n_results = next(steps)
-        while n_results != self.numberOfSteps:
+        while n_results < self.numberOfSteps:
             self._run_multicore_check_terminate(listener)
             if self._status is not None:
                 self._status.fixed_status(n_results)

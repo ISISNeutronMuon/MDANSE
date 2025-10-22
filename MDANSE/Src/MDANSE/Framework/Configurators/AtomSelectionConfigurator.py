@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-from collections import Counter, defaultdict
 from json import JSONDecodeError
 
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection

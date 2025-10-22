@@ -20,7 +20,6 @@ import json
 from typing import TYPE_CHECKING, Any
 from warnings import warn
 
-import numpy as np
 from more_itertools import value_chain
 
 from MDANSE.Core.Error import Error
