@@ -104,10 +104,11 @@ class ChemicalSystem:
         if name_list is not None:
             self._atom_names = [str(x) for x in name_list]
 
-        self._rdkit_dummy_atms = []
-        for atom in self.rdkit_mol.GetAtoms():
-            if atom.GetAtomicNum() == 0:
-                self._rdkit_dummy_atms.append(atom.GetIdx())
+        self._rdkit_dummy_atms = [
+            atom.GetIdx()
+            for atom in self.rdkit_mol.GetAtoms()
+            if atom.GetAtomicNum() == 0
+        ]
 
     def add_atom(self, atm_num: int) -> int:
         rdkit_atm = Chem.Atom(atm_num) if atm_num is not None else Chem.Atom(0)
