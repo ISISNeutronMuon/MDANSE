@@ -16,6 +16,8 @@
 from __future__ import annotations
 
 import itertools
+import traceback
+from enum import Enum, auto
 
 from qtpy.QtCore import (
     QDeadlineTimer,
@@ -33,8 +35,16 @@ from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
+class LoadStatus(Enum):
+    LOADING = auto()
+    READY = auto()
+    FAILED = auto()
+    EMPTY = auto()
+
+
 class LoaderThread(QThread):
     results = Signal(object)
+    failure = Signal(int)
 
     def __init__(
         self,
@@ -52,12 +62,28 @@ class LoaderThread(QThread):
         self._target_label = target_label
 
     def run(self):
-        trajectory = Trajectory(self._filename)
-        self.results.emit((trajectory, self._target_index))
-        if self._display_item is not None and self._target_label is not None:
-            self._display_item.setData(
-                self._target_label, role=Qt.ItemDataRole.DisplayRole
+        try:
+            trajectory = Trajectory(self._filename)
+        except Exception as e:
+            LOG.error(
+                "Failed loading file %s, exception %s traceback %s",
+                self._filename,
+                str(e),
+                traceback.format_exc(),
             )
+            self.failure.emit(self._target_index)
+            if self._display_item is not None and self._target_label is not None:
+                self._display_item.setData(
+                    f"Failed to load {self._target_label}. See the log for details.",
+                    role=Qt.ItemDataRole.DisplayRole,
+                )
+        else:
+            self.results.emit((trajectory, self._target_index))
+            if self._display_item is not None and self._target_label is not None:
+                self._display_item.setData(
+                    self._target_label, role=Qt.ItemDataRole.DisplayRole
+                )
+                self._display_item.setEnabled(True)
 
 
 class TrajectoryModel(QStandardItemModel):
@@ -75,6 +101,7 @@ class TrajectoryModel(QStandardItemModel):
         self._node_numbers = []
         self._trajectory_paths = {}
         self._trajectory_instances = {}
+        self._trajectory_status = {}
         self._loading_threads = {}
         self._next_number = itertools.count()
 
@@ -85,8 +112,10 @@ class TrajectoryModel(QStandardItemModel):
         self._node_numbers.append(retval)
         self._trajectory_paths[retval] = full_name
         self._trajectory_instances[retval] = None
+        self._trajectory_status[retval] = LoadStatus.LOADING
         item = QStandardItem(f"Loading {label}...")
         item.setData(retval)
+        item.setEnabled(False)
         self.appendRow(item)
         self.launch_loader(full_name, retval, display_item=item, target_label=label)
         return retval
@@ -102,6 +131,7 @@ class TrajectoryModel(QStandardItemModel):
             None, filename, index, display_item=display_item, target_label=target_label
         )
         thread.results.connect(self.accept_results)
+        thread.failure.connect(self.accept_failure)
         self._loading_threads[index] = thread
         thread.start()
 
@@ -120,16 +150,25 @@ class TrajectoryModel(QStandardItemModel):
         if index not in self._trajectory_instances:
             return
         self._trajectory_instances[index] = trajectory
+        self._trajectory_status[index] = LoadStatus.READY
         self.finished_loading.emit(index)
         # self._loading_threads[index].wait()
 
-    def item_is_ready(self, row: int) -> bool:
+    @Slot(int)
+    def accept_failure(self, index) -> None:
+        if index not in self._trajectory_instances:
+            return
+        self._trajectory_status[index] = LoadStatus.FAILED
+        self.free_name.emit(self._trajectory_paths[index])
+        self.finished_loading.emit(index)
+        # self._loading_threads[index].wait()
+
+    def item_status(self, row: int) -> LoadStatus:
         try:
             node_number = self.item(row).data()
         except AttributeError:
-            return False
-        traj = self.get_trajectory(node_number)
-        return isinstance(traj, Trajectory)
+            return LoadStatus.EMPTY
+        return self._trajectory_status[node_number]
 
     def removeRow(self, row: int, parent: QModelIndex | None = None) -> bool:
         if parent is None:
@@ -142,6 +181,7 @@ class TrajectoryModel(QStandardItemModel):
         retcode = super().removeRow(row, parent)
         instance = self._trajectory_instances.pop(node_number)
         filename = self._trajectory_paths.pop(node_number)
+        self._trajectory_status.pop(node_number)
         if instance:
             instance.close()
         self.free_name.emit(str(filename))
