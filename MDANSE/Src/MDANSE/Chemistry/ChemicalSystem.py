@@ -172,7 +172,9 @@ class ChemicalSystem:
         # deal with them.
         for cluster_name in self._clusters:
             for idx, cluster in enumerate(self._clusters[cluster_name]):
-                cluster_no_dummes = [i for i in cluster if i not in self._rdkit_dummy_atms]
+                cluster_no_dummes = [
+                    i for i in cluster if i not in self._rdkit_dummy_atms
+                ]
 
                 atm_nums = [atom_numbers[i] for i in cluster_no_dummes]
                 unsupported = [
