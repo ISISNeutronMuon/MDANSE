@@ -173,11 +173,11 @@ class ChemicalSystem:
         # deal with them.
         for cluster_name in self._clusters:
             for idx, cluster in enumerate(self._clusters[cluster_name]):
-                cluster_no_dummes = [
+                cluster_no_dummies = [
                     i for i in cluster if i not in self._rdkit_dummy_atms
                 ]
 
-                atm_nums = [atom_numbers[i] for i in cluster_no_dummes]
+                atm_nums = [atom_numbers[i] for i in cluster_no_dummies]
                 unsupported = [
                     element_list[idx]
                     for idx, atom in enumerate(atm_nums)
@@ -194,7 +194,7 @@ class ChemicalSystem:
                     continue
 
                 atm_num_valences = []
-                for i, j in enumerate(cluster_no_dummes):
+                for i, j in enumerate(cluster_no_dummies):
                     num_bonds = self.rdkit_mol.GetAtomWithIdx(j).GetDegree()
                     atm_num_valences.append(
                         len([k for k in atomic_valences[atm_nums[i]] if num_bonds <= k])
@@ -214,11 +214,11 @@ class ChemicalSystem:
                 mapping = {}
 
                 submolecule = Chem.RWMol()
-                for i in cluster_no_dummes:
+                for i in cluster_no_dummies:
                     new_idx = submolecule.AddAtom(self.rdkit_mol.GetAtomWithIdx(i))
                     mapping[i] = new_idx
                 bond_idxs = []
-                for i, j in it.combinations(cluster_no_dummes, 2):
+                for i, j in it.combinations(cluster_no_dummies, 2):
                     bond = self.rdkit_mol.GetBondBetweenAtoms(i, j)
                     if bond is None:
                         continue
@@ -236,8 +236,8 @@ class ChemicalSystem:
                 if smiles in uniq_submols:
                     submolecule = uniq_submols[smiles]
                 else:
-                    conf = Chem.Conformer(len(cluster_no_dummes))
-                    for i, j in enumerate(cluster_no_dummes):
+                    conf = Chem.Conformer(len(cluster_no_dummies))
+                    for i, j in enumerate(cluster_no_dummies):
                         if j not in self._rdkit_dummy_atms:
                             x, y, z = coord_ang[j]
                             conf.SetAtomPosition(i, Point3D(x, y, z))
