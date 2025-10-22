@@ -179,9 +179,9 @@ class ChemicalSystem:
 
                 atm_nums = [atom_numbers[i] for i in cluster_no_dummes]
                 unsupported = [
-                    element_list[i]
-                    for i, j in enumerate(atm_nums)
-                    if j not in atomic_valences
+                    element_list[idx]
+                    for idx, atom in enumerate(atm_nums)
+                    if atom not in atomic_valences
                 ]
                 if len(unsupported) > 0:
                     LOG.warning(
