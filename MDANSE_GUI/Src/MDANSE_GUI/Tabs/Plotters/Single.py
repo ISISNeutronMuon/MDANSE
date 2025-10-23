@@ -224,6 +224,11 @@ class Single(Plotter):
                             linestyle=databundle.line_style,
                             color=tuple(main_colour),
                         )
+                        try:
+                            temp.set_marker(databundle.marker)
+                        except ValueError:
+                            with contextlib.suppress(Exception):
+                                temp.set_marker(int(databundle.marker))
                         self._active_curves.append(temp)
                         self._backup_curves.append([temp.get_xdata(), temp.get_ydata()])
                         self.height_max = max(self.height_max, temp.get_ydata().max())
