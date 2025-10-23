@@ -20,10 +20,17 @@ from enum import Enum
 from pathlib import Path
 
 from qtpy.QtCore import Qt, Signal, Slot
-from qtpy.QtGui import QStandardItem, QStandardItemModel
+from qtpy.QtGui import (
+    QStandardItem,
+    QStandardItemModel,
+    QUndoCommand,
+    QUndoGroup,
+    QUndoStack,
+)
 from qtpy.QtWidgets import (
     QDialog,
     QFileDialog,
+    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -32,6 +39,7 @@ from qtpy.QtWidgets import (
     QPlainTextEdit,
     QPushButton,
     QScrollArea,
+    QUndoView,
     QVBoxLayout,
     QWidget,
 )
@@ -63,10 +71,29 @@ class SelectionValidity(Enum):
     MALFORMED_SELECTION = "This is not a valid selection string."
 
 
+class AppendSelectionCommand(QUndoCommand):
+    def __init__(self, model, json_string):
+        super().__init__()
+        self.model = model
+        self.json_string = json_string
+
+    def redo(self):
+        new_item = QStandardItem(self.json_string)
+        new_item.setEditable(False)
+        self.model.appendRow(new_item)
+        self.model.selection_changed.emit()
+
+    def undo(self):
+        self.model.removeRow(self.model.rowCount() - 1)
+        self.model.selection_changed.emit()
+
+
 class SelectionModel(QStandardItemModel):
     """Stores the selection operations in the GUI view."""
 
     selection_changed = Signal()
+    can_undo = Signal(bool)
+    can_redo = Signal(bool)
 
     def __init__(self, trajectory):
         """Assign the current trajectory to the model."""
@@ -76,11 +103,25 @@ class SelectionModel(QStandardItemModel):
         self._current_selection = set()
         self._manual_selection_item = None
         self._clicked_atoms = []
+        self.undo_stack = QUndoStack(self)
 
     def clear(self):
         """Remove all the lines from the selection model."""
         self._clicked_atoms = []
+        self.undo_stack.clear()
         return super().clear()
+
+    @Slot()
+    def undo_last(self):
+        self.undo_stack.undo()
+        self.can_undo.emit(self.undo_stack.canUndo())
+        self.can_redo.emit(self.undo_stack.canRedo())
+
+    @Slot()
+    def redo_last(self):
+        self.undo_stack.redo()
+        self.can_undo.emit(self.undo_stack.canUndo())
+        self.can_redo.emit(self.undo_stack.canRedo())
 
     def rebuild_selection(self, last_operation: str) -> SelectionValidity:
         """Update the current selection based on the text in the GUI.
@@ -202,10 +243,8 @@ class SelectionModel(QStandardItemModel):
     def accept_from_widget(self, json_string: str):
         """Add a selection operation sent from a selection widget."""
         self.finalise_manual_selection()
-        new_item = QStandardItem(json_string)
-        new_item.setEditable(False)
-        self.appendRow(new_item)
-        self.selection_changed.emit()
+        append_selection_command = AppendSelectionCommand(self, json_string)
+        self.undo_stack.push(append_selection_command)
 
     @Slot(str)
     def create_from_string(self, json_string: str):
@@ -378,7 +417,20 @@ class SelectionHelper(QDialog):
             create_layouts.
 
         """
-        return [self.selection_operations_view, self.selection_textbox]
+        selection_panel = QWidget(self)
+        panel_layout = QGridLayout(selection_panel)
+        undo_button = QPushButton("Undo", selection_panel)
+        redo_button = QPushButton("Redo", selection_panel)
+        panel_layout.addWidget(undo_button, 0, 0)
+        panel_layout.addWidget(redo_button, 0, 1)
+        panel_layout.addWidget(self.selection_operations_view, 1, 0, 1, 2)
+        undo_button.setEnabled(self.selection_model.undo_stack.canUndo())
+        redo_button.setEnabled(self.selection_model.undo_stack.canRedo())
+        self.selection_model.can_redo.connect(redo_button.setEnabled)
+        self.selection_model.can_undo.connect(undo_button.setEnabled)
+        undo_button.clicked.connect(self.selection_model.undo_last)
+        redo_button.clicked.connect(self.selection_model.redo_last)
+        return [selection_panel, self.selection_textbox]
 
     def left_widgets(self) -> list[QWidget]:
         """Create widgets for defining the selection.
