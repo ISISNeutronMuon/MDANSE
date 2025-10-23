@@ -25,9 +25,7 @@ from matplotlib.backends.backend_qt5agg import (
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import (
-    QApplication,
     QComboBox,
-    QDialog,
     QGridLayout,
     QLabel,
     QLineEdit,

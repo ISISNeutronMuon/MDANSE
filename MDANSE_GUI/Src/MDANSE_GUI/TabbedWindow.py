@@ -18,14 +18,12 @@ from __future__ import annotations
 import os
 from collections import defaultdict
 from importlib import metadata
-from pathlib import PurePath
 
 from qtpy.QtCore import QMessageLogger, QSize, Qt, QTimer, QUrl, Signal, Slot
 from qtpy.QtGui import QDesktopServices
 from qtpy.QtWidgets import (
     QAction,
     QApplication,
-    QFileDialog,
     QMainWindow,
     QMenuBar,
     QMessageBox,
@@ -48,7 +46,6 @@ from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Tabs.RunTab import RunTab
 from MDANSE_GUI.Tabs.TrajectoryTab import TrajectoryTab
-from MDANSE_GUI.Tabs.Views.PlotDataView import PlotDataView
 from MDANSE_GUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.UserSettingsEditor import UserSettingsEditor
 from MDANSE_GUI.Widgets.NotificationTabWidget import NotificationTabWidget

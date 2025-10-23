@@ -3,7 +3,6 @@ indent-width = 4
 target-version = "py310"
 
 extend-exclude = [
-    "MDANSE/Src/MDANSE/Framework/Jobs/RigidBodyTrajectory.py",
     "MDANSE/Src/MDANSE/MolecularDynamics/Trajectory.py",
     "MDANSE/Tests",
     "MDANSE_GUI/Tests",

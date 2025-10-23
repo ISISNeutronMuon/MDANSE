@@ -15,14 +15,8 @@
 #
 from __future__ import annotations
 
-import operator
-from collections.abc import Iterable
-from typing import Union
-
 import numpy as np
 
-from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 
 
@@ -32,76 +26,6 @@ class MolecularDynamicsError(Error):
 
 class UniverseAdapterError(Error):
     pass
-
-
-def elements_from_masses(masses: Iterable[float], tolerance: float = 0.01):
-    result = ["X"] * len(masses)
-    upper_limit = np.round(masses).astype(int).max()
-    all_masses = ATOMS_DATABASE.get_property("atomic_weight")
-    for n, mass in enumerate(masses):
-        for protons in range(upper_limit):
-            possible_matches = ATOMS_DATABASE._atoms_by_atomic_number[protons]
-            for match in possible_matches:
-                reference_mass = all_masses[match]
-                if abs(mass - reference_mass) <= tolerance:
-                    result[n] = match
-    return result
-
-
-def atom_index_to_molecule_index(chemical_system: ChemicalSystem) -> list[int]:
-    """Returns a list of molecule numbers, per atom. Single
-    atoms are assigned the value -1.
-
-    Parameters
-    ----------
-    chemical_system : ChemicalSystem
-        Object describing all the atoms and molecules in the system
-
-    Returns
-    -------
-    List[int]
-        list of molecule numbers, per atom.
-    """
-
-    lut = [-1] * len(chemical_system.atom_list)
-    last_cluster = 1
-    for cluster_name in chemical_system._clusters:
-        for cluster in chemical_system._clusters[cluster_name]:
-            for atom_index in cluster:
-                lut[atom_index] = last_cluster
-            last_cluster += 1
-    return lut
-
-
-def find_atoms_in_molecule(
-    chemical_system: ChemicalSystem,
-    entity_name: str,
-    atom_names: list[str],
-    indices: bool = False,
-) -> list[list[int]]:
-    if entity_name not in chemical_system._clusters:
-        return []
-
-    result = []
-    for index_list in chemical_system._clusters[entity_name]:
-        if indices:
-            result.append(
-                [
-                    chemical_system._atom_indices[index]
-                    for index in index_list
-                    if chemical_system.atom_list[index] in atom_names
-                ]
-            )
-        else:
-            result.append(
-                [
-                    chemical_system.atom_list[index]
-                    for index in index_list
-                    if chemical_system.atom_list[index] in atom_names
-                ]
-            )
-
-    return result
 
 
 def atomic_trajectory(

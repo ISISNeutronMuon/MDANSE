@@ -25,7 +25,6 @@ from .DFTB import DFTB as DFTB
 from .DL_POLY import DL_POLY as DL_POLY
 from .Forcite import Forcite as Forcite
 from .Gromacs import Gromacs as Gromacs
-from .ImprovedASE import ImprovedASE as ImprovedASE
 from .LAMMPS import LAMMPS as LAMMPS
 from .MDAnalysis import MDAnalysis as MDAnalysis
 from .MDTraj import MDTraj as MDTraj

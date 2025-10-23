@@ -26,11 +26,9 @@ from .ComboWidget import ComboWidget as ComboWidget
 from .CorrelationFramesWidget import CorrelationFramesWidget as CorrelationFramesWidget
 from .DerivativeOrderWidget import DerivativeOrderWidget as DerivativeOrderWidget
 from .DistHistCutoffWidget import DistHistCutoffWidget as DistHistCutoffWidget
-from .DummyWidget import DummyWidget as DummyWidget
 from .FloatWidget import FloatWidget as FloatWidget
 from .FramesWidget import FramesWidget as FramesWidget
 from .HDFTrajectoryWidget import HDFTrajectoryWidget as HDFTrajectoryWidget
-from .InputDirectoryWidget import InputDirectoryWidget as InputDirectoryWidget
 from .InputFileWidget import InputFileWidget as InputFileWidget
 from .InstrumentResolutionWidget import (
     InstrumentResolutionWidget as InstrumentResolutionWidget,
@@ -57,7 +55,6 @@ from .MoleculeWidget import MoleculeWidget as MoleculeWidget
 from .MultiInputFileWidget import MultiInputFileWidget as MultiInputFileWidget
 from .MultipleCombosWidget import MultipleCombosWidget as MultipleCombosWidget
 from .OptionalFloatWidget import OptionalFloatWidget as OptionalFloatWidget
-from .OutputDirectoryWidget import OutputDirectoryWidget as OutputDirectoryWidget
 from .OutputFilesWidget import OutputFilesWidget as OutputFilesWidget
 from .OutputStructureWidget import OutputStructureWidget as OutputStructureWidget
 from .OutputTrajectoryWidget import OutputTrajectoryWidget as OutputTrajectoryWidget
@@ -66,7 +63,6 @@ from .ProjectionWidget import ProjectionWidget as ProjectionWidget
 from .QVectorsWidget import QVectorsWidget as QVectorsWidget
 from .RangeWidget import RangeWidget as RangeWidget
 from .RunningModeWidget import RunningModeWidget as RunningModeWidget
-from .StringWidget import StringWidget as StringWidget
 from .TrajectoryFilterWidget import TrajectoryFilterWidget as TrajectoryFilterWidget
 from .UnitCellWidget import UnitCellWidget as UnitCellWidget
 from .VectorWidget import VectorWidget as VectorWidget

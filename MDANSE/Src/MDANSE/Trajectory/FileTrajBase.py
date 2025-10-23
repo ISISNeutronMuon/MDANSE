@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
 from pathlib import Path
 
 import h5py
@@ -24,10 +23,8 @@ import numpy as np
 import numpy.typing as npt
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.MolecularDynamics.Configuration import (
     _Configuration,
-    contiguous_coordinates_real,
 )
 from MDANSE.MolecularDynamics.TrajectoryUtils import atomic_trajectory
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -201,84 +198,6 @@ class TrajectoryFile(ABC):
             return real_coordinates
 
         return box_coordinates
-
-    def read_com_trajectory(
-        self,
-        atom_indices: Sequence[int],
-        first: int = 0,
-        last: int | None = None,
-        step: int = 1,
-        *,
-        box_coordinates: bool = False,
-    ) -> npt.NDArray[float]:
-        """Build the trajectory of the center of mass of a set of atoms.
-
-        Parameters
-        ----------
-        atoms : Sequence[int]
-            The atoms for which the center of mass should be computed.
-        first : int
-            The index of the first frame. (Default value = 0)
-        last : int or None
-            The index of the last frame. (Default value = None)
-        step : int
-            Number of frames between each sample. (Default value = 1)
-        box_coordinates : bool
-            If `True`, the coordiniates are returned in box coordinates. (Default value = False)
-
-        Returns
-        -------
-        ndarray
-            2D array containing the center of mass trajectory for the selected frames
-
-        """
-        slc = np.s_[first:last:step]
-
-        if len(atom_indices) == 1:
-            return self.read_atomic_trajectory(
-                atom_indices[0],
-                first=first,
-                last=last,
-                step=step,
-                box_coordinates=box_coordinates,
-            )
-
-        masses = self.masses()[atom_indices]
-        coords = self.coordinates(frame=slc, indices=atom_indices)
-
-        if coords.ndim == 2:
-            coords = coords[np.newaxis, :, :]
-
-        if self._unit_cells is not None:
-            direct_cells = np.array(
-                [uc.direct for uc in self._unit_cells[slc]],
-            )
-            inverse_cells = np.array(
-                [uc.inverse for uc in self._unit_cells[slc]],
-            )
-
-            temp_coords = contiguous_coordinates_real(
-                coords,
-                direct_cells,
-                inverse_cells,
-                [list(range(len(coords)))],
-                bring_to_centre=True,
-            )
-
-            com_coords = np.vstack(
-                [center_of_mass(coords, masses) for coords in temp_coords],
-            )
-
-            com_traj = atomic_trajectory(com_coords, direct_cells, inverse_cells)
-
-        else:
-            com_traj = np.sum(
-                coords[:, atom_indices, :] * masses[np.newaxis, :, np.newaxis],
-                axis=1,
-            )
-            com_traj /= np.sum(masses)
-
-        return com_traj
 
     def read_atomic_trajectory(
         self,

@@ -29,7 +29,6 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlottingContext import (
     PlottingContext,
     SingleDataset,
-    plotting_column_labels,
 )
 
 

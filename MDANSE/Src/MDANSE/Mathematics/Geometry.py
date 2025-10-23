@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import numpy as np
-from numpy.linalg import det
 
 from MDANSE.Core.Error import Error
 from MDANSE.Mathematics.LinearAlgebra import Vector
@@ -111,26 +110,6 @@ def moment_of_inertia(
     return moi
 
 
-def build_cartesian_axes(origin, p1, p2, dtype=np.float64):
-    origin = np.array(origin, dtype=dtype)
-    p1 = np.array(p1, dtype=dtype)
-    p2 = np.array(p2, dtype=dtype)
-
-    v1 = p1 - origin
-    v2 = p2 - origin
-
-    n1 = v1 + v2
-    n1 /= np.linalg.norm(n1)
-
-    n3 = np.cross(v1, n1)
-    n3 /= np.linalg.norm(n3)
-
-    n2 = np.cross(n3, n1)
-    n2 /= np.linalg.norm(n2)
-
-    return n1, n2, n3
-
-
 def generate_sphere_points(n: int) -> np.ndarray:
     """Returns list of 3d coordinates of points on a sphere using the
     Golden Section Spiral algorithm.
@@ -179,112 +158,3 @@ def random_points_on_circle(axis, radius=1.0, nPoints=100):
     points *= radius / np.sqrt(np.sum(points**2, axis=0))
 
     return points
-
-
-def get_euler_angles(rotation, tolerance=1e-5):
-    """
-    R must be an indexable of shape (3,3) and represent and ORTHOGONAL POSITIVE
-    DEFINITE matrix.
-    """
-
-    fuzz = 1e-3
-    rotation = np.asarray(rotation, float)
-
-    if det(rotation) < 0.0:
-        raise GeometryError("determinant is negative\n" + str(rotation))
-
-    if not np.allclose(np.mat(rotation) * rotation.T, np.identity(3), atol=tolerance):
-        raise GeometryError("not an orthogonal matrix\n" + str(rotation))
-    cang = 2.0 - np.sum(
-        np.square(
-            [
-                rotation[0, 2],
-                rotation[1, 2],
-                rotation[2, 0],
-                rotation[2, 1],
-                rotation[2, 2],
-            ]
-        )
-    )
-    cang = np.sqrt(min(max(cang, 0.0), 1.0))
-    if rotation[2, 2] < 0.0:
-        cang = -cang
-    ang = np.arccos(cang)
-    beta = np.degrees(ang)
-    sang = np.sin(ang)
-    if sang > fuzz:
-        alpha = np.degrees(np.arctan2(rotation[1, 2], rotation[0, 2]))
-        gamma = np.degrees(np.arctan2(rotation[2, 1], -rotation[2, 0]))
-    else:
-        alpha = np.degrees(np.arctan2(-rotation[0, 1], rotation[0, 0] * rotation[2, 2]))
-        gamma = 0.0
-
-    if np.isclose(beta, 0.0, atol=fuzz):
-        alpha, beta, gamma = alpha + gamma, 0.0, 0.0
-    elif np.isclose(beta, 180.0, atol=fuzz):
-        alpha, beta, gamma = alpha - gamma, 180.0, 0.0
-
-    alpha = np.mod(alpha, 360.0)
-    gamma = np.mod(gamma, 360.0)
-
-    if np.isclose(alpha, 360.0, atol=fuzz):
-        alpha = 0.0
-    if np.isclose(gamma, 360.0, atol=fuzz):
-        gamma = 0.0
-
-    return alpha, beta, gamma
-
-
-def superposition_fit(confs):
-    """
-    :param confs: the weight, reference position, and alternate position for each atom
-    :type confs: sequence of (float, Vector, Vector)
-    :returns: the quaternion representing the rotation,
-              the center of mass in the reference configuration,
-              the center of mass in the alternate configuraton,
-              and the RMS distance after the optimal superposition
-    """
-    w_sum = 0.0
-    wr_sum = np.zeros((3,), np.float64)
-    for w, r_ref, _ in confs:
-        w_sum += w
-        wr_sum += w * r_ref.array
-    ref_cms = wr_sum / w_sum
-    pos = np.zeros((3,), np.float64)
-    possq = 0.0
-    cross = np.zeros((3, 3), np.float64)
-    for w_in, r_ref_in, r_in in confs:
-        w = w_in / w_sum
-        r_ref = r_ref_in.array - ref_cms
-        r = r_in.array
-        pos = pos + w * r
-        possq = possq + w * np.add.reduce(r * r) + w * np.add.reduce(r_ref * r_ref)
-        cross = cross + w * r[:, np.newaxis] * r_ref[np.newaxis, :]
-    k = np.zeros((4, 4), np.float64)
-    k[0, 0] = -cross[0, 0] - cross[1, 1] - cross[2, 2]
-    k[0, 1] = cross[1, 2] - cross[2, 1]
-    k[0, 2] = cross[2, 0] - cross[0, 2]
-    k[0, 3] = cross[0, 1] - cross[1, 0]
-    k[1, 1] = -cross[0, 0] + cross[1, 1] + cross[2, 2]
-    k[1, 2] = -cross[0, 1] - cross[1, 0]
-    k[1, 3] = -cross[0, 2] - cross[2, 0]
-    k[2, 2] = cross[0, 0] - cross[1, 1] + cross[2, 2]
-    k[2, 3] = -cross[1, 2] - cross[2, 1]
-    k[3, 3] = cross[0, 0] + cross[1, 1] - cross[2, 2]
-    for i in range(1, 4):
-        for j in range(i):
-            k[i, j] = k[j, i]
-    k = 2.0 * k
-    for i in range(4):
-        k[i, i] = k[i, i] + possq - np.add.reduce(pos * pos)
-    e, v = np.linalg.eig(k)
-    v = np.transpose(v)
-    i = np.argmin(e)
-    v = v[i]
-    if v[0] < 0:
-        v = -v
-    rms = 0.0 if e[i] <= 0.0 else np.sqrt(e[i])
-
-    from MDANSE.Mathematics.LinearAlgebra import Quaternion, Vector
-
-    return Quaternion(v), Vector(ref_cms), Vector(pos), rms

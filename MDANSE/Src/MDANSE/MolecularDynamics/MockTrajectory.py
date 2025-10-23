@@ -24,12 +24,10 @@ import numpy as np
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Units import measure
-from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
     _Configuration,
-    contiguous_coordinates_real,
 )
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE.MolecularDynamics.TrajectoryUtils import atomic_trajectory
@@ -339,73 +337,6 @@ class MockTrajectory:
         """
 
         return self._number_of_frames
-
-    def read_com_trajectory(
-        self, indices, first=0, last=None, step=1, box_coordinates=False
-    ):
-        """Build the trajectory of the center of mass of a set of atoms.
-
-        :param atoms: the atoms for which the center of mass should be computed
-        :type atoms: list MDANSE.Chemistry.ChemicalSystem.Atom
-        :param first: the index of the first frame
-        :type first: int
-        :param last: the index of the last frame
-        :type last: int
-        :param step: the step in frame
-        :type step: int
-        :param box_coordinates: if True, the coordiniates are returned in box coordinates
-        :type step: bool
-
-        :return: 2D array containing the center of mass trajectory for the selected frames
-        :rtype: ndarray
-        """
-
-        if last is None:
-            last = len(self)
-
-        masses = np.array(
-            [
-                self.chemical_system.atom_property("atomic_weight")[index]
-                for index in indices
-            ]
-        )
-
-        frames = np.array([self.coordinates(fnum) for fnum in range(first, last, step)])
-        coords = frames[:, indices, :].astype(np.float64)
-
-        if coords.ndim == 2:
-            coords = coords[np.newaxis, :, :]
-
-        if self._pbc:
-            direct_cells = np.array(
-                [self.unit_cell(fnum).direct for fnum in range(first, last, step)]
-            )
-            inverse_cells = np.array(
-                [self.unit_cell(fnum).inverse for fnum in range(first, last, step)]
-            )
-            temp_coords = contiguous_coordinates_real(
-                coords,
-                direct_cells,
-                inverse_cells,
-                [list(range(len(coords)))],
-                bring_to_centre=True,
-            )
-            com_coords = np.vstack(
-                [
-                    center_of_mass(temp_coords[tstep], masses)
-                    for tstep in range(len(temp_coords))
-                ]
-            )
-
-            com_traj = atomic_trajectory(com_coords, direct_cells, inverse_cells)
-
-        else:
-            com_traj = np.sum(
-                coords[:, indices, :] * masses[np.newaxis, :, np.newaxis], axis=1
-            )
-            com_traj /= np.sum(masses)
-
-        return com_traj
 
     def to_real_coordinates(self, box_coordinates, first, last, step):
         """Convert box coordinates to real coordinates for a set of frames.

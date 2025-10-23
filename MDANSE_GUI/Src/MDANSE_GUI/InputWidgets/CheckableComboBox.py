@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from itertools import compress, count, groupby
+from itertools import compress
 
 from more_itertools import consecutive_groups
 from qtpy.QtCore import QEvent, QObject, Qt

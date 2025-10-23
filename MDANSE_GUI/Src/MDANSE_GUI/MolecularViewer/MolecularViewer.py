@@ -29,7 +29,6 @@ from scipy.spatial import cKDTree as KDTree
 from scipy.spatial.transform import Rotation as R
 from vtk.util import numpy_support
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
 
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory

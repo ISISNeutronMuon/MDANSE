@@ -128,14 +128,11 @@ def parameters():
 @pytest.mark.parametrize(
     "job_info",
     [
-        # "AngularCorrelation",
-        # "GeneralAutoCorrelationFunction",
         ("DensityOfStates", ["dos", "vacf"], False),
         ("MeanSquareDisplacement", ["msd"], False),
         ("VelocityAutoCorrelationFunction", ["vacf"], False),
         ("VanHoveFunctionDistinct", ["vh"], False),
         ("VanHoveFunctionSelf", ["vh"], False),
-        # "OrderParameter",
         ("PositionAutoCorrelationFunction", ["pacf"], False),
         ("PositionPowerSpectrum", ["pacf", "pps"], False),
     ],

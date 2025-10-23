@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from MDANSE.MolecularDynamics.Analysis import (AnalysisError,
-                                               mean_square_deviation,
                                                mean_square_displacement,
                                                mean_square_fluctuation,
                                                radius_of_gyration)
@@ -17,23 +16,6 @@ COORDS = [
               [1, 1, 2], [2, 1, 2], [2, 2, 2], [1, 2, 2]], dtype=float),
 ]
 
-@pytest.mark.parametrize("coords,masses,root,expected", [
-    ((COORDS[1], COORDS[0]), None, False, 20/3),
-    ((COORDS[1], COORDS[0]), [3, 10, 1], False, 80/14),
-    ((COORDS[2], COORDS[0]), None, True, 5),
-    ((COORDS[4], COORDS[5]), None, True, np.sqrt(3)),
-    ((COORDS[4], COORDS[5]), None, False, 3),
-    ])
-def test_mean_square_deviation(coords, masses, root, expected):
-    msd = mean_square_deviation(*coords, masses, root)
-    assert msd == expected
-
-@pytest.mark.parametrize("coords,masses,root,expected", [
-    ([np.zeros((3, 3)), np.zeros((3, 4))], None, False, AnalysisError),
-])
-def test_invalid(coords, masses, root, expected):
-    with pytest.raises(expected):
-        mean_square_deviation(*coords, masses, root)
 
 @pytest.mark.parametrize("coords, n_configs, expected", [
     (COORDS[1], 1, [0., 1., 4.])

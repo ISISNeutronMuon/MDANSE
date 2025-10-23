@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
-from qtpy.QtCore import QObject, QTimer, Signal, Slot
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QSlider
 
 

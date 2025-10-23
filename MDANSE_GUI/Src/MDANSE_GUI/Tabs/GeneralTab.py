@@ -217,27 +217,3 @@ class GeneralTab(QObject):
         for target in [self._model, self._visualiser, self._view, self._logger]:
             if target is not None:
                 target._session = self._session
-
-    @Slot(str)
-    def critical(self, message: str):
-        LOG.critical(message)
-
-    @Slot(str)
-    def warning(self, message: str):
-        LOG.warning(message)
-
-    @Slot(str)
-    def error(self, message: str):
-        LOG.error(message)
-
-    @Slot(str)
-    def debug(self, message: str):
-        LOG.debug(message)
-
-    @Slot(str)
-    def info(self, message: str):
-        LOG.info(message)
-
-    @Slot(str)
-    def fatal(self, message: str):
-        LOG.critical(message)

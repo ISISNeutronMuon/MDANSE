@@ -23,8 +23,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
-import numpy as np
-from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
     QComboBox,

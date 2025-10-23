@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
 
@@ -26,16 +25,11 @@ import numpy.typing as npt
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Units import measure
-from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
     _Configuration,
-    contiguous_coordinates_real,
-)
-from MDANSE.MolecularDynamics.TrajectoryUtils import (
-    atomic_trajectory,
 )
 from MDANSE.MolecularDynamics.UnitCell import (
     BAD_CELL,

@@ -27,49 +27,6 @@ class AnalysisError(Error):
     pass
 
 
-def mean_square_deviation(
-    coords1: np.ndarray,
-    coords2: np.ndarray,
-    masses: np.ndarray = None,
-    root: bool = False,
-) -> float:
-    """
-    Computes the mean square deviation between two sets of coordinates using the following function:
-    .. math:: \\frac{\\sum_{i=0} ^{n} ((\\sum_{x=1} ^{3} (coords1_{i,x} - coords2_{i,x})^2) * m_i)}{\\sum_{i=0} ^{n} m_i}
-    where n is the number of particles (i.e. the length of the provided arrays), coords1 and coords2 are the provided
-    coordinate arrays, so :math: `coords1_{i,x}` is equivalent to coords[i, x] where i is atom index and x is axis, and
-    m is the provided array of masses, or an array of ones if None is passed in.
-
-    :param coords1: the first set of n coordinates.
-    :type coords1: (n,3) numpy array
-
-    :param coords2: the second set of n coordinates.
-    :type coords2: (n,3) numpy array
-
-    :param masses: the n input masses. If None the center of gravity is computed.
-    :type masses: n-numpy array
-
-    :param root: if True, return the square root of MSD, i.e. the root-mean-square deviation
-    :type root: bool
-
-    :return: the mean square deviation.
-    :rtype: float
-    """
-
-    if coords1.shape != coords2.shape:
-        raise AnalysisError("The input coordinates shapes do not match")
-
-    if masses is None:
-        masses = np.ones((coords1.shape[0]), dtype=np.float64)
-
-    rmsd = np.sum(np.sum((coords1 - coords2) ** 2, axis=1) * masses) / np.sum(masses)
-
-    if root:
-        rmsd = np.sqrt(rmsd)
-
-    return rmsd
-
-
 def mean_square_displacement(coords: np.ndarray, n_configs: int) -> NDArray[np.float64]:
     """Computes the mean square displacement of a set of coordinates
     using the MSD algorithm described in Kneller et al., Com. Phys. Com., 1995.

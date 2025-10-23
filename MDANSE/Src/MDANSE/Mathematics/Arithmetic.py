@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import itertools
 from collections.abc import Iterable
-from typing import Union
 
 import numpy as np
 

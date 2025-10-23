@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from contextlib import suppress
 
-from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QColor
 from qtpy.QtWidgets import (
     QApplication,

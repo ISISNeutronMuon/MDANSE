@@ -16,10 +16,8 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from functools import reduce
 from itertools import islice
 from itertools import product as cart_prod
-from math import prod as product
 from typing import TYPE_CHECKING
 
 import numpy as np
