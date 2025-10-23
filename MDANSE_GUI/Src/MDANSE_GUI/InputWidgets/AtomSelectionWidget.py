@@ -24,7 +24,6 @@ from qtpy.QtGui import (
     QStandardItem,
     QStandardItemModel,
     QUndoCommand,
-    QUndoGroup,
     QUndoStack,
 )
 from qtpy.QtWidgets import (
@@ -39,7 +38,6 @@ from qtpy.QtWidgets import (
     QPlainTextEdit,
     QPushButton,
     QScrollArea,
-    QUndoView,
     QVBoxLayout,
     QWidget,
 )
@@ -113,6 +111,7 @@ class SelectionModel(QStandardItemModel):
 
     @Slot()
     def undo_last(self):
+        self.finalise_manual_selection()
         self.undo_stack.undo()
         self.can_undo.emit(self.undo_stack.canUndo())
         self.can_redo.emit(self.undo_stack.canRedo())
@@ -245,6 +244,8 @@ class SelectionModel(QStandardItemModel):
         self.finalise_manual_selection()
         append_selection_command = AppendSelectionCommand(self, json_string)
         self.undo_stack.push(append_selection_command)
+        self.can_undo.emit(self.undo_stack.canUndo())
+        self.can_redo.emit(self.undo_stack.canRedo())
 
     @Slot(str)
     def create_from_string(self, json_string: str):
@@ -656,13 +657,17 @@ class AtomSelectionWidget(WidgetBase):
         """
         return SelectionHelper(traj_data, self.selection_model, self._base)
 
-    @Slot()
-    def helper_dialog(self) -> None:
-        """Open the helper dialog."""
+    def initialise_helper(self) -> None:
+        """Create a helper dialog instance if it does not exist at the moment."""
         if self.helper is None:
             self.helper = self.create_helper(self.helper_settings)
             if self.helper_save_button:
                 self.helper.create_optional_save_button()
+
+    @Slot()
+    def helper_dialog(self) -> None:
+        """Open the helper dialog."""
+        self.initialise_helper()
         if self.helper.isVisible():
             geometry = self.helper.saveGeometry()
             self.helper.previous_geometry = geometry
@@ -702,6 +707,7 @@ class AtomSelectionWidget(WidgetBase):
             LOG.warning("Selection from %s was empty and will be ignored", fname)
             return
         new_selection = temp_selection.convert_to_json()
+        self.initialise_helper()
         self.helper.selection_model.create_from_string(new_selection)
 
     def get_widget_value(self) -> str:
