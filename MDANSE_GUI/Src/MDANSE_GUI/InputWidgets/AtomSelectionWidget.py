@@ -70,18 +70,31 @@ class SelectionValidity(Enum):
 
 
 class AppendSelectionCommand(QUndoCommand):
-    def __init__(self, model, json_string):
+    """A selection operation with methods to add and remove itself from the model."""
+
+    def __init__(self, model: SelectionModel, json_string: str):
+        """Stores a reference to the SelectionModel instance and the selection string.
+
+        Parameters
+        ----------
+        model : SelectionModel
+            The selection operation will be added to it or removed from it.
+        json_string : str
+            String describing a single selection operation.
+        """
         super().__init__()
         self.model = model
         self.json_string = json_string
 
     def redo(self):
+        """Append the selection to the SelectionModel."""
         new_item = QStandardItem(self.json_string)
         new_item.setEditable(False)
         self.model.appendRow(new_item)
         self.model.selection_changed.emit()
 
     def undo(self):
+        """Remove the last selection from the SelectionModel."""
         self.model.removeRow(self.model.rowCount() - 1)
         self.model.selection_changed.emit()
 
@@ -111,6 +124,9 @@ class SelectionModel(QStandardItemModel):
 
     @Slot()
     def undo_last(self):
+        """Execute QUndoStack.undo and update the undo/redo buttons.
+
+        Removes the last selection from the list."""
         self.finalise_manual_selection()
         self.undo_stack.undo()
         self.can_undo.emit(self.undo_stack.canUndo())
@@ -118,6 +134,9 @@ class SelectionModel(QStandardItemModel):
 
     @Slot()
     def redo_last(self):
+        """Execute QUndoStack.redo and update the undo/redo buttons.
+
+        Brings back the last operation removed by undo."""
         self.undo_stack.redo()
         self.can_undo.emit(self.undo_stack.canUndo())
         self.can_redo.emit(self.undo_stack.canRedo())
