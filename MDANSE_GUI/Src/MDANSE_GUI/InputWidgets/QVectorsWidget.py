@@ -38,6 +38,7 @@ from MDANSE_GUI.Tabs.Visualisers.PlotWidget import PlotWidget
 
 class VectorModel(QStandardItemModel):
     type_changed = Signal()
+    unit_cell_missing = Signal()
     input_is_valid = Signal(bool)
 
     def __init__(self, *args, trajectory=None, **kwargs):
@@ -52,9 +53,13 @@ class VectorModel(QStandardItemModel):
     ):
         self.clear()
         self._defaults = []
-        self._generator = IQVectors.create(
-            vector_type, self._trajectory.configuration(0)
-        )
+        try:
+            self._generator = IQVectors.create(
+                vector_type, self._trajectory.configuration(0)
+            )
+        except ValueError:
+            self.unit_cell_missing.emit()
+            return
         settings = self._generator.settings
         for kv in settings.items():
             name = kv[0]  # dictionary key
@@ -184,6 +189,7 @@ class QVectorsWidget(WidgetBase):
         self._selector.setCurrentIndex(1)
         self._model.itemChanged.connect(self.updateValue)
         self._model.type_changed.connect(self.updateValue)
+        self._model.unit_cell_missing.connect(self.fail_early)
         self.updateValue()
         if self._tooltip:
             tooltip_text = self._tooltip
@@ -209,6 +215,12 @@ class QVectorsWidget(WidgetBase):
             self.clear_error()
         else:
             self.mark_error("Some entries in the parameter table are invalid.")
+
+    @Slot()
+    def fail_early(self):
+        """Interrupt the vector generation process early due to initial errors."""
+        self._configurator.error_status = "Unit cell information is missing in the trajectory. Lattice vectors will not work."
+        self.updateValue()
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
