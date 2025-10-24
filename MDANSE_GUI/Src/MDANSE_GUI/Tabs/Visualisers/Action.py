@@ -89,6 +89,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "CorrelationFramesConfigurator": CorrelationFramesWidget,
     "FramesConfigurator": FramesWidget,
     "RangeConfigurator": RangeWidget,
+    "QRangeConfigurator": RangeWidget,
     "DistHistCutoffConfigurator": DistHistCutoffWidget,
     "VectorConfigurator": VectorWidget,
     "HDFInputFileConfigurator": InputFileWidget,

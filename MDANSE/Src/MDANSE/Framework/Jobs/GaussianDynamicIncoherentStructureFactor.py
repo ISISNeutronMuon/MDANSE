@@ -51,15 +51,18 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
     )
     settings["q_shells"] = (
-        "RangeConfigurator",
-        {"valueType": float, "includeLast": True, "mini": 0.0},
+        "QRangeConfigurator",
+        {"valueType": float, "includeLast": True, "mini": 0.0, "show_prediction": True},
     )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
+        {
+            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
+            "show_prediction": True,
+        },
     )
     settings["projection"] = (
         "ProjectionConfigurator",

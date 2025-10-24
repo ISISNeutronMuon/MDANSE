@@ -50,7 +50,7 @@ class AreaPerMolecule(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
     )
     settings["axis"] = (
         "SingleChoiceConfigurator",

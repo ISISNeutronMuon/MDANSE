@@ -17,6 +17,8 @@ class DistHistCutoffConfigurator(RangeConfigurator):
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self._max_value = kwargs.get("max_value", True)
+        self.prediction_key = "value"
+        self.prediction_unit = "nm"
 
     def configure(self, value):
         """Configure the distance histogram cutoff configurator.

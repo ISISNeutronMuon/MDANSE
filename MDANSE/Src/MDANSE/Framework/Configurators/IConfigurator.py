@@ -113,6 +113,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         default: Any | None = None,
         label: str | None = None,
         optional: bool = False,
+        show_prediction: bool = False,
         **kwargs,
     ):
         """Create an input parser for an MDANSE job input parameter.
@@ -154,9 +155,11 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         self.optional = optional
 
         self.configured = False
-
+        self.show_prediction = show_prediction
         self.valid = True
 
+        self.prediction_key = "none"
+        self.prediction_unit = "none"
         self._error_status = "OK"
         self._warning_status = ""
 
@@ -330,3 +333,16 @@ class IConfigurator(dict, metaclass=SubclassFactory):
                 if prop.is_configured()
             ]
         return all(c in configured for c in self.dependencies.values())
+
+    def preview_output_axis(self):
+        """Show what data axis will be created in the output file."""
+        if not self.show_prediction:
+            return None, None
+        if not self.is_configured():
+            return None, None
+        if not self.valid:
+            return None, None
+        if self.prediction_key in self:
+            return self[self.prediction_key], self.prediction_unit
+        else:
+            return None, None

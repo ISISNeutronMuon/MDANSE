@@ -124,7 +124,7 @@ class SolventAccessibleSurface(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "default": (0, 2, 1)},
+        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",

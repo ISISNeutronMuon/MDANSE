@@ -57,7 +57,7 @@ class ElasticIncoherentStructureFactor(IJob):
     )
     settings["q_vectors"] = (
         "QVectorsConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
     )
     settings["projection"] = (
         "ProjectionConfigurator",

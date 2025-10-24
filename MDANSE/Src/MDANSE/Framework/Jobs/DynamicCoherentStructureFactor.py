@@ -63,15 +63,18 @@ class DynamicCoherentStructureFactor(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
     )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
+        {
+            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
+            "show_prediction": True,
+        },
     )
     settings["q_vectors"] = (
         "QVectorsConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",

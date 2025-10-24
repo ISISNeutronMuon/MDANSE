@@ -48,6 +48,11 @@ class InstrumentResolutionConfigurator(IConfigurator):
 
     _default = ("gaussian", {"mu": 0.0, "sigma": 10.0})
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prediction_key = "romega"
+        self.prediction_unit = "rad/ps"
+
     def configure(self, value):
         """
         Configure the instrument resolution.
@@ -102,13 +107,3 @@ class InstrumentResolutionConfigurator(IConfigurator):
             : len(time)
         ]
         self.error_status = "OK"
-
-    def preview_output_axis(self):
-        if not self.is_configured():
-            return None, None
-        if not self.valid:
-            return None, None
-        if "romega" in self:
-            return self["romega"], "rad/ps"
-        else:
-            return None, None

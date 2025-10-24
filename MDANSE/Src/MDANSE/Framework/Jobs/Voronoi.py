@@ -69,7 +69,7 @@ class Voronoi(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "default": (0, 5, 1)},
+        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
     )
     settings["pbc"] = (
         "BooleanConfigurator",

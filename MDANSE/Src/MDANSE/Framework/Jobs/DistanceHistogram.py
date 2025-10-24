@@ -62,6 +62,7 @@ class DistanceHistogram(IJob):
             "includeLast": True,
             "mini": 0.0,
             "dependencies": {"trajectory": "trajectory"},
+            "show_prediction": True,
         },
     )
     settings["grouping_level"] = (

@@ -37,6 +37,8 @@ class FramesConfigurator(RangeConfigurator):
         """
 
         RangeConfigurator.__init__(self, name, sort=True, **kwargs)
+        self.prediction_key = "time"
+        self.prediction_unit = "ps"
 
     def configure(self, value):
         """
@@ -103,10 +105,3 @@ class FramesConfigurator(RangeConfigurator):
             self["time_step"] = 1.0
 
         self["duration"] = self["time"] - self["time"][0]
-
-    def preview_output_axis(self):
-        if not self.is_configured():
-            return None, None
-        if not self.valid:
-            return None, None
-        return self["time"], "ps"

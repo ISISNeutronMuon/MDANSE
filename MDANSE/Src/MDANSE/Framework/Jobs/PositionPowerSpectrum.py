@@ -59,7 +59,10 @@ class PositionPowerSpectrum(IJob):
     )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
+        {
+            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
+            "show_prediction": True,
+        },
     )
     settings["projection"] = (
         "ProjectionConfigurator",

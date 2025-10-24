@@ -84,11 +84,18 @@ class XRayStaticStructureFactor(DistanceHistogram):
             "includeLast": True,
             "mini": 0.0,
             "dependencies": {"trajectory": "trajectory"},
+            "show_prediction": False,
         },
     )
     settings["q_values"] = (
-        "RangeConfigurator",
-        {"valueType": float, "includeLast": True, "mini": 0.0, "default": (0, 500, 1)},
+        "QRangeConfigurator",
+        {
+            "valueType": float,
+            "includeLast": True,
+            "mini": 0.0,
+            "default": (0, 500, 1),
+            "show_prediction": True,
+        },
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",

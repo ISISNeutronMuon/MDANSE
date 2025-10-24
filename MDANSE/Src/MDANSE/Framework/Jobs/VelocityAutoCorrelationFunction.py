@@ -49,7 +49,7 @@ class VelocityAutoCorrelationFunction(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
     )
     settings["interpolation_order"] = (
         "InterpolationOrderConfigurator",

@@ -96,7 +96,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
     )
     settings["molecule_and_axis"] = (
         "AxisSelectionConfigurator",
