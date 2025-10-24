@@ -128,7 +128,7 @@ class ChemicalSystem:
                 # dummy atoms.
                 self.rdkit_mol.AddBond(i, j, Chem.rdchem.BondType.UNSPECIFIED)
 
-    def set_bond_orders(self, coords: np.ndarray, max_valence_combo=100):
+    def set_bond_orders(self, coords: np.ndarray, max_iters=1000, max_natms=100):
         """Set the bond types for the bonds in the rdkit_mol.
 
         Parameters
@@ -136,34 +136,16 @@ class ChemicalSystem:
         coords : np.ndarray
             The coordinates of the system to determine the bond types
             from.
-        max_valence_combo: int
-            The maximum number of valence combinations.
+        max_iters: int
+            The maximum number of iterations used in the rdkit
+            DetermineBondOrders function.
+        max_natms : int
+            Skips DetermineBondOrders for molecules with a number of atoms
+            larger than max_natms.
         """
-
-        # number of possible valences that an atom could have e.g. nitrogen
-        # has two possible valences 3 or 4 when determining the bond types,
-        # DetermineBondOrders will check all possible combinations of valences
-        # see https://github.com/rdkit/rdkit/blob/master/Code/GraphMol/DetermineBonds/DetermineBonds.cpp
-        atomic_valences = {
-            1: [1],
-            5: [3, 4],
-            6: [4],
-            7: [3, 4],
-            8: [2, 1, 3],
-            9: [1],
-            14: [4],
-            15: [5, 3],
-            16: [6, 3, 2],
-            17: [1],
-            32: [4],
-            35: [1],
-            53: [1],
-        }
 
         uniq_submols = {}
         coord_ang = coords * measure(1.0, "nm").toval("ang")
-        element_list = [atm.GetSymbol() for atm in self.rdkit_mol.GetAtoms()]
-        atom_numbers = [atm.GetAtomicNum() for atm in self.rdkit_mol.GetAtoms()]
 
         # Calling rdDetermineBonds.DetermineBondOrders for a large system
         # is quite computationally expensive. It's better to call this
@@ -177,36 +159,9 @@ class ChemicalSystem:
                     i for i in cluster if i not in self._rdkit_dummy_atms
                 ]
 
-                atm_nums = [atom_numbers[i] for i in cluster_no_dummies]
-                unsupported = [
-                    element_list[idx]
-                    for idx, atom in enumerate(atm_nums)
-                    if atom not in atomic_valences
-                ]
-                if len(unsupported) > 0:
+                if len(cluster_no_dummies) > max_natms:
                     LOG.warning(
-                        f"Bond type determination for molecule {cluster_name} "
-                        f"with index {idx} contains the following unsupported "
-                        f"atoms: {unsupported}. SMARTS pattern matching will "
-                        f"not work as expected. Bond types set to UNSPECIFIED "
-                        f"use bond type wildcard ~ to match bonds in this molecule."
-                    )
-                    continue
-
-                atm_num_valences = []
-                for atm_num, j in zip(atm_nums, cluster_no_dummies, strict=False):
-                    num_bonds = self.rdkit_mol.GetAtomWithIdx(j).GetDegree()
-                    atm_num_valences.append(
-                        quantify(
-                            atomic_valences[atm_num],
-                            pred=lambda k, nb=num_bonds: nb <= k,
-                        )
-                    )
-
-                num_valences_combo = np.prod(atm_num_valences, dtype=object)
-                if num_valences_combo > max_valence_combo:
-                    LOG.warning(
-                        f"Number of valence combinations {num_valences_combo} "
+                        f"Number of atoms in {cluster_name} with idx {idx} "
                         f"is very large - skipping bond type determination. "
                         f"SMARTS pattern matching will not work as expected. "
                         f"Bond types set to UNSPECIFIED use bond type wildcard "
@@ -253,7 +208,7 @@ class ChemicalSystem:
                         rdDetermineBonds.DetermineBondOrders(
                             submolecule,
                             charge=0,
-                            maxIterations=max_valence_combo + 1,
+                            maxIterations=max_iters,
                         )
                     except Exception as e:
                         LOG.error(
@@ -268,7 +223,15 @@ class ChemicalSystem:
                 for i, j in enumerate(bond_idxs):
                     submol_bond = submolecule.GetBondWithIdx(i)
                     mol_bond = self.rdkit_mol.GetBondWithIdx(j)
-                    mol_bond.SetBondType(submol_bond.GetBondType())
+                    bond_type = submol_bond.GetBondType()
+                    mol_bond.SetBondType(bond_type)
+                    if bond_type == Chem.rdchem.BondType.AROMATIC:
+                        mol_bond.GetBeginAtom().SetIsAromatic(True)
+                        mol_bond.GetEndAtom().SetIsAromatic(True)
+
+        # determine ring info for the rdkit_mol so the SMART pattern like
+        # [cR1] can be used
+        Chem.GetSymmSSSR(self.rdkit_mol)
 
     def add_labels(self, label_dict: dict[str, list[int]]):
         for key, item in label_dict.items():
@@ -338,9 +301,13 @@ class ChemicalSystem:
         set[int]
             An set of matched atom indices.
         """
-        matches = self.rdkit_mol.GetSubstructMatches(
-            Chem.MolFromSmarts(smarts), maxMatches=maxmatches
-        )
+        try:
+            matches = self.rdkit_mol.GetSubstructMatches(
+                Chem.MolFromSmarts(smarts), maxMatches=maxmatches
+            )
+        except RuntimeError as e:
+            LOG.error(f"Unable to run pattern match using {smarts}: {e}")
+            return set()
         return {ind for match in matches for ind in match}
 
     @property
