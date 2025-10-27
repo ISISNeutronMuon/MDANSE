@@ -43,6 +43,7 @@ from .FileWithAtomDataConfigurator import (
 )
 from .FloatConfigurator import FloatConfigurator as FloatConfigurator
 from .FramesConfigurator import FramesConfigurator as FramesConfigurator
+from .GridStepConfigurator import GridStepConfigurator as GridStepConfigurator
 from .GroupingLevelConfigurator import (
     GroupingLevelConfigurator as GroupingLevelConfigurator,
 )

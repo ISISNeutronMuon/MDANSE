@@ -59,8 +59,13 @@ class MolecularTrace(IJob):
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["spatial_resolution"] = (
-        "FloatConfigurator",
-        {"mini": 0.01, "default": 0.1},
+        "GridStepConfigurator",
+        {
+            "mini": 0.01,
+            "default": 0.1,
+            "dependencies": {"trajectory": "trajectory"},
+            "show_prediction": True,
+        },
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})

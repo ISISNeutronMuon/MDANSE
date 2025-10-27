@@ -74,7 +74,15 @@ class ScatteringLengthDensityProfile(IJob):
         "SingleChoiceConfigurator",
         {"choices": ["a", "b", "c"], "default": "c"},
     )
-    settings["dr"] = ("FloatConfigurator", {"default": 0.01, "mini": 1.0e-9})
+    settings["dr"] = (
+        "GridStepConfigurator",
+        {
+            "default": 0.01,
+            "mini": 1.0e-9,
+            "dependencies": {"trajectory": "trajectory", "axis": "axis"},
+            "show_prediction": True,
+        },
+    )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
