@@ -29,3 +29,4 @@ class QRangeConfigurator(RangeConfigurator):
         super().__init__(*args, **kwargs)
         self.prediction_key = "value"
         self.prediction_unit = "1/nm"
+        self.prediction_label = "Q vector shell centres"

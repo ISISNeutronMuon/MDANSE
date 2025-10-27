@@ -19,6 +19,7 @@ class DistHistCutoffConfigurator(RangeConfigurator):
         self._max_value = kwargs.get("max_value", True)
         self.prediction_key = "value"
         self.prediction_unit = "nm"
+        self.prediction_label = "Interatomic distance"
 
     def configure(self, value):
         """Configure the distance histogram cutoff configurator.

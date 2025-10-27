@@ -63,7 +63,10 @@ class MolecularTrace(IJob):
         {
             "mini": 0.01,
             "default": 0.1,
-            "dependencies": {"trajectory": "trajectory"},
+            "dependencies": {
+                "trajectory": "trajectory",
+                "frames": "frames",
+            },
             "show_prediction": True,
         },
     )

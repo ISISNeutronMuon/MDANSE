@@ -27,6 +27,10 @@ class CorrelationFramesConfigurator(FramesConfigurator):
     together with a movable window used for correlations.
     """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prediction_label = "Simulation time difference"
+
     def configure(self, value: tuple[int, int, int, int]):
         """Set the number of correlation frames to use.
 

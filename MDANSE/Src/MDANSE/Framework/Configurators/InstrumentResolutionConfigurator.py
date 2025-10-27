@@ -52,6 +52,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
         super().__init__(*args, **kwargs)
         self.prediction_key = "romega"
         self.prediction_unit = "rad/ps"
+        self.prediction_label = "Energy transfer"
 
     def configure(self, value):
         """

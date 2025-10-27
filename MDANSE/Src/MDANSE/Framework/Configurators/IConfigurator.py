@@ -125,6 +125,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         """
         self.name = name
+        self.prediction_label = kwargs.get("prediction_label", name)
 
         self._printable_attributes = [
             "name",
@@ -336,13 +337,16 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
     def preview_output_axis(self):
         """Show what data axis will be created in the output file."""
-        if not self.show_prediction:
-            return None, None
-        if not self.is_configured():
-            return None, None
-        if not self.valid:
-            return None, None
-        if self.prediction_key in self:
-            return self[self.prediction_key], self.prediction_unit
+        if not self.show_prediction or not self.is_configured() or not self.valid:
+            yield None
+        elif hasattr(self, "prediction_keys"):
+            for key in self.prediction_keys:
+                yield (key, self[key], self.prediction_unit)
+        elif self.prediction_key in self:
+            yield (
+                self.prediction_label,
+                self[self.prediction_key],
+                self.prediction_unit,
+            )
         else:
-            return None, None
+            yield None

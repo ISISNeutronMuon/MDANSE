@@ -48,6 +48,7 @@ class QVectorsConfigurator(IConfigurator):
         super().__init__(*args, **kwargs)
         self.prediction_key = "shells"
         self.prediction_unit = "1/nm"
+        self.prediction_label = "Q vector shell centres"
 
     def configure(self, value: tuple[str, dict[str, Any]]):
         """Create a vector generator with given parameters.

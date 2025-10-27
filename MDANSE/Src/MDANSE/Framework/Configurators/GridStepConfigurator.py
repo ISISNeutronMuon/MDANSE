@@ -11,12 +11,12 @@
 #
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import numpy as np
 
 from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
-
-AXIS_INDEX = {"a": 0, "b": 1, "c": 2}
 
 
 class GridStepConfigurator(FloatConfigurator):
@@ -25,6 +25,36 @@ class GridStepConfigurator(FloatConfigurator):
         self["grid"] = []
         self.prediction_key = "grid"
         self.prediction_unit = "nm"
+        self.prediction_label = "Real space bin centres"
+        self._avg_cell = None
+        self._last_frames = []
+
+    def new_frames(self) -> Sequence[float] | None:
+        new_frames = self.configurable[self.dependencies["frames"]]["value"]
+        if len(new_frames) != len(self._last_frames) or not np.allclose(
+            new_frames, self._last_frames
+        ):
+            self._last_frames = new_frames
+            return new_frames
+        return None
+
+    @property
+    def average_unit_cell(self):
+        frames = self.new_frames()
+        if frames is not None:
+            self._avg_cell = None
+        if self._avg_cell is not None:
+            return self._avg_cell
+        trajectory: Trajectory = self.configurable[self.dependencies["trajectory"]][
+            "instance"
+        ]
+        if any(trajectory.unit_cell(frame) is None for frame in frames):
+            self._avg_cell = trajectory.max_span
+        else:
+            self._avg_cell = np.array(
+                [trajectory.unit_cell(frame)._unit_cell for frame in frames]
+            ).mean(axis=0)
+        return self._avg_cell
 
     def configure(self, value):
         super().configure(value)
@@ -32,14 +62,29 @@ class GridStepConfigurator(FloatConfigurator):
         trajectory: Trajectory = self.configurable[self.dependencies["trajectory"]][
             "instance"
         ]
-        unit_cell = trajectory.unit_cell(0)._unit_cell
+        unit_cell = self.average_unit_cell
         if unit_cell is None:
             axes = trajectory.max_span
         else:
             axes = np.linalg.norm(unit_cell, axis=0)
         if "axis" in self.dependencies:
-            axis = self.configurable[self.dependencies["axis"]]["value"]
-            axis_length = axes[AXIS_INDEX[axis]]
-            self["grid"] = np.arange(0.0, axis_length, self["value"])
+            axis_index = self.configurable[self.dependencies["axis"]]["index"]
+            axis_length = axes[axis_index]
+            temp_array = np.arange(
+                0.0, axis_length - 0.1 * self["value"], self["value"]
+            )
+            self["grid"] = temp_array + 0.5 * self["value"]
             return
-        self["grid"] = [np.arange(0, axes[index], self["value"]) for index in range(3)]
+        self.prediction_keys = [
+            "a-direction grid",
+            "b-direction grid",
+            "c-direction grid",
+        ]
+        self["grid"] = []
+        temp = [
+            np.arange(0.0, axes[index] - 0.1 * self["value"], self["value"])
+            + 0.5 * self["value"]
+            for index in range(3)
+        ]
+        for arr_index, temp_array in enumerate(temp):
+            self[self.prediction_keys[arr_index]] = temp_array

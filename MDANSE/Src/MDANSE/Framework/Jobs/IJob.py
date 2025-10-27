@@ -307,7 +307,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
     def run_step(self, index):
         pass
 
-    def preview_output_axis(self) -> dict[str, Sequence[float]]:
+    def preview_output_axis(self) -> list[tuple[str, Sequence[float], str]]:
         """Collect the output axis values and unit information from configurators.
 
         Returns
@@ -315,11 +315,11 @@ class IJob(Configurable, metaclass=SubclassFactory):
         dict[str, Sequence[float]]
             Dictionary of {unit: values} pairs, predicting the data output range.
         """
-        axes = {}
+        axes = []
         for configurator in self._configuration.values():
-            axis, unit = configurator.preview_output_axis()
-            if axis is not None:
-                axes[unit] = axis
+            for prediction in configurator.preview_output_axis():
+                if prediction is not None:
+                    axes.append(prediction)
         return axes
 
     @classmethod
