@@ -31,6 +31,8 @@ from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
 
+import json
+
 label_text = """<b>Load and view trajectories.</b>
 <br><br>
 Any trajectory you select will be visualised in the 3D view window on the right side.
@@ -60,12 +62,18 @@ class TrajectoryTab(GeneralTab):
             str(self.get_path("trajectory")),
             "HDF5 files, MDANSE or H5MD format (*.mdt *.h5);;H5MD files (*.h5);;All files (*)",
         )
+
+        loaded_file =  []
+
         for fname in fnames[0]:
             self.load_trajectory(PurePath(fname))
             last_path = str(PurePath(os.path.split(fname)[0]))
+            loaded_file.append(fname)
         if fnames[0]:
             self.set_path("trajectory", str(PurePath(last_path)))
             self._session.save()
+        return loaded_file
+
 
     @Slot(str)
     def load_trajectory(self, some_fname: str):
@@ -74,6 +82,31 @@ class TrajectoryTab(GeneralTab):
             _, short_name = os.path.split(fname)
             self._core._model.append_object((fname, short_name))
             self._session.protect_filename(fname)
+
+    def recent_trajectory_files(self, filename="recent_trajectory_file.json", max_num_files: int = 10) -> list[str]:
+        loaded_file = self.load_trajectories()
+
+        if os.path.exists(filename):
+            with open (filename, "r" ) as f:
+                recent_files = json.load(f)
+                for file in loaded_file:
+                    if file in recent_files:
+                        recent_files.remove(file)
+                        recent_files.insert(0, file)
+                    else:
+                        recent_files.append(file)
+        else:
+            recent_files = []
+            for file in loaded_file:
+                recent_files.append(file)
+    
+        with open (filename, "w" ) as f:
+            json.dump(recent_files, f)
+
+        return recent_files
+
+
+
 
     @classmethod
     def gui_instance(

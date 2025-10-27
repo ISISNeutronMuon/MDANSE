@@ -180,6 +180,9 @@ class TabbedWindow(QMainWindow):
         self.exitAct = QAction("Exit", parent=menubar)
         self.exitAct.triggered.connect(self.shut_down)
         file_group.addAction(self.exitAct)
+        self.recentfileAct = QAction("Open Recent File", parent=menubar)
+        self.recentfileAct.triggered.connect(self.openRecentFile)
+        file_group.addAction(self.recentfileAct)
         self.settingsAct = QAction("User Settings", parent=menubar)
         self.settingsAct.triggered.connect(self.launchSettingsEditor)
         settings_group.addAction(self.settingsAct)
@@ -202,6 +205,8 @@ class TabbedWindow(QMainWindow):
     def shut_down(self):
         QApplication.quit()
         self.destroy(True, True)
+
+    def open_recent_trajectory_file(self):
 
     def version_information(self):
         version = ""
