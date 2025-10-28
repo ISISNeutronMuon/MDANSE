@@ -128,7 +128,7 @@ class ChemicalSystem:
                 # dummy atoms.
                 self.rdkit_mol.AddBond(i, j, Chem.rdchem.BondType.UNSPECIFIED)
 
-    def set_bond_orders(self, coords: np.ndarray, max_iters=1000, max_natms=100):
+    def set_bond_orders(self, coords: np.ndarray, *, max_iters: int = 1000, max_natms: int = 100):
         """Set the bond types for the bonds in the rdkit_mol.
 
         Parameters
