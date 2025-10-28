@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import abc
 import json
+from collections.abc import Iterator, Sequence
 from typing import TYPE_CHECKING, Any, NamedTuple
 from warnings import warn
 
@@ -78,6 +79,13 @@ class ConfiguratorError(Error):
 
 
 class PredictionSettings(NamedTuple):
+    """Strings used for showing the predicted output range in the GUI.
+
+    key - The dictionary key of where the Sequence[float] is stored in the Configurator.
+    label - An explanation for the user of what physical property the numbers represent.
+    unit - The internal unit of MDANSE of the number array. Used for converting to GUI units.
+    """
+
     key: str
     label: str
     unit: str = "none"
@@ -340,8 +348,20 @@ class IConfigurator(dict, metaclass=SubclassFactory):
             ]
         return all(c in configured for c in self.dependencies.values())
 
-    def preview_output_axis(self):
-        """Show what data axis will be created in the output file."""
+    def preview_output_axis(self) -> Iterator[str, Sequence[float], str] | None:
+        """Show what data axis will be created in the output file.
+
+        Returns None if the configurator is not in a valid state.
+        In rare cases one configurator can produce multiple axes.
+        Since a configurator is a dict, prediction.key is used to select the
+        correct item from the dict that contains the numerical values needed
+        for output prediction.
+
+        Yields
+        ------
+        Iterator[str, Sequence[float], str] | None
+            Text label, array of numbers, physical unit
+        """
         if not self.is_configured() or not self.valid:
             return
         if hasattr(self, "prediction_keys"):
