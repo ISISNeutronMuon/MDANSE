@@ -40,8 +40,6 @@ class Connectivity:
         self._selection = selection or trajectory._selection or trajectory.atom_indices
         self._periodic = self._input_trajectory.configuration(0).is_periodic
         self.check_composition()
-        self._bonds = None
-        self._bond_mapping = None
         self._unique_bonds = None
         self._translation_vectors = {}
 
@@ -173,7 +171,6 @@ class Connectivity:
                     for key, value in dist.items():
                         distances[key] = min(value, distances.get(key, 99.0))
         bonds = []
-        bond_mapping = {atom_number: [] for atom_number in range(len(self._elements))}
         for key, value in distances.items():
             if key[0] == key[1]:
                 continue
@@ -181,9 +178,6 @@ class Connectivity:
             if value > maxbonds[element_pair]:
                 continue
             bonds.append(key)
-            bond_mapping[key[0]].append(key[1])
-        self._bonds = bonds
-        self._bond_mapping = bond_mapping
         self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0)
 
     def add_bond_information(self, new_chemical_system: ChemicalSystem):
