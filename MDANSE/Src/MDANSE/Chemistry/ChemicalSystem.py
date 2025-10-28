@@ -69,7 +69,7 @@ class ChemicalSystem:
         # the rdkit atom indexes to the ones in MDANSE
         self._rdkit_map = {}
         self._rdkit_map_inv = {}
-        self._rdkit_dummy_atms = []
+        self._rdkit_dummy_atms = set()
 
         self._unique_elements = set()
 
@@ -104,11 +104,11 @@ class ChemicalSystem:
         if name_list is not None:
             self._atom_names = [str(x) for x in name_list]
 
-        self._rdkit_dummy_atms = [
+        self._rdkit_dummy_atms = {
             atom.GetIdx()
             for atom in self.rdkit_mol.GetAtoms()
             if atom.GetAtomicNum() == 0
-        ]
+        }
 
     def add_atom(self, atm_num: int) -> int:
         rdkit_atm = Chem.Atom(atm_num) if atm_num is not None else Chem.Atom(0)
@@ -128,7 +128,9 @@ class ChemicalSystem:
                 # dummy atoms.
                 self.rdkit_mol.AddBond(i, j, Chem.rdchem.BondType.UNSPECIFIED)
 
-    def set_bond_orders(self, coords: np.ndarray, *, max_iters: int = 1000, max_natms: int = 100):
+    def set_bond_orders(
+        self, coords: np.ndarray, *, max_iters: int = 1000, max_natms: int = 100
+    ):
         """Set the bond types for the bonds in the rdkit_mol.
 
         Parameters

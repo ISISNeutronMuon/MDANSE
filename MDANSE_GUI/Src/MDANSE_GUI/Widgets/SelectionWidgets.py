@@ -19,6 +19,7 @@ import json
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
+import more_itertools
 import numpy as np
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator, QValidator
@@ -499,7 +500,9 @@ class PatternSelection(BasicSelectionWidget):
         layout.addWidget(self.selection_field)
         self.selection_field.addItems(self.pattern_dictionary.keys())
         layout.addWidget(QLabel("pattern:"))
-        self.input_field = QLineEdit(more_itertools.first(self.pattern_dictionary.values()), self)
+        self.input_field = QLineEdit(
+            more_itertools.first(self.pattern_dictionary.values()), self
+        )
         self.input_field.setPlaceholderText("can be edited")
         layout.addWidget(self.input_field)
         self.selection_field.currentTextChanged.connect(self.update_string)
