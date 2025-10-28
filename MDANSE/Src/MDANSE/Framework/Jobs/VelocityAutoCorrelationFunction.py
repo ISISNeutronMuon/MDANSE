@@ -42,6 +42,7 @@ class VelocityAutoCorrelationFunction(IJob):
         "Analysis",
         "Dynamics",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -49,7 +50,7 @@ class VelocityAutoCorrelationFunction(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["interpolation_order"] = (
         "InterpolationOrderConfigurator",

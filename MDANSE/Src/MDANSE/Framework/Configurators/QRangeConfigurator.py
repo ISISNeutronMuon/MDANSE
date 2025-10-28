@@ -15,11 +15,11 @@
 #
 from __future__ import annotations
 
-import numpy as np
-
 from MDANSE.Framework.Configurators.RangeConfigurator import (
     RangeConfigurator,
 )
+
+from .IConfigurator import PredictionSettings
 
 
 class QRangeConfigurator(RangeConfigurator):
@@ -27,6 +27,6 @@ class QRangeConfigurator(RangeConfigurator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.prediction_key = "value"
-        self.prediction_unit = "1/nm"
-        self.prediction_label = "Q vector shell centres"
+        self.prediction = PredictionSettings(
+            key="value", label="Q vector shell centres", unit="1/nm"
+        )

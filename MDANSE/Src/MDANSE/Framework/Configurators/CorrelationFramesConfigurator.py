@@ -18,6 +18,7 @@ from __future__ import annotations
 import math
 
 from .FramesConfigurator import FramesConfigurator
+from .IConfigurator import PredictionSettings
 
 
 class CorrelationFramesConfigurator(FramesConfigurator):
@@ -29,7 +30,9 @@ class CorrelationFramesConfigurator(FramesConfigurator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.prediction_label = "Time step (dt)"
+        self.prediction = PredictionSettings(
+            key="time", label="Time step (dt)", unit="ps"
+        )
 
     def configure(self, value: tuple[int, int, int, int]):
         """Set the number of correlation frames to use.

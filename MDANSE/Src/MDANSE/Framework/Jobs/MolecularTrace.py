@@ -45,6 +45,7 @@ class MolecularTrace(IJob):
         "Analysis",
         "Structure",
     )
+    PREDICTORS = ("spatial_resolution",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -67,7 +68,6 @@ class MolecularTrace(IJob):
                 "trajectory": "trajectory",
                 "frames": "frames",
             },
-            "show_prediction": True,
         },
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})

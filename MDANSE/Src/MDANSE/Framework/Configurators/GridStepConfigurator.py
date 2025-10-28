@@ -18,14 +18,16 @@ import numpy as np
 from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
+from .IConfigurator import PredictionSettings
+
 
 class GridStepConfigurator(FloatConfigurator):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self["grid"] = []
-        self.prediction_key = "grid"
-        self.prediction_unit = "nm"
-        self.prediction_label = "Real space bin centres"
+        self.prediction = PredictionSettings(
+            key="grid", label="Real space bin centres", unit="nm"
+        )
         self._avg_cell = None
         self._last_frames = []
 

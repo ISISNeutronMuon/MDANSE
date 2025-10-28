@@ -56,6 +56,7 @@ class DynamicCoherentStructureFactor(IJob):
         "Analysis",
         "Scattering",
     )
+    PREDICTORS = ("instrument_resolution", "q_vectors")
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -69,12 +70,11 @@ class DynamicCoherentStructureFactor(IJob):
         "InstrumentResolutionConfigurator",
         {
             "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-            "show_prediction": True,
         },
     )
     settings["q_vectors"] = (
         "QVectorsConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",

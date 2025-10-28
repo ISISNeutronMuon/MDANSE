@@ -20,6 +20,8 @@ from typing import Any
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
+from .IConfigurator import PredictionSettings
+
 
 class QVectorsConfigurator(IConfigurator):
     """Creates and configures a q-vector generator.
@@ -46,9 +48,9 @@ class QVectorsConfigurator(IConfigurator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.prediction_key = "shells"
-        self.prediction_unit = "1/nm"
-        self.prediction_label = "Q vector shell centres"
+        self.prediction = PredictionSettings(
+            key="shells", label="Q vector shell centres", unit="1/nm"
+        )
 
     def configure(self, value: tuple[str, dict[str, Any]]):
         """Create a vector generator with given parameters.

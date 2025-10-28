@@ -43,6 +43,7 @@ class AreaPerMolecule(IJob):
         "Analysis",
         "Structure",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -50,7 +51,7 @@ class AreaPerMolecule(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["axis"] = (
         "SingleChoiceConfigurator",

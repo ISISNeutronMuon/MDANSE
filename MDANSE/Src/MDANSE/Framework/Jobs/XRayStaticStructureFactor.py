@@ -67,6 +67,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
         "Analysis",
         "Scattering",
     )
+    PREDICTORS = ("q_values",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -84,7 +85,6 @@ class XRayStaticStructureFactor(DistanceHistogram):
             "includeLast": True,
             "mini": 0.0,
             "dependencies": {"trajectory": "trajectory"},
-            "show_prediction": False,
         },
     )
     settings["q_values"] = (
@@ -94,7 +94,6 @@ class XRayStaticStructureFactor(DistanceHistogram):
             "includeLast": True,
             "mini": 0.0,
             "default": (0, 500, 1),
-            "show_prediction": True,
         },
     )
     settings["grouping_level"] = (

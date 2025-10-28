@@ -344,12 +344,13 @@ class VanHoveFunctionDistinct(IJob):
         "Analysis",
         "Dynamics",
     )
+    PREDICTORS = ("frames", "r_values")
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["r_values"] = (
         "DistHistCutoffConfigurator",
@@ -359,7 +360,6 @@ class VanHoveFunctionDistinct(IJob):
             "includeLast": True,
             "mini": 0.0,
             "dependencies": {"trajectory": "trajectory"},
-            "show_prediction": True,
         },
     )
     settings["grouping_level"] = (

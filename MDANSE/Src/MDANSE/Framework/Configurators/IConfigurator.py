@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import abc
 import json
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 from warnings import warn
 
 from more_itertools import value_chain
@@ -77,6 +77,12 @@ class ConfiguratorError(Error):
         return self._message
 
 
+class PredictionSettings(NamedTuple):
+    key: str
+    label: str
+    unit: str = "none"
+
+
 class IConfigurator(dict, metaclass=SubclassFactory):
     """The parent class for all the input parameter parsers.
 
@@ -113,7 +119,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         default: Any | None = None,
         label: str | None = None,
         optional: bool = False,
-        show_prediction: bool = False,
+        prediction_label: str | None = None,
         **kwargs,
     ):
         """Create an input parser for an MDANSE job input parameter.
@@ -125,7 +131,9 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         """
         self.name = name
-        self.prediction_label = kwargs.get("prediction_label", name)
+        self.prediction = PredictionSettings(
+            "value", prediction_label or name, unit="none"
+        )
 
         self._printable_attributes = [
             "name",
@@ -156,11 +164,8 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         self.optional = optional
 
         self.configured = False
-        self.show_prediction = show_prediction
         self.valid = True
 
-        self.prediction_key = "none"
-        self.prediction_unit = "none"
         self._error_status = "OK"
         self._warning_status = ""
 
@@ -337,16 +342,14 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
     def preview_output_axis(self):
         """Show what data axis will be created in the output file."""
-        if not self.show_prediction or not self.is_configured() or not self.valid:
-            yield None
-        elif hasattr(self, "prediction_keys"):
+        if not self.is_configured() or not self.valid:
+            return
+        if hasattr(self, "prediction_keys"):
             for key in self.prediction_keys:
-                yield (key, self[key], self.prediction_unit)
-        elif self.prediction_key in self:
+                yield (key, self[key], self.prediction.unit)
+        elif self.prediction.key in self:
             yield (
-                self.prediction_label,
-                self[self.prediction_key],
-                self.prediction_unit,
+                self.prediction.label,
+                self[self.prediction.key],
+                self.prediction.unit,
             )
-        else:
-            yield None

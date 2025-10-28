@@ -62,6 +62,7 @@ class Voronoi(IJob):
         "Analysis",
         "Structure",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -69,7 +70,7 @@ class Voronoi(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["pbc"] = (
         "BooleanConfigurator",

@@ -44,6 +44,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         "Analysis",
         "Scattering",
     )
+    PREDICTORS = ("instrument_resolution", "q_shells")
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -55,13 +56,12 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     )
     settings["q_shells"] = (
         "QRangeConfigurator",
-        {"valueType": float, "includeLast": True, "mini": 0.0, "show_prediction": True},
+        {"valueType": float, "includeLast": True, "mini": 0.0},
     )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
         {
             "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-            "show_prediction": True,
         },
     )
     settings["projection"] = (

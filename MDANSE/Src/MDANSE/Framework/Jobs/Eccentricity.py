@@ -44,6 +44,7 @@ class Eccentricity(IJob):
         "Analysis",
         "Structure",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -51,7 +52,7 @@ class Eccentricity(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",

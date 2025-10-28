@@ -46,6 +46,7 @@ class ElasticIncoherentStructureFactor(IJob):
         "Analysis",
         "Scattering",
     )
+    PREDICTORS = "q_vectors"
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -57,7 +58,7 @@ class ElasticIncoherentStructureFactor(IJob):
     )
     settings["q_vectors"] = (
         "QVectorsConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["projection"] = (
         "ProjectionConfigurator",

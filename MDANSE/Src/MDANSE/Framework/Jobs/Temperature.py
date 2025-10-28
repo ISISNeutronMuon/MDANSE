@@ -45,6 +45,7 @@ class Temperature(IJob):
         "Analysis",
         "Thermodynamics",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -52,7 +53,7 @@ class Temperature(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["interpolation_order"] = (
         "InterpolationOrderConfigurator",

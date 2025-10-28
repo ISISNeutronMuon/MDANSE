@@ -42,6 +42,7 @@ class RootMeanSquareDeviation(IJob):
         "Analysis",
         "Dynamics",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -49,7 +50,7 @@ class RootMeanSquareDeviation(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["reference_frame"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["grouping_level"] = (

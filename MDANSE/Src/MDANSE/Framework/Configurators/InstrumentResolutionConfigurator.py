@@ -22,6 +22,8 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )
 
+from .IConfigurator import PredictionSettings
+
 
 class InstrumentResolutionConfigurator(IConfigurator):
     r"""Defines the resolution function to use for signal broadening.
@@ -50,9 +52,9 @@ class InstrumentResolutionConfigurator(IConfigurator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.prediction_key = "romega"
-        self.prediction_unit = "rad/ps"
-        self.prediction_label = "Energy transfer"
+        self.prediction = PredictionSettings(
+            key="romega", label="Energy transfer", unit="rad/ps"
+        )
 
     def configure(self, value):
         """

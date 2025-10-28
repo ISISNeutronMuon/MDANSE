@@ -15,7 +15,8 @@
 #
 from __future__ import annotations
 
-from MDANSE.Framework.Configurators.RangeConfigurator import RangeConfigurator
+from .IConfigurator import PredictionSettings
+from .RangeConfigurator import RangeConfigurator
 
 
 class FramesConfigurator(RangeConfigurator):
@@ -37,9 +38,7 @@ class FramesConfigurator(RangeConfigurator):
         """
 
         RangeConfigurator.__init__(self, name, sort=True, **kwargs)
-        self.prediction_key = "time"
-        self.prediction_unit = "ps"
-        self.prediction_label = "Time"
+        self.prediction = PredictionSettings(key="time", label="Time", unit="ps")
 
     def configure(self, value):
         """

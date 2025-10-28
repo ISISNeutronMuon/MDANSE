@@ -48,6 +48,7 @@ class ScatteringLengthDensityProfile(IJob):
         "Analysis",
         "Scattering",
     )
+    PREDICTORS = ("dr",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -84,7 +85,6 @@ class ScatteringLengthDensityProfile(IJob):
                 "axis": "axis",
                 "frames": "frames",
             },
-            "show_prediction": True,
             "prediction_label": "bin centres along axis",
         },
     )

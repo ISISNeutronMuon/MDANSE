@@ -198,6 +198,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
     section = "job"
     key_gen = key_generator(6)
     ancestor = []
+    PREDICTORS = ()
     runscript_import_line = "from MDANSE.Framework.Jobs.IJob import IJob"
 
     @classmethod
@@ -316,7 +317,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
             Dictionary of {unit: values} pairs, predicting the data output range.
         """
         axes = []
-        for configurator in self._configuration.values():
+        for predictor in self.PREDICTORS:
+            configurator = self._configuration[predictor]
             for prediction in configurator.preview_output_axis():
                 if prediction is not None:
                     axes.append(prediction)

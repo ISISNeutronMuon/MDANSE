@@ -44,6 +44,7 @@ class CoordinationNumber(DistanceHistogram):
     label = "Coordination Number"
 
     enabled = True
+    PREDICTORS = ("r_values",)
 
     category = (
         "Analysis",
@@ -66,7 +67,6 @@ class CoordinationNumber(DistanceHistogram):
             "includeLast": True,
             "mini": 0.0,
             "dependencies": {"trajectory": "trajectory"},
-            "show_prediction": True,
         },
     )
     settings["grouping_level"] = (
