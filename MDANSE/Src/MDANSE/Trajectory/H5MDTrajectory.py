@@ -205,7 +205,11 @@ class H5MDTrajectory(TrajectoryFile):
     @property
     def units(self) -> Mapping[str, str]:
         """Mapping of property labels to units."""
-        return ChainMap(self._units, ATOMS_DATABASE.units)
+        return ChainMap(
+            self._units,
+            {"b_incoherent": "Ang", "b_coherent": "Ang"},
+            ATOMS_DATABASE.units,
+        )
 
     @classmethod
     def file_is_right(self, filename: Path | str) -> bool:
