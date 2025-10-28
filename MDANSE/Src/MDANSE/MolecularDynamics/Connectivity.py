@@ -23,6 +23,7 @@ from scipy.spatial import KDTree
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
@@ -40,7 +41,7 @@ class Connectivity:
         self._selection = selection or trajectory._selection or trajectory.atom_indices
         self._periodic = self._input_trajectory.configuration(0).is_periodic
         self.check_composition()
-        self._unique_bonds = None
+        self._unique_bonds = []
         self._translation_vectors = {}
 
     def check_composition(self):
@@ -58,7 +59,7 @@ class Connectivity:
         self._radii = radii
         self.max_distance = 2 * np.max(list(radii.values())) + 0.04
 
-    def internal_distances(
+    def total_distances(
         self, frame_index: int = 0, max_distance: float | None = None
     ) -> dict[tuple[int, int], float]:
         """Calculate distances between pairs of atoms within the specified limit.
@@ -75,64 +76,20 @@ class Connectivity:
         dict[tuple[int, int], float]
             Dictionary of {(atom index 1, atom_index 2) : distance} pairs.
         """
-        tree = KDTree(self._input_trajectory.coordinates(frame_index, self._selection))
-        return tree.sparse_distance_matrix(
+        coordinates, atom_indices = padded_coordinates(
+            self._input_trajectory.coordinates(frame_index, self._selection),
+            self._input_trajectory.unit_cell(frame_index),
+            1.1 * max_distance,
+        )
+        tree = KDTree(coordinates)
+        sdm = tree.sparse_distance_matrix(
             tree, max_distance=max_distance or self.max_distance
         )
-
-    def periodic_distances(
-        self, frame_index: int = 0, max_distance: float | None = None
-    ) -> Iterable[tuple[int, dict[tuple[int, int], float]]] | None:
-        """Calculate the distances between atoms in a periodic box.
-
-        It will create copies of the system translated by unit cell vectors.
-
-        Parameters
-        ----------
-        frame_index : int, optional
-            Trajectory frame for which to calculate distances, by default 0
-        max_distance : float, optional
-            Distance cutoff in nm, by default None
-
-        Returns
-        -------
-        None
-            If no atoms are selected.
-
-        Yields
-        ------
-        Iterator[Iterable[tuple[int, dict[tuple[int, int], float]]]]
-            Index of box replica and a dictionary of distances.
-        """
-        unit_cell = self._input_trajectory.unit_cell(frame_index)
-        vector_a, vector_b, vector_c = (
-            unit_cell.a_vector,
-            unit_cell.b_vector,
-            unit_cell.c_vector,
-        )
-        if self._periodic:
-            temp_conf = self._input_trajectory.configuration(frame_index)
-            temp_conf.fold_coordinates()
-            coordinates = temp_conf.coordinates[self._selection]
-        else:
-            coordinates = self._input_trajectory.coordinates(
-                frame_index, self._selection
-            )
-        if not len(coordinates):
-            return None
-        tree1 = KDTree(coordinates)
-        for num, shift in enumerate(product([-1, 0, 1], repeat=3)):
-            if np.allclose(shift, [0, 0, 0]):
-                continue
-            self._translation_vectors[num] = shift
-            offset = shift[0] * vector_a + shift[1] * vector_b + shift[2] * vector_c
-            tree2 = KDTree(coordinates + offset.reshape((1, 3)))
-            yield (
-                num,
-                tree1.sparse_distance_matrix(
-                    tree2, max_distance=max_distance or self.max_distance
-                ),
-            )
+        return {
+            (atom_indices[index_pair[0]], atom_indices[index_pair[1]]): distance
+            for index_pair, distance in sdm.items()
+            if index_pair[0] != index_pair[1]
+        }
 
     def find_bonds(self, frames: list[int] | None = None, tolerance: float = 0.04):
         """Find bonds in the trajectory based on interatomic distances.
@@ -160,24 +117,16 @@ class Connectivity:
             for pair in pairs
         }
         total_max_length = max(maxbonds.values())
+        bonds = []
         for frame_index in samples:
-            distances = self.internal_distances(
+            distances = self.total_distances(
                 frame_index=frame_index, max_distance=total_max_length
             )
-            if self._periodic:
-                for _, dist in self.periodic_distances(
-                    frame_index=frame_index, max_distance=total_max_length
-                ):
-                    for key, value in dist.items():
-                        distances[key] = min(value, distances.get(key, 99.0))
-        bonds = []
-        for key, value in distances.items():
-            if key[0] == key[1]:
-                continue
-            element_pair = (self._elements[key[0]], self._elements[key[1]])
-            if value > maxbonds[element_pair]:
-                continue
-            bonds.append(key)
+            for key, value in distances.items():
+                element_pair = (self._elements[key[0]], self._elements[key[1]])
+                if value > maxbonds[element_pair]:
+                    continue
+                bonds.append(key)
         self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0)
 
     def add_bond_information(self, new_chemical_system: ChemicalSystem):
