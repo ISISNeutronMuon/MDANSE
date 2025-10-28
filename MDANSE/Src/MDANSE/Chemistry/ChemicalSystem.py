@@ -25,7 +25,7 @@ from typing import Any, SupportsInt
 import h5py
 import networkx as nx
 import numpy as np
-from more_itertools import padded, quantify
+from more_itertools import padded
 from rdkit import Chem
 from rdkit.Chem import rdDetermineBonds
 from rdkit.Geometry import Point3D
