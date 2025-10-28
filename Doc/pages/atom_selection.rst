@@ -262,7 +262,7 @@ hydrogens (``H3``) the next part ``([H])([H])[H]`` means to match the
 three hydrogen atoms ``[H]`` that are bonded to the carbon. If you have
 very large molecule then the atom type and bond type determination may fail and
 MDANSE will use generic atom types and unspecified bond types. In this case you
-may need to generalise your SMARTS pattern so that it is more general, for example,
+may need to generalise your SMARTS pattern, for example,
 to match a methyl group you may need to use ``[#6X4H3](~[H])(~[H])~[H]``
 instead where ``#6`` means any sort of carbon atom and ``~`` means any
 type of bond.
