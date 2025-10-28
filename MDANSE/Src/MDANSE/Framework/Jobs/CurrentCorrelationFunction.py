@@ -70,7 +70,7 @@ class CurrentCorrelationFunction(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",

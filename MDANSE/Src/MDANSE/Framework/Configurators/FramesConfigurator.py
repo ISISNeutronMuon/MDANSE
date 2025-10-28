@@ -39,7 +39,7 @@ class FramesConfigurator(RangeConfigurator):
         RangeConfigurator.__init__(self, name, sort=True, **kwargs)
         self.prediction_key = "time"
         self.prediction_unit = "ps"
-        self.prediction_label = "Simulation time"
+        self.prediction_label = "Time"
 
     def configure(self, value):
         """

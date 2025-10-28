@@ -29,7 +29,7 @@ class CorrelationFramesConfigurator(FramesConfigurator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.prediction_label = "Simulation time difference"
+        self.prediction_label = "Time step (dt)"
 
     def configure(self, value: tuple[int, int, int, int]):
         """Set the number of correlation frames to use.

@@ -51,7 +51,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "show_prediction": True},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["q_shells"] = (
         "QRangeConfigurator",
