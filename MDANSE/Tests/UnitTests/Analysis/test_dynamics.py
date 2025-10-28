@@ -196,4 +196,4 @@ def test_output_axis_preview(tmp_path, parameters):
     job = IJob.create("DensityOfStates")
     job.setup(parameters)
     axes = job.preview_output_axis()
-    assert len(axes) == 2  # two configurators return valid arrays
+    assert len(axes) == 1  # we only use the axis for the main result
