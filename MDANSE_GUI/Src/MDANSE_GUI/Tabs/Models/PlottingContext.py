@@ -871,7 +871,7 @@ class PlottingContext(QStandardItemModel):
                 "",
                 self.next_colour(),
                 new_dataset._linestyle,
-                new_dataset._marker if new_dataset._marker else "",
+                new_dataset._marker if new_dataset._marker else "None",
                 "",
                 new_dataset._filename,
             ]
