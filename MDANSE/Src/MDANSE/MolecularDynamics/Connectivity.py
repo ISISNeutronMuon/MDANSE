@@ -59,10 +59,10 @@ class Connectivity:
         self._radii = radii
         self.max_distance = 2 * np.max(list(radii.values())) + 0.04
 
-    def total_distances(
+    def total_distances_sq(
         self, frame_index: int = 0, max_distance: float | None = None
     ) -> dict[tuple[int, int], float]:
-        """Calculate distances between pairs of atoms within the specified limit.
+        """Calculate squared distances between pairs of atoms within the specified limit.
 
         Parameters
         ----------
@@ -82,13 +82,32 @@ class Connectivity:
             1.1 * max_distance,
         )
         tree = KDTree(coordinates)
-        sdm = tree.sparse_distance_matrix(
-            tree, max_distance=max_distance or self.max_distance
+        contacts = tree.query_ball_point(
+            coordinates, max_distance or self.max_distance, workers=-1
         )
+        n_dists = sum([len(i) for i in contacts])
+
+        js = np.zeros(n_dists, dtype=int)
+        ks = np.zeros(n_dists, dtype=int)
+        start = 0
+        for i, idxs in enumerate(contacts):
+            n_idxs = len(idxs)
+            if n_idxs == 0:
+                continue
+            js[start : start + n_idxs] = i
+            ks[start : start + n_idxs] = idxs
+            start += n_idxs
+
+        mask = js < ks
+        js = js[mask]
+        ks = ks[mask]
+        diff = coordinates[js] - coordinates[ks]
+        dist = np.sum(diff * diff, axis=1)
         return {
-            (atom_indices[index_pair[0]], atom_indices[index_pair[1]]): distance
-            for index_pair, distance in sdm.items()
-            if index_pair[0] != index_pair[1]
+            (atom_indices[js[common_index]], atom_indices[ks[common_index]]): dist[
+                common_index
+            ]
+            for common_index in range(len(diff))
         }
 
     def find_bonds(self, frames: list[int] | None = None, tolerance: float = 0.04):
@@ -107,7 +126,7 @@ class Connectivity:
         """
         if frames is None:
             max_frame = len(self._input_trajectory)
-            samples = [0, max_frame - 1] + [max_frame // denom for denom in [2, 3, 5]]
+            samples = [0, max_frame - 1]
         else:
             samples = frames
         samples = list(np.unique(samples))
@@ -116,15 +135,16 @@ class Connectivity:
             pair: (self._radii[pair[0]] + self._radii[pair[1]]) + tolerance
             for pair in pairs
         }
+        maxbonds_sq = {key: value**2 for key, value in maxbonds.items()}
         total_max_length = max(maxbonds.values())
         bonds = []
         for frame_index in samples:
-            distances = self.total_distances(
+            distances_sq = self.total_distances_sq(
                 frame_index=frame_index, max_distance=total_max_length
             )
-            for key, value in distances.items():
+            for key, value in distances_sq.items():
                 element_pair = (self._elements[key[0]], self._elements[key[1]])
-                if value > maxbonds[element_pair]:
+                if value > maxbonds_sq[element_pair]:
                     continue
                 bonds.append(key)
         self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0)
