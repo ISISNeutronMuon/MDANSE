@@ -46,7 +46,7 @@ class ElasticIncoherentStructureFactor(IJob):
         "Analysis",
         "Scattering",
     )
-    PREDICTORS = "q_vectors"
+    PREDICTORS = ("q_vectors",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
