@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import collections
+import itertools as it
 
 from scipy.signal import correlate
 
@@ -212,6 +213,58 @@ class DensityOfStates(IJob):
                 units="au",
             )
 
+        for element in self.trajectory.unique_names:
+            for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
+                self._outputData.add(
+                    f"vacf/components/{i}{j}/{element}",
+                    "LineOutputVariable",
+                    (self.configuration["frames"]["n_frames"],),
+                    axis="vacf/axes/time",
+                    units="nm2/ps2",
+                )
+                self._outputData.add(
+                    f"dos/components/{i}{j}/{element}",
+                    "LineOutputVariable",
+                    (instrResolution["n_romegas"],),
+                    axis="dos/axes/romega",
+                    units="au",
+                    main_result=True,
+                    partial_result=True,
+                )
+                if self.add_ideal_results:
+                    self._outputData.add(
+                        f"dos/components/{i}{j}/ideal/{element}",
+                        "LineOutputVariable",
+                        (instrResolution["n_romegas"],),
+                        axis="dos/axes/romega",
+                        units="au",
+                    )
+
+        for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
+            self._outputData.add(
+                f"vacf/components/{i}{j}/total",
+                "LineOutputVariable",
+                (self.configuration["frames"]["n_frames"],),
+                axis="dos/axes/time",
+                units="nm2/ps2",
+            )
+            self._outputData.add(
+                f"dos/components/{i}{j}/total",
+                "LineOutputVariable",
+                (instrResolution["n_romegas"],),
+                axis="dos/axes/romega",
+                units="au",
+                main_result=True,
+            )
+            if self.add_ideal_results:
+                self._outputData.add(
+                    f"dos/components/{i}{j}/ideal/total",
+                    "LineOutputVariable",
+                    (instrResolution["n_romegas"],),
+                    axis="dos/axes/romega",
+                    units="au",
+                )
+
         self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
@@ -256,25 +309,35 @@ class DensityOfStates(IJob):
                 )
 
         series = self.configuration["projection"]["projector"](series)
+        v_x = series[:, 0]
+        v_y = series[:, 1]
+        v_z = series[:, 2]
 
         n_configs = self.configuration["frames"]["n_configs"]
-        atomicVACF = correlate(series, series[:n_configs], mode="valid") / (
-            3 * n_configs
-        )
-        return index, atomicVACF.T[0]
+        components = []
+        for v_i, v_j in it.combinations_with_replacement([v_x, v_y, v_z], 2):
+            components.append(
+                correlate(v_i, v_j[:n_configs], mode="valid").T / n_configs
+            )
+        return index, components
 
-    def combine(self, index, x):
+    def combine(self, index, vacfs):
         """
         Combines returned results of run_step.\n
         :Parameters:
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """
-
         # The symbol of the atom.
         element = self._atoms[self.trajectory.atom_indices[index]]
 
-        self._outputData[f"vacf/{element}"] += x
+        isotropic = (vacfs[0] + vacfs[3] + vacfs[5]) / 3
+        self._outputData[f"vacf/{element}"] += isotropic
+
+        for i, (j, k) in enumerate(
+            it.combinations_with_replacement(["x", "y", "z"], 2)
+        ):
+            self._outputData[f"vacf/components/{j}{k}/{element}"] += vacfs[i]
 
     def finalize(self):
         """
@@ -297,6 +360,22 @@ class DensityOfStates(IJob):
                     self.configuration["instrument_resolution"]["time_step"],
                     fft="rfft",
                 )
+            for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
+                self._outputData[f"vacf/components/{i}{j}/{element}"][:] /= number
+                self._outputData[f"dos/components/{i}{j}/{element}"][:] = get_spectrum(
+                    self._outputData[f"vacf/components/{i}{j}/{element}"],
+                    self.configuration["instrument_resolution"]["time_window"],
+                    self.configuration["instrument_resolution"]["time_step"],
+                    fft="rfft",
+                )
+                if self.add_ideal_results:
+                    self._outputData[f"dos/components/{i}{j}/ideal/{element}"][:] = get_spectrum(
+                        self._outputData[f"vacf/components/{i}{j}/{element}"],
+                        None,
+                        self.configuration["instrument_resolution"]["time_step"],
+                        fft="rfft",
+                    )
+
         selected_weights, all_weights = self.trajectory.get_weights(
             prop=self.configuration["weights"]["property"]
         )
@@ -315,7 +394,15 @@ class DensityOfStates(IJob):
         assign_weights(self._outputData, weight_dict, "dos/%s", self.labels)
         if self.add_ideal_results:
             assign_weights(self._outputData, weight_dict, "dos/ideal/%s", self.labels)
-
+        for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
+            assign_weights(
+                self._outputData, weight_dict, f"vacf/components/{i}{j}/%s", self.labels
+            )
+            assign_weights(self._outputData, weight_dict, f"dos/components/{i}{j}/%s", self.labels)
+            if self.add_ideal_results:
+                assign_weights(
+                    self._outputData, weight_dict, f"dos/components/{i}{j}/ideal/%s", self.labels
+                )
         n_selected = sum(nAtomsPerElement.values())
         n_total = len(self.trajectory.atom_types)
         fact = n_selected / n_total
@@ -328,6 +415,15 @@ class DensityOfStates(IJob):
             weighted_sum(self._outputData, "dos/%s", self.labels) / fact
         )
         self._outputData["dos/total"].scaling_factor = fact
+        for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
+            self._outputData[f"vacf/components/{i}{j}/total"][:] = (
+                weighted_sum(self._outputData, f"vacf/components/{i}{j}/%s", self.labels) / fact
+            )
+            self._outputData[f"vacf/components/{i}{j}/total"].scaling_factor = fact
+            self._outputData[f"dos/components/{i}{j}/total"][:] = (
+                weighted_sum(self._outputData, f"dos/components/{i}{j}/%s", self.labels) / fact
+            )
+            self._outputData[f"dos/components/{i}{j}/total"].scaling_factor = fact
 
         add_grouped_totals(
             self.trajectory,
@@ -361,6 +457,40 @@ class DensityOfStates(IJob):
                 axis="dos/axes/romega",
                 units="au",
             )
+
+        for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
+            add_grouped_totals(
+                self.trajectory,
+                self._outputData,
+                f"vacf_{i}{j}",
+                "LineOutputVariable",
+                axis="vacf/axes/time",
+                units="nm2/ps2",
+            )
+            add_grouped_totals(
+                self.trajectory,
+                self._outputData,
+                f"dos_{i}{j}",
+                "LineOutputVariable",
+                axis="dos/axes/romega",
+                units="au",
+                main_result=True,
+                partial_result=True,
+            )
+            if self.add_ideal_results:
+                self._outputData[f"dosf_{i}{j}/ideal/total"][:] = (
+                    weighted_sum(self._outputData, f"dosf_{i}{j}/ideal/%s", self.labels)
+                    / fact
+                )
+                self._outputData[f"dosf_{i}{j}/ideal/total"].scaling_factor = fact
+                add_grouped_totals(
+                    self.trajectory,
+                    self._outputData,
+                    f"dosf_{i}{j}/ideal",
+                    "LineOutputVariable",
+                    axis="dos/axes/romega",
+                    units="au",
+                )
 
         self._outputData.write(
             self.configuration["output_files"]["root"],
