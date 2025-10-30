@@ -15,8 +15,9 @@
 #
 from __future__ import annotations
 
-import h5py
 import html
+
+import h5py
 import numpy as np
 import numpy.typing as npt
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
