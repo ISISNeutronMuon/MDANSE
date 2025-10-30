@@ -63,7 +63,7 @@ def get_mpl_markers():
         key: mark
         for key, mark in MarkerStyle.markers.items()
         if isinstance(key, str)
-        and key.lower() not in {"", " ", "none"}
+        and key not in {"", " ", "none"}
         and not key.isdigit()
     }
 
