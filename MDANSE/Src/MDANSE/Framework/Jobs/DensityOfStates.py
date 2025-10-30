@@ -424,9 +424,7 @@ class DensityOfStates(IJob):
         self._outputData["dos/total"].scaling_factor = fact
         for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
             self._outputData[f"vcf/components/{i}{j}/total"][:] = (
-                weighted_sum(
-                    self._outputData, f"vcf/components/{i}{j}/%s", self.labels
-                )
+                weighted_sum(self._outputData, f"vcf/components/{i}{j}/%s", self.labels)
                 / fact
             )
             self._outputData[f"vcf/components/{i}{j}/total"].scaling_factor = fact
@@ -490,10 +488,14 @@ class DensityOfStates(IJob):
             )
             if self.add_ideal_results:
                 self._outputData[f"dos/components/{i}{j}/ideal/total"][:] = (
-                    weighted_sum(self._outputData, f"dos/components/{i}{j}/ideal/%s", self.labels)
+                    weighted_sum(
+                        self._outputData, f"dos/components/{i}{j}/ideal/%s", self.labels
+                    )
                     / fact
                 )
-                self._outputData[f"dos/components/{i}{j}/ideal/total"].scaling_factor = fact
+                self._outputData[
+                    f"dos/components/{i}{j}/ideal/total"
+                ].scaling_factor = fact
                 add_grouped_totals(
                     self.trajectory,
                     self._outputData,
