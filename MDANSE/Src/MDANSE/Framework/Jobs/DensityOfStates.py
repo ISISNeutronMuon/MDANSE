@@ -369,11 +369,13 @@ class DensityOfStates(IJob):
                     fft="rfft",
                 )
                 if self.add_ideal_results:
-                    self._outputData[f"dos/components/{i}{j}/ideal/{element}"][:] = get_spectrum(
-                        self._outputData[f"vacf/components/{i}{j}/{element}"],
-                        None,
-                        self.configuration["instrument_resolution"]["time_step"],
-                        fft="rfft",
+                    self._outputData[f"dos/components/{i}{j}/ideal/{element}"][:] = (
+                        get_spectrum(
+                            self._outputData[f"vacf/components/{i}{j}/{element}"],
+                            None,
+                            self.configuration["instrument_resolution"]["time_step"],
+                            fft="rfft",
+                        )
                     )
 
         selected_weights, all_weights = self.trajectory.get_weights(
@@ -398,10 +400,15 @@ class DensityOfStates(IJob):
             assign_weights(
                 self._outputData, weight_dict, f"vacf/components/{i}{j}/%s", self.labels
             )
-            assign_weights(self._outputData, weight_dict, f"dos/components/{i}{j}/%s", self.labels)
+            assign_weights(
+                self._outputData, weight_dict, f"dos/components/{i}{j}/%s", self.labels
+            )
             if self.add_ideal_results:
                 assign_weights(
-                    self._outputData, weight_dict, f"dos/components/{i}{j}/ideal/%s", self.labels
+                    self._outputData,
+                    weight_dict,
+                    f"dos/components/{i}{j}/ideal/%s",
+                    self.labels,
                 )
         n_selected = sum(nAtomsPerElement.values())
         n_total = len(self.trajectory.atom_types)
@@ -417,11 +424,15 @@ class DensityOfStates(IJob):
         self._outputData["dos/total"].scaling_factor = fact
         for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
             self._outputData[f"vacf/components/{i}{j}/total"][:] = (
-                weighted_sum(self._outputData, f"vacf/components/{i}{j}/%s", self.labels) / fact
+                weighted_sum(
+                    self._outputData, f"vacf/components/{i}{j}/%s", self.labels
+                )
+                / fact
             )
             self._outputData[f"vacf/components/{i}{j}/total"].scaling_factor = fact
             self._outputData[f"dos/components/{i}{j}/total"][:] = (
-                weighted_sum(self._outputData, f"dos/components/{i}{j}/%s", self.labels) / fact
+                weighted_sum(self._outputData, f"dos/components/{i}{j}/%s", self.labels)
+                / fact
             )
             self._outputData[f"dos/components/{i}{j}/total"].scaling_factor = fact
 
