@@ -14,8 +14,19 @@ class MathRenderer:
     # Ignore the following expression
     ignores = {r"\mathbf{q}": "q"}
 
-    def __init__(self, text: str) -> None:
+    # Inline expression marker
+    INLINE = r":math:"
+
+    # Multiline block expression marker
+    MULTILINE_BLOCK = r".. math::"
+
+    # Line breaks used
+    BREAK = r"<br\s*/?>"
+    DOUBLE_BREAK = f"{BREAK}\s*{BREAK}"
+
+    def __init__(self, text: str, dark: bool = False) -> None:
         self.raw_text = text
+        self.dark = dark
 
     @staticmethod
     def replace_ignored(text: str) -> str:
@@ -26,92 +37,101 @@ class MathRenderer:
         return text in MathRenderer.ignores
 
     @staticmethod
-    def containsMultiLineBlockExpression(text: str) -> bool:
-        return text in {".. math::", r"<br />.. math::<br />"}
+    def contains_multiline_block_expression(text: str) -> bool:
+        return (
+            re.search(f"<br />{MathRenderer.MULTILINE_BLOCK}<br />", text) is not None
+        )
 
     @staticmethod
-    def containsBlockExpression(text: str) -> bool:
+    def contains_block_expression(text: str) -> bool:
         return text.startswith(".. math:")
 
     @staticmethod
-    def containsInlineExpressions(text: str) -> bool:
-        return re.search(r"(:math:`.*?`)", text) is not None
+    def contains_inline_expressions(text: str) -> bool:
+        return re.search(f"({MathRenderer.INLINE}`.*?`)", text) is not None
 
-    @staticmethod
-    def processBlockExpression(text: str) -> list[tuple[str, bool]]:
-        return [(text[len(".. math:: ") :], True)]
+    def process_block_expression(self, substrings: list[str], index: int) -> None:
+        expr = substrings[index].strip(f"{MathRenderer.MULTILINE_BLOCK}").strip("`")
+        if not expr:
+            match = re.search(r"<br\s*/?>(.*?)<br\s*/?>", substrings[index + 1])
+            expr = match.group(1).strip()
+        substrings[index] = self.render(expr, self.dark)
+        substrings[index + 1] = ""
 
-    @staticmethod
-    def processMultiLineBlockExpression(
-        strings: list[str], n: int
-    ) -> tuple[list[tuple[str, bool]], int]:
-        substrings = strings[n + 1 :]
+    def process_multiline_block_expression(
+        self, strings: list[str], index: int
+    ) -> None:
+        substrings = strings[index + 1 :]
         group = []
         for s in substrings:
-            if (not s) or (s == r"<br /><br />"):
+            if (not s) or re.fullmatch(self.DOUBLE_BREAK, s):
                 break
             group.append(s)
 
-        group = [s.replace(r"<br />", "") for s in group]
-        total = "".join(group)
+        total = re.sub(self.BREAK, "", "".join(group))
         if total.startswith(r"<br />") and total.endswith(r"<br />"):
             result = total.split(r"<br />")[1]
         else:
             result = total.split(r"<br /><br />")[0]
 
-        return [(result, True)], n + len(group) + 1
+        strings[index] = self.render(result, self.dark)
+        expr_end = index + len(group) + 1
+        discard = strings[index + 1 : expr_end]
+        strings[index + 1 : expr_end] = [""] * len(discard)
 
-    @staticmethod
-    def processInlineExpressions(text: str) -> list[tuple[str, bool]]:
-        pattern = r"(:math:`.*?`)"
-        substrings = re.split(pattern, text)
+    def process_inline_expressions(self, substrings: list[str], index: int) -> None:
+        pattern = f"({MathRenderer.INLINE}`.*?`)"
+        text = substrings[index]
         scanned = []
-        for s in substrings:
-            if s.startswith(":math:"):
-                expr = s[len(":math:`") : -1]
-                scanned.append((expr, True))
-            else:
-                scanned.append((s, False))
+        matches = tuple(re.finditer(pattern, text))
+        for i, match in enumerate(matches):
+            last_span = matches[i - 1].span()
+            expr_start, expr_end = match.span()
+            plain_text = text[(0 if i < 1 else last_span[1]) : expr_start]
+            scanned.append(self.process_plain_text(plain_text))
+            span, expression = (
+                match[0],
+                match[1].strip(f"{MathRenderer.INLINE}").strip("`"),
+            )
+            rendered = self.render(expression, self.dark)
+            scanned.append(rendered)
+        substrings[index] = "".join(scanned)
 
-        return scanned
+    def process_plain_text(self, text: str) -> str:
+        text = text.replace("\n", "<br>")
+        return f'<span style="margin:0; padding:0;">{text}</span>'
 
     def scan(self) -> list[tuple[str, bool]]:
         # Use regex matching to find expressions
         pattern = r"(<br />.*?<br />)"
         substrings = re.split(pattern, self.raw_text)
 
-        scanned = []
         for index, s in enumerate(substrings):
             if s:
-                if self.containsMultiLineBlockExpression(s):
+                if self.contains_multiline_block_expression(s):
                     # Html is a multiline block expression
-                    group, end = self.processMultiLineBlockExpression(substrings, index)
-                    scanned.extend(group)
-                    substrings[index:end] = [""] * (end - index)
-                elif self.containsBlockExpression(s):
+                    self.process_multiline_block_expression(substrings, index)
+                elif self.contains_block_expression(s):
                     # Html substring contains a block expression
-                    group = self.processBlockExpression(s)
-                    scanned.extend(group)
-                elif self.containsInlineExpressions(s):
+                    self.process_block_expression(substrings, index)
+                elif self.contains_inline_expressions(s):
                     # Html substring contains inline math expressions
-                    group = self.processInlineExpressions(s)
-                    scanned.extend(group)
+                    self.process_inline_expressions(substrings, index)
                 elif ":Example:" in s:
-                    # We have reached the end of the section containing math expressions
-                    rest = "".join(substrings[index:])
-                    scanned.append((rest, False))
+                    # Break - we don't process any info below this line
                     break
                 else:
-                    # Html substring contains plain text only
-                    scanned.append((s, False))
-        return scanned
+                    # This is plain text
+                    substrings[index] = self.process_plain_text(s)
+
+        return "".join(substrings)
 
     @staticmethod
     def mask(text: str) -> str:
         return f"${text}$"
 
     @staticmethod
-    def render(expression: str, dark: bool = False) -> None:
+    def render(expression: str, dark: bool = False) -> str:
         # Create a figure containing the rendered LaTex expression
         fig, ax = plt.subplots(figsize=(0.01, 0.01))
         ax.axis("off")
@@ -139,6 +159,20 @@ class MathRenderer:
 
         # Cache rendered expression
         MathRenderer.set_cache(expression, image)
+
+        return (
+            MathRenderer.embed_html(image)
+            if len(expression) < 10
+            else MathRenderer.embed_html_large(image)
+        )
+
+    @staticmethod
+    def embed_html(image: str) -> str:
+        return f'<span style="vertical-align:middle;"><img src="data:image/png;base64,{image}" style="height:1em; display:inline;"></span>'
+
+    @staticmethod
+    def embed_html_large(image: str) -> str:
+        return f'<div style="text-align:left; margin:2px 0; padding:0;"><img src="data:image/png;base64,{image}" style="vertical-align:middle;"></div>'
 
     @classmethod
     def set_cache(cls, key, value) -> None:
