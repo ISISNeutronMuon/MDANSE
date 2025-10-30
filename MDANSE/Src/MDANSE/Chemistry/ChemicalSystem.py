@@ -167,7 +167,7 @@ class ChemicalSystem:
                         f"is very large - skipping bond type determination. "
                         f"SMARTS pattern matching will not work as expected. "
                         f"Bond types set to UNSPECIFIED, use the bond type wildcard "
-                        f"~ to match bonds in this molecule and use general atom symbols"
+                        f"~ to match bonds in this molecule and use general atom symbols "
                         f"e.g. [#6] instead of [C] or [c]. See "
                         f"https://www.daylight.com/dayhtml/doc/theory/theory.smarts.html "
                         f"for more details on SMARTS pattern matching."

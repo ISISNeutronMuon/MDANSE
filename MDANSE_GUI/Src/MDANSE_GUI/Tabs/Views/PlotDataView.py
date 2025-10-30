@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import h5py
+import html
 import numpy as np
 import numpy.typing as npt
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
@@ -27,7 +28,7 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem, MDADataStructure
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
-from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
+from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 BIN_STEP_PADDING = 2.0
 
@@ -255,13 +256,20 @@ class PlotDataView(QTreeView):
             packet = text, mda_data_structure.file
         self.dataset_selected.emit(packet)
         if hasattr(mda_data_structure, "_metadata"):
-            self.item_details.emit(mda_data_structure._metadata)
+            self.item_details.emit(
+                html.escape(
+                    "\n".join(
+                        f"{key}: {item}"
+                        for key, item in mda_data_structure._metadata.items()
+                    )
+                )
+            )
         else:
             try:
                 text += "\n"
                 for attr in mda_data_structure.attrs:
                     text += f"{attr}: {mda_data_structure.attrs[attr]}\n"
-                self.item_details.emit(text)
+                self.item_details.emit(html.escape(text))
             except Exception:
                 self.item_details.emit("No additional information included.")
 
@@ -347,11 +355,13 @@ class PlotDataView(QTreeView):
                 description += f"{key}: {dataset.attrs[key]}\n"
         else:
             description = "generic item"
-        self.item_details.emit(description)  # this should emit the job name
+        self.item_details.emit(
+            html.escape(description)
+        )  # this should emit the job name
 
     def connect_to_visualiser(
         self,
-        visualiser: DataPlotter | PlotDataInfo,
+        visualiser: DataPlotter | TextInfo,
     ) -> None:
         """Connect to a visualiser.
 
@@ -363,7 +373,7 @@ class PlotDataView(QTreeView):
         """
         if isinstance(visualiser, DataPlotter):
             self.dataset_selected.connect(visualiser.accept_data)
-        elif isinstance(visualiser, PlotDataInfo):
+        elif isinstance(visualiser, TextInfo):
             self.item_details.connect(visualiser.update_panel)
         else:
             raise NotImplementedError(

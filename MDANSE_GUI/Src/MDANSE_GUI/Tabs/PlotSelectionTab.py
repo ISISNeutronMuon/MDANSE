@@ -28,7 +28,7 @@ from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.PlotDataModel import PlotDataModel
 from MDANSE_GUI.Tabs.Views.PlotDataView import PlotDataView
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
-from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
+from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 label_text = """Load files and <b>assign data sets
 to a plot.</b>
@@ -111,7 +111,7 @@ class PlotSelectionTab(GeneralTab):
             layout=partial(
                 MultiPanel,
                 left_panels=[
-                    PlotDataInfo(
+                    TextInfo(
                         header="MDANSE Plotting",
                         footer="Look up our "
                         + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
