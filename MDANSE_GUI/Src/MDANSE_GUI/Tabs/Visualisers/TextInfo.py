@@ -15,8 +15,8 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import Signal, Slot, Qt
-from qtpy.QtWidgets import QTextBrowser, QApplication
+from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtWidgets import QApplication, QTextBrowser
 
 from .MathRenderer import MathRenderer
 

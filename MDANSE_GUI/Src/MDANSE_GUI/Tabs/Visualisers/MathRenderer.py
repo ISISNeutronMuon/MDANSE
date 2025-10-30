@@ -22,7 +22,7 @@ class MathRenderer:
 
     # Line breaks used
     BREAK = r"<br\s*/?>"
-    DOUBLE_BREAK = f"{BREAK}\s*{BREAK}"
+    DOUBLE_BREAK = rf"{BREAK}\s*{BREAK}"
 
     def __init__(self, text: str, dark: bool = False) -> None:
         self.raw_text = text
@@ -86,13 +86,10 @@ class MathRenderer:
         matches = tuple(re.finditer(pattern, text))
         for i, match in enumerate(matches):
             last_span = matches[i - 1].span()
-            expr_start, expr_end = match.span()
+            expr_start = match.span()[0]
             plain_text = text[(0 if i < 1 else last_span[1]) : expr_start]
             scanned.append(self.process_plain_text(plain_text))
-            span, expression = (
-                match[0],
-                match[1].strip(f"{MathRenderer.INLINE}").strip("`"),
-            )
+            expression = match[1].strip(f"{MathRenderer.INLINE}").strip("`")
             rendered = self.render(expression, self.dark)
             scanned.append(rendered)
         substrings[index] = "".join(scanned)
