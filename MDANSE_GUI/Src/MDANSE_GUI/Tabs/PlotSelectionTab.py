@@ -15,10 +15,12 @@
 #
 from __future__ import annotations
 
+import json
 import os
 from functools import partial
 from pathlib import PurePath
 
+from MDANSE.Core.Platform import PLATFORM
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
@@ -46,6 +48,9 @@ will <b>appear in the next tab.</b>
 
 
 class PlotSelectionTab(GeneralTab):
+    DEFAULT_JSON_PATH = PLATFORM.application_directory() / "recent_plot_selection_file.json"
+    MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDA results", self.load_files)
@@ -72,6 +77,7 @@ class PlotSelectionTab(GeneralTab):
             str(self.get_path("plot_selection")),
             "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
         )
+        recent_files = []  # list to store loaded files for recent files tracking
         if fnames is None:
             return
         if len(fnames[0]) < 1:
@@ -79,7 +85,9 @@ class PlotSelectionTab(GeneralTab):
         for fname in fnames[0]:
             self.load_results(str(PurePath(fname)))
             last_path = str(PurePath(os.path.split(fname)[0]))
+            recent_files.append(str(PurePath(fname)))
         self.set_path("plot_selection", last_path)
+        self.recent_plot_files(recent_files)
 
     @Slot(str)
     def load_results(self, some_fname: str):
@@ -88,6 +96,43 @@ class PlotSelectionTab(GeneralTab):
             fname = os.path.abspath(fname)
             self._model.add_file(str(fname))
             self._session.protect_filename(fname)
+
+    def recent_plot_files(self, files: list[str] = ()) -> list[str]:
+        """Adding recently loaded plot selection files to a json file. The json file is used to
+        populate the "Open Recent Plot Selection File" menu in the File menu.
+
+        Parameters
+        ----------
+        files : list[str], optional
+            List of recently loaded plot selection files, by default ()
+        Returns
+        -------
+        list[str]
+            List of recently loaded plot selection files.
+        """
+        filename = self.DEFAULT_JSON_PATH
+        max_num_files = self.MAX_NUMBER_RECENT_FILES
+
+        if os.path.exists(filename):
+            with open (filename) as f:
+                recent_files = json.load(f)
+                for file in files:
+                    if file in recent_files:
+                        recent_files.remove(file)
+                    recent_files.append(file)
+        else:
+            recent_files = []
+            for file in files:
+                recent_files.append(file)
+
+        if len(recent_files) > max_num_files:
+            recent_files = recent_files[-max_num_files:]
+
+        with open (filename, "w" ) as f:
+            json.dump(recent_files, f, indent=4)
+
+        return recent_files
+
 
     @classmethod
     def standard_instance(cls):
