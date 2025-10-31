@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import json
 import os
 from functools import partial
 from pathlib import PurePath
@@ -22,6 +23,8 @@ from pathlib import PurePath
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
+from MDANSE.Core.Platform import PLATFORM
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewerExtended
 from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
@@ -30,8 +33,6 @@ from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
-
-import json
 
 label_text = """<b>Load and view trajectories.</b>
 <br><br>
@@ -49,6 +50,9 @@ the atom over all simulation frames.
 
 
 class TrajectoryTab(GeneralTab):
+    DEFAULT_JSON_PATH = PLATFORM.application_directory() / "recent_trajectory_file.json"
+    MAX_NUMBER_RECENT_FILES = 10 #maximum number of recent files to store
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDT Trajectories", self.load_trajectories)
@@ -63,17 +67,16 @@ class TrajectoryTab(GeneralTab):
             "HDF5 files, MDANSE or H5MD format (*.mdt *.h5);;H5MD files (*.h5);;All files (*)",
         )
 
-        loaded_file =  []
+        loaded_files =  [] #list to store loaded files for recent files tracking
 
         for fname in fnames[0]:
             self.load_trajectory(PurePath(fname))
             last_path = str(PurePath(os.path.split(fname)[0]))
-            loaded_file.append(fname)
+            loaded_files.append(str(PurePath(fname)))
         if fnames[0]:
             self.set_path("trajectory", str(PurePath(last_path)))
             self._session.save()
-        return loaded_file
-
+        self.recent_trajectory_files(loaded_files)
 
     @Slot(str)
     def load_trajectory(self, some_fname: str):
@@ -83,25 +86,42 @@ class TrajectoryTab(GeneralTab):
             self._core._model.append_object((fname, short_name))
             self._session.protect_filename(fname)
 
-    def recent_trajectory_files(self, filename="recent_trajectory_file.json", max_num_files: int = 10) -> list[str]:
-        loaded_file = self.load_trajectories()
+    def recent_trajectory_files(self, files: list[str] = ()) -> list[str]:
+        """_summary_
+        Adding recently loaded trajectory files to a json file. The json file is used to
+        populate the "Open Recent Trajectories File" menu in the File menu.
+
+        Parameters
+        ----------
+        files : list[str], optional
+            _description_, by default ()
+
+        Returns
+        -------
+        list[str]
+            _description_
+        """
+
+        filename = self.DEFAULT_JSON_PATH
+        max_num_files = self.MAX_NUMBER_RECENT_FILES 
 
         if os.path.exists(filename):
-            with open (filename, "r" ) as f:
+            with open (filename) as f:
                 recent_files = json.load(f)
-                for file in loaded_file:
+                for file in files:
                     if file in recent_files:
                         recent_files.remove(file)
-                        recent_files.insert(0, file)
-                    else:
-                        recent_files.append(file)
+                    recent_files.append(file)
         else:
             recent_files = []
-            for file in loaded_file:
+            for file in files:
                 recent_files.append(file)
-    
+
+        if len(recent_files) > max_num_files:
+            recent_files = recent_files[-max_num_files:]
+
         with open (filename, "w" ) as f:
-            json.dump(recent_files, f)
+            json.dump(recent_files, f, indent=4)
 
         return recent_files
 
