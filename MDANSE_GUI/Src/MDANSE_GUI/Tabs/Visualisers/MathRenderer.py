@@ -19,14 +19,11 @@ class MathRenderer:
     # Cache mapping the raw LaTex expression to its rendered image form
     cache = {}
 
-    # Ignore the following expression
-    ignores = {r"\mathbf{q}": "q"}
-
     # Inline expression marker
     INLINE = r":math:"
 
     # Multiline block expression marker
-    MULTILINE_BLOCK = r".. math::"
+    BLOCK = r".. math::"
 
     # Line breaks used
     BREAK = r"<br\s*/?>"
@@ -44,74 +41,6 @@ class MathRenderer:
         """
         self.raw_text = text
         self.dark = dark
-
-    @staticmethod
-    def replace_ignored(text: str) -> str:
-        """Returns a standard string to replace the instance of a mathematical expression that we do not want to render
-        as an image, but keep as plain text (i.e. a single variable that is referred to often).
-
-        Parameters
-        ----------
-        text : str
-            LaTex symbol for expression to be ignored.
-
-        Returns
-        -------
-        str
-            Plain text symbol to display instead of ignored expression.
-
-        """
-        return MathRenderer.ignores[text]
-
-    @staticmethod
-    def ignore(text: str) -> bool:
-        """Returns a boolean determining whether to replace the instance of a mathematical expression that we do not
-        want to render as an image, but keep as plain text (i.e. a single variable that is referred to often).
-
-        Parameters
-        ----------
-        text : str
-            LaTex symbol for expression to be ignored.
-
-        Returns
-        -------
-        bool
-            Boolean value - if true, we ignore the expression.
-
-        """
-        return text in MathRenderer.ignores
-
-    @staticmethod
-    def contains_multiline_block_expression(text: str) -> bool:
-        """Returns a boolean determining whether the current substring from the parent html description string contains
-        a multiline block expression.
-
-        This is assessed based on a regex search for the presence of the pattern ".. math::" enclosed within line breaks
-
-        For example:
-
-            '<br />.. math::<br />',
-            '\\hat{\\mathbf{n}}(t) =  \\frac{\\mathbf{r}_{i}(t)
-                                        - \\mathbf{r}_{j}(t)}{\\vert \\mathbf{r}_{i}(t) - \\mathbf{r}_{j}(t) \\vert}'
-            |                                                                                                          |
-            ____________________________________________________________________________________________________________
-                                                            ^
-                                                This is the block expression to be rendered
-
-        Parameters
-        ----------
-        text : str
-            Html string to be searched.
-
-        Returns
-        -------
-        bool
-            Boolean value - if true, this string contains a multiline block LaTex expression.
-
-        """
-        return (
-            re.search(f"<br />{MathRenderer.MULTILINE_BLOCK}<br />", text) is not None
-        )
 
     @staticmethod
     def contains_block_expression(text: str) -> bool:
@@ -139,7 +68,7 @@ class MathRenderer:
             Boolean value - if true, this string contains a block LaTex expression.
 
         """
-        return text.startswith(".. math:")
+        return re.search(MathRenderer.BLOCK, text)
 
     @staticmethod
     def contains_inline_expressions(text: str) -> bool:
@@ -182,8 +111,15 @@ class MathRenderer:
             Index of parent strings to be modified.
 
         """
-        expr = substrings[index].strip(f"{MathRenderer.MULTILINE_BLOCK}").strip("`")
+        expr = substrings[index].strip(f"{MathRenderer.BLOCK}").strip("`")
+        if MathRenderer.BLOCK in expr:
+            # Attempted to isolate expression but could not strip identifier, since it is enclosed in line breaks -
+            # this is a multiline block expression
+            self.process_multiline_block_expression(substrings, index)
+            return
+
         if not expr:
+            # Expression not located in same substring as identifier, try to locate it in the adjacent substring
             match = re.search(r"<br\s*/?>(.*?)<br\s*/?>", substrings[index + 1])
             expr = match.group(1).strip()
         substrings[index] = self.render(expr, self.dark)
@@ -196,7 +132,7 @@ class MathRenderer:
 
         Parameters
         ----------
-        substrings : str
+        strings : str
             Parent html string list.
 
         index : str
@@ -276,10 +212,7 @@ class MathRenderer:
 
         for index, s in enumerate(substrings):
             if s:
-                if self.contains_multiline_block_expression(s):
-                    # Html is a multiline block expression
-                    self.process_multiline_block_expression(substrings, index)
-                elif self.contains_block_expression(s):
+                if self.contains_block_expression(s):
                     # Html substring contains a block expression
                     self.process_block_expression(substrings, index)
                 elif self.contains_inline_expressions(s):
@@ -337,7 +270,7 @@ class MathRenderer:
             0,
             0,
             MathRenderer.mask(expression),
-            fontsize=7,
+            fontsize=5,
             color="white" if dark else "black",
         )
 
@@ -347,8 +280,8 @@ class MathRenderer:
             buffer,
             format="png",
             bbox_inches="tight",
-            pad_inches=0.1,
-            dpi=150,
+            pad_inches=0,
+            dpi=200,
             transparent=dark,
         )
         plt.close(fig)
