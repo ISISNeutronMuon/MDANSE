@@ -189,15 +189,16 @@ class TabbedWindow(QMainWindow):
         file_group = menubar.addMenu("File")
         settings_group = menubar.addMenu("Settings")
         help_group = menubar.addMenu("Help")
-        self.exitAct = QAction("Exit", parent=menubar)
-        self.exitAct.triggered.connect(self.shut_down)
-        file_group.addAction(self.exitAct)
         self.recent_trajectory_fileAct = QMenu("Open Recent Trajectories File", parent=menubar)
         self.recent_trajectory_fileAct.aboutToShow.connect(self.populate_recent_trajectory_menu)
         file_group.addMenu(self.recent_trajectory_fileAct)
         self.recent_plot_selection_fileAct = QMenu("Open Recent Plot Selection File", parent=menubar)
         self.recent_plot_selection_fileAct.aboutToShow.connect(self.populate_recent_plot_selection_menu)
         file_group.addMenu(self.recent_plot_selection_fileAct)
+        file_group.addSeparator()
+        self.exitAct = QAction("Exit", parent=menubar)
+        self.exitAct.triggered.connect(self.shut_down)
+        file_group.addAction(self.exitAct)
         self.settingsAct = QAction("User Settings", parent=menubar)
         self.settingsAct.triggered.connect(self.launchSettingsEditor)
         settings_group.addAction(self.settingsAct)
@@ -231,24 +232,16 @@ class TabbedWindow(QMainWindow):
                 if not isinstance(data, list):
                     raise ValueError("Recent trajectory file is not a list")
                 data = list(reversed(data))
-                #print("Reopen closed trajectory files:")
                 for file in data:
-                    print(file)
                     action = QAction(file, self.recent_trajectory_fileAct)
                     action.triggered.connect(lambda checked=False, fp=file: self.open_recent_trajectory_file(fp))
                     self.recent_trajectory_fileAct.addAction(action)
         else:
-            # QMessageBox.information(
-            #     self,
-            #     "No Recent Trajectory File",
-            #     f"No recent trajectory file found at {filename}.",
-            # )
             return []
 
     @Slot()
-    #create a signal that will send a single path to the trajectory tab to load recent files
     def open_recent_trajectory_file(self, file: str):
-        #emit signal with the file name as the argument
+        """Emit signal to the trajectory tab to load the file with the file path as the argument."""
         self.signal_recent_trajectory_file.emit(file)
 
     def populate_recent_plot_selection_menu(self, filename=PlotSelectionTab.DEFAULT_JSON_PATH):
@@ -260,18 +253,15 @@ class TabbedWindow(QMainWindow):
                 if not isinstance(data, list):
                     raise ValueError("Recent plot selection file is not a list")
                 data = list(reversed(data))
-                #print("Reopen closed plot selection files:")
                 for file in data:
-                    print(file)
                     action = QAction(file, self.recent_plot_selection_fileAct)
                     action.triggered.connect(lambda checked=False, fp=file: self.open_recent_plot_selection_file(fp))
                     self.recent_plot_selection_fileAct.addAction(action)
         else:
             return []
     @Slot()
-    #create a signal that will send a single path to the plot selection tab to load recent files
     def open_recent_plot_selection_file(self, file: str):
-        #emit signal with the file name as the argument
+        """ Emit signal to the plot selection tab to load the file with the file path as the argument."""
         self.signal_recent_plot_selection_file.emit(file)
 
     def version_information(self):

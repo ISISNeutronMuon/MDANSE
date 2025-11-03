@@ -103,7 +103,7 @@ class TrajectoryTab(GeneralTab):
         """
 
         filename = self.DEFAULT_JSON_PATH
-        max_num_files = self.MAX_NUMBER_RECENT_FILES 
+        max_num_files = self.MAX_NUMBER_RECENT_FILES
 
         if os.path.exists(filename):
             with open (filename) as f:
@@ -125,8 +125,34 @@ class TrajectoryTab(GeneralTab):
 
         return recent_files
 
+<<<<<<< HEAD
 
 
+=======
+    @classmethod
+    def standard_instance(cls):
+        the_tab = cls(
+            window,
+            name="Trajectories",
+            session=LocalSession(),
+            model=GeneralModel(),
+            view=TrajectoryView(),
+            visualiser=View3D(MolecularViewerExtended()),
+            layout=partial(
+                MultiPanel,
+                left_panels=[
+                    TrajectoryInfo(
+                        header="MDANSE Trajectory",
+                        footer="Look up our "
+                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                        + " page.",
+                    )
+                ],
+            ),
+            label_text=label_text,
+        )
+        return the_tab
+>>>>>>> 868b6c8c (ruff formatting and notifcation for plot creator tab added)
 
     @classmethod
     def gui_instance(
