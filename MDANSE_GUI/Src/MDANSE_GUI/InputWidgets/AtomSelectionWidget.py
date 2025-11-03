@@ -129,7 +129,7 @@ class SelectionModel(QStandardItemModel):
         Removes the last selection from the list."""
         self.finalise_manual_selection()
         self.undo_stack.undo()
-        self.can_undo.emit(self.undo_stack.canUndo())
+        self.can_undo.emit(self.undo_stack.canUndo() and self.rowCount() > 1)
         self.can_redo.emit(self.undo_stack.canRedo())
 
     @Slot()
@@ -183,6 +183,7 @@ class SelectionModel(QStandardItemModel):
     @Slot(int)
     def on_atom_clicked(self, index: int):
         """Add atom index to manual selection. Receives signals from View3D."""
+        self.can_redo.emit(False)
         if not self._clicked_atoms:
             self._manual_selection_item = QStandardItem("Manual selection IN PROGRESS")
             self.appendRow([self._manual_selection_item])
