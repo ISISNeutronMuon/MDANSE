@@ -8,6 +8,14 @@ from matplotlib import pyplot as plt
 
 
 class MathRenderer:
+    """Operates on a html string by scanning through the string to locate renderable mathematical expressions using
+    LaTex typesetting. This works for inline, block, and multiline block expressions.
+
+    These html embedded expressions are mutated in-place to display an image, rendered in Matplotlib, of the expression
+    within the parent description text.
+
+    """
+
     # Cache mapping the raw LaTex expression to its rendered image form
     cache = {}
 
@@ -25,32 +33,155 @@ class MathRenderer:
     DOUBLE_BREAK = rf"{BREAK}\s*{BREAK}"
 
     def __init__(self, text: str, dark: bool = False) -> None:
+        """
+        Parameters
+        ----------
+        text : str
+            Html description string to be processed.
+        dark : bool
+            Boolean value determining the current configuration of dark/light mode at application startup time.
+
+        """
         self.raw_text = text
         self.dark = dark
 
     @staticmethod
     def replace_ignored(text: str) -> str:
+        """Returns a standard string to replace the instance of a mathematical expression that we do not want to render
+        as an image, but keep as plain text (i.e. a single variable that is referred to often).
+
+        Parameters
+        ----------
+        text : str
+            LaTex symbol for expression to be ignored.
+
+        Returns
+        -------
+        str
+            Plain text symbol to display instead of ignored expression.
+
+        """
         return MathRenderer.ignores[text]
 
     @staticmethod
     def ignore(text: str) -> bool:
+        """Returns a boolean determining whether to replace the instance of a mathematical expression that we do not want to render
+        as an image, but keep as plain text (i.e. a single variable that is referred to often).
+
+        Parameters
+        ----------
+        text : str
+            LaTex symbol for expression to be ignored.
+
+        Returns
+        -------
+        bool
+            Boolean value - if true, we ignore the expression.
+
+        """
         return text in MathRenderer.ignores
 
     @staticmethod
     def contains_multiline_block_expression(text: str) -> bool:
+        """Returns a boolean determining whether the current substring from the parent html description string contains
+        a multiline block expression.
+
+        This is assessed based on a regex search for the presence of the pattern ".. math::" enclosed within line breaks.
+
+        For example:
+
+            '<br />.. math::<br />',
+            '\\hat{\\mathbf{n}}(t) =  \\frac{\\mathbf{r}_{i}(t)
+                                        - \\mathbf{r}_{j}(t)}{\\vert \\mathbf{r}_{i}(t) - \\mathbf{r}_{j}(t) \\vert}'
+            |                                                                                                          |
+            ____________________________________________________________________________________________________________
+                                                            ^
+                                                This is the block expression to be rendered
+
+        Parameters
+        ----------
+        text : str
+            Html string to be searched.
+
+        Returns
+        -------
+        bool
+            Boolean value - if true, this string contains a multiline block LaTex expression.
+
+        """
         return (
             re.search(f"<br />{MathRenderer.MULTILINE_BLOCK}<br />", text) is not None
         )
 
     @staticmethod
     def contains_block_expression(text: str) -> bool:
+        """Returns a boolean determining whether the current substring from the parent html description string contains
+        a multiline block expression.
+
+        This is assessed based on the string commencing with the identifier ".. math::".
+
+        For example:
+
+            '.. math::',
+            '<br />\\phi(t = t_{1}-t_{0}) = \\arccos( \\hat{\\mathbf{n}}(t_{1}) \\cdot \\hat{\\mathbf{n}}(t_{0}))<br />'
+                   |                                                                                            |
+                   ______________________________________________________________________________________________
+                                                            ^
+                                                This is the block expression to be rendered
+        Parameters
+        ----------
+        text : str
+            Html string to be searched.
+
+        Returns
+        -------
+        bool
+            Boolean value - if true, this string contains a block LaTex expression.
+
+        """
         return text.startswith(".. math:")
 
     @staticmethod
     def contains_inline_expressions(text: str) -> bool:
+        """Returns a boolean determining whether the current substring from the parent html description string contains
+        a multiline block expression.
+
+        This is assessed based on a regex search for the presence of the pattern ".. math::" followed immediately by a
+        mathematical expression on the same line.
+
+        For example:
+
+                '<br />The general result is :math:`C_{l}(t) = \\langle P_{l}[\\cos(\\phi(t))] \\rangle`,<br />'
+                                                    |                                                 |
+                                                    ___________________________________________________
+                                                            ^
+                                                This is the inline expression to be rendered
+
+        Parameters
+        ----------
+        text : str
+            Html string to be searched.
+
+        Returns
+        -------
+        bool
+            Boolean value - if true, this string contains an inline LaTex expression.
+
+        """
         return re.search(f"({MathRenderer.INLINE}`.*?`)", text) is not None
 
     def process_block_expression(self, substrings: list[str], index: int) -> None:
+        """Renders a block expression as an image and modifies the parent html to embed the image.
+
+        Parameters
+        ----------
+        substrings : str
+            Parent html string list.
+
+        index : str
+            Index of parent strings to be modified.
+
+        """
         expr = substrings[index].strip(f"{MathRenderer.MULTILINE_BLOCK}").strip("`")
         if not expr:
             match = re.search(r"<br\s*/?>(.*?)<br\s*/?>", substrings[index + 1])
@@ -61,10 +192,21 @@ class MathRenderer:
     def process_multiline_block_expression(
         self, strings: list[str], index: int
     ) -> None:
+        """Renders a multiline block expression as an image and modifies the parent html to embed the image.
+
+        Parameters
+        ----------
+        substrings : str
+            Parent html string list.
+
+        index : str
+            Index of parent strings to be modified.
+
+        """
         substrings = strings[index + 1 :]
         group = []
         for s in substrings:
-            if (not s) or re.fullmatch(self.DOUBLE_BREAK, s):
+            if (not s) or re.fullmatch(self.DOUBLE_BREAK, s) or (":Example:" in s):
                 break
             group.append(s)
 
@@ -80,6 +222,17 @@ class MathRenderer:
         strings[index + 1 : expr_end] = [""] * len(discard)
 
     def process_inline_expressions(self, substrings: list[str], index: int) -> None:
+        """Renders an inline expression as an image and modifies the parent html to embed the image.
+
+        Parameters
+        ----------
+        substrings : str
+            Parent html string list.
+
+        index : str
+            Index of parent strings to be modified.
+
+        """
         pattern = f"({MathRenderer.INLINE}`.*?`)"
         text = substrings[index]
         scanned = []
@@ -95,10 +248,31 @@ class MathRenderer:
         substrings[index] = "".join(scanned)
 
     def process_plain_text(self, text: str) -> str:
+        """Embeds the plain text in a html span.
+
+        Parameters
+        ----------
+        text : str
+            Parent html string list.
+
+        """
         text = text.replace("\n", "<br>")
         return f'<span style="margin:0; padding:0;">{text}</span>'
 
-    def scan(self) -> list[tuple[str, bool]]:
+    def scan(self) -> str:
+        """Traverses the parent html string as a list of substrings separated by line breaks, applying the above conditions
+        to each substring to determine whether they are an inline, block, or multiline block LaTex expression, or simple
+        plain text, and processes the substrings accordingly.
+
+        After processing these component substrings are joined back together into a html object for display.
+
+        Returns
+        -------
+        str
+            Processed html with embedded LaTex expression images.
+
+        """
+
         # Use regex matching to find expressions
         pattern = r"(<br />.*?<br />)"
         substrings = re.split(pattern, self.raw_text)
@@ -115,7 +289,7 @@ class MathRenderer:
                     # Html substring contains inline math expressions
                     self.process_inline_expressions(substrings, index)
                 elif ":Example:" in s:
-                    # Break - we don't process any info below this line
+                    # Break - we don't process any info below this line containing the header "Example"
                     break
                 else:
                     # This is plain text
@@ -125,10 +299,40 @@ class MathRenderer:
 
     @staticmethod
     def mask(text: str) -> str:
+        """Format the input text string into the form "$<EXPRESSION>$", for compatibilty with matplotlib LaTex rendering.
+
+        Parameters
+        ----------
+        text : str
+            Input string.
+
+        Returns
+        -------
+        str
+            Formatted text with mask applied.
+
+        """
         return f"${text}$"
 
     @staticmethod
     def render(expression: str, dark: bool = False) -> str:
+        """Renders the LaTex expression string in matplotlib.
+
+        Parameters
+        ----------
+        expression : str
+            Expression string.
+
+        dark : bool
+            Boolean value - if true, dark mode is set.
+
+        Returns
+        -------
+        str
+            Html string containing embedded image.
+
+        """
+
         # Create a figure containing the rendered LaTex expression
         fig, ax = plt.subplots(figsize=(0.01, 0.01))
         ax.axis("off")
@@ -165,21 +369,84 @@ class MathRenderer:
 
     @staticmethod
     def embed_html(image: str) -> str:
+        """Embed a rendered image string in html.
+
+        Parameters
+        ----------
+        image : str
+            Rendered image as a string.
+
+        Returns
+        -------
+        str
+            Formatted html string containing embedded image.
+
+        """
         return f'<span style="vertical-align:middle;"><img src="data:image/png;base64,{image}" style="height:1em; display:inline;"></span>'
 
     @staticmethod
     def embed_html_large(image: str) -> str:
+        """Embed a large rendered image string in html.
+
+        Parameters
+        ----------
+        image : str
+            Rendered image as a string.
+
+        Returns
+        -------
+        str
+            Formatted html string containing embedded image.
+
+        """
         return f'<div style="text-align:left; margin:2px 0; padding:0;"><img src="data:image/png;base64,{image}" style="vertical-align:middle;"></div>'
 
     @classmethod
     def set_cache(cls, key, value) -> None:
+        """Insert a key value pair, representing an expression and a rendered image respectively.
+
+        Parameters
+        ----------
+        key : str
+            LaTex expression.
+
+        value : str
+            Rendered image as a string.
+
+        """
         cls.cache.update({key: value})
 
     @classmethod
     def cached(cls, key) -> bool:
+        """Determine whether a key value pair, representing an expression and a rendered image, exists in the cache.
+
+        Parameters
+        ----------
+        key : str
+            LaTex expression.
+
+        Returns
+        -------
+        bool
+            Boolean value - true if the cache contains the image for the given expression.
+
+        """
         result = key in cls.cache
         return result
 
     @classmethod
     def from_cache(cls, key) -> str:
+        """Retrieve a key value pair, representing an expression and a rendered image respectively.
+
+        Parameters
+        ----------
+        key : str
+            LaTex expression.
+
+        Returns
+        -------
+        str
+            Rendered image as string.
+
+        """
         return cls.cache[key]
