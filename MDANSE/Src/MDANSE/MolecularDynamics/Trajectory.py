@@ -20,6 +20,7 @@ import math
 from collections import Counter, defaultdict
 from collections.abc import Sequence
 from enum import auto
+import html
 from operator import itemgetter
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -107,7 +108,7 @@ def trajectory_summary(traj: Trajectory):
 
     val = "\n".join(val)
 
-    return val
+    return html.escape(val)
 
 
 def chemical_system_summary(cs: ChemicalSystem) -> str:
@@ -118,7 +119,7 @@ def chemical_system_summary(cs: ChemicalSystem) -> str:
     for molname, mollist in cs._clusters.items():
         text += f"Molecule: {molname}; Count: {len(mollist)}\n"
     text += " ===== \n"
-    return text
+    return html.escape(text)
 
 
 class Trajectory:

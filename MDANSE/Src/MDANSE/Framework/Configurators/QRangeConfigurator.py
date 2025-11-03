@@ -1,6 +1,6 @@
-#    This file is part of MDANSE_GUI.
+#    This file is part of MDANSE.
 #
-#    MDANSE_GUI is free software: you can redistribute it and/or modify
+#    MDANSE is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
@@ -15,17 +15,18 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import Slot
+from MDANSE.Framework.Configurators.RangeConfigurator import (
+    RangeConfigurator,
+)
 
-from .TextInfo import TextInfo
+from .IConfigurator import PredictionSettings
 
 
-class PlotDataInfo(TextInfo):
-    @Slot(object)
-    def update_panel(self, input_text):
-        try:
-            text = "\n".join([f"{key}: {item}" for key, item in input_text.items()])
-        except Exception:
-            text = str(input_text)
-        filtered = self.filter(text)
-        self.setHtml(filtered)
+class QRangeConfigurator(RangeConfigurator):
+    """Range configurator for Q vector generation."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prediction = PredictionSettings(
+            key="value", label="Q vector shell centres", unit="1/nm"
+        )

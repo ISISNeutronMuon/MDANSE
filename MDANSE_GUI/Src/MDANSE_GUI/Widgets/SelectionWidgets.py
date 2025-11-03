@@ -19,6 +19,7 @@ import json
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
+import more_itertools
 import numpy as np
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator, QValidator
@@ -479,12 +480,15 @@ class PatternSelection(BasicSelectionWidget):
 
         """
         self.pattern_dictionary = {
-            "primary amine": "[#7X3;H2;!$([#7][#6X3][!#6]);!$([#7][#6X2][!#6])](~[H])~[H]",
-            "hydroxy": "[#8;H1,H2]~[H]",
-            "methyl": "[#6;H3](~[H])(~[H])~[H]",
+            "carboxylic acid": "[CX3](=O)[OX2H1][H]",
+            "primary amine": "[NX3;H2;!$(NC=[!#6]);!$(NC#[!#6])]([H])[H]",
+            "hydroxy": "[OX2H][H]",
+            "methyl": "[CX4H3]([H])([H])[H]",
             "phosphate": "[#15X4](~[#8])(~[#8])(~[#8])~[#8]",
             "sulphate": "[#16X4](~[#8])(~[#8])(~[#8])~[#8]",
-            "thiol": "[#16X2;H1]~[H]",
+            "thiol": "[#16X2H1][H]",
+            "unfused benzene": "[cR1r6]([H]).[cR1r6]",
+            "water": "[OX2H2]([H])[H]",
         }
         super().__init__(parent, widget_label=widget_label)
 
@@ -496,7 +500,9 @@ class PatternSelection(BasicSelectionWidget):
         layout.addWidget(self.selection_field)
         self.selection_field.addItems(self.pattern_dictionary.keys())
         layout.addWidget(QLabel("pattern:"))
-        self.input_field = QLineEdit("", self)
+        self.input_field = QLineEdit(
+            more_itertools.first(self.pattern_dictionary.values()), self
+        )
         self.input_field.setPlaceholderText("can be edited")
         layout.addWidget(self.input_field)
         self.selection_field.currentTextChanged.connect(self.update_string)

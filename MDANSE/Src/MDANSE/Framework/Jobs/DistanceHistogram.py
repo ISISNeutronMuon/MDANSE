@@ -47,6 +47,7 @@ class DistanceHistogram(IJob):
         "Analysis",
         "Structure",
     )
+    PREDICTORS = ("r_values",)
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})

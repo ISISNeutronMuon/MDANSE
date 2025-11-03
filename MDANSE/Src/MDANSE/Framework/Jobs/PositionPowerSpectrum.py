@@ -48,6 +48,7 @@ class PositionPowerSpectrum(IJob):
         "Analysis",
         "Dynamics",
     )
+    PREDICTORS = ("instrument_resolution",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -59,7 +60,9 @@ class PositionPowerSpectrum(IJob):
     )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
+        {
+            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
+        },
     )
     settings["projection"] = (
         "ProjectionConfigurator",

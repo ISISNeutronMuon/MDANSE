@@ -57,7 +57,9 @@ class PlotTab(GeneralTab):
             self.model.regenerate_colours
         )
         self._core._extra_visualiser.make_layout()
-        self.matplotlib_dialog = PlotSettingsEditor(settings=self._settings)
+        self.matplotlib_dialog = PlotSettingsEditor(
+            self.parent(), settings=self._settings
+        )
         self.matplotlib_dialog.values_changed.connect(self._visualiser.update_plots)
         self._core.add_button("Change matplotlib settings", self.edit_matplotlib)
 

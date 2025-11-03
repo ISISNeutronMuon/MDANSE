@@ -372,9 +372,17 @@ class TabbedWindow(QMainWindow):
         self._job_holder.results_for_loading.connect(plot_tab.load_results)
         self._job_holder.results_for_loading.connect(plot_tab.tab_notification)
         plot_tab._view.fast_plotting_data.connect(self.accept_external_data)
+        plot_tab._view.fast_plotting_vectors.connect(self.accept_and_plot_vectors)
 
     def accept_external_data(self, model):
         self._tabs["Plot Creator"]._visualiser.new_plot()
+        self._tabs["Plot Holder"].accept_external_data(model)
+
+    def accept_and_plot_vectors(self, model):
+        self._tabs["Plot Creator"]._visualiser.new_plot()
+        self._tabs["Plot Holder"]._visualiser.plotter.plot_selector.setCurrentText(
+            "Vectors"
+        )
         self._tabs["Plot Holder"].accept_external_data(model)
 
     def createPlotHolder(self):

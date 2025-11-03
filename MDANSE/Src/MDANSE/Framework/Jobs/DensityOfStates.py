@@ -44,6 +44,7 @@ class DensityOfStates(IJob):
         "Analysis",
         "Dynamics",
     )
+    PREDICTORS = ("instrument_resolution",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -55,7 +56,9 @@ class DensityOfStates(IJob):
     )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
+        {
+            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
+        },
     )
     settings["interpolation_order"] = (
         "InterpolationOrderConfigurator",

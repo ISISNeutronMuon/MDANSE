@@ -15,15 +15,137 @@
 #
 from __future__ import annotations
 
+import html
+
+import h5py
+import numpy as np
+import numpy.typing as npt
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QMouseEvent
 from qtpy.QtWidgets import QAbstractItemView, QMenu, QTreeView
 
+from MDANSE.Framework.Configurators.QVectorsConfigurator import QVectorsConfigurator
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem, MDADataStructure
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
-from MDANSE_GUI.Tabs.Visualisers.PlotDataInfo import PlotDataInfo
+from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+BIN_STEP_PADDING = 2.0
+
+
+def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[float]:
+    """Finds the vector shell dataset and returns arrays of q vector lengths.
+
+    Parameters
+    ----------
+    shell_index : int
+        Index of the MDANSE q vector shell in the HDF5 data structure.
+    parent : h5py.Dataset
+        HDF5 object holding the shell_N keys, where N is shell_index.
+
+    Returns
+    -------
+    npt.NDArray[float]
+        A 1D array of q-vector lengths.
+    """
+    qvectors = parent[f"shell_{shell_index}/qvector_array"][:]
+    return np.linalg.norm(qvectors, axis=0)
+
+
+def convert_vectors_to_datasets(
+    source: h5py.File | QVectorsConfigurator, main_dstet: str = "vector_generator"
+) -> tuple[SingleDataset, SingleDataset]:
+    """Create plottable SingleDataset instances showing |q| of generated vectors.
+
+    Parameters
+    ----------
+    file : h5py.File
+        HDF5 file object, typically an .mda file.
+    main_dstet : str, optional
+        Name of the group with q vector shells, by default "vector_generator".
+
+    Returns
+    -------
+    Iterable[SingleDataset]
+        1D array of vector count vs. |q|, 2D histogram of q vector counts per shell.
+    """
+    if isinstance(source, h5py.File):
+        filename = source.filename
+        parent_dset = source[main_dstet]
+        qvals = parent_dset["q"][:]
+        nshells = len(qvals)
+        modq_per_shell = [shell_to_modq(n, parent_dset) for n in range(nshells)]
+        if not all(
+            "custom_field" in parent_dset[f"shell_{shell_index}/qvector_array"].attrs
+            for shell_index in range(nshells)
+        ):
+            available_vectors = np.array([len(qvecs) for qvecs in modq_per_shell])
+        else:
+            available_vectors = np.array(
+                [
+                    [
+                        int(x)
+                        for x in parent_dset[
+                            f"shell_{shell_index}/qvector_array"
+                        ].attrs["custom_field"]
+                    ]
+                    for shell_index in range(nshells)
+                ]
+            )
+    elif isinstance(source, QVectorsConfigurator):
+        filename = None
+        qvals = np.array(source["shells"])
+        nshells = len(qvals)
+        modq_per_shell = [
+            np.linalg.norm(source["q_vectors"][qvals[n]]["q_vectors"], axis=0)
+            for n in range(nshells)
+        ]
+        available_vectors = np.array(
+            [source["q_vectors"][qvals[n]]["n_q_vectors"] for n in range(nshells)]
+        )
+    mean_q = np.array([np.mean(qvecs) for qvecs in modq_per_shell])
+    mean_q_yerr = np.array([np.std(qvecs) for qvecs in modq_per_shell])
+    qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
+    q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 0.1
+    bin_step = 0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell])
+    bin_step = 0.2 * q_step if abs(bin_step) < 1e-09 else max(bin_step, 0.05 * q_step)
+    common_bins = np.arange(max(0.0, qmin), qmax + 1.1 * bin_step, bin_step)
+    qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
+    stacked_histograms = np.vstack(qmod_histograms)
+    xvals = common_bins[1:] - np.diff(common_bins) / 2
+    nvec_per_q = SingleDataset(
+        "Available vectors",
+        None,
+        linestyle=":",
+        marker="o",
+        data=available_vectors,
+        plot_axes={"|q|": qvals},
+        axes_units={"|q|": "1/nm"},
+        optional_filename=filename,
+    )
+    real_q_ideal_q = SingleDataset(
+        "Mean |q|",
+        None,
+        linestyle="-",
+        marker=".",
+        data=mean_q,
+        plot_axes={"|q|": qvals},
+        axes_units={"|q|": "1/nm"},
+        data_unit="1/nm",
+        yerror=mean_q_yerr,
+        optional_filename=filename,
+    )
+    vecs_per_qbin = SingleDataset(
+        "Shell population",
+        None,
+        data=stacked_histograms,
+        data_unit="counts",
+        plot_axes={"|q|": qvals, "q_bin": xvals},
+        axes_units={"|q|": "1/nm", "q_bin": "1/nm"},
+        optional_filename=filename,
+    )
+    return nvec_per_q, real_q_ideal_q, vecs_per_qbin
 
 
 class PlotDataView(QTreeView):
@@ -39,7 +161,7 @@ class PlotDataView(QTreeView):
     error = Signal(str)
     fast_plotting_data = Signal(object)
     free_name = Signal(str)
-    fast_plotting_data = Signal(object)
+    fast_plotting_vectors = Signal(object)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -99,6 +221,11 @@ class PlotDataView(QTreeView):
         menu.exec_(event.globalPos())
 
     def populateMenu(self, menu: QMenu, index: QModelIndex):
+        for action, method in [("Vector summary", self.plot_vectors)]:
+            temp_action = menu.addAction(action)
+            temp_action.triggered.connect(method)
+            temp_action.setEnabled(self.model().itemFromIndex(index).has_vectors)
+        menu.addSeparator()
         for action, method in [("Delete", self.deleteNode)]:
             temp_action = menu.addAction(action)
             temp_action.triggered.connect(method)
@@ -130,15 +257,35 @@ class PlotDataView(QTreeView):
             packet = text, mda_data_structure.file
         self.dataset_selected.emit(packet)
         if hasattr(mda_data_structure, "_metadata"):
-            self.item_details.emit(mda_data_structure._metadata)
+            self.item_details.emit(
+                html.escape(
+                    "\n".join(
+                        f"{key}: {item}"
+                        for key, item in mda_data_structure._metadata.items()
+                    )
+                )
+            )
         else:
             try:
                 text += "\n"
                 for attr in mda_data_structure.attrs:
                     text += f"{attr}: {mda_data_structure.attrs[attr]}\n"
-                self.item_details.emit(text)
+                self.item_details.emit(html.escape(text))
             except Exception:
                 self.item_details.emit("No additional information included.")
+
+    def plot_vectors(
+        self,
+    ):
+        source_model = self.model()
+        index = self.currentIndex()
+        mda_data_structure = source_model.parent_object(index)
+        file = mda_data_structure._file
+        LOG.debug("Running plot_vectors on file %s", file.filename)
+        model = PlottingContext()
+        for qvec_dataset in convert_vectors_to_datasets(file):
+            model.add_dataset(qvec_dataset)
+        self.fast_plotting_vectors.emit(model)
 
     def quick_plot_data(
         self,
@@ -209,11 +356,13 @@ class PlotDataView(QTreeView):
                 description += f"{key}: {dataset.attrs[key]}\n"
         else:
             description = "generic item"
-        self.item_details.emit(description)  # this should emit the job name
+        self.item_details.emit(
+            html.escape(description)
+        )  # this should emit the job name
 
     def connect_to_visualiser(
         self,
-        visualiser: DataPlotter | PlotDataInfo,
+        visualiser: DataPlotter | TextInfo,
     ) -> None:
         """Connect to a visualiser.
 
@@ -225,7 +374,7 @@ class PlotDataView(QTreeView):
         """
         if isinstance(visualiser, DataPlotter):
             self.dataset_selected.connect(visualiser.accept_data)
-        elif isinstance(visualiser, PlotDataInfo):
+        elif isinstance(visualiser, TextInfo):
             self.item_details.connect(visualiser.update_panel)
         else:
             raise NotImplementedError(

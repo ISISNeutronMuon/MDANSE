@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import copy
+import itertools as it
 from collections.abc import Iterable
 from functools import reduce
 from pathlib import Path
@@ -24,10 +25,13 @@ from typing import Any, SupportsInt
 import h5py
 import networkx as nx
 import numpy as np
-from more_itertools import padded
+from more_itertools import padded, quantify
 from rdkit import Chem
+from rdkit.Chem import rdDetermineBonds
+from rdkit.Geometry import Point3D
 
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 
 
@@ -60,6 +64,13 @@ class ChemicalSystem:
         self._clusters = {}
 
         self.rdkit_mol = Chem.RWMol()
+        # rdkit DetermineBondOrders doesn't work with dummy atoms. we
+        # avoid adding them to the rdkit_mol but will need to map from
+        # the rdkit atom indexes to the ones in MDANSE
+        self._rdkit_map = {}
+        self._rdkit_map_inv = {}
+        self._rdkit_dummy_atms = set()
+
         self._unique_elements = set()
 
     def __str__(self):
@@ -93,6 +104,12 @@ class ChemicalSystem:
         if name_list is not None:
             self._atom_names = [str(x) for x in name_list]
 
+        self._rdkit_dummy_atms = {
+            atom.GetIdx()
+            for atom in self.rdkit_mol.GetAtoms()
+            if atom.GetAtomicNum() == 0
+        }
+
     def add_atom(self, atm_num: int) -> int:
         rdkit_atm = Chem.Atom(atm_num) if atm_num is not None else Chem.Atom(0)
         rdkit_atm.SetNumExplicitHs(0)
@@ -102,9 +119,124 @@ class ChemicalSystem:
     def add_bonds(self, pair_list: Iterable[tuple[SupportsInt, SupportsInt]]):
         self._bonds.extend(pair_list)
         for pair in pair_list:
-            self.rdkit_mol.AddBond(
-                int(pair[0]), int(pair[1]), Chem.rdchem.BondType.UNSPECIFIED
-            )
+            i, j = int(pair[0]), int(pair[1])
+            if i not in self._rdkit_dummy_atms and j not in self._rdkit_dummy_atms:
+                # Ignore the bonds to any dummy atoms. This means that
+                # the SMARTS pattern match will ignore any bonds to
+                # dummy atoms. E.g. [OX2] will match oxygen atoms connected
+                # to two other real atoms even if it is also connected to
+                # dummy atoms.
+                self.rdkit_mol.AddBond(i, j, Chem.rdchem.BondType.UNSPECIFIED)
+
+    def set_bond_orders(
+        self, coords: np.ndarray, *, max_iters: int = 1000, max_natms: int = 100
+    ):
+        """Set the bond types for the bonds in the rdkit_mol.
+
+        Parameters
+        ----------
+        coords : np.ndarray
+            The coordinates of the system to determine the bond types
+            from.
+        max_iters: int
+            The maximum number of iterations used in the rdkit
+            DetermineBondOrders function.
+        max_natms : int
+            Skips DetermineBondOrders for molecules with a number of atoms
+            larger than max_natms.
+        """
+
+        uniq_submols = {}
+        coord_ang = coords * measure(1.0, "nm").toval("ang")
+
+        # Calling rdDetermineBonds.DetermineBondOrders for a large system
+        # is quite computationally expensive. It's better to call this
+        # function for unique molecules and then copy over all the bond
+        # types for all others. We also need to remove dummy atom before
+        # using rdDetermineBonds.DetermineBondOrders because it can't
+        # deal with them.
+        for cluster_name in self._clusters:
+            for idx, cluster in enumerate(self._clusters[cluster_name]):
+                cluster_no_dummies = [
+                    i for i in cluster if i not in self._rdkit_dummy_atms
+                ]
+
+                if len(cluster_no_dummies) > max_natms:
+                    LOG.warning(
+                        f"Number of atoms in {cluster_name} with idx {idx} "
+                        f"is very large - skipping bond type determination. "
+                        f"SMARTS pattern matching will not work as expected. "
+                        f"Bond types set to UNSPECIFIED, use the bond type wildcard "
+                        f"~ to match bonds in this molecule and use general atom symbols "
+                        f"e.g. [#6] instead of [C] or [c]. See "
+                        f"https://www.daylight.com/dayhtml/doc/theory/theory.smarts.html "
+                        f"for more details on SMARTS pattern matching."
+                    )
+                    continue
+
+                mapping = {}
+
+                submolecule = Chem.RWMol()
+                for i in cluster_no_dummies:
+                    new_idx = submolecule.AddAtom(self.rdkit_mol.GetAtomWithIdx(i))
+                    mapping[i] = new_idx
+                bond_idxs = []
+                for i, j in it.combinations(cluster_no_dummies, 2):
+                    bond = self.rdkit_mol.GetBondBetweenAtoms(i, j)
+                    if bond is None:
+                        continue
+                    k = bond.GetBeginAtomIdx()
+                    m = bond.GetEndAtomIdx()
+                    submolecule.AddBond(
+                        mapping[k], mapping[m], Chem.rdchem.BondType.UNSPECIFIED
+                    )
+                    bond_idxs.append(bond.GetIdx())
+
+                # canonical=False should deal molecules in the same
+                # cluster_name group which do not have the same atom ordering
+                smiles = Chem.MolToSmiles(submolecule, canonical=False)
+
+                if smiles in uniq_submols:
+                    submolecule = uniq_submols[smiles]
+                else:
+                    conf = Chem.Conformer(len(cluster_no_dummies))
+                    for i, j in enumerate(cluster_no_dummies):
+                        if j not in self._rdkit_dummy_atms:
+                            x, y, z = coord_ang[j]
+                            conf.SetAtomPosition(i, Point3D(x, y, z))
+                    submolecule.AddConformer(conf)
+                    try:
+                        LOG.info(
+                            f"Determining bond orders for molecule "
+                            f"{cluster_name} with index {idx}"
+                        )
+                        rdDetermineBonds.DetermineBondOrders(
+                            submolecule,
+                            charge=0,
+                            maxIterations=max_iters,
+                        )
+                    except Exception as e:
+                        LOG.error(
+                            f"Error determining bond orders for molecule "
+                            f"{cluster_name} with index {idx}: {e}. SMARTS "
+                            f"pattern matching will not work as expected. Bond "
+                            f"types set to UNSPECIFIED use bond type wildcard "
+                            f"~ to match bonds in this molecule."
+                        )
+                    uniq_submols[smiles] = submolecule
+
+                for i, j in enumerate(bond_idxs):
+                    submol_bond = submolecule.GetBondWithIdx(i)
+                    mol_bond = self.rdkit_mol.GetBondWithIdx(j)
+                    bond_type = submol_bond.GetBondType()
+                    mol_bond.SetBondType(bond_type)
+                    if bond_type == Chem.rdchem.BondType.AROMATIC:
+                        mol_bond.GetBeginAtom().SetIsAromatic(True)
+                        mol_bond.GetEndAtom().SetIsAromatic(True)
+
+        # determine ring info for the rdkit_mol so the SMART pattern like
+        # [cR1] can be used
+        Chem.GetSymmSSSR(self.rdkit_mol)
 
     def add_labels(self, label_dict: dict[str, list[int]]):
         for key, item in label_dict.items():
@@ -174,9 +306,13 @@ class ChemicalSystem:
         set[int]
             An set of matched atom indices.
         """
-        matches = self.rdkit_mol.GetSubstructMatches(
-            Chem.MolFromSmarts(smarts), maxMatches=maxmatches
-        )
+        try:
+            matches = self.rdkit_mol.GetSubstructMatches(
+                Chem.MolFromSmarts(smarts), maxMatches=maxmatches
+            )
+        except RuntimeError as e:
+            LOG.error(f"Unable to run pattern match using {smarts}: {e}")
+            return set()
         return {ind for match in matches for ind in match}
 
     @property

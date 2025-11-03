@@ -41,6 +41,7 @@ class Density(IJob):
         "Analysis",
         "Thermodynamics",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -48,7 +49,9 @@ class Density(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {
+            "dependencies": {"trajectory": "trajectory"},
+        },
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})

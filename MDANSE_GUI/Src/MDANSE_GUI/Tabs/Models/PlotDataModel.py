@@ -37,6 +37,7 @@ class BasicPlotDataItem(QStandardItem):
         super().__init__(*args, **kwargs)
         self.data_parent = data_parent
         self._item_type = "generic"
+        self.has_vectors = False
 
     @abstractmethod
     def data_path(self):
@@ -80,6 +81,7 @@ class BasicPlotDataItem(QStandardItem):
 
     def populate(self, data: h5py.File | h5py.Group):
         """Create model items for the children datasets from the HDF5 file."""
+        self.has_vectors = "vector_generator" in data
         for key in data.keys() - EXCLUDE:
             try:
                 data[key]

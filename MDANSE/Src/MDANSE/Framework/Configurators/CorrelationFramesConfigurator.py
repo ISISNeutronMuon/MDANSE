@@ -18,6 +18,7 @@ from __future__ import annotations
 import math
 
 from .FramesConfigurator import FramesConfigurator
+from .IConfigurator import PredictionSettings
 
 
 class CorrelationFramesConfigurator(FramesConfigurator):
@@ -26,6 +27,12 @@ class CorrelationFramesConfigurator(FramesConfigurator):
     Configures the time frame range to be used in the calculations
     together with a movable window used for correlations.
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prediction = PredictionSettings(
+            key="time", label="Time step (dt)", unit="ps"
+        )
 
     def configure(self, value: tuple[int, int, int, int]):
         """Set the number of correlation frames to use.

@@ -117,6 +117,7 @@ class MoleculeWidget(WidgetBase):
         self.default_labels()
         self.update_labels()
         self.updateValue()
+        self.window = None
 
     @Slot()
     def molecule_changed(self):
@@ -139,12 +140,13 @@ class MoleculeWidget(WidgetBase):
         """Open a window that shows a preview of selected molecule."""
         if self.selected_mol is None:
             return
-        self.window = MoleculePreviewWidget(
-            self._base,
-            self.selected_mol,
-            self.selected_name,
-            self.atom_database,
-        )
+        if self.window is None:
+            self.window = MoleculePreviewWidget(
+                self._base,
+                self.selected_mol,
+                self.selected_name,
+                self.atom_database,
+            )
         if self.window.isVisible():
             self.window.close()
         else:

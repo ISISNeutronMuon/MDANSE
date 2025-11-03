@@ -20,3 +20,4 @@ from .Heatmap import Heatmap as Heatmap
 from .Plotter import Plotter as Plotter
 from .Single import Single as Single
 from .Text import Text as Text
+from .Vectors import Vectors as Vectors

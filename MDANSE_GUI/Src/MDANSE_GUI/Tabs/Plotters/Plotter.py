@@ -153,6 +153,20 @@ class Plotter(metaclass=SubclassFactory):
             LOG.debug("Axis check failed.")
             return
 
+    def toggle_grid(self, enabled: bool) -> None:
+        if self._figure is None:
+            return
+        for axes in self._axes:
+            axes.grid(enabled)
+        self._figure.canvas.draw()
+
+    def toggle_legend(self, enabled: bool) -> None:
+        if self._figure is None:
+            return
+        for axes in self._axes:
+            axes.get_legend().set_visible(enabled)
+        self._figure.canvas.draw()
+
     def enable_slider(self, *, allow_slider: bool = True):
         """Enable or disable sliders.
 
