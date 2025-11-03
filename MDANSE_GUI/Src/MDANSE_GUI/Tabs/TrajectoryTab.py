@@ -51,7 +51,7 @@ the atom over all simulation frames.
 
 class TrajectoryTab(GeneralTab):
     DEFAULT_JSON_PATH = PLATFORM.application_directory() / "recent_trajectory_file.json"
-    MAX_NUMBER_RECENT_FILES = 10 #maximum number of recent files to store
+    MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -67,7 +67,7 @@ class TrajectoryTab(GeneralTab):
             "HDF5 files, MDANSE or H5MD format (*.mdt *.h5);;H5MD files (*.h5);;All files (*)",
         )
 
-        loaded_files =  [] #list to store loaded files for recent files tracking
+        loaded_files = []  # list to store loaded files for recent files tracking
 
         for fname in fnames[0]:
             self.load_trajectory(PurePath(fname))
@@ -106,7 +106,7 @@ class TrajectoryTab(GeneralTab):
         max_num_files = self.MAX_NUMBER_RECENT_FILES
 
         if os.path.exists(filename):
-            with open (filename) as f:
+            with open(filename) as f:
                 recent_files = json.load(f)
                 for file in files:
                     if file in recent_files:
@@ -120,7 +120,7 @@ class TrajectoryTab(GeneralTab):
         if len(recent_files) > max_num_files:
             recent_files = recent_files[-max_num_files:]
 
-        with open (filename, "w" ) as f:
+        with open(filename, "w") as f:
             json.dump(recent_files, f, indent=4)
 
         return recent_files
