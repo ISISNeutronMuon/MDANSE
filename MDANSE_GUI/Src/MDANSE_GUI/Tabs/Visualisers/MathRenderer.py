@@ -65,8 +65,8 @@ class MathRenderer:
 
     @staticmethod
     def ignore(text: str) -> bool:
-        """Returns a boolean determining whether to replace the instance of a mathematical expression that we do not want to render
-        as an image, but keep as plain text (i.e. a single variable that is referred to often).
+        """Returns a boolean determining whether to replace the instance of a mathematical expression that we do not
+        want to render as an image, but keep as plain text (i.e. a single variable that is referred to often).
 
         Parameters
         ----------
@@ -86,7 +86,7 @@ class MathRenderer:
         """Returns a boolean determining whether the current substring from the parent html description string contains
         a multiline block expression.
 
-        This is assessed based on a regex search for the presence of the pattern ".. math::" enclosed within line breaks.
+        This is assessed based on a regex search for the presence of the pattern ".. math::" enclosed within line breaks
 
         For example:
 
@@ -237,14 +237,12 @@ class MathRenderer:
         text = substrings[index]
         scanned = []
         matches = tuple(re.finditer(pattern, text))
+        # To account for potentially several inline expressions on the same line, iterate over all matches
         for i, match in enumerate(matches):
-            last_span = matches[i - 1].span()
-            expr_start = match.span()[0]
-            plain_text = text[(0 if i < 1 else last_span[1]) : expr_start]
+            plain_text = text[(0 if i < 1 else matches[i - 1].end()) : match.start()]
             scanned.append(self.process_plain_text(plain_text))
             expression = match[1].strip(f"{MathRenderer.INLINE}").strip("`")
-            rendered = self.render(expression, self.dark)
-            scanned.append(rendered)
+            scanned.append(self.render(expression, self.dark))
         substrings[index] = "".join(scanned)
 
     def process_plain_text(self, text: str) -> str:
@@ -260,9 +258,9 @@ class MathRenderer:
         return f'<span style="margin:0; padding:0;">{text}</span>'
 
     def scan(self) -> str:
-        """Traverses the parent html string as a list of substrings separated by line breaks, applying the above conditions
-        to each substring to determine whether they are an inline, block, or multiline block LaTex expression, or simple
-        plain text, and processes the substrings accordingly.
+        """Traverses the parent html string as a list of substrings separated by line breaks, applying the above
+        conditions to each substring to determine whether they are an inline, block, or multiline block LaTex expression
+        , or simple plain text, and processes the substrings accordingly.
 
         After processing these component substrings are joined back together into a html object for display.
 
@@ -272,7 +270,6 @@ class MathRenderer:
             Processed html with embedded LaTex expression images.
 
         """
-
         # Use regex matching to find expressions
         pattern = r"(<br />.*?<br />)"
         substrings = re.split(pattern, self.raw_text)
@@ -299,7 +296,8 @@ class MathRenderer:
 
     @staticmethod
     def mask(text: str) -> str:
-        """Format the input text string into the form "$<EXPRESSION>$", for compatibilty with matplotlib LaTex rendering.
+        """Format the input text string into the form "$<EXPRESSION>$", for compatibility with matplotlib
+        LaTex rendering.
 
         Parameters
         ----------
@@ -332,7 +330,6 @@ class MathRenderer:
             Html string containing embedded image.
 
         """
-
         # Create a figure containing the rendered LaTex expression
         fig, ax = plt.subplots(figsize=(0.01, 0.01))
         ax.axis("off")
