@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import html
 import os
 from pathlib import PurePath
 
@@ -38,7 +39,7 @@ class HDFTrajectoryWidget(WidgetBase):
             label = QLabel("No Trajectory available", self._base)
             self._layout.addWidget(label)
         else:
-            label = QLabel(str(filename), self._base)
+            label = QLabel(html.escape(str(filename)), self._base)
             self._layout.addWidget(label)
             trajectory_path, _ = os.path.split(filename)
             self.default_path = PurePath(trajectory_path)
