@@ -47,7 +47,9 @@ will <b>appear in the next tab.</b>
 
 
 class PlotSelectionTab(GeneralTab):
-    DEFAULT_JSON_PATH = PLATFORM.application_directory() / "recent_plot_selection_file.json"
+    DEFAULT_JSON_PATH = (
+        PLATFORM.application_directory() / "recent_plot_selection_file.json"
+    )
     MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
 
     def __init__(self, *args, **kwargs):
@@ -114,7 +116,7 @@ class PlotSelectionTab(GeneralTab):
         max_num_files = self.MAX_NUMBER_RECENT_FILES
 
         if os.path.exists(filename):
-            with open (filename) as f:
+            with open(filename) as f:
                 recent_files = json.load(f)
                 for file in files:
                     if file in recent_files:
@@ -128,11 +130,10 @@ class PlotSelectionTab(GeneralTab):
         if len(recent_files) > max_num_files:
             recent_files = recent_files[-max_num_files:]
 
-        with open (filename, "w" ) as f:
+        with open(filename, "w") as f:
             json.dump(recent_files, f, indent=4)
 
         return recent_files
-
 
     @classmethod
     def gui_instance(
