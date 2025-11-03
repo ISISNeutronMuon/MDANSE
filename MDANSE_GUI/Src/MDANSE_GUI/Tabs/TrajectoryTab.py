@@ -103,7 +103,7 @@ class TrajectoryTab(GeneralTab):
         """
 
         filename = self.DEFAULT_JSON_PATH
-        max_num_files = self.MAX_NUMBER_RECENT_FILES 
+        max_num_files = self.MAX_NUMBER_RECENT_FILES
 
         if os.path.exists(filename):
             with open (filename) as f:
@@ -124,9 +124,6 @@ class TrajectoryTab(GeneralTab):
             json.dump(recent_files, f, indent=4)
 
         return recent_files
-
-#qtfile dialog history, save state for files being opened could be added to file menu
-
 
     @classmethod
     def standard_instance(cls):

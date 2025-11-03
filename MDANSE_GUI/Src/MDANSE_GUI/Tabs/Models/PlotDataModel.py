@@ -155,6 +155,7 @@ class PlotDataModel(QStandardItemModel):
 
     error = Signal(str)
     all_elements = Signal(object)
+    finished_loading = Signal(int)
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
@@ -184,6 +185,7 @@ class PlotDataModel(QStandardItemModel):
             self._next_number += 1
             self.appendRow(new_item)
             new_item.populate(new_datafile._file)
+            self.finished_loading.emit( self._next_number - 1)
 
     def inner_object(self, index: QModelIndex) -> MDADataStructure | h5py.Dataset:
         """For a Qt model index, return its corresponding HDF5 object.
