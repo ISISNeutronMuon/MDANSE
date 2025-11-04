@@ -16,10 +16,16 @@
 from __future__ import annotations
 
 import copy
+import csv
 import enum
-from typing import TYPE_CHECKING, Any
+from collections.abc import Iterator
+from itertools import count
+from typing import TYPE_CHECKING, Any, Literal, TextIO
 
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
+from more_itertools import consumer
 
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.MLogging import LOG
@@ -313,3 +319,115 @@ class Plotter(metaclass=SubclassFactory):
             "If you expected a plot, please check the settings you changed last."
         )
         figure.canvas.draw()
+
+    @staticmethod
+    def save_name(
+        out_file: str, axis: str | int = "N/A", line: str | int = "N/A"
+    ) -> str:
+        """Get standardised output filename.
+
+        Parameters
+        ----------
+        out_file : str
+            Filename template to use.
+        axis : str | int
+            Axis name.
+        line : str | int
+            Line name.
+        """
+        return out_file.replace("%axis%", str(axis)).replace("%line%", str(line))
+
+    @consumer
+    def _save_files(self, out_file: str):
+        """Get next instance of file to write.
+
+        If axes or line are to be updated will
+        open new files when necessary, returning
+        previous when unnecessary.
+
+        Parameters
+        ----------
+        out_file : str
+            Filename template to use.
+        """
+        line = "%line%" in out_file
+        axis = "%axis%" in out_file
+
+        new_axis, new_line = int(axis), int(line)
+
+        while True:
+            new_file = self.save_name(out_file, new_axis, new_line)
+            LOG.info("Saving plot data to %s.", new_file)
+            with open(new_file, "w", encoding="utf-8") as file:
+                old_axis, old_line = new_axis, new_line
+                while (new_axis, new_line) == (old_axis, old_line):
+                    new_axis, new_line = yield file
+                    new_axis, new_line = new_axis * axis, new_line * line
+
+    @staticmethod
+    def _write_save_data(
+        file: TextIO,
+        axis: Axes,
+        line: Line2D,
+        ax_ind: int,
+        line_ind: int,
+    ) -> None:
+        """Write structured save data to csv file.
+
+        Parameters
+        ----------
+        file : TextIO
+            File to write to.
+        axis : Axes
+            Axis to write.
+        line : Line2D
+            Line to write.
+        ax_ind : int
+            Index of axis.
+        line_ind : int
+            Index of line.
+        """
+        title = axis.get_title() or ax_ind
+        xlabel = axis.get_xlabel()
+        ylabel = axis.get_ylabel()
+
+        writer = csv.writer(file)
+        eol = writer.dialect.lineterminator
+
+        file.write(f"# Axis: {title}; Line: {line._label or line_ind}{eol}")
+
+        writer.writerow((xlabel or "index", ylabel or "value"))
+        writer.writerows(line.get_xydata())
+
+        file.write(eol)
+
+    def save_data(self, out_file: str) -> None:
+        """Save lines to file.
+
+        Parameters
+        ----------
+        out_file : str
+            File to write data to.
+        """
+        file_gen = self._save_files(out_file)
+
+        for ax_ind, axis in enumerate(self._figure.axes, 1):
+            for li_ind, line in enumerate(self._get_datasets(axis), 1):
+                file = file_gen.send((ax_ind, li_ind))
+                self._write_save_data(file, axis, line, ax_ind, li_ind)
+
+    @staticmethod
+    def _get_datasets(axis: Axes) -> Iterator[Line2D]:
+        """Yield datasets from axis.
+
+        Parameters
+        ----------
+        axis : Axes
+            Axis to use.
+
+        Yields
+        ------
+        Line2D
+            Each line in dataset.
+        """
+        yield from axis.get_lines()

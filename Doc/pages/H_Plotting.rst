@@ -170,6 +170,37 @@ Changing the main axis will result in an updated plot
 
    The same 2D array is now plotted against the energy axis.
 
+Saving the Data
+~~~~~~~~~~~~~~~
+
+Basic saving
+------------
+
+It is possible to save the data as they are presented (including
+modifications, shifts and normalisations) to file for further
+processing. These data are saved in an annotated ``.csv`` format for
+transferability and ease of use.
+
+Each data block (axis, line) starts with a commented header-line
+(using ``#`` as a comment marker) detailing the contents of the block.
+
+.. note::
+
+   Because of potentially mismatched axes (e.g. due to numerical
+   rounding) it is not possible to stack multiple lines side-by-side in
+   the output data file.
+
+Advanced saving
+---------------
+
+If you do not wish to save all multi-plot data to the same file, it is
+possible to use some magic strings in the filename to dump each axis
+or line to its own file.
+
+These strings are ``%axis%``, ``%line%``. If these are present in the
+filename, the data will be split into multiple files with ``%axis%``
+and ``%line%`` replaced with the respective axis or line index.
+
 Customising the Plot
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -179,7 +210,7 @@ Matplotlib settings
 Analysis results are plotted using the matplotlib library.
 It offers many options of customising the plots, including
 some like the figure dimensions and DPI value which have
-to be set before a new plot is created. 
+to be set before a new plot is created.
 
 MDANSE saves the matplotlib parameters in its own configuration
 file, and offers a simple interface for modifying the settings.
@@ -298,4 +329,3 @@ on the physical axes of the data set, as shown in
 
    The legend of the plot shows which part of the 2D data set
    is represented by this curve.
-

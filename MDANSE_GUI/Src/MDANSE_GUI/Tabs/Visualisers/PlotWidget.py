@@ -15,22 +15,24 @@
 #
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 import matplotlib.pyplot as mpl
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from more_itertools import ilen
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDoubleSpinBox,
+    QFileDialog,
     QGridLayout,
     QHBoxLayout,
     QLabel,
+    QMessageBox,
+    QPushButton,
     QVBoxLayout,
     QWidget,
 )
@@ -41,6 +43,9 @@ from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
 from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
+
+if TYPE_CHECKING:
+    from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
 class SliderPack(QWidget):
@@ -214,6 +219,7 @@ class PlotWidget(QWidget):
         self.unique_id = -1
         self.make_canvas()
         self.set_plotter(plotter_type)
+
         if plotter_type != "Single":
             self.plot_selector.setCurrentText(plotter_type)
 
@@ -238,6 +244,7 @@ class PlotWidget(QWidget):
             self._plotter = Plotter.create(plotter_option)
         except Exception:
             self._plotter = Plotter()
+
         self.change_slider_labels.emit(self._plotter.slider_labels())
         self.change_slider_limits.emit(self._plotter.slider_limits())
         self.change_slider_coupling.emit(self._plotter.sliders_coupled())
@@ -354,46 +361,72 @@ class PlotWidget(QWidget):
         """
         canvas = self
         layout = QVBoxLayout(canvas)
-        figure = mpl.figure()
-        figAgg = FigureCanvasQTAgg(figure)
+
+        self._figure = mpl.figure()
+        figAgg = FigureCanvasQTAgg(self._figure)
         figAgg.setParent(canvas)
         figAgg.updateGeometry()
-        toolbar = MDANSEMatPlotLibNavBar(figAgg, canvas)
-        toolbar.update()
         layout.addWidget(figAgg, stretch=1)
-        normaliser = NormalisationWidget(self)
-        slider = SliderPack(self)
-        self.change_slider_labels.connect(slider.new_slider_labels)
-        self.change_slider_limits.connect(slider.new_limits)
-        self.change_slider_coupling.connect(slider.new_coupling)
-        self.reset_slider_values.connect(self.set_slider_values)
-        slider.new_values.connect(self.slider_change)
-        normaliser.new_values.connect(self.normaliser_change)
-        self._sliderpack = slider
-        self._normaliser = normaliser
+
         # Matplotlib control widgets, next to the toolbar.
-        temp_hlayout = QHBoxLayout()
-        temp_hlayout.addWidget(toolbar)
-        legend_box = QCheckBox(text="Legend")
-        grid_box = QCheckBox(text="Grid")
-        legend_box.clicked.connect(self.use_legend)
-        grid_box.clicked.connect(self.use_grid)
-        temp_hlayout.addWidget(legend_box)
-        temp_hlayout.addWidget(grid_box)
-        # The following widgets are placed below the plot.
-        layout.addLayout(temp_hlayout)
-        layout.addWidget(slider)
-        layout.addWidget(normaliser)
-        self._legend_box = legend_box
-        self._grid_box = grid_box
+
+        self._toolbar = MDANSEMatPlotLibNavBar(figAgg, canvas)
+        self._toolbar.update()
+
+        self._legend_box = QCheckBox(text="Legend")
+        self._legend_box.clicked.connect(self.use_legend)
         self._legend_box.setChecked(True)
+
+        self._grid_box = QCheckBox(text="Grid")
+        self._grid_box.clicked.connect(self.use_grid)
         self._grid_box.setChecked(True)
-        self._figure = figure
-        self._toolbar = toolbar
-        plot_selector = QComboBox(self)
-        layout.addWidget(plot_selector)
-        plot_selector.addItems(self.available_plotters())
-        plot_selector.setCurrentText("Single")
-        plot_selector.currentTextChanged.connect(self.set_plotter)
-        self.plot_selector = plot_selector
-        self.set_plotter(plot_selector.currentText())
+
+        self._save_button = QPushButton("Save Data", self)
+        self._save_button.pressed.connect(self._save_data)
+        self._save_button.setToolTip("Save data in plot to a csv file.")
+        self._file_dialog = QFileDialog.getSaveFileName
+
+        temp_hlayout = QHBoxLayout()
+        temp_hlayout.addWidget(self._toolbar)
+        temp_hlayout.addWidget(self._legend_box)
+        temp_hlayout.addWidget(self._grid_box)
+        temp_hlayout.addWidget(self._save_button)
+        layout.addLayout(temp_hlayout)
+
+        # The following widgets are placed below the plot.
+
+        self._sliderpack = SliderPack(self)
+        self.change_slider_labels.connect(self._sliderpack.new_slider_labels)
+        self.change_slider_limits.connect(self._sliderpack.new_limits)
+        self.change_slider_coupling.connect(self._sliderpack.new_coupling)
+        self.reset_slider_values.connect(self.set_slider_values)
+        self._sliderpack.new_values.connect(self.slider_change)
+        layout.addWidget(self._sliderpack)
+
+        self._normaliser = NormalisationWidget(self)
+        self._normaliser.new_values.connect(self.normaliser_change)
+        layout.addWidget(self._normaliser)
+
+        self.plot_selector = QComboBox(self)
+        self.plot_selector.addItems(self.available_plotters())
+        self.plot_selector.setCurrentText("Single")
+        self.plot_selector.currentTextChanged.connect(self.set_plotter)
+        self.set_plotter(self.plot_selector.currentText())
+        layout.addWidget(self.plot_selector)
+
+    def _save_data(self) -> None:
+        plotter = self._plotter
+        if not plotter._figure or not any(
+            ilen(plotter._get_datasets(ax)) for ax in plotter._figure.axes
+        ):
+            QMessageBox.warning(self, "No data", "No data in plot.")
+            return
+
+        save_loc, _ = self._file_dialog(
+            parent=self,
+            caption="Save file",
+            directory=str(Path.cwd()),
+            filter="Data files (*.dat);;All files (*)",
+        )
+
+        self._plotter.save_data(save_loc)

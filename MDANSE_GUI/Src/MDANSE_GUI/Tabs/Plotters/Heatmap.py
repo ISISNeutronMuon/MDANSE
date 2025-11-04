@@ -15,10 +15,14 @@
 #
 from __future__ import annotations
 
+import csv
 import math
-from typing import TYPE_CHECKING, Any
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any, TextIO
 
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.image import AxesImage
 from matplotlib.pyplot import colorbar as mpl_colorbar
 from scipy.interpolate import interp1d
 
@@ -353,3 +357,67 @@ class Heatmap(Plotter):
         self.check_curve_lengths()
         self.request_slider_values()
         target.canvas.draw()
+
+    @staticmethod
+    def _write_save_data(
+        file: TextIO, axis: Axes, line: AxesImage, ax_ind: int, line_ind: int
+    ) -> None:
+        """Write structured save data to csv file.
+
+        Parameters
+        ----------
+        file : TextIO
+            File to write to.
+        axis : Axes
+            Axis to write.
+        line : AxesImage
+            Heatmap to write.
+        ax_ind : int
+            Index of axis.
+        line_ind : int
+            Index of line (always 1).
+        """
+        title = axis.get_title() or ax_ind
+        line_label = line.get_label() or line_ind
+        xlabel = axis.get_xlabel()
+        ylabel = axis.get_ylabel()
+
+        writer = csv.writer(file)
+        eol = writer.dialect.lineterminator
+        file.write(f"# Axis: {title}; Line: {line_label or line_ind}{eol}")
+
+        data = line.get_array().T
+        extent = line.get_extent()
+
+        LOG.warning("%s", data.shape)
+
+        x, y = (
+            np.linspace(start, stop, n)
+            for (start, stop), n in zip(
+                (extent[:2], extent[2:]),
+                data.shape,
+                strict=True,
+            )
+        )
+
+        writer.writerow((xlabel or "index", ylabel or "value", "data"))
+        for (i, j), dat in np.ndenumerate(data):
+            writer.writerow((x[i], y[j], dat))
+
+        file.write(eol)
+
+    @staticmethod
+    def _get_datasets(axis: Axes) -> Iterator[AxesImage]:
+        """Yield datasets from axis.
+
+        Parameters
+        ----------
+        axis : Axes
+            Axis to use.
+
+        Yields
+        ------
+        AxesImage
+            Each image in dataset.
+        """
+        yield from axis.get_images()
