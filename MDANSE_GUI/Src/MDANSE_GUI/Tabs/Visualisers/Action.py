@@ -79,6 +79,7 @@ from MDANSE_GUI.InputWidgets import (
     WeightsWidget,
 )
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
+from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.DelayedButton import DelayedButton
 
 widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
@@ -389,19 +390,19 @@ class Action(QWidget):
                 # signals from these widgets to stop this from happening
                 # show_output_prediction will be called at the end of
                 # this function.
-                widget.blockSignals(True)
-                if isinstance(widget, InstrumentResolutionWidget):
-                    if resolution_tuple is None:
-                        continue
-                    widget.change_function(resolution_tuple[0], resolution_tuple[1])
-                if isinstance(widget, QVectorsWidget):
-                    if q_vector_tuple is None:
-                        continue
-                    widget._selector.setCurrentText(q_vector_tuple[0])
-                    widget._model.switch_qvector_type(
-                        q_vector_tuple[0], q_vector_tuple[1]
-                    )
-                widget.blockSignals(False)
+                with block_signals(widget):
+                    if isinstance(widget, InstrumentResolutionWidget):
+                        if resolution_tuple is None:
+                            continue
+                        widget.change_function(resolution_tuple[0], resolution_tuple[1])
+                    if isinstance(widget, QVectorsWidget):
+                        if q_vector_tuple is None:
+                            continue
+                        widget._selector.setCurrentText(q_vector_tuple[0])
+                        widget._model.switch_qvector_type(
+                            q_vector_tuple[0], q_vector_tuple[1]
+                        )
+
         self.allow_execution()
         self.show_output_prediction()
 

@@ -22,6 +22,8 @@ from qtpy.QtCore import QEvent, QObject, Qt
 from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import QComboBox
 
+from MDANSE_GUI.Utils import block_signals
+
 
 class CheckableComboBox(QComboBox):
     """A multi-select checkable combobox"""
@@ -75,10 +77,10 @@ class CheckableComboBox(QComboBox):
                 # need to block signals temporarily otherwise as we
                 # need to make a change on all the items which could
                 # cause alot of signals to be emitted
-                self.model().blockSignals(True)
-                for i in range(self.n_items):
-                    self.set_item_checked_state(i, set_checked)
-                self.model().blockSignals(False)
+                with block_signals(self.model()):
+                    for i in range(self.n_items):
+                        self.set_item_checked_state(i, set_checked)
+
                 self.select_all_item.setCheckState(
                     Qt.Checked if set_checked else Qt.Unchecked
                 )

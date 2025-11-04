@@ -25,6 +25,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.ResolutionDialog import ResolutionDialog
 from MDANSE_GUI.Widgets.ResolutionWidget import widget_text_map
 
@@ -135,14 +136,15 @@ class InstrumentResolutionWidget(WidgetBase):
                 new_params = init_parameters[widget_text_map[function]]
         else:
             new_params = optional_parameters
-        self._type_combo.blockSignals(True)
-        if function in widget_text_map:
-            self._type_combo.setCurrentText(widget_text_map[function])
-        elif function in reverse_text_map:
-            self._type_combo.setCurrentText(reverse_text_map[function])
-        else:
-            self._type_combo.setCurrentText(function)
-        self._type_combo.blockSignals(False)
+
+        with block_signals(self._type_combo):
+            if function in widget_text_map:
+                self._type_combo.setCurrentText(widget_text_map[function])
+            elif function in reverse_text_map:
+                self._type_combo.setCurrentText(reverse_text_map[function])
+            else:
+                self._type_combo.setCurrentText(function)
+
         self.set_field_values(new_params)
         self.updateValue()
         [field.textChanged.connect(self.updateValue) for field in self._fields]

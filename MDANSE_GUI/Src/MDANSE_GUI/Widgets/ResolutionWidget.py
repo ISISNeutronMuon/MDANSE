@@ -40,6 +40,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.Utils import block_signals
 
 widget_text_map = {
     "ideal": "ideal",
@@ -402,40 +403,38 @@ class ResolutionWidget(QWidget):
         widget_values : tuple[str, dict]
             Widget values from InstrumentResolutionWidget
         """
-        self.blockSignals(True)
-        new_function_name = widget_values[0]
-        offical_name = "missing"
-        for key, value in widget_text_map.items():
-            if new_function_name == value:
-                offical_name = key
-        new_params = widget_values[1]
-        new_eta = new_params.get("eta", "0.0")
-        try:
-            fwhm, centre = revert_parameters(new_params, new_function_name)
-        except Exception:
-            self.blockSignals(False)
-            return
-        self._peak_selector.setCurrentText(offical_name)
-        if abs(fwhm) < 1e-12:
-            new_fwhm = 0.0
-        else:
-            temp_value = fwhm / self._calculator._factor_value
-            new_fwhm = round(
-                temp_value,
-                abs(math.floor(math.log10(abs(temp_value)))) + 3,
-            )
-        if abs(centre) < 1e-12:
-            new_centre = 0.0
-        else:
-            temp_value = centre / self._calculator._factor_value
-            new_centre = round(
-                temp_value,
-                abs(math.floor(math.log10(abs(temp_value)))) + 3,
-            )
-        self._fwhm.setText(str(new_fwhm))
-        self._centre.setText(str(new_centre))
-        self._eta.setText(str(new_eta))
-        self.blockSignals(False)
+        with block_signals(self):
+            new_function_name = widget_values[0]
+            offical_name = "missing"
+            for key, value in widget_text_map.items():
+                if new_function_name == value:
+                    offical_name = key
+            new_params = widget_values[1]
+            new_eta = new_params.get("eta", "0.0")
+            try:
+                fwhm, centre = revert_parameters(new_params, new_function_name)
+            except Exception:
+                return
+            self._peak_selector.setCurrentText(offical_name)
+            if abs(fwhm) < 1e-12:
+                new_fwhm = 0.0
+            else:
+                temp_value = fwhm / self._calculator._factor_value
+                new_fwhm = round(
+                    temp_value,
+                    abs(math.floor(math.log10(abs(temp_value)))) + 3,
+                )
+            if abs(centre) < 1e-12:
+                new_centre = 0.0
+            else:
+                temp_value = centre / self._calculator._factor_value
+                new_centre = round(
+                    temp_value,
+                    abs(math.floor(math.log10(abs(temp_value)))) + 3,
+                )
+            self._fwhm.setText(str(new_fwhm))
+            self._centre.setText(str(new_centre))
+            self._eta.setText(str(new_eta))
         self.recalculate_peak()
 
     def update_text_output(self, rounding_precision=3, error=False):

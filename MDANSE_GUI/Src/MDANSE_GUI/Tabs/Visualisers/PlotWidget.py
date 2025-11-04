@@ -40,6 +40,7 @@ from qtpy.QtWidgets import (
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
+from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
 from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
 
@@ -175,16 +176,15 @@ class SliderPack(QWidget):
     @Slot()
     def box_to_slider(self):
         """Update sliders if spin boxes have changed."""
-        self.blockSignals(True)
-        vals = np.zeros_like(self._valarray)
-        clicks = np.zeros_like(self._clickarray)
-        for ns, box in enumerate(self._spinboxes):
-            vals[ns] = box.value()
-        clicks = np.round((vals - self._minarray) / self._steparray).astype(int)
-        for ns, slider in enumerate(self._sliders):
-            slider.setValue(clicks[ns])
-        self.slider_to_box()
-        self.blockSignals(False)
+        with block_signals(self):
+            vals = np.zeros_like(self._valarray)
+            clicks = np.zeros_like(self._clickarray)
+            for ns, box in enumerate(self._spinboxes):
+                vals[ns] = box.value()
+            clicks = np.round((vals - self._minarray) / self._steparray).astype(int)
+            for ns, slider in enumerate(self._sliders):
+                slider.setValue(clicks[ns])
+            self.slider_to_box()
 
     @Slot()
     def collect_values(self):

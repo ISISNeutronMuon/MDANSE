@@ -35,6 +35,7 @@ from qtpy.QtWidgets import (
 from MDANSE import PLATFORM
 from MDANSE.IO.IOUtils import strip_comments
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.Utils import block_signals
 
 ERROR_COLOR = QColor(255, 0, 0)
 
@@ -185,13 +186,16 @@ class PlotSettingsModel(QStandardItemModel):
             mark_error = True
         else:
             mark_error = False
-        self.blockSignals(True)
-        row = self._row_lookup.get(key)
-        if mark_error:
-            self.item(row, 1).setData(ERROR_COLOR, role=Qt.ItemDataRole.BackgroundRole)
-        else:
-            self.item(row, 1).setData(None, role=Qt.ItemDataRole.BackgroundRole)
-        self.blockSignals(False)
+
+        with block_signals(self):
+            row = self._row_lookup.get(key)
+            if mark_error:
+                self.item(row, 1).setData(
+                    ERROR_COLOR, role=Qt.ItemDataRole.BackgroundRole
+                )
+            else:
+                self.item(row, 1).setData(None, role=Qt.ItemDataRole.BackgroundRole)
+
         self.plots_need_updating.emit()
 
     @Slot()
@@ -213,15 +217,15 @@ class PlotSettingsModel(QStandardItemModel):
                 )
                 bad_keys.append(key)
                 bad_indices.append(row)
-        self.blockSignals(True)
-        for row in range(self.rowCount()):
-            if row in bad_indices:
-                self.item(row, 1).setData(
-                    ERROR_COLOR, role=Qt.ItemDataRole.BackgroundRole
-                )
-            else:
-                self.item(row, 1).setData(None, role=Qt.ItemDataRole.BackgroundRole)
-        self.blockSignals(False)
+
+        with block_signals(self):
+            for row in range(self.rowCount()):
+                if row in bad_indices:
+                    self.item(row, 1).setData(
+                        ERROR_COLOR, role=Qt.ItemDataRole.BackgroundRole
+                    )
+                else:
+                    self.item(row, 1).setData(None, role=Qt.ItemDataRole.BackgroundRole)
 
 
 class PlotSettingsEditor(QDialog):
