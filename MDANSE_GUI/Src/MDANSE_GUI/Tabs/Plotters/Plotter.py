@@ -25,7 +25,7 @@ import numpy as np
 from more_itertools import consumer
 
 from MDANSE.Core.RegisterFactory import RegisterFactory
-from MDANSE.IO.IOUtils import UCDict
+from MDANSE.IO.IOUtils import UCDict, UCEnum
 from MDANSE.MLogging import LOG
 from MDANSE.util_types import FloatArray
 
@@ -39,12 +39,18 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
-class NormOperations(enum.Enum):
+class NormOperations(UCEnum):
     """Enum for selecting mathematical operations when calculating norms."""
 
     AVERAGE = enum.auto()
     SUM = enum.auto()
     NOT_IMPLEMENTED = enum.auto()
+
+    @classmethod
+    def _missing_(cls, value: str) -> NormOperations:
+        if res := super()._missing_(value):
+            return res
+        return cls.NOT_IMPLEMENTED
 
 
 def str_to_enum(operation: str) -> NormOperations:
@@ -53,19 +59,15 @@ def str_to_enum(operation: str) -> NormOperations:
     Parameters
     ----------
     operation : str
-        name of the mathematical operation as string.
+        Name of the mathematical operation as string.
 
     Returns
     -------
     NormOperations
-        enum value of the operation.
+        Enum value of the operation.
 
     """
-    if operation == "average":
-        return NormOperations.AVERAGE
-    if operation == "sum":
-        return NormOperations.SUM
-    return NormOperations.NOT_IMPLEMENTED
+    return NormOperations(operation)
 
 
 def enum_to_str(operation: NormOperations) -> str:
@@ -74,19 +76,15 @@ def enum_to_str(operation: NormOperations) -> str:
     Parameters
     ----------
     operation : NormOperations
-        Enum of the mathematical operation
+        Enum of the mathematical operation.
 
     Returns
     -------
     str
-        name of the operation as string
+        Name of the operation as string.
 
     """
-    if operation == NormOperations.AVERAGE:
-        return "average"
-    if NormOperations.SUM:
-        return "sum"
-    return "not implemented"
+    return operation.name.lower()
 
 
 NORMALISATION_DEFAULTS = {
@@ -95,6 +93,8 @@ NORMALISATION_DEFAULTS = {
     "max_index": 1,
     "operation": NormOperations.AVERAGE,
 }
+
+ValidPlotters = Literal["Single", "Vectors", "Text", "Heatmap", "Grid"]
 
 
 class Plotter(RegisterFactory):
@@ -214,25 +214,30 @@ class Plotter(RegisterFactory):
         """
         apply = self._normalisation_values["apply"]
         operation = self._normalisation_values["operation"]
-        if not apply or operation == NormOperations.NOT_IMPLEMENTED:
+        if not apply or operation is NormOperations.NOT_IMPLEMENTED:
             return xdata, ydata
+
         min_index = self._normalisation_values["min_index"]
         max_index = self._normalisation_values["max_index"]
         ref_values = ydata[min_index:max_index]
+
         if len(ref_values) < 1:
             self._normalisation_errors.append(
                 "No points within the specified index range"
             )
             return xdata, ydata
-        if operation == NormOperations.AVERAGE:
+
+        if operation is NormOperations.AVERAGE:
             scale_factor = np.nanmean(ref_values)
-        elif operation == NormOperations.SUM:
+        elif operation is NormOperations.SUM:
             scale_factor = np.sum(np.nan_to_num(ref_values))
+
         if np.isclose(scale_factor, 0.0):
             self._normalisation_errors.append(
                 "Normalisation factor is 0 and will not be applied."
             )
             return xdata, ydata
+
         return xdata, ydata / scale_factor
 
     def normalise_array(self, data_array: FloatArray) -> FloatArray:
@@ -258,15 +263,18 @@ class Plotter(RegisterFactory):
         ref_column = data_array[:, min_index:max_index]
         if ref_column.shape[1] < 1:
             return data_array
-        if operation == NormOperations.AVERAGE:
+
+        if operation is NormOperations.AVERAGE:
             scale_column = np.nanmean(ref_column, axis=1)
-        elif operation == NormOperations.SUM:
+        elif operation is NormOperations.SUM:
             scale_column = np.sum(np.nan_to_num(ref_column), axis=1)
+
         if np.any(np.isclose(scale_column, 0.0)):
             self._normalisation_errors.append(
                 "Normalisation factor is 0 for some rows of the 2D array."
             )
             return data_array
+
         return data_array / scale_column.reshape((len(scale_column), 1))
 
     def change_normalisation(self, new_value: dict[str, Any]):

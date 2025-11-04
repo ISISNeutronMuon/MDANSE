@@ -52,7 +52,7 @@ SCALE_FACTOR_FORMAT = "3.3f"
 class PlotArgs(NamedTuple):
     """Arguments for plotting data."""
 
-    dataset: FloatArray | ComplexArray
+    dataset: SingleDataset
     colour: str
     line_style: str
     marker: str

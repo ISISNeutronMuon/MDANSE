@@ -21,14 +21,17 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from matplotlib.colors import to_rgb
+from more_itertools import one
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from matplotlib.figure import Figure
+    from matplotlib.lines import Line2D
 
-    from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
+    from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs, PlottingContext
 
 
 @Plotter.register("Single")
@@ -39,8 +42,8 @@ class Single(Plotter):
         """Initialise all ploting parameters to default values."""
         super().__init__()
         self._figure = None
-        self._active_curves = []
-        self._backup_curves = []
+        self._active_curves: list[Line2D] = []
+        self._backup_curves: list[Line2D] = []
         self._backup_limits = []
         self._curve_limit_per_dataset = 12
         self.height_max, self.length_max = 0.0, 0.0
@@ -80,7 +83,7 @@ class Single(Plotter):
         Parameters
         ----------
         new_value : dict[str, Any]
-            parameters as in NORMALISATION_DEFAULTS
+            Parameters as in NORMALISATION_DEFAULTS.
 
         """
         super().change_normalisation(new_value)
@@ -89,12 +92,12 @@ class Single(Plotter):
     def offset_curves(self):
         """Offset curves against each other based on slider settings."""
         target = self._figure
-        if target is None:
+        if target is None or not self._active_curves:
             return
-        if len(self._active_curves) == 0:
-            return
+
         new_value = self._slider_values
         saved_xmin, saved_xmax, saved_ymin, saved_ymax = self._backup_limits
+
         for num, curve in enumerate(self._active_curves):
             xdata = self._backup_curves[num][0]
             ydata = self._backup_curves[num][1]
@@ -112,15 +115,18 @@ class Single(Plotter):
         self._backup_limits = [saved_xmin, saved_xmax, saved_ymin, saved_ymax]
         self._axes[0].relim()
         self._axes[0].autoscale()
+
         if self._toolbar is not None:
             self._toolbar.update()
             self._toolbar.push_current()
+
         try:
             self._axes[0].set_xlim(saved_xmin, saved_xmax)
         except ValueError:
             LOG.error(
                 f"Matplotlib could not set x limits to {saved_xmin}, {saved_xmax}",
             )
+
         try:
             self._axes[0].set_ylim(saved_ymin, saved_ymax)
         except ValueError:
@@ -140,7 +146,7 @@ class Single(Plotter):
         self,
         plotting_context: PlottingContext,
         figure: Figure = None,
-        update_only=False,
+        update_only: bool = False,
         toolbar=None,
     ):
         """Plot all datasets in the same figure.
@@ -158,29 +164,39 @@ class Single(Plotter):
 
         """
         self.enable_slider(allow_slider=False)
+
         target = self.get_figure(figure)
         if target is None:
             return
+
         if toolbar is not None:
             self._toolbar = toolbar
+
         self._figure = target
         self._figure.set_layout_engine("none")
         self._active_curves = []
         self._backup_curves = []
         self._normalisation_errors = []
+
         axes = target.add_subplot(111)
         self._axes = [axes]
         self.apply_settings(plotting_context)
         x_axis_labels = []
+
         self.height_max, self.length_max = 0.0, 0.0
+
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
+
         if len(plotting_context.datasets()) == 0:
             target.clear()
             target.canvas.draw()
+
         for databundle in plotting_context.datasets().values():
             dataset = databundle.dataset
+            plotlabel = databundle.legend_label
+
             try:
                 best_unit, best_axis = (
                     dataset._axes_units[databundle.main_axis],
@@ -188,15 +204,16 @@ class Single(Plotter):
                 )
             except KeyError:
                 best_unit, best_axis = dataset.longest_axis()
-            plotlabel = databundle.legend_label
+
             x_axis_labels.append(dataset.x_axis_label(best_axis))
+
             if dataset._n_dim == 1:
-                [temp] = axes.plot(
-                    dataset.x_axis(best_axis),
-                    dataset.data,
-                    linestyle=databundle.line_style,
+                self._plot_single(
+                    axes,
+                    databundle,
+                    best_axis,
                     label=plotlabel,
-                    color=databundle.colour,
+                    colour=databundle.colour,
                 )
                 try:
                     temp.set_marker(databundle.marker)
@@ -219,16 +236,17 @@ class Single(Plotter):
                 colour_increment = (0.5 - main_colour) / min(
                     self._curve_limit_per_dataset, len(multi_curves)
                 )
+
                 for key, value in islice(
                     multi_curves.items(), self._curve_limit_per_dataset
                 ):
                     try:
-                        [temp] = axes.plot(
-                            dataset.x_axis(best_axis),
-                            value,
-                            label=plotlabel + ":" + dataset._curve_labels[key],
-                            linestyle=databundle.line_style,
-                            color=tuple(main_colour),
+                        self._plot_single(
+                            axes,
+                            databundle,
+                            best_axis,
+                            label=f"{plotlabel}:{dataset._curve_labels[key]}",
+                            colour=tuple(main_colour),
                         )
                         try:
                             temp.set_marker(databundle.marker)
@@ -249,11 +267,14 @@ class Single(Plotter):
                         LOG.error(f"values={value}")
                         return
                     main_colour += colour_increment
+
         if len(self._backup_curves) > 1:
             self.enable_slider(allow_slider=True)
+
         elif not self._backup_curves:
             self.plot_blank()
             return
+
         if update_only:
             try:
                 axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
@@ -261,6 +282,7 @@ class Single(Plotter):
                 LOG.error(
                     f"Matplotlib could not set x limits to {self._backup_limits[0]}, {self._backup_limits[1]}"
                 )
+
             try:
                 axes.set_ylim((self._backup_limits[2], self._backup_limits[3]))
             except ValueError:
@@ -270,9 +292,55 @@ class Single(Plotter):
         else:
             xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
             self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
+
         axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
         legend = axes.legend()
         legend.set_visible(plotting_context.use_legend)
         axes.grid(plotting_context.use_grid)
         self.check_curve_lengths()
         self.offset_curves()
+
+    def _plot_single(
+        self,
+        axes: Axes,
+        databundle: PlotArgs,
+        best_axis: str,
+        *,
+        label: str,
+        colour: tuple[float, float, float],
+    ):
+        """Plot a single curve to axes.
+
+        Parameters
+        ----------
+        axes : Axes
+            Axis to plot to.
+        databundle : FIXME: Add type.
+            FIXME: Add docs.
+        best_axis : str
+            Axis label of X-axis.
+        label : str
+            Plot label.
+        colour : FIXME: Add type.
+            Curve colour.
+        """
+        temp: Line2D = one(
+            axes.plot(
+                databundle.dataset.x_axis(best_axis),
+                databundle.dataset.data,
+                linestyle=databundle.line_style,
+                label=databundle.legend_label,
+                color=databundle.colour,
+            )
+        )
+
+        try:
+            temp.set_marker(databundle.marker)
+        except ValueError:
+            with contextlib.suppress(Exception):
+                temp.set_marker(int(databundle.marker))
+
+        self._active_curves.append(temp)
+        self._backup_curves.append([temp.get_xdata(), temp.get_ydata()])
+        self.height_max = max(self.height_max, temp.get_ydata().max())
+        self.length_max = max(self.length_max, temp.get_xdata().max())
