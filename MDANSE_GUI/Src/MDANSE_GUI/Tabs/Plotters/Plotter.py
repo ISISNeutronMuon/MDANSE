@@ -18,6 +18,7 @@ from __future__ import annotations
 import copy
 import csv
 import enum
+import math
 from itertools import count
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, TextIO
 
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from matplotlib.axes import Axes
+    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from matplotlib.figure import Figure
     from matplotlib.lines import Line2D
 
@@ -101,6 +103,12 @@ class Plotter(RegisterFactory):
     """Parent class to all classes used for displaying data."""
 
     registry: ClassVar[UCDict[str, type[Plotter]]] = UCDict()
+
+    GRID_SIZES = {
+        2: (2, 1),
+        5: (2, 3),
+        6: (2, 3),
+    }
 
     def __init__(self) -> None:
         """Create defaults common to all plotters."""
@@ -287,20 +295,20 @@ class Plotter(RegisterFactory):
         plotting_context: PlottingContext,
         figure: Figure | None = None,
         update_only: bool = False,
-        toolbar=None,
+        toolbar: Toolbar | None = None,
     ):
         """Plot the selected data in the figure.
 
         Parameters
         ----------
         plotting_context : PlottingContext
-            Data model storing the data to be plotted
+            Data model storing the data to be plotted.
         figure : Figure, optional
-            Matplotlib figure instance for plotting, by default None
+            Matplotlib figure instance for plotting, by default None.
         update_only : bool, optional
-            If true, try to re-use zoom settings, by default False
-        toolbar : _type_, optional
-            GUI instance of the matplotlib toolbar, by default None
+            If true, try to re-use zoom settings, by default False.
+        toolbar : Toolbar, optional
+            GUI instance of the matplotlib toolbar, by default None.
 
         """
         LOG.info(f"normalisation errors {self._normalisation_errors}, setting to []")
@@ -456,3 +464,19 @@ class Plotter(RegisterFactory):
             Each line in dataset.
         """
         yield from axis.get_lines()
+
+    @classmethod
+    def grid_size(cls, n_plots: int) -> tuple[int, int]:
+        """Get a good grid layout for plotting.
+
+        Parameters
+        ----------
+        n_plots : int
+            Number of expected plots.
+
+        Returns
+        -------
+        tuple[int, int]
+            Grid size.
+        """
+        return cls.GRID_SIZES.get(n_plots, (math.ceil(n_plots**0.5),) * 2)

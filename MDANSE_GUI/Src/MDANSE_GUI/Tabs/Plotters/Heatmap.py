@@ -26,25 +26,18 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from matplotlib.pyplot import colorbar as mpl_colorbar
-from more_itertools import first, ilen, locate
+from more_itertools import ilen
 from scipy.interpolate import interp1d
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
+    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from matplotlib.figure import Figure
     from matplotlib.image import AxesImage
 
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
-
-
-GRID_SIZES = {
-    2: (2, 1),
-    5: (2, 3),
-    6: (2, 3),
-}
 
 
 @Plotter.register("Heatmap")
@@ -170,20 +163,20 @@ class Heatmap(Plotter):
         plotting_context: PlottingContext,
         figure: Figure | None = None,
         update_only: bool = False,
-        toolbar=None,
+        toolbar: Toolbar | None = None,
     ):
         """Plot the first dataset as a heatmap.
 
         Parameters
         ----------
         plotting_context : PlottingContext
-            Data model storing the data to be plotted
+            Data model storing the data to be plotted.
         figure : Figure, optional
-            Matplotlib figure instance for plotting, by default None
+            Matplotlib figure instance for plotting, by default None.
         update_only : bool, optional
-            If true, try to re-use zoom settings, by default False
-        toolbar : _type_, optional
-            GUI instance of the matplotlib toolbar, by default None
+            If true, try to re-use zoom settings, by default False.
+        toolbar : Toolbar, optional
+            GUI instance of the matplotlib toolbar, by default None.
         """
         self.enable_slider(allow_slider=True)
         target = self.get_figure(figure)
@@ -194,6 +187,7 @@ class Heatmap(Plotter):
             self._toolbar = toolbar
 
         self._figure = target
+        self._figure.set_layout_engine(layout="constrained")
         self._current_x_axes = []
         minmax_bak = {key: val.minmax for key, val in self._backup.items()}
         scale_interpolators = {val.ind: val.interp for val in self._backup.values()}
@@ -205,15 +199,11 @@ class Heatmap(Plotter):
             LOG.debug("Axis check failed.")
             return
 
-        def get_planes() -> Iterator[tuple[PlotArgs, str, np.ndarray]]:
-            for databundle in plotting_context.datasets().values():
-                ds = databundle.dataset
+        nplots = min(ilen(plotting_context.planes(self._slice_axis)), self._plot_limit)
 
-                for label, plane in ds.planes_vs_axis(
-                    ds.main_axis_index(databundle.main_axis, default=self._slice_axis),
-                    max_limit=self._plot_limit,
-                ):
-                    yield databundle, label, plane
+        if not nplots:
+            self.plot_blank()
+            return
 
         # Check interpolators
         for databundle in plotting_context.datasets().values():
@@ -229,11 +219,11 @@ class Heatmap(Plotter):
                     results,
                 )
 
-        nplots = min(ilen(get_planes()), self._plot_limit)
-        gridsize = GRID_SIZES.get(nplots, (math.ceil(nplots**0.5),) * 2)
+        grid_size = self.grid_size(nplots)
+        gs = self._figure.add_gridspec(*grid_size)
 
         for ind, (databundle, label, plane) in enumerate(
-            islice(get_planes(), self._plot_limit),
+            islice(plotting_context.planes(self._slice_axis), self._plot_limit),
         ):
             dataset = databundle.dataset
             limits = []
@@ -345,6 +335,9 @@ class Heatmap(Plotter):
             legend = axes.legend()
             legend.set_visible(plotting_context.use_legend)
             axes.grid(plotting_context.use_grid)
+
+        if nplots == 1:  # Exploit label from loop for one plot
+            self._figure.suptitle(label)
 
         self.check_curve_lengths()
         self.request_slider_values()

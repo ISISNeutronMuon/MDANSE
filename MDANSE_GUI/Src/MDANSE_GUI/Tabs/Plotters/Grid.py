@@ -21,14 +21,19 @@ from itertools import islice
 from typing import TYPE_CHECKING, Any
 
 from matplotlib import rcParams
+from more_itertools import ilen
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
+    import numpy as np
+    from matplotlib.axes import Axes
+    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from matplotlib.figure import Figure
+    from matplotlib.lines import Line2D
 
-    from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
+    from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs, PlottingContext
 
 
 @Plotter.register("Grid")
@@ -70,20 +75,21 @@ class Grid(Plotter):
         """
         super().change_normalisation(new_value)
         target = self._figure
-        if target is None:
+        if target is None or not self._active_curves:
             return
-        if len(self._active_curves) == 0:
-            return
+
         for curve_index, curve in enumerate(self._active_curves):
-            xdata = self._backup_curves[curve_index][0]
-            ydata = self._backup_curves[curve_index][1]
+            xdata, ydata = self._backup_curves[curve_index]
             xdata, ydata = self.normalise_curve(xdata, ydata)
             curve.set_xdata(xdata)
             curve.set_ydata(ydata)
+
         target.canvas.draw()
+
         for axes in self._axes:
             axes.relim()
             axes.autoscale()
+
         if self._toolbar is not None:
             self._toolbar.update()
             self._toolbar.push_current()
@@ -110,33 +116,37 @@ class Grid(Plotter):
     def plot(
         self,
         plotting_context: PlottingContext,
-        figure: Figure = None,
-        update_only=False,
-        toolbar=None,
+        figure: Figure | None = None,
+        update_only: bool = False,
+        toolbar: Toolbar | None = None,
     ):
         """Plot datasets in separate subplots.
 
         Parameters
         ----------
         plotting_context : PlottingContext
-            Data model storing the data to be plotted
+            Data model storing the data to be plotted.
         figure : Figure, optional
-            Matplotlib figure instance for plotting, by default None
+            Matplotlib figure instance for plotting, by default None.
         update_only : bool, optional
-            If true, try to re-use zoom settings, by default False
-        toolbar : _type_, optional
-            GUI instance of the matplotlib toolbar, by default None
+            If true, try to re-use zoom settings, by default False.
+        toolbar : Toolbar, optional
+            GUI instance of the matplotlib toolbar, by default None.
 
         """
         self.enable_slider(allow_slider=False)
         target = self.get_figure(figure)
+
         if target is None:
             return
+
         if toolbar is not None:
             self._toolbar = toolbar
+
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
+
         self._figure = target
         self._axes = []
         self._axes_titles = []
@@ -209,9 +219,75 @@ class Grid(Plotter):
         if counter == 0:
             self.plot_blank()
             return
+
+        gridsize = self.grid_size(nplots)
+
+        for ind, (databundle, label, curve) in enumerate(
+            islice(plotting_context.curves(), self._plot_limit), 1
+        ):
+            axes = target.add_subplot(*gridsize, ind)
+            self._plot_single(
+                axes,
+                curve,
+                databundle,
+                label=label,
+                colour=databundle.colour,
+            )
+
+            if plotting_context.use_legend:
+                axes.legend()
+            axes.grid(plotting_context.use_grid)
+
         self.apply_settings(plotting_context)
         self.check_curve_lengths()
         target.canvas.draw()
+
         if self._toolbar is not None:
             self._toolbar.update()
             self._toolbar.push_current()
+
+    def _plot_single(
+        self,
+        axes: Axes,
+        curve: tuple[np.ndarray, np.ndarray] | tuple[np.ndarray],
+        databundle: PlotArgs,
+        *,
+        label: str,
+        colour: tuple[float, float, float],
+    ):
+        """Plot a single curve to axes.
+
+        Parameters
+        ----------
+        axes : Axes
+            Axis to plot to.
+        curve : tuple[np.ndarray, np.ndarray] | tuple[np.ndarray]
+            Curve to plot.
+        databundle : PlotArgs
+            Data to plot.
+        label : str
+            Plot label.
+        colour : tuple[float, float, float]
+            Curve colour.
+        """
+        lines: list[Line2D] = axes.plot(
+            *curve,
+            linestyle=databundle.line_style,
+            label=label,
+            color=colour,
+        )
+
+        axes.set_xlabel(databundle.dataset.x_axis_label(databundle.main_axis))
+
+        for line in lines:
+            try:
+                line.set_marker(databundle.marker)
+            except ValueError:
+                with contextlib.suppress(Exception):
+                    line.set_marker(int(databundle.marker))
+
+        self._axes.append(axes)
+        self._active_curves.extend(lines)
+        self._backup_curves.extend(
+            (line.get_xdata(), line.get_ydata()) for line in lines
+        )

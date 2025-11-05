@@ -96,8 +96,6 @@ class SingleDataset:
     ):
         self._name = name
         self._use_scaling = True
-        self._curves: dict[tuple[int, ...], FloatArray] = {}
-        self._curve_labels: dict[tuple[int, ...], str] = {}
         self._linestyle = linestyle
         self._marker = marker
         self._data_limits = None
@@ -527,7 +525,9 @@ class SingleDataset:
         """
         if self._n_dim < 2:
             return ""
+
         label = "at "
+
         for axis_index, axis_name in enumerate(axis_lookup):
             axis_label = self.axis_true_name(axis_name)
 
@@ -557,6 +557,16 @@ class SingleDataset:
                 return float(picked_value)
         return label.rstrip(", ")
 
+    def curve_ind(self, limits: int | None = None, /):
+        """Get indices of valid axes.
+
+        Parameters
+        ----------
+        limits : int
+            Max number of curves to return.
+        """
+        return islice(self._data_limits, limits)
+
     def curves_vs_axis(
         self,
         x_axis_details: tuple[str, str],
@@ -568,8 +578,8 @@ class SingleDataset:
 
         Parameters
         ----------
-        x_axis_details : tuple[str, str]
-            Name and original unit of the primary plotting axis
+        main_axis : str
+            Name and original unit of the primary plotting axis.
         max_limit : int, optional
             Maximum number of curves allowed by plotter, by default 1
         skip_label_text: bool, optional
@@ -580,17 +590,22 @@ class SingleDataset:
         dict[int, FloatArray]
             List of data arrays ready for plotting
 
+        Yields
+        ------
+        str
+            Plot label.
+        np.ndarray
+            x-axis.
+        np.ndarray
+            Curve to plot.
         """
-        self._curves = {}
-        self._curve_labels = {}
+        x_axis = self.x_axis(main_axis)
 
         if self._data.ndim == 1:
-            self._curves[(0,)] = self.data
-            self._curve_labels[(0,)] = ""
-            return self.data
+            yield None, (x_axis, self.data)
+            return
 
         data_shape = self._data.shape
-        x_axis_unit, x_axis_name = x_axis_details
         slicer = []
         indexer = []
         label_lookup = []
@@ -600,8 +615,7 @@ class SingleDataset:
             raise ValueError("Array shape does not match the order of the axes")
 
         for current_dim, axis_name in enumerate(self._axes_order):
-            axis_unit = self._axes_units[axis_name]
-            if axis_unit == x_axis_unit and axis_name == x_axis_name:
+            if axis_name == main_axis:
                 slicer.append([slice(None)])
                 continue
 
@@ -612,13 +626,16 @@ class SingleDataset:
 
         if not indexer:
             LOG.warning("Empty selection for data set %s", self._name)
-            return self._curves
+            return
 
         for index in self.curve_ind(max_limit):
             try:
                 index_tuple = nth_product(index, *indexer)
                 index_slicer = nth_product(index, *slicer)
-                self._curves[index_tuple] = self.data[index_slicer].squeeze()
+                yield (
+                    self.generate_curve_label(index_tuple, label_lookup),
+                    (x_axis, self.data[index_slicer].squeeze()),
+                )
             except IndexError:
                 LOG.warning(
                     "Skipping: in dataset %s, index %s is out of bounds",
@@ -659,8 +676,6 @@ class SingleDataset:
         ----------
         axis_number : int
             index of the axis perpendicular to the plotted array
-        max_limit : int, optional
-            Maximum number of curves allowed by plotter, by default 1
 
         Yields
         ------
@@ -760,7 +775,9 @@ class PlottingContext(QStandardItemModel):
 
     needs_an_update = Signal("quint64")
 
-    def __init__(self, *args, unit_lookup=None, **kwargs):
+    def __init__(
+        self, *args, unit_lookup: int | None = None, colormap: str = "viridis", **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self._datasets = {}
         self._current_axis = [None, None, None]
@@ -771,13 +788,14 @@ class PlottingContext(QStandardItemModel):
         self._best_xunits = []
         self._colour_list = get_mpl_colours()
         self._last_colour_list = get_mpl_colours()
-        self._colour_map = kwargs.get("colormap", "viridis")
+        self._colour_map = colormap
         self._last_colour = 0
         self._unit_lookup = unit_lookup
         self.plot_widget_id = -1
         self.use_legend = True
         self.use_grid = True
         self.setHorizontalHeaderLabels(plotting_column_labels)
+        self.itemChanged.connect(self.ask_for_update)
 
     def generate_colour(self, number: int) -> str:
         """Get the matplotlib colour string for the nth curve.
@@ -923,7 +941,15 @@ class PlottingContext(QStandardItemModel):
 
             self._datasets[key].set_data_limits(data_number_string, main_axis=main_axis)
             self._datasets[key].set_current_units(self._unit_lookup)
-            result[key] = PlotArgs(self._datasets[key], **plot_args)
+            result[key] = PlotArgs(
+                dataset=self._datasets[key],
+                colour=row_data["Colour"].text(),
+                line_style=row_data["Line style"].text(),
+                marker=row_data["Marker"].text(),
+                row=row,
+                main_axis=row_data["Main axis"].text(),
+                legend_label=row_data["Legend label"].text(),
+            )
 
         return result
 
@@ -950,7 +976,7 @@ class PlottingContext(QStandardItemModel):
         self._datasets[newkey] = new_dataset
         items = [
             QStandardItem(str(x))
-            for x in [
+            for x in (
                 new_dataset._name,
                 getattr(optional_values, "legend_label", new_dataset._labels["medium"]),
                 new_dataset._data_shape,
@@ -966,7 +992,7 @@ class PlottingContext(QStandardItemModel):
                     new_dataset._scaling_factor, show=1, arr_fmt=SCALE_FACTOR_FORMAT
                 ),
                 new_dataset._filename,
-            ]
+            )
         ]
 
         fixed = {"Dataset", "Trajectory", "Size", "Unit", "Apply scaling?"}
@@ -987,8 +1013,6 @@ class PlottingContext(QStandardItemModel):
         items[plotting_column_index["Use it?"]].setText(
             f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1",
         )
-
-        self.itemChanged.connect(self.ask_for_update)
 
         temp = items[plotting_column_index["Colour"]]
         temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
@@ -1043,3 +1067,28 @@ class PlottingContext(QStandardItemModel):
         dkey = index.data(role=Qt.ItemDataRole.UserRole)
         self.removeRow(index.row())
         self._datasets.pop(dkey, None)
+
+    def planes(
+        self, default_axis: int = 0, planes_per_dataset: int | None = None
+    ) -> Generator[tuple[PlotArgs, str, np.ndarray]]:
+        for databundle in self.datasets().values():
+            ds = databundle.dataset
+
+            for label, plane in islice(
+                ds.planes_vs_axis(
+                    ds.main_axis_index(databundle.main_axis, default=default_axis)
+                ),
+                planes_per_dataset,
+            ):
+                yield databundle, label, plane
+
+    def curves(
+        self, curves_per_dataset: int | None = None
+    ) -> Generator[tuple[PlotArgs, str, np.ndarray]]:
+        for databundle in self.datasets().values():
+            ds = databundle.dataset
+
+            for label, curve in islice(
+                ds.curves_vs_axis(databundle.main_axis), curves_per_dataset
+            ):
+                yield databundle, label, curve

@@ -29,6 +29,7 @@ from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from qtpy.QtWidgets import QTextBrowser
 
     from MDANSE_GUI.Tabs.Models.PlottingContext import (
@@ -501,9 +502,9 @@ class Text(Plotter):
         self,
         plotting_context: PlottingContext,
         figure: QTextBrowser = None,
-        colours=None,
-        update_only=False,
-        toolbar=None,
+        colours: None = None,
+        update_only: bool = False,
+        toolbar: Toolbar | None = None,
     ):
         """Show data as text.
 
@@ -516,12 +517,12 @@ class Text(Plotter):
             Data model containing the data sets to be shown
         figure : QTextBrowser, optional
             Target widget, an instance of QTextBrowser
-        colours : _type_, optional
-            ignored here
+        colours : None, optional
+            Ignored here
         update_only : bool, optional
-            ignored
-        toolbar : _type_, optional
-            ignored
+            Ignored
+        toolbar : Toolbar, optional
+            Ignored.
 
         """
         target = self.get_figure(figure)

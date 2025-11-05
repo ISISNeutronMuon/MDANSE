@@ -25,6 +25,7 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
+    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from matplotlib.figure import Figure
 
     from MDANSE.util_types import FloatArray
@@ -78,7 +79,7 @@ class Vectors(Plotter):
         Parameters
         ----------
         new_value : dict[str, Any]
-            parameters as in NORMALISATION_DEFAULTS
+            Parameters as in NORMALISATION_DEFAULTS.
 
         """
         super().change_normalisation(new_value)
@@ -88,20 +89,20 @@ class Vectors(Plotter):
         plotting_context: PlottingContext,
         figure: Figure | None = None,
         update_only: bool = False,
-        toolbar: type | None = None,
+        toolbar: Toolbar | None = None,
     ):
         """Plot all datasets in the same figure.
 
         Parameters
         ----------
         plotting_context : PlottingContext
-            Data model storing the data to be plotted
+            Data model storing the data to be plotted.
         figure : Figure, optional
-            Matplotlib figure instance for plotting, by default None
+            Matplotlib figure instance for plotting, by default None.
         update_only : bool, optional
-            If true, try to re-use zoom settings, by default False
-        toolbar : _type_, optional
-            GUI instance of the matplotlib toolbar, by default None
+            If true, try to re-use zoom settings, by default False.
+        toolbar : Toolbar, optional
+            GUI instance of the matplotlib toolbar, by default None.
 
         """
         self.enable_slider(allow_slider=False)
@@ -109,6 +110,7 @@ class Vectors(Plotter):
 
         if target is None:
             return
+
         if toolbar is not None:
             self._toolbar = toolbar
 
@@ -116,6 +118,7 @@ class Vectors(Plotter):
         self._normalisation_errors = []
         self._axes = []
         self.apply_settings(plotting_context)
+
         x_axis_labels = []
 
         if plotting_context.set_axes() is None:
@@ -142,8 +145,10 @@ class Vectors(Plotter):
                 )
             except KeyError:
                 best_unit, best_axis = dataset.longest_axis()
+
             plotlabel = databundle.legend_label
             x_axis_labels.append(dataset.x_axis_label(best_axis))
+
             if dataset._name == "Available vectors":
                 axes = target.add_subplot(single_plot_stack.pop())
                 if dataset._n_dim == 2:
@@ -185,6 +190,7 @@ class Vectors(Plotter):
                 self._axes.append(axes)
                 axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
                 axes.set_title(dataset._name)
+
             elif dataset._name == "Shell population":
                 axes = target.add_subplot(212)
                 multi_curves = dataset.curves_vs_axis(
@@ -271,12 +277,15 @@ class Vectors(Plotter):
                     ylimits[0],
                     ylimits[1],
                 ]
+
         for axes in self._axes:
             legend = axes.legend()
             legend.set_visible(plotting_context.use_legend)
             axes.grid(plotting_context.use_grid)
             axes.relim()
             axes.autoscale()
+
         if self._toolbar is not None:
             self._toolbar.update()
+
         target.canvas.draw()
