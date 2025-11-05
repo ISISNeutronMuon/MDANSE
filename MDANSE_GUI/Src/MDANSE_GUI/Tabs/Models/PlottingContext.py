@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import copy
 import functools
+from collections.abc import Generator, Iterable, Sequence
 from contextlib import suppress
 from itertools import islice
 from math import prod
@@ -31,7 +32,7 @@ from matplotlib import rcParams
 from matplotlib.colors import to_hex as mpl_to_hex
 from matplotlib.lines import lineStyles
 from matplotlib.markers import MarkerStyle
-from more_itertools import nth_product
+from more_itertools import first, locate, nth, nth_product, sort_together, unzip
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 
@@ -99,9 +100,7 @@ class SingleDataset:
         self._curve_labels: dict[tuple[int, ...], str] = {}
         self._linestyle = linestyle
         self._marker = marker
-        self._planes: dict[int, FloatArray] = {}
-        self._plane_labels: dict[int, str] = {}
-        self._data_limits: list[int] | None = None
+        self._data_limits = None
         self._imaginary_data = None
         self._valid = True
         self._scaling_factor = 1.0
@@ -237,11 +236,11 @@ class SingleDataset:
                 self._axes_order.append(axis_key)
                 self._axes_scaling[axis_key] = 1.0
                 self._current_units[axis_key] = self._axes_units[axis_key]
-            self._axes_tag = "|".join([str(x) for x in self._axes])
+            self._axes_tag = "|".join(str(x) for x in self._axes)
             return
 
         for axis_key, axis_array in plot_axes.items():
-            self._axes_tag = "|".join([str(x) for x in plot_axes])
+            self._axes_tag = "|".join(str(x) for x in plot_axes)
             self._axes[axis_key] = axis_array
             self._axes_units[axis_key] = (
                 "N/A" if axes_units is None else axes_units[axis_key]
@@ -266,9 +265,11 @@ class SingleDataset:
                 self._axes[f"index{dim_number}"] = np.arange(dim_length)
                 self._axes_units[f"index{dim_number}"] = "N/A"
             return
+
         self._current_units = {}
         self._axes_scaling = {}
         self._axes_order = []
+
         for ax_number, axis_name in enumerate(axes_tag.split("|")):
             aname = axis_name.strip()
             if aname == "index":
@@ -326,6 +327,7 @@ class SingleDataset:
         """Update the unit based on the unit lookup of the PlottingContext."""
         if unit_lookup is None:
             return
+
         for axis_name, axis_unit in self._axes_units.items():
             factor, new_unit = unit_lookup.conversion_factor(axis_unit)
             self._axes_scaling[axis_name] = factor
@@ -633,7 +635,13 @@ class SingleDataset:
         return self._curves
 
     def curve_ind(self, limits: int, /) -> Iterator[int]:
-        """Return a generator of indices indexing only the curves within the limits."""
+        """Return a generator of indices indexing only the curves within the limits.
+
+        Parameters
+        ----------
+        limits : int
+            Max number of curves to return.
+        """
         return (
             islice(self._data_limits, limits)
             if self._data_limits is not None
@@ -644,7 +652,7 @@ class SingleDataset:
         self,
         axis_number: int,
         max_limit: int = 1,
-    ) -> list[FloatArray] | FloatArray | None:
+    ) -> Generator[tuple[str, FloatArray]]:
         """Prepare for plotting 2D subsets of an ND array.
 
         Parameters
@@ -652,49 +660,81 @@ class SingleDataset:
         axis_number : int
             index of the axis perpendicular to the plotted array
         max_limit : int, optional
-            maximum number of planes allowed by plotter, by default 1
+            Maximum number of curves allowed by plotter, by default 1
+
+        Yields
+        ------
+        str
+            Grid label.
+        np.ndarray
+            2D array.
+
+        """
+        match self._data.ndim:
+            case 1:
+                pass
+            case 2:
+                if axis_number == 1:
+                    yield self._labels["medium"], self.data.T
+                else:
+                    yield self._labels["medium"], self.data
+            case 3:
+                perpendicular_axis_name, perpendicular_axis = nth(
+                    self._axes.items(), axis_number
+                )
+
+                reordered_view = np.moveaxis(self.data, axis_number, 0)
+
+                for plane_number in self.curve_ind(max_limit):
+                    yield (
+                        f"{self._labels['minimal']}:{perpendicular_axis_name}={perpendicular_axis[plane_number]}",
+                        reordered_view[plane_number],
+                    )
+            case _:
+                raise NotImplementedError(
+                    f"Cannot handle {self._data.ndim}-dimensional data."
+                )
+
+    def main_axis_index(self, main_axis: str, *, default: int) -> int:
+        """Find index of main axis.
+
+        Parameters
+        ----------
+        main_axis : str
+            Main axis name to search for.
+        default : int
+            Index if ``main_axis`` not found.
 
         Returns
         -------
-        list[FloatArray]
-            List of 2D arrays for heatmap plots
-
+        int
+            Index of main axis.
         """
-        self._planes = {}
-        self._plane_labels = {}
-        _found = -1
-        total_ndim = self._data.ndim
+        return first(locate(self._axes, pred=lambda x: x == main_axis), default)
 
-        if total_ndim == 1:
-            return None
-        if total_ndim == 2:
-            return self.data
+    def axes_main_order(
+        self, main_axis: str | None = None, ind: int | None = None
+    ) -> Sequence[str]:
+        """Return axis keys with ``main_axis`` first then the others.
 
-        data_shape = self._data.shape
-        number_of_planes = data_shape[axis_number]
-        perpendicular_axis = None
-        perpendicular_axis_name = ""
-        slice_def = []
+        Parameters
+        ----------
+        main_axis : str, optional
+            Name of main axis to move to front.
+        ind : int, optional
+            Main axis by index (if `main_axis` not found).
 
-        for number, (axis_name, axis_array) in enumerate(self._axes.items()):
-            if number == axis_number:
-                slice_def.append(0)
-                perpendicular_axis = axis_array
-                perpendicular_axis_name = self.axis_true_name(axis_name)
-            else:
-                slice_def.append(slice(None))
-
-        for plane_number in self.curve_ind(max_limit):
-            if plane_number >= number_of_planes:
-                break
-            fixed_argument = perpendicular_axis[plane_number]
-            slice_def[axis_number] = plane_number
-            self._planes[plane_number] = self.data[tuple(slice_def)]
-            self._plane_labels[plane_number] = (
-                f"{perpendicular_axis_name}={fixed_argument}"
-            )
-
-        return None
+        Returns
+        -------
+        Sequence[str]
+            Reordered axes.
+        """
+        main_ind = self.main_axis_index(main_axis, default=ind)
+        return sort_together(
+            unzip(enumerate(self._axes)),
+            key=lambda x: x == main_ind,
+            reverse=True,
+        )[1]
 
 
 plotting_column_labels = [

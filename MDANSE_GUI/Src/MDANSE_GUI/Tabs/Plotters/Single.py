@@ -16,12 +16,12 @@
 from __future__ import annotations
 
 import contextlib
+from collections.abc import Generator
 from itertools import islice
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from matplotlib.colors import to_rgb
-from more_itertools import one
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
@@ -43,19 +43,19 @@ class Single(Plotter):
         super().__init__()
         self._figure = None
         self._active_curves: list[Line2D] = []
-        self._backup_curves: list[Line2D] = []
+        self._backup_curves: list[tuple[np.ndarray, np.ndarray]] = []
         self._backup_limits = []
         self._curve_limit_per_dataset = 12
         self.height_max, self.length_max = 0.0, 0.0
 
-    def clear(self, figure: Figure = None):
+    def clear(self, figure: Figure | None = None):
         """Clear the figure."""
         target = self._figure if figure is None else figure
         if target is None:
             return
         target.clear()
 
-    def get_figure(self, figure: Figure = None):
+    def get_figure(self, figure: Figure | None = None):
         """Return the figure instance used for plotting."""
         target = self._figure if figure is None else figure
         if target is None:
@@ -84,7 +84,6 @@ class Single(Plotter):
         ----------
         new_value : dict[str, Any]
             Parameters as in NORMALISATION_DEFAULTS.
-
         """
         super().change_normalisation(new_value)
         self.offset_curves()
@@ -99,8 +98,7 @@ class Single(Plotter):
         saved_xmin, saved_xmax, saved_ymin, saved_ymax = self._backup_limits
 
         for num, curve in enumerate(self._active_curves):
-            xdata = self._backup_curves[num][0]
-            ydata = self._backup_curves[num][1]
+            xdata, ydata = self._backup_curves[num]
             xdata, ydata = self.normalise_curve(xdata, ydata)
             new_xdata = xdata + num * self.length_max * new_value[1]
             new_ydata = ydata + num * self.height_max * new_value[0]
@@ -145,7 +143,7 @@ class Single(Plotter):
     def plot(
         self,
         plotting_context: PlottingContext,
-        figure: Figure = None,
+        figure: Figure | None = None,
         update_only: bool = False,
         toolbar=None,
     ):
@@ -232,9 +230,9 @@ class Single(Plotter):
                 multi_curves = dataset.curves_vs_axis(
                     (best_unit, best_axis), max_limit=self._curve_limit_per_dataset
                 )
-                main_colour = np.array(to_rgb(databundle.colour))
-                colour_increment = (0.5 - main_colour) / min(
-                    self._curve_limit_per_dataset, len(multi_curves)
+                colours = self.colours(
+                    databundle.colour,
+                    min(self._curve_limit_per_dataset, len(multi_curves)),
                 )
 
                 for key, value in islice(
@@ -246,7 +244,7 @@ class Single(Plotter):
                             databundle,
                             best_axis,
                             label=f"{plotlabel}:{dataset._curve_labels[key]}",
-                            colour=tuple(main_colour),
+                            colour=next(colours),
                         )
                         try:
                             temp.set_marker(databundle.marker)
@@ -266,7 +264,6 @@ class Single(Plotter):
                         LOG.error(f"x_axis={dataset._axes[best_axis]}")
                         LOG.error(f"values={value}")
                         return
-                    main_colour += colour_increment
 
         if len(self._backup_curves) > 1:
             self.enable_slider(allow_slider=True)
@@ -300,6 +297,26 @@ class Single(Plotter):
         self.check_curve_lengths()
         self.offset_curves()
 
+    @staticmethod
+    def colours(colour: str, n_curves: int) -> Generator[tuple[float, float, float]]:
+        """Generate colours from root colour.
+
+        Parameters
+        ----------
+        colour : str
+            Root colour.
+
+        Returns
+        -------
+        Generator[tuple[float, float, float]]
+            Next colour in sequence.
+        """
+        main_colour = np.array(to_rgb(colour))
+        colour_increment = (0.5 - main_colour) / n_curves
+        for _ in range(n_curves):
+            main_colour += colour_increment
+            yield tuple(main_colour)
+
     def _plot_single(
         self,
         axes: Axes,
@@ -315,8 +332,8 @@ class Single(Plotter):
         ----------
         axes : Axes
             Axis to plot to.
-        databundle : FIXME: Add type.
-            FIXME: Add docs.
+        databundle : PlotArgs
+            Data to plot.
         best_axis : str
             Axis label of X-axis.
         label : str
@@ -324,23 +341,25 @@ class Single(Plotter):
         colour : FIXME: Add type.
             Curve colour.
         """
-        temp: Line2D = one(
-            axes.plot(
-                databundle.dataset.x_axis(best_axis),
-                databundle.dataset.data,
-                linestyle=databundle.line_style,
-                label=databundle.legend_label,
-                color=databundle.colour,
-            )
+        lines: list[Line2D] = axes.plot(
+            databundle.dataset.x_axis(best_axis),
+            databundle.dataset.data,
+            linestyle=databundle.line_style,
+            label=label,
+            color=colour,
         )
 
-        try:
-            temp.set_marker(databundle.marker)
-        except ValueError:
-            with contextlib.suppress(Exception):
-                temp.set_marker(int(databundle.marker))
+        for line in lines:
+            try:
+                line.set_marker(databundle.marker)
+            except ValueError:
+                with contextlib.suppress(Exception):
+                    line.set_marker(int(databundle.marker))
 
-        self._active_curves.append(temp)
-        self._backup_curves.append([temp.get_xdata(), temp.get_ydata()])
-        self.height_max = max(self.height_max, temp.get_ydata().max())
-        self.length_max = max(self.length_max, temp.get_xdata().max())
+            self.height_max = max(self.height_max, line.get_ydata().max())
+            self.length_max = max(self.length_max, line.get_xdata().max())
+
+        self._active_curves.extend(lines)
+        self._backup_curves.extend(
+            (line.get_xdata(), line.get_ydata()) for line in lines
+        )
