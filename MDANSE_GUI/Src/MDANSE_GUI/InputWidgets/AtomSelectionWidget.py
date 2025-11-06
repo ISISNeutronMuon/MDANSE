@@ -193,6 +193,17 @@ class SelectionModel(QStandardItemModel):
         )
 
     @Slot()
+    def atom_clicked_undo(self):
+        self.can_redo.emit(False)
+        if len(self._clicked_atoms) <= 1:
+            self.clear_manual_selection()
+        else:
+            self._clicked_atoms.pop()
+            self._manual_selection_item.setText(
+                f"Manual selection IN PROGRESS: clicked on {self._clicked_atoms}",
+            )
+
+    @Slot()
     def clear_manual_selection(self):
         """Remove the placeholder item from the end of the list, clear clicked atoms."""
         if not self._clicked_atoms:
@@ -327,10 +338,10 @@ class SelectionHelper(QDialog):
         self.selection_textbox = QPlainTextEdit()
         self.selection_textbox.setReadOnly(True)
 
-        mol_view = MolecularViewerWithPicking()
-        mol_view.clicked_atom_index.connect(self.update_from_3d_view)
-        mol_view.picked_atoms_changed.connect(self.update_picked_atom_count)
-        self.view_3d = View3D(mol_view)
+        self.mol_view = MolecularViewerWithPicking()
+        self.mol_view.clicked_atom_index.connect(self.update_from_3d_view)
+        self.mol_view.picked_atoms_changed.connect(self.update_picked_atom_count)
+        self.view_3d = View3D(self.mol_view)
         self.view_3d.update_panel(traj_data)
 
         layouts = self.create_layouts()
@@ -510,9 +521,10 @@ class SelectionHelper(QDialog):
 
     @Slot()
     def undo_manual_selection(self):
-        """Remove all atoms (de)selected in the most recent manual selection."""
-        self.selection_model.clear_manual_selection()
-        self.recalculate_selection()
+        if len(self.selection_model._clicked_atoms) > 0:
+            idx = self.selection_model._clicked_atoms[-1]
+            self.mol_view.pick_atom(idx)
+        self.selection_model.atom_clicked_undo()
 
     @Slot()
     def recalculate_selection(self):

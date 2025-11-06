@@ -1211,25 +1211,21 @@ class MolecularViewerWithPicking(MolecularViewer):
         picked_pos = np.array(picker.GetPickPosition())
         coords = self._reader.read_frame(self._current_frame)
         _, idx = KDTree(coords).query(picked_pos)
-        self.on_pick_atom(idx)
 
-    def on_pick_atom(self, picked_atom):
-        """Change the color of a selected atom"""
-        if self._reader is None:
+        if idx < 0 or idx >= self._n_atoms:
             return
 
-        if picked_atom < 0 or picked_atom >= self._n_atoms:
-            return
+        self.clicked_atom_index.emit(idx)
+        self.pick_atom(idx)
+        self.picked_atoms_changed.emit(self.picked_atoms)
 
-        self.clicked_atom_index.emit(picked_atom)
+    def pick_atom(self, picked_atom):
         if picked_atom in self.picked_atoms:
             self.picked_atoms.remove(picked_atom)
         else:
             self.picked_atoms.add(picked_atom)
-
         self.update_picked_polydata()
         self.update_renderer()
-        self.picked_atoms_changed.emit(self.picked_atoms)
 
     def change_picked(self, picked: set[int]):
         self.picked_atoms = picked
