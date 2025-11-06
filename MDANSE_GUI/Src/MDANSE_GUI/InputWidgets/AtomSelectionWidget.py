@@ -19,7 +19,7 @@ import json
 from enum import Enum
 from pathlib import Path
 
-from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtCore import QEvent, QObject, Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
     QDialog,
@@ -292,6 +292,13 @@ class SelectionHelper(QDialog):
         self.all_selection = True
         self.selected = set()
         self.reset()
+
+    def event(self, a1: QEvent | None) -> bool:
+        if a1.type() == QEvent.WindowDeactivate:
+            # finalise manual selection if the user moves away from the
+            # selection helper
+            self.selection_model.finalise_manual_selection()
+        return super().event(a1)
 
     def closeEvent(self, a0):
         """Hide the window instead of closing.
