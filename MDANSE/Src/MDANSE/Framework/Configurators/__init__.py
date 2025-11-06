@@ -96,6 +96,7 @@ from .OptionalFloatConfigurator import (
     OptionalFloatConfigurator as OptionalFloatConfigurator,
 )
 from .OutputFilesConfigurator import OutputFilesConfigurator as OutputFilesConfigurator
+from .OutputSqwConfigurator import OutputSqwConfigurator as OutputSqwConfigurator
 from .OutputStructureConfigurator import (
     OutputStructureConfigurator as OutputStructureConfigurator,
 )
