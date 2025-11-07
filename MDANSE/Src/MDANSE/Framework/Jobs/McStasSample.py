@@ -62,6 +62,12 @@ def symmetrise_array(input_array: npt.NDArray[float]) -> npt.NDArray[float]:
     return (input_array[half_len:0:-1] + input_array[-half_len:]) / 2
 
 
+def symmetrise_axis(input_array: npt.NDArray[float]) -> npt.NDArray[float]:
+    total_len = len(input_array)
+    half_len = total_len // 2 + 1 if total_len % 2 else total_len // 2
+    return np.abs((-input_array[half_len - 1 :: -1] + input_array[-half_len:]) / 2)
+
+
 def create_header(par: SystemParameters, arr: ResultParameters):
     return f"""# Format: Sqw data file for Isotropic_Sqw <http://www.mcstas.org>
 # {par.system_name}
@@ -79,7 +85,7 @@ def create_header(par: SystemParameters, arr: ResultParameters):
 # ylabel: Energy [meV]
 #
 # Physical parameters:
-# Comment       MDANSE calculation of the {par.coh_or_inc} part of S(q,w)
+# Comment       MDANSE calculation of the {arr.coh_or_inc} part of S(q,w)
 # Instrument    MDANSE {importlib.metadata.version("MDANSE")}
 # Material      {par.system_name}
 # Phase         TBC
@@ -140,7 +146,7 @@ def get_result_info(
         is_coherent = "Coherent" in task_name
         is_incoherent = "Incoherent" in task_name
     data_array = symmetrise_array(data_array.T).T
-    omega_array = symmetrise_array(omega_array)
+    omega_array = symmetrise_axis(omega_array)
     sig_max = np.max(data_array)
     sig_min = np.min(data_array)
     sig_mean = np.mean(data_array)
@@ -192,7 +198,7 @@ class McStasSample(IJob):
         Initialize the input parameters and analysis self variables
         """
         super().initialize()
-        self.numberOfSteps = 0
+        self.numberOfSteps = 1
 
         trajectory_params = get_trajectory_info(self.trajectory)
         result_params, self.result_arrays = get_result_info(
@@ -216,10 +222,16 @@ class McStasSample(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
+        print(f"Writing into file {self.configuration['output_files']['file']}")
         PLATFORM.create_directory(
             Path(self.configuration["output_files"]["file"]).parent
         )
         data_array, q_array, omega_array = self.result_arrays
+        print(f"q_array {len(q_array)} from {np.min(q_array)} to {np.max(q_array)}")
+        print(
+            f"E_array {len(omega_array)} from {np.min(omega_array)} to {np.max(omega_array)}"
+        )
+        print(f"data_array {data_array.shape}")
         with open(self.configuration["output_files"]["file"], "w") as target:
             target.write(self.header)
             target.write("#\n")
