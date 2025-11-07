@@ -31,6 +31,7 @@ from vtk.util import numpy_support
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Connectivity import distance_calculation
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.MolecularViewer.AtomProperties import (
     AtomProperties,
@@ -795,26 +796,7 @@ class MolecularViewer(QtWidgets.QWidget):
         # determine and set bonds without PBC applied
         bonds = vtk.vtkCellArray()
 
-        tree = KDTree(rs)
-        contacts = tree.query_ball_point(rs, 2 * np.max(covs) + tolerance, workers=-1)
-        n_dists = sum([len(i) for i in contacts])
-
-        js = np.zeros(n_dists, dtype=int)
-        ks = np.zeros(n_dists, dtype=int)
-        start = 0
-        for i, idxs in enumerate(contacts):
-            n_idxs = len(idxs)
-            if n_idxs == 0:
-                continue
-            js[start : start + n_idxs] = i
-            ks[start : start + n_idxs] = idxs
-            start += n_idxs
-
-        mask = js < ks
-        js = js[mask]
-        ks = ks[mask]
-        diff = rs[js] - rs[ks]
-        dist = np.sum(diff * diff, axis=1)
+        dist, js, ks, _ = distance_calculation(rs, 2 * np.max(covs) + tolerance)
         sum_radii = (covs[js] + covs[ks] + tolerance) ** 2
         js = js[(dist > 0) & (dist < sum_radii)]
         ks = ks[(dist > 0) & (dist < sum_radii)]

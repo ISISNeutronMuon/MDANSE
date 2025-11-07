@@ -19,12 +19,39 @@ from collections.abc import Iterable
 from itertools import product
 
 import numpy as np
+import numpy.typing as npt
 from scipy.spatial import KDTree
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+
+def distance_calculation(
+    coordinates: npt.NDArray[float], max_distance: float, worker_limit: int = -1
+):
+    tree = KDTree(coordinates)
+    contacts = tree.query_ball_point(coordinates, max_distance, workers=worker_limit)
+    n_dists = sum([len(i) for i in contacts])
+
+    js = np.zeros(n_dists, dtype=int)
+    ks = np.zeros(n_dists, dtype=int)
+    start = 0
+    for i, idxs in enumerate(contacts):
+        n_idxs = len(idxs)
+        if n_idxs == 0:
+            continue
+        js[start : start + n_idxs] = i
+        ks[start : start + n_idxs] = idxs
+        start += n_idxs
+
+    mask = js < ks
+    js = js[mask]
+    ks = ks[mask]
+    diff = coordinates[js] - coordinates[ks]
+    dist = np.sum(diff * diff, axis=1)
+    return dist, js, ks, diff
 
 
 class Connectivity:
@@ -36,7 +63,9 @@ class Connectivity:
         self,
         trajectory: Trajectory,
         selection: list[int] | None = None,
+        parallel_workers: int | None = None,
     ):
+        self.worker_limit = parallel_workers if parallel_workers else -1
         self._input_trajectory = trajectory
         self._selection = selection or trajectory._selection or trajectory.atom_indices
         self._periodic = self._input_trajectory.configuration(0).is_periodic
@@ -81,28 +110,12 @@ class Connectivity:
             self._input_trajectory.unit_cell(frame_index),
             1.1 * max_distance,
         )
-        tree = KDTree(coordinates)
-        contacts = tree.query_ball_point(
-            coordinates, max_distance or self.max_distance, workers=-1
+        dist, js, ks, diff = distance_calculation(
+            coordinates,
+            max_distance or self.max_distance,
+            worker_limit=self.worker_limit,
         )
-        n_dists = sum([len(i) for i in contacts])
 
-        js = np.zeros(n_dists, dtype=int)
-        ks = np.zeros(n_dists, dtype=int)
-        start = 0
-        for i, idxs in enumerate(contacts):
-            n_idxs = len(idxs)
-            if n_idxs == 0:
-                continue
-            js[start : start + n_idxs] = i
-            ks[start : start + n_idxs] = idxs
-            start += n_idxs
-
-        mask = js < ks
-        js = js[mask]
-        ks = ks[mask]
-        diff = coordinates[js] - coordinates[ks]
-        dist = np.sum(diff * diff, axis=1)
         return {
             (atom_indices[js[common_index]], atom_indices[ks[common_index]]): dist[
                 common_index
