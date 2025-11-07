@@ -117,6 +117,7 @@ class SolventAccessibleSurface(IJob):
         "Analysis",
         "Structure",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -124,7 +125,7 @@ class SolventAccessibleSurface(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "default": (0, 2, 1)},
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",

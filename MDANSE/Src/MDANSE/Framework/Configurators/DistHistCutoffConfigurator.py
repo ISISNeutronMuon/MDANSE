@@ -4,6 +4,7 @@ from math import floor
 
 import numpy as np
 
+from .IConfigurator import PredictionSettings
 from .RangeConfigurator import RangeConfigurator
 
 
@@ -17,6 +18,10 @@ class DistHistCutoffConfigurator(RangeConfigurator):
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self._max_value = kwargs.get("max_value", True)
+        self.prediction = PredictionSettings(
+            key="value",
+            label="Interatomic distance",
+        )
 
     def configure(self, value):
         """Configure the distance histogram cutoff configurator.

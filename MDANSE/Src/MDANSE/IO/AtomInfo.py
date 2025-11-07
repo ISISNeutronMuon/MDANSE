@@ -20,6 +20,8 @@ from collections import defaultdict
 from MDANSE.Chemistry import ATOMS_DATABASE, AtomsDatabase
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
+WIDTH = 70
+
 
 def atom_info(atom: str, database: AtomsDatabase | Trajectory | None = None) -> str:
     """Return as string all the information about the input atom.
@@ -39,11 +41,8 @@ def atom_info(atom: str, database: AtomsDatabase | Trajectory | None = None) -> 
     """
     if database is None:
         database = ATOMS_DATABASE
-    if isinstance(database, AtomsDatabase):
-        units = database.units
-    else:
-        units = defaultdict(lambda: "none")
 
+    units = database.units
     properties = database.properties
     atoms = database.atoms
 
@@ -60,23 +59,21 @@ def atom_info(atom: str, database: AtomsDatabase | Trajectory | None = None) -> 
             prop_name: database.get_atom_property(atom, prop_name)
             for prop_name in properties
         }
+
     # A delimiter line.
-    delimiter = "-" * 70
-    tab_fmt = "{:<20}{!s:>40}{!s:>10}"
+    delimiter = "-" * WIDTH
+    tab_fmt = f"{{:<20}}{{!s:>40}}{{!s:>{WIDTH - 60}}}"
 
     info = [
         delimiter,
-        f"{atom:^70}",
+        f"{atom:^{WIDTH}}",
         tab_fmt.format("property", "value", "unit"),
         delimiter,
     ]
 
     # The values for all element's properties
-    for pname in sorted(properties):
-        if pname.strip():
-            info.append(
-                tab_fmt.format(pname, property_dict.get(pname), units.get(pname))
-            )
+    for pname in sorted(prop for prop in properties if prop.strip()):
+        info.append(tab_fmt.format(pname, property_dict.get(pname), units.get(pname)))
 
     info.append(delimiter)
     info = "\n".join(info)

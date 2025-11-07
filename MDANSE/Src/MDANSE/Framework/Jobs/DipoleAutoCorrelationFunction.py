@@ -39,6 +39,7 @@ class DipoleAutoCorrelationFunction(IJob):
         "Analysis",
         "Infrared",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 

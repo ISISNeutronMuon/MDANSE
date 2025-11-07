@@ -18,8 +18,9 @@ from __future__ import annotations
 import copy
 import math
 from collections import Counter, defaultdict
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from enum import auto
+import html
 from operator import itemgetter
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -107,7 +108,7 @@ def trajectory_summary(traj: Trajectory):
 
     val = "\n".join(val)
 
-    return val
+    return html.escape(val)
 
 
 def chemical_system_summary(cs: ChemicalSystem) -> str:
@@ -118,7 +119,7 @@ def chemical_system_summary(cs: ChemicalSystem) -> str:
     for molname, mollist in cs._clusters.items():
         text += f"Molecule: {molname}; Count: {len(mollist)}\n"
     text += " ===== \n"
-    return text
+    return html.escape(text)
 
 
 class Trajectory:
@@ -424,6 +425,11 @@ class Trajectory:
 
     def __len__(self):
         return len(self._trajectory)
+
+    @property
+    def units(self) -> Mapping[str, str]:
+        """Mapping of property labels to units."""
+        return self._trajectory.units
 
     def charges(self, frame: int) -> npt.NDArray[float]:
         """Return the electrical charge of atoms at a given frame.

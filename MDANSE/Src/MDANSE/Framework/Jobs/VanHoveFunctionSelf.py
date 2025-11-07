@@ -99,6 +99,7 @@ class VanHoveFunctionSelf(IJob):
         "Analysis",
         "Dynamics",
     )
+    PREDICTORS = ("frames", "r_values")
 
     settings = collections.OrderedDict()
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})

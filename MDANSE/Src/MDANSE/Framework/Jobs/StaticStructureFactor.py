@@ -44,6 +44,7 @@ class StaticStructureFactor(DistanceHistogram):
         "Analysis",
         "Scattering",
     )
+    PREDICTORS = ("q_values",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -64,8 +65,13 @@ class StaticStructureFactor(DistanceHistogram):
         },
     )
     settings["q_values"] = (
-        "RangeConfigurator",
-        {"valueType": float, "includeLast": True, "mini": 0.0, "default": (0, 500, 1)},
+        "QRangeConfigurator",
+        {
+            "valueType": float,
+            "includeLast": True,
+            "mini": 0.0,
+            "default": (0, 500, 1),
+        },
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",

@@ -20,6 +20,7 @@ from itertools import islice
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+from matplotlib.colors import to_rgb
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
@@ -208,6 +209,10 @@ class Single(Plotter):
                 multi_curves = dataset.curves_vs_axis(
                     (best_unit, best_axis), max_limit=self._curve_limit_per_dataset
                 )
+                main_colour = np.array(to_rgb(databundle.colour))
+                colour_increment = (0.5 - main_colour) / min(
+                    self._curve_limit_per_dataset, len(multi_curves)
+                )
                 for key, value in islice(
                     multi_curves.items(), self._curve_limit_per_dataset
                 ):
@@ -216,7 +221,14 @@ class Single(Plotter):
                             dataset.x_axis(best_axis),
                             value,
                             label=plotlabel + ":" + dataset._curve_labels[key],
+                            linestyle=databundle.line_style,
+                            color=tuple(main_colour),
                         )
+                        try:
+                            temp.set_marker(databundle.marker)
+                        except ValueError:
+                            with contextlib.suppress(Exception):
+                                temp.set_marker(int(databundle.marker))
                         self._active_curves.append(temp)
                         self._backup_curves.append([temp.get_xdata(), temp.get_ydata()])
                         self.height_max = max(self.height_max, temp.get_ydata().max())
@@ -226,6 +238,7 @@ class Single(Plotter):
                         LOG.error(f"x_axis={dataset._axes[best_axis]}")
                         LOG.error(f"values={value}")
                         return
+                    main_colour += colour_increment
         if len(self._backup_curves) > 1:
             self.enable_slider(allow_slider=True)
         elif not self._backup_curves:

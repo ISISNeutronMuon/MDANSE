@@ -91,7 +91,7 @@ def check_metadata(hdf5_file: h5py.File) -> dict[str, str]:
     else:
         meta.visititems(put_into_dict)
 
-    meta_dict["<b>file header</b>"] = "\n" + hdf5_file.attrs.get("header", "no header")
+    meta_dict["file header"] = "\n" + hdf5_file.attrs.get("header", "no header")
 
     return meta_dict
 

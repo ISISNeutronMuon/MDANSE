@@ -89,6 +89,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
         "Analysis",
         "Dynamics",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 

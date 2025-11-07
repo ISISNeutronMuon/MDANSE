@@ -62,9 +62,7 @@ def get_mpl_markers():
     return {
         key: mark
         for key, mark in MarkerStyle.markers.items()
-        if isinstance(key, str)
-        and key.lower() not in {"", " ", "none"}
-        and not key.isdigit()
+        if isinstance(key, str) and key not in {"", " ", "none"} and not key.isdigit()
     }
 
 
@@ -871,7 +869,7 @@ class PlottingContext(QStandardItemModel):
                 "",
                 self.next_colour(),
                 new_dataset._linestyle,
-                new_dataset._marker if new_dataset._marker else "",
+                new_dataset._marker if new_dataset._marker else "None",
                 "",
                 new_dataset._filename,
             ]

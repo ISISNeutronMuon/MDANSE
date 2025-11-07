@@ -16,12 +16,14 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 import h5py
 import numpy as np
 import numpy.typing as npt
 
+from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.MolecularDynamics.Configuration import (
     _Configuration,
@@ -119,6 +121,11 @@ class TrajectoryFile(ABC):
     def get_atom_property(
         self, atom_symbol: str, atom_property: str
     ) -> int | float | complex | str: ...
+
+    @property
+    def units(self) -> Mapping[str, str]:
+        """Mapping of property labels to units."""
+        return ATOMS_DATABASE.units
 
     def read_configuration_trajectory(
         self,

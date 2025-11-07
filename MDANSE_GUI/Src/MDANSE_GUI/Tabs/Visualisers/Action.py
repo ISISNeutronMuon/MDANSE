@@ -83,12 +83,14 @@ from MDANSE_GUI.Widgets.DelayedButton import DelayedButton
 
 widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "FloatConfigurator": FloatWidget,
+    "GridStepConfigurator": FloatWidget,
     "OptionalFloatConfigurator": OptionalFloatWidget,
     "BooleanConfigurator": BooleanWidget,
     "IntegerConfigurator": IntegerWidget,
     "CorrelationFramesConfigurator": CorrelationFramesWidget,
     "FramesConfigurator": FramesWidget,
     "RangeConfigurator": RangeWidget,
+    "QRangeConfigurator": RangeWidget,
     "DistHistCutoffConfigurator": DistHistCutoffWidget,
     "VectorConfigurator": VectorWidget,
     "HDFInputFileConfigurator": InputFileWidget,
@@ -411,12 +413,12 @@ class Action(QWidget):
             pardict = self.set_parameters()
             self._job_instance.setup(pardict, rebuild=False)
             axes = self._job_instance.preview_output_axis()
-            LOG.info(f"Axes = {axes.keys()}")
+            LOG.info(f"Axes = {[axis[0] for axis in axes if axis is not None]}")
             text = "<p><b>The results will cover the following range:</b></p>"
-            for unit, old_array in axes.items():
+            for label, old_array, unit in axes:
                 scale_factor, new_unit = self._parent_tab.conversion_factor(unit)
                 array = np.array(old_array) * scale_factor
-                text += f"<p>[{summarise_array(array)}] ({new_unit})</p>"
+                text += f"<p>{label}: [{summarise_array(array)}] ({new_unit})</p>"
             self._preview_box.setText(text)
 
     @Slot()

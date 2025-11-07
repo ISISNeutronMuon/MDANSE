@@ -17,7 +17,8 @@ from __future__ import annotations
 
 import abc
 import json
-from typing import TYPE_CHECKING, Any
+from collections.abc import Iterator, Sequence
+from typing import TYPE_CHECKING, Any, NamedTuple
 from warnings import warn
 
 from more_itertools import value_chain
@@ -77,6 +78,19 @@ class ConfiguratorError(Error):
         return self._message
 
 
+class PredictionSettings(NamedTuple):
+    """Strings used for showing the predicted output range in the GUI.
+
+    key - The dictionary key of where the Sequence[float] is stored in the Configurator.
+    label - An explanation for the user of what physical property the numbers represent.
+    unit - The internal unit of MDANSE of the number array. Used for converting to GUI units.
+    """
+
+    key: str
+    label: str
+    unit: str = "none"
+
+
 class IConfigurator(dict, metaclass=SubclassFactory):
     """The parent class for all the input parameter parsers.
 
@@ -113,6 +127,7 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         default: Any | None = None,
         label: str | None = None,
         optional: bool = False,
+        prediction_label: str | None = None,
         **kwargs,
     ):
         """Create an input parser for an MDANSE job input parameter.
@@ -124,6 +139,9 @@ class IConfigurator(dict, metaclass=SubclassFactory):
 
         """
         self.name = name
+        self.prediction = PredictionSettings(
+            "value", prediction_label or name, unit="none"
+        )
 
         self._printable_attributes = [
             "name",
@@ -154,7 +172,6 @@ class IConfigurator(dict, metaclass=SubclassFactory):
         self.optional = optional
 
         self.configured = False
-
         self.valid = True
 
         self._error_status = "OK"
@@ -330,3 +347,29 @@ class IConfigurator(dict, metaclass=SubclassFactory):
                 if prop.is_configured()
             ]
         return all(c in configured for c in self.dependencies.values())
+
+    def preview_output_axis(self) -> Iterator[str, Sequence[float], str] | None:
+        """Show what data axis will be created in the output file.
+
+        Returns None if the configurator is not in a valid state.
+        In rare cases one configurator can produce multiple axes.
+        Since a configurator is a dict, prediction.key is used to select the
+        correct item from the dict that contains the numerical values needed
+        for output prediction.
+
+        Yields
+        ------
+        Iterator[str, Sequence[float], str] | None
+            Text label, array of numbers, physical unit
+        """
+        if not self.is_configured() or not self.valid:
+            return
+        if hasattr(self, "prediction_keys"):
+            for key in self.prediction_keys:
+                yield (key, self[key], self.prediction.unit)
+        elif self.prediction.key in self:
+            yield (
+                self.prediction.label,
+                self[self.prediction.key],
+                self.prediction.unit,
+            )

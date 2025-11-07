@@ -229,8 +229,8 @@ class PlotSettingsEditor(QDialog):
 
     values_changed = Signal()
 
-    def __init__(self, *args, settings=None, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, *args, settings=None, **kwargs):
+        super().__init__(parent, *args, **kwargs)
 
         self.setWindowTitle("MDANSE Plot Settings Editor")
 
