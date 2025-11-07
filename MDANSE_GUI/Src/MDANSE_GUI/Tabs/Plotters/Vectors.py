@@ -20,8 +20,12 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import numpy.typing as npt
+from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
+from more_itertools import ilen
 
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
@@ -39,7 +43,7 @@ def violin_plot_width(positions: FloatArray) -> float:
 
 @Plotter.register("Vectors")
 class Vectors(Plotter):
-    """Plots all the datasets in the same figure."""
+    """Plots summarised Q-Vectors to one figure."""
 
     def __init__(self) -> None:
         """Initialise all ploting parameters to default values."""
@@ -117,6 +121,8 @@ class Vectors(Plotter):
         self._figure = target
         self._normalisation_errors = []
         self._axes = []
+        self._active_curves = []
+        self._backup_curves = []
         self.apply_settings(plotting_context)
 
         x_axis_labels = []
@@ -127,37 +133,30 @@ class Vectors(Plotter):
 
         if not plotting_context.datasets():
             target.clear()
-            target.canvas.draw()
+            self.plot_blank()
+            return
 
-        single_plot_stack = [222, 221]
-        label_stack = [
-            "Used",
-            "Found",
-        ]
+        gs = self._figure.add_gridspec(2, 2)
+        labels = iter(("Total available", "Requested", "Selected"))
 
         for databundle in plotting_context.datasets().values():
             dataset = databundle.dataset
 
-            try:
-                best_unit, best_axis = (
-                    dataset._axes_units[databundle.main_axis],
-                    databundle.main_axis,
-                )
-            except KeyError:
-                best_unit, best_axis = dataset.longest_axis()
-
             plotlabel = databundle.legend_label
-            x_axis_labels.append(dataset.x_axis_label(best_axis))
+            x_axis_labels = [dataset.x_axis_label(databundle.main_axis)]
 
-            if dataset._name == "Available vectors":
-                axes = target.add_subplot(single_plot_stack.pop())
-                if dataset._n_dim == 2:
-                    temp_curves = []
-                    for value in dataset.data.T:
-                        [temp] = axes.plot(
-                            dataset.x_axis(best_axis),
-                            value,
-                            label=label_stack.pop(),
+            match dataset._name:
+                case "Available vectors":
+                    axes = self._figure.add_subplot(gs[0])
+
+                    lab = plotlabel if dataset._n_dim == 2 else next(labels)
+
+                    for _, curve in dataset.curves_vs_axis(databundle.main_axis):
+                        self._plot_single(
+                            axes,
+                            curve,
+                            databundle,
+                            label=lab,
                         )
                         temp_curves.append(temp)
                         if not label_stack:
@@ -220,19 +219,20 @@ class Vectors(Plotter):
                             width=width,
                             edgecolor="black",
                         )
-                        bottom += value
-                    except ValueError:
-                        LOG.error(f"Plotting failed for {plotlabel} using {best_axis}")
-                        LOG.error(f"x_axis={dataset._axes[best_axis]}")
-                        LOG.error(f"values={value}")
-                        return
-                    else:
-                        if (
-                            add_legend_placeholder
-                            and bar_index == len(multi_curves) - 2
-                        ):
-                            add_legend_placeholder = False
-                            add_last_entry = True
+                    )
+
+                    x_axis = dataset.x_axis(databundle.main_axis)
+                    bottom = np.zeros_like(x_axis)
+                    width = 0.8 * abs(np.mean(x_axis[1:] - x_axis[:-1]))
+
+                    axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
+                    for ind, (label, curve) in enumerate(
+                        dataset.curves_vs_axis(
+                            databundle.main_axis,
+                            max_limit=self._curve_limit_per_dataset,
+                        )
+                    ):
+                        try:
                             axes.bar(
                                 x_axis,
                                 0,
@@ -289,3 +289,68 @@ class Vectors(Plotter):
             self._toolbar.update()
 
         target.canvas.draw()
+
+    @staticmethod
+    def get_label(ind: int, n_curves: int, limit: int, label: str):
+        """Get label for legend.
+
+        For the abbreviated legend return None for those which are
+        between ``limit`` and ``n_curves`` (skipping them), and "..."
+        when it's at the limit.
+
+        Parameters
+        ----------
+        ind : int
+            Current index.
+        n_curves : int
+            Total number of "curves" to plot.
+        limit : int
+            Max number of entries in legend.
+        label : str
+            Current labe.
+        """
+        if ind == limit:
+            return "..."
+        if limit < ind < n_curves - 1:
+            return None
+        return label
+
+    def _plot_single(
+        self,
+        axes: Axes,
+        curve: tuple[np.ndarray, np.ndarray] | tuple[np.ndarray],
+        databundle: PlotArgs,
+        *,
+        yerr: np.ndarray | None = None,
+        label: str,
+    ):
+        """Plot a single curve to axes.
+
+        Parameters
+        ----------
+        axes : Axes
+            Axis to plot to.
+        curve : tuple[np.ndarray, np.ndarray] | tuple[np.ndarray]
+            Curve to plot.
+        databundle : PlotArgs
+            Data to plot.
+        yerr : ndarray, optional
+            Error bars to add.
+        label : str
+            Plot label.
+        """
+        line, _caps, _bars = axes.errorbar(
+            *curve,
+            yerr=yerr,
+            linestyle=databundle.line_style,
+            label=label,
+            color=databundle.colour,
+        )
+
+        axes.set_title(databundle.dataset._name)
+
+        try:
+            line.set_marker(databundle.marker)
+        except ValueError:
+            with contextlib.suppress(Exception):
+                line.set_marker(int(databundle.marker))
