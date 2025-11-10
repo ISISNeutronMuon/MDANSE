@@ -30,7 +30,29 @@ from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 def distance_calculation(
     coordinates: npt.NDArray[float], max_distance: float, worker_limit: int = -1
-):
+) -> tuple[npt.NDArray[float], npt.NDArray[int], npt.NDArray[int], npt.NDArray[float]]:
+    """Calculate distances between atoms in the input array.
+
+    KDTree is used to calculate distances, and only distances within
+    the max_distance cutoff are considered.
+
+    This calculation is typically used for detecting chemical bonds between
+    atoms based on interatomic distances.
+
+    Parameters
+    ----------
+    coordinates : npt.NDArray[float]
+        An (N,3) array of atom coordinates.
+    max_distance : float
+        The largest distance to be considered in the calculation.
+    worker_limit : int, optional
+        Number of CPU cores to use, where -1 uses all available cores, by default -1
+
+    Returns
+    -------
+    tuple[npt.NDArray[float], npt.NDArray[int], npt.NDArray[int], npt.NDArray[float]]
+        Distance array, Indices of first atom, Indices of second atom, Coordinate difference array.
+    """
     tree = KDTree(coordinates)
     contacts = tree.query_ball_point(coordinates, max_distance, workers=worker_limit)
     n_dists = sum([len(i) for i in contacts])

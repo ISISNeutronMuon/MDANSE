@@ -24,6 +24,8 @@ import networkx as nx
 import numpy as np
 from numpy.typing import ArrayLike
 
+from MDANSE.MLogging import LOG
+
 if TYPE_CHECKING:
     from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -238,6 +240,12 @@ def padded_coordinates(
         Any error that may indicate that a Voronoi job failed
     """
     if abs(thickness) < 1e-6:
+        return coords, np.arange(len(coords), dtype=int)
+    if unit_cell is None:
+        LOG.warning(
+            "No unit cell given to padded_coordinates, but padding of %s was requested",
+            thickness,
+        )
         return coords, np.arange(len(coords), dtype=int)
     vectors = (
         unit_cell.a_vector,
