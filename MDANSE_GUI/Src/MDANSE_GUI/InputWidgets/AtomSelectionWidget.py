@@ -550,6 +550,7 @@ class SelectionHelper(QDialog):
         if len(self.selection_model._clicked_atoms) == 1:
             self.disable_gui_selection_buttons()
         self.selection_model.atom_clicked_undo()
+        self.update_selection_textbox()
 
     @Slot()
     def confirm_manual_selection(self):
