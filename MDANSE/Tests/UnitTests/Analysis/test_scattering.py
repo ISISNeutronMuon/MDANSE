@@ -193,7 +193,7 @@ def test_output_axis_preview(tmp_path, qvector_grid):
     axes = dcsf.preview_output_axis()
 
     print(axes)
-    assert len(axes) == 3  # two configurators return valid arrays
+    assert len(axes) == 2  # the main result is S(Q,w), so we need two axes
 
 
 @pytest.mark.parametrize(

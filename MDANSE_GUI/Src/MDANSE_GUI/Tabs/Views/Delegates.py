@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from contextlib import suppress
 
-from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QColor
 from qtpy.QtWidgets import (
     QApplication,
@@ -29,6 +29,8 @@ from qtpy.QtWidgets import (
     QStyledItemDelegate,
     QStyleOptionProgressBar,
 )
+
+from MDANSE_GUI.Utils import block_signals
 
 
 class ColourPicker(QStyledItemDelegate):
@@ -58,14 +60,13 @@ class MainAxisCombo(QItemDelegate):
         super().__init__(*args, **kwargs)
 
     def setEditorData(self, editor, index):
-        editor.blockSignals(True)
-        text = index.model().data(index, Qt.DisplayRole)
-        try:
-            i = self._items.index(text)
-        except ValueError:
-            i = 0
-        editor.setCurrentIndex(i)
-        editor.blockSignals(False)
+        with block_signals(editor):
+            text = index.model().data(index, Qt.DisplayRole)
+            try:
+                i = self._items.index(text)
+            except ValueError:
+                i = 0
+            editor.setCurrentIndex(i)
 
     def setModelData(self, editor, model, index):
         model.setData(index, editor.currentText())
@@ -91,14 +92,13 @@ class MplStyleCombo(QItemDelegate):
         super().__init__(*args, **kwargs)
 
     def setEditorData(self, editor, index):
-        editor.blockSignals(True)
-        text = index.model().data(index, Qt.DisplayRole)
-        try:
-            i = self._items.index(text)
-        except ValueError:
-            i = 0
-        editor.setCurrentIndex(i)
-        editor.blockSignals(False)
+        with block_signals(editor):
+            text = index.model().data(index, Qt.DisplayRole)
+            try:
+                i = self._items.index(text)
+            except ValueError:
+                i = 0
+            editor.setCurrentIndex(i)
 
     def setModelData(self, editor, model, index):
         model.setData(index, editor.currentText())

@@ -43,6 +43,7 @@ class Infrared(IJob):
         "Analysis",
         "Infrared",
     )
+    PREDICTORS = ("instrument_resolution",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -54,7 +55,9 @@ class Infrared(IJob):
     )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
+        {
+            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
+        },
     )
     settings["derivative_order"] = (
         "DerivativeOrderConfigurator",

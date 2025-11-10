@@ -22,7 +22,7 @@ import rdkit.Chem.AllChem as allchem
 import rdkit.Chem.Draw as draw
 from PIL.ImageQt import ImageQt
 from qtpy.QtCore import QObject
-from qtpy.QtGui import QFont, QImage, QPixmap
+from qtpy.QtGui import QFont, QPixmap
 from qtpy.QtWidgets import QDialog, QLabel, QVBoxLayout
 
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
@@ -94,14 +94,18 @@ class MoleculePreviewWidget(QDialog):
         large_molecule = self.atom_database.chemical_system.rdkit_mol
         submolecule = chem.RWMol()
         mapping = {}
-        self.bond_mapping = {}
         for index in self.mol_info["atom_indices"]:
             new_index = submolecule.AddAtom(large_molecule.GetAtomWithIdx(index))
             mapping[index] = new_index
         for bond in self.mol_info["bond_list"]:
-            new_pair = mapping[bond[0]], mapping[bond[1]]
-            bond_index = submolecule.AddBond(new_pair[0], new_pair[1])
-            self.bond_mapping[bond_index] = new_pair
+            i, j = mapping[bond[0]], mapping[bond[1]]
+            rdkit_bond = large_molecule.GetBondBetweenAtoms(bond[0], bond[1])
+            bond_type = (
+                rdkit_bond.GetBondType()
+                if rdkit_bond is not None
+                else chem.rdchem.BondType.UNSPECIFIED
+            )
+            submolecule.AddBond(i, j, bond_type)
         allchem.Compute2DCoords(submolecule)
         return submolecule
 
@@ -113,31 +117,4 @@ class MoleculePreviewWidget(QDialog):
         pil_image = draw.MolToImage(submolecule, size=(600, 600), options=draw_options)
         qt_image = ImageQt(pil_image).copy()
         pixmap = QPixmap.fromImage(qt_image)
-        self.image_label.setPixmap(pixmap)
-
-    def filter_bonds(self, selected_atoms: list[int]) -> list[int]:
-        """Find and return only the bonds that appear in the molecule."""
-        return [
-            key
-            for key, pair in self.bond_mapping.items()
-            if pair[0] in selected_atoms and pair[1] in selected_atoms
-        ]
-
-    def show_formula_with_selection(self, selected_atoms: list[int]):
-        """Draw the formula and highlight the selected atoms and bonds."""
-        submolecule = self.prepare_rdkit_molecule()
-        optional_bonds = self.filter_bonds(selected_atoms)
-        driver = draw.rdMolDraw2D.MolDraw2DCairo(600, 600)
-        draw_options = draw.MolDrawOptions()
-        draw_options.addAtomIndices = True
-        driver.SetDrawOptions(draw_options)
-        draw.rdMolDraw2D.PrepareAndDrawMolecule(
-            driver,
-            submolecule,
-            highlightAtoms=selected_atoms,
-            highlightBonds=optional_bonds,
-        )
-        png_data = driver.GetDrawingText()
-        image = QImage.fromData(png_data).copy()
-        pixmap = QPixmap.fromImage(image)
         self.image_label.setPixmap(pixmap)

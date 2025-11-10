@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: (${{ matrix.os }}-${{ matrix.python-version }}) Build MDANSE and run tests

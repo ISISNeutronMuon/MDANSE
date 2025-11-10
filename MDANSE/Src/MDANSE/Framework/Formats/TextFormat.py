@@ -21,7 +21,7 @@ import tarfile
 import time
 from importlib import metadata
 from pathlib import Path
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 import numpy as np
 

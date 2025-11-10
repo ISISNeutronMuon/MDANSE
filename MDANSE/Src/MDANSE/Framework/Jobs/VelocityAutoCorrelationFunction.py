@@ -24,7 +24,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 )
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
-from MDANSE.Mathematics.Signal import differentiate, normalisation_factor
+from MDANSE.Mathematics.Signal import differentiate
 
 
 class VelocityAutoCorrelationFunction(IJob):
@@ -42,6 +42,7 @@ class VelocityAutoCorrelationFunction(IJob):
         "Analysis",
         "Dynamics",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 

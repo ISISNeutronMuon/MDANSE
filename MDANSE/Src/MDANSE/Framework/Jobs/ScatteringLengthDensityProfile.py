@@ -48,6 +48,7 @@ class ScatteringLengthDensityProfile(IJob):
         "Analysis",
         "Scattering",
     )
+    PREDICTORS = ("dr",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -74,7 +75,19 @@ class ScatteringLengthDensityProfile(IJob):
         "SingleChoiceConfigurator",
         {"choices": ["a", "b", "c"], "default": "c"},
     )
-    settings["dr"] = ("FloatConfigurator", {"default": 0.01, "mini": 1.0e-9})
+    settings["dr"] = (
+        "GridStepConfigurator",
+        {
+            "default": 0.01,
+            "mini": 1.0e-9,
+            "dependencies": {
+                "trajectory": "trajectory",
+                "axis": "axis",
+                "frames": "frames",
+            },
+            "prediction_label": "bin centres along axis",
+        },
+    )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
@@ -169,9 +182,7 @@ class ScatteringLengthDensityProfile(IJob):
         box_coords = box_coords - np.floor(box_coords)
 
         axis_index = self.configuration["axis"]["index"]
-        axis = conf.unit_cell.direct[axis_index, :]
-        axis_length = np.sqrt(np.sum(axis**2))
-        self._extent += axis_length
+        self._extent += np.linalg.norm(conf.unit_cell.direct[axis_index])
 
         slice_volume_ang3 = 1e3 * conf.unit_cell.volume / self._n_bins
 

@@ -18,8 +18,6 @@ import unittest
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Mathematics.Transformation import Translation, Rotation
-from MDANSE.Mathematics.LinearAlgebra import Vector
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicBoxConfiguration,
     PeriodicRealConfiguration,
@@ -105,55 +103,6 @@ class TestConfiguration(unittest.TestCase):
             conf["velocities"] = np.random.uniform(0, 1, (self._nAtoms + 1, 3))
         with self.assertRaises(ValueError):
             conf["velocities"] = np.random.uniform(0, 1, (self._nAtoms, 4))
-
-    def test_apply_transformation_translation(self):
-        coords = np.array([[1, 1, 1], [2, 1, 1], [5, 1, 1], [9, 1, 1]])
-        vels = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 1]])
-        forces = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 1]])
-        conf = RealConfiguration(
-            self.chem_system, coords, velocities=vels, forces=forces
-        )
-
-        transformation = Translation(Vector(1, 0, 0))
-        conf.apply_transformation(transformation)
-
-        expected_result = coords[:]
-        expected_result[:, 0] += 1
-        self.assertTrue(
-            np.allclose(expected_result, conf["coordinates"]),
-            f'\nexpected = {expected_result}\nactual = {conf["coordinates"]}',
-        )
-        self.assertTrue(
-            np.allclose(vels, conf["velocities"]), f'\nactual = {conf["velocities"]}'
-        )
-        self.assertTrue(
-            np.allclose(forces, conf["forces"]), f'\nactual = {conf["forces"]}'
-        )
-
-    def test_apply_transformation_rotation(self):
-        coords = np.array([[1, 1, 1], [2, 1, 1], [5, 1, 1], [9, 1, 1]])
-        vels = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 1]])
-        forces = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 1]])
-        conf = RealConfiguration(
-            self.chem_system, coords, velocities=vels, forces=forces
-        )
-
-        transformation = Rotation(Vector(1, 0, 0), np.radians(180))
-        conf.apply_transformation(transformation)
-
-        expected_coords = np.array([[1, -1, -1], [2, -1, -1], [5, -1, -1], [9, -1, -1]])
-        expected_vels = np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1], [1, -1, -1]])
-        self.assertTrue(
-            np.allclose(expected_coords, conf["coordinates"]),
-            f'\nexpected = {expected_coords}\nactual = {conf["coordinates"]}',
-        )
-        self.assertTrue(
-            np.allclose(expected_vels, conf["velocities"]),
-            f'\nactual = {conf["velocities"]}',
-        )
-        self.assertTrue(
-            np.allclose(forces, conf["forces"]), f'\nactual = {conf["forces"]}'
-        )
 
     def test_properties(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))

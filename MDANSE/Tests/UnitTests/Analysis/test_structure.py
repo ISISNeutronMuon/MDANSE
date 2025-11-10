@@ -93,6 +93,8 @@ def test_structure_analysis(
     parameters["trajectory"] = traj_info[1]
     parameters["running_mode"] = running_mode
     parameters["output_files"] = (temp_name, (output_format,), "INFO")
+    if job_info[0] in ("SolventAccessibleSurface", "Voronoi"):
+        parameters["frames"] = (0,2,1)
 
     job = IJob.create(job_info[0])
     job.run(parameters, status=True)

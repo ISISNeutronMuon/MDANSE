@@ -58,6 +58,7 @@ class CurrentCorrelationFunction(IJob):
     enabled = True
 
     label = "Current Correlation Function"
+    PREDICTORS = ("instrument_resolution", "q_vectors")
 
     category = (
         "Analysis",
@@ -74,7 +75,9 @@ class CurrentCorrelationFunction(IJob):
     )
     settings["instrument_resolution"] = (
         "InstrumentResolutionConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
+        {
+            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
+        },
     )
     settings["interpolation_order"] = (
         "InterpolationOrderConfigurator",

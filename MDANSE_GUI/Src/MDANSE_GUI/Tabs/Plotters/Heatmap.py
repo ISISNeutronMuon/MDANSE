@@ -22,7 +22,6 @@ import numpy as np
 from matplotlib.pyplot import colorbar as mpl_colorbar
 from scipy.interpolate import interp1d
 
-from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 

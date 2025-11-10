@@ -85,6 +85,8 @@ class UnitCellConfigurator(IConfigurator):
         else:
             self.recommended_cell = (first_cell + last_cell) / 2.0
 
+        self.recommended_cell = self.recommended_cell.tolist()
+
     def configure(self, value):
         """
         Configure the unit cell as a 3x3 array.
@@ -112,7 +114,7 @@ class UnitCellConfigurator(IConfigurator):
                     self.error_status = "Input shape must be 3x3"
                     return
 
-            self["value"] = input_array
+            self["value"] = value[0]
         else:
-            self["value"] = np.eye(3)
+            self["value"] = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         self.error_status = "OK"

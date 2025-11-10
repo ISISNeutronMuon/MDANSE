@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import html
 from logging import Handler, LogRecord
 
 from qtpy.QtCore import Slot, qInstallMessageHandler
@@ -45,7 +46,7 @@ class GuiLogHandler(Handler):
 
     def emit(self, record: LogRecord):
         if self._visualiser is not None:
-            message = self.formatter.format(record)
+            message = html.escape(self.formatter.format(record))
             if "WARNING" in message:
                 message = f'<span style="color:orange;">{message}</span>'
             elif "ERROR" in message or "CRITICAL" in message:

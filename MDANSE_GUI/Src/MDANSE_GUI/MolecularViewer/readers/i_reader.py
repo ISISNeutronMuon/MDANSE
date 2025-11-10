@@ -18,10 +18,7 @@ from __future__ import annotations
 import abc
 import collections
 
-import numpy as np
-
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.MLogging import LOG
 
 
 class InvalidFileError(Exception):

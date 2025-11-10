@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import collections
-import itertools
 from math import sqrt
 
 import numpy as np

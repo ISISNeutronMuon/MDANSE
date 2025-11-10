@@ -1228,6 +1228,8 @@ class FilterDesigner(QDialog):
             QSizePolicy.Policy.Maximum,
         )
 
+        settings_groupbox.setLayout(self.setting_stack_layout)
+
         for name, filter_class in FILTER_MAP.items():
             template = (
                 FilterSettingGroup
@@ -1250,7 +1252,6 @@ class FilterDesigner(QDialog):
         index = list(FILTER_MAP).index(self.settings["filter"])
         self.setting_stack_layout.setCurrentIndex(index)
 
-        settings_groupbox.setLayout(self.setting_stack_layout)
         widget_area.addWidget(settings_groupbox)
 
         # Add the filter designer preferences stack layout

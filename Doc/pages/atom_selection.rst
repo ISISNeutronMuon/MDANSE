@@ -253,15 +253,19 @@ trajectory with the "Search for molecules" option, and molecules
 will be identified based on interatomic distances and covalent radii.
 
 **SMARTS Patterns**: The `SMARTS <https://www.daylight.com/dayhtml/doc/theory/theory.smarts.html>`_
-(SMILES arbitrary target specification) functionality
-in MDANSE is still very limited, since
-MDANSE does not differentiate between different types of chemical
-bonds. Therefore, the SMARTS strings provided by MDANSE do
-not specify the bond type, and any custom strings input by
-the user need to follow the same approach. A methyl group
-can currently be found using a SMARTS string
-[#6;H3](~[H])(~[H])~[H]. We intend to add the missing information
-to the system topology in the future.
+(SMILES arbitrary target specification) can be used to match specific
+functional groups or molecules, for example, the SMARTS string
+``[CX4H3]([H])([H])[H]`` can be used to match all methyl groups. The SMARTS
+pattern can be understood by breaking it down, ``[CX4H3]`` means an
+aliphatic carbon (``C``) with a connectivity of 4 (``X4``) with three
+hydrogens (``H3``) the next part ``([H])([H])[H]`` means to match the
+three hydrogen atoms ``[H]`` that are bonded to the carbon. If you have
+very large molecule then the atom type and bond type determination may fail and
+MDANSE will use generic atom types and unspecified bond types. In this case you
+may need to generalise your SMARTS pattern, for example,
+to match a methyl group you may need to use ``[#6X4H3](~[H])(~[H])~[H]``
+instead where ``#6`` means any sort of carbon atom and ``~`` means any
+type of bond.
 
 **Manual Selection**: It is possible to select atoms by clicking each one of them
 in the 3D view. This will create a list of indices that can be used

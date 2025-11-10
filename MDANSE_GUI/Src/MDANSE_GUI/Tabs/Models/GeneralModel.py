@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import QModelIndex, QMutex, QObject, Qt, Signal, Slot
+from qtpy.QtCore import QModelIndex, QMutex, QObject, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 

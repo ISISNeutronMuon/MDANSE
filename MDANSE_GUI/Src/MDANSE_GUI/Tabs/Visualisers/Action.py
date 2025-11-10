@@ -35,6 +35,7 @@ from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
     HDFTrajectoryConfigurator,
 )
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets import (
@@ -51,7 +52,6 @@ from MDANSE_GUI.InputWidgets import (
     FloatWidget,
     FramesWidget,
     HDFTrajectoryWidget,
-    InputDirectoryWidget,
     InputFileWidget,
     InstrumentResolutionWidget,
     IntegerWidget,
@@ -65,7 +65,6 @@ from MDANSE_GUI.InputWidgets import (
     MultiInputFileWidget,
     MultipleCombosWidget,
     OptionalFloatWidget,
-    OutputDirectoryWidget,
     OutputFilesWidget,
     OutputStructureWidget,
     OutputTrajectoryWidget,
@@ -74,23 +73,25 @@ from MDANSE_GUI.InputWidgets import (
     QVectorsWidget,
     RangeWidget,
     RunningModeWidget,
-    StringWidget,
     TrajectoryFilterWidget,
     UnitCellWidget,
     VectorWidget,
     WeightsWidget,
 )
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
+from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.DelayedButton import DelayedButton
 
 widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "FloatConfigurator": FloatWidget,
+    "GridStepConfigurator": FloatWidget,
     "OptionalFloatConfigurator": OptionalFloatWidget,
     "BooleanConfigurator": BooleanWidget,
     "IntegerConfigurator": IntegerWidget,
     "CorrelationFramesConfigurator": CorrelationFramesWidget,
     "FramesConfigurator": FramesWidget,
     "RangeConfigurator": RangeWidget,
+    "QRangeConfigurator": RangeWidget,
     "DistHistCutoffConfigurator": DistHistCutoffWidget,
     "VectorConfigurator": VectorWidget,
     "HDFInputFileConfigurator": InputFileWidget,
@@ -389,19 +390,19 @@ class Action(QWidget):
                 # signals from these widgets to stop this from happening
                 # show_output_prediction will be called at the end of
                 # this function.
-                widget.blockSignals(True)
-                if isinstance(widget, InstrumentResolutionWidget):
-                    if resolution_tuple is None:
-                        continue
-                    widget.change_function(resolution_tuple[0], resolution_tuple[1])
-                if isinstance(widget, QVectorsWidget):
-                    if q_vector_tuple is None:
-                        continue
-                    widget._selector.setCurrentText(q_vector_tuple[0])
-                    widget._model.switch_qvector_type(
-                        q_vector_tuple[0], q_vector_tuple[1]
-                    )
-                widget.blockSignals(False)
+                with block_signals(widget):
+                    if isinstance(widget, InstrumentResolutionWidget):
+                        if resolution_tuple is None:
+                            continue
+                        widget.change_function(resolution_tuple[0], resolution_tuple[1])
+                    if isinstance(widget, QVectorsWidget):
+                        if q_vector_tuple is None:
+                            continue
+                        widget._selector.setCurrentText(q_vector_tuple[0])
+                        widget._model.switch_qvector_type(
+                            q_vector_tuple[0], q_vector_tuple[1]
+                        )
+
         self.allow_execution()
         self.show_output_prediction()
 
@@ -413,15 +414,12 @@ class Action(QWidget):
             pardict = self.set_parameters()
             self._job_instance.setup(pardict, rebuild=False)
             axes = self._job_instance.preview_output_axis()
-            LOG.info(f"Axes = {axes.keys()}")
+            LOG.info(f"Axes = {[axis[0] for axis in axes if axis is not None]}")
             text = "<p><b>The results will cover the following range:</b></p>"
-            for unit, old_array in axes.items():
+            for label, old_array, unit in axes:
                 scale_factor, new_unit = self._parent_tab.conversion_factor(unit)
                 array = np.array(old_array) * scale_factor
-                if len(array) < 6:
-                    text += f"<p>{array} ({new_unit})</p>"
-                else:
-                    text += f"<p>[{array[0]}, {array[1]}, {array[2]}, ..., {array[-1]}] ({new_unit})</p>"
+                text += f"<p>{label}: [{summarise_array(array)}] ({new_unit})</p>"
             self._preview_box.setText(text)
 
     @Slot()

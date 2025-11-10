@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import collections
-import itertools as it
 from math import sqrt
 
 from MDANSE.Framework.AtomGrouping.grouping import (

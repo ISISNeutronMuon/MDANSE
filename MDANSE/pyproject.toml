@@ -36,7 +36,7 @@ dependencies = [
     "scipy",
     "h5py>=3.13",
     "ase",
-    "rdkit",
+    "rdkit>=2025.3.3",
     "MDAnalysis",
     "mdtraj",
     "networkx",

@@ -15,7 +15,8 @@
 #
 from __future__ import annotations
 
-from MDANSE.Framework.Configurators.RangeConfigurator import RangeConfigurator
+from .IConfigurator import PredictionSettings
+from .RangeConfigurator import RangeConfigurator
 
 
 class FramesConfigurator(RangeConfigurator):
@@ -37,6 +38,7 @@ class FramesConfigurator(RangeConfigurator):
         """
 
         RangeConfigurator.__init__(self, name, sort=True, **kwargs)
+        self.prediction = PredictionSettings(key="time", label="Time", unit="ps")
 
     def configure(self, value):
         """
@@ -103,10 +105,3 @@ class FramesConfigurator(RangeConfigurator):
             self["time_step"] = 1.0
 
         self["duration"] = self["time"] - self["time"][0]
-
-    def preview_output_axis(self):
-        if not self.is_configured():
-            return None, None
-        if not self.valid:
-            return None, None
-        return self["time"], "ps"

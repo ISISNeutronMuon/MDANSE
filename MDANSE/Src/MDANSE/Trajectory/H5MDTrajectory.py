@@ -15,7 +15,8 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections import ChainMap
+from collections.abc import Mapping
 from enum import Enum
 from pathlib import Path
 
@@ -26,16 +27,11 @@ import numpy.typing as npt
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Units import measure
-from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
     _Configuration,
-    contiguous_coordinates_real,
-)
-from MDANSE.MolecularDynamics.TrajectoryUtils import (
-    atomic_trajectory,
 )
 from MDANSE.MolecularDynamics.UnitCell import (
     BAD_CELL,
@@ -143,6 +139,7 @@ class H5MDTrajectory(TrajectoryFile):
         self._h5_filename = Path(h5_filename)
 
         self._h5_file = h5py.File(self._h5_filename, "r")
+
         particle_types = self._h5_file["/particles/all/species"]
         particle_lookup = h5py.check_enum_dtype(
             self._h5_file["/particles/all/species"].dtype
@@ -176,12 +173,18 @@ class H5MDTrajectory(TrajectoryFile):
 
         self._variables_to_skip = set()
         self._load_units()
-
         self._load_unit_cells()
+
+        if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
+            configuration = self.configuration(0)
+            contiguous_configuration = configuration.contiguous_configuration()
+            coords = contiguous_configuration.coordinates
+            self._chemical_system.set_bond_orders(coords)
 
     def _load_units(self) -> None:
         """Load units from h5 file."""
-        self.units = {}
+        self.unit_conv = {}
+        self._units = {}
 
         for name, loc in self.KEYS.items():
             if loc not in self._h5_file:
@@ -192,10 +195,21 @@ class H5MDTrajectory(TrajectoryFile):
                 unit = d["unit"]
                 for orig, rep in self.UNIT_MAP.items():
                     unit = unit.replace(orig, rep)
-                self.units[name] = measure(1.0, unit).toval(self.UNIT_CONV[name])
+                self.unit_conv[name] = measure(1.0, unit).toval(self.UNIT_CONV[name])
+                self._units[name] = unit
             else:
                 LOG.warning("No units for %s, using default of 1.0.", name)
-                self.units[name] = 1.0
+                self.unit_conv[name] = 1.0
+                self._units[name] = "none"
+
+    @property
+    def units(self) -> Mapping[str, str]:
+        """Mapping of property labels to units."""
+        return ChainMap(
+            self._units,
+            {"b_incoherent": "Ang", "b_coherent": "Ang"},
+            ATOMS_DATABASE.units,
+        )
 
     @classmethod
     def file_is_right(self, filename: Path | str) -> bool:
@@ -243,13 +257,13 @@ class H5MDTrajectory(TrajectoryFile):
         grp = self.positions
 
         configuration = {
-            "coordinates": grp[frame, :, :] * self.units["position"],
+            "coordinates": grp[frame, :, :] * self.unit_conv["position"],
             "time": self.time()[frame],
         }
 
         if self.vel_key in self._h5_file:
             configuration["velocities"] = (
-                self.velocities[frame, :, :] * self.units["velocity"]
+                self.velocities[frame, :, :] * self.unit_conv["velocity"]
             )
 
         if self._unit_cells is not None:
@@ -312,7 +326,7 @@ class H5MDTrajectory(TrajectoryFile):
 
         retval = self.positions[frame, atom_indices, :]
 
-        return retval.astype(np.float64) * self.units["position"]
+        return retval.astype(np.float64) * self.unit_conv["position"]
 
     def configuration(self, frame: int = 0) -> _Configuration:
         """Build and return a configuration at a given frame.
@@ -356,7 +370,7 @@ class H5MDTrajectory(TrajectoryFile):
         self._unit_cells = []
 
         try:
-            cells = self._h5_file[self.box_key][:] * self.units["box"]
+            cells = self._h5_file[self.box_key][:] * self.unit_conv["box"]
         except KeyError:
             self._unit_cells = None
             self.unit_cell_warning = NO_CELL
@@ -391,7 +405,7 @@ class H5MDTrajectory(TrajectoryFile):
         """Time timesteps from file."""
 
         try:
-            time = self._h5_file[self.time_key][:] * self.units["time"]
+            time = self._h5_file[self.time_key][:] * self.unit_conv["time"]
         except Exception:
             LOG.warning("Time may be invalid in H5MD file.")
             time = np.array([], dtype=np.float64)

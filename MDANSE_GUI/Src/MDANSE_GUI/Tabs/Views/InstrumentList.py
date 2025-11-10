@@ -15,11 +15,10 @@
 #
 from __future__ import annotations
 
-import copy
 import os
 
 import tomlkit
-from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
+from qtpy.QtCore import QModelIndex, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QStandardItem
 from qtpy.QtWidgets import QAbstractItemView, QListView, QMenu
 from tomlkit.parser import ParseError

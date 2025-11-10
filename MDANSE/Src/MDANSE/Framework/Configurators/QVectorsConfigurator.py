@@ -20,6 +20,8 @@ from typing import Any
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
+from .IConfigurator import PredictionSettings
+
 
 class QVectorsConfigurator(IConfigurator):
     """Creates and configures a q-vector generator.
@@ -43,6 +45,12 @@ class QVectorsConfigurator(IConfigurator):
         "SphericalLatticeQVectors",
         {"shells": (0.1, 5, 0.1), "width": 0.1, "n_vectors": 50, "seed": 0},
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prediction = PredictionSettings(
+            key="shells", label="Q vector shell centres", unit="1/nm"
+        )
 
     def configure(self, value: tuple[str, dict[str, Any]]):
         """Create a vector generator with given parameters.
@@ -113,20 +121,3 @@ class QVectorsConfigurator(IConfigurator):
         self["value"] = self["q_vectors"]
         self["generator"] = generator
         self.error_status = "OK"
-
-    def preview_output_axis(self):
-        """Output the values of |Q| from current parameters.
-
-        Returns
-        -------
-        list[float]
-            Values of |Q|.
-        str
-            Physical unit of Q.
-
-        """
-        if not self.is_configured():
-            return None, None
-        if not self.valid:
-            return None, None
-        return self["shells"], "1/nm"

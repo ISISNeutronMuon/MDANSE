@@ -22,6 +22,8 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )
 
+from .IConfigurator import PredictionSettings
+
 
 class InstrumentResolutionConfigurator(IConfigurator):
     r"""Defines the resolution function to use for signal broadening.
@@ -47,6 +49,12 @@ class InstrumentResolutionConfigurator(IConfigurator):
     """
 
     _default = ("gaussian", {"mu": 0.0, "sigma": 10.0})
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prediction = PredictionSettings(
+            key="romega", label="Energy transfer", unit="rad/ps"
+        )
 
     def configure(self, value):
         """
@@ -102,13 +110,3 @@ class InstrumentResolutionConfigurator(IConfigurator):
             : len(time)
         ]
         self.error_status = "OK"
-
-    def preview_output_axis(self):
-        if not self.is_configured():
-            return None, None
-        if not self.valid:
-            return None, None
-        if "romega" in self:
-            return self["romega"], "rad/ps"
-        else:
-            return None, None

@@ -40,6 +40,7 @@ from qtpy.QtWidgets import (
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
+from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
 from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
 
@@ -175,16 +176,15 @@ class SliderPack(QWidget):
     @Slot()
     def box_to_slider(self):
         """Update sliders if spin boxes have changed."""
-        self.blockSignals(True)
-        vals = np.zeros_like(self._valarray)
-        clicks = np.zeros_like(self._clickarray)
-        for ns, box in enumerate(self._spinboxes):
-            vals[ns] = box.value()
-        clicks = np.round((vals - self._minarray) / self._steparray).astype(int)
-        for ns, slider in enumerate(self._sliders):
-            slider.setValue(clicks[ns])
-        self.slider_to_box()
-        self.blockSignals(False)
+        with block_signals(self):
+            vals = np.zeros_like(self._valarray)
+            clicks = np.zeros_like(self._clickarray)
+            for ns, box in enumerate(self._spinboxes):
+                vals[ns] = box.value()
+            clicks = np.round((vals - self._minarray) / self._steparray).astype(int)
+            for ns, slider in enumerate(self._sliders):
+                slider.setValue(clicks[ns])
+            self.slider_to_box()
 
     @Slot()
     def collect_values(self):
@@ -206,6 +206,7 @@ class PlotWidget(QWidget):
 
     def __init__(self, *args, **kwargs) -> None:
         """Create an empty plot with the default plotter."""
+        plotter_type = kwargs.pop("plotter_type", "Single")
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None
@@ -214,7 +215,9 @@ class PlotWidget(QWidget):
         self._slider_max = 100
         self.unique_id = -1
         self.make_canvas()
-        self.set_plotter("Single")
+        self.set_plotter(plotter_type)
+        if plotter_type != "Single":
+            self.plot_selector.setCurrentText(plotter_type)
 
     def set_context(self, new_context: PlottingContext):
         """Assign a data model to the plot widget."""
@@ -289,7 +292,8 @@ class PlotWidget(QWidget):
             bool_flag = self._legend_box.isChecked()
         if self._plotting_context:
             self._plotting_context.use_legend = bool_flag
-            self._plotting_context.ask_for_update()
+        if self._plotter:
+            self._plotter.toggle_legend(bool_flag)
 
     @Slot()
     def use_grid(self, bool_flag: bool | None = None):
@@ -297,7 +301,8 @@ class PlotWidget(QWidget):
             bool_flag = self._grid_box.isChecked()
         if self._plotting_context:
             self._plotting_context.use_grid = bool_flag
-            self._plotting_context.ask_for_update()
+        if self._plotter:
+            self._plotter.toggle_grid(bool_flag)
 
     def plot_data(self, update_only=False):
         """Use the internal plotter instance to create a plot.
@@ -392,4 +397,5 @@ class PlotWidget(QWidget):
         plot_selector.addItems(self.available_plotters())
         plot_selector.setCurrentText("Single")
         plot_selector.currentTextChanged.connect(self.set_plotter)
+        self.plot_selector = plot_selector
         self.set_plotter(plot_selector.currentText())

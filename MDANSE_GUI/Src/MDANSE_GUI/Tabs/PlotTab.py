@@ -24,7 +24,6 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
-from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 from MDANSE_GUI.Tabs.Views.PlotDetailsView import PlotDetailsView
 from MDANSE_GUI.Tabs.Visualisers.PlotHolder import PlotHolder
 from MDANSE_GUI.Tabs.Visualisers.PlotSettings import PlotSettings
@@ -58,7 +57,9 @@ class PlotTab(GeneralTab):
             self.model.regenerate_colours
         )
         self._core._extra_visualiser.make_layout()
-        self.matplotlib_dialog = PlotSettingsEditor(settings=self._settings)
+        self.matplotlib_dialog = PlotSettingsEditor(
+            self.parent(), settings=self._settings
+        )
         self.matplotlib_dialog.values_changed.connect(self._visualiser.update_plots)
         self._core.add_button("Change matplotlib settings", self.edit_matplotlib)
 

@@ -18,7 +18,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Literal, TypedDict
+from typing import Literal
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Status import Status

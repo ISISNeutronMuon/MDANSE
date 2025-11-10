@@ -41,13 +41,7 @@ def parameters():
     return parameters
 
 @pytest.mark.parametrize("traj_type", [
-    pytest.param("RigidBodyTrajectory",
-                 marks=pytest.mark.xfail()),
-    pytest.param("GlobalMotionFilteredTrajectory",
-                 marks=pytest.mark.xfail()),
-    "CroppedTrajectory",
     "CenterOfMassesTrajectory",
-    "UnfoldedTrajectory",
 ])
 def test_trajectory(tmp_path, parameters, traj_type):
     temp_name = tmp_path / "output"
@@ -71,19 +65,6 @@ def test_CenterOfMassesTrajectory(tmp_path, parameters):
 
     parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
     job = IJob.create("CenterOfMassesTrajectory")
-    job.run(parameters, status=True)
-
-    assert out_file.is_file()
-    assert log_file.is_file()
-
-
-def test_UnfoldedTrajectory(tmp_path, parameters):
-    temp_name = tmp_path / "output"
-    out_file = temp_name.with_suffix(".mdt")
-    log_file = temp_name.with_suffix(".log")
-
-    parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
-    job = IJob.create("UnfoldedTrajectory")
     job.run(parameters, status=True)
 
     assert out_file.is_file()

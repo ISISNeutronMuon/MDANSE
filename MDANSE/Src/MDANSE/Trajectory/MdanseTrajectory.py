@@ -15,7 +15,9 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections import ChainMap, defaultdict
+from collections.abc import Iterable, Mapping
+from functools import cached_property
 from pathlib import Path
 
 import h5py
@@ -74,12 +76,18 @@ class MdanseTrajectory(TrajectoryFile):
         self._has_database = "atom_database" in self._h5_file
         self._has_atoms = []
 
+        # Load all the unit cells
+        self._load_unit_cells()
+
         # Load the chemical system
         self._chemical_system = ChemicalSystem(self._h5_filename.stem, self)
         self._chemical_system.load(self._h5_file)
 
-        # Load all the unit cells
-        self._load_unit_cells()
+        if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
+            configuration = self.configuration(0)
+            contiguous_configuration = configuration.contiguous_configuration()
+            coords = contiguous_configuration.coordinates
+            self._chemical_system.set_bond_orders(coords)
 
     @classmethod
     def file_is_right(cls, filename: Path | str) -> bool:
@@ -436,6 +444,9 @@ class MdanseTrajectory(TrajectoryFile):
 
         data_type = self._data_types[index]
 
+        if data_type == b"str":
+            return ATOMS_DATABASE.get_atom_property(atom_symbol, atom_property)
+
         if index not in self._data_units:
             data_unit = "none"
             try:
@@ -467,11 +478,6 @@ class MdanseTrajectory(TrajectoryFile):
         elif data_type == b"int":
             out = int(value)
 
-        elif data_type == b"str":
-            if isinstance(value, bytes):
-                value = value.decode("utf-8")
-            out = value
-
         else:
             out = str_to_num(value)
             unit_conv = {
@@ -499,6 +505,27 @@ class MdanseTrajectory(TrajectoryFile):
         return [
             key for key in self._h5_file["/atom_database"] if "property_" not in key
         ]
+
+    @cached_property
+    def units(self) -> Mapping[str, str]:
+        """Mapping of property labels to units."""
+        unit_map = ChainMap(
+            {"b_incoherent": "ang", "b_coherent": "ang"},  # Inject old, weird units.
+            ATOMS_DATABASE.units,
+        )
+
+        if "atom_database/property_units" not in self._h5_file:
+            return unit_map
+
+        return unit_map.new_child(  # Inject units from file.
+            dict(
+                zip(
+                    self._h5_file["/atom_database/property_labels"].asstr(),
+                    self._h5_file["/atom_database/property_units"].asstr(),
+                    strict=True,
+                ),
+            ),
+        )
 
     def properties(self) -> list[str]:
         """Return the list of all the properties in the trajectory's database.

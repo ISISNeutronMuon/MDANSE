@@ -26,7 +26,6 @@ from numpy.typing import ArrayLike
 
 if TYPE_CHECKING:
     from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-    from MDANSE.Mathematics.Transformation import RigidBodyTransformation
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
@@ -361,29 +360,6 @@ class _Configuration(metaclass=abc.ABCMeta):
             )
 
         self._variables[name] = value
-
-    def apply_transformation(self, transfo: RigidBodyTransformation) -> None:
-        """
-        Applies a linear transformation to the configuration.
-
-        :param transfo: the transformation to be applied
-        :type transfo: :class: `MDANSE.Mathematics.Transformation.RigidBodyTransformation`
-        """
-        conf = self["coordinates"]
-        rot = transfo.rotation().tensor.array
-        conf[:] = np.dot(conf, np.transpose(rot))
-
-        np.add(
-            conf,
-            transfo.translation().vector.array[np.newaxis, :],
-            conf,
-            casting="unsafe",
-        )
-
-        if "velocities" in self._variables:
-            velocities = self._variables["velocities"]
-            rot = transfo.rotation().tensor.array
-            velocities[:] = np.dot(velocities, np.transpose(rot))
 
     @property
     def chemical_system(self) -> ChemicalSystem:

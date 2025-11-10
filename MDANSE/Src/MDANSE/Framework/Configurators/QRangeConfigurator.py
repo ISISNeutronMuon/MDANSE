@@ -15,9 +15,18 @@
 #
 from __future__ import annotations
 
-from MDANSE.NeutronInstruments.Spectrum.Spectrum import Spectrum
+from MDANSE.Framework.Configurators.RangeConfigurator import (
+    RangeConfigurator,
+)
+
+from .IConfigurator import PredictionSettings
 
 
-class FlatSpectrum(Spectrum):
-    def flux_at_wavelength(self, wavelength: float):
-        return 1.0
+class QRangeConfigurator(RangeConfigurator):
+    """Range configurator for Q vector generation."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prediction = PredictionSettings(
+            key="value", label="Q vector shell centres", unit="1/nm"
+        )

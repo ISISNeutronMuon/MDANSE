@@ -16,8 +16,10 @@
 from __future__ import annotations
 
 import abc
+import json
 import multiprocessing
 import os
+import pprint
 import queue
 import random
 import stat
@@ -45,6 +47,15 @@ from MDANSE.MLogging import FMT, LOG
 RUNSCRIPT = """\
 #!{executable}
 
+import os
+os.environ.update(
+    OMP_NUM_THREADS = '1',
+    OPENBLAS_NUM_THREADS = '1',
+    MKL_NUM_THREADS = '1',
+    VECLIB_MAXIMUM_THREADS = '1',
+    NUMEXPR_NUM_THREADS = '1'
+)
+
 ########################################################
 # This is an automatically generated MDANSE run script #
 ########################################################
@@ -56,8 +67,7 @@ RUNSCRIPT = """\
 ########################################################
 
 parameters = {{
-{param_str}
-}}
+{param_str}}}
 
 ########################################################
 # Setup and run the analysis                           #
@@ -138,6 +148,45 @@ def key_generator(
             prefix = new_prefix
 
 
+def _format_params(parameters: dict) -> str:
+    """Format the job parameters.
+
+    Parameters
+    ----------
+    parameters : dict
+        The jobs parameter dictionary.
+
+    Returns
+    -------
+    str
+        A formatted string of parameter used in the runscripts.
+    """
+    param_str = ""
+    for k, (v, label) in parameters.items():
+        str_v = str(v)
+        if (
+            isinstance(v, str)
+            and len(str_v) > 72
+            and str_v.startswith("{")
+            and str_v.endswith("}")
+        ):
+            # if it's a long json string then try to make a multiline
+            # string and format it
+            try:
+                json_data = json.loads(str_v)
+                param = f'"""{json.dumps(json_data, indent=4)}"""'
+                param = param.replace("\n", "\n    ")
+            except json.decoder.JSONDecodeError:
+                param = repr(v)
+        elif isinstance(v, (tuple, list, dict)):
+            param = pprint.pformat(v, indent=0, width=72)
+            param = param.replace("\n", "\n        ")
+        else:
+            param = repr(v)
+        param_str += f"    {k!r}: {param},  " + ("# " + label if label else "") + "\n"
+    return param_str
+
+
 class IJob(Configurable, metaclass=SubclassFactory):
     """The parent class for any MDANSE job.
 
@@ -149,6 +198,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
     section = "job"
     key_gen = key_generator(6)
     ancestor = []
+    PREDICTORS = ()
     runscript_import_line = "from MDANSE.Framework.Jobs.IJob import IJob"
 
     @classmethod
@@ -225,20 +275,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
         except KeyError:
             LOG.error("IJob did not find 'write_logs' in output_files")
 
-        if selection := self.configuration.get("atom_selection"):
-            try:
-                array_length = selection["total_number_of_atoms"]
-            except KeyError:
-                LOG.warning(
-                    "Job could not find total number of atoms in atom selection."
-                )
-            else:
-                valid_indices = selection["flatten_indices"]
-                self._outputData.add(
-                    "selected_atoms",
-                    "LineOutputVariable",
-                    [index in valid_indices for index in range(array_length)],
-                )
         self.set_up_trajectory()
 
     def set_up_trajectory(self):
@@ -256,6 +292,13 @@ class IJob(Configurable, metaclass=SubclassFactory):
         self.trajectory = trajectory["instance"]
         if (selection := self.configuration.get("atom_selection")) is not None:
             self.trajectory.set_selection(selection["flatten_indices"])
+            array_length = self.trajectory.chemical_system._total_number_of_atoms
+            valid_indices = selection["flatten_indices"]
+            self._outputData.add(
+                "selected_atoms",
+                "LineOutputVariable",
+                [index in valid_indices for index in range(array_length)],
+            )
         if (transmutation := self.configuration.get("atom_transmutation")) is not None:
             self.trajectory.set_transmutation(transmutation.transmutation)
         if (grouping := self.configuration.get("grouping_level")) is not None:
@@ -265,14 +308,20 @@ class IJob(Configurable, metaclass=SubclassFactory):
     def run_step(self, index):
         pass
 
-    def preview_output_axis(self):
-        axes = {}
-        for configurator in self._configuration.values():
-            preview_method = getattr(configurator, "preview_output_axis", None)
-            if callable(preview_method):
-                axis, unit = preview_method()
-                if axis is not None:
-                    axes[unit] = axis
+    def preview_output_axis(self) -> list[tuple[str, Sequence[float], str]]:
+        """Collect the output axis values and unit information from configurators.
+
+        Returns
+        -------
+        dict[str, Sequence[float]]
+            Dictionary of {unit: values} pairs, predicting the data output range.
+        """
+        axes = []
+        for predictor in self.PREDICTORS:
+            configurator = self._configuration[predictor]
+            for prediction in configurator.preview_output_axis():
+                if prediction is not None:
+                    axes.append(prediction)
         return axes
 
     @classmethod
@@ -296,17 +345,12 @@ class IJob(Configurable, metaclass=SubclassFactory):
             for key, (val, label) in sorted(parameters.items())
         }
 
-        param_str = "\n".join(
-            f"    {k!r}: {v!r}," + ("# " + label if label else "")
-            for k, (v, label) in parameters.items()
-        )
-
         with open(jobFile, "w") as f:
             f.write(
                 RUNSCRIPT.format(
                     executable=sys.executable,
                     import_line=cls.runscript_import_line,
-                    param_str=param_str,
+                    param_str=_format_params(parameters),
                     parent=cls.runscript_import_line.split(" ")[-1],
                     var_name=cls.__name__.lower(),
                     job_name=cls.__name__,
@@ -409,7 +453,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         steps = iter(steps)
 
         n_results = next(steps)
-        while n_results != self.numberOfSteps:
+        while n_results < self.numberOfSteps:
             self._run_multicore_check_terminate(listener)
             if self._status is not None:
                 self._status.fixed_status(n_results)

@@ -20,10 +20,16 @@ from enum import Enum
 from pathlib import Path
 
 from qtpy.QtCore import Qt, Signal, Slot
-from qtpy.QtGui import QStandardItem, QStandardItemModel
+from qtpy.QtGui import (
+    QStandardItem,
+    QStandardItemModel,
+    QUndoCommand,
+    QUndoStack,
+)
 from qtpy.QtWidgets import (
     QDialog,
     QFileDialog,
+    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -63,10 +69,42 @@ class SelectionValidity(Enum):
     MALFORMED_SELECTION = "This is not a valid selection string."
 
 
+class AppendSelectionCommand(QUndoCommand):
+    """A selection operation with methods to add and remove itself from the model."""
+
+    def __init__(self, model: SelectionModel, json_string: str):
+        """Stores a reference to the SelectionModel instance and the selection string.
+
+        Parameters
+        ----------
+        model : SelectionModel
+            The selection operation will be added to it or removed from it.
+        json_string : str
+            String describing a single selection operation.
+        """
+        super().__init__()
+        self.model = model
+        self.json_string = json_string
+
+    def redo(self):
+        """Append the selection to the SelectionModel."""
+        new_item = QStandardItem(self.json_string)
+        new_item.setEditable(False)
+        self.model.appendRow(new_item)
+        self.model.selection_changed.emit()
+
+    def undo(self):
+        """Remove the last selection from the SelectionModel."""
+        self.model.removeRow(self.model.rowCount() - 1)
+        self.model.selection_changed.emit()
+
+
 class SelectionModel(QStandardItemModel):
     """Stores the selection operations in the GUI view."""
 
     selection_changed = Signal()
+    can_undo = Signal(bool)
+    can_redo = Signal(bool)
 
     def __init__(self, trajectory):
         """Assign the current trajectory to the model."""
@@ -76,11 +114,32 @@ class SelectionModel(QStandardItemModel):
         self._current_selection = set()
         self._manual_selection_item = None
         self._clicked_atoms = []
+        self.undo_stack = QUndoStack(self)
 
     def clear(self):
         """Remove all the lines from the selection model."""
         self._clicked_atoms = []
+        self.undo_stack.clear()
         return super().clear()
+
+    @Slot()
+    def undo_last(self):
+        """Execute QUndoStack.undo and update the undo/redo buttons.
+
+        Removes the last selection from the list."""
+        self.finalise_manual_selection()
+        self.undo_stack.undo()
+        self.can_undo.emit(self.undo_stack.canUndo() and self.rowCount() > 1)
+        self.can_redo.emit(self.undo_stack.canRedo())
+
+    @Slot()
+    def redo_last(self):
+        """Execute QUndoStack.redo and update the undo/redo buttons.
+
+        Brings back the last operation removed by undo."""
+        self.undo_stack.redo()
+        self.can_undo.emit(self.undo_stack.canUndo())
+        self.can_redo.emit(self.undo_stack.canRedo())
 
     def rebuild_selection(self, last_operation: str) -> SelectionValidity:
         """Update the current selection based on the text in the GUI.
@@ -124,6 +183,7 @@ class SelectionModel(QStandardItemModel):
     @Slot(int)
     def on_atom_clicked(self, index: int):
         """Add atom index to manual selection. Receives signals from View3D."""
+        self.can_redo.emit(False)
         if not self._clicked_atoms:
             self._manual_selection_item = QStandardItem("Manual selection IN PROGRESS")
             self.appendRow([self._manual_selection_item])
@@ -202,10 +262,10 @@ class SelectionModel(QStandardItemModel):
     def accept_from_widget(self, json_string: str):
         """Add a selection operation sent from a selection widget."""
         self.finalise_manual_selection()
-        new_item = QStandardItem(json_string)
-        new_item.setEditable(False)
-        self.appendRow(new_item)
-        self.selection_changed.emit()
+        append_selection_command = AppendSelectionCommand(self, json_string)
+        self.undo_stack.push(append_selection_command)
+        self.can_undo.emit(self.undo_stack.canUndo())
+        self.can_redo.emit(self.undo_stack.canRedo())
 
     @Slot(str)
     def create_from_string(self, json_string: str):
@@ -378,7 +438,20 @@ class SelectionHelper(QDialog):
             create_layouts.
 
         """
-        return [self.selection_operations_view, self.selection_textbox]
+        selection_panel = QWidget(self)
+        panel_layout = QGridLayout(selection_panel)
+        undo_button = QPushButton("Undo", selection_panel)
+        redo_button = QPushButton("Redo", selection_panel)
+        panel_layout.addWidget(undo_button, 0, 0)
+        panel_layout.addWidget(redo_button, 0, 1)
+        panel_layout.addWidget(self.selection_operations_view, 1, 0, 1, 2)
+        undo_button.setEnabled(self.selection_model.undo_stack.canUndo())
+        redo_button.setEnabled(self.selection_model.undo_stack.canRedo())
+        self.selection_model.can_redo.connect(redo_button.setEnabled)
+        self.selection_model.can_undo.connect(undo_button.setEnabled)
+        undo_button.clicked.connect(self.selection_model.undo_last)
+        redo_button.clicked.connect(self.selection_model.redo_last)
+        return [selection_panel, self.selection_textbox]
 
     def left_widgets(self) -> list[QWidget]:
         """Create widgets for defining the selection.
@@ -604,13 +677,17 @@ class AtomSelectionWidget(WidgetBase):
         """
         return SelectionHelper(traj_data, self.selection_model, self._base)
 
-    @Slot()
-    def helper_dialog(self) -> None:
-        """Open the helper dialog."""
+    def initialise_helper(self) -> None:
+        """Create a helper dialog instance if it does not exist at the moment."""
         if self.helper is None:
             self.helper = self.create_helper(self.helper_settings)
             if self.helper_save_button:
                 self.helper.create_optional_save_button()
+
+    @Slot()
+    def helper_dialog(self) -> None:
+        """Open the helper dialog."""
+        self.initialise_helper()
         if self.helper.isVisible():
             geometry = self.helper.saveGeometry()
             self.helper.previous_geometry = geometry
@@ -650,6 +727,7 @@ class AtomSelectionWidget(WidgetBase):
             LOG.warning("Selection from %s was empty and will be ignored", fname)
             return
         new_selection = temp_selection.convert_to_json()
+        self.initialise_helper()
         self.helper.selection_model.create_from_string(new_selection)
 
     def get_widget_value(self) -> str:

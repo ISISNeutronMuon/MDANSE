@@ -22,7 +22,7 @@ from scipy.signal import correlate
 from scipy.spatial.transform import Rotation
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
+from MDANSE.Mathematics.Geometry import center_of_mass
 
 
 class RotationAutocorrelation(IJob):
@@ -41,6 +41,7 @@ class RotationAutocorrelation(IJob):
         "Analysis",
         "Dynamics",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
