@@ -210,7 +210,7 @@ class GUISelection(BasicSelectionWidget):
         """Add GUI selection buttons, not connected."""
         layout = self.layout()
         self.confirm_gui_selection = QPushButton("CONFIRM manual selection", self)
-        self.undo_gui_selection = QPushButton("Undo atom selection", self)
+        self.undo_gui_selection = QPushButton("Undo previous action", self)
         self.confirm_gui_selection.setEnabled(False)
         self.undo_gui_selection.setEnabled(False)
         for button in [self.confirm_gui_selection, self.undo_gui_selection]:

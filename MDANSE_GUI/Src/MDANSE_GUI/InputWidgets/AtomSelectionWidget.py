@@ -459,8 +459,8 @@ class SelectionHelper(QDialog):
         """
         selection_panel = QWidget(self)
         panel_layout = QGridLayout(selection_panel)
-        undo_button = QPushButton("Undo", selection_panel)
-        redo_button = QPushButton("Redo", selection_panel)
+        undo_button = QPushButton("Undo selection", selection_panel)
+        redo_button = QPushButton("Redo selection", selection_panel)
         panel_layout.addWidget(undo_button, 0, 0)
         panel_layout.addWidget(redo_button, 0, 1)
         panel_layout.addWidget(self.selection_operations_view, 1, 0, 1, 2)
