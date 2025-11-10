@@ -16,6 +16,8 @@
 from __future__ import annotations
 
 import copy
+import os
+from pathlib import Path
 from typing import Any
 
 import more_itertools
@@ -29,6 +31,10 @@ from scipy.spatial import cKDTree as KDTree
 from scipy.spatial.transform import Rotation as R
 from vtk.util import numpy_support
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.vtkCommonColor import vtkNamedColors
+from vtkmodules.vtkIOGeometry import vtkSTLReader
+from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
+from vtkmodules.vtkRenderingCore import vtkRenderWindow
 
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Connectivity import distance_calculation
@@ -267,8 +273,118 @@ class MolecularViewer(QtWidgets.QWidget):
         data : Trajectory
             instance of the MDANSE input trajectory handler
         """
+
         reader = hdf5wrapper.HDF5Wrapper(fname, trajectory, trajectory.chemical_system)
         self.set_reader(reader)
+
+    def create_actor_for_placeholder_3d_model(
+        self,
+        filename: str,
+        colour: tuple[float, float, float],
+        scale: float,
+        position: tuple[float, float, float]):
+        """_summary_
+
+        Parameters
+        ----------
+        filename : str
+            _description_
+        colour : tuple[float, float, float]
+            _description_
+        scale : float
+            _description_
+        position : tuple[float, float, float]
+            _description_
+
+        Returns
+        -------
+        vtk.vtkActor
+            The created actor
+        """
+        # Validate colour
+        if not isinstance(colour, tuple):
+            raise TypeError("Colour must be a tuple.")
+        if len(colour) != 3:
+            raise ValueError("Colour must be a tuple of three values.")
+        if not all(isinstance(x, float) for x in colour):
+            raise TypeError("Each colour value must be a float.")
+
+        # Validate scale
+        if not isinstance(scale, float):
+            raise TypeError("Scale must be a float.")
+
+        # Validate position
+        if not isinstance(position, tuple):
+            raise TypeError("Position must be a tuple.")
+        if len(position) != 3:
+            raise ValueError("Position must be a tuple of three values.")
+        if not all(isinstance(x, (int, float)) for x in position):
+            raise TypeError("Each position value must be a float or int.")
+
+        reader = vtk.vtkSTLReader()
+        filepath = os.path.join(os.path.dirname(__file__), "..", "Tabs", "Visualisers", filename)  # Ensure os is imported
+        reader.SetFileName(filepath)
+        reader.Update()
+
+        mapper = vtk.vtkPolyDataMapper()
+        mapper.SetInputConnection(reader.GetOutputPort())
+
+        actor = vtk.vtkActor()
+        actor.SetMapper(mapper)
+        actor.GetProperty().SetColor(colour)
+        actor.SetPosition(position)
+        actor.SetScale(scale)
+        #make center sphere metallic and semi-transparent
+        if filename == "center_sphere.stl":
+            actor.GetProperty().SetOpacity(0.5)  # Make the center sphere semi-transparent
+            actor.GetProperty().SetSpecular(1)
+            actor.GetProperty().SetSpecularPower(100)
+            actor.GetProperty().SetMetallic(1.0)
+            actor.GetProperty().SetRoughness(0.2)
+
+        #continue rotating the actor around Z axis
+        #self.rotate_actor(actor, 45.0)
+
+
+        return actor
+
+    def load_trajectory_placeholder_3d_model(self):
+        """Loads a 3D blender model of mdanse into the viewer.
+
+        Parameters
+        ----------
+        path : str
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+
+        spheres = [
+        ("center_sphere.stl", (0.5, 0.5, 0.5), 0.3, (0, 0, 0)),       # grey center
+        ("yellow_sphere.stl", (1.0, 1.0, 0.0), 0.3, (0, 0, 0)),
+        ("blue_sphere.stl", (0.0, 0.0, 1.0), 0.3, (0, 0, 0)),
+        ("red_sphere.stl", (1.0, 0.0, 0.0), 0.3, (0, 0, 0)),
+    ]
+
+        for filename, colour, position, scale  in spheres:
+            actor = self.create_actor_for_placeholder_3d_model(filename, colour, position, scale)
+            self._renderer.AddActor(actor)
+
+        for filename, colour, scale, position in spheres:
+            actor = self.create_actor_for_placeholder_3d_model(filename, colour, scale, position)
+            self._renderer.AddActor(actor)
+
+        # rendering
+        if self.reset_camera:
+            self._renderer.ResetCamera()
+            self.reset_camera = False
+
+        self._iren.GetRenderWindow().Render()
+        self._iren.Render()
+
 
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
@@ -622,6 +738,14 @@ class MolecularViewer(QtWidgets.QWidget):
         self.atom_actor = None
 
         del self._actors
+
+    #clears the render window after removing all view props
+    def clear_render_window(self):
+        self.renderer.RemoveAllViewProps()
+        self._renderer.ResetCamera()
+        #self.get_render_window().Render()
+        self._iren.Render()
+
 
     def create_atom_label_actors(self):
         """Creates atom label actors, setting the text to the chosen

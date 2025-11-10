@@ -15,7 +15,10 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import Signal, Slot
+import os
+from pathlib import Path
+
+from qtpy.QtCore import QUrl, Signal, Slot
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 from MDANSE_GUI.MolecularViewer.Controls import ViewerControls
@@ -43,14 +46,24 @@ class View3D(QWidget):
         self._controls = controls
         self._controls.toggle_projection()
 
+        # Set layout
+        self.setLayout(layout)
+        self.load_placeholder()
+
+    def load_placeholder(self):
+        self._viewer.load_trajectory_placeholder_3d_model()
+
+
+
     @Slot(tuple)
     def update_panel(self, data: tuple):
         fullpath, incoming = data
         if fullpath == "" or data is None:
-            self._viewer.clear_panel()
-            return
+            self._viewer.clear_render_window()
+            self.load_placeholder()
 
         try:
+            self._viewer.clear_render_window()
             self._viewer._new_trajectory_object(fullpath, incoming)
         except AttributeError:
             self.error.emit(f"3D View could not visualise {fullpath}")
