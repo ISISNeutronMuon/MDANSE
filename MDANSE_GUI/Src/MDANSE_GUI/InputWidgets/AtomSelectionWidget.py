@@ -105,6 +105,7 @@ class SelectionModel(QStandardItemModel):
     selection_changed = Signal()
     can_undo = Signal(bool)
     can_redo = Signal(bool)
+    gui_selection_finalised = Signal()
 
     def __init__(self, trajectory):
         """Assign the current trajectory to the model."""
@@ -268,6 +269,7 @@ class SelectionModel(QStandardItemModel):
             json_string = json.dumps(new_params)
             self._clicked_atoms = []
             self.accept_from_widget(json_string)
+        self.gui_selection_finalised.emit()
 
     @Slot(str)
     def accept_from_widget(self, json_string: str):
@@ -342,6 +344,8 @@ class SelectionHelper(QDialog):
         self.mol_view.clicked_atom_index.connect(self.update_from_3d_view)
         self.mol_view.picked_atoms_changed.connect(self.update_picked_atom_count)
         self.mol_view.picked_atoms_changed.connect(self.enable_gui_selection_buttons)
+        self.selection_model.gui_selection_finalised.connect(self.disable_gui_selection_buttons)
+
         self.view_3d = View3D(self.mol_view)
         self.view_3d.update_panel(traj_data)
 
@@ -369,7 +373,7 @@ class SelectionHelper(QDialog):
         if a1.type() == QEvent.WindowDeactivate:
             # confirm the manual selection if the user moves away from the
             # selection helper
-            self.confirm_manual_selection()
+            self.selection_model.finalise_manual_selection()
         return super().event(a1)
 
     def closeEvent(self, a0):
@@ -509,7 +513,7 @@ class SelectionHelper(QDialog):
             select_layout.addWidget(widget)
             if isinstance(widget, GUISelection):
                 self.confirm_gui_selection_button.clicked.connect(
-                    self.confirm_manual_selection,
+                    self.selection_model.finalise_manual_selection,
                 )
                 self.undo_gui_selection_button.clicked.connect(
                     self.undo_manual_selection
@@ -551,11 +555,6 @@ class SelectionHelper(QDialog):
             self.disable_gui_selection_buttons()
         self.selection_model.atom_clicked_undo()
         self.update_selection_textbox()
-
-    @Slot()
-    def confirm_manual_selection(self):
-        self.disable_gui_selection_buttons()
-        self.selection_model.finalise_manual_selection()
 
     @Slot()
     def recalculate_selection(self):
