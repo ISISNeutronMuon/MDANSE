@@ -100,38 +100,50 @@ def compare_trees(
 def solvent_accessible_surface(
     coords: npt.NDArray[float],
     all_indices: npt.NDArray[int],
-    selected_indices: list[int],
+    selected_indices: Sequence[int],
     grouping_indices: npt.NDArray[int],
     vdw_radii: npt.NDArray[float],
     sphere_points: npt.NDArray[float],
     probe_radius_value: float,
     *,
     calculate_blocking: bool = False,
-):
-    """Calculate the total surface are of a group of atoms, and how much is blocked.
+) -> tuple[float, float, dict[int, float]]:
+    """Calculate the total accessible surface of the selected atoms.
 
-    Coordinates of all atoms are used in this analysis. The selected atoms are the
-    ones for which the surface area is calculated. The atoms that are not in the
-    selection are still considered in the analysis, since they can block the
-    accessible surface.
+    Coordinates of all atoms are used in this analysis.
+    The total surface is calculated considering only the selected atoms,
+    based on how many sphere points around each selected atom are within
+    a radius from other selected atoms, and therefore blocked.
+    Free surface is calculated as a number of sphere points around the
+    selected atoms that are not blocked by ANY atoms, selected or not.
+    Blocked surface (calculated if calculate_blocking=True) checks which
+    points on the sphere are within the cutoff radius from specific atoms
+    outside the selection. The blocked surfaces are not additive, as it is
+    possible for a point to be blocked by more that one atom at the same time.
 
     Parameters
     ----------
-    coords : np.ndarray
+    coords : np.ndarray[float]
         Coordinates of all atoms plus their copies in padding region.
-    indices : list[int]
-        Indices of atoms belonging to the selection.
-    vdwRadii : np.ndarray
+    all_indices : np.ndarray[int]
+        An array of all the atom indices.
+    indices : Sequence[int]
+        Indices of only the selected atoms.
+    grouping_indices : np.ndarray[int]
+        Index of the results group (e.g. 'Cu', '<H2_O1>/H') to which each atom belongs.
+    vdw_radii : np.ndarray
         For each atom, its van der Waals radius.
     sphere_points : np.ndarray
-        Coordinates of points on a sphere.
+        Pre-generated near-equidistant points on a sphere.
     probe_radius_value : float
         Radius of the probe particle.
+    calculate_blocking : bool, default False
+        If True, the fraction of the surface blocked by different atoms will be calculated.
 
     Returns
     -------
-    float, npt.NDArray[float]
-        Total surface, blocked surface per atom
+    float, float, dict[int, float]
+        Total surface, free surface, blocked surface per atom
     """
     # Computes the Solvent Accessible Surface Based on the algorithm published by Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
     total_sas = 0.0
