@@ -344,7 +344,9 @@ class SelectionHelper(QDialog):
         self.mol_view.clicked_atom_index.connect(self.update_from_3d_view)
         self.mol_view.picked_atoms_changed.connect(self.update_picked_atom_count)
         self.mol_view.picked_atoms_changed.connect(self.enable_gui_selection_buttons)
-        self.selection_model.gui_selection_finalised.connect(self.disable_gui_selection_buttons)
+        self.selection_model.gui_selection_finalised.connect(
+            self.disable_gui_selection_buttons
+        )
 
         self.view_3d = View3D(self.mol_view)
         self.view_3d.update_panel(traj_data)
