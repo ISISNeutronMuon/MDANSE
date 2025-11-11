@@ -33,6 +33,15 @@ class FramesWidget(WidgetBase):
                 self._last_frame = -1
         else:
             self._last_frame = -1
+
+        self.build_fields()
+        self.default_labels()
+        for field in self._fields:
+            field.setToolTip(self._tooltip)
+        self.update_labels()
+        self.updateValue()
+
+    def build_fields(self):
         labels = [
             QLabel("First frame", self._base),
             QLabel("Last frame", self._base),
@@ -54,15 +63,6 @@ class FramesWidget(WidgetBase):
         self._fields = fields
         self._validators = validators
         self._default_values = placeholders
-        self.default_labels()
-        self.update_labels()
-        self.updateValue()
-        if self._tooltip:
-            tooltip_text = self._tooltip
-        else:
-            tooltip_text = "A single logical value that can be True of False"
-        for field in fields:
-            field.setToolTip(tooltip_text)
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,

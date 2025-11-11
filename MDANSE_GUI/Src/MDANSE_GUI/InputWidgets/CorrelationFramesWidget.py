@@ -24,13 +24,15 @@ from .FramesWidget import FramesWidget
 
 
 class CorrelationFramesWidget(FramesWidget):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+
+    def build_fields(self):
+        super().build_fields()
 
         if self._last_frame <= 0:
             c_frames = "1"
         else:
             c_frames = str(math.ceil(self._last_frame * 0.5))
+
         field = QLineEdit(c_frames, self._base)
         validator = QIntValidator(field)
 
@@ -44,3 +46,11 @@ class CorrelationFramesWidget(FramesWidget):
         self._fields.append(field)
         self._validators.append(QIntValidator(field))
         self._default_values.append(c_frames)
+
+    def default_labels(self):
+        if self._label_text == "":
+            self._label_text = "CorrelationFramesWidget"
+        if self._tooltip == "":
+            self._tooltip = (
+                "Correlation frames to be used, given as (First, Last, StepSize, CorrelationFrames)"
+            )

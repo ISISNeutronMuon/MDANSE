@@ -129,6 +129,11 @@ class TabbedWindow(QMainWindow):
         else:
             self.invertToolbar(dark=False)
 
+    def changeEvent(self, event):
+        if event.type() == event.PaletteChange:
+            self.check_dark_mode()
+        super().changeEvent(event)
+
     def createCommonModels(self):
         self._trajectory_model = TrajectoryModel()
         self._instrument_model = GeneralModel()

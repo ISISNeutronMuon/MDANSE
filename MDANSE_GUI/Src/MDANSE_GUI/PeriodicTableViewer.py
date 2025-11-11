@@ -319,6 +319,9 @@ class InfoDisplay(QFrame):
         fields = []
         for n in range(10):
             temp = QLabel(self.base)
+            font = temp.font()
+            font.setBold(True)
+            temp.setFont(font)
             fields.append(temp)
             temp.setToolTip(tooltips[n])
         # in the end it was not necessary to have field[0]
@@ -329,9 +332,6 @@ class InfoDisplay(QFrame):
             layout.addWidget(fields[n], n - 4, 4)
 
         self.fields = fields
-
-        stylesheet = "font-weight: bold"
-        self.setStyleSheet(stylesheet)
 
     @Slot(object)
     def updateDisplay(self, info_object):

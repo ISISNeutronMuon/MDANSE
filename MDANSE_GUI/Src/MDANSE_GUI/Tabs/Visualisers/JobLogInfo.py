@@ -27,8 +27,7 @@ ErrorTypes = Literal["WARNING", "ERROR", "CRITICAL", "DEBUG", "INFO"]
 
 class JobLogInfo(TextInfo):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.setStyleSheet("font-family: Courier New;")
+        super().__init__(*args, font="Courier New", **kwargs)
 
     @Slot(object)
     def update_panel(self, incoming: tuple[Iterable[str], Iterable[ErrorTypes]]):

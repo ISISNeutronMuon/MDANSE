@@ -320,7 +320,9 @@ class Action(QWidget):
             buttonbase.setLayout(buttonlayout)
             self.save_button = QPushButton("Save as script", buttonbase)
             self.execute_button = DelayedButton("RUN!", buttonbase, delay=3000)
-            self.execute_button.setStyleSheet("font-weight: bold")
+            font = self.execute_button.font()
+            font.setBold(True)
+            self.execute_button.setFont(font)
             self.post_execute_checkbox = QCheckBox("Auto-load results", buttonbase)
             try:
                 default_check_status = (
@@ -442,7 +444,7 @@ class Action(QWidget):
                     "Warning(s) found in input widgets above."
                 )
             else:
-                self.execute_button.setStyleSheet("QWidget { }")
+                self.execute_button.setStyleSheet("")
                 self.execute_button.setToolTip(
                     "Launch the job using the current parameters."
                 )

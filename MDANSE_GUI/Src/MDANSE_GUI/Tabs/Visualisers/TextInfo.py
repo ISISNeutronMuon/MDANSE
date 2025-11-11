@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 from qtpy.QtCore import Signal, Slot
+from qtpy.QtGui import QFont
 from qtpy.QtWidgets import QTextBrowser
 
 
@@ -25,7 +26,10 @@ class TextInfo(QTextBrowser):
     def __init__(self, *args, **kwargs):
         self._header = kwargs.pop("header", "")
         self._footer = kwargs.pop("footer", "")
+        self._font = kwargs.pop("font", None)
         super().__init__(*args, **kwargs)
+        if self._font is not None:
+            self.setFont(QFont(self._font))
         self.setOpenExternalLinks(True)
         self.setHtml(self.filter(""))
 
