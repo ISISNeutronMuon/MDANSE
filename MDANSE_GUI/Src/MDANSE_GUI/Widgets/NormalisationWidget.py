@@ -18,7 +18,7 @@ from __future__ import annotations
 from typing import Any
 
 from qtpy.QtCore import Signal, Slot
-from qtpy.QtGui import QPalette, QColor
+from qtpy.QtGui import QColor, QPalette
 from qtpy.QtWidgets import (
     QCheckBox,
     QComboBox,

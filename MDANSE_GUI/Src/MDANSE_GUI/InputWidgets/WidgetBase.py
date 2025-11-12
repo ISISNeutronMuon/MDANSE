@@ -19,7 +19,7 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Literal
 
 from qtpy.QtCore import QObject, Signal, Slot
-from qtpy.QtGui import QPalette, QColor
+from qtpy.QtGui import QColor, QPalette
 from qtpy.QtWidgets import (
     QGridLayout,
     QGroupBox,
