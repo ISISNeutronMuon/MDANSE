@@ -24,7 +24,6 @@ from .FramesWidget import FramesWidget
 
 
 class CorrelationFramesWidget(FramesWidget):
-
     def build_fields(self):
         super().build_fields()
 
@@ -51,6 +50,4 @@ class CorrelationFramesWidget(FramesWidget):
         if self._label_text == "":
             self._label_text = "CorrelationFramesWidget"
         if self._tooltip == "":
-            self._tooltip = (
-                "Correlation frames to be used, given as (First, Last, StepSize, CorrelationFrames)"
-            )
+            self._tooltip = "Correlation frames to be used, given as (First, Last, StepSize, CorrelationFrames)"

@@ -19,6 +19,7 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Literal
 
 from qtpy.QtCore import QObject, Signal, Slot
+from qtpy.QtGui import QPalette, QColor
 from qtpy.QtWidgets import (
     QGridLayout,
     QGroupBox,
@@ -35,13 +36,6 @@ if TYPE_CHECKING:
 
 Layouts = Literal["QHBoxLayout", "QVBoxLayout", "QGridLayout"]
 Bases = Literal["QWidget", "QGroupBox"]
-
-WARNING_STYLE = (
-    "QWidget#InputWidget { background-color:rgb(220,210,30); font-weight: bold }"
-)
-ERROR_STYLE = (
-    "QWidget#InputWidget { background-color:rgb(180,20,180); font-weight: bold }"
-)
 
 
 class WidgetBase(QObject):
@@ -112,7 +106,7 @@ class WidgetBase(QObject):
             raise NotImplementedError(f"Cannot create base of type {self._base_type}.")
 
         self._base = base
-        self._base.setObjectName("InputWidget")
+        self._base.setAutoFillBackground(True)
         self._layout = layout
         self._configurator = configurator
         self._parent_dialog = parent
@@ -175,7 +169,12 @@ class WidgetBase(QObject):
             If True, update the widget's error without sending signals
 
         """
-        self._base.setStyleSheet(ERROR_STYLE)
+        pal = self._base.palette()
+        pal.setColor(QPalette.Window, QColor(180, 20, 180))
+        self._base.setPalette(pal)
+        font = self._base.font()
+        font.setBold(True)
+        self._base.setFont(font)
         self._base.setToolTip(error_text)
         if not silent:
             self.valid_changed.emit()
@@ -192,7 +191,12 @@ class WidgetBase(QObject):
         """
         if warning_text:
             self.has_warning = True
-            self._base.setStyleSheet(WARNING_STYLE)
+            pal = self._base.palette()
+            pal.setColor(QPalette.Window, QColor(220, 210, 30))
+            self._base.setPalette(pal)
+            font = self._base.font()
+            font.setBold(True)
+            self._base.setFont(font)
             self._base.setToolTip(warning_text)
             self.valid_changed.emit()
             return
@@ -201,7 +205,10 @@ class WidgetBase(QObject):
 
     def clear_error(self):
         """Remove error highlighting."""
-        self._base.setStyleSheet("")
+        self._base.setPalette(QPalette())
+        font = self._base.font()
+        font.setBold(False)
+        self._base.setFont(font)
         self._base.setToolTip("")
         self.valid_changed.emit()
 
