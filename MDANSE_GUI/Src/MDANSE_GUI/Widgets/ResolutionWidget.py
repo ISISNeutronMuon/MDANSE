@@ -19,9 +19,6 @@ import math
 import matplotlib.pyplot as mpl
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qt5agg import (
-    NavigationToolbar2QT as NavigationToolbar2QTAgg,
-)
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import (
@@ -40,6 +37,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
 from MDANSE_GUI.Utils import block_signals
 
 widget_text_map = {
@@ -325,7 +323,7 @@ class ResolutionWidget(QWidget):
         figAgg = FigureCanvasQTAgg(figure)
         figAgg.setParent(canvas)
         figAgg.updateGeometry()
-        toolbar = NavigationToolbar2QTAgg(figAgg, canvas)
+        toolbar = MDANSEMatPlotLibNavBar(figAgg, canvas)
         toolbar.update()
         layout.addWidget(figAgg)
         layout.addWidget(toolbar)

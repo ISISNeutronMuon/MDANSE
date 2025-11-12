@@ -18,6 +18,7 @@ from __future__ import annotations
 from typing import Any
 
 from qtpy.QtCore import Signal, Slot
+from qtpy.QtGui import QPalette, QColor
 from qtpy.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -32,9 +33,6 @@ from MDANSE_GUI.Tabs.Plotters.Plotter import (
     enum_to_str,
     str_to_enum,
 )
-
-NORM_ERROR_STYLE = "QWidget { background-color:rgb(220,210,30); font-weight: bold }"
-NORM_CLEAN_STYLE = "QWidget { }"
 
 
 class NormalisationWidget(QWidget):
@@ -162,11 +160,19 @@ class NormalisationWidget(QWidget):
         error_text : str
             Collected normalisation error messages as a text string
         """
-        self.setStyleSheet(NORM_ERROR_STYLE)
+        pal = self.palette()
+        pal.setColor(QPalette.Window, QColor(220, 210, 30))
+        self.setPalette(pal)
+        font = self.font()
+        font.setBold(True)
+        self.setFont(font)
         self.setToolTip(error_text)
 
     @Slot()
     def clear_error(self):
         """Restores the normal appearance to the normalisation widgets."""
-        self.setStyleSheet(NORM_CLEAN_STYLE)
+        self.setPalette(QPalette())
+        font = self.font()
+        font.setBold(False)
+        self.setFont(font)
         self.setToolTip("")

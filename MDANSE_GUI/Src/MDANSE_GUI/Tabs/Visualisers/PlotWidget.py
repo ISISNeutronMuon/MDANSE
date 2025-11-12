@@ -23,9 +23,6 @@ if TYPE_CHECKING:
 import matplotlib.pyplot as mpl
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qt5agg import (
-    NavigationToolbar2QT as NavigationToolbar2QTAgg,
-)
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
@@ -39,6 +36,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
@@ -360,7 +358,7 @@ class PlotWidget(QWidget):
         figAgg = FigureCanvasQTAgg(figure)
         figAgg.setParent(canvas)
         figAgg.updateGeometry()
-        toolbar = NavigationToolbar2QTAgg(figAgg, canvas)
+        toolbar = MDANSEMatPlotLibNavBar(figAgg, canvas)
         toolbar.update()
         layout.addWidget(figAgg, stretch=1)
         normaliser = NormalisationWidget(self)

@@ -23,9 +23,6 @@ import matplotlib.pyplot as mpl
 import numpy as np
 import numpy.typing as npt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qt5agg import (
-    NavigationToolbar2QT as NavigationToolbar2QTAgg,
-)
 from qtpy.QtCore import QObject, Qt, QThread, Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
@@ -63,6 +60,7 @@ from MDANSE.Mathematics.Signal import (
     filter_description_string,
 )
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
 
 # Default maximum value for a float spinbox
 DEFAULT_SPINBOX_MAX_FLOAT = 1000.0
@@ -1491,7 +1489,7 @@ class FilterDesigner(QDialog):
         figure = mpl.figure(figsize=[fig_width, fig_height], dpi=dpi, frameon=True)
         figAgg = FigureCanvasQTAgg(figure)
         figAgg.setParent(canvas)
-        toolbar = NavigationToolbar2QTAgg(figAgg, canvas)
+        toolbar = MDANSEMatPlotLibNavBar(figAgg, canvas)
         toolbar.update()
         figAgg.setMinimumSize(*self._canvas_dimensions.values())
         figAgg.setFixedSize(*self._canvas_dimensions.values())
