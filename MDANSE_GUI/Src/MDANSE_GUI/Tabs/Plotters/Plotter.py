@@ -96,6 +96,8 @@ NORMALISATION_DEFAULTS = {
     "operation": NormOperations.AVERAGE,
 }
 
+ValidPlotters = Literal["Grid", "Heatmap", "Single"]
+
 
 class Plotter(RegisterFactory):
     """Parent class to all classes used for displaying data."""
