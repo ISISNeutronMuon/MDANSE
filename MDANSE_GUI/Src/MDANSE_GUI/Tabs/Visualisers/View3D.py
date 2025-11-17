@@ -51,19 +51,18 @@ class View3D(QWidget):
         self.load_placeholder()
 
     def load_placeholder(self):
+        self._viewer.clear_panel()
         self._viewer.load_trajectory_placeholder_3d_model()
-
-
 
     @Slot(tuple)
     def update_panel(self, data: tuple):
         fullpath, incoming = data
         if fullpath == "" or data is None:
-            self._viewer.clear_render_window()
+            self._viewer._camera.SetParallelProjection(0)
             self.load_placeholder()
+            return
 
         try:
-            self._viewer.clear_render_window()
             self._viewer._new_trajectory_object(fullpath, incoming)
         except AttributeError:
             self.error.emit(f"3D View could not visualise {fullpath}")

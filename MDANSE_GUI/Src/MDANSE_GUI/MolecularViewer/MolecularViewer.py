@@ -24,7 +24,7 @@ import more_itertools
 import numpy as np
 import vtk
 from qtpy import QtWidgets
-from qtpy.QtCore import Signal, Slot
+from qtpy.QtCore import QTimer, Signal, Slot
 from qtpy.QtWidgets import QSizePolicy
 from scipy.interpolate import CubicSpline
 from scipy.spatial import cKDTree as KDTree
@@ -138,6 +138,14 @@ class MolecularViewer(QtWidgets.QWidget):
         self._axes_renderer.SetActiveCamera(self._axes_camera)
         self._axes_camera.SetFocalPoint(0, 0, 0)
         self._axes_camera.SetPosition(0, 0, 8)
+
+        # Initialize rotation parameters
+        self.rotation_angle = 0
+        self.rotation_speed = 10
+
+        # Animation timer for rotating the 3D model
+        self._animation_timer = QTimer()
+        self._animation_timer.timeout.connect(self.animate_rotation)
 
         def update_axes_orientation(caller, event):
             """The axes camera needs to rotate with the main camera."""
@@ -276,13 +284,15 @@ class MolecularViewer(QtWidgets.QWidget):
 
         reader = hdf5wrapper.HDF5Wrapper(fname, trajectory, trajectory.chemical_system)
         self.set_reader(reader)
+        self._animation_timer.stop()
 
     def create_actor_for_placeholder_3d_model(
         self,
         filename: str,
         colour: tuple[float, float, float],
         scale: float,
-        position: tuple[float, float, float]):
+        position: tuple[float, float, float],
+    ):
         """_summary_
 
         Parameters
@@ -322,7 +332,9 @@ class MolecularViewer(QtWidgets.QWidget):
             raise TypeError("Each position value must be a float or int.")
 
         reader = vtk.vtkSTLReader()
-        filepath = os.path.join(os.path.dirname(__file__), "..", "Tabs", "Visualisers", filename)  # Ensure os is imported
+        filepath = os.path.join(
+            os.path.dirname(__file__), "..", "Tabs", "Visualisers", filename
+        )  # Ensure os is imported
         reader.SetFileName(filepath)
         reader.Update()
 
@@ -334,57 +346,71 @@ class MolecularViewer(QtWidgets.QWidget):
         actor.GetProperty().SetColor(colour)
         actor.SetPosition(position)
         actor.SetScale(scale)
-        #make center sphere metallic and semi-transparent
+        # make center sphere metallic and semi-transparent
         if filename == "center_sphere.stl":
-            actor.GetProperty().SetOpacity(0.5)  # Make the center sphere semi-transparent
+            actor.GetProperty().SetOpacity(
+                0.5
+            )  # Make the center sphere semi-transparent
             actor.GetProperty().SetSpecular(1)
             actor.GetProperty().SetSpecularPower(100)
             actor.GetProperty().SetMetallic(1.0)
             actor.GetProperty().SetRoughness(0.2)
 
-        #continue rotating the actor around Z axis
-        #self.rotate_actor(actor, 45.0)
-
-
         return actor
 
     def load_trajectory_placeholder_3d_model(self):
-        """Loads a 3D blender model of mdanse into the viewer.
+        """Loads a 3D blender model of mdanse into the viewer."""
 
-        Parameters
-        ----------
-        path : str
-            _description_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
-
+        self._actors = vtk.vtkAssembly()
         spheres = [
-        ("center_sphere.stl", (0.5, 0.5, 0.5), 0.3, (0, 0, 0)),       # grey center
-        ("yellow_sphere.stl", (1.0, 1.0, 0.0), 0.3, (0, 0, 0)),
-        ("blue_sphere.stl", (0.0, 0.0, 1.0), 0.3, (0, 0, 0)),
-        ("red_sphere.stl", (1.0, 0.0, 0.0), 0.3, (0, 0, 0)),
-    ]
+            ("center_sphere.stl", (0.5, 0.5, 0.5), 0.3, (0, 0, 0)),  # grey center
+            ("yellow_sphere.stl", (1.0, 1.0, 0.0), 0.3, (0, 0, 0)),
+            ("blue_sphere.stl", (0.0, 0.0, 1.0), 0.3, (0, 0, 0)),
+            ("red_sphere.stl", (1.0, 0.0, 0.0), 0.3, (0, 0, 0)),
+        ]
 
-        for filename, colour, position, scale  in spheres:
-            actor = self.create_actor_for_placeholder_3d_model(filename, colour, position, scale)
-            self._renderer.AddActor(actor)
+        for filename, colour, position, scale in spheres:
+            actor = self.create_actor_for_placeholder_3d_model(
+                filename, colour, position, scale
+            )
+            self._actors.AddPart(actor)
 
-        for filename, colour, scale, position in spheres:
-            actor = self.create_actor_for_placeholder_3d_model(filename, colour, scale, position)
-            self._renderer.AddActor(actor)
+        self._animation_timer.start(50)
 
-        # rendering
-        if self.reset_camera:
-            self._renderer.ResetCamera()
-            self.reset_camera = False
+        self._renderer.AddActor(self._actors)
 
+        # side view camera
+        self._camera.SetPosition(20, 0, 0)
+        self._camera.SetFocalPoint(0, 0, 0)
+        self._camera.SetViewUp(0, 0, 1)
+
+        # Reset camera to fit the model
+        self._renderer.ResetCamera()
         self._iren.GetRenderWindow().Render()
         self._iren.Render()
 
+    def animate_rotation(self):
+        """Continuously rotates the 3D model."""
+        if self._animation_timer.isActive():
+            self.rotation_angle = (self.rotation_angle + self.rotation_speed) % 360
+            self.rotate_3D_model_actor(self.rotation_angle)
+            self._iren.Render()
+
+    def rotate_3D_model_actor(self, angle):
+        """Rotates the given actor by the specified angle around axis."""
+
+        # different axis rotation for each actor in the assembly
+        for i, actor in enumerate(self._actors.GetParts()):
+            individual_transform = vtk.vtkTransform()
+            if i == 0:  # center sphere
+                individual_transform.RotateZ(angle)
+            elif i == 1:  # yellow sphere
+                individual_transform.RotateZ(-angle)
+            elif i == 2:  # blue sphere
+                individual_transform.RotateX(angle)
+            elif i == 3:  # red sphere
+                individual_transform.RotateX(-angle)
+            actor.SetUserTransform(individual_transform)
 
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
@@ -738,14 +764,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self.atom_actor = None
 
         del self._actors
-
-    #clears the render window after removing all view props
-    def clear_render_window(self):
-        self.renderer.RemoveAllViewProps()
-        self._renderer.ResetCamera()
-        #self.get_render_window().Render()
-        self._iren.Render()
-
 
     def create_atom_label_actors(self):
         """Creates atom label actors, setting the text to the chosen
