@@ -24,7 +24,7 @@ from string import ascii_uppercase as upcase
 from typing import Any, Literal
 
 import numpy as np
-from more_itertools import first, split_before, spy
+from more_itertools import first, one, sort_together, split_before, spy
 from numpy.typing import NDArray
 
 from MDANSE.Core.Error import Error
@@ -631,11 +631,11 @@ class LAMMPSConfigFile(Parser, dict):
                 f" and existing element names ({', '.join(self['elements'].values())})."
             )
 
-        return {
-            "mass": np.array(
-                [elem[0] for elem in float_list_parser(lines).values()], dtype=float
-            )
-        }
+        data = float_list_parser(lines)
+        ind = np.argsort([int(x) for x in data])
+        masses = np.array([one(x) for x in data.values()], dtype=float)
+
+        return {"mass": masses[ind]}
 
     def elements_parser(
         self, lines: Iterable[str], *_
