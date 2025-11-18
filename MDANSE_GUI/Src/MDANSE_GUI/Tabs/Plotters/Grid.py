@@ -46,7 +46,7 @@ class Grid(Plotter):
         self._backup_limits = []
         self._active_curves = []
         self._backup_curves = []
-        self._plot_limit = 8
+        self._plot_limit = 9
         self._title_length_limit = 30
 
     def slider_labels(self) -> list[str]:
@@ -234,9 +234,10 @@ class Grid(Plotter):
                 colour=databundle.colour,
             )
 
-            if plotting_context.use_legend:
-                axes.legend()
+            axes.legend()
             axes.grid(plotting_context.use_grid)
+
+        axes.get_legend().set_visible(plotting_context.use_legend)
 
         self.apply_settings(plotting_context)
         self.check_curve_lengths()

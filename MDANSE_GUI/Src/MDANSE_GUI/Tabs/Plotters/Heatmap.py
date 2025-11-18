@@ -229,9 +229,7 @@ class Heatmap(Plotter):
             limits = []
             x_axis_labels, y_axis_labels = [], []
 
-            for name in dataset.axes_main_order(
-                databundle.main_axis, ind=self._slice_axis
-            ):
+            for name in dataset._axes:
                 axis_array = dataset.x_axis(name)
                 limits += [axis_array[0], axis_array[-1]]
                 if not x_axis_labels:
