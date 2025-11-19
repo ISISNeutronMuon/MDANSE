@@ -2,7 +2,7 @@ Parallelism of MDANSE tasks
 ===========================
 
 Analysis tasks normally run on a single CPU core. Their configuration
-contains an input parameter :code:`"running_mode"`, shown in the scripts as
+contains an input parameter :code:`running_mode`, shown in the scripts as
 
 .. code-block:: python
 
@@ -22,7 +22,7 @@ be performed by separate processes. Typically, one step of an analysis
 is dealing either with a single atom, or with a single q-vector shell.
 
 To parallelise an analysis over 8 processes, the value of
-:code:`"running_mode"` can be replaced with
+:code:`running_mode` can be replaced with
 
 .. code-block:: python
 
