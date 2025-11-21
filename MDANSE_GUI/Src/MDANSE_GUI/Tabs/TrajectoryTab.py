@@ -23,8 +23,6 @@ from pathlib import PurePath
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
-from MDANSE.Core.Platform import PLATFORM
-
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewerExtended
 from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
@@ -50,6 +48,9 @@ the atom over all simulation frames.
 
 
 class TrajectoryTab(GeneralTab):
+    DEFAULT_JSON_PATH = PLATFORM.application_directory() / "recent_trajectory_file.json"
+    MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDT Trajectories", self.load_trajectories)
@@ -73,7 +74,6 @@ class TrajectoryTab(GeneralTab):
         if fnames[0]:
             self.set_path("trajectory", str(PurePath(last_path)))
             self._session.save()
-        #self.recent_trajectory_files(loaded_files)
 
     @Slot(str)
     def load_trajectory(self, some_fname: str):
@@ -82,6 +82,45 @@ class TrajectoryTab(GeneralTab):
             _, short_name = os.path.split(fname)
             self._core._model.append_object((fname, short_name))
             self._session.protect_filename(fname)
+
+    def recent_trajectory_files(self, files: list[str] = ()) -> list[str]:
+        """_summary_
+        Adding recently loaded trajectory files to a json file. The json file is used to
+        populate the "Open Recent Trajectories File" menu in the File menu.
+
+        Parameters
+        ----------
+        files : list[str], optional
+            _description_, by default ()
+
+        Returns
+        -------
+        list[str]
+            _description_
+        """
+
+        filename = self.DEFAULT_JSON_PATH
+        max_num_files = self.MAX_NUMBER_RECENT_FILES
+
+        if os.path.exists(filename):
+            with open(filename) as f:
+                recent_files = json.load(f)
+                for file in files:
+                    if file in recent_files:
+                        recent_files.remove(file)
+                    recent_files.append(file)
+        else:
+            recent_files = []
+            for file in files:
+                recent_files.append(file)
+
+        if len(recent_files) > max_num_files:
+            recent_files = recent_files[-max_num_files:]
+
+        with open(filename, "w") as f:
+            json.dump(recent_files, f, indent=4)
+
+        return recent_files
 
     @classmethod
     def gui_instance(

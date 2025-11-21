@@ -232,12 +232,21 @@ class TabbedWindow(QMainWindow):
         self.destroy(True, True)
 
     @Slot()
+<<<<<<< HEAD
     def populate_recent_trajectory_menu(self, filename=TrajectoryModel.DEFAULT_JSON_PATH):
+=======
+    def populate_recent_trajectory_menu(self, filename=TrajectoryTab.DEFAULT_JSON_PATH):
+>>>>>>> 0a31be5c7f06953bd92ea45020d68ec8d1406a6d
         """Populate the recent trajectory files menu in the File menu."""
         self.recent_trajectory_fileAct.clear()
         if os.path.exists(filename):
             with open(filename) as f:
                 data = json.load(f)
+<<<<<<< HEAD
+=======
+                if not isinstance(data, list):
+                    raise ValueError("Recent trajectory file is not a list")
+>>>>>>> 0a31be5c7f06953bd92ea45020d68ec8d1406a6d
                 data = list(reversed(data))
                 for file in data:
                     action = QAction(file, self.recent_trajectory_fileAct)
