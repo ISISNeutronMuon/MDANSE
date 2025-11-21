@@ -16,6 +16,8 @@
 from __future__ import annotations
 
 import itertools
+import json
+import os
 import traceback
 from enum import Enum, auto
 
@@ -31,6 +33,7 @@ from qtpy.QtCore import (
 )
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
+from MDANSE.Core.Platform import PLATFORM
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
@@ -90,10 +93,14 @@ class TrajectoryModel(QStandardItemModel):
     """Like GeneralModel, but should implement trajectory
     loading in the background."""
 
+    DEFAULT_JSON_PATH = PLATFORM.application_directory() / "recent_trajectory_file.json"
+    MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
+
     error = Signal(str)
     all_elements = Signal(object)
     finished_loading = Signal(int)
     free_name = Signal(str)
+    recent_files_update = Signal(str)
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
@@ -104,6 +111,7 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_status = {}
         self._loading_threads = {}
         self._next_number = itertools.count()
+        self.recent_files_update.connect(self.recent_trajectory_files)
 
     @Slot(tuple)
     def append_object(self, input: tuple) -> int:
@@ -152,7 +160,32 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_instances[index] = trajectory
         self._trajectory_status[index] = LoadStatus.READY
         self.finished_loading.emit(index)
+        filename = self._trajectory_paths[index]
+        self.recent_files_update.emit(filename)
         # self._loading_threads[index].wait()
+
+    @Slot(str)
+    def recent_trajectory_files(self, traj_filepath: str):
+        filename = self.DEFAULT_JSON_PATH
+        max_num_files = self.MAX_NUMBER_RECENT_FILES
+        if os.path.exists(filename) and os.path.getsize(filename) > 0:
+            with open(filename) as f:
+                recent_files = json.load(f)
+        else:
+            recent_files = []
+
+        if traj_filepath in recent_files:
+            recent_files.remove(traj_filepath)
+        recent_files.append(traj_filepath)
+
+        if len(recent_files) > max_num_files:
+            delete_number_of_files = len(recent_files) - max_num_files
+            while delete_number_of_files > 0:
+                recent_files.pop(0)
+                delete_number_of_files -= 1
+
+        with open(filename, "w") as f:
+            json.dump(recent_files, f, indent=4)
 
     @Slot(int)
     def accept_failure(self, index) -> None:

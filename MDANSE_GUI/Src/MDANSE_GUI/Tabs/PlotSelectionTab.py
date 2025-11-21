@@ -23,6 +23,8 @@ from pathlib import PurePath
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
+from MDANSE.Core.Platform import PLATFORM
+
 from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
@@ -114,21 +116,22 @@ class PlotSelectionTab(GeneralTab):
         """
         filename = self.DEFAULT_JSON_PATH
         max_num_files = self.MAX_NUMBER_RECENT_FILES
-
-        if os.path.exists(filename):
+        if os.path.exists(filename) and os.path.getsize(filename) > 0:
             with open(filename) as f:
                 recent_files = json.load(f)
-                for file in files:
-                    if file in recent_files:
-                        recent_files.remove(file)
-                    recent_files.append(file)
         else:
             recent_files = []
-            for file in files:
-                recent_files.append(file)
+
+        for file in files:
+            if file in recent_files:
+                recent_files.remove(file)
+            recent_files.append(file)
 
         if len(recent_files) > max_num_files:
-            recent_files = recent_files[-max_num_files:]
+            delete_number_of_files = len(recent_files) - max_num_files
+            while delete_number_of_files > 0:
+                recent_files.pop(0)
+                delete_number_of_files -= 1
 
         with open(filename, "w") as f:
             json.dump(recent_files, f, indent=4)
