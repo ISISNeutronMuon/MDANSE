@@ -24,12 +24,7 @@ from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
 from MDANSE.Core.Platform import PLATFORM
-<<<<<<< HEAD
-
 from MDANSE_GUI.Session.Session import Session
-=======
-from MDANSE_GUI.Session.LocalSession import LocalSession
->>>>>>> 0a31be5c7f06953bd92ea45020d68ec8d1406a6d
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.PlotDataModel import PlotDataModel
@@ -120,7 +115,6 @@ class PlotSelectionTab(GeneralTab):
         """
         filename = self.DEFAULT_JSON_PATH
         max_num_files = self.MAX_NUMBER_RECENT_FILES
-<<<<<<< HEAD
         if os.path.exists(filename) and os.path.getsize(filename) > 0:
             with open(filename) as f:
                 recent_files = json.load(f)
@@ -137,55 +131,11 @@ class PlotSelectionTab(GeneralTab):
             while delete_number_of_files > 0:
                 recent_files.pop(0)
                 delete_number_of_files -= 1
-=======
-
-        if os.path.exists(filename):
-            with open(filename) as f:
-                recent_files = json.load(f)
-                for file in files:
-                    if file in recent_files:
-                        recent_files.remove(file)
-                    recent_files.append(file)
-        else:
-            recent_files = []
-            for file in files:
-                recent_files.append(file)
-
-        if len(recent_files) > max_num_files:
-            recent_files = recent_files[-max_num_files:]
->>>>>>> 0a31be5c7f06953bd92ea45020d68ec8d1406a6d
 
         with open(filename, "w") as f:
             json.dump(recent_files, f, indent=4)
 
         return recent_files
-<<<<<<< HEAD
-=======
-
-    @classmethod
-    def standard_instance(cls):
-        the_tab = cls(
-            window,
-            name="Plotting",
-            session=LocalSession(),
-            model=PlotDataModel(),
-            view=PlotDataView(),
-            visualiser=DataPlotter(),
-            layout=partial(
-                MultiPanel,
-                left_panels=[
-                    PlotDataInfo(
-                        header="MDANSE Plotting",
-                        footer="Look up our "
-                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
-                        + " page.",
-                    )
-                ],
-            ),
-            label_text=label_text,
-        )
-        return the_tab
->>>>>>> 0a31be5c7f06953bd92ea45020d68ec8d1406a6d
 
     @classmethod
     def gui_instance(
