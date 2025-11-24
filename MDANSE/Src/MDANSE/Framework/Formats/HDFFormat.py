@@ -181,7 +181,8 @@ class HDFFormat(IFormat):
             outputFile = h5py.File.in_memory()
 
         else:
-            filename = Path(filename).with_suffix(extension)
+            filepath = Path(filename)
+            filename = filepath.with_name(filepath.name + extension)
 
             # The HDF output file is opened for writing.
             PLATFORM.create_directory(filename.parent)
