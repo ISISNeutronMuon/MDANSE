@@ -182,7 +182,10 @@ class HDFFormat(IFormat):
 
         else:
             filepath = Path(filename)
-            filename = filepath.with_name(filepath.name + extension)
+            if "." in filepath:
+                filename = filepath.with_name(filepath.name + extension)
+            else:
+                filename = filepath.with_suffix(extension)
 
             # The HDF output file is opened for writing.
             PLATFORM.create_directory(filename.parent)
