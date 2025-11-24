@@ -232,7 +232,9 @@ class TabbedWindow(QMainWindow):
         self.destroy(True, True)
 
     @Slot()
-    def populate_recent_trajectory_menu(self, filename=TrajectoryModel.DEFAULT_JSON_PATH):
+    def populate_recent_trajectory_menu(
+        self, filename=TrajectoryModel.DEFAULT_JSON_PATH
+    ):
         """Populate the recent trajectory files menu in the File menu."""
         self.recent_trajectory_fileAct.clear()
         if os.path.exists(filename):
