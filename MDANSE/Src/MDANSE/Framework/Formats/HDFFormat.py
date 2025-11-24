@@ -182,7 +182,7 @@ class HDFFormat(IFormat):
 
         else:
             filepath = Path(filename)
-            if "." in filepath:
+            if "." in filepath.name:
                 filename = filepath.with_name(filepath.name + extension)
             else:
                 filename = filepath.with_suffix(extension)
