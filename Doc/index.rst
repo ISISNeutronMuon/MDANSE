@@ -112,5 +112,6 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
    pages/analysis_jobs
    pages/parameters
    pages/R_units
+   pages/R_parallel
    pages/R_further
    pages/references
