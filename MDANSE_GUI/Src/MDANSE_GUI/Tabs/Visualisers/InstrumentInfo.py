@@ -62,7 +62,7 @@ class SimpleInstrument:
     sample_options = ("isotropic", "crystal")
     technique_options = ("QENS", "INS")
     resolution_options = tuple(map(str, widget_text_map))
-    qvector_options = tuple(map(str, IQVectors.indirect_subclasses()))
+    qvector_options = tuple(IQVectors.raw_names())
     energy_units = ("meV", "1/cm", "THz")
     momentum_units = ("1/ang", "1/nm", "1/Bohr")
 

@@ -107,7 +107,7 @@ def show_results_contents(filename: str, *, verbose: bool) -> str:
 
 def show_jobs(*, show_converters: bool = False):
     if show_converters:
-        converters = Converter.indirect_subclasses()
+        converters = Converter.available_names()
         output = "\n".join(
             [
                 "==Converters==",
@@ -116,7 +116,7 @@ def show_jobs(*, show_converters: bool = False):
         )
     else:
         analyses = []
-        for job_name in IJob.indirect_subclasses():
+        for job_name in IJob.available_names():
             instance = IJob.create(job_name)
             if instance.category[0] != "Converters" and instance.enabled:
                 analyses.append([*getattr(instance, "category", []), job_name])
@@ -130,9 +130,9 @@ def show_jobs(*, show_converters: bool = False):
 
 
 def show_single_job(job_name: str):
-    if job_name in IJob.indirect_subclasses():
+    if job_name in IJob.available_names():
         instance = IJob.create(job_name)
-    elif job_name in Converter.indirect_subclasses():
+    elif job_name in Converter.available_names():
         instance = Converter.create(job_name)
     else:
         raise KeyError(f"{job_name} is not a converter or analysis included in MDANSE.")

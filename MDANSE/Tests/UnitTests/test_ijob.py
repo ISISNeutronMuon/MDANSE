@@ -7,8 +7,6 @@ from MDANSE.Framework.Jobs.IJob import IJob
 ALL_JOBS = [
     "AreaPerMolecule",
     "AverageStructure",
-    "CartesianCorrelationFunction",
-    "CartesianPowerSpectrum",
     "CenterOfMassesTrajectory",
     "DistanceHistogram",
     "CurrentCorrelationFunction",
@@ -40,7 +38,6 @@ ALL_JOBS = [
     "VanHoveFunctionSelf",
     "VelocityCorrelationFunction",
     "Voronoi",
-    "Converter",
     "CoordinationNumber",
     "PairDistributionFunction",
     "StaticStructureFactor",
@@ -70,8 +67,8 @@ def test_create_template_with_the_wrong_jobname_raises_error():
         IJob.create("QWERTY").save(temp_name)
 
 
-def test_indirect_subclasses_creates_list_of_all_possible_jobs():
-    assert set(ALL_JOBS) == set(IJob.indirect_subclasses())
+def test_available_names_creates_list_of_all_possible_jobs():
+    assert set(ALL_JOBS) == set(IJob.raw_names())
 
 
 @pytest.mark.parametrize("jobname", ALL_JOBS)

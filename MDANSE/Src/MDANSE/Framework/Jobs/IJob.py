@@ -595,3 +595,8 @@ class IJob(Configurable, RegisterFactory, ABC):
             if handler.name == self._log_filename:
                 handler.close()
                 LOG.removeHandler(handler)
+
+
+class Dummy(IJob):
+    def run_step(self):
+        raise NotImplementedError(f"{type(self).__name__} is never meant to be run.")

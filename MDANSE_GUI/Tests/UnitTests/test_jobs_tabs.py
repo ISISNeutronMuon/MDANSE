@@ -18,11 +18,9 @@ from MDANSE_GUI.Tabs.JobTab import JobTab
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 
-CONVERTER_SUBCLASSES = Converter.indirect_subclass_dictionary()
-ENABLED_CONVERTERS = {
-    key: val for key, val in CONVERTER_SUBCLASSES.items() if val.enabled
-}
-IJOB_SUBCLASSES = IJob.indirect_subclass_dictionary()
+CONVERTER_SUBCLASSES = Converter.raw_dict()
+ENABLED_CONVERTERS = {key: val for key, val in CONVERTER_SUBCLASSES.items() if val.enabled}
+IJOB_SUBCLASSES = IJob.raw_dict()
 ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.enabled}
 
 

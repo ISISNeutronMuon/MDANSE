@@ -34,7 +34,7 @@ from qtpy.QtWidgets import (
 from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
     HDFTrajectoryConfigurator,
 )
-from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.IJob import Dummy, IJob
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
@@ -142,7 +142,7 @@ class Action(QWidget):
         self._trajectory_instance = None
         self._settings = None
         self._job_name = None
-        self._job_instance = IJob()
+        self._job_instance = Dummy()
         self._use_preview = use_preview
         self._current_instrument = None
         self._has_been_initialised = False
@@ -178,7 +178,7 @@ class Action(QWidget):
         if new_path == self._input_traj_path:
             LOG.debug("Skipping set_trajectory, no change.")
             return
-        self._job_instance = IJob()
+        self._job_instance = Dummy()
         self._trajectory_instance = trajectory
         self._trajectory_configurator = HDFTrajectoryConfigurator(
             "Input Trajectory", instance=trajectory

@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar
 
-from MDANSE.Core.SubclassFactory import RegisterFactory
+from MDANSE.Core.RegisterFactory import RegisterFactory
 from MDANSE.IO.IOUtils import UCDict
 
 if TYPE_CHECKING:
