@@ -20,11 +20,13 @@ from collections.abc import Callable, Iterable
 from typing import Any
 
 from MDANSE.Framework.AtomMapping import AtomLabel
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Parsers import Parser
 
 from .InputFileConfigurator import InputFileConfigurator
 
 
+@IConfigurator.register("FileWithAtomDataConfigurator")
 class FileWithAtomDataConfigurator(InputFileConfigurator):
     """
     Class for handling files that contain atom information.

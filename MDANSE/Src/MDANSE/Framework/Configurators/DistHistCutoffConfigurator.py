@@ -19,10 +19,13 @@ from math import floor
 
 import numpy as np
 
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
 from .IConfigurator import PredictionSettings
 from .RangeConfigurator import RangeConfigurator
 
 
+@IConfigurator.register("DistHistCutoffConfigurator")
 class DistHistCutoffConfigurator(RangeConfigurator):
     """Range of interatomic distances for a histogram.
 

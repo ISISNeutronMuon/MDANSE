@@ -15,11 +15,13 @@
 #
 from __future__ import annotations
 
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.MoleculeSelectionConfigurator import (
     MoleculeSelectionConfigurator,
 )
 
 
+@IConfigurator.register("AxisSelectionConfigurator")
 class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
     """Defines a local axis in a molecule.
 

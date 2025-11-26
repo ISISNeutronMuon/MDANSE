@@ -20,8 +20,10 @@ from contextlib import suppress
 import mdtraj as md
 
 from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("MDTrajTimeStepConfigurator")
 class MDTrajTimeStepConfigurator(FloatConfigurator):
     """Inputs the time step value for the MDTraj converter."""
 

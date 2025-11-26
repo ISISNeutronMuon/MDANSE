@@ -20,6 +20,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
 )
 
 
+@IConfigurator.register("SingleChoiceConfigurator")
 class SingleChoiceConfigurator(IConfigurator):
     """Selects a single item from multiple choices."""
 

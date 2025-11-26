@@ -15,9 +15,11 @@
 #
 from __future__ import annotations
 
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.IntegerConfigurator import IntegerConfigurator
 
 
+@IConfigurator.register("DerivativeOrderConfigurator")
 class DerivativeOrderConfigurator(IntegerConfigurator):
     """Specifies the order of a numerical derivative.
 

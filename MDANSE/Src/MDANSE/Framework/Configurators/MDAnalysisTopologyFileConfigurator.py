@@ -20,10 +20,12 @@ from collections.abc import Iterable
 import MDAnalysis as mda
 
 from MDANSE.Framework.AtomMapping import AtomLabel
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 
+@IConfigurator.register("MDAnalysisTopologyFileConfigurator")
 class MDAnalysisTopologyFileConfigurator(FileWithAtomDataConfigurator):
     """Constructs and MDAnalysis.Universe from the input file.
 

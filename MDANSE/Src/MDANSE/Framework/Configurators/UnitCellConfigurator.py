@@ -21,6 +21,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MLogging import LOG
 
 
+@IConfigurator.register("UnitCellConfigurator")
 class UnitCellConfigurator(IConfigurator):
     """Input a unit cell definition.
 

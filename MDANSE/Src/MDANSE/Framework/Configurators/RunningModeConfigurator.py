@@ -20,6 +20,7 @@ import multiprocessing
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("RunningModeConfigurator")
 class RunningModeConfigurator(IConfigurator):
     """Specifies how many CPU cores will be used by this task.
 

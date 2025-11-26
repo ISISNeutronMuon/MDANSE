@@ -29,6 +29,7 @@ from MDANSE.Mathematics.Signal import (
 )
 
 
+@IConfigurator.register("TrajectoryFilterConfigurator")
 class TrajectoryFilterConfigurator(IConfigurator):
     """Defines the filter that will be applied to atom positions.
 

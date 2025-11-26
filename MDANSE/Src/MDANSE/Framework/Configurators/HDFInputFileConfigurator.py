@@ -19,9 +19,11 @@ import traceback
 
 import h5py
 
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 
 
+@IConfigurator.register("HDFInputFileConfigurator")
 class HDFInputFileConfigurator(InputFileConfigurator):
     """Uses an .mda file from another analysis as input."""
 

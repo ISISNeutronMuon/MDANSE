@@ -18,6 +18,7 @@ from __future__ import annotations
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("FloatConfigurator")
 class FloatConfigurator(IConfigurator):
     """Inputs a single floating-point number."""
 

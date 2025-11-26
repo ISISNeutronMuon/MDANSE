@@ -21,6 +21,7 @@ from MDANSE.Framework.AtomSelector.selector import ReusableSelection
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("AtomSelectionConfigurator")
 class AtomSelectionConfigurator(IConfigurator):
     """Selects atoms in trajectory based on the input string.
 

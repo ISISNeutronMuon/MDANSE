@@ -18,13 +18,13 @@ from __future__ import annotations
 import abc
 import json
 from collections.abc import Iterator, Sequence
-from typing import TYPE_CHECKING, Any, NamedTuple
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple
 from warnings import warn
 
 from more_itertools import value_chain
 
-from MDANSE.Core.SubclassFactory import SubclassFactory
-from MDANSE.IO.IOUtils import MDANSEEncoder
+from MDANSE.Core.RegisterFactory import RegisterFactory
+from MDANSE.IO.IOUtils import MDANSEEncoder, UCDict
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
@@ -56,7 +56,7 @@ class PredictionSettings(NamedTuple):
     unit: str = "none"
 
 
-class IConfigurator(dict, metaclass=SubclassFactory):
+class IConfigurator(dict, RegisterFactory, abc.ABC):
     """The parent class for all the input parameter parsers.
 
     This class implements the base class for configurator objects.
@@ -74,6 +74,8 @@ class IConfigurator(dict, metaclass=SubclassFactory):
     it can happen that they depends on other configurators of the
     configuration.
     """
+
+    registry: ClassVar[UCDict[str, type[IConfigurator]]] = UCDict()
 
     _default = None
 

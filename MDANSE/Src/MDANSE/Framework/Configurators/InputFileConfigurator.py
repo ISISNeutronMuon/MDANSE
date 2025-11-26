@@ -20,6 +20,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
+@IConfigurator.register("InputFileConfigurator")
 class InputFileConfigurator(IConfigurator):
     """Uses a file as input. Very general."""
 

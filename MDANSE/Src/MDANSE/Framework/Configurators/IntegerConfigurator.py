@@ -20,6 +20,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
 )
 
 
+@IConfigurator.register("IntegerConfigurator")
 class IntegerConfigurator(IConfigurator):
     """Inputs a single integer number."""
 

@@ -22,6 +22,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 
+@IConfigurator.register("OutputFilesConfigurator")
 class OutputFilesConfigurator(IConfigurator):
     """Allows the user to choose the output file for writing.
 
