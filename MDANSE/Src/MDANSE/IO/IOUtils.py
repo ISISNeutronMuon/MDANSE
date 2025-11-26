@@ -17,11 +17,12 @@ from __future__ import annotations
 
 import json
 import re
+from collections import UserDict
 from enum import Enum
 from functools import singledispatch
 from itertools import filterfalse
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import numpy as np
 from more_itertools import first_true, last, take, value_chain
@@ -31,7 +32,36 @@ from MDANSE.MLogging import LOG
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Sequence
 
+K = TypeVar("K", str, bytes)
+V = TypeVar("V")
+
 MAX_FILE_COUNT = 2048
+
+
+class UCDict(UserDict[K, V]):
+    """Case insensitive dictionary where all keys are uppercase."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._raw = {}
+
+    def __setitem__(self, key: K, item: V) -> None:
+        super().__setitem__(key.upper(), item)
+        self._raw[key.upper()] = key
+
+    def __getitem__(self, key: K) -> V:
+        return super().__getitem__(key.upper())
+
+    def __contains__(self, key: K) -> bool:
+        return super().__contains__(key.upper())
+
+    @property
+    def raw_mapping(self) -> dict[K, K]:
+        return self._raw.copy()
+
+    @property
+    def raw_dict(self) -> dict[K, V]:
+        return {key: self[key] for key in self._raw.values()}
 
 
 class UCEnum(Enum):
