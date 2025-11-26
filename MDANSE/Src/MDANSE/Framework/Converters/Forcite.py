@@ -20,6 +20,7 @@ import numpy as np
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import TrjFile, XTDFile
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
@@ -31,6 +32,8 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 FORCE_FACTOR = measure(1.0, "kcal_per_mole/ang", equivalent=True).toval("Da nm/ps2 mol")
 
 
+@IJob.register("Forcite")
+@Converter.register("Forcite")
 class Forcite(Converter):
     """Converts a Forcite trajectory to an MDT trajectory."""
 

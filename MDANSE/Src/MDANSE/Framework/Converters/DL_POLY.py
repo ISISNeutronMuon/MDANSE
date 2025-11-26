@@ -22,13 +22,13 @@ from more_itertools import consume as drop
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import DLPField, DLPHistory
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class HistoryFileError(Exception):
@@ -39,6 +39,8 @@ class DL_POLYConverterError(Exception):
     pass
 
 
+@IJob.register("DL_POLY")
+@Converter.register("DL_POLY")
 class DL_POLY(Converter):
     """Converts a DL_POLY trajectory to an MDT trajectory."""
 

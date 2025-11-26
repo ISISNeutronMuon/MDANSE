@@ -23,9 +23,9 @@ from more_itertools import all_equal
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import CP2KCellFile, XYZFile
 from MDANSE.Framework.Units import measure
-from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -35,6 +35,8 @@ class CP2KConverterError(Exception):
     pass
 
 
+@IJob.register("CP2K")
+@Converter.register("CP2K")
 class CP2K(Converter):
     """Converts a CP2K trajectory to an MDT trajectory."""
 

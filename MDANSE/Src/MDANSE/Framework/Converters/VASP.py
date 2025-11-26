@@ -15,20 +15,23 @@
 #
 from __future__ import annotations
 
+import collections
+
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import XDATCARFile
-from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class VASPConverterError(Exception):
     pass
 
 
+@IJob.register("VASP")
+@Converter.register("VASP")
 class VASP(Converter):
     """Converts a VASP XDATCAR file to an MDT trajectory.
 

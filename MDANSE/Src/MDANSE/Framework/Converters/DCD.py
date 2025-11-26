@@ -15,23 +15,23 @@
 #
 from __future__ import annotations
 
+import collections
+
 import numpy as np
 
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import DCDFile, PDBFile
-from MDANSE.Framework.Units import measure
-from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
-from MDANSE.MolecularDynamics.Trajectory import (
-    TrajectoryWriter,
-)
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 PI_2 = 0.5 * np.pi
 RECSCALE32BIT = 1
 RECSCALE64BIT = 2
 
 
+@IJob.register("DCD")
+@Converter.register("DCD")
 class DCD(Converter):
     """Converts a DCD trajectory to an MDT trajectory."""
 

@@ -20,12 +20,15 @@ import numpy as np
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import CASTEPMDFile
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
+@IJob.register("CASTEP")
+@Converter.register("CASTEP")
 class CASTEP(Converter):
     """Converts a Castep Trajectory into an MDT trajectory file."""
 
