@@ -392,6 +392,7 @@ class DatasetFormatter:
         return header_lines, temp
 
 
+@Plotter.register("Text")
 class Text(Plotter):
     """Special plotter producing text instead of plots.
 
