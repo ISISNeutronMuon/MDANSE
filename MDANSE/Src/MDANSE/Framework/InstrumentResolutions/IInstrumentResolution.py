@@ -16,18 +16,22 @@
 from __future__ import annotations
 
 import abc
+from typing import ClassVar
 
 import numpy as np
 
-from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Core.RegisterFactory import RegisterFactory
 from MDANSE.Framework.Configurable import Configurable
+from MDANSE.IO.IOUtils import UCDict
 
 
 class InstrumentResolutionError(Exception):
     pass
 
 
-class IInstrumentResolution(Configurable, metaclass=SubclassFactory):
+class IInstrumentResolution(Configurable, RegisterFactory, abc.ABC):
+    registry: ClassVar[UCDict[str, type[IInstrumentResolution]]] = UCDict()
+
     def __init__(self):
         Configurable.__init__(self)
 

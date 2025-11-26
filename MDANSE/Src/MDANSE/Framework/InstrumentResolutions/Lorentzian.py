@@ -20,6 +20,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
+@IInstrumentResolution.register("Lorentzian")
 class Lorentzian(IInstrumentResolution):
     """
     Defines an instrument resolution with a lorentzian response
