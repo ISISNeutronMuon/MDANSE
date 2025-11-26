@@ -75,6 +75,7 @@ def van_hove_self(
     return histograms
 
 
+@IJob.register("VanHoveFunctionSelf")
 class VanHoveFunctionSelf(IJob):
     """Calculates the self part of the van Hove function.
 

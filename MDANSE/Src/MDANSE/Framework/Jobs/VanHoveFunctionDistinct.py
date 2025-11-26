@@ -319,6 +319,7 @@ def intramolecular_lookup_dict(
     return result
 
 
+@IJob.register("VanHoveFunctionDistinct")
 class VanHoveFunctionDistinct(IJob):
     """Calculates the distinct van Hove function.
 

@@ -31,6 +31,7 @@ from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
 )
 
 
+@IJob.register("DistanceHistogram")
 class DistanceHistogram(IJob):
     """Calculates a histogram of interatomic distances.
 

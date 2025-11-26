@@ -23,6 +23,7 @@ from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 
 
+@IJob.register("Infrared")
 class Infrared(IJob):
     """Calculates the infrared spectrum of a system of molecules.
 

@@ -21,6 +21,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import radius_of_gyration
 
 
+@IJob.register("RadiusOfGyration")
 class RadiusOfGyration(IJob):
     """Calculates the radius of gyration of selected atoms.
 

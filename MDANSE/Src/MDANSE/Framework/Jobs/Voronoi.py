@@ -38,6 +38,7 @@ class VoronoiError(Exception):
     pass
 
 
+@IJob.register("Voronoi")
 class Voronoi(IJob):
     """Performs the Voronoi analysis of available volume per atom.
 

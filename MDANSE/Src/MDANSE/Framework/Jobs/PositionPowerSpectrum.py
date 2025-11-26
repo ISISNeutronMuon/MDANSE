@@ -16,11 +16,13 @@
 from __future__ import annotations
 
 from MDANSE.Framework.Jobs.CartesianPowerSpectrum import CartesianPowerSpectrum
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Jobs.PositionCorrelationFunction import (
     PositionCorrelationFunction,
 )
 
 
+@IJob.register("PositionPowerSpectrum")
 class PositionPowerSpectrum(CartesianPowerSpectrum, PositionCorrelationFunction):
     """Calculates the position power spectrum.
 

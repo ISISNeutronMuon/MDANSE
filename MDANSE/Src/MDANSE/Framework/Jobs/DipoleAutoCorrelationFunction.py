@@ -22,6 +22,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
 
 
+@IJob.register("DipoleAutoCorrelationFunction")
 class DipoleAutoCorrelationFunction(IJob):
     """Calculates the Dipole Autocorrelation Function of a system.
 

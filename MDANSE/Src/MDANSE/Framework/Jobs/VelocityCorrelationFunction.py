@@ -18,9 +18,11 @@ from __future__ import annotations
 from MDANSE.Framework.Jobs.CartesianCorrelationFunction import (
     CartesianCorrelationFunction,
 )
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import differentiate
 
 
+@IJob.register("VelocityCorrelationFunction")
 class VelocityCorrelationFunction(CartesianCorrelationFunction):
     r"""Calculates the velocity correlation function of the selected atoms.
 

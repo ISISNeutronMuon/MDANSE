@@ -32,6 +32,7 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
+@IJob.register("TrajectoryEditor")
 class TrajectoryEditor(IJob):
     """Write out a modified version of the input trajectory.
 

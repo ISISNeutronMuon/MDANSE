@@ -26,6 +26,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
     update_pair_results,
 )
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
@@ -51,6 +52,7 @@ def atomic_scattering_factor(element, qvalues, trajectory):
     )
 
 
+@IJob.register("XRayStaticStructureFactor")
 class XRayStaticStructureFactor(DistanceHistogram):
     """Computes the X-ray static structure for a set of atoms.
 

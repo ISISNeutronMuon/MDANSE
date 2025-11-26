@@ -24,6 +24,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
+@IJob.register("ElasticIncoherentStructureFactor")
 class ElasticIncoherentStructureFactor(IJob):
     """Calculates the Elastic Incoherent Structure Factor of a trajectory.
 

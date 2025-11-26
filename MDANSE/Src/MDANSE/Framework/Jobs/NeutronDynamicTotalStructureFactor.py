@@ -30,6 +30,7 @@ class NeutronDynamicTotalStructureFactorError(Exception):
     pass
 
 
+@IJob.register("NeutronDynamicTotalStructureFactor")
 class NeutronDynamicTotalStructureFactor(IJob):
     r"""Combines the coherent and incoherent dynamic structure factors.
 

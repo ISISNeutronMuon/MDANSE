@@ -20,6 +20,7 @@ import numpy as np
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
+@IJob.register("MolecularTrace")
 class MolecularTrace(IJob):
     """Maps the volume occupied by atoms over time.
 

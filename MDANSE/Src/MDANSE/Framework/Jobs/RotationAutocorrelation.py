@@ -23,6 +23,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
 
 
+@IJob.register("RotationAutocorrelation")
 class RotationAutocorrelation(IJob):
     """Calculates the rotation angle correlation of molecules.
 

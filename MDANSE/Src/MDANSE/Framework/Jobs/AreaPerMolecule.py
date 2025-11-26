@@ -24,6 +24,7 @@ class AreaPerMoleculeError(Exception):
     pass
 
 
+@IJob.register("AreaPerMolecule")
 class AreaPerMolecule(IJob):
     """Computes the area per molecule.
 
