@@ -141,7 +141,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         # Initialize rotation parameters
         self.rotation_angle = 0
-        self.rotation_speed = 10
+        self.rotation_speed = 1
 
         # Animation timer for rotating the 3D model
         self._animation_timer = QTimer()
@@ -298,43 +298,24 @@ class MolecularViewer(QtWidgets.QWidget):
         Parameters
         ----------
         filename : str
-            _description_
+            filename with each sphere object
         colour : tuple[float, float, float]
-            _description_
+            Colour of each sphere object
         scale : float
-            _description_
+            The sphere object size
         position : tuple[float, float, float]
-            _description_
+            The position of each sphere
 
         Returns
         -------
         vtk.vtkActor
             The created actor
         """
-        # Validate colour
-        if not isinstance(colour, tuple):
-            raise TypeError("Colour must be a tuple.")
-        if len(colour) != 3:
-            raise ValueError("Colour must be a tuple of three values.")
-        if not all(isinstance(x, float) for x in colour):
-            raise TypeError("Each colour value must be a float.")
-
-        # Validate scale
-        if not isinstance(scale, float):
-            raise TypeError("Scale must be a float.")
-
-        # Validate position
-        if not isinstance(position, tuple):
-            raise TypeError("Position must be a tuple.")
-        if len(position) != 3:
-            raise ValueError("Position must be a tuple of three values.")
-        if not all(isinstance(x, (int, float)) for x in position):
-            raise TypeError("Each position value must be a float or int.")
 
         reader = vtk.vtkSTLReader()
         filepath = os.path.join(
-            os.path.dirname(__file__), "..", "Tabs", "Visualisers", filename
-        )  # Ensure os is imported
+            os.path.dirname(__file__), "..", "Tabs", "Visualisers", filename)
+        # filepath = Path(__file__).resolve().parents[3] / "Icons" / filename
         reader.SetFileName(filepath)
         reader.Update()
 
