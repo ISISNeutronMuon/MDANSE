@@ -24,9 +24,11 @@ from MDANSE.Framework.QVectors.CircularQVectors import (
     circle_of_vectors,
     circle_rotation_matrix,
 )
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors, fpsampling
 
 
+@IQVectors.register("CircularLatticeQVectors")
 class CircularLatticeQVectors(LatticeQVectors):
     """Generates Q vectors on a plane perpendicular to the 'axis' vector.
 

@@ -20,9 +20,11 @@ from operator import itemgetter
 import numpy as np
 from more_itertools import map_reduce
 
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
+@IQVectors.register("GridQVectors")
 class GridQVectors(LatticeQVectors):
     """Generates vectors on a grid.
 

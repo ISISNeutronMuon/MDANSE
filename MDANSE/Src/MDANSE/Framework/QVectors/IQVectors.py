@@ -16,14 +16,15 @@
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np
 import numpy.typing as npt
 from scipy.stats import truncnorm
 
-from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Core.RegisterFactory import RegisterFactory
 from MDANSE.Framework.Configurable import Configurable
+from MDANSE.IO.IOUtils import UCDict
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
@@ -115,9 +116,10 @@ def calculate_average_q_per_shell(vector_config: IQVectors) -> npt.NDArray[float
     return results
 
 
-class IQVectors(Configurable, metaclass=SubclassFactory):
+class IQVectors(Configurable, RegisterFactory, abc.ABC):
     """Parent class of all Q vector generators."""
 
+    registry: ClassVar[UCDict[str, IQVectors]] = UCDict()
     is_lattice = False
 
     def __init__(self, unit_cell: UnitCell | None, status=None):
