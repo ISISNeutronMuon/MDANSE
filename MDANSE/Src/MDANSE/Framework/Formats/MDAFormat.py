@@ -16,8 +16,10 @@
 from __future__ import annotations
 
 from MDANSE.Framework.Formats.HDFFormat import HDFFormat
+from MDANSE.Framework.Formats.IFormat import IFormat
 
 
+@IFormat.register("MDAFormat")
 class MDAFormat(HDFFormat):
     """
     This class handles the writing of output variables in MDA file format.

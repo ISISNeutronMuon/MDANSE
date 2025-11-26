@@ -37,6 +37,7 @@ def length_stringio(input: io.BytesIO) -> int:
     return result
 
 
+@IFormat.register("TextFormat")
 class TextFormat(IFormat):
     """
     This class handles the writing of output variables in Text format. Each output variable is written into separate Text files which are further
