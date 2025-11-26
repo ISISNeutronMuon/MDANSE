@@ -18,6 +18,7 @@ from __future__ import annotations
 from MDANSE.Framework.Projectors.IProjector import IProjector
 
 
+@IProjector.register("NullProjector")
 class NullProjector(IProjector):
     def set_axis(self, axis):
         pass
