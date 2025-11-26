@@ -16,13 +16,15 @@
 from __future__ import annotations
 
 import collections
-from typing import TYPE_CHECKING
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np
 import numpy.typing as npt
 
-from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Core.RegisterFactory import RegisterFactory
 from MDANSE.Framework.Formats.IFormat import IFormat
+from MDANSE.IO.IOUtils import UCDict
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -46,13 +48,15 @@ class OutputData(collections.OrderedDict):
             self.data_object = temp_format.write(basename, self, header, inputs)
 
 
-class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
+class IOutputVariable(np.ndarray, RegisterFactory):
     """
     Defines a MDANSE output variable.
 
     A MDANSE output variable is defined as s subclass of Numpy array that stores additional attributes.
     Those extra attributes will be contain information necessary for the the MDANSE plotter.
     """
+
+    registry: ClassVar[UCDict[str, type[IOutputVariable]]] = UCDict()
 
     def __new__(
         cls,
