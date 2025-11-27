@@ -166,14 +166,14 @@ class DensityOfStates(IJob):
 
         for element in self.trajectory.unique_names:
             self._outputData.add(
-                f"vcf/{element}",
+                f"vcf/isotropic/{element}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
                 axis="vcf/axes/time",
                 units="nm2/ps2",
             )
             self._outputData.add(
-                f"dos/{element}",
+                f"dos/isotropic/{element}",
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
                 axis="dos/axes/romega",
@@ -183,21 +183,21 @@ class DensityOfStates(IJob):
             )
             if self.add_ideal_results:
                 self._outputData.add(
-                    f"dos/ideal/{element}",
+                    f"dos/ideal/isotropic/{element}",
                     "LineOutputVariable",
                     (instrResolution["n_romegas"],),
                     axis="dos/axes/romega",
                     units="au",
                 )
         self._outputData.add(
-            "vcf/total",
+            "vcf/isotropic/total",
             "LineOutputVariable",
             (self.configuration["frames"]["n_frames"],),
             axis="dos/axes/time",
             units="nm2/ps2",
         )
         self._outputData.add(
-            "dos/total",
+            "dos/isotropic/total",
             "LineOutputVariable",
             (instrResolution["n_romegas"],),
             axis="dos/axes/romega",
@@ -206,7 +206,7 @@ class DensityOfStates(IJob):
         )
         if self.add_ideal_results:
             self._outputData.add(
-                "dos/ideal/total",
+                "dos/ideal/isotropic/total",
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
                 axis="dos/axes/romega",
@@ -216,24 +216,22 @@ class DensityOfStates(IJob):
         for element in self.trajectory.unique_names:
             for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
                 self._outputData.add(
-                    f"vcf/components/{i}{j}/{element}",
+                    f"vcf/{i}{j}/{element}",
                     "LineOutputVariable",
                     (self.configuration["frames"]["n_frames"],),
                     axis="vcf/axes/time",
                     units="nm2/ps2",
                 )
                 self._outputData.add(
-                    f"dos/components/{i}{j}/{element}",
+                    f"dos/{i}{j}/{element}",
                     "LineOutputVariable",
                     (instrResolution["n_romegas"],),
                     axis="dos/axes/romega",
                     units="au",
-                    main_result=True,
-                    partial_result=True,
                 )
                 if self.add_ideal_results:
                     self._outputData.add(
-                        f"dos/components/{i}{j}/ideal/{element}",
+                        f"dos/ideal/{i}{j}/{element}",
                         "LineOutputVariable",
                         (instrResolution["n_romegas"],),
                         axis="dos/axes/romega",
@@ -242,23 +240,22 @@ class DensityOfStates(IJob):
 
         for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
             self._outputData.add(
-                f"vcf/components/{i}{j}/total",
+                f"vcf/{i}{j}/total",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
                 axis="dos/axes/time",
                 units="nm2/ps2",
             )
             self._outputData.add(
-                f"dos/components/{i}{j}/total",
+                f"dos/{i}{j}/total",
                 "LineOutputVariable",
                 (instrResolution["n_romegas"],),
                 axis="dos/axes/romega",
                 units="au",
-                main_result=True,
             )
             if self.add_ideal_results:
                 self._outputData.add(
-                    f"dos/components/{i}{j}/ideal/total",
+                    f"dos/ideal/{i}{j}/total",
                     "LineOutputVariable",
                     (instrResolution["n_romegas"],),
                     axis="dos/axes/romega",
@@ -332,12 +329,12 @@ class DensityOfStates(IJob):
         element = self._atoms[self.trajectory.atom_indices[index]]
 
         isotropic = (vcfs[0] + vcfs[3] + vcfs[5]) / 3
-        self._outputData[f"vcf/{element}"] += isotropic
+        self._outputData[f"vcf/isotropic/{element}"] += isotropic
 
         for i, (j, k) in enumerate(
             it.combinations_with_replacement(["x", "y", "z"], 2)
         ):
-            self._outputData[f"vcf/components/{j}{k}/{element}"] += vcfs[i]
+            self._outputData[f"vcf/{j}{k}/{element}"] += vcfs[i]
 
     def finalize(self):
         """
@@ -346,32 +343,32 @@ class DensityOfStates(IJob):
 
         nAtomsPerElement = self.trajectory.get_natoms()
         for element, number in nAtomsPerElement.items():
-            self._outputData[f"vcf/{element}"][:] /= number
-            self._outputData[f"dos/{element}"][:] = get_spectrum(
-                self._outputData[f"vcf/{element}"],
+            self._outputData[f"vcf/isotropic/{element}"][:] /= number
+            self._outputData[f"dos/isotropic/{element}"][:] = get_spectrum(
+                self._outputData[f"vcf/isotropic/{element}"],
                 self.configuration["instrument_resolution"]["time_window"],
                 self.configuration["instrument_resolution"]["time_step"],
                 fft="rfft",
             )
             if self.add_ideal_results:
-                self._outputData[f"dos/ideal/{element}"][:] = get_spectrum(
-                    self._outputData[f"vcf/{element}"],
+                self._outputData[f"dos/ideal/isotropic/{element}"][:] = get_spectrum(
+                    self._outputData[f"vcf/isotropic/{element}"],
                     None,
                     self.configuration["instrument_resolution"]["time_step"],
                     fft="rfft",
                 )
             for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
-                self._outputData[f"vcf/components/{i}{j}/{element}"][:] /= number
-                self._outputData[f"dos/components/{i}{j}/{element}"][:] = get_spectrum(
-                    self._outputData[f"vcf/components/{i}{j}/{element}"],
+                self._outputData[f"vcf/{i}{j}/{element}"][:] /= number
+                self._outputData[f"dos/{i}{j}/{element}"][:] = get_spectrum(
+                    self._outputData[f"vcf/{i}{j}/{element}"],
                     self.configuration["instrument_resolution"]["time_window"],
                     self.configuration["instrument_resolution"]["time_step"],
                     fft="rfft",
                 )
                 if self.add_ideal_results:
-                    self._outputData[f"dos/components/{i}{j}/ideal/{element}"][:] = (
+                    self._outputData[f"dos/ideal/{i}{j}/{element}"][:] = (
                         get_spectrum(
-                            self._outputData[f"vcf/components/{i}{j}/{element}"],
+                            self._outputData[f"vcf/{i}{j}/{element}"],
                             None,
                             self.configuration["instrument_resolution"]["time_step"],
                             fft="rfft",
@@ -395,49 +392,49 @@ class DensityOfStates(IJob):
         assign_weights(self._outputData, weight_dict, "vcf/%s", self.labels)
         assign_weights(self._outputData, weight_dict, "dos/%s", self.labels)
         if self.add_ideal_results:
-            assign_weights(self._outputData, weight_dict, "dos/ideal/%s", self.labels)
+            assign_weights(self._outputData, weight_dict, "dos/ideal/isotropic/%s", self.labels)
         for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
             assign_weights(
-                self._outputData, weight_dict, f"vcf/components/{i}{j}/%s", self.labels
+                self._outputData, weight_dict, f"vcf/{i}{j}/%s", self.labels
             )
             assign_weights(
-                self._outputData, weight_dict, f"dos/components/{i}{j}/%s", self.labels
+                self._outputData, weight_dict, f"dos/{i}{j}/%s", self.labels
             )
             if self.add_ideal_results:
                 assign_weights(
                     self._outputData,
                     weight_dict,
-                    f"dos/components/{i}{j}/ideal/%s",
+                    f"dos/ideal/{i}{j}/%s",
                     self.labels,
                 )
         n_selected = sum(nAtomsPerElement.values())
         n_total = len(self.trajectory.atom_types)
         fact = n_selected / n_total
 
-        self._outputData["vcf/total"][:] = (
+        self._outputData["vcf/isotropic/total"][:] = (
             weighted_sum(self._outputData, "vcf/%s", self.labels) / fact
         )
-        self._outputData["vcf/total"].scaling_factor = fact
-        self._outputData["dos/total"][:] = (
+        self._outputData["vcf/isotropic/total"].scaling_factor = fact
+        self._outputData["dos/isotropic/total"][:] = (
             weighted_sum(self._outputData, "dos/%s", self.labels) / fact
         )
-        self._outputData["dos/total"].scaling_factor = fact
+        self._outputData["dos/isotropic/total"].scaling_factor = fact
         for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
-            self._outputData[f"vcf/components/{i}{j}/total"][:] = (
-                weighted_sum(self._outputData, f"vcf/components/{i}{j}/%s", self.labels)
+            self._outputData[f"vcf/{i}{j}/total"][:] = (
+                weighted_sum(self._outputData, f"vcf/{i}{j}/%s", self.labels)
                 / fact
             )
-            self._outputData[f"vcf/components/{i}{j}/total"].scaling_factor = fact
-            self._outputData[f"dos/components/{i}{j}/total"][:] = (
-                weighted_sum(self._outputData, f"dos/components/{i}{j}/%s", self.labels)
+            self._outputData[f"vcf/{i}{j}/total"].scaling_factor = fact
+            self._outputData[f"dos/{i}{j}/total"][:] = (
+                weighted_sum(self._outputData, f"dos/{i}{j}/%s", self.labels)
                 / fact
             )
-            self._outputData[f"dos/components/{i}{j}/total"].scaling_factor = fact
+            self._outputData[f"dos/{i}{j}/total"].scaling_factor = fact
 
         add_grouped_totals(
             self.trajectory,
             self._outputData,
-            "vcf",
+            "vcf/isotropic",
             "LineOutputVariable",
             axis="vcf/axes/time",
             units="nm2/ps2",
@@ -445,7 +442,7 @@ class DensityOfStates(IJob):
         add_grouped_totals(
             self.trajectory,
             self._outputData,
-            "dos",
+            "dos/isotropic",
             "LineOutputVariable",
             axis="dos/axes/romega",
             units="au",
@@ -454,14 +451,14 @@ class DensityOfStates(IJob):
         )
 
         if self.add_ideal_results:
-            self._outputData["dos/ideal/total"][:] = (
-                weighted_sum(self._outputData, "dos/ideal/%s", self.labels) / fact
+            self._outputData["dos/ideal/isotropic/total"][:] = (
+                weighted_sum(self._outputData, "dos/ideal/isotropic/%s", self.labels) / fact
             )
-            self._outputData["dos/ideal/total"].scaling_factor = fact
+            self._outputData["dos/ideal/isotropic/total"].scaling_factor = fact
             add_grouped_totals(
                 self.trajectory,
                 self._outputData,
-                "dos/ideal",
+                "dos/ideal/isotropic",
                 "LineOutputVariable",
                 axis="dos/axes/romega",
                 units="au",
@@ -471,7 +468,7 @@ class DensityOfStates(IJob):
             add_grouped_totals(
                 self.trajectory,
                 self._outputData,
-                f"vcf/components/{i}{j}",
+                f"vcf/{i}{j}",
                 "LineOutputVariable",
                 axis="vcf/axes/time",
                 units="nm2/ps2",
@@ -479,27 +476,25 @@ class DensityOfStates(IJob):
             add_grouped_totals(
                 self.trajectory,
                 self._outputData,
-                f"dos/components/{i}{j}",
+                f"dos/{i}{j}",
                 "LineOutputVariable",
                 axis="dos/axes/romega",
                 units="au",
-                main_result=True,
-                partial_result=True,
             )
             if self.add_ideal_results:
-                self._outputData[f"dos/components/{i}{j}/ideal/total"][:] = (
+                self._outputData[f"dos/ideal/{i}{j}/total"][:] = (
                     weighted_sum(
-                        self._outputData, f"dos/components/{i}{j}/ideal/%s", self.labels
+                        self._outputData, f"dos/ideal/{i}{j}/%s", self.labels
                     )
                     / fact
                 )
                 self._outputData[
-                    f"dos/components/{i}{j}/ideal/total"
+                    f"dos/ideal/{i}{j}/total"
                 ].scaling_factor = fact
                 add_grouped_totals(
                     self.trajectory,
                     self._outputData,
-                    f"dos/components/{i}{j}/ideal",
+                    f"dos/ideal/{i}{j}",
                     "LineOutputVariable",
                     axis="dos/axes/romega",
                     units="au",
