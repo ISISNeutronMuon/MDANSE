@@ -324,6 +324,7 @@ class CurrentCorrelationFunction(IJob):
         """
         shell = self.configuration["q_vectors"]["shells"][index]
         qvec_weights = self.configuration["q_vectors"]["value"][shell]["weights"]
+        qvec_weights_sqrt = np.sqrt(qvec_weights)
 
         trajectory = self.trajectory
         cell_present = True
@@ -438,9 +439,10 @@ class CurrentCorrelationFunction(IJob):
                 if qVectors.ndim > 2:
                     temp_dotprod = np.einsum("ij,jki->ik", coords, qVectors)
                     curr = np.einsum(
-                        "ik,ij->ikj",
+                        "ik,ij,j->ikj",
                         veloc,
-                        np.exp(1j * temp_dotprod) * np.sqrt(qvec_weights[None, :]),
+                        np.exp(1j * temp_dotprod),
+                        qvec_weights_sqrt,
                     )
                     long = np.einsum(
                         "lji,kji,ikj->ilj",
@@ -451,10 +453,10 @@ class CurrentCorrelationFunction(IJob):
                     trans = curr - long
                 else:
                     curr = np.einsum(
-                        "ik,ij->ikj",
+                        "ik,ij,j->ikj",
                         veloc,
-                        np.exp(1j * np.dot(coords, qVectors))
-                        * np.sqrt(qvec_weights[None, :]),
+                        np.exp(1j * np.dot(coords, qVectors)),
+                        qvec_weights_sqrt,
                     )
                     long = np.einsum(
                         "lj,kj,ikj->ilj",

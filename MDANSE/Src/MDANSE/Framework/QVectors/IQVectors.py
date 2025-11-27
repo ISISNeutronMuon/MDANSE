@@ -20,15 +20,27 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
+from scipy.stats import truncnorm
 
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.Framework.Configurable import Configurable
-from MDANSE.Mathematics.Geometry import GAUSS_WIDTH_FACTOR
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+GAUSS_WIDTH_FACTOR = 2 * 2.35482  # 2*sqrt(2*ln(2))
+
+
+def truncated_normal_distribution(n_elements, left_limit, right_limit, width, centre):
+    return truncnorm.rvs(
+        GAUSS_WIDTH_FACTOR * (left_limit - centre) / width,
+        GAUSS_WIDTH_FACTOR * (right_limit - centre) / width,
+        loc=centre,
+        scale=width / GAUSS_WIDTH_FACTOR,
+        size=n_elements,
+    )
 
 
 class IQVectors(Configurable, metaclass=SubclassFactory):
@@ -106,53 +118,6 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
 
         """
         return 2 * np.pi * np.dot(unit_cell.inverse, hkls)
-
-    @classmethod
-    def sampled_indices(
-        self,
-        q_lengths: npt.NDArray[float],
-        q: float,
-        half_width: float,
-        nvecs_per_shell: int,
-    ) -> list[int]:
-        """Return array indices based on normal distribution of vectors lengths around q.
-
-        The vectors are picked randomly with a probability decreasing with the difference
-        between the actual and requested q. The sampling process continues until the
-        desired number of vectors has been picked.
-
-        Please keep in mind that the distribution of the vector lengths will not be
-        a Gaussian function if nvecs_per_shell is too close to the total length
-        of the input vector array.
-
-        Parameters
-        ----------
-        q_lengths : npt.NDArray[float]
-            A 1D array of vector lengths.
-        q : float
-            The requested mean value of |q| for the normal distribution.
-        half_width : float
-            Half of the q vector generator shell width
-        nvecs_per_shell : int
-            Number of q vectors to be picked.
-
-        Returns
-        -------
-        list[int]
-            List of indices sampling the vectors from the input array.
-        """
-        subset = []
-        gauss_half_width = half_width / GAUSS_WIDTH_FACTOR
-        distribution = np.exp(-0.5 * ((q_lengths - q) / (gauss_half_width)) ** 2)
-        # spherical_correction = 1 / q_lengths**2
-        scaling = distribution  # * spherical_correction
-        scaling /= np.max(scaling)
-        while len(subset) < nvecs_per_shell:
-            index = np.unique(np.random.randint(0, len(q_lengths), nvecs_per_shell))
-            index = index[np.where(np.logical_not(np.in1d(index, subset)))]
-            rand_pool = np.random.ranf(len(index))
-            subset.extend(index[np.where(scaling[index] > rand_pool)])
-        return subset[:nvecs_per_shell]
 
     @classmethod
     def lattice_vectors_with_weights(

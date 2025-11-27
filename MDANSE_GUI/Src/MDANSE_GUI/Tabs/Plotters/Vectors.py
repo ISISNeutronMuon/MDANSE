@@ -160,7 +160,7 @@ class Vectors(Plotter):
                 self._axes.append(axes)
                 axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
                 axes.set_title(dataset._name)
-            elif dataset._name == "|q| - <|q|>":
+            elif dataset._name == r"<|q|> - q$_{target}$":
                 axes = target.add_subplot(single_plot_stack.pop())
                 temp_curves = axes.plot(
                     dataset.x_axis(best_axis),

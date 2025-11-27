@@ -266,6 +266,7 @@ class DynamicCoherentStructureFactor(IJob):
             return index, None
 
         qvec_weights = self.configuration["q_vectors"]["value"][shell]["weights"]
+        qvec_weights_sqrt = np.sqrt(qvec_weights[None, :])
 
         traj = self.trajectory
 
@@ -315,7 +316,7 @@ class DynamicCoherentStructureFactor(IJob):
                 selectedCoordinates = np.take(coords, idxs, axis=0)
                 rho[element][i, :] = np.sum(
                     np.exp(1j * np.dot(selectedCoordinates, qVectors))
-                    * np.sqrt(qvec_weights[None, :]),
+                    * qvec_weights_sqrt,
                     axis=0,
                 )
         if not cell_present:

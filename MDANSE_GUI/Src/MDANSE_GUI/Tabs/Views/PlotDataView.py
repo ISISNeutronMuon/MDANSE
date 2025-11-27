@@ -73,11 +73,14 @@ def vector_angular_datasets(
         Datasets of polar and azimuthal angles.
     """
     q_array = source["q_vectors"][shell_key]["q_vectors"]
-    return angular_datasets_from_qarray(q_array)
+    q_weights = source["q_vectors"][shell_key]["weights"]
+    return angular_datasets_from_qarray(q_array, q_weights)
 
 
 def angular_datasets_from_qarray(
-    q_array: npt.NDArray[float], filename: str | None = None
+    q_array: npt.NDArray[float],
+    weight_array: npt.NDArray[float],
+    filename: str | None = None,
 ) -> tuple[SingleDataset, SingleDataset]:
     """Convert an array of q vectors into two datasets of spherical angles.
 
@@ -97,20 +100,29 @@ def angular_datasets_from_qarray(
     polar_angles = np.arctan2(inplane_r, q_array[2, :])
     azimuthal_angles = np.arctan2(q_array[1, :], q_array[0, :])
     results = []
-    for input_angles, label, xlabel in (
-        (polar_angles, "Polar angle", r"$\theta$"),
-        (azimuthal_angles, "Azimuthal angle", r"$\phi$"),
+    for input_angles, label, xlabel, normalise in (
+        (
+            polar_angles,
+            r"Polar angle, NORMALISED: counts/sin($\theta$)",
+            r"$\theta$",
+            True,
+        ),
+        (azimuthal_angles, "Azimuthal angle", r"$\phi$", False),
     ):
         rounding_precision = 3
         angles = np.round(input_angles, rounding_precision)
-        angles, counts = np.unique(angles, return_counts=True)
+        counts, bins = np.histogram(angles, weights=weight_array)
+        unique_counts, _ = np.histogram(angles, bins=bins)
+        mean_angles = (bins[1:] + bins[:-1]) / 2
+        if normalise:
+            counts = counts / np.sin(mean_angles)
         dataset = SingleDataset(
             label,
             None,
-            linestyle="none",
+            linestyle="-",
             marker="o",
-            data=counts,
-            plot_axes={xlabel: angles},
+            data=np.vstack((counts, unique_counts)),
+            plot_axes={xlabel: mean_angles},
             axes_units={xlabel: "rad"},
             data_unit="rad",
             optional_filename=filename,
@@ -235,6 +247,10 @@ def vector_q_statistics_datasets(
             "weights" in parent_dset[f"shell_{shell_index}"]
             for shell_index in range(nshells)
         ):
+            vec_weights = [
+                parent_dset[f"shell_{shell_index}/weights"][:]
+                for shell_index in range(nshells)
+            ]
             unique_vectors = np.array(
                 [
                     len(parent_dset[f"shell_{shell_index}/weights"])
@@ -248,6 +264,8 @@ def vector_q_statistics_datasets(
                 ]
             )
             available_vectors = np.vstack((all_vectors, unique_vectors)).T
+        else:
+            vec_weights = [np.ones_like(modq_shell) for modq_shell in modq_per_shell]
     elif isinstance(source, QVectorsConfigurator):
         filename = None
         qvals = np.array([float(x) for x in source["q_vectors"]])
@@ -265,8 +283,25 @@ def vector_q_statistics_datasets(
                 for n in range(nshells)
             ]
         )
-    mean_q = np.array([np.mean(qvecs) for qvecs in modq_per_shell])
-    mean_q_yerr = np.array([np.std(qvecs) for qvecs in modq_per_shell])
+        vec_weights = [
+            source["q_vectors"][qvals[n]]["weights"][:] for n in range(nshells)
+        ]
+    mean_q = np.array(
+        [
+            np.average(modq_values, weights=weight_values)
+            for modq_values, weight_values in zip(
+                modq_per_shell, vec_weights, strict=True
+            )
+        ]
+    )
+    mean_q_yerr = np.array(
+        [
+            np.average((modq_values - average_value) ** 2, weights=weight_values)
+            for modq_values, weight_values, average_value in zip(
+                modq_per_shell, vec_weights, mean_q, strict=True
+            )
+        ]
+    )
     qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
     q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 0.1
     bin_step = 0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell])
@@ -286,7 +321,7 @@ def vector_q_statistics_datasets(
         optional_filename=filename,
     )
     real_q_ideal_q = SingleDataset(
-        "|q| - <|q|>",
+        r"<|q|> - q$_{target}$",
         None,
         linestyle="-",
         marker=".",
@@ -418,6 +453,10 @@ class PlotDataView(QTreeView):
         if "qvector_array" not in mda_data_structure:
             return
         self._qvector_shell = mda_data_structure["qvector_array"][:]
+        try:
+            self._qvector_weights = mda_data_structure["weights"][:]
+        except KeyError:
+            self._qvector_weights = np.ones_like(self._qvector_shell)
         self._qvector_filename = mda_data_structure.file.filename
         menu = QMenu()
         temp_action = menu.addAction("Vector positions")
@@ -501,7 +540,7 @@ class PlotDataView(QTreeView):
         ):
             new_model.add_dataset(dataset)
         for dataset in angular_datasets_from_qarray(
-            self._qvector_shell, self._qvector_filename
+            self._qvector_shell, self._qvector_weights, self._qvector_filename
         ):
             new_model.add_dataset(dataset)
         self.vector_shell_plotting.emit(new_model)

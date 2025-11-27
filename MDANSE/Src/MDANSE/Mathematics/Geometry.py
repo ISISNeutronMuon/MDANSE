@@ -24,8 +24,6 @@ from scipy.spatial.transform import Rotation
 from MDANSE.Core.Error import Error
 from MDANSE.Mathematics.LinearAlgebra import Vector
 
-GAUSS_WIDTH_FACTOR = 2.35482  # 2*sqrt(2*ln(2))
-
 
 class GeometryError(Error):
     pass

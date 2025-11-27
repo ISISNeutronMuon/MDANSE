@@ -19,24 +19,17 @@ import collections
 
 import numpy as np
 
-from MDANSE.Framework.QVectors.IQVectors import IQVectors
-from MDANSE.Mathematics.Geometry import GAUSS_WIDTH_FACTOR
+from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
 
 
 def spherical_vectors(q: float, q_width: float, n_vecs: int):
     qmin = max(0.01 * abs(q), q - q_width / 2)
     qmax = q + q_width / 2
-    all_radii = []
-    while len(all_radii) < n_vecs:
-        temp_radii = np.random.normal(q, 0.5 * q_width / GAUSS_WIDTH_FACTOR, 2 * n_vecs)
-        all_radii.extend(
-            temp_radii[
-                np.where(np.logical_and((temp_radii >= qmin), (temp_radii <= qmax)))
-            ]
-        )
+    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)
     radii = np.array(all_radii)[:n_vecs]
-    theta = np.arccos(2 * np.random.ranf(n_vecs) - 1)
-    phi = 2 * np.pi * np.random.ranf(n_vecs)
+    rng = np.random.default_rng()
+    theta = np.arccos(2 * rng.random(size=n_vecs) - 1)
+    phi = 2 * np.pi * rng.random(size=n_vecs)
     return np.vstack(
         (
             radii * np.sin(theta) * np.cos(phi),

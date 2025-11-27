@@ -21,8 +21,7 @@ import numpy as np
 import numpy.typing as npt
 from scipy.spatial.transform import Rotation
 
-from MDANSE.Framework.QVectors.IQVectors import IQVectors
-from MDANSE.Mathematics.Geometry import GAUSS_WIDTH_FACTOR, rotation_matrix
+from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
 
 
 def circle_rotation_matrix(
@@ -84,14 +83,7 @@ def circle_of_vectors(
         regular_circle = np.dot(rot_mat, regular_circle)
     qmin = max(0.01 * abs(q), q - q_width / 2)
     qmax = q + q_width / 2
-    all_radii = []
-    while len(all_radii) < n_vecs:
-        temp_radii = np.random.normal(q, 0.5 * q_width / GAUSS_WIDTH_FACTOR, 2 * n_vecs)
-        all_radii.extend(
-            temp_radii[
-                np.where(np.logical_and((temp_radii >= qmin), (temp_radii <= qmax)))
-            ]
-        )
+    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)
     return np.array(all_radii)[None, :n_vecs] * regular_circle
 
 

@@ -338,6 +338,15 @@ The frame selection can be input as three numbers, in the format
 of (first, last, step).
 
 
+.. _configurator-analysis-GridStepConfigurator:
+
+GridStepConfigurator
+--------------------
+
+default=0
+
+
+
 .. _configurator-analysis-GroupingLevelConfigurator:
 
 GroupingLevelConfigurator
@@ -554,6 +563,15 @@ The input vector can be used as an axis direction,
 or as a plane normal vector.
 
 
+
+.. _configurator-analysis-QRangeConfigurator:
+
+QRangeConfigurator
+------------------
+
+default=(0, 10, 1)
+
+Range configurator for Q vector generation.
 
 .. _configurator-analysis-QVectorsConfigurator:
 

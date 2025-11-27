@@ -146,6 +146,11 @@ class Vectors3D(Plotter):
                 axes = target.add_subplot(
                     single_plot_stack[ds_index - 2], projection="3d"
                 )
+                all_coords = np.concatenate(
+                    [dataset.x_axis("q_x"), dataset.x_axis("q_y"), dataset.data]
+                )
+                self.axis3d_min = np.min(all_coords)
+                self.axis3d_max = np.max(all_coords)
                 temp_curves = axes.scatter(
                     dataset.x_axis("q_x"),
                     dataset.x_axis("q_y"),
@@ -155,6 +160,7 @@ class Vectors3D(Plotter):
                     color=databundle.colour,
                 )
                 self._axes.append(axes)
+                self.axes3d = axes
                 axes.set_xlabel(dataset.x_axis_label("q_x"))
                 axes.set_ylabel(dataset.x_axis_label("q_y"))
                 axes.set_title(dataset._name)
@@ -169,28 +175,23 @@ class Vectors3D(Plotter):
                     _, best_axis = dataset.longest_axis()
                 plotlabel = databundle.legend_label
                 axes = target.add_subplot(single_plot_stack[ds_index - 2])
-                angles, counts = np.unique(
-                    dataset.x_axis(best_axis), return_counts=True
-                )
-                temp_curves = axes.plot(
-                    angles,
-                    counts,
-                    linestyle=databundle.line_style,
+                bins = dataset.x_axis(best_axis)
+                temp_curves = axes.bar(
+                    bins,
+                    dataset.data[0, :],
+                    linestyle="none",
                     label=plotlabel,
                     color=databundle.colour,
+                    width=np.mean(np.diff(bins)),
                 )
-                for temp in temp_curves:
-                    try:
-                        temp.set_marker(databundle.marker)
-                    except ValueError:
-                        with contextlib.suppress(Exception):
-                            temp.set_marker(int(databundle.marker))
-                _ = axes.hist(
-                    dataset.x_axis(best_axis),
-                    18,
-                    facecolor="none",
-                    linewidth=2,
-                    edgecolor="k",
+                temp_curves2 = axes.bar(
+                    bins,
+                    dataset.data[1, :],
+                    linestyle=databundle.line_style,
+                    label="Unique counts",
+                    color="none",
+                    edgecolor="black",
+                    width=np.mean(np.diff(bins)),
                 )
                 self._axes.append(axes)
                 axes.set_xlabel(dataset.x_axis_label(best_axis))
@@ -218,6 +219,9 @@ class Vectors3D(Plotter):
             axes.grid(plotting_context.use_grid)
             axes.relim()
             axes.autoscale()
+        self.axes3d.set_xlim([self.axis3d_min, self.axis3d_max])
+        self.axes3d.set_ylim([self.axis3d_min, self.axis3d_max])
+        self.axes3d.set_zlim([self.axis3d_min, self.axis3d_max])
         if self._toolbar is not None:
             self._toolbar.update()
         target.canvas.draw()

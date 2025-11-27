@@ -20,21 +20,13 @@ import collections
 import numpy as np
 import numpy.typing as npt
 
-from MDANSE.Framework.QVectors.IQVectors import IQVectors
-from MDANSE.Mathematics.Geometry import GAUSS_WIDTH_FACTOR
+from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
 
 
 def linear_vectors(q: float, q_width: float, n_vecs: int, axis: npt.NDArray[float]):
     qmin = max(0.01 * abs(q), q - q_width / 2)
     qmax = q + q_width / 2
-    all_radii = []
-    while len(all_radii) < n_vecs:
-        temp_radii = np.random.normal(q, 0.5 * q_width / GAUSS_WIDTH_FACTOR, 2 * n_vecs)
-        all_radii.extend(
-            temp_radii[
-                np.where(np.logical_and((temp_radii >= qmin), (temp_radii <= qmax)))
-            ]
-        )
+    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)
     fact = np.array(all_radii)[:n_vecs]
     return axis[:, np.newaxis] * fact
 
