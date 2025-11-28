@@ -52,7 +52,7 @@ class DatasetFormatter:
         self._preview_columns = 10
         self._rounding_prec = 5
         self._comment = "#"
-        self._separator = " "
+        self._separator = ","
 
     def take_new_input(self, pc: PlottingContext):
         """Assign the input PlottingContext to the plotter.
@@ -97,7 +97,7 @@ class DatasetFormatter:
             return ["No data selected"]
 
         for databundle in self._plotting_context.datasets().values():
-            yield self.process_data(databundle.dataset, separator=self._separator)
+            yield self.process_data(databundle.dataset, main_axis=databundle.main_axis)
 
     def make_dataset_header(self, dataset: SingleDataset, comment_character="#"):
         """Return the dataset informartion as text.
@@ -131,7 +131,7 @@ class DatasetFormatter:
         self,
         header_lines: list[str],
         data_array: Iterator[Iterator[float]],
-        separator: str = " ",
+        separator: str = ",",
     ):
         """Combine the header text with the data array into a string."""
         if self._is_preview:
@@ -180,8 +180,6 @@ class DatasetFormatter:
         ----------
         dataset : SingleDataset
             A SingleDataset read from an .MDA file (HDF5).
-        separator : str, optional
-            Character(s) separating numbers in the output table, by default " ".
 
         Returns
         -------
@@ -226,8 +224,6 @@ class DatasetFormatter:
         ----------
         dataset : SingleDataset
             A SingleDataset read from an .MDA file (HDF5).
-        separator : str, optional
-            Character(s) separating numbers in the output table, by default " ".
         main_axis : str or None
             Main axis to plot.
 
@@ -305,8 +301,6 @@ class DatasetFormatter:
         ----------
         dataset : SingleDataset
             input dataset
-        separator : str, optional
-            character separating the number in the output, by default " "
         is_preview : bool, optional
             if True, limit the number of output rows and columns, by default False
 
@@ -409,7 +403,7 @@ class Text(Plotter):
         preview_lines=10,
         preview_columns=10,
         rounding=15,
-        separator=" ",
+        separator=",",
         comment="#",
     ):
         """Pass the GUI settings to the text formatter."""

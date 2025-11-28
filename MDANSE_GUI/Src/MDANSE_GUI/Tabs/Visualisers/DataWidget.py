@@ -77,8 +77,9 @@ class DataWidget(QWidget):
         self._preview_widget.setChecked(True)
         self._preview_widget.checkStateChanged.connect(self.update_plotter_params)
 
-        self._separator_widget = QLineEdit(" ", self)
+        self._separator_widget = QLineEdit(",", self)
         self._separator_widget.textChanged.connect(self.update_plotter_params)
+        self._separator_widget.setMaxLength(1)
 
         self._comment_widget = QLineEdit("#", self)
         self._comment_widget.textChanged.connect(self.update_plotter_params)
@@ -190,6 +191,7 @@ class DataWidget(QWidget):
                 writer = csv.writer(
                     target,
                     dialect=self._dialect_combo.currentText,
+                    delimiter=self._plotter._formatter._separator,
                 )
                 for header, data in self._plotter._formatter.datasets_for_csv():
                     target.writelines(line + "\n" for line in header)
