@@ -45,7 +45,7 @@ def test_vcf(generate_benchmarks, tmp_path, interp_order):
         [
             f"/vcf/{comp}/{elem}"
             for elem in ("Cu", "S", "Sb", "total")
-            for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz")
+            for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz", "zz")
         ],
         scale_result=False,
         compare_axis=True,
@@ -83,7 +83,7 @@ def test_pps(generate_benchmarks, tmp_path):
         [
             f"{fn}/{comp}/{elem}"
             for elem in ("Cu", "S", "Sb", "total")
-            for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz")
+            for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz", "zz")
             for fn in ("pcf", "pps")
         ],
         scale_result=True,
