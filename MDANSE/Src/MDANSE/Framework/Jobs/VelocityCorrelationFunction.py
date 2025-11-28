@@ -142,8 +142,8 @@ class VelocityCorrelationFunction(IJob):
 
         for component in self._vcf_components:
             for result in list(self.trajectory.unique_names) + ["total"]:
-                main_result = self.MAIN_RESULTS == f"vcf/{component}/"
-                partial_result = main_result and "total" != result
+                main_result = f"vcf/{component}/" == self.MAIN_RESULTS
+                partial_result = main_result and result != "total"
                 self._outputData.add(
                     f"vcf/{component}/{result}",
                     "LineOutputVariable",
@@ -251,8 +251,8 @@ class VelocityCorrelationFunction(IJob):
                 "LineOutputVariable",
                 axis="vcf/axes/time",
                 units="nm2/ps2",
-                main_result=self.MAIN_RESULTS == f"vcf/{component}/",
-                partial_result=self.MAIN_RESULTS == f"vcf/{component}/",
+                main_result=f"vcf/{component}/" == self.MAIN_RESULTS,
+                partial_result=f"vcf/{component}/" == self.MAIN_RESULTS,
             )
 
     def finalize(self):

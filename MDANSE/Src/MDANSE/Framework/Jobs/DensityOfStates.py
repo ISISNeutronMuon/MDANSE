@@ -158,14 +158,14 @@ class DensityOfStates(VelocityCorrelationFunction):
 
         self._dos_components = self._vcf_components
         if self.add_ideal_results:
-            self._dos_components.append(f"ideal/isotropic")
+            self._dos_components.append("ideal/isotropic")
             for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
                 self._dos_components.append(f"ideal/{i}{j}")
 
         for component in self._dos_components:
             for result in list(self.trajectory.unique_names) + ["total"]:
-                main_result = self.MAIN_RESULTS == f"dos/{component}/"
-                partial_result = main_result and "total" != result
+                main_result = f"dos/{component}/" == self.MAIN_RESULTS
+                partial_result = main_result and result != "total"
                 self._outputData.add(
                     f"dos/{component}/{result}",
                     "LineOutputVariable",
@@ -209,6 +209,6 @@ class DensityOfStates(VelocityCorrelationFunction):
                 "LineOutputVariable",
                 axis="dos/axes/romega",
                 units="au",
-                main_result=self.MAIN_RESULTS == f"dos/{component}/",
-                partial_result=self.MAIN_RESULTS == f"dos/{component}/",
+                main_result=f"dos/{component}/" == self.MAIN_RESULTS,
+                partial_result=f"dos/{component}/" == self.MAIN_RESULTS,
             )
