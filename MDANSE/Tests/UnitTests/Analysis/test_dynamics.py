@@ -1,4 +1,3 @@
-import itertools as it
 import pytest
 
 from test_helpers.compare_hdf5 import compare_hdf5
