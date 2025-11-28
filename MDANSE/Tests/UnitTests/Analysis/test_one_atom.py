@@ -25,7 +25,7 @@ ALL_ANALYSES = [
     "GaussianDynamicIncoherentStructureFactor",
     "MeanSquareDisplacement",
     "MolecularTrace",
-    "PositionAutoCorrelationFunction",
+    "PositionCorrelationFunction",
     "RadiusOfGyration",
     "RootMeanSquareDeviation",
     "RootMeanSquareFluctuation",

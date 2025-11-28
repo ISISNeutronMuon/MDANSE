@@ -1,5 +1,6 @@
-import numpy as np
+import itertools as it
 import pytest
+
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
@@ -42,7 +43,11 @@ def test_vcf(generate_benchmarks, tmp_path, interp_order):
     compare_hdf5(
         out_file,
         result_file,
-        [f"/vcf/{elem}" for elem in ("Cu", "S", "Sb", "total")],
+        [
+            f"/vcf/{comp}/{elem}"
+            for elem in ("Cu", "S", "Sb", "total")
+            for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz")
+        ],
         scale_result=False,
         compare_axis=True,
     )
@@ -77,9 +82,10 @@ def test_pps(generate_benchmarks, tmp_path):
         out_file,
         result_file,
         [
-            f"{fn}/{elem}"
+            f"{fn}/{comp}/{elem}"
             for elem in ("Cu", "S", "Sb", "total")
-            for fn in ("pacf", "pps")
+            for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz")
+            for fn in ("pcf", "pps")
         ],
         scale_result=True,
         scale_benchmark=True,
@@ -133,8 +139,8 @@ def parameters():
         ("VelocityCorrelationFunction", ["vcf"], False),
         ("VanHoveFunctionDistinct", ["vh"], False),
         ("VanHoveFunctionSelf", ["vh"], False),
-        ("PositionAutoCorrelationFunction", ["pacf"], False),
-        ("PositionPowerSpectrum", ["pacf", "pps"], False),
+        ("PositionCorrelationFunction", ["pcf"], False),
+        ("PositionPowerSpectrum", ["pcf", "pps"], False),
     ],
     ids=lambda x: x[0],
 )

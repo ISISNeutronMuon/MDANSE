@@ -22,7 +22,7 @@ ALL_JOBS = [
     "MeanSquareDisplacement",
     "MolecularTrace",
     "NeutronDynamicTotalStructureFactor",
-    "PositionAutoCorrelationFunction",
+    "PositionCorrelationFunction",
     "RadiusOfGyration",
     "RootMeanSquareDeviation",
     "RootMeanSquareFluctuation",

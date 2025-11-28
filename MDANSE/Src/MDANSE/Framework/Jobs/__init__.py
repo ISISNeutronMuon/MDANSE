@@ -17,6 +17,10 @@ from __future__ import annotations
 
 from .AreaPerMolecule import AreaPerMolecule as AreaPerMolecule
 from .AverageStructure import AverageStructure as AverageStructure
+from .CartesianCorrelationFunction import (
+    CartesianCorrelationFunction as CartesianCorrelationFunction,
+)
+from .CartesianPowerSpectrum import CartesianPowerSpectrum as CartesianPowerSpectrum
 from .CenterOfMassesTrajectory import (
     CenterOfMassesTrajectory as CenterOfMassesTrajectory,
 )
@@ -54,8 +58,8 @@ from .NeutronDynamicTotalStructureFactor import (
 from .PairDistributionFunction import (
     PairDistributionFunction as PairDistributionFunction,
 )
-from .PositionAutoCorrelationFunction import (
-    PositionAutoCorrelationFunction as PositionAutoCorrelationFunction,
+from .PositionCorrelationFunction import (
+    PositionCorrelationFunction as PositionCorrelationFunction,
 )
 from .PositionPowerSpectrum import PositionPowerSpectrum as PositionPowerSpectrum
 from .RadiusOfGyration import RadiusOfGyration as RadiusOfGyration
