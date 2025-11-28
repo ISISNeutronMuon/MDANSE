@@ -7,6 +7,8 @@ from MDANSE.Framework.Jobs.IJob import IJob
 ALL_JOBS = [
     "AreaPerMolecule",
     "AverageStructure",
+    "CartesianCorrelationFunction",
+    "CartesianPowerSpectrum",
     "CenterOfMassesTrajectory",
     "DistanceHistogram",
     "CurrentCorrelationFunction",

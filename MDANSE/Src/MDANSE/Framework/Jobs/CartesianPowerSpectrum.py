@@ -151,7 +151,7 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
                 self._pwr_components.append(f"ideal/{i}{j}")
 
         for component in self._pwr_components:
-            for result in list(self.trajectory.unique_names) + ["total"]:
+            for result in [*list(self.trajectory.unique_names), "total"]:
                 main_result = f"{self.PWR_NAME}/{component}/" == self.MAIN_RESULTS
                 partial_result = main_result and result != "total"
                 self._outputData.add(
@@ -172,7 +172,7 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
         time_window = self.configuration["instrument_resolution"]["time_window"]
 
         for component in self._pwr_components:
-            for element, number in nAtomsPerElement.items():
+            for element in nAtomsPerElement:
                 self._outputData[f"{self.PWR_NAME}/{component}/{element}"][:] = (
                     get_spectrum(
                         self._outputData[

@@ -135,7 +135,7 @@ class CartesianCorrelationFunction(IJob):
             self._cf_components.append(f"{i}{j}")
 
         for component in self._cf_components:
-            for result in list(self.trajectory.unique_names) + ["total"]:
+            for result in [*list(self.trajectory.unique_names), "total"]:
                 main_result = f"{self.CF_NAME}/{component}/" == self.MAIN_RESULTS
                 partial_result = main_result and result != "total"
                 self._outputData.add(
