@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+import collections
+
 from MDANSE.Framework.Jobs.CartesianCorrelationFunction import (
     CartesianCorrelationFunction,
 )
@@ -35,6 +37,22 @@ class VelocityCorrelationFunction(CartesianCorrelationFunction):
     CF_NAME = "vcf"
     CF_UNITS = "nm2/ps2"
     MAIN_RESULTS = "vcf/isotropic/"
+
+    settings = list(CartesianCorrelationFunction.settings.items())
+    settings.insert(
+        2,
+        (
+            "interpolation_order",
+            (
+                "InterpolationOrderConfigurator",
+                {
+                    "label": "velocities",
+                    "dependencies": {"trajectory": "trajectory", "frames": "frames"},
+                },
+            ),
+        ),
+    )
+    settings = collections.OrderedDict(settings)
 
     def get_series(self, index):
         trajectory = self.trajectory

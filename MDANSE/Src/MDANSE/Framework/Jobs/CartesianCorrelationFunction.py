@@ -45,13 +45,6 @@ class CartesianCorrelationFunction(IJob):
         "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["interpolation_order"] = (
-        "InterpolationOrderConfigurator",
-        {
-            "label": "velocities",
-            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-        },
-    )
     settings["projection"] = (
         "ProjectionConfigurator",
         {"label": "project coordinates"},

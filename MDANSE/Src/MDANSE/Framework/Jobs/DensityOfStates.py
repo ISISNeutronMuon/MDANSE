@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+import collections
+
 from MDANSE.Framework.Jobs.CartesianPowerSpectrum import CartesianPowerSpectrum
 from MDANSE.Framework.Jobs.VelocityCorrelationFunction import (
     VelocityCorrelationFunction,
@@ -32,6 +34,23 @@ class DensityOfStates(CartesianPowerSpectrum, VelocityCorrelationFunction):
     """
 
     label = "Density Of States"
+
+    settings = list(CartesianPowerSpectrum.settings.items())
+    settings.insert(
+        3,
+        (
+            "interpolation_order",
+            (
+                "InterpolationOrderConfigurator",
+                {
+                    "label": "velocities",
+                    "dependencies": {"trajectory": "trajectory", "frames": "frames"},
+                },
+            ),
+        ),
+    )
+    settings = collections.OrderedDict(settings)
+
     PWR_NAME = "dos"
     PWR_UNITS = "au"
     MAIN_RESULTS = "dos/isotropic/"

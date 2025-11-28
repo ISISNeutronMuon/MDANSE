@@ -35,62 +35,20 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
     )
     PREDICTORS = ("instrument_resolution",)
 
-    settings = collections.OrderedDict()
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    settings = list(CartesianCorrelationFunction.settings.items())
+    settings.insert(
+        2,
+        (
+            "instrument_resolution",
+            (
+                "InstrumentResolutionConfigurator",
+                {
+                    "dependencies": {"trajectory": "trajectory", "frames": "frames"},
+                },
+            ),
+        ),
     )
-    settings["instrument_resolution"] = (
-        "InstrumentResolutionConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-        },
-    )
-    settings["interpolation_order"] = (
-        "InterpolationOrderConfigurator",
-        {
-            "label": "velocities",
-            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-        },
-    )
-    settings["projection"] = (
-        "ProjectionConfigurator",
-        {"label": "project coordinates"},
-    )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {
-            "default": "atomic_weight",
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            },
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    settings = collections.OrderedDict(settings)
 
     PWR_NAME = ""
     PWR_UNITS = ""
