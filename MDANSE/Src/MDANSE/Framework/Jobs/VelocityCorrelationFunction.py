@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import collections
+import itertools as it
 
 from scipy.signal import correlate
 
@@ -27,16 +28,16 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 from MDANSE.Mathematics.Signal import differentiate
 
 
-class VelocityAutoCorrelationFunction(IJob):
-    r"""Calculates the velocity autocorrelation function of the selected atoms.
+class VelocityCorrelationFunction(IJob):
+    r"""Calculates the velocity correlation function of the selected atoms.
 
-    The Velocity AutoCorrelation Function (VACF) is a property describing the dynamics
+    The Velocity Correlation Function (VCF) is a property describing the dynamics
     of a molecular system. It reveals the underlying nature of the forces acting on
     the system. Its Fourier Transform gives the cartesian density of states for a set
     of atoms.
     """
 
-    label = "Velocity AutoCorrelation Function"
+    label = "Velocity Correlation Function"
 
     category = (
         "Analysis",
@@ -96,6 +97,8 @@ class VelocityAutoCorrelationFunction(IJob):
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
+    MAIN_RESULTS = "vcf/isotropic/"
+
     def initialize(self):
         """
         Initialize the input parameters and analysis self variables
@@ -108,35 +111,48 @@ class VelocityAutoCorrelationFunction(IJob):
             (element, (element,)) for element in self.trajectory.get_natoms()
         ]
 
-        # Will store the time.
+        selected_weights, all_weights = self.trajectory.get_weights(
+            prop=self.configuration["weights"]["property"]
+        )
+        if self.configuration["weights"]["property"] in ("b_coherent", "b_incoherent"):
+            for weights in selected_weights, all_weights:
+                for key, value in weights.items():
+                    weights[key] = abs(value) ** 2
+        self.weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            self.trajectory.get_natoms(),
+            self.trajectory.get_all_natoms(),
+            1,
+        )
+
+        self.initialize_outputdata()
+
+    def initialize_outputdata(self):
         self._outputData.add(
-            "vacf/axes/time",
+            "vcf/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
         )
 
-        for element in self.trajectory.unique_names:
-            self._outputData.add(
-                f"vacf/{element}",
-                "LineOutputVariable",
-                (self.configuration["frames"]["n_frames"],),
-                axis="vacf/axes/time",
-                units="nm2/ps2",
-                main_result=True,
-                partial_result=True,
-            )
+        self._vcf_components = ["isotropic"]
+        for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
+            self._vcf_components.append(f"{i}{j}")
 
-        self._outputData.add(
-            "vacf/total",
-            "LineOutputVariable",
-            (self.configuration["frames"]["n_frames"],),
-            axis="vacf/axes/time",
-            units="nm2/ps2",
-            main_result=True,
-        )
-
-        self._atoms = self.trajectory.atom_names
+        for component in self._vcf_components:
+            for result in list(self.trajectory.unique_names) + ["total"]:
+                main_result = self.MAIN_RESULTS == f"vcf/{component}/"
+                partial_result = main_result and "total" != result
+                self._outputData.add(
+                    f"vcf/{component}/{result}",
+                    "LineOutputVariable",
+                    (self.configuration["frames"]["n_frames"],),
+                    axis="vcf/axes/time",
+                    units="nm2/ps2",
+                    main_result=main_result,
+                    partial_result=partial_result,
+                )
 
     def run_step(self, index):
         """
@@ -147,7 +163,7 @@ class VelocityAutoCorrelationFunction(IJob):
         :Returns:
             #. index (int): The index of the step.
             #. atomicDOS (np.array): The calculated density of state for atom of index=index
-            #. atomicVACF (np.array): The calculated velocity auto-correlation function for atom of index=index
+            #. atomicVCF (np.array): The calculated velocity auto-correlation function for atom of index=index
         """
 
         trajectory = self.trajectory
@@ -180,69 +196,70 @@ class VelocityAutoCorrelationFunction(IJob):
                 )
 
         series = self.configuration["projection"]["projector"](series)
+        v_x = series[:, 0]
+        v_y = series[:, 1]
+        v_z = series[:, 2]
 
         n_configs = self.configuration["frames"]["n_configs"]
-        atomicVACF = correlate(series, series[:n_configs], mode="valid") / (
-            3 * n_configs
-        )
-        return index, atomicVACF.T[0]
+        components = []
+        for v_i, v_j in it.combinations_with_replacement([v_x, v_y, v_z], 2):
+            components.append(
+                correlate(v_i, v_j[:n_configs], mode="valid").T / n_configs
+            )
+        return index, components
 
-    def combine(self, index, x):
+    def combine(self, index, vcfs):
         """
         Combines returned results of run_step.\n
         :Parameters:
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """
-
         # The symbol of the atom.
-        element = self._atoms[self.trajectory.atom_indices[index]]
+        element = self.trajectory.atom_names[self.trajectory.atom_indices[index]]
 
-        self._outputData[f"vacf/{element}"] += x
+        isotropic = (vcfs[0] + vcfs[3] + vcfs[5]) / 3
+        self._outputData[f"vcf/isotropic/{element}"] += isotropic
+
+        for i, (j, k) in enumerate(
+            it.combinations_with_replacement(["x", "y", "z"], 2)
+        ):
+            self._outputData[f"vcf/{j}{k}/{element}"] += vcfs[i]
+
+    def weight_and_group(self):
+        nAtomsPerElement = self.trajectory.get_natoms()
+        fact = sum(nAtomsPerElement.values()) / len(self.trajectory.atom_types)
+
+        for component in self._vcf_components:
+            for element, number in nAtomsPerElement.items():
+                self._outputData[f"vcf/{component}/{element}"][:] /= number
+
+            assign_weights(
+                self._outputData, self.weight_dict, f"vcf/{component}/%s", self.labels
+            )
+
+            self._outputData[f"vcf/{component}/total"][:] = (
+                weighted_sum(self._outputData, f"vcf/{component}/%s", self.labels)
+                / fact
+            )
+            self._outputData[f"vcf/{component}/total"].scaling_factor = fact
+
+            add_grouped_totals(
+                self.trajectory,
+                self._outputData,
+                f"vcf/{component}",
+                "LineOutputVariable",
+                axis="vcf/axes/time",
+                units="nm2/ps2",
+                main_result=self.MAIN_RESULTS == f"vcf/{component}/",
+                partial_result=self.MAIN_RESULTS == f"vcf/{component}/",
+            )
 
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
-
-        nAtomsPerElement = self.trajectory.get_natoms()
-        for element, number in nAtomsPerElement.items():
-            self._outputData[f"vacf/{element}"] /= number
-
-        selected_weights, all_weights = self.trajectory.get_weights(
-            prop=self.configuration["weights"]["property"]
-        )
-        if self.configuration["weights"]["property"] in ("b_coherent", "b_incoherent"):
-            for weights in selected_weights, all_weights:
-                for key, value in weights.items():
-                    weights[key] = abs(value) ** 2
-        weight_dict = get_weights(
-            selected_weights,
-            all_weights,
-            nAtomsPerElement,
-            self.trajectory.get_all_natoms(),
-            1,
-        )
-        assign_weights(self._outputData, weight_dict, "vacf/%s", self.labels)
-
-        n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.trajectory.get_all_natoms().values())
-        fact = n_selected / n_total
-
-        vacfTotal = weighted_sum(self._outputData, "vacf/%s", self.labels)
-        self._outputData["vacf/total"][:] = vacfTotal / fact
-        self._outputData["vacf/total"].scaling_factor = fact
-
-        add_grouped_totals(
-            self.trajectory,
-            self._outputData,
-            "vacf",
-            "LineOutputVariable",
-            axis="vacf/axes/time",
-            units="nm2/ps2",
-            main_result=True,
-            partial_result=True,
-        )
+        self.weight_and_group()
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

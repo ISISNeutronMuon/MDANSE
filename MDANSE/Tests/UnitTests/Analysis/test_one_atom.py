@@ -36,7 +36,7 @@ ALL_ANALYSES = [
     "TrajectoryFilter",
     "VanHoveFunctionDistinct",
     "VanHoveFunctionSelf",
-    "VelocityAutoCorrelationFunction",
+    "VelocityCorrelationFunction",
     "Voronoi",
     "CoordinationNumber",
     "PairDistributionFunction",

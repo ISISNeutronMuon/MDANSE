@@ -82,8 +82,8 @@ from .TrajectoryEditor import TrajectoryEditor as TrajectoryEditor
 from .TrajectoryFilter import TrajectoryFilter as TrajectoryFilter
 from .VanHoveFunctionDistinct import VanHoveFunctionDistinct as VanHoveFunctionDistinct
 from .VanHoveFunctionSelf import VanHoveFunctionSelf as VanHoveFunctionSelf
-from .VelocityAutoCorrelationFunction import (
-    VelocityAutoCorrelationFunction as VelocityAutoCorrelationFunction,
+from .VelocityCorrelationFunction import (
+    VelocityCorrelationFunction as VelocityCorrelationFunction,
 )
 from .Voronoi import Voronoi as Voronoi
 from .XRayStaticStructureFactor import (

@@ -36,7 +36,7 @@ ALL_JOBS = [
     "TrajectoryFilter",
     "VanHoveFunctionDistinct",
     "VanHoveFunctionSelf",
-    "VelocityAutoCorrelationFunction",
+    "VelocityCorrelationFunction",
     "Voronoi",
     "Converter",
     "CoordinationNumber",

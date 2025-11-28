@@ -103,7 +103,7 @@ def test_dos(generate_benchmarks, tmp_path, trajectory, resolution_generator):
     assert text_file.is_file()
 
     keys = [f"{fn}/{elem}"
-            for fn in ("dos", "vacf")
+            for fn in ("dos", "vcf")
             for elem in ("Cu", "S", "Sb", "total")]
 
     compare_hdf5(out_file,
@@ -151,7 +151,7 @@ def test_dos_is_reproducible(tmp_path, trajectory):
         disf.run(parameters, status=True)
 
     keys = [f"{fn}/{elem}"
-            for fn in ("dos", "vacf")
+            for fn in ("dos", "vcf")
             for elem in ("Cu", "S", "Sb", "total")]
 
     compare_hdf5(temp_name1.with_suffix(".mda"),

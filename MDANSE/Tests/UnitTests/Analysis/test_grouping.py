@@ -101,9 +101,9 @@ def test_trajectory_state():
 @pytest.mark.parametrize(
     "job_info",
     [
-        ("DensityOfStates", ["dos", "vacf"], "equal", 1e-10, 1e-7),
+        ("DensityOfStates", ["dos", "vcf"], "equal", 1e-10, 1e-7),
         ("MeanSquareDisplacement", ["msd"], "equal", 1e-10, 1e-7),
-        ("VelocityAutoCorrelationFunction", ["vacf"], "equal", 1e-10, 1e-7),
+        ("VelocityCorrelationFunction", ["vcf"], "equal", 1e-10, 1e-7),
         ("VanHoveFunctionDistinct", ["vh"], "equal", 1e-10, 1e-7),
         ("VanHoveFunctionSelf", ["vh"], "equal", 1e-10, 1e-7),
         ("PositionAutoCorrelationFunction", ["pacf"], "equal", 1e-10, 1e-7),
@@ -258,7 +258,7 @@ def test_ssfsf(generate_benchmarks, tmp_path, dcsf):
 @pytest.mark.parametrize(
     "job_info",
     [
-        ("DensityOfStates", ["dos", "vacf"], "equal", 1e-10, 1e-7),
+        ("DensityOfStates", ["dos", "vcf"], "equal", 1e-10, 1e-7),
         ("PositionPowerSpectrum", ["pacf", "pps"], "equal", 1e-10, 1e-7),
         ("DynamicCoherentStructureFactor", ["dcsf"], "b_coherent", 1e-6, 1e-6),
     ],

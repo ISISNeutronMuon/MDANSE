@@ -11,16 +11,16 @@ com_traj = CONV_DIR / "com_trajectory.mdt"
 
 
 @pytest.mark.parametrize("interp_order", [1, 2, 3])
-def test_vacf(generate_benchmarks, tmp_path, interp_order):
+def test_vcf(generate_benchmarks, tmp_path, interp_order):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
-    result_file = RESULTS_DIR / f"vacf_{interp_order}.mda"
+    result_file = RESULTS_DIR / f"vcf_{interp_order}.mda"
 
     if generate_benchmarks:
         temp_name = result_file.with_suffix("")
 
-    result_file = RESULTS_DIR / f"vacf_{interp_order}.mda"
+    result_file = RESULTS_DIR / f"vcf_{interp_order}.mda"
 
     parameters = {
         "frames": (0, 10, 1, 5),
@@ -30,8 +30,8 @@ def test_vacf(generate_benchmarks, tmp_path, interp_order):
         "trajectory": short_traj,
     }
 
-    vacf = IJob.create("VelocityAutoCorrelationFunction")
-    vacf.run(parameters, status=True)
+    vcf = IJob.create("VelocityCorrelationFunction")
+    vcf.run(parameters, status=True)
 
     if generate_benchmarks:
         return
@@ -42,7 +42,7 @@ def test_vacf(generate_benchmarks, tmp_path, interp_order):
     compare_hdf5(
         out_file,
         result_file,
-        [f"/vacf/{elem}" for elem in ("Cu", "S", "Sb", "total")],
+        [f"/vcf/{elem}" for elem in ("Cu", "S", "Sb", "total")],
         scale_result=False,
         compare_axis=True,
     )
@@ -128,9 +128,9 @@ def parameters():
 @pytest.mark.parametrize(
     "job_info",
     [
-        ("DensityOfStates", ["dos", "vacf"], False),
+        ("DensityOfStates", ["dos", "vcf"], False),
         ("MeanSquareDisplacement", ["msd"], False),
-        ("VelocityAutoCorrelationFunction", ["vacf"], False),
+        ("VelocityCorrelationFunction", ["vcf"], False),
         ("VanHoveFunctionDistinct", ["vh"], False),
         ("VanHoveFunctionSelf", ["vh"], False),
         ("PositionAutoCorrelationFunction", ["pacf"], False),
