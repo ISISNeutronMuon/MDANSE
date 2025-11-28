@@ -34,5 +34,7 @@ def test_vcf(generate_benchmarks, tmp_path, interp_order):
     assert log_file.is_file()
 
     compare_hdf5(out_file, result_file,
-                [f"vcf/{elem}" for elem in ("H", "O", "Si", "total")],
+                [f"vcf/{comp}/{elem}"
+                 for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz", "zz")
+                 for elem in ("H", "O", "Si", "total")],
                 scale_result=False, compare_axis=True)

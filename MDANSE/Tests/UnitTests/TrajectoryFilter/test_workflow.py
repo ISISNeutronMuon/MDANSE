@@ -446,7 +446,7 @@ def test_convolution(
 
     # Retrieve U(w), check the data is as expected
     original_data = LocalDataset(
-        "pps/total", h5py.File(unfiltered_power_spectrum, "r+")
+        "pps/isotropic/total", h5py.File(unfiltered_power_spectrum, "r+")
     )
     u_x_axis_name = list(original_data._axes_units.keys())
 
@@ -497,7 +497,7 @@ def test_convolution(
     assert fw_out_file.is_file()
 
     # Retrieve F(w), check the data is as expected
-    filtered_data = LocalDataset("pps/total", h5py.File(fw_out_file, "r+"))
+    filtered_data = LocalDataset("pps/isotropic/total", h5py.File(fw_out_file, "r+"))
     f_x_axis_name = list(filtered_data._axes_units.keys())
 
     assert f_x_axis_name == ["pps/axes/romega"]
