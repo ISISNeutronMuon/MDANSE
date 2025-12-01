@@ -20,6 +20,15 @@ CUAU_TRAJ = "CuAu_asap_10fs-step_unfiltered.mdt"
 
 GLYCYL_L_ALANINE_TRAJ = "glycyl_l_alanine_charmm_unfiltered.mdt"
 
+SUFFIX = "_unfiltered_power_spectrum"
+
+
+def safe_mda(filename):
+    ext = filename.suffix
+    stripped = filename.with_suffix("").name
+    stripped += f".mdt{SUFFIX}"
+    return filename.with_name(stripped + ext)
+
 
 class LocalDataset:
     """Mimics the SingleDataset class from MDANSE GUI."""
@@ -193,7 +202,7 @@ def srtio3_spectrum_clean(tmp_path_factory):
     """Fixture returns the output file of the PositionPowerSpectrum job with the cp2k SrTiO3 trajectory as the input."""
 
     yield run_power_spectrum(
-        tmp_path_factory.mktemp("data") / f"{SRTIO3_TRAJ}_unfiltered_power_spectrum",
+        tmp_path_factory.mktemp("data") / f"{SRTIO3_TRAJ}{SUFFIX}",
         [0, 320, 1, 160],
         CONV_DIR / SRTIO3_TRAJ,
     )
@@ -204,7 +213,7 @@ def cuau_spectrum_clean(tmp_path_factory):
     """Fixture returns the output file of the PositionPowerSpectrum job with the ASAP CuAu trajectory as the input."""
 
     yield run_power_spectrum(
-        tmp_path_factory.mktemp("data") / f"{CUAU_TRAJ}_unfiltered_power_spectrum",
+        tmp_path_factory.mktemp("data") / f"{CUAU_TRAJ}{SUFFIX}",
         [0, 1000, 1, 500],
         CONV_DIR / CUAU_TRAJ,
     )
@@ -218,8 +227,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
     """
 
     yield run_power_spectrum(
-        tmp_path_factory.mktemp("data")
-        / f"{GLYCYL_L_ALANINE_TRAJ}_unfiltered_power_spectrum",
+        tmp_path_factory.mktemp("data") / f"{GLYCYL_L_ALANINE_TRAJ}{SUFFIX}",
         [0, 25, 1, 13],
         CONV_DIR / GLYCYL_L_ALANINE_TRAJ,
     )
@@ -436,11 +444,11 @@ def test_convolution(
 
     # Select unfiltered power spectrum fixture
     if trajectory_name == SRTIO3_TRAJ:
-        unfiltered_power_spectrum = srtio3_spectrum_clean
+        unfiltered_power_spectrum = safe_mda(srtio3_spectrum_clean)
     elif trajectory_name == CUAU_TRAJ:
-        unfiltered_power_spectrum = cuau_spectrum_clean
+        unfiltered_power_spectrum = safe_mda(cuau_spectrum_clean)
     elif trajectory_name == GLYCYL_L_ALANINE_TRAJ:
-        unfiltered_power_spectrum = glycl_l_alanine_spectrum_clean
+        unfiltered_power_spectrum = safe_mda(glycl_l_alanine_spectrum_clean)
     else:
         ValueError(f"{trajectory_name} is not a recognised .mdt file.")
 

@@ -181,11 +181,13 @@ class HDFFormat(IFormat):
             outputFile = h5py.File.in_memory()
 
         else:
-            filepath = Path(filename)
-            if "." in filepath.stem:
-                filename = filepath.with_name(filepath.name + extension)
+            user_given_name = Path(filename).name
+            filepath = Path(filename).with_suffix(".mda")
+
+            if filepath.name != user_given_name:
+                filename = filepath.with_name(user_given_name + extension)
             else:
-                filename = filepath.with_suffix(extension)
+                filename = filepath
 
             # The HDF output file is opened for writing.
             PLATFORM.create_directory(filename.parent)
