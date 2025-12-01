@@ -198,7 +198,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
             output_data.add(
                 current,
                 "SurfaceOutputVariable",
-                qvector_info[q]["q_vectors"],
+                qvector_info[q]["q_vectors"] if qvector_info[q] is not None else [[]],
                 units="1/nm",
                 axis="vector_generator/coordinates|index",
             )
@@ -208,13 +208,16 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
             output_data.add(
                 current,
                 "LineOutputVariable",
-                qvector_info[q]["weights"],
+                qvector_info[q]["weights"] if qvector_info[q] is not None else [],
                 units="au",
                 axis="index",
             )
 
         for nq, q in enumerate(q_values):
-            if (data := qvector_info[q].get("hkls")) is not None:
+            if (
+                qvector_info[q] is not None
+                and (data := qvector_info[q].get("hkls")) is not None
+            ):
                 current = f"vector_generator/shell_{nq}/hkl_array"
                 output_data.add(
                     current,

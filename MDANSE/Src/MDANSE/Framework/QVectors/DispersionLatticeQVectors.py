@@ -56,7 +56,7 @@ class DispersionLatticeQVectors(LatticeQVectors):
 
     def _generate(self):
         start = self._configuration["start"]["value"].array
-        step_vector = self._configuration["step"]["value"]
+        step_vector = self._configuration["step"]["value"].array
         n_steps = self._configuration["n_steps"]["value"]
         scell_multiple = self._configuration["using_supercell"]["value"]
 
@@ -64,13 +64,12 @@ class DispersionLatticeQVectors(LatticeQVectors):
             step_vector, np.arange(0, n_steps)
         )
         vects = self.hkl_to_qvectors(hkls, self._unit_cell)
-        q_vectors, weights = self.lattice_vectors_with_weights(vects, self._unit_cell)
+        hkl_vectors, weights = self.lattice_vectors_with_weights(vects, self._unit_cell)
         # The k matrix (3,n_hkls)
+        q_vectors = self.hkl_to_qvectors(hkl_vectors, self._unit_cell)
 
-        dists = np.sqrt(np.sum(q_vectors**2, axis=0))
-        keyvals = dists * np.sign(
-            np.dot(step_vector, self.qvectors_to_hkl(q_vectors, self._unit_cell))
-        )
+        dists = np.linalg.norm(q_vectors, axis=0)
+        keyvals = dists * np.sign(np.dot(step_vector, hkl_vectors))
 
         if self._status is not None:
             self._status.start(len(dists))

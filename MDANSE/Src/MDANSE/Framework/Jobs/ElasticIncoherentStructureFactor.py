@@ -169,7 +169,8 @@ class ElasticIncoherentStructureFactor(IJob):
         atomicEISF = np.zeros((self._nQShells,), dtype=np.float64)
 
         for i, q in enumerate(self.configuration["q_vectors"]["shells"]):
-            if q not in self.configuration["q_vectors"]["value"]:
+            if self.configuration["q_vectors"]["value"][q] is None:
+                atomicEISF[i] = np.nan
                 continue
 
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]

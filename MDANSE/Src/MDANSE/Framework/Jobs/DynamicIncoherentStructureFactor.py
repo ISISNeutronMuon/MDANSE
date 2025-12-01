@@ -243,6 +243,9 @@ class DynamicIncoherentStructureFactor(IJob):
 
         n_configs = self.configuration["frames"]["n_configs"]
         for q in self.configuration["q_vectors"]["shells"]:
+            if self.configuration["q_vectors"]["value"][q] is None:
+                disf_per_q_shell[q] = np.nan
+                continue
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
             qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
 

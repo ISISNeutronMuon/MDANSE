@@ -262,7 +262,10 @@ class DynamicCoherentStructureFactor(IJob):
         """
         shell = self.configuration["q_vectors"]["shells"][index]
 
-        if shell not in self.configuration["q_vectors"]["value"]:
+        if (
+            shell not in self.configuration["q_vectors"]["value"]
+            or self.configuration["q_vectors"]["value"][shell] is None
+        ):
             return index, None
 
         qvec_weights = self.configuration["q_vectors"]["value"][shell]["weights"]
@@ -343,6 +346,9 @@ class DynamicCoherentStructureFactor(IJob):
                     rho[label_i], rho[label_j][:n_configs], mode="valid"
                 ).T[0] / (n_configs * norm)
                 self._outputData[f"dcsf/f(q,t)/{pair_str}"][index, :] += corr.real
+        else:
+            for pair_str, (_, _) in self.labels:
+                self._outputData[f"dcsf/f(q,t)/{pair_str}"][index, :] = np.nan
 
     def finalize(self):
         """Apply weights and write out the results."""

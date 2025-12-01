@@ -29,7 +29,7 @@ VEC_PARAMS = {
         "k": (0,6,1),
         "l": (0,6,1),
         "start": (0,0,0),
-        "step": (0,1,0),
+        "step": (1,0,0),
         "direction": (1,1,1),
     }
 
@@ -174,6 +174,8 @@ def test_qvector_to_hkl_conversion(trajectory, qvector_generator):
         print(f"{qvector_generator} has no shells")
         return
     for q in instance._configuration["shells"]["value"][:2]:
+        if instance._configuration["q_vectors"][q] is None:
+            continue
         try:
             original_qvectors = instance._configuration["q_vectors"][q]["q_vectors"]
         except KeyError:

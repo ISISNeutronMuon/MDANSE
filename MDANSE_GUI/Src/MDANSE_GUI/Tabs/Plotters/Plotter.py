@@ -214,9 +214,9 @@ class Plotter(metaclass=SubclassFactory):
             )
             return xdata, ydata
         if operation == NormOperations.AVERAGE:
-            scale_factor = np.mean(ref_values)
+            scale_factor = np.nanmean(ref_values)
         elif operation == NormOperations.SUM:
-            scale_factor = np.sum(ref_values)
+            scale_factor = np.sum(np.nan_to_num(ref_values))
         if np.isclose(scale_factor, 0.0):
             self._normalisation_errors.append(
                 "Normalisation factor is 0 and will not be applied."
@@ -248,9 +248,9 @@ class Plotter(metaclass=SubclassFactory):
         if ref_column.shape[1] < 1:
             return data_array
         if operation == NormOperations.AVERAGE:
-            scale_column = np.mean(ref_column, axis=1)
+            scale_column = np.nanmean(ref_column, axis=1)
         elif operation == NormOperations.SUM:
-            scale_column = np.sum(ref_column, axis=1)
+            scale_column = np.sum(np.nan_to_num(ref_column), axis=1)
         if np.any(np.isclose(scale_column, 0.0)):
             self._normalisation_errors.append(
                 "Normalisation factor is 0 for some rows of the 2D array."

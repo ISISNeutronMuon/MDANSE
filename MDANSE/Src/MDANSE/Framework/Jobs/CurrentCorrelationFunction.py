@@ -323,6 +323,9 @@ class CurrentCorrelationFunction(IJob):
 
         """
         shell = self.configuration["q_vectors"]["shells"][index]
+        if self.configuration["q_vectors"]["value"][shell] is None:
+            return index, None
+
         qvec_weights = self.configuration["q_vectors"]["value"][shell]["weights"]
         qvec_weights_sqrt = np.sqrt(qvec_weights)
 

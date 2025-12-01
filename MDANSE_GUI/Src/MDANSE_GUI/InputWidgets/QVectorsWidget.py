@@ -201,7 +201,13 @@ class ShellPanel(QWidget):
             LOG.warning(
                 "Shell %i was not available in the Q vector generator", shell_index
             )
+            self.plot_widget.plot_blank()
             return
+        else:
+            if vec_dict[vec_key] is None:
+                LOG.warning("Shell %i does not contain any vectors", shell_index)
+                self.plot_widget.plot_blank()
+                return
         self.update_label(shell_index)
         new_model = PlottingContext()
         for dataset in vector_projection_datasets(self.qvec_config, vec_key):

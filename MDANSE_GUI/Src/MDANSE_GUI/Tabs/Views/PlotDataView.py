@@ -241,26 +241,31 @@ def vector_q_statistics_datasets(
         parent_dset = source[main_dset]
         qvals = parent_dset["q"][:]
         nshells = len(qvals)
-        modq_per_shell = [shell_to_modq(n, parent_dset) for n in range(nshells)]
+        valid_shells = [
+            index
+            for index in range(nshells)
+            if len(parent_dset[f"shell_{index}/qvector_array"][0])
+        ]
+        modq_per_shell = [shell_to_modq(n, parent_dset) for n in valid_shells]
         available_vectors = np.array([len(qvecs) for qvecs in modq_per_shell])
         if all(
             "weights" in parent_dset[f"shell_{shell_index}"]
-            for shell_index in range(nshells)
+            for shell_index in valid_shells
         ):
             vec_weights = [
                 parent_dset[f"shell_{shell_index}/weights"][:]
-                for shell_index in range(nshells)
+                for shell_index in valid_shells
             ]
             unique_vectors = np.array(
                 [
                     len(parent_dset[f"shell_{shell_index}/weights"])
-                    for shell_index in range(nshells)
+                    for shell_index in valid_shells
                 ]
             )
             all_vectors = np.array(
                 [
                     sum(parent_dset[f"shell_{shell_index}/weights"][:])
-                    for shell_index in range(nshells)
+                    for shell_index in valid_shells
                 ]
             )
             available_vectors = np.vstack((all_vectors, unique_vectors)).T
@@ -269,10 +274,15 @@ def vector_q_statistics_datasets(
     elif isinstance(source, QVectorsConfigurator):
         filename = None
         qvals = np.array([float(x) for x in source["q_vectors"]])
-        nshells = len(qvals)
+        valid_shells = [
+            index
+            for index in range(len(qvals))
+            if source["q_vectors"][qvals[index]] is not None
+        ]
+        nshells = len(valid_shells)
         modq_per_shell = [
             np.linalg.norm(source["q_vectors"][qvals[n]]["q_vectors"], axis=0)
-            for n in range(nshells)
+            for n in valid_shells
         ]
         available_vectors = np.array(
             [
@@ -280,11 +290,11 @@ def vector_q_statistics_datasets(
                     sum(source["q_vectors"][qvals[n]]["weights"]),
                     len(source["q_vectors"][qvals[n]]["weights"]),
                 )
-                for n in range(nshells)
+                for n in valid_shells
             ]
         )
         vec_weights = [
-            source["q_vectors"][qvals[n]]["weights"][:] for n in range(nshells)
+            source["q_vectors"][qvals[n]]["weights"][:] for n in valid_shells
         ]
     mean_q = np.array(
         [
@@ -302,7 +312,7 @@ def vector_q_statistics_datasets(
             )
         ]
     )
-    qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[nshells - 1])
+    qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[-1])
     q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 0.1
     bin_step = 0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell])
     bin_step = 0.2 * q_step if abs(bin_step) < 1e-09 else max(bin_step, 0.05 * q_step)
@@ -316,7 +326,7 @@ def vector_q_statistics_datasets(
         linestyle=":",
         marker="o",
         data=available_vectors,
-        plot_axes={"|q|": qvals},
+        plot_axes={"|q|": qvals[valid_shells]},
         axes_units={"|q|": "1/nm"},
         optional_filename=filename,
     )
@@ -325,8 +335,8 @@ def vector_q_statistics_datasets(
         None,
         linestyle="-",
         marker=".",
-        data=mean_q - qvals,
-        plot_axes={"|q|": qvals},
+        data=mean_q - qvals[valid_shells],
+        plot_axes={"|q|": qvals[valid_shells]},
         axes_units={"|q|": "1/nm"},
         data_unit="1/nm",
         yerror=mean_q_yerr,
@@ -337,7 +347,7 @@ def vector_q_statistics_datasets(
         None,
         data=stacked_histograms,
         data_unit="counts",
-        plot_axes={"|q|": qvals, "q_bin": xvals},
+        plot_axes={"|q|": qvals[valid_shells], "q_bin": xvals},
         axes_units={"|q|": "1/nm", "q_bin": "1/nm"},
         optional_filename=filename,
     )
@@ -453,10 +463,12 @@ class PlotDataView(QTreeView):
         if "qvector_array" not in mda_data_structure:
             return
         self._qvector_shell = mda_data_structure["qvector_array"][:]
+        if not len(self._qvector_shell[0]):
+            return
         try:
             self._qvector_weights = mda_data_structure["weights"][:]
         except KeyError:
-            self._qvector_weights = np.ones_like(self._qvector_shell)
+            self._qvector_weights = np.ones(self._qvector_shell.shape[1])
         self._qvector_filename = mda_data_structure.file.filename
         menu = QMenu()
         temp_action = menu.addAction("Vector positions")

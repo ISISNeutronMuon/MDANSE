@@ -84,6 +84,7 @@ class LinearLatticeQVectors(LatticeQVectors):
             weights = weights[selection]
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             if not len(weights):
+                self._configuration["q_vectors"][q] = None
                 continue
 
             self._configuration["q_vectors"][q] = {}

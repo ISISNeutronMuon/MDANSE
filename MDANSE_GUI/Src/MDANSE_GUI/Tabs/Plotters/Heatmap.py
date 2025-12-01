@@ -93,7 +93,9 @@ class Heatmap(Plotter):
             new_data = self.normalise_array(data)
             image.set_data(new_data)
             percentiles = np.linspace(0, 100.0, 21)
-            results = [np.percentile(new_data, perc) for perc in percentiles]
+            results = [
+                np.percentile(np.nan_to_num(new_data), perc) for perc in percentiles
+            ]
             self._backup_scale_interpolators[ds_num] = interp1d(
                 percentiles,
                 results,
@@ -288,9 +290,7 @@ class Heatmap(Plotter):
                 colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
                 colorbar.set_label(dataset._data_unit)
                 xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
-            self._backup_arrays[databundle.row] = np.nan_to_num(
-                all_datasets[xnum][::-1, :]
-            )
+            self._backup_arrays[databundle.row] = all_datasets[xnum][::-1, :]
             if update_only:
                 interpolator = self._backup_scale_interpolators[databundle.row]
                 last_minmax = [
@@ -334,8 +334,8 @@ class Heatmap(Plotter):
                         f"Matplotlib could not set colorbar limits to {last_minmax}",
                     )
                 self._backup_minmax[databundle.row] = [
-                    dataset._data.min(),
-                    dataset._data.max(),
+                    np.nanmin(dataset._data),
+                    np.nanmax(dataset._data),
                 ]
                 self._backup_limits[databundle.row] = [
                     xlimits[0],
