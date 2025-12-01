@@ -184,7 +184,7 @@ class Vectors3D(Plotter):
                     color=databundle.colour,
                     width=np.mean(np.diff(bins)),
                 )
-                temp_curves2 = axes.bar(
+                _ = axes.bar(
                     bins,
                     dataset.data[1, :],
                     linestyle=databundle.line_style,

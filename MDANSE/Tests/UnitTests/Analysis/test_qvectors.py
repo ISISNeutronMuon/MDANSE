@@ -29,6 +29,7 @@ VEC_PARAMS = {
         "k": (0,6,1),
         "l": (0,6,1),
         "start": (0,0,0),
+        "step": (0,1,0),
         "direction": (1,1,1),
     }
 
@@ -56,6 +57,7 @@ def test_classmethod_lattice_vectors_with_weights():
                         [0,1,2,0],
                         [0,0,0,0]])*2*np.pi
     vecs, weights = IQVectors.lattice_vectors_with_weights(vectors, cell1)
+    vecs, weights = IQVectors.remove_zero_vector(vecs, weights=weights)
     assert vecs.shape == (3,2)
     assert vecs.shape[1] == len(weights)
 

@@ -81,20 +81,27 @@ class CircularLatticeQVectors(LatticeQVectors):
 
         for q in self._configuration["shells"]["value"]:
             q_vectors = circle_of_vectors(q, width, nvecs_per_shell, rot_mat=rot_mat)
-            lattice_qvectors, weights = self.lattice_vectors_with_weights(
+            lattice_hkl_vectors, weights = self.lattice_vectors_with_weights(
                 q_vectors, self._unit_cell
             )
+            selection = self.vectors_within_limits(
+                self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),
+                q_min=q - 0.5 * width,
+                q_max=q + 0.5 * width,
+            )
+            weights = weights[selection]
+            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             if not len(weights):
                 continue
 
             self._configuration["q_vectors"][q] = {}
-            self._configuration["q_vectors"][q]["q_vectors"] = lattice_qvectors
+            self._configuration["q_vectors"][q]["q_vectors"] = self.hkl_to_qvectors(
+                lattice_hkl_vectors, self._unit_cell
+            )
             self._configuration["q_vectors"][q]["weights"] = weights
             self._configuration["q_vectors"][q]["n_q_vectors"] = np.sum(weights)
             self._configuration["q_vectors"][q]["q"] = q
-            self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
-                lattice_qvectors, self._unit_cell
-            )
+            self._configuration["q_vectors"][q]["hkls"] = lattice_hkl_vectors
 
             if self._status is not None:
                 if self._status.is_stopped():

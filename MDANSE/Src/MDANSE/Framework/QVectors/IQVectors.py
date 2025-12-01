@@ -143,13 +143,28 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
             Unique Q-vectors as HKL values, number of times each vector appeared.
         """
         hkl_fractional = self.qvectors_to_hkl(start_shape, unit_cell)
-        hkl_rounded, weights = np.unique(
-            np.round(hkl_fractional), return_counts=True, axis=1
-        )
-        zero_vector_index = np.where(np.linalg.norm(hkl_rounded, axis=0) < 1e-15)[0]
-        return self.hkl_to_qvectors(
-            np.delete(hkl_rounded, zero_vector_index, axis=1), unit_cell
-        ), np.delete(weights, zero_vector_index)
+        return np.unique(np.round(hkl_fractional), return_counts=True, axis=1)
+
+    @classmethod
+    def remove_zero_vector(
+        self, vectors: npt.NDArray[float], weights: npt.NDArray[float] | None = None
+    ):
+        zero_vector_index = np.where(np.linalg.norm(vectors, axis=0) < 1e-15)[0]
+        vectors = np.delete(vectors, zero_vector_index, axis=1)
+        if weights is not None:
+            weights = np.delete(weights, zero_vector_index)
+        return vectors, weights
+
+    @classmethod
+    def vectors_within_limits(
+        self,
+        q_vectors: npt.NDArray[float],
+        *,
+        q_min: float,
+        q_max: float,
+    ):
+        lengths = np.linalg.norm(q_vectors, axis=0)
+        return np.where((lengths >= q_min) & (lengths <= q_max))
 
     def write_vectors_to_file(self, output_data: OutputData):
         """Write the vectors to output file as an array.
