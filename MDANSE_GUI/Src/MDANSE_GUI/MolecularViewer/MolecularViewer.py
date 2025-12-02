@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import copy
-import os
 from pathlib import Path
 from typing import Any
 
@@ -140,8 +139,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._axes_camera.SetPosition(0, 0, 8)
 
         # Initialize rotation parameters
-        self.rotation_angle = 0
-        self.rotation_speed = 1
+        self.rotation_speed = 5
 
         # Animation timer for rotating the 3D model
         self._animation_timer = QTimer()
@@ -313,9 +311,7 @@ class MolecularViewer(QtWidgets.QWidget):
         """
 
         reader = vtk.vtkSTLReader()
-        filepath = os.path.join(
-            os.path.dirname(__file__), "..", "Tabs", "Visualisers", filename)
-        # filepath = Path(__file__).resolve().parents[3] / "Icons" / filename
+        filepath = Path(__file__).parents[1] / "Icons" / filename
         reader.SetFileName(filepath)
         reader.Update()
 
@@ -325,6 +321,7 @@ class MolecularViewer(QtWidgets.QWidget):
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
         actor.GetProperty().SetColor(colour)
+
         actor.SetPosition(position)
         actor.SetScale(scale)
         # make center sphere metallic and semi-transparent
@@ -336,6 +333,12 @@ class MolecularViewer(QtWidgets.QWidget):
             actor.GetProperty().SetSpecularPower(100)
             actor.GetProperty().SetMetallic(1.0)
             actor.GetProperty().SetRoughness(0.2)
+
+        individual_transform = vtk.vtkTransform()
+        individual_transform.Identity()
+        individual_transform.Translate(0.0, 0.5, 0.5)
+        individual_transform.Scale(0.5, 0.5, 0.5)
+        actor.SetUserTransform(individual_transform)
 
         return actor
 
@@ -356,42 +359,38 @@ class MolecularViewer(QtWidgets.QWidget):
             )
             self._actors.AddPart(actor)
 
-        self._animation_timer.start(50)
 
         self._renderer.AddActor(self._actors)
 
-        # side view camera
+        #side view of 3d model
         self._camera.SetPosition(20, 0, 0)
         self._camera.SetFocalPoint(0, 0, 0)
         self._camera.SetViewUp(0, 0, 1)
 
-        # Reset camera to fit the model
-        self._renderer.ResetCamera()
-        self._iren.GetRenderWindow().Render()
-        self._iren.Render()
+        self._renderer.ResetCameraScreenSpace(0.4)
+        self._camera.SetWindowCenter(-0.5, -0.5)
+        self.reset_camera = True
+
+
+        self._animation_timer.start(50)
 
     def animate_rotation(self):
         """Continuously rotates the 3D model."""
         if self._animation_timer.isActive():
-            self.rotation_angle = (self.rotation_angle + self.rotation_speed) % 360
-            self.rotate_3D_model_actor(self.rotation_angle)
+            self.rotate_3D_model_actor(self.rotation_speed)
             self._iren.Render()
 
     def rotate_3D_model_actor(self, angle):
         """Rotates the given actor by the specified angle around axis."""
-
-        # different axis rotation for each actor in the assembly
         for i, actor in enumerate(self._actors.GetParts()):
-            individual_transform = vtk.vtkTransform()
             if i == 0:  # center sphere
-                individual_transform.RotateZ(angle)
+                actor.RotateZ(angle)
             elif i == 1:  # yellow sphere
-                individual_transform.RotateZ(-angle)
+                actor.RotateZ(-angle)
             elif i == 2:  # blue sphere
-                individual_transform.RotateX(angle)
+                actor.RotateX(angle)
             elif i == 3:  # red sphere
-                individual_transform.RotateX(-angle)
-            actor.SetUserTransform(individual_transform)
+                actor.RotateX(-angle)
 
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
@@ -1222,6 +1221,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if self.reset_camera:
             self._renderer.ResetCamera()
             self.reset_camera = False
+            self._camera.SetWindowCenter(0.0, 0.0)
 
         self._iren.GetRenderWindow().Render()
         self._iren.Render()

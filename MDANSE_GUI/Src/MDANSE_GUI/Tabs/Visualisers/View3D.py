@@ -15,9 +15,6 @@
 #
 from __future__ import annotations
 
-import os
-from pathlib import Path
-
 from qtpy.QtCore import QUrl, Signal, Slot
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
@@ -58,7 +55,7 @@ class View3D(QWidget):
     def update_panel(self, data: tuple):
         fullpath, incoming = data
         if fullpath == "" or data is None:
-            #self._viewer._camera.SetParallelProjection(0)
+            self._viewer._camera.SetParallelProjection(0)
             self.load_placeholder()
             return
 
