@@ -359,10 +359,9 @@ class MolecularViewer(QtWidgets.QWidget):
             )
             self._actors.AddPart(actor)
 
-
         self._renderer.AddActor(self._actors)
 
-        #side view of 3d model
+        # side view of 3d model
         self._camera.SetPosition(20, 0, 0)
         self._camera.SetFocalPoint(0, 0, 0)
         self._camera.SetViewUp(0, 0, 1)
@@ -370,7 +369,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._renderer.ResetCameraScreenSpace(0.4)
         self._camera.SetWindowCenter(-0.5, -0.5)
         self.reset_camera = True
-
 
         self._animation_timer.start(50)
 
