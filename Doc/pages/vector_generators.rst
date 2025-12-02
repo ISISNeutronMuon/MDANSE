@@ -66,17 +66,11 @@ crystal lattice defined by the simulation box. Every vector will be
 generated as :math:`\mathbf{k}_{start} + n\mathbf{k}_{step}` for
 integer n from 0 to n_steps.
 
-The 'using_supercell' input is only used for the final conversion
-of q vectors to HKL coordinates. If the simulated cell is a supercell,
-you can specify the multiplicity of the supercell here to have the
-HKL values generated in the units of the original unit cell.
-
 Inputs:
 
 - start: :ref:`configurator-analysis-VectorConfigurator` default=[0, 0, 0]
 - step: :ref:`configurator-analysis-VectorConfigurator` default=[1, 0, 0]
 - n_steps: :ref:`configurator-analysis-IntegerConfigurator` default=10
-- using_supercell: :ref:`configurator-analysis-VectorConfigurator` default=[1, 1, 1]
 
 
 .. _qvectors-reference-DispersionQVectors:

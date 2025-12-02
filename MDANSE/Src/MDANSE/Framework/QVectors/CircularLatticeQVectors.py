@@ -25,7 +25,6 @@ from MDANSE.Framework.QVectors.CircularQVectors import (
     circle_rotation_matrix,
 )
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
-from MDANSE.Mathematics.Geometry import rotation_matrix
 
 
 class CircularLatticeQVectors(LatticeQVectors):

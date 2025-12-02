@@ -277,12 +277,22 @@ class PlotWidget(QWidget):
         """List all the plotters supported by this widget."""
         return [str(x) for x in Plotter.indirect_subclasses() if str(x) != "Text"]
 
-    def plot_blank(self):
+    def plot_blank(
+        self,
+        *,
+        draw_cross: bool = True,
+        override_title: str | None = None,
+        override_label: str | None = None,
+    ):
         """Show a blank plot to indicate that plotting failed."""
         LOG.debug("PlotWidget is about to call self._plotter.plot_blank()")
         if self._plotter is None:
             self._plotter = Plotter()
-        self._plotter.plot_blank()
+        self._plotter.plot_blank(
+            draw_cross=draw_cross,
+            override_title=override_title,
+            override_label=override_label,
+        )
 
     @Slot()
     def use_legend(self, bool_flag: bool | None = None):
@@ -316,6 +326,7 @@ class PlotWidget(QWidget):
             return
         if self._plotting_context is None:
             return
+        self._figure.set_layout_engine("tight")
         self._plotter.plot(
             self._plotting_context,
             self._figure,
@@ -354,7 +365,7 @@ class PlotWidget(QWidget):
         """
         canvas = self
         layout = QVBoxLayout(canvas)
-        figure = mpl.figure()
+        figure = mpl.figure(layout="constrained")
         figAgg = FigureCanvasQTAgg(figure)
         figAgg.setParent(canvas)
         figAgg.updateGeometry()

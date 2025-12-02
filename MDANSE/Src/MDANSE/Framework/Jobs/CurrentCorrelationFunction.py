@@ -488,12 +488,8 @@ class CurrentCorrelationFunction(IJob):
         """
         if x is None:
             for pair_str, _ in self.labels:
-                self._outputData[f"ccf/j(q,t)_long/{pair_str}"][index, :] = np.zeros(
-                    self._nFrames,
-                )
-                self._outputData[f"ccf/j(q,t)_trans/{pair_str}"][index, :] = np.zeros(
-                    self._nFrames,
-                )
+                self._outputData[f"ccf/j(q,t)_long/{pair_str}"][index, :] = np.nan
+                self._outputData[f"ccf/j(q,t)_trans/{pair_str}"][index, :] = np.nan
             return
 
         rho_l, rho_t, norm = x

@@ -295,7 +295,13 @@ class Plotter(metaclass=SubclassFactory):
         self._axes = [axes]
         self.apply_settings(plotting_context)
 
-    def plot_blank(self, *, draw_cross: bool = True):
+    def plot_blank(
+        self,
+        *,
+        draw_cross: bool = True,
+        override_title: str | None = None,
+        override_label: str | None = None,
+    ):
         """Inform the user that no data could be plotted.
 
         Parameters
@@ -308,8 +314,16 @@ class Plotter(metaclass=SubclassFactory):
         if draw_cross:
             axes.axline([0, 0], [1, 1], color="k", linestyle="-")
             axes.axline([0, 1], [1, 0], color="k", linestyle="-")
-        axes.set_title("The data sets you selected could not be plotted.")
-        axes.set_xlabel(
-            "If you expected a plot, please check the settings you changed last."
+        label_text = (
+            override_label
+            if override_label
+            else "If you expected a plot, please check the settings you changed last."
         )
+        title_text = (
+            override_title
+            if override_title
+            else "The data sets you selected could not be plotted."
+        )
+        axes.set_title(title_text)
+        axes.set_xlabel(label_text)
         figure.canvas.draw()

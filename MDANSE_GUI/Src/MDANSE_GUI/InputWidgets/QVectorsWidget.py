@@ -165,6 +165,7 @@ class ShellPanel(QWidget):
         self.shell_selector.valueChanged.connect(self.set_shell)
         self.shell_information = QLabel("th shell, |q| = N/A")
         self.plot_widget = PlotWidget(self, plotter_type=self.plotter_type)
+        self.plot_widget._figure.set_layout_engine("constrained")
         self.plot_widget.plot_selector.setVisible(False)
         self.plot_widget._normaliser.setVisible(False)
         self.plot_widget._sliderpack.setVisible(False)
@@ -206,7 +207,11 @@ class ShellPanel(QWidget):
         else:
             if vec_dict[vec_key] is None:
                 LOG.warning("Shell %i does not contain any vectors", shell_index)
-                self.plot_widget.plot_blank()
+                self.plot_widget.plot_blank(
+                    draw_cross=False,
+                    override_title=f"Shell {shell_index}, q={vec_key}, contains no vectors.",
+                    override_label="To introduce vectors at this Q, you may have to run the simulation with a larger cell.",
+                )
                 return
         self.update_label(shell_index)
         new_model = PlottingContext()
@@ -265,6 +270,7 @@ class VectorViewer(QDialog):
         layout.addWidget(self.main_widget)
         self.setLayout(layout)
         self.plot_widget = PlotWidget(self, plotter_type="Vectors")
+        self.plot_widget._figure.set_layout_engine("constrained")
         self.plot_widget.plot_selector.setVisible(False)
         self.plot_widget._normaliser.setVisible(False)
         self.plot_widget._sliderpack.setVisible(False)
