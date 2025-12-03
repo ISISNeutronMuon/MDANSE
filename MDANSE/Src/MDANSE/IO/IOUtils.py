@@ -291,7 +291,7 @@ def summarise_array(array: Sequence, *, maxlen: int = 6, show: int = 3) -> str:
 
 def unused_standard_output_filename(
     path_stem: Path, job_name: str, extra_text: str = "_result", extension: str = ".mda"
-):
+) -> Path | None:
     """Return the first unused output file name following the default naming pattern.
 
     This function suggests the filename given as:
@@ -311,8 +311,8 @@ def unused_standard_output_filename(
 
     Returns
     -------
-    Path
-        The first file name generated which does not currently exist.
+    Path | None
+        The first file name which does not exist. None if all names are taken.
     """
     temp_name_generator = (
         path_stem.with_name("".join((job_name, extra_text, str(number + 1))))
