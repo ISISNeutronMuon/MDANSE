@@ -182,7 +182,7 @@ class HDFFormat(IFormat):
 
         else:
             user_given_name = Path(filename).name
-            filepath = Path(filename).with_suffix(".mda")
+            filepath = Path(filename).with_suffix(extension)
 
             if filepath.name != user_given_name:
                 filename = filepath.with_name(user_given_name + extension)
