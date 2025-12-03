@@ -15,35 +15,19 @@
 #
 from __future__ import annotations
 
-import os
-import os.path
 from pathlib import Path
 
-from more_itertools import first_true
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton
 
 from MDANSE.Framework.Configurators.OutputFilesConfigurator import (
     OutputFilesConfigurator,
 )
+from MDANSE.IO.IOUtils import unused_standard_output_filename
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 from .CheckableComboBox import CheckableComboBox
-
-MAX_FILE_COUNT = 2048
-
-
-def unused_standard_output_filename(
-    path_stem: Path, job_name: str, extension: str = ".mda"
-):
-    temp_name_generator = (
-        path_stem.with_name(job_name + "_result" + str(number + 1))
-        for number in range(MAX_FILE_COUNT)
-    )
-    return first_true(
-        temp_name_generator, pred=lambda x: not x.with_suffix(extension).exists()
-    )
 
 
 class OutputFilesWidget(WidgetBase):
@@ -144,4 +128,4 @@ class OutputFilesWidget(WidgetBase):
         formats = self.type_box.checked_values()
         log_level = self.logs_combo.currentText()
 
-        return (str(Path(os.path.abspath(filename))), formats, log_level)
+        return (str(Path(filename).absolute()), formats, log_level)
