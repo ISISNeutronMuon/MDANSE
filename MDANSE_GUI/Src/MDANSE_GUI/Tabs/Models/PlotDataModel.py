@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+import json
+import os
 from abc import abstractmethod
 from pathlib import Path
 from typing import TypeVar
@@ -23,6 +25,7 @@ import h5py
 from qtpy.QtCore import QModelIndex, QMutex, QObject, Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
+from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MLogging import LOG
 
@@ -141,6 +144,12 @@ class MDADataStructure:
     def __init__(self, filename: str):
         self._file = h5py.File(filename)
         self._metadata = check_metadata(self._file)
+        #Ensure only mda type file are loaded in Plot Creator Tab
+        output_metadata = self._metadata["inputs/output_files"]
+        if not isinstance(output_metadata[1], list) or "MDAFormat" not in output_metadata[1]:
+            self.close()
+            raise ValueError(f"Not a .mda type file {filename}")
+
 
     def close(self):
         """Close the HDF5 file."""
@@ -153,16 +162,23 @@ class PlotDataModel(QStandardItemModel):
     Meant to be used with DoublePanel, GeneralView and ItemVisualiser.
     It stores elements and emits them to the ItemVisualiser.
     """
+    DEFAULT_JSON_PATH = (
+        PLATFORM.application_directory() / "recent_plot_selection_file.json"
+    )
+    MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
 
     error = Signal(str)
     all_elements = Signal(object)
     finished_loading = Signal(int)
+    recent_files_update = Signal(str)
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
         self.mutex = QMutex()
         self._nodes = {}
         self._next_number = 0
+        self.recent_files_update.connect(self.recent_plot_files)
+
 
     @Slot(str)
     def add_file(self, filename: str):
@@ -177,7 +193,7 @@ class PlotDataModel(QStandardItemModel):
         try:
             new_datafile = MDADataStructure(filename)
         except Exception as e:
-            LOG.error(f"Invalid: {e!s}")
+            LOG.error(f"Invalid: {e}")
         else:
             self._nodes[self._next_number] = new_datafile
             new_item = DataFileItem()
@@ -187,6 +203,41 @@ class PlotDataModel(QStandardItemModel):
             self.appendRow(new_item)
             new_item.populate(new_datafile._file)
             self.finished_loading.emit(self._next_number - 1)
+            self.recent_files_update.emit(filename)
+
+    @Slot(str)
+    def recent_plot_files(self, plot_filepath: str):
+        """Adding recently loaded plot selection files to a json file. The json file is used to
+        populate the "Open Recent Plot Selection File" menu in the File menu.
+
+        Parameters
+        ----------
+        plot_filepath : Path of the added file
+        Returns
+        -------
+        Str
+            Recently loaded plot selection file path.
+        """
+        filename = self.DEFAULT_JSON_PATH
+        max_num_files = self.MAX_NUMBER_RECENT_FILES
+        if os.path.exists(filename) and os.path.getsize(filename) > 0:
+            with open(filename) as f:
+                recent_files = json.load(f)
+        else:
+            recent_files = []
+
+        if plot_filepath in recent_files:
+            recent_files.remove(plot_filepath)
+        recent_files.append(plot_filepath)
+
+        if len(recent_files) > max_num_files:
+            delete_number_of_files = len(recent_files) - max_num_files
+            while delete_number_of_files > 0:
+                recent_files.pop(0)
+                delete_number_of_files -= 1
+
+        with open(filename, "w") as f:
+            json.dump(recent_files, f, indent=4)
 
     def inner_object(self, index: QModelIndex) -> MDADataStructure | h5py.Dataset:
         """For a Qt model index, return its corresponding HDF5 object.

@@ -44,6 +44,7 @@ from MDANSE_GUI.Tabs.LoggingTab import GuiLogHandler, LoggingTab
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
 from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
+from MDANSE_GUI.Tabs.Models.PlotDataModel import PlotDataModel
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Tabs.RunTab import RunTab
@@ -258,7 +259,7 @@ class TabbedWindow(QMainWindow):
         self.signal_recent_trajectory_file.emit(file)
 
     def populate_recent_plot_selection_menu(
-        self, filename=PlotSelectionTab.DEFAULT_JSON_PATH
+        self, filename=PlotDataModel.DEFAULT_JSON_PATH
     ):
         """Populate the recent plot selection files menu in the File menu."""
         self.recent_plot_selection_fileAct.clear()
