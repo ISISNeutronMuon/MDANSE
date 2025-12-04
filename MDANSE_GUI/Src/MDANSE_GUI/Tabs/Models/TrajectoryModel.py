@@ -161,7 +161,7 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_status[index] = LoadStatus.READY
         self.finished_loading.emit(index)
         filename = self._trajectory_paths[index]
-        self.recent_files_update.emit(filename)
+        self.recent_files_update.emit(str(filename))
         # self._loading_threads[index].wait()
 
     @Slot(str)
