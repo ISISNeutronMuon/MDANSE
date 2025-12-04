@@ -144,12 +144,14 @@ class MDADataStructure:
     def __init__(self, filename: str):
         self._file = h5py.File(filename)
         self._metadata = check_metadata(self._file)
-        #Ensure only mda type file are loaded in Plot Creator Tab
+        # Ensure only mda type file are loaded in Plot Creator Tab
         output_metadata = self._metadata["inputs/output_files"]
-        if not isinstance(output_metadata[1], list) or "MDAFormat" not in output_metadata[1]:
+        if (
+            not isinstance(output_metadata[1], list)
+            or "MDAFormat" not in output_metadata[1]
+        ):
             self.close()
             raise ValueError(f"Not a .mda type file {filename}")
-
 
     def close(self):
         """Close the HDF5 file."""
@@ -162,6 +164,7 @@ class PlotDataModel(QStandardItemModel):
     Meant to be used with DoublePanel, GeneralView and ItemVisualiser.
     It stores elements and emits them to the ItemVisualiser.
     """
+
     DEFAULT_JSON_PATH = (
         PLATFORM.application_directory() / "recent_plot_selection_file.json"
     )
@@ -178,7 +181,6 @@ class PlotDataModel(QStandardItemModel):
         self._nodes = {}
         self._next_number = 0
         self.recent_files_update.connect(self.recent_plot_files)
-
 
     @Slot(str)
     def add_file(self, filename: str):

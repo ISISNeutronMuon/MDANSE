@@ -43,8 +43,8 @@ from MDANSE_GUI.Tabs.JobTab import JobTab
 from MDANSE_GUI.Tabs.LoggingTab import GuiLogHandler, LoggingTab
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
-from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 from MDANSE_GUI.Tabs.Models.PlotDataModel import PlotDataModel
+from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 from MDANSE_GUI.Tabs.PlotSelectionTab import PlotSelectionTab
 from MDANSE_GUI.Tabs.PlotTab import PlotTab
 from MDANSE_GUI.Tabs.RunTab import RunTab
