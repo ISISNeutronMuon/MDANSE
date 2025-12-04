@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import collections
+import copy
 
 from MDANSE.Framework.Jobs.CartesianPowerSpectrum import CartesianPowerSpectrum
 from MDANSE.Framework.Jobs.VelocityCorrelationFunction import (
@@ -35,7 +36,8 @@ class DensityOfStates(CartesianPowerSpectrum, VelocityCorrelationFunction):
 
     label = "Density Of States"
 
-    settings = list(CartesianPowerSpectrum.settings.items())
+    settings = copy.deepcopy(CartesianPowerSpectrum.settings)
+    settings = list(settings.items())
     settings.insert(
         3,
         (
@@ -50,6 +52,7 @@ class DensityOfStates(CartesianPowerSpectrum, VelocityCorrelationFunction):
         ),
     )
     settings = collections.OrderedDict(settings)
+    settings["weights"][1]["default"] = "atomic_weight"
 
     PWR_NAME = "dos"
     PWR_UNITS = "au"

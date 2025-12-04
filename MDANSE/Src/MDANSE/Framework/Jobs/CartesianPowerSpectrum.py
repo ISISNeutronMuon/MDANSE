@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import collections
+import copy
 import itertools as it
 
 from MDANSE.Framework.AtomGrouping.grouping import (
@@ -35,7 +36,8 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
     )
     PREDICTORS = ("instrument_resolution",)
 
-    settings = list(CartesianCorrelationFunction.settings.items())
+    settings = copy.deepcopy(CartesianCorrelationFunction.settings)
+    settings = list(settings.items())
     settings.insert(
         2,
         (
@@ -49,7 +51,6 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
         ),
     )
     settings = collections.OrderedDict(settings)
-    settings["weights"][1]["default"] = "atomic_weight"
 
     PWR_NAME = ""
     PWR_UNITS = ""
