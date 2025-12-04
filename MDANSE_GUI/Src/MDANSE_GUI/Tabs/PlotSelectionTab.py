@@ -47,7 +47,6 @@ will <b>appear in the next tab.</b>
 
 
 class PlotSelectionTab(GeneralTab):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDA results", self.load_files)
@@ -94,7 +93,6 @@ class PlotSelectionTab(GeneralTab):
             fname = os.path.abspath(fname)
             self._model.add_file(str(fname))
             self._session.protect_filename(fname)
-
 
     @classmethod
     def gui_instance(
