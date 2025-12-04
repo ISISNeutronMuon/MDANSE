@@ -74,7 +74,6 @@ class PlotSelectionTab(GeneralTab):
             str(self.get_path("plot_selection")),
             "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
         )
-        recent_files = []  # list to store loaded files for recent files tracking
         if fnames is None:
             return
         if len(fnames[0]) < 1:
@@ -82,9 +81,7 @@ class PlotSelectionTab(GeneralTab):
         for fname in fnames[0]:
             self.load_results(str(PurePath(fname)))
             last_path = str(PurePath(os.path.split(fname)[0]))
-            recent_files.append(str(PurePath(fname)))
         self.set_path("plot_selection", last_path)
-        # self.recent_plot_files(recent_files)
 
     @Slot(str)
     def load_results(self, some_fname: str):
