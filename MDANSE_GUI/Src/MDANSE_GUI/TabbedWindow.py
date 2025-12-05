@@ -19,6 +19,7 @@ import json
 import os
 from collections import defaultdict
 from importlib import metadata
+from pathlib import Path
 
 from qtpy.QtCore import QMessageLogger, QSize, Qt, QTimer, QUrl, Signal, Slot
 from qtpy.QtGui import QDesktopServices
@@ -232,52 +233,44 @@ class TabbedWindow(QMainWindow):
         QApplication.quit()
         self.destroy(True, True)
 
+    def populate_recent_menu(self, menu, recent_filepath: str, open_recent_file):
+        menu.clear()
+        filepath = Path(recent_filepath)
+
+        if not filepath.is_file():
+            return []
+
+        with filepath.open(encoding="utf-8") as file:
+            data = json.load(file)
+
+        if not isinstance(data, list):
+            raise ValueError(f"{filepath} JSON is not a list")
+
+        for file in data[::-1]:
+            action = QAction(file, menu)
+            action.triggered.connect(
+                lambda checked=False, fp=file: open_recent_file(fp)
+            )
+            menu.addAction(action)
+
     @Slot()
     def populate_recent_trajectory_menu(
         self, filename=TrajectoryModel.DEFAULT_JSON_PATH
     ):
         """Populate the recent trajectory files menu in the File menu."""
-        self.recent_trajectory_fileAct.clear()
-        if os.path.exists(filename):
-            with open(filename) as f:
-                data = json.load(f)
-                data = list(reversed(data))
-                for file in data:
-                    action = QAction(file, self.recent_trajectory_fileAct)
-                    action.triggered.connect(
-                        lambda checked=False, fp=file: self.open_recent_trajectory_file(
-                            fp
-                        )
-                    )
-                    self.recent_trajectory_fileAct.addAction(action)
-        else:
-            return []
+        self.populate_recent_menu(self.recent_trajectory_fileAct, filename, self.open_recent_trajectory_file)
 
     @Slot()
     def open_recent_trajectory_file(self, file: str):
         """Emit signal to the trajectory tab to load the file with the file path as the argument."""
         self.signal_recent_trajectory_file.emit(file)
 
+    @Slot()
     def populate_recent_plot_selection_menu(
         self, filename=PlotDataModel.DEFAULT_JSON_PATH
     ):
         """Populate the recent plot selection files menu in the File menu."""
-        self.recent_plot_selection_fileAct.clear()
-        if os.path.exists(filename):
-            with open(filename) as f:
-                data = json.load(f)
-                if not isinstance(data, list):
-                    raise ValueError("Recent plot selection file is not a list")
-                data = list(reversed(data))
-                for file in data:
-                    action = QAction(file, self.recent_plot_selection_fileAct)
-                    action.triggered.connect(
-                        lambda checked=False,
-                        fp=file: self.open_recent_plot_selection_file(fp)
-                    )
-                    self.recent_plot_selection_fileAct.addAction(action)
-        else:
-            return []
+        self.populate_recent_menu(self.recent_plot_selection_fileAct, filename, self.open_recent_plot_selection_file)
 
     @Slot()
     def open_recent_plot_selection_file(self, file: str):

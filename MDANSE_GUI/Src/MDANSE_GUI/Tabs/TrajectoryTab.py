@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import os
 from functools import partial
-from pathlib import PurePath
+from pathlib import Path
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
@@ -64,16 +64,16 @@ class TrajectoryTab(GeneralTab):
         loaded_files = []  # list to store loaded files for recent files tracking
 
         for fname in fnames[0]:
-            self.load_trajectory(PurePath(fname))
-            last_path = str(PurePath(os.path.split(fname)[0]))
-            loaded_files.append(str(PurePath(fname)))
-        if fnames[0]:
-            self.set_path("trajectory", str(PurePath(last_path)))
+            filepath = Path(fname)
+            self.load_trajectory(filepath)
+            last_path = str(filepath.parent)
+            loaded_files.append(str(filepath))
+            self.set_path("trajectory", last_path)
             self._session.save()
 
     @Slot(str)
     def load_trajectory(self, some_fname: str):
-        fname = str(PurePath(some_fname))
+        fname = str(Path(some_fname))
         if len(fname) > 0:
             _, short_name = os.path.split(fname)
             self._core._model.append_object((fname, short_name))

@@ -28,6 +28,7 @@ from qtpy.QtGui import QStandardItem, QStandardItemModel
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.Tabs.Models.TrajectoryModel import add_file_to_recent_file
 
 Self = TypeVar("Self", bound="BasicPlotDataItem")
 EXCLUDE = {"metadata"}
@@ -222,24 +223,9 @@ class PlotDataModel(QStandardItemModel):
         """
         filename = self.DEFAULT_JSON_PATH
         max_num_files = self.MAX_NUMBER_RECENT_FILES
-        if os.path.exists(filename) and os.path.getsize(filename) > 0:
-            with open(filename) as f:
-                recent_files = json.load(f)
-        else:
-            recent_files = []
-
-        if plot_filepath in recent_files:
-            recent_files.remove(plot_filepath)
-        recent_files.append(plot_filepath)
-
-        if len(recent_files) > max_num_files:
-            delete_number_of_files = len(recent_files) - max_num_files
-            while delete_number_of_files > 0:
-                recent_files.pop(0)
-                delete_number_of_files -= 1
-
-        with open(filename, "w") as f:
-            json.dump(recent_files, f, indent=4)
+        add_file_to_recent_file(
+            filename, max_num_files, plot_filepath
+        )
 
     def inner_object(self, index: QModelIndex) -> MDADataStructure | h5py.Dataset:
         """For a Qt model index, return its corresponding HDF5 object.
