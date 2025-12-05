@@ -223,9 +223,7 @@ class PlotDataModel(QStandardItemModel):
         """
         filename = self.DEFAULT_JSON_PATH
         max_num_files = self.MAX_NUMBER_RECENT_FILES
-        add_file_to_recent_file(
-            filename, max_num_files, plot_filepath
-        )
+        add_file_to_recent_file(filename, max_num_files, plot_filepath)
 
     def inner_object(self, index: QModelIndex) -> MDADataStructure | h5py.Dataset:
         """For a Qt model index, return its corresponding HDF5 object.

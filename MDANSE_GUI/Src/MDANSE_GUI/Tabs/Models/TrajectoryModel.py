@@ -18,9 +18,9 @@ from __future__ import annotations
 import itertools
 import json
 import os
-from pathlib import Path
 import traceback
 from enum import Enum, auto
+from pathlib import Path
 
 from qtpy.QtCore import (
     QDeadlineTimer,
@@ -37,6 +37,7 @@ from qtpy.QtGui import QStandardItem, QStandardItemModel
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
 
 def add_file_to_recent_file(
     recent_file_path: str, max_num_of_files: int, loaded_file: str
@@ -68,6 +69,7 @@ def add_file_to_recent_file(
 
     with filepath.open("w", encoding="utf-8") as file:
         json.dump(recent_files, file, indent=4)
+
 
 class LoadStatus(Enum):
     LOADING = auto()

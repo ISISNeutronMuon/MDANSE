@@ -233,7 +233,30 @@ class TabbedWindow(QMainWindow):
         QApplication.quit()
         self.destroy(True, True)
 
-    def populate_recent_menu(self, menu, recent_filepath: str, open_recent_file):
+    def populate_recent_menu(
+        self, menu: str, recent_filepath: str, open_recent_file_function: str
+    ):
+        """Generic helper for populating 'recent files' menus.
+
+        Parameters
+        ----------
+        menu : str
+            the QMenu to add actions to
+        recent_filepath : str
+            path to JSON file that stores recent items
+        open_recent_file_function : str
+            function to call when an item is clicked
+
+        Returns
+        -------
+        _type_
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         menu.clear()
         filepath = Path(recent_filepath)
 
@@ -249,7 +272,7 @@ class TabbedWindow(QMainWindow):
         for file in data[::-1]:
             action = QAction(file, menu)
             action.triggered.connect(
-                lambda checked=False, fp=file: open_recent_file(fp)
+                lambda checked=False, fp=file: open_recent_file_function(fp)
             )
             menu.addAction(action)
 
@@ -258,7 +281,9 @@ class TabbedWindow(QMainWindow):
         self, filename=TrajectoryModel.DEFAULT_JSON_PATH
     ):
         """Populate the recent trajectory files menu in the File menu."""
-        self.populate_recent_menu(self.recent_trajectory_fileAct, filename, self.open_recent_trajectory_file)
+        self.populate_recent_menu(
+            self.recent_trajectory_fileAct, filename, self.open_recent_trajectory_file
+        )
 
     @Slot()
     def open_recent_trajectory_file(self, file: str):
@@ -270,7 +295,11 @@ class TabbedWindow(QMainWindow):
         self, filename=PlotDataModel.DEFAULT_JSON_PATH
     ):
         """Populate the recent plot selection files menu in the File menu."""
-        self.populate_recent_menu(self.recent_plot_selection_fileAct, filename, self.open_recent_plot_selection_file)
+        self.populate_recent_menu(
+            self.recent_plot_selection_fileAct,
+            filename,
+            self.open_recent_plot_selection_file,
+        )
 
     @Slot()
     def open_recent_plot_selection_file(self, file: str):
