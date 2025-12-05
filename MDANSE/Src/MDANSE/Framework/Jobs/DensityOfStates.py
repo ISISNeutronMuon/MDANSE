@@ -52,7 +52,6 @@ class DensityOfStates(CartesianPowerSpectrum, VelocityCorrelationFunction):
         ),
     )
     settings = collections.OrderedDict(settings)
-    settings["weights"][1]["default"] = "atomic_weight"
 
     PWR_NAME = "dos"
     PWR_UNITS = "au"

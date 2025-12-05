@@ -51,6 +51,7 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
         ),
     )
     settings = collections.OrderedDict(settings)
+    settings["weights"][1]["default"] = "atomic_weight"
 
     PWR_NAME = ""
     PWR_UNITS = ""
