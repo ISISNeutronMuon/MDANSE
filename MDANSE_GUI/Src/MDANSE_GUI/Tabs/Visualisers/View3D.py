@@ -55,7 +55,6 @@ class View3D(QWidget):
     def update_panel(self, data: tuple):
         fullpath, incoming = data
         if fullpath == "" or data is None:
-            self._viewer._camera.SetParallelProjection(0)
             self.load_placeholder()
             return
 

@@ -116,6 +116,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._iren.GetRenderWindow()
 
+        self._backup_wheel_method = copy.copy(self._iren.wheelEvent)
+        self._dummy_method = copy.copy(dummy_method)
+
         self.atom_actor = None
         self._last_coords = None
         self.atom_label_actors = []
@@ -347,10 +350,10 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._actors = vtk.vtkAssembly()
         spheres = [
-            ("center_sphere.stl", (0.5, 0.5, 0.5), 0.3, (0, 0, 0)),  # grey center
-            ("yellow_sphere.stl", (1.0, 1.0, 0.0), 0.3, (0, 0, 0)),
-            ("blue_sphere.stl", (0.0, 0.0, 1.0), 0.3, (0, 0, 0)),
-            ("red_sphere.stl", (1.0, 0.0, 0.0), 0.3, (0, 0, 0)),
+            ("center_sphere.stl", (0.5, 0.5, 0.5), 0.4, (0, 0, 0)),  # grey center
+            ("yellow_sphere.stl", (1.0, 1.0, 0.0), 0.4, (0, 0, 0)),
+            ("blue_sphere.stl", (0.0, 0.0, 1.0), 0.4, (0, 0, 0)),
+            ("red_sphere.stl", (1.0, 0.0, 0.0), 0.4, (0, 0, 0)),
         ]
 
         for filename, colour, position, scale in spheres:
@@ -371,6 +374,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self.reset_camera = True
 
         self._animation_timer.start(50)
+
+        self._iren.wheelEvent = self._dummy_method
 
     def animate_rotation(self):
         """Continuously rotates the 3D model."""
@@ -631,6 +636,7 @@ class MolecularViewer(QtWidgets.QWidget):
             self.atom_actor = ball_actor
         else:
             self.atom_actor = None
+        self._iren.wheelEvent = self._backup_wheel_method
         return actors
 
     def create_uc_actor(self):
