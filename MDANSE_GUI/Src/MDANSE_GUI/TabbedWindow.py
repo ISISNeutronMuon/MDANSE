@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import os
 from collections import defaultdict
+from collections.abc import Callable
 from importlib import metadata
 from pathlib import Path
 
@@ -58,6 +59,26 @@ from MDANSE_GUI.Widgets.StyleDialog import StyleDatabase, StyleDialog
 MDANSE_CODE_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE")
 MDANSE_DOCS_WEBSITE = QUrl("https://mdanse.readthedocs.io/en/latest/")
 MDANSE_PROJECT_WEBSITE = QUrl("https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx")
+
+
+class RecentFileAction(QAction):
+    def __init__(
+        self,
+        *args,
+        file_path: str | None = None,
+        external_function: Callable | None = None,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.file_path = file_path
+        self.external_function = external_function
+        self.triggered.connect(self.on_triggered)
+        if not Path(file_path).exists():
+            self.setEnabled(False)
+
+    @Slot()
+    def on_triggered(self):
+        self.external_function(str(self.file_path))
 
 
 class TabbedWindow(QMainWindow):
@@ -192,20 +213,20 @@ class TabbedWindow(QMainWindow):
         file_group = menubar.addMenu("File")
         settings_group = menubar.addMenu("Settings")
         help_group = menubar.addMenu("Help")
-        self.recent_trajectory_fileAct = QMenu(
+        self.recent_trajectory_file_menu = QMenu(
             "Open Recent Trajectories File", parent=menubar
         )
-        self.recent_trajectory_fileAct.aboutToShow.connect(
+        self.recent_trajectory_file_menu.aboutToShow.connect(
             self.populate_recent_trajectory_menu
         )
-        file_group.addMenu(self.recent_trajectory_fileAct)
-        self.recent_plot_selection_fileAct = QMenu(
-            "Open Recent Plot Selection File", parent=menubar
+        file_group.addMenu(self.recent_trajectory_file_menu)
+        self.recent_plot_selection_file_menu = QMenu(
+            "Open Recent Results File", parent=menubar
         )
-        self.recent_plot_selection_fileAct.aboutToShow.connect(
+        self.recent_plot_selection_file_menu.aboutToShow.connect(
             self.populate_recent_plot_selection_menu
         )
-        file_group.addMenu(self.recent_plot_selection_fileAct)
+        file_group.addMenu(self.recent_plot_selection_file_menu)
         file_group.addSeparator()
         self.exitAct = QAction("Exit", parent=menubar)
         self.exitAct.triggered.connect(self.shut_down)
@@ -234,34 +255,25 @@ class TabbedWindow(QMainWindow):
         self.destroy(True, True)
 
     def populate_recent_menu(
-        self, menu: str, recent_filepath: str, open_recent_file_function: str
+        self, menu: QMenu, recent_filepath: Path, open_recent_file_function: Callable
     ):
         """Generic helper for populating 'recent files' menus.
 
         Parameters
         ----------
-        menu : str
-            the QMenu to add actions to
-        recent_filepath : str
-            path to JSON file that stores recent items
-        open_recent_file_function : str
+        menu : QMenu
+            The QMenu to which file loading actions will be added.
+        recent_filepath : Path
+            Path to the JSON file that stores recent items.
+        open_recent_file_function : Callable
             function to call when an item is clicked
 
-        Returns
-        -------
-        _type_
-            _description_
-
-        Raises
-        ------
-        ValueError
-            _description_
         """
         menu.clear()
         filepath = Path(recent_filepath)
 
         if not filepath.is_file():
-            return []
+            return
 
         with filepath.open(encoding="utf-8") as file:
             data = json.load(file)
@@ -270,9 +282,11 @@ class TabbedWindow(QMainWindow):
             raise ValueError(f"{filepath} JSON is not a list")
 
         for file in data[::-1]:
-            action = QAction(file, menu)
-            action.triggered.connect(
-                lambda checked=False, fp=file: open_recent_file_function(fp)
+            action = RecentFileAction(
+                file,
+                menu,
+                file_path=file,
+                external_function=open_recent_file_function,
             )
             menu.addAction(action)
 
@@ -282,7 +296,7 @@ class TabbedWindow(QMainWindow):
     ):
         """Populate the recent trajectory files menu in the File menu."""
         self.populate_recent_menu(
-            self.recent_trajectory_fileAct, filename, self.open_recent_trajectory_file
+            self.recent_trajectory_file_menu, filename, self.open_recent_trajectory_file
         )
 
     @Slot()
@@ -296,7 +310,7 @@ class TabbedWindow(QMainWindow):
     ):
         """Populate the recent plot selection files menu in the File menu."""
         self.populate_recent_menu(
-            self.recent_plot_selection_fileAct,
+            self.recent_plot_selection_file_menu,
             filename,
             self.open_recent_plot_selection_file,
         )

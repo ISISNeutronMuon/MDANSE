@@ -39,7 +39,7 @@ from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
-def add_file_to_recent_file(
+def store_recently_used_filename(
     recent_file_path: str, max_num_of_files: int, loaded_file: str
 ):
     """Updating recent file list with successfully loaded file
@@ -144,7 +144,10 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_status = {}
         self._loading_threads = {}
         self._next_number = itertools.count()
-        self.recent_files_update.connect(self.recent_trajectory_files)
+        if not self.DEFAULT_JSON_PATH.exists():
+            with self.DEFAULT_JSON_PATH.open("w", encoding="utf-8") as file:
+                json.dump(["RecentlyUsedTrajectoryFile"], file, indent=4)
+        self.recent_files_update.connect(self.store_mdt_file)
 
     @Slot(tuple)
     def append_object(self, input: tuple) -> int:
@@ -198,7 +201,7 @@ class TrajectoryModel(QStandardItemModel):
         # self._loading_threads[index].wait()
 
     @Slot(str)
-    def recent_trajectory_files(self, traj_filepath: str):
+    def store_mdt_file(self, traj_filepath: str):
         """Updating recent trajectory file list
 
         Parameters
@@ -208,7 +211,7 @@ class TrajectoryModel(QStandardItemModel):
         """
         filename = self.DEFAULT_JSON_PATH
         max_num_files = self.MAX_NUMBER_RECENT_FILES
-        add_file_to_recent_file(filename, max_num_files, traj_filepath)
+        store_recently_used_filename(filename, max_num_files, traj_filepath)
 
     @Slot(int)
     def accept_failure(self, index) -> None:

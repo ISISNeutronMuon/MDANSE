@@ -28,7 +28,7 @@ from qtpy.QtGui import QStandardItem, QStandardItemModel
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Tabs.Models.TrajectoryModel import add_file_to_recent_file
+from MDANSE_GUI.Tabs.Models.TrajectoryModel import store_recently_used_filename
 
 Self = TypeVar("Self", bound="BasicPlotDataItem")
 EXCLUDE = {"metadata"}
@@ -181,7 +181,10 @@ class PlotDataModel(QStandardItemModel):
         self.mutex = QMutex()
         self._nodes = {}
         self._next_number = 0
-        self.recent_files_update.connect(self.recent_plot_files)
+        if not self.DEFAULT_JSON_PATH.exists():
+            with self.DEFAULT_JSON_PATH.open("w", encoding="utf-8") as file:
+                json.dump(["RecentlyUsedResultsFile"], file, indent=4)
+        self.recent_files_update.connect(self.store_mda_file)
 
     @Slot(str)
     def add_file(self, filename: str):
@@ -209,21 +212,18 @@ class PlotDataModel(QStandardItemModel):
             self.recent_files_update.emit(filename)
 
     @Slot(str)
-    def recent_plot_files(self, plot_filepath: str):
-        """Adding recently loaded plot selection files to a json file. The json file is used to
-        populate the "Open Recent Plot Selection File" menu in the File menu.
+    def store_mda_file(self, plot_filepath: str):
+        """Store the input file path in a JSON file.
 
         Parameters
         ----------
-        plot_filepath : Path of the added file
-        Returns
-        -------
-        Str
-            Recently loaded plot selection file path.
+        plot_filepath : str
+            _description_
         """
+
         filename = self.DEFAULT_JSON_PATH
         max_num_files = self.MAX_NUMBER_RECENT_FILES
-        add_file_to_recent_file(filename, max_num_files, plot_filepath)
+        store_recently_used_filename(filename, max_num_files, plot_filepath)
 
     def inner_object(self, index: QModelIndex) -> MDADataStructure | h5py.Dataset:
         """For a Qt model index, return its corresponding HDF5 object.
