@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import json
-import os
 from abc import abstractmethod
 from pathlib import Path
 from typing import TypeVar

@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import json
 import os
 from functools import partial
 from pathlib import PurePath
