@@ -350,10 +350,10 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._actors = vtk.vtkAssembly()
         spheres = [
-            ("center_sphere.stl", (0.5, 0.5, 0.5), 0.4, (0, 0, 0)),  # grey center
-            ("yellow_sphere.stl", (1.0, 1.0, 0.0), 0.4, (0, 0, 0)),
-            ("blue_sphere.stl", (0.0, 0.0, 1.0), 0.4, (0, 0, 0)),
-            ("red_sphere.stl", (1.0, 0.0, 0.0), 0.4, (0, 0, 0)),
+            ("center_sphere.stl", (0.6, 0.6, 0.6), 0.4, (0, 0, 0)),  # grey center
+            ("yellow_sphere.stl", (0.2, 0.85, 0.25), 0.4, (0, 0, 0)),
+            ("blue_sphere.stl", (0.2, 0.35, 0.85), 0.4, (0, 0, 0)),
+            ("red_sphere.stl", (0.85, 0.24, 0.2), 0.4, (0, 0, 0)),
         ]
 
         for filename, colour, position, scale in spheres:
@@ -425,7 +425,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._cell_visible = flags[2]
         result = self.set_coordinates(self._current_frame)
         if result is False:
-            self.update_renderer()
+            self._iren.Render()
 
     def _change_axes(self, axes_option: str):
         """Changes the axes type in the 3D viewer.
