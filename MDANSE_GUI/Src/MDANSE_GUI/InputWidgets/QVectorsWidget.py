@@ -205,15 +205,15 @@ class ShellPanel(QWidget):
             self.plot_widget.plot_blank()
             return
         else:
-            if vec_dict[vec_key] is None:
-                LOG.warning("Shell %i does not contain any vectors", shell_index)
-                self.plot_widget.plot_blank(
-                    draw_cross=False,
-                    override_title=f"Shell {shell_index}, q={vec_key}, contains no vectors.",
-                    override_label="To introduce vectors at this Q, you may have to run the simulation with a larger cell.",
-                )
-                return
-        self.update_label(shell_index)
+            self.update_label(shell_index)
+        if vec_dict[vec_key] is None:
+            LOG.warning("Shell %i does not contain any vectors", shell_index)
+            self.plot_widget.plot_blank(
+                draw_cross=False,
+                override_title=f"Shell {shell_index}, q={vec_key}, contains no vectors.",
+                override_label="To introduce vectors at this Q, you may have to run the simulation with a larger cell.",
+            )
+            return
         new_model = PlottingContext()
         for dataset in vector_projection_datasets(self.qvec_config, vec_key):
             new_model.add_dataset(dataset)

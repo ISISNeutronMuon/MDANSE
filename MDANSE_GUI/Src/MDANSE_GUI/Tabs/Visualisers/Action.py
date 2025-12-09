@@ -404,6 +404,7 @@ class Action(QWidget):
                         widget._model.switch_qvector_type(
                             q_vector_tuple[0], q_vector_tuple[1]
                         )
+                        widget.preview_vectors()
 
         self.allow_execution()
         self.show_output_prediction()

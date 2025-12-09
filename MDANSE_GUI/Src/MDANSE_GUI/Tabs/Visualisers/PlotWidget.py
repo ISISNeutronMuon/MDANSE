@@ -244,7 +244,7 @@ class PlotWidget(QWidget):
             self._plotter = Plotter.create(plotter_option)
         except Exception:
             self._plotter = Plotter()
-
+        self._plotter._figure = self._figure
         self.change_slider_labels.emit(self._plotter.slider_labels())
         self.change_slider_limits.emit(self._plotter.slider_limits())
         self.change_slider_coupling.emit(self._plotter.sliders_coupled())
@@ -282,7 +282,7 @@ class PlotWidget(QWidget):
 
     def available_plotters(self) -> list[str]:
         """List all the plotters supported by this widget."""
-        return [str(x) for x in Plotter.indirect_subclasses() if str(x) != "Text"]
+        return [str(x) for x in Plotter.indirect_subclasses() if str(x) not in ("Text")]
 
     def plot_blank(
         self,
@@ -424,6 +424,16 @@ class PlotWidget(QWidget):
         self.plot_selector.currentTextChanged.connect(self.set_plotter)
         self.set_plotter(self.plot_selector.currentText())
         layout.addWidget(self.plot_selector)
+        self.hide_plotters()
+
+    def hide_plotters(self):
+        model = self.plot_selector.model()
+        for i in range(model.rowCount()):
+            index = model.index(i, 0)
+            item = model.itemFromIndex(index)
+            item_text = model.data(index)
+            if item_text in ("Text", "Vectors", "Vectors3D"):
+                item.setSelectable(False)
 
     def _save_data(self) -> None:
         plotter = self._plotter
