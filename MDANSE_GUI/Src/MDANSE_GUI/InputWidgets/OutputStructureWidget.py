@@ -15,9 +15,7 @@
 #
 from __future__ import annotations
 
-import os
-import os.path
-from pathlib import PurePath
+from pathlib import Path
 
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton
@@ -35,20 +33,15 @@ class OutputStructureWidget(WidgetBase):
         default_value = self._configurator.default
         try:
             parent = kwargs.get("parent")
-            self.default_path = PurePath(parent.default_path)
-        except KeyError:
-            self.default_path = PurePath(os.path.abspath("."))
-            LOG.error("KeyError in OutputTrajectoryWidget - can't get default path.")
-        except AttributeError:
-            self.default_path = PurePath(os.path.abspath("."))
-            LOG.error(
-                "AttributeError in OutputTrajectoryWidget - can't get default path."
-            )
+            self.default_path = Path(parent.default_path)
+        except (KeyError, AttributeError) as e:
+            self.default_path = Path(".").absolute()
+            LOG.error("%s in OutputTrajectoryWidget - can't get default path.", str(e))
         try:
             parent = kwargs.get("parent")
-            guess_name = str(PurePath(os.path.join(self.default_path, "POSCAR")))
+            guess_name = self.default_path / "POSCAR"
         except Exception:
-            guess_name = str(PurePath(default_value[0]))
+            guess_name = self.default_path / default_value
             LOG.error("It was not possible to get the job name from the parent")
         else:
             self._session = parent._parent_tab._session
@@ -113,7 +106,7 @@ class OutputStructureWidget(WidgetBase):
             self.file_association,  # text string specifying the file name filter.
         )
         if len(new_value[0]) > 0:
-            self._field.setText(str(PurePath(new_value[0])))
+            self._field.setText(str(Path(new_value[0])))
             self.updateValue()
 
     def get_widget_value(self):
@@ -123,4 +116,4 @@ class OutputStructureWidget(WidgetBase):
             filename = self._default_value[0]
         format = self.format_box.currentText()
         log_level = self.logs_combo.currentText()
-        return (os.path.abspath(filename), format, log_level)
+        return (str(Path(filename).absolute()), format, log_level)

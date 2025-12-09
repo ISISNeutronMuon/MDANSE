@@ -7,11 +7,11 @@ mock_json = DATA_DIR / "mock.json"
 
 
 @pytest.mark.parametrize("interp_order", [1, 2, 3])
-def test_vacf(generate_benchmarks, tmp_path, interp_order):
+def test_vcf(generate_benchmarks, tmp_path, interp_order):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
-    result_file = RESULTS_DIR / f"mock_traj_vacf_{interp_order}.mda"
+    result_file = RESULTS_DIR / f"mock_traj_vcf_{interp_order}.mda"
 
     if generate_benchmarks:
         temp_name = result_file.with_suffix("")
@@ -24,8 +24,8 @@ def test_vacf(generate_benchmarks, tmp_path, interp_order):
         "trajectory": mock_json,
     }
 
-    vacf = IJob.create("VelocityAutoCorrelationFunction", trajectory_input="mock")
-    vacf.run(parameters, status=True)
+    vcf = IJob.create("VelocityCorrelationFunction", trajectory_input="mock")
+    vcf.run(parameters, status=True)
 
     if generate_benchmarks:
         return
@@ -34,5 +34,7 @@ def test_vacf(generate_benchmarks, tmp_path, interp_order):
     assert log_file.is_file()
 
     compare_hdf5(out_file, result_file,
-                [f"vacf/{elem}" for elem in ("H", "O", "Si", "total")],
+                [f"vcf/{comp}/{elem}"
+                 for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz", "zz")
+                 for elem in ("H", "O", "Si", "total")],
                 scale_result=False, compare_axis=True)

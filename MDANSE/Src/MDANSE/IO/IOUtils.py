@@ -25,9 +25,11 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from more_itertools import value_chain
+from more_itertools import first_true, value_chain
 
 from MDANSE.MLogging import LOG
+
+MAX_FILE_COUNT = 2048
 
 
 class UCEnum(Enum):
@@ -285,3 +287,37 @@ def summarise_array(array: Sequence, *, maxlen: int = 6, show: int = 3) -> str:
         return ", ".join(map(str, array))
 
     return ", ".join(map(str, value_chain(array[:show], "...", array[-1])))
+
+
+def unused_standard_output_filename(
+    path_stem: Path, job_name: str, extra_text: str = "_result", extension: str = ".mda"
+) -> Path | None:
+    """Return the first unused output file name following the default naming pattern.
+
+    This function suggests the filename given as:
+    /directory/of/input/trajectory/JobName_resultN
+    where N is a positive integer number.
+
+    Parameters
+    ----------
+    path_stem : Path
+        Output directory with a placeholder name.
+    job_name : str
+        Name of the analysis that will produce this output file.
+    extra_text : str, optional
+        Additional text before the file number, by default "_result".
+    extension : str, optional
+        File name extension, by default ".mda".
+
+    Returns
+    -------
+    Path | None
+        The first file name which does not exist. None if all names are taken.
+    """
+    temp_name_generator = (
+        path_stem.with_name("".join((job_name, extra_text, str(number + 1))))
+        for number in range(MAX_FILE_COUNT)
+    )
+    return first_true(
+        temp_name_generator, pred=lambda x: not x.with_suffix(extension).exists()
+    )

@@ -102,8 +102,9 @@ def test_dos(generate_benchmarks, tmp_path, trajectory, resolution_generator):
     assert log_file.is_file()
     assert text_file.is_file()
 
-    keys = [f"{fn}/{elem}"
-            for fn in ("dos", "vacf")
+    keys = [f"{fn}/{comp}/{elem}"
+            for fn in ("dos", "vcf")
+            for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz", "zz")
             for elem in ("Cu", "S", "Sb", "total")]
 
     compare_hdf5(out_file,
@@ -150,8 +151,9 @@ def test_dos_is_reproducible(tmp_path, trajectory):
         disf = IJob.create("DensityOfStates")
         disf.run(parameters, status=True)
 
-    keys = [f"{fn}/{elem}"
-            for fn in ("dos", "vacf")
+    keys = [f"{fn}/{comp}/{elem}"
+            for fn in ("dos", "vcf")
+            for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz", "zz")
             for elem in ("Cu", "S", "Sb", "total")]
 
     compare_hdf5(temp_name1.with_suffix(".mda"),

@@ -17,6 +17,10 @@ from __future__ import annotations
 
 from .AreaPerMolecule import AreaPerMolecule as AreaPerMolecule
 from .AverageStructure import AverageStructure as AverageStructure
+from .CartesianCorrelationFunction import (
+    CartesianCorrelationFunction as CartesianCorrelationFunction,
+)
+from .CartesianPowerSpectrum import CartesianPowerSpectrum as CartesianPowerSpectrum
 from .CenterOfMassesTrajectory import (
     CenterOfMassesTrajectory as CenterOfMassesTrajectory,
 )
@@ -54,8 +58,8 @@ from .NeutronDynamicTotalStructureFactor import (
 from .PairDistributionFunction import (
     PairDistributionFunction as PairDistributionFunction,
 )
-from .PositionAutoCorrelationFunction import (
-    PositionAutoCorrelationFunction as PositionAutoCorrelationFunction,
+from .PositionCorrelationFunction import (
+    PositionCorrelationFunction as PositionCorrelationFunction,
 )
 from .PositionPowerSpectrum import PositionPowerSpectrum as PositionPowerSpectrum
 from .RadiusOfGyration import RadiusOfGyration as RadiusOfGyration
@@ -82,8 +86,8 @@ from .TrajectoryEditor import TrajectoryEditor as TrajectoryEditor
 from .TrajectoryFilter import TrajectoryFilter as TrajectoryFilter
 from .VanHoveFunctionDistinct import VanHoveFunctionDistinct as VanHoveFunctionDistinct
 from .VanHoveFunctionSelf import VanHoveFunctionSelf as VanHoveFunctionSelf
-from .VelocityAutoCorrelationFunction import (
-    VelocityAutoCorrelationFunction as VelocityAutoCorrelationFunction,
+from .VelocityCorrelationFunction import (
+    VelocityCorrelationFunction as VelocityCorrelationFunction,
 )
 from .Voronoi import Voronoi as Voronoi
 from .XRayStaticStructureFactor import (

@@ -10,13 +10,13 @@ This section contains background theory for following plugins:
 
 -  :ref:`analysis-dos`
 -  :ref:`analysis-msd`
--  :ref:`analysis-op`
--  :ref:`analysis-pacf`
+-  :ref:`analysis-pcf`
+-  :ref:`analysis-pps`
 -  :ref:`analysis-rtcf`
 -  :ref:`root-mean-square-deviation`
 -  :ref:`root-mean-square-fluctuation`
 -  :ref:`analysis-vhf`
--  :ref:`analysis-vacf`
+-  :ref:`analysis-vcf`
 
 
 .. _analysis-dos:
@@ -26,33 +26,45 @@ Density of States
 
 .. _theory-and-implementation-1:
 
-MDANSE calculates the power spectrum of the VACF (see the
-section on :ref:`analysis-vacf`), which in case of
-the mass-weighted VACF defines the phonon discrete DOS as
+MDANSE calculates the power spectrum of the velocity correlation function (see the
+section on :ref:`analysis-vcf`), which includes the Fourier transform of the
+cartesian products of the velocity correlation function such as
+the Fourier transform of the time correlation between the :math:`x` and
+:math:`y` components of the velocity
 
 .. math::
    :label: dos1
 
-   \mathrm{DOS}(\omega) = \sum\limits_{\alpha} W_{\alpha} C_{\mathbf{vv}\alpha\alpha}\left( \omega \right),
+   C_{v_x v_y\alpha\alpha}(\omega) = \frac{1}{Nc_{\alpha}} \sum_{j \in \alpha} \frac{1}{2\pi} \int\mathrm{d}t \, \left\langle v_{x,j}\left( 0 \right)\cdot v_{y,j}\left( t \right) \right\rangle e^{-i\omega t}
+
+where :math:`C_{v_x v_y\alpha\alpha}\left( \omega \right)`
+is the Fourier transform of the of the velocity correlation function average
+over atoms of type :math:`\alpha`, and :math:`v_{x,j}` and :math:`v_{y,j}` are
+the :math:`x` and :math:`y` components of the velocity of atom :math:`j`.
+
+The Fourier transform of the mass-weighted velocity
+autocorrelation function (average of the diagonal terms of the
+mass-weighted velocity correlation function) for a harmonic system is the
+vibrational DOS
 
 .. math::
    :label: dos2
 
-   C_{\mathbf{vv}\alpha\alpha}(\omega) = \frac{1}{Nc_{\alpha}} \sum_{j \in \alpha} \frac{1}{6\pi} \int\mathrm{d}t \, \left\langle \mathbf{v}_{j}\left( 0 \right)\cdot \mathbf{v}_{j}\left( t \right) \right\rangle e^{-i\omega t}
+   \mathrm{DOS}(\omega) = \sum\limits_{\alpha} W_{\alpha} C_{\mathbf{vv}\alpha\alpha}\left( \omega \right),
 
-where :math:`C_{\mathbf{vv}\alpha\alpha}\left( \omega \right)`
-is the Fourier transform of the velocity autocorrelation function average over atoms of type :math:`\alpha`,
-:math:`W_{\alpha}` is the weighting factor of atom type :math:`\alpha`.
-The DOS can be computed either for the isotropic case or with respect to a
-user-defined axis.
+.. math::
+   :label: dos3
 
-Since the DOS is computed from the unnormalized VACF, the DOS at :math:`\omega=0` gives an
-approximate value for the diffusion constant (see Eq. :math:numref:`vacf6`)
-when an equal weighting scheme is used. The DOS can be
-smoothed by, for example, a Gaussian window applied in the time domain
-[Ref10]_ (see the section :ref:`correlation-frames`); the diffusion
+   C_{\mathbf{vv}\alpha\alpha}(\omega) = \frac{1}{Nc_{\alpha}} \sum_{j \in \alpha} \frac{1}{6\pi} \int\mathrm{d}t \, \left\langle \mathbf{v}_{j}\left( 0 \right)\cdot \mathbf{v}_{j}\left( t \right) \right\rangle e^{-i\omega t}.
+
+where :math:`W_{\alpha}` is the weighting factor of atom type :math:`\alpha`.
+Since the DOS is computed from the unnormalized velocity autocorrelation function,
+the DOS at :math:`\omega=0` gives an approximate value for the diffusion
+constant (see Eq. :math:numref:`vacf6`) when an equal weighting scheme is used.
+The DOS can be smoothed by, for example, a Gaussian window applied in the time
+domain [Ref10]_ (see the section :ref:`correlation-frames`); the diffusion
 constant obtained from this DOS is biased due to the spectral smoothing
-procedure since the VACF is weighted by this window Gaussian function.
+procedure.
 
 MDANSE computes the density of states starting from atomic
 velocities. In the case that velocities are not available, the velocities will be
@@ -64,9 +76,9 @@ The DOS is also related to the DISF, since for isotropic systems
 .. math::
    :label: dos3
 
-   \mathrm{DOS}(\omega) = \lim_{k  \rightarrow 0} \left( \frac{\omega}{k}\right)^2 S_{\text{inc}}(k, \omega)
+   \mathrm{DOS}(\omega) = \lim_{q  \rightarrow 0} \frac{1}{3} \frac{\omega^2}{q^2} S_{\text{inc}}(q, \omega)
 
-so that DOS result relevant to neturon experiment measuring the vibrational (or phonon)
+so that DOS result relevant to neutron experiment measuring the vibrational (or phonon)
 density of states can be calculated by using the ``b_incoherent`` weight setting.
 
 
@@ -161,123 +173,53 @@ from Eq. :math:numref:`msd1`
 
 where the last part on the right side Eq. :math:numref:`msd6` is the position autocorrelation of the particle :math:`j`.
 
-.. _analysis-op:
 
-Order Parameter
-'''''''''''''''
+.. _analysis-pcf:
 
-.. _theory-and-implementation-3:
-                         
-.. note::
-
-    **This job is currently not available.
-    The documentation here is out-dated and only left here for referencing
-    purposes.**
-
-    Adequate and accurate cross comparison of the NMR and MD simulation
-    data is of crucial importance in versatile studies conformational
-    dynamics of proteins. NMR relaxation spectroscopy has proven to be a
-    unique approach for a site-specific investigation of both global
-    tumbling and internal motions of proteins. The molecular motions
-    modulate the magnetic interactions between the nuclear spins and lead
-    for each nuclear spin to a relaxation behaviour which reflects its
-    environment. Since its first applications to the study of protein
-    dynamics, a wide variety of experiments has been proposed to investigate
-    backbone as well as side chain dynamics. Among them, the heteronuclear
-    relaxation measurement of amide backbone :sup:`15`\ N nuclei is one of
-    the most widespread techniques. The relationship between microscopic
-    motions and measured spin relaxation rates is given by Redfield's theory
-    [Ref13]_. Under the hypothesis that
-    :sup:`15`\ N relaxation occurs through dipole-dipole interactions with
-    the directly bonded :sup:`1`\ H atom and chemical shift anisotropy
-    (CSA), and assuming that the tensor describing the CSA is axially
-    symmetric with its axis parallel to the N-H bond, the relaxation rates
-    of the :sup:`15`\ N nuclei are determined by a time correlation
-    function,
-
-    .. math::
-
-       {C_{\mathit{ii}}{(t) = \left\langle {P_{2}\left( {\mu_{i}(0)\cdot\mu_{i}(t)} \right)} \right\rangle}}
-
-    which describes the dynamics of a unit vector :math:`\mu_{i}(t)` pointing
-    along the :sup:`15`\ N-:sup:`1`\ H bond of the residue :math:`i` in the
-    laboratory frame. Here :math:`P_{2}(x)` is the second order Legendre
-    polynomial. The Redfield theory shows that relaxation measurements probe
-    the relaxation dynamics of a selected nuclear spin only at a few
-    frequencies. Moreover, only a limited number of independent observables
-    are accessible. Hence, to relate relaxation data to protein dynamics one
-    has to postulate either a dynamical model for molecular motions or a
-    functional form for :math:`C_{ii}(t)`, yet depending on a limited number
-    of adjustable parameters. Usually, the tumbling motion of proteins in
-    solution is assumed isotropic and uncorrelated with the internal
-    motions, such that:
-
-    .. math::
-
-       {C_{\mathit{ii}}{(t) = C^{\mathrm{G}}}(t) C_{\mathit{ii}}^{\mathrm{I}}(t)}
-
-    where :math:`C^{\mathrm{G}}(t)` and :math:`C_{\mathit{ii}}^{\mathrm{I}}(t)` denote the
-    global and the internal time correlation function,
-    respectively. Within the so-called model free approach
-    [Ref14]_, [Ref15]_
-    the internal correlation function is modelled by an exponential,
-
-    .. math::
-
-       {C_{\mathit{ii}}^{\mathrm{I}}{(t) = {S_{i}^{2} + \left( {1 - S_{i}^{2}} \right)}}\exp\left( \frac{- t}{\tau_{\mathrm{eff},i}} \right)}
-
-    Here the asymptotic value
-
-    .. math::
-
-       {S_{i}^{2} = C_{\mathit{ii}}}\left( {+ \infty} \right)
-
-    \ is the so-called generalized order parameter, which indicates the
-    degree of spatial restriction of the internal motions of a bond vector,
-    while the characteristic time :math:`\tau_{\mathrm{eff},i}` is an
-    effective correlation time, setting the time scale of the
-    internal relaxation processes. :math:`S_{i}^{2}` can adopt values
-    ranging from :math:`0` (completely disordered) to :math:`1` (fully ordered). So,
-    :math:`S_{i}^{2}` is the appropriate indicator of protein backbone motions in
-    computationally feasible timescales as it describes the spatial aspects
-    of the reorientational motion of N-H peptidic bonds vector.
-
-    When performing order parameter analysis, MDANSE computes for each
-    residue :math:`i` both :math:`C_{\mathit{ii}}(t)` and :math:`S_{i}^{2}`.
-    It also computes a correlation function averaged over all the selected
-    bonds defined as:
-
-    .. math::
-
-       {C^{\mathrm{I}}{(t) = {\sum\limits_{i = 1}^{N_{\mathrm{bonds}}}{C_{\mathit{ii}}^{\mathrm{I}}(t)}}}}
-
-    where :math:`N_{\mathrm{bonds}}` is the number of selected bonds for the analysis.
-
-
-.. _analysis-pacf:
-
-Position Autocorrelation Function
+Position Correlation Function
 '''''''''''''''''''''''''''''''''
 
-The position autocorrelation function (PACF) is similar to the
-velocity autocorrelation function in :ref:`analysis-vacf`. In MDANSE the PACF
+The position correlation function (PCF) is similar to the
+velocity correlation function in :ref:`analysis-vcf`. In MDANSE the PCF
 is calculated relative to the atoms average position over the entire
-trajectory. The PACF of atom type :math:`\alpha` is
+trajectory. The position autocorrelation function (average of the
+diagonal terms of the PCF) of atom type :math:`\alpha` is
 
 .. math::
-   :label: pacf1
+   :label: pcf1
 
    \mathrm{PACF}_{\alpha}(t) = \frac{1}{3}\frac{1}{Nc_{\alpha}} \sum_{j \in \alpha}  \left\langle {\Delta \mathbf{r}_{j}(0)\cdot \Delta  \mathbf{r}_{j}(t)} \right\rangle
 
 where
 
 .. math::
-   :label: pacf2
+   :label: pcf2
 
    \Delta \mathbf{r}_{j}\left( t \right) = \mathbf{r}_{j}(t) - \langle \mathbf{r}_{j} \rangle
 
-so that the origin dependence of the PACF function is removed.
+so that the origin dependence of the position autocorrelation function is removed.
 
+
+.. _analysis-pps:
+
+Position Power Spectrum
+'''''''''''''''''''''''
+
+The position power spectrum is similar to the density of states
+calculation in :ref:`analysis-dos` but is instead a Fourier transform of the
+PCF. The average of the diagonal terms of the PPS is
+
+.. math::
+   :label: pps1
+
+   \mathrm{PPS}_{\alpha}(\omega) =  \int\mathrm{d}t \ \mathrm{PACF}_{\alpha}(t) e^{-i\omega t}
+
+and is related to the vibrational DOS via the expresssion
+
+.. math::
+   :label: pps2
+
+   \mathrm{DOS}_{\alpha}(\omega) = \omega^2 \mathrm{PPS}_{\alpha}(\omega).
 
 .. _analysis-rtcf:
 
@@ -427,17 +369,18 @@ For liquid or gaseous systems,
 
 where in the thermodynamic limit :math:`N \rightarrow \infty`.
 
-.. _analysis-vacf:
+.. _analysis-vcf:
 
-Velocity Autocorrelation Function
+Velocity Correlation Function
 '''''''''''''''''''''''''''''''''
 
 .. _theory-and-implementation-4:
 
-The Velocity AutoCorrelation Function (VACF) is a property describing the dynamics
+The Velocity Correlation Function (VCF) is a property describing the dynamics
 of a molecular system. It reveals the underlying nature of the forces acting on
-the system. Its Fourier Transform gives the cartesian density of states for a set
-of atoms.
+the system. For a harmonic system, the Fourier transform of the average of the
+diagonal components, the velocity autocorrelation function (VACF), is related to
+the vibrational density of states.
 
 In a molecular system that would be made of non-interacting particles,
 the velocities would be constant and the VACF would have
@@ -464,8 +407,16 @@ oscillation before decaying to zero. This decaying time can be
 considered as the average time for a collision between two atoms to
 occur before they diffuse away.
 
-Mathematically, the VACF of atom :math:`j` in an atomic or molecular system is
-usually defined as
+The VCF of atom :math:`j` in an atomic or molecular system is defined as
+between the :math:`x` and :math:`y` components of the velocity is
+defined as
+
+.. math::
+   :label: vacf0
+
+   C_{v_x v_y jj}(t) = \frac{1}{3}\left\langle v_{x,j}(0) v_{y,j}( t ) \right\rangle
+
+while the VACF of atom :math:`j` in an atomic or molecular system is defined as
 
 .. math::
    :label: vacf1

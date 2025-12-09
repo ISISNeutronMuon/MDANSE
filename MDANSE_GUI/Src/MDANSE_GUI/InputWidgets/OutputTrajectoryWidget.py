@@ -15,9 +15,7 @@
 #
 from __future__ import annotations
 
-import os
-import os.path
-from pathlib import PurePath
+from pathlib import Path
 
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
@@ -32,6 +30,7 @@ from qtpy.QtWidgets import (
 from MDANSE.Framework.Configurators.OutputTrajectoryConfigurator import (
     OutputTrajectoryConfigurator,
 )
+from MDANSE.IO.IOUtils import unused_standard_output_filename
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
@@ -44,29 +43,22 @@ class OutputTrajectoryWidget(WidgetBase):
         default_value = self._configurator.default
         try:
             self._parent = kwargs.get("parent")
-            self.default_path = PurePath(self._parent._default_path)
-        except KeyError:
-            self.default_path = PurePath(os.path.abspath("."))
-            LOG.error("KeyError in OutputTrajectoryWidget - can't get default path.")
-        except AttributeError:
-            self.default_path = PurePath(os.path.abspath("."))
-            LOG.error(
-                "AttributeError in OutputTrajectoryWidget - can't get default path."
-            )
+            self.default_path = Path(self._parent._default_path)
+        except (KeyError, AttributeError) as e:
+            self.default_path = Path(".").absolute()
+            LOG.error("%s in OutputTrajectoryWidget - can't get default path.", str(e))
         else:
             self._session = self._parent._parent_tab._session
         try:
             self._parent = kwargs.get("parent")
             jobname = str(self._parent._job_instance.label).replace(" ", "")
-            guess_name = str(
-                PurePath(os.path.join(self.default_path, jobname + "_trajectory1"))
-            )
         except Exception:
-            guess_name = str(PurePath(default_value[0]))
+            jobname = "converted_trajectory"
             LOG.error("It was not possible to get the job name from the parent")
-        while os.path.exists(guess_name + ".mdt"):
-            prefix, number = guess_name.split("_trajectory")
-            guess_name = str(PurePath(prefix + "_trajectory" + str(1 + int(number))))
+        self.default_path = self.default_path / "trajectory"
+        guess_name = unused_standard_output_filename(
+            self.default_path, jobname, extra_text="_trajectory", extension=".mdt"
+        )
         self.file_association = "MDT trajectory (*.mdt)"
         self._value = default_value
         self._field = QLineEdit(str(guess_name), self._base)
@@ -151,7 +143,7 @@ class OutputTrajectoryWidget(WidgetBase):
             self.file_association,  # text string specifying the file name filter.
         )
         if len(new_value[0]) > 0:
-            self._field.setText(str(PurePath(new_value[0])))
+            self._field.setText(str(Path(new_value[0])))
             self.updateValue()
 
     def get_widget_value(self):

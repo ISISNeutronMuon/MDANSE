@@ -1134,7 +1134,7 @@ class FilterDesigner(QDialog):
             None,
             "PositionPowerSpectrum",
             new_params,
-            ["pps/axes/romega", "pps/total"],
+            ["pps/axes/romega", "pps/isotropic/total"],
         )
         self.pps_thread.results.connect(self.accept_results)
         self.pps_thread.finished.connect(self.unblock_checkbox)
