@@ -170,6 +170,7 @@ class PlotDataModel(QStandardItemModel):
         PLATFORM.application_directory() / "recent_plot_selection_file.json"
     )
     MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
+    PLACEHOLDER_STRING = "Recently used result files (.mda)"
 
     error = Signal(str)
     all_elements = Signal(object)
@@ -183,7 +184,7 @@ class PlotDataModel(QStandardItemModel):
         self._next_number = 0
         if not self.DEFAULT_JSON_PATH.exists():
             with self.DEFAULT_JSON_PATH.open("w", encoding="utf-8") as file:
-                json.dump(["RecentlyUsedResultsFile"], file, indent=4)
+                json.dump([self.PLACEHOLDER_STRING], file, indent=4)
         self.recent_files_update.connect(self.store_mda_file)
 
     @Slot(str)

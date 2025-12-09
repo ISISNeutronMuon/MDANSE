@@ -62,6 +62,14 @@ MDANSE_PROJECT_WEBSITE = QUrl("https://www.isis.stfc.ac.uk/Pages/MDANSEproject.a
 
 
 class RecentFileAction(QAction):
+    """A subclass of QAction made for loading recently used files.
+
+    It stores a file name and a reference to a class method to be called
+    when the action is clicked. The main reason for using a subclass of
+    QAction is to avoid using a lambda function which references a method
+    of a class instance, as this used to be known to cause problems with
+    object reference count and garbage collection."""
+
     def __init__(
         self,
         *args,
@@ -78,6 +86,10 @@ class RecentFileAction(QAction):
 
     @Slot()
     def on_triggered(self):
+        """Executes a function on an argument, both given as input in the constructor.
+
+        Here it is meant run a method of one of the data models which will load
+        a file with a specific name into the model."""
         self.external_function(str(self.file_path))
 
 
@@ -255,7 +267,11 @@ class TabbedWindow(QMainWindow):
         self.destroy(True, True)
 
     def populate_recent_menu(
-        self, menu: QMenu, recent_filepath: Path, open_recent_file_function: Callable
+        self,
+        menu: QMenu,
+        recent_filepath: Path,
+        open_recent_file_function: Callable,
+        placeholder_string: str,
     ):
         """Generic helper for populating 'recent files' menus.
 
@@ -266,7 +282,9 @@ class TabbedWindow(QMainWindow):
         recent_filepath : Path
             Path to the JSON file that stores recent items.
         open_recent_file_function : Callable
-            function to call when an item is clicked
+            Function to call when an item is clicked.
+        placeholder_string : str
+            Text to show on an inactive entry if the file list was empty.
 
         """
         menu.clear()
@@ -281,6 +299,9 @@ class TabbedWindow(QMainWindow):
         if not isinstance(data, list):
             raise ValueError(f"{filepath} JSON is not a list")
 
+        if len(data) > 1 and placeholder_string in data:
+            data.remove(placeholder_string)
+
         for file in data[::-1]:
             action = RecentFileAction(
                 file,
@@ -292,11 +313,16 @@ class TabbedWindow(QMainWindow):
 
     @Slot()
     def populate_recent_trajectory_menu(
-        self, filename=TrajectoryModel.DEFAULT_JSON_PATH
+        self,
+        filename=TrajectoryModel.DEFAULT_JSON_PATH,
+        placeholder=TrajectoryModel.PLACEHOLDER_STRING,
     ):
         """Populate the recent trajectory files menu in the File menu."""
         self.populate_recent_menu(
-            self.recent_trajectory_file_menu, filename, self.open_recent_trajectory_file
+            self.recent_trajectory_file_menu,
+            filename,
+            self.open_recent_trajectory_file,
+            placeholder_string=placeholder,
         )
 
     @Slot()
@@ -306,13 +332,16 @@ class TabbedWindow(QMainWindow):
 
     @Slot()
     def populate_recent_plot_selection_menu(
-        self, filename=PlotDataModel.DEFAULT_JSON_PATH
+        self,
+        filename=PlotDataModel.DEFAULT_JSON_PATH,
+        placeholder=PlotDataModel.PLACEHOLDER_STRING,
     ):
         """Populate the recent plot selection files menu in the File menu."""
         self.populate_recent_menu(
             self.recent_plot_selection_file_menu,
             filename,
             self.open_recent_plot_selection_file,
+            placeholder_string=placeholder,
         )
 
     @Slot()

@@ -128,6 +128,7 @@ class TrajectoryModel(QStandardItemModel):
 
     DEFAULT_JSON_PATH = PLATFORM.application_directory() / "recent_trajectory_file.json"
     MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
+    PLACEHOLDER_STRING = "Recently used trajectory files (.mdt, .h5)"
 
     error = Signal(str)
     all_elements = Signal(object)
@@ -146,7 +147,7 @@ class TrajectoryModel(QStandardItemModel):
         self._next_number = itertools.count()
         if not self.DEFAULT_JSON_PATH.exists():
             with self.DEFAULT_JSON_PATH.open("w", encoding="utf-8") as file:
-                json.dump(["RecentlyUsedTrajectoryFile"], file, indent=4)
+                json.dump([self.PLACEHOLDER_STRING], file, indent=4)
         self.recent_files_update.connect(self.store_mdt_file)
 
     @Slot(tuple)
