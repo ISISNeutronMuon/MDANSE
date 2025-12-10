@@ -143,6 +143,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         # Initialize rotation parameters
         self.rotation_speed = 5
+        self.secondary_speed = 0.23 * self.rotation_speed
 
         # Animation timer for rotating the 3D model
         self._animation_timer = QTimer()
@@ -380,20 +381,23 @@ class MolecularViewer(QtWidgets.QWidget):
     def animate_rotation(self):
         """Continuously rotates the 3D model."""
         if self._animation_timer.isActive():
-            self.rotate_3D_model_actor(self.rotation_speed)
+            self.rotate_3D_model_actor(self.rotation_speed, self.secondary_speed)
             self._iren.Render()
 
-    def rotate_3D_model_actor(self, angle):
+    def rotate_3D_model_actor(self, angle, minor_angle):
         """Rotates the given actor by the specified angle around axis."""
         for i, actor in enumerate(self._actors.GetParts()):
             if i == 0:  # center sphere
                 actor.RotateZ(angle)
-            elif i == 1:  # yellow sphere
-                actor.RotateZ(-angle)
+            elif i == 1:  # green sphere
+                actor.RotateY(-angle)
+                actor.RotateZ(minor_angle)
             elif i == 2:  # blue sphere
                 actor.RotateX(angle)
+                actor.RotateZ(-minor_angle)
             elif i == 3:  # red sphere
-                actor.RotateX(-angle)
+                actor.RotateY(-angle)
+                actor.RotateX(-minor_angle)
 
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
@@ -409,7 +413,8 @@ class MolecularViewer(QtWidgets.QWidget):
             Sphere radii in 3D view will be multiplied by this factor
         """
         self._scale_factor = scale_factor
-        self.update_renderer()
+        if self._reader is not None:
+            self.update_renderer()
 
     def _new_visibility(self, flags: list[bool]):
         """Takes the new values of boolean flags which make
