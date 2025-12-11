@@ -294,24 +294,24 @@ class MolecularViewer(QtWidgets.QWidget):
         colour: tuple[float, float, float],
         scale: float,
         position: tuple[float, float, float],
-    ):
-        """_summary_
+    ) -> vtk.vtkActor:
+        """Load a 3D object definition and return it as a VTK actor.
 
         Parameters
         ----------
         filename : str
-            filename with each sphere object
+            Filename of the STL file with the 3D mesh.
         colour : tuple[float, float, float]
-            Colour of each sphere object
+            Colour to be assigned to the object.
         scale : float
-            The sphere object size
+            Scaling factor which will resize the object.
         position : tuple[float, float, float]
-            The position of each sphere
+            The initial position of the object.
 
         Returns
         -------
         vtk.vtkActor
-            The created actor
+            A VTK actor of the 3D shape.
         """
 
         reader = vtk.vtkSTLReader()
@@ -379,13 +379,25 @@ class MolecularViewer(QtWidgets.QWidget):
         self._iren.wheelEvent = self._dummy_method
 
     def animate_rotation(self):
-        """Continuously rotates the 3D model."""
+        """Continuously rotate the 3D model."""
         if self._animation_timer.isActive():
-            self.rotate_3D_model_actor(self.rotation_speed, self.secondary_speed)
+            self.rotate_3D_model_actors(self.rotation_speed, self.secondary_speed)
             self._iren.Render()
 
-    def rotate_3D_model_actor(self, angle, minor_angle):
-        """Rotates the given actor by the specified angle around axis."""
+    def rotate_3D_model_actors(self, angle: float, minor_angle: float):
+        """Rotate the all the placeholder actors around the pre-defined axes.
+
+        The components of the 3D placeholder are rotated independently.
+        A second rotation by a smaller angle is applied to the rings to
+        create the impression of the spheres moving along their rings.
+
+        Parameters
+        ----------
+        angle : float
+            Angle to be used for the main rotation.
+        minor_angle : float
+            Angle to be used for the secondary rotation.
+        """
         for i, actor in enumerate(self._actors.GetParts()):
             if i == 0:  # center sphere
                 actor.RotateZ(angle)
@@ -401,7 +413,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
-        """Updates the scale factor by which all the atom radii are multiplied.
+        """Update the scale factor by which all the atom radii are multiplied.
+
         Scale factor 1.0 means that the covalent radii of atoms are used as
         radii of the spheres in the 3D view. By default the atom size is scaled
         down to allow the user to see atoms behind the first layer and the
