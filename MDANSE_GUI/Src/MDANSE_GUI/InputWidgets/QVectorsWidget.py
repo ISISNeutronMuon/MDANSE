@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+from more_itertools import nth
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import QBrush, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
@@ -176,9 +177,8 @@ class ShellPanel(QWidget):
 
     def update_label(self, shell_index: int):
         vec_dict = self.qvec_config["q_vectors"]
-        vec_keys = list(vec_dict.keys())
         self.shell_information.setText(
-            f"{numerator_suffix(shell_index)} shell, |q| = {vec_keys[shell_index]}"
+            f"{numerator_suffix(shell_index)} shell, |q| = {nth(vec_dict, shell_index)}"
         )
 
     @Slot(int)
@@ -197,7 +197,7 @@ class ShellPanel(QWidget):
         if update_limit:
             self.set_upper_limit(len(vec_dict))
         try:
-            vec_key = list(vec_dict.keys())[shell_index]
+            vec_key = nth(vec_dict, shell_index)
         except KeyError:
             LOG.warning(
                 "Shell %i was not available in the Q vector generator", shell_index
@@ -372,8 +372,7 @@ class QVectorsWidget(WidgetBase):
         not allowing the user to change the plotting mode from 'vectors'.
         """
         dialog_instance = VectorViewer(self._base, configurator=self._configurator)
-        for shell_panel in (dialog_instance.shell_panel_3D,):
-            self.new_shell_number.connect(shell_panel.set_upper_limit)
+        self.new_shell_number.connect(dialog_instance.shell_panel_3D.set_upper_limit)
         return dialog_instance
 
     @Slot()

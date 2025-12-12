@@ -22,6 +22,7 @@ from qtpy.QtWidgets import QTextBrowser
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_text_map
 
 
@@ -115,7 +116,7 @@ class SimpleInstrument:
             results.append(new_entry)
         return results
 
-    def create_q_vector_params(self, sample_cell=None):
+    def create_q_vector_params(self, sample_cell: UnitCell | None = None):
         if not self._configured:
             return
         cov_type = self._qvector_type

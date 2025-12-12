@@ -97,9 +97,7 @@ class Heatmap(Plotter):
             new_data = self.normalise_array(data)
             image.set_data(new_data)
             percentiles = np.linspace(0, 100.0, 21)
-            results = [
-                np.percentile(np.nan_to_num(new_data), perc) for perc in percentiles
-            ]
+            results = np.percentile(np.nan_to_num(new_data), percentiles)
             self._backup_scale_interpolators[ds_num] = interp1d(
                 percentiles,
                 results,

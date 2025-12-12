@@ -149,11 +149,8 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
     def remove_zero_vector(
         self, vectors: npt.NDArray[float], weights: npt.NDArray[float] | None = None
     ):
-        zero_vector_index = np.where(np.linalg.norm(vectors, axis=0) < 1e-15)[0]
-        vectors = np.delete(vectors, zero_vector_index, axis=1)
-        if weights is not None:
-            weights = np.delete(weights, zero_vector_index)
-        return vectors, weights
+        nonzero_vector_mask = np.linalg.norm(vectors, axis=0) > 1e-15
+        return vectors[nonzero_vector_mask], weights[nonzero_vector_mask]
 
     @classmethod
     def vectors_within_limits(
