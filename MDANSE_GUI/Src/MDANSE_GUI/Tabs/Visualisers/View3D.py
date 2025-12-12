@@ -15,9 +15,10 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import QUrl, Signal, Slot
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.MolecularViewer.Controls import ViewerControls
 from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 
@@ -52,12 +53,11 @@ class View3D(QWidget):
         self._viewer.load_trajectory_placeholder_3d_model()
 
     @Slot(tuple)
-    def update_panel(self, data: tuple):
-        fullpath, incoming = data
-        if fullpath == "" or data is None:
+    def update_panel(self, data: tuple[str, Trajectory]):
+        if data is None or data[0] == "":
             self.load_placeholder()
             return
-
+        fullpath, incoming = data
         try:
             self._viewer._new_trajectory_object(fullpath, incoming)
         except AttributeError:

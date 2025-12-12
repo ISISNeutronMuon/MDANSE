@@ -116,8 +116,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._iren.GetRenderWindow()
 
-        self._backup_wheel_method = copy.copy(self._iren.wheelEvent)
-        self._dummy_method = copy.copy(dummy_method)
+        self._backup_wheel_method = self._iren.wheelEvent
+        self._dummy_method = dummy_method
 
         self.atom_actor = None
         self._last_coords = None

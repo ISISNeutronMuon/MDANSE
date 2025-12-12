@@ -19,6 +19,7 @@ from qtpy.QtCore import QModelIndex, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QStandardItem
 from qtpy.QtWidgets import QAbstractItemView, QListView, QMenu
 
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.Tabs.Models.TrajectoryModel import LoadStatus
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
@@ -66,11 +67,9 @@ class TrajectoryView(QListView):
         model = self.model()
         node_number = model.itemFromIndex(index).data()
         trajectory = model.get_trajectory(node_number)
-        if trajectory is None:
-            self.item_details.emit(("", None))
-        elif isinstance(trajectory, str):
+        if isinstance(trajectory, str):
             self.item_details.emit((trajectory, None))
-        else:
+        elif isinstance(trajectory, Trajectory):
             self.item_details.emit((trajectory._filename, trajectory))
 
     def connect_to_visualiser(self, visualiser: View3D | TrajectoryInfo) -> None:
