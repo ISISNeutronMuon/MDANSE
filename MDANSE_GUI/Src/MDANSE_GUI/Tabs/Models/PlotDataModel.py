@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import json
 from abc import abstractmethod
 from pathlib import Path
 from typing import TypeVar
@@ -27,7 +26,7 @@ from qtpy.QtGui import QStandardItem, QStandardItemModel
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Tabs.Models.TrajectoryModel import store_recently_used_filename
+from MDANSE_GUI.Session.RecentFiles import RecentFiles
 
 Self = TypeVar("Self", bound="BasicPlotDataItem")
 EXCLUDE = {"metadata"}
@@ -174,17 +173,17 @@ class PlotDataModel(QStandardItemModel):
     error = Signal(str)
     all_elements = Signal(object)
     finished_loading = Signal(int)
-    recent_files_update = Signal(str)
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
         self.mutex = QMutex()
         self._nodes = {}
         self._next_number = 0
-        if not self.DEFAULT_JSON_PATH.exists():
-            with self.DEFAULT_JSON_PATH.open("w", encoding="utf-8") as file:
-                json.dump([self.PLACEHOLDER_STRING], file, indent=4)
-        self.recent_files_update.connect(self.store_mda_file)
+        self.recent_files = RecentFiles(
+            self.DEFAULT_JSON_PATH,
+            self.MAX_NUMBER_RECENT_FILES,
+            self.PLACEHOLDER_STRING,
+        )
 
     @Slot(str)
     def add_file(self, filename: str):
@@ -199,31 +198,17 @@ class PlotDataModel(QStandardItemModel):
         try:
             new_datafile = MDADataStructure(filename)
         except Exception as e:
-            LOG.error(f"Invalid: {e}")
+            LOG.error("Invalid: %s", e)
         else:
             self._nodes[self._next_number] = new_datafile
             new_item = DataFileItem()
             new_item.setData(f"{Path(filename).name}", role=Qt.ItemDataRole.DisplayRole)
             new_item.setData(self._next_number, role=Qt.ItemDataRole.UserRole)
-            self._next_number += 1
             self.appendRow(new_item)
             new_item.populate(new_datafile._file)
-            self.finished_loading.emit(self._next_number - 1)
-            self.recent_files_update.emit(filename)
-
-    @Slot(str)
-    def store_mda_file(self, plot_filepath: str):
-        """Store the input file path in a JSON file.
-
-        Parameters
-        ----------
-        plot_filepath : str
-            _description_
-        """
-
-        filename = self.DEFAULT_JSON_PATH
-        max_num_files = self.MAX_NUMBER_RECENT_FILES
-        store_recently_used_filename(filename, max_num_files, plot_filepath)
+            self.finished_loading.emit(self._next_number)
+            self.recent_files.store_recently_used_filename(filename)
+            self._next_number += 1
 
     def inner_object(self, index: QModelIndex) -> MDADataStructure | h5py.Dataset:
         """For a Qt model index, return its corresponding HDF5 object.

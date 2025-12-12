@@ -16,10 +16,8 @@
 from __future__ import annotations
 
 import itertools
-import json
 import traceback
 from enum import Enum, auto
-from pathlib import Path
 
 from qtpy.QtCore import (
     QDeadlineTimer,
@@ -36,38 +34,7 @@ from qtpy.QtGui import QStandardItem, QStandardItemModel
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
-
-
-def store_recently_used_filename(
-    recent_file_path: str, max_num_of_files: int, loaded_file: str
-):
-    """Updating recent file list with successfully loaded file
-
-    Parameters
-    ----------
-    recent_file : str
-        JSON file path for storing recently loaded files
-    max_num_of_files : int
-        maximum number of files stored in recent file list
-    loaded_file : str
-        Path of the successfully loaded file
-    """
-    filepath = Path(recent_file_path)
-    # if the recent file exists and not empty
-    if filepath.is_file() and filepath.stat().st_size > 0:
-        with filepath.open(encoding="utf-8") as file:
-            recent_files = json.load(file)
-    else:
-        recent_files = []
-
-    if loaded_file in recent_files:
-        recent_files.remove(loaded_file)
-    recent_files.append(loaded_file)
-
-    recent_files = recent_files[-max_num_of_files:]
-
-    with filepath.open("w", encoding="utf-8") as file:
-        json.dump(recent_files, file, indent=4)
+from MDANSE_GUI.Session.RecentFiles import RecentFiles
 
 
 class LoadStatus(Enum):
@@ -133,7 +100,6 @@ class TrajectoryModel(QStandardItemModel):
     all_elements = Signal(object)
     finished_loading = Signal(int)
     free_name = Signal(str)
-    recent_files_update = Signal(str)
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent=parent)
@@ -144,10 +110,11 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_status = {}
         self._loading_threads = {}
         self._next_number = itertools.count()
-        if not self.DEFAULT_JSON_PATH.exists():
-            with self.DEFAULT_JSON_PATH.open("w", encoding="utf-8") as file:
-                json.dump([self.PLACEHOLDER_STRING], file, indent=4)
-        self.recent_files_update.connect(self.store_mdt_file)
+        self.recent_files = RecentFiles(
+            self.DEFAULT_JSON_PATH,
+            self.MAX_NUMBER_RECENT_FILES,
+            self.PLACEHOLDER_STRING,
+        )
 
     @Slot(tuple)
     def append_object(self, input: tuple) -> int:
@@ -197,21 +164,8 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_status[index] = LoadStatus.READY
         self.finished_loading.emit(index)
         filename = self._trajectory_paths[index]
-        self.recent_files_update.emit(str(filename))
+        self.recent_files.store_recently_used_filename(str(filename))
         # self._loading_threads[index].wait()
-
-    @Slot(str)
-    def store_mdt_file(self, traj_filepath: str):
-        """Updating recent trajectory file list
-
-        Parameters
-        ----------
-        traj_filepath : str
-            Loaded trajectory file path
-        """
-        filename = self.DEFAULT_JSON_PATH
-        max_num_files = self.MAX_NUMBER_RECENT_FILES
-        store_recently_used_filename(filename, max_num_files, traj_filepath)
 
     @Slot(int)
     def accept_failure(self, index) -> None:

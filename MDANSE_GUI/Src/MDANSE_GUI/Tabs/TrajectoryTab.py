@@ -64,18 +64,18 @@ class TrajectoryTab(GeneralTab):
         loaded_files = []  # list to store loaded files for recent files tracking
 
         for fname in fnames[0]:
+            self.load_trajectory(fname)
             filepath = Path(fname)
-            self.load_trajectory(filepath)
             last_path = str(filepath.parent)
             loaded_files.append(str(filepath))
             self.set_path("trajectory", last_path)
             self._session.save()
 
     @Slot(str)
-    def load_trajectory(self, some_fname: str):
-        fname = str(Path(some_fname))
+    def load_trajectory(self, fname: str):
+        fpath = Path(fname)
         if len(fname) > 0:
-            _, short_name = os.path.split(fname)
+            short_name = fpath.name
             self._core._model.append_object((fname, short_name))
             self._session.protect_filename(fname)
 
