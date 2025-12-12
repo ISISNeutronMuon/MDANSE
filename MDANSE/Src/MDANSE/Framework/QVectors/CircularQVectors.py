@@ -26,7 +26,7 @@ from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_dist
 
 def circle_rotation_matrix(
     target_circle_axis: npt.NDArray[float],
-) -> npt.NDArray[float]:
+) -> npt.NDArray[float] | None:
     """Return rotation matrix that transforms 001 vector into target vector.
 
     Parameters
@@ -43,8 +43,7 @@ def circle_rotation_matrix(
         rotation, _ = Rotation.align_vectors(target_circle_axis, np.array([0, 0, 1]))
     except ValueError:
         return None
-    else:
-        return rotation.as_matrix()
+    return rotation.as_matrix()
 
 
 def circle_of_vectors(
@@ -135,14 +134,12 @@ class CircularQVectors(IQVectors):
 
         for q in self._configuration["shells"]["value"]:
             q_vectors = circle_of_vectors(q, width, nvecs_per_shell, rot_mat=rot_mat)
-            self._configuration["q_vectors"][q] = {}
-            self._configuration["q_vectors"][q]["q_vectors"] = q_vectors
-            self._configuration["q_vectors"][q]["n_q_vectors"] = nvecs_per_shell
-            self._configuration["q_vectors"][q]["weights"] = np.ones(nvecs_per_shell)
-            self._configuration["q_vectors"][q]["q"] = q
-            if self._unit_cell is not None:
-                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
-                    q_vectors, self._unit_cell
-                )
-            else:
-                self._configuration["q_vectors"][q]["hkls"] = None
+            self._configuration["q_vectors"][q] = {
+                "q_vectors": q_vectors,
+                "n_q_vectors": nvecs_per_shell,
+                "weights": np.ones(nvecs_per_shell),
+                "q": q,
+                "hkls": self.qvectors_to_hkl(q_vectors, self._unit_cell)
+                if self._unit_cell is not None
+                else None,
+            }

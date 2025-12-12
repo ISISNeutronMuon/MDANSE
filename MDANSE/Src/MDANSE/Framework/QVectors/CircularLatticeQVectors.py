@@ -94,14 +94,13 @@ class CircularLatticeQVectors(LatticeQVectors):
                 self._configuration["q_vectors"][q] = None
                 continue
 
-            self._configuration["q_vectors"][q] = {}
-            self._configuration["q_vectors"][q]["q_vectors"] = self.hkl_to_qvectors(
-                lattice_hkl_vectors, self._unit_cell
-            )
-            self._configuration["q_vectors"][q]["weights"] = weights
-            self._configuration["q_vectors"][q]["n_q_vectors"] = np.sum(weights)
-            self._configuration["q_vectors"][q]["q"] = q
-            self._configuration["q_vectors"][q]["hkls"] = lattice_hkl_vectors
+            self._configuration["q_vectors"][q] = {
+                "q_vectors": self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),
+                "weights": weights,
+                "n_q_vectors": np.sum(weights),
+                "q": q,
+                "hkls": lattice_hkl_vectors,
+            }
 
             if self._status is not None:
                 if self._status.is_stopped():

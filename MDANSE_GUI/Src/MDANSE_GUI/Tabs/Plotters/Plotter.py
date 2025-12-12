@@ -322,13 +322,10 @@ class Plotter(metaclass=SubclassFactory):
             axes.axline([0, 1], [1, 0], color="k", linestyle="-")
         label_text = (
             override_label
-            if override_label
-            else "If you expected a plot, please check the settings you changed last."
+            or "If you expected a plot, please check the settings you changed last."
         )
         title_text = (
-            override_title
-            if override_title
-            else "The data sets you selected could not be plotted."
+            override_title or "The data sets you selected could not be plotted."
         )
         axes.set_title(title_text)
         axes.set_xlabel(label_text)

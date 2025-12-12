@@ -68,17 +68,13 @@ class DispersionLatticeQVectors(LatticeQVectors):
         self._configuration["q_vectors"] = collections.OrderedDict()
 
         for i, v in enumerate(keyvals):
-            self._configuration["q_vectors"][v] = {}
-            self._configuration["q_vectors"][v]["q_vectors"] = q_vectors[:, i][
-                :, np.newaxis
-            ]
-            self._configuration["q_vectors"][v]["n_q_vectors"] = weights[i]
-            self._configuration["q_vectors"][v]["weights"] = weights[i : i + 1]
-            self._configuration["q_vectors"][v]["q"] = v
-            self._configuration["q_vectors"][v]["hkls"] = hkl_vectors[:, i][
-                :, np.newaxis
-            ]
-
+            self._configuration["q_vectors"][v] = {
+                "q_vectors": q_vectors[:, i][:, np.newaxis],
+                "n_q_vectors": weights[i],
+                "weights": weights[i : i + 1],
+                "q": v,
+                "hkls": hkl_vectors[:, i][:, np.newaxis],
+            }
             if self._status is not None:
                 if self._status.is_stopped():
                     return

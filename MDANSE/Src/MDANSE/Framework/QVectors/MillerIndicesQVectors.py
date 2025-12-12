@@ -99,15 +99,13 @@ class MillerIndicesQVectors(LatticeQVectors):
             nHits = len(hits)
 
             if nHits != 0:
-                self._configuration["q_vectors"][q] = {}
-                self._configuration["q_vectors"][q]["q_vectors"] = vects[:, hits]
-                self._configuration["q_vectors"][q]["n_q_vectors"] = nHits
-                self._configuration["q_vectors"][q]["weights"] = np.ones(nHits)
-                self._configuration["q_vectors"][q]["q"] = q
-                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
-                    vects[:, hits], self._unit_cell
-                )
-
+                self._configuration["q_vectors"][q] = {
+                    "q_vectors": vects[:, hits],
+                    "n_q_vectors": nHits,
+                    "weights": np.ones(nHits),
+                    "q": q,
+                    "hkls": self.qvectors_to_hkl(vects[:, hits], self._unit_cell),
+                }
             if self._status is not None:
                 if self._status.is_stopped():
                     return

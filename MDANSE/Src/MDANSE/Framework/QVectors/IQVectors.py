@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
-GAUSS_WIDTH_FACTOR = 2 * 2.35482  # 2*sqrt(2*ln(2))
+GAUSS_WIDTH_FACTOR = 4.70964  # 2*sqrt(2*ln(2))
 
 
 def truncated_normal_distribution(n_elements, left_limit, right_limit, width, centre):
@@ -150,7 +150,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
         self, vectors: npt.NDArray[float], weights: npt.NDArray[float] | None = None
     ):
         nonzero_vector_mask = np.linalg.norm(vectors, axis=0) > 1e-15
-        return vectors[nonzero_vector_mask], weights[nonzero_vector_mask]
+        return vectors[:, nonzero_vector_mask], weights[nonzero_vector_mask]
 
     @classmethod
     def vectors_within_limits(

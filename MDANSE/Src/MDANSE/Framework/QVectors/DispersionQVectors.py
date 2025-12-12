@@ -103,25 +103,21 @@ class DispersionQVectors(IQVectors):
         q_vectors, keyvals = dispersion_vectors(q_start, q_end, q_step)
         if self._status is not None:
             self._status.start(len(keyvals))
-        if self._unit_cell is not None:
-            hkls = self.qvectors_to_hkl(q_vectors, self._unit_cell)
+        hkls = (
+            self.qvectors_to_hkl(q_vectors, self._unit_cell)
+            if self._unit_cell is not None
+            else None
+        )
         self._configuration["q_vectors"] = collections.OrderedDict()
 
         for index, keyval in enumerate(keyvals):
-            self._configuration["q_vectors"][keyval] = {}
-            self._configuration["q_vectors"][keyval]["q"] = keyval
-            self._configuration["q_vectors"][keyval]["q_vectors"] = q_vectors[:, index][
-                :, np.newaxis
-            ]
-            self._configuration["q_vectors"][keyval]["n_q_vectors"] = 1
-            self._configuration["q_vectors"][keyval]["weights"] = np.ones(1)
-            if self._unit_cell is not None:
-                self._configuration["q_vectors"][keyval]["hkls"] = hkls[:, index][
-                    :, np.newaxis
-                ]
-            else:
-                self._configuration["q_vectors"][keyval]["hkls"] = None
-
+            self._configuration["q_vectors"][keyval] = {
+                "q": keyval,
+                "q_vectors": q_vectors[:, index][:, np.newaxis],
+                "n_q_vectors": 1,
+                "weights": np.ones(1),
+                "hkls": hkls[:, index][:, np.newaxis] if hkls is not None else None,
+            }
             if self._status is not None:
                 if self._status.is_stopped():
                     return

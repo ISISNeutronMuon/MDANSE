@@ -80,18 +80,15 @@ class SphericalQVectors(IQVectors):
         for q in self._configuration["shells"]["value"]:
             q_vectors = spherical_vectors(q, width, nvecs_per_shell)
 
-            self._configuration["q_vectors"][q] = {}
-            self._configuration["q_vectors"][q]["q_vectors"] = q_vectors
-            self._configuration["q_vectors"][q]["n_q_vectors"] = nvecs_per_shell
-            self._configuration["q_vectors"][q]["weights"] = np.ones(nvecs_per_shell)
-            self._configuration["q_vectors"][q]["q"] = q
-            if self._unit_cell is not None:
-                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
-                    q_vectors, self._unit_cell
-                )
-            else:
-                self._configuration["q_vectors"][q]["hkls"] = None
-
+            self._configuration["q_vectors"][q] = {
+                "q_vectors": q_vectors,
+                "n_q_vectors": nvecs_per_shell,
+                "weights": np.ones(nvecs_per_shell),
+                "q": q,
+                "hkls": self.qvectors_to_hkl(q_vectors, self._unit_cell)
+                if self._unit_cell is not None
+                else None,
+            }
             if self._status is not None:
                 if self._status.is_stopped():
                     return

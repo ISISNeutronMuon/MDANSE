@@ -49,8 +49,9 @@ from MDANSE_GUI.Utils import block_signals
 
 
 def numerator_suffix(index: int) -> str:
-    last_digit = int(str(index)[-1])
-    match last_digit:
+    if 10 <= index % 100 <= 20:
+        return "th"
+    match index % 10:
         case 1:
             return "st"
         case 2:
@@ -183,10 +184,8 @@ class ShellPanel(QWidget):
 
     @Slot(int)
     def set_upper_limit(self, number_of_shells: int):
-        current_shell = self.shell_selector.value()
+        current_shell = min(self.shell_selector.value(), number_of_shells - 1)
         self.shell_selector.setMaximum(number_of_shells - 1)
-        if current_shell >= number_of_shells:
-            current_shell = number_of_shells - 1
         with block_signals(self.shell_selector):
             self.shell_selector.setValue(current_shell)
         self.set_shell(current_shell, update_limit=False)
@@ -303,9 +302,7 @@ class QVectorsWidget(WidgetBase):
         top_bar_layout.addWidget(QLabel("Generator type:"), stretch=0)
         self._selector = QComboBox(self._base)
         self._selector.addItems(
-            filter(
-                lambda x: x not in ("LatticeQVectors",), IQVectors.indirect_subclasses()
-            )
+            x for x in IQVectors.indirect_subclasses() if x != "LatticeQVectors"
         )
         self._model = VectorModel(self._base, trajectory=trajectory)
         self._view = QTableView(self._base)
