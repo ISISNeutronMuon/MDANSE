@@ -53,7 +53,7 @@ class View3D(QWidget):
         self._viewer.load_trajectory_placeholder_3d_model()
 
     @Slot(tuple)
-    def update_panel(self, data: tuple[str, Trajectory]):
+    def update_panel(self, data: tuple[str, Trajectory] | None):
         if data is None or data[0] == "":
             self.load_placeholder()
             return

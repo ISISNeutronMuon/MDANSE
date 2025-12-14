@@ -1242,8 +1242,8 @@ class MolecularViewer(QtWidgets.QWidget):
         # rendering
         if self.reset_camera:
             self._renderer.ResetCamera()
-            self.reset_camera = False
             self._camera.SetWindowCenter(0.0, 0.0)
+            self.reset_camera = False
 
         self._iren.GetRenderWindow().Render()
         self._iren.Render()
