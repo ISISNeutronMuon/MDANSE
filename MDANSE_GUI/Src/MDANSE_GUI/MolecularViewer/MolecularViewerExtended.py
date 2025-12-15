@@ -73,7 +73,7 @@ class MolecularViewerExtended(MolecularViewer):
             return
 
         picked_pos = np.array(picker.GetPickPosition())
-        _, picked_index = KDTree(self._last_coords).query(picked_pos)
+        _, picked_index = KDTree(self._current_coords).query(picked_pos)
 
         if picked_index < 0 or picked_index >= self._n_atoms:
             return

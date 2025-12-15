@@ -112,8 +112,8 @@ class MolecularViewerWithPicking(MolecularViewer):
 
         self.set_atm_polydata_scalars(
             (
-                self._colour_manager.colours[picked],
-                self._colour_manager.radii[picked],
+                self._colour_manager.colours,
+                self._colour_manager.radii,
                 np.arange(len(self.picked_atoms)),
             )
         )
@@ -148,8 +148,7 @@ class MolecularViewerWithPicking(MolecularViewer):
             return
 
         picked_pos = np.array(picker.GetPickPosition())
-        coords = self._reader.read_frame(self._current_frame)
-        _, idx = KDTree(coords).query(picked_pos)
+        _, idx = KDTree(self._current_coords).query(picked_pos)
 
         if idx < 0 or idx >= self._n_atoms:
             return
