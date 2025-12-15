@@ -38,7 +38,7 @@ from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets.CheckableComboBox import CheckableComboBox
 
 if TYPE_CHECKING:
-    from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
+    from MDANSE_GUI.MolecularViewer import MolecularViewer
 
 
 class IndexSelectionMode(Enum):

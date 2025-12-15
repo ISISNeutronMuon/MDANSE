@@ -46,7 +46,7 @@ from MDANSE.Framework.AtomSelector.selector import ReusableSelection
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewerWithPicking
+from MDANSE_GUI.MolecularViewer import MolecularViewerWithPicking
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
 from MDANSE_GUI.Widgets.SelectionWidgets import (
     AllAtomSelection,

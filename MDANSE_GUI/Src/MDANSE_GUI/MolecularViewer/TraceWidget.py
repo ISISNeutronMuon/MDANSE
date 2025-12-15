@@ -32,7 +32,7 @@ from qtpy.QtWidgets import (
 )
 
 if TYPE_CHECKING:
-    from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
+    from MDANSE_GUI.MolecularViewer import MolecularViewer
 
 
 TRACE_PARAMETERS = {

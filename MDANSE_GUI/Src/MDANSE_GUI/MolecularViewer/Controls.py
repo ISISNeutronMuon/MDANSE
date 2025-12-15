@@ -37,7 +37,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
+from MDANSE_GUI.MolecularViewer import MolecularViewer
 from MDANSE_GUI.MolecularViewer.PropertyWidget import PropertyWidget
 from MDANSE_GUI.MolecularViewer.TraceWidget import TraceWidget
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
@@ -355,7 +355,7 @@ class ViewerControls(QWidget):
             self._viewer._camera.SetParallelProjection(255)
         else:
             self._viewer._camera.SetParallelProjection(0)
-        self._viewer._iren.Render()
+        self._viewer.update_renderer()
         self._projection = not self._projection
 
     @Slot()
@@ -366,11 +366,11 @@ class ViewerControls(QWidget):
 
     @Slot()
     def changeAxes(self):
-        self._viewer._change_axes(self.axes_combo.currentText())
+        self._viewer.change_axes(self.axes_combo.currentText())
 
     @Slot()
     def changeLabels(self):
-        self._viewer._change_atom_labels(self.labels_combo.currentText())
+        self._viewer.change_atom_labels(self.labels_combo.currentText())
 
     @Slot(int)
     def setTimeStep(self, new_value: int):

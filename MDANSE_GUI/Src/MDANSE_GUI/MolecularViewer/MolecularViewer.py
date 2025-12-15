@@ -16,24 +16,19 @@
 from __future__ import annotations
 
 import copy
-from pathlib import Path
 from typing import Any
 
 import more_itertools
 import numpy as np
 import vtk
 from qtpy import QtWidgets
-from qtpy.QtCore import QTimer, Signal, Slot
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QSizePolicy
 from scipy.interpolate import CubicSpline
 from scipy.spatial import cKDTree as KDTree
 from scipy.spatial.transform import Rotation as R
 from vtk.util import numpy_support
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.vtkCommonColor import vtkNamedColors
-from vtkmodules.vtkIOGeometry import vtkSTLReader
-from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
-from vtkmodules.vtkRenderingCore import vtkRenderWindow
 
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Connectivity import distance_calculation
@@ -53,12 +48,7 @@ def array_to_3d_imagedata(data: np.ndarray, spacing: tuple[float, float, float])
     dx, dy, dz = spacing
     image.SetSpacing(dx, dy, dz)
     image.SetExtent(0, nx - 1, 0, ny - 1, 0, nz - 1)
-    if vtk.vtkVersion.GetVTKMajorVersion() < 6:
-        image.SetScalarTypeToDouble()
-        image.SetNumberOfScalarComponents(1)
-    else:
-        image.AllocateScalars(vtk.VTK_DOUBLE, 1)
-
+    image.AllocateScalars(vtk.VTK_DOUBLE, 1)
     image.GetPointData().SetScalars(numpy_support.numpy_to_vtk(data.ravel("F")))
     return image
 
@@ -79,11 +69,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._element_database = None
 
         self._iren = QVTKRenderWindowInteractor(self)
-
-        def dummy_method(self, ev=None):
-            pass
-
-        self._iren.keyPressEvent = dummy_method
+        self._iren.keyPressEvent = lambda *args, **kwargs: None
 
         # the main render which includes the trajectory
         self._renderer = vtk.vtkRenderer()
@@ -117,13 +103,6 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._iren.GetRenderWindow()
 
-        self._backup_wheel_method = self._iren.wheelEvent
-        self._dummy_method = dummy_method
-
-        self.atom_actor = None
-        self._last_coords = None
-        self.atom_label_actors = []
-
         layout = QtWidgets.QStackedLayout(self)
         layout.addWidget(self._iren)
         self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
@@ -134,21 +113,13 @@ class MolecularViewer(QtWidgets.QWidget):
         self._renderer.SetActiveCamera(self._camera)
         self._label_renderer.SetActiveCamera(self._camera)
         self._camera.SetFocalPoint(0, 0, 0)
-        self._camera.SetPosition(0, 0, 20)
+        self._camera.SetPosition(20, 0, 0)
+        self._camera.SetViewUp(0, 0, 1)
 
         # camera for the axes
         self._axes_camera = vtk.vtkCamera()
         self._axes_renderer.SetActiveCamera(self._axes_camera)
         self._axes_camera.SetFocalPoint(0, 0, 0)
-        self._axes_camera.SetPosition(0, 0, 8)
-
-        # Initialize rotation parameters
-        self.rotation_speed = 5
-        self.secondary_speed = 0.23 * self.rotation_speed
-
-        # Animation timer for rotating the 3D model
-        self._animation_timer = QTimer()
-        self._animation_timer.timeout.connect(self.animate_rotation)
 
         def update_axes_orientation(caller, event):
             """The axes camera needs to rotate with the main camera."""
@@ -177,9 +148,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._atoms = []
 
-        self._polydata = None
-        self._polydata_bonds_exist = False
-        self._uc_polydata = None
+        self._atm_polydata = None
 
         self._surfaces = []
         self._isocontours = []
@@ -187,14 +156,22 @@ class MolecularViewer(QtWidgets.QWidget):
         self._reader = None
 
         self._current_frame = 0
+        self._current_coords = None
 
         self.axes_actors = []
-        self.update_axes()
+        self.atom_label_actors = []
+        self.uc_actor = None
+        self.atom_actor = None
+        self.bond_actor = None
+
+        self._atm_polydata = vtk.vtkPolyData()
+        self._uc_polydata = vtk.vtkPolyData()
+
+        self.create_axes()
+        self.create_unit_cell()
 
         self._colour_manager = AtomProperties()
         self.dummy_size = 0.0
-
-        self.reset_camera = False
 
     def clear_axes(self):
         if not self.axes_actors:
@@ -205,7 +182,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.axes_actors = []
 
-    def update_axes(self):
+    def create_axes(self):
         def add_arrow(color, direction):
             rot = R.align_vectors(direction, [1, 0, 0])[0].as_matrix()
 
@@ -274,6 +251,368 @@ class MolecularViewer(QtWidgets.QWidget):
             add_arrow(np.eye(3)[i], matrix[i])
             add_text(label, matrix[i])
 
+    def change_axes(self, axes_option: str):
+        """Changes the axes type in the 3D viewer.
+
+        Parameters
+        ----------
+        axes_option : str
+            The axes type that will be used.
+        """
+        self.current_axes_type = axes_option
+        self.create_axes()
+        self.update_renderer()
+
+    def clear_atom_labels(self):
+        """Clears the atoms labels."""
+        if not self.atom_label_actors:
+            return
+
+        for actor in self.atom_label_actors:
+            self._label_renderer.RemoveActor(actor)
+
+        self.atom_label_actors = []
+
+    def create_atom_labels(self):
+        """Creates atom label actors, setting the text to the chosen
+        atom_label_type.
+        """
+        self.clear_atom_labels()
+        self.atom_label_actors = []
+
+        if self._reader is None:
+            return
+
+        if self.atom_label_type == "index":
+            labels = list(range(self._reader._n_atoms))
+        elif self.atom_label_type == "label":
+            label_dict = self._reader._trajectory.chemical_system._labels
+            if not label_dict:
+                return
+            keys = more_itertools.run_length.decode(
+                ((k, len(v)) for k, v in label_dict.items())
+            )
+            labels = sorted(keys, key=label_dict.__getitem__)
+        elif self.atom_label_type == "atom":
+            labels = self._atoms
+        elif self.atom_label_type == "molecule":
+            label_dict = self._reader._trajectory.chemical_system._clusters
+            if not label_dict:
+                return
+            label_dict = {
+                k: list(more_itertools.collapse(v)) for k, v in label_dict.items()
+            }
+            keys = more_itertools.run_length.decode(
+                ((k, len(v)) for k, v in label_dict.items())
+            )
+            labels = sorted(keys, key=label_dict.__getitem__)
+        else:
+            return
+
+        if self._current_coords is None or len(labels) != self._reader._n_atoms:
+            return
+
+        atom_label_actors = []
+        for label, coord in zip(labels, self._current_coords, strict=True):
+            text = vtk.vtkVectorText()
+            text.SetText(f"{label}")
+
+            mapper = vtk.vtkPolyDataMapper()
+            mapper.SetInputConnection(text.GetOutputPort())
+
+            follower = vtk.vtkFollower()
+            follower.SetMapper(mapper)
+            follower.SetScale(0.025)
+            follower.SetPosition(*coord)
+            follower.SetCamera(self._label_renderer.GetActiveCamera())
+
+            atom_label_actors.append(follower)
+            self._label_renderer.AddActor(follower)
+
+        self.atom_label_actors = atom_label_actors
+
+    def update_atom_labels(self):
+        """Updates the atom label follwer positions."""
+        if (
+            self._reader is None
+            or self._current_coords is None
+            or not self.atom_label_actors
+            or self.atom_label_type == "none"
+        ):
+            return
+
+        for follower, coord in zip(
+            self.atom_label_actors,
+            self._current_coords,
+            strict=True,
+        ):
+            follower.SetPosition(*coord)
+
+    def change_atom_labels(self, label_option: str) -> None:
+        """Changes the atoms label text.
+
+        Parameters
+        ----------
+        label_option : str
+            The atom label option.
+        """
+        self.atom_label_type = label_option
+        self.create_atom_labels()
+        self.update_renderer()
+
+    def clear_unit_cell(self):
+        if not self.uc_actor:
+            return
+
+        self._renderer.RemoveActor(self.uc_actor)
+        self.uc_actor = None
+
+    def create_unit_cell(self):
+        self.clear_unit_cell()
+
+        if not self._cell_visible:
+            return
+
+        uc_mapper = vtk.vtkPolyDataMapper()
+        uc_mapper.SetInputData(self._uc_polydata)
+        uc_mapper.ScalarVisibilityOn()
+        uc_actor = vtk.vtkLODActor()
+        uc_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
+        uc_actor.SetMapper(uc_mapper)
+        self._renderer.AddActor(uc_actor)
+        self.uc_actor = uc_actor
+
+    def update_uc_polydata(self):
+        """Updates the unit cell actor using the unit cell parameters
+        from the current trajectory frame.
+        """
+        if self._reader is None:
+            return
+
+        uc = self._reader.read_pbc(self._current_frame)
+        if self._cell_visible and uc is not None:
+            # update the unit cell
+            a = uc.a_vector
+            b = uc.b_vector
+            c = uc.c_vector
+            uc_points = vtk.vtkPoints()
+            uc_points.SetNumberOfPoints(8)
+            for i, v in enumerate([[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c]):
+                x, y, z = v
+                uc_points.SetPoint(i, x, y, z)
+            self._uc_polydata.SetPoints(uc_points)
+
+            uc_lines = vtk.vtkCellArray()
+            for i, j in [
+                (0, 1),
+                (0, 2),
+                (0, 3),
+                (1, 4),
+                (1, 5),
+                (4, 7),
+                (2, 4),
+                (2, 6),
+                (5, 7),
+                (3, 5),
+                (3, 6),
+                (6, 7),
+            ]:
+                line = vtk.vtkLine()
+                line.GetPointIds().SetId(0, i)
+                line.GetPointIds().SetId(1, j)
+                uc_lines.InsertNextCell(line)
+            self._uc_polydata.SetLines(uc_lines)
+
+    def clear_atoms(self):
+        if not self.atom_actor:
+            return
+
+        self._renderer.RemoveActor(self.atom_actor)
+        self.atom_actor = None
+
+    def create_atoms(self, ball_opacity: float = 1.0):
+        self.clear_atoms()
+
+        if not self._atoms_visible:
+            return
+
+        actor = self.create_atom_actor(self._atm_polydata, ball_opacity)
+        self._renderer.AddActor(actor)
+        self.atom_actor = actor
+
+    def clear_bonds(self):
+        if not self.bond_actor:
+            return
+
+        self._renderer.RemoveActor(self.bond_actor)
+        self.bond_actor = None
+
+    def create_bonds(self, line_opacity: float = 1.0):
+        self.clear_bonds()
+
+        if not self._bonds_visible:
+            return
+
+        actor = self.create_bond_actor(self._atm_polydata, line_opacity)
+        self._renderer.AddActor(actor)
+        self.bond_actor = actor
+
+    def create_atom_actor(
+        self,
+        polydata: vtk.vtkPolyData,
+        ball_opacity: float = 1.0,
+    ) -> vtk.vtkLODActor:
+        """Creates VTK actors which visualise atoms.
+
+        Parameters
+        ----------
+        polydata : vtk.vtkPolyData
+            VTK object storing the atom properties used in 3D view (colour, radius)
+        ball_opacity : float, optional
+            opacity (alpha) of atom spheres, by default 1.0
+
+        Returns
+        -------
+            Two vtk.vtkLODActor instances, for atoms
+
+        """
+        temp_radius = float(1.0 * self._scale_factor)
+        sphere = vtk.vtkSphereSource()
+        sphere.SetCenter(0, 0, 0)
+        sphere.SetRadius(temp_radius)
+        sphere.SetThetaResolution(self._resolution)
+        sphere.SetPhiResolution(self._resolution)
+
+        glyph_mapper = vtk.vtkGlyph3DMapper()
+        glyph_mapper.SetInputData(self._atm_polydata)
+        glyph_mapper.SetSourceConnection(sphere.GetOutputPort())
+
+        temp_scale = float(1.0 * self._scale_factor)
+        glyph_mapper.ScalingOn()
+        glyph_mapper.SetScaleModeToScaleByMagnitude()
+        glyph_mapper.SetScaleArray("radii")
+        glyph_mapper.SetScaleFactor(temp_scale)
+
+        glyph_mapper.ScalarVisibilityOn()
+        glyph_mapper.SelectColorArray("colours")
+        glyph_mapper.ColorByArrayComponent("colours", 1)
+        glyph_mapper.SetLookupTable(self._colour_manager._lut)
+        glyph_mapper.SetScalarRange(
+            self._atm_polydata.GetPointData().GetArray("colours").GetRange()
+        )
+
+        ball_actor = vtk.vtkLODActor()
+        ball_actor.SetMapper(glyph_mapper)
+        ball_actor.GetProperty().SetAmbient(0.2)
+        ball_actor.GetProperty().SetDiffuse(0.5)
+        ball_actor.GetProperty().SetSpecular(0.3)
+        ball_actor.GetProperty().SetOpacity(ball_opacity)
+        ball_actor.SetNumberOfCloudPoints(30000)
+        return ball_actor
+
+    def create_bond_actor(
+        self,
+        polydata: vtk.vtkPolyData,
+        line_opacity: float = 1.0,
+    ) -> vtk.vtkLODActor:
+        """Creates VTK actors which visualise bonds.
+
+        Parameters
+        ----------
+        polydata : vtk.vtkPolyData
+            VTK object storing the atom properties used in 3D view (colour, radius)
+        line_opacity : float, optional
+            opacity (alpha) of bond lines, by default 1.0
+
+        Returns
+        -------
+            Two vtk.vtkLODActor instances, for bonds
+        """
+        line_mapper = vtk.vtkPolyDataMapper()
+        line_mapper.SetInputData(polydata)
+        line_mapper.SetLookupTable(self._colour_manager._lut)
+        line_mapper.ScalarVisibilityOn()
+        line_mapper.ColorByArrayComponent("scalars", 1)
+        line_actor = vtk.vtkLODActor()
+        line_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
+        line_actor.SetMapper(line_mapper)
+        line_actor.GetProperty().SetAmbient(0.2)
+        line_actor.GetProperty().SetDiffuse(0.5)
+        line_actor.GetProperty().SetSpecular(0.3)
+        line_actor.GetProperty().SetOpacity(line_opacity)
+        return line_actor
+
+    def update_atm_polydata(self):
+        """Triggers an update of the VTK actors, making them use the
+        latest parameters from the input widgets.
+        """
+        if self._current_coords is None:
+            return
+
+        if self._atoms_visible or self._bonds_visible:
+            atoms = vtk.vtkPoints()
+            atoms.SetData(numpy_support.numpy_to_vtk(self._current_coords))
+            self._atm_polydata.SetPoints(atoms)
+
+        if self._bonds_visible:
+            # do not bond atoms to dummy atoms
+            rs = self._current_coords[self.not_du]
+            bonds, bonds_exist = self.create_bond_cell_array(
+                rs, self.covs[self.not_du], self.not_du
+            )
+            if bonds_exist:
+                self._atm_polydata.SetLines(bonds)
+                return
+
+    def create_bond_cell_array(
+        self,
+        rs: np.ndarray,
+        covs: np.typing.NDArray[float],
+        not_du: np.typing.NDArray[bool],
+        tolerance: float = 0.04,
+    ):
+        """Finds the pairs of atoms which should be connected by bonds,
+        based on their positions, covalent radii and tolerance of distances.
+        Dummy atoms can be excluded from forming bonds.
+
+        This does NOT consider periodic boundary conditions.
+
+        Parameters
+        ----------
+        rs : np.ndarray
+            an (N,3) array of atom coordinates
+        covs : Iterable[float]
+            an (N,) array of covalent radii
+        not_du : Iterable[bool]
+            an (N,) list of boolean flags. A dummy atom is marked with False
+        tolerance : float, optional
+            bond is formed if |pos_1 - pos_2| < radius_1 + radius_2 + tolerance.
+            By default 0.04 nm
+
+        Returns
+        -------
+        vtk.vtkCellArray, bool
+            a VTK array of pairs of atom indices, and a flag True if some bonds were found
+        """
+        # determine and set bonds without PBC applied
+        bonds = vtk.vtkCellArray()
+
+        dist, js, ks, _ = distance_calculation(rs, 2 * np.max(covs) + tolerance)
+        sum_radii = (covs[js] + covs[ks] + tolerance) ** 2
+        js = js[(dist > 0) & (dist < sum_radii)]
+        ks = ks[(dist > 0) & (dist < sum_radii)]
+        ls = not_du[js]
+        ms = not_du[ks]
+
+        n_points = len(ls)
+        idxs = np.zeros((len(ls), 3), dtype=np.int64)
+        idxs[:, 0] = 2
+        idxs[:, 1] = ls
+        idxs[:, 2] = ms
+        bonds.SetCells(n_points, numpy_support.numpy_to_vtkIdTypeArray(idxs.flatten()))
+
+        return bonds, len(ls) > 0
+
     def _new_trajectory_object(self, fname: str, trajectory: Trajectory):
         """Creates and sets a new trajectory reader for the input trajectory.
 
@@ -284,133 +623,10 @@ class MolecularViewer(QtWidgets.QWidget):
         data : Trajectory
             instance of the MDANSE input trajectory handler
         """
-
         reader = hdf5wrapper.HDF5Wrapper(fname, trajectory, trajectory.chemical_system)
+        if (self._reader is not None) and (reader.filename == self._reader.filename):
+            return
         self.set_reader(reader)
-        self._animation_timer.stop()
-
-    def create_actor_for_placeholder_3d_model(
-        self,
-        filename: str,
-        colour: tuple[float, float, float],
-        scale: float,
-        position: tuple[float, float, float],
-    ) -> vtk.vtkActor:
-        """Load a 3D object definition and return it as a VTK actor.
-
-        Parameters
-        ----------
-        filename : str
-            Filename of the STL file with the 3D mesh.
-        colour : tuple[float, float, float]
-            Colour to be assigned to the object.
-        scale : float
-            Scaling factor which will resize the object.
-        position : tuple[float, float, float]
-            The initial position of the object.
-
-        Returns
-        -------
-        vtk.vtkActor
-            A VTK actor of the 3D shape.
-        """
-
-        reader = vtk.vtkSTLReader()
-        filepath = Path(__file__).parents[1] / "Icons" / filename
-        reader.SetFileName(filepath)
-        reader.Update()
-
-        mapper = vtk.vtkPolyDataMapper()
-        mapper.SetInputConnection(reader.GetOutputPort())
-
-        actor = vtk.vtkActor()
-        actor.SetMapper(mapper)
-        actor.GetProperty().SetColor(colour)
-
-        actor.SetPosition(position)
-        actor.SetScale(scale)
-        # make center sphere metallic and semi-transparent
-        if filename == "center_sphere.stl":
-            actor.GetProperty().SetOpacity(
-                0.5
-            )  # Make the center sphere semi-transparent
-            actor.GetProperty().SetSpecular(1)
-            actor.GetProperty().SetSpecularPower(100)
-            actor.GetProperty().SetMetallic(1.0)
-            actor.GetProperty().SetRoughness(0.2)
-
-        individual_transform = vtk.vtkTransform()
-        individual_transform.Identity()
-        individual_transform.Translate(0.0, 0.5, 0.5)
-        individual_transform.Scale(0.5, 0.5, 0.5)
-        actor.SetUserTransform(individual_transform)
-
-        return actor
-
-    def load_trajectory_placeholder_3d_model(self):
-        """Loads a 3D blender model of mdanse into the viewer."""
-
-        self._actors = vtk.vtkAssembly()
-        spheres = [
-            ("center_sphere.stl", (0.6, 0.6, 0.6), 0.4, (0, 0, 0)),  # grey center
-            ("yellow_sphere.stl", (0.2, 0.85, 0.25), 0.4, (0, 0, 0)),
-            ("blue_sphere.stl", (0.2, 0.35, 0.85), 0.4, (0, 0, 0)),
-            ("red_sphere.stl", (0.85, 0.24, 0.2), 0.4, (0, 0, 0)),
-        ]
-
-        for filename, colour, position, scale in spheres:
-            actor = self.create_actor_for_placeholder_3d_model(
-                filename, colour, position, scale
-            )
-            self._actors.AddPart(actor)
-
-        self._renderer.AddActor(self._actors)
-
-        # side view of 3d model
-        self._camera.SetPosition(20, 0, 0)
-        self._camera.SetFocalPoint(0, 0, 0)
-        self._camera.SetViewUp(0, 0, 1)
-
-        self._renderer.ResetCameraScreenSpace(0.4)
-        self._camera.SetWindowCenter(-0.5, -0.5)
-        self.reset_camera = True
-
-        self._animation_timer.start(50)
-
-        self._iren.wheelEvent = self._dummy_method
-
-    def animate_rotation(self):
-        """Continuously rotate the 3D model."""
-        if self._animation_timer.isActive():
-            self.rotate_3D_model_actors(self.rotation_speed, self.secondary_speed)
-            self._iren.Render()
-
-    def rotate_3D_model_actors(self, angle: float, minor_angle: float):
-        """Rotate the all the placeholder actors around the pre-defined axes.
-
-        The components of the 3D placeholder are rotated independently.
-        A second rotation by a smaller angle is applied to the rings to
-        create the impression of the spheres moving along their rings.
-
-        Parameters
-        ----------
-        angle : float
-            Angle to be used for the main rotation.
-        minor_angle : float
-            Angle to be used for the secondary rotation.
-        """
-        for i, actor in enumerate(self._actors.GetParts()):
-            if i == 0:  # center sphere
-                actor.RotateZ(angle)
-            elif i == 1:  # green sphere
-                actor.RotateY(-angle)
-                actor.RotateZ(minor_angle)
-            elif i == 2:  # blue sphere
-                actor.RotateX(angle)
-                actor.RotateZ(-minor_angle)
-            elif i == 3:  # red sphere
-                actor.RotateY(-angle)
-                actor.RotateX(-minor_angle)
 
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
@@ -428,6 +644,7 @@ class MolecularViewer(QtWidgets.QWidget):
         """
         self._scale_factor = scale_factor
         if self._reader is not None:
+            self.create_atoms()
             self.update_renderer()
 
     def _new_visibility(self, flags: list[bool]):
@@ -442,36 +659,10 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atoms_visible = flags[0]
         self._bonds_visible = flags[1]
         self._cell_visible = flags[2]
-        result = self.set_coordinates(self._current_frame)
-        if result is False:
-            self._iren.Render()
-
-    def _change_axes(self, axes_option: str):
-        """Changes the axes type in the 3D viewer.
-
-        Parameters
-        ----------
-        axes_option : str
-            The axes type that will be used.
-        """
-        self.current_axes_type = axes_option
-        self.update_axes()
-        self._iren.GetRenderWindow().Render()
-        self._iren.Render()
-
-    def _change_atom_labels(self, label_option: str) -> None:
-        """Changes the atoms label text.
-
-        Parameters
-        ----------
-        label_option : str
-            The atom label option.
-        """
-        self.atom_label_type = label_option
-        self.clear_atom_labels()
-        self.create_atom_label_actors()
-        self._iren.GetRenderWindow().Render()
-        self._iren.Render()
+        self.create_unit_cell()
+        self.create_atoms()
+        self.create_bonds()
+        self.update_renderer()
 
     def trace_from_dialog(self, params: dict[str, Any]):
         """Passes the input parameter dictionary to the method
@@ -502,7 +693,7 @@ class MolecularViewer(QtWidgets.QWidget):
             surface.ReleaseGraphicsResources(self._iren.GetRenderWindow())
             self._renderer.RemoveActor(surface)
             self._surfaces.pop(trace_number)
-            self._iren.Render()
+            self.update_renderer()
             self.changed_trace.emit()
 
     def _draw_isosurface(self, index: int, params: dict[str, Any] | None = None):
@@ -590,10 +781,7 @@ class MolecularViewer(QtWidgets.QWidget):
         new_isocontour = vtk.vtkMarchingContourFilter()
         new_isocontour.UseScalarTreeOn()
         new_isocontour.ComputeNormalsOn()
-        if vtk.vtkVersion.GetVTKMajorVersion() < 6:
-            new_isocontour.SetInput(self.image)
-        else:
-            new_isocontour.SetInputData(self._image)
+        new_isocontour.SetInputData(self._image)
         new_isocontour.SetValue(0, trace_isovalue)
 
         self._depthSort = vtk.vtkDepthSortPolyData()
@@ -627,235 +815,25 @@ class MolecularViewer(QtWidgets.QWidget):
         self._surfaces.append(new_surface)
         self._isocontours.append(new_isocontour)
 
-        self._iren.Render()
+        self.update_renderer()
 
         LOG.info(f"Finished calculating the trace of atom {index}")
         self.changed_trace.emit()
 
-    def create_all_actors(self) -> list[vtk.vtkActor]:
-        """Collects all the VTK actors that should be shown in 3D view.
-
-        Returns
-        -------
-        List[vtk.vtkActor]
-            typically actors for unit cell, bonds and atoms
-        """
-        actors = []
-        if self._polydata is None:
-            return actors
-
-        line_actor, ball_actor = self.create_traj_actors(self._polydata)
-        if self._cell_visible:
-            uc_actor = self.create_uc_actor()
-            actors.append(uc_actor)
-        if self._bonds_visible and self._polydata_bonds_exist:
-            actors.append(line_actor)
-        if self._atoms_visible:
-            actors.append(ball_actor)
-            self.atom_actor = ball_actor
-        else:
-            self.atom_actor = None
-        self._iren.wheelEvent = self._backup_wheel_method
-        return actors
-
-    def create_uc_actor(self):
-        uc_mapper = vtk.vtkPolyDataMapper()
-        if vtk.vtkVersion.GetVTKMajorVersion() < 6:
-            uc_mapper.SetInput(self._uc_polydata)
-        else:
-            uc_mapper.SetInputData(self._uc_polydata)
-        uc_mapper.ScalarVisibilityOn()
-        uc_actor = vtk.vtkLODActor()
-        uc_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
-        uc_actor.SetMapper(uc_mapper)
-        return uc_actor
-
-    def create_traj_actors(
-        self,
-        polydata: vtk.vtkPolyData,
-        line_opacity: float = 1.0,
-        ball_opacity: float = 1.0,
-    ) -> list[vtk.vtkActor]:
-        """Creates VTK actors which visualise atoms and bonds.
-
-        Parameters
-        ----------
-        polydata : vtk.vtkPolyData
-            VTK object storing the atom properties used in 3D view (colour, radius)
-        line_opacity : float, optional
-            opacity (alpha) of bond lines, by default 1.0
-        ball_opacity : float, optional
-            opacity (alpha) of atom spheres, by default 1.0
-
-        Returns
-        -------
-            Two vtk.vtkLODActor instances, for bonds and atoms
-
-        """
-        line_mapper = vtk.vtkPolyDataMapper()
-        if vtk.vtkVersion.GetVTKMajorVersion() < 6:
-            line_mapper.SetInput(polydata)
-        else:
-            line_mapper.SetInputData(polydata)
-
-        line_mapper.SetLookupTable(self._colour_manager._lut)
-        line_mapper.ScalarVisibilityOn()
-        line_mapper.ColorByArrayComponent("scalars", 1)
-        line_actor = vtk.vtkLODActor()
-        line_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
-        line_actor.SetMapper(line_mapper)
-        line_actor.GetProperty().SetAmbient(0.2)
-        line_actor.GetProperty().SetDiffuse(0.5)
-        line_actor.GetProperty().SetSpecular(0.3)
-        line_actor.GetProperty().SetOpacity(line_opacity)
-
-        temp_radius = float(1.0 * self._scale_factor)
-        sphere = vtk.vtkSphereSource()
-        sphere.SetCenter(0, 0, 0)
-        sphere.SetRadius(temp_radius)
-        sphere.SetThetaResolution(self._resolution)
-        sphere.SetPhiResolution(self._resolution)
-        glyph = vtk.vtkGlyph3D()
-        if vtk.vtkVersion.GetVTKMajorVersion() < 6:
-            glyph.SetInput(polydata)
-        else:
-            glyph.SetInputData(polydata)
-
-        temp_scale = float(1.0 * self._scale_factor)
-        glyph.SetScaleModeToScaleByScalar()
-        glyph.SetColorModeToColorByScalar()
-        glyph.SetScaleFactor(temp_scale)
-        glyph.SetSourceConnection(sphere.GetOutputPort())
-        glyph.SetIndexModeToScalar()
-        sphere_mapper = vtk.vtkPolyDataMapper()
-        sphere_mapper.SetLookupTable(self._colour_manager._lut)
-        sphere_mapper.SetScalarRange(polydata.GetScalarRange())
-        sphere_mapper.SetInputConnection(glyph.GetOutputPort())
-        sphere_mapper.ScalarVisibilityOn()
-        sphere_mapper.ColorByArrayComponent("scalars", 1)
-        ball_actor = vtk.vtkLODActor()
-        ball_actor.SetMapper(sphere_mapper)
-        ball_actor.GetProperty().SetAmbient(0.2)
-        ball_actor.GetProperty().SetDiffuse(0.5)
-        ball_actor.GetProperty().SetSpecular(0.3)
-        ball_actor.GetProperty().SetOpacity(ball_opacity)
-        ball_actor.SetNumberOfCloudPoints(30000)
-        return [line_actor, ball_actor]
-
-    def clear_trajectory(self, clear_isosurfaces=True):
-        """Removes all the actors from the 3D view.
-
-        When updating the animation frame, it usually makes sense to keep
-        the isosurfaces in the view, which is allowed by the keyword argument.
-
-        Parameters
-        ----------
-        clear_isosurfaces : bool, optional
-            if True, isosurfaces are removed too, by default True
-        """
-
-        if not hasattr(self, "_actors"):
-            return
-        if self._actors is None:
-            return
-
-        if clear_isosurfaces:
-            self.on_clear_atomic_trace()
-        self._actors.VisibilityOff()
-        self._actors.ReleaseGraphicsResources(self.get_render_window())
-        self._renderer.RemoveActor(self._actors)
-        self.atom_actor = None
-
-        del self._actors
-
-    def create_atom_label_actors(self):
-        """Creates atom label actors, setting the text to the chosen
-        atom_label_type.
-        """
-        self.atom_label_actors = []
-        if self._reader is None:
-            return
-
-        if self.atom_label_type == "index":
-            labels = list(range(self._reader._n_atoms))
-        elif self.atom_label_type == "label":
-            label_dict = self._reader._trajectory.chemical_system._labels
-            if not label_dict:
-                return
-            keys = more_itertools.run_length.decode(
-                ((k, len(v)) for k, v in label_dict.items())
-            )
-            labels = sorted(keys, key=label_dict.__getitem__)
-        elif self.atom_label_type == "atom":
-            labels = self._atoms
-        elif self.atom_label_type == "molecule":
-            label_dict = self._reader._trajectory.chemical_system._clusters
-            if not label_dict:
-                return
-            label_dict = {
-                k: list(more_itertools.collapse(v)) for k, v in label_dict.items()
-            }
-            keys = more_itertools.run_length.decode(
-                ((k, len(v)) for k, v in label_dict.items())
-            )
-            labels = sorted(keys, key=label_dict.__getitem__)
-        else:
-            return
-
-        if len(labels) != self._reader._n_atoms:
-            return
-
-        atom_label_actors = []
-        for label, coord in zip(
-            labels, self._reader.read_frame(self._current_frame), strict=True
-        ):
-            text = vtk.vtkVectorText()
-            text.SetText(f"{label}")
-
-            mapper = vtk.vtkPolyDataMapper()
-            mapper.SetInputConnection(text.GetOutputPort())
-
-            follower = vtk.vtkFollower()
-            follower.SetMapper(mapper)
-            follower.SetScale(0.025)
-            follower.SetPosition(*coord)
-            follower.SetCamera(self._label_renderer.GetActiveCamera())
-
-            atom_label_actors.append(follower)
-            self._label_renderer.AddActor(follower)
-
-        self.atom_label_actors = atom_label_actors
-
-    def update_atom_label_actors(self):
-        """Updates the atom label follwer positions."""
-        if (
-            self._reader is None
-            or not self.atom_label_actors
-            or self.atom_label_type == "none"
-        ):
-            return
-
-        for follower, coord in zip(
-            self.atom_label_actors,
-            self._reader.read_frame(self._current_frame),
-            strict=True,
-        ):
-            follower.SetPosition(*coord)
-
-    def clear_atom_labels(self):
-        """Clears the atoms labels."""
-        if not self.atom_label_actors:
-            return
-
-        for actor in self.atom_label_actors:
-            self._label_renderer.RemoveActor(actor)
-
-        self.atom_label_actors = []
-
-    def clear_panel(self) -> None:
+    def clear_panel(self):
         """Clears the Molecular Viewer panel"""
-        self.clear_trajectory()
+        self.on_clear_atomic_trace()
+
+        self._atm_polydata.Initialize()
+        self._uc_polydata.Initialize()
+
         self.clear_atom_labels()
+        self.clear_atoms()
+        self.clear_bonds()
+        self.clear_unit_cell()
+        self.create_axes()
+
+        self.update_renderer()
 
         self._reader = None
 
@@ -866,155 +844,9 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atoms = []
         self._atom_colours = []
         self._current_frame = 0
-        self.reset_all_polydata()
-        self.update_axes()
-
-        self.update_renderer()
 
         # clear the atom properties table
         self._colour_manager.removeRows(0, self._colour_manager.rowCount())
-
-    def reset_all_polydata(self):
-        self._polydata = vtk.vtkPolyData()
-        self._uc_polydata = vtk.vtkPolyData()
-
-    def update_all_polydata_and_axes(self):
-        self.update_polydata()
-        self.update_uc_polydata()
-        self.update_axes()
-
-    def update_polydata(self):
-        """Triggers an update of the VTK actors, making them use the
-        latest parameters from the input widgets.
-        """
-        coords = self._reader.read_frame(self._current_frame)
-        self._last_coords = coords
-
-        if self._atoms_visible or self._bonds_visible:
-            atoms = vtk.vtkPoints()
-            atoms.SetData(numpy_support.numpy_to_vtk(coords))
-            self._polydata.SetPoints(atoms)
-
-        if self._bonds_visible:
-            # do not bond atoms to dummy atoms
-            rs = coords[self.not_du]
-            bonds, bonds_exist = self.create_bond_cell_array(
-                rs, self.covs[self.not_du], self.not_du
-            )
-            if bonds_exist:
-                self._polydata.SetLines(bonds)
-                self._polydata_bonds_exist = True
-                return
-
-        self._polydata_bonds_exist = False
-
-    def create_bond_cell_array(
-        self,
-        rs: np.ndarray,
-        covs: np.typing.NDArray[float],
-        not_du: list[bool],
-        tolerance: float = 0.04,
-    ):
-        """Finds the pairs of atoms which should be connected by bonds,
-        based on their positions, covalent radii and tolerance of distances.
-        Dummy atoms can be excluded from forming bonds.
-
-        This does NOT consider periodic boundary conditions.
-
-        Parameters
-        ----------
-        rs : np.ndarray
-            an (N,3) array of atom coordinates
-        covs : Iterable[float]
-            an (N,) array of covalent radii
-        not_du : Iterable[bool]
-            an (N,) list of boolean flags. A dummy atom is marked with False
-        tolerance : float, optional
-            bond is formed if |pos_1 - pos_2| < radius_1 + radius_2 + tolerance.
-            By default 0.04 nm
-
-        Returns
-        -------
-        vtk.vtkCellArray, bool
-            a VTK array of pairs of atom indices, and a flag True if some bonds were found
-        """
-        # determine and set bonds without PBC applied
-        bonds = vtk.vtkCellArray()
-
-        dist, js, ks, _ = distance_calculation(rs, 2 * np.max(covs) + tolerance)
-        sum_radii = (covs[js] + covs[ks] + tolerance) ** 2
-        js = js[(dist > 0) & (dist < sum_radii)]
-        ks = ks[(dist > 0) & (dist < sum_radii)]
-        ls = not_du[js]
-        ms = not_du[ks]
-
-        n_points = len(ls)
-        idxs = np.zeros((len(ls), 3), dtype=np.int64)
-        idxs[:, 0] = 2
-        idxs[:, 1] = ls
-        idxs[:, 2] = ms
-        bonds.SetCells(n_points, numpy_support.numpy_to_vtkIdTypeArray(idxs.flatten()))
-
-        return bonds, len(ls) > 0
-
-    def update_uc_polydata(self):
-        """Updates the unit cell actor using the unit cell parameters
-        from the current trajectory frame.
-        """
-        uc = self._reader.read_pbc(self._current_frame)
-        if self._cell_visible and uc is not None:
-            # update the unit cell
-            a = uc.a_vector
-            b = uc.b_vector
-            c = uc.c_vector
-            uc_points = vtk.vtkPoints()
-            uc_points.SetNumberOfPoints(8)
-            for i, v in enumerate([[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c]):
-                x, y, z = v
-                uc_points.SetPoint(i, x, y, z)
-            self._uc_polydata.SetPoints(uc_points)
-
-            uc_lines = vtk.vtkCellArray()
-            for i, j in [
-                (0, 1),
-                (0, 2),
-                (0, 3),
-                (1, 4),
-                (1, 5),
-                (4, 7),
-                (2, 4),
-                (2, 6),
-                (5, 7),
-                (3, 5),
-                (3, 6),
-                (6, 7),
-            ]:
-                line = vtk.vtkLine()
-                line.GetPointIds().SetId(0, i)
-                line.GetPointIds().SetId(1, j)
-                uc_lines.InsertNextCell(line)
-            self._uc_polydata.SetLines(uc_lines)
-
-    def get_atom_index(self, pid):
-        """Return the atom index from the vtk data point index.
-
-        Args:
-            pid (int): the data point index
-        """
-
-        _, _, idx = (
-            self.glyph.GetOutput().GetPointData().GetArray("scalars").GetTuple3(pid)
-        )
-
-        return int(idx)
-
-    def get_render_window(self):
-        """Returns the render window."""
-        return self._iren.GetRenderWindow()
-
-    @property
-    def iren(self):
-        return self._iren
 
     def on_change_atomic_trace_opacity(self, surface_index: int, opacity: float):
         """This method should allow changing the opacity of an already existing
@@ -1032,7 +864,7 @@ class MolecularViewer(QtWidgets.QWidget):
             return
 
         self._surfaces[surface_index].GetProperty().SetOpacity(opacity)
-        self._iren.Render()
+        self.update_renderer()
 
     def on_change_atomic_trace_isocontour_level(self, surface_index: int, level: float):
         """This method should allow changing the isocontour level for an already existing
@@ -1051,7 +883,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._isocontours[surface_index].SetValue(0, level)
         self._isocontours[surface_index].Update()
-        self._iren.Render()
+        self.update_renderer()
 
     def on_change_atomic_trace_rendering_type(
         self, surface_index: int, rendering_type: str
@@ -1082,7 +914,7 @@ class MolecularViewer(QtWidgets.QWidget):
         else:
             return
 
-        self._iren.Render()
+        self.update_renderer()
 
     def on_clear_atomic_trace(self):
         """Event handler called when the user select the 'Atomic trace -> Clear' main menu item"""
@@ -1094,7 +926,7 @@ class MolecularViewer(QtWidgets.QWidget):
             surface.VisibilityOff()
             surface.ReleaseGraphicsResources(self._iren.GetRenderWindow())
             self._renderer.RemoveActor(surface)
-        self._iren.Render()
+        self.update_renderer()
 
         self._surfaces = []
         self.changed_trace.emit()
@@ -1124,10 +956,6 @@ class MolecularViewer(QtWidgets.QWidget):
         """
         self._property_dialog = viewer_controls.create_property_viewer(self)
 
-    @property
-    def renderer(self):
-        return self._renderer
-
     @Slot(int)
     def set_coordinates(self, frame: int):
         """Changes the atom positions in the 3D view to those from
@@ -1139,12 +967,15 @@ class MolecularViewer(QtWidgets.QWidget):
             index of the trajectory frame
         """
         if self._reader is None:
-            return False
+            return
 
         self._current_frame = frame % self._reader.n_frames
+        self._current_coords = self._reader.read_frame(self._current_frame)
 
         # update the atoms
-        self.update_all_polydata_and_axes()
+        self.update_atm_polydata()
+        self.update_uc_polydata()
+        self.create_axes()
 
         # Update the view.
         self.update_renderer()
@@ -1159,14 +990,6 @@ class MolecularViewer(QtWidgets.QWidget):
         reader : IReader
             typically an instance of HDF5Wrapper from MolecularViewer
         """
-
-        if (self._reader is not None) and (reader.filename == self._reader.filename):
-            return
-
-        self.reset_camera = True
-        self.clear_trajectory()
-        self.clear_atom_labels()
-
         self._reader = reader
 
         self._element_database = self._reader._trajectory
@@ -1212,14 +1035,34 @@ class MolecularViewer(QtWidgets.QWidget):
             ]
         )
 
+        self._current_coords = self._reader.read_frame(self._current_frame)
+
+        self._atm_polydata.Initialize()
+        self._uc_polydata.Initialize()
+
         scalars = ndarray_to_vtkarray(
             self._atom_colours, self._atom_scales, self._n_atoms
         )
+        self._atm_polydata.GetPointData().SetScalars(scalars)
+        radii_vtk = numpy_support.numpy_to_vtk(self._atom_scales)
+        radii_vtk.SetName("radii")
+        colours_vtk = numpy_support.numpy_to_vtk(self._atom_colours)
+        colours_vtk.SetName("colours")
+        self._atm_polydata.GetPointData().AddArray(radii_vtk)
+        self._atm_polydata.GetPointData().AddArray(colours_vtk)
 
-        self.reset_all_polydata()
-        self._polydata.GetPointData().SetScalars(scalars)
+        self.update_atm_polydata()
+        self.update_uc_polydata()
 
-        self.create_atom_label_actors()
+        self.create_unit_cell()
+        self.create_atom_labels()
+        self.create_atoms()
+        self.create_bonds()
+        self.create_axes()
+
+        self._renderer.ResetCamera()
+        self._camera.SetWindowCenter(0.0, 0.0)
+        self.update_renderer()
 
         self._colour_manager.onNewValues()
         self.new_max_frames.emit(self._n_frames - 1)
@@ -1230,239 +1073,19 @@ class MolecularViewer(QtWidgets.QWidget):
     def take_atom_properties(self, data):
         colours, radii, numbers = data
         scalars = ndarray_to_vtkarray(colours, radii, numbers)
-        self._polydata = vtk.vtkPolyData()
-        self._polydata.GetPointData().SetScalars(scalars)
-        self.update_all_polydata_and_axes()
+        self._atm_polydata.GetPointData().SetScalars(scalars)
+
+        radii_vtk = numpy_support.numpy_to_vtk(radii)
+        radii_vtk.SetName("radii")
+        colours_vtk = numpy_support.numpy_to_vtk(colours)
+        colours_vtk.SetName("colours")
+        self._atm_polydata.GetPointData().AddArray(radii_vtk)
+        self._atm_polydata.GetPointData().AddArray(colours_vtk)
+
+        self.create_atoms()
+        self.create_bonds()
         self.update_renderer()
 
     def update_renderer(self):
-        """
-        Update the renderer
-        """
-        # deleting old frame
-        self.clear_trajectory(clear_isosurfaces=False)
-
-        # creating new polydata
-        self._actors = vtk.vtkAssembly()
-        for actor in self.create_all_actors():
-            self._actors.AddPart(actor)
-
-        # adding polydata to renderer
-        self._renderer.AddActor(self._actors)
-
-        # update atom label positions
-        self.update_atom_label_actors()
-
-        # rendering
-        if self.reset_camera:
-            self._renderer.ResetCamera()
-            self._camera.SetWindowCenter(0.0, 0.0)
-            self.reset_camera = False
-
         self._iren.GetRenderWindow().Render()
         self._iren.Render()
-
-
-class MolecularViewerExtended(MolecularViewer):
-    """MolecularViewer which emits atom index when clicked."""
-
-    clicked_atom_index = Signal(int)
-
-    def __init__(self):
-        super().__init__()
-        self._iren.AddObserver("LeftButtonPressEvent", self.handle_click_event)
-
-    def handle_click_event(self, obj, event=None):
-        """Event handler when an atom is mouse-picked with the left mouse button"""
-
-        if not self._reader:
-            return
-
-        if self.atom_actor is None:
-            return
-
-        if self._last_coords is None:
-            return
-
-        picker = vtk.vtkCellPicker()
-
-        picker.AddPickList(self.atom_actor)
-        picker.PickFromListOn()
-
-        pos = obj.GetEventPosition()
-        picker.Pick(pos[0], pos[1], 0, self._renderer)
-
-        picked_actor = picker.GetActor()
-        if picked_actor is None:
-            return
-
-        picked_pos = np.array(picker.GetPickPosition())
-        _, picked_index = KDTree(self._last_coords).query(picked_pos)
-
-        if picked_index < 0 or picked_index >= self._n_atoms:
-            return
-
-        self.clicked_atom_index.emit(picked_index)
-        LOG.debug(f"Click event picked up atom index {picked_index}")
-
-
-class MolecularViewerWithPicking(MolecularViewer):
-    """This class implements a molecular viewer with picking."""
-
-    clicked_atom_index = Signal(int)
-    picked_atoms_changed = Signal(object)
-
-    def __init__(self):
-        super().__init__()
-        # we set dummy size to something non-zero since we need to be
-        # able to see it for picking purposes
-        self.dummy_size = 0.1
-        self._picking_domain = None
-        self._picked_polydata = None
-        self._picked_polydata_bonds_exist = False
-        self._polydata_opacity = 0.15
-        self.picked_atoms = set()
-        self.build_events()
-
-    def build_events(self):
-        """Build the events."""
-        self._iren.AddObserver("LeftButtonPressEvent", self.on_pick)
-
-    def on_pick(self, obj, event=None):
-        """Event handler when an atom is mouse-picked with the left mouse button"""
-
-        if not self._reader:
-            return
-
-        if self._picking_domain is None:
-            return
-
-        picker = vtk.vtkCellPicker()
-
-        picker.AddPickList(self._picking_domain)
-        picker.PickFromListOn()
-
-        pos = obj.GetEventPosition()
-        picker.Pick(pos[0], pos[1], 0, self._renderer)
-
-        picked_actor = picker.GetActor()
-        if picked_actor is None:
-            return
-
-        picked_pos = np.array(picker.GetPickPosition())
-        coords = self._reader.read_frame(self._current_frame)
-        _, idx = KDTree(coords).query(picked_pos)
-
-        if idx < 0 or idx >= self._n_atoms:
-            return
-
-        self.clicked_atom_index.emit(idx)
-        self.pick_atom(idx)
-        self.picked_atoms_changed.emit(self.picked_atoms)
-
-    def pick_atom(self, picked_atom):
-        if picked_atom in self.picked_atoms:
-            self.picked_atoms.remove(picked_atom)
-        else:
-            self.picked_atoms.add(picked_atom)
-        self.update_picked_polydata()
-        self.update_renderer()
-
-    def change_picked(self, picked: set[int]):
-        self.picked_atoms = picked
-        self.update_picked_polydata()
-        self.update_renderer()
-
-    def update_picked_polydata(self):
-        atoms = vtk.vtkPoints()
-
-        if len(self.picked_atoms) == 0:
-            self._picked_polydata.SetPoints(atoms)
-            return
-
-        picked = np.array(sorted(self.picked_atoms))
-        coords = self._reader.read_frame(self._current_frame)
-        atoms.SetData(numpy_support.numpy_to_vtk(coords[picked]))
-        self._picked_polydata.SetPoints(atoms)
-
-        scalars = ndarray_to_vtkarray(
-            self._colour_manager.colours[picked],
-            self._colour_manager.radii[picked],
-            np.arange(len(self.picked_atoms)),
-        )
-        self._picked_polydata.GetPointData().SetScalars(scalars)
-
-        not_du = np.arange(len(self.picked_atoms))[self.du_log[picked]]
-        if self._bonds_visible and len(not_du) >= 1:
-            # do not bond atoms to dummy atoms
-            rs = coords[picked][not_du]
-            covs = self.covs[picked][not_du]
-
-            bonds, bonds_exist = self.create_bond_cell_array(rs, covs, not_du)
-            if bonds_exist:
-                self._picked_polydata.SetLines(bonds)
-                self._picked_polydata_bonds_exist = True
-                return
-
-        self._picked_polydata_bonds_exist = False
-
-    def reset_all_polydata(self):
-        super().reset_all_polydata()
-        self._picked_polydata = vtk.vtkPolyData()
-
-    def update_all_polydata_and_axes(self):
-        super().update_all_polydata_and_axes()
-        self.update_picked_polydata()
-
-    def create_all_actors(self):
-        actors = []
-        if self._polydata is None or self._picked_polydata is None:
-            return actors
-
-        line_actor, ball_actor = self.create_traj_actors(
-            self._polydata,
-            line_opacity=self._polydata_opacity,
-            ball_opacity=self._polydata_opacity,
-        )
-        picked_line_actor, picked_ball_actor = self.create_traj_actors(
-            self._picked_polydata
-        )
-        if self._cell_visible:
-            uc_actor = self.create_uc_actor()
-            actors.append(uc_actor)
-        if self._bonds_visible and self._polydata_bonds_exist:
-            actors.append(line_actor)
-        if self._bonds_visible and self._picked_polydata_bonds_exist:
-            actors.append(picked_line_actor)
-        if self._atoms_visible:
-            self._picking_domain = ball_actor
-            actors.append(ball_actor)
-            actors.append(picked_ball_actor)
-        else:
-            self._picking_domain = None
-        return actors
-
-    @Slot(object)
-    def take_atom_properties(self, data):
-        colours, radii, numbers = data
-        scalars = ndarray_to_vtkarray(colours, radii, numbers)
-        self._polydata = vtk.vtkPolyData()
-        self._polydata.GetPointData().SetScalars(scalars)
-
-        picked_colours = []
-        picked_radii = []
-        picked_numbers = []
-        for i in sorted(self.picked_atoms):
-            picked_colours.append(colours[i])
-            picked_radii.append(radii[i])
-            picked_numbers.append(numbers[i])
-
-        scalars = ndarray_to_vtkarray(
-            np.array(picked_colours),
-            np.array(picked_radii),
-            np.arange(len(self.picked_atoms)),
-        )
-        self._picked_polydata = vtk.vtkPolyData()
-        self._picked_polydata.GetPointData().SetScalars(scalars)
-
-        self.set_coordinates(self._current_frame)
