@@ -120,6 +120,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._axes_camera = vtk.vtkCamera()
         self._axes_renderer.SetActiveCamera(self._axes_camera)
         self._axes_camera.SetFocalPoint(0, 0, 0)
+        self._axes_camera.SetPosition(0, 0, 8)
 
         def update_axes_orientation(caller, event):
             """The axes camera needs to rotate with the main camera."""
