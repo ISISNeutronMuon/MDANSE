@@ -181,7 +181,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.set_picked_polydata_scalars(data)
 
     def set_picked_polydata_scalars(self, data):
-        colours, radii, numbers = data
+        colours, radii, _ = data
 
         picked = np.array(sorted(self.picked_atoms))
         if len(picked) == 0:

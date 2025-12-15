@@ -148,9 +148,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._iren.Initialize()
 
         self._atoms = []
-
-        self._atm_polydata = None
-
         self._surfaces = []
         self._isocontours = []
 
