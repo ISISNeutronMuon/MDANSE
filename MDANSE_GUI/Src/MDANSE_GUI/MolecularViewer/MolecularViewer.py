@@ -485,7 +485,7 @@ class MolecularViewer(QtWidgets.QWidget):
         sphere.SetPhiResolution(self._resolution)
 
         glyph_mapper = vtk.vtkGlyph3DMapper()
-        glyph_mapper.SetInputData(self._atm_polydata)
+        glyph_mapper.SetInputData(polydata)
         glyph_mapper.SetSourceConnection(sphere.GetOutputPort())
 
         temp_scale = float(1.0 * self._scale_factor)
@@ -499,7 +499,7 @@ class MolecularViewer(QtWidgets.QWidget):
         glyph_mapper.ColorByArrayComponent("colours", 1)
         glyph_mapper.SetLookupTable(self._colour_manager._lut)
         glyph_mapper.SetScalarRange(
-            self._atm_polydata.GetPointData().GetArray("colours").GetRange()
+            polydata.GetPointData().GetArray("colours").GetRange()
         )
 
         ball_actor = vtk.vtkLODActor()
@@ -661,6 +661,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._bonds_visible = flags[1]
         self._cell_visible = flags[2]
         self.create_unit_cell()
+        self.update_atm_polydata()
         self.create_atoms()
         self.create_bonds()
         self.update_renderer()
@@ -1008,6 +1009,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atom_colours = self._colour_manager.reinitialise_from_database(
             self._atoms, self._element_database, self.dummy_size
         )
+        self._colour_manager.onNewValues()
         # this returns a list of indices, mapping colours to atoms
 
         self._atom_scales = np.array(
@@ -1040,17 +1042,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._atm_polydata.Initialize()
         self._uc_polydata.Initialize()
-
-        scalars = ndarray_to_vtkarray(
-            self._atom_colours, self._atom_scales, self._n_atoms
+        self.set_atm_polydata_scalars(
+            (self._atom_colours, self._atom_scales, self._n_atoms)
         )
-        self._atm_polydata.GetPointData().SetScalars(scalars)
-        radii_vtk = numpy_support.numpy_to_vtk(self._atom_scales)
-        radii_vtk.SetName("radii")
-        colours_vtk = numpy_support.numpy_to_vtk(self._atom_colours)
-        colours_vtk.SetName("colours")
-        self._atm_polydata.GetPointData().AddArray(radii_vtk)
-        self._atm_polydata.GetPointData().AddArray(colours_vtk)
 
         self.update_atm_polydata()
         self.update_uc_polydata()
@@ -1065,13 +1059,18 @@ class MolecularViewer(QtWidgets.QWidget):
         self._camera.SetWindowCenter(0.0, 0.0)
         self.update_renderer()
 
-        self._colour_manager.onNewValues()
         self.new_max_frames.emit(self._n_frames - 1)
         self._trace_dialog.update_limits()
         self._property_dialog.extract_props(self._reader._trajectory)
 
     @Slot(object)
     def take_atom_properties(self, data):
+        self.set_atm_polydata_scalars(data)
+        self.create_atoms()
+        self.create_bonds()
+        self.update_renderer()
+
+    def set_atm_polydata_scalars(self, data):
         colours, radii, numbers = data
         scalars = ndarray_to_vtkarray(colours, radii, numbers)
         self._atm_polydata.GetPointData().SetScalars(scalars)
@@ -1082,10 +1081,6 @@ class MolecularViewer(QtWidgets.QWidget):
         colours_vtk.SetName("colours")
         self._atm_polydata.GetPointData().AddArray(radii_vtk)
         self._atm_polydata.GetPointData().AddArray(colours_vtk)
-
-        self.create_atoms()
-        self.create_bonds()
-        self.update_renderer()
 
     def update_renderer(self):
         self._iren.GetRenderWindow().Render()
