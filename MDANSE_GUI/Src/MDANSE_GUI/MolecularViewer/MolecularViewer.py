@@ -1006,18 +1006,12 @@ class MolecularViewer(QtWidgets.QWidget):
         self._resolution = min(self._resolution, 10)
         self._resolution = max(self._resolution, 4)
 
-        self._atom_colours = self._colour_manager.reinitialise_from_database(
+        self._colour_manager.reinitialise_from_database(
             self._atoms, self._element_database, self.dummy_size
         )
-        self._colour_manager.onNewValues()
+        self._colour_manager.rebuild_colours()
         # this returns a list of indices, mapping colours to atoms
 
-        self._atom_scales = np.array(
-            [
-                self._element_database.get_atom_property(at, "vdw_radius")
-                for at in self._atoms
-            ]
-        ).astype(np.float32)
         self.du_log = np.array(
             [
                 self._element_database.get_atom_property(at, "dummy") == 0
@@ -1043,7 +1037,11 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atm_polydata.Initialize()
         self._uc_polydata.Initialize()
         self.set_atm_polydata_scalars(
-            (self._atom_colours, self._atom_scales, self._n_atoms)
+            (
+                self._colour_manager.colours,
+                self._colour_manager.radii,
+                np.arange(self._colour_manager._total_length),
+            )
         )
 
         self.update_atm_polydata()

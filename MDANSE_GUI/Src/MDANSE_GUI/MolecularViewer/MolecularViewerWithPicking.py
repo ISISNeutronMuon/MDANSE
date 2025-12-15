@@ -110,9 +110,13 @@ class MolecularViewerWithPicking(MolecularViewer):
         atoms.SetData(numpy_support.numpy_to_vtk(coords[picked]))
         self._picked_polydata.SetPoints(atoms)
 
-        self.set_atm_polydata_scalars((
-            self._colour_manager.colours[picked], self._colour_manager.radii[picked], np.arange(len(self.picked_atoms))
-        ))
+        self.set_atm_polydata_scalars(
+            (
+                self._colour_manager.colours[picked],
+                self._colour_manager.radii[picked],
+                np.arange(len(self.picked_atoms)),
+            )
+        )
 
         not_du = np.arange(len(self.picked_atoms))[self.du_log[picked]]
         if self._bonds_visible and len(not_du) >= 1:

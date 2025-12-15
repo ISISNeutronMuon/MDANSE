@@ -201,14 +201,9 @@ class AtomProperties(QStandardItemModel):
             self.appendRow(item_row)
             self._groups.append(atom_entry)
         self._total_length = len(all_atoms)
-        return colour_index_list
 
-    @Slot()
-    def onNewValues(self):
-        self.rebuild_colours()
         colours = np.empty(self._total_length, dtype=int)
         radii = np.empty(self._total_length, dtype=float)
-        numbers = np.arange(self._total_length)
         for entry in self._groups:
             colour = entry.colour()
             red, green, blue = colour.red(), colour.green(), colour.blue()
@@ -219,4 +214,10 @@ class AtomProperties(QStandardItemModel):
             colours[indices] = vtk_colour
         self.radii = radii
         self.colours = colours
-        self.new_atom_properties.emit((colours, radii, numbers))
+
+    @Slot()
+    def onNewValues(self):
+        self.rebuild_colours()
+        self.new_atom_properties.emit(
+            (self.colours, self.radii, np.arange(self._total_length))
+        )
