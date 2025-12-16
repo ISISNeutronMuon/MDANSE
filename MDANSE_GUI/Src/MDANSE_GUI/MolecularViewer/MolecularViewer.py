@@ -958,6 +958,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_atm_polydata()
         self.update_uc_polydata()
         self.create_axes()
+        self.create_atom_labels()
 
         # Update the view.
         self.update_renderer()
