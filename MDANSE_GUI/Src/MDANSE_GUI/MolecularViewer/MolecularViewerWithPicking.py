@@ -48,7 +48,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         super().clear_atoms()
         self.clear_picked_atoms()
 
-    def create_atoms(self, atm_opacity: float = 0.15, picked_opacity: float = 1.0):
+    def create_atoms(self, atm_opacity: float = 0.20, picked_opacity: float = 1.0):
         super().create_atoms(atm_opacity)
         self.create_picked_atoms()
 
@@ -56,7 +56,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         super().clear_bonds()
         self.clear_picked_bonds()
 
-    def create_bonds(self, bond_opacity: float = 0.15, picked_opacity: float = 1.0):
+    def create_bonds(self, bond_opacity: float = 0.20, picked_opacity: float = 1.0):
         super().create_bonds(bond_opacity)
         self.create_picked_bonds()
 
@@ -132,29 +132,34 @@ class MolecularViewerWithPicking(MolecularViewer):
     def on_pick(self, obj, event=None):
         """Event handler when an atom is mouse-picked with the left mouse button"""
 
-        if not self._reader or self.atom_actor is None:
+        if not self._reader or self.atom_actor is None or self._current_coords is None:
             return
 
-        picker = vtk.vtkCellPicker()
+        coords = self._current_coords
+        scaled_radii = self._colour_manager.radii * self._scale_factor**2
+        idxs = np.arange(len(scaled_radii))
 
-        picker.AddPickList(self.atom_actor)
-        picker.PickFromListOn()
+        x, y = obj.GetEventPosition()
 
-        pos = obj.GetEventPosition()
-        picker.Pick(pos[0], pos[1], 0, self._renderer)
+        self._renderer.SetDisplayPoint(x, y, 0.0)
+        self._renderer.DisplayToWorld()
+        x_1 = np.array(self._renderer.GetWorldPoint()[:3])
 
-        picked_actor = picker.GetActor()
-        if picked_actor is None:
+        self._renderer.SetDisplayPoint(x, y, 1.0)
+        self._renderer.DisplayToWorld()
+        x_2 = np.array(self._renderer.GetWorldPoint()[:3])
+
+        x_21 = x_2 - x_1
+        dist_to_line = np.linalg.norm(np.cross(coords - x_1, coords - x_2), axis=1) / np.linalg.norm(x_21)
+        selected = dist_to_line < scaled_radii
+        dist_x_21 = np.dot(coords - x_1, x_21)
+
+        if not np.any(selected):
             return
 
-        picked_pos = np.array(picker.GetPickPosition())
-        _, idx = KDTree(self._current_coords).query(picked_pos)
-
-        if idx < 0 or idx >= self._n_atoms:
-            return
-
-        self.clicked_atom_index.emit(idx)
-        self.pick_atom(idx)
+        picked_index = idxs[selected][np.argsort(dist_x_21[selected])][0]
+        self.clicked_atom_index.emit(picked_index)
+        self.pick_atom(picked_index)
         self.picked_atoms_changed.emit(self.picked_atoms)
 
     def pick_atom(self, picked_atom):

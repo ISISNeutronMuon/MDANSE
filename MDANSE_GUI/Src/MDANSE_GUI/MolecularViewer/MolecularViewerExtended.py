@@ -60,24 +60,29 @@ class MolecularViewerExtended(MolecularViewer):
         if not self._reader or self.atom_actor is None or self._current_coords is None:
             return
 
-        picker = vtk.vtkCellPicker()
+        coords = self._current_coords
+        scaled_radii = self._colour_manager.radii * self._scale_factor**2
+        idxs = np.arange(len(scaled_radii))
 
-        picker.AddPickList(self.atom_actor)
-        picker.PickFromListOn()
+        x, y = obj.GetEventPosition()
 
-        pos = obj.GetEventPosition()
-        picker.Pick(pos[0], pos[1], 0, self._renderer)
+        self._renderer.SetDisplayPoint(x, y, 0.0)
+        self._renderer.DisplayToWorld()
+        x_1 = np.array(self._renderer.GetWorldPoint()[:3])
 
-        picked_actor = picker.GetActor()
-        if picked_actor is None:
+        self._renderer.SetDisplayPoint(x, y, 1.0)
+        self._renderer.DisplayToWorld()
+        x_2 = np.array(self._renderer.GetWorldPoint()[:3])
+
+        x_21 = x_2 - x_1
+        dist_to_line = np.linalg.norm(np.cross(coords - x_1, coords - x_2), axis=1) / np.linalg.norm(x_21)
+        selected = dist_to_line < scaled_radii
+        dist_x_21 = np.dot(coords - x_1, x_21)
+
+        if not np.any(selected):
             return
 
-        picked_pos = np.array(picker.GetPickPosition())
-        _, picked_index = KDTree(self._current_coords).query(picked_pos)
-
-        if picked_index < 0 or picked_index >= self._n_atoms:
-            return
-
+        picked_index = idxs[selected][np.argsort(dist_x_21[selected])][0]
         self.clicked_atom_index.emit(picked_index)
         LOG.debug(f"Click event picked up atom index {picked_index}")
 
