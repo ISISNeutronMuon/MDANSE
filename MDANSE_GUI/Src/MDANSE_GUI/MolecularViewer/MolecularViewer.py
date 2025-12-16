@@ -15,8 +15,8 @@
 #
 from __future__ import annotations
 
-from collections import ChainMap
 import copy
+from collections import ChainMap
 from typing import Any
 
 import more_itertools
@@ -812,7 +812,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.update_renderer()
 
-        LOG.info(f"Finished calculating the trace of atom %d", index)
+        LOG.info("Finished calculating the trace of atom %d", index)
         self.changed_trace.emit()
 
     def clear_panel(self):

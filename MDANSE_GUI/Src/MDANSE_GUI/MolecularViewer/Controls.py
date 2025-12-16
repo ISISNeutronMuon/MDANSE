@@ -326,7 +326,9 @@ class ViewerControls(QWidget):
         base.setLayout(layout)
         self._side_base.addTab(base, "Property viewer")
         # colour changes
-        self._property_widget = PropertyWidget(self._viewer, self._side_base.indexOf(base))
+        self._property_widget = PropertyWidget(
+            self._viewer, self._side_base.indexOf(base)
+        )
         self._side_base.currentChanged.connect(self._property_widget._active)
         # self._property_widget.initialise_values(viewer)
         layout.addWidget(self._property_widget)
