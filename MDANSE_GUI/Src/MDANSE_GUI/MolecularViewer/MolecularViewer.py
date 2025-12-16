@@ -276,7 +276,6 @@ class MolecularViewer(QtWidgets.QWidget):
         atom_label_type.
         """
         self.clear_atom_labels()
-        self.atom_label_actors = []
 
         if self._reader is None:
             return
@@ -310,7 +309,6 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._current_coords is None or len(labels) != self._reader._n_atoms:
             return
 
-        self.atom_label_actors = []
         for label, coord in zip(labels, self._current_coords, strict=True):
             text = vtk.vtkVectorText()
             text.SetText(f"{label}")
