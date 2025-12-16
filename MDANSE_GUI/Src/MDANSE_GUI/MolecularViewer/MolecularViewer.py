@@ -29,6 +29,9 @@ from scipy.interpolate import CubicSpline
 from scipy.spatial import cKDTree as KDTree
 from scipy.spatial.transform import Rotation as R
 from vtk.util import numpy_support
+from vtkmodules.vtkCommonCore import vtkStringArray
+from vtkmodules.vtkRenderingLabel import vtkLabeledDataMapper
+from vtkmodules.vtkRenderingCore import vtkActor2D
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from MDANSE.MLogging import LOG
@@ -157,7 +160,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._current_coords = None
 
         self.axes_actors = []
-        self.atom_label_actors = []
+        self.atom_label_actor = None
         self.uc_actor = None
         self.atom_actor = None
         self.bond_actor = None
@@ -263,13 +266,11 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def clear_atom_labels(self):
         """Clears the atoms labels."""
-        if not self.atom_label_actors:
+        if not self.atom_label_actor:
             return
 
-        for actor in self.atom_label_actors:
-            self._label_renderer.RemoveActor(actor)
-
-        self.atom_label_actors = []
+        self._label_renderer.RemoveActor(self.atom_label_actor)
+        self.atom_label_actor = None
 
     def create_atom_labels(self):
         """Creates atom label actors, setting the text to the chosen
@@ -281,7 +282,7 @@ class MolecularViewer(QtWidgets.QWidget):
             return
 
         if self.atom_label_type == "index":
-            labels = list(range(self._reader._n_atoms))
+            labels = list(range(self._n_atoms))
         elif self.atom_label_type == "label":
             label_dict = self._reader._trajectory.chemical_system._labels
             if not label_dict:
@@ -306,24 +307,27 @@ class MolecularViewer(QtWidgets.QWidget):
         else:
             return
 
-        if self._current_coords is None or len(labels) != self._reader._n_atoms:
+        if len(labels) != self._n_atoms:
             return
 
-        for label, coord in zip(labels, self._current_coords, strict=True):
-            text = vtk.vtkVectorText()
-            text.SetText(f"{label}")
+        labels_vtk = vtkStringArray()
+        labels_vtk.SetName("labels")
+        labels_vtk.SetNumberOfValues(self._n_atoms)
+        for i, label in enumerate(labels):
+            labels_vtk.SetValue(i, str(label))
+        self._atm_polydata.GetPointData().AddArray(labels_vtk)
 
-            mapper = vtk.vtkPolyDataMapper()
-            mapper.SetInputConnection(text.GetOutputPort())
+        label_mapper = vtkLabeledDataMapper()
+        label_mapper.SetInputData(self._atm_polydata)
+        label_mapper.SetLabelModeToLabelFieldData()
+        label_mapper.SetFieldDataName("labels")
+        text_prop = label_mapper.GetLabelTextProperty()
+        text_prop.SetFontSize(12)
 
-            follower = vtk.vtkFollower()
-            follower.SetMapper(mapper)
-            follower.SetScale(0.025)
-            follower.SetPosition(*coord)
-            follower.SetCamera(self._label_renderer.GetActiveCamera())
-
-            self.atom_label_actors.append(follower)
-            self._label_renderer.AddActor(follower)
+        actor = vtkActor2D()
+        actor.SetMapper(label_mapper)
+        self.atom_label_actor = actor
+        self._label_renderer.AddActor(actor)
 
     def update_atom_labels(self):
         """Updates the atom label follwer positions."""
@@ -958,7 +962,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_atm_polydata()
         self.update_uc_polydata()
         self.create_axes()
-        self.create_atom_labels()
 
         # Update the view.
         self.update_renderer()
