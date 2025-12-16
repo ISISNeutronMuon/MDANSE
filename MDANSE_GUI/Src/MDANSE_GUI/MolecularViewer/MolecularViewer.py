@@ -32,7 +32,6 @@ from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Connectivity import distance_calculation
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.MolecularViewer.AtomProperties import (
     AtomProperties,
     ndarray_to_vtkarray,
@@ -944,17 +943,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._trace_dialog.remove_atom_trace.connect(self.delete_isosurface_from_dialog)
         self.changed_trace.connect(self._trace_dialog.update_limits)
 
-    def create_property_viewer_dialog(self, viewer_controls):
-        """Creates and connects an additional panel of the GUI which contains
-        an instance of PropertyWidget.
-
-        Parameters
-        ----------
-        viewer_controls : ViewerControls
-            instance of the ViewerControls widget from View3D
-        """
-        self._property_dialog = viewer_controls.create_property_viewer(self)
-
     @Slot(int)
     def set_coordinates(self, frame: int):
         """Changes the atom positions in the 3D view to those from
@@ -1056,7 +1044,6 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.new_max_frames.emit(self._n_frames - 1)
         self._trace_dialog.update_limits()
-        self._property_dialog.extract_props(self._reader._trajectory)
 
     @Slot(object)
     def take_atom_properties(self, data):

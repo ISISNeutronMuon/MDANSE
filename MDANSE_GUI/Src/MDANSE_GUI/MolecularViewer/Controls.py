@@ -318,7 +318,7 @@ class ViewerControls(QWidget):
         layout.addWidget(self._trace_widget)
         return self._trace_widget
 
-    def create_property_viewer(self, viewer):
+    def create_property_viewer(self):
         """Adds widget for viewing trajectory properties."""
         base = QWidget(self)
         base.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
@@ -326,11 +326,10 @@ class ViewerControls(QWidget):
         base.setLayout(layout)
         self._side_base.addTab(base, "Property viewer")
         # colour changes
-        self._property_widget = PropertyWidget(viewer, self._side_base.indexOf(base))
+        self._property_widget = PropertyWidget(self._viewer, self._side_base.indexOf(base))
         self._side_base.currentChanged.connect(self._property_widget._active)
         # self._property_widget.initialise_values(viewer)
         layout.addWidget(self._property_widget)
-        return self._property_widget
 
     @Slot()
     def set_background_colour(self):

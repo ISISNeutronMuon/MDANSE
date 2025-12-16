@@ -36,8 +36,8 @@ class View3D(QWidget):
         viewer.setParent(controls)
         controls.setViewer(viewer)
         controls.createSidePanel()
+        controls.create_property_viewer()
         viewer.create_trace_dialog(controls)
-        viewer.create_property_viewer_dialog(controls)
         if hasattr(viewer, "clicked_atom_index"):
             viewer.clicked_atom_index.connect(controls._trace_widget.accept_atom_index)
         layout.addWidget(controls)
@@ -53,6 +53,7 @@ class View3D(QWidget):
         fullpath, incoming = data
         try:
             self._viewer._new_trajectory_object(fullpath, incoming)
+            self._controls._property_widget.extract_props(incoming)
         except AttributeError:
             self.error.emit(f"3D View could not visualise {fullpath}")
             self._viewer.clear_panel()
