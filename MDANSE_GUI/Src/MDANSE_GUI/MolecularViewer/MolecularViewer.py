@@ -29,10 +29,10 @@ from scipy.interpolate import CubicSpline
 from scipy.spatial import cKDTree as KDTree
 from scipy.spatial.transform import Rotation as R
 from vtk.util import numpy_support
-from vtkmodules.vtkCommonCore import vtkStringArray
-from vtkmodules.vtkRenderingLabel import vtkLabeledDataMapper
-from vtkmodules.vtkRenderingCore import vtkActor2D
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.vtkCommonCore import vtkStringArray
+from vtkmodules.vtkRenderingCore import vtkActor2D
+from vtkmodules.vtkRenderingLabel import vtkLabeledDataMapper
 
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Connectivity import distance_calculation
