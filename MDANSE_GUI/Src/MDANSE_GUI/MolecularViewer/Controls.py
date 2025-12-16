@@ -305,18 +305,26 @@ class ViewerControls(QWidget):
             self._atom_details.resizeColumnToContents(column_number)
         self._splitter.addWidget(absolute_base)
 
-    def createTracePanel(self, viewer):
-        """Adds widgets for finer control of the playback"""
+    def createTracePanel(self):
+        """Adds widgets for generate atom trace plots."""
         base = QWidget(self)
         base.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         layout = QVBoxLayout(base)
         base.setLayout(layout)
         self._side_base.addTab(base, "Atom trace")
         # colour changes
-        self._trace_widget = TraceWidget(viewer)
-        self._trace_widget.initialise_values(viewer)
+        self._trace_widget = TraceWidget(self._viewer)
+        self._trace_widget.initialise_values(self._viewer)
         layout.addWidget(self._trace_widget)
-        return self._trace_widget
+
+    def create_trace_dialog(self):
+        """Creates the atom trace panel and connects the trace panel to
+        the molecule viewer.
+        """
+        self.createTracePanel()
+        self._trace_widget.new_atom_trace.connect(self._viewer.create_atom_trace)
+        self._trace_widget.remove_atom_trace.connect(self._viewer.delete_atom_trace)
+        self._viewer.changed_trace.connect(self._trace_widget.update_limits)
 
     def create_property_viewer(self):
         """Adds widget for viewing trajectory properties."""

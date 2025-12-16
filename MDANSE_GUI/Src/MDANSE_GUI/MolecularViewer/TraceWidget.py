@@ -217,7 +217,9 @@ class TraceWidget(QWidget):
         if self._molviewer is None:
             return
         self._atom_spinbox.setMaximum(max(self._molviewer._n_atoms - 1, 0))
-        self._surface_spinbox.setMaximum(max(len(self._molviewer._surfaces) - 1, 0))
+        self._surface_spinbox.setMaximum(
+            max(len(self._molviewer.surface_actors) - 1, 0)
+        )
         self.enable_buttons()
 
     @Slot(str)
@@ -243,7 +245,7 @@ class TraceWidget(QWidget):
         """
         if self._molviewer is None:
             return
-        self.remove_trace_button.setEnabled(len(self._molviewer._surfaces) != 0)
+        self.remove_trace_button.setEnabled(len(self._molviewer.surface_actors) != 0)
         self.add_trace_button.setEnabled(self._molviewer._n_atoms > 0)
 
     def get_values(self) -> dict[str, Any]:

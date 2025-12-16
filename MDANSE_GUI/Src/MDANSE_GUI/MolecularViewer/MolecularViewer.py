@@ -100,12 +100,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self._iren.GetRenderWindow().AddRenderer(self._axes_renderer)
 
         self._iren.GetRenderWindow().SetPosition((0, 0))
-
         self._iren.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
-
         self._iren.Enable()
-
-        self._iren.GetRenderWindow()
 
         layout = QtWidgets.QStackedLayout(self)
         layout.addWidget(self._iren)
@@ -152,8 +148,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._iren.Initialize()
 
         self._atoms = []
-        self._surfaces = []
-        self._isocontours = []
 
         self._reader = None
 
@@ -165,6 +159,9 @@ class MolecularViewer(QtWidgets.QWidget):
         self.uc_actor = None
         self.atom_actor = None
         self.bond_actor = None
+        self.surface_actors = []
+
+        self.isocontours = []
 
         self._atm_polydata = vtk.vtkPolyData()
         self._uc_polydata = vtk.vtkPolyData()
@@ -331,7 +328,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._label_renderer.AddActor(actor)
 
     def update_atom_labels(self):
-        """Updates the atom label follwer positions."""
+        """Updates the atom label follower positions."""
         if (
             self._reader is None
             or self._current_coords is None
@@ -609,70 +606,19 @@ class MolecularViewer(QtWidgets.QWidget):
 
         return bonds, n_points > 0
 
-    def _new_trajectory_object(self, fname: str, trajectory: Trajectory):
-        """Creates and sets a new trajectory reader for the input trajectory.
-
-        Parameters
-        ----------
-        fname : str
-            trajectory file name
-        data : Trajectory
-            instance of the MDANSE input trajectory handler
-        """
-        reader = hdf5wrapper.HDF5Wrapper(fname, trajectory, trajectory.chemical_system)
-        if (self._reader is not None) and (reader.filename == self._reader.filename):
+    def clear_atom_trace(self):
+        """Event handler called when the user select the 'Atomic trace -> Clear' main menu item"""
+        if not self.surface_actors:
             return
-        self.set_reader(reader)
 
-    @Slot(float)
-    def _new_scaling(self, scale_factor: float):
-        """Update the scale factor by which all the atom radii are multiplied.
+        for surface in self.surface_actors:
+            self._renderer.RemoveActor(surface)
 
-        Scale factor 1.0 means that the covalent radii of atoms are used as
-        radii of the spheres in the 3D view. By default the atom size is scaled
-        down to allow the user to see atoms behind the first layer and the
-        bonds between atoms.
+        self.surface_actors = []
+        self.isocontours = []
+        self.changed_trace.emit()
 
-        Parameters
-        ----------
-        scale_factor : float
-            Sphere radii in 3D view will be multiplied by this factor
-        """
-        self._scale_factor = scale_factor
-        if self._reader is not None:
-            self.create_atoms()
-            self.update_renderer()
-
-    def _new_visibility(self, flags: list[bool]):
-        """Takes the new values of boolean flags which make
-        different actors in the 3D scene (in)visible.
-
-        Parameters
-        ----------
-        flags : List[bool]
-            Each actor will be visible if its flag is True.
-        """
-        self._atoms_visible = flags[0]
-        self._bonds_visible = flags[1]
-        self._cell_visible = flags[2]
-        self.create_unit_cell()
-        self.update_atm_polydata()
-        self.create_atoms()
-        self.create_bonds()
-        self.update_renderer()
-
-    def trace_from_dialog(self, params: dict[str, Any]):
-        """Passes the input parameter dictionary to the method
-        which draws an isosurface in the 3D view.
-
-        Parameters
-        ----------
-        params : dict[str, Any]
-            dictionary of input parameters from TraceWidget.py
-        """
-        self._draw_isosurface(params["atom_number"], params)
-
-    def delete_isosurface_from_dialog(self, trace_number: int):
+    def delete_atom_trace(self, trace_number: int):
         """Deletes from the 3D scene the isosurface with a specified
         index, if it exists.
 
@@ -682,24 +628,21 @@ class MolecularViewer(QtWidgets.QWidget):
             index of the isosurface
         """
         try:
-            surface = self._surfaces[trace_number]
+            surface = self.surface_actors[trace_number]
         except IndexError:
             return
-        surface.VisibilityOff()
-        surface.ReleaseGraphicsResources(self._iren.GetRenderWindow())
         self._renderer.RemoveActor(surface)
-        self._surfaces.pop(trace_number)
+        self.surface_actors.pop(trace_number)
+        self.isocontours.pop(trace_number)
         self.update_renderer()
         self.changed_trace.emit()
 
-    def _draw_isosurface(self, index: int, params: dict[str, Any] | None = None):
+    def create_atom_trace(self, params: dict[str, Any] | None = None):
         """Calculates the total volume used by an atom in the trajectory
         and draws an isosurface around it.
 
         Parameters
         ----------
-        index : int
-            index of the atom in the system
         params : Dict[str, Any], optional
             A dictionary of isosurface parameters. If None, defaults from
             TraceWidget.py will be used instead.
@@ -708,6 +651,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._reader is None:
             return
 
+        index = params["atom_number"]
         LOG.info(f"Computing isosurface of atom {index}")
         if params is None:
             params = copy.copy(TRACE_PARAMETERS)
@@ -810,18 +754,134 @@ class MolecularViewer(QtWidgets.QWidget):
         self._renderer.AddActor(new_surface)
 
         new_surface.SetPosition(*lower_limit)
-        self._surfaces.append(new_surface)
-        self._isocontours.append(new_isocontour)
+        self.surface_actors.append(new_surface)
+        self.isocontours.append(new_isocontour)
 
         self.update_renderer()
 
         LOG.info("Finished calculating the trace of atom %d", index)
         self.changed_trace.emit()
 
+    def change_atom_trace_opacity(self, surface_index: int, opacity: float):
+        """This method should allow changing the opacity of an already existing
+        isosurface. Currently not connected to any widgets.
+
+        Parameters
+        ----------
+        surface_index : int
+            index of the isosurface in self._surfaces
+        opacity : float
+            new opacity value for the isosurface
+        """
+
+        if surface_index >= len(self.surface_actors):
+            return
+
+        self.surface_actors[surface_index].GetProperty().SetOpacity(opacity)
+        self.update_renderer()
+
+    def change_atom_trace_isocontour_level(self, surface_index: int, level: float):
+        """This method should allow changing the isocontour level for an already existing
+        isosurface. Currently not connected to any widgets.
+
+        Parameters
+        ----------
+        surface_index : int
+            index of the isosurface in self._surfaces
+        level : float
+            new value of isocontour level
+        """
+
+        if surface_index >= len(self.surface_actors):
+            return
+
+        self.isocontours[surface_index].SetValue(0, level)
+        self.isocontours[surface_index].Update()
+        self.update_renderer()
+
+    def change_atom_trace_rendering_type(self, surface_index: int, rendering_type: str):
+        """Method for changing the rendering style of an existing isosurface.
+        Currently not connected to any widgets.
+
+        Parameters
+        ----------
+        surface_index : int
+            index of the isosurface in self._surfaces
+        rendering_type : str
+            one of the following: wireframe, surface, points
+        """
+
+        if surface_index >= len(self.surface_actors):
+            return
+
+        surface = self.surface_actors[surface_index]
+
+        if rendering_type == "wireframe":
+            surface.GetProperty().SetRepresentationToWireframe()
+        elif rendering_type == "surface":
+            surface.GetProperty().SetRepresentationToSurface()
+        elif rendering_type == "points":
+            surface.GetProperty().SetRepresentationToPoints()
+            surface.GetProperty().SetPointSize(3)
+        else:
+            return
+
+        self.update_renderer()
+
+    def _new_trajectory_object(self, fname: str, trajectory: Trajectory):
+        """Creates and sets a new trajectory reader for the input trajectory.
+
+        Parameters
+        ----------
+        fname : str
+            trajectory file name
+        data : Trajectory
+            instance of the MDANSE input trajectory handler
+        """
+        reader = hdf5wrapper.HDF5Wrapper(fname, trajectory, trajectory.chemical_system)
+        if (self._reader is not None) and (reader.filename == self._reader.filename):
+            return
+        self.set_reader(reader)
+
+    @Slot(float)
+    def _new_scaling(self, scale_factor: float):
+        """Update the scale factor by which all the atom radii are multiplied.
+
+        Scale factor 1.0 means that the covalent radii of atoms are used as
+        radii of the spheres in the 3D view. By default the atom size is scaled
+        down to allow the user to see atoms behind the first layer and the
+        bonds between atoms.
+
+        Parameters
+        ----------
+        scale_factor : float
+            Sphere radii in 3D view will be multiplied by this factor
+        """
+        self._scale_factor = scale_factor
+        if self._reader is not None:
+            self.create_atoms()
+            self.update_renderer()
+
+    def _new_visibility(self, flags: list[bool]):
+        """Takes the new values of boolean flags which make
+        different actors in the 3D scene (in)visible.
+
+        Parameters
+        ----------
+        flags : List[bool]
+            Each actor will be visible if its flag is True.
+        """
+        self._atoms_visible = flags[0]
+        self._bonds_visible = flags[1]
+        self._cell_visible = flags[2]
+        self.create_unit_cell()
+        self.update_atm_polydata()
+        self.create_atoms()
+        self.create_bonds()
+        self.update_renderer()
+
     def clear_panel(self):
         """Clears the Molecular Viewer panel"""
-        self.on_clear_atomic_trace()
-
         self._atm_polydata.Initialize()
         self._uc_polydata.Initialize()
 
@@ -829,6 +889,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.clear_atoms()
         self.clear_bonds()
         self.clear_unit_cell()
+        self.clear_atom_trace()
         self.create_axes()
 
         self.update_renderer()
@@ -846,103 +907,6 @@ class MolecularViewer(QtWidgets.QWidget):
         # clear the atom properties table
         self._colour_manager.removeRows(0, self._colour_manager.rowCount())
 
-    def on_change_atomic_trace_opacity(self, surface_index: int, opacity: float):
-        """This method should allow changing the opacity of an already existing
-        isosurface. Currently not connected to any widgets.
-
-        Parameters
-        ----------
-        surface_index : int
-            index of the isosurface in self._surfaces
-        opacity : float
-            new opacity value for the isosurface
-        """
-
-        if surface_index >= len(self._surfaces):
-            return
-
-        self._surfaces[surface_index].GetProperty().SetOpacity(opacity)
-        self.update_renderer()
-
-    def on_change_atomic_trace_isocontour_level(self, surface_index: int, level: float):
-        """This method should allow changing the isocontour level for an already existing
-        isosurface. Currently not connected to any widgets.
-
-        Parameters
-        ----------
-        surface_index : int
-            index of the isosurface in self._surfaces
-        level : float
-            new value of isocontour level
-        """
-
-        if surface_index >= len(self._surfaces):
-            return
-
-        self._isocontours[surface_index].SetValue(0, level)
-        self._isocontours[surface_index].Update()
-        self.update_renderer()
-
-    def on_change_atomic_trace_rendering_type(
-        self, surface_index: int, rendering_type: str
-    ):
-        """Method for changing the rendering style of an existing isosurface.
-        Currently not connected to any widgets.
-
-        Parameters
-        ----------
-        surface_index : int
-            index of the isosurface in self._surfaces
-        rendering_type : str
-            one of the following: wireframe, surface, points
-        """
-
-        if surface_index >= len(self._surfaces):
-            return
-
-        surface = self._surfaces[surface_index]
-
-        if rendering_type == "wireframe":
-            surface.GetProperty().SetRepresentationToWireframe()
-        elif rendering_type == "surface":
-            surface.GetProperty().SetRepresentationToSurface()
-        elif rendering_type == "points":
-            surface.GetProperty().SetRepresentationToPoints()
-            surface.GetProperty().SetPointSize(3)
-        else:
-            return
-
-        self.update_renderer()
-
-    def on_clear_atomic_trace(self):
-        """Event handler called when the user select the 'Atomic trace -> Clear' main menu item"""
-
-        if not self._surfaces:
-            return
-
-        for surface in self._surfaces:
-            surface.VisibilityOff()
-            surface.ReleaseGraphicsResources(self._iren.GetRenderWindow())
-            self._renderer.RemoveActor(surface)
-        self.update_renderer()
-
-        self._surfaces = []
-        self.changed_trace.emit()
-
-    def create_trace_dialog(self, viewer_controls):
-        """Creates and connects an additional panel of the GUI which contains
-        an instance of TraceWidget.
-
-        Parameters
-        ----------
-        viewer_controls : ViewerControls
-            instance of the ViewerControls widget from View3D
-        """
-        self._trace_dialog = viewer_controls.createTracePanel(self)
-        self._trace_dialog.new_atom_trace.connect(self.trace_from_dialog)
-        self._trace_dialog.remove_atom_trace.connect(self.delete_isosurface_from_dialog)
-        self.changed_trace.connect(self._trace_dialog.update_limits)
-
     @Slot(int)
     def set_coordinates(self, frame: int):
         """Changes the atom positions in the 3D view to those from
@@ -959,12 +923,11 @@ class MolecularViewer(QtWidgets.QWidget):
         self._current_frame = frame % self._reader.n_frames
         self._current_coords = self._reader.read_frame(self._current_frame)
 
-        # update the atoms
+        # update the atom positions, bonds, and axis
         self.update_atm_polydata()
         self.update_uc_polydata()
         self.create_axes()
 
-        # Update the view.
         self.update_renderer()
         self.frame_changed.emit()
 
@@ -995,7 +958,6 @@ class MolecularViewer(QtWidgets.QWidget):
             self._atoms, self._element_database, self.dummy_size
         )
         self._colour_manager.rebuild_colours()
-        # this returns a list of indices, mapping colours to atoms
 
         self.du_log = np.array(
             [
@@ -1016,11 +978,10 @@ class MolecularViewer(QtWidgets.QWidget):
                 for at in self._reader.atom_types
             ]
         )
-
         self._current_coords = self._reader.read_frame(self._current_frame)
 
-        self._atm_polydata.Initialize()
-        self._uc_polydata.Initialize()
+        self.clear_atom_trace()
+
         self.set_atm_polydata_scalars(
             (
                 self._colour_manager.colours,
@@ -1028,7 +989,6 @@ class MolecularViewer(QtWidgets.QWidget):
                 np.arange(self._colour_manager._total_length),
             )
         )
-
         self.update_atm_polydata()
         self.update_uc_polydata()
 
@@ -1042,7 +1002,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_renderer()
 
         self.new_max_frames.emit(self._n_frames - 1)
-        self._trace_dialog.update_limits()
+        self.changed_trace.emit()
 
     @Slot(object)
     def take_atom_properties(self, data):

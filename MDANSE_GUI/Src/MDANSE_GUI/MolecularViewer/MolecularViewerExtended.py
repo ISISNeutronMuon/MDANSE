@@ -20,7 +20,6 @@ from pathlib import Path
 import numpy as np
 import vtk
 from qtpy.QtCore import QTimer, Signal
-from scipy.spatial import cKDTree as KDTree
 from vtk.util import numpy_support
 
 from MDANSE.MLogging import LOG
