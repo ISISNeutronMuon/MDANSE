@@ -52,6 +52,7 @@ class MolecularViewerExtended(MolecularViewer):
     def set_reader(self, reader):
         self._animation_timer.stop()
         self.clear_placeholder()
+        self._camera.SetWindowCenter(0.0, 0.0)
         super().set_reader(reader)
 
     def handle_click_event(self, obj, event=None):

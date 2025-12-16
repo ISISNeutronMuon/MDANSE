@@ -1039,7 +1039,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self.create_axes()
 
         self._renderer.ResetCamera()
-        self._camera.SetWindowCenter(0.0, 0.0)
         self.update_renderer()
 
         self.new_max_frames.emit(self._n_frames - 1)
