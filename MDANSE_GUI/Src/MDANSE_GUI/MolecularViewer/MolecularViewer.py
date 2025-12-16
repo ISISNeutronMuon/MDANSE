@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+from collections import ChainMap
 import copy
 from typing import Any
 
@@ -309,7 +310,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._current_coords is None or len(labels) != self._reader._n_atoms:
             return
 
-        atom_label_actors = []
+        self.atom_label_actors = []
         for label, coord in zip(labels, self._current_coords, strict=True):
             text = vtk.vtkVectorText()
             text.SetText(f"{label}")
@@ -323,10 +324,8 @@ class MolecularViewer(QtWidgets.QWidget):
             follower.SetPosition(*coord)
             follower.SetCamera(self._label_renderer.GetActiveCamera())
 
-            atom_label_actors.append(follower)
+            self.atom_label_actors.append(follower)
             self._label_renderer.AddActor(follower)
-
-        self.atom_label_actors = atom_label_actors
 
     def update_atom_labels(self):
         """Updates the atom label follwer positions."""
@@ -395,8 +394,7 @@ class MolecularViewer(QtWidgets.QWidget):
             uc_points = vtk.vtkPoints()
             uc_points.SetNumberOfPoints(8)
             for i, v in enumerate([[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c]):
-                x, y, z = v
-                uc_points.SetPoint(i, x, y, z)
+                uc_points.SetPoint(i, *v)
             self._uc_polydata.SetPoints(uc_points)
 
             uc_lines = vtk.vtkCellArray()
@@ -473,10 +471,9 @@ class MolecularViewer(QtWidgets.QWidget):
             Two vtk.vtkLODActor instances, for atoms
 
         """
-        temp_radius = float(1.0 * self._scale_factor)
         sphere = vtk.vtkSphereSource()
         sphere.SetCenter(0, 0, 0)
-        sphere.SetRadius(temp_radius)
+        sphere.SetRadius(self._scale_factor)
         sphere.SetThetaResolution(self._resolution)
         sphere.SetPhiResolution(self._resolution)
 
@@ -484,11 +481,10 @@ class MolecularViewer(QtWidgets.QWidget):
         glyph_mapper.SetInputData(polydata)
         glyph_mapper.SetSourceConnection(sphere.GetOutputPort())
 
-        temp_scale = float(1.0 * self._scale_factor)
         glyph_mapper.ScalingOn()
         glyph_mapper.SetScaleModeToScaleByMagnitude()
         glyph_mapper.SetScaleArray("radii")
-        glyph_mapper.SetScaleFactor(temp_scale)
+        glyph_mapper.SetScaleFactor(self._scale_factor)
 
         glyph_mapper.ScalarVisibilityOn()
         glyph_mapper.SelectColorArray("colours")
@@ -602,13 +598,13 @@ class MolecularViewer(QtWidgets.QWidget):
         ms = not_du[ks]
 
         n_points = len(ls)
-        idxs = np.zeros((len(ls), 3), dtype=np.int64)
+        idxs = np.zeros((n_points, 3), dtype=np.int64)
         idxs[:, 0] = 2
         idxs[:, 1] = ls
         idxs[:, 2] = ms
         bonds.SetCells(n_points, numpy_support.numpy_to_vtkIdTypeArray(idxs.flatten()))
 
-        return bonds, len(ls) > 0
+        return bonds, n_points > 0
 
     def _new_trajectory_object(self, fname: str, trajectory: Trajectory):
         """Creates and sets a new trajectory reader for the input trajectory.
@@ -668,7 +664,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         Parameters
         ----------
-        params : Dict[str, Any]
+        params : dict[str, Any]
             dictionary of input parameters from TraceWidget.py
         """
         self._draw_isosurface(params["atom_number"], params)
@@ -686,13 +682,12 @@ class MolecularViewer(QtWidgets.QWidget):
             surface = self._surfaces[trace_number]
         except IndexError:
             return
-        else:
-            surface.VisibilityOff()
-            surface.ReleaseGraphicsResources(self._iren.GetRenderWindow())
-            self._renderer.RemoveActor(surface)
-            self._surfaces.pop(trace_number)
-            self.update_renderer()
-            self.changed_trace.emit()
+        surface.VisibilityOff()
+        surface.ReleaseGraphicsResources(self._iren.GetRenderWindow())
+        self._renderer.RemoveActor(surface)
+        self._surfaces.pop(trace_number)
+        self.update_renderer()
+        self.changed_trace.emit()
 
     def _draw_isosurface(self, index: int, params: dict[str, Any] | None = None):
         """Calculates the total volume used by an atom in the trajectory
@@ -713,13 +708,15 @@ class MolecularViewer(QtWidgets.QWidget):
         LOG.info(f"Computing isosurface of atom {index}")
         if params is None:
             params = copy.copy(TRACE_PARAMETERS)
+        else:
+            params = ChainMap(params, TRACE_PARAMETERS)
 
-        traj_sampling = params.get("traj_samples", 1000)
-        smearing_factor = params.get("smearing_factor", 1)
-        grid_step = params.get("grid_sampling", 0.02)
-        rgb = params.get("surface_colour", (0, 0.5, 0.75))
-        opacity = params.get("surface_opacity", 0.5)
-        trace_isovalue = params.get("trace_isovalue", 0.5)
+        traj_sampling = params["traj_samples"]
+        smearing_factor = params["smearing_factor"]
+        grid_step = params["grid_sampling"]
+        rgb = params["surface_colour"]
+        opacity = params["surface_opacity"]
+        trace_isovalue = params["trace_isovalue"]
 
         # interpolate the trajectory and sample to reduce the number of
         # positions that will be evaluated or if there are only a few
@@ -809,13 +806,13 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._renderer.AddActor(new_surface)
 
-        new_surface.SetPosition(lower_limit[0], lower_limit[1], lower_limit[2])
+        new_surface.SetPosition(*lower_limit)
         self._surfaces.append(new_surface)
         self._isocontours.append(new_isocontour)
 
         self.update_renderer()
 
-        LOG.info(f"Finished calculating the trace of atom {index}")
+        LOG.info(f"Finished calculating the trace of atom %d", index)
         self.changed_trace.emit()
 
     def clear_panel(self):

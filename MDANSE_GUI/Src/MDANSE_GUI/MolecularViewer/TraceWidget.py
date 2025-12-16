@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 TRACE_PARAMETERS = {
     "atom_number": 0,
-    "traj_sampling": 1000,
+    "traj_samples": 1000,
     "smearing_factor": 1,
     "grid_sampling": 0.02,
     "surface_colour": (0, 0.5, 0.75),

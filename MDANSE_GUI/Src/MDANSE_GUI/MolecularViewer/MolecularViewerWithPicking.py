@@ -165,10 +165,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.picked_atoms_changed.emit(self.picked_atoms)
 
     def pick_atom(self, picked_atom):
-        if picked_atom in self.picked_atoms:
-            self.picked_atoms.remove(picked_atom)
-        else:
-            self.picked_atoms.add(picked_atom)
+        self.picked_atoms = self.picked_atoms.symmetric_difference({picked_atom})
         self._picked_polydata.Initialize()
         self.update_picked_polydata()
         self.create_picked_atoms()
