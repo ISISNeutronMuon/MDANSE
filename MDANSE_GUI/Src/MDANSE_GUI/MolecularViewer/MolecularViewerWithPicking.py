@@ -150,7 +150,9 @@ class MolecularViewerWithPicking(MolecularViewer):
         x_2 = np.array(self._renderer.GetWorldPoint()[:3])
 
         x_21 = x_2 - x_1
-        dist_to_line = np.linalg.norm(np.cross(coords - x_1, coords - x_2), axis=1) / np.linalg.norm(x_21)
+        dist_to_line = np.linalg.norm(
+            np.cross(coords - x_1, coords - x_2), axis=1
+        ) / np.linalg.norm(x_21)
         selected = dist_to_line < scaled_radii
         dist_x_21 = np.dot(coords - x_1, x_21)
 
