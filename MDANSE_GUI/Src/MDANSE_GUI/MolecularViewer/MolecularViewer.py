@@ -595,8 +595,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
         dist, js, ks, _ = distance_calculation(rs, 2 * np.max(covs) + tolerance)
         sum_radii = (covs[js] + covs[ks] + tolerance) ** 2
-        js = js[(dist > 0) & (dist < sum_radii)]
-        ks = ks[(dist > 0) & (dist < sum_radii)]
+        js = js[dist < sum_radii]
+        ks = ks[dist < sum_radii]
         ls = not_du[js]
         ms = not_du[ks]
 
