@@ -18,7 +18,6 @@ from __future__ import annotations
 import numpy as np
 import vtk
 from qtpy.QtCore import Signal
-from scipy.spatial import cKDTree as KDTree
 from vtk.util import numpy_support
 
 from MDANSE_GUI.MolecularViewer.AtomProperties import ndarray_to_vtkarray
@@ -48,17 +47,17 @@ class MolecularViewerWithPicking(MolecularViewer):
         super().clear_atoms()
         self.clear_picked_atoms()
 
-    def create_atoms(self, atm_opacity: float = 0.20, picked_opacity: float = 1.0):
-        super().create_atoms(atm_opacity)
-        self.create_picked_atoms()
+    def create_atoms(self, *, opacity: float = 0.20, picked_opacity: float = 1.0):
+        super().create_atoms(opacity=opacity)
+        self.create_picked_atoms(opacity=picked_opacity)
 
     def clear_bonds(self):
         super().clear_bonds()
         self.clear_picked_bonds()
 
-    def create_bonds(self, bond_opacity: float = 0.20, picked_opacity: float = 1.0):
-        super().create_bonds(bond_opacity)
-        self.create_picked_bonds()
+    def create_bonds(self, *, opacity: float = 0.20, picked_opacity: float = 1.0):
+        super().create_bonds(opacity=opacity)
+        self.create_picked_bonds(opacity=picked_opacity)
 
     def update_atm_polydata(self):
         super().update_atm_polydata()
@@ -71,13 +70,13 @@ class MolecularViewerWithPicking(MolecularViewer):
         self._renderer.RemoveActor(self.picked_atom_actor)
         self.picked_atom_actor = None
 
-    def create_picked_atoms(self, ball_opacity: float = 1.0):
+    def create_picked_atoms(self, *, opacity: float = 1.0):
         self.clear_picked_atoms()
 
         if not self._atoms_visible or len(self.picked_atoms) == 0:
             return
 
-        actor = self.create_atom_actor(self._picked_polydata, ball_opacity)
+        actor = self.create_atom_actor(self._picked_polydata, opacity=opacity)
         self._renderer.AddActor(actor)
         self.picked_atom_actor = actor
 
@@ -88,13 +87,13 @@ class MolecularViewerWithPicking(MolecularViewer):
         self._renderer.RemoveActor(self.picked_bond_actor)
         self.picked_bond_actor = None
 
-    def create_picked_bonds(self, line_opacity: float = 1.0):
+    def create_picked_bonds(self, *, opacity: float = 1.0):
         self.clear_picked_bonds()
 
         if not self._bonds_visible or len(self.picked_atoms) == 0:
             return
 
-        actor = self.create_bond_actor(self._picked_polydata, line_opacity)
+        actor = self.create_bond_actor(self._picked_polydata, opacity=opacity)
         self._renderer.AddActor(actor)
         self.picked_bond_actor = actor
 

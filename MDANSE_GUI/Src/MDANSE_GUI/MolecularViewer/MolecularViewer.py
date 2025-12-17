@@ -425,13 +425,13 @@ class MolecularViewer(QtWidgets.QWidget):
         self._renderer.RemoveActor(self.atom_actor)
         self.atom_actor = None
 
-    def create_atoms(self, ball_opacity: float = 1.0):
+    def create_atoms(self, *, opacity: float = 1.0):
         self.clear_atoms()
 
         if not self._atoms_visible:
             return
 
-        actor = self.create_atom_actor(self._atm_polydata, ball_opacity)
+        actor = self.create_atom_actor(self._atm_polydata, opacity=opacity)
         self._renderer.AddActor(actor)
         self.atom_actor = actor
 
@@ -442,20 +442,21 @@ class MolecularViewer(QtWidgets.QWidget):
         self._renderer.RemoveActor(self.bond_actor)
         self.bond_actor = None
 
-    def create_bonds(self, line_opacity: float = 1.0):
+    def create_bonds(self, *, opacity: float = 1.0):
         self.clear_bonds()
 
         if not self._bonds_visible:
             return
 
-        actor = self.create_bond_actor(self._atm_polydata, line_opacity)
+        actor = self.create_bond_actor(self._atm_polydata, opacity=opacity)
         self._renderer.AddActor(actor)
         self.bond_actor = actor
 
     def create_atom_actor(
         self,
         polydata: vtk.vtkPolyData,
-        ball_opacity: float = 1.0,
+        *,
+        opacity: float = 1.0,
     ) -> vtk.vtkLODActor:
         """Creates VTK actors which visualise atoms.
 
@@ -463,7 +464,7 @@ class MolecularViewer(QtWidgets.QWidget):
         ----------
         polydata : vtk.vtkPolyData
             VTK object storing the atom properties used in 3D view (colour, radius)
-        ball_opacity : float, optional
+        opacity : float, optional
             opacity (alpha) of atom spheres, by default 1.0
 
         Returns
@@ -499,14 +500,15 @@ class MolecularViewer(QtWidgets.QWidget):
         ball_actor.GetProperty().SetAmbient(0.2)
         ball_actor.GetProperty().SetDiffuse(0.5)
         ball_actor.GetProperty().SetSpecular(0.3)
-        ball_actor.GetProperty().SetOpacity(ball_opacity)
+        ball_actor.GetProperty().SetOpacity(opacity)
         ball_actor.SetNumberOfCloudPoints(30000)
         return ball_actor
 
     def create_bond_actor(
         self,
         polydata: vtk.vtkPolyData,
-        line_opacity: float = 1.0,
+        *,
+        opacity: float = 1.0,
     ) -> vtk.vtkLODActor:
         """Creates VTK actors which visualise bonds.
 
@@ -514,7 +516,7 @@ class MolecularViewer(QtWidgets.QWidget):
         ----------
         polydata : vtk.vtkPolyData
             VTK object storing the atom properties used in 3D view (colour, radius)
-        line_opacity : float, optional
+        opacity : float, optional
             opacity (alpha) of bond lines, by default 1.0
 
         Returns
@@ -532,7 +534,7 @@ class MolecularViewer(QtWidgets.QWidget):
         line_actor.GetProperty().SetAmbient(0.2)
         line_actor.GetProperty().SetDiffuse(0.5)
         line_actor.GetProperty().SetSpecular(0.3)
-        line_actor.GetProperty().SetOpacity(line_opacity)
+        line_actor.GetProperty().SetOpacity(opacity)
         return line_actor
 
     def update_atm_polydata(self):
