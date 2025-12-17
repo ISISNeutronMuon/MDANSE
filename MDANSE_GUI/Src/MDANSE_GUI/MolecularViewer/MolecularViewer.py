@@ -388,12 +388,9 @@ class MolecularViewer(QtWidgets.QWidget):
         uc = self._reader.read_pbc(self._current_frame)
         if self._cell_visible and uc is not None:
             # update the unit cell
-            a = uc.a_vector
-            b = uc.b_vector
-            c = uc.c_vector
             uc_points = vtk.vtkPoints()
             uc_points.SetNumberOfPoints(8)
-            for i, v in enumerate([[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c]):
+            for i, v in enumerate(uc.vertices):
                 uc_points.SetPoint(i, *v)
             self._uc_polydata.SetPoints(uc_points)
 

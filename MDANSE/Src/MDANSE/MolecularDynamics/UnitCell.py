@@ -139,3 +139,10 @@ class UnitCell:
         gamma = np.linalg.norm(np.cross(a, b)) / (abc[0] * abc[1])
         angles = np.degrees(np.arcsin([alpha, beta, gamma]))
         return *abc, *angles
+
+    @property
+    def vertices(self):
+        a = self.a_vector
+        b = self.b_vector
+        c = self.c_vector
+        return np.array([[0, 0, 0], a, b, c, a + b, a + c, b + c, a + b + c])
