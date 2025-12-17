@@ -60,7 +60,7 @@ class DispersionLatticeQVectors(LatticeQVectors):
         dists = np.linalg.norm(q_vectors, axis=0)
         sign_array = np.sign(np.dot(step_vector, hkl_vectors))
         keyvals = dists.copy()
-        keyvals[np.where(sign_array < 0)] *= -1
+        keyvals[sign_array < 0] *= -1
 
         if self._status is not None:
             self._status.start(len(dists))

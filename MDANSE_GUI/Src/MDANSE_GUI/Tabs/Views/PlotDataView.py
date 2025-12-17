@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import html
+from collections.abc import Generator
 
 import h5py
 import numpy as np
@@ -96,10 +97,11 @@ def angular_datasets_from_qarray(
     tuple[SingleDataset, SingleDataset]
         Datasets of polar and azimuthal angles.
     """
-    inplane_r = np.sqrt(q_array[0, :] ** 2 + q_array[1, :] ** 2)
+    inplane_r = np.linalg.norm(q_array[:2, :], axis=0)
     polar_angles = np.arctan2(inplane_r, q_array[2, :])
     azimuthal_angles = np.arctan2(q_array[1, :], q_array[0, :])
     results = []
+    rounding_precision = 3
     for input_angles, label, xlabel, normalise in (
         (
             polar_angles,
@@ -109,7 +111,6 @@ def angular_datasets_from_qarray(
         ),
         (azimuthal_angles, "Azimuthal angle", r"$\phi$", False),
     ):
-        rounding_precision = 3
         angles = np.round(input_angles, rounding_precision)
         counts, bins = np.histogram(angles, weights=weight_array)
         unique_counts, _ = np.histogram(angles, bins=bins)
@@ -248,26 +249,18 @@ def vector_q_statistics_datasets(
         ]
         modq_per_shell = [shell_to_modq(n, parent_dset) for n in valid_shells]
         available_vectors = np.array([len(qvecs) for qvecs in modq_per_shell])
+
+        def q_data(elem: str) -> Generator:
+            for index in valid_shells:
+                yield parent_dset[f"shell_{index}/{elem}"]
+
         if all(
             "weights" in parent_dset[f"shell_{shell_index}"]
             for shell_index in valid_shells
         ):
-            vec_weights = [
-                parent_dset[f"shell_{shell_index}/weights"][:]
-                for shell_index in valid_shells
-            ]
-            unique_vectors = np.array(
-                [
-                    len(parent_dset[f"shell_{shell_index}/weights"])
-                    for shell_index in valid_shells
-                ]
-            )
-            all_vectors = np.array(
-                [
-                    sum(parent_dset[f"shell_{shell_index}/weights"][:])
-                    for shell_index in valid_shells
-                ]
-            )
+            vec_weights = [dat[:] for dat in q_data("weights")]
+            unique_vectors = np.array([len(dat) for dat in q_data("weights")])
+            all_vectors = np.array([sum(dat[:]) for dat in q_data("weights")])
             available_vectors = np.vstack((all_vectors, unique_vectors)).T
         else:
             vec_weights = [np.ones_like(modq_shell) for modq_shell in modq_per_shell]
@@ -280,22 +273,22 @@ def vector_q_statistics_datasets(
             if source["q_vectors"][qvals[index]] is not None
         ]
         nshells = len(valid_shells)
-        modq_per_shell = [
-            np.linalg.norm(source["q_vectors"][qvals[n]]["q_vectors"], axis=0)
-            for n in valid_shells
-        ]
+
+        def q_data(elem: str) -> Generator:
+            for index in valid_shells:
+                yield source["q_vectors"][qvals[index]][elem]
+
+        modq_per_shell = [np.linalg.norm(dat, axis=0) for dat in q_data("q_vectors")]
         available_vectors = np.array(
             [
                 (
-                    sum(source["q_vectors"][qvals[n]]["weights"]),
-                    len(source["q_vectors"][qvals[n]]["weights"]),
+                    sum(dat),
+                    len(dat),
                 )
-                for n in valid_shells
+                for dat in q_data("weights")
             ]
         )
-        vec_weights = [
-            source["q_vectors"][qvals[n]]["weights"][:] for n in valid_shells
-        ]
+        vec_weights = [dat[:] for dat in q_data("weights")]
     mean_q = np.array(
         [
             np.average(modq_values, weights=weight_values)
