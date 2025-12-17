@@ -47,6 +47,8 @@ class MolecularViewerExtended(MolecularViewer):
         self._animation_timer.timeout.connect(self.animate_rotation)
         self.create_placeholder()
         self.start_animation()
+        # reset camera once more after the gui has been set up
+        QTimer.singleShot(0, lambda: self._renderer.ResetCameraScreenSpace(0.4))
 
     def set_reader(self, reader):
         self._animation_timer.stop()
