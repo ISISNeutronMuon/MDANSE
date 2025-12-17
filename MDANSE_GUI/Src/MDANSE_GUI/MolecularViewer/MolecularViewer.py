@@ -325,23 +325,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self.atom_label_actor = actor
         self._label_renderer.AddActor(actor)
 
-    def update_atom_labels(self):
-        """Updates the atom label follower positions."""
-        if (
-            self._reader is None
-            or self._current_coords is None
-            or not self.atom_label_actors
-            or self.atom_label_type == "none"
-        ):
-            return
-
-        for follower, coord in zip(
-            self.atom_label_actors,
-            self._current_coords,
-            strict=True,
-        ):
-            follower.SetPosition(*coord)
-
     def change_atom_labels(self, label_option: str) -> None:
         """Changes the atoms label text.
 
