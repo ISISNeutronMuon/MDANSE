@@ -45,15 +45,14 @@ class RecentFiles:
             Path of the successfully loaded file
         """
         # if the recent file exists and not empty
+        recent_files = []
+
         if self.json_file_path.is_file():
             try:
                 with self.json_file_path.open(encoding="utf-8") as file:
                     recent_files = json.load(file)
             except json.decoder.JSONDecodeError as err:
                 LOG.error("Invalid recent files json %s: %s", self.json_file_path, err)
-                recent_files = []
-        else:
-            recent_files = []
 
         if loaded_file in recent_files:
             recent_files.remove(loaded_file)
