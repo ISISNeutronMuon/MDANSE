@@ -553,7 +553,7 @@ class MolecularViewer(QtWidgets.QWidget):
             # do not bond atoms to dummy atoms
             rs = self._current_coords[self.not_du]
             bonds, bonds_exist = self.create_bond_cell_array(
-                rs, self.covs[self.not_du], self.not_du
+                rs=rs, covs=self.covs[self.not_du], not_du=self.not_du
             )
             if bonds_exist:
                 self._atm_polydata.SetLines(bonds)
@@ -561,6 +561,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def create_bond_cell_array(
         self,
+        *,
         rs: np.ndarray,
         covs: np.typing.NDArray[float],
         not_du: np.typing.NDArray[bool],
