@@ -169,6 +169,11 @@ class PlotDataModel(QStandardItemModel):
     )
     MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
     PLACEHOLDER_STRING = "Recently used result files (.mda)"
+    recent_files = RecentFiles(
+        DEFAULT_JSON_PATH,
+        MAX_NUMBER_RECENT_FILES,
+        PLACEHOLDER_STRING,
+    )
 
     error = Signal(str)
     all_elements = Signal(object)
@@ -179,11 +184,6 @@ class PlotDataModel(QStandardItemModel):
         self.mutex = QMutex()
         self._nodes = {}
         self._next_number = 0
-        self.recent_files = RecentFiles(
-            self.DEFAULT_JSON_PATH,
-            self.MAX_NUMBER_RECENT_FILES,
-            self.PLACEHOLDER_STRING,
-        )
 
     @Slot(str)
     def add_file(self, filename: str):

@@ -95,6 +95,11 @@ class TrajectoryModel(QStandardItemModel):
     DEFAULT_JSON_PATH = PLATFORM.application_directory() / "recent_trajectory_file.json"
     MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
     PLACEHOLDER_STRING = "Recently used trajectory files (.mdt, .h5)"
+    recent_files = RecentFiles(
+        DEFAULT_JSON_PATH,
+        MAX_NUMBER_RECENT_FILES,
+        PLACEHOLDER_STRING,
+    )
 
     error = Signal(str)
     all_elements = Signal(object)
@@ -110,11 +115,6 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_status = {}
         self._loading_threads = {}
         self._next_number = itertools.count()
-        self.recent_files = RecentFiles(
-            self.DEFAULT_JSON_PATH,
-            self.MAX_NUMBER_RECENT_FILES,
-            self.PLACEHOLDER_STRING,
-        )
 
     @Slot(tuple)
     def append_object(self, input: tuple) -> int:
