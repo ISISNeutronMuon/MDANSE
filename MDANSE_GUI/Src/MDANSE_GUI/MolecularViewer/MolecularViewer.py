@@ -281,20 +281,18 @@ class MolecularViewer(QtWidgets.QWidget):
 
         if self.atom_label_type == "index":
             labels = list(range(self._n_atoms))
-        elif self.atom_label_type == "label":
-            label_dict = self._reader._trajectory.chemical_system._labels
-            if not label_dict:
-                return
+        elif self.atom_label_type == "label" and (
+            label_dict := self._reader._trajectory.chemical_system._labels
+        ):
             keys = more_itertools.run_length.decode(
                 ((k, len(v)) for k, v in label_dict.items())
             )
             labels = sorted(keys, key=label_dict.__getitem__)
         elif self.atom_label_type == "atom":
             labels = self._atoms
-        elif self.atom_label_type == "molecule":
-            label_dict = self._reader._trajectory.chemical_system._clusters
-            if not label_dict:
-                return
+        elif self.atom_label_type == "molecule" and (
+            label_dict := self._reader._trajectory.chemical_system._clusters
+        ):
             label_dict = {
                 k: list(more_itertools.collapse(v)) for k, v in label_dict.items()
             }
