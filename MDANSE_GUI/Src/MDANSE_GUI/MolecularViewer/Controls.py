@@ -355,7 +355,7 @@ class ViewerControls(QWidget):
             self._viewer._camera.SetParallelProjection(255)
         else:
             self._viewer._camera.SetParallelProjection(0)
-        self._viewer.update_renderer()
+        self._viewer._iren.Render()
         self._projection = not self._projection
 
     @Slot()

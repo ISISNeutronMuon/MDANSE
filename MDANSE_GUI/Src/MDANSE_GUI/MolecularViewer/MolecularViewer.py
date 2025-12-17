@@ -16,19 +16,24 @@
 from __future__ import annotations
 
 import copy
+from pathlib import Path
 from typing import Any
 
 import more_itertools
 import numpy as np
 import vtk
 from qtpy import QtWidgets
-from qtpy.QtCore import Signal, Slot
+from qtpy.QtCore import QTimer, Signal, Slot
 from qtpy.QtWidgets import QSizePolicy
 from scipy.interpolate import CubicSpline
 from scipy.spatial import cKDTree as KDTree
 from scipy.spatial.transform import Rotation as R
 from vtk.util import numpy_support
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.vtkCommonColor import vtkNamedColors
+from vtkmodules.vtkIOGeometry import vtkSTLReader
+from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
+from vtkmodules.vtkRenderingCore import vtkRenderWindow
 
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Connectivity import distance_calculation
@@ -112,6 +117,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self._iren.GetRenderWindow()
 
+        self._backup_wheel_method = self._iren.wheelEvent
+        self._dummy_method = dummy_method
+
         self.atom_actor = None
         self._last_coords = None
         self.atom_label_actors = []
@@ -133,6 +141,14 @@ class MolecularViewer(QtWidgets.QWidget):
         self._axes_renderer.SetActiveCamera(self._axes_camera)
         self._axes_camera.SetFocalPoint(0, 0, 0)
         self._axes_camera.SetPosition(0, 0, 8)
+
+        # Initialize rotation parameters
+        self.rotation_speed = 5
+        self.secondary_speed = 0.23 * self.rotation_speed
+
+        # Animation timer for rotating the 3D model
+        self._animation_timer = QTimer()
+        self._animation_timer.timeout.connect(self.animate_rotation)
 
         def update_axes_orientation(caller, event):
             """The axes camera needs to rotate with the main camera."""
@@ -268,12 +284,138 @@ class MolecularViewer(QtWidgets.QWidget):
         data : Trajectory
             instance of the MDANSE input trajectory handler
         """
+
         reader = hdf5wrapper.HDF5Wrapper(fname, trajectory, trajectory.chemical_system)
         self.set_reader(reader)
+        self._animation_timer.stop()
+
+    def create_actor_for_placeholder_3d_model(
+        self,
+        filename: str,
+        colour: tuple[float, float, float],
+        scale: float,
+        position: tuple[float, float, float],
+    ) -> vtk.vtkActor:
+        """Load a 3D object definition and return it as a VTK actor.
+
+        Parameters
+        ----------
+        filename : str
+            Filename of the STL file with the 3D mesh.
+        colour : tuple[float, float, float]
+            Colour to be assigned to the object.
+        scale : float
+            Scaling factor which will resize the object.
+        position : tuple[float, float, float]
+            The initial position of the object.
+
+        Returns
+        -------
+        vtk.vtkActor
+            A VTK actor of the 3D shape.
+        """
+
+        reader = vtk.vtkSTLReader()
+        filepath = Path(__file__).parents[1] / "Icons" / filename
+        reader.SetFileName(filepath)
+        reader.Update()
+
+        mapper = vtk.vtkPolyDataMapper()
+        mapper.SetInputConnection(reader.GetOutputPort())
+
+        actor = vtk.vtkActor()
+        actor.SetMapper(mapper)
+        actor.GetProperty().SetColor(colour)
+
+        actor.SetPosition(position)
+        actor.SetScale(scale)
+        # make center sphere metallic and semi-transparent
+        if filename == "center_sphere.stl":
+            actor.GetProperty().SetOpacity(
+                0.5
+            )  # Make the center sphere semi-transparent
+            actor.GetProperty().SetSpecular(1)
+            actor.GetProperty().SetSpecularPower(100)
+            actor.GetProperty().SetMetallic(1.0)
+            actor.GetProperty().SetRoughness(0.2)
+
+        individual_transform = vtk.vtkTransform()
+        individual_transform.Identity()
+        individual_transform.Translate(0.0, 0.5, 0.5)
+        individual_transform.Scale(0.5, 0.5, 0.5)
+        actor.SetUserTransform(individual_transform)
+
+        return actor
+
+    def load_trajectory_placeholder_3d_model(self):
+        """Loads a 3D blender model of mdanse into the viewer."""
+
+        self._actors = vtk.vtkAssembly()
+        spheres = [
+            ("center_sphere.stl", (0.6, 0.6, 0.6), 0.4, (0, 0, 0)),  # grey center
+            ("yellow_sphere.stl", (0.2, 0.85, 0.25), 0.4, (0, 0, 0)),
+            ("blue_sphere.stl", (0.2, 0.35, 0.85), 0.4, (0, 0, 0)),
+            ("red_sphere.stl", (0.85, 0.24, 0.2), 0.4, (0, 0, 0)),
+        ]
+
+        for filename, colour, position, scale in spheres:
+            actor = self.create_actor_for_placeholder_3d_model(
+                filename, colour, position, scale
+            )
+            self._actors.AddPart(actor)
+
+        self._renderer.AddActor(self._actors)
+
+        # side view of 3d model
+        self._camera.SetPosition(20, 0, 0)
+        self._camera.SetFocalPoint(0, 0, 0)
+        self._camera.SetViewUp(0, 0, 1)
+
+        self._renderer.ResetCameraScreenSpace(0.4)
+        self._camera.SetWindowCenter(-0.5, -0.5)
+        self.reset_camera = True
+
+        self._animation_timer.start(50)
+
+        self._iren.wheelEvent = self._dummy_method
+
+    def animate_rotation(self):
+        """Continuously rotate the 3D model."""
+        if self._animation_timer.isActive():
+            self.rotate_3D_model_actors(self.rotation_speed, self.secondary_speed)
+            self._iren.Render()
+
+    def rotate_3D_model_actors(self, angle: float, minor_angle: float):
+        """Rotate the all the placeholder actors around the pre-defined axes.
+
+        The components of the 3D placeholder are rotated independently.
+        A second rotation by a smaller angle is applied to the rings to
+        create the impression of the spheres moving along their rings.
+
+        Parameters
+        ----------
+        angle : float
+            Angle to be used for the main rotation.
+        minor_angle : float
+            Angle to be used for the secondary rotation.
+        """
+        for i, actor in enumerate(self._actors.GetParts()):
+            if i == 0:  # center sphere
+                actor.RotateZ(angle)
+            elif i == 1:  # green sphere
+                actor.RotateY(-angle)
+                actor.RotateZ(minor_angle)
+            elif i == 2:  # blue sphere
+                actor.RotateX(angle)
+                actor.RotateZ(-minor_angle)
+            elif i == 3:  # red sphere
+                actor.RotateY(-angle)
+                actor.RotateX(-minor_angle)
 
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
-        """Updates the scale factor by which all the atom radii are multiplied.
+        """Update the scale factor by which all the atom radii are multiplied.
+
         Scale factor 1.0 means that the covalent radii of atoms are used as
         radii of the spheres in the 3D view. By default the atom size is scaled
         down to allow the user to see atoms behind the first layer and the
@@ -285,7 +427,8 @@ class MolecularViewer(QtWidgets.QWidget):
             Sphere radii in 3D view will be multiplied by this factor
         """
         self._scale_factor = scale_factor
-        self.update_renderer()
+        if self._reader is not None:
+            self.update_renderer()
 
     def _new_visibility(self, flags: list[bool]):
         """Takes the new values of boolean flags which make
@@ -301,7 +444,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._cell_visible = flags[2]
         result = self.set_coordinates(self._current_frame)
         if result is False:
-            self.update_renderer()
+            self._iren.Render()
 
     def _change_axes(self, axes_option: str):
         """Changes the axes type in the 3D viewer.
@@ -512,6 +655,7 @@ class MolecularViewer(QtWidgets.QWidget):
             self.atom_actor = ball_actor
         else:
             self.atom_actor = None
+        self._iren.wheelEvent = self._backup_wheel_method
         return actors
 
     def create_uc_actor(self):
@@ -1112,6 +1256,7 @@ class MolecularViewer(QtWidgets.QWidget):
         # rendering
         if self.reset_camera:
             self._renderer.ResetCamera()
+            self._camera.SetWindowCenter(0.0, 0.0)
             self.reset_camera = False
 
         self._iren.GetRenderWindow().Render()
