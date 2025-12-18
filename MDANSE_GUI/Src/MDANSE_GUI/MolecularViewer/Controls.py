@@ -37,7 +37,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE_GUI.MolecularViewer import MolecularViewer
+from MDANSE_GUI.MolecularViewer import MolecularViewer, AxesType
 from MDANSE_GUI.MolecularViewer.PropertyWidget import PropertyWidget
 from MDANSE_GUI.MolecularViewer.TraceWidget import TraceWidget
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
@@ -272,7 +272,8 @@ class ViewerControls(QWidget):
         layout5.addWidget(cell_visible, 0, 2, 1, 1)
 
         self.axes_combo = QComboBox()
-        self.axes_combo.addItems(["none", "cartesian", "direct", "reciprocal"])
+        for axes in AxesType:
+            self.axes_combo.addItem(axes.value, axes)
         self.axes_combo.setCurrentIndex(1)
         label = QLabel("axes:")
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -375,7 +376,7 @@ class ViewerControls(QWidget):
 
     @Slot()
     def changeAxes(self):
-        self._viewer.change_axes(self.axes_combo.currentText())
+        self._viewer.change_axes(self.axes_combo.currentData())
 
     @Slot()
     def changeLabels(self):

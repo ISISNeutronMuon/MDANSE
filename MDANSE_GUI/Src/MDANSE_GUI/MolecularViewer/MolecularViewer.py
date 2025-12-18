@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import copy
 from collections import ChainMap
+from enum import Enum
 from typing import Any
 
 import more_itertools
@@ -55,6 +56,13 @@ def array_to_3d_imagedata(data: np.ndarray, spacing: tuple[float, float, float])
     image.AllocateScalars(vtk.VTK_DOUBLE, 1)
     image.GetPointData().SetScalars(numpy_support.numpy_to_vtk(data.ravel("F")))
     return image
+
+
+class AxesType(Enum):
+    NONE = "none"
+    CARTESIAN = "cartesian"
+    DIRECT = "direct"
+    RECIPROCAL = "reciprocal"
 
 
 class MolecularViewer(QtWidgets.QWidget):
@@ -142,7 +150,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atoms_visible = True
         self._bonds_visible = True
         self._cell_visible = True
-        self.current_axes_type = "cartesian"
+        self.current_axes_type = AxesType.CARTESIAN
         self.atom_label_type = "none"
 
         self._iren.Initialize()
@@ -220,10 +228,10 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.clear_axes()
 
-        if self.current_axes_type == "none":
+        if self.current_axes_type == AxesType.NONE:
             return
 
-        if self.current_axes_type == "cartesian":
+        if self.current_axes_type == AxesType.CARTESIAN:
             add_arrow([1, 0, 0], [1, 0, 0])
             add_arrow([0, 1, 0], [0, 1, 0])
             add_arrow([0, 0, 1], [0, 0, 1])
@@ -238,10 +246,10 @@ class MolecularViewer(QtWidgets.QWidget):
         if uc is None:
             return
 
-        if self.current_axes_type == "direct":
+        if self.current_axes_type == AxesType.DIRECT:
             matrix = uc.direct.copy()
             labels = ["a", "b", "c"]
-        elif self.current_axes_type == "reciprocal":
+        elif self.current_axes_type == AxesType.RECIPROCAL:
             matrix = uc.inverse.copy().T
             labels = ["a*", "b*", "c*"]
 
@@ -863,6 +871,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def clear_panel(self):
         """Clears the Molecular Viewer panel"""
+        self._reader = None
+
         self._atm_polydata.Initialize()
         self._uc_polydata.Initialize()
 
@@ -874,8 +884,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self.create_axes()
 
         self.update_renderer()
-
-        self._reader = None
 
         # set everything to some empty/zero value
         self._n_atoms = 0
