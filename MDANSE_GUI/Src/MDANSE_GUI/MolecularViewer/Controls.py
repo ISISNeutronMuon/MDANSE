@@ -37,7 +37,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE_GUI.MolecularViewer import MolecularViewer, AxesType
+from MDANSE_GUI.MolecularViewer import AxesType, MolecularViewer
 from MDANSE_GUI.MolecularViewer.PropertyWidget import PropertyWidget
 from MDANSE_GUI.MolecularViewer.TraceWidget import TraceWidget
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
