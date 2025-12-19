@@ -15,6 +15,6 @@
 #
 from __future__ import annotations
 
-from .MolecularViewer import AxesType, MolecularViewer
+from .MolecularViewer import AtomLabelType, AxesType, MolecularViewer
 from .MolecularViewerExtended import MolecularViewerExtended
 from .MolecularViewerWithPicking import MolecularViewerWithPicking

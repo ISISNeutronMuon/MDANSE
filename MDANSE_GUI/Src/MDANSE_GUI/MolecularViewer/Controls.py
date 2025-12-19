@@ -37,7 +37,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE_GUI.MolecularViewer import AxesType, MolecularViewer
+from MDANSE_GUI.MolecularViewer import AtomLabelType, AxesType, MolecularViewer
 from MDANSE_GUI.MolecularViewer.PropertyWidget import PropertyWidget
 from MDANSE_GUI.MolecularViewer.TraceWidget import TraceWidget
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
@@ -286,7 +286,8 @@ class ViewerControls(QWidget):
         ]
 
         self.labels_combo = QComboBox()
-        self.labels_combo.addItems(["none", "index", "label", "atom", "molecule"])
+        for label_type in AtomLabelType:
+            self.labels_combo.addItem(label_type.value, label_type)
         label = QLabel("labels:")
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout5.addWidget(label, 2, 0, 1, 1)
@@ -380,7 +381,7 @@ class ViewerControls(QWidget):
 
     @Slot()
     def changeLabels(self):
-        self._viewer.change_atom_labels(self.labels_combo.currentText())
+        self._viewer.change_atom_labels(self.labels_combo.currentData())
 
     @Slot(int)
     def setTimeStep(self, new_value: int):

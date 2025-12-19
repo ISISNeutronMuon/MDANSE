@@ -58,6 +58,14 @@ def array_to_3d_imagedata(data: np.ndarray, spacing: tuple[float, float, float])
     return image
 
 
+class AtomLabelType(Enum):
+    NONE = "none"
+    INDEX = "index"
+    LABEL = "label"
+    ATOM = "atom"
+    MOLECULE = "molecule"
+
+
 class AxesType(Enum):
     NONE = "none"
     CARTESIAN = "cartesian"
@@ -150,8 +158,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self._atoms_visible = True
         self._bonds_visible = True
         self._cell_visible = True
-        self.current_axes_type = AxesType.CARTESIAN
-        self.atom_label_type = "none"
+        self.axes_type = AxesType.CARTESIAN
+        self.atom_label_type = AtomLabelType.NONE
 
         self._iren.Initialize()
 
@@ -228,10 +236,10 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.clear_axes()
 
-        if self.current_axes_type == AxesType.NONE:
+        if self.axes_type == AxesType.NONE:
             return
 
-        if self.current_axes_type == AxesType.CARTESIAN:
+        if self.axes_type == AxesType.CARTESIAN:
             add_arrow([1, 0, 0], [1, 0, 0])
             add_arrow([0, 1, 0], [0, 1, 0])
             add_arrow([0, 0, 1], [0, 0, 1])
@@ -246,10 +254,10 @@ class MolecularViewer(QtWidgets.QWidget):
         if uc is None:
             return
 
-        if self.current_axes_type == AxesType.DIRECT:
+        if self.axes_type == AxesType.DIRECT:
             matrix = uc.direct.copy()
             labels = ["a", "b", "c"]
-        elif self.current_axes_type == AxesType.RECIPROCAL:
+        elif self.axes_type == AxesType.RECIPROCAL:
             matrix = uc.inverse.copy().T
             labels = ["a*", "b*", "c*"]
 
@@ -258,15 +266,15 @@ class MolecularViewer(QtWidgets.QWidget):
             add_arrow(np.eye(3)[i], matrix[i])
             add_text(label, matrix[i])
 
-    def change_axes(self, axes_option: str):
+    def change_axes(self, axes_option: AxesType):
         """Changes the axes type in the 3D viewer.
 
         Parameters
         ----------
-        axes_option : str
+        axes_option : AxesType
             The axes type that will be used.
         """
-        self.current_axes_type = axes_option
+        self.axes_type = axes_option
         self.create_axes()
         self.update_renderer()
 
@@ -287,18 +295,18 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._reader is None:
             return
 
-        if self.atom_label_type == "index":
+        if self.atom_label_type == AtomLabelType.INDEX:
             labels = list(range(self._n_atoms))
-        elif self.atom_label_type == "label" and (
+        elif self.atom_label_type == AtomLabelType.LABEL and (
             label_dict := self._reader._trajectory.chemical_system._labels
         ):
             keys = more_itertools.run_length.decode(
                 ((k, len(v)) for k, v in label_dict.items())
             )
             labels = sorted(keys, key=label_dict.__getitem__)
-        elif self.atom_label_type == "atom":
+        elif self.atom_label_type == AtomLabelType.ATOM:
             labels = self._atoms
-        elif self.atom_label_type == "molecule" and (
+        elif self.atom_label_type == AtomLabelType.MOLECULE and (
             label_dict := self._reader._trajectory.chemical_system._clusters
         ):
             label_dict = {
@@ -333,13 +341,13 @@ class MolecularViewer(QtWidgets.QWidget):
         self.atom_label_actor = actor
         self._label_renderer.AddActor(actor)
 
-    def change_atom_labels(self, label_option: str) -> None:
+    def change_atom_labels(self, label_option: AtomLabelType) -> None:
         """Changes the atoms label text.
 
         Parameters
         ----------
-        label_option : str
-            The atom label option.
+        label_option : AtomLabelType
+            The atom label that will be used.
         """
         self.atom_label_type = label_option
         self.create_atom_labels()
