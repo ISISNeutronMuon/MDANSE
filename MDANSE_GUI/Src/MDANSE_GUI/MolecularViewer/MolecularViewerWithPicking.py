@@ -136,21 +136,19 @@ class MolecularViewerWithPicking(MolecularViewer):
         elif self.bond_calc == BondCalc.LAST:
             rs = self._reader.read_frame(self._n_frames - 1)
         elif self.bond_calc == BondCalc.FILE:
-            picked_not_dummy = picked[not_du]
-
             bonds = np.array(self._reader._trajectory.chemical_system._bonds)
             if len(bonds) == 0:
                 self._picked_polydata.SetLines(vtk.vtkCellArray())
                 return
 
-            mask = np.isin(bonds[:, 0], picked_not_dummy) & np.isin(
-                bonds[:, 1], picked_not_dummy
-            )
+            # unlike the other bond calc methods if the MDANSE trajectory bonds
+            # atoms to dummy atoms we will also do that here
+            mask = np.isin(bonds[:, 0], picked) & np.isin(bonds[:, 1], picked)
             picked_bonds = bonds[mask]
             picked_bonds = np.column_stack(
                 (
-                    np.searchsorted(picked_not_dummy, picked_bonds[:, 0]),
-                    np.searchsorted(picked_not_dummy, picked_bonds[:, 1]),
+                    np.searchsorted(picked, picked_bonds[:, 0]),
+                    np.searchsorted(picked, picked_bonds[:, 1]),
                 )
             )
 
@@ -170,7 +168,7 @@ class MolecularViewerWithPicking(MolecularViewer):
             return
 
         bonds = self.create_bond_cell_array(
-            rs=rs[picked][not_du], covs=self.covs[picked][not_du], not_du=self.not_du
+            rs=rs[picked][not_du], covs=self.covs[picked][not_du], not_du=not_du
         )
         self._picked_polydata.SetLines(bonds)
 
