@@ -22,7 +22,7 @@ from vtk.util import numpy_support
 
 from MDANSE_GUI.MolecularViewer.AtomProperties import ndarray_to_vtkarray
 
-from .MolecularViewer import MolecularViewer
+from .MolecularViewer import BondCalc, MolecularViewer
 
 
 class MolecularViewerWithPicking(MolecularViewer):
@@ -63,6 +63,10 @@ class MolecularViewerWithPicking(MolecularViewer):
         super().update_atm_polydata()
         self.update_picked_polydata()
 
+    def change_atm_polydata_lines(self):
+        super().change_atm_polydata_lines()
+        self.change_picked_polydata_lines()
+
     def clear_picked_atoms(self):
         if not self.picked_atom_actor:
             return
@@ -90,7 +94,7 @@ class MolecularViewerWithPicking(MolecularViewer):
     def create_picked_bonds(self, *, opacity: float = 1.0):
         self.clear_picked_bonds()
 
-        if not self._bonds_visible or len(self.picked_atoms) == 0:
+        if self.bond_calc == BondCalc.NONE or len(self.picked_atoms) == 0:
             return
 
         actor = self.create_bond_actor(self._picked_polydata, opacity=opacity)
@@ -117,16 +121,58 @@ class MolecularViewerWithPicking(MolecularViewer):
             )
         )
 
-        not_du = np.arange(len(self.picked_atoms))[self.du_log[picked]]
-        if self._bonds_visible and len(not_du) >= 1:
-            # do not bond atoms to dummy atoms
-            rs = coords[picked][not_du]
-            covs = self.covs[picked][not_du]
+    def change_picked_polydata_lines(self):
+        if len(self.picked_atoms) <= 1:
+            self._picked_polydata.SetLines(vtk.vtkCellArray())
+            return
 
-            bonds, bonds_exist = self.create_bond_cell_array(rs, covs, not_du)
-            if bonds_exist:
-                self._picked_polydata.SetLines(bonds)
+        picked = np.array(sorted(self.picked_atoms))
+        not_du = np.arange(len(self.picked_atoms))[self.du_log[picked]]
+
+        if self.bond_calc == BondCalc.EVERY:
+            rs = self._current_coords
+        elif self.bond_calc == BondCalc.FIRST:
+            rs = self._reader.read_frame(0)
+        elif self.bond_calc == BondCalc.LAST:
+            rs = self._reader.read_frame(self._n_frames - 1)
+        elif self.bond_calc == BondCalc.FILE:
+            picked_not_dummy = picked[not_du]
+
+            bonds = np.array(self._reader._trajectory.chemical_system._bonds)
+            if len(bonds) == 0:
+                self._picked_polydata.SetLines(vtk.vtkCellArray())
                 return
+
+            mask = np.isin(bonds[:, 0], picked_not_dummy) & np.isin(
+                bonds[:, 1], picked_not_dummy
+            )
+            picked_bonds = bonds[mask]
+            picked_bonds = np.column_stack(
+                (
+                    np.searchsorted(picked_not_dummy, picked_bonds[:, 0]),
+                    np.searchsorted(picked_not_dummy, picked_bonds[:, 1]),
+                )
+            )
+
+            n_bonds = len(picked_bonds)
+            if n_bonds == 0:
+                self._picked_polydata.SetLines(vtk.vtkCellArray())
+            else:
+                cell_array = vtk.vtkCellArray()
+                idxs = np.column_stack((np.full(n_bonds, 2), picked_bonds))
+                cell_array.SetCells(
+                    n_bonds, numpy_support.numpy_to_vtkIdTypeArray(idxs.flatten())
+                )
+                self._picked_polydata.SetLines(cell_array)
+            return
+        else:
+            self._picked_polydata.SetLines(vtk.vtkCellArray())
+            return
+
+        bonds = self.create_bond_cell_array(
+            rs=rs[picked][not_du], covs=self.covs[picked][not_du], not_du=self.not_du
+        )
+        self._picked_polydata.SetLines(bonds)
 
     def on_pick(self, obj, event=None):
         """Event handler when an atom is mouse-picked with the left mouse button"""
@@ -167,6 +213,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.picked_atoms = self.picked_atoms.symmetric_difference({picked_atom})
         self._picked_polydata.Initialize()
         self.update_picked_polydata()
+        self.change_picked_polydata_lines()
         self.create_picked_atoms()
         self.create_picked_bonds()
         self.update_renderer()
@@ -175,6 +222,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.picked_atoms = picked
         self._picked_polydata.Initialize()
         self.update_picked_polydata()
+        self.change_picked_polydata_lines()
         self.create_picked_atoms()
         self.create_picked_bonds()
         self.update_renderer()

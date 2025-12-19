@@ -37,7 +37,12 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE_GUI.MolecularViewer import AtomLabelType, AxesType, MolecularViewer
+from MDANSE_GUI.MolecularViewer.MolecularViewer import (
+    AtomLabelType,
+    AxesType,
+    BondCalc,
+    MolecularViewer,
+)
 from MDANSE_GUI.MolecularViewer.PropertyWidget import PropertyWidget
 from MDANSE_GUI.MolecularViewer.TraceWidget import TraceWidget
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, RadiusSpinBox
@@ -113,7 +118,7 @@ class ViewerControls(QWidget):
         self._current_step_size = 1
         self._time_per_frame = 80  # in ms
         self._frame_factor = 1  # just a scalar multiplication factor
-        self._visibility = [True, True, True, True]
+        self._visibility = [True, True]
         self.createSlider()
         self.createButtons(Qt.Orientation.Horizontal)
         self._bkg_dialog = QColorDialog()
@@ -263,13 +268,14 @@ class ViewerControls(QWidget):
 
         atoms_visible = QCheckBox("atoms:")
         atoms_visible.setLayoutDirection(Qt.RightToLeft)
-        bonds_visible = QCheckBox("bonds:")
-        bonds_visible.setLayoutDirection(Qt.RightToLeft)
         cell_visible = QCheckBox("cell:")
         cell_visible.setLayoutDirection(Qt.RightToLeft)
         layout5.addWidget(atoms_visible, 0, 0, 1, 1)
-        layout5.addWidget(bonds_visible, 0, 1, 1, 1)
-        layout5.addWidget(cell_visible, 0, 2, 1, 1)
+        layout5.addWidget(cell_visible, 0, 1, 1, 1)
+        self._visibility_checkboxes = [
+            atoms_visible,
+            cell_visible,
+        ]
 
         self.axes_combo = QComboBox()
         for axes in AxesType:
@@ -278,12 +284,7 @@ class ViewerControls(QWidget):
         label = QLabel("axes:")
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout5.addWidget(label, 1, 0, 1, 1)
-        layout5.addWidget(self.axes_combo, 1, 1, 1, 2)
-        self._visibility_checkboxes = [
-            atoms_visible,
-            bonds_visible,
-            cell_visible,
-        ]
+        layout5.addWidget(self.axes_combo, 1, 1, 1, 1)
 
         self.labels_combo = QComboBox()
         for label_type in AtomLabelType:
@@ -291,7 +292,16 @@ class ViewerControls(QWidget):
         label = QLabel("labels:")
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout5.addWidget(label, 2, 0, 1, 1)
-        layout5.addWidget(self.labels_combo, 2, 1, 1, 2)
+        layout5.addWidget(self.labels_combo, 2, 1, 1, 1)
+
+        self.bond_calc_combo = QComboBox()
+        for bond_calc in BondCalc:
+            self.bond_calc_combo.addItem(bond_calc.value, bond_calc)
+        self.bond_calc_combo.setCurrentIndex(3)
+        label = QLabel("bonds:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        layout5.addWidget(label, 3, 0, 1, 1)
+        layout5.addWidget(self.bond_calc_combo, 3, 1, 1, 1)
 
         for nw, box in enumerate(self._visibility_checkboxes):
             box.setTristate(False)
@@ -299,6 +309,7 @@ class ViewerControls(QWidget):
             box.stateChanged.connect(self.setVisibility)
         self.axes_combo.currentIndexChanged.connect(self.changeAxes)
         self.labels_combo.currentIndexChanged.connect(self.changeLabels)
+        self.bond_calc_combo.currentIndexChanged.connect(self.changeBondCalc)
 
         layout.addWidget(wrapper5)
         # the database of atom types
@@ -382,6 +393,10 @@ class ViewerControls(QWidget):
     @Slot()
     def changeLabels(self):
         self._viewer.change_atom_labels(self.labels_combo.currentData())
+
+    @Slot()
+    def changeBondCalc(self):
+        self._viewer.change_bond_calc(self.bond_calc_combo.currentData())
 
     @Slot(int)
     def setTimeStep(self, new_value: int):

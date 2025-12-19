@@ -73,6 +73,14 @@ class AxesType(Enum):
     RECIPROCAL = "reciprocal"
 
 
+class BondCalc(Enum):
+    NONE = "none"
+    FIRST = "first frame"
+    LAST = "last frame"
+    EVERY = "every frame"
+    FILE = "from file"
+
+
 class MolecularViewer(QtWidgets.QWidget):
     """MolecularViewer is a Qt widget containing a 3D viewer
     of molecular structures, currently implemented in VTK."""
@@ -156,10 +164,10 @@ class MolecularViewer(QtWidgets.QWidget):
         self._resolution = 0
 
         self._atoms_visible = True
-        self._bonds_visible = True
         self._cell_visible = True
         self.axes_type = AxesType.CARTESIAN
         self.atom_label_type = AtomLabelType.NONE
+        self.bond_calc = BondCalc.EVERY
 
         self._iren.Initialize()
 
@@ -439,12 +447,24 @@ class MolecularViewer(QtWidgets.QWidget):
     def create_bonds(self, *, opacity: float = 1.0):
         self.clear_bonds()
 
-        if not self._bonds_visible:
+        if self.bond_calc == BondCalc.NONE:
             return
 
         actor = self.create_bond_actor(self._atm_polydata, opacity=opacity)
         self._renderer.AddActor(actor)
         self.bond_actor = actor
+
+    def change_bond_calc(self, bond_calc_option: BondCalc) -> None:
+        """Changes when the bond calculation are to run.
+
+        Parameters
+        ----------
+        bond_calc_option : BondCalc
+            The bond calculation option.
+        """
+        self.bond_calc = bond_calc_option
+        self.change_atm_polydata_lines()
+        self.update_renderer()
 
     def create_atom_actor(
         self,
@@ -538,20 +558,39 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._current_coords is None:
             return
 
-        if self._atoms_visible or self._bonds_visible:
+        if self._atoms_visible or self.bond_calc != BondCalc.NONE:
             atoms = vtk.vtkPoints()
             atoms.SetData(numpy_support.numpy_to_vtk(self._current_coords))
             self._atm_polydata.SetPoints(atoms)
 
-        if self._bonds_visible:
-            # do not bond atoms to dummy atoms
+    def change_atm_polydata_lines(self):
+        if self.bond_calc == BondCalc.EVERY:
             rs = self._current_coords[self.not_du]
-            bonds, bonds_exist = self.create_bond_cell_array(
-                rs=rs, covs=self.covs[self.not_du], not_du=self.not_du
-            )
-            if bonds_exist:
-                self._atm_polydata.SetLines(bonds)
+        elif self.bond_calc == BondCalc.FIRST:
+            rs = self._reader.read_frame(0)[self.not_du]
+        elif self.bond_calc == BondCalc.LAST:
+            rs = self._reader.read_frame(self._n_frames - 1)[self.not_du]
+        elif self.bond_calc == BondCalc.FILE:
+            bonds = np.array(self._reader._trajectory.chemical_system._bonds)
+            n_bonds = len(bonds)
+            if n_bonds == 0:
+                self._atm_polydata.SetLines(vtk.vtkCellArray())
                 return
+            cell_array = vtk.vtkCellArray()
+            idxs = np.column_stack((np.full(n_bonds, 2), bonds))
+            cell_array.SetCells(
+                n_bonds, numpy_support.numpy_to_vtkIdTypeArray(idxs.flatten())
+            )
+            self._atm_polydata.SetLines(cell_array)
+            return
+        else:
+            self._atm_polydata.SetLines(vtk.vtkCellArray())
+            return
+
+        bonds = self.create_bond_cell_array(
+            rs=rs, covs=self.covs[self.not_du], not_du=self.not_du
+        )
+        self._atm_polydata.SetLines(bonds)
 
     def create_bond_cell_array(
         self,
@@ -560,7 +599,7 @@ class MolecularViewer(QtWidgets.QWidget):
         covs: np.typing.NDArray[float],
         not_du: np.typing.NDArray[bool],
         tolerance: float = 0.04,
-    ):
+    ) -> vtk.vtkCellArray:
         """Finds the pairs of atoms which should be connected by bonds,
         based on their positions, covalent radii and tolerance of distances.
         Dummy atoms can be excluded from forming bonds.
@@ -581,8 +620,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
         Returns
         -------
-        vtk.vtkCellArray, bool
-            a VTK array of pairs of atom indices, and a flag True if some bonds were found
+        vtk.vtkCellArray
+            a VTK array of pairs of atom indices
         """
         # determine and set bonds without PBC applied
         bonds = vtk.vtkCellArray()
@@ -595,13 +634,14 @@ class MolecularViewer(QtWidgets.QWidget):
         ms = not_du[ks]
 
         n_points = len(ls)
+        if n_points == 0:
+            return bonds
         idxs = np.zeros((n_points, 3), dtype=np.int64)
         idxs[:, 0] = 2
         idxs[:, 1] = ls
         idxs[:, 2] = ms
         bonds.SetCells(n_points, numpy_support.numpy_to_vtkIdTypeArray(idxs.flatten()))
-
-        return bonds, n_points > 0
+        return bonds
 
     def clear_atom_trace(self):
         """Event handler called when the user select the 'Atomic trace -> Clear' main menu item"""
@@ -869,12 +909,9 @@ class MolecularViewer(QtWidgets.QWidget):
             Each actor will be visible if its flag is True.
         """
         self._atoms_visible = flags[0]
-        self._bonds_visible = flags[1]
-        self._cell_visible = flags[2]
+        self._cell_visible = flags[1]
         self.create_unit_cell()
-        self.update_atm_polydata()
         self.create_atoms()
-        self.create_bonds()
         self.update_renderer()
 
     def clear_panel(self):
@@ -922,6 +959,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
         # update the atom positions, bonds, and axis
         self.update_atm_polydata()
+        if self.bond_calc == BondCalc.EVERY:
+            self.change_atm_polydata_lines()
         self.update_uc_polydata()
         self.create_axes()
 
@@ -987,6 +1026,7 @@ class MolecularViewer(QtWidgets.QWidget):
             )
         )
         self.update_atm_polydata()
+        self.change_atm_polydata_lines()
         self.update_uc_polydata()
 
         self.create_unit_cell()
