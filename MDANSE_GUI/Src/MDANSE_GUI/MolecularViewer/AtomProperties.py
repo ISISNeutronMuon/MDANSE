@@ -201,7 +201,9 @@ class AtomProperties(QStandardItemModel):
             self.appendRow(item_row)
             self._groups.append(atom_entry)
         self._total_length = len(all_atoms)
+        self.set_radii_and_colours()
 
+    def set_radii_and_colours(self):
         colours = np.empty(self._total_length, dtype=int)
         radii = np.empty(self._total_length, dtype=float)
         for entry in self._groups:
@@ -218,6 +220,7 @@ class AtomProperties(QStandardItemModel):
     @Slot()
     def onNewValues(self):
         self.rebuild_colours()
+        self.set_radii_and_colours()
         self.new_atom_properties.emit(
             (self.colours, self.radii, np.arange(self._total_length))
         )
