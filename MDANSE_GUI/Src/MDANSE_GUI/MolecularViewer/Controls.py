@@ -156,7 +156,7 @@ class ViewerControls(QWidget):
         viewer.new_max_frames.connect(self.stop_animation)
         # self._database.setViewer(viewer)
         # viewer.setDataModel(viewer._colour_manager)
-        viewer._colour_manager.new_atom_properties.connect(viewer.take_atom_properties)
+        viewer._colour_manager.new_atom_properties.connect(viewer._new_atom_properties)
 
     def createButtons(self, orientation: Qt.Orientation):
         """Create a bar with video player buttons for controlling the

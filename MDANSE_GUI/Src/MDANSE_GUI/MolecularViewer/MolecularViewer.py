@@ -871,7 +871,7 @@ class MolecularViewer(QtWidgets.QWidget):
         ----------
         fname : str
             trajectory file name
-        data : Trajectory
+        trajectory : Trajectory
             instance of the MDANSE input trajectory handler
         """
         reader = hdf5wrapper.HDF5Wrapper(fname, trajectory, trajectory.chemical_system)
@@ -913,58 +913,22 @@ class MolecularViewer(QtWidgets.QWidget):
         self.create_atoms()
         self.update_renderer()
 
-    def clear_panel(self):
-        """Clears the Molecular Viewer panel"""
-        self._reader = None
-
-        self._atm_polydata.Initialize()
-        self._uc_polydata.Initialize()
-
-        self.clear_atom_labels()
-        self.clear_atoms()
-        self.clear_bonds()
-        self.clear_unit_cell()
-        self.clear_atom_trace()
-        self.create_axes()
-
+    @Slot(object)
+    def _new_atom_properties(self, data):
+        self.set_atm_polydata_scalars(data)
         self.update_renderer()
 
-        # set everything to some empty/zero value
-        self._n_atoms = 0
-        self._n_frames = 0
-        self.new_max_frames.emit(0)
-        self._atoms = []
-        self._atom_colours = []
-        self._current_frame = 0
+    def set_atm_polydata_scalars(self, data):
+        colours, radii, numbers = data
+        scalars = ndarray_to_vtkarray(colours, radii, numbers)
+        self._atm_polydata.GetPointData().SetScalars(scalars)
 
-        # clear the atom properties table
-        self._colour_manager.removeRows(0, self._colour_manager.rowCount())
-
-    @Slot(int)
-    def set_coordinates(self, frame: int):
-        """Changes the atom positions in the 3D view to those from
-        the selected frame of the trajectory.
-
-        Parameters
-        ----------
-        frame : int
-            index of the trajectory frame
-        """
-        if self._reader is None:
-            return
-
-        self._current_frame = frame % self._reader.n_frames
-        self._current_coords = self._reader.read_frame(self._current_frame)
-
-        # update the atom positions, bonds, and axis
-        self.update_atm_polydata()
-        if self.bond_calc == BondCalc.EVERY:
-            self.change_atm_polydata_lines()
-        self.update_uc_polydata()
-        self.create_axes()
-
-        self.update_renderer()
-        self.frame_changed.emit()
+        radii_vtk = numpy_support.numpy_to_vtk(radii)
+        radii_vtk.SetName("radii")
+        colours_vtk = numpy_support.numpy_to_vtk(colours)
+        colours_vtk.SetName("colours")
+        self._atm_polydata.GetPointData().AddArray(radii_vtk)
+        self._atm_polydata.GetPointData().AddArray(colours_vtk)
 
     def set_reader(self, reader):
         """Sets the input object to be the new source of atom data for
@@ -1040,22 +1004,58 @@ class MolecularViewer(QtWidgets.QWidget):
         self.new_max_frames.emit(self._n_frames - 1)
         self.changed_trace.emit()
 
-    @Slot(object)
-    def take_atom_properties(self, data):
-        self.set_atm_polydata_scalars(data)
+    @Slot(int)
+    def set_coordinates(self, frame: int):
+        """Changes the atom positions in the 3D view to those from
+        the selected frame of the trajectory.
+
+        Parameters
+        ----------
+        frame : int
+            index of the trajectory frame
+        """
+        if self._reader is None:
+            return
+
+        self._current_frame = frame % self._reader.n_frames
+        self._current_coords = self._reader.read_frame(self._current_frame)
+
+        # update the atom positions, bonds, and axis
+        self.update_atm_polydata()
+        if self.bond_calc == BondCalc.EVERY:
+            self.change_atm_polydata_lines()
+        self.update_uc_polydata()
+        self.create_axes()
+
+        self.update_renderer()
+        self.frame_changed.emit()
+
+    def clear_panel(self):
+        """Clears the Molecular Viewer panel"""
+        self._reader = None
+
+        self._atm_polydata.Initialize()
+        self._uc_polydata.Initialize()
+
+        self.clear_atom_labels()
+        self.clear_atoms()
+        self.clear_bonds()
+        self.clear_unit_cell()
+        self.clear_atom_trace()
+        self.create_axes()
+
         self.update_renderer()
 
-    def set_atm_polydata_scalars(self, data):
-        colours, radii, numbers = data
-        scalars = ndarray_to_vtkarray(colours, radii, numbers)
-        self._atm_polydata.GetPointData().SetScalars(scalars)
+        # set everything to some empty/zero value
+        self._n_atoms = 0
+        self._n_frames = 0
+        self.new_max_frames.emit(0)
+        self._atoms = []
+        self._atom_colours = []
+        self._current_frame = 0
 
-        radii_vtk = numpy_support.numpy_to_vtk(radii)
-        radii_vtk.SetName("radii")
-        colours_vtk = numpy_support.numpy_to_vtk(colours)
-        colours_vtk.SetName("colours")
-        self._atm_polydata.GetPointData().AddArray(radii_vtk)
-        self._atm_polydata.GetPointData().AddArray(colours_vtk)
+        # clear the atom properties table
+        self._colour_manager.removeRows(0, self._colour_manager.rowCount())
 
     def update_renderer(self):
         self._iren.GetRenderWindow().Render()
