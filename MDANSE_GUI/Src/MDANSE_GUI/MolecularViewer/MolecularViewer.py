@@ -1044,8 +1044,6 @@ class MolecularViewer(QtWidgets.QWidget):
     @Slot(object)
     def take_atom_properties(self, data):
         self.set_atm_polydata_scalars(data)
-        self.create_atoms()
-        self.create_bonds()
         self.update_renderer()
 
     def set_atm_polydata_scalars(self, data):
