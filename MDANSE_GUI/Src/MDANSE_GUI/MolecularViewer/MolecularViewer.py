@@ -191,7 +191,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._uc_polydata = vtk.vtkPolyData()
 
         self.create_axes()
-        self.create_unit_cell()
 
         self._colour_manager = AtomProperties()
         self.dummy_size = 0.0
