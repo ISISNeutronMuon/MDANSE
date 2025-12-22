@@ -16,9 +16,9 @@
 from __future__ import annotations
 
 import copy
+import math
 from collections import ChainMap
 from enum import Enum
-import math
 from typing import Any
 
 import more_itertools
