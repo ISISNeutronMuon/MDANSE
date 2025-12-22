@@ -503,6 +503,8 @@ class MolecularViewer(QtWidgets.QWidget):
             The bond calculation option.
         """
         self.bond_calc = bond_calc_option
+        if self._reader is None:
+            return
         self.change_atm_polydata_lines()
         self.update_renderer()
 
@@ -955,6 +957,8 @@ class MolecularViewer(QtWidgets.QWidget):
         """
         self._atoms_visible = flags[0]
         self._cell_visible = flags[1]
+        if self._reader is None:
+            return
         self.create_unit_cell()
         self.create_atoms()
         self.update_renderer()
