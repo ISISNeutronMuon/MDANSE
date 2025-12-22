@@ -44,30 +44,53 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.picked_bond_actor = None
 
     def clear_atoms(self):
+        """Clears atom and picked atoms."""
         super().clear_atoms()
         self.clear_picked_atoms()
 
     def create_atoms(self, *, opacity: float = 0.20, picked_opacity: float = 1.0):
+        """Creates atom and picked atoms actors with different opacities.
+
+        Parameters
+        ----------
+        opacity : float
+            opacity (alpha) of the atom sphere, by default 0.2
+        picked_opacity : float
+            opacity (alpha) of the picked atom sphere, by default 1.0
+        """
         super().create_atoms(opacity=opacity)
         self.create_picked_atoms(opacity=picked_opacity)
 
     def clear_bonds(self):
+        """Clears bonds and picked bonds."""
         super().clear_bonds()
         self.clear_picked_bonds()
 
     def create_bonds(self, *, opacity: float = 0.20, picked_opacity: float = 1.0):
+        """Creates bonds and picked bonds with different opacities.
+
+        Parameters
+        ----------
+        opacity : float
+            opacity (alpha) of the bond lines, by default 0.2
+        picked_opacity : float
+            opacity (alpha) of the picked bond lines, by default 1.0
+        """
         super().create_bonds(opacity=opacity)
         self.create_picked_bonds(opacity=picked_opacity)
 
     def update_atm_polydata(self):
+        """Updates the atom and picked atom polydata coordinates."""
         super().update_atm_polydata()
         self.update_picked_polydata()
 
     def change_atm_polydata_lines(self):
+        """Updates the atom and picked atom polydata lines."""
         super().change_atm_polydata_lines()
         self.change_picked_polydata_lines()
 
     def clear_picked_atoms(self):
+        """Clears the picked atom actor and removes it from the renderer."""
         if not self.picked_atom_actor:
             return
 
@@ -75,6 +98,13 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.picked_atom_actor = None
 
     def create_picked_atoms(self, *, opacity: float = 1.0):
+        """Clear and create the picked atom actor and add it to renderer.
+
+        Parameters
+        ----------
+        opacity : float, optional
+            opacity (alpha) of picked atom spheres, by default 1.0
+        """
         self.clear_picked_atoms()
 
         if not self._atoms_visible or len(self.picked_atoms) == 0:
@@ -85,6 +115,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.picked_atom_actor = actor
 
     def clear_picked_bonds(self):
+        """Clears the picked bond actor and removes it from the renderer."""
         if not self.picked_bond_actor:
             return
 
@@ -92,6 +123,13 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.picked_bond_actor = None
 
     def create_picked_bonds(self, *, opacity: float = 1.0):
+        """Clear and create the picked bond actor and add it to renderer.
+
+        Parameters
+        ----------
+        opacity : float, optional
+            opacity (alpha) of picked bond lines, by default 1.0
+        """
         self.clear_picked_bonds()
 
         if self.bond_calc == BondCalc.NONE or len(self.picked_atoms) == 0:
@@ -102,6 +140,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.picked_bond_actor = actor
 
     def update_picked_polydata(self):
+        """Updates the picked polydata coordinates."""
         atoms = vtk.vtkPoints()
 
         if len(self.picked_atoms) == 0:
@@ -117,11 +156,11 @@ class MolecularViewerWithPicking(MolecularViewer):
             (
                 self._colour_manager.colours,
                 self._colour_manager.radii,
-                np.arange(len(self.picked_atoms)),
             )
         )
 
     def change_picked_polydata_lines(self):
+        """Calculate and/or updates the picked polydata bonds."""
         if len(self.picked_atoms) <= 1:
             self._picked_polydata.SetLines(vtk.vtkCellArray())
             return
@@ -208,6 +247,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.picked_atoms_changed.emit(self.picked_atoms)
 
     def pick_atom(self, picked_atom):
+        """Updates the 3D view on atom picked from mouse clicks."""
         self.picked_atoms = self.picked_atoms.symmetric_difference({picked_atom})
         self._picked_polydata.Initialize()
         self.update_picked_polydata()
@@ -217,6 +257,13 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.update_renderer()
 
     def change_picked(self, picked: set[int]):
+        """Changes the picked atoms based on the input atom indices.
+
+        Parameters
+        ----------
+        picked : set[int]
+            The set of picked atom indices.
+        """
         self.picked_atoms = picked
         self._picked_polydata.Initialize()
         self.update_picked_polydata()
@@ -225,12 +272,26 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.create_picked_bonds()
         self.update_renderer()
 
-    def set_atm_polydata_scalars(self, data):
+    def set_atm_polydata_scalars(self, data: tuple[np.ndarray, np.ndarray]):
+        """Sets the atom and picked atom polydata scalar and array data.
+
+        Parameters
+        ----------
+        data : tuple[np.ndarray, np.ndarray]
+            A tuple of arrays of atom colours, and radii.
+        """
         super().set_atm_polydata_scalars(data)
         self.set_picked_polydata_scalars(data)
 
-    def set_picked_polydata_scalars(self, data):
-        colours, radii, _ = data
+    def set_picked_polydata_scalars(self, data: tuple[np.ndarray, np.ndarray]):
+        """Sets the picked polydata scalar and array data.
+
+        Parameters
+        ----------
+        data : tuple[np.ndarray, np.ndarray]
+            A tuple of arrays of atom colours and radii.
+        """
+        colours, radii = data
 
         picked = np.array(sorted(self.picked_atoms))
         if len(picked) == 0:

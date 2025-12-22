@@ -142,6 +142,12 @@ class UnitCell:
 
     @property
     def vertices(self):
+        """
+        Returns
+        -------
+        np.ndarray
+            The positions of the vertices of the unit cell.
+        """
         a = self.a_vector
         b = self.b_vector
         c = self.c_vector

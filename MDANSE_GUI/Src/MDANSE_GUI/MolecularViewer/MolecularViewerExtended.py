@@ -51,6 +51,9 @@ class MolecularViewerExtended(MolecularViewer):
         QTimer.singleShot(0, lambda: self._renderer.ResetCameraScreenSpace(0.4))
 
     def set_reader(self, reader):
+        """Stops the animation, clears the placeholder, sets the camera
+        position center back to the normal position, and finally set the
+        reader which loads the trajectory."""
         self._animation_timer.stop()
         self.clear_placeholder()
         self._camera.SetWindowCenter(0.0, 0.0)
@@ -91,6 +94,7 @@ class MolecularViewerExtended(MolecularViewer):
         LOG.debug(f"Click event picked up atom index {picked_index}")
 
     def clear_placeholder(self):
+        """Clears the placeholder actors and removes them from the renderer."""
         if not self.placeholder_actors:
             return
 
@@ -145,6 +149,7 @@ class MolecularViewerExtended(MolecularViewer):
             self.placeholder_actors.append(actor)
 
     def start_animation(self):
+        """Set the camera and start the placeholder animation."""
         # side view of 3d model
         self._camera.SetPosition(20, 0, 0)
         self._camera.SetFocalPoint(0, 0, 0)
@@ -170,7 +175,8 @@ class MolecularViewerExtended(MolecularViewer):
                     actor.RotateX(-self.secondary_speed)
             self.update_renderer()
 
-    def clear_panel(self) -> None:
+    def clear_panel(self):
+        """Clears the panel, and then create and animate the placeholder."""
         super().clear_panel()
         if not self._animation_timer.isActive():
             self.create_placeholder()

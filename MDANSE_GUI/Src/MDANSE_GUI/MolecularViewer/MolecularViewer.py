@@ -196,6 +196,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.dummy_size = 0.0
 
     def clear_axes(self):
+        """Clears the axes actors and removes them from the renderer."""
         if not self.axes_actors:
             return
 
@@ -205,7 +206,20 @@ class MolecularViewer(QtWidgets.QWidget):
         self.axes_actors = []
 
     def create_axes(self):
-        def add_arrow(color, direction):
+        """Clears and creates a new set of axes actors and adds
+        them to the renderer.
+        """
+
+        def add_arrow(color: list[float | int], direction: list[float | int]):
+            """Creates an arrow actor and add it to the axes renderer.
+
+            Parameters
+            ----------
+            color : list[float | int]
+                The colour of the arrow.
+            direction : list[float | int]
+                The direction of the arrow.
+            """
             rot = R.align_vectors(direction, [1, 0, 0])[0].as_matrix()
 
             vtk_matrix = vtk.vtkMatrix4x4()
@@ -226,7 +240,16 @@ class MolecularViewer(QtWidgets.QWidget):
             self.axes_actors.append(arrow_actor)
             self._axes_renderer.AddActor(arrow_actor)
 
-        def add_text(text, coord):
+        def add_text(text: str, coord: list[float | int]):
+            """Creates an axes label and add it to the axes renderer.
+
+            Parameters
+            ----------
+            text : str
+                The text of the label.
+            coord : list[float | int]
+                The position of the label.
+            """
             vec_text = vtk.vtkVectorText()
             vec_text.SetText(text)
 
@@ -274,7 +297,7 @@ class MolecularViewer(QtWidgets.QWidget):
             add_text(label, matrix[i])
 
     def change_axes(self, axes_option: AxesType):
-        """Changes the axes type in the 3D viewer.
+        """Changes the axes type in the 3D viewer. Updates the renderer.
 
         Parameters
         ----------
@@ -286,7 +309,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_renderer()
 
     def clear_atom_labels(self):
-        """Clears the atoms labels."""
+        """Clears the atom label actor and removes it from the renderer."""
         if not self.atom_label_actor:
             return
 
@@ -294,8 +317,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self.atom_label_actor = None
 
     def create_atom_labels(self):
-        """Creates atom label actors, setting the text to the chosen
-        atom_label_type.
+        """Clear and create atom label actor, setting the text to the
+        one chosen by atom_label_type, and add it to the label renderer.
         """
         self.clear_atom_labels()
 
@@ -349,7 +372,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._label_renderer.AddActor(actor)
 
     def change_atom_labels(self, label_option: AtomLabelType) -> None:
-        """Changes the atoms label text.
+        """Changes the atoms label text. Updates the renderer.
 
         Parameters
         ----------
@@ -361,6 +384,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_renderer()
 
     def clear_unit_cell(self):
+        """Clears the unit cell actor and remove it from the renderer."""
         if not self.uc_actor:
             return
 
@@ -368,6 +392,9 @@ class MolecularViewer(QtWidgets.QWidget):
         self.uc_actor = None
 
     def create_unit_cell(self):
+        """Clear and create the unit cell actor and add it to
+        the renderer.
+        """
         self.clear_unit_cell()
 
         if not self._cell_visible:
@@ -383,9 +410,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.uc_actor = uc_actor
 
     def update_uc_polydata(self):
-        """Updates the unit cell actor using the unit cell parameters
-        from the current trajectory frame.
-        """
+        """Updates the unit cell polydata."""
         if self._reader is None:
             return
 
@@ -420,6 +445,7 @@ class MolecularViewer(QtWidgets.QWidget):
             self._uc_polydata.SetLines(uc_lines)
 
     def clear_atoms(self):
+        """Clears the atom actor and removes it from the renderer."""
         if not self.atom_actor:
             return
 
@@ -427,6 +453,13 @@ class MolecularViewer(QtWidgets.QWidget):
         self.atom_actor = None
 
     def create_atoms(self, *, opacity: float = 1.0):
+        """Clear and create the atom actor and add it to renderer.
+
+        Parameters
+        ----------
+        opacity : float, optional
+            opacity (alpha) of atom spheres, by default 1.0
+        """
         self.clear_atoms()
 
         if not self._atoms_visible:
@@ -437,6 +470,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.atom_actor = actor
 
     def clear_bonds(self):
+        """Clears the bond actor and remove it from the renderer."""
         if not self.bond_actor:
             return
 
@@ -444,6 +478,13 @@ class MolecularViewer(QtWidgets.QWidget):
         self.bond_actor = None
 
     def create_bonds(self, *, opacity: float = 1.0):
+        """Clear and create the bond actor and add it to renderer.
+
+        Parameters
+        ----------
+        opacity : float, optional
+            opacity (alpha) of the bond lines, by default 1.0
+        """
         self.clear_bonds()
 
         if self.bond_calc == BondCalc.NONE:
@@ -454,7 +495,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.bond_actor = actor
 
     def change_bond_calc(self, bond_calc_option: BondCalc) -> None:
-        """Changes when the bond calculation are to run.
+        """Changes when the bond calculations are run. Updates the renderer.
 
         Parameters
         ----------
@@ -482,8 +523,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         Returns
         -------
-            Two vtk.vtkLODActor instances, for atoms
-
+            The vtk.vtkLODActor instances for atoms
         """
         sphere = vtk.vtkSphereSource()
         sphere.SetCenter(0, 0, 0)
@@ -534,7 +574,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         Returns
         -------
-            Two vtk.vtkLODActor instances, for bonds
+            The vtk.vtkLODActor instances for bonds
         """
         line_mapper = vtk.vtkPolyDataMapper()
         line_mapper.SetInputData(polydata)
@@ -551,9 +591,7 @@ class MolecularViewer(QtWidgets.QWidget):
         return line_actor
 
     def update_atm_polydata(self):
-        """Triggers an update of the VTK actors, making them use the
-        latest parameters from the input widgets.
-        """
+        """Updates the atom polydata coordinates."""
         if self._current_coords is None:
             return
 
@@ -563,6 +601,7 @@ class MolecularViewer(QtWidgets.QWidget):
             self._atm_polydata.SetPoints(atoms)
 
     def change_atm_polydata_lines(self):
+        """Calculate and/or updates the atom polydata bonds."""
         if self.bond_calc == BondCalc.EVERY:
             rs = self._current_coords[self.not_du]
         elif self.bond_calc == BondCalc.FIRST:
@@ -656,7 +695,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def delete_atom_trace(self, trace_number: int):
         """Deletes from the 3D scene the isosurface with a specified
-        index, if it exists.
+        index, if it exists. Updates the renderer.
 
         Parameters
         ----------
@@ -675,7 +714,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def create_atom_trace(self, params: dict[str, Any] | None = None):
         """Calculates the total volume used by an atom in the trajectory
-        and draws an isosurface around it.
+        and draws an isosurface around it. Updates the renderer.
 
         Parameters
         ----------
@@ -800,7 +839,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def change_atom_trace_opacity(self, surface_index: int, opacity: float):
         """This method should allow changing the opacity of an already existing
-        isosurface. Currently not connected to any widgets.
+        isosurface. Updates the renderer.
+
+        Currently not connected to any widgets.
 
         Parameters
         ----------
@@ -818,7 +859,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def change_atom_trace_isocontour_level(self, surface_index: int, level: float):
         """This method should allow changing the isocontour level for an already existing
-        isosurface. Currently not connected to any widgets.
+        isosurface. Updates the renderer.
+
+        Currently not connected to any widgets.
 
         Parameters
         ----------
@@ -837,6 +880,8 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def change_atom_trace_rendering_type(self, surface_index: int, rendering_type: str):
         """Method for changing the rendering style of an existing isosurface.
+        Updates the renderer.
+
         Currently not connected to any widgets.
 
         Parameters
@@ -882,6 +927,7 @@ class MolecularViewer(QtWidgets.QWidget):
     @Slot(float)
     def _new_scaling(self, scale_factor: float):
         """Update the scale factor by which all the atom radii are multiplied.
+        Updates the renderer.
 
         Scale factor 1.0 means that the covalent radii of atoms are used as
         radii of the spheres in the 3D view. By default the atom size is scaled
@@ -899,8 +945,8 @@ class MolecularViewer(QtWidgets.QWidget):
             self.update_renderer()
 
     def _new_visibility(self, flags: list[bool]):
-        """Takes the new values of boolean flags which make
-        different actors in the 3D scene (in)visible.
+        """Takes the new values of boolean flags which make different
+        actors in the 3D scene (in)visible. Updates the renderer.
 
         Parameters
         ----------
@@ -914,13 +960,27 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_renderer()
 
     @Slot(object)
-    def _new_atom_properties(self, data):
+    def _new_atom_properties(self, data: tuple[np.ndarray, np.ndarray]):
+        """Sets the atom polydata scalar and array data. Updates the renderer.
+
+        Parameters
+        ----------
+        data : tuple[np.ndarray, np.ndarray]
+            A tuple of arrays of atom colours and radii.
+        """
         self.set_atm_polydata_scalars(data)
         self.update_renderer()
 
-    def set_atm_polydata_scalars(self, data):
-        colours, radii, numbers = data
-        scalars = ndarray_to_vtkarray(colours, radii, numbers)
+    def set_atm_polydata_scalars(self, data: tuple[np.ndarray, np.ndarray]):
+        """Sets the atom polydata scalar and array data.
+
+        Parameters
+        ----------
+        data : tuple[np.ndarray, np.ndarray]
+            A tuple of arrays of atom colours and radii.
+        """
+        colours, radii = data
+        scalars = ndarray_to_vtkarray(colours, radii, np.arange(len(radii)))
         self._atm_polydata.GetPointData().SetScalars(scalars)
 
         radii_vtk = numpy_support.numpy_to_vtk(radii)
@@ -932,7 +992,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def set_reader(self, reader):
         """Sets the input object to be the new source of atom data for
-        the 3D viewer.
+        the 3D viewer. Updates the renderer.
 
         Parameters
         ----------
@@ -985,7 +1045,6 @@ class MolecularViewer(QtWidgets.QWidget):
             (
                 self._colour_manager.colours,
                 self._colour_manager.radii,
-                np.arange(self._colour_manager._total_length),
             )
         )
         self.update_atm_polydata()
@@ -1006,8 +1065,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
     @Slot(int)
     def set_coordinates(self, frame: int):
-        """Changes the atom positions in the 3D view to those from
-        the selected frame of the trajectory.
+        """Changes the atom positions, unit cell vertices, and axes directions
+        in the 3D view to those from the selected frame of the trajectory.
+        Updates the renderer.
 
         Parameters
         ----------
@@ -1031,7 +1091,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.frame_changed.emit()
 
     def clear_panel(self):
-        """Clears the Molecular Viewer panel"""
+        """Clears the Molecular Viewer panel. Updates the renderer."""
         self._reader = None
 
         self._atm_polydata.Initialize()
@@ -1058,5 +1118,6 @@ class MolecularViewer(QtWidgets.QWidget):
         self._colour_manager.removeRows(0, self._colour_manager.rowCount())
 
     def update_renderer(self):
+        """Updates the renderer."""
         self._iren.GetRenderWindow().Render()
         self._iren.Render()
