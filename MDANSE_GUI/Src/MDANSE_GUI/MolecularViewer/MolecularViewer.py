@@ -1087,7 +1087,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if self.bond_calc == BondCalc.EVERY:
             self.change_atm_polydata_lines()
         self.update_uc_polydata()
-        if self.axes_type == AxesType.DIRECT or self.axes_type == AxesType.RECIPROCAL:
+        if self.axes_type in (AxesType.DIRECT, AxesType.RECIPROCAL):
             self.create_axes()
 
         self.update_renderer()
