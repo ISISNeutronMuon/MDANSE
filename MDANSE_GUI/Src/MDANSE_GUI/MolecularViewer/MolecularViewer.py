@@ -28,7 +28,6 @@ from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QSizePolicy
 from scipy.interpolate import CubicSpline
 from scipy.spatial import cKDTree as KDTree
-from scipy.spatial.transform import Rotation as R
 from vtk.util import numpy_support
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkCommonCore import vtkStringArray
@@ -218,17 +217,15 @@ class MolecularViewer(QtWidgets.QWidget):
             color : list[float | int]
                 The colour of the arrow.
             direction : list[float | int]
-                The direction of the arrow.
+                The direction of the arrow, must be normalised.
             """
-            rot = R.align_vectors(direction, [1, 0, 0])[0].as_matrix()
-
-            vtk_matrix = vtk.vtkMatrix4x4()
-            for j in range(3):
-                for k in range(3):
-                    vtk_matrix.SetElement(j, k, rot[j, k])
-            vtk_matrix.SetElement(3, 3, 1.0)
+            x, y, z = direction
             transform = vtk.vtkTransform()
-            transform.SetMatrix(vtk_matrix)
+            transform.Identity()
+            if x < 0 and abs(y) < 1e-6 and abs(z) < 1e-6:
+                transform.RotateWXYZ(180, 0, 1, 0)
+            else:
+                transform.RotateWXYZ(np.degrees(np.arccos(x)), 0, -z, y)
 
             arrow_source = vtk.vtkArrowSource()
             arrow_mapper = vtk.vtkPolyDataMapper()
