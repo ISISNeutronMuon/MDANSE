@@ -18,6 +18,7 @@ from __future__ import annotations
 import copy
 from collections import ChainMap
 from enum import Enum
+import math
 from typing import Any
 
 import more_itertools
@@ -225,7 +226,7 @@ class MolecularViewer(QtWidgets.QWidget):
             if x < 0 and abs(y) < 1e-6 and abs(z) < 1e-6:
                 transform.RotateWXYZ(180, 0, 1, 0)
             else:
-                transform.RotateWXYZ(np.degrees(np.arccos(x)), 0, -z, y)
+                transform.RotateWXYZ(np.degrees(math.acos(x)), 0, -z, y)
 
             arrow_source = vtk.vtkArrowSource()
             arrow_mapper = vtk.vtkPolyDataMapper()
