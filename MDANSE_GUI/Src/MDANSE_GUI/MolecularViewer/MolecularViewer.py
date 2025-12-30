@@ -771,18 +771,10 @@ class MolecularViewer(QtWidgets.QWidget):
 
         tree = KDTree(grid)
         contacts = tree.query_ball_point(coords, radius, workers=-1)
-        n_dists = sum([len(i) for i in contacts])
-
-        js = np.zeros(n_dists, dtype=int)
-        ks = np.zeros(n_dists, dtype=int)
-        start = 0
-        for i, idxs in enumerate(contacts):
-            n_idxs = len(idxs)
-            if n_idxs == 0:
-                continue
-            js[start : start + n_idxs] = i
-            ks[start : start + n_idxs] = idxs
-            start += n_idxs
+        n_contacts = np.fromiter((len(i) for i in contacts), dtype=int)
+        mask = n_contacts > 0
+        js = np.repeat(np.nonzero(mask)[0], n_contacts[mask])
+        ks = np.concatenate([contacts[i] for i in np.nonzero(mask)[0]])
 
         diff = coords[js] - grid[ks]
         sq_dist = np.sum(diff**2, axis=-1)
@@ -812,7 +804,6 @@ class MolecularViewer(QtWidgets.QWidget):
         mapper = vtk.vtkPolyDataMapper()
         mapper.SetInputConnection(self._depthSort.GetOutputPort())
         mapper.ScalarVisibilityOff()
-        mapper.Update()
 
         new_surface = vtk.vtkActor()
         new_surface.SetMapper(mapper)
