@@ -37,7 +37,7 @@ class QVectorsConfigurator(IConfigurator):
     norm match the Q shell value within a given tolerance.
 
     Depending on the generator selected, Q vectors can be generated
-    isotropically or anistropically, on a lattice or randomly.
+    isotropically or anisotropically, on a lattice or randomly.
 
     """
 

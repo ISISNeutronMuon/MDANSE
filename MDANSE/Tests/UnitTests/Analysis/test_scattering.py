@@ -19,7 +19,7 @@ com_traj = CONV_DIR / "com_trajectory.mdt"
 def qvector_grid():
     return (
         "GridQVectors",
-        {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
+        {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "q_step": 1},
     )
 
 
@@ -36,7 +36,7 @@ def dcsf(tmp_path_factory):
         "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "q_vectors": (
             "GridQVectors",
-            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
+            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "q_step": 1},
         ),
         "running_mode": ("single-core",),
         "trajectory": short_traj,
@@ -62,7 +62,7 @@ def disf(tmp_path_factory):
         "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "q_vectors": (
             "GridQVectors",
-            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
+            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "q_step": 1},
         ),
         "running_mode": ("single-core",),
         "trajectory": short_traj,

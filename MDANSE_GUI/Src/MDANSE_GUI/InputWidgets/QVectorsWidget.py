@@ -40,6 +40,7 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 from MDANSE_GUI.Tabs.Views.PlotDataView import (
+    qvector_binning_from_dict,
     vector_angular_datasets,
     vector_projection_datasets,
     vector_q_statistics_datasets,
@@ -401,7 +402,10 @@ class QVectorsWidget(WidgetBase):
             self.helper.shell_panel_3D.plot_widget._plotter.plot_blank()
             return
         model = PlottingContext()
-        for qvec_dataset in vector_q_statistics_datasets(self._configurator):
+        modq_binning = qvector_binning_from_dict(self._configurator["parameters"])
+        for qvec_dataset in vector_q_statistics_datasets(
+            self._configurator, q_bin_limits=modq_binning
+        ):
             model.add_dataset(qvec_dataset)
         self.helper.plot_widget.set_plotter("Vectors")
         self.helper.plot_widget.set_context(model)

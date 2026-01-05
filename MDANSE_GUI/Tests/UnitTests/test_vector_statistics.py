@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 from MDANSE_GUI.Tabs.Views.PlotDataView import (
+    qvector_binning_general,
     vector_q_statistics_datasets,
     shell_to_modq,
 )
@@ -45,3 +46,9 @@ def test_vector_q_statistics_datasets_vecperq(file_qvec):
     nvec_per_q, _, _ = vector_q_statistics_datasets(file_qvec)
     assert len(nvec_per_q.data) == len(SHELL_MODQ)
     assert all(nvec_per_q.data == VEC_PER_SHELL)
+
+
+def test_qvector_binning():
+    bin_limits = qvector_binning_general(2.0, 2.5, 0.5, 0.2, 4)
+    assert np.isclose(sum(bin_limits[2:4])/2, 2.0)
+    assert np.isclose(sum(bin_limits[6:8])/2, 2.5)

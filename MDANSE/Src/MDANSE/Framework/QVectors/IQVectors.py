@@ -31,9 +31,47 @@ if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 GAUSS_WIDTH_FACTOR = 4.70964  # 2*sqrt(2*ln(2))
+WIDTH_NONZERO_LIMIT = 1e-15  # width below this limit is assumed to be 0
 
 
-def truncated_normal_distribution(n_elements, left_limit, right_limit, width, centre):
+def truncated_normal_distribution(
+    n_elements: int,
+    left_limit: float,
+    right_limit: float,
+    width: float,
+    centre: float,
+    zero_width_limit: float = 0.1,
+) -> npt.NDArray[float]:
+    """Generate a normal distribution of values within the specified limits.
+
+    Parameters
+    ----------
+    n_elements : int
+        Number of values to be generated.
+    left_limit : float
+        Lower limit of the generated values.
+    right_limit : float
+        Upper limit of the generated values.
+    width : float
+        FWHM of the value distribution.
+    centre : float
+        Position of the maximum of the distribution.
+    zero_width_limit : float, optional
+        Limits used when width is 0 to guarantee non-zero domain width, by default 0.1.
+
+    Returns
+    -------
+    npt.NDArray[float]
+        _description_
+    """
+    if abs(width) < WIDTH_NONZERO_LIMIT:
+        return truncnorm.rvs(
+            -zero_width_limit,
+            zero_width_limit,
+            loc=centre,
+            scale=0,
+            size=n_elements,
+        )
     return truncnorm.rvs(
         GAUSS_WIDTH_FACTOR * (left_limit - centre) / width,
         GAUSS_WIDTH_FACTOR * (right_limit - centre) / width,
@@ -74,7 +112,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
 
     @classmethod
     def qvectors_to_hkl(
-        self,
+        cls,
         vector_array: np.array,
         unit_cell: UnitCell,
     ) -> np.ndarray:
@@ -99,7 +137,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
         return np.dot(unit_cell.direct, vector_array) / (2 * np.pi)
 
     @classmethod
-    def hkl_to_qvectors(self, hkls: np.array, unit_cell: UnitCell) -> np.ndarray:
+    def hkl_to_qvectors(cls, hkls: np.array, unit_cell: UnitCell) -> np.ndarray:
         """Convert an array of HKL values to scattering vectors.
 
         Uses a unit cell object to get the lattice vectors for conversion.
@@ -121,7 +159,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
 
     @classmethod
     def lattice_vectors_with_weights(
-        self,
+        cls,
         start_shape: npt.NDArray[float],
         unit_cell: UnitCell,
     ) -> tuple[npt.NDArray[float], npt.NDArray[float]]:
@@ -142,26 +180,26 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
         tuple[npt.NDArray[float], npt.NDArray[float]]
             Unique Q-vectors as HKL values, number of times each vector appeared.
         """
-        hkl_fractional = self.qvectors_to_hkl(start_shape, unit_cell)
+        hkl_fractional = cls.qvectors_to_hkl(start_shape, unit_cell)
         return np.unique(np.round(hkl_fractional), return_counts=True, axis=1)
 
     @classmethod
     def remove_zero_vector(
-        self, vectors: npt.NDArray[float], weights: npt.NDArray[float] | None = None
+        cls, vectors: npt.NDArray[float], weights: npt.NDArray[float] | None = None
     ):
         nonzero_vector_mask = np.linalg.norm(vectors, axis=0) > 1e-15
         return vectors[:, nonzero_vector_mask], weights[nonzero_vector_mask]
 
     @classmethod
     def vectors_within_limits(
-        self,
+        cls,
         q_vectors: npt.NDArray[float],
         *,
         q_min: float,
         q_max: float,
     ):
         lengths = np.linalg.norm(q_vectors, axis=0)
-        return np.where((lengths >= q_min) & (lengths <= q_max))
+        return (lengths >= q_min) & (lengths <= q_max)
 
     def write_vectors_to_file(self, output_data: OutputData):
         """Write the vectors to output file as an array.

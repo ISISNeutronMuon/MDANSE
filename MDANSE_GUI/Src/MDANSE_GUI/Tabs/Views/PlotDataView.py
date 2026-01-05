@@ -16,7 +16,9 @@
 from __future__ import annotations
 
 import html
+import json
 from collections.abc import Generator
+from typing import Any
 
 import h5py
 import numpy as np
@@ -26,6 +28,7 @@ from qtpy.QtGui import QContextMenuEvent, QMouseEvent
 from qtpy.QtWidgets import QAbstractItemView, QMenu, QTreeView
 
 from MDANSE.Framework.Configurators.QVectorsConfigurator import QVectorsConfigurator
+from MDANSE.Framework.QVectors.IQVectors import WIDTH_NONZERO_LIMIT
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem, MDADataStructure
@@ -33,7 +36,43 @@ from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDatase
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
-BIN_STEP_PADDING = 2.0
+MAX_BINS_PER_SHELL = 20
+MIN_BINS_PER_SHELL = 3
+MAX_BINS_PER_PLOT = 180
+
+
+def qvector_binning_from_dict(
+    qvector_params: dict[str, Any], n_segments: int = 10
+) -> npt.NDArray[float] | None:
+    step_params = qvector_params.get("shells")
+    if step_params is None:
+        return None
+    start, end, step_size = step_params
+    width = qvector_params.get("width")
+    return qvector_binning_general(start, end, step_size, width, n_segments)
+
+
+def qvector_binning_general(
+    start: float, end: float, step_size: float, width: float | None, n_segments: int
+):
+    if width is not None and abs(width) > WIDTH_NONZERO_LIMIT:
+        n_segments = max(
+            min(MAX_BINS_PER_SHELL, n_segments * round(step_size / width)),
+            MIN_BINS_PER_SHELL,
+        )
+    bin_width = step_size / n_segments
+    first_offset = min(2 + 2 * start // bin_width, n_segments)
+    last_value = (
+        end + bin_width * n_segments if width is None else end + width / 2 + bin_width
+    )
+    while (last_value - first_offset * bin_width) / bin_width > MAX_BINS_PER_PLOT:
+        bin_width += step_size / n_segments
+        first_offset = min(2 + 2 * start // bin_width, n_segments)
+    return np.arange(
+        start - bin_width * (first_offset + 1) / 2,
+        last_value,
+        bin_width,
+    )
 
 
 def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[float]:
@@ -102,17 +141,18 @@ def angular_datasets_from_qarray(
     azimuthal_angles = np.arctan2(q_array[1, :], q_array[0, :])
     results = []
     rounding_precision = 3
-    for input_angles, label, xlabel, normalise in (
+    for input_angles, label, xlabel, normalise, hist_range in (
         (
             polar_angles,
             r"Polar angle, NORMALISED: counts/sin($\theta$)",
             r"$\theta$",
             True,
+            (0, np.pi),
         ),
-        (azimuthal_angles, "Azimuthal angle", r"$\phi$", False),
+        (azimuthal_angles, "Azimuthal angle", r"$\phi$", False, (-np.pi, np.pi)),
     ):
         angles = np.round(input_angles, rounding_precision)
-        counts, bins = np.histogram(angles, weights=weight_array)
+        counts, bins = np.histogram(angles, weights=weight_array, range=hist_range)
         unique_counts, _ = np.histogram(angles, bins=bins)
         mean_angles = (bins[1:] + bins[:-1]) / 2
         if normalise:
@@ -221,7 +261,9 @@ def projection_datasets_from_qarray(
 
 
 def vector_q_statistics_datasets(
-    source: h5py.File | QVectorsConfigurator, main_dset: str = "vector_generator"
+    source: h5py.File | QVectorsConfigurator,
+    main_dset: str = "vector_generator",
+    q_bin_limits: npt.NDArray[float] | None = None,
 ) -> tuple[SingleDataset, SingleDataset]:
     """Create plottable SingleDataset instances showing |q| of generated vectors.
 
@@ -231,6 +273,8 @@ def vector_q_statistics_datasets(
         HDF5 file object, typically an .mda file.
     main_dset : str, optional
         Name of the group with q vector shells, by default "vector_generator".
+    q_bin_limits: npt.NDArray[float], optional
+        Bin limits for the |q| histogram. If not given, it will be determined from |q| values.
 
     Returns
     -------
@@ -305,11 +349,13 @@ def vector_q_statistics_datasets(
             )
         ]
     )
-    qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[-1])
-    q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 0.1
-    bin_step = 0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell])
-    bin_step = 0.2 * q_step if abs(bin_step) < 1e-09 else max(bin_step, 0.05 * q_step)
-    common_bins = np.arange(max(0.0, qmin), qmax + 1.1 * bin_step, bin_step)
+    if q_bin_limits is None:
+        qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[-1])
+        q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 0.1
+        bin_width = 0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell])
+        common_bins = qvector_binning_general(qmin, qmax, q_step, bin_width, 10)
+    else:
+        common_bins = q_bin_limits
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
     stacked_histograms = np.vstack(qmod_histograms)
     xvals = common_bins[1:] - np.diff(common_bins) / 2
@@ -533,7 +579,11 @@ class PlotDataView(QTreeView):
         file = mda_data_structure._file
         LOG.debug("Running plot_vectors on file %s", file.filename)
         model = PlottingContext()
-        for qvec_dataset in vector_q_statistics_datasets(file):
+        _, qvector_params = json.loads(file["metadata/inputs/q_vectors"][0])
+        modq_binning = qvector_binning_from_dict(qvector_params)
+        for qvec_dataset in vector_q_statistics_datasets(
+            file, q_bin_limits=modq_binning
+        ):
             model.add_dataset(qvec_dataset)
         self.fast_plotting_vectors.emit(model)
 
