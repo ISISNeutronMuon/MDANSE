@@ -31,9 +31,6 @@ from scipy.interpolate import CubicSpline
 from scipy.spatial import cKDTree as KDTree
 from vtk.util import numpy_support
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.vtkCommonCore import vtkStringArray
-from vtkmodules.vtkRenderingCore import vtkActor2D
-from vtkmodules.vtkRenderingLabel import vtkLabeledDataMapper
 
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Connectivity import distance_calculation
@@ -75,9 +72,9 @@ class AxesType(Enum):
 
 class BondCalc(Enum):
     NONE = "none"
-    FIRST = "first frame"
-    LAST = "last frame"
-    EVERY = "every frame"
+    FIRST = "calculate from first frame"
+    LAST = "calculate from last frame"
+    EVERY = "calculate for every frame"
     FILE = "from file"
 
 
@@ -179,7 +176,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._current_coords = None
 
         self.axes_actors = []
-        self.atom_label_actor = None
+        self.atom_label_actors = []
         self.uc_actor = None
         self.atom_actor = None
         self.bond_actor = None
@@ -307,12 +304,14 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_renderer()
 
     def clear_atom_labels(self):
-        """Clears the atom label actor and removes it from the renderer."""
-        if not self.atom_label_actor:
+        """Clears the atom label actors and removes it from the renderer."""
+        if not self.atom_label_actors:
             return
 
-        self._label_renderer.RemoveActor(self.atom_label_actor)
-        self.atom_label_actor = None
+        for actor in self.atom_label_actors:
+            self._label_renderer.RemoveActor(actor)
+
+        self.atom_label_actors = []
 
     def create_atom_labels(self):
         """Clear and create atom label actor, setting the text to the
@@ -350,24 +349,32 @@ class MolecularViewer(QtWidgets.QWidget):
         if len(labels) != self._n_atoms:
             return
 
-        labels_vtk = vtkStringArray()
-        labels_vtk.SetName("labels")
-        labels_vtk.SetNumberOfValues(self._n_atoms)
-        for i, label in enumerate(labels):
-            labels_vtk.SetValue(i, str(label))
-        self._atm_polydata.GetPointData().AddArray(labels_vtk)
+        self.atom_label_actors = []
+        for label, coord in zip(labels, self._current_coords, strict=True):
+            text = vtk.vtkVectorText()
+            text.SetText(f"{label}")
 
-        label_mapper = vtkLabeledDataMapper()
-        label_mapper.SetInputData(self._atm_polydata)
-        label_mapper.SetLabelModeToLabelFieldData()
-        label_mapper.SetFieldDataName("labels")
-        text_prop = label_mapper.GetLabelTextProperty()
-        text_prop.SetFontSize(12)
+            mapper = vtk.vtkPolyDataMapper()
+            mapper.SetInputConnection(text.GetOutputPort())
 
-        actor = vtkActor2D()
-        actor.SetMapper(label_mapper)
-        self.atom_label_actor = actor
-        self._label_renderer.AddActor(actor)
+            follower = vtk.vtkFollower()
+            follower.SetMapper(mapper)
+            follower.SetScale(0.025)
+            follower.SetPosition(*coord)
+            follower.SetCamera(self._label_renderer.GetActiveCamera())
+
+            self.atom_label_actors.append(follower)
+            self._label_renderer.AddActor(follower)
+
+    def update_atom_labels(self):
+        """Updates the atom label actors to the current position."""
+        if self._reader is None or self.atom_label_type is AtomLabelType.NONE:
+            return
+
+        for follower, coord in zip(
+            self.atom_label_actors, self._current_coords, strict=True
+        ):
+            follower.SetPosition(*coord)
 
     def change_atom_labels(self, label_option: AtomLabelType) -> None:
         """Changes the atoms label text. Updates the renderer.
@@ -1084,6 +1091,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_uc_polydata()
         if self.axes_type in (AxesType.DIRECT, AxesType.RECIPROCAL):
             self.create_axes()
+        self.update_atom_labels()
 
         self.update_renderer()
         self.frame_changed.emit()

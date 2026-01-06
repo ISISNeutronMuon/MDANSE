@@ -48,7 +48,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         super().clear_atoms()
         self.clear_picked_atoms()
 
-    def create_atoms(self, *, opacity: float = 0.20, picked_opacity: float = 1.0):
+    def create_atoms(self, *, opacity: float = 0.3, picked_opacity: float = 1.0):
         """Creates atom and picked atoms actors with different opacities.
 
         Parameters
@@ -66,7 +66,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         super().clear_bonds()
         self.clear_picked_bonds()
 
-    def create_bonds(self, *, opacity: float = 0.20, picked_opacity: float = 1.0):
+    def create_bonds(self, *, opacity: float = 0.3, picked_opacity: float = 1.0):
         """Creates bonds and picked bonds with different opacities.
 
         Parameters
