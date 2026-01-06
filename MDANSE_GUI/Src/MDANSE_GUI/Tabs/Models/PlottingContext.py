@@ -157,6 +157,7 @@ class SingleDataset:
 
         self._data_unit = source[self._name].attrs["units"]
         self._n_dim = len(self._data.shape)
+        self._data_shape = self._data.shape
         self._axes_tag = source[self._name].attrs["axis"]
 
         self.create_axes_tags(self._axes_tag, source)
@@ -173,6 +174,7 @@ class SingleDataset:
         yerror: npt.NDArray[float] | None = None,
         xerror: npt.NDArray[float] | None = None,
         optional_filename: str | None = None,
+        uneven_array: bool = False,
     ) -> None:
         """Set data for plotting without using a data file.
 
@@ -198,13 +200,20 @@ class SingleDataset:
             "medium": self._name,
             "full": self._name,
         }
-        self._data = np.real(data)
+        if uneven_array:
+            self._data = data
+            self._n_dim = 1
+            self._data_shape = (len(data),)
+            self._use_scaling = False
+        else:
+            self._data = np.real(data)
+            self._n_dim = len(self._data.shape)
+            self._data_shape = self._data.shape
         self._scaling_factor = scaling_factor
         self._xerror = xerror
         self._yerror = yerror
 
         self._data_unit = data_unit
-        self._n_dim = len(self._data.shape)
         if plot_axes is None:
             for ax_number, npoints in enumerate(self._data.shape):
                 axis_key = f"index{ax_number}"
@@ -863,7 +872,7 @@ class PlottingContext(QStandardItemModel):
             for x in [
                 new_dataset._name,
                 new_dataset._labels["medium"],
-                new_dataset._data.shape,
+                new_dataset._data_shape,
                 new_dataset._data_unit,
                 new_dataset.longest_axis()[-1],
                 "",
@@ -884,7 +893,11 @@ class PlottingContext(QStandardItemModel):
         for key in ("Use it?", "Apply weights?"):
             item = items[plotting_column_index[key]]
             item.setCheckable(True)
-            item.setCheckState(Qt.CheckState.Checked)
+            item.setCheckState(
+                Qt.CheckState.Checked
+                if key == "Use it?" or new_dataset._use_scaling
+                else Qt.CheckState.Unchecked
+            )
 
         items[plotting_column_index["Use it?"]].setText(
             f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1"

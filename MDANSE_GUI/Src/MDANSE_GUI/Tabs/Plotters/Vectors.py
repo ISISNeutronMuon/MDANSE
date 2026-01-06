@@ -36,8 +36,8 @@ class Vectors(Plotter):
         """Initialise all ploting parameters to default values."""
         super().__init__()
         self._figure = None
-        self._backup_limits = []
-        self._curve_limit_per_dataset = 36
+        self._backup_limits = {}
+        self._curve_limit_per_dataset = 128
         self._legend_limit_for_histogram = 6
 
     def slider_labels(self) -> list[str]:
@@ -103,7 +103,6 @@ class Vectors(Plotter):
         if toolbar is not None:
             self._toolbar = toolbar
         self._figure = target
-        error_lims = None
         self._normalisation_errors = []
         self._axes = []
         self.apply_settings(plotting_context)
@@ -162,32 +161,7 @@ class Vectors(Plotter):
                 axes.set_title(dataset._name)
             elif dataset._name == r"<|q|> - q$_{target}$":
                 axes = target.add_subplot(single_plot_stack.pop())
-                temp_curves = axes.plot(
-                    dataset.x_axis(best_axis),
-                    dataset.data,
-                    linestyle=databundle.line_style,
-                    label=plotlabel,
-                    color=databundle.colour,
-                )
-                if dataset._yerror is not None:
-                    axes.errorbar(
-                        dataset.x_axis(best_axis),
-                        dataset.data,
-                        fmt=databundle.marker,
-                        yerr=dataset._yerror,
-                        color=temp_curves[0].get_color(),
-                    )
-                    max_error = np.max(dataset._yerror)
-                    error_lims = (
-                        np.min(dataset.data) - max_error,
-                        np.max(dataset.data) + max_error,
-                    )
-                for temp in temp_curves:
-                    try:
-                        temp.set_marker(databundle.marker)
-                    except ValueError:
-                        with contextlib.suppress(Exception):
-                            temp.set_marker(int(databundle.marker))
+                axes.violinplot(dataset.data, positions=dataset.x_axis(best_axis))
                 self._axes.append(axes)
                 axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
                 axes.set_title(dataset._name)
@@ -235,31 +209,36 @@ class Vectors(Plotter):
                             axes.bar(
                                 x_axis, 0, label="...", color=target.get_facecolor()
                             )
-        for axes in self._axes:
+        for axindex, axes in enumerate(self._axes):
             if update_only:
+                plot_limits = self._backup_limits[axindex]
+                if axindex != 1:
+                    try:
+                        axes.set_xlim((plot_limits[0], plot_limits[1]))
+                    except ValueError:
+                        LOG.error(
+                            f"Matplotlib could not set x limits to {plot_limits[0]}, {plot_limits[1]}"
+                        )
                 try:
-                    axes.set_xlim((self._backup_limits[0], self._backup_limits[1]))
-                except ValueError:
-                    LOG.error(
-                        f"Matplotlib could not set x limits to {self._backup_limits[0]}, {self._backup_limits[1]}"
-                    )
-                try:
-                    axes.set_ylim((self._backup_limits[2], self._backup_limits[3]))
+                    axes.set_ylim((plot_limits[2], plot_limits[3]))
                 except ValueError:
                     LOG.error(
                         f"Matplotlib could not set y limits to {self._backup_limits[2]}, {self._backup_limits[3]}"
                     )
             else:
                 xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
-                self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
+                self._backup_limits[axindex] = [
+                    xlimits[0],
+                    xlimits[1],
+                    ylimits[0],
+                    ylimits[1],
+                ]
         for axes in self._axes:
             legend = axes.legend()
             legend.set_visible(plotting_context.use_legend)
             axes.grid(plotting_context.use_grid)
             axes.relim()
             axes.autoscale()
-        if error_lims is not None:
-            self._axes[1].set_ylim(*error_lims)
         if self._toolbar is not None:
             self._toolbar.update()
         target.canvas.draw()

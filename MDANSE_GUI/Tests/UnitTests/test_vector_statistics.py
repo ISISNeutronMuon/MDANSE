@@ -48,7 +48,10 @@ def test_vector_q_statistics_datasets_vecperq(file_qvec):
     assert all(nvec_per_q.data == VEC_PER_SHELL)
 
 
-def test_qvector_binning():
-    bin_limits = qvector_binning_general(2.0, 2.5, 0.5, 0.2, 4)
-    assert np.isclose(sum(bin_limits[2:4])/2, 2.0)
-    assert np.isclose(sum(bin_limits[6:8])/2, 2.5)
+@pytest.mark.parametrize("width", [0.1, 1.0, 10.0])
+def test_bin_limits_vs_width(width: float):
+    binning = qvector_binning_general(5.0, 6.0, 1.0, width, 10)
+    bin_min, bin_max = np.min(binning), np.max(binning)
+    print(bin_min, bin_max, 1.0, width)
+    assert np.isclose(bin_max, 6 + width/2) or bin_max >= 6 + width/2
+    assert np.isclose(bin_min, 5 - width/2) or bin_min <= 5 - width/2 or sum(binning < 0) < 2

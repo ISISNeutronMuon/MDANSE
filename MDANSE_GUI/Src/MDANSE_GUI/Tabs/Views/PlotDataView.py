@@ -23,6 +23,7 @@ from typing import Any
 import h5py
 import numpy as np
 import numpy.typing as npt
+from more_itertools import always_iterable
 from qtpy.QtCore import QAbstractItemModel, QModelIndex, QPoint, Qt, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QMouseEvent
 from qtpy.QtWidgets import QAbstractItemView, QMenu, QTreeView
@@ -55,21 +56,30 @@ def qvector_binning_from_dict(
 def qvector_binning_general(
     start: float, end: float, step_size: float, width: float | None, n_segments: int
 ):
-    if width is not None and abs(width) > WIDTH_NONZERO_LIMIT:
+    if width is None or abs(width) <= WIDTH_NONZERO_LIMIT:
+        n_segments = min(MAX_BINS_PER_SHELL, n_segments)
+        bin_width = step_size / n_segments
+        first_offset = start - step_size / 2 - bin_width
+        last_value = end + step_size / 2 + bin_width
+    elif width > step_size:
+        n_segments = min(MAX_BINS_PER_SHELL, n_segments * round(width / step_size))
+        bin_width = width / n_segments
+        first_offset = start - width / 2 - bin_width
+        last_value = end + width / 2 + bin_width
+    else:
         n_segments = max(
             min(MAX_BINS_PER_SHELL, n_segments * round(step_size / width)),
             MIN_BINS_PER_SHELL,
         )
-    bin_width = step_size / n_segments
-    first_offset = min(2 + 2 * start // bin_width, n_segments)
-    last_value = (
-        end + bin_width * n_segments if width is None else end + width / 2 + bin_width
-    )
+        bin_width = step_size / n_segments
+        first_offset = start - step_size / 2 - bin_width
+        last_value = end + step_size / 2 + bin_width
     while (last_value - first_offset * bin_width) / bin_width > MAX_BINS_PER_PLOT:
         bin_width += step_size / n_segments
-        first_offset = min(2 + 2 * start // bin_width, n_segments)
+        bins_till_zero = start // bin_width + 1
+        first_offset = min(bins_till_zero, n_segments)
     return np.arange(
-        start - bin_width * (first_offset + 1) / 2,
+        start - bin_width * (first_offset + 0.5),
         last_value,
         bin_width,
     )
@@ -333,22 +343,6 @@ def vector_q_statistics_datasets(
             ]
         )
         vec_weights = [dat[:] for dat in q_data("weights")]
-    mean_q = np.array(
-        [
-            np.average(modq_values, weights=weight_values)
-            for modq_values, weight_values in zip(
-                modq_per_shell, vec_weights, strict=True
-            )
-        ]
-    )
-    mean_q_yerr = np.array(
-        [
-            np.average((modq_values - average_value) ** 2, weights=weight_values)
-            for modq_values, weight_values, average_value in zip(
-                modq_per_shell, vec_weights, mean_q, strict=True
-            )
-        ]
-    )
     if q_bin_limits is None:
         qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[-1])
         q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 0.1
@@ -356,6 +350,10 @@ def vector_q_statistics_datasets(
         common_bins = qvector_binning_general(qmin, qmax, q_step, bin_width, 10)
     else:
         common_bins = q_bin_limits
+    if np.any(common_bins < 0):
+        start_index = np.argmax(common_bins >= 0) - 1
+        if start_index >= 0:
+            common_bins = common_bins[start_index:]
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
     stacked_histograms = np.vstack(qmod_histograms)
     xvals = common_bins[1:] - np.diff(common_bins) / 2
@@ -374,12 +372,24 @@ def vector_q_statistics_datasets(
         None,
         linestyle="-",
         marker=".",
-        data=mean_q - qvals[valid_shells],
+        data=[
+            np.concatenate(
+                [
+                    int(vec_weights[shellindex][vecindex])
+                    * list(always_iterable(veclen))
+                    for vecindex, veclen in enumerate(
+                        modq_per_shell[shellindex] - qvals[shell]
+                    )
+                ]
+            )
+            / 10
+            for shellindex, shell in enumerate(valid_shells)
+        ],
         plot_axes={"|q|": qvals[valid_shells]},
         axes_units={"|q|": "1/nm"},
-        data_unit="1/nm",
-        yerror=mean_q_yerr,
+        data_unit="1/ang",
         optional_filename=filename,
+        uneven_array=True,
     )
     vecs_per_qbin = SingleDataset(
         "Shell population",

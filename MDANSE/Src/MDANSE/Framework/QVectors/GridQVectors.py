@@ -48,7 +48,7 @@ class GridQVectors(LatticeQVectors):
         "RangeConfigurator",
         {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
     )
-    settings["q_step"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 0.01})
+    settings["q_step"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 0.2})
 
     def _generate(self):
         hrange = self._configuration["hrange"]["value"]
