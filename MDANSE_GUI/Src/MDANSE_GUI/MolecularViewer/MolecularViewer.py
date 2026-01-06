@@ -503,7 +503,9 @@ class MolecularViewer(QtWidgets.QWidget):
         self.bond_calc = bond_calc_option
         if self._reader is None:
             return
+        self.update_atm_polydata()
         self.change_atm_polydata_lines()
+        self.create_bonds()
         self.update_renderer()
 
     def create_atom_actor(
@@ -948,6 +950,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self._cell_visible = flags[1]
         if self._reader is None:
             return
+        self.update_uc_polydata()
+        self.update_atm_polydata()
         self.create_unit_cell()
         self.create_atoms()
         self.update_renderer()
