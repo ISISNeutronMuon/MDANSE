@@ -168,43 +168,44 @@ class MolecularViewerWithPicking(MolecularViewer):
         picked = np.array(sorted(self.picked_atoms))
         not_du = np.arange(len(self.picked_atoms))[self.du_log[picked]]
 
-        if self.bond_calc == BondCalc.EVERY:
-            rs = self._current_coords
-        elif self.bond_calc == BondCalc.FIRST:
-            rs = self._reader.read_frame(0)
-        elif self.bond_calc == BondCalc.LAST:
-            rs = self._reader.read_frame(self._n_frames - 1)
-        elif self.bond_calc == BondCalc.FILE:
-            bonds = np.array(self._reader._trajectory.chemical_system._bonds)
-            if len(bonds) == 0:
+        match self.bond_calc:
+            case BondCalc.EVERY:
+                rs = self._current_coords
+            case BondCalc.FIRST:
+                rs = self._reader.read_frame(0)
+            case BondCalc.LAST:
+                rs = self._reader.read_frame(self._n_frames - 1)
+            case BondCalc.FILE:
+                bonds = np.array(self._reader._trajectory.chemical_system._bonds)
+                if len(bonds) == 0:
+                    self._picked_polydata.SetLines(vtk.vtkCellArray())
+                    return
+
+                # unlike the other bond calc methods if the MDANSE trajectory bonds
+                # atoms to dummy atoms we will also do that here
+                mask = np.isin(bonds[:, 0], picked) & np.isin(bonds[:, 1], picked)
+                picked_bonds = bonds[mask]
+                picked_bonds = np.column_stack(
+                    (
+                        np.searchsorted(picked, picked_bonds[:, 0]),
+                        np.searchsorted(picked, picked_bonds[:, 1]),
+                    )
+                )
+
+                n_bonds = len(picked_bonds)
+                if n_bonds == 0:
+                    self._picked_polydata.SetLines(vtk.vtkCellArray())
+                else:
+                    cell_array = vtk.vtkCellArray()
+                    idxs = np.column_stack((np.full(n_bonds, 2), picked_bonds))
+                    cell_array.SetCells(
+                        n_bonds, numpy_support.numpy_to_vtkIdTypeArray(idxs.flatten())
+                    )
+                    self._picked_polydata.SetLines(cell_array)
+                return
+            case BondCalc.NONE:
                 self._picked_polydata.SetLines(vtk.vtkCellArray())
                 return
-
-            # unlike the other bond calc methods if the MDANSE trajectory bonds
-            # atoms to dummy atoms we will also do that here
-            mask = np.isin(bonds[:, 0], picked) & np.isin(bonds[:, 1], picked)
-            picked_bonds = bonds[mask]
-            picked_bonds = np.column_stack(
-                (
-                    np.searchsorted(picked, picked_bonds[:, 0]),
-                    np.searchsorted(picked, picked_bonds[:, 1]),
-                )
-            )
-
-            n_bonds = len(picked_bonds)
-            if n_bonds == 0:
-                self._picked_polydata.SetLines(vtk.vtkCellArray())
-            else:
-                cell_array = vtk.vtkCellArray()
-                idxs = np.column_stack((np.full(n_bonds, 2), picked_bonds))
-                cell_array.SetCells(
-                    n_bonds, numpy_support.numpy_to_vtkIdTypeArray(idxs.flatten())
-                )
-                self._picked_polydata.SetLines(cell_array)
-            return
-        else:
-            self._picked_polydata.SetLines(vtk.vtkCellArray())
-            return
 
         bonds = self.create_bond_cell_array(
             rs=rs[picked][not_du], covs=self.covs[picked][not_du], not_du=not_du

@@ -19,7 +19,7 @@ import copy
 import math
 from collections import ChainMap
 from enum import Enum
-from typing import Any
+from typing import Any, TypeAlias
 
 import more_itertools
 import numpy as np
@@ -41,6 +41,9 @@ from MDANSE_GUI.MolecularViewer.AtomProperties import (
 )
 from MDANSE_GUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.MolecularViewer.TraceWidget import TRACE_PARAMETERS
+
+
+ThreeVector: TypeAlias = tuple[float, float, float]
 
 
 def array_to_3d_imagedata(data: np.ndarray, spacing: tuple[float, float, float]):
@@ -207,14 +210,14 @@ class MolecularViewer(QtWidgets.QWidget):
         them to the renderer.
         """
 
-        def add_arrow(color: list[float | int], direction: list[float | int]):
+        def add_arrow(color: ThreeVector, direction: ThreeVector):
             """Creates an arrow actor and add it to the axes renderer.
 
             Parameters
             ----------
-            color : list[float | int]
+            color : ThreeVector
                 The colour of the arrow.
-            direction : list[float | int]
+            direction : ThreeVector
                 The direction of the arrow, must be normalised.
             """
             x, y, z = direction
@@ -235,14 +238,14 @@ class MolecularViewer(QtWidgets.QWidget):
             self.axes_actors.append(arrow_actor)
             self._axes_renderer.AddActor(arrow_actor)
 
-        def add_text(text: str, coord: list[float | int]):
+        def add_text(text: str, coord: ThreeVector):
             """Creates an axes label and add it to the axes renderer.
 
             Parameters
             ----------
             text : str
                 The text of the label.
-            coord : list[float | int]
+            coord : ThreeVector
                 The position of the label.
             """
             vec_text = vtk.vtkVectorText()
@@ -261,16 +264,16 @@ class MolecularViewer(QtWidgets.QWidget):
 
         self.clear_axes()
 
-        if self.axes_type == AxesType.NONE:
+        if self.axes_type is AxesType.NONE:
             return
 
-        if self.axes_type == AxesType.CARTESIAN:
-            add_arrow([1, 0, 0], [1, 0, 0])
-            add_arrow([0, 1, 0], [0, 1, 0])
-            add_arrow([0, 0, 1], [0, 0, 1])
-            add_text("X", [1, 0, 0])
-            add_text("Y", [0, 1, 0])
-            add_text("Z", [0, 0, 1])
+        if self.axes_type is AxesType.CARTESIAN:
+            add_arrow((1, 0, 0), (1, 0, 0))
+            add_arrow((0, 1, 0), (0, 1, 0))
+            add_arrow((0, 0, 1), (0, 0, 1))
+            add_text("X", (1, 0, 0))
+            add_text("Y", (0, 1, 0))
+            add_text("Z", (0, 0, 1))
             return
 
         if self._reader is None:
@@ -279,10 +282,10 @@ class MolecularViewer(QtWidgets.QWidget):
         if uc is None:
             return
 
-        if self.axes_type == AxesType.DIRECT:
+        if self.axes_type is AxesType.DIRECT:
             matrix = uc.direct.copy()
             labels = ["a", "b", "c"]
-        elif self.axes_type == AxesType.RECIPROCAL:
+        elif self.axes_type is AxesType.RECIPROCAL:
             matrix = uc.inverse.copy().T
             labels = ["a*", "b*", "c*"]
 
@@ -322,29 +325,30 @@ class MolecularViewer(QtWidgets.QWidget):
         if self._reader is None:
             return
 
-        if self.atom_label_type == AtomLabelType.INDEX:
-            labels = list(range(self._n_atoms))
-        elif self.atom_label_type == AtomLabelType.LABEL and (
-            label_dict := self._reader._trajectory.chemical_system._labels
-        ):
-            keys = more_itertools.run_length.decode(
-                ((k, len(v)) for k, v in label_dict.items())
-            )
-            labels = sorted(keys, key=label_dict.__getitem__)
-        elif self.atom_label_type == AtomLabelType.ATOM:
-            labels = self._atoms
-        elif self.atom_label_type == AtomLabelType.MOLECULE and (
-            label_dict := self._reader._trajectory.chemical_system._clusters
-        ):
-            label_dict = {
-                k: list(more_itertools.collapse(v)) for k, v in label_dict.items()
-            }
-            keys = more_itertools.run_length.decode(
-                ((k, len(v)) for k, v in label_dict.items())
-            )
-            labels = sorted(keys, key=label_dict.__getitem__)
-        else:
-            return
+        match self.atom_label_type:
+            case AtomLabelType.INDEX:
+                labels = list(range(self._n_atoms))
+            case AtomLabelType.LABEL if (
+                label_dict := self._reader._trajectory.chemical_system._labels
+            ):
+                keys = more_itertools.run_length.decode(
+                    ((k, len(v)) for k, v in label_dict.items())
+                )
+                labels = sorted(keys, key=label_dict.__getitem__)
+            case AtomLabelType.ATOM:
+                labels = self._atoms
+            case AtomLabelType.MOLECULE if (
+                label_dict := self._reader._trajectory.chemical_system._clusters
+            ):
+                label_dict = {
+                    k: list(more_itertools.collapse(v)) for k, v in label_dict.items()
+                }
+                keys = more_itertools.run_length.decode(
+                    ((k, len(v)) for k, v in label_dict.items())
+                )
+                labels = sorted(keys, key=label_dict.__getitem__)
+            case _:
+                return
 
         if len(labels) != self._n_atoms:
             return
@@ -611,28 +615,29 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def change_atm_polydata_lines(self):
         """Calculate and/or updates the atom polydata bonds."""
-        if self.bond_calc == BondCalc.EVERY:
-            rs = self._current_coords[self.not_du]
-        elif self.bond_calc == BondCalc.FIRST:
-            rs = self._reader.read_frame(0)[self.not_du]
-        elif self.bond_calc == BondCalc.LAST:
-            rs = self._reader.read_frame(self._n_frames - 1)[self.not_du]
-        elif self.bond_calc == BondCalc.FILE:
-            bonds = np.array(self._reader._trajectory.chemical_system._bonds)
-            n_bonds = len(bonds)
-            if n_bonds == 0:
+        match self.bond_calc:
+            case BondCalc.EVERY:
+                rs = self._current_coords[self.not_du]
+            case BondCalc.FIRST:
+                rs = self._reader.read_frame(0)[self.not_du]
+            case BondCalc.LAST:
+                rs = self._reader.read_frame(self._n_frames - 1)[self.not_du]
+            case BondCalc.FILE:
+                bonds = np.array(self._reader._trajectory.chemical_system._bonds)
+                n_bonds = len(bonds)
+                if n_bonds == 0:
+                    self._atm_polydata.SetLines(vtk.vtkCellArray())
+                    return
+                cell_array = vtk.vtkCellArray()
+                idxs = np.column_stack((np.full(n_bonds, 2), bonds))
+                cell_array.SetCells(
+                    n_bonds, numpy_support.numpy_to_vtkIdTypeArray(idxs.flatten())
+                )
+                self._atm_polydata.SetLines(cell_array)
+                return
+            case BondCalc.NONE:
                 self._atm_polydata.SetLines(vtk.vtkCellArray())
                 return
-            cell_array = vtk.vtkCellArray()
-            idxs = np.column_stack((np.full(n_bonds, 2), bonds))
-            cell_array.SetCells(
-                n_bonds, numpy_support.numpy_to_vtkIdTypeArray(idxs.flatten())
-            )
-            self._atm_polydata.SetLines(cell_array)
-            return
-        else:
-            self._atm_polydata.SetLines(vtk.vtkCellArray())
-            return
 
         bonds = self.create_bond_cell_array(
             rs=rs, covs=self.covs[self.not_du], not_du=self.not_du

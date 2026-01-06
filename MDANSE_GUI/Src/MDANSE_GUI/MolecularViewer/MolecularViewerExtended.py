@@ -91,7 +91,7 @@ class MolecularViewerExtended(MolecularViewer):
 
         picked_index = idxs[selected][np.argsort(dist_x_21[selected])][0]
         self.clicked_atom_index.emit(picked_index)
-        LOG.debug(f"Click event picked up atom index {picked_index}")
+        LOG.debug(f"Click event picked up atom index %d", picked_index)
 
     def clear_placeholder(self):
         """Clears the placeholder actors and removes them from the renderer."""
