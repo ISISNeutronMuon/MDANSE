@@ -42,7 +42,6 @@ from MDANSE_GUI.MolecularViewer.AtomProperties import (
 from MDANSE_GUI.MolecularViewer.readers import hdf5wrapper
 from MDANSE_GUI.MolecularViewer.TraceWidget import TRACE_PARAMETERS
 
-
 ThreeVector: TypeAlias = tuple[float, float, float]
 
 
