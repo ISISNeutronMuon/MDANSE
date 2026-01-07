@@ -43,6 +43,16 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.picked_atom_actor = None
         self.picked_bond_actor = None
 
+    @property
+    def n_picked_atoms(self) -> int:
+        """
+        Returns
+        -------
+        int
+            The number of picked atoms.
+        """
+        return len(self.picked_atoms)
+
     def clear_atoms(self):
         """Clears atom and picked atoms."""
         super().clear_atoms()
@@ -107,7 +117,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         """
         self.clear_picked_atoms()
 
-        if not self._atoms_visible or len(self.picked_atoms) == 0:
+        if not self._atoms_visible or self.n_picked_atoms == 0:
             return
 
         actor = self.create_atom_actor(self._picked_polydata, opacity=opacity)
@@ -132,7 +142,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         """
         self.clear_picked_bonds()
 
-        if self.bond_calc == BondCalc.NONE or len(self.picked_atoms) == 0:
+        if self.bond_calc == BondCalc.NONE or self.n_picked_atoms == 0:
             return
 
         actor = self.create_bond_actor(self._picked_polydata, opacity=opacity)
@@ -143,7 +153,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         """Updates the picked polydata coordinates."""
         atoms = vtk.vtkPoints()
 
-        if len(self.picked_atoms) == 0:
+        if self.n_picked_atoms == 0:
             self._picked_polydata.SetPoints(atoms)
             return
 
@@ -161,12 +171,12 @@ class MolecularViewerWithPicking(MolecularViewer):
 
     def change_picked_polydata_lines(self):
         """Calculate and/or updates the picked polydata bonds."""
-        if len(self.picked_atoms) <= 1:
+        if self.n_picked_atoms <= 1:
             self._picked_polydata.SetLines(vtk.vtkCellArray())
             return
 
         picked = np.array(sorted(self.picked_atoms))
-        not_du = np.arange(len(self.picked_atoms))[self.du_log[picked]]
+        not_du = np.arange(self.n_picked_atoms)[self.du_log[picked]]
 
         match self.bond_calc:
             case BondCalc.EVERY:
@@ -304,7 +314,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         scalars = ndarray_to_vtkarray(
             colours,
             radii,
-            np.arange(len(self.picked_atoms)),
+            np.arange(self.n_picked_atoms),
         )
         self._picked_polydata.GetPointData().SetScalars(scalars)
 
