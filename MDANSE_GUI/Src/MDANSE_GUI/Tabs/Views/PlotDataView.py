@@ -38,7 +38,7 @@ from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 MAX_BINS_PER_SHELL = 20
-MIN_BINS_PER_SHELL = 3
+MIN_BINS_PER_SHELL = 1
 MAX_BINS_PER_PLOT = 180
 
 
@@ -56,33 +56,56 @@ def qvector_binning_from_dict(
 def qvector_binning_general(
     start: float, end: float, step_size: float, width: float | None, n_segments: int
 ):
-    if width is None or abs(width) <= WIDTH_NONZERO_LIMIT:
-        n_segments = min(MAX_BINS_PER_SHELL, n_segments)
-        bin_width = step_size / n_segments
-        first_offset = start - step_size / 2 - bin_width
-        last_value = end + step_size / 2 + bin_width
-    elif width > step_size:
-        n_segments = min(MAX_BINS_PER_SHELL, n_segments * round(width / step_size))
-        bin_width = width / n_segments
-        first_offset = start - width / 2 - bin_width
-        last_value = end + width / 2 + bin_width
-    else:
-        n_segments = max(
-            min(MAX_BINS_PER_SHELL, n_segments * round(step_size / width)),
-            MIN_BINS_PER_SHELL,
-        )
-        bin_width = step_size / n_segments
-        first_offset = start - step_size / 2 - bin_width
-        last_value = end + step_size / 2 + bin_width
-    while (last_value - first_offset * bin_width) / bin_width > MAX_BINS_PER_PLOT:
-        bin_width += step_size / n_segments
-        bins_till_zero = start // bin_width + 1
-        first_offset = min(bins_till_zero, n_segments)
-    return np.arange(
-        start - bin_width * (first_offset + 0.5),
+    width = abs(width)
+    step_size = abs(step_size)
+    if end < start:
+        start, end = end, start
+    if np.isclose(start, end) and (width is None or abs(width) < WIDTH_NONZERO_LIMIT):
+        return np.array([start - 0.05, start + 0.05])
+
+    def get_bin_width(n_segments):
+        if np.isclose(start, end):
+            bin_width = width / n_segments
+            peak_width = width
+        elif width is None or width <= step_size / 2:
+            bin_width = step_size / n_segments
+            peak_width = step_size
+        else:
+            bin_width = step_size / n_segments
+            peak_width = width
+        return bin_width, peak_width
+
+    def get_first_last_values(bin_width, peak_width):
+        bins_per_shell = peak_width // bin_width
+        if bins_per_shell > MAX_BINS_PER_SHELL or bins_per_shell < MIN_BINS_PER_SHELL:
+            bins_per_shell = min(
+                max(MIN_BINS_PER_SHELL, bins_per_shell), MAX_BINS_PER_SHELL
+            )
+            bin_width = peak_width / bins_per_shell
+        first_value = start - 0.5 * (bins_per_shell + 1) * bin_width
+        last_value = end + 0.5 * (bins_per_shell + 1.01) * bin_width
+        return first_value, last_value
+
+    bin_width, peak_width = get_bin_width(n_segments)
+    first_value, last_value = get_first_last_values(bin_width, peak_width)
+    common_binning = np.arange(
+        first_value,
         last_value,
         bin_width,
     )
+    last_value = len(common_binning)
+    while len(common_binning) > MAX_BINS_PER_PLOT:
+        bin_width *= 2
+        first_value, last_value = get_first_last_values(bin_width, peak_width)
+        common_binning = np.arange(
+            first_value,
+            last_value,
+            bin_width,
+        )
+        if len(common_binning) == last_value:
+            break
+        last_value = len(common_binning)
+    return common_binning
 
 
 def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[float]:
@@ -382,7 +405,6 @@ def vector_q_statistics_datasets(
                     )
                 ]
             )
-            / 10
             for shellindex, shell in enumerate(valid_shells)
         ],
         plot_axes={"|q|": qvals[valid_shells]},

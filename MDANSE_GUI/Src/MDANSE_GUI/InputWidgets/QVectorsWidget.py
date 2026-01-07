@@ -403,10 +403,17 @@ class QVectorsWidget(WidgetBase):
             return
         model = PlottingContext()
         modq_binning = qvector_binning_from_dict(self._configurator["parameters"])
-        for qvec_dataset in vector_q_statistics_datasets(
-            self._configurator, q_bin_limits=modq_binning
-        ):
-            model.add_dataset(qvec_dataset)
+        try:
+            for qvec_dataset in vector_q_statistics_datasets(
+                self._configurator, q_bin_limits=modq_binning
+            ):
+                model.add_dataset(qvec_dataset)
+        except ValueError:
+            self.helper.plot_widget.plot_blank(
+                override_title="No vectors have been generated.",
+                override_label="Please change the input parameters.",
+            )
+            return
         self.helper.plot_widget.set_plotter("Vectors")
         self.helper.plot_widget.set_context(model)
         self.helper.plot_widget.use_grid()

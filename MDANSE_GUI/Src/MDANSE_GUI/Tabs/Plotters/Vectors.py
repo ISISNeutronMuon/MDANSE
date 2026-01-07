@@ -219,6 +219,19 @@ class Vectors(Plotter):
                         LOG.error(
                             f"Matplotlib could not set x limits to {plot_limits[0]}, {plot_limits[1]}"
                         )
+                else:
+                    for databundle in plotting_context.datasets().values():
+                        dataset = databundle.dataset
+                        best_unit, best_axis = dataset.longest_axis()
+                        if dataset._name == r"<|q|> - q$_{target}$":
+                            axes.clear()
+                            axes.violinplot(
+                                dataset.data,
+                                positions=dataset.x_axis(best_axis),
+                                widths=5.0 * dataset._axes_scaling[best_axis],
+                            )
+                            axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
+                            axes.set_title(dataset._name)
                 try:
                     axes.set_ylim((plot_limits[2], plot_limits[3]))
                 except ValueError:
