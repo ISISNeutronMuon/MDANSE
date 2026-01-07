@@ -90,7 +90,7 @@ def qvector_binning_general(
     first_value, last_value = get_first_last_values(bin_width, peak_width)
     common_binning = np.arange(
         first_value,
-        last_value,
+        last_value + 1,
         bin_width,
     )
     last_value = len(common_binning)
@@ -99,12 +99,14 @@ def qvector_binning_general(
         first_value, last_value = get_first_last_values(bin_width, peak_width)
         common_binning = np.arange(
             first_value,
-            last_value,
+            last_value + 1,
             bin_width,
         )
         if len(common_binning) == last_value:
             break
         last_value = len(common_binning)
+    offset = np.min(np.abs(start - common_binning)) / bin_width
+    common_binning -= (offset - 0.5) * bin_width
     return common_binning
 
 

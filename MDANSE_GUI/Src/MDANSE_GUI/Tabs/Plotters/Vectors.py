@@ -19,6 +19,7 @@ import contextlib
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+import numpy.typing as npt
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
@@ -27,6 +28,10 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
+
+
+def violin_plot_width(positions: npt.NDArray[float]) -> float:
+    return np.mean(np.diff(positions)) if len(positions) > 1 else 0.5
 
 
 class Vectors(Plotter):
@@ -161,7 +166,12 @@ class Vectors(Plotter):
                 axes.set_title(dataset._name)
             elif dataset._name == r"<|q|> - q$_{target}$":
                 axes = target.add_subplot(single_plot_stack.pop())
-                axes.violinplot(dataset.data, positions=dataset.x_axis(best_axis))
+                xvals = dataset.x_axis(best_axis)
+                axes.violinplot(
+                    dataset.data,
+                    positions=xvals,
+                    widths=violin_plot_width(xvals),
+                )
                 self._axes.append(axes)
                 axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
                 axes.set_title(dataset._name)
@@ -225,10 +235,11 @@ class Vectors(Plotter):
                         best_unit, best_axis = dataset.longest_axis()
                         if dataset._name == r"<|q|> - q$_{target}$":
                             axes.clear()
+                            xvals = dataset.x_axis(best_axis)
                             axes.violinplot(
                                 dataset.data,
-                                positions=dataset.x_axis(best_axis),
-                                widths=5.0 * dataset._axes_scaling[best_axis],
+                                positions=xvals,
+                                widths=violin_plot_width(xvals),
                             )
                             axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
                             axes.set_title(dataset._name)
