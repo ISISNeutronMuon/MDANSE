@@ -43,8 +43,23 @@ MAX_BINS_PER_PLOT = 180
 
 
 def qvector_binning_from_dict(
-    qvector_params: dict[str, Any], n_segments: int = 10
+    qvector_params: dict[str, Any],
+    n_segments: int = 10,
 ) -> npt.NDArray[float] | None:
+    """Calculate the range of |q| bins from the vector generator parameters.
+
+    Parameters
+    ----------
+    qvector_params : dict[str, Any]
+        Input parameters of any subclass of IQVectors given as a dictionary.
+    n_segments : int, optional
+        Starting value of the number of histogram bins per vector shell, by default 10
+
+    Returns
+    -------
+    npt.NDArray[float] | None
+        A 1D array of |q| bin limits.
+    """
     step_params = qvector_params.get("shells")
     if step_params is None:
         return None
@@ -54,8 +69,32 @@ def qvector_binning_from_dict(
 
 
 def qvector_binning_general(
-    start: float, end: float, step_size: float, width: float | None, n_segments: int
-):
+    start: float,
+    end: float,
+    step_size: float,
+    width: float | None,
+    n_segments: int,
+) -> npt.NDArray[float]:
+    """Calculate the |q| bin limits based of vector shell limits and steps.
+
+    Parameters
+    ----------
+    start : float
+        Lower limit of the |q| shell range.
+    end : float
+        Upper limit of the |q| shell range.
+    step_size : float
+        Step size of the |q| shell range.
+    width : float | None
+        Width of a single shell in |q| units (1/nm).
+    n_segments : int
+        Starting value of number of histogram bins per shell.
+
+    Returns
+    -------
+    npt.NDArray[float]
+        A 1D array of |q| histogram bin limits.
+    """
     width = abs(width)
     step_size = abs(step_size)
     if end < start:
@@ -64,6 +103,7 @@ def qvector_binning_general(
         return np.array([start - 0.15, start - 0.05, start + 0.05, start + 0.15])
 
     def get_bin_width(n_segments):
+        """Return the bin width based on shell width and shell separation."""
         if np.isclose(start, end):
             bin_width = width / n_segments
             peak_width = width
@@ -76,10 +116,12 @@ def qvector_binning_general(
         return bin_width, peak_width
 
     def get_first_last_values(bin_width, peak_width):
+        """Return the limits of the binning range based on the shell and bin sizes."""
         bins_per_shell = peak_width // bin_width
         if bins_per_shell > MAX_BINS_PER_SHELL or bins_per_shell < MIN_BINS_PER_SHELL:
             bins_per_shell = min(
-                max(MIN_BINS_PER_SHELL, bins_per_shell), MAX_BINS_PER_SHELL
+                max(MIN_BINS_PER_SHELL, bins_per_shell),
+                MAX_BINS_PER_SHELL,
             )
             bin_width = peak_width / bins_per_shell
         first_value = start - 0.5 * (bins_per_shell + 1) * bin_width
@@ -111,7 +153,7 @@ def qvector_binning_general(
 
 
 def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[float]:
-    """Finds the vector shell dataset and returns arrays of q vector lengths.
+    """Find the vector shell dataset and returns arrays of q vector lengths.
 
     Parameters
     ----------
@@ -163,6 +205,8 @@ def angular_datasets_from_qarray(
     ----------
     q_array : npt.NDArray[float]
         A (3,N) array of reciprocal space vectors.
+    weight_array: npt.NDArray[float],
+        Array of weights per vector, based the multiplicity of each vector.
     filename : str | None, optional
         Name of the file to be shown in plot details, by default None
 
@@ -226,13 +270,15 @@ def vector_projection_datasets(
         Datasets of coordinates grouped as y(x), z(x), z(y) and z(x,y).
     """
     q_array = source["q_vectors"][shell_key]["q_vectors"] * measure(
-        1.0, iunit="1/nm"
+        1.0,
+        iunit="1/nm",
     ).toval("1/ang")
     return projection_datasets_from_qarray(q_array)
 
 
 def projection_datasets_from_qarray(
-    q_array: npt.NDArray[float], filename: str | None = None
+    q_array: npt.NDArray[float],
+    filename: str | None = None,
 ) -> tuple[SingleDataset, SingleDataset, SingleDataset, SingleDataset]:
     """Convert a q vector array to datasets of Cartesian coordinates.
 
@@ -304,11 +350,11 @@ def vector_q_statistics_datasets(
 
     Parameters
     ----------
-    file : h5py.File
-        HDF5 file object, typically an .mda file.
+    source : h5py.File | QVectorsConfigurator
+        An object containing vector parameters: configurator or an .mda file.
     main_dset : str, optional
         Name of the group with q vector shells, by default "vector_generator".
-    q_bin_limits: npt.NDArray[float], optional
+    q_bin_limits : npt.NDArray[float], optional
         Bin limits for the |q| histogram. If not given, it will be determined from |q| values.
 
     Returns
@@ -365,7 +411,7 @@ def vector_q_statistics_datasets(
                     len(dat),
                 )
                 for dat in q_data("weights")
-            ]
+            ],
         )
         vec_weights = [dat[:] for dat in q_data("weights")]
     if q_bin_limits is None:
@@ -403,9 +449,9 @@ def vector_q_statistics_datasets(
                     int(vec_weights[shellindex][vecindex])
                     * list(always_iterable(veclen))
                     for vecindex, veclen in enumerate(
-                        modq_per_shell[shellindex] - qvals[shell]
+                        modq_per_shell[shellindex] - qvals[shell],
                     )
-                ]
+                ],
             )
             for shellindex, shell in enumerate(valid_shells)
         ],
@@ -521,7 +567,10 @@ class PlotDataView(QTreeView):
             temp_action.triggered.connect(method)
 
     def populateVectorMenu(
-        self, model: QAbstractItemModel, index: QModelIndex, event_pos: QPoint
+        self,
+        model: QAbstractItemModel,
+        index: QModelIndex,
+        event_pos: QPoint,
     ):
         """Show a menu that allows to visualise a single vector shell.
 
@@ -591,8 +640,8 @@ class PlotDataView(QTreeView):
                     "\n".join(
                         f"{key}: {item}"
                         for key, item in mda_data_structure._metadata.items()
-                    )
-                )
+                    ),
+                ),
             )
         else:
             try:
@@ -616,7 +665,8 @@ class PlotDataView(QTreeView):
         _, qvector_params = json.loads(file["metadata/inputs/q_vectors"][0])
         modq_binning = qvector_binning_from_dict(qvector_params)
         for qvec_dataset in vector_q_statistics_datasets(
-            file, q_bin_limits=modq_binning
+            file,
+            q_bin_limits=modq_binning,
         ):
             model.add_dataset(qvec_dataset)
         self.fast_plotting_vectors.emit(model)
@@ -625,11 +675,14 @@ class PlotDataView(QTreeView):
         """Create and emit datasets with vector positions in a single shell."""
         new_model = PlottingContext()
         for dataset in projection_datasets_from_qarray(
-            self._qvector_shell, self._qvector_filename
+            self._qvector_shell,
+            self._qvector_filename,
         ):
             new_model.add_dataset(dataset)
         for dataset in angular_datasets_from_qarray(
-            self._qvector_shell, self._qvector_weights, self._qvector_filename
+            self._qvector_shell,
+            self._qvector_weights,
+            self._qvector_filename,
         ):
             new_model.add_dataset(dataset)
         self.vector_shell_plotting.emit(new_model)
@@ -704,7 +757,7 @@ class PlotDataView(QTreeView):
         else:
             description = "generic item"
         self.item_details.emit(
-            html.escape(description)
+            html.escape(description),
         )  # this should emit the job name
 
     def connect_to_visualiser(

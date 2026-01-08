@@ -18,11 +18,31 @@ from __future__ import annotations
 import collections
 
 import numpy as np
+import numpy.typing as npt
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
 
 
-def spherical_vectors(q: float, q_width: float, n_vecs: int):
+def spherical_vectors(q: float, q_width: float, n_vecs: int) -> npt.NDArray[float]:
+    """Generate vectors on a sphere.
+
+    The distribution should be uniform in angles, and normal in the
+    |q| values around the requested |q| with the q_width.
+
+    Parameters
+    ----------
+    q : float
+        The centre of the |q| value distribution.
+    q_width : float
+        The width of the |q| distribution.
+    n_vecs : int
+        Number of vectors to generate.
+
+    Returns
+    -------
+    npt.NDArray[float]
+        A (3,N) array of vectors.
+    """
     qmin = max(0.01 * abs(q), q - q_width / 2)
     qmax = q + q_width / 2
     all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)
@@ -35,7 +55,7 @@ def spherical_vectors(q: float, q_width: float, n_vecs: int):
             radii * np.sin(theta) * np.cos(phi),
             radii * np.sin(theta) * np.sin(phi),
             radii * np.cos(theta),
-        )
+        ),
     )
 
 

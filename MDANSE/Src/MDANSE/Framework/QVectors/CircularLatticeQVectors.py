@@ -67,7 +67,7 @@ class CircularLatticeQVectors(LatticeQVectors):
 
         nvecs_per_shell = self._configuration["n_vectors"]["value"]
         target_circle_axis = self._configuration["axis"]["value"] / np.linalg.norm(
-            self._configuration["axis"]["value"]
+            self._configuration["axis"]["value"],
         )
         rot_mat = circle_rotation_matrix(target_circle_axis)
 
@@ -81,7 +81,8 @@ class CircularLatticeQVectors(LatticeQVectors):
         for q in self._configuration["shells"]["value"]:
             q_vectors = circle_of_vectors(q, width, nvecs_per_shell, rot_mat=rot_mat)
             lattice_hkl_vectors, weights = self.lattice_vectors_with_weights(
-                q_vectors, self._unit_cell
+                q_vectors,
+                self._unit_cell,
             )
             selection = self.vectors_within_limits(
                 self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),

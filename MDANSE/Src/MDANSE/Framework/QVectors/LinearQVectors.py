@@ -24,6 +24,27 @@ from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_dist
 
 
 def linear_vectors(q: float, q_width: float, n_vecs: int, axis: npt.NDArray[float]):
+    """Generate vectors on a line.
+
+    The distribution will be normal in the |q| values around the
+    requested |q| with the q_width.
+
+    Parameters
+    ----------
+    q : float
+        The centre of the |q| value distribution.
+    q_width : float
+        The width of the |q| distribution.
+    n_vecs : int
+        Number of vectors to generate.
+    axis: npt.NDArray[float]
+        Defines a line in space on which the vectors are generated.
+
+    Returns
+    -------
+    npt.NDArray[float]
+        A (3,N) array of vectors.
+    """
     qmin = max(0.01 * abs(q), q - q_width / 2)
     qmax = q + q_width / 2
     all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)

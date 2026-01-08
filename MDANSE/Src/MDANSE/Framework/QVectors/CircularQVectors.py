@@ -47,7 +47,10 @@ def circle_rotation_matrix(
 
 
 def circle_of_vectors(
-    q: float, q_width: float, n_vecs: int, rot_mat: npt.NDArray[float] | None
+    q: float,
+    q_width: float,
+    n_vecs: int,
+    rot_mat: npt.NDArray[float] | None,
 ) -> npt.NDArray[float]:
     """Generate vectors on a circle in plane.
 
@@ -76,7 +79,7 @@ def circle_of_vectors(
             np.sin(parameter_points),
             np.cos(parameter_points),
             np.zeros_like(parameter_points),
-        )
+        ),
     )
     if rot_mat is not None:
         regular_circle = np.dot(rot_mat, regular_circle)
@@ -121,7 +124,7 @@ class CircularQVectors(IQVectors):
 
         nvecs_per_shell = self._configuration["n_vectors"]["value"]
         target_circle_axis = self._configuration["axis"]["value"] / np.linalg.norm(
-            self._configuration["axis"]["value"]
+            self._configuration["axis"]["value"],
         )
         rot_mat = circle_rotation_matrix(target_circle_axis)
 

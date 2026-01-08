@@ -28,7 +28,8 @@ class DispersionLatticeQVectors(LatticeQVectors):
     The input 'start' and 'step' vectors are expressed as HKL values of the
     crystal lattice defined by the simulation box. Every vector will be
     generated as :math:`\mathbf{k}_{start} + n\mathbf{k}_{step}` for
-    integer n from 0 to n_steps."""
+    integer n from 0 to n_steps.
+    """
 
     settings = collections.OrderedDict()
     settings["start"] = (
@@ -50,7 +51,8 @@ class DispersionLatticeQVectors(LatticeQVectors):
         n_steps = self._configuration["n_steps"]["value"]
 
         hkls = np.array(start)[:, np.newaxis] + np.outer(
-            step_vector, np.arange(0, n_steps)
+            step_vector,
+            np.arange(0, n_steps),
         )
         vects = self.hkl_to_qvectors(hkls, self._unit_cell)
         hkl_vectors, weights = self.lattice_vectors_with_weights(vects, self._unit_cell)

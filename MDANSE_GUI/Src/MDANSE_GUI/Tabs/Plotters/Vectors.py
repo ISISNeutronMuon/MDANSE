@@ -31,6 +31,7 @@ if TYPE_CHECKING:
 
 
 def violin_plot_width(positions: npt.NDArray[float]) -> float:
+    """Return the width of the violin plot based on the spacing between points."""
     return np.mean(np.diff(positions)) if len(positions) > 1 else 0.5
 
 
@@ -178,7 +179,8 @@ class Vectors(Plotter):
             elif dataset._name == "Shell population":
                 axes = target.add_subplot(212)
                 multi_curves = dataset.curves_vs_axis(
-                    (best_unit, best_axis), max_limit=self._curve_limit_per_dataset
+                    (best_unit, best_axis),
+                    max_limit=self._curve_limit_per_dataset,
                 )
                 x_axis = dataset.x_axis(best_axis)
                 bottom = np.zeros(len(x_axis))
@@ -217,7 +219,10 @@ class Vectors(Plotter):
                             add_legend_placeholder = False
                             add_last_entry = True
                             axes.bar(
-                                x_axis, 0, label="...", color=target.get_facecolor()
+                                x_axis,
+                                0,
+                                label="...",
+                                color=target.get_facecolor(),
                             )
         for axindex, axes in enumerate(self._axes):
             if update_only:
@@ -227,7 +232,7 @@ class Vectors(Plotter):
                         axes.set_xlim((plot_limits[0], plot_limits[1]))
                     except ValueError:
                         LOG.error(
-                            f"Matplotlib could not set x limits to {plot_limits[0]}, {plot_limits[1]}"
+                            f"Matplotlib could not set x limits to {plot_limits[0]}, {plot_limits[1]}",
                         )
                 else:
                     for databundle in plotting_context.datasets().values():
@@ -247,7 +252,7 @@ class Vectors(Plotter):
                     axes.set_ylim((plot_limits[2], plot_limits[3]))
                 except ValueError:
                     LOG.error(
-                        f"Matplotlib could not set y limits to {self._backup_limits[2]}, {self._backup_limits[3]}"
+                        f"Matplotlib could not set y limits to {self._backup_limits[2]}, {self._backup_limits[3]}",
                     )
             else:
                 xlimits, ylimits = axes.get_xlim(), axes.get_ylim()

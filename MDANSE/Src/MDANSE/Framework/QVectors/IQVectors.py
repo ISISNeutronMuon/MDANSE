@@ -62,7 +62,7 @@ def truncated_normal_distribution(
     Returns
     -------
     npt.NDArray[float]
-        _description_
+        A truncated normal distribution of points within the specified limits.
     """
     if abs(width) < WIDTH_NONZERO_LIMIT:
         return truncnorm.rvs(
@@ -184,20 +184,29 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
         return np.unique(np.round(hkl_fractional), return_counts=True, axis=1)
 
     @classmethod
-    def remove_zero_vector(
-        cls, vectors: npt.NDArray[float], weights: npt.NDArray[float] | None = None
-    ):
-        nonzero_vector_mask = np.linalg.norm(vectors, axis=0) > 1e-15
-        return vectors[:, nonzero_vector_mask], weights[nonzero_vector_mask]
-
-    @classmethod
     def vectors_within_limits(
         cls,
         q_vectors: npt.NDArray[float],
         *,
         q_min: float,
         q_max: float,
-    ):
+    ) -> npt.NDArray[bool]:
+        """Check which vectors in the input array have the length within the limits.
+
+        Parameters
+        ----------
+        q_vectors : npt.NDArray[float]
+            Array containing vectors to be checked.
+        q_min : float
+            Lower limit of |q|
+        q_max : float
+            Upper limit of |q|
+
+        Returns
+        -------
+        npt.NDArray[bool]
+            Boolean mask array, True for vectors within limits.
+        """
         lengths = np.linalg.norm(q_vectors, axis=0)
         return (lengths >= q_min) & (lengths <= q_max)
 

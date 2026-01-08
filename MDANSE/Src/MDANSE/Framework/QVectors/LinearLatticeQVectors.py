@@ -74,7 +74,8 @@ class LinearLatticeQVectors(LatticeQVectors):
         for q in self._configuration["shells"]["value"]:
             q_vectors = linear_vectors(q, width, nvecs_per_shell, axis)
             lattice_hkl_vectors, weights = self.lattice_vectors_with_weights(
-                q_vectors, self._unit_cell
+                q_vectors,
+                self._unit_cell,
             )
             selection = self.vectors_within_limits(
                 self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),

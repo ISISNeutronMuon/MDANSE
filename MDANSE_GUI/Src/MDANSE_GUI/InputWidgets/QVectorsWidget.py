@@ -50,6 +50,12 @@ from MDANSE_GUI.Utils import block_signals
 
 
 def numerator_suffix(index: int) -> str:
+    """Return the text numerator suffix for the input number.
+
+    For numbers ending with 1 is will return 'st' for 'first',
+    except for numbers ending with 11 where it will be 'th' for 'eleventh'.
+    The same reasoning follows for 2nd and 3rd.
+    """
     if 10 <= index % 100 <= 20:
         return "th"
     match index % 10:
@@ -64,6 +70,8 @@ def numerator_suffix(index: int) -> str:
 
 
 class VectorModel(QStandardItemModel):
+    """Qt model for selecting vector generator types."""
+
     type_changed = Signal()
     unit_cell_missing = Signal()
     input_is_valid = Signal(bool)
@@ -76,8 +84,19 @@ class VectorModel(QStandardItemModel):
 
     @Slot(str)
     def switch_qvector_type(
-        self, vector_type: str, optional_settings: dict | None = None
+        self,
+        vector_type: str,
+        optional_settings: dict | None = None,
     ):
+        """Create a vector generator of the input type and updates the input parameters.
+
+        Parameters
+        ----------
+        vector_type : str
+            Name of the IQVectors subclass to be created.
+        optional_settings : dict | None, optional
+            Dictionary of vector generator input parameters, by default None
+        """
         self.clear()
         self._defaults = []
         self._generator = IQVectors.create(vector_type, self._trajectory.unit_cell(0))
@@ -102,6 +121,7 @@ class VectorModel(QStandardItemModel):
         self.type_changed.emit()
 
     def params_summary(self) -> dict:
+        """Validate input types and return a dictionary of input parameters."""
         params = {}
         all_inputs_are_valid = True
         for rownum in range(self.rowCount()):
@@ -114,7 +134,8 @@ class VectorModel(QStandardItemModel):
                 params[name] = "failed"
             if params[name] == "failed":
                 self.item(rownum, 1).setData(
-                    QBrush(Qt.GlobalColor.red), role=Qt.ItemDataRole.BackgroundRole
+                    QBrush(Qt.GlobalColor.red),
+                    role=Qt.ItemDataRole.BackgroundRole,
                 )
                 all_inputs_are_valid = False
             else:
@@ -123,6 +144,7 @@ class VectorModel(QStandardItemModel):
         return params
 
     def parse_vtype(self, vtype: str, value: str, vname: str):
+        """Validate the inputs of a type accepting multiple numbers."""
         if vtype in ("RangeConfigurator", "VectorConfigurator"):
             inner_type = self._generator.settings[vname][1]["valueType"]
             tempstring = value.strip("()[] ")
@@ -160,6 +182,7 @@ class ShellPanel(QWidget):
         self.set_shell(0)
 
     def create_layout(self):
+        """Create the GUI elements of a vector shell viewer."""
         layout = QGridLayout()
         self.setLayout(layout)
         box_label = QLabel("Vector shell: ", self)
@@ -178,13 +201,15 @@ class ShellPanel(QWidget):
         layout.addWidget(self.plot_widget, 1, 0, 2, 3)
 
     def update_label(self, shell_index: int):
+        """Set the GUI label text to the current shell number and q value."""
         vec_dict = self.qvec_config["q_vectors"]
         self.shell_information.setText(
-            f"{numerator_suffix(shell_index)} shell, |q| = {nth(vec_dict, shell_index)}"
+            f"{numerator_suffix(shell_index)} shell, |q| = {nth(vec_dict, shell_index)}",
         )
 
     @Slot(int)
     def set_upper_limit(self, number_of_shells: int):
+        """Set the spinbox upper limit to the last q vector shell index."""
         current_shell = min(self.shell_selector.value(), number_of_shells - 1)
         self.shell_selector.setMaximum(number_of_shells - 1)
         with block_signals(self.shell_selector):
@@ -192,7 +217,16 @@ class ShellPanel(QWidget):
         self.set_shell(current_shell, update_limit=False)
 
     @Slot(int)
-    def set_shell(self, shell_index: int, update_limit: bool = True):
+    def set_shell(self, shell_index: int, *, update_limit: bool = True):
+        """Change the index of the current vector shell and update the plots.
+
+        Parameters
+        ----------
+        shell_index : int
+            Vector shell index in the vector generator.
+        update_limit : bool, optional
+            Update the spinbox upper limit, by default True
+        """
         vec_dict = self.qvec_config["q_vectors"]
         if update_limit:
             self.set_upper_limit(len(vec_dict))
@@ -200,7 +234,8 @@ class ShellPanel(QWidget):
             vec_key = nth(vec_dict, shell_index)
         except KeyError:
             LOG.warning(
-                "Shell %i was not available in the Q vector generator", shell_index
+                "Shell %i was not available in the Q vector generator",
+                shell_index,
             )
             self.plot_widget.plot_blank()
             return
@@ -228,6 +263,7 @@ class ShellPanel(QWidget):
 
     @Slot()
     def update_plot(self):
+        """Draw the plots for the current vector shell."""
         self.set_shell(self.shell_selector.value())
 
 
@@ -283,11 +319,14 @@ class VectorViewer(QDialog):
 
     @Slot()
     def update_plot(self):
+        """Draw the vector plots using the latest data."""
         self.plot_widget.plot_data(update_only=True)
         self.shell_panel_3D.update_plot()
 
 
 class QVectorsWidget(WidgetBase):
+    """Input widget defining the vector generator type and its parameters."""
+
     new_shell_number = Signal(int)
 
     def __init__(self, *args, **kwargs):
@@ -327,7 +366,7 @@ class QVectorsWidget(WidgetBase):
             tooltip_text = "The parameters needed by the specific q-vector generator can be input here"
         self._view.setToolTip(tooltip_text)
         self._selector.setToolTip(
-            "The q vectors will be generated using the method chosen here."
+            "The q vectors will be generated using the method chosen here.",
         )
         self._model.input_is_valid.connect(self.validate_model_parameters)
         policy = self._view.sizePolicy()
@@ -335,12 +374,13 @@ class QVectorsWidget(WidgetBase):
         self._view.setSizePolicy(policy)
         self._view.horizontalHeader().hide()
         self._view.setSizeAdjustPolicy(
-            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents
+            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
         )
         self.value_changed.connect(self.preview_vectors)
 
     @Slot(bool)
     def validate_model_parameters(self, all_are_correct: bool):
+        """Update the widget appearance based on the input validation results."""
         if all_are_correct:
             self.clear_error()
         else:
@@ -392,7 +432,8 @@ class QVectorsWidget(WidgetBase):
     def preview_vectors(self):
         """Build the data sets and plot them in the dialog window.
 
-        If the dialog is not open, this function exits immediately."""
+        If the dialog is not open, this function exits immediately.
+        """
         if self.helper is None:
             self.helper = self.create_helper()
         if not self.helper.isVisible():
@@ -405,7 +446,8 @@ class QVectorsWidget(WidgetBase):
         modq_binning = qvector_binning_from_dict(self._configurator["parameters"])
         try:
             for qvec_dataset in vector_q_statistics_datasets(
-                self._configurator, q_bin_limits=modq_binning
+                self._configurator,
+                q_bin_limits=modq_binning,
             ):
                 model.add_dataset(qvec_dataset)
         except ValueError:
@@ -422,9 +464,11 @@ class QVectorsWidget(WidgetBase):
         model.needs_an_update.connect(self.helper.update_plot)
 
     def updateValue(self):
+        """Use the current inputs to configure the q vector generator."""
         temp = super().updateValue()
         is_valid = self._configurator.error_status == "OK"
         self._preview_button.setEnabled(is_valid)
         if is_valid:
             self.new_shell_number.emit(self._configurator["n_shells"])
             return temp
+        return None

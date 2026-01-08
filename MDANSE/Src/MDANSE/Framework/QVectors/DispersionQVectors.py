@@ -24,7 +24,9 @@ from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
 
 def dispersion_vectors(
-    q_start: npt.NDArray[float], q_end: npt.NDArray[float], q_step: float
+    q_start: npt.NDArray[float],
+    q_end: npt.NDArray[float],
+    q_step: float,
 ) -> tuple[npt.NDArray[float], npt.NDArray[float]]:
     """Generate vectors in a straight line.
 
@@ -64,7 +66,8 @@ class DispersionQVectors(IQVectors):
     """Generates Q vectors along a path between two points.
 
     As opposed to DispersionLatticeQVectors, the vectors will not
-    necessarily correspond to integer HKL values."""
+    necessarily correspond to integer HKL values.
+    """
 
     settings = collections.OrderedDict()
     settings["q_start"] = (

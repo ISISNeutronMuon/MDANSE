@@ -152,7 +152,7 @@ class SingleDataset:
                 self._scaling_factor = float(source[self._name].attrs["scaling_factor"])
             except TypeError:
                 self._scaling_factor = np.array(
-                    source[self._name].attrs["scaling_factor"]
+                    source[self._name].attrs["scaling_factor"],
                 )
 
         self._data_unit = source[self._name].attrs["units"]
@@ -192,8 +192,15 @@ class SingleDataset:
             Dictionary of axis_name: axis_array pairs, by default None
         axes_units : dict[str, str] | None, optional
             Dictionary of axis_name: axis_unit pairs, by default None
+        yerror: npt.NDArray[float] | None = None
+            Vertical error bars associated with the data points.
+        xerror: npt.NDArray[float] | None = None
+            Horizontal error bars associated with the data points.
+        optional_filename: str | None = None
+            File name to be displayed as the origin of this data set.
+        uneven_array: bool = False
+            If True, allow the data rows to be of different length.
         """
-
         self._filename = optional_filename if optional_filename else "no file"
         self._labels = {
             "minimal": self._name,
@@ -285,6 +292,7 @@ class SingleDataset:
 
     @staticmethod
     def axis_true_name(axis_key: str) -> str:
+        """Return the short name of the axis dataset without the path."""
         if "/" in axis_key:
             return axis_key.rsplit("/", 1)[1].strip()
         return axis_key
@@ -386,15 +394,13 @@ class SingleDataset:
         if ":" in token:
             slice_parts = map(int, token.split(":"))
             slc = slice(*slice_parts).indices(max_len)
-
             return range(*slc)
-        elif "-" in token:
-            start, stop = map(int, token.split("-"))
 
+        if "-" in token:
+            start, stop = map(int, token.split("-"))
             return range(start, stop + 1)
 
-        else:
-            return (int(token),)
+        return (int(token),)
 
     def set_data_limits(self, limit_string: str):
         """Parse the string used for selecting a subset of data.
@@ -604,6 +610,7 @@ class SingleDataset:
         return self._curves
 
     def curve_ind(self, limits: int, /):
+        """Return a generator of indices indexing only the curves within the limits."""
         return (
             islice(self._data_limits, limits)
             if self._data_limits is not None
@@ -611,7 +618,9 @@ class SingleDataset:
         )
 
     def planes_vs_axis(
-        self, axis_number: int, max_limit: int = 1
+        self,
+        axis_number: int,
+        max_limit: int = 1,
     ) -> list[np.ndarray] | np.ndarray | None:
         """Prepare for plotting 2D subsets of an ND array.
 
@@ -896,11 +905,11 @@ class PlottingContext(QStandardItemModel):
             item.setCheckState(
                 Qt.CheckState.Checked
                 if key == "Use it?" or new_dataset._use_scaling
-                else Qt.CheckState.Unchecked
+                else Qt.CheckState.Unchecked,
             )
 
         items[plotting_column_index["Use it?"]].setText(
-            f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1"
+            f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1",
         )
 
         self.itemChanged.connect(self.ask_for_update)
@@ -913,6 +922,7 @@ class PlottingContext(QStandardItemModel):
 
     @Slot()
     def ask_for_update(self):
+        """Emit a signal to indicate that a plot should be updated."""
         self.needs_an_update.emit(self.plot_widget_id)
 
     def set_axes(self):

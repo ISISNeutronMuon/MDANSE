@@ -115,7 +115,6 @@ class WidgetBase(QObject):
 
     def update_labels(self):
         """Update contained labels (dependent on base_type)."""
-
         if self._base_type == "QWidget":
             self._label.setText(self._label_text)
         elif self._base_type == "QGroupBox":
@@ -140,8 +139,7 @@ class WidgetBase(QObject):
 
     @abstractmethod
     def value_from_configurator(self):
-        """
-        Set the widgets to the values of the underlying configurator object.
+        """Set the widgets to the values of the underlying configurator object.
 
         Should also check for dependencies of the configurator.
         """
@@ -152,7 +150,7 @@ class WidgetBase(QObject):
 
     @abstractmethod
     def configure_using_default(self):
-        """Use configurator's default value, and highlight in the GUI"""
+        """Use configurator's default value, and highlight in the GUI."""
         default = self._configurator.default
         LOG.info(f"Setting {default} as placeholder text")
         self._field.setPlaceholderText(str(default))
@@ -192,13 +190,12 @@ class WidgetBase(QObject):
         if warning_text:
             self.has_warning = True
             pal = self._base.palette()
-            pal.setColor(QPalette.Window, QColor(220, 210, 30))
+            pal.setColor(QPalette.ColorRole.Window, QColor(220, 210, 30))
             self._base.setPalette(pal)
             font = self._base.font()
             font.setBold(True)
             self._base.setFont(font)
             self._base.setToolTip(warning_text)
-            self.valid_changed.emit()
             return
         self.has_warning = False
         self.clear_error()
@@ -215,6 +212,7 @@ class WidgetBase(QObject):
     @abstractmethod
     @Slot()
     def updateValue(self):
+        """Pass the GUI input to the backend's parser and validate."""
         current_value = self.get_widget_value()
         if self._empty:
             self.configure_using_default()
@@ -222,7 +220,7 @@ class WidgetBase(QObject):
             self._configurator.configure(current_value)
         except Exception:
             self.mark_error(
-                "COULD NOT SET THIS VALUE - you may need to change the values in other widgets"
+                "COULD NOT SET THIS VALUE - you may need to change the values in other widgets",
             )
         self.value_changed.emit()
         if not self._configurator.valid:
@@ -230,6 +228,7 @@ class WidgetBase(QObject):
 
     @abstractmethod
     def get_value(self):
+        """Return the current value of the GUI input after validating."""
         self.updateValue()
         return self._configurator["value"]
 
