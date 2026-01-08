@@ -788,6 +788,10 @@ class MolecularViewer(QtWidgets.QWidget):
 
         tree = KDTree(grid)
         contacts = tree.query_ball_point(coords, radius, workers=-1)
+
+        # generate indexes of all pairs of points in close contact
+        # e.g. js = [0, 0, 0, ...] and ks = [1, 2, 4, ...]
+        # so that pairs (0, 1), (0, 2), (0, 4), ... are in close contact
         n_contacts = np.fromiter((len(i) for i in contacts), dtype=int)
         mask = n_contacts > 0
         js = np.repeat(np.nonzero(mask)[0], n_contacts[mask])
