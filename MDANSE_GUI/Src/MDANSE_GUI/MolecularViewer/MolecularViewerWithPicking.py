@@ -142,7 +142,7 @@ class MolecularViewerWithPicking(MolecularViewer):
         """
         self.clear_picked_bonds()
 
-        if self.bond_calc == BondCalc.NONE or self.n_picked_atoms == 0:
+        if self.bond_calc is BondCalc.NONE or self.n_picked_atoms == 0:
             return
 
         actor = self.create_bond_actor(self._picked_polydata, opacity=opacity)
