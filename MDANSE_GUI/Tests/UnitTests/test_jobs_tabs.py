@@ -30,7 +30,7 @@ DATA_DIR = Path(__file__).parents[3] / "MDANSE/Tests/UnitTests/Converted"
 
 @pytest.fixture
 def trajectory():
-    traj_path = DATA_DIR / "lammps.mdt"
+    traj_path = DATA_DIR / "lammps_fakecell.mdt"
     yield traj_path, "dummy"
 
 

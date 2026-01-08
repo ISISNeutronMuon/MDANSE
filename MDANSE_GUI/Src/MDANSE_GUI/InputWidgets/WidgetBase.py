@@ -227,9 +227,6 @@ class WidgetBase(QObject):
         self.value_changed.emit()
         if not self._configurator.valid:
             self.mark_error(self._configurator.error_status)
-        else:
-            self.mark_warning(self._configurator.warning_status)
-            self.value_updated.emit()
 
     @abstractmethod
     def get_value(self):

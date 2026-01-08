@@ -423,6 +423,8 @@ class QVectorsWidget(WidgetBase):
 
     def updateValue(self):
         temp = super().updateValue()
-        self._preview_button.setEnabled(self._configurator.error_status == "OK")
-        self.new_shell_number.emit(self._configurator["n_shells"])
-        return temp
+        is_valid = self._configurator.error_status == "OK"
+        self._preview_button.setEnabled(is_valid)
+        if is_valid:
+            self.new_shell_number.emit(self._configurator["n_shells"])
+            return temp

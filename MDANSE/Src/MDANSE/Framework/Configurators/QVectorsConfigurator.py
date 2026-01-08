@@ -121,3 +121,14 @@ class QVectorsConfigurator(IConfigurator):
         self["value"] = self["q_vectors"]
         self["generator"] = generator
         self.error_status = "OK"
+
+        if any(shell is None for shell in self["value"].values()):
+            self.warning_status = "Some of the q vector shells are empty. The corresponding results will be NaN values."
+        else:
+            self.warning_status = ""
+            return
+
+        if all(shell is None for shell in self["value"].values()):
+            self.error_status = (
+                "All the q vector shells are empty. There will be no valid results."
+            )

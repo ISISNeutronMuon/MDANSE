@@ -61,7 +61,7 @@ def qvector_binning_general(
     if end < start:
         start, end = end, start
     if np.isclose(start, end) and (width is None or abs(width) < WIDTH_NONZERO_LIMIT):
-        return np.array([start - 0.05, start + 0.05])
+        return np.array([start - 0.15, start - 0.05, start + 0.05, start + 0.15])
 
     def get_bin_width(n_segments):
         if np.isclose(start, end):
@@ -90,7 +90,7 @@ def qvector_binning_general(
     first_value, last_value = get_first_last_values(bin_width, peak_width)
     common_binning = np.arange(
         first_value,
-        last_value + 1,
+        last_value,
         bin_width,
     )
     last_value = len(common_binning)
@@ -99,7 +99,7 @@ def qvector_binning_general(
         first_value, last_value = get_first_last_values(bin_width, peak_width)
         common_binning = np.arange(
             first_value,
-            last_value + 1,
+            last_value,
             bin_width,
         )
         if len(common_binning) == last_value:

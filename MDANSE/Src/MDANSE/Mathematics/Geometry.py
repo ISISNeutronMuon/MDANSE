@@ -143,21 +143,3 @@ def generate_sphere_points(n_samples: int) -> np.ndarray:
     zs = np.sin(theta) * radius
 
     return np.vstack([xs, ys, zs])
-
-
-def rotation_matrix(axis: Sequence[float], theta: float) -> npt.NDArray[float]:
-    """Return the rotation axis of rotation around the axis by theta angle.
-
-    Parameters
-    ----------
-    axis : Sequence[float]
-        A 3D vector defining the rotation axis.
-    theta : float
-        Rotation angle in radians.
-
-    Returns
-    -------
-    npt.NDArray[float]
-        A 3x3 rotation matrix.
-    """
-    return Rotation.from_rotvec(axis / np.linalg.norm(axis) * theta).as_matrix()
