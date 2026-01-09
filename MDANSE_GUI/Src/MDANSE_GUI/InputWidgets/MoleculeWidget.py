@@ -113,7 +113,6 @@ class MoleculeWidget(WidgetBase):
             self._layout.addWidget(cbox)
         self._layout.addWidget(button)
         self._configurator = configurator
-        self.valid_changed.connect(self.toggle_button)
         self.default_labels()
         self.update_labels()
         self.updateValue()

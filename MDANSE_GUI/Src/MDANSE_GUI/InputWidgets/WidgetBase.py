@@ -57,7 +57,6 @@ class WidgetBase(QObject):
         Layout to add.
     """
 
-    valid_changed = Signal()
     value_updated = Signal()
     value_changed = Signal()
 
@@ -168,14 +167,12 @@ class WidgetBase(QObject):
 
         """
         pal = self._base.palette()
-        pal.setColor(QPalette.Window, QColor(180, 20, 180))
+        pal.setColor(QPalette.ColorRole.Window, QColor(180, 20, 180))
         self._base.setPalette(pal)
         font = self._base.font()
         font.setBold(True)
         self._base.setFont(font)
         self._base.setToolTip(error_text)
-        if not silent:
-            self.valid_changed.emit()
 
     def mark_warning(self, warning_text: str):
         """If the input caused a warning, display warning_text and highlight the widget.
@@ -198,7 +195,6 @@ class WidgetBase(QObject):
             self._base.setToolTip(warning_text)
             return
         self.has_warning = False
-        self.clear_error()
 
     def clear_error(self):
         """Remove error highlighting."""
@@ -207,7 +203,6 @@ class WidgetBase(QObject):
         font.setBold(False)
         self._base.setFont(font)
         self._base.setToolTip("")
-        self.valid_changed.emit()
 
     @abstractmethod
     @Slot()
