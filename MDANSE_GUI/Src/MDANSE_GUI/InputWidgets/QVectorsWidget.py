@@ -71,17 +71,13 @@ def numerator_suffix(index: int) -> str:
             return "th"
 
 
-def dicts_are_the_same(new_dict: dict[str, str], ref_dict: dict[str, str]) -> bool:
-    """Check if all the values in the new dict are the same in the reference dict."""
-    return all(new_dict.get(key) == value for key, value in ref_dict.items())
-
-
 def parameters_have_changed(qvec_configurator, plotting_object) -> bool:
     """Check if the vector generator type and input parameters have changed."""
     new_params = qvec_configurator["parameters"]
     new_type = qvec_configurator["vector_type"]
-    if new_type != plotting_object.last_vec_type or not dicts_are_the_same(
-        new_params, plotting_object.last_vec_params
+    if (
+        new_type != plotting_object.last_vec_type
+        or new_params != plotting_object.last_vec_params
     ):
         plotting_object.last_vec_type = new_type
         plotting_object.last_vec_params = copy.copy(new_params)

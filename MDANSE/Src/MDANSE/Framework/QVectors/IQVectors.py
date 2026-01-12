@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import abc
-import math
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -65,7 +64,7 @@ def truncated_normal_distribution(
     npt.NDArray[float]
         A truncated normal distribution of points within the specified limits.
     """
-    if math.isclose(width, 0, abs_tol=WIDTH_NONZERO_LIMIT):
+    if np.isclose(width, 0, atol=WIDTH_NONZERO_LIMIT):
         return truncnorm.rvs(
             -zero_width_limit,
             zero_width_limit,

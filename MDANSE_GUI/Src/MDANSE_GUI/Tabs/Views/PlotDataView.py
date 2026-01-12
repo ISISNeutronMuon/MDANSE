@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import html
 import json
-import math
 from collections.abc import Generator
 from typing import Any
 
@@ -98,7 +97,7 @@ def qvector_binning_general(
     if end < start:
         start, end = end, start
     if np.isclose(start, end) and (
-        width is None or math.isclose(width, 0, abs_tol=WIDTH_NONZERO_LIMIT)
+        width is None or np.isclose(width, 0, atol=WIDTH_NONZERO_LIMIT)
     ):
         return np.array([start - 0.15, start - 0.05, start + 0.05, start + 0.15])
 

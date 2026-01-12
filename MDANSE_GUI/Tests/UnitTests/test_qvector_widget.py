@@ -18,7 +18,11 @@ from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 
 IJOB_SUBCLASSES = IJob.indirect_subclass_dictionary()
 ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.enabled}
-ENABLED_QVECTORS = [qvecs for qvecs in IQVectors.indirect_subclasses() if qvecs not in ("IQVectors", "LatticeQVectors")]
+ENABLED_QVECTORS = [
+    qvecs
+    for qvecs in IQVectors.indirect_subclasses()
+    if qvecs not in ("IQVectors", "LatticeQVectors")
+]
 
 DATA_DIR = Path(__file__).parents[3] / "MDANSE/Tests/UnitTests/Converted"
 
@@ -28,6 +32,7 @@ def trajectory():
     traj_path = DATA_DIR / "lammps.mdt"
     yield traj_path, "dummy"
 
+
 @pytest.mark.parametrize("qvector_type", ENABLED_QVECTORS)
 def test_job_widgets_load(qapp, qtbot, caplog, trajectory, qvector_type):
     """
@@ -36,8 +41,12 @@ def test_job_widgets_load(qapp, qtbot, caplog, trajectory, qvector_type):
     This includes raises in the construction of widgets and missing widgets.
     """
     window = QMainWindow()
-    jobname = "DynamicCoherentStructureFactor"
-    index = [job_index for job_index, job_name in enumerate(sorted(ENABLED_JOBS), 1) if job_name == jobname][0]
+    curr_job_name = "DynamicCoherentStructureFactor"
+    index = [
+        job_index
+        for job_index, job_name in enumerate(sorted(ENABLED_JOBS), 1)
+        if job_name == curr_job_name
+    ][0]
 
     widget = JobTab.gui_instance(
         parent=window,
@@ -70,7 +79,11 @@ def test_job_widgets_load(qapp, qtbot, caplog, trajectory, qvector_type):
     ind = model.indexFromItem(item)
     view.on_select_action(ind)
 
-    widget_index = [windex for windex, widget_key in enumerate(action._widgets_in_layout.keys()) if widget_key == "q_vectors"][0]
+    widget_index = [
+        windex
+        for windex, widget_key in enumerate(action._widgets_in_layout.keys())
+        if widget_key == "q_vectors"
+    ][0]
     qvec_widget = action._widgets[widget_index]
     if "SphericalLattice" in qvector_type:
         with qtbot.waitSignal(qvec_widget.value_changed):
