@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import abc
-import collections
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 
@@ -67,7 +66,7 @@ class IReader(abc.ABC):
 
     @property
     def molecules(self):
-        mol_indexes = collections.OrderedDict()
+        mol_indexes = {}
 
         for i, resid in enumerate(self._residue_ids):
             mol_indexes.setdefault(resid, []).append(i)
@@ -116,7 +115,7 @@ class IReader(abc.ABC):
             if at in atom_names:
                 indexes.append(i)
 
-        indexes_per_molecule = collections.OrderedDict()
+        indexes_per_molecule = {}
         for idx in indexes:
             resid = self._residue_ids[idx]
             indexes_per_molecule.setdefault(resid, []).append(idx)

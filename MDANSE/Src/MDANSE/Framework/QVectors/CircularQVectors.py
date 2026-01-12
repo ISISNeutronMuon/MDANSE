@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 import numpy.typing as npt
 from scipy.spatial.transform import Rotation
@@ -100,7 +98,7 @@ class CircularQVectors(IQVectors):
     around the shell centre defined by the 'shells' input.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
         "RangeConfigurator",
@@ -133,7 +131,7 @@ class CircularQVectors(IQVectors):
         if self._status is not None:
             self._status.start(self._configuration["shells"]["number"])
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
             q_vectors = circle_of_vectors(q, width, nvecs_per_shell, rot_mat=rot_mat)

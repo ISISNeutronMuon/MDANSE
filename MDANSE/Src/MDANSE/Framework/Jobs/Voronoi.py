@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 import math
 
 import numpy as np
@@ -66,7 +65,7 @@ class Voronoi(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",

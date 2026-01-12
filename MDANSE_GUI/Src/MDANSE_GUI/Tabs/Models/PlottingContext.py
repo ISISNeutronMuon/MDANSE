@@ -167,13 +167,14 @@ class SingleDataset:
         self,
         _source: None,
         data: npt.NDArray[float],
+        *,
         data_unit: str = "none",
         scaling_factor: float = 1.0,
         plot_axes: dict[str, npt.NDArray[float]] | None = None,
         axes_units: dict[str, str] | None = None,
         yerror: npt.NDArray[float] | None = None,
         xerror: npt.NDArray[float] | None = None,
-        optional_filename: str | None = None,
+        optional_filename: str = "no file",
         uneven_array: bool = False,
     ) -> None:
         """Set data for plotting without using a data file.
@@ -196,12 +197,12 @@ class SingleDataset:
             Vertical error bars associated with the data points.
         xerror: npt.NDArray[float] | None = None
             Horizontal error bars associated with the data points.
-        optional_filename: str | None = None
+        optional_filename: str = "no file"
             File name to be displayed as the origin of this data set.
         uneven_array: bool = False
             If True, allow the data rows to be of different length.
         """
-        self._filename = optional_filename if optional_filename else "no file"
+        self._filename = optional_filename
         self._labels = {
             "minimal": self._name,
             "medium": self._name,

@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import abc
-import collections
 import itertools as it
 
 from scipy.signal import correlate
@@ -39,7 +38,7 @@ class CartesianCorrelationFunction(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",

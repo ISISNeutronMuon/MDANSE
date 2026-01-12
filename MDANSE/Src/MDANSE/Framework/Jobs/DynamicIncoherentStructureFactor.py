@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 from scipy.signal import correlate
 
@@ -51,7 +49,7 @@ class DynamicIncoherentStructureFactor(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
@@ -237,7 +235,7 @@ class DynamicIncoherentStructureFactor(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        disf_per_q_shell = collections.OrderedDict()
+        disf_per_q_shell = {}
         for q in self.configuration["q_vectors"]["shells"]:
             disf_per_q_shell[q] = np.zeros((self._nFrames,), dtype=np.float64)
 

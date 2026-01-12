@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
@@ -31,7 +29,7 @@ class MillerIndicesQVectors(LatticeQVectors):
     their length.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["shells"] = (
         "RangeConfigurator",
         {
@@ -86,7 +84,7 @@ class MillerIndicesQVectors(LatticeQVectors):
         if self._status is not None:
             self._status.start(len(self._configuration["shells"]["value"]))
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
             qmin = max(0, q - halfWidth)

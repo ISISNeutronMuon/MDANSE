@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
@@ -31,7 +29,7 @@ class DispersionLatticeQVectors(LatticeQVectors):
     integer n from 0 to n_steps.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["start"] = (
         "VectorConfigurator",
         {"valueType": int, "notNull": False, "default": [0, 0, 0]},
@@ -67,7 +65,7 @@ class DispersionLatticeQVectors(LatticeQVectors):
         if self._status is not None:
             self._status.start(len(dists))
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         for i, v in enumerate(keyvals):
             self._configuration["q_vectors"][v] = {

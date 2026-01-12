@@ -15,11 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-from functools import partial
-
-from more_itertools import run_length
-
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
@@ -62,7 +57,7 @@ class VASP(Converter):
 
     label = "VASP"
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["xdatcar_file"] = (
         "FileWithAtomDataConfigurator",
         {

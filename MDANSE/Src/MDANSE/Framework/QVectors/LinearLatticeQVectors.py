@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 import random
 
 import numpy as np
@@ -38,7 +37,7 @@ class LinearLatticeQVectors(LatticeQVectors):
     over all vectors in the group, which is still called a shell.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
         "RangeConfigurator",
@@ -69,7 +68,7 @@ class LinearLatticeQVectors(LatticeQVectors):
         if self._status is not None:
             self._status.start(self._configuration["shells"]["number"])
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
             q_vectors = linear_vectors(q, width, nvecs_per_shell, axis)

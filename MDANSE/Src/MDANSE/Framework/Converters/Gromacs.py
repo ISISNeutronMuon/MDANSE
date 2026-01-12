@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 from pathlib import Path
 
 import numpy as np
@@ -39,7 +38,7 @@ class Gromacs(Converter):
 
     label = "Gromacs"
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["pdb_file"] = (
         "FileWithAtomDataConfigurator",
         {

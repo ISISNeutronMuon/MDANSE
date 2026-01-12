@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 import numpy.typing as npt
 
@@ -69,7 +67,7 @@ class DispersionQVectors(IQVectors):
     necessarily correspond to integer HKL values.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["q_start"] = (
         "VectorConfigurator",
         {
@@ -111,7 +109,7 @@ class DispersionQVectors(IQVectors):
             if self._unit_cell is not None
             else None
         )
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         for index, keyval in enumerate(keyvals):
             self._configuration["q_vectors"][keyval] = {

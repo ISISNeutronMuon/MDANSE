@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import html
 import json
+import math
 from collections.abc import Generator
 from typing import Any
 
@@ -60,8 +61,7 @@ def qvector_binning_from_dict(
     npt.NDArray[float] | None
         A 1D array of |q| bin limits.
     """
-    step_params = qvector_params.get("shells")
-    if step_params is None:
+    if (step_params := qvector_params.get("shells")) is None:
         return None
     start, end, step_size = step_params
     width = qvector_params.get("width")
@@ -97,7 +97,9 @@ def qvector_binning_general(
     """
     if end < start:
         start, end = end, start
-    if np.isclose(start, end) and (width is None or abs(width) < WIDTH_NONZERO_LIMIT):
+    if np.isclose(start, end) and (
+        width is None or math.isclose(width, 0, abs_tol=WIDTH_NONZERO_LIMIT)
+    ):
         return np.array([start - 0.15, start - 0.05, start + 0.05, start + 0.15])
 
     width = abs(width) if width else width

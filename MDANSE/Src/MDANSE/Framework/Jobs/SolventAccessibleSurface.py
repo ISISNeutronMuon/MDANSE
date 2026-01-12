@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 import copy
 from collections.abc import Sequence
 
@@ -372,7 +371,7 @@ class SolventAccessibleSurface(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",

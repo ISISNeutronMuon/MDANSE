@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 from math import sqrt
 
 import numpy as np
@@ -67,7 +66,7 @@ class CurrentCorrelationFunction(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",

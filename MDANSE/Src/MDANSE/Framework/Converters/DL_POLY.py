@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 from typing import Any
 
 import numpy as np
@@ -46,7 +45,7 @@ class DL_POLY(Converter):
 
     label = "DL-POLY"
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["field_file"] = (
         "FileWithAtomDataConfigurator",
         {

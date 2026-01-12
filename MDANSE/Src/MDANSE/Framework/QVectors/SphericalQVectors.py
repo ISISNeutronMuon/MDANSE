@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 import numpy.typing as npt
 
@@ -70,7 +68,7 @@ class SphericalQVectors(IQVectors):
     around the shell centre defined by the 'shells' input.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
         "RangeConfigurator",
@@ -92,7 +90,7 @@ class SphericalQVectors(IQVectors):
 
         nvecs_per_shell = self._configuration["n_vectors"]["value"]
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         if self._status is not None:
             self._status.start(len(self._configuration["shells"]["value"]))

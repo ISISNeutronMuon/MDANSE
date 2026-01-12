@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
@@ -27,7 +25,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 class PseudoVoigt(IInstrumentResolution):
     """Defines an instrument resolution with a pseudo-voigt response"""
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["eta"] = ("FloatConfigurator", {"mini": 0.0, "maxi": 1.0, "default": 0.5})
     settings["mu_lorentzian"] = ("FloatConfigurator", {"default": 0.0})
     settings["sigma_lorentzian"] = ("FloatConfigurator", {"default": 1.0})
