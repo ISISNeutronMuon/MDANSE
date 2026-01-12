@@ -18,11 +18,10 @@ from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 
 IJOB_SUBCLASSES = IJob.indirect_subclass_dictionary()
 ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.enabled}
-ENABLED_QVECTORS = [
-    qvecs
-    for qvecs in IQVectors.indirect_subclasses()
-    if qvecs not in ("IQVectors", "LatticeQVectors")
-]
+ENABLED_QVECTORS = set(IQVectors.indirect_subclasses()) - {
+    "IQVectors",
+    "LatticeQVectors",
+}
 
 DATA_DIR = Path(__file__).parents[3] / "MDANSE/Tests/UnitTests/Converted"
 
