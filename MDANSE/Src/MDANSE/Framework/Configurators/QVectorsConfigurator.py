@@ -108,7 +108,7 @@ class QVectorsConfigurator(IConfigurator):
                 raise Exception("no Q vectors could be generated")
 
             self["parameters"] = parameters
-            # self["type"] = generator._type
+            self["vector_type"] = generator_name
             self["is_lattice"] = generator.is_lattice
             self["q_vectors"] = generator.configuration["q_vectors"]
 
@@ -122,7 +122,7 @@ class QVectorsConfigurator(IConfigurator):
         self["generator"] = generator
         self.error_status = "OK"
 
-        if any(shell is None for shell in self["value"].values()):
+        if None in self["value"].values():
             self.warning_status = "Some of the q vector shells are empty. The corresponding results will be NaN values."
         else:
             self.warning_status = ""

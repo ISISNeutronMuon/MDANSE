@@ -227,7 +227,7 @@ class Vectors(Plotter):
         for axindex, axes in enumerate(self._axes):
             if update_only:
                 plot_limits = self._backup_limits[axindex]
-                if axindex != 1:
+                if axindex != 1:  # axindex 1 is a special dataset for the violin plot.
                     try:
                         axes.set_xlim((plot_limits[0], plot_limits[1]))
                     except ValueError:

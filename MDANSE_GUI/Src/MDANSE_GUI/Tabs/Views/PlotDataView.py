@@ -95,27 +95,26 @@ def qvector_binning_general(
     npt.NDArray[float]
         A 1D array of |q| histogram bin limits.
     """
-    width = abs(width)
-    step_size = abs(step_size)
     if end < start:
         start, end = end, start
     if np.isclose(start, end) and (width is None or abs(width) < WIDTH_NONZERO_LIMIT):
         return np.array([start - 0.15, start - 0.05, start + 0.05, start + 0.15])
 
-    def get_bin_width(n_segments):
+    width = abs(width) if width else width
+    step_size = abs(step_size)
+
+    def get_bin_width(n_segments: int) -> tuple[float, float]:
         """Return the bin width based on shell width and shell separation."""
         if np.isclose(start, end):
-            bin_width = width / n_segments
-            peak_width = width
+            return width / n_segments, width
         elif width is None or width <= step_size / 2:
-            bin_width = step_size / n_segments
-            peak_width = step_size
+            return step_size / n_segments, step_size
         else:
-            bin_width = step_size / n_segments
-            peak_width = width
-        return bin_width, peak_width
+            return step_size / n_segments, width
 
-    def get_first_last_values(bin_width, peak_width):
+    def get_first_last_values(
+        bin_width: float, peak_width: float
+    ) -> tuple[float, float]:
         """Return the limits of the binning range based on the shell and bin sizes."""
         bins_per_shell = peak_width // bin_width
         if bins_per_shell > MAX_BINS_PER_SHELL or bins_per_shell < MIN_BINS_PER_SHELL:
@@ -135,7 +134,7 @@ def qvector_binning_general(
         last_value,
         bin_width,
     )
-    last_value = len(common_binning)
+    last_binning_length = len(common_binning)
     while len(common_binning) > MAX_BINS_PER_PLOT:
         bin_width *= 2
         first_value, last_value = get_first_last_values(bin_width, peak_width)
@@ -144,9 +143,9 @@ def qvector_binning_general(
             last_value,
             bin_width,
         )
-        if len(common_binning) == last_value:
+        if len(common_binning) == last_binning_length:
             break
-        last_value = len(common_binning)
+        last_binning_length = len(common_binning)
     offset = np.min(np.abs(start - common_binning)) / bin_width
     common_binning -= (offset - 0.5) * bin_width
     return common_binning

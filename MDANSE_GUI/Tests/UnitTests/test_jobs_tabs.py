@@ -9,7 +9,6 @@ from qtpy.QtWidgets import QMainWindow
 
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.Session.Session import LocalSession
 from MDANSE_GUI.Session.Settings import LocalSettings
 from MDANSE_GUI.Tabs.ConverterTab import ConverterTab

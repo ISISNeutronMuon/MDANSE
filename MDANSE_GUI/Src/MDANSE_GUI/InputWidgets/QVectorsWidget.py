@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+import copy
+
 from more_itertools import nth
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import QBrush, QStandardItem, QStandardItemModel
@@ -67,6 +69,24 @@ def numerator_suffix(index: int) -> str:
             return "rd"
         case _:
             return "th"
+
+
+def dicts_are_the_same(new_dict: dict[str, str], ref_dict: dict[str, str]) -> bool:
+    """Check if all the values in the new dict are the same in the reference dict."""
+    return all(new_dict.get(key) == value for key, value in ref_dict.items())
+
+
+def parameters_have_changed(qvec_configurator, plotting_object) -> bool:
+    """Check if the vector generator type and input parameters have changed."""
+    new_params = qvec_configurator["parameters"]
+    new_type = qvec_configurator["vector_type"]
+    if new_type != plotting_object.last_vec_type or not dicts_are_the_same(
+        new_params, plotting_object.last_vec_params
+    ):
+        plotting_object.last_vec_type = new_type
+        plotting_object.last_vec_params = copy.copy(new_params)
+        return True
+    return False
 
 
 class VectorModel(QStandardItemModel):
@@ -172,12 +192,17 @@ class ShellPanel(QWidget):
         self,
         *args,
         qvec_configurator: QVectorsConfigurator | None = None,
-        plotter_type="Vectors3D",
+        plotter_type: str = "Vectors3D",
+        dialog_reference: QDialog,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.qvec_config = qvec_configurator
         self.plotter_type = plotter_type
+        self.parent_dialog = dialog_reference
+        self.last_vec_type = ""
+        self.last_vec_params = {}
+        self.current_plotted_shell = -1
         self.create_layout()
         self.set_shell(0)
 
@@ -227,6 +252,11 @@ class ShellPanel(QWidget):
         update_limit : bool, optional
             Update the spinbox upper limit, by default True
         """
+        if (
+            not parameters_have_changed(self.qvec_config, self)
+            and shell_index == self.current_plotted_shell
+        ):
+            return
         vec_dict = self.qvec_config["q_vectors"]
         if update_limit:
             self.set_upper_limit(len(vec_dict))
@@ -240,6 +270,9 @@ class ShellPanel(QWidget):
             self.plot_widget.plot_blank()
             return
         else:
+            if vec_key is None:
+                self.set_shell(self.shell_selector.value())
+                return
             self.update_label(shell_index)
         if vec_dict[vec_key] is None:
             LOG.warning("Shell %i does not contain any vectors", shell_index)
@@ -248,6 +281,8 @@ class ShellPanel(QWidget):
                 override_title=f"Shell {shell_index}, q={vec_key}, contains no vectors.",
                 override_label="To introduce vectors at this Q, you may have to run the simulation with a larger cell.",
             )
+            return
+        if not self.parent_dialog.isVisible():
             return
         new_model = PlottingContext()
         for dataset in vector_projection_datasets(self.qvec_config, vec_key):
@@ -259,6 +294,7 @@ class ShellPanel(QWidget):
         self.plot_widget.use_grid()
         self.plot_widget.use_legend()
         self.plot_widget.plot_data()
+        self.current_plotted_shell = shell_index
         new_model.needs_an_update.connect(self.update_plot)
 
     @Slot()
@@ -299,6 +335,10 @@ class VectorViewer(QDialog):
 
         """
         super().__init__(parent, *args, **kwargs)
+        self.tab_index = {}
+        self.qvec_configurator = configurator
+        self.last_vec_type = ""
+        self.last_vec_params = {}
         self.setWindowTitle(self._helper_title)
         self.setWindowFlags(Qt.Window)
         layout = QVBoxLayout()
@@ -310,18 +350,54 @@ class VectorViewer(QDialog):
         self.plot_widget.plot_selector.setVisible(False)
         self.plot_widget._normaliser.setVisible(False)
         self.plot_widget._sliderpack.setVisible(False)
-        self.main_widget.addTab(self.plot_widget, "Vector |q| statistics")
+        self.tab_index["statistics"] = self.main_widget.addTab(
+            self.plot_widget, "Vector |q| statistics"
+        )
         self.shell_panel_3D = ShellPanel(
             qvec_configurator=configurator,
             plotter_type="Vectors3D",
+            dialog_reference=self,
         )
-        self.main_widget.addTab(self.shell_panel_3D, "Vector angle statistics")
+        self.tab_index["shells"] = self.main_widget.addTab(
+            self.shell_panel_3D, "Vector angle statistics"
+        )
+        self.main_widget.currentChanged.connect(self.update_plot)
+
+    def calculate_vector_statistics(self):
+        if not parameters_have_changed(self.qvec_configurator, self):
+            return
+        model = PlottingContext()
+        modq_binning = qvector_binning_from_dict(self.qvec_configurator["parameters"])
+        try:
+            for qvec_dataset in vector_q_statistics_datasets(
+                self.qvec_configurator,
+                q_bin_limits=modq_binning,
+            ):
+                model.add_dataset(qvec_dataset)
+        except ValueError:
+            self.plot_widget.plot_blank(
+                override_title="No vectors have been generated.",
+                override_label="Please change the input parameters.",
+            )
+            return
+        self.plot_widget.set_plotter("Vectors")
+        self.plot_widget.set_context(model)
+        self.plot_widget.use_grid()
+        self.plot_widget.use_legend()
+        self.plot_widget.plot_data()
+        model.needs_an_update.connect(self.update_plot)
 
     @Slot()
     def update_plot(self):
         """Draw the vector plots using the latest data."""
-        self.plot_widget.plot_data(update_only=True)
-        self.shell_panel_3D.update_plot()
+        current_tab = self.main_widget.currentIndex()
+        stats = self.tab_index["statistics"]
+        shells = self.tab_index["shells"]
+        if current_tab == stats:
+            self.calculate_vector_statistics()
+            self.plot_widget.plot_data(update_only=True)
+        elif current_tab == shells:
+            self.shell_panel_3D.update_plot()
 
 
 class QVectorsWidget(WidgetBase):
@@ -442,26 +518,7 @@ class QVectorsWidget(WidgetBase):
             self.helper.plot_widget._plotter.plot_blank()
             self.helper.shell_panel_3D.plot_widget._plotter.plot_blank()
             return
-        model = PlottingContext()
-        modq_binning = qvector_binning_from_dict(self._configurator["parameters"])
-        try:
-            for qvec_dataset in vector_q_statistics_datasets(
-                self._configurator,
-                q_bin_limits=modq_binning,
-            ):
-                model.add_dataset(qvec_dataset)
-        except ValueError:
-            self.helper.plot_widget.plot_blank(
-                override_title="No vectors have been generated.",
-                override_label="Please change the input parameters.",
-            )
-            return
-        self.helper.plot_widget.set_plotter("Vectors")
-        self.helper.plot_widget.set_context(model)
-        self.helper.plot_widget.use_grid()
-        self.helper.plot_widget.use_legend()
-        self.helper.plot_widget.plot_data()
-        model.needs_an_update.connect(self.helper.update_plot)
+        self.helper.update_plot()
 
     def updateValue(self):
         """Use the current inputs to configure the q vector generator."""
