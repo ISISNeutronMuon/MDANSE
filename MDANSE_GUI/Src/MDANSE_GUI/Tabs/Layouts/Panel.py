@@ -61,17 +61,26 @@ class Panel(QWidget):
         self._base = QWidget(self)
         self._layout = QHBoxLayout(self._base)
         self._base.setLayout(self._layout)
+
         self._base_layout = QHBoxLayout(self)
         self.setLayout(self._base_layout)
 
-    @property
-    def logged_things(self) -> Sequence[QWidget]:
-        raise NotImplementedError("Logged objects not defined.")
+        self._leftside = QWidget(self._base)
+        self._leftlayout = QVBoxLayout(self._leftside)
+        self._leftside.setLayout(self._leftlayout)
 
-    def connect_logging(self):
-        self.error.connect(self._tab_reference.error)
-        for thing in self.logged_things:
-            thing.error.connect(self._tab_reference.error)
+        self._tab_label = QLabel(self._leftside)
+        self._leftlayout.addWidget(self._tab_label)
+
+        upper_buttons = QWidget(self._leftside)
+        self._ub_layout = QHBoxLayout(upper_buttons)
+        upper_buttons.setLayout(self._ub_layout)
+        self._leftlayout.addWidget(upper_buttons)
+
+        lower_buttons = QWidget(self._leftside)
+        self._lb_layout = QHBoxLayout(lower_buttons)
+        lower_buttons.setLayout(self._lb_layout)
+        self._leftlayout.addWidget(lower_buttons)
 
     @Slot(str)
     def set_label_text(self, text: str):
@@ -79,7 +88,7 @@ class Panel(QWidget):
         self._tab_label.setWordWrap(True)
         self._tab_label.setText(text)
 
-    def add_widget(self, tempwidget: QWidget = None, *, upper: bool = True):
+    def add_widget(self, tempwidget: QWidget | None = None, *, upper: bool = True):
         if upper:
             self._ub_layout.addWidget(tempwidget)
         else:
@@ -87,8 +96,16 @@ class Panel(QWidget):
 
     def set_model(self, model: GeneralModel):
         self._model = model
-        assert self._view is not None
         self._view.setModel(model)
+
+    def current_item(self):
+        try:
+            index = self._view.currentIndex()
+            item = self._model.itemFromIndex(index)
+        except Exception as e:
+            self.error.emit(repr(e))
+        else:
+            return item
 
     def add_button(
         self,

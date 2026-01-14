@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Iterable
 
     from qtpy.QtWidgets import (
         QWidget,
@@ -34,8 +34,8 @@ class MultiPanel(DoublePanel):
     def __init__(
         self,
         *args,
-        left_panels: Sequence[QWidget] = (),
-        right_panels: Sequence[QWidget] = (),
+        left_panels: Iterable[QWidget] = (),
+        right_panels: Iterable[QWidget] = (),
         extra_visualiser: QWidget | None = None,
         **kwargs,
     ):

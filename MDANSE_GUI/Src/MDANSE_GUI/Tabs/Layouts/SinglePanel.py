@@ -42,27 +42,8 @@ class SinglePanel(Panel):
         scroll_area.setWidgetResizable(True)
         self._base_layout.addWidget(scroll_area)
 
-        leftside = QWidget(self._base)
-        leftlayout = QVBoxLayout(leftside)
-        leftside.setLayout(leftlayout)
-
-        self._layout.addWidget(leftside)
-
-        upper_buttons = QWidget(leftside)
-        ub_layout = QHBoxLayout(upper_buttons)
-        upper_buttons.setLayout(ub_layout)
-        lower_buttons = QWidget(leftside)
-        lb_layout = QHBoxLayout(lower_buttons)
-        lower_buttons.setLayout(lb_layout)
-
-        self._tab_label = QLabel(leftside)
-        leftlayout.addWidget(self._tab_label)
-        leftlayout.addWidget(upper_buttons)
-        leftlayout.addWidget(lower_buttons)
+        self._layout.addWidget(self._leftside)
 
         if self._visualiser is not None:
-            leftlayout.addWidget(self._visualiser)
-
-        self._leftlayout = leftlayout
-        self._lb_layout = lb_layout
-        self._ub_layout = ub_layout
+            # Insert between upper/lower
+            self._leftlayout.insertWidget(2, self._visualiser)
