@@ -15,17 +15,30 @@
 #
 from __future__ import annotations
 
-from .DoublePanel import DoublePanel
+from typing import TYPE_CHECKING
+
+from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from qtpy.QtWidgets import (
+        QWidget,
+    )
 
 
 class MultiPanel(DoublePanel):
     """The multi-panel layout which adds an extra visualiser panels to
     the left or right side of the layout"""
 
-    def __init__(self, *args, **kwargs):
-        left_panels = kwargs.pop("left_panels", [])
-        right_panels = kwargs.pop("right_panels", [])
-        extra_visualiser = kwargs.pop("extra_visualiser", None)
+    def __init__(
+        self,
+        *args,
+        left_panels: Sequence[QWidget] = (),
+        right_panels: Sequence[QWidget] = (),
+        extra_visualiser: QWidget | None = None,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         for left_panel in left_panels:
