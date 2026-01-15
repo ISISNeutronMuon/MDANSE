@@ -15,8 +15,8 @@
 #
 from __future__ import annotations
 
-import copy
 import json
+import math
 
 import h5py
 import numpy as np
@@ -105,7 +105,9 @@ class TrajectoryFilter(IJob):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        self.numberOfSteps = len(self.trajectory.atom_indices)
+        self.chunk_size = 100
+        self.n_chunks = math.ceil(self.configuration["frames"]["number"] / self.chunk_size)
+        self.numberOfSteps = self.n_chunks
 
         self._atoms = self.trajectory.atom_names
 
@@ -115,7 +117,37 @@ class TrajectoryFilter(IJob):
 
         # This stores the trajectory (position array) of atoms by x, y, z component, to be filtered
         self.atomic_trajectory_array = np.zeros(
-            (len(self._selected_atoms), 3, len(self.configuration["frames"]["value"]))
+            (len(self._selected_atoms), 3, self.chunk_size)
+        )
+
+        # Get filter class and instantiate filter object
+        filter_config = json.loads(self.configuration["trajectory_filter"]["value"])
+        filter_class, filter_attributes = (
+            FILTER_MAP[filter_config["filter"]],
+            filter_config["attributes"],
+        )
+        filter_attributes.setdefault(
+            "n_steps", self.configuration["trajectory"]["length"]
+        )
+        filter_attributes.setdefault(
+            "time_step_ps", self.configuration["trajectory"]["md_time_step"]
+        )
+        self.filter = filter_class(**filter_attributes)
+
+        name = self.configuration["output_files"]["file"].stem
+        if not isinstance(name, str):
+            name = "filtered_traj_chemical_system"
+
+        output_chemical_system = ChemicalSystem(name)
+        output_chemical_system.initialise_atoms(self._selected_atoms)
+
+        # Create trajectory writer object
+        self._output_trajectory = TrajectoryWriter(
+            self.configuration["output_files"]["file"],
+            output_chemical_system,
+            filter_attributes["n_steps"],
+            positions_dtype=self.configuration["output_files"]["dtype"],
+            compression=self.configuration["output_files"]["compression"],
         )
 
     def run_step(self, index):
@@ -128,19 +160,53 @@ class TrajectoryFilter(IJob):
 
         """
         LOG.debug(f"Running step: {index}")
-        trajectory = self.trajectory
 
-        # get atom index
-        atom_index = self.trajectory.atom_indices[index]
+        self.atomic_trajectory_array.fill(0)
+        for idx in range(len(self.trajectory.atom_indices)):
+            atom_index = self.trajectory.atom_indices[idx]
+            series = self.trajectory.read_atomic_trajectory(
+                atom_index,
+                first=self.configuration["frames"]["first"] + index * self.chunk_size,
+                last=self.configuration["frames"]["step"] + (index + 1) * self.chunk_size - 1,
+                step=self.configuration["frames"]["step"],
+            )
+            self.atomic_trajectory_array[idx, :, :series.shape[0]] = series.T
 
-        series = trajectory.read_atomic_trajectory(
-            atom_index,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
+        # Magnitude of zero frequency in filter response (equivalent to the average atomic positions)
+        zero_magnitude = np.abs(self.filter.freq_response.magnitudes[0])
+
+        # Apply filter (only apply initial position offset to atoms if filter response f(0) != 1)
+        filtered_coords = apply(
+            self.filter,
+            self.atomic_trajectory_array,
+            apply_offsets=not np.isclose(zero_magnitude, 1),
         )
 
-        self.atomic_trajectory_array[index] = series.T
+        time = self.configuration["frames"]["time"]
+        dt = time[1] - time[0]
+
+        for i in range(self.chunk_size):
+            j = i + index * self.chunk_size
+            if j >= self.configuration["frames"]["number"]:
+                break
+
+            filtered_configuration = get_output_configuration(
+                parent=self.configuration["trajectory"]["instance"].configuration(
+                    self.configuration["frames"]["value"][j],
+                ),
+                output_chemical_system=self._output_trajectory.chemical_system,
+                output_coordinates=filtered_coords[:, :, i],
+            )
+
+            self._output_trajectory.dump_configuration(
+                filtered_configuration,
+                dt * j,
+                units={
+                    "time": "ps",
+                    "unit_cell": "nm",
+                    "coordinates": "nm",
+                },
+            )
 
         return index, None
 
@@ -161,60 +227,6 @@ class TrajectoryFilter(IJob):
 
     def finalize(self):
         """Write out the new trajectory."""
-        # Get filter class and instantiate filter object
-        filter_config = json.loads(self.configuration["trajectory_filter"]["value"])
-
-        filter_class, filter_attributes = (
-            FILTER_MAP[filter_config["filter"]],
-            filter_config["attributes"],
-        )
-
-        filter_attributes.setdefault(
-            "n_steps", self.configuration["trajectory"]["length"]
-        )
-        filter_attributes.setdefault(
-            "time_step_ps", self.configuration["trajectory"]["md_time_step"]
-        )
-
-        filter = filter_class(**filter_attributes)
-
-        trajectories = copy.deepcopy(self.atomic_trajectory_array)
-
-        # Magnitude of zero frequency in filter response (equivalent to the average atomic positions)
-        zero_magnitude = np.abs(filter.freq_response.magnitudes[0])
-
-        # Apply filter (only apply initial position offset to atoms if filter response f(0) != 1)
-        filtered_coords = apply(
-            filter,
-            trajectories,
-            apply_offsets=not np.isclose(zero_magnitude, 1),
-        )
-
-        # Create new chemical system for output trajectory
-        name = self.configuration["output_files"]["file"].stem
-        if not isinstance(name, str):
-            name = "filtered_traj_chemical_system"
-        output_chemical_system = ChemicalSystem(name)
-        output_chemical_system.initialise_atoms(self._selected_atoms)
-
-        # Create trajectory writer object
-        self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["file"],
-            output_chemical_system,
-            filter_attributes["n_steps"],
-            None,
-            positions_dtype=self.configuration["output_files"]["dtype"],
-            compression=self.configuration["output_files"]["compression"],
-        )
-
-        # Write trajectory
-        write_filtered_trajectory(
-            parent_configuration=self.configuration,
-            nsteps=filter_attributes["n_steps"],
-            filtered_coordinates=filtered_coords,
-            output_trajectory=self._output_trajectory,
-        )
-
         # The input trajectory is closed.
         self.trajectory.close()
 
@@ -267,53 +279,6 @@ def apply(filter: Filter, trajectories: np.ndarray, apply_offsets: bool) -> np.n
             output_trajectory_array[at][i] = output
 
     return output_trajectory_array
-
-
-def write_filtered_trajectory(
-    parent_configuration: _Configuration,
-    nsteps: int,
-    filtered_coordinates: np.ndarray,
-    output_trajectory: TrajectoryWriter,
-) -> None:
-    """Write the filtered trajectory object.
-
-    Parameters
-    ----------
-    parent_configuration : _Configuration
-        Parent configuration.
-    nsteps : int
-        Number of simulation steps.
-    filtered_coordinates : np.ndarray
-        Coordinates of the filtered atomic trajectories.
-    output_trajectory : TrajectoryWriter
-        Trajectory writer object to write the output trajectory.
-
-    """
-    time = parent_configuration["frames"]["time"]
-    dt = time[1] - time[0]
-    for index in range(nsteps):
-        frame_coordinates = [
-            (x[index], y[index], z[index]) for (x, y, z) in filtered_coordinates
-        ]
-
-        # The filtered configuration coordinates at the current frame index
-        filtered_configuration_coordinates = np.array(frame_coordinates)
-
-        filtered_configuration = get_output_configuration(
-            parent=parent_configuration["trajectory"]["instance"].configuration(
-                parent_configuration["frames"]["value"][0],
-            ),
-            output_chemical_system=output_trajectory.chemical_system,
-            output_coordinates=filtered_configuration_coordinates,
-        )
-
-        output_trajectory.chemical_system.configuration = filtered_configuration
-
-        output_trajectory.dump_configuration(
-            filtered_configuration,
-            dt * index,
-            units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"},
-        )
 
 
 def get_output_configuration(
