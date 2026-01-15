@@ -106,7 +106,9 @@ class TrajectoryFilter(IJob):
         super().initialize()
 
         self.chunk_size = 100
-        self.n_chunks = math.ceil(self.configuration["frames"]["number"] / self.chunk_size)
+        self.n_chunks = math.ceil(
+            self.configuration["frames"]["number"] / self.chunk_size
+        )
         self.numberOfSteps = self.n_chunks
 
         self._atoms = self.trajectory.atom_names
@@ -167,10 +169,12 @@ class TrajectoryFilter(IJob):
             series = self.trajectory.read_atomic_trajectory(
                 atom_index,
                 first=self.configuration["frames"]["first"] + index * self.chunk_size,
-                last=self.configuration["frames"]["step"] + (index + 1) * self.chunk_size - 1,
+                last=self.configuration["frames"]["step"]
+                + (index + 1) * self.chunk_size
+                - 1,
                 step=self.configuration["frames"]["step"],
             )
-            self.atomic_trajectory_array[idx, :, :series.shape[0]] = series.T
+            self.atomic_trajectory_array[idx, :, : series.shape[0]] = series.T
 
         # Magnitude of zero frequency in filter response (equivalent to the average atomic positions)
         zero_magnitude = np.abs(self.filter.freq_response.magnitudes[0])
