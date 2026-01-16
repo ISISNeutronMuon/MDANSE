@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import math
+from traceback import print_tb
 
 import h5py
 import numpy as np
@@ -168,13 +169,15 @@ class TrajectoryFilter(IJob):
             atom_index = self.trajectory.atom_indices[idx]
             series = self.trajectory.read_atomic_trajectory(
                 atom_index,
-                first=self.configuration["frames"]["first"] + index * self.chunk_size,
-                last=self.configuration["frames"]["step"]
-                + (index + 1) * self.chunk_size
-                - 1,
+                first=self.configuration["frames"]["first"],
+                last=self.configuration["frames"]["last"] + 1,
                 step=self.configuration["frames"]["step"],
             )
-            self.atomic_trajectory_array[idx, :, : series.shape[0]] = series.T
+            first = index * self.chunk_size
+            last = (index + 1) * self.chunk_size
+            if last > self.configuration["frames"]["last"]:
+                last = self.configuration["frames"]["last"] + 1
+            self.atomic_trajectory_array[idx, :, : last - first] = series.T[:, first:last]
 
         # Magnitude of zero frequency in filter response (equivalent to the average atomic positions)
         zero_magnitude = np.abs(self.filter.freq_response.magnitudes[0])
