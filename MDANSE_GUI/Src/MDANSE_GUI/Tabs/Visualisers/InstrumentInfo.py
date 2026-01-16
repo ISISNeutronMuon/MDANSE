@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+from more_itertools import first_true
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import QTextBrowser
@@ -26,6 +27,13 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_text_map
 
 
+def generate_name(
+    blocked_names: set[str], name_root: str = "Generic neutron instrument"
+) -> str:
+    name_generator = (" ".join([name_root, str(number)]) for number in range(1, 2048))
+    return first_true(name_generator, pred=lambda x: x not in blocked_names)
+
+
 class SimpleInstrument:
     sample_options = ("isotropic", "crystal")
     technique_options = ("QENS", "INS")
@@ -34,9 +42,13 @@ class SimpleInstrument:
     energy_units = ("meV", "1/cm", "THz")
     momentum_units = ("1/ang", "1/nm", "1/Bohr")
 
-    def __init__(self, optional_qitem_reference: QStandardItem = None) -> None:
+    def __init__(
+        self,
+        optional_qitem_reference: QStandardItem = None,
+        blocked_names: set[str] | None = None,
+    ) -> None:
         self._list_item = optional_qitem_reference
-        self._name = "Generic neutron instrument"
+        self._name = generate_name(blocked_names)
         self._name_is_fixed = False
         self._sample = "isotropic"
         self._technique = "QENS"

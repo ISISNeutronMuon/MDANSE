@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from qtpy.QtCore import Signal, Slot
-from qtpy.QtGui import QDoubleValidator, QIntValidator
+from qtpy.QtGui import QDoubleValidator, QIntValidator, QValidator
 from qtpy.QtWidgets import (
     QComboBox,
     QGridLayout,
@@ -30,6 +30,46 @@ from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import InstrumentInfo, SimpleIns
 from MDANSE_GUI.Widgets.VectorWidget import VectorWidget
 
 
+class FreeNameValidator(QValidator):
+    def __init__(self, *args, instrument_list=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instrument_list = instrument_list
+
+    def validate(self, input_string: str, position: int) -> tuple[int, str]:
+        """Check the input string from a widget.
+
+        Implementation of the virtual method of QValidator.
+        It takes in the string from a QLineEdit and the cursor position,
+        and an enum value of the validator state. Widgets will reject
+        inputs which change the state to Invalid.
+
+        Parameters
+        ----------
+        input_string : str
+            current contents of a text input field
+        position : int
+            position of the cursor in the text input field
+
+        Returns
+        -------
+        int
+            Validator state.
+        str
+            Original input string.
+        int
+            Cursor position.
+
+        """
+        state = QValidator.State.Intermediate
+        if self.instrument_list is None:
+            return QValidator.State.Acceptable, input_string, position
+        if not input_string or input_string in self.instrument_list.get_blocked_names():
+            state = QValidator.State.Invalid
+        else:
+            state = QValidator.State.Acceptable
+        return state, input_string, position
+
+
 class InstrumentDetails(QWidget):
     instrument_details_changed = Signal(int)
 
@@ -38,11 +78,17 @@ class InstrumentDetails(QWidget):
         self.setLayout(QGridLayout(self))
         self._widgets = {}
         self._values = {}
+        self._view_reference = None
         self._current_instrument = None
         self.populate_panel(SimpleInstrument)
         self.add_visualiser()
         for attr in ["_sample", "_technique"]:
             self._widgets[attr].currentTextChanged.connect(self.reset_qvector_combobox)
+
+    def save_view_reference(self, view):
+        self._view_reference = view
+        self._name_validator = FreeNameValidator(instrument_list=self._view_reference)
+        self._widgets["_name"].setValidator(self._name_validator)
 
     def add_visualiser(self):
         layout = self.layout()

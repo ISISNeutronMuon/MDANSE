@@ -45,6 +45,13 @@ class InstrumentList(QListView):
         self._all_instruments = set()
         self._backup_instruments = {}
 
+    def get_blocked_names(self) -> set[str]:
+        model = self.model()
+        return {model.index(row, 0).data() for row in range(model.rowCount())}
+
+    def all_names_are_unique(self):
+        return len(self.get_blocked_names()) == self.model().rowCount()
+
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
         if index.row() == -1:
@@ -139,7 +146,7 @@ class InstrumentList(QListView):
         model = self.model()
         if model is None:
             return
-        new_instrument = SimpleInstrument()
+        new_instrument = SimpleInstrument(blocked_names=self.get_blocked_names())
         LOG.debug(f"New instrument, name: {new_instrument._name}")
         new_name = new_instrument._name if optional_name is None else optional_name
 
@@ -205,6 +212,11 @@ class InstrumentList(QListView):
 
     @Slot()
     def save_to_file(self, filename: str | None = None):
+        if not self.all_names_are_unique():
+            LOG.error(
+                "Instruments will NOT be saved. Some instruments have conflicting names."
+            )
+            return
         if filename is None:
             filename = os.path.join(
                 PLATFORM.application_directory(), "InstrumentDefinitions.toml"
