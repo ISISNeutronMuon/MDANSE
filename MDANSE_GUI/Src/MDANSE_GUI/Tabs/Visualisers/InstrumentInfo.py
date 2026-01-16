@@ -28,8 +28,26 @@ from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_tex
 
 
 def generate_name(
-    blocked_names: set[str], name_root: str = "Generic neutron instrument"
+    blocked_names: set[str] | None, name_root: str = "Generic neutron instrument"
 ) -> str:
+    """Create a text string different to those in the input set, if provided.
+
+    This function adds numbers to the text string which is the root of the new name.
+
+    Parameters
+    ----------
+    blocked_names : set[str] | None
+        Set of all the names that are already in use.
+    name_root : str, optional
+        Starting name, by default "Generic neutron instrument".
+
+    Returns
+    -------
+    str
+        First name root plus number that is not already in the input set.
+    """
+    if blocked_names is None:
+        return name_root
     name_generator = (" ".join([name_root, str(number)]) for number in range(1, 2048))
     return first_true(name_generator, pred=lambda x: x not in blocked_names)
 

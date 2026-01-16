@@ -31,17 +31,18 @@ from MDANSE_GUI.Widgets.VectorWidget import VectorWidget
 
 
 class FreeNameValidator(QValidator):
+    """Validator which compares the input text to the stored set of strings.
+
+    The intention is not to allow the user to type in a name that is already
+    present in the input set.
+    """
+
     def __init__(self, *args, instrument_list=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.instrument_list = instrument_list
 
     def validate(self, input_string: str, position: int) -> tuple[int, str]:
-        """Check the input string from a widget.
-
-        Implementation of the virtual method of QValidator.
-        It takes in the string from a QLineEdit and the cursor position,
-        and an enum value of the validator state. Widgets will reject
-        inputs which change the state to Invalid.
+        """Prevent the user from typing a name that is present in the input set.
 
         Parameters
         ----------
@@ -86,6 +87,11 @@ class InstrumentDetails(QWidget):
             self._widgets[attr].currentTextChanged.connect(self.reset_qvector_combobox)
 
     def save_view_reference(self, view):
+        """Save a reference to InstrumentList.
+
+        InstrumentList is then used by the input validator to look up the
+        current list of instrument names in the model.
+        """
         self._view_reference = view
         self._name_validator = FreeNameValidator(instrument_list=self._view_reference)
         self._widgets["_name"].setValidator(self._name_validator)

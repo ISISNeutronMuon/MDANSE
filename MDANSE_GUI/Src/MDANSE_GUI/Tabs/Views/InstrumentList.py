@@ -46,10 +46,12 @@ class InstrumentList(QListView):
         self._backup_instruments = {}
 
     def get_blocked_names(self) -> set[str]:
+        """Return a set of all names that are already present in the model."""
         model = self.model()
         return {model.index(row, 0).data() for row in range(model.rowCount())}
 
-    def all_names_are_unique(self):
+    def all_names_are_unique(self) -> bool:
+        """Return True is every name only appears once in the model, False otherwise."""
         return len(self.get_blocked_names()) == self.model().rowCount()
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
