@@ -40,6 +40,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
     _default_filter = DEFAULT_FILTER
 
     _settings = filter_default_attributes()
+    time_axis = {"n_steps": 10, "time_step_ps": 0.001}
 
     @classmethod
     def get_default(cls) -> str:
@@ -68,6 +69,10 @@ class TrajectoryFilterConfigurator(IConfigurator):
             return
 
         self._settings = value
+        self.time_axis = {
+            "n_steps": self.configurable[self.dependencies["frames"]]["n_frames"],
+            "time_step_ps": self.configurable[self.dependencies["frames"]]["time_step"],
+        }
 
         try:
             dict_value = json.loads(value)

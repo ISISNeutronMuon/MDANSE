@@ -71,7 +71,7 @@ class TrajectoryFilter(IJob):
     )
     settings["trajectory_filter"] = (
         "TrajectoryFilterConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
@@ -117,6 +117,9 @@ class TrajectoryFilter(IJob):
         self.atomic_trajectory_array = np.zeros(
             (len(self._selected_atoms), 3, len(self.configuration["frames"]["value"]))
         )
+
+        self.n_time_steps = self.configuration["frames"]["n_steps"]
+        self.time_step_ps = self.configuration["frames"]["time_step"]
 
     def run_step(self, index):
         """Run the filter for a single atom.
@@ -169,14 +172,9 @@ class TrajectoryFilter(IJob):
             filter_config["attributes"],
         )
 
-        filter_attributes.setdefault(
-            "n_steps", self.configuration["trajectory"]["length"]
-        )
-        filter_attributes.setdefault(
-            "time_step_ps", self.configuration["trajectory"]["md_time_step"]
-        )
+        time_axis = {"n_steps": self.n_time_steps, "time_step_ps": self.time_step_ps}
 
-        filter = filter_class(**filter_attributes)
+        filter = filter_class(**filter_attributes, **time_axis)
 
         trajectories = copy.deepcopy(self.atomic_trajectory_array)
 

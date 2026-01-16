@@ -661,6 +661,20 @@ def test_default_settings(
         {
             "trajectory": SRTIO3_TRAJ,
             "max_frequency": (626, 0),
+            "frames": [0, 320, 2, 80],
+            "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
+            "filter": "Butterworth",
+            "attributes": {
+                "n_steps": 160,
+                "time_step_ps": 0.005,
+                "order": 1,
+                "attenuation_type": "highpass",
+                "cutoff_freq": 19.635,
+            },
+        },
+        {
+            "trajectory": SRTIO3_TRAJ,
+            "max_frequency": (626, 0),
             "frames": [0, 320, 1, 160],
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Butterworth",

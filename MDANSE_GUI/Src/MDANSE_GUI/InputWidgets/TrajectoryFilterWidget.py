@@ -474,9 +474,12 @@ class FilterSettingGroup(QObject):
     # Signal: emitted when a setting has changed
     _setting_changed = Signal()
 
+    new_bin_width = Signal(float)
+
     def __init__(
         self,
         parent_attributes: dict,
+        time_axis: dict,
         schema: dict,
         render_func: Callable,
         flags: set = frozenset(),
@@ -521,11 +524,10 @@ class FilterSettingGroup(QObject):
         # Schema for the filter settings
         self.schema = schema
         self.load_from_schema()
+        self.time_axis = time_axis
 
         freq_key = [key for key in self.schema if key.endswith("_freq")]
-        initial_value = 1 / (
-            self.parent_attributes["time_step_ps"] * self.parent_attributes["n_steps"]
-        )
+        initial_value = 1 / (time_axis["n_steps"] * time_axis["time_step_ps"])
         if self.units is Filter.FrequencyUnits.ANGULAR:
             initial_value *= Filter._cyclic_to_angular
         self.attributes.update({freq_key.pop(): initial_value})
@@ -538,6 +540,16 @@ class FilterSettingGroup(QObject):
 
         # Connection: when the settings have been updated, re-render the filter designer
         self._settings_updated.connect(render_func)
+
+    @Slot(object)
+    def accept_time_axis(self, new_values: tuple[int, float]):
+        self.time_axis["n_steps"] = new_values[0]
+        self.time_axis["time_step_ps"] = new_values[1]               
+        bin_width = np.round(
+                    Filter.frequency_resolution(new_values[0], new_values[1], units=self.units),
+                    FLOAT_SPINBOX_DECIMALS,
+                )
+        self.new_bin_width.emit(bin_width)
 
     def load_from_schema(self) -> None:
         """Load the attributes from the filter setting schema."""
@@ -676,10 +688,8 @@ class FilterSettingGroup(QObject):
         if isinstance(setting, float):
             if setting_key in {"cutoff_freq", "fundamental_freq"}:
                 # Filter frequency spinbox with constrained values
-                n_steps = self.parent_attributes.get("n_steps", DEFAULT_N_STEPS)
-                time_step = self.parent_attributes.get(
-                    "time_step_ps", DEFAULT_TIME_STEP
-                )
+                n_steps = self.time_axis.get("n_steps", DEFAULT_N_STEPS)
+                time_step = self.time_axis.get("time_step_ps", DEFAULT_TIME_STEP)
 
                 bin_width = np.round(
                     Filter.frequency_resolution(n_steps, time_step, units=self.units),
@@ -710,6 +720,7 @@ class FilterSettingGroup(QObject):
                         value=bin_width,
                     )
                     widget.set_snap(snap_to=bin_width)
+                self.new_bin_width.connect(widget.setSingleStep)
             else:
                 # Other data spinbox
                 widget = QDoubleSpinBox()
@@ -784,6 +795,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
     def __init__(
         self,
         parent_attributes: dict,
+        time_axis: dict,
         schema: dict,
         render_func: Callable,
         flags: set = frozenset(),
@@ -802,7 +814,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
             Set of flags associated with the current filter that can be used to invoke certain rules about settings.
 
         """
-        super().__init__(parent_attributes, schema, render_func, flags)
+        super().__init__(parent_attributes, time_axis, schema, render_func, flags)
 
         # Generate an extra index for the frequency bound widget in the grid layout
         last_index = self.indices[-1]
@@ -944,6 +956,7 @@ class FilterDesigner(QDialog):
     _helper_title = "Filter designer"
     _canvas_dimensions = {"width": 700, "height": 500}
     _trajectory_power_spectrum = None
+    new_time_axis = Signal(object)
 
     def __init__(
         self,
@@ -957,6 +970,8 @@ class FilterDesigner(QDialog):
         self.setWindowTitle(self._helper_title)
         self.field = field
         self.configurator = configurator
+        self.n_steps = 10
+        self.time_step_ps = 0.001
 
         self.graph_ready = False
 
@@ -974,6 +989,11 @@ class FilterDesigner(QDialog):
         self.set_filter(self.configurator._default_filter.__name__)
         self.create_designer()
         self.preferences_group.pps_checkbox.checkStateChanged.connect(self.update_pps)
+
+    def update_time_axis(self, n_steps: int = 10, time_step_ps: float = 0.001):
+        self.n_steps = n_steps
+        self.time_step_ps = time_step_ps
+        self.new_time_axis.emit((n_steps, time_step_ps))
 
     def find_configuration(self) -> dict[str, str]:
         """Find the configuration of the main filter job.
@@ -1015,16 +1035,7 @@ class FilterDesigner(QDialog):
         """
         self.settings = {
             "filter": filter_type,
-            "attributes": {
-                # Number of simulation steps
-                "n_steps": self.configurator.configurable.settings["trajectory"][1][
-                    "configurator"
-                ]["length"],
-                # Simulation time step in picoseconds
-                "time_step_ps": self.configurator.configurable.settings["trajectory"][
-                    1
-                ]["configurator"]["md_time_step"],
-            },
+            "attributes": {},
         }
 
     def create_designer(self) -> None:
@@ -1236,10 +1247,12 @@ class FilterDesigner(QDialog):
             )
             group_obj = template(
                 parent_attributes=copy.deepcopy(self.settings["attributes"]),
+                time_axis={"n_steps": self.n_steps, "time_step_ps": self.time_step_ps},
                 schema=filter_class.default_settings,
                 render_func=self.render_canvas_assets,
                 flags=filter_class.flags,
             )
+            self.new_time_axis.connect(group_obj.accept_time_axis)
             self.settings_group[name] = group_obj
             widget = QWidget()
             layout = self.settings_group[name].as_grid()
@@ -1422,7 +1435,11 @@ class FilterDesigner(QDialog):
 
         # Preview instantiation of the selected filter
         filter_class = FILTER_MAP[self.settings["filter"]]
-        filter_preview = filter_class(**self.settings["attributes"])
+        filter_preview = filter_class(
+            n_steps=self.n_steps,
+            time_step_ps=self.time_step_ps,
+            **self.settings["attributes"],
+        )
 
         # Check if we are displaying trajectory power spectral attenuation alongside filter response
         ps, attenuated_ps = None, None
@@ -1539,8 +1556,6 @@ class FilterDesigner(QDialog):
 
     def apply(self) -> None:
         """Pass the filter parameters to the main widget."""
-        self.configurator.configure(self.settings)
-
         filter_class = FILTER_MAP[self.settings["filter"]]
 
         # update widget field text to reflect filter designer
@@ -1596,6 +1611,16 @@ class TrajectoryFilterWidget(WidgetBase):
         self.update_labels()
         self.updateValue()
         self._field.setToolTip(self._tooltip_text)
+        for widget in self.parent()._widgets:
+            if (
+                widget._configurator
+                is self._configurator.configurable[
+                    self._configurator.dependencies["frames"]
+                ]
+            ):
+                self._frame_widget = widget
+                break
+        self._frame_widget.value_changed.connect(self.update_time_axis)
 
     def create_helper(self) -> FilterDesigner:
         """
@@ -1615,6 +1640,15 @@ class TrajectoryFilterWidget(WidgetBase):
         else:
             self.filter_designer.update_pps()
             self.filter_designer.show()
+
+    @Slot()
+    def update_time_axis(self):
+        n_steps = self._frame_widget._configurator["n_frames"]
+        time_step_ps = self._frame_widget._configurator["time_step"]
+        self.filter_designer.update_time_axis(
+            n_steps=n_steps, time_step_ps=time_step_ps
+        )
+        self.filter_designer.render_canvas_assets()
 
     def get_widget_value(self) -> str:
         """
