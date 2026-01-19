@@ -30,7 +30,9 @@ from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_tex
 
 
 def generate_name(
-    existing_names: set[str] | None, name_root: str = "Generic neutron instrument"
+    existing_names: set[str] | None,
+    prefix: str = "Generic neutron instrument ",
+    suffix: str = "",
 ) -> str:
     """Create a text string different to those in the input set, if provided.
 
@@ -40,17 +42,19 @@ def generate_name(
     ----------
     existing_names : set[str] | None
         Set of all the names that are already in use.
-    name_root : str, optional
-        Starting name, by default "Generic neutron instrument".
+    prefix : str, optional
+        Part of the name before the number, by default "Generic neutron instrument".
+    suffix : str, optional
+        Part of the name after the number, by default "".
 
     Returns
     -------
     str
-        First name root plus number that is not already in the input set.
+        Name composed of prefix, number, suffix using the lowest positive number possible.
     """
     if existing_names is None:
-        return name_root
-    name_generator = (f"{name_root} {number}" for number in count(1))
+        return f"{prefix}{suffix}"
+    name_generator = (f"{prefix}{number}{suffix}" for number in count(1))
     return first_true(name_generator, pred=lambda x: x not in existing_names)
 
 

@@ -19,7 +19,7 @@ import os
 
 import tomlkit
 from qtpy.QtCore import QModelIndex, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QStandardItem, QValidator
+from qtpy.QtGui import QContextMenuEvent, QStandardItem
 from qtpy.QtWidgets import QAbstractItemView, QListView, QMenu
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
@@ -30,6 +30,7 @@ from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import (
     InstrumentDetails,
     SimpleInstrument,
 )
+from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import generate_name
 
 
 class InstrumentList(QListView):
@@ -105,14 +106,16 @@ class InstrumentList(QListView):
         index = self.currentIndex()
         node_number = model.itemFromIndex(index).data()
         instrument = model._nodes[node_number]
-        new_instrument_name = instrument._name + " (Copy)"
-        new_instrument = self.add_instrument(new_instrument_name)
+        new_unique_name = generate_name(
+            self.get_existing_names(), prefix=f"{instrument._name} (Copy ", suffix=")"
+        )
+        new_instrument = self.add_instrument(new_unique_name)
         for line in new_instrument.inputs():
             attr_name = line[0]
             setattr(new_instrument, attr_name, getattr(instrument, attr_name, None))
-        new_instrument._name = instrument._name + " (Copy)"
+        new_instrument._name = new_unique_name
         if new_instrument._list_item is not None:
-            new_instrument._list_item.setText(new_instrument_name)
+            new_instrument._list_item.setText(new_unique_name)
 
     @Slot()
     def restoreNode(self):
