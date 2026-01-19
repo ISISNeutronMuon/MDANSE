@@ -19,7 +19,7 @@ import os
 
 import tomlkit
 from qtpy.QtCore import QModelIndex, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QStandardItem
+from qtpy.QtGui import QContextMenuEvent, QStandardItem, QValidator
 from qtpy.QtWidgets import QAbstractItemView, QListView, QMenu
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
@@ -45,14 +45,14 @@ class InstrumentList(QListView):
         self._all_instruments = set()
         self._backup_instruments = {}
 
-    def get_blocked_names(self) -> set[str]:
+    def get_existing_names(self) -> set[str]:
         """Return a set of all names that are already present in the model."""
         model = self.model()
         return {model.index(row, 0).data() for row in range(model.rowCount())}
 
     def all_names_are_unique(self) -> bool:
         """Return True is every name only appears once in the model, False otherwise."""
-        return len(self.get_blocked_names()) == self.model().rowCount()
+        return len(self.get_existing_names()) == self.model().rowCount()
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
@@ -148,7 +148,7 @@ class InstrumentList(QListView):
         model = self.model()
         if model is None:
             return
-        new_instrument = SimpleInstrument(blocked_names=self.get_blocked_names())
+        new_instrument = SimpleInstrument(existing_names=self.get_existing_names())
         LOG.debug(f"New instrument, name: {new_instrument._name}")
         new_name = new_instrument._name if optional_name is None else optional_name
 

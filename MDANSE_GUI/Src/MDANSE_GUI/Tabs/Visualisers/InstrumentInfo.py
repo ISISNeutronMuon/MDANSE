@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from itertools import count
+
 from more_itertools import first_true
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem
@@ -28,7 +30,7 @@ from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_tex
 
 
 def generate_name(
-    blocked_names: set[str] | None, name_root: str = "Generic neutron instrument"
+    existing_names: set[str] | None, name_root: str = "Generic neutron instrument"
 ) -> str:
     """Create a text string different to those in the input set, if provided.
 
@@ -36,7 +38,7 @@ def generate_name(
 
     Parameters
     ----------
-    blocked_names : set[str] | None
+    existing_names : set[str] | None
         Set of all the names that are already in use.
     name_root : str, optional
         Starting name, by default "Generic neutron instrument".
@@ -46,10 +48,10 @@ def generate_name(
     str
         First name root plus number that is not already in the input set.
     """
-    if blocked_names is None:
+    if existing_names is None:
         return name_root
-    name_generator = (f"{name_root} {number" for number in range(1, 2048))
-    return first_true(name_generator, pred=lambda x: x not in blocked_names)
+    name_generator = (f"{name_root} {number}" for number in count(1))
+    return first_true(name_generator, pred=lambda x: x not in existing_names)
 
 
 class SimpleInstrument:
@@ -63,10 +65,10 @@ class SimpleInstrument:
     def __init__(
         self,
         optional_qitem_reference: QStandardItem = None,
-        blocked_names: set[str] | None = None,
+        existing_names: set[str] | None = None,
     ) -> None:
         self._list_item = optional_qitem_reference
-        self._name = generate_name(blocked_names)
+        self._name = generate_name(existing_names)
         self._name_is_fixed = False
         self._sample = "isotropic"
         self._technique = "QENS"

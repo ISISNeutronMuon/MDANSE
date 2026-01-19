@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator, QIntValidator, QValidator
 from qtpy.QtWidgets import (
@@ -28,6 +30,9 @@ from qtpy.QtWidgets import (
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import InstrumentInfo, SimpleInstrument
 from MDANSE_GUI.Widgets.VectorWidget import VectorWidget
+
+if TYPE_CHECKING:
+    from MDANSE_GUI.Tabs.Views.InstrumentList import InstrumentList
 
 
 class FreeNameValidator(QValidator):
@@ -61,11 +66,15 @@ class FreeNameValidator(QValidator):
             Cursor position.
 
         """
-        state = QValidator.State.Acceptable if (
-            input_string 
-            and self.instrument_list 
-            and input_string not in self.instrument_list.get_blocked_names()
-        ) else QValidator.State.Invalid
+        state = (
+            QValidator.State.Acceptable
+            if (
+                input_string
+                and self.instrument_list
+                and input_string not in self.instrument_list.get_existing_names()
+            )
+            else QValidator.State.Invalid
+        )
         return state, input_string, position
 
 
