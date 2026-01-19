@@ -48,7 +48,7 @@ def generate_name(
     """
     if blocked_names is None:
         return name_root
-    name_generator = (" ".join([name_root, str(number)]) for number in range(1, 2048))
+    name_generator = (f"{name_root} {number" for number in range(1, 2048))
     return first_true(name_generator, pred=lambda x: x not in blocked_names)
 
 

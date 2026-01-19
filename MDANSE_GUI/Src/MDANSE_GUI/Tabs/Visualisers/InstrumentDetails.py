@@ -37,7 +37,7 @@ class FreeNameValidator(QValidator):
     present in the input set.
     """
 
-    def __init__(self, *args, instrument_list=None, **kwargs):
+    def __init__(self, *args, instrument_list: InstrumentList | None = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.instrument_list = instrument_list
 
@@ -61,13 +61,11 @@ class FreeNameValidator(QValidator):
             Cursor position.
 
         """
-        state = QValidator.State.Intermediate
-        if self.instrument_list is None:
-            return QValidator.State.Acceptable, input_string, position
-        if not input_string or input_string in self.instrument_list.get_blocked_names():
-            state = QValidator.State.Invalid
-        else:
-            state = QValidator.State.Acceptable
+        state = QValidator.State.Acceptable if (
+            input_string 
+            and self.instrument_list 
+            and input_string not in self.instrument_list.get_blocked_names()
+        ) else QValidator.State.Invalid
         return state, input_string, position
 
 
