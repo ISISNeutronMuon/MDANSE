@@ -51,6 +51,15 @@ class InstrumentList(QListView):
         model = self.model()
         return {model.index(row, 0).data() for row in range(model.rowCount())}
 
+    def get_other_names(self) -> set[str]:
+        """Return a set of names in the model excluding the current item."""
+        model = self.model()
+        return {
+            model.index(row, 0).data()
+            for row in range(model.rowCount())
+            if row != self.currentIndex().row()
+        }
+
     def all_names_are_unique(self) -> bool:
         """Return True is every name only appears once in the model, False otherwise."""
         return len(self.get_existing_names()) == self.model().rowCount()
