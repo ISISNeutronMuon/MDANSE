@@ -69,6 +69,7 @@ class InstrumentTab(GeneralTab):
                 instrument._configured = (
                     True  # instruments loaded from file are configured
                 )
+        self._visualiser.save_view_reference(self._view)
 
     @Slot()
     def load_trajectories(self):

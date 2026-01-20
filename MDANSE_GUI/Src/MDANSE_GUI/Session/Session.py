@@ -91,7 +91,9 @@ class Session(QObject):
         gs.load_settings()
         paths = gs.group("paths")
         paths.set_group_comment("Lookup of working directory paths for the main GUI")
-        paths.add("root_directory", Path.home(), "Starting path for any file search")
+        paths.add(
+            "root_directory", str(Path.home()), "Starting path for any file search"
+        )
 
         units = gs.group("units")
         units.set_group_comment(

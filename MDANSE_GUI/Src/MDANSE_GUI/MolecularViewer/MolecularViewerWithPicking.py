@@ -229,7 +229,7 @@ class MolecularViewerWithPicking(MolecularViewer):
             return
 
         coords = self._current_coords
-        scaled_radii = self._colour_manager.radii * self._scale_factor**2
+        scaled_radii = self._colour_manager.radii * self._atom_scale_factor**2
         idxs = np.arange(len(scaled_radii))
 
         x, y = obj.GetEventPosition()

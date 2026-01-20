@@ -30,6 +30,7 @@ from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import (
     InstrumentDetails,
     SimpleInstrument,
 )
+from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import generate_name
 
 
 class InstrumentList(QListView):
@@ -44,6 +45,15 @@ class InstrumentList(QListView):
         self._current_instrument = None
         self._all_instruments = set()
         self._backup_instruments = {}
+
+    def get_existing_names(self) -> set[str]:
+        """Return a set of all names that are already present in the model."""
+        model = self.model()
+        return {model.index(row, 0).data() for row in range(model.rowCount())}
+
+    def all_names_are_unique(self) -> bool:
+        """Return True is every name only appears once in the model, False otherwise."""
+        return len(self.get_existing_names()) == self.model().rowCount()
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         index = self.indexAt(event.pos())
@@ -96,14 +106,16 @@ class InstrumentList(QListView):
         index = self.currentIndex()
         node_number = model.itemFromIndex(index).data()
         instrument = model._nodes[node_number]
-        new_instrument_name = instrument._name + " (Copy)"
-        new_instrument = self.add_instrument(new_instrument_name)
+        new_unique_name = generate_name(
+            self.get_existing_names(), prefix=f"{instrument._name} (Copy ", suffix=")"
+        )
+        new_instrument = self.add_instrument(new_unique_name)
         for line in new_instrument.inputs():
             attr_name = line[0]
             setattr(new_instrument, attr_name, getattr(instrument, attr_name, None))
-        new_instrument._name = instrument._name + " (Copy)"
+        new_instrument._name = new_unique_name
         if new_instrument._list_item is not None:
-            new_instrument._list_item.setText(new_instrument_name)
+            new_instrument._list_item.setText(new_unique_name)
 
     @Slot()
     def restoreNode(self):
@@ -139,7 +151,7 @@ class InstrumentList(QListView):
         model = self.model()
         if model is None:
             return
-        new_instrument = SimpleInstrument()
+        new_instrument = SimpleInstrument(existing_names=self.get_existing_names())
         LOG.debug(f"New instrument, name: {new_instrument._name}")
         new_name = new_instrument._name if optional_name is None else optional_name
 
@@ -205,6 +217,11 @@ class InstrumentList(QListView):
 
     @Slot()
     def save_to_file(self, filename: str | None = None):
+        if not self.all_names_are_unique():
+            LOG.error(
+                "Instruments will NOT be saved. Some instruments have conflicting names."
+            )
+            return
         if filename is None:
             filename = os.path.join(
                 PLATFORM.application_directory(), "InstrumentDefinitions.toml"
