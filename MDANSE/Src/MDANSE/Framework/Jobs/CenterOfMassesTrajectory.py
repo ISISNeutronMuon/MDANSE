@@ -72,6 +72,11 @@ class CenterOfMassesTrajectory(IJob):
 
         self.cluster_composition = {}
         original_atom_list = chemical_system.atom_list
+        nondummy_indices = set(
+            np.array(chemical_system._atom_indices)[
+                np.logical_not(chemical_system.atom_property("dummy"))
+            ]
+        )
         selected_indices = (
             set(self.trajectory._selection)
             if self.trajectory._selection
@@ -80,15 +85,24 @@ class CenterOfMassesTrajectory(IJob):
         new_element_list = []
         used_up_atoms = set()
         new_chemical_system = ChemicalSystem()
+        self.temp_clusters = {}
         for cluster_name in chemical_system._clusters:
             for cluster in chemical_system._clusters[cluster_name]:
-                if selected_indices and set(cluster) <= selected_indices:
+                nondummy_cluster = nondummy_indices.intersection(cluster)
+                if (
+                    nondummy_cluster
+                    and selected_indices
+                    and nondummy_cluster <= selected_indices
+                ):
                     if cluster_name not in self.cluster_composition:
                         self.cluster_composition[cluster_name] = [
                             original_atom_list[ind] for ind in cluster
                         ]
+                    if cluster_name not in self.temp_clusters:
+                        self.temp_clusters[cluster_name] = []
                     new_element_list.append(cluster_name)
                     used_up_atoms.update(set(cluster))
+                    self.temp_clusters[cluster_name].append(list(nondummy_cluster))
         for index in selected_indices:
             if index not in used_up_atoms:
                 new_element_list.append(chemical_system.atom_list[index])
@@ -134,8 +148,8 @@ class CenterOfMassesTrajectory(IJob):
 
         com_coords = np.empty((n_coms, 3), dtype=np.float64)
         mol_index = 0
-        for cluster_name in chemical_system._clusters:
-            for cluster in chemical_system._clusters[cluster_name]:
+        for cluster_name in self.temp_clusters:
+            for cluster in self.temp_clusters[cluster_name]:
                 if not set(cluster).issubset(self.selected_indices):
                     continue
                 masses = [
