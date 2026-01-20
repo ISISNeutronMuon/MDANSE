@@ -28,7 +28,11 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import InstrumentInfo, SimpleInstrument
+from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import (
+    InstrumentInfo,
+    SimpleInstrument,
+    generate_name,
+)
 from MDANSE_GUI.Widgets.VectorWidget import VectorWidget
 
 if TYPE_CHECKING:
@@ -76,6 +80,12 @@ class FreeNameValidator(QValidator):
             else QValidator.State.Invalid
         )
         return state, input_string, position
+
+    def fixup(self, a0):
+        new_name = generate_name(
+            self.instrument_list.get_existing_names(), prefix=f"{a0}_duplicate"
+        )
+        return super().fixup(new_name)
 
 
 class InstrumentDetails(QWidget):
