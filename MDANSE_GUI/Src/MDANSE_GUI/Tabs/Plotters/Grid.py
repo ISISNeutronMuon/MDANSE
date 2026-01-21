@@ -20,6 +20,8 @@ import math
 from itertools import islice
 from typing import TYPE_CHECKING, Any
 
+from matplotlib import rcParams
+
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
@@ -39,6 +41,7 @@ class Grid(Plotter):
         self._active_curves = []
         self._backup_curves = []
         self._plot_limit = 8
+        self._title_length_limit = 30
 
     def slider_labels(self) -> list[str]:
         """Return labels to show that sliders are not used."""
@@ -84,6 +87,25 @@ class Grid(Plotter):
             self._toolbar.update()
             self._toolbar.push_current()
 
+    def title_fontsize(self, title_text: str) -> int:
+        normal_size = rcParams["font.size"]
+        new_size = (
+            normal_size
+            if len(title_text) < self._title_length_limit
+            else normal_size - round(len(title_text) / self._title_length_limit)
+        )
+        return new_size
+
+    def toggle_legend(self, enabled: bool) -> None:
+        if self._figure is None:
+            return
+        for plot_index, axes in enumerate(self._axes):
+            axes.set_title(
+                self._axes_titles[plot_index] if enabled else "",
+                fontsize=self.title_fontsize(self._axes_titles[plot_index]),
+            )
+        self._figure.canvas.draw()
+
     def plot(
         self,
         plotting_context: PlottingContext,
@@ -116,6 +138,7 @@ class Grid(Plotter):
             return
         self._figure = target
         self._axes = []
+        self._axes_titles = []
         self._backup_curves = []
         self._active_curves = []
         self._normalisation_errors = []
@@ -169,8 +192,13 @@ class Grid(Plotter):
                     with contextlib.suppress(Exception):
                         temp_curve.set_marker(int(databundle.marker))
                 axes.set_xlabel(x_axis_label)
-                if plotting_context.use_legend:
-                    axes.legend()
+                self._axes_titles.append(plotlabel)
+                axes.set_title(
+                    plotlabel if plotting_context.use_legend else "",
+                    fontsize=self.title_fontsize(plotlabel),
+                )
+                legend = axes.legend()
+                legend.set_visible(False)
                 axes.grid(plotting_context.use_grid)
                 startnum += 1
                 self._active_curves.append(temp_curve)

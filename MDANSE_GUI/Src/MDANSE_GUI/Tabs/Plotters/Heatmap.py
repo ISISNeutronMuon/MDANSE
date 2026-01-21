@@ -349,8 +349,8 @@ class Heatmap(Plotter):
             axes.set_ylabel(", ".join(np.unique(y_axis_labels)))
             self._backup_images[databundle.row] = image
         if startnum > 1:
-            if plotting_context.use_legend:
-                axes.legend()
+            legend = axes.legend()
+            legend.set_visible(plotting_context.use_legend)
             axes.grid(plotting_context.use_grid)
         self.check_curve_lengths()
         self.request_slider_values()
