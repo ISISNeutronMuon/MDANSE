@@ -788,9 +788,13 @@ class PlottingContext(QStandardItemModel):
         into this slot.
 
         """
-        for dataset in other._datasets.values():
-            self.add_dataset(dataset)
-            self.add_dataset(dataset.spawn_imaginary_dataset())
+        for dataset, plot_args in zip(
+            other._datasets.values(), other.datasets().values(), strict=True
+        ):
+            self.add_dataset(dataset, optional_values=plot_args)
+            self.add_dataset(
+                dataset.spawn_imaginary_dataset(), optional_values=plot_args
+            )
         self.set_axes()
 
     @Slot(dict)
@@ -860,13 +864,17 @@ class PlottingContext(QStandardItemModel):
 
         return result
 
-    def add_dataset(self, new_dataset: SingleDataset):
+    def add_dataset(
+        self, new_dataset: SingleDataset, optional_values: PlotArgs | None = None
+    ):
         """Add a SingleDataset instance to the model and GUI.
 
         Parameters
         ----------
         new_dataset : SingleDataset
-            a SingleDataset instance
+            A SingleDataset instance.
+        optional_values : PlotArgs | None
+            If the dataset is being added from another model, the model.datasets() output can be added here.
 
         """
         if new_dataset is None or not new_dataset._valid:
@@ -881,7 +889,9 @@ class PlottingContext(QStandardItemModel):
             QStandardItem(str(x))
             for x in [
                 new_dataset._name,
-                new_dataset._labels["medium"],
+                new_dataset._labels["medium"]
+                if optional_values is None
+                else optional_values.legend_label,
                 new_dataset._data_shape,
                 new_dataset._data_unit,
                 new_dataset.longest_axis()[-1],
@@ -924,7 +934,8 @@ class PlottingContext(QStandardItemModel):
     @Slot()
     def ask_for_update(self):
         """Emit a signal to indicate that a plot should be updated."""
-        self.needs_an_update.emit(self.plot_widget_id)
+        if self.plot_widget_id >= 0:
+            self.needs_an_update.emit(self.plot_widget_id)
 
     def set_axes(self):
         """Check that axis information can be found for datasets."""
