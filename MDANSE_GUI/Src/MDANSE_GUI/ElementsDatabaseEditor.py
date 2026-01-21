@@ -41,7 +41,11 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.Databases import AtomsDatabaseError
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker
-from MDANSE_GUI.Widgets.GeneralWidgets import InputDialog, InputVariable
+from MDANSE_GUI.Widgets.GeneralWidgets import (
+    InputDialog,
+    InputVariable,
+    WhitespaceValidator,
+)
 
 
 class ComplexValidator(QValidator):
@@ -322,6 +326,8 @@ class NewElementDialog(QDialog):
 
         layout = QVBoxLayout(self)
         edit = QLineEdit(self)
+        self.validator = WhitespaceValidator(self, default_name="NewAtom")
+        edit.setValidator(self.validator)
         layout.addWidget(edit)
         self.setLayout(layout)
         self.textedit = edit
@@ -424,7 +430,8 @@ class ElementModel(QStandardItemModel):
                     "format": str,
                     "label": "New element name",
                     "tooltip": "Type the name of the new chemical element here.",
-                    "value": "",
+                    "value": "NewAtom",
+                    "default_text": "NewAtom",
                 }
             )
         ]
@@ -447,7 +454,8 @@ class ElementModel(QStandardItemModel):
                     "format": str,
                     "label": "New property name",
                     "tooltip": "Type the name of the new property here; it will be added to the table.",
-                    "value": "",
+                    "value": "NewProperty",
+                    "default_text": "NewProperty",
                 },
             ),
             InputVariable(
@@ -488,7 +496,8 @@ class ElementModel(QStandardItemModel):
                     "format": str,
                     "label": f'Rename custom atom "{self.parent().viewer.mouse_atm}" to',
                     "tooltip": "Type the new name of the chemical element here.",
-                    "value": "",
+                    "value": f"{self.parent().viewer.mouse_atm}",
+                    "default_text": "NewAtom",
                 },
             ),
         ]
@@ -536,7 +545,8 @@ class ElementModel(QStandardItemModel):
                     "format": str,
                     "label": f'Rename custom property "{self.parent().viewer.mouse_prop}" to',
                     "tooltip": "Type the new name of the atom property here.",
-                    "value": "",
+                    "value": f"{self.parent().viewer.mouse_prop}",
+                    "default_text": "NewProperty",
                 },
             ),
         ]
@@ -613,13 +623,13 @@ class ElementModel(QStandardItemModel):
 
         for _, idx in row_idxs:
             atm_sym = self.verticalHeaderItem(idx).text()
-            atm_sym_copy = atm_sym + " (copy)"
+            atm_sym_copy = atm_sym + "(copy)"
             while True:
                 if atm_sym_copy not in self.database.atoms:
                     self.database.add_atom(atm_sym_copy)
                     self.copy_row_in_database(atm_sym_copy, atm_sym)
                     break
-                atm_sym_copy += " (copy)"
+                atm_sym_copy += "(copy)"
         self.save_changes()
 
     @Slot(dict)
@@ -737,7 +747,7 @@ class ElementModel(QStandardItemModel):
         col_idx.sort()
         for idx in col_idx:
             prop_label = self.horizontalHeaderItem(idx).text()
-            prop_label_copy = prop_label + " (copy)"
+            prop_label_copy = prop_label + "(copy)"
             prop_type = self.database._properties[prop_label]
             prop_unit = self.database._units[prop_label]
             while True:
@@ -746,7 +756,7 @@ class ElementModel(QStandardItemModel):
                         prop_label_copy, prop_label, prop_type, prop_unit
                     )
                     break
-                prop_label_copy += " (copy)"
+                prop_label_copy += "(copy)"
         self.save_changes()
 
     @Slot()

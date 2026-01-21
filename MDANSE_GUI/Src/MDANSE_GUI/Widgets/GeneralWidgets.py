@@ -25,6 +25,7 @@ from qtpy.QtGui import (
     QDoubleValidator,
     QIntValidator,
     QPalette,
+    QValidator,
 )
 from qtpy.QtWidgets import (
     QCheckBox,
@@ -58,6 +59,29 @@ from MDANSE.MLogging import LOG
 # 4. The information gathered is shown to the user,
 # with a possibility of correcting the entries.
 # 5. The corrected parameters are passed to the converter, and the job is started.
+
+
+class WhitespaceValidator(QValidator):
+    """Does not allow empty or whitespace names."""
+
+    EXCLUDED_CHARACTERS = [" ", "\n", "\t", "\\"]
+
+    def __init__(self, *args, default_name: str = "DEFAULT", **kwargs):
+        super().__init__(*args, **kwargs)
+        self.default_name = default_name
+
+    def validate(self, input_string: str, position: int):
+        state = (
+            QValidator.State.Invalid
+            if not input_string
+            or any(char in input_string for char in self.EXCLUDED_CHARACTERS)
+            else QValidator.State.Acceptable
+        )
+        return state, input_string, position
+
+    def fixup(self, invalid_string: str):
+        invalid_string = self.default_name
+        return super().fixup(invalid_string)
 
 
 class GeneralInput(QObject):
@@ -641,6 +665,10 @@ class InputDialog(QDialog):
                     validator = QIntValidator(temp_base)
                 elif format is float:
                     validator = QDoubleValidator(temp_base)
+                elif hasattr(var, "default_text"):
+                    validator = WhitespaceValidator(
+                        temp_base, default_name=var.default_text
+                    )
                 else:
                     validator = None
                 widget_instance.setText(str(value))
