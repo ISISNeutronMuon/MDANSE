@@ -118,7 +118,7 @@ class TrajectoryFilter(IJob):
             (len(self._selected_atoms), 3, len(self.configuration["frames"]["value"]))
         )
 
-        self.n_time_steps = self.configuration["frames"]["n_steps"]
+        self.n_time_steps = self.configuration["frames"]["number"]
         self.time_step_ps = self.configuration["frames"]["time_step"]
 
     def run_step(self, index):
@@ -199,7 +199,7 @@ class TrajectoryFilter(IJob):
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
             output_chemical_system,
-            filter_attributes["n_steps"],
+            time_axis["n_steps"],
             None,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
@@ -208,7 +208,7 @@ class TrajectoryFilter(IJob):
         # Write trajectory
         write_filtered_trajectory(
             parent_configuration=self.configuration,
-            nsteps=filter_attributes["n_steps"],
+            nsteps=time_axis["n_steps"],
             filtered_coordinates=filtered_coords,
             output_trajectory=self._output_trajectory,
         )

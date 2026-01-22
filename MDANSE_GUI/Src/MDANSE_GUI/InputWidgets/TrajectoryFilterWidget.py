@@ -544,11 +544,11 @@ class FilterSettingGroup(QObject):
     @Slot(object)
     def accept_time_axis(self, new_values: tuple[int, float]):
         self.time_axis["n_steps"] = new_values[0]
-        self.time_axis["time_step_ps"] = new_values[1]               
+        self.time_axis["time_step_ps"] = new_values[1]
         bin_width = np.round(
-                    Filter.frequency_resolution(new_values[0], new_values[1], units=self.units),
-                    FLOAT_SPINBOX_DECIMALS,
-                )
+            Filter.frequency_resolution(new_values[0], new_values[1], units=self.units),
+            FLOAT_SPINBOX_DECIMALS,
+        )
         self.new_bin_width.emit(bin_width)
 
     def load_from_schema(self) -> None:

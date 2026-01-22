@@ -243,8 +243,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Butterworth",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "order": 1,
                 "attenuation_type": "lowpass",
                 "cutoff_freq": 19.635,
@@ -257,8 +255,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Butterworth",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "order": 1,
                 "attenuation_type": "highpass",
                 "cutoff_freq": 31.416,
@@ -271,8 +267,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "order": 1,
                 "min_attenuation": 12.7,
                 "attenuation_type": "bandpass",
@@ -286,8 +280,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Bessel",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "order": 1,
                 "norm": "phase",
                 "attenuation_type": "bandstop",
@@ -301,8 +293,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "order": 2,
                 "min_attenuation": 20.0,
                 "attenuation_type": "bandpass",
@@ -316,8 +306,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "order": 2,
                 "min_attenuation": 2.0,
                 "attenuation_type": "bandpass",
@@ -331,8 +319,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Notch",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "fundamental_freq": 6.875,
                 "quality_factor": 1.6,
             },
@@ -344,8 +330,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Peak",
             "attributes": {
-                "n_steps": 1000,
-                "time_step_ps": 0.01,
                 "fundamental_freq": 5.7,
                 "quality_factor": 1.5,
             },
@@ -357,8 +341,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Comb",
             "attributes": {
-                "n_steps": 1000,
-                "time_step_ps": 0.01,
                 "fundamental_freq": 5.0,
                 "quality_factor": 30.0,
                 "comb_type": "notch",
@@ -372,8 +354,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "order": 1,
                 "min_attenuation": 10.0,
                 "attenuation_type": "bandstop",
@@ -387,8 +367,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Elliptical",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "order": 2,
                 "max_ripple": 1.0,
                 "min_attenuation": 20.0,
@@ -403,8 +381,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeI",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "order": 1,
                 "max_ripple": 5.0,
                 "attenuation_type": "bandstop",
@@ -472,8 +448,11 @@ def test_convolution(
     # Retrieve filter configuration dict
     filter_class = FILTER_MAP[filter_config["filter"]]
 
+    trajectory_instance = Trajectory(CONV_DIR / trajectory_name)
+    time_axis = trajectory_instance.time()
+    time_step = time_axis[1] - time_axis[0]
     # Instantiate filter object
-    filter_object = filter_class(**filter_config["attributes"])
+    filter_object = filter_class(**filter_config["attributes"], n_steps = frames[1], time_step_ps=time_step)
 
     # Supply frequencies against which to calculate response H(w)
     filter_object.custom_freq_range = u_x_axis
@@ -533,8 +512,6 @@ def test_convolution(
             "frames": [0, 25, 1, 13],
             "filter": "Butterworth",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "cutoff_freq": 0.000377,
             },
         },
@@ -543,8 +520,6 @@ def test_convolution(
             "frames": [0, 25, 1, 13],
             "filter": "ChebyshevTypeI",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "cutoff_freq": 0.000377,
             },
         },
@@ -553,8 +528,6 @@ def test_convolution(
             "frames": [0, 25, 1, 13],
             "filter": "ChebyshevTypeII",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "cutoff_freq": 0.000377,
                 "min_attenuation": 10.0,
             },
@@ -564,8 +537,6 @@ def test_convolution(
             "frames": [0, 25, 1, 13],
             "filter": "Elliptical",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "attenuation_type": "bandpass",
                 "cutoff_freq": [0.000377, 0.000577],
             },
@@ -575,8 +546,6 @@ def test_convolution(
             "frames": [0, 25, 1, 13],
             "filter": "Bessel",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "attenuation_type": "bandpass",
                 "cutoff_freq": [0.000377, 0.000577],
             },
@@ -586,8 +555,6 @@ def test_convolution(
             "frames": [0, 25, 1, 13],
             "filter": "Notch",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "fundamental_freq": 0.000125,
             },
         },
@@ -596,8 +563,6 @@ def test_convolution(
             "frames": [0, 25, 1, 13],
             "filter": "Peak",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "fundamental_freq": 0.000125,
             },
         },
@@ -606,8 +571,6 @@ def test_convolution(
             "frames": [0, 25, 1, 13],
             "filter": "Comb",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "fundamental_freq": 6.25e-05,
                 "comb_type": "notch",
             },
@@ -617,8 +580,6 @@ def test_convolution(
             "frames": [0, 25, 1, 13],
             "filter": "Comb",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "fundamental_freq": 6.25e-05,
             },
         },
@@ -651,8 +612,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Butterworth",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "order": 1,
                 "attenuation_type": "highpass",
                 "cutoff_freq": 19.635,
@@ -665,8 +624,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Butterworth",
             "attributes": {
-                "n_steps": 160,
-                "time_step_ps": 0.005,
                 "order": 1,
                 "attenuation_type": "highpass",
                 "cutoff_freq": 19.635,
@@ -679,8 +636,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Butterworth",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "order": 2,
                 "attenuation_type": "bandpass",
                 "cutoff_freq": [19.635, 31.416],
@@ -693,8 +648,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "order": 1,
                 "min_attenuation": 12.7,
                 "attenuation_type": "highpass",
@@ -708,8 +661,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Comb",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "fundamental_freq": 10.0,
                 "quality_factor": 2.0,
             },
@@ -721,8 +672,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Comb",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "fundamental_freq": 10.0,
                 "quality_factor": 20.0,
                 "comb_type": "peak",
@@ -735,8 +684,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Comb",
             "attributes": {
-                "n_steps": 320,
-                "time_step_ps": 0.005,
                 "fundamental_freq": 10.0,
                 "quality_factor": 20.0,
                 "comb_type": "peak",
@@ -750,8 +697,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Peak",
             "attributes": {
-                "n_steps": 1000,
-                "time_step_ps": 0.01,
                 "fundamental_freq": 5.7,
                 "quality_factor": 1.5,
             },
@@ -763,8 +708,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "Comb",
             "attributes": {
-                "n_steps": 1000,
-                "time_step_ps": 0.01,
                 "fundamental_freq": 5.0,
                 "quality_factor": 30.0,
                 "comb_type": "notch",
@@ -778,8 +721,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "order": 4,
                 "min_attenuation": 10.0,
                 "attenuation_type": "highpass",
@@ -793,8 +734,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeII",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "order": 2,
                 "min_attenuation": 0.1,
                 "attenuation_type": "lowpass",
@@ -808,8 +747,6 @@ def test_default_settings(
             "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 6], "operation_type": "intersection"}}',
             "filter": "ChebyshevTypeI",
             "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
                 "order": 1,
                 "max_ripple": 0.4,
                 "attenuation_type": "bandpass",
