@@ -72,9 +72,15 @@ class CenterOfMassesTrajectory(IJob):
 
         self.cluster_composition = {}
         original_atom_list = chemical_system.atom_list
-        nondummy_indices = {ind for ind, dummy in 
-        zip(chemical_system._atom_indices, chemical_system.atom_property("dummy"), strict=True)
-        if not dummy}
+        nondummy_indices = {
+            ind
+            for ind, dummy in zip(
+                chemical_system._atom_indices,
+                chemical_system.atom_property("dummy"),
+                strict=True,
+            )
+            if not dummy
+        }
         selected_indices = (
             set(self.trajectory._selection)
             if self.trajectory._selection
