@@ -57,6 +57,7 @@ from MDANSE_GUI.Widgets.NotificationTabWidget import NotificationTabWidget
 from MDANSE_GUI.Widgets.StyleDialog import StyleDatabase, StyleDialog
 
 MDANSE_CODE_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE")
+MDANSE_EXAMPLES_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE-Examples")
 MDANSE_DOCS_WEBSITE = QUrl("https://mdanse.readthedocs.io/en/latest/")
 MDANSE_PROJECT_WEBSITE = QUrl("https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx")
 
@@ -252,6 +253,7 @@ class TabbedWindow(QMainWindow):
         for label, function in [
             ("project", self.show_website_project),
             ("source code", self.show_website_code),
+            ("examples", self.show_website_examples),
             ("documentation", self.show_website_docs),
         ]:
             temp_action = QAction(f"Open MDANSE {label} website", parent=menubar)
@@ -357,6 +359,9 @@ class TabbedWindow(QMainWindow):
 
     def show_website_code(self):
         QDesktopServices.openUrl(MDANSE_CODE_WEBSITE)
+
+    def show_website_examples(self):
+        QDesktopServices.openUrl(MDANSE_EXAMPLES_WEBSITE)
 
     def show_website_project(self):
         QDesktopServices.openUrl(MDANSE_PROJECT_WEBSITE)
