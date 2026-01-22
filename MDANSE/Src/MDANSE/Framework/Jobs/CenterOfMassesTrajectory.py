@@ -72,11 +72,9 @@ class CenterOfMassesTrajectory(IJob):
 
         self.cluster_composition = {}
         original_atom_list = chemical_system.atom_list
-        nondummy_indices = set(
-            np.array(chemical_system._atom_indices)[
-                np.logical_not(chemical_system.atom_property("dummy"))
-            ]
-        )
+        nondummy_indices = {ind for ind, dummy in 
+        zip(chemical_system._atom_indices, chemical_system.atom_property("dummy"), strict=True)
+        if not dummy}
         selected_indices = (
             set(self.trajectory._selection)
             if self.trajectory._selection
@@ -98,8 +96,7 @@ class CenterOfMassesTrajectory(IJob):
                         self.cluster_composition[cluster_name] = [
                             original_atom_list[ind] for ind in cluster
                         ]
-                    if cluster_name not in self.temp_clusters:
-                        self.temp_clusters[cluster_name] = []
+                    self.temp_clusters.setdefault(cluster_name, [])
                     new_element_list.append(cluster_name)
                     used_up_atoms.update(set(cluster))
                     self.temp_clusters[cluster_name].append(list(nondummy_cluster))
