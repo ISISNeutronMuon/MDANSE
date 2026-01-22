@@ -889,9 +889,7 @@ class PlottingContext(QStandardItemModel):
             QStandardItem(str(x))
             for x in [
                 new_dataset._name,
-                new_dataset._labels["medium"]
-                if optional_values is None
-                else optional_values.legend_label,
+                getattr(optional_values, "legend_label", new_dataset._labels["medium"]),
                 new_dataset._data_shape,
                 new_dataset._data_unit,
                 new_dataset.longest_axis()[-1],
