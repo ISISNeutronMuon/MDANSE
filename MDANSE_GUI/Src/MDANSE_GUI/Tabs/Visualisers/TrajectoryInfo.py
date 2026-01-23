@@ -33,10 +33,12 @@ class TrajectoryInfo(TextInfo):
     def update_panel(self, data: tuple):
         fullpath, incoming = data
         if incoming is None:
-            self.setHtml(self.filter(fullpath))
+            self.setHtml(self.filter(f"<pre>{fullpath}</pre>"))
             return
         try:
-            text = trajectory_summary(incoming)  # this is from a trajectory object
+            text = trajectory_summary(
+                incoming, use_html=True
+            )  # this is from a trajectory object
         except AttributeError as err:
             LOG.error(
                 "Could not summarise trajectory %s.\n Error: %s.\n Traceback: %s",

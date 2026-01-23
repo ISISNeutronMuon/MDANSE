@@ -61,7 +61,8 @@ class GroupingLevels(UCEnum):
         return self.name.title()
 
 
-def trajectory_summary(traj: Trajectory):
+def trajectory_summary(traj: Trajectory, use_html: bool = False):
+    head = []
     val = []
     try:
         time_axis = traj.time()
@@ -73,8 +74,12 @@ def trajectory_summary(traj: Trajectory):
         else:
             timeline = f"[{summarise_array(time_axis, maxlen=5)}]\n"
 
-    val.append("Path:")
-    val.append(f"{traj.filename}\n")
+    filename = html.escape(f"{traj.filename}")
+    if use_html:
+        head.append(f"Path: <pre>{filename}</pre>")
+    else:
+        head.append("Path:")
+        head.append(f"{filename}\n")
     val.append("Number of steps:")
     val.append(f"{len(traj)}\n")
     val.append("Configuration:")
@@ -106,9 +111,12 @@ def trajectory_summary(traj: Trajectory):
     for molname, mollist in traj.chemical_system._clusters.items():
         val.append(f"Molecule: {molname}; Count: {len(mollist)}")
 
+    head = "\n".join(head)
     val = "\n".join(val)
+    if use_html:
+        val = html.escape(val)
 
-    return html.escape(val)
+    return head + "\n" + val
 
 
 def chemical_system_summary(cs: ChemicalSystem) -> str:
