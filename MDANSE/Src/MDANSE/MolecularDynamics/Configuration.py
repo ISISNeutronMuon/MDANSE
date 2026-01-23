@@ -66,6 +66,7 @@ def contiguous_coordinates_real(
     rcell: np.ndarray,
     indices: list[tuple[int, ...]],
     bring_to_centre: bool = False,
+    reference_positions: np.ndarray | None = None,
 ):
     """Translates atoms by a lattice vector. Returns a coordinate array
     in which atoms in each segment are separated from the first atom
@@ -85,6 +86,9 @@ def contiguous_coordinates_real(
     bring_to_centre: bool
         if true, atoms are shifted to minimise the distance from the average
         position and not from the first atom
+    reference_positions : np.ndarray | None
+        if given, these positions are used as reference points to be taken as the centre
+        of new positions for each group instead of the first atom in each group
 
     Returns
     -------
@@ -106,6 +110,12 @@ def contiguous_coordinates_real(
             newconfig = centre + minimum_offsets
             newconfig = np.matmul(newconfig, cell)
             contiguous_coords[idxs] = newconfig
+        elif reference_positions is not None:
+            minimum_offsets = scaleconfig[idxs[:]] - reference_positions
+            minimum_offsets -= np.round(minimum_offsets)
+            newconfig = reference_positions + minimum_offsets
+            newconfig = np.matmul(newconfig, cell)
+            contiguous_coords[idxs[:]] = newconfig   
         else:
             minimum_offsets = scaleconfig[idxs[1:]] - scaleconfig[idxs[0]]
             minimum_offsets -= np.round(minimum_offsets)

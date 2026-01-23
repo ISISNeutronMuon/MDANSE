@@ -93,3 +93,4 @@ from .Voronoi import Voronoi as Voronoi
 from .XRayStaticStructureFactor import (
     XRayStaticStructureFactor as XRayStaticStructureFactor,
 )
+from .BulkInfrared import BulkInfrared as BulkInfrared
