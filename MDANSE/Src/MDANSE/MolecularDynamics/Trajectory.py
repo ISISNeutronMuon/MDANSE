@@ -61,7 +61,25 @@ class GroupingLevels(UCEnum):
         return self.name.title()
 
 
-def trajectory_summary(traj: Trajectory, use_html: bool = False):
+def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
+    """Return information about the input trajectory as formatted text.
+
+    This function is used both in the CLI and in the GUI. For GUI use
+    use_html should be True to include tags that work with the HTML-enabled
+    text widget.
+
+    Parameters
+    ----------
+    traj : Trajectory
+        Trajectory object from which information will be extracted.
+    use_html : bool, optional
+        Set to True if the output will be shown in the GUI, by default False.
+
+    Returns
+    -------
+    str
+        A multi-line text string summarising the trajectory contents.
+    """
     head = []
     val = []
     try:
