@@ -116,7 +116,15 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
 
     """
 
-    def __init__(self, minimum: float, maximum: float, step: float, value: float):
+    def __init__(
+        self,
+        minimum: float,
+        maximum: float,
+        step: float,
+        value: float,
+        *,
+        use_snap: bool = True,
+    ):
         """
         Parameters
         ----------
@@ -140,6 +148,7 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
         self.setMaximum(maximum)
         self.setSingleStep(step)
         self.setValue(value)
+        self.use_snap = use_snap
 
     def reset_connections(self):
         """Reset all connections to custom slots."""
@@ -260,6 +269,19 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
 
         # Update with constrained value
         self.setValue(x)
+
+    @Slot(object)
+    def update_step_and_limits(self, step_vmax: tuple[float, float, float]):
+        current_value = self.value()
+        bin_width, vmax, time_step = step_vmax
+        self.setMinimum(bin_width)
+        self.setMaximum(vmax)
+        self.setSingleStep(bin_width)
+        if self.use_snap:
+            self.set_snap(snap_to=bin_width)
+        else:
+            self.set_search(constraint_func=lambda x: ((1 / time_step) % x) == 0)
+        self.setValue(current_value)
 
     @staticmethod
     def to_float(value: Any) -> float:
@@ -474,7 +496,7 @@ class FilterSettingGroup(QObject):
     # Signal: emitted when a setting has changed
     _setting_changed = Signal()
 
-    new_bin_width = Signal(float)
+    new_bin_width_vmax_tstep = Signal(object)
 
     def __init__(
         self,
@@ -549,7 +571,11 @@ class FilterSettingGroup(QObject):
             Filter.frequency_resolution(new_values[0], new_values[1], units=self.units),
             FLOAT_SPINBOX_DECIMALS,
         )
-        self.new_bin_width.emit(bin_width)
+        vmax = np.round(
+            Filter.nyquist(new_values[1], units=self.units) - bin_width,
+            FLOAT_SPINBOX_DECIMALS,
+        )
+        self.new_bin_width_vmax_tstep.emit((bin_width, vmax, new_values[1]))
 
     def load_from_schema(self) -> None:
         """Load the attributes from the filter setting schema."""
@@ -708,6 +734,7 @@ class FilterSettingGroup(QObject):
                         maximum=vmax,
                         step=bin_width,
                         value=bin_width,
+                        use_snap=False,
                     )
                     widget.set_search(
                         constraint_func=lambda x: ((1 / time_step) % x) == 0
@@ -720,7 +747,7 @@ class FilterSettingGroup(QObject):
                         value=bin_width,
                     )
                     widget.set_snap(snap_to=bin_width)
-                self.new_bin_width.connect(widget.setSingleStep)
+                self.new_bin_width_vmax_tstep.connect(widget.update_step_and_limits)
             else:
                 # Other data spinbox
                 widget = QDoubleSpinBox()
@@ -931,6 +958,7 @@ class BoundedFilterSettingsGroup(FilterSettingGroup):
         widget.set_snap(snap_to=step)
         widget.setEnabled(False)
         widget.valueChanged.connect(self.notify)
+        self.new_bin_width_vmax_tstep.connect(widget.update_step_and_limits)
         self.store_widget("bound_freq", widget)
         grid.addWidget(widget, grid_pos[1][0] + 1, grid_pos[1][1])
 
@@ -1639,6 +1667,7 @@ class TrajectoryFilterWidget(WidgetBase):
             self.filter_designer.close()
         else:
             self.filter_designer.update_pps()
+            self.update_time_axis()
             self.filter_designer.show()
 
     @Slot()
