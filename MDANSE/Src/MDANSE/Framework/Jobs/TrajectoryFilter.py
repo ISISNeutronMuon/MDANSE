@@ -201,7 +201,7 @@ class TrajectoryFilter(IJob):
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
             output_chemical_system,
-            filter_attributes["n_steps"],
+            filtered_coords.shape[2],
             None,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
@@ -210,7 +210,6 @@ class TrajectoryFilter(IJob):
         # Write trajectory
         write_filtered_trajectory(
             parent_configuration=self.configuration,
-            nsteps=filter_attributes["n_steps"],
             filtered_coordinates=filtered_coords,
             output_trajectory=self._output_trajectory,
         )
@@ -271,7 +270,6 @@ def apply(filter: Filter, trajectories: np.ndarray, apply_offsets: bool) -> np.n
 
 def write_filtered_trajectory(
     parent_configuration: _Configuration,
-    nsteps: int,
     filtered_coordinates: np.ndarray,
     output_trajectory: TrajectoryWriter,
 ) -> None:
@@ -281,14 +279,13 @@ def write_filtered_trajectory(
     ----------
     parent_configuration : _Configuration
         Parent configuration.
-    nsteps : int
-        Number of simulation steps.
     filtered_coordinates : np.ndarray
         Coordinates of the filtered atomic trajectories.
     output_trajectory : TrajectoryWriter
         Trajectory writer object to write the output trajectory.
 
     """
+    nsteps = filtered_coordinates.shape[2]
     time = parent_configuration["frames"]["time"]
     dt = time[1] - time[0]
     for index in range(nsteps):
