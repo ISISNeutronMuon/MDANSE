@@ -16,11 +16,10 @@
 from __future__ import annotations
 
 import copy
+import html
 import math
 from collections import Counter, defaultdict
-from collections.abc import Mapping, Sequence
 from enum import auto
-import html
 from operator import itemgetter
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -32,17 +31,19 @@ from more_itertools import always_iterable, first
 
 from MDANSE import PLATFORM
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Chemistry.Databases import str_to_num
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.IO.IOUtils import UCEnum, summarise_array
-from MDANSE.MolecularDynamics.Configuration import _Configuration
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
+    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.Chemistry.Databases import AtomsDatabase
+    from MDANSE.MolecularDynamics.Configuration import _Configuration
+    from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 available_formats = {
@@ -455,7 +456,11 @@ class Trajectory:
         """Mapping of property labels to units."""
         return self._trajectory.units
 
-    def charges(self, frame: int) -> npt.NDArray[float]:
+    def charges(
+        self,
+        frame: int,
+        atom_indices: slice | int = SLICE_ALL,
+    ) -> npt.NDArray[float]:
         """Return the electrical charge of atoms at a given frame.
 
         Parameters
@@ -469,7 +474,7 @@ class Trajectory:
             Charges at given time.
 
         """
-        return self._trajectory.charges(frame)
+        return self._trajectory.charges(frame, atom_indices)
 
     def coordinates(
         self,
@@ -1311,4 +1316,3 @@ class TrajectoryWriter:
 
         self._current_index += 1
         self._last_configuration = configuration
-
