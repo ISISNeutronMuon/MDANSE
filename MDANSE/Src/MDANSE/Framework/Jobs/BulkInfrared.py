@@ -79,10 +79,6 @@ class BulkInfrared(IJob):
     def initialize(self):
         super().initialize()
 
-        self.chemical_system = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system
-
         self.numberOfSteps = len(self.trajectory.atom_indices)
         instrResolution = self.configuration["instrument_resolution"]
 
@@ -159,25 +155,27 @@ class BulkInfrared(IJob):
             auto-correlation function for a molecule.
         """
         n_configs = self.configuration["frames"]["n_configs"]
-        c_frames = self.configuration["frames"]["n_frames"]
         first_frame = self.configuration["frames"]["first"]
         step_frame = self.configuration["frames"]["step"]
+        last_frame = self.configuration["frames"]["last"]
+        number = self.configuration["frames"]["number"]
+        n_atms = self.trajectory.get_total_natoms()
 
-        # dipole of the index of atom coming in so it's relaitive to origin. empty array of n_configs x 3 for x,y,z
-        ddipole_i = np.zeros((n_configs, 3))
-
+        ddipole_i = np.zeros((number, 3))
         for i, frame_index in enumerate(
             range(
                 first_frame,
-                first_frame + step_frame * n_configs,
+                last_frame + 1,
                 step_frame,
             )
         ):
             configuration = self.trajectory.configuration(frame_index)
             contiguous_configuration = configuration.contiguous_configuration()
             charges = self.trajectory.charges(frame_index)
-            q_i = charges[index]
-
+            try:
+                q_i = self.configuration["atom_charges"]["charges"][index]
+            except KeyError:
+                q_i = charges[index]
             ddipole_i[i] = q_i * (contiguous_configuration["coordinates"][index, :])
 
         for axis in range(3):
@@ -187,50 +185,54 @@ class BulkInfrared(IJob):
                 dt=step_frame,
             )
 
-        ddipole_ij = np.zeros(c_frames)
-        # loop through the d/dt and do the distance between the unique pairs of atoms
-        for i, c_index in enumerate(
+        configuration = self.trajectory.configuration(first_frame)
+        contiguous_configuration = configuration.contiguous_configuration()
+        coords_0 = contiguous_configuration["coordinates"]
+        coords_ref = coords_0[index]
+
+        cell = configuration.unit_cell.direct
+        inverse_cell = configuration.unit_cell.inverse
+        diff_frac = (coords_0 - coords_ref) @ inverse_cell
+        diff_frac -= np.round(diff_frac)
+        diff_coords = diff_frac @ cell
+        r = np.sqrt(np.sum(diff_coords * diff_coords, axis=1))
+        # TODO add configurator for cutoff
+        # smaller cutoffs reproduce molecular calculation
+        cutoff = r < 0.15
+
+        ddipole_j = np.zeros((number, 3))
+        for j, frame_index in enumerate(
             range(
                 first_frame,
-                first_frame + step_frame * c_frames,
+                last_frame + 1,
                 step_frame,
             )
         ):
-            ddipole_j = np.zeros((n_configs, 3))
-            for j, frame_index in enumerate(
-                range(
-                    first_frame,
-                    first_frame + step_frame * n_configs,
-                    step_frame,
+            configuration = self.trajectory.configuration(frame_index)
+            try:
+                charges = np.array(
+                    [
+                        self.configuration["atom_charges"]["charges"][i]
+                        for i in range(n_atms)
+                    ]
                 )
-            ):
-                configuration = self.trajectory.configuration(frame_index + c_index)
+            except KeyError:
+                charges = np.array(self.trajectory.charges(frame_index))
+            contiguous_configuration = configuration.contiguous_configuration()
+            coords = contiguous_configuration["coordinates"]
+            ddipole_j[j] = np.sum(charges[cutoff, np.newaxis] * coords[cutoff], axis=0)
 
-                charges = np.array(self.trajectory.charges(frame_index + c_index))
-                contiguous_configuration = configuration.contiguous_configuration()
+        for axis in range(3):
+            ddipole_j[:, axis] = differentiate(
+                ddipole_j[:, axis],
+                order=self.configuration["derivative_order"]["value"],
+                dt=step_frame,
+            )
 
-                coords = contiguous_configuration["coordinates"]
-                cell = configuration.unit_cell.direct
-                inverse_cell = configuration.unit_cell.inverse
-
-                scaled_coords = coords @ inverse_cell
-                scaled_ref = scaled_coords[index]
-                diff_frac = scaled_coords - scaled_ref
-                diff_frac -= np.round(diff_frac)
-                diff_real = diff_frac @ cell
-                # r = np.sqrt(np.dot(diff_real, diff_real))
-
-                ddipole_j[j] = np.sum(charges[:, np.newaxis] * diff_real, axis=0)
-
-            for axis in range(3):
-                ddipole_j[:, axis] = differentiate(
-                    ddipole_j[:, axis],
-                    order=self.configuration["derivative_order"]["value"],
-                    dt=step_frame,
-                )
-            ddipole_ij[i] = np.sum(ddipole_i * ddipole_j) / (3 * n_configs)
-
-        return index, ddipole_ij
+        ddipole_ij = correlate(ddipole_i, ddipole_j[:n_configs], mode="valid") / (
+            3 * n_configs
+        )
+        return index, ddipole_ij.T[0]
 
     def combine(self, index: int, x: np.ndarray):
         """Add the d/dt dipole auto-correlation function of molecule
