@@ -43,6 +43,7 @@ if TYPE_CHECKING:
 
 NUMBERS_FOR_SLICE = 3
 NUMBERS_FOR_RANGE = 2
+SCALE_FACTOR_ROUNDING = 3
 
 
 class PlotArgs(NamedTuple):
@@ -889,7 +890,9 @@ class PlottingContext(QStandardItemModel):
                 self.next_colour(),
                 new_dataset._linestyle,
                 new_dataset._marker if new_dataset._marker else "None",
-                "",
+                round(new_dataset._scaling_factor, SCALE_FACTOR_ROUNDING)
+                if isinstance(new_dataset._scaling_factor, float)
+                else f"{round(new_dataset._scaling_factor[0], SCALE_FACTOR_ROUNDING)}, ..., {round(new_dataset._scaling_factor[-1], SCALE_FACTOR_ROUNDING)}",
                 new_dataset._filename,
             ]
         ]
