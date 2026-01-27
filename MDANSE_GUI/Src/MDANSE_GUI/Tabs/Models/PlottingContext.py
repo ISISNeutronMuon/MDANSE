@@ -90,6 +90,7 @@ class SingleDataset:
         **kwargs,
     ):
         self._name = name
+        self._allow_scaling = True
         self._use_scaling = True
         self._curves = {}
         self._curve_labels = {}
@@ -154,6 +155,7 @@ class SingleDataset:
                 self._scaling_factor = np.array(
                     source[self._name].attrs["scaling_factor"],
                 )
+        self._use_scaling = source[self._name].attrs["use_scaling"]
 
         self._data_unit = source[self._name].attrs["units"]
         self._n_dim = len(self._data.shape)
@@ -176,6 +178,8 @@ class SingleDataset:
         xerror: npt.NDArray[float] | None = None,
         optional_filename: str = "no file",
         uneven_array: bool = False,
+        allow_scaling: bool = True,
+        use_scaling: bool = True,
     ) -> None:
         """Set data for plotting without using a data file.
 
@@ -201,6 +205,11 @@ class SingleDataset:
             File name to be displayed as the origin of this data set.
         uneven_array: bool = False
             If True, allow the data rows to be of different length.
+        allow_scaling: bool = True
+            If True, then the plot can be scaled using the scaling factor.
+        use_scaling: bool = True
+            If True, then the plot will be scaled with the scaling factor
+            by default.
         """
         self._filename = optional_filename
         self._labels = {
@@ -208,10 +217,16 @@ class SingleDataset:
             "medium": self._name,
             "full": self._name,
         }
+        self._allow_scaling = allow_scaling
+        if self._allow_scaling:
+            self._use_scaling = use_scaling
+        else:
+            self._use_scaling = False
         if uneven_array:
             self._data = data
             self._n_dim = 1
             self._data_shape = (len(data),)
+            self._allow_scaling = False
             self._use_scaling = False
         else:
             self._data = np.real(data)
@@ -908,6 +923,10 @@ class PlottingContext(QStandardItemModel):
                 if key == "Use it?" or new_dataset._use_scaling
                 else Qt.CheckState.Unchecked,
             )
+
+        if not new_dataset._allow_scaling:
+            item = items[plotting_column_index["Apply weights?"]]
+            item.setEnabled(False)
 
         items[plotting_column_index["Use it?"]].setText(
             f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1",

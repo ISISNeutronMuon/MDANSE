@@ -246,6 +246,7 @@ def angular_datasets_from_qarray(
             axes_units={xlabel: "rad"},
             data_unit="rad",
             optional_filename=filename,
+            allow_scaling=False,
         )
         results.append(dataset)
     return results
@@ -304,6 +305,7 @@ def projection_datasets_from_qarray(
         axes_units={"q_x": "1/ang"},
         data_unit="1/ang",
         optional_filename=filename,
+        allow_scaling=False,
     )
     projection_ac = SingleDataset(
         "q$_z$ vs q$_x$",
@@ -315,6 +317,7 @@ def projection_datasets_from_qarray(
         axes_units={"q_x": "1/ang"},
         data_unit="1/ang",
         optional_filename=filename,
+        allow_scaling=False,
     )
     projection_bc = SingleDataset(
         "q$_z$ vs q$_y$",
@@ -326,6 +329,7 @@ def projection_datasets_from_qarray(
         axes_units={"q_y": "1/ang"},
         data_unit="1/ang",
         optional_filename=filename,
+        allow_scaling=False,
     )
     full_vectors = SingleDataset(
         "q$_z$ in 3D",
@@ -337,6 +341,7 @@ def projection_datasets_from_qarray(
         axes_units={"q_x": "1/ang", "q_y": "1/ang"},
         data_unit="1/ang",
         optional_filename=filename,
+        allow_scaling=False,
     )
     return projection_ab, projection_ac, projection_bc, full_vectors
 
@@ -437,6 +442,7 @@ def vector_q_statistics_datasets(
         plot_axes={"|q|": qvals[valid_shells]},
         axes_units={"|q|": "1/nm"},
         optional_filename=filename,
+        allow_scaling=False,
     )
     real_q_ideal_q = SingleDataset(
         r"<|q|> - q$_{target}$",
@@ -460,6 +466,7 @@ def vector_q_statistics_datasets(
         data_unit="1/ang",
         optional_filename=filename,
         uneven_array=True,
+        allow_scaling=False,
     )
     vecs_per_qbin = SingleDataset(
         "Shell population",
@@ -469,6 +476,7 @@ def vector_q_statistics_datasets(
         plot_axes={"|q|": qvals[valid_shells], "q_bin": xvals},
         axes_units={"|q|": "1/nm", "q_bin": "1/nm"},
         optional_filename=filename,
+        allow_scaling=False,
     )
     return nvec_per_q, real_q_ideal_q, vecs_per_qbin
 

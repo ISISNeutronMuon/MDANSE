@@ -133,6 +133,7 @@ class MeanSquareDisplacement(IJob):
                 units="nm2",
                 main_result=True,
                 partial_result=True,
+                use_scaling=False,
             )
 
         self._atoms = self.trajectory.atom_names
@@ -212,6 +213,7 @@ class MeanSquareDisplacement(IJob):
             axis="msd/axes/time",
             units="nm2",
             main_result=True,
+            use_scaling=False,
         )
         self._outputData["msd/total"].scaling_factor = fact
 
@@ -224,6 +226,7 @@ class MeanSquareDisplacement(IJob):
             units="nm2",
             main_result=True,
             partial_result=True,
+            use_scaling=False,
         )
 
         self._outputData.write(

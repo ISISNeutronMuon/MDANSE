@@ -61,6 +61,7 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         *,
         main_result: bool = False,
         partial_result: bool = False,
+        use_scaling: bool = True,
         dtype: type = np.float64,
     ):
         """Instantiate a new MDANSE output variable.
@@ -81,6 +82,8 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
             Whether the data are the main result of a calculation.
         partial_result : bool
             Whether the data are a complete calculation.
+        use_scaling : bool
+            Whether the scaling factor should be applied by default.
 
         Raises
         ------
@@ -121,6 +124,8 @@ class IOutputVariable(np.ndarray, metaclass=SubclassFactory):
         obj.axis = "|".join(axis)
 
         obj.scaling_factor = 1.0
+
+        obj.use_scaling = use_scaling
 
         data_tags = []
         if main_result:
