@@ -90,16 +90,6 @@ class MeanSquareDisplacement(IJob):
             }
         },
     )
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            }
-        },
-    )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
@@ -134,6 +124,14 @@ class MeanSquareDisplacement(IJob):
                 main_result=True,
                 partial_result=True,
             )
+        self._outputData.add(
+            "msd/total",
+            "LineOutputVariable",
+            (self.configuration["frames"]["n_frames"],),
+            axis="msd/axes/time",
+            units="nm2",
+            main_result=True,
+        )
 
         self._atoms = self.trajectory.atom_names
 
@@ -177,43 +175,13 @@ class MeanSquareDisplacement(IJob):
         element = self._atoms[self.trajectory.atom_indices[index]]
 
         self._outputData[f"msd/{element}"] += result
+        self._outputData["msd/total"] += result
 
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
-
-        # The MSDs per element are averaged.
-        nAtomsPerElement = self.trajectory.get_natoms()
-        for element, number in list(nAtomsPerElement.items()):
-            self._outputData[f"msd/{element}"] /= number
-
-        selected_weights, all_weights = self.trajectory.get_weights(
-            prop=self.configuration["weights"]["property"]
-        )
-        weight_dict = get_weights(
-            selected_weights,
-            all_weights,
-            nAtomsPerElement,
-            self.trajectory.get_all_natoms(),
-            1,
-        )
-        assign_weights(self._outputData, weight_dict, "msd/%s", self.labels)
-
-        n_selected = sum(nAtomsPerElement.values())
-        n_total = sum(self.trajectory.get_all_natoms().values())
-        fact = n_selected / n_total
-
-        msdTotal = weighted_sum(self._outputData, "msd/%s", self.labels) / fact
-        self._outputData.add(
-            "msd/total",
-            "LineOutputVariable",
-            msdTotal,
-            axis="msd/axes/time",
-            units="nm2",
-            main_result=True,
-        )
-        self._outputData["msd/total"].scaling_factor = fact
+        n_atms = self.trajectory.get_total_natoms()
 
         add_grouped_totals(
             self.trajectory,
@@ -222,9 +190,19 @@ class MeanSquareDisplacement(IJob):
             "LineOutputVariable",
             axis="msd/axes/time",
             units="nm2",
+            scaling_factor=False,
+            post_func=lambda x: x / n_atms,
+            post_label="total",
             main_result=True,
             partial_result=True,
         )
+
+        # The MSDs per element are averaged.
+        nAtomsPerElement = self.trajectory.get_natoms()
+        for element, number in list(nAtomsPerElement.items()):
+            self._outputData[f"msd/{element}"] /= number
+
+        self._outputData["msd/total"] /= n_atms
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

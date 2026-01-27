@@ -685,7 +685,7 @@ plotting_column_labels = [
     "Colour",
     "Line style",
     "Marker",
-    "Apply weights?",
+    "Apply scaling?",
     "Trajectory",
 ]
 plotting_column_index = {
@@ -836,7 +836,7 @@ class PlottingContext(QStandardItemModel):
             )
             useit = row_data["Use it?"].checkState() is Qt.CheckState.Checked
             self._datasets[key]._use_scaling = (
-                row_data["Apply weights?"].checkState() is Qt.CheckState.Checked
+                row_data["Apply scaling?"].checkState() is Qt.CheckState.Checked
             )
 
             if not useit:
@@ -894,13 +894,13 @@ class PlottingContext(QStandardItemModel):
             ]
         ]
 
-        fixed = {"Dataset", "Trajectory", "Size", "Unit", "Apply weights?"}
+        fixed = {"Dataset", "Trajectory", "Size", "Unit", "Apply scaling?"}
 
         for key, item in zip(plotting_column_labels, items, strict=True):
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
             item.setEditable(key not in fixed)
 
-        for key in ("Use it?", "Apply weights?"):
+        for key in ("Use it?", "Apply scaling?"):
             item = items[plotting_column_index[key]]
             item.setCheckable(True)
             item.setCheckState(
