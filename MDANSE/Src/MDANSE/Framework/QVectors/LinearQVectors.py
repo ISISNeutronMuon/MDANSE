@@ -15,25 +15,53 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
+import numpy.typing as npt
 
-from MDANSE.Framework.QVectors.IQVectors import IQVectors
+from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
+
+
+def linear_vectors(q: float, q_width: float, n_vecs: int, axis: npt.NDArray[float]):
+    """Generate vectors on a line.
+
+    The distribution will be normal in the |q| values around the
+    requested |q| with the q_width.
+
+    Parameters
+    ----------
+    q : float
+        The centre of the |q| value distribution.
+    q_width : float
+        The width of the |q| distribution.
+    n_vecs : int
+        Number of vectors to generate.
+    axis: npt.NDArray[float]
+        Defines a line in space on which the vectors are generated.
+
+    Returns
+    -------
+    npt.NDArray[float]
+        A (3,N) array of vectors.
+    """
+    qmin = max(0.01 * abs(q), q - q_width / 2)
+    qmax = q + q_width / 2
+    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)
+    fact = np.array(all_radii)[:n_vecs]
+    return axis[:, np.newaxis] * fact
 
 
 class LinearQVectors(IQVectors):
     """Generates vectors randomly on a straight line.
 
-    Vectors within one shell are generated within
-    a tolerance limit around a central |Q| value.
-    Most calculations will produce one data point
-    for |Q| by averaging the results over all
-    vectors in the group, which is still called
-    a shell.
+    Most calculations will produce one data point for |Q| by averaging the results
+    over all vectors in the group, which is still called a shell.
+
+    The vector lengths in a single shell assume a normal distribution with the
+    FWHM of 'width'/2 and limited to the range of (q - width/2, q + width/2)
+    around the shell centre defined by the 'shells' input.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
         "RangeConfigurator",
@@ -55,30 +83,29 @@ class LinearQVectors(IQVectors):
         if self._configuration["seed"]["value"] != 0:
             np.random.seed(self._configuration["seed"]["value"])
 
-        axis = self._configuration["axis"]["vector"]
+        axis = self._configuration["axis"]["vector"].array
 
         width = self._configuration["width"]["value"]
 
-        nVectors = self._configuration["n_vectors"]["value"]
+        nvecs_per_shell = self._configuration["n_vectors"]["value"]
 
         if self._status is not None:
             self._status.start(self._configuration["shells"]["number"])
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            fact = q * np.sign(
-                np.random.uniform(-0.5, 0.5, nVectors)
-            ) + width * np.random.uniform(-0.5, 0.5, nVectors)
+            q_vectors = linear_vectors(q, width, nvecs_per_shell, axis)
 
-            self._configuration["q_vectors"][q] = {}
-            self._configuration["q_vectors"][q]["q_vectors"] = (
-                axis.array[:, np.newaxis] * fact
-            )
-            self._configuration["q_vectors"][q]["n_q_vectors"] = nVectors
-            self._configuration["q_vectors"][q]["q"] = q
-            self._configuration["q_vectors"][q]["hkls"] = None
-
+            self._configuration["q_vectors"][q] = {
+                "q_vectors": q_vectors,
+                "n_q_vectors": nvecs_per_shell,
+                "weights": np.ones(nvecs_per_shell),
+                "q": q,
+                "hkls": self.qvectors_to_hkl(q_vectors, self._unit_cell)
+                if self._unit_cell is not None
+                else None,
+            }
             if self._status is not None:
                 if self._status.is_stopped():
                     return

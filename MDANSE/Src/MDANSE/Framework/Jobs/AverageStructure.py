@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 from pathlib import Path
 
 import numpy as np
@@ -47,7 +46,7 @@ class AverageStructure(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",

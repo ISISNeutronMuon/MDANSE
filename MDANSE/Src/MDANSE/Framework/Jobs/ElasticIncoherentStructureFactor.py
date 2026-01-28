@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 
 from MDANSE.Framework.AtomGrouping.grouping import (
@@ -50,7 +48,7 @@ class ElasticIncoherentStructureFactor(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
@@ -169,15 +167,17 @@ class ElasticIncoherentStructureFactor(IJob):
         atomicEISF = np.zeros((self._nQShells,), dtype=np.float64)
 
         for i, q in enumerate(self.configuration["q_vectors"]["shells"]):
-            if q not in self.configuration["q_vectors"]["value"]:
+            if self.configuration["q_vectors"]["value"][q] is None:
+                atomicEISF[i] = np.nan
                 continue
 
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
+            qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
 
             a = np.average(np.exp(1j * np.dot(series, qVectors)), axis=0)
             a = np.abs(a) ** 2
 
-            atomicEISF[i] = np.average(a)
+            atomicEISF[i] = np.average(a, weights=qvec_weights)
 
         return index, atomicEISF
 

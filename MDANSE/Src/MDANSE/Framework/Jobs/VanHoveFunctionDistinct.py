@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 import itertools as it
 from collections.abc import Iterator
 
@@ -346,7 +345,7 @@ class VanHoveFunctionDistinct(IJob):
     )
     PREDICTORS = ("frames", "r_values")
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",

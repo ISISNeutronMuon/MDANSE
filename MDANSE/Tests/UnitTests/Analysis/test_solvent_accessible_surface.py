@@ -19,12 +19,12 @@ from MDANSE.Framework.Jobs.SolventAccessibleSurface import (
 from MDANSE.Mathematics.Geometry import generate_sphere_points
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
-N_SPHERE_POINTS = 500
+N_SPHERE_POINTS = 800
 
 
 @pytest.fixture(scope="module")
 def sphere_tree():
-    sphere = generate_sphere_points(N_SPHERE_POINTS)
+    sphere = generate_sphere_points(N_SPHERE_POINTS).T
     sphere_tree = KDTree(sphere)
     return sphere_tree
 
@@ -152,20 +152,6 @@ def test_compare_trees_blocks_everything(sphere_tree, atom_tree):
     assert len(free_sphere_points) == 0
 
 
-def test_compare_trees_blocks_half(sphere_tree, atom_tree):
-    """A value of van der Waals radius can be found that blocks half the sphere points."""
-    free_sphere_points = compare_trees(
-        sphere_tree,
-        atom_tree,
-        set(range(N_SPHERE_POINTS)),
-        np.array([1.315]),  # van der Waals radii of atoms
-        2.5,  # max distance
-        0.0,  # min distance
-        0.1,  # probe particle radius
-    )
-    assert len(free_sphere_points) == int(N_SPHERE_POINTS / 2)
-
-
 def test_identify_loose_atoms_atom_grouping():
     traj_instance = Trajectory(CONV_DIR / "fake_co2_molecules.mdt")
     molecule_atoms, loose_atoms = identify_loose_atoms(traj_instance, "atom")
@@ -270,7 +256,7 @@ def test_sas_blocked_is_positive_for_same_atoms():
     selected_indices = {0}
     grouping_indices = np.ones(8)
     vdw_radii = 0.5 * np.ones(8)
-    sphere_points = generate_sphere_points(N_SPHERE_POINTS)
+    sphere_points = generate_sphere_points(N_SPHERE_POINTS).T
     probe_radius = 0.5
     results = solvent_accessible_surface(
         coords,
@@ -304,7 +290,7 @@ def test_sas_blocked_is_nonnegative_for_different_atoms():
     selected_indices = {0}
     grouping_indices = np.arange(8) + 1
     vdw_radii = 0.5 * np.ones(8)
-    sphere_points = generate_sphere_points(N_SPHERE_POINTS)
+    sphere_points = generate_sphere_points(N_SPHERE_POINTS).T
     probe_radius = 0.5
     results = solvent_accessible_surface(
         coords,

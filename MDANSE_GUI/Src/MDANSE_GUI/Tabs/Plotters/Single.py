@@ -102,8 +102,8 @@ class Single(Plotter):
             new_ydata = ydata + num * self.height_max * new_value[0]
             curve.set_xdata(new_xdata)
             curve.set_ydata(new_ydata)
-            xmin, xmax = new_xdata.min(), new_xdata.max()
-            ymin, ymax = new_ydata.min(), new_ydata.max()
+            xmin, xmax = np.nanmin(new_xdata), np.nanmax(new_xdata)
+            ymin, ymax = np.nanmin(new_ydata), np.nanmax(new_ydata)
             saved_xmin = min(xmin, saved_xmin)
             saved_xmax = max(xmax, saved_xmax)
             saved_ymin = min(ymin, saved_ymin)
@@ -163,6 +163,7 @@ class Single(Plotter):
         if toolbar is not None:
             self._toolbar = toolbar
         self._figure = target
+        self._figure.set_layout_engine("none")
         self._active_curves = []
         self._backup_curves = []
         self._normalisation_errors = []
@@ -203,8 +204,8 @@ class Single(Plotter):
                         temp.set_marker(int(databundle.marker))
                 self._active_curves.append(temp)
                 self._backup_curves.append([temp.get_xdata(), temp.get_ydata()])
-                self.height_max = max(self.height_max, temp.get_ydata().max())
-                self.length_max = max(self.length_max, temp.get_xdata().max())
+                self.height_max = max(self.height_max, np.nanmax(temp.get_ydata()))
+                self.length_max = max(self.length_max, np.nanmax(temp.get_xdata()))
             else:
                 multi_curves = dataset.curves_vs_axis(
                     (best_unit, best_axis), max_limit=self._curve_limit_per_dataset
@@ -231,8 +232,12 @@ class Single(Plotter):
                                 temp.set_marker(int(databundle.marker))
                         self._active_curves.append(temp)
                         self._backup_curves.append([temp.get_xdata(), temp.get_ydata()])
-                        self.height_max = max(self.height_max, temp.get_ydata().max())
-                        self.length_max = max(self.length_max, temp.get_xdata().max())
+                        self.height_max = max(
+                            self.height_max, np.nanmax(temp.get_ydata())
+                        )
+                        self.length_max = max(
+                            self.length_max, np.nanmax(temp.get_xdata())
+                        )
                     except ValueError:
                         LOG.error(f"Plotting failed for {plotlabel} using {best_axis}")
                         LOG.error(f"x_axis={dataset._axes[best_axis]}")
@@ -261,8 +266,8 @@ class Single(Plotter):
             xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
             self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
         axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
-        if plotting_context.use_legend:
-            axes.legend()
+        legend = axes.legend()
+        legend.set_visible(plotting_context.use_legend)
         axes.grid(plotting_context.use_grid)
         self.check_curve_lengths()
         self.offset_curves()

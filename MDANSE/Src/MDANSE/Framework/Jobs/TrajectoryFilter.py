@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 import copy
 import json
 
@@ -56,7 +55,7 @@ class TrajectoryFilter(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
@@ -76,7 +75,13 @@ class TrajectoryFilter(IJob):
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {
+            "dependencies": {"trajectory": "trajectory"},
+            "default": """\
+{
+   "0": {"function_name": "select_all", "operation_type": "union"}
+}""",
+        },
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",

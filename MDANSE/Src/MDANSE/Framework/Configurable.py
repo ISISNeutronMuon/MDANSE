@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 from more_itertools import value_chain
 
 from MDANSE.Core.Error import Error
@@ -45,14 +43,14 @@ class Configurable:
 
     enabled = True
 
-    settings = collections.OrderedDict()
+    settings = {}
 
     def __init__(self, settings=None, trajectory_input="mdanse"):
         """
         Constructor
         """
 
-        self._configuration = collections.OrderedDict()
+        self._configuration = {}
 
         self._configured = False
 
@@ -391,7 +389,7 @@ class Configurable:
                 "Invalid type for settings: must be a mapping-like object"
             )
 
-        params = collections.OrderedDict()
+        params = {}
         for name, (typ, kwds) in list(settings.items()):
             cfg = IConfigurator.create(typ, name, **kwds)
             params[name] = (cfg.default, cfg.label)

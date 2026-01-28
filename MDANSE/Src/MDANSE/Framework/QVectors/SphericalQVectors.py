@@ -15,25 +15,60 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
+import numpy.typing as npt
 
-from MDANSE.Framework.QVectors.IQVectors import IQVectors
-from MDANSE.Mathematics.Geometry import random_points_on_sphere
+from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
+
+
+def spherical_vectors(q: float, q_width: float, n_vecs: int) -> npt.NDArray[float]:
+    """Generate vectors on a sphere.
+
+    The distribution should be uniform in angles, and normal in the
+    |q| values around the requested |q| with the q_width.
+
+    Parameters
+    ----------
+    q : float
+        The centre of the |q| value distribution.
+    q_width : float
+        The width of the |q| distribution.
+    n_vecs : int
+        Number of vectors to generate.
+
+    Returns
+    -------
+    npt.NDArray[float]
+        A (3,N) array of vectors.
+    """
+    qmin = max(0.01 * abs(q), q - q_width / 2)
+    qmax = q + q_width / 2
+    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)
+    radii = np.array(all_radii)[:n_vecs]
+    rng = np.random.default_rng()
+    theta = np.arccos(2 * rng.random(size=n_vecs) - 1)
+    phi = 2 * np.pi * rng.random(size=n_vecs)
+    return np.vstack(
+        (
+            radii * np.sin(theta) * np.cos(phi),
+            radii * np.sin(theta) * np.sin(phi),
+            radii * np.cos(theta),
+        ),
+    )
 
 
 class SphericalQVectors(IQVectors):
     """Generates vectors randomly on a sphere.
 
-    Vectors within one shell are generated within
-    a tolerance limit around a central |Q| value.
-    Most calculations will produce one data point
-    for |Q| by averaging the results over all
-    vectors in the shell.
+    Most calculations will produce one data point for |Q| by averaging the
+    results over all vectors in the shell.
+
+    The vector lengths in a single shell assume a normal distribution with the
+    FWHM of 'width'/2 and limited to the range of (q - width/2, q + width/2)
+    around the shell centre defined by the 'shells' input.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
         "RangeConfigurator",
@@ -53,26 +88,25 @@ class SphericalQVectors(IQVectors):
 
         width = self._configuration["width"]["value"]
 
-        nVectors = self._configuration["n_vectors"]["value"]
+        nvecs_per_shell = self._configuration["n_vectors"]["value"]
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         if self._status is not None:
             self._status.start(len(self._configuration["shells"]["value"]))
 
         for q in self._configuration["shells"]["value"]:
-            fact = q * np.sign(
-                np.random.uniform(-0.5, 0.5, nVectors)
-            ) + width * np.random.uniform(-0.5, 0.5, nVectors)
+            q_vectors = spherical_vectors(q, width, nvecs_per_shell)
 
-            v = random_points_on_sphere(radius=1.0, nPoints=nVectors)
-
-            self._configuration["q_vectors"][q] = {}
-            self._configuration["q_vectors"][q]["q_vectors"] = fact * v
-            self._configuration["q_vectors"][q]["n_q_vectors"] = nVectors
-            self._configuration["q_vectors"][q]["q"] = q
-            self._configuration["q_vectors"][q]["hkls"] = None
-
+            self._configuration["q_vectors"][q] = {
+                "q_vectors": q_vectors,
+                "n_q_vectors": nvecs_per_shell,
+                "weights": np.ones(nvecs_per_shell),
+                "q": q,
+                "hkls": self.qvectors_to_hkl(q_vectors, self._unit_cell)
+                if self._unit_cell is not None
+                else None,
+            }
             if self._status is not None:
                 if self._status.is_stopped():
                     return

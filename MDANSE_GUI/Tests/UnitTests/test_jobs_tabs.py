@@ -9,7 +9,6 @@ from qtpy.QtWidgets import QMainWindow
 
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.Session.Session import LocalSession
 from MDANSE_GUI.Session.Settings import LocalSettings
 from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
@@ -30,7 +29,7 @@ DATA_DIR = Path(__file__).parents[3] / "MDANSE/Tests/UnitTests/Converted"
 
 @pytest.fixture
 def trajectory():
-    traj_path = DATA_DIR / "lammps.mdt"
+    traj_path = DATA_DIR / "lammps_fakecell.mdt"
     yield traj_path, "dummy"
 
 

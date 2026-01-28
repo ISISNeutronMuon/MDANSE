@@ -220,9 +220,9 @@ class Plotter(metaclass=SubclassFactory):
             )
             return xdata, ydata
         if operation == NormOperations.AVERAGE:
-            scale_factor = np.mean(ref_values)
+            scale_factor = np.nanmean(ref_values)
         elif operation == NormOperations.SUM:
-            scale_factor = np.sum(ref_values)
+            scale_factor = np.sum(np.nan_to_num(ref_values))
         if np.isclose(scale_factor, 0.0):
             self._normalisation_errors.append(
                 "Normalisation factor is 0 and will not be applied."
@@ -254,9 +254,9 @@ class Plotter(metaclass=SubclassFactory):
         if ref_column.shape[1] < 1:
             return data_array
         if operation == NormOperations.AVERAGE:
-            scale_column = np.mean(ref_column, axis=1)
+            scale_column = np.nanmean(ref_column, axis=1)
         elif operation == NormOperations.SUM:
-            scale_column = np.sum(ref_column, axis=1)
+            scale_column = np.sum(np.nan_to_num(ref_column), axis=1)
         if np.any(np.isclose(scale_column, 0.0)):
             self._normalisation_errors.append(
                 "Normalisation factor is 0 for some rows of the 2D array."
@@ -301,7 +301,13 @@ class Plotter(metaclass=SubclassFactory):
         self._axes = [axes]
         self.apply_settings(plotting_context)
 
-    def plot_blank(self, *, draw_cross: bool = True):
+    def plot_blank(
+        self,
+        *,
+        draw_cross: bool = True,
+        override_title: str | None = None,
+        override_label: str | None = None,
+    ):
         """Inform the user that no data could be plotted.
 
         Parameters
@@ -314,10 +320,15 @@ class Plotter(metaclass=SubclassFactory):
         if draw_cross:
             axes.axline([0, 0], [1, 1], color="k", linestyle="-")
             axes.axline([0, 1], [1, 0], color="k", linestyle="-")
-        axes.set_title("The data sets you selected could not be plotted.")
-        axes.set_xlabel(
-            "If you expected a plot, please check the settings you changed last."
+        label_text = (
+            override_label
+            or "If you expected a plot, please check the settings you changed last."
         )
+        title_text = (
+            override_title or "The data sets you selected could not be plotted."
+        )
+        axes.set_title(title_text)
+        axes.set_xlabel(label_text)
         figure.canvas.draw()
 
     @staticmethod

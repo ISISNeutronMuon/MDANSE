@@ -20,7 +20,7 @@ standard input file names.
 
 Inputs:
 
-- trajectory_file: :ref:`configurator-converter-ASEFileConfigurator` default=INPUT_FILENAME
+- trajectory_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - time_unit: :ref:`configurator-converter-SingleChoiceConfigurator` default=fs
@@ -38,7 +38,7 @@ Converts a Castep Trajectory into an MDT trajectory file.
 
 Inputs:
 
-- castep_file: :ref:`configurator-converter-MDFileConfigurator` default=INPUT_FILENAME.md
+- castep_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.md
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -53,8 +53,9 @@ Converts a CHARMM trajectory to an MDT trajectory.
 
 Inputs:
 
-- pdb_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.pdb
-- dcd_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.dcd
+- pdb_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.pdb
+- dcd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.dcd
+- atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -69,10 +70,10 @@ Converts a CP2K trajectory to an MDT trajectory.
 
 Inputs:
 
-- pos_file: :ref:`configurator-converter-XYZFileConfigurator` default=INPUT_FILENAME.xyz
-- vel_file: :ref:`configurator-converter-OptionalXYZFileConfigurator` default=
-- force_file: :ref:`configurator-converter-OptionalXYZFileConfigurator` default=
-- cell_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.cell
+- pos_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.xyz
+- vel_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=
+- force_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=
+- cell_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.cell
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -87,8 +88,9 @@ Converts a DCD trajectory to an MDT trajectory.
 
 Inputs:
 
-- pdb_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.pdb
-- dcd_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.dcd
+- pdb_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.pdb
+- dcd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.dcd
+- atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -103,8 +105,8 @@ Converts a DFTB trajectory to an MDT trajectory.
 
 Inputs:
 
-- xtd_file: :ref:`configurator-converter-XTDFileConfigurator` default=INPUT_FILENAME.xtd
-- trj_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.trj
+- xtd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.xtd
+- trj_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.trj
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -119,8 +121,8 @@ Converts a DL_POLY trajectory to an MDT trajectory.
 
 Inputs:
 
-- field_file: :ref:`configurator-converter-FieldFileConfigurator` default=INPUT_FILENAME
-- history_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME
+- field_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME
+- history_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -135,8 +137,8 @@ Converts a Forcite trajectory to an MDT trajectory.
 
 Inputs:
 
-- xtd_file: :ref:`configurator-converter-XTDFileConfigurator` default=INPUT_FILENAME.xtd
-- trj_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.trj
+- xtd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.xtd
+- trj_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.trj
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -151,8 +153,9 @@ Converts a Gromacs trajectory to an MDT trajectory.
 
 Inputs:
 
-- pdb_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.pdb
+- pdb_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.pdb
 - xtc_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.xtc
+- atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
 
@@ -166,7 +169,7 @@ Converts a LAMMPS trajectory to an MDT trajectory.
 
 Inputs:
 
-- config_file: :ref:`configurator-converter-ConfigFileConfigurator` default=INPUT_FILENAME.config
+- config_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.config
 - trajectory_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.lammps
 - trajectory_format: :ref:`configurator-converter-SingleChoiceConfigurator` default=custom
 - lammps_units: :ref:`configurator-converter-SingleChoiceConfigurator` default=real
@@ -236,8 +239,9 @@ Converts a NAMD trajectory to an MDT trajectory.
 
 Inputs:
 
-- pdb_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.pdb
-- dcd_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.dcd
+- pdb_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.pdb
+- dcd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.dcd
+- atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -275,7 +279,7 @@ atom coordinates below.
 
 Inputs:
 
-- xdatcar_file: :ref:`configurator-converter-XDATCARFileConfigurator` default=INPUT_FILENAME
+- xdatcar_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
@@ -291,8 +295,9 @@ Converts an Xplor trajectory to an MDT trajectory.
 
 Inputs:
 
-- pdb_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.pdb
-- dcd_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.dcd
+- pdb_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.pdb
+- dcd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.dcd
+- atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A

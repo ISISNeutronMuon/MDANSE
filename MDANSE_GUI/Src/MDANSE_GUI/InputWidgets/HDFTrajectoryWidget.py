@@ -73,7 +73,6 @@ class HDFTrajectoryWidget(WidgetBase):
         if not self._configurator.valid:
             self.mark_error(self._configurator.error_status)
         else:
-            self.mark_warning(self._configurator.warning_status)
             if self._configurator.warning_status:
                 self._label.setToolTip(self._configurator.warning_status)
             else:

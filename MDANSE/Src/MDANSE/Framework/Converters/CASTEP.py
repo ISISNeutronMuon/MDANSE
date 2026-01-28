@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
@@ -33,7 +31,7 @@ class CASTEP(Converter):
 
     label = "CASTEP"
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["castep_file"] = (
         "FileWithAtomDataConfigurator",
         {

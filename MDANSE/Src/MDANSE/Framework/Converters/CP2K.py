@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 from typing import Any
 
 import numpy as np
@@ -50,7 +49,7 @@ class CP2K(Converter):
 
     label = "CP2K"
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["pos_file"] = (
         "FileWithAtomDataConfigurator",
         {

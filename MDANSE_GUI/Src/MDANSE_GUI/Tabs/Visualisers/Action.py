@@ -298,7 +298,7 @@ class Action(QWidget):
                 self.layout.addWidget(widget, stretch=input_widget._relative_size)
                 self._widgets_in_layout[key] = widget
                 self._widgets.append(input_widget)
-                input_widget.valid_changed.connect(self.allow_execution)
+                input_widget.value_changed.connect(self.allow_execution)
                 has_preview = callable(
                     getattr(input_widget._configurator, "preview_output_axis", False)
                 )
@@ -406,6 +406,7 @@ class Action(QWidget):
                         widget._model.switch_qvector_type(
                             q_vector_tuple[0], q_vector_tuple[1]
                         )
+                        widget.preview_vectors()
 
         self.allow_execution()
         self.show_output_prediction()
@@ -431,9 +432,11 @@ class Action(QWidget):
         allow = True
         has_warning = False
         for widget in self._widgets:
+            widget.clear_error()
             if not widget._configurator.valid:
                 allow = False
                 widget.mark_error(widget._configurator.error_status, silent=True)
+            widget.mark_warning(widget._configurator.warning_status)
             has_warning = has_warning or widget.has_warning
         if self.execute_button is not None:
             self.execute_button.setEnabled(allow)

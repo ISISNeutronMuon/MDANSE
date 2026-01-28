@@ -15,7 +15,11 @@
 #
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import numpy as np
+import numpy.typing as npt
+from scipy.spatial.transform import Rotation
 
 from MDANSE.Core.Error import Error
 from MDANSE.Mathematics.LinearAlgebra import Vector
@@ -110,51 +114,32 @@ def moment_of_inertia(
     return moi
 
 
-def generate_sphere_points(n: int) -> np.ndarray:
+def generate_sphere_points(n_samples: int) -> np.ndarray:
     """Returns list of 3d coordinates of points on a sphere using the
     Golden Section Spiral algorithm.
+
+    Returns coordinates on a sphere with radius=1 and centre=0,0,0.
+
+    Parameters
+    ----------
+    n_samples : int, optional
+        number of points on the sphere, by default 1000
+
+    Returns
+    -------
+    npt.NDArray[float]
+        (n_samples, 3) array of point coordinates on a sphere
     """
 
-    inputs = np.arange(int(n))
-    points = np.empty([len(inputs), 3])
+    indices = np.arange(n_samples)
+    angle_step = np.pi * (np.sqrt(5.0) - 1.0)  # angle step in radians
 
-    inc = np.pi * (3 - np.sqrt(5))
+    ys = 1 - (indices / (n_samples - 1)) * 2  # y coordinate in [-1, 1] range
+    radius = np.sqrt(1 - ys**2)  # circle radius at height y
 
-    offset = 2 / float(n)
+    theta = angle_step * indices
 
-    y = inputs * offset - 1 + (offset / 2)
-    r = np.sqrt(1 - y * y)
-    phi = inputs * inc
-    points[:, 0] = np.cos(phi) * r
-    points[:, 1] = y
-    points[:, 2] = np.sin(phi) * r
+    xs = np.cos(theta) * radius
+    zs = np.sin(theta) * radius
 
-    return points
-
-
-def random_points_on_sphere(radius=1.0, nPoints=100):
-    points = np.zeros((3, nPoints), dtype=np.float64)
-
-    theta = 2.0 * np.pi * np.random.uniform(nPoints)
-    u = np.random.uniform(-1.0, 1.0, nPoints)
-    points[0, :] = radius * np.sqrt(1 - u**2) * np.cos(theta)
-    points[1, :] = radius * np.sqrt(1 - u**2) * np.sin(theta)
-    points[2, :] = radius * u
-
-    return points
-
-
-def random_points_on_circle(axis, radius=1.0, nPoints=100):
-    axis = Vector(axis).normal().array
-
-    points = np.random.uniform(-radius, radius, 3 * nPoints)
-    points = points.reshape((3, nPoints))
-
-    proj = np.dot(axis, points)
-    proj = np.dot(axis[:, np.newaxis], proj[np.newaxis, :])
-
-    points -= proj
-
-    points *= radius / np.sqrt(np.sum(points**2, axis=0))
-
-    return points
+    return np.vstack([xs, ys, zs])

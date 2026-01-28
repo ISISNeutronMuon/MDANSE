@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )
@@ -27,7 +25,7 @@ class Lorentzian(IInstrumentResolution):
     Defines an instrument resolution with a lorentzian response
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["mu"] = ("FloatConfigurator", {"default": 0.0})
     settings["sigma"] = ("FloatConfigurator", {"default": 1.0})
 

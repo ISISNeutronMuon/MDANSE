@@ -15,28 +15,33 @@
 #
 from __future__ import annotations
 
-import collections
 import random
 
 import numpy as np
 
+from MDANSE.Framework.QVectors.CircularQVectors import (
+    circle_of_vectors,
+    circle_rotation_matrix,
+)
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
-from MDANSE.Mathematics.LinearAlgebra import Vector
 
 
 class CircularLatticeQVectors(LatticeQVectors):
-    """Generates Q vectors on a plane.
+    """Generates Q vectors on a plane perpendicular to the 'axis' vector.
 
-    Vectors are grouped into annuli (called 'shells')
-    based on their length.
+    Vectors are grouped into shells limited to the range of
+    (q - width/2, q + width/2) around the shell centre q.
 
-    Only vectors commensurate with the reciprocal
-    space lattice vectors will be generated.
-    |Q| values for which no valid vectors can
-    be found are omitted in the output.
+    Only vectors commensurate with the reciprocal space lattice will be generated.
+    If more lattice vectors than requested are available in the requested range
+    for a shell, a subset of the vectors will be selected with the probability
+    given as a Gaussian function with FWHM of width/2 and centred on the |q|
+    which is the nominal centre of the shell.
+
+    |Q| values for which no valid vectors can be found are omitted in the output.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
         "RangeConfigurator",
@@ -49,13 +54,9 @@ class CircularLatticeQVectors(LatticeQVectors):
     )
     settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
     settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
-    settings["axis_1"] = (
+    settings["axis"] = (
         "VectorConfigurator",
-        {"normalize": False, "notNull": True, "valueType": int, "default": [1, 0, 0]},
-    )
-    settings["axis_2"] = (
-        "VectorConfigurator",
-        {"normalize": False, "notNull": True, "valueType": int, "default": [0, 1, 0]},
+        {"normalize": False, "notNull": True, "valueType": float, "default": [0, 0, 1]},
     )
 
     def _generate(self):
@@ -63,64 +64,43 @@ class CircularLatticeQVectors(LatticeQVectors):
             np.random.seed(self._configuration["seed"]["value"])
             random.seed(self._configuration["seed"]["value"])
 
-        hkls = np.transpose(
-            [
-                self._configuration["axis_1"]["vector"],
-                self._configuration["axis_2"]["vector"],
-            ]
+        nvecs_per_shell = self._configuration["n_vectors"]["value"]
+        target_circle_axis = self._configuration["axis"]["value"] / np.linalg.norm(
+            self._configuration["axis"]["value"],
         )
+        rot_mat = circle_rotation_matrix(target_circle_axis)
 
-        qVects = self.hkl_to_qvectors(hkls, self._unit_cell)
-
-        qMax = (
-            self._configuration["shells"]["last"]
-            + 0.5 * self._configuration["width"]["value"]
-        )
-
-        uvMax = np.ceil([qMax / Vector(v).length() for v in qVects.T]) + 1
-        # Enforce integers in uvMax
-        uvMax = uvMax.astype(np.int64)
-
-        idxs = np.mgrid[-uvMax[0] : uvMax[0] + 1, -uvMax[1] : uvMax[1] + 1]
-
-        idxs = idxs.reshape(2, (2 * uvMax[0] + 1) * (2 * uvMax[1] + 1))
-
-        vects = np.dot(qVects, idxs)
-
-        dists2 = np.sum(vects**2, axis=0)
-
-        halfWidth = self._configuration["width"]["value"] / 2
-
-        nVectors = self._configuration["n_vectors"]["value"]
+        width = self._configuration["width"]["value"] / 2
 
         if self._status is not None:
             self._status.start(self._configuration["shells"]["number"])
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            qmin = max(0, q - halfWidth)
+            q_vectors = circle_of_vectors(q, width, nvecs_per_shell, rot_mat=rot_mat)
+            lattice_hkl_vectors, weights = self.lattice_vectors_with_weights(
+                q_vectors,
+                self._unit_cell,
+            )
+            selection = self.vectors_within_limits(
+                self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),
+                q_min=q - 0.5 * width,
+                q_max=q + 0.5 * width,
+            )
+            weights = weights[selection]
+            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
+            if not len(weights):
+                self._configuration["q_vectors"][q] = None
+                continue
 
-            q2low = qmin * qmin
-            q2up = (q + halfWidth) * (q + halfWidth)
-
-            hits = np.where((dists2 >= q2low) & (dists2 <= q2up))[0]
-
-            nHits = len(hits)
-
-            if nHits != 0:
-                n = min(nHits, nVectors)
-
-                if nHits > nVectors:
-                    hits = random.sample(hits, nVectors)
-
-                self._configuration["q_vectors"][q] = {}
-                self._configuration["q_vectors"][q]["q_vectors"] = vects[:, hits]
-                self._configuration["q_vectors"][q]["n_q_vectors"] = n
-                self._configuration["q_vectors"][q]["q"] = q
-                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
-                    vects[:, hits], self._unit_cell
-                )
+            self._configuration["q_vectors"][q] = {
+                "q_vectors": self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),
+                "weights": weights,
+                "n_q_vectors": np.sum(weights),
+                "q": q,
+                "hkls": lattice_hkl_vectors,
+            }
 
             if self._status is not None:
                 if self._status.is_stopped():

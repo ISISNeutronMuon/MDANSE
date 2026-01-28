@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 from math import sqrt
 
 import numpy as np
@@ -67,7 +66,7 @@ class CurrentCorrelationFunction(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
@@ -323,6 +322,11 @@ class CurrentCorrelationFunction(IJob):
 
         """
         shell = self.configuration["q_vectors"]["shells"][index]
+        if self.configuration["q_vectors"]["value"][shell] is None:
+            return index, None
+
+        qvec_weights = self.configuration["q_vectors"]["value"][shell]["weights"]
+        qvec_weights_sqrt = np.sqrt(qvec_weights)
 
         trajectory = self.trajectory
         cell_present = True
@@ -385,6 +389,7 @@ class CurrentCorrelationFunction(IJob):
             )
 
         qVectors = qVectors[:, non_zero]
+        qvec_weights = qvec_weights[non_zero]
         qVectors2 = qVectors2[non_zero]
         nQVectors = qVectors.shape[1]
         if not cell_fixed:
@@ -436,9 +441,10 @@ class CurrentCorrelationFunction(IJob):
                 if qVectors.ndim > 2:
                     temp_dotprod = np.einsum("ij,jki->ik", coords, qVectors)
                     curr = np.einsum(
-                        "ik,ij->ikj",
+                        "ik,ij,j->ikj",
                         veloc,
                         np.exp(1j * temp_dotprod),
+                        qvec_weights_sqrt,
                     )
                     long = np.einsum(
                         "lji,kji,ikj->ilj",
@@ -449,9 +455,10 @@ class CurrentCorrelationFunction(IJob):
                     trans = curr - long
                 else:
                     curr = np.einsum(
-                        "ik,ij->ikj",
+                        "ik,ij,j->ikj",
                         veloc,
                         np.exp(1j * np.dot(coords, qVectors)),
+                        qvec_weights_sqrt,
                     )
                     long = np.einsum(
                         "lj,kj,ikj->ilj",
@@ -464,7 +471,7 @@ class CurrentCorrelationFunction(IJob):
                 rho_l[element] += long
                 rho_t[element] += trans
 
-        return index, (rho_l, rho_t)
+        return index, (rho_l, rho_t, np.sum(qvec_weights))
 
     def combine(self, index: int, x: tuple[np.ndarray, np.ndarray] | None):
         """Calculate the correlation functions of the current densities.
@@ -480,15 +487,11 @@ class CurrentCorrelationFunction(IJob):
         """
         if x is None:
             for pair_str, _ in self.labels:
-                self._outputData[f"ccf/j(q,t)_long/{pair_str}"][index, :] = np.zeros(
-                    self._nFrames,
-                )
-                self._outputData[f"ccf/j(q,t)_trans/{pair_str}"][index, :] = np.zeros(
-                    self._nFrames,
-                )
+                self._outputData[f"ccf/j(q,t)_long/{pair_str}"][index, :] = np.nan
+                self._outputData[f"ccf/j(q,t)_trans/{pair_str}"][index, :] = np.nan
             return
 
-        rho_l, rho_t = x
+        rho_l, rho_t, norm = x
         n_configs = self.configuration["frames"]["n_configs"]
         for pair_str, (label_i, label_j) in self.labels:
             corr_l = correlate(
@@ -497,7 +500,7 @@ class CurrentCorrelationFunction(IJob):
                 :,
                 0,
                 0,
-            ] / (3 * n_configs * rho_l[label_i].shape[2])
+            ] / (3 * n_configs * norm)
             self._outputData[f"ccf/j(q,t)_long/{pair_str}"][index, :] += corr_l.real
             corr_t = correlate(
                 rho_t[label_i], rho_t[label_j][:n_configs], mode="valid"
@@ -505,7 +508,7 @@ class CurrentCorrelationFunction(IJob):
                 :,
                 0,
                 0,
-            ] / (3 * n_configs * rho_t[label_i].shape[2])
+            ] / (3 * n_configs * norm)
             self._outputData[f"ccf/j(q,t)_trans/{pair_str}"][index, :] += corr_t.real
 
     def finalize(self):

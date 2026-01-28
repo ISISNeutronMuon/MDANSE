@@ -15,6 +15,9 @@
 #
 from __future__ import annotations
 
+from itertools import count
+
+from more_itertools import first_true
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import QTextBrowser
@@ -22,7 +25,37 @@ from qtpy.QtWidgets import QTextBrowser
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_text_map
+
+
+def generate_name(
+    existing_names: set[str] | None,
+    prefix: str = "Generic neutron instrument ",
+    suffix: str = "",
+) -> str:
+    """Create a text string different to those in the input set, if provided.
+
+    This function adds numbers to the text string which is the root of the new name.
+
+    Parameters
+    ----------
+    existing_names : set[str] | None
+        Set of all the names that are already in use.
+    prefix : str, optional
+        Part of the name before the number, by default "Generic neutron instrument".
+    suffix : str, optional
+        Part of the name after the number, by default "".
+
+    Returns
+    -------
+    str
+        Name composed of prefix, number, suffix using the lowest positive number possible.
+    """
+    if existing_names is None:
+        return f"{prefix}{suffix}"
+    name_generator = (f"{prefix}{number}{suffix}" for number in count(1))
+    return first_true(name_generator, pred=lambda x: x not in existing_names)
 
 
 class SimpleInstrument:
@@ -33,9 +66,13 @@ class SimpleInstrument:
     energy_units = ("meV", "1/cm", "THz")
     momentum_units = ("1/ang", "1/nm", "1/Bohr")
 
-    def __init__(self, optional_qitem_reference: QStandardItem = None) -> None:
+    def __init__(
+        self,
+        optional_qitem_reference: QStandardItem = None,
+        existing_names: set[str] | None = None,
+    ) -> None:
         self._list_item = optional_qitem_reference
-        self._name = "Generic neutron instrument"
+        self._name = generate_name(existing_names)
         self._name_is_fixed = False
         self._sample = "isotropic"
         self._technique = "QENS"
@@ -115,12 +152,12 @@ class SimpleInstrument:
             results.append(new_entry)
         return results
 
-    def create_q_vector_params(self, sample_configuration=None):
+    def create_q_vector_params(self, sample_cell: UnitCell | None = None):
         if not self._configured:
             return
         cov_type = self._qvector_type
         try:
-            qvec_generator = IQVectors.create(cov_type, sample_configuration)
+            qvec_generator = IQVectors.create(cov_type, sample_cell)
         except ValueError:
             return ("No qvectors", {})
         except AttributeError:

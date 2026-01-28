@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
@@ -31,7 +29,7 @@ class MillerIndicesQVectors(LatticeQVectors):
     their length.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["shells"] = (
         "RangeConfigurator",
         {
@@ -86,7 +84,7 @@ class MillerIndicesQVectors(LatticeQVectors):
         if self._status is not None:
             self._status.start(len(self._configuration["shells"]["value"]))
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
             qmin = max(0, q - halfWidth)
@@ -99,14 +97,13 @@ class MillerIndicesQVectors(LatticeQVectors):
             nHits = len(hits)
 
             if nHits != 0:
-                self._configuration["q_vectors"][q] = {}
-                self._configuration["q_vectors"][q]["q_vectors"] = vects[:, hits]
-                self._configuration["q_vectors"][q]["n_q_vectors"] = nHits
-                self._configuration["q_vectors"][q]["q"] = q
-                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
-                    vects[:, hits], self._unit_cell
-                )
-
+                self._configuration["q_vectors"][q] = {
+                    "q_vectors": vects[:, hits],
+                    "n_q_vectors": nHits,
+                    "weights": np.ones(nHits),
+                    "q": q,
+                    "hkls": self.qvectors_to_hkl(vects[:, hits], self._unit_cell),
+                }
             if self._status is not None:
                 if self._status.is_stopped():
                     return

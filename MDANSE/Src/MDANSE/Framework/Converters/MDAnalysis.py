@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import MDAnalysis as mda
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
@@ -46,7 +44,7 @@ class MDAnalysis(Converter):
 
     category = ("Converters", "General")
     label = "MDAnalysis"
-    settings = collections.OrderedDict()
+    settings = {}
     settings["topology_file"] = (
         "MDAnalysisTopologyFileConfigurator",
         {

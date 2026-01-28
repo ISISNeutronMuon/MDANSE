@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 from MDANSE.Framework.Jobs.CartesianCorrelationFunction import (
     CartesianCorrelationFunction,
 )
@@ -52,7 +50,7 @@ class VelocityCorrelationFunction(CartesianCorrelationFunction):
             ),
         ),
     )
-    settings = collections.OrderedDict(settings)
+    settings = dict(settings)
 
     def get_series(self, index):
         trajectory = self.trajectory

@@ -38,6 +38,7 @@ def parameters():
     parameters["q_values"] = (0.0, 10.0, 0.1)
     parameters["r_values"] = (0.0, 0.9, 0.1)
     parameters["per_axis"] = False
+    parameters["n_sphere_points"] = 300
     parameters["reference_direction"] = (0, 0, 1)
     parameters["instrument_resolution"] = ("Gaussian", {"sigma": 1.0, "mu": 0.0})
     parameters["interpolation_order"] = "3rd order"

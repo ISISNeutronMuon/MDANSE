@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 import copy
 from collections.abc import Sequence
 
@@ -372,7 +371,7 @@ class SolventAccessibleSurface(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",
@@ -445,7 +444,7 @@ class SolventAccessibleSurface(IJob):
         self.spherePoints = np.array(
             generate_sphere_points(self.configuration["n_sphere_points"]["value"]),
             dtype=np.float64,
-        )
+        ).T
 
         # A mapping between the atom indices and covalent_radius radius for the whole universe.
         if self.configuration["radius_type"]["value"] == "van der Waals":

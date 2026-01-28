@@ -15,9 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-import struct
-
 import numpy as np
 
 from MDANSE.Core.Error import Error
@@ -41,7 +38,7 @@ class DCD(Converter):
 
     label = "DCD"
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["pdb_file"] = (
         "FileWithAtomDataConfigurator",
         {

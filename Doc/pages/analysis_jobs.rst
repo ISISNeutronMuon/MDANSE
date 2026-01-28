@@ -330,7 +330,7 @@ Inputs:
 
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
-- q_shells: :ref:`configurator-analysis-RangeConfigurator` default=N/A
+- q_shells: :ref:`configurator-analysis-QRangeConfigurator` default=N/A
 - instrument_resolution: :ref:`configurator-analysis-InstrumentResolutionConfigurator` default=N/A
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
@@ -434,7 +434,7 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
-- spatial_resolution: :ref:`configurator-analysis-FloatConfigurator` default=0.1
+- spatial_resolution: :ref:`configurator-analysis-GridStepConfigurator` default=0.1
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
@@ -651,8 +651,8 @@ Calculates the Root Mean Square Fluctuation of atom positions.
 
 The root mean square fluctuation (RMSF) for a set of atoms is similar to the
 square root of the mean square displacement (MSD), except that it is spatially
-resolved (by atom/residue/etc) rather than time resolved. It reveals the
-dynamical heterogeneity of the molecule over the course of a MD simulation.
+resolved rather than time resolved. It reveals the dynamical heterogeneity
+of the molecule over the course of an MD simulation.
 
 As opposed to most analysis types, the result is a single number per atom index.
 
@@ -660,7 +660,7 @@ Inputs:
 
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
-- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=each atom
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=atom
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
@@ -693,7 +693,7 @@ Inputs:
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - axis: :ref:`configurator-analysis-SingleChoiceConfigurator` default=c
-- dr: :ref:`configurator-analysis-FloatConfigurator` default=0.01
+- dr: :ref:`configurator-analysis-GridStepConfigurator` default=0.01
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
@@ -735,10 +735,13 @@ of the VDW radii of the atoms in the molecule under study.
 Inputs:
 
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
-- frames: :ref:`configurator-analysis-FramesConfigurator` default=(0, 2, 1)
+- frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - n_sphere_points: :ref:`configurator-analysis-IntegerConfigurator` default=1000
 - probe_radius: :ref:`configurator-analysis-FloatConfigurator` default=0.14
+- radius_type: :ref:`configurator-analysis-SingleChoiceConfigurator` default=van der Waals
+- calculate_blocked_surface: :ref:`configurator-analysis-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
@@ -758,7 +761,7 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - r_values: :ref:`configurator-analysis-DistHistCutoffConfigurator` default=N/A
-- q_values: :ref:`configurator-analysis-RangeConfigurator` default=(0, 500, 1)
+- q_values: :ref:`configurator-analysis-QRangeConfigurator` default=(0, 500, 1)
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
@@ -831,10 +834,8 @@ At the moment, the main applications include:
 Inputs:
 
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
-- frames: :ref:`configurator-analysis-FramesConfigurator` default=(0, -1, 1)
-- unit_cell: :ref:`configurator-analysis-UnitCellConfigurator` default=(array([[1., 0., 0.],
-       [0., 1., 0.],
-       [0., 0., 1.]]), False)
+- frames: :ref:`configurator-analysis-FramesConfigurator` default=(0, 1, 1)
+- unit_cell: :ref:`configurator-analysis-UnitCellConfigurator` default=([[1, 0, 0], [0, 1, 0], [0, 0, 1]], False)
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - atom_charges: :ref:`configurator-analysis-PartialChargeConfigurator` default={}
@@ -867,6 +868,7 @@ Inputs:
 - projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
 - trajectory_filter: :ref:`configurator-analysis-TrajectoryFilterConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - weights: :ref:`configurator-analysis-WeightsConfigurator` default=atomic_weight
 - output_files: :ref:`configurator-analysis-OutputTrajectoryConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
@@ -983,7 +985,7 @@ Gael Goret, PELLEGRINI Eric
 Inputs:
 
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
-- frames: :ref:`configurator-analysis-FramesConfigurator` default=(0, 5, 1)
+- frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - pbc: :ref:`configurator-analysis-BooleanConfigurator` default=True
 - pbc_border_size: :ref:`configurator-analysis-FloatConfigurator` default=0.2
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
@@ -1004,7 +1006,7 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - r_values: :ref:`configurator-analysis-DistHistCutoffConfigurator` default=N/A
-- q_values: :ref:`configurator-analysis-RangeConfigurator` default=(0, 500, 1)
+- q_values: :ref:`configurator-analysis-QRangeConfigurator` default=(0, 500, 1)
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A

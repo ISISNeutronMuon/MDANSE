@@ -586,9 +586,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
             label = "label of the class"
             with templateFile.open("w") as f:
                 f.write(
-                    f'''import collections
-
-from MDANSE.Framework.Jobs.IJob import IJob
+                    f'''from MDANSE.Framework.Jobs.IJob import IJob
 
 class {classname}(IJob):
     """
@@ -603,7 +601,7 @@ class {classname}(IJob):
 
     # You should enter the configuration of your job here
     # Here a basic example of a job that will use a HDF trajectory, a frame selection and an output file in HDF5 and Text file formats
-    settings = collections.OrderedDict()
+    settings = {{}}
     settings['trajectory']=('hdf_trajectory',{{}})
     settings['frames']=('frames', {{"dependencies":{{'trajectory':'trajectory'}}}})
     settings['output_files']=('output_files', {{"formats":["HDFFormat","netcdf","TextFormat"]}})

@@ -7,7 +7,8 @@ import numpy as np
 import pytest
 
 from MDANSE_GUI.Tabs.Views.PlotDataView import (
-    convert_vectors_to_datasets,
+    qvector_binning_general,
+    vector_q_statistics_datasets,
     shell_to_modq,
 )
 
@@ -41,7 +42,16 @@ def test_shell_to_modq_lengths(file_qvec):
         assert np.allclose(modq, SHELL_MODQ[n], atol=0.01, rtol=0.05)
 
 
-def test_convert_vectors_to_datasets_vecperq(file_qvec):
-    nvec_per_q, _, _ = convert_vectors_to_datasets(file_qvec)
+def test_vector_q_statistics_datasets_vecperq(file_qvec):
+    nvec_per_q, _, _ = vector_q_statistics_datasets(file_qvec)
     assert len(nvec_per_q.data) == len(SHELL_MODQ)
     assert all(nvec_per_q.data == VEC_PER_SHELL)
+
+
+@pytest.mark.parametrize("width", [0.1, 1.0, 10.0])
+def test_bin_limits_vs_width(width: float):
+    binning = qvector_binning_general(5.0, 6.0, 1.0, width, 10)
+    bin_min, bin_max = np.min(binning), np.max(binning)
+    print(bin_min, bin_max, 1.0, width)
+    assert np.isclose(bin_max, 6 + width/2) or bin_max >= 6 + width/2
+    assert np.isclose(bin_min, 5 - width/2) or bin_min <= 5 - width/2 or sum(binning < 0) < 2

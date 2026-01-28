@@ -91,7 +91,8 @@ class MolecularViewer(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        self._scale_factor = 0.4
+        self._atom_scale_factor = 0.4
+        self._line_scale_factor = 0.4
 
         self._element_database = None
 
@@ -416,7 +417,7 @@ class MolecularViewer(QtWidgets.QWidget):
         uc_mapper.SetInputData(self._uc_polydata)
         uc_mapper.ScalarVisibilityOn()
         uc_actor = vtk.vtkLODActor()
-        uc_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
+        uc_actor.GetProperty().SetLineWidth(3 * self._line_scale_factor)
         uc_actor.SetMapper(uc_mapper)
         self._renderer.AddActor(uc_actor)
         self.uc_actor = uc_actor
@@ -543,7 +544,7 @@ class MolecularViewer(QtWidgets.QWidget):
         """
         sphere = vtk.vtkSphereSource()
         sphere.SetCenter(0, 0, 0)
-        sphere.SetRadius(self._scale_factor)
+        sphere.SetRadius(self._atom_scale_factor)
         sphere.SetThetaResolution(self._resolution)
         sphere.SetPhiResolution(self._resolution)
 
@@ -554,7 +555,7 @@ class MolecularViewer(QtWidgets.QWidget):
         glyph_mapper.ScalingOn()
         glyph_mapper.SetScaleModeToScaleByMagnitude()
         glyph_mapper.SetScaleArray("radii")
-        glyph_mapper.SetScaleFactor(self._scale_factor)
+        glyph_mapper.SetScaleFactor(self._atom_scale_factor)
 
         glyph_mapper.ScalarVisibilityOn()
         glyph_mapper.SelectColorArray("colours")
@@ -598,7 +599,7 @@ class MolecularViewer(QtWidgets.QWidget):
         line_mapper.ScalarVisibilityOn()
         line_mapper.ColorByArrayComponent("scalars", 1)
         line_actor = vtk.vtkLODActor()
-        line_actor.GetProperty().SetLineWidth(3 * self._scale_factor)
+        line_actor.GetProperty().SetLineWidth(3 * self._line_scale_factor)
         line_actor.SetMapper(line_mapper)
         line_actor.GetProperty().SetAmbient(0.2)
         line_actor.GetProperty().SetDiffuse(0.5)
@@ -879,7 +880,7 @@ class MolecularViewer(QtWidgets.QWidget):
         scale_factor : float
             Sphere radii in 3D view will be multiplied by this factor
         """
-        self._scale_factor = scale_factor
+        self._atom_scale_factor = scale_factor
         if self._reader is not None:
             self.create_atoms()
             self.update_renderer()

@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 from math import isclose
 
 import mdtraj as md
@@ -41,7 +40,7 @@ class MDTraj(Converter):
 
     category = ("Converters", "General")
     label = "MDTraj"
-    settings = collections.OrderedDict()
+    settings = {}
 
     settings["coordinate_files"] = (
         "MDTrajTrajectoryFileConfigurator",

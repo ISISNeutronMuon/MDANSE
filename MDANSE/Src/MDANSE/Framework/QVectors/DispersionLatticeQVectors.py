@@ -15,22 +15,26 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
 class DispersionLatticeQVectors(LatticeQVectors):
-    """Generates Q vectors along a direction."""
+    r"""Generates Q vectors along a line in the HKL units of the simulation box.
 
-    settings = collections.OrderedDict()
+    The input 'start' and 'step' vectors are expressed as HKL values of the
+    crystal lattice defined by the simulation box. Every vector will be
+    generated as :math:`\mathbf{k}_{start} + n\mathbf{k}_{step}` for
+    integer n from 0 to n_steps.
+    """
+
+    settings = {}
     settings["start"] = (
         "VectorConfigurator",
         {"valueType": int, "notNull": False, "default": [0, 0, 0]},
     )
-    settings["direction"] = (
+    settings["step"] = (
         "VectorConfigurator",
         {"valueType": int, "notNull": True, "default": [1, 0, 0]},
     )
@@ -40,33 +44,37 @@ class DispersionLatticeQVectors(LatticeQVectors):
     )
 
     def _generate(self):
-        start = self._configuration["start"]["value"]
-        direction = self._configuration["direction"]["value"]
+        start = self._configuration["start"]["value"].array
+        step_vector = self._configuration["step"]["value"].array
         n_steps = self._configuration["n_steps"]["value"]
 
         hkls = np.array(start)[:, np.newaxis] + np.outer(
-            direction, np.arange(0, n_steps)
+            step_vector,
+            np.arange(0, n_steps),
         )
-
-        # The k matrix (3,n_hkls)
         vects = self.hkl_to_qvectors(hkls, self._unit_cell)
+        hkl_vectors, weights = self.lattice_vectors_with_weights(vects, self._unit_cell)
+        # The k matrix (3,n_hkls)
+        q_vectors = self.hkl_to_qvectors(hkl_vectors, self._unit_cell)
 
-        dists = np.sqrt(np.sum(vects**2, axis=0))
+        dists = np.linalg.norm(q_vectors, axis=0)
+        sign_array = np.sign(np.dot(step_vector, hkl_vectors))
+        keyvals = dists.copy()
+        keyvals[sign_array < 0] *= -1
 
         if self._status is not None:
             self._status.start(len(dists))
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
-        for i, v in enumerate(dists):
-            self._configuration["q_vectors"][v] = {}
-            self._configuration["q_vectors"][v]["q_vectors"] = vects[:, i][
-                :, np.newaxis
-            ]
-            self._configuration["q_vectors"][v]["n_q_vectors"] = 1
-            self._configuration["q_vectors"][v]["q"] = v
-            self._configuration["q_vectors"][v]["hkls"] = hkls[:, i][:, np.newaxis]
-
+        for i, v in enumerate(keyvals):
+            self._configuration["q_vectors"][v] = {
+                "q_vectors": q_vectors[:, i][:, np.newaxis],
+                "n_q_vectors": weights[i],
+                "weights": weights[i : i + 1],
+                "q": v,
+                "hkls": hkl_vectors[:, i][:, np.newaxis],
+            }
             if self._status is not None:
                 if self._status.is_stopped():
                     return

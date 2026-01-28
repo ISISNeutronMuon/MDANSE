@@ -15,7 +15,7 @@ four_molecules = CONV_DIR / "four_molecules.mdt"
 def qvector_grid():
     return (
         "GridQVectors",
-        {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
+        {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "q_step": 1},
     )
 
 
@@ -25,7 +25,7 @@ def parameters():
         "trajectory": named_mols,
         "q_vectors": (
             "GridQVectors",
-            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
+            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "q_step": 1},
         ),
         "q_shells": (2.0, 12.2, 2.0),
         "r_values": (0.0, 0.9, 0.01),
@@ -48,7 +48,7 @@ def dcsf(tmp_path_factory):
         "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "q_vectors": (
             "GridQVectors",
-            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
+            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "q_step": 1},
         ),
         "trajectory": four_molecules,
         "weights": "b_coherent",
@@ -70,7 +70,7 @@ def disf(tmp_path_factory):
         "output_files": (temp_name, ("MDAFormat",), "INFO"),
         "q_vectors": (
             "GridQVectors",
-            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
+            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "q_step": 1},
         ),
         "trajectory": four_molecules,
         "weights": "b_incoherent",

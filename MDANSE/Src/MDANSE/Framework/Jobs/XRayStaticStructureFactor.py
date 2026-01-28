@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 from collections.abc import Iterator
 
 import numpy as np
@@ -71,7 +70,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",

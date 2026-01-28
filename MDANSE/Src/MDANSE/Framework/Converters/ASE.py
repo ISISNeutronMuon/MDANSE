@@ -58,7 +58,7 @@ class ASE(Converter):
     category = ("Converters", "General")
     label = "ASE"
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory_file"] = (
         "FileWithAtomDataConfigurator",
         {

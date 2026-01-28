@@ -15,8 +15,10 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import Signal, Slot
-from qtpy.QtGui import QDoubleValidator, QIntValidator
+from qtpy.QtGui import QDoubleValidator, QIntValidator, QValidator
 from qtpy.QtWidgets import (
     QComboBox,
     QGridLayout,
@@ -26,8 +28,83 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import InstrumentInfo, SimpleInstrument
+from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import (
+    InstrumentInfo,
+    SimpleInstrument,
+    generate_name,
+)
 from MDANSE_GUI.Widgets.VectorWidget import VectorWidget
+
+if TYPE_CHECKING:
+    from MDANSE_GUI.Tabs.Views.InstrumentList import InstrumentList
+
+
+class FreeNameValidator(QValidator):
+    """Validator which compares the input text to the stored set of strings.
+
+    The intention is not to allow the user to type in a name that is already
+    present in the input set.
+    """
+
+    def __init__(self, *args, instrument_list: InstrumentList | None = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instrument_list = instrument_list
+
+    def validate(self, input_string: str, position: int) -> tuple[int, str]:
+        """Prevent the user from typing a name that is present in the input set.
+
+        Parameters
+        ----------
+        input_string : str
+            current contents of a text input field
+        position : int
+            position of the cursor in the text input field
+
+        Returns
+        -------
+        int
+            Validator state.
+        str
+            Original input string.
+        int
+            Cursor position.
+
+        """
+        state = (
+            QValidator.State.Acceptable
+            if (
+                input_string
+                and self.instrument_list
+                and input_string not in self.instrument_list.get_other_names()
+            )
+            else QValidator.State.Invalid
+        )
+        return state, input_string, position
+
+    def fixup(self, invalid_string: str) -> str:
+        """Modify the current input string so it can pass validation.
+
+        This method will be called on the input string if the user stops editing
+        leaving the text in invalid state. Since this validator prevents duplicate
+        names from being entered, it will append a tag to the current name with
+        a number that is incremented as needed to find a name that does not
+        currently appear on the list.
+
+        Parameters
+        ----------
+        invalid_string : str
+            Contents of the text input field, currently not passing validation.
+
+        Returns
+        -------
+        str
+            Modified string which will be passed to validate method again.
+        """
+        new_name = generate_name(
+            self.instrument_list.get_other_names(),
+            prefix=f"{invalid_string}_duplicate",
+        )
+        return super().fixup(new_name)
 
 
 class InstrumentDetails(QWidget):
@@ -38,11 +115,22 @@ class InstrumentDetails(QWidget):
         self.setLayout(QGridLayout(self))
         self._widgets = {}
         self._values = {}
+        self._view_reference = None
         self._current_instrument = None
         self.populate_panel(SimpleInstrument)
         self.add_visualiser()
         for attr in ["_sample", "_technique"]:
             self._widgets[attr].currentTextChanged.connect(self.reset_qvector_combobox)
+
+    def save_view_reference(self, view):
+        """Save a reference to InstrumentList.
+
+        InstrumentList is then used by the input validator to look up the
+        current list of instrument names in the model.
+        """
+        self._view_reference = view
+        self._name_validator = FreeNameValidator(instrument_list=self._view_reference)
+        self._widgets["_name"].setValidator(self._name_validator)
 
     def add_visualiser(self):
         layout = self.layout()

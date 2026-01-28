@@ -7,15 +7,6 @@ Input Parameter Types
 Converter Inputs
 ~~~~~~~~~~~~~~~~
 
-.. _configurator-converter-ASEFileConfigurator:
-
-ASEFileConfigurator
--------------------
-
-default=
-
-Sets an input file for the ASE converter.
-
 .. _configurator-converter-AtomMappingConfigurator:
 
 AtomMappingConfigurator
@@ -50,27 +41,31 @@ or by the using the following (standard)
 representation of a boolean: 'true'/'false', 'yes'/'no', 'y'/'n', '1'/'0', 1/0
 
 
-.. _configurator-converter-ConfigFileConfigurator:
+.. _configurator-converter-FileWithAtomDataConfigurator:
 
-ConfigFileConfigurator
-----------------------
-
-default=
-
-Parse the result of a LAMMPS ``write_data``.
-
-Provides necessary initial details if not included in
-trajectory.
-
-
-.. _configurator-converter-FieldFileConfigurator:
-
-FieldFileConfigurator
----------------------
+FileWithAtomDataConfigurator
+----------------------------
 
 default=
 
-The DL_POLY field file configurator.
+
+Class for handling files that contain atom information.
+
+Returns the parsed structure in the ``instance`` attribute.
+
+If this is ``optional`` and undefined, ``instance`` will instead be
+``None`` for easy checking.
+
+Parameters
+----------
+parser : type[Parser] or Callable
+Routine or object to parse data into relevant form.
+
+Notes
+-----
+For old behaviour any object subclassing this can pass ``self.parse`` into the
+``parser`` argument.
+
 
 .. _configurator-converter-FloatConfigurator:
 
@@ -139,21 +134,6 @@ set to AUTO. The automatic format determination typically
 fails for filenames without an extension.
 
 
-.. _configurator-converter-MDFileConfigurator:
-
-MDFileConfigurator
-------------------
-
-default=
-
-Set a CASTEP .md file as input.
-
-Class representing a .md file format (documentation can be found at
-https://www.tcm.phy.cam.ac.uk/castep/MD/node13.html). It is used to
-determine the structure of the file (eg. the length of each section)
-and to read the information stored in one frame of the trajectory.
-
-
 .. _configurator-converter-MDTrajTimeStepConfigurator:
 
 MDTrajTimeStepConfigurator
@@ -185,15 +165,6 @@ Multiple files can be concatenated, but they have to be all in
 the same format.
 
 
-.. _configurator-converter-OptionalXYZFileConfigurator:
-
-OptionalXYZFileConfigurator
----------------------------
-
-default=
-
-Input for an XYZ file. The filename can also be empty.
-
 .. _configurator-converter-OutputTrajectoryConfigurator:
 
 OutputTrajectoryConfigurator
@@ -222,45 +193,6 @@ SingleChoiceConfigurator
 default=[]
 
 Selects a single item from multiple choices.
-
-.. _configurator-converter-XDATCARFileConfigurator:
-
-XDATCARFileConfigurator
------------------------
-
-default=
-
-Inputs an XDATCAR file (for the VASP converter).
-
-.. _configurator-converter-XTDFileConfigurator:
-
-XTDFileConfigurator
--------------------
-
-default=
-
-Opens and reads an XTD file.
-
-The information contained in the XTD file will be used
-to construct an instance of ChemicalSystem.
-
-
-.. _configurator-converter-XYZFileConfigurator:
-
-XYZFileConfigurator
--------------------
-
-default=
-
-Reads information from an XYZ file for the CP2K converter.
-
-This class loads the contents of an XYZ file.
-This file may contain the atom positions, velocities or forces.
-In either case there will be 3 components per atom.
-
-If you have an ExtendedXYZ file, load it with the ASE converter instead.
-
-
 
 Analysis Inputs
 ~~~~~~~~~~~~~~~
@@ -404,6 +336,15 @@ Select the trajectory frames on which to run the analysis.
 
 The frame selection can be input as three numbers, in the format
 of (first, last, step).
+
+
+.. _configurator-analysis-GridStepConfigurator:
+
+GridStepConfigurator
+--------------------
+
+default=0
+
 
 
 .. _configurator-analysis-GroupingLevelConfigurator:
@@ -623,6 +564,15 @@ or as a plane normal vector.
 
 
 
+.. _configurator-analysis-QRangeConfigurator:
+
+QRangeConfigurator
+------------------
+
+default=(0, 10, 1)
+
+Range configurator for Q vector generation.
+
 .. _configurator-analysis-QVectorsConfigurator:
 
 QVectorsConfigurator
@@ -712,6 +662,15 @@ Input a unit cell definition.
 This is normally used to introduce a cell definition to a trajectory,
 or to change the existing cell definition.
 
+
+.. _configurator-analysis-VectorConfigurator:
+
+VectorConfigurator
+------------------
+
+default=[1.0, 0.0, 0.0]
+
+Inputs a vector given as 3 floating point numbers.
 
 .. _configurator-analysis-WeightsConfigurator:
 

@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 from math import sqrt
 
 import numpy as np
@@ -55,7 +54,7 @@ class NeutronDynamicTotalStructureFactor(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["dcsf_input_file"] = (
         "HDFInputFileConfigurator",

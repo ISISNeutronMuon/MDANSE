@@ -15,30 +15,27 @@
 #
 from __future__ import annotations
 
-import collections
-import random
-
 import numpy as np
 
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
+from MDANSE.Framework.QVectors.SphericalQVectors import spherical_vectors
 
 
 class SphericalLatticeQVectors(LatticeQVectors):
-    """Generates vectors randomly on a sphere.
+    """Generates randomly-selected lattice vectors grouped into spheres.
 
-    Only vectors commensurate with the reciprocal
-    space lattice vectors will be generated.
-    |Q| values for which no valid vectors can
-    be found are omitted in the output.
+    Only vectors commensurate with the reciprocal space lattice will be generated.
+    If more lattice vectors than requested are available in the requested range
+    for a shell, a subset of the vectors will be selected with the probability
+    given as a Gaussian function with FWHM of width/2 and centred on the |q|
+    which is the nominal centre of the shell.
 
-    Vectors within one shell are generated within
-    a tolerance limit around a central |Q| value.
-    Most calculations will produce one data point
-    for |Q| by averaging the results over all
-    vectors in the shell.
+    |Q| values for which no valid vectors can be found are omitted in the output.
+    Most calculations will produce one data point per |Q| by averaging the results
+    over all vectors in the shell.
     """
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
     settings["shells"] = (
         "RangeConfigurator",
@@ -55,62 +52,40 @@ class SphericalLatticeQVectors(LatticeQVectors):
     def _generate(self):
         if self._configuration["seed"]["value"] != 0:
             np.random.seed(self._configuration["seed"]["value"])
-            random.seed(self._configuration["seed"]["value"])
-        qMax = (
-            self._configuration["shells"]["last"]
-            + 0.5 * self._configuration["width"]["value"]
-        )
 
-        hklMax = np.ceil(self.qvectors_to_hkl(qMax * np.eye(3), self._unit_cell)) + 1
+        width = self._configuration["width"]["value"]
 
-        hkl_vects = np.mgrid[
-            -hklMax[0, 0] : hklMax[0, 0] + 1,
-            -hklMax[1, 1] : hklMax[1, 1] + 1,
-            -hklMax[2, 2] : hklMax[2, 2] + 1,
-        ]
-
-        hkl_vects = hkl_vects.reshape(
-            3,
-            np.prod(2 * np.diag(hklMax) + 1, dtype=int),
-        )
-
-        vects = self.hkl_to_qvectors(hkl_vects, self._unit_cell)
-
-        dists2 = np.sum(vects**2, axis=0)
-
-        halfWidth = self._configuration["width"]["value"] / 2
-
-        nVectors = self._configuration["n_vectors"]["value"]
+        nvecs_per_shell = self._configuration["n_vectors"]["value"]
 
         if self._status is not None:
             self._status.start(self._configuration["shells"]["number"])
 
-        self._configuration["q_vectors"] = collections.OrderedDict()
+        self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            qmin = max(0, q - halfWidth)
+            q_vectors = spherical_vectors(q, width, nvecs_per_shell)
+            lattice_hkl_vectors, weights = self.lattice_vectors_with_weights(
+                q_vectors,
+                self._unit_cell,
+            )
+            selection = self.vectors_within_limits(
+                self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),
+                q_min=q - 0.5 * width,
+                q_max=q + 0.5 * width,
+            )
+            weights = weights[selection]
+            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
+            if not len(weights):
+                self._configuration["q_vectors"][q] = None
+                continue
 
-            q2low = qmin * qmin
-            q2up = (q + halfWidth) * (q + halfWidth)
-
-            hits = np.where((dists2 >= q2low) & (dists2 <= q2up))[0]
-
-            nHits = len(hits)
-
-            if nHits != 0:
-                n = min(nHits, nVectors)
-
-                if nHits > nVectors:
-                    hits = random.sample(sorted(hits), nVectors)
-
-                self._configuration["q_vectors"][q] = {}
-                self._configuration["q_vectors"][q]["q_vectors"] = vects[:, hits]
-                self._configuration["q_vectors"][q]["n_q_vectors"] = n
-                self._configuration["q_vectors"][q]["q"] = q
-                self._configuration["q_vectors"][q]["hkls"] = self.qvectors_to_hkl(
-                    vects[:, hits], self._unit_cell
-                )
-
+            self._configuration["q_vectors"][q] = {
+                "q_vectors": self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),
+                "n_q_vectors": np.sum(weights),
+                "weights": weights,
+                "q": q,
+                "hkls": lattice_hkl_vectors,
+            }
             if self._status is not None:
                 if self._status.is_stopped():
                     return

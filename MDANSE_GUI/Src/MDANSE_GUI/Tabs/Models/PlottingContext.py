@@ -152,11 +152,12 @@ class SingleDataset:
                 self._scaling_factor = float(source[self._name].attrs["scaling_factor"])
             except TypeError:
                 self._scaling_factor = np.array(
-                    source[self._name].attrs["scaling_factor"]
+                    source[self._name].attrs["scaling_factor"],
                 )
 
         self._data_unit = source[self._name].attrs["units"]
         self._n_dim = len(self._data.shape)
+        self._data_shape = self._data.shape
         self._axes_tag = source[self._name].attrs["axis"]
 
         self.create_axes_tags(self._axes_tag, source)
@@ -166,13 +167,15 @@ class SingleDataset:
         self,
         _source: None,
         data: npt.NDArray[float],
+        *,
         data_unit: str = "none",
         scaling_factor: float = 1.0,
         plot_axes: dict[str, npt.NDArray[float]] | None = None,
         axes_units: dict[str, str] | None = None,
         yerror: npt.NDArray[float] | None = None,
         xerror: npt.NDArray[float] | None = None,
-        optional_filename: str | None = None,
+        optional_filename: str = "no file",
+        uneven_array: bool = False,
     ) -> None:
         """Set data for plotting without using a data file.
 
@@ -190,21 +193,35 @@ class SingleDataset:
             Dictionary of axis_name: axis_array pairs, by default None
         axes_units : dict[str, str] | None, optional
             Dictionary of axis_name: axis_unit pairs, by default None
+        yerror: npt.NDArray[float] | None = None
+            Vertical error bars associated with the data points.
+        xerror: npt.NDArray[float] | None = None
+            Horizontal error bars associated with the data points.
+        optional_filename: str = "no file"
+            File name to be displayed as the origin of this data set.
+        uneven_array: bool = False
+            If True, allow the data rows to be of different length.
         """
-
-        self._filename = optional_filename if optional_filename else "no file"
+        self._filename = optional_filename
         self._labels = {
             "minimal": self._name,
             "medium": self._name,
             "full": self._name,
         }
-        self._data = np.real(data)
+        if uneven_array:
+            self._data = data
+            self._n_dim = 1
+            self._data_shape = (len(data),)
+            self._use_scaling = False
+        else:
+            self._data = np.real(data)
+            self._n_dim = len(self._data.shape)
+            self._data_shape = self._data.shape
         self._scaling_factor = scaling_factor
         self._xerror = xerror
         self._yerror = yerror
 
         self._data_unit = data_unit
-        self._n_dim = len(self._data.shape)
         if plot_axes is None:
             for ax_number, npoints in enumerate(self._data.shape):
                 axis_key = f"index{ax_number}"
@@ -276,6 +293,7 @@ class SingleDataset:
 
     @staticmethod
     def axis_true_name(axis_key: str) -> str:
+        """Return the short name of the axis dataset without the path."""
         if "/" in axis_key:
             return axis_key.rsplit("/", 1)[1].strip()
         return axis_key
@@ -377,15 +395,13 @@ class SingleDataset:
         if ":" in token:
             slice_parts = map(int, token.split(":"))
             slc = slice(*slice_parts).indices(max_len)
-
             return range(*slc)
-        elif "-" in token:
-            start, stop = map(int, token.split("-"))
 
+        if "-" in token:
+            start, stop = map(int, token.split("-"))
             return range(start, stop + 1)
 
-        else:
-            return (int(token),)
+        return (int(token),)
 
     def set_data_limits(self, limit_string: str):
         """Parse the string used for selecting a subset of data.
@@ -595,6 +611,7 @@ class SingleDataset:
         return self._curves
 
     def curve_ind(self, limits: int, /):
+        """Return a generator of indices indexing only the curves within the limits."""
         return (
             islice(self._data_limits, limits)
             if self._data_limits is not None
@@ -602,7 +619,9 @@ class SingleDataset:
         )
 
     def planes_vs_axis(
-        self, axis_number: int, max_limit: int = 1
+        self,
+        axis_number: int,
+        max_limit: int = 1,
     ) -> list[np.ndarray] | np.ndarray | None:
         """Prepare for plotting 2D subsets of an ND array.
 
@@ -666,7 +685,7 @@ plotting_column_labels = [
     "Colour",
     "Line style",
     "Marker",
-    "Apply weights?",
+    "Apply scaling?",
     "Trajectory",
 ]
 plotting_column_index = {
@@ -817,7 +836,7 @@ class PlottingContext(QStandardItemModel):
             )
             useit = row_data["Use it?"].checkState() is Qt.CheckState.Checked
             self._datasets[key]._use_scaling = (
-                row_data["Apply weights?"].checkState() is Qt.CheckState.Checked
+                row_data["Apply scaling?"].checkState() is Qt.CheckState.Checked
             )
 
             if not useit:
@@ -863,7 +882,7 @@ class PlottingContext(QStandardItemModel):
             for x in [
                 new_dataset._name,
                 new_dataset._labels["medium"],
-                new_dataset._data.shape,
+                new_dataset._data_shape,
                 new_dataset._data_unit,
                 new_dataset.longest_axis()[-1],
                 "",
@@ -875,19 +894,23 @@ class PlottingContext(QStandardItemModel):
             ]
         ]
 
-        fixed = {"Dataset", "Trajectory", "Size", "Unit", "Apply weights?"}
+        fixed = {"Dataset", "Trajectory", "Size", "Unit", "Apply scaling?"}
 
         for key, item in zip(plotting_column_labels, items, strict=True):
             item.setData(newkey, role=Qt.ItemDataRole.UserRole)
             item.setEditable(key not in fixed)
 
-        for key in ("Use it?", "Apply weights?"):
+        for key in ("Use it?", "Apply scaling?"):
             item = items[plotting_column_index[key]]
             item.setCheckable(True)
-            item.setCheckState(Qt.CheckState.Checked)
+            item.setCheckState(
+                Qt.CheckState.Checked
+                if key == "Use it?" or new_dataset._use_scaling
+                else Qt.CheckState.Unchecked,
+            )
 
         items[plotting_column_index["Use it?"]].setText(
-            f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1"
+            f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1",
         )
 
         self.itemChanged.connect(self.ask_for_update)
@@ -900,6 +923,7 @@ class PlottingContext(QStandardItemModel):
 
     @Slot()
     def ask_for_update(self):
+        """Emit a signal to indicate that a plot should be updated."""
         self.needs_an_update.emit(self.plot_widget_id)
 
     def set_axes(self):

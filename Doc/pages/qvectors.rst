@@ -4,6 +4,16 @@
 q-Vector Generation
 ~~~~~~~~~~~~~~~~~~~
 
+A complete list of q-vector generators can be found in :ref:`vector-generator-list`.
+However, please keep in mind that for the typical neutron scattering calculations
+it is necessary to choose a lattice vector generator to get correct results of
+for the spatial correlations between pairs of atoms (as in e.g. Dynamic Coherent
+Structure Factor), and a spherical vector generator to simulate the random orientation
+of the simulated objects in respect to the beam. This means that the
+:ref:`qvectors-reference-SphericalLatticeQVectors` generator should be the best
+choice for most users, unless you are simulating a highly ordered sample with a
+well known orientation (e.g. a single crystal).
+
 Reciprocal Lattice q-Vectors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

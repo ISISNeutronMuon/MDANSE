@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 from scipy.signal import correlate
 
@@ -51,7 +49,7 @@ class DynamicIncoherentStructureFactor(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",
@@ -237,17 +235,21 @@ class DynamicIncoherentStructureFactor(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        disf_per_q_shell = collections.OrderedDict()
+        disf_per_q_shell = {}
         for q in self.configuration["q_vectors"]["shells"]:
             disf_per_q_shell[q] = np.zeros((self._nFrames,), dtype=np.float64)
 
         n_configs = self.configuration["frames"]["n_configs"]
         for q in self.configuration["q_vectors"]["shells"]:
+            if self.configuration["q_vectors"]["value"][q] is None:
+                disf_per_q_shell[q] = np.nan
+                continue
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
+            qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
 
-            rho = np.exp(1j * np.dot(series, qVectors))
+            rho = np.exp(1j * np.dot(series, qVectors)) * np.sqrt(qvec_weights[None, :])
             res = correlate(rho, rho[:n_configs], mode="valid").T[0] / (
-                n_configs * rho.shape[1]
+                n_configs * np.sum(qvec_weights)
             )
 
             disf_per_q_shell[q] += res.real

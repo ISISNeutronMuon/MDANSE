@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 
 from MDANSE.Framework.AtomGrouping.grouping import (
@@ -101,7 +99,7 @@ class VanHoveFunctionSelf(IJob):
     )
     PREDICTORS = ("frames", "r_values")
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "CorrelationFramesConfigurator",

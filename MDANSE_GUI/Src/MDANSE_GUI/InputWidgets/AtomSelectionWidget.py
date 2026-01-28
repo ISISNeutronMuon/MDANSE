@@ -107,15 +107,20 @@ class SelectionModel(QStandardItemModel):
     can_redo = Signal(bool)
     gui_selection_finalised = Signal()
 
-    def __init__(self, trajectory):
+    def __init__(self, trajectory, *, default: str = "{}"):
         """Assign the current trajectory to the model."""
         super().__init__(None)
+        self._default = default
         self._trajectory = trajectory
         self._selection = ReusableSelection()
         self._current_selection = set()
         self._manual_selection_item = None
         self._clicked_atoms = []
         self.undo_stack = QUndoStack(self)
+
+    def reset(self) -> None:
+        """Reset selection model to its default."""
+        self.create_from_string(self._default)
 
     def clear(self):
         """Remove all the lines from the selection model."""
@@ -632,13 +637,7 @@ class SelectionHelper(QDialog):
 
     def reset(self) -> None:
         """Reset the helper to the default state."""
-        self.selection_model.clear()
-        self.selection_model.accept_from_widget(
-            '{"function_name": "select_all", "operation_type": "union"}'
-        )
-        self.selection_model.accept_from_widget(
-            '{"function_name": "select_dummy", "operation_type": "difference"}'
-        )
+        self.selection_model.reset()
         self.recalculate_selection()
 
 
@@ -657,7 +656,8 @@ class AtomSelectionWidget(WidgetBase):
     def __init__(self, *args, use_list_view: bool = True, **kwargs):
         """Create the main widget for atom selection."""
         super().__init__(*args, **kwargs)
-        self._value = self._default_value
+        self.default = self._value = self._configurator.default or self._default_value
+
         if use_list_view:
             self._field = QListView(self._base)
             load_button = QPushButton(self._load_button_text, self._base)
@@ -668,22 +668,21 @@ class AtomSelectionWidget(WidgetBase):
             self._field.setPlaceholderText(default_text)
             self._field.setText(default_text)
             self._field.setMaxLength(2147483647)
+
         traj_config = self._configurator.configurable[
             self._configurator.dependencies["trajectory"]
         ]
         traj_filename = traj_config["filename"]
         trajectory = traj_config["instance"]
+
         self._trajectory_path = Path(traj_filename).parent
-        self.selection_model = SelectionModel(trajectory)
-        self.selection_model.clear()
-        self.selection_model.accept_from_widget(
-            '{"function_name": "select_all", "operation_type": "union"}'
-        )
-        self.selection_model.accept_from_widget(
-            '{"function_name": "select_dummy", "operation_type": "difference"}'
-        )
+
+        self.selection_model = SelectionModel(trajectory, default=self.default)
+        self.selection_model.reset()
+
         if use_list_view:
             self._field.setModel(self.selection_model)
+
         self.helper = None
         self.helper_settings = (traj_filename, trajectory)
         self.helper_save_button = False

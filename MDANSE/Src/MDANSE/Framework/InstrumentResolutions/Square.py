@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
@@ -27,7 +25,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 class Square(IInstrumentResolution):
     """Defines an instrument resolution with a square response"""
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["mu"] = ("FloatConfigurator", {"default": 0.0})
     settings["sigma"] = ("FloatConfigurator", {"default": 1.0})
 

@@ -19,8 +19,9 @@ import abc
 from typing import TYPE_CHECKING
 
 import numpy as np
+import numpy.typing as npt
+from scipy.stats import truncnorm
 
-from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.Framework.Configurable import Configurable
 from MDANSE.MLogging import LOG
@@ -29,16 +30,66 @@ if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
+GAUSS_WIDTH_FACTOR = 4.70964  # 2*sqrt(2*ln(2))
+WIDTH_NONZERO_LIMIT = 1e-15  # width below this limit is assumed to be 0
+
+
+def truncated_normal_distribution(
+    n_elements: int,
+    left_limit: float,
+    right_limit: float,
+    width: float,
+    centre: float,
+    zero_width_limit: float = 0.1,
+) -> npt.NDArray[float]:
+    """Generate a normal distribution of values within the specified limits.
+
+    Parameters
+    ----------
+    n_elements : int
+        Number of values to be generated.
+    left_limit : float
+        Lower limit of the generated values.
+    right_limit : float
+        Upper limit of the generated values.
+    width : float
+        FWHM of the value distribution.
+    centre : float
+        Position of the maximum of the distribution.
+    zero_width_limit : float, optional
+        Limits used when width is 0 to guarantee non-zero domain width, by default 0.1.
+
+    Returns
+    -------
+    npt.NDArray[float]
+        A truncated normal distribution of points within the specified limits.
+    """
+    if np.isclose(width, 0, atol=WIDTH_NONZERO_LIMIT):
+        return truncnorm.rvs(
+            -zero_width_limit,
+            zero_width_limit,
+            loc=centre,
+            scale=0,
+            size=n_elements,
+        )
+    return truncnorm.rvs(
+        GAUSS_WIDTH_FACTOR * (left_limit - centre) / width,
+        GAUSS_WIDTH_FACTOR * (right_limit - centre) / width,
+        loc=centre,
+        scale=width / GAUSS_WIDTH_FACTOR,
+        size=n_elements,
+    )
+
 
 class IQVectors(Configurable, metaclass=SubclassFactory):
     """Parent class of all Q vector generators."""
 
     is_lattice = False
 
-    def __init__(self, atom_configuration, status=None):
+    def __init__(self, unit_cell: UnitCell | None, status=None):
         Configurable.__init__(self)
 
-        self._atom_configuration = atom_configuration
+        self._unit_cell = unit_cell
 
         self._status = status
 
@@ -61,7 +112,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
 
     @classmethod
     def qvectors_to_hkl(
-        self,
+        cls,
         vector_array: np.array,
         unit_cell: UnitCell,
     ) -> np.ndarray:
@@ -86,7 +137,7 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
         return np.dot(unit_cell.direct, vector_array) / (2 * np.pi)
 
     @classmethod
-    def hkl_to_qvectors(self, hkls: np.array, unit_cell: UnitCell) -> np.ndarray:
+    def hkl_to_qvectors(cls, hkls: np.array, unit_cell: UnitCell) -> np.ndarray:
         """Convert an array of HKL values to scattering vectors.
 
         Uses a unit cell object to get the lattice vectors for conversion.
@@ -105,6 +156,59 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
 
         """
         return 2 * np.pi * np.dot(unit_cell.inverse, hkls)
+
+    @classmethod
+    def lattice_vectors_with_weights(
+        cls,
+        start_shape: npt.NDArray[float],
+        unit_cell: UnitCell,
+    ) -> tuple[npt.NDArray[float], npt.NDArray[float]]:
+        """Return HKL vectors from the input q-vector array.
+
+        An arbitrary shape will be scaled by values between qmin and qmax
+        to populate all the integer-index HKL values in the shell.
+
+        Parameters
+        ----------
+        start_shape : npt.NDArray[float]
+            Q-vector array representing a specific geometric shape.
+        unit_cell : UnitCell
+            The unit cell of the system, for conversion to HKL values.
+
+        Returns
+        -------
+        tuple[npt.NDArray[float], npt.NDArray[float]]
+            Unique Q-vectors as HKL values, number of times each vector appeared.
+        """
+        hkl_fractional = cls.qvectors_to_hkl(start_shape, unit_cell)
+        return np.unique(np.round(hkl_fractional), return_counts=True, axis=1)
+
+    @classmethod
+    def vectors_within_limits(
+        cls,
+        q_vectors: npt.NDArray[float],
+        *,
+        q_min: float,
+        q_max: float,
+    ) -> npt.NDArray[bool]:
+        """Check which vectors in the input array have the length within the limits.
+
+        Parameters
+        ----------
+        q_vectors : npt.NDArray[float]
+            Array containing vectors to be checked.
+        q_min : float
+            Lower limit of |q|
+        q_max : float
+            Upper limit of |q|
+
+        Returns
+        -------
+        npt.NDArray[bool]
+            Boolean mask array, True for vectors within limits.
+        """
+        lengths = np.linalg.norm(q_vectors, axis=0)
+        return (lengths >= q_min) & (lengths <= q_max)
 
     def write_vectors_to_file(self, output_data: OutputData):
         """Write the vectors to output file as an array.
@@ -138,13 +242,26 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
             output_data.add(
                 current,
                 "SurfaceOutputVariable",
-                qvector_info[q]["q_vectors"],
+                qvector_info[q]["q_vectors"] if qvector_info[q] is not None else [[]],
                 units="1/nm",
                 axis="vector_generator/coordinates|index",
             )
 
         for nq, q in enumerate(q_values):
-            if (data := qvector_info[q].get("hkls")) is not None:
+            current = f"vector_generator/shell_{nq}/weights"
+            output_data.add(
+                current,
+                "LineOutputVariable",
+                qvector_info[q]["weights"] if qvector_info[q] is not None else [],
+                units="au",
+                axis="index",
+            )
+
+        for nq, q in enumerate(q_values):
+            if (
+                qvector_info[q] is not None
+                and (data := qvector_info[q].get("hkls")) is not None
+            ):
                 current = f"vector_generator/shell_{nq}/hkl_array"
                 output_data.add(
                     current,

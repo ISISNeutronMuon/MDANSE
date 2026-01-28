@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
 from math import sqrt
 
 from MDANSE.Framework.AtomGrouping.grouping import (
@@ -42,7 +41,7 @@ class StructureFactorFromScatteringFunction(IJob):
 
     ancestor = ["hdf_data"]
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["dcsf_input_file"] = (
         "HDFInputFileConfigurator",

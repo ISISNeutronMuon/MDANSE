@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 from more_itertools import always_iterable
 
@@ -49,7 +47,7 @@ class DistanceHistogram(IJob):
     )
     PREDICTORS = ("r_values",)
 
-    settings = collections.OrderedDict()
+    settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
         "FramesConfigurator",

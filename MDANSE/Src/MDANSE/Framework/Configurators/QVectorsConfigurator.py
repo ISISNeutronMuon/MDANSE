@@ -37,7 +37,7 @@ class QVectorsConfigurator(IConfigurator):
     norm match the Q shell value within a given tolerance.
 
     Depending on the generator selected, Q vectors can be generated
-    isotropically or anistropically, on a lattice or randomly.
+    isotropically or anisotropically, on a lattice or randomly.
 
     """
 
@@ -79,7 +79,7 @@ class QVectorsConfigurator(IConfigurator):
 
             generator = IQVectors.create(
                 generator_name,
-                trajConfig["instance"].configuration(0),
+                trajConfig["instance"].unit_cell(0),
             )
             try:
                 generator.setup(parameters)
@@ -108,7 +108,7 @@ class QVectorsConfigurator(IConfigurator):
                 raise Exception("no Q vectors could be generated")
 
             self["parameters"] = parameters
-            # self["type"] = generator._type
+            self["vector_type"] = generator_name
             self["is_lattice"] = generator.is_lattice
             self["q_vectors"] = generator.configuration["q_vectors"]
 
@@ -121,3 +121,14 @@ class QVectorsConfigurator(IConfigurator):
         self["value"] = self["q_vectors"]
         self["generator"] = generator
         self.error_status = "OK"
+
+        if None in self["value"].values():
+            self.warning_status = "Some of the q vector shells are empty. The corresponding results will be NaN values."
+        else:
+            self.warning_status = ""
+            return
+
+        if all(shell is None for shell in self["value"].values()):
+            self.error_status = (
+                "All the q vector shells are empty. There will be no valid results."
+            )
