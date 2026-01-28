@@ -94,10 +94,9 @@ def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
 
     filename = html.escape(f"{traj.filename}")
     if use_html:
-        head.append(f"Path: <pre>{filename}</pre>")
+        head = f"Path: <pre>{filename}</pre>"
     else:
-        head.append("Path:")
-        head.append(f"{filename}\n")
+        head = "Path:\n{filename}\n"
     val.append("Number of steps:")
     val.append(f"{len(traj)}\n")
     val.append("Configuration:")
