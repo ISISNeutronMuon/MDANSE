@@ -96,7 +96,7 @@ def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
     if use_html:
         head = f"Path: <pre>{filename}</pre>"
     else:
-        head = "Path:\n{filename}\n"
+        head = f"Path:\n{filename}\n"
     val.append("Number of steps:")
     val.append(f"{len(traj)}\n")
     val.append("Configuration:")
@@ -128,7 +128,6 @@ def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
     for molname, mollist in traj.chemical_system._clusters.items():
         val.append(f"Molecule: {molname}; Count: {len(mollist)}")
 
-    head = "\n".join(head)
     val = "\n".join(val)
     if use_html:
         val = html.escape(val)
