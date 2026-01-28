@@ -198,7 +198,9 @@ class InfraredBulk(IJob):
             # smaller cutoffs reproduce molecular calculation
             # all atoms that have approached the reference atom across
             # the entire trajectory
-            cutoff = np.logical_or(cutoff, r < self.configuration["distance_cutoff"]["value"])
+            cutoff = np.logical_or(
+                cutoff, r < self.configuration["distance_cutoff"]["value"]
+            )
 
         for axis in range(3):
             ddipole_i[:, axis] = differentiate(
