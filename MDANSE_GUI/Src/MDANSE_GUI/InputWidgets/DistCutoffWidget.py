@@ -21,7 +21,6 @@ from .FloatWidget import FloatWidget
 
 
 class DistCutoffWidget(FloatWidget):
-
     def setup_field(self, *args, **kwargs):
         mini = 0.0
         default = floor(self._configurator.get_max_cutoff() * 100) / 100

@@ -115,7 +115,7 @@ def contiguous_coordinates_real(
             minimum_offsets -= np.round(minimum_offsets)
             newconfig = reference_positions + minimum_offsets
             newconfig = np.matmul(newconfig, cell)
-            contiguous_coords[idxs[:]] = newconfig   
+            contiguous_coords[idxs[:]] = newconfig
         else:
             minimum_offsets = scaleconfig[idxs[1:]] - scaleconfig[idxs[0]]
             minimum_offsets -= np.round(minimum_offsets)

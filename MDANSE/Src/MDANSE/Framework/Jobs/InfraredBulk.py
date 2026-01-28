@@ -168,6 +168,7 @@ class InfraredBulk(IJob):
         number = self.configuration["frames"]["number"]
         n_atms = self.trajectory.get_total_natoms()
 
+        cutoff = np.zeros(n_atms, dtype=bool)
         ddipole_i = np.zeros((number, 3))
         for i, frame_index in enumerate(
             range(
@@ -185,27 +186,26 @@ class InfraredBulk(IJob):
                 q_i = charges[index]
             ddipole_i[i] = q_i * (contiguous_configuration["coordinates"][index, :])
 
+            coords = contiguous_configuration["coordinates"]
+            coords_ref = coords[index]
+            cell = configuration.unit_cell.direct
+            inverse_cell = configuration.unit_cell.inverse
+            diff_frac = (coords - coords_ref) @ inverse_cell
+            diff_frac -= np.round(diff_frac)
+            diff_coords = diff_frac @ cell
+            r = np.sqrt(np.sum(diff_coords * diff_coords, axis=1))
+
+            # smaller cutoffs reproduce molecular calculation
+            # all atoms that have approached the reference atom across
+            # the entire trajectory
+            cutoff = np.logical_or(cutoff, r < self.configuration["distance_cutoff"]["value"])
+
         for axis in range(3):
             ddipole_i[:, axis] = differentiate(
                 ddipole_i[:, axis],
                 order=self.configuration["derivative_order"]["value"],
                 dt=step_frame,
             )
-
-        configuration = self.trajectory.configuration(first_frame)
-        contiguous_configuration = configuration.contiguous_configuration()
-        coords_0 = contiguous_configuration["coordinates"]
-        coords_ref = coords_0[index]
-
-        cell = configuration.unit_cell.direct
-        inverse_cell = configuration.unit_cell.inverse
-        diff_frac = (coords_0 - coords_ref) @ inverse_cell
-        diff_frac -= np.round(diff_frac)
-        diff_coords = diff_frac @ cell
-        r = np.sqrt(np.sum(diff_coords * diff_coords, axis=1))
-
-        # smaller cutoffs reproduce molecular calculation
-        cutoff = r < self.configuration["distance_cutoff"]["value"]
 
         ddipole_j = np.zeros((number, 3))
         for j, frame_index in enumerate(

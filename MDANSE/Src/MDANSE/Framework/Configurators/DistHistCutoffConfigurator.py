@@ -22,7 +22,6 @@ from .IConfigurator import PredictionSettings
 from .RangeConfigurator import RangeConfigurator
 
 
-
 class DistHistCutoffConfigurator(RangeConfigurator):
     """Range of interatomic distances for a histogram.
 
@@ -58,6 +57,5 @@ class DistHistCutoffConfigurator(RangeConfigurator):
         super().configure(value)
 
     def get_max_cutoff(self):
-        traj_config = self.configurable[self.dependencies["trajectory"]][
-            "instance"]
+        traj_config = self.configurable[self.dependencies["trajectory"]]["instance"]
         return get_largest_cutoff(traj_config)

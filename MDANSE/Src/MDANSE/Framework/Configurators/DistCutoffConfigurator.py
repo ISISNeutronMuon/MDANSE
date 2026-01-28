@@ -54,9 +54,9 @@ def get_largest_cutoff(traj_config) -> float:
             cross_ab = np.cross(vec_a, vec_b)
 
             if (
-                    np.allclose(cross_bc, 0.0)
-                    or np.allclose(cross_ca, 0.0)
-                    or np.allclose(cross_ab, 0.0)
+                np.allclose(cross_bc, 0.0)
+                or np.allclose(cross_ca, 0.0)
+                or np.allclose(cross_ab, 0.0)
             ):
                 raise ValueError("Trajectory contains invalid unit cell.")
 
@@ -91,6 +91,5 @@ class DistCutoffConfigurator(FloatConfigurator):
             return
 
     def get_max_cutoff(self):
-        traj_config = self.configurable[self.dependencies["trajectory"]][
-            "instance"]
+        traj_config = self.configurable[self.dependencies["trajectory"]]["instance"]
         return get_largest_cutoff(traj_config)
