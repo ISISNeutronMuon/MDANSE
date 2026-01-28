@@ -681,6 +681,8 @@ class MolecularViewer(QtWidgets.QWidget):
         """
         # determine and set bonds without PBC applied
         bonds = vtk.vtkCellArray()
+        if not len(covs):
+            return bonds
 
         dist, js, ks, _ = distance_calculation(rs, 2 * np.max(covs) + tolerance)
         sum_radii = (covs[js] + covs[ks] + tolerance) ** 2
