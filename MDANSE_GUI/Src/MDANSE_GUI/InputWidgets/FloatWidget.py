@@ -24,8 +24,11 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class FloatWidget(WidgetBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.setup_field(*args, **kwargs)
+
+    def setup_field(self, *args, **kwargs):
         try:
-            default_option = float(self._configurator.default)
+            default_option = kwargs.get("default", float(self._configurator.default))
         except ValueError:
             default_option = 0.0
         if self._configurator.choices:
@@ -40,7 +43,8 @@ class FloatWidget(WidgetBase):
         else:
             field = QLineEdit(self._base)
             validator = QDoubleValidator(field)
-            minval, maxval = self._configurator.mini, self._configurator.maxi
+            minval = kwargs.get("mini", self._configurator.mini)
+            maxval = kwargs.get("mini", self._configurator.maxi)
             if minval is not None:
                 validator.setBottom(minval)
             if maxval is not None:

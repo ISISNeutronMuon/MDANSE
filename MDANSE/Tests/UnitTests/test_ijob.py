@@ -60,7 +60,8 @@ ALL_JOBS = [
     "NAMD",
     "XPLOR",
     "DFTB",
-    "Infrared",
+    "InfraredBulk",
+    "InfraredMolecular",
 ]
 
 

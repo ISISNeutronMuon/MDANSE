@@ -25,11 +25,11 @@ from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 
 
-class BulkInfrared(IJob):
-    """Calculates the infrared spectrum of a system of molecules.
+class InfraredBulk(IJob):
+    """Calculates the infrared spectrum of a system bulk system.
 
     The infrared spectrum is calculated as the autocorrelation of the derivative
-    the molecular dipole moments.
+    the dipole moments.
 
     This analysis requires molecules to be defined in the system,
     and partial charges to be set to non-zero values.
@@ -37,7 +37,7 @@ class BulkInfrared(IJob):
 
     enabled = True
 
-    label = "BulkInfrared Spectrum"
+    label = "Infrared Spectrum Bulk"
 
     category = (
         "Analysis",
@@ -64,6 +64,13 @@ class BulkInfrared(IJob):
         {
             "label": "d/dt dipole numerical derivative",
             "dependencies": {"frames": "frames"},
+        },
+    )
+    settings["distance_cutoff"] = (
+        "DistCutoffConfigurator",
+        {
+            "label": "cutoff (nm)",
+            "dependencies": {"trajectory": "trajectory"},
         },
     )
     settings["atom_charges"] = (
@@ -196,9 +203,9 @@ class BulkInfrared(IJob):
         diff_frac -= np.round(diff_frac)
         diff_coords = diff_frac @ cell
         r = np.sqrt(np.sum(diff_coords * diff_coords, axis=1))
-        # TODO add configurator for cutoff
+
         # smaller cutoffs reproduce molecular calculation
-        cutoff = r < 0.15
+        cutoff = r < self.configuration["distance_cutoff"]["value"]
 
         ddipole_j = np.zeros((number, 3))
         for j, frame_index in enumerate(
@@ -235,22 +242,20 @@ class BulkInfrared(IJob):
         return index, ddipole_ij.T[0]
 
     def combine(self, index: int, x: np.ndarray):
-        """Add the d/dt dipole auto-correlation function of molecule
-        to the results.
+        """Add the d/dt dipole correlation function to the results.
 
         Parameters
         ----------
         index : int
             The index of the molecule.
         x : np.ndarray
-            d/dt dipole auto-correlation function for a molecule
+            d/dt dipole correlation function
         """
         self._outputData["ddacf/ddacf"] += x
 
     def finalize(self):
-        """Average the d/dt dipole auto-correlation function over the
-        number of molecules in the trajectory, fourier transform to
-        get the IR spectrum and save the results.
+        """Average the d/dt dipole auto-correlation function and
+        fourier transform to get the IR spectrum and save the results.
         """
         self._outputData["ddacf/ddacf"] /= self.numberOfSteps
         self._outputData["ir/ir"][:] = get_spectrum(

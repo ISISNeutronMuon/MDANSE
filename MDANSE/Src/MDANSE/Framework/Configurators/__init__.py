@@ -35,6 +35,9 @@ from .CorrelationFramesConfigurator import (
 from .DerivativeOrderConfigurator import (
     DerivativeOrderConfigurator as DerivativeOrderConfigurator,
 )
+from .DistCutoffConfigurator import (
+    DistCutoffConfigurator as DistCutoffConfigurator,
+)
 from .DistHistCutoffConfigurator import (
     DistHistCutoffConfigurator as DistHistCutoffConfigurator,
 )

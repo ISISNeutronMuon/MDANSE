@@ -17,15 +17,13 @@ from __future__ import annotations
 
 from math import floor
 
-from .RangeWidget import RangeWidget
+from .FloatWidget import FloatWidget
 
 
-class DistHistCutoffWidget(RangeWidget):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class DistCutoffWidget(FloatWidget):
 
-    def setup_fields(self, *args, **kwargs):
-        start = 0.0
-        end = floor(self._configurator.get_max_cutoff() * 100) / 100
-        step = 0.01
-        super().setup_fields(*args, default=(start, end, step), **kwargs)
+    def setup_field(self, *args, **kwargs):
+        mini = 0.0
+        default = floor(self._configurator.get_max_cutoff() * 100) / 100
+        maxi = default
+        super().setup_field(mini=mini, default=default, maxi=maxi)

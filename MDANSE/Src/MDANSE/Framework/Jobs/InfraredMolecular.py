@@ -25,7 +25,7 @@ from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 
 
-class Infrared(IJob):
+class InfraredMolecular(IJob):
     """Calculates the infrared spectrum of a system of molecules.
 
     The infrared spectrum is calculated as the autocorrelation of the derivative
@@ -37,7 +37,7 @@ class Infrared(IJob):
 
     enabled = True
 
-    label = "Infrared Spectrum"
+    label = "Infrared Spectrum Molecular"
 
     category = (
         "Analysis",

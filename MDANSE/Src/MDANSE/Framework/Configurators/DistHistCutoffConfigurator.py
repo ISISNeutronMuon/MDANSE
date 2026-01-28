@@ -1,11 +1,26 @@
+#    This file is part of MDANSE.
+#
+#    MDANSE_GUI is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
 from __future__ import annotations
 
 from math import floor
 
-import numpy as np
-
+from .DistCutoffConfigurator import get_largest_cutoff
 from .IConfigurator import PredictionSettings
 from .RangeConfigurator import RangeConfigurator
+
 
 
 class DistHistCutoffConfigurator(RangeConfigurator):
@@ -34,7 +49,7 @@ class DistHistCutoffConfigurator(RangeConfigurator):
         if not self.update_needed(value):
             return
 
-        if self._max_value and value[1] > floor(self.get_largest_cutoff() * 100) / 100:
+        if self._max_value and value[1] > floor(self.get_max_cutoff() * 100) / 100:
             self.error_status = (
                 "The cutoff distance goes into the simulation box periodic images."
             )
@@ -42,47 +57,7 @@ class DistHistCutoffConfigurator(RangeConfigurator):
 
         super().configure(value)
 
-    def get_largest_cutoff(self) -> float:
-        """Get the largest cutoff value for the given trajectories
-        unit cells.
-
-        Returns
-        -------
-        float
-            The maximum cutoff for the distance histogram job.
-        """
-        traj_config = self.configurable[self.dependencies["trajectory"]]["instance"]
-        try:
-            trajectory_array = np.array(
-                [
-                    traj_config.unit_cell(frame)._unit_cell
-                    for frame in range(len(traj_config))
-                ]
-            )
-        except Exception:
-            return np.linalg.norm(traj_config.min_span)
-        else:
-            if np.allclose(trajectory_array, 0.0):
-                return np.linalg.norm(traj_config.min_span)
-            else:
-                # calculated the radius of the largest sphere that can
-                # fit into the unit cell
-                min_d = np.min(trajectory_array, axis=0)
-                vec_a, vec_b, vec_c = min_d
-
-                cross_bc = np.cross(vec_b, vec_c)
-                cross_ca = np.cross(vec_c, vec_a)
-                cross_ab = np.cross(vec_a, vec_b)
-
-                if (
-                    np.allclose(cross_bc, 0.0)
-                    or np.allclose(cross_ca, 0.0)
-                    or np.allclose(cross_ab, 0.0)
-                ):
-                    raise ValueError("Trajectory contains invalid unit cell.")
-
-                h_1 = abs(np.dot(vec_a, cross_bc)) / np.linalg.norm(cross_bc)
-                h_2 = abs(np.dot(vec_b, cross_ca)) / np.linalg.norm(cross_ca)
-                h_3 = abs(np.dot(vec_c, cross_ab)) / np.linalg.norm(cross_ab)
-
-                return 0.5 * min(h_1, h_2, h_3)
+    def get_max_cutoff(self):
+        traj_config = self.configurable[self.dependencies["trajectory"]][
+            "instance"]
+        return get_largest_cutoff(traj_config)
