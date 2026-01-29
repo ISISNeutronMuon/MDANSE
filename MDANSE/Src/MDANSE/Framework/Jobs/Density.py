@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import numpy as np
+from more_itertools import ilen
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
@@ -61,9 +62,15 @@ class Density(IJob):
 
         self._n_frames = self.numberOfSteps
 
-        self._n_atoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.number_of_atoms
+        real_atoms = {
+            at_symbol
+            for at_symbol in self.trajectory.unique_elements
+            if not self.trajectory.get_atom_property(at_symbol, "dummy")
+        }
+
+        self._n_atoms = ilen(
+            symbol for symbol in self.trajectory.atom_types if symbol in real_atoms
+        )
 
         self._symbols = self.configuration["trajectory"][
             "instance"
