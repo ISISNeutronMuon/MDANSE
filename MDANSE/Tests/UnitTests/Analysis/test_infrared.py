@@ -83,7 +83,7 @@ def test_ir_analysis(generate_benchmarks, tmp_path):
         "molecule_name": "C1_O2",
     }
 
-    job = IJob.create("Infrared")
+    job = IJob.create("InfraredMolecular")
     job.run(parameters, status=True)
 
     if generate_benchmarks:
