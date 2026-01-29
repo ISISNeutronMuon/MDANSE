@@ -246,6 +246,15 @@ class Trajectory:
         if self._selection:
             return set(always_iterable(self.selection_getter(self.atom_types)))
         return set(always_iterable(self.atom_types))
+    
+    @property
+    def non_dummy_elements(self) -> set[str]:
+        """Set of chemical elements which are not dummy atoms."""
+        return {
+            at_symbol
+            for at_symbol in self.unique_elements
+            if not self.get_atom_property(at_symbol, "dummy")
+        }
 
     @property
     def unique_names(self) -> set[str]:

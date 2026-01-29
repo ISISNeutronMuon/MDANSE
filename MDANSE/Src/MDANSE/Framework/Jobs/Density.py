@@ -62,14 +62,10 @@ class Density(IJob):
 
         self._n_frames = self.numberOfSteps
 
-        real_atoms = {
-            at_symbol
-            for at_symbol in self.trajectory.unique_elements
-            if not self.trajectory.get_atom_property(at_symbol, "dummy")
-        }
-
         self._n_atoms = ilen(
-            symbol for symbol in self.trajectory.atom_types if symbol in real_atoms
+            symbol
+            for symbol in self.trajectory.atom_types
+            if symbol in self.trajectory.non_dummy_elements
         )
 
         self._symbols = self.configuration["trajectory"][

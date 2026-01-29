@@ -69,15 +69,10 @@ class Temperature(IJob):
         """
         super().initialize()
 
-        real_atoms = {
-            at_symbol
-            for at_symbol in self.trajectory.unique_elements
-            if not self.trajectory.get_atom_property(at_symbol, "dummy")
-        }
         self.indices = [
             index
             for index, symbol in enumerate(self.trajectory.atom_types)
-            if symbol in real_atoms
+            if symbol in self.trajectory.non_dummy_elements
         ]
 
         self.numberOfSteps = len(self.indices)
