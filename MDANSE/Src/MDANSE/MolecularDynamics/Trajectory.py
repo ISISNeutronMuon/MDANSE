@@ -71,7 +71,7 @@ def trajectory_summary(traj: Trajectory):
         if len(time_axis) < 1:
             timeline = "N/A\n"
         else:
-            timeline = f"[{summarise_array(time_axis, maxlen=5)}]\n"
+            timeline = f"[{summarise_array(time_axis, maxlen=5, arr_fmt='5.4f')}]\n"
 
     val.append("Path:")
     val.append(f"{traj.filename}\n")

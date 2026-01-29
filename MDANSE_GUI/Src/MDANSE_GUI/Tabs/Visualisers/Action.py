@@ -422,7 +422,7 @@ class Action(QWidget):
             for label, old_array, unit in axes:
                 scale_factor, new_unit = self._parent_tab.conversion_factor(unit)
                 array = np.array(old_array) * scale_factor
-                text += f"<p>{label}: [{summarise_array(array)}] ({new_unit})</p>"
+                text += f"<p>{label}: [{summarise_array(array, arr_fmt='5.3f')}] ({new_unit})</p>"
             self._preview_box.setText(text)
 
     @Slot()
