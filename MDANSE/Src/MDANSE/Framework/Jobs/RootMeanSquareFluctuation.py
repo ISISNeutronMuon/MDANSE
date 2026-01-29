@@ -87,14 +87,17 @@ class RootMeanSquareFluctuation(IJob):
             main_result=True,
         )
 
-        self.group_indices = {}
         if self.group_molecules:
-            for grp in self.trajectory.group_lookup:
-                self.group_indices[grp] = {
+            self.group_indices = {
+                grp: {
                     job_i: at_i
                     for job_i, at_i in enumerate(self.trajectory.atom_indices)
                     if f"<{grp}>" in self._names[job_i]
                 }
+                for grp in self.trajectory.group_lookup
+             }
+         else:
+             self.group_indices = {}
 
         for name in self.trajectory.unique_names:
             idxs = [
