@@ -97,9 +97,9 @@ class RootMeanSquareFluctuation(IJob):
                     if f"<{grp}>" in self._names[job_i]
                 }
                 for grp in self.trajectory.group_lookup
-             }
-         else:
-             self.group_indices = {}
+            }
+        else:
+            self.group_indices = {}
 
         for name in self.trajectory.unique_names:
             idxs = [
