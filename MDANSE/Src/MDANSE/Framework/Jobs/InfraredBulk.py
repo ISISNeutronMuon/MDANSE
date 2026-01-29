@@ -165,28 +165,41 @@ class InfraredBulk(IJob):
         first_frame = self.configuration["frames"]["first"]
         step_frame = self.configuration["frames"]["step"]
         last_frame = self.configuration["frames"]["last"]
-        number = self.configuration["frames"]["number"]
+        n_frames = self.configuration["frames"]["number"]
         n_atms = self.trajectory.get_total_natoms()
 
-        cutoff = np.zeros(n_atms, dtype=bool)
-        ddipole_i = np.zeros((number, 3))
-        for i, frame_index in enumerate(
-            range(
-                first_frame,
-                last_frame + 1,
-                step_frame,
+        series_i = self.trajectory.read_atomic_trajectory(
+            index,
+            first=first_frame,
+            last=last_frame + 1,
+            step=step_frame,
+        )
+        try:
+            q_i = self.configuration["atom_charges"]["charges"][index]
+        except KeyError:
+            q_i = np.array(
+                [
+                    self.trajectory.charges(t)[index]
+                    for t in range(first_frame, last_frame + 1, step_frame)
+                ]
             )
+        ddipole_i = q_i * series_i
+
+        for axis in range(3):
+            ddipole_i[:, axis] = differentiate(
+                ddipole_i[:, axis],
+                order=self.configuration["derivative_order"]["value"],
+                dt=step_frame,
+            )
+
+        cutoff = np.zeros(n_atms, dtype=bool)
+        for frame_index in range(
+            first_frame,
+            last_frame + 1,
+            step_frame,
         ):
             configuration = self.trajectory.configuration(frame_index)
-            contiguous_configuration = configuration.contiguous_configuration()
-            charges = self.trajectory.charges(frame_index)
-            try:
-                q_i = self.configuration["atom_charges"]["charges"][index]
-            except KeyError:
-                q_i = charges[index]
-            ddipole_i[i] = q_i * (contiguous_configuration["coordinates"][index, :])
-
-            coords = contiguous_configuration["coordinates"]
+            coords = configuration["coordinates"]
             coords_ref = coords[index]
             cell = configuration.unit_cell.direct
             inverse_cell = configuration.unit_cell.inverse
@@ -202,34 +215,27 @@ class InfraredBulk(IJob):
                 cutoff, r < self.configuration["distance_cutoff"]["value"]
             )
 
-        for axis in range(3):
-            ddipole_i[:, axis] = differentiate(
-                ddipole_i[:, axis],
-                order=self.configuration["derivative_order"]["value"],
-                dt=step_frame,
-            )
+        ddipole_j = np.zeros((n_frames, 3))
+        for j in range(n_atms):
+            if not cutoff[j]:
+                continue
 
-        ddipole_j = np.zeros((number, 3))
-        for j, frame_index in enumerate(
-            range(
-                first_frame,
-                last_frame + 1,
-                step_frame,
+            series_j = self.trajectory.read_atomic_trajectory(
+                j,
+                first=first_frame,
+                last=last_frame + 1,
+                step=step_frame,
             )
-        ):
-            configuration = self.trajectory.configuration(frame_index)
             try:
-                charges = np.array(
+                q_j = self.configuration["atom_charges"]["charges"][j]
+            except KeyError:
+                q_j = np.array(
                     [
-                        self.configuration["atom_charges"]["charges"][i]
-                        for i in range(n_atms)
+                        self.trajectory.charges(t)[j]
+                        for t in range(first_frame, last_frame + 1, step_frame)
                     ]
                 )
-            except KeyError:
-                charges = np.array(self.trajectory.charges(frame_index))
-            contiguous_configuration = configuration.contiguous_configuration()
-            coords = contiguous_configuration["coordinates"]
-            ddipole_j[j] = np.sum(charges[cutoff, np.newaxis] * coords[cutoff], axis=0)
+            ddipole_j += q_j * series_j
 
         for axis in range(3):
             ddipole_j[:, axis] = differentiate(
