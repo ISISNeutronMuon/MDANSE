@@ -70,9 +70,8 @@ class RootMeanSquareFluctuation(IJob):
         self.group_molecules = self.configuration["grouping_level"]["value"] != "atom"
         self.ele_idxs = {}
 
-        self._names = [
-            self.trajectory.atom_names[index] for index in self.trajectory.atom_indices
-        ]
+        all_names = self.trajectory.atom_names
+        self._names = [all_names[index] for index in self.trajectory.atom_indices]
 
         self._outputData.add(
             "rmsf/axes/indices/all",
