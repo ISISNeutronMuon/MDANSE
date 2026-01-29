@@ -64,7 +64,13 @@ class TrajectoryEditor(IJob):
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {
+            "dependencies": {"trajectory": "trajectory"},
+            "default": """\
+{
+   "0": {"function_name": "select_all", "operation_type": "union"}
+}""",
+        },
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",

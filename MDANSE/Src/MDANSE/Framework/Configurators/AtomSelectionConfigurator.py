@@ -35,7 +35,10 @@ class AtomSelectionConfigurator(IConfigurator):
 
     """
 
-    _default = "{}"
+    _default = """{
+        "0": {"function_name": "select_all", "operation_type": "union"},
+        "1": {"function_name": "select_dummy", "operation_type": "difference"}
+    }"""
 
     def configure(self, value: str) -> None:
         """Configure an input value.

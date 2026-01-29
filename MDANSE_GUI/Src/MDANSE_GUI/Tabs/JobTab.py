@@ -184,6 +184,7 @@ class JobTab(GeneralTab):
             # we only update the widget if a job is selected from the
             # actions tree
             self.action.apply_instrument()
+            self.action.allow_execution()
 
     @Slot(int)
     def update_action_after_instrument_change(self, index: int):
