@@ -169,11 +169,10 @@ class TrajectoryFilter(IJob):
             filter_config["attributes"],
         )
 
-        filter_attributes.setdefault(
-            "n_steps", self.configuration["trajectory"]["length"]
-        )
-        filter_attributes.setdefault(
-            "time_step_ps", self.configuration["trajectory"]["md_time_step"]
+        update_frames(
+            filter_attributes,
+            self.configuration["frames"]["n_frames"],
+            self.configuration["frames"]["time_step"],
         )
 
         filter = filter_class(**filter_attributes)
@@ -210,6 +209,7 @@ class TrajectoryFilter(IJob):
         # Write trajectory
         write_filtered_trajectory(
             parent_configuration=self.configuration,
+            nsteps=filter_attributes["n_steps"],
             filtered_coordinates=filtered_coords,
             output_trajectory=self._output_trajectory,
         )
@@ -233,6 +233,11 @@ class TrajectoryFilter(IJob):
         outputFile.close()
 
         super().finalize()
+
+
+def update_frames(attributes: dict, nsteps: int, step: np.float64) -> None:
+    """ """
+    attributes.update({"n_steps": nsteps, "time_step_ps": step})
 
 
 def apply(filter: Filter, trajectories: np.ndarray, apply_offsets: bool) -> np.ndarray:
@@ -270,6 +275,7 @@ def apply(filter: Filter, trajectories: np.ndarray, apply_offsets: bool) -> np.n
 
 def write_filtered_trajectory(
     parent_configuration: _Configuration,
+    nsteps: int,
     filtered_coordinates: np.ndarray,
     output_trajectory: TrajectoryWriter,
 ) -> None:
@@ -279,13 +285,14 @@ def write_filtered_trajectory(
     ----------
     parent_configuration : _Configuration
         Parent configuration.
+    nsteps : int
+        Number of simulation steps.
     filtered_coordinates : np.ndarray
         Coordinates of the filtered atomic trajectories.
     output_trajectory : TrajectoryWriter
         Trajectory writer object to write the output trajectory.
 
     """
-    nsteps = filtered_coordinates.shape[2]
     time = parent_configuration["frames"]["time"]
     dt = time[1] - time[0]
     for index in range(nsteps):
