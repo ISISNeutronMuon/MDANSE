@@ -168,7 +168,7 @@ class PartialChargeConfigurator(IConfigurator):
                 try:
                     charge = float(k)
                 except (TypeError, ValueError):
-                    self.error_status = f"Wrong charge {k} in the charge dictionary"
+                    self.error_status = f"Wrong charge {k} in the charge dictionary."
                     return
                 else:
                     for index in v:

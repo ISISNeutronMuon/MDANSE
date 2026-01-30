@@ -75,11 +75,11 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
         try:
             self.instance = self.parser(filepath)
         except Exception as e:
-            self.error_status = f"File parsing error {e}: {traceback.format_exc()}"
+            self.error_status = f"File parsing error {e}: {traceback.format_exc()}."
             return
 
         if not self.labels:
-            self.error_status = "Unable to generate atom labels"
+            self.error_status = "Unable to generate atom labels."
             return
 
     @property

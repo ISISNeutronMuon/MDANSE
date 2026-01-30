@@ -54,7 +54,9 @@ class SingleChoiceConfigurator(IConfigurator):
         try:
             self["index"] = self.choices.index(value)
         except ValueError:
-            self.error_status = f"{value} item is not a valid choice"
+            self.error_status = (
+                f"{value} item is not one of the valid choices: {self.choices}."
+            )
             return
         else:
             self["value"] = value

@@ -60,15 +60,15 @@ class DerivativeOrderConfigurator(IntegerConfigurator):
 
         if value <= 0 or value > 5:
             self.error_status = (
-                "Use an interpolation order less than or equal to zero or "
-                "greater than 5 is not implemented."
+                "Interpolation orders less than or equal to zero or "
+                "greater than 5 are not implemented."
             )
             return
 
         number = frames_configurator["number"]
         if number < value + 1:
             self.error_status = (
-                f"Not enough MD frames to apply derivatives of order {value}"
+                f"Not enough MD frames to apply derivatives of order {value}."
             )
             return
 

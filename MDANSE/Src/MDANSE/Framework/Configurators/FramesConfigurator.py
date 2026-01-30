@@ -63,7 +63,7 @@ class FramesConfigurator(RangeConfigurator):
         try:
             num_values = [int(x) for x in value[0:3]]
         except (ValueError, TypeError):
-            self.error_status = "Input values must castable to int"
+            self.error_status = "Input values must castable to int."
             return
 
         # special case for negative last step option
@@ -74,17 +74,17 @@ class FramesConfigurator(RangeConfigurator):
 
         # check first setting
         if first < 0 or first > n_steps - 1:
-            self.error_status = f"First frame needs to be between 0 and {n_steps - 1}"
+            self.error_status = f"First frame needs to be between 0 and {n_steps - 1}."
             return
 
         # check last setting
         if last <= 0 or last > n_steps or last <= first:
-            self.error_status = f"Last frame needs to be between 1 and {n_steps} and greater than the first frame"
+            self.error_status = f"Last frame needs to be between 1 and {n_steps} and greater than the first frame."
             return
 
         # check step setting
         if step < 1:
-            self.error_status = f"Cannot create a range with a step: {step}"
+            self.error_status = f"Cannot create a range with a step: {step}."
             return
 
         self._mini = 0

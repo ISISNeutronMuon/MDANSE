@@ -87,7 +87,7 @@ class RangeConfigurator(IConfigurator):
         first, last, step = value
 
         if step == 0:
-            self.error_status = "Step of a range cannot be 0"
+            self.error_status = "Step of a range cannot be 0."
             return
 
         if self.includeLast:
@@ -110,7 +110,7 @@ class RangeConfigurator(IConfigurator):
             value = value[value < self.maxi]
 
         if value.size == 0:
-            self.error_status = "the input range is empty."
+            self.error_status = "The input range is empty."
             return
 
         if self.sort:

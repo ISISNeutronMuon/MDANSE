@@ -57,7 +57,7 @@ class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
 
         topology_configurator = self.configurable[self.dependencies["input_file"]]
         if not topology_configurator.valid:
-            self.error_status = "Requires valid topology file."
+            self.error_status = "Requires a valid topology file."
             return
 
         try:

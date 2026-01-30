@@ -59,7 +59,7 @@ class MultipleChoicesConfigurator(IConfigurator):
         self._original_input = value
 
         if self.nChoices is not None and len(value) != self.nChoices:
-            self.error_status = "invalid number of choices."
+            self.error_status = "Invalid number of choices."
             return
 
         indices = []
@@ -67,7 +67,7 @@ class MultipleChoicesConfigurator(IConfigurator):
             indices = [self.choices.index(v) for v in value]
         except ValueError:
             self.error_status = (
-                f"{', '.join(set(value) - set(self.choices))} are not valid choices"
+                f"{', '.join(set(value) - set(self.choices))} are not valid choices."
             )
             return
 

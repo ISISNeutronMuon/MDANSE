@@ -68,19 +68,19 @@ class OutputStructureConfigurator(IConfigurator):
         root = Path(root)
 
         if logs not in self.log_options:
-            self.error_status = "log level option not recognised"
+            self.error_status = f"Log level option {logs} not recognised."
             return
 
         if not root:
-            self.error_status = "empty root name for the output file."
+            self.error_status = "Empty root name for the output file."
             return
 
         if not PLATFORM.is_file_writable(root):
-            self.error_status = f"the file {root} is not writable"
+            self.error_status = f"The file {root} is not writable."
             return
 
         if format not in self.formats:
-            self.error_status = "Output format is not supported"
+            self.error_status = f"Output format {format} is not supported."
             return
 
         self["root"] = root

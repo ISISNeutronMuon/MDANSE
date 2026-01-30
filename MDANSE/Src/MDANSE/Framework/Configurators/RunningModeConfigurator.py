@@ -61,7 +61,7 @@ class RunningModeConfigurator(IConfigurator):
             if slots < 0:
                 slots = min(abs(slots), maxSlots)
             elif slots == 0 or slots > maxSlots:
-                self.error_status = "invalid number of allocated slots."
+                self.error_status = f"Invalid number of allocated slots: {slots}."
                 return
 
         self["mode"] = mode

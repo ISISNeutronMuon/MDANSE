@@ -115,7 +115,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
             return
 
         if self.test_values_for_nan(value):
-            self.error_status = f"Property {value} is NaN for at leas one atom type."
+            self.error_status = f"Property {value} is NaN for at least one atom type."
             return
 
         self["property"] = value

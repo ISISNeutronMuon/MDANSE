@@ -70,7 +70,7 @@ class MDAnalysisTimeStepConfigurator(FloatConfigurator):
                     )
                     return
             else:
-                self.error_status = "Unable to determine a time step from MDAnalysis"
+                self.error_status = "Unable to determine a time step from MDAnalysis."
                 return
 
         super().configure(value)

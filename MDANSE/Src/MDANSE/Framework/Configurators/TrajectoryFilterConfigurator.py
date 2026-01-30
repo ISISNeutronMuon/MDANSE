@@ -40,6 +40,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
     _default_filter = DEFAULT_FILTER
 
     _settings = filter_default_attributes()
+    _expected_keys = {"filter", "attributes"}
 
     @classmethod
     def get_default(cls) -> str:
@@ -72,11 +73,11 @@ class TrajectoryFilterConfigurator(IConfigurator):
         try:
             dict_value = json.loads(value)
 
-            if not {"filter", "attributes"} <= dict_value.keys():
-                self.error_status = f"The dictionary \n{dict_value}\n does not contain the expected keys"
+            if not self._expected_keys <= dict_value.keys():
+                self.error_status = f"The dictionary \n{dict_value}\n does not contain the expected keys {self._expected_keys}."
 
         except (TypeError, ValueError):
-            self.error_status = f"Value \n{value}\n in {self} is not of correct format (expected JSON string)"
+            self.error_status = f"Value \n{value}\n in {self} is not of correct format (expected JSON string)."
 
         self.error_status = "OK"
         self["value"] = self._settings

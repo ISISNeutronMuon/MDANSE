@@ -58,7 +58,7 @@ class BooleanConfigurator(IConfigurator):
         self._original_input = value
 
         if value not in self._shortCuts:
-            self.error_status = "Input is not recognised as a true/false value"
+            self.error_status = "Input is not recognised as a true/false value."
         else:
             self.error_status = "OK"
             self["value"] = self._shortCuts[value]
