@@ -19,12 +19,12 @@ import codecs
 import io
 import tarfile
 import time
-from importlib import metadata
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+import MDANSE
 from MDANSE import PLATFORM
 from MDANSE.Framework.Formats.IFormat import IFormat
 
@@ -90,7 +90,7 @@ class TextFormat(IFormat):
                 real_buffer = io.BytesIO()
                 tempStr = codecs.getwriter("utf-8")(real_buffer)
                 tempStr.write(f"run type: {run_instance.__class__.__name__}\n")
-                tempStr.write(f"MDANSE version: {metadata.version('MDANSE')}\n")
+                tempStr.write(f"MDANSE version: {MDANSE.__version__}\n")
                 for key, value in inputs.items():
                     tempStr.write(f"parameters[{key}] = {value}\n")
                 tempStr.write("\n\n")

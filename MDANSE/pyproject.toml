@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools", "numpy", "wheel"]
+requires = ["setuptools", "numpy", "wheel", "setuptools-git-versioning>=3.0,<4"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE"
-version = "2.0.1"
 description = 'MDANSE Core package - Molecular Dynamics trajectory handling and analysis code'
+dynamic = ["version"]
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
@@ -42,6 +42,7 @@ dependencies = [
     "networkx",
     "more-itertools",
     "typing_extensions",
+    "setuptools-git-versioning>=3.0,<4",
 ]
 
 [dependency-groups]
@@ -68,6 +69,10 @@ include-package-data = true
 MDANSE = ["Chemistry/*.json",
           "Chemistry/*.csv",
           "Framework/*.json"]
+
+[tool.setuptools-git-versioning]
+enabled = true
+starting_version = "2.0.1"
 
 [project.scripts]
 mdanse = "MDANSE.Scripts.mdanse:main"

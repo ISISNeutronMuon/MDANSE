@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools", "numpy", "wheel"]
+requires = ["setuptools", "numpy", "wheel", "setuptools-git-versioning>=3.0,<4"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "MDANSE_GUI"
-version = "2.0.1"
 description = 'MDANSE GUI package - the graphical interface for MDANSE'
+dynamic = ["version"]
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
@@ -39,7 +39,8 @@ dependencies = [
     "vtk>=9.4.0",
     "PyQt6",
     "PyYAML",
-    "tomlkit"
+    "tomlkit",
+    "setuptools-git-versioning>=3.0,<4",
 ]
 
 [dependency-groups]
@@ -62,6 +63,10 @@ include-package-data = true
 [tool.setuptools.package-data]
 MDANSE_GUI = ["Icons/*.png", "Icons/*.ico", "Icons/*.stl",
               "Resources/*.toml", "Resources/*.png"]
+
+[tool.setuptools-git-versioning]
+enabled = true
+starting_version = "2.0.1"
 
 [project.gui-scripts]
 mdanse_elements_database = "MDANSE_GUI.Scripts.mdanse_elements_database:main"

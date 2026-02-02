@@ -16,12 +16,12 @@
 from __future__ import annotations
 
 import json
-from importlib import metadata
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import h5py
 
+import MDANSE
 from MDANSE import PLATFORM
 from MDANSE.Framework.Formats.IFormat import IFormat
 from MDANSE.MLogging import LOG
@@ -113,7 +113,7 @@ def write_metadata(job: IJob, output_file: h5py.File):
     meta.create_dataset(
         "MDANSE_version",
         (1,),
-        data=str(metadata.version("MDANSE")),
+        data=MDANSE.__version__,
         dtype=string_dt,
     )
 
@@ -210,7 +210,7 @@ class HDFFormat(IFormat):
             meta.create_dataset(
                 "MDANSE_version",
                 (1,),
-                data=str(metadata.version("MDANSE")),
+                data=MDANSE.__version__,
                 dtype=string_dt,
             )
 
