@@ -52,8 +52,8 @@ class FloatWidget(WidgetBase):
         else:
             field = QLineEdit(self._base)
             validator = QDoubleValidator(field)
-            minval = mini if mini is not None else float(self._configurator.mini)
-            maxval = maxi if maxi is not None else float(self._configurator.maxi)
+            minval = mini if mini is not None else self._configurator.mini
+            maxval = maxi if maxi is not None else self._configurator.maxi
             if minval is not None:
                 validator.setBottom(minval)
             if maxval is not None:
