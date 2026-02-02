@@ -64,42 +64,13 @@ class TrajectoryFilter(IJob):
         "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["instrument_resolution"] = (
-        "InstrumentResolutionConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
-    )
-    settings["projection"] = (
-        "ProjectionConfigurator",
-        {},
+    settings["pps_input_file"] = (
+        "HDFInputFileConfigurator",
+        {"label": "MDANSE Position Power Spectrum", "default": "pps.mda"},
     )
     settings["trajectory_filter"] = (
         "TrajectoryFilterConfigurator",
         {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory"},
-            "default": """\
-{
-   "0": {"function_name": "select_all", "operation_type": "union"}
-}""",
-        },
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {
-            "default": "atomic_weight",
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            },
-        },
     )
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
