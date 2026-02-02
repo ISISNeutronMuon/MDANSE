@@ -15,14 +15,12 @@
 #
 from __future__ import annotations
 
-from math import floor
-
 from .FloatWidget import FloatWidget
 
 
 class DistCutoffWidget(FloatWidget):
     def setup_field(self, *args, **kwargs):
         mini = 0.0
-        default = floor(self._configurator.get_max_cutoff() * 100) / 100
+        default = round(self._configurator.get_max_cutoff(), 2)
         maxi = default
         super().setup_field(mini=mini, default=default, maxi=maxi)

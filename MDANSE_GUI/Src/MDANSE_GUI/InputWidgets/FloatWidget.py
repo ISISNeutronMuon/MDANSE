@@ -26,9 +26,18 @@ class FloatWidget(WidgetBase):
         super().__init__(*args, **kwargs)
         self.setup_field(*args, **kwargs)
 
-    def setup_field(self, *args, **kwargs):
+    def setup_field(
+        self,
+        *args,
+        default: float | None = None,
+        mini: float | None = None,
+        maxi: float | None = None,
+        **kwargs,
+    ):
         try:
-            default_option = kwargs.get("default", float(self._configurator.default))
+            default_option = (
+                default if default is not None else float(self._configurator.default)
+            )
         except ValueError:
             default_option = 0.0
         if self._configurator.choices:
@@ -43,8 +52,8 @@ class FloatWidget(WidgetBase):
         else:
             field = QLineEdit(self._base)
             validator = QDoubleValidator(field)
-            minval = kwargs.get("mini", self._configurator.mini)
-            maxval = kwargs.get("mini", self._configurator.maxi)
+            minval = mini if mini is not None else float(self._configurator.mini)
+            maxval = maxi if maxi is not None else float(self._configurator.maxi)
             if minval is not None:
                 validator.setBottom(minval)
             if maxval is not None:
@@ -82,3 +91,7 @@ class FloatWidget(WidgetBase):
         else:
             self._empty = False
         return strval
+
+    def configure_using_default(self):
+        """Configure with the default value."""
+        self._configurator.configure(self._default_value)

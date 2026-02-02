@@ -48,7 +48,7 @@ class DistHistCutoffConfigurator(RangeConfigurator):
         if not self.update_needed(value):
             return
 
-        if self._max_value and value[1] > floor(self.get_max_cutoff() * 100) / 100:
+        if self._max_value and value[1] > round(self.get_max_cutoff(), 2):
             self.error_status = (
                 "The cutoff distance goes into the simulation box periodic images."
             )

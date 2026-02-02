@@ -70,6 +70,7 @@ class InfraredBulk(IJob):
         "DistCutoffConfigurator",
         {
             "label": "cutoff (nm)",
+            "mini": 1e-8,
             "dependencies": {"trajectory": "trajectory"},
         },
     )
@@ -176,6 +177,7 @@ class InfraredBulk(IJob):
         )
         try:
             q_i = self.configuration["atom_charges"]["charges"][index]
+            ddipole_i = q_i * series_i
         except KeyError:
             q_i = np.array(
                 [
@@ -183,7 +185,7 @@ class InfraredBulk(IJob):
                     for t in range(first_frame, last_frame + 1, step_frame)
                 ]
             )
-        ddipole_i = q_i * series_i
+            ddipole_i = q_i[:, np.newaxis] * series_i
 
         for axis in range(3):
             ddipole_i[:, axis] = differentiate(
@@ -228,6 +230,7 @@ class InfraredBulk(IJob):
             )
             try:
                 q_j = self.configuration["atom_charges"]["charges"][j]
+                ddipole_j += q_j * series_j
             except KeyError:
                 q_j = np.array(
                     [
@@ -235,7 +238,7 @@ class InfraredBulk(IJob):
                         for t in range(first_frame, last_frame + 1, step_frame)
                     ]
                 )
-            ddipole_j += q_j * series_j
+                ddipole_j += q_j[:, np.newaxis] * series_j
 
         for axis in range(3):
             ddipole_j[:, axis] = differentiate(

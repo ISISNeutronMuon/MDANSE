@@ -84,7 +84,7 @@ class DistCutoffConfigurator(FloatConfigurator):
         """
         super().configure(value)
 
-        if float(value) > floor(self.get_max_cutoff() * 100) / 100:
+        if float(value) > round(self.get_max_cutoff(), 2):
             self.error_status = (
                 "The cutoff distance goes into the simulation box periodic images."
             )
