@@ -60,7 +60,7 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
             if extension not in supported:
                 self.error_status = (
                     f"Trajectory file does not contain topology information. "
-                    f"File '{extension}' is not supported; should be one of the following: {supported}."
+                    f"File '{extension}' is not supported. Should be one of the following: {supported}."
                 )
                 return
 
