@@ -73,41 +73,6 @@ DEFAULT_SPINBOX_STEP_FLOAT = 0.1
 FLOAT_SPINBOX_DECIMALS = 8
 
 
-# class BackgroundThread(QThread):
-#     """Runs one MDANSE job and returns the requested datasets."""
-
-#     results = Signal(object)
-
-#     def __init__(
-#         self,
-#         parent,
-#         job_name: str,
-#         parameters: dict[str, str],
-#         result_keys: list[str],
-#     ):
-#         super().__init__(parent)
-#         self.job_name = job_name
-#         self.parameters = parameters
-#         self.res_keys = result_keys
-
-#     def run(self):
-#         """Run the job and emit datasets with labels in self.res_keys.
-
-#         This will be run automatically after the thread's .start() method
-#         has been called.
-#         """
-#         job = IJob.create(self.job_name)
-#         self.parameters["output_files"] = (
-#             "OUTPUT_FILENAME",
-#             ["FileInMemory"],
-#             "no logs",
-#         )
-#         job.run(self.parameters, status=True)
-#         output = job.results
-#         res_dict = {key: output[key][:] for key in self.res_keys}
-#         self.results.emit(res_dict)
-
-
 class ConstrainedDoubleSpinBox(QDoubleSpinBox):
     """A spinbox that only allows values from a specific set.
 
@@ -413,32 +378,7 @@ class FilterPreferencesGroup(QObject):
         )
         self.grid.addWidget(coeff_type_cbox, 2, 1)
 
-        # Display trajectory position power spectral attentuation for comparison
-        self.pps_label = QLabel("Show trajectory attenuation")
-        self.grid.addWidget(self.pps_label, 3, 0)
-        attenuation_checkbox = QCheckBox()
-        self.pps_checkbox = attenuation_checkbox
-        self.widgets.update({"show_attenuation": attenuation_checkbox})
-        attenuation_checkbox.setEnabled(True)
-        attenuation_checkbox.stateChanged.connect(self.collect_inputs)
-        attenuation_checkbox.setToolTip(
-            "Display trajectory power spectrum for comparison",
-        )
-        self.grid.addWidget(attenuation_checkbox, 3, 1)
-
         return self.grid
-
-    # @Slot(bool)
-    # def enable_pps(self, enable: bool):
-    #     """Allow or block another calculation of PositionPowerSpectrum.
-
-    #     The checkbox will not be possible to uncheck while the calculation
-    #     is running, and the label text will inform the user that the
-    #     calculation is in progres..
-    #     """
-    #     self.pps_checkbox.setEnabled(enable)
-    #     message = "Show trajectory attenuation" if enable else "Calculating PPS..."
-    #     self.pps_label.setText(message)
 
     @staticmethod
     def visit(widget: QWidget) -> Any:
@@ -482,10 +422,27 @@ class FilterAttenuationGroup(FilterPreferencesGroup):
 
         """
         # Attenuation form
-
-        # Load from external .mda file
+        self.grid.addWidget(QLabel("Form"), 0, 0)
+        form_cbox = self.add_combobox(
+            "form",
+            ("Gaussian", "External file"),
+            "Select form of attenuated function, either an analytic functional form or a spectrum from an existing .mda file",
+        )
+        self.grid.addWidget(form_cbox, 0, 1)
 
         # Show attenuation checkbox
+        self.show_label = QLabel("Show")
+        self.grid.addWidget(self.show_label, 1, 0)
+        attenuation_checkbox = QCheckBox()
+        self.show_checkbox = attenuation_checkbox
+        self.widgets.update({"show": attenuation_checkbox})
+        attenuation_checkbox.setEnabled(True)
+        attenuation_checkbox.setChecked(True)
+        attenuation_checkbox.stateChanged.connect(self.collect_inputs)
+        attenuation_checkbox.setToolTip(
+            "Display trajectory power spectrum for comparison",
+        )
+        self.grid.addWidget(attenuation_checkbox, 1, 1)
 
         return self.grid
 
@@ -1003,15 +960,10 @@ class FilterDesigner(QDialog):
         self.preferences_group = None
         self.attenuation_group = None
 
-        #self.pps_thread = None
-        #self.pps_last_params = {}
-        #self.pps_last_result = []
-
         self.layouts = QHBoxLayout()
 
         self.set_filter(self.configurator._default_filter.__name__)
         self.create_designer()
-        #self.preferences_group.pps_checkbox.checkStateChanged.connect(self.update_pps)
 
     def accept_time_steps(self, n_steps: int, time_step_ps: float):
         """Save the new time parameters given by the frames settings.
@@ -1159,53 +1111,6 @@ class FilterDesigner(QDialog):
         """
         return signal.resample(values, to_len) / values.max()
 
-    # @Slot(object)
-    # def accept_results(self, res_dict: dict[str, npt.NDArray[float]]):
-    #     """Store the results of the calculation inf a background thread.
-
-    #     Parameters
-    #     ----------
-    #     res_dict: dict[str, npt.NDArray[float]]
-    #         A dictionary of {dataset_name: dataset_array} pairs.
-
-    #     """
-    #     self._trajectory_power_spectrum = list(res_dict.values())
-    #     self.pps_thread = None
-    #     self.render_canvas_assets()
-
-    # @Slot()
-    # def unblock_checkbox(self):
-    #     """Make the checkbox clickable after the calculation thread has finshed."""
-    #     self.preferences_group.enable_pps(True)
-
-    # def update_pps(self):
-    #     """Run another PositionPowerSpectrum calculation.
-
-    #     It will only start a new calculation if the calculation is not running already,
-    #     there are no results so far, or the input parameters have changed.
-    #     """
-    #     if (
-    #         self.pps_thread is not None
-    #         or not self.preferences_group.pps_checkbox.isChecked()
-    #     ):
-    #         return
-    #     new_params = self.find_configuration()
-    #     if self.pps_last_params and all(
-    #         self.pps_last_params[k] == new_params[k] for k in new_params
-    #     ):
-    #         return
-    #     self.pps_last_params.update(new_params)
-    #     self.pps_thread = BackgroundThread(
-    #         None,
-    #         "PositionPowerSpectrum",
-    #         new_params,
-    #         ["pps/axes/romega", "pps/isotropic/total"],
-    #     )
-    #     self.pps_thread.results.connect(self.accept_results)
-    #     self.pps_thread.finished.connect(self.unblock_checkbox)
-    #     self.preferences_group.enable_pps(False)
-    #     self.pps_thread.start()
-
     def set_trajectory_power_spectrum(
         self,
         tr_filter: Filter,
@@ -1346,7 +1251,7 @@ class FilterDesigner(QDialog):
             QSizePolicy.Policy.Maximum,
         )
 
-        self.attenuation_groupbox = FilterAttenuationGroup(
+        self.attenuation_group = FilterAttenuationGroup(
             render_func=self.edit_attenuation,
         )
         attenuation_groupbox.setLayout(self.attenuation_group.as_grid())
@@ -1506,7 +1411,9 @@ class FilterDesigner(QDialog):
         analog_filter = self.preferences["coeff_type"] == "analog"
         db_response = self.preferences["response_units"] == "dB"
         energies = self.preferences["xaxis_units"] == "meV"
-        show_attenuation = self.preferences.get("show_attenuation", False)
+
+        # Set attenuation
+        show_attenuation = self.attenuation.get("show", False)
 
         # Preview instantiation of the selected filter
         filter_class = FILTER_MAP[self.settings["filter"]]
@@ -1514,11 +1421,7 @@ class FilterDesigner(QDialog):
 
         # Check if we are displaying trajectory power spectral attenuation alongside filter response
         ps, attenuated_ps = None, None
-        if (
-            show_attenuation
-            #and self.pps_thread is None
-            and self._trajectory_power_spectrum is not None
-        ):
+        if show_attenuation and self._trajectory_power_spectrum is not None:
             ps_axis, ps, attenuated_ps = self.set_trajectory_power_spectrum(
                 filter_preview,
             )
@@ -1718,7 +1621,6 @@ class TrajectoryFilterWidget(WidgetBase):
         if self.filter_designer.isVisible():
             self.filter_designer.close()
         else:
-            #self.filter_designer.update_pps()
             self.filter_designer.show()
 
     def get_widget_value(self) -> str:
