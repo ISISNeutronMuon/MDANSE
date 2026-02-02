@@ -25,6 +25,7 @@ import numpy as np
 import numpy.typing as npt
 from more_itertools import first
 
+import MDANSE
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Chemistry.Databases import str_to_num
@@ -112,6 +113,21 @@ class MdanseTrajectory(TrajectoryFile):
             LOG.warning(f"Could not load {filename} as h5py. \nReason: {err!s}")
             return False
 
+        if "/metadata/MDANSE_version" not in file_object:
+            LOG.warning(
+                f"{filename} does not contain version information. "
+                "This may be because it is very old or is not a valid MDANSE file. "
+                "If you run into issues, consider regenerating the file with this version of MDANSE."
+            )
+        elif (
+            ver := file_object["/metadata/MDANSE_version"][0].decode("utf-8")
+        ) != MDANSE.__version__:
+            LOG.info(
+                f"{filename} version ({ver}) differs from this version ({MDANSE.__version__}). "
+                "Despite backwards compatibilty some jobs may not run as expected. "
+                "If you run into issues, consider regenerating the file with this version of MDANSE."
+            )
+
         try:
             mdtraj = cls(filename)
             chem = ChemicalSystem(filename.stem, mdtraj)
@@ -123,10 +139,10 @@ class MdanseTrajectory(TrajectoryFile):
             )
             return False
 
-        try:
-            grp = file_object["/composition"]
-            grp.attrs["name"]
-        except KeyError:
+        if (
+            "/composition" not in file_object
+            or "name" not in file_object["/composition"].attrs
+        ):
             LOG.warning(
                 f"Could not find /composition from {filename}. MDANSE will try"
                 " to read it as H5MD next.",
