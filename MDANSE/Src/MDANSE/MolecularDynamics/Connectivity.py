@@ -178,7 +178,8 @@ class Connectivity:
                 if value > maxbonds_sq[element_pair]:
                     continue
                 bonds.append(key)
-        self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0)
+        if bonds:
+            self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0)
 
     def add_bond_information(self, new_chemical_system: ChemicalSystem):
         new_chemical_system.add_bonds(self._unique_bonds)

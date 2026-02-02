@@ -619,6 +619,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def change_atm_polydata_lines(self):
         """Calculate and/or updates the atom polydata bonds."""
+        if not len(self.not_du):
+            self._atm_polydata.SetLines(vtk.vtkCellArray())
+            return
         match self.bond_calc:
             case BondCalc.EVERY:
                 rs = self._current_coords[self.not_du]
