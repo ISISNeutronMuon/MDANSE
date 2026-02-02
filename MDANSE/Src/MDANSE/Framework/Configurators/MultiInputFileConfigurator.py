@@ -56,7 +56,7 @@ class MultiInputFileConfigurator(IConfigurator):
                     return
                 if type(values) is not list:
                     self.error_status = (
-                        "Input values should be possible to be evaluated as a list."
+                        "Not possible to evaluate input values as a list.."
                     )
                     return
             else:
@@ -68,7 +68,7 @@ class MultiInputFileConfigurator(IConfigurator):
                 return
         else:
             self.error_status = (
-                "Input values should be possible to be evaluated as a list."
+                "Not possible to evaluate input values as a list.."
             )
             return
 
