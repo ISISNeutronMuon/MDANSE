@@ -428,15 +428,14 @@ class MolecularViewer(QtWidgets.QWidget):
             return
 
         uc = self._reader.read_pbc(self._current_frame)
+        uc_points = vtk.vtkPoints()
+        uc_lines = vtk.vtkCellArray()
         if self._cell_visible and uc is not None:
             # update the unit cell
-            uc_points = vtk.vtkPoints()
             uc_points.SetNumberOfPoints(8)
             for i, v in enumerate(uc.vertices):
                 uc_points.SetPoint(i, *v)
-            self._uc_polydata.SetPoints(uc_points)
 
-            uc_lines = vtk.vtkCellArray()
             for i, j in [
                 (0, 1),
                 (0, 2),
@@ -455,7 +454,9 @@ class MolecularViewer(QtWidgets.QWidget):
                 line.GetPointIds().SetId(0, i)
                 line.GetPointIds().SetId(1, j)
                 uc_lines.InsertNextCell(line)
-            self._uc_polydata.SetLines(uc_lines)
+
+        self._uc_polydata.SetPoints(uc_points)
+        self._uc_polydata.SetLines(uc_lines)
 
     def clear_atoms(self):
         """Clears the atom actor and removes it from the renderer."""
