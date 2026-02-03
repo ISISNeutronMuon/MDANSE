@@ -74,7 +74,7 @@ any point during the trajectory. We therefore assume that the correlation functi
 
 is small when atoms :math:`i` and :math:`j` are separeted by large distances
 which may not be true for periodic systems where the motion of atoms
-may be correlated between atoms separeted by large distances.
+separeted by large distances may still be correlated.
 
 .. _infraredmolecular:
 
