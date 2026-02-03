@@ -8,8 +8,9 @@ Analysis: Other
 
 This section contains background theory for following plugins:
 
--  :ref:`infrared`
 -  :ref:`dipole-autocorrelation-function`
+-  :ref:`infraredbulk`
+-  :ref:`infraredmolecular`
 -  :ref:`density`
 -  :ref:`temperature`
 -  :ref:`center-of-masses-trajectory`
