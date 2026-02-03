@@ -45,6 +45,7 @@ class QVectorsConfigurator(IConfigurator):
         "SphericalLatticeQVectors",
         {"shells": (0.1, 5, 0.1), "width": 0.1, "n_vectors": 50, "seed": 0},
     )
+    label = "Q vector generation parameters"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

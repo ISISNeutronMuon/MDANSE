@@ -60,7 +60,7 @@ class AverageStructure(IJob):
         "BooleanConfigurator",
         {
             "default": False,
-            "label": "Fold coordinates in to box. Normally it should not be necessary.",
+            "label": "Fold coordinates into box. Normally it should not be necessary.",
         },
     )
     settings["output_units"] = (
@@ -73,7 +73,7 @@ class AverageStructure(IJob):
     )
     settings["output_files"] = (
         "OutputStructureConfigurator",
-        {"format": "vasp"},
+        {"format": "vasp", "label": "Output structure file name and format"},
     )
 
     def initialize(self):

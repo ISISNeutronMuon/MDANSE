@@ -91,13 +91,13 @@ class TrajectoryEditor(IJob):
         "OptionalFloatConfigurator",
         {
             "default": [False, 0.04],
+            "label": "Detect molecules within covalent radii plus this distance",
             "label_text": "Search for molecules (covalent radii plus the tolerance in nm)",
         },
     )
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
-            "label": "MDANSE trajectory (filename, datatype, chunk size, compression, logfile output)",
             "format": "MDTFormat",
         },
     )

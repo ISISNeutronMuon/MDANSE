@@ -312,8 +312,12 @@ class Action(QWidget):
         self.check_inputs()
 
         if self._use_preview and "preview_box" not in self._widgets_in_layout:
-            box = QGroupBox("results preview")
+            box = QGroupBox("Preview of output axes")
             self._preview_box = QLabel(self)
+            self._preview_box.setToolTip(
+                "The current input parameters will result in the output "
+                "being calculated at the following points."
+            )
             QHBoxLayout(box).addWidget(self._preview_box)
             self.layout.addWidget(box)
             self._widgets_in_layout["preview_box"] = box

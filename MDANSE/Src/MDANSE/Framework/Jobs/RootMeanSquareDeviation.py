@@ -50,7 +50,10 @@ class RootMeanSquareDeviation(IJob):
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["reference_frame"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
+    settings["reference_frame"] = (
+        "IntegerConfigurator",
+        {"mini": 0, "default": 0, "label": "Trajectory frame used as reference"},
+    )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
         {

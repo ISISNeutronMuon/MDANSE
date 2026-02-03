@@ -32,7 +32,7 @@ class MoleculeSelectionConfigurator(IConfigurator):
     """
 
     _default = ""
-    label = "Molecule selection"
+    label = "Molecule type"
 
     def __init__(self, name, choices=None, **kwargs):
         """

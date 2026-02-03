@@ -45,7 +45,6 @@ class DensityOfStates(CartesianPowerSpectrum, VelocityCorrelationFunction):
             (
                 "InterpolationOrderConfigurator",
                 {
-                    "label": "velocities",
                     "dependencies": {"trajectory": "trajectory", "frames": "frames"},
                 },
             ),

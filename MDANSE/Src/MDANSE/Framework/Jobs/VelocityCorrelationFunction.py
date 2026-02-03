@@ -44,7 +44,6 @@ class VelocityCorrelationFunction(CartesianCorrelationFunction):
             (
                 "InterpolationOrderConfigurator",
                 {
-                    "label": "velocities",
                     "dependencies": {"trajectory": "trajectory", "frames": "frames"},
                 },
             ),

@@ -101,7 +101,6 @@ class TrajectoryFilter(IJob):
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
-            "label": "MDANSE trajectory (filename, datatype, chunk size, compression, logfile output)",
             "format": "MDTFormat",
         },
     )

@@ -100,7 +100,6 @@ class ReorientationalTimeCorrelationFunction(IJob):
     settings["molecule_and_axis"] = (
         "AxisSelectionConfigurator",
         {
-            "label": "molecule name",
             "default": "",
             "dependencies": {"trajectory": "trajectory"},
         },
@@ -116,7 +115,10 @@ class ReorientationalTimeCorrelationFunction(IJob):
     )
     settings["per_axis"] = (
         "BooleanConfigurator",
-        {"label": "output contribution per axis", "default": False},
+        {
+            "label": "Decompose the results into per-axis contributions",
+            "default": False,
+        },
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})

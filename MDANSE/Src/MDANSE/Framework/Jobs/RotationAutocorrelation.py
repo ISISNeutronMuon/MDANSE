@@ -52,7 +52,6 @@ class RotationAutocorrelation(IJob):
     settings["molecule"] = (
         "MoleculeSelectionConfigurator",
         {
-            "label": "molecule name",
             "default": "",
             "dependencies": {"trajectory": "trajectory"},
         },

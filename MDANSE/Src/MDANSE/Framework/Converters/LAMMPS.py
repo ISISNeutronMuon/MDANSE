@@ -176,7 +176,7 @@ class LAMMPS(Converter):
     )
     settings["fold"] = (
         "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates in to box"},
+        {"default": False, "label": "Fold coordinates into box"},
     )
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",

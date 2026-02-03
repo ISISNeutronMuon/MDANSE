@@ -73,9 +73,16 @@ class Voronoi(IJob):
     )
     settings["pbc"] = (
         "BooleanConfigurator",
-        {"label": "apply periodic_boundary_condition", "default": True},
+        {"label": "Periodic boundary conditions are applied", "default": True},
     )
-    settings["pbc_border_size"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.2})
+    settings["pbc_border_size"] = (
+        "FloatConfigurator",
+        {
+            "mini": 0.0,
+            "default": 0.2,
+            "label": "Padding radius (nm) for periodic boundary conditions",
+        },
+    )
     settings["output_files"] = ("OutputFilesConfigurator", {})
 
     def initialize(self):

@@ -354,7 +354,6 @@ class VanHoveFunctionDistinct(IJob):
     settings["r_values"] = (
         "DistHistCutoffConfigurator",
         {
-            "label": "r values (nm)",
             "valueType": float,
             "includeLast": True,
             "mini": 0.0,

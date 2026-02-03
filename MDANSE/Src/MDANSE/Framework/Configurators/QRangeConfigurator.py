@@ -25,6 +25,8 @@ from .IConfigurator import PredictionSettings
 class QRangeConfigurator(RangeConfigurator):
     """Range configurator for Q vector generation."""
 
+    label = "Generate Q vector shells in this range"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.prediction = PredictionSettings(

@@ -389,8 +389,22 @@ class SolventAccessibleSurface(IJob):
             }
         },
     )
-    settings["n_sphere_points"] = ("IntegerConfigurator", {"mini": 1, "default": 1000})
-    settings["probe_radius"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.14})
+    settings["n_sphere_points"] = (
+        "IntegerConfigurator",
+        {
+            "mini": 1,
+            "default": 1000,
+            "label": "Number of sphere points for surface sampling",
+        },
+    )
+    settings["probe_radius"] = (
+        "FloatConfigurator",
+        {
+            "mini": 0.0,
+            "default": 0.14,
+            "label": "Radius of the probe particle for surface sampling",
+        },
+    )
     settings["radius_type"] = (
         "SingleChoiceConfigurator",
         {
@@ -403,7 +417,7 @@ class SolventAccessibleSurface(IJob):
         "BooleanConfigurator",
         {
             "default": False,
-            "label": "Run additional calculations to check which atoms outside the selection are blocking the surface of the selected atoms.",
+            "label": "Calculate which atoms are blocking the surface of the selection (expensive)",
         },
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})

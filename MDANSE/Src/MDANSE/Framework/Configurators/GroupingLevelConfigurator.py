@@ -37,7 +37,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
     PAIR_GROUP_TEMPLATE = "{}/<{}><{}>/{}"
 
     _default = "atom"
-    label = "Result grouping level"
+    label = "Grouping level"
 
     def __init__(self, name: str, choices: list[str] | None = None, **kwargs):
         """
