@@ -423,8 +423,8 @@ class PropertyWidget(QWidget):
         """Clears the property viewer."""
         self._prop_selection.clear()
         self._prop_model.clear()
-        self._atom_props = {}
-        self._raw_props = {}
-        self._frame_props = {}
-        self._trajectory_props = {}
-        self.curr_selection = {}
+        self._atom_props.clear()
+        self._raw_props.clear()
+        self._frame_props.clear()
+        self._trajectory_props.clear()
+        self.curr_selection.clear()
