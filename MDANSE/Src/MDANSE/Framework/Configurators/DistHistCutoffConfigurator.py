@@ -15,6 +15,8 @@ class DistHistCutoffConfigurator(RangeConfigurator):
     the periodic image of any atom in the system.
     """
 
+    label = "Distance histogram binning"
+
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self._max_value = kwargs.get("max_value", True)

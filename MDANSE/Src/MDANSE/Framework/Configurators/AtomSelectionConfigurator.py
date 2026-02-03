@@ -40,6 +40,8 @@ class AtomSelectionConfigurator(IConfigurator):
         "1": {"function_name": "select_dummy", "operation_type": "difference"}
     }"""
 
+    label = "Atom selection"
+
     def configure(self, value: str) -> None:
         """Configure an input value.
 

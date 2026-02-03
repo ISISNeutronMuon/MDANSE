@@ -28,6 +28,8 @@ class CorrelationFramesConfigurator(FramesConfigurator):
     together with a movable window used for correlations.
     """
 
+    label = "Frame sampling and correlation frames"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.prediction = PredictionSettings(

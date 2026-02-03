@@ -41,6 +41,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
     _settings = filter_default_attributes()
     _expected_keys = {"filter", "attributes"}
+    label = "Trajectory filter settings"
 
     @classmethod
     def get_default(cls) -> str:

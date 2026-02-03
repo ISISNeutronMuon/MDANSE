@@ -36,7 +36,6 @@ class OutputStructureConfigurator(IConfigurator):
 
     log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
     _default = ("OUTPUT_FILENAME", "vasp", "no logs")
-    _label = "Output filename and format (filename, format)"
 
     def __init__(self, name, formats=None, **kwargs):
         """

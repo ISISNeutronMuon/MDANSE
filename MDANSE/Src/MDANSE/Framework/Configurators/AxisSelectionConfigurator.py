@@ -38,6 +38,7 @@ class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
     """
 
     _default = (None, 0)
+    label = "Axis in a molecule"
 
     def configure(self, value: tuple[str, str | None, str | None]):
         """Set the molecule name, and the optional atom indices.

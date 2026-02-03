@@ -67,7 +67,7 @@ class TrajectoryFilter(IJob):
     )
     settings["projection"] = (
         "ProjectionConfigurator",
-        {"label": "project coordinates"},
+        {},
     )
     settings["trajectory_filter"] = (
         "TrajectoryFilterConfigurator",

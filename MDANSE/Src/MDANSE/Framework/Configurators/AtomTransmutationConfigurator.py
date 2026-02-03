@@ -109,6 +109,7 @@ class AtomTransmutationConfigurator(IConfigurator):
     """
 
     _default = "{}"
+    label = "Atom transmutation"
 
     def configure(self, value: str):  # noqa: PLR0911
         """Configure an input value.

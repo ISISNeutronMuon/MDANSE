@@ -34,6 +34,7 @@ class ProjectionConfigurator(IConfigurator):
     """
 
     _default = None
+    label = "Coordinate projection"
 
     def configure(self, value: tuple[str, Sequence[SupportsFloat]]):
         """

@@ -22,6 +22,8 @@ from .IConfigurator import PredictionSettings
 
 
 class GridStepConfigurator(FloatConfigurator):
+    label = "Size of the grid step"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self["grid"] = []

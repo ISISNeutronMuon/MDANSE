@@ -25,6 +25,7 @@ class DerivativeOrderConfigurator(IntegerConfigurator):
     """
 
     _default = 3
+    label = "Order of the derivative"
 
     def __init__(self, name: str, **kwargs) -> None:
         """

@@ -31,6 +31,7 @@ class RunningModeConfigurator(IConfigurator):
     availablesModes = ["single-core", "multicore"]
 
     _default = ("single-core", 1)
+    label = "Parallelisation options"
 
     def configure(self, value):
         """

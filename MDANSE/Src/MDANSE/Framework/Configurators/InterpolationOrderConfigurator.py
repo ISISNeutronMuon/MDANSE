@@ -35,6 +35,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
     """
 
     _default = 3
+    label = "Interpolation order for velocity determination"
 
     def __init__(self, name, **kwargs):
         """

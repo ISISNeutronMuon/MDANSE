@@ -49,6 +49,7 @@ class InstrumentResolutionConfigurator(IConfigurator):
     """
 
     _default = ("gaussian", {"mu": 0.0, "sigma": 10.0})
+    label = "Instrument resolution function"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

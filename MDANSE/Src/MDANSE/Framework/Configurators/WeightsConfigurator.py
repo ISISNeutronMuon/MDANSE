@@ -32,6 +32,7 @@ class WeightsConfigurator(SingleChoiceConfigurator):
     """
 
     _default = "equal"
+    label = "Property used for weighting the results"
 
     def __init__(self, name: str, **kwargs):
         """Create the configurator.

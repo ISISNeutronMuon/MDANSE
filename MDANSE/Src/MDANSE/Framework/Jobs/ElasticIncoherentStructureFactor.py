@@ -60,7 +60,7 @@ class ElasticIncoherentStructureFactor(IJob):
     )
     settings["projection"] = (
         "ProjectionConfigurator",
-        {"label": "project coordinates"},
+        {},
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",

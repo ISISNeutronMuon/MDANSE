@@ -255,6 +255,8 @@ class Action(QWidget):
             ddict = value[1]
             configurator = job_instance.configuration[key]
             if key not in self._widgets_in_layout:
+                if "label" not in ddict and hasattr(configurator, "label"):
+                    ddict["label"] = configurator.label
                 ddict.setdefault("label", key)
                 ddict["configurator"] = configurator
                 ddict["source_object"] = self._input_traj_path
@@ -274,6 +276,8 @@ class Action(QWidget):
             dtype = value[0]
             ddict = value[1]
             configurator = job_instance.configuration[key]
+            if "label" not in ddict and hasattr(configurator, "label"):
+                ddict["label"] = configurator.label
             ddict.setdefault("label", key)
             ddict["configurator"] = configurator
             ddict["source_object"] = self._input_traj_path

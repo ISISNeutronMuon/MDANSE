@@ -29,7 +29,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
     """
 
     _default = "INPUT_FILENAME.mdt"
-    _label = "MDANSE trajectory file"
+    label = "Input trajectory file"
 
     def configure_from_instance(self):
         if self._instance is None:
