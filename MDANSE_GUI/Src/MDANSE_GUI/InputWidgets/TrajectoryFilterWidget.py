@@ -408,8 +408,16 @@ class FilterAttenuationGroup(FilterPreferencesGroup):
 
     """
 
+    functional_forms = ["Gaussian"]
+
     def __init__(self, render_func: Callable):
         super().__init__(render_func)
+
+    @staticmethod
+    def make_forms() -> list[str]:
+        forms = copy.deepcopy(FilterAttenuationGroup.functional_forms)
+        forms.append("External file (.mda)")
+        return forms
 
     def as_grid(self) -> QGridLayout:
         """Populate the preferences grid layout with the filter designer preference widgets.
@@ -424,7 +432,7 @@ class FilterAttenuationGroup(FilterPreferencesGroup):
         self.grid.addWidget(QLabel("Form"), 0, 0)
         form_cbox = self.add_combobox(
             "form",
-            ("Gaussian", "External file"),
+            tuple(self.make_forms()),
             "Select form of attenuated function, either an analytic functional form or a spectrum from an existing .mda file",
         )
         self.grid.addWidget(form_cbox, 0, 1)
@@ -436,7 +444,6 @@ class FilterAttenuationGroup(FilterPreferencesGroup):
         self.show_checkbox = attenuation_checkbox
         self.widgets.update({"show": attenuation_checkbox})
         attenuation_checkbox.setEnabled(True)
-        attenuation_checkbox.setChecked(True)
         attenuation_checkbox.stateChanged.connect(self.collect_inputs)
         attenuation_checkbox.setToolTip(
             "Display trajectory power spectrum for comparison",
@@ -928,7 +935,6 @@ class FilterDesigner(QDialog):
 
     _helper_title = "Filter designer"
     _canvas_dimensions = {"width": 700, "height": 500}
-    _trajectory_power_spectrum = None
 
     def __init__(
         self,
@@ -1089,9 +1095,10 @@ class FilterDesigner(QDialog):
         """
         return signal.resample(values, to_len) / values.max()
 
-    def set_trajectory_power_spectrum(
+    def get_attenuation_power_spectrum(
         self,
         tr_filter: Filter,
+        pps_filename: str = None,
     ) -> Sequence[npt.NDArray[float]]:
         """Put curves on the same scale for the plot.
 
@@ -1115,8 +1122,12 @@ class FilterDesigner(QDialog):
         """
         response = tr_filter.freq_response
 
+        # TODO: If no filename supplied, use a Gaussian normalised to 1.0, centered on the frequency midpoint
+        freqs, normalised = None, None
+
         # Trajectory power spectrum data
-        freqs, values = copy.deepcopy(self._trajectory_power_spectrum)
+        # TODO: Read the position power spectrum frequencies and values from the current .mda file
+        freqs, values = self.read_pps_from_file(pps_filename)
 
         # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain, setting
         # custom frequency range on filter object
@@ -1391,19 +1402,23 @@ class FilterDesigner(QDialog):
         energies = self.preferences["xaxis_units"] == "meV"
 
         # Set attenuation
+        source = self.attenuation.get("form", False)
         show_attenuation = self.attenuation.get("show", False)
 
         # Preview instantiation of the selected filter
         filter_class = FILTER_MAP[self.settings["filter"]]
         filter_preview = filter_class(**self.settings["attributes"])
 
-        # Check if we are displaying trajectory power spectral attenuation alongside filter response
+        # Get comparative attenuation from either an external trajectory PPS, or from an analytical functional form
         ps, attenuated_ps = None, None
-        if show_attenuation and self._trajectory_power_spectrum is not None:
-            ps_axis, ps, attenuated_ps = self.set_trajectory_power_spectrum(
+        if show_attenuation:
+            ps_axis, ps, attenuated_ps = self.get_attenuation_power_spectrum(
                 filter_preview,
+                # TODO: fetch pps filename from configurator, if the attenuation source is not a Gaussian or other
+                pps_filename=self.fetch_pps_file() if (source not in FilterAttenuationGroup.functional_forms) else None
             )
 
+        # Get filter coefficients
         numerator, denominator = (
             filter_preview.to_digital_coeffs()
             if not analog_filter
