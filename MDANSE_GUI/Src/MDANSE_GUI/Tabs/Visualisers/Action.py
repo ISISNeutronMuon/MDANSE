@@ -505,7 +505,7 @@ class Action(QWidget):
             if labels:
                 label = self._job_instance.settings[key][1]["label"]
                 if tooltip := self._job_instance.settings[key][1].get("tooltip"):
-                    label += f", {tooltip}"
+                    label += f". {tooltip}"
                 results[key] = (self._widgets[widnum].get_widget_value(), label)
             else:
                 results[key] = self._widgets[widnum].get_widget_value()

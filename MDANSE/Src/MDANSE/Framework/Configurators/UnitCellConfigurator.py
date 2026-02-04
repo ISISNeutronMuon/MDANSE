@@ -29,7 +29,8 @@ class UnitCellConfigurator(IConfigurator):
     """
 
     _default = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], False
-    label = "Unit cell definition"
+    label = "Unit cell"
+    tooltip = "The definition of the simulation box dimensions."
 
     def __init__(self, name, **kwargs):
         """

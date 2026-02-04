@@ -41,6 +41,7 @@ class AtomSelectionConfigurator(IConfigurator):
     }"""
 
     label = "Atom selection"
+    tooltip = "The analysis can be run on a subset of atoms in the trajectory."
 
     def configure(self, value: str) -> None:
         """Configure an input value.

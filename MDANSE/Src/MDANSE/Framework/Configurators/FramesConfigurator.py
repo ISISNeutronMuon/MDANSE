@@ -27,6 +27,7 @@ class FramesConfigurator(RangeConfigurator):
     """
 
     label = "Frame sampling"
+    tooltip = "The values are: first frame, last frame, step size."
     _default = "all"
 
     def __init__(self, name, **kwargs):

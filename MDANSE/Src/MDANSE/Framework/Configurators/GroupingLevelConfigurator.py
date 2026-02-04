@@ -38,6 +38,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
 
     _default = "atom"
     label = "Grouping level"
+    tooltip = "The partial results can be separated between different molecule types."
 
     def __init__(self, name: str, choices: list[str] | None = None, **kwargs):
         """

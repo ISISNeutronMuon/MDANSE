@@ -32,6 +32,7 @@ class RunningModeConfigurator(IConfigurator):
 
     _default = ("single-core", 1)
     label = "Parallelisation options"
+    tooltip = "Run the job on a single core or parallelise over multiple cores."
 
     def configure(self, value):
         """
