@@ -1,7 +1,6 @@
 
 # This is the input file which created the following test files:
 # lammps_moly_custom.txt
-# lammps_moly_h5md.h5
 # lammps_moly_xyz.txt
 # It requires the starting structure defined in:
 # structure_moly.lammps
@@ -45,8 +44,6 @@ fix            1 all nvt temp 2500.0 2500.0 100.0 tchain 1
 # Output
 dump             dumpXYZ all xyz 1 lammps_moly_xyz.txt
 dump             dumpPos all custom 1 lammps_moly_custom.txt id type x y z
-dump h5md1 all h5md 1 lammps_moly_h5md.h5 position image velocity force
-write_dump all h5md lammps_moly_h5md.h5 file_from h5md1 species
 # dump           dumpCharge all custom 1 dump.charges id type x y z q
 
 # Run the simulation
