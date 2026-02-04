@@ -45,7 +45,11 @@ class StructureFactorFromScatteringFunction(IJob):
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["dcsf_input_file"] = (
         "HDFInputFileConfigurator",
-        {"label": "MDANSE Coherent Structure Factor", "default": "dcsf.mda"},
+        {
+            "label": "MDANSE Coherent Structure Factor",
+            "default": "dcsf.mda",
+            "tooltip": "Calculated using DynamicCoherentStructureFactor analysis",
+        },
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",

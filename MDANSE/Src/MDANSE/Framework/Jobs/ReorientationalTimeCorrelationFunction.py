@@ -107,10 +107,11 @@ class ReorientationalTimeCorrelationFunction(IJob):
     settings["polynomial_order"] = (
         "IntegerConfigurator",
         {
-            "label": "Maximum Legendre polynomial order to be used",
+            "label": "Maximum Legendre polynomial order",
             "default": 2,
             "mini": 1,
             "maxi": 6,
+            "tooltip": "All the orders up to this one will be calculated.",
         },
     )
     settings["per_axis"] = (

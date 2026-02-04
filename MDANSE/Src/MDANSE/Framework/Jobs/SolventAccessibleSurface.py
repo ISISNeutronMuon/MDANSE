@@ -394,7 +394,8 @@ class SolventAccessibleSurface(IJob):
         {
             "mini": 1,
             "default": 1000,
-            "label": "Number of sphere points for surface sampling",
+            "label": "Number of sphere points",
+            "tooltip": "The surface of each atom will be approximated by this number of near-evenly spaced points.",
         },
     )
     settings["probe_radius"] = (
@@ -402,13 +403,15 @@ class SolventAccessibleSurface(IJob):
         {
             "mini": 0.0,
             "default": 0.14,
-            "label": "Radius of the probe particle for surface sampling",
+            "label": "Probe particle radius",
+            "tooltip": "Radius of the probe particle used for surface sampling",
         },
     )
     settings["radius_type"] = (
         "SingleChoiceConfigurator",
         {
-            "label": "Use van der Waals radius (adsorption) or covalent radius (chemisorption)",
+            "label": "Atom radius type",
+            "tooltip": "Use van der Waals radius (adsorption) or covalent radius (chemisorption)",
             "choices": ["van der Waals", "covalent"],
             "default": "van der Waals",
         },
@@ -417,7 +420,8 @@ class SolventAccessibleSurface(IJob):
         "BooleanConfigurator",
         {
             "default": False,
-            "label": "Calculate which atoms are blocking the surface of the selection (expensive)",
+            "label": "Calculate blocked surface per atom",
+            "tooltip": "Calculate which atoms are blocking the surface of the selection (expensive)",
         },
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})

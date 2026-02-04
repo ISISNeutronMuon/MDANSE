@@ -58,7 +58,6 @@ class CASTEP(Converter):
         {
             "formats": ["MDTFormat"],
             "root": "castep_file",
-            "label": "MDANSE trajectory (filename, datatype, chunk size, compression, logfile output)",
         },
     )
 

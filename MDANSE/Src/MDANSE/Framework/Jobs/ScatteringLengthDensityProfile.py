@@ -76,7 +76,8 @@ class ScatteringLengthDensityProfile(IJob):
         {
             "choices": ["a", "b", "c"],
             "default": "c",
-            "label": "Calculate profile along this cell axis",
+            "label": "Profile axis",
+            "tooltip": "Calculate the profile along this vector of the unit cell",
         },
     )
     settings["dr"] = (

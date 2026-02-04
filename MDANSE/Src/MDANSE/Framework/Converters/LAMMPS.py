@@ -183,7 +183,6 @@ class LAMMPS(Converter):
         {
             "formats": ["MDTFormat"],
             "root": "config_file",
-            "label": "MDANSE trajectory (filename, datatype, chunk size, compression, logfile output)",
         },
     )
 

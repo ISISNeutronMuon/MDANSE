@@ -66,7 +66,7 @@ class AverageStructure(IJob):
     settings["output_units"] = (
         "SingleChoiceConfigurator",
         {
-            "label": "Distance units of the output",
+            "label": "Distance unit of the output",
             "choices": ["Angstrom", "Bohr", "nm", "pm"],
             "default": "Angstrom",
         },

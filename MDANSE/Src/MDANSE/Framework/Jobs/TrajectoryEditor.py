@@ -91,7 +91,8 @@ class TrajectoryEditor(IJob):
         "OptionalFloatConfigurator",
         {
             "default": [False, 0.04],
-            "label": "Detect molecules within covalent radii plus this distance",
+            "label": "Detect molecules",
+            "tooltip": "Accept bonds for distances lower than sum of the covalent radii and this tolerance margin",
             "label_text": "Search for molecules (covalent radii plus the tolerance in nm)",
         },
     )
