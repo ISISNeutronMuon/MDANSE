@@ -257,6 +257,8 @@ class Action(QWidget):
             if key not in self._widgets_in_layout:
                 if "label" not in ddict and hasattr(configurator, "label"):
                     ddict["label"] = configurator.label
+                if "tooltip" not in ddict and hasattr(configurator, "tooltip"):
+                    ddict["tooltip"] = configurator.tooltip
                 ddict.setdefault("label", key)
                 ddict["configurator"] = configurator
                 ddict["source_object"] = self._input_traj_path
@@ -278,6 +280,8 @@ class Action(QWidget):
             configurator = job_instance.configuration[key]
             if "label" not in ddict and hasattr(configurator, "label"):
                 ddict["label"] = configurator.label
+            if "tooltip" not in ddict and hasattr(configurator, "tooltip"):
+                ddict["tooltip"] = configurator.tooltip
             ddict.setdefault("label", key)
             ddict["configurator"] = configurator
             ddict["source_object"] = self._input_traj_path
@@ -500,6 +504,8 @@ class Action(QWidget):
         for widnum, key in enumerate(self._job_instance.settings.keys()):
             if labels:
                 label = self._job_instance.settings[key][1]["label"]
+                if tooltip := self._job_instance.settings[key][1].get("tooltip"):
+                    label += f", {tooltip}"
                 results[key] = (self._widgets[widnum].get_widget_value(), label)
             else:
                 results[key] = self._widgets[widnum].get_widget_value()
