@@ -222,9 +222,7 @@ class LAMMPS(Converter):
         self._reader.open_file(self.configuration["trajectory_file"]["value"])
         self._reader.set_output(self._trajectory)
 
-    def create_reader(
-        self, trajectory_type: Literal["custom", "xyz"]
-    ) -> LAMMPSReader:
+    def create_reader(self, trajectory_type: Literal["custom", "xyz"]) -> LAMMPSReader:
         """Create the required reader.
 
         Parameters
