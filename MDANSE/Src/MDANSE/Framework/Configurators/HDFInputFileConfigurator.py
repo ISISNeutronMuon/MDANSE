@@ -63,15 +63,18 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         self._original_input = value
 
         InputFileConfigurator.configure(self, value)
-        if not self.valid:
+
+        if not value and self.optional:
+            self.error_status = "OK"
             return
 
         try:
             self["instance"] = h5py.File(self["value"], "r")
-
         except OSError:
             self.error_status = f"Cannot open HDF file {value} for reading."
             return
+        else:
+            self["instance"] = None
 
         for v in self.variables:
             if v in self["instance"]:

@@ -1120,7 +1120,7 @@ class FilterDesigner(QDialog):
     def get_attenuation_power_spectrum(
         self,
         tr_filter: Filter,
-        pps_filename: str = None,
+        pps_filename: str | None = None,
     ) -> Sequence[npt.NDArray[float]]:
         """Put curves on the same scale for the plot.
 
@@ -1131,6 +1131,8 @@ class FilterDesigner(QDialog):
         ----------
         tr_filter : Filter
             Filter class for the designed filter.
+        pps_filename : str | None
+            File name from which the reference spectrum will be loaded, optional.
 
         Returns
         -------
@@ -1144,12 +1146,12 @@ class FilterDesigner(QDialog):
         """
         response = tr_filter.freq_response
 
-        # TODO: If no filename supplied, use a Gaussian normalised to 1.0, centered on the frequency midpoint
-        freqs, normalised = None, None
-
         # Trajectory power spectrum data
-        # TODO: Read the position power spectrum frequencies and values from the current .mda file
-        freqs, values = self.read_pps_from_file(pps_filename)
+        if pps_filename:
+            freqs, values = self.read_pps_from_file(pps_filename)
+        else:
+            # TODO: If no filename supplied, use a Gaussian normalised to 1.0, centered on the frequency midpoint
+            freqs, values = np.linspace(0, 10, 10), np.ones(10)
 
         # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain, setting
         # custom frequency range on filter object
@@ -1436,8 +1438,9 @@ class FilterDesigner(QDialog):
         if show_attenuation:
             ps_axis, ps, attenuated_ps = self.get_attenuation_power_spectrum(
                 filter_preview,
-                # TODO: fetch pps filename from configurator, if the attenuation source is not a Gaussian or other
-                pps_filename=self.fetch_pps_file() if (source not in FilterAttenuationGroup.functional_forms) else None
+                pps_filename=self.configurator.pps_file_name
+                if (source not in FilterAttenuationGroup.functional_forms)
+                else None,
             )
 
         # Get filter coefficients

@@ -62,11 +62,11 @@ class InputFileConfigurator(IConfigurator):
         self._original_input = value
 
         value = PLATFORM.get_path(value)
+        self["value"] = value
+        self["filename"] = value
 
         if not value.exists():
             self.error_status = f"The file {value} does not exist."
             return
 
-        self["value"] = value
-        self["filename"] = value
         self.error_status = "OK"
