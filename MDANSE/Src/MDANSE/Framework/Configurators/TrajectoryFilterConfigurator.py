@@ -67,6 +67,12 @@ class TrajectoryFilterConfigurator(IConfigurator):
         if not self.update_needed(value):
             return
 
+        reference_file_configurator = self.configurable[
+            self.dependencies["pps_input_file"]
+        ]
+        if reference_file_configurator.configured and reference_file_configurator.valid:
+            self.pps_file_name = reference_file_configurator["value"]
+
         self._settings = value
 
         try:
