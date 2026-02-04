@@ -1623,6 +1623,9 @@ class TrajectoryFilterWidget(WidgetBase):
                 self._pps_file_widget = widget
                 break
         self.filter_designer = self.create_helper()
+        self._pps_file_widget.value_changed.connect(
+            self.filter_designer.render_canvas_assets
+        )
 
     def create_helper(self) -> FilterDesigner:
         """
