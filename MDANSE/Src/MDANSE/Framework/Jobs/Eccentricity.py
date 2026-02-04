@@ -104,7 +104,7 @@ class Eccentricity(IJob):
         conf = conf.contiguous_configuration()
         series = conf["coordinates"][self._indices, :]
 
-        if np.sum(np.abs(self._selectionMasses)) == 0.0:
+        if np.allclose(self._selectionMasses, 0.0):
             LOG.warning(
                 "All atoms have 0 mass. Replacing mass with 1 to allow eccentricity calculation."
             )
