@@ -63,7 +63,12 @@ class TrajectoryFilter(IJob):
     )
     settings["pps_input_file"] = (
         "HDFInputFileConfigurator",
-        {"label": "MDANSE Position Power Spectrum", "default": "", "optional": True},
+        {
+            "label": "MDANSE Position Power Spectrum",
+            "default": "",
+            "optional": True,
+            "variables": ("pps/axes/romega", "/pps/isotropic/total"),
+        },
     )
     settings["trajectory_filter"] = (
         "TrajectoryFilterConfigurator",

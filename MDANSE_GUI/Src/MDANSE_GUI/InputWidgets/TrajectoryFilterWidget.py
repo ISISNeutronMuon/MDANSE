@@ -17,13 +17,15 @@ from __future__ import annotations
 
 import copy
 from collections.abc import Callable, Sequence
+from pathlib import Path
 from typing import Any
 
+import h5py
 import matplotlib.pyplot as mpl
 import numpy as np
 import numpy.typing as npt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from qtpy.QtCore import QObject, Qt, QThread, Signal, Slot
+from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -45,6 +47,9 @@ from qtpy.QtWidgets import (
 from scipy import signal
 from scipy.interpolate import interp1d
 
+from MDANSE.Framework.Configurators.HDFInputFileConfigurator import (
+    HDFInputFileConfigurator,
+)
 from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
     TrajectoryFilterConfigurator,
 )
@@ -59,6 +64,7 @@ from MDANSE.Mathematics.Signal import (
     FrequencyDomain,
     filter_description_string,
 )
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
 
@@ -70,6 +76,25 @@ DEFAULT_SPINBOX_STEP_FLOAT = 0.1
 
 # Decimal precision for a float spinbox
 FLOAT_SPINBOX_DECIMALS = 8
+
+
+def read_pps_from_file(
+    filename: str | Path,
+) -> tuple[npt.NDArray[float], npt.NDArray[float]] | tuple[None, None]:
+    try:
+        with h5py.File(filename) as source:
+            energy_axis = source["pps/axes/romega"][:]
+            data_array = source["/pps/isotropic/total"][:]
+    except KeyError:
+        LOG.error("PPS data could not be found in file %s", filename)
+    except Exception:
+        LOG.error(
+            "Path %s could not be opened for reading a Position Power Spectrum",
+            filename,
+        )
+    else:
+        return energy_axis, data_array
+    return None, None
 
 
 class ConstrainedDoubleSpinBox(QDoubleSpinBox):
@@ -942,6 +967,7 @@ class FilterDesigner(QDialog):
         configurator: TrajectoryFilterConfigurator,
         parent,
         *args,
+        pps_configurator: HDFInputFileConfigurator | None = None,
         **kwargs,
     ):
         super().__init__(parent, *args, **kwargs)
@@ -957,6 +983,7 @@ class FilterDesigner(QDialog):
         self.settings_group = {}
         self.preferences_group = None
         self.attenuation_group = None
+        self.pps_configurator = pps_configurator
 
         self.layouts = QHBoxLayout()
 
@@ -1126,10 +1153,13 @@ class FilterDesigner(QDialog):
 
         # Trajectory power spectrum data
         if pps_filename:
-            freqs, values = self.read_pps_from_file(pps_filename)
-        else:
+            file_freqs, file_values = read_pps_from_file(pps_filename)
+
+        if not pps_filename or file_freqs is None or file_values is None:
             # TODO: If no filename supplied, use a Gaussian normalised to 1.0, centered on the frequency midpoint
             freqs, values = np.linspace(0, 10, 10), np.ones(10)
+        else:
+            freqs, values = file_freqs, file_values
 
         # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain, setting
         # custom frequency range on filter object
@@ -1413,10 +1443,11 @@ class FilterDesigner(QDialog):
 
         # Get comparative attenuation from either an external trajectory PPS, or from an analytical functional form
         ps, attenuated_ps = None, None
+
         if show_attenuation:
             ps_axis, ps, attenuated_ps = self.get_attenuation_power_spectrum(
                 filter_preview,
-                pps_filename=self.configurator.pps_file_name
+                pps_filename=self.pps_configurator["value"]
                 if (source not in FilterAttenuationGroup.functional_forms)
                 else None,
             )
@@ -1575,7 +1606,6 @@ class TrajectoryFilterWidget(WidgetBase):
         self._field.setPlaceholderText(self._default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
         self._field.textChanged.connect(self.updateValue)
-        self.filter_designer = self.create_helper()
         helper_button = QPushButton(self._push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
         self._layout.addWidget(self._field)
@@ -1583,6 +1613,16 @@ class TrajectoryFilterWidget(WidgetBase):
         self.update_labels()
         self.updateValue()
         self._field.setToolTip(self._tooltip_text)
+        for widget in self.parent()._widgets:
+            if (
+                widget._configurator
+                is self._configurator.configurable[
+                    self._configurator.dependencies["pps_input_file"]
+                ]
+            ):
+                self._pps_file_widget = widget
+                break
+        self.filter_designer = self.create_helper()
 
     def create_helper(self) -> FilterDesigner:
         """
@@ -1592,7 +1632,12 @@ class TrajectoryFilterWidget(WidgetBase):
             Create and return the filter designer QDialog.
 
         """
-        return FilterDesigner(self._field, self._configurator, self._base)
+        return FilterDesigner(
+            self._field,
+            self._configurator,
+            self._base,
+            pps_configurator=self._pps_file_widget._configurator,
+        )
 
     @Slot()
     def helper_dialog(self) -> None:
