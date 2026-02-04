@@ -20,17 +20,27 @@ from abc import ABC, abstractmethod
 from collections import namedtuple
 from copy import copy
 from enum import Enum
-from typing import NamedTuple
+from typing import TYPE_CHECKING, ClassVar, Final, Literal, NamedTuple
 
 import numpy as np
+import numpy.typing as npt
 from scipy import fftpack, signal
 
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
+if TYPE_CHECKING:
+    from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
+
 
 class SignalError(Exception):
     pass
+
+
+class RationalPolynomial(NamedTuple):
+    unit: Literal["S", "Z"]
+    numerator: str
+    denominator: str
 
 
 INTERPOLATION_ORDER = {}
@@ -76,7 +86,7 @@ INTERPOLATION_ORDER[5] = np.array(
 )
 
 
-def normalisation_factor(x: np.ndarray, axis: int = 0) -> np.ndarray:
+def normalisation_factor(x: IOutputVariable, axis: int = 0) -> np.ndarray:
     """Normalizes the signal by dividing x by the zeroth elements
     along the input axis.
 
@@ -264,19 +274,21 @@ DEFAULT_FILTER_CUTOFF = 0.0001
 class TransferFunction(NamedTuple):
     """Container for the filter transfer transfer function expressed in terms of the numerator/denominator coefficients of a rational polynomial."""
 
-    numerator: np.ndarray
-    denominator: np.ndarray
+    numerator: npt.NDArray[np.floating]
+    denominator: npt.NDArray[np.floating]
 
 
 class FrequencyDomain(NamedTuple):
     """Container for the frequency response of the filter."""
 
-    frequencies: np.ndarray
-    magnitudes: np.ndarray
+    frequencies: npt.NDArray[np.floating]
+    magnitudes: npt.NDArray[np.floating]
 
 
 class Filter(ABC):
     """Base class for a filter operating on a signal."""
+
+    default_settings = {}
 
     # Symbolic variable for analog filter transfer function (Laplace plane)
     S = "iw"
@@ -300,8 +312,8 @@ class Filter(ABC):
     class FrequencyUnits(Enum):
         """Enumeration for frequency unit type."""
 
-        CYCLIC: str = "THz"
-        ANGULAR: str = "rad/ps"
+        CYCLIC = "THz"
+        ANGULAR = "rad/ps"
 
     class FrequencyRangeMethod(Enum):
         """Enumeration for custom (externally provided) and FFT-derived frequency ranges for plotting the
@@ -309,28 +321,32 @@ class Filter(ABC):
 
         """
 
-        CUSTOM: int = 0
-        FFT: int = 1
+        CUSTOM = 0
+        FFT = 1
 
     class Flags(Enum):
         """Enumeration for flags associated with usage of filters."""
 
-        DIGITAL_ONLY: int = 0
-        DIGITAL_AND_ANALOGUE: int = 1
-        FUNDAMENTAL_EVENLY_DIVIDES_FS: int = 2
-        BOUNDED_FILTER: int = 3
+        DIGITAL_ONLY = 0
+        DIGITAL_AND_ANALOGUE = 1
+        FUNDAMENTAL_EVENLY_DIVIDES_FS = 2
+        BOUNDED_FILTER = 3
+
+    flags: ClassVar[set[Flags]]
+    coeffs: TransferFunction
+    sos: npt.ArrayLike
 
     @abstractmethod
-    def __init__(self, **kwargs):
+    def __init__(self, *, n_steps: int, time_step_ps: float, **kwargs):
         # Custom frequency range (assumes frequencies are angular) around which to compute the filter frequency response
-        self.custom_freq_range = []
+        self.custom_freq_range = np.zeros(0)
         # Number of simulation steps
-        self.n_steps = kwargs.pop("n_steps")
+        self.n_steps = n_steps
         # Simulation sample frequency in THz
-        self.sample_freq = 1 / kwargs.pop("time_step_ps")
+        self.sample_freq = 1 / time_step_ps
         self.set_filter_attributes(kwargs)
 
-    def compute_frequencies(self, filt_range: np.ndarray):
+    def compute_frequencies(self, filt_range: npt.NDArray[np.floating]):
         """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
 
         See Also
@@ -351,7 +367,7 @@ class Filter(ABC):
         """
         return signal.freqz_sos(self.sos, worN=filt_range, fs=self.sample_freq)
 
-    def apply(self, input: np.array) -> np.ndarray:
+    def apply(self, input: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
         """Returns the convolution of the digital designed filter with an input signal.
 
         See Also
@@ -446,7 +462,7 @@ class Filter(ABC):
         self._freq_response = FrequencyDomain(*response)
 
     @classmethod
-    def frequency_resolution(cls, num_steps: float, timestep: float, units):
+    def frequency_resolution(cls, num_steps: float, timestep: float, units) -> float:
         """Returns the frequency resolution of the trajectory given N fixed timesteps.
         Analogous to the bin-width of an FFT of the trajectory.
 
@@ -501,7 +517,7 @@ class Filter(ABC):
         resize_to: int = 1000,
         units: FrequencyUnits = FrequencyUnits.ANGULAR,
         symmetric: bool = False,
-    ) -> np.ndarray:
+    ) -> npt.NDArray[np.floating]:
         """Obtain an FFT-based frequency range for the frequency domain of a discrete time signal with a given number
         of elements and a constant time step.
 
@@ -520,7 +536,7 @@ class Filter(ABC):
 
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.floating]
             FFT frequencies.
 
         """
@@ -555,7 +571,7 @@ class Filter(ABC):
 
         Parameters
         ----------
-        coeffs : np.ndarray
+        coeffs : npt.NDArray[np.floating]
             Array of polynomial coefficients.
         unit : str
             String representation of the mathematical symbol corresponding to the S or Z planes.
@@ -589,40 +605,40 @@ class Filter(ABC):
         return expr
 
     @classmethod
-    def rational_polynomial_string(
-        cls, numerator, denominator, analog=True
-    ) -> dict[str, str]:
+    def rational_polynomial(
+        cls, numerator: npt.NDArray[np.floating], denominator: npt.NDArray[np.floating], analog: bool = True
+    ) -> RationalPolynomial:
         """Formats a transfer function rational polynomial into a pair of strings.
 
         Parameters
         ----------
-        numerator : np.ndarray
+        numerator : npt.NDArray[np.floating]
             Array of coefficients representing the numerator of the transfer function.
-        denominator : np.ndarray)
+        denominator : npt.NDArray[np.floating])
             Array of coefficients representing the denominator of the transfer function.
         analog : bool
             Filter is analog (Laplace/S-domain) or digital (Z-domain).
 
         Returns
         -------
-        dict[str, str]
-            Dictionary of string coefficients representing the transfer function rational polynomial.
+        RationalPolynomial
+            Coefficients representing the transfer function rational polynomial.
 
         """
         if analog:
             # Analogue (Laplace-domain) transfer function
             numerator_str = cls.polynomial_string(numerator, cls.S)
             denominator_str = Filter.polynomial_string(denominator, cls.S)
-            return {
-                "unit": "S",
-                "numerator": numerator_str,
-                "denominator": denominator_str,
-            }
+            return RationalPolynomial(
+                unit="S",
+                numerator=numerator_str,
+                denominator=denominator_str,
+            )
 
         # Digital (Z-domain) transfer function
         numerator_str = Filter.polynomial_string(numerator, cls.Z, False)
         denominator_str = Filter.polynomial_string(denominator, cls.Z, False)
-        return {"unit": "Z", "numerator": numerator_str, "denominator": denominator_str}
+        return RationalPolynomial(unit="Z", numerator=numerator_str, denominator=denominator_str)
 
     def attributes_to_string(self, description) -> str:
         """Formats the given filter attribute into a description string.
@@ -693,14 +709,14 @@ class Filter(ABC):
 
         Parameters
         ----------
-        freq : float | np.ndarray
+        freq : float | npt.NDArray[np.floating]
             Frequency.
         units : FrequencyUnit
             Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps).
 
         Returns
         -------
-        float | np.ndarray
+        float | npt.NDArray[np.floating]
             Energy.
 
         """
@@ -719,14 +735,14 @@ class Filter(ABC):
 
         Parameters
         ----------
-        energy : float | np.ndarray
+        energy : float | npt.NDArray[np.floating]
             Energy.
         units : FrequencyUnit
             Frequency unit type for conversion (i.e. CYCLIC=THz, ANGULAR=rad/ps).
 
         Returns
         -------
-        float | np.ndarray
+        float | npt.NDArray[np.floating]
             Frequency.
 
         """
@@ -1082,7 +1098,7 @@ class Comb(Filter):
         self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
-FILTERS = (
+FILTERS: Final = (
     Butterworth,
     ChebyshevTypeI,
     ChebyshevTypeII,
@@ -1092,15 +1108,17 @@ FILTERS = (
     Peak,
 )
 
-FILTER_MAP = {filter_class.__name__: filter_class for filter_class in FILTERS}
+FILTER_MAP: dict[str, type[Filter]] = {
+    filter_class.__name__: filter_class for filter_class in FILTERS
+}
 
 # Default filter type is Butterworth
-DEFAULT_FILTER = Butterworth
+DEFAULT_FILTER: Final[type[Filter]] = Butterworth
 # Default simulation time step in picoseconds
-DEFAULT_TIME_STEP = 0.005
+DEFAULT_TIME_STEP: Final[float] = 0.005
 
 # Default number of simulation steps
-DEFAULT_N_STEPS = 320
+DEFAULT_N_STEPS: Final[int] = 320
 
 
 def filter_default_attributes(filter=DEFAULT_FILTER):
