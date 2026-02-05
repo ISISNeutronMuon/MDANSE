@@ -510,16 +510,16 @@ class ChemicalSystem:
         if close_on_end:
             source.close()
 
-    def legacy_load(self, trajectory: h5py.File | str):
+    def legacy_load(self, trajectory: h5py.File | Path | str):
         """Read the ChemicalSystem from an old (pre-2025) trajectory.
         Parameters
         ----------
-        trajectory : str | h5py.File
+        trajectory : Path | str | h5py.File
             Filename or a file object of the trajectory.
         """
 
         close_on_end = False
-        if isinstance(trajectory, str):
+        if isinstance(trajectory, (Path, str)):
             close_on_end = True
             source = h5py.File(trajectory)
         else:

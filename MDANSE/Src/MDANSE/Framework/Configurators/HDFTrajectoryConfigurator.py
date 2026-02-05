@@ -62,10 +62,15 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         try:
             trajectory_instance = Trajectory(self["value"])
         except KeyError:
-            self.error_status = f"Could not use {value} as input trajectory"
+            self.error_status = f"Could not use {value} as input trajectory."
             return
         self.extract_information(trajectory_instance)
         self.error_status = "OK"
+        if not trajectory_instance.non_dummy_elements:
+            self.warning_status = (
+                "This trajectory contains only dummy atoms. "
+                "Analysis runs will fail or produce meaningless results."
+            )
 
     def extract_information(self, trajectory_instance: Trajectory):
         self["instance"] = trajectory_instance

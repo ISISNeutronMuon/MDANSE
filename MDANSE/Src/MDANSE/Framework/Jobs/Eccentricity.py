@@ -20,6 +20,7 @@ from more_itertools import always_iterable
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
+from MDANSE.MLogging import LOG
 
 
 class Eccentricity(IJob):
@@ -103,6 +104,11 @@ class Eccentricity(IJob):
         conf = conf.contiguous_configuration()
         series = conf["coordinates"][self._indices, :]
 
+        if np.allclose(self._selectionMasses, 0.0):
+            LOG.warning(
+                "All atoms have 0 mass. Replacing mass with 1 to allow eccentricity calculation."
+            )
+            self._selectionMasses = np.ones(len(series))
         com = center_of_mass(series, masses=self._selectionMasses)
 
         # calculate the inertia moments

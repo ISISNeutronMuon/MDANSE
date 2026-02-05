@@ -70,7 +70,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
             self["instance"] = h5py.File(self["value"], "r")
         except OSError:
             self.error_status = (
-                f"Can not open {value} HDF file for reading: {traceback.format_exc()}"
+                f"Cannot open {value} HDF file for reading: {traceback.format_exc()}"
             )
             return
         else:
@@ -85,7 +85,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
                     self._units[v] = "unitless"
             else:
                 self.error_status = (
-                    f"the variable {v} was not  found in {value} HDF file"
+                    f"The variable {v} was not found in HDF file {value}."
                 )
                 return
         self.error_status = "OK"

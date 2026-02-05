@@ -57,10 +57,6 @@ class MolecularTrace(IJob):
         "AtomSelectionConfigurator",
         {
             "dependencies": {"trajectory": "trajectory"},
-            "default": """\
-{
-   "0": {"function_name": "select_all", "operation_type": "union"}
-}""",
         },
     )
     settings["spatial_resolution"] = (

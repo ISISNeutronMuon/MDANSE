@@ -66,7 +66,7 @@ class InputFileConfigurator(IConfigurator):
         self["filename"] = value
 
         if not value.exists():
-            self.error_status = f"The file {value} does not exist"
+            self.error_status = f"The file {value} does not exist."
             return
 
         self.error_status = "OK"

@@ -428,15 +428,14 @@ class MolecularViewer(QtWidgets.QWidget):
             return
 
         uc = self._reader.read_pbc(self._current_frame)
+        uc_points = vtk.vtkPoints()
+        uc_lines = vtk.vtkCellArray()
         if self._cell_visible and uc is not None:
             # update the unit cell
-            uc_points = vtk.vtkPoints()
             uc_points.SetNumberOfPoints(8)
             for i, v in enumerate(uc.vertices):
                 uc_points.SetPoint(i, *v)
-            self._uc_polydata.SetPoints(uc_points)
 
-            uc_lines = vtk.vtkCellArray()
             for i, j in [
                 (0, 1),
                 (0, 2),
@@ -455,7 +454,9 @@ class MolecularViewer(QtWidgets.QWidget):
                 line.GetPointIds().SetId(0, i)
                 line.GetPointIds().SetId(1, j)
                 uc_lines.InsertNextCell(line)
-            self._uc_polydata.SetLines(uc_lines)
+
+        self._uc_polydata.SetPoints(uc_points)
+        self._uc_polydata.SetLines(uc_lines)
 
     def clear_atoms(self):
         """Clears the atom actor and removes it from the renderer."""
@@ -619,6 +620,9 @@ class MolecularViewer(QtWidgets.QWidget):
 
     def change_atm_polydata_lines(self):
         """Calculate and/or updates the atom polydata bonds."""
+        if not len(self.not_du):
+            self._atm_polydata.SetLines(vtk.vtkCellArray())
+            return
         match self.bond_calc:
             case BondCalc.EVERY:
                 rs = self._current_coords[self.not_du]
@@ -681,6 +685,8 @@ class MolecularViewer(QtWidgets.QWidget):
         """
         # determine and set bonds without PBC applied
         bonds = vtk.vtkCellArray()
+        if not len(covs):
+            return bonds
 
         dist, js, ks, _ = distance_calculation(rs, 2 * np.max(covs) + tolerance)
         sum_radii = (covs[js] + covs[ks] + tolerance) ** 2

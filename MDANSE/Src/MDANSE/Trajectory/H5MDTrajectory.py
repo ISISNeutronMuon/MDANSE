@@ -16,9 +16,9 @@
 from __future__ import annotations
 
 from collections import ChainMap
-from collections.abc import Mapping
 from enum import Enum
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import h5py
 import numpy as np
@@ -42,6 +42,9 @@ from MDANSE.MolecularDynamics.UnitCell import (
 )
 
 from .FileTrajBase import TrajectoryFile
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 SLICE_ALL = np.s_[:]
 
@@ -274,7 +277,11 @@ class H5MDTrajectory(TrajectoryFile):
 
         return configuration
 
-    def charges(self, frame: int) -> npt.NDArray[float]:
+    def charges(
+        self,
+        frame: int,
+        indices: slice | int = np.s_[:],
+    ) -> npt.NDArray[float]:
         """Return the electrical charge of atoms at a given frame.
 
         Parameters
@@ -288,17 +295,20 @@ class H5MDTrajectory(TrajectoryFile):
             Charges at given time.
 
         """
-        if 0 > frame >= len(self):
-            raise IndexError(f"Invalid frame number: {frame}")
+        self._check_frame(frame)
+
+        if isinstance(indices, int):
+            indices = slice(indices, indices + 1)
 
         key = self.charge_key
         if key is self.ChargeLoc.PER_STEP:
-            charge = self._h5_file[key.value][frame]
+            charge = self._h5_file[key.value][frame, indices]
         elif key is self.ChargeLoc.GLOBAL:
-            charge = self._h5_file[key.value][:]
+            charge = self._h5_file[key.value][indices]
         elif key is self.ChargeLoc.NONE:
             LOG.debug(f"No charge information in trajectory {self._h5_filename}")
-            charge = np.zeros(self._chemical_system.number_of_atoms)
+            n_req = len(range(*indices.indices(self.chemical_system.number_of_atoms)))
+            charge = np.zeros(n_req, dtype=np.float64)
 
         return charge.astype(np.float64)
 

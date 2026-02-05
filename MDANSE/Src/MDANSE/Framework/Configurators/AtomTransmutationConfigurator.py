@@ -149,7 +149,7 @@ class AtomTransmutationConfigurator(IConfigurator):
         try:
             value = {int(idx): element for idx, element in value.items()}
         except ValueError:
-            self.error_status = "Key of transmutation map should be castable to int"
+            self.error_status = "Key of transmutation map should be castable to int."
             return
 
         keys = set(value.keys())
@@ -165,7 +165,7 @@ class AtomTransmutationConfigurator(IConfigurator):
                 element not in ATOMS_DATABASE.atoms
             ):
                 self.error_status = (
-                    f"the element {element} is not registered in the database"
+                    f"The element {element} is not registered in the database."
                 )
                 return
 

@@ -45,7 +45,7 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
             return
 
         if not self.configurable[self.dependencies["coordinate_files"]].valid:
-            self.error_status = "Trajectory file not valid"
+            self.error_status = "Trajectory file not valid."
             return
 
         if not value:
@@ -60,7 +60,7 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
             if extension not in supported:
                 self.error_status = (
                     f"Trajectory file does not contain topology information. "
-                    f"File '{extension}' not support should be one of the following: {supported}"
+                    f"File '{extension}' is not supported. Should be one of the following: {supported}."
                 )
                 return
 
@@ -71,13 +71,13 @@ class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
                 return
 
             if len(self.labels) == 0:
-                self.error_status = "Unable to generate atom labels"
+                self.error_status = "Unable to generate atom labels."
 
         else:
             extension = "".join(Path(value).suffixes)[1:]
             supported = [i[1:] for i in _TOPOLOGY_EXTS]
             if extension not in supported:
-                self.error_status = f"File '{extension}' not supported. Should be one of the following: {supported}"
+                self.error_status = f"File '{extension}' is not supported. Should be one of the following: {supported}"
                 return
             super().configure(value)
 

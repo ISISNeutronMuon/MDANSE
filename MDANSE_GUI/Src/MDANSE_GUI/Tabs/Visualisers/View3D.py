@@ -49,6 +49,7 @@ class View3D(QWidget):
     def update_panel(self, data: tuple[str, Trajectory] | None):
         if data is None or data[0] == "":
             self._viewer.clear_panel()
+            self._controls._property_widget.clear_viewer()
             return
         fullpath, incoming = data
         try:
@@ -57,3 +58,4 @@ class View3D(QWidget):
         except AttributeError:
             self.error.emit(f"3D View could not visualise {fullpath}")
             self._viewer.clear_panel()
+            self._controls._property_widget.clear_viewer()

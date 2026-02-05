@@ -50,6 +50,8 @@ class PropertyWidget(QWidget):
         self._index = index
         self.active = False
         self.viewer.frame_changed.connect(self.update_table)
+        self._atom_props = {}
+        self._trajectory_props = {}
 
     @Slot(int)
     def _active(self, index: int):
@@ -416,3 +418,13 @@ class PropertyWidget(QWidget):
             self._update_prop_table(prop_name)
 
         self._last_prop = prop_name
+
+    def clear_viewer(self):
+        """Clears the property viewer."""
+        self._prop_selection.clear()
+        self._prop_model.clear()
+        self._atom_props.clear()
+        self._raw_props.clear()
+        self._frame_props.clear()
+        self._trajectory_props.clear()
+        self.curr_selection.clear()

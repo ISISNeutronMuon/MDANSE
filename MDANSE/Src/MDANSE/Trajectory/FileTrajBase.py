@@ -89,7 +89,11 @@ class TrajectoryFile(ABC):
     def __len__(self) -> int: ...
 
     @abstractmethod
-    def charges(self, frame: int) -> npt.NDArray[float]: ...
+    def charges(
+        self,
+        frame: int,
+        indices: slice | int = np.s_[:],
+    ) -> npt.NDArray[float]: ...
 
     @abstractmethod
     def coordinates(

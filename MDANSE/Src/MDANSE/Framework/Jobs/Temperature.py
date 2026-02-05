@@ -69,9 +69,13 @@ class Temperature(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.number_of_atoms
+        self.indices = [
+            index
+            for index, symbol in enumerate(self.trajectory.atom_types)
+            if symbol in self.trajectory.non_dummy_elements
+        ]
+
+        self.numberOfSteps = len(self.indices)
 
         self._nFrames = self.configuration["frames"]["number"]
 
@@ -124,7 +128,8 @@ class Temperature(IJob):
             #. kineticEnergy (np.array): The calculated kinetic energy
         """
 
-        symbol = self._atoms[index]
+        real_index = self.indices[index]
+        symbol = self._atoms[real_index]
 
         mass = self.trajectory.get_atom_property(symbol, "atomic_weight")
 
@@ -132,7 +137,7 @@ class Temperature(IJob):
 
         if self.configuration["interpolation_order"]["value"] == 0:
             series = trajectory.read_configuration_trajectory(
-                index,
+                real_index,
                 first=self.configuration["frames"]["first"],
                 last=self.configuration["frames"]["last"] + 1,
                 step=self.configuration["frames"]["step"],
@@ -140,7 +145,7 @@ class Temperature(IJob):
             )
         else:
             series = trajectory.read_atomic_trajectory(
-                index,
+                real_index,
                 first=self.configuration["frames"]["first"],
                 last=self.configuration["frames"]["last"] + 1,
                 step=self.configuration["frames"]["step"],
@@ -173,7 +178,7 @@ class Temperature(IJob):
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
-        nAtoms = len(self._atoms)
+        nAtoms = len(self.indices)
         self._outputData["temp/kinetic_energy"] /= nAtoms - 1
 
         norm = np.arange(1, self._outputData["temp/kinetic_energy"].shape[0] + 1)

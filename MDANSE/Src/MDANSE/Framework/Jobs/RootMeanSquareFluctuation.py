@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from itertools import groupby
+
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import mean_square_fluctuation
 
@@ -70,7 +72,8 @@ class RootMeanSquareFluctuation(IJob):
         self.group_molecules = self.configuration["grouping_level"]["value"] != "atom"
         self.ele_idxs = {}
 
-        self._names = self.trajectory.atom_names
+        all_names = self.trajectory.atom_names
+        self._names = [all_names[index] for index in self.trajectory.atom_indices]
 
         self._outputData.add(
             "rmsf/axes/indices/all",
@@ -86,19 +89,49 @@ class RootMeanSquareFluctuation(IJob):
             main_result=True,
         )
 
-        for names in self.trajectory.unique_names:
-            idxs = [i for i in self.trajectory.atom_indices if names == self._names[i]]
-            self.ele_idxs[names] = idxs
+        if self.group_molecules:
+            self.group_indices = {
+                grp: {
+                    job_i: at_i
+                    for job_i, at_i in enumerate(self.trajectory.atom_indices)
+                    if f"<{grp}>" in self._names[job_i]
+                }
+                for grp in self.trajectory.group_lookup
+            }
+        else:
+            self.group_indices = {}
+
+        for name in self.trajectory.unique_names:
+            idxs = [
+                at_i
+                for job_i, at_i in enumerate(self.trajectory.atom_indices)
+                if self._names[job_i] == name
+            ]
+            self.ele_idxs[name] = 0
             self._outputData.add(
-                f"rmsf/axes/indices/{names}",
+                f"rmsf/axes/indices/{name}",
                 "LineOutputVariable",
                 idxs,
             )
             self._outputData.add(
-                f"rmsf/{names}",
+                f"rmsf/{name}",
                 "LineOutputVariable",
                 (len(idxs),),
-                axis=f"rmsf/axes/indices/{names}",
+                axis=f"rmsf/axes/indices/{name}",
+                units="nm",
+            )
+
+        for grp, index_dict in self.group_indices.items():
+            self._outputData.add(
+                f"rmsf/axes/indices/<{grp}>/all",
+                "LineOutputVariable",
+                index_dict.values(),
+            )
+            self._outputData.add(
+                f"rmsf/<{grp}>/all",
+                "LineOutputVariable",
+                (len(index_dict),),
+                axis=f"rmsf/axes/indices/<{grp}>/all",
                 units="nm",
             )
 
@@ -138,36 +171,19 @@ class RootMeanSquareFluctuation(IJob):
         """
         self._outputData["rmsf/all"][index] = x
         name = self._names[index]
-        idxs = self.ele_idxs[name]
-        self._outputData[f"rmsf/{name}"][idxs.index(index)] = x
+        self._outputData[f"rmsf/{name}"][self.ele_idxs[name]] = x
+        self.ele_idxs[name] += 1
 
     def finalize(self):
         """Finalizes the calculations (e.g. averaging the total term, output
         files creations ...).
         """
         if self.group_molecules:
-            for grp in self.trajectory.group_lookup:
-                eles = self.trajectory.group_elements(grp)
-                idxs = []
-                for ele in eles:
-                    idxs += self.ele_idxs[f"<{grp}>/{ele}"]
-                idxs = sorted(idxs)
-                self._outputData.add(
-                    f"rmsf/axes/indices/<{grp}>/all",
-                    "LineOutputVariable",
-                    idxs,
-                )
-                self._outputData.add(
-                    f"rmsf/<{grp}>/all",
-                    "LineOutputVariable",
-                    (len(idxs),),
-                    axis=f"rmsf/axes/indices/<{grp}>/all",
-                    units="nm",
-                )
-                for i, idx in enumerate(idxs):
-                    self._outputData[f"rmsf/<{grp}>/all"][i] = self._outputData[
+            for grp, index_dict in self.group_indices.items():
+                for result_in, job_in in enumerate(index_dict.keys()):
+                    self._outputData[f"rmsf/<{grp}>/all"][result_in] = self._outputData[
                         "rmsf/all"
-                    ][idx]
+                    ][job_in]
 
         # Write the output variables.
         self._outputData.write(

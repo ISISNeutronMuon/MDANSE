@@ -24,7 +24,6 @@ lammps_lammps = DATA_DIR / "lammps_test.lammps"
 lammps_moly = DATA_DIR / "structure_moly.lammps"
 lammps_custom = DATA_DIR / "lammps_moly_custom.txt"
 lammps_xyz = DATA_DIR / "lammps_moly_xyz.txt"
-lammps_h5md = CONV_DIR / "lammps_moly_h5md.h5"
 lammps_cao_config = DATA_DIR / "lammps_CaO.config"
 lammps_cao_run = DATA_DIR / "lammps_CaO.lammps"
 lammps_ar = DATA_DIR / "lammps_ar.config"
@@ -468,7 +467,7 @@ def test_lammps_mdt_conversion_unit_system(generate_benchmarks, tmp_path, unit_s
 
 @pytest.mark.parametrize(
     "trajectory_file,trajectory_format",
-    [(lammps_custom, "custom"), (lammps_xyz, "xyz"), (lammps_h5md, "h5md")],
+    [(lammps_custom, "custom"), (lammps_xyz, "xyz")],
 )
 def test_lammps_mdt_conversion_trajectory_format(
     generate_benchmarks, tmp_path, trajectory_file, trajectory_format

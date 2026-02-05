@@ -106,12 +106,12 @@ class UnitCellConfigurator(IConfigurator):
                 input_array = np.array(value[0], dtype=float)
             except Exception:
                 self.error_status = (
-                    "Could not convert the inputs into a floating point array"
+                    "Could not convert the inputs into a floating point array."
                 )
                 return
             else:
                 if input_array.shape != (3, 3):
-                    self.error_status = "Input shape must be 3x3"
+                    self.error_status = "Input shape must be 3x3."
                     return
 
             self["value"] = value[0]

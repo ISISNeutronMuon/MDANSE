@@ -15,41 +15,17 @@
 #
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from collections import defaultdict
-from contextlib import suppress
-from enum import Enum, auto
-from itertools import count
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-import h5py
-import numpy as np
-from more_itertools import consume as drop
-from more_itertools import ilen, take
-from numpy.typing import NDArray
-
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Core.Error import Error
-from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Parsers import (
     LAMMPSConfigFile,
     LAMMPScustom,
-    LAMMPSh5md,
     LAMMPSReader,
     LAMMPSxyz,
 )
-from MDANSE.Framework.Parsers.LAMMPS import LAMMPS_UNITS
-from MDANSE.Framework.Parsers.LAMMPSConfig import ATOM_TYPES_MAP
-from MDANSE.Framework.Units import measure
-from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicBoxConfiguration,
-    PeriodicRealConfiguration,
-)
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 if TYPE_CHECKING:
     from MDANSE.Framework.Configurators.ConfigFileConfigurator import (
@@ -65,7 +41,6 @@ class LAMMPS(Converter):
     _READERS = {
         "custom": LAMMPScustom,
         "xyz": LAMMPSxyz,
-        "h5md": LAMMPSh5md,
     }
 
     settings = {}
@@ -90,7 +65,7 @@ class LAMMPS(Converter):
         "SingleChoiceConfigurator",
         {
             "label": "LAMMPS trajectory format",
-            "choices": ["custom", "xyz", "h5md"],
+            "choices": ["custom", "xyz"],
             "default": "custom",
         },
     )
@@ -247,14 +222,12 @@ class LAMMPS(Converter):
         self._reader.open_file(self.configuration["trajectory_file"]["value"])
         self._reader.set_output(self._trajectory)
 
-    def create_reader(
-        self, trajectory_type: Literal["custom", "xyz", "h5md"]
-    ) -> LAMMPSReader:
+    def create_reader(self, trajectory_type: Literal["custom", "xyz"]) -> LAMMPSReader:
         """Create the required reader.
 
         Parameters
         ----------
-        trajectory_type : Literal["custom", "xyz", "h5md"]
+        trajectory_type : Literal["custom", "xyz"]
             Type of file to load.
 
         Returns
@@ -330,7 +303,6 @@ class LAMMPS(Converter):
         --------
         LAMMPScustom.parse_first_step
         LAMMPSxyz.parse_first_step
-        LAMMPSh5md.parse_first_step
         """
 
         self._reader.open_file(self.configuration["trajectory_file"]["value"])

@@ -166,7 +166,9 @@ class MdanseTrajectory(TrajectoryFile):
 
         return configuration
 
-    def charges(self, frame: int) -> npt.NDArray[float]:
+    def charges(
+        self, frame: int, indices: slice | int = np.s_[:]
+    ) -> npt.NDArray[float]:
         """Return the electrical charge array for given time step.
 
         Parameters
@@ -187,14 +189,21 @@ class MdanseTrajectory(TrajectoryFile):
         """
         self._check_frame(frame)
 
+        if isinstance(indices, int):
+            indices = slice(indices, indices + 1)
+
         if "/charge" in self._h5_file:
-            return self._h5_file["/charge"].astype(np.float64)
+            return self._h5_file["/charge"][indices].astype(np.float64)
 
         if "/configuration/charges" in self._h5_file:
-            return self._h5_file["/configuration/charges"][frame].astype(np.float64)
+            return self._h5_file["/configuration/charges"][frame, indices].astype(
+                np.float64
+            )
 
         LOG.debug(f"No charge information in trajectory {self._h5_filename}")
-        return np.zeros(self.chemical_system.number_of_atoms, dtype=np.float64)
+
+        n_req = len(range(*indices.indices(self.chemical_system.number_of_atoms)))
+        return np.zeros(n_req, dtype=np.float64)
 
     def coordinates(
         self, frame: slice | int, indices: slice | int = np.s_[:]

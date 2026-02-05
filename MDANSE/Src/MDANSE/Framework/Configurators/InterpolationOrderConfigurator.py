@@ -73,19 +73,22 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
 
         if value == 0:
             if not traj_has_velocities:
-                self.error_status = "the trajectory does not contain any velocities. Use an interpolation order higher than 0"
+                self.error_status = (
+                    "The trajectory does not contain any velocities. "
+                    "Use an interpolation order higher than 0."
+                )
                 return
             self["variable"] = "velocities"
         elif value > 5:
             self.error_status = (
-                "Use an interpolation order greater than 5 is not implemented."
+                "Interpolation orders greater than 5 are not implemented."
             )
             return
         else:
             number = frames_configurator["number"]
             if number < value + 1:
                 self.error_status = (
-                    f"Not enough MD frames to apply derivatives of order {value}"
+                    f"Not enough MD frames to apply derivatives of order {value}."
                 )
                 return
             self["variable"] = "coordinates"
