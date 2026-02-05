@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-from math import floor
-
 import numpy as np
 
 from .FloatConfigurator import FloatConfigurator
@@ -53,11 +51,7 @@ def get_largest_cutoff(traj_config) -> float:
     cross_ca = np.cross(vec_c, vec_a)
     cross_ab = np.cross(vec_a, vec_b)
 
-    if (
-        np.allclose(cross_bc, 0.0)
-        or np.allclose(cross_ca, 0.0)
-        or np.allclose(cross_ab, 0.0)
-    ):
+    if any(np.allclose(vec, 0.0) for vec in (cross_bc, cross_ca, cross_ab)):
         raise ValueError("Trajectory contains invalid unit cell.")
 
     h_1 = abs(np.dot(vec_a, cross_bc)) / np.linalg.norm(cross_bc)

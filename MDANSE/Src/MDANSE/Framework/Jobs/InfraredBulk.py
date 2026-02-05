@@ -16,12 +16,12 @@
 from __future__ import annotations
 
 import collections
+from itertools import compress
 
 import numpy as np
 from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 
 
@@ -217,10 +217,7 @@ class InfraredBulk(IJob):
             )
 
         ddipole_j = np.zeros((n_frames, 3))
-        for j in range(n_atms):
-            if not cutoff[j]:
-                continue
-
+        for j in compress(range(n_atms), cutoff):
             series_j = self.trajectory.read_atomic_trajectory(
                 j,
                 first=first_frame,

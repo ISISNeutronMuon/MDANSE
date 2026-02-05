@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-from math import floor
-
 from .DistCutoffConfigurator import get_largest_cutoff
 from .IConfigurator import PredictionSettings
 from .RangeConfigurator import RangeConfigurator

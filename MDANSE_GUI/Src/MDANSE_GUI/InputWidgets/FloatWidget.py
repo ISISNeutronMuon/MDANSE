@@ -36,7 +36,7 @@ class FloatWidget(WidgetBase):
     ):
         try:
             default_option = (
-                default if default is not None else float(self._configurator.default)
+                default if default is not None else self._configurator.default
             )
         except ValueError:
             default_option = 0.0
