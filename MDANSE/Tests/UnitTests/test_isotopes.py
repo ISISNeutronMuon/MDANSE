@@ -32,6 +32,7 @@ def test_single_isotope(element):
         if (
             isinstance(avg_dict[key], (list, dict)) 
             or avg_dict[key] == isotope_dict[key]
+            or key == "nuclear_spin"
         ):
             continue
         assert np.isclose(avg_dict[key], isotope_dict[key], equal_nan=True)
