@@ -50,7 +50,7 @@ class OutputFilesConfigurator(IConfigurator):
         "no logs",
     )
     label = "Analysis result files (name and format)"
-    tooltip = "It is possible to use MDAFormant and TextFormat simultaneously."
+    tooltip = "It is possible to use MDAFormat and TextFormat simultaneously."
 
     def __init__(self, name: str, formats: list[str] | None = None, **kwargs):
         """Initialise the values of the output file name parser.
