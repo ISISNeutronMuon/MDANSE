@@ -73,8 +73,6 @@ class HDFInputFileConfigurator(InputFileConfigurator):
                 f"Cannot open {value} HDF file for reading: {traceback.format_exc()}"
             )
             return
-        else:
-            self["instance"] = None
 
         for v in self.variables:
             if v in self["instance"]:
