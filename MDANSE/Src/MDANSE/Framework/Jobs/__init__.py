@@ -48,7 +48,8 @@ from .GaussianDynamicIncoherentStructureFactor import (
     GaussianDynamicIncoherentStructureFactor as GaussianDynamicIncoherentStructureFactor,
 )
 from .IJob import IJob as IJob
-from .Infrared import Infrared as Infrared
+from .InfraredBulk import InfraredBulk as InfraredBulk
+from .InfraredMolecular import InfraredMolecular as InfraredMolecular
 from .JobStatus import JobStatus as JobStatus
 from .MeanSquareDisplacement import MeanSquareDisplacement as MeanSquareDisplacement
 from .MolecularTrace import MolecularTrace as MolecularTrace

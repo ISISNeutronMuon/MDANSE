@@ -25,6 +25,7 @@ from .CheckableComboBox import CheckableComboBox as CheckableComboBox
 from .ComboWidget import ComboWidget as ComboWidget
 from .CorrelationFramesWidget import CorrelationFramesWidget as CorrelationFramesWidget
 from .DerivativeOrderWidget import DerivativeOrderWidget as DerivativeOrderWidget
+from .DistCutoffWidget import DistCutoffWidget as DistCutoffWidget
 from .DistHistCutoffWidget import DistHistCutoffWidget as DistHistCutoffWidget
 from .FloatWidget import FloatWidget as FloatWidget
 from .FramesWidget import FramesWidget as FramesWidget
