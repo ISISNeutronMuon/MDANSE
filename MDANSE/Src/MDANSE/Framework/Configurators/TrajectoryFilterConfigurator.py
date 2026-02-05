@@ -68,12 +68,6 @@ class TrajectoryFilterConfigurator(IConfigurator):
         if not self.update_needed(value):
             return
 
-        reference_file_configurator = self.configurable[
-            self.dependencies["pps_input_file"]
-        ]
-        if reference_file_configurator.configured and reference_file_configurator.valid:
-            self.pps_file_name = reference_file_configurator["value"]
-
         self._settings = value
 
         try:
@@ -81,9 +75,11 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
             if not self._expected_keys <= dict_value.keys():
                 self.error_status = f"The dictionary \n{dict_value}\n does not contain the expected keys {self._expected_keys}."
+                return
 
         except (TypeError, ValueError):
             self.error_status = f"Value \n{value}\n in {self} is not of correct format (expected JSON string)."
+            return
 
         self.error_status = "OK"
         self["value"] = self._settings

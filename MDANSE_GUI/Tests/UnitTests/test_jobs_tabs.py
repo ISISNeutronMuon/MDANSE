@@ -9,6 +9,8 @@ from qtpy.QtWidgets import QMainWindow
 
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.NeutronDynamicTotalStructureFactor import NeutronDynamicTotalStructureFactor
+from MDANSE.Framework.Jobs.StructureFactorFromScatteringFunction import StructureFactorFromScatteringFunction
 from MDANSE_GUI.Session.Session import LocalSession
 from MDANSE_GUI.Session.Settings import LocalSettings
 from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
@@ -26,6 +28,10 @@ ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.enabled}
 
 DATA_DIR = Path(__file__).parents[3] / "MDANSE/Tests/UnitTests/Converted"
 
+
+NeutronDynamicTotalStructureFactor.settings["dcsf_input_file"][1]["default"] = Path(__file__).parent / "dcsf.mda"
+NeutronDynamicTotalStructureFactor.settings["disf_input_file"][1]["default"] = Path(__file__).parent / "disf.mda"
+StructureFactorFromScatteringFunction.settings["dcsf_input_file"][1]["default"] = Path(__file__).parent / "dcsf.mda"
 
 @pytest.fixture
 def trajectory():

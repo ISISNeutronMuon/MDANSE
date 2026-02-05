@@ -79,6 +79,10 @@ class TrajectoryFilter(IJob):
             }
         },
     )
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
