@@ -220,6 +220,18 @@ class TrajectoryFilter(IJob):
             output_trajectory=self._output_trajectory,
         )
 
+        for out_frame, in_frame in enumerate(
+            range(
+                self.configuration["frames"]["first"],
+                self.configuration["frames"]["last"] + 1,
+                self.configuration["frames"]["step"],
+            )
+        ):
+            self._output_trajectory.write_charges(
+                self.trajectory.charges(in_frame)[self.trajectory.atom_indices],
+                out_frame,
+            )
+
         # The input trajectory is closed.
         self.trajectory.close()
 
