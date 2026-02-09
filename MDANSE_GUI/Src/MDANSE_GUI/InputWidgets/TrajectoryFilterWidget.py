@@ -81,6 +81,21 @@ FLOAT_SPINBOX_DECIMALS = 8
 def read_pps_from_file(
     filename: str | Path,
 ) -> tuple[npt.NDArray[float], npt.NDArray[float]] | tuple[None, None]:
+    """Reads a trajectory position power spectrum from an .mda filename,
+    returning the power spectrum as a dataset consisting of the energies (meV)
+    and the corresponding spectrum.
+
+    Parameters
+    __________
+    filename: str | Path
+        Name of the external .mda filename containing the position power spectrum
+
+    Returns
+    __________
+    tuple[npt.NDArray[float], npt.NDArray[float]] | tuple[None, None]
+        Energy axis and corresponding trajectory power spectrum
+
+    """
     try:
         with h5py.File(filename) as source:
             energy_axis = source["pps/axes/romega"][:]
@@ -433,14 +448,66 @@ class FilterAttenuationGroup(FilterPreferencesGroup):
 
     """
 
-    functional_forms = ["Gaussian"]
+    @staticmethod
+    def gaussian(x: np.array, mu: float, sigma: float) -> float:
+        """Returns a centered Gaussian, paramterised by values mu and sigma, over
+        a given input domain x.
+
+        Parameters
+        ----------
+        x : np.array
+            Domain values (x-axis) over which the Gaussian function will be computed
+        mu : float
+            Parameter mu of the Gaussian
+        sigma : float
+            Parameter sigma of the Gaussian
+
+        """
+        return (1 / 2 * np.pi) * np.exp(-0.5 * ((x - mu) / sigma) ** 2)
+
+    @staticmethod
+    def double_gaussian(x: np.array, mu: float, sigma: float) -> float:
+        """Returns a double Gaussian, paramterised by values mu and sigma, over
+        a given input domain x.
+
+        The Gaussian curves are centered symmetrically one quarter of the length
+        of x, either side of the midpoint.
+
+        Parameters
+        ----------
+        x : np.array
+            Domain values (x-axis) over which the Gaussian function will be computed
+        mu : float
+            Parameter mu of the Gaussian
+        sigma : float
+            Parameter sigma of the Gaussian
+
+        """
+        return FilterAttenuationGroup.gaussian(
+            x, mu / 2, sigma
+        ) + FilterAttenuationGroup.gaussian(x, mu + (mu / 2), sigma)
+
+    functional_forms = {"Gaussian": gaussian, "Double gaussian": double_gaussian}
 
     def __init__(self, render_func: Callable):
         super().__init__(render_func)
 
     @staticmethod
     def make_forms() -> list[str]:
-        forms = copy.deepcopy(FilterAttenuationGroup.functional_forms)
+        """Returns a list of string options for the available attenuation functional forms combobox,
+        including:
+
+        Gaussian
+        Double gaussian
+        External file (.mda)
+
+        Returns
+        ----------
+        list[str]
+            List of strings representing the options for the attenuation functional form combobox
+
+        """
+        forms = list(FilterAttenuationGroup.functional_forms.keys())
         forms.append("External file (.mda)")
         return forms
 
@@ -1122,10 +1189,53 @@ class FilterDesigner(QDialog):
         """
         return signal.resample(values, to_len) / values.max()
 
+    def get_attenuation_function(
+        self, tr_filter: Filter, source: str
+    ) -> Sequence[npt.NDArray[float]]:
+        """Put curves on the same scale for the plot.
+
+        Generate an attenuation function to display alongside the filter frequency response,
+        returning the frequency values of the attenuation function, as well as its magnitudes
+        and magnitudes after attenuation.
+
+        Parameters
+        ----------
+        tr_filter : Filter
+            Filter class for the designed filter.
+        source : str
+            String name of the attenuation function to display.
+
+        Returns
+        -------
+        raw_power_spectrum_freqs : npt.NDArray[float]
+            Frequency axis of the original PPS result.
+        power_spectrum : npt.NDArray[float]
+            Trajectory power spectrum.
+        attenuated_power_spectrum : npt.NDArray[float]
+            Attenuated power spectrum due to the designed filter response.
+
+        """
+        freqs = tr_filter.freq_response.frequencies
+        attenuation_fn = FilterAttenuationGroup.functional_forms[source]
+        if source == "Gaussian":
+            values = attenuation_fn(freqs, freqs.max() / 2, freqs.max() / 4)
+        elif source == "Double gaussian":
+            values = attenuation_fn(freqs, freqs.max() / 2, freqs.max() / 8)
+        elif source in {"Gaussian noise", "Uniform noise"}:
+            values = attenuation_fn(freqs)
+        else:
+            raise ValueError("Unknown attenuation functional form")
+        normalised = values / np.max(values)
+
+        if self.current_filter_units() == Filter.FrequencyUnits.CYCLIC:
+            freqs /= 2 * np.pi
+
+        return (freqs, normalised, normalised * tr_filter.freq_response.magnitudes)
+
     def get_attenuation_power_spectrum(
         self,
         tr_filter: Filter,
-        pps_filename: str | None = None,
+        pps_filename: str,
     ) -> Sequence[npt.NDArray[float]]:
         """Put curves on the same scale for the plot.
 
@@ -1151,13 +1261,14 @@ class FilterDesigner(QDialog):
         """
         response = tr_filter.freq_response
 
+        file_freqs, file_values = None, None
+
         # Trajectory power spectrum data
         if pps_filename:
             file_freqs, file_values = read_pps_from_file(pps_filename)
 
-        if not pps_filename or file_freqs is None or file_values is None:
-            # TODO: If no filename supplied, use a Gaussian normalised to 1.0, centered on the frequency midpoint
-            freqs, values = np.linspace(0, 10, 10), np.ones(10)
+        if file_freqs is None or file_values is None:
+            freqs, values = response
         else:
             freqs, values = file_freqs, file_values
 
@@ -1434,7 +1545,7 @@ class FilterDesigner(QDialog):
         energies = self.preferences["xaxis_units"] == "meV"
 
         # Set attenuation
-        source = self.attenuation.get("form", False)
+        source = self.attenuation.get("form", "Gaussian")
         show_attenuation = self.attenuation.get("show", False)
 
         # Preview instantiation of the selected filter
@@ -1445,12 +1556,13 @@ class FilterDesigner(QDialog):
         ps, attenuated_ps = None, None
 
         if show_attenuation:
-            ps_axis, ps, attenuated_ps = self.get_attenuation_power_spectrum(
-                filter_preview,
-                pps_filename=self.pps_configurator["value"]
-                if (source not in FilterAttenuationGroup.functional_forms)
-                else None,
-            )
+            if source not in FilterAttenuationGroup.functional_forms:
+                attenuation = self.get_attenuation_power_spectrum(
+                    filter_preview, pps_filename=self.pps_configurator["value"]
+                )
+            else:
+                attenuation = self.get_attenuation_function(filter_preview, source)
+            ps_axis, ps, attenuated_ps = attenuation
 
         # Get filter coefficients
         numerator, denominator = (
