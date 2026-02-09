@@ -23,6 +23,7 @@ class DistHistCutoffConfigurator(RangeConfigurator):
         self.prediction = PredictionSettings(
             key="value",
             label="Interatomic distance",
+            unit="nm",
         )
 
     def configure(self, value):

@@ -309,7 +309,7 @@ class Action(QWidget):
                     getattr(input_widget._configurator, "preview_output_axis", False)
                 )
                 if self._use_preview and has_preview:
-                    input_widget.value_updated.connect(self.show_output_prediction)
+                    input_widget.value_changed.connect(self.show_output_prediction)
                 LOG.info(f"Set up the right widget for {key}")
             # self.handlers[key] = data_handler
         self._has_been_initialised = True

@@ -57,7 +57,6 @@ class WidgetBase(QObject):
         Layout to add.
     """
 
-    value_updated = Signal()
     value_changed = Signal()
 
     def __init__(
