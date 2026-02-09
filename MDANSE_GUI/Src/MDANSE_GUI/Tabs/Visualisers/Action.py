@@ -255,6 +255,10 @@ class Action(QWidget):
             ddict = value[1]
             configurator = job_instance.configuration[key]
             if key not in self._widgets_in_layout:
+                if "label" not in ddict and hasattr(configurator, "label"):
+                    ddict["label"] = configurator.label
+                if "tooltip" not in ddict and hasattr(configurator, "tooltip"):
+                    ddict["tooltip"] = configurator.tooltip
                 ddict.setdefault("label", key)
                 ddict["configurator"] = configurator
                 ddict["source_object"] = self._input_traj_path
@@ -274,6 +278,10 @@ class Action(QWidget):
             dtype = value[0]
             ddict = value[1]
             configurator = job_instance.configuration[key]
+            if "label" not in ddict and hasattr(configurator, "label"):
+                ddict["label"] = configurator.label
+            if "tooltip" not in ddict and hasattr(configurator, "tooltip"):
+                ddict["tooltip"] = configurator.tooltip
             ddict.setdefault("label", key)
             ddict["configurator"] = configurator
             ddict["source_object"] = self._input_traj_path
@@ -308,8 +316,12 @@ class Action(QWidget):
         self.check_inputs()
 
         if self._use_preview and "preview_box" not in self._widgets_in_layout:
-            box = QGroupBox("results preview")
+            box = QGroupBox("Preview of output axes")
             self._preview_box = QLabel(self)
+            self._preview_box.setToolTip(
+                "The current input parameters will result in the output "
+                "being calculated at the following points."
+            )
             QHBoxLayout(box).addWidget(self._preview_box)
             self.layout.addWidget(box)
             self._widgets_in_layout["preview_box"] = box
@@ -492,6 +504,8 @@ class Action(QWidget):
         for widnum, key in enumerate(self._job_instance.settings.keys()):
             if labels:
                 label = self._job_instance.settings[key][1]["label"]
+                if tooltip := self._job_instance.settings[key][1].get("tooltip"):
+                    label += f". {tooltip}"
                 results[key] = (self._widgets[widnum].get_widget_value(), label)
             else:
                 results[key] = self._widgets[widnum].get_widget_value()

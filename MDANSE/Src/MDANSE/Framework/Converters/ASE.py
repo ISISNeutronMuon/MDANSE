@@ -98,7 +98,6 @@ class ASE(Converter):
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
-            "label": "MDANSE trajectory (filename, datatype, chunk size, compression, logfile output)",
             "formats": ["MDTFormat"],
             "root": "trajectory_file",
         },

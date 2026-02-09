@@ -73,7 +73,6 @@ class Gromacs(Converter):
         {
             "formats": ["MDTFormat"],
             "root": "pdb_file",
-            "label": "MDANSE trajectory (filename, datatype, chunk size, compression, logfile output)",
         },
     )
 

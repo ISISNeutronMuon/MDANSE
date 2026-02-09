@@ -41,6 +41,10 @@ class OutputTrajectoryConfigurator(IConfigurator):
 
     log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
     _default = ("OUTPUT_TRAJECTORY", 64, 128, "none", "no logs")
+    label = "MDANSE output trajectory"
+    tooltip = (
+        "Values are: filename, data type, chunk size, compression, logfile output."
+    )
 
     def __init__(self, name, format=None, **kwargs):
         """Initializes the configurator.

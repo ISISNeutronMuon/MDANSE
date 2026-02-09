@@ -88,7 +88,6 @@ class VASP(Converter):
         {
             "formats": ["MDTFormat"],
             "root": "xdatcar_file",
-            "label": "MDANSE trajectory (filename, datatype, chunk size, compression, logfile output)",
         },
     )
 

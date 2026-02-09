@@ -34,6 +34,8 @@ class ProjectionConfigurator(IConfigurator):
     """
 
     _default = None
+    label = "Coordinate projection"
+    tooltip = "The coordinates from the trajectory can be projected on a line or plane."
 
     def configure(self, value: tuple[str, Sequence[SupportsFloat]]):
         """
@@ -41,7 +43,7 @@ class ProjectionConfigurator(IConfigurator):
 
         :param value: the input projector definition. It can be a 2-tuple whose 1st element if the name \
         of the projector (one of *'null'*,*'axial'* or *'planar'*) and the 2nd element the parameters for the selected \
-        projector (None for *'null'*, a Scientific.Vector for *'axial'* and a list of two Scientific.Vector for *'planar'*) \
+        projector (None for *'null'*, a vector for *'axial'* or *'planar'*) \
         or ``None`` in the case where no projection is needed.
         :type value: 2-tuple
         """

@@ -135,6 +135,8 @@ class PartialChargeConfigurator(IConfigurator):
     """Assigns partial charges to atoms."""
 
     _default = "{}"
+    label = "Partial electrical charges"
+    tooltip = "Values can be set separately for each atom and will be constant in time."
 
     def configure(self, value):
         """

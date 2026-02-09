@@ -60,20 +60,20 @@ class AverageStructure(IJob):
         "BooleanConfigurator",
         {
             "default": False,
-            "label": "Fold coordinates in to box. Normally it should not be necessary.",
+            "label": "Fold coordinates into box. Normally it should not be necessary.",
         },
     )
     settings["output_units"] = (
         "SingleChoiceConfigurator",
         {
-            "label": "Distance units of the output",
+            "label": "Distance unit of the output",
             "choices": ["Angstrom", "Bohr", "nm", "pm"],
             "default": "Angstrom",
         },
     )
     settings["output_files"] = (
         "OutputStructureConfigurator",
-        {"format": "vasp"},
+        {"format": "vasp", "label": "Output structure file name and format"},
     )
 
     def initialize(self):

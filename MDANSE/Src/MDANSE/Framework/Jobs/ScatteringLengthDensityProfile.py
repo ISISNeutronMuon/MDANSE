@@ -73,7 +73,12 @@ class ScatteringLengthDensityProfile(IJob):
     )
     settings["axis"] = (
         "SingleChoiceConfigurator",
-        {"choices": ["a", "b", "c"], "default": "c"},
+        {
+            "choices": ["a", "b", "c"],
+            "default": "c",
+            "label": "Profile axis",
+            "tooltip": "Calculate the profile along this vector of the unit cell",
+        },
     )
     settings["dr"] = (
         "GridStepConfigurator",

@@ -26,7 +26,8 @@ class FramesConfigurator(RangeConfigurator):
     of (first, last, step).
     """
 
-    _label = "Subset of frames to be selected (first, last, step size)"
+    label = "Frame sampling"
+    tooltip = "The values are: first frame, last frame, step size."
     _default = "all"
 
     def __init__(self, name, **kwargs):

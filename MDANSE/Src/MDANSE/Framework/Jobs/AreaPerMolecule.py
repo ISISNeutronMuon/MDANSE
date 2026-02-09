@@ -54,7 +54,7 @@ class AreaPerMolecule(IJob):
     settings["axis"] = (
         "SingleChoiceConfigurator",
         {
-            "label": "area vectors",
+            "label": "Surface defined by unit cell vectors",
             "choices": ["ab", "bc", "ac"],
             "default": "ab",
         },
@@ -62,7 +62,6 @@ class AreaPerMolecule(IJob):
     settings["molecule_name"] = (
         "MoleculeSelectionConfigurator",
         {
-            "label": "molecule name",
             "default": "",
             "dependencies": {"trajectory": "trajectory"},
         },

@@ -109,6 +109,8 @@ class AtomTransmutationConfigurator(IConfigurator):
     """
 
     _default = "{}"
+    label = "Atom transmutation"
+    tooltip = "Atom types (and properties) can be temporarily changed for the current analysis run."
 
     def configure(self, value: str):  # noqa: PLR0911
         """Configure an input value.

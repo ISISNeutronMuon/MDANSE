@@ -73,9 +73,21 @@ class Voronoi(IJob):
     )
     settings["pbc"] = (
         "BooleanConfigurator",
-        {"label": "apply periodic_boundary_condition", "default": True},
+        {
+            "label": "Use periodic boundary conditions",
+            "tooltip": "Atoms from periodic copies of the system are considered to be blocking the available space",
+            "default": True,
+        },
     )
-    settings["pbc_border_size"] = ("FloatConfigurator", {"mini": 0.0, "default": 0.2})
+    settings["pbc_border_size"] = (
+        "FloatConfigurator",
+        {
+            "mini": 0.0,
+            "default": 0.2,
+            "label": "Padding radius (nm)",
+            "tooltip": "Only atoms within this distance from the unit cell wall will be included in the periodic copies",
+        },
+    )
     settings["output_files"] = ("OutputFilesConfigurator", {})
 
     def initialize(self):

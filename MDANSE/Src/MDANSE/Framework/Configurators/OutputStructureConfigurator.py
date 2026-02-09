@@ -36,7 +36,7 @@ class OutputStructureConfigurator(IConfigurator):
 
     log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
     _default = ("OUTPUT_FILENAME", "vasp", "no logs")
-    _label = "Output filename and format (filename, format)"
+    tooltip = "Time-averaged coordinates of atoms will be written to this file."
 
     def __init__(self, name, formats=None, **kwargs):
         """

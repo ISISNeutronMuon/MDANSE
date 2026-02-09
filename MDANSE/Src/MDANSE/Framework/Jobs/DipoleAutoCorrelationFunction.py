@@ -50,7 +50,6 @@ class DipoleAutoCorrelationFunction(IJob):
     settings["molecule_name"] = (
         "MoleculeSelectionConfigurator",
         {
-            "label": "molecule name",
             "default": "",
             "dependencies": {"trajectory": "trajectory"},
         },

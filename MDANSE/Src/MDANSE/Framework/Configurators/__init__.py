@@ -119,9 +119,6 @@ from .SingleChoiceConfigurator import (
 from .TrajectoryFilterConfigurator import (
     TrajectoryFilterConfigurator as TrajectoryFilterConfigurator,
 )
-from .TrajectoryVariableConfigurator import (
-    TrajectoryVariableConfigurator as TrajectoryVariableConfigurator,
-)
 from .UnitCellConfigurator import UnitCellConfigurator as UnitCellConfigurator
 from .VectorConfigurator import VectorConfigurator as VectorConfigurator
 from .WeightsConfigurator import WeightsConfigurator as WeightsConfigurator

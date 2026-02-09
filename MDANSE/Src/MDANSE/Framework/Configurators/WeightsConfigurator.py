@@ -32,6 +32,8 @@ class WeightsConfigurator(SingleChoiceConfigurator):
     """
 
     _default = "equal"
+    label = "Weights"
+    tooltip = "Atom property selected here will be used for calculating the scaling factors of the results."
 
     def __init__(self, name: str, **kwargs):
         """Create the configurator.
