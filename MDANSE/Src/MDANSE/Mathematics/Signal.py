@@ -353,8 +353,7 @@ class Filter(ABC):
             Frequency response over a given range of angular frequencies.
 
         """
-
-        return signal.freqs(*transfer_function, worN=range)
+        return signal.freqz_sos(self.sos, worN=range, fs=self.sample_freq)
 
     def apply(self, input: np.array) -> np.ndarray:
         """Returns the convolution of the digital designed filter with an input signal.
@@ -375,12 +374,7 @@ class Filter(ABC):
             Output signal resulting from convolution with the filter.
 
         """
-        coeffs = (
-            self.to_digital_coeffs()
-            if Filter.Flags.DIGITAL_ONLY not in self.flags
-            else self.coeffs
-        )
-        return signal.filtfilt(coeffs.numerator, coeffs.denominator, input)
+        return signal.sosfiltfilt(self.sos, input)
 
     def to_digital_coeffs(self) -> TransferFunction:
         """Returns the filter instance digital coefficients converted from analog, by performing a bilinear transform.
@@ -397,9 +391,8 @@ class Filter(ABC):
 
         """
         return TransferFunction(
-            *signal.bilinear(
-                self.coeffs.numerator, self.coeffs.denominator, self.sample_freq
-            )
+            self.coeffs.numerator,
+            self.coeffs.denominator,
         )
 
     @property
@@ -768,7 +761,7 @@ class Butterworth(Filter):
 
     """
 
-    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+    flags = {Filter.Flags.DIGITAL_ONLY}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -786,15 +779,15 @@ class Butterworth(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = TransferFunction(
-            *signal.butter(
-                self.order,
-                self.cutoff_freq,
-                btype=self.attenuation_type,
-                analog=True,
-                output="ba",
-            )
+        self.sos = signal.butter(
+            self.order,
+            self.cutoff_freq,
+            btype=self.attenuation_type,
+            analog=False,
+            output="sos",
+            fs=self.sample_freq,
         )
+        self.coeffs = TransferFunction(*signal.sos2tf(self.sos))
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
 
 
@@ -808,7 +801,7 @@ class ChebyshevTypeI(Filter):
 
     """
 
-    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+    flags = {Filter.Flags.DIGITAL_ONLY}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -830,16 +823,16 @@ class ChebyshevTypeI(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = TransferFunction(
-            *signal.cheby1(
-                self.order,
-                self.max_ripple,
-                self.cutoff_freq,
-                btype=self.attenuation_type,
-                analog=True,
-                output="ba",
-            )
+        self.sos = signal.cheby1(
+            self.order,
+            self.max_ripple,
+            self.cutoff_freq,
+            btype=self.attenuation_type,
+            analog=False,
+            output="sos",
+            fs=self.sample_freq,
         )
+        self.coeffs = TransferFunction(*signal.sos2tf(self.sos))
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
 
 
@@ -853,7 +846,7 @@ class ChebyshevTypeII(Filter):
 
     """
 
-    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+    flags = {Filter.Flags.DIGITAL_ONLY}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -875,16 +868,16 @@ class ChebyshevTypeII(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = TransferFunction(
-            *signal.cheby2(
-                self.order,
-                self.min_attenuation,
-                self.cutoff_freq,
-                btype=self.attenuation_type,
-                analog=True,
-                output="ba",
-            )
+        self.sos = signal.cheby2(
+            self.order,
+            self.min_attenuation,
+            self.cutoff_freq,
+            btype=self.attenuation_type,
+            analog=False,
+            output="sos",
+            fs=self.sample_freq,
         )
+        self.coeffs = TransferFunction(*signal.sos2tf(self.sos))
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
 
 
@@ -898,7 +891,7 @@ class Elliptical(Filter):
 
     """
 
-    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+    flags = {Filter.Flags.DIGITAL_ONLY}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -924,17 +917,17 @@ class Elliptical(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = TransferFunction(
-            *signal.ellip(
-                self.order,
-                self.max_ripple,
-                self.min_attenuation,
-                self.cutoff_freq,
-                btype=self.attenuation_type,
-                analog=True,
-                output="ba",
-            )
+        self.sos = signal.ellip(
+            self.order,
+            self.max_ripple,
+            self.min_attenuation,
+            self.cutoff_freq,
+            btype=self.attenuation_type,
+            analog=False,
+            output="sos",
+            fs=self.sample_freq,
         )
+        self.coeffs = TransferFunction(*signal.sos2tf(self.sos))
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
 
 
@@ -948,7 +941,7 @@ class Bessel(Filter):
 
     """
 
-    flags = {Filter.Flags.DIGITAL_AND_ANALOGUE}
+    flags = {Filter.Flags.DIGITAL_ONLY}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -971,16 +964,16 @@ class Bessel(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = TransferFunction(
-            *signal.bessel(
-                self.order,
-                self.cutoff_freq,
-                btype=self.attenuation_type,
-                analog=True,
-                output="ba",
-                norm=self.norm,
-            )
+        self.sos = signal.bessel(
+            self.order,
+            self.cutoff_freq,
+            btype=self.attenuation_type,
+            norm=self.norm,
+            analog=False,
+            output="sos",
+            fs=self.sample_freq,
         )
+        self.coeffs = TransferFunction(*signal.sos2tf(self.sos))
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
 
 
@@ -1010,37 +1003,12 @@ class Notch(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = TransferFunction(
-            *signal.iirnotch(
-                self.fundamental_freq, self.quality_factor, fs=self.sample_freq
-            )
+        b, a = signal.iirnotch(
+            self.fundamental_freq, self.quality_factor, fs=self.sample_freq
         )
+        self.sos = signal.tf2sos(a, b, analog=False)
+        self.coeffs = TransferFunction(b, a)
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
-
-    def compute_frequencies(
-        self, transfer_function: TransferFunction, range: np.ndarray
-    ):
-        """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
-
-        See Also
-        ________
-        scipy.signal.freqz :
-            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqz.html
-
-        Parameters
-        ----------
-        transfer_function : TransferFunction
-            Numerator and denominator of the filter transfer function.
-        range : np.ndarray
-            Range of frequency values over which to compute.
-
-        Returns
-        -------
-        np.ndarray
-            Frequency response over a given range of cyclic frequencies.
-        """
-
-        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
 
 
 class Peak(Filter):
@@ -1069,38 +1037,12 @@ class Peak(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = TransferFunction(
-            *signal.iirpeak(
-                self.fundamental_freq, self.quality_factor, fs=self.sample_freq
-            )
+        b, a = signal.iirpeak(
+            self.fundamental_freq, self.quality_factor, fs=self.sample_freq
         )
+        self.sos = signal.tf2sos(a, b, analog=False)
+        self.coeffs = TransferFunction(b, a)
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
-
-    def compute_frequencies(
-        self, transfer_function: TransferFunction, range: np.ndarray
-    ):
-        """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
-
-        See Also
-        ________
-        scipy.signal.freqz :
-            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqz.html
-
-        Parameters
-        ----------
-        transfer_function : TransferFunction)
-            Numerator and denominator of the filter transfer function.
-        range : np.ndarray
-            Range of frequency values over which to compute.
-
-        Returns
-        -------
-        np.ndarray
-            Frequency response over a given range of cyclic frequencies.
-
-        """
-
-        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
 
 
 class Comb(Filter):
@@ -1139,42 +1081,16 @@ class Comb(Filter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.coeffs = TransferFunction(
-            *signal.iircomb(
-                self.fundamental_freq,
-                self.quality_factor,
-                ftype=self.comb_type,
-                pass_zero=self.pass_zero,
-                fs=self.sample_freq,
-            )
+        b, a = signal.iircomb(
+            self.fundamental_freq,
+            self.quality_factor,
+            ftype=self.comb_type,
+            pass_zero=self.pass_zero,
+            fs=self.sample_freq,
         )
+        self.sos = signal.tf2sos(a, b, analog=False)
+        self.coeffs = TransferFunction(b, a)
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
-
-    def compute_frequencies(
-        self, transfer_function: TransferFunction, range: np.ndarray
-    ):
-        """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
-
-        See Also
-        ________
-        scipy.signal.freqz :
-            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqz.html
-
-        Parameters
-        ----------
-        transfer_function : TransferFunction
-            Numerator and denominator of the filter transfer function.
-        range : np.ndarray
-            Range of frequency values over which to compute.
-
-        Returns
-        -------
-        np.ndarray
-            Frequency response over a given range of cyclic frequencies.
-
-        """
-
-        return signal.freqz(*transfer_function, worN=range, fs=self.sample_freq)
 
 
 FILTERS = (
