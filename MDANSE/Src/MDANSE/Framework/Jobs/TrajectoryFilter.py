@@ -22,7 +22,10 @@ import h5py
 import numpy as np
 from more_itertools import always_iterable
 
-from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Chemistry.ChemicalSystem import (
+    ChemicalSystem,
+    assign_molecules_after_atom_selection,
+)
 from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import FILTER_MAP, Filter
@@ -201,6 +204,11 @@ class TrajectoryFilter(IJob):
             name = "filtered_traj_chemical_system"
         output_chemical_system = ChemicalSystem(name)
         output_chemical_system.initialise_atoms(self._selected_atoms)
+        assign_molecules_after_atom_selection(
+            self.trajectory.atom_indices,
+            self.trajectory.chemical_system,
+            output_chemical_system,
+        )
 
         # Create trajectory writer object
         self._output_trajectory = TrajectoryWriter(
