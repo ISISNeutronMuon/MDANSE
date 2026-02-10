@@ -69,7 +69,7 @@ def assign_molecules_after_atom_selection(
         for val in vals:
             new_cluster = set(val) & selected_idxs
             if new_cluster:
-                new_cluster = sorted([indx_map[i] for i in new_cluster])
+                new_cluster = sorted(indx_map[i] for i in new_cluster)
                 selected_clusters[key].append(new_cluster)
 
     new_cs._clusters = selected_clusters
