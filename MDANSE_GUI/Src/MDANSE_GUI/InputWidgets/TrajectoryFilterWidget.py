@@ -1252,7 +1252,12 @@ class FilterDesigner(QDialog):
         if self.current_filter_units() == Filter.FrequencyUnits.CYCLIC:
             freqs /= 2 * np.pi
 
-        return (freqs, normalised, normalised * tr_filter.freq_response.magnitudes)
+        return (
+            freqs,
+            normalised,
+            freqs,
+            normalised * tr_filter.freq_response.magnitudes,
+        )
 
     def get_attenuation_power_spectrum(
         self,
@@ -1283,16 +1288,13 @@ class FilterDesigner(QDialog):
         """
         response = tr_filter.freq_response
 
-        file_freqs, file_values = None, None
+        file_freqs, file_values = read_pps_from_file(pps_filename)
+        freqs, _ = response
 
-        # Trajectory power spectrum data
-        if pps_filename:
-            file_freqs, file_values = read_pps_from_file(pps_filename)
-
-        if file_freqs is None or file_values is None:
-            freqs, values = response
-        else:
-            freqs, values = file_freqs, file_values
+        if file_freqs is None:
+            file_freqs = freqs
+        if file_values is None:
+            file_values = np.ones_like(freqs)
 
         # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain, setting
         # custom frequency range on filter object
@@ -1303,8 +1305,13 @@ class FilterDesigner(QDialog):
         )
         tr_filter.set_freq_response(Filter.FrequencyRangeMethod.CUSTOM)
 
+        overlap_mask = (file_freqs >= max(freqs.min(), file_freqs.min())) & (
+            file_freqs <= min(freqs.max(), file_freqs.max())
+        )
+        att_freqs = file_freqs[overlap_mask]
+
         # Normalise trajectory power spectrum (y-axis)
-        normalised = values / np.max(values)
+        normalised = file_values / np.max(file_values)
 
         attenuation = interp1d(
             tr_filter.freq_response.frequencies,
@@ -1470,7 +1477,7 @@ class FilterDesigner(QDialog):
 
         # Conditionally display trajectory power spectral attenuation
         if trajectory_power_spectrum:
-            psx, ps, attenuated_ps = trajectory_power_spectrum
+            psx, ps, apsx, attenuated_ps = trajectory_power_spectrum
             axes.plot(
                 psx,
                 20 * np.log10(ps) if db_response else ps,
@@ -1584,7 +1591,7 @@ class FilterDesigner(QDialog):
                 )
             else:
                 attenuation = self.get_attenuation_function(filter_preview, source)
-            ps_axis, ps, attenuated_ps = attenuation
+            ps_axis, ps, attenuated_ps_axis, attenuated_ps = attenuation
 
         # Get filter coefficients
         numerator, denominator = (
@@ -1598,7 +1605,7 @@ class FilterDesigner(QDialog):
             filter_preview.freq_response,
             db_response=db_response,
             energies=energies,
-            trajectory_power_spectrum=(ps_axis, ps, attenuated_ps)
+            trajectory_power_spectrum=(ps_axis, ps, attenuated_ps_axis, attenuated_ps)
             if ps is not None and attenuated_ps is not None
             else None,
         )
