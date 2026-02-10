@@ -1006,7 +1006,7 @@ class Notch(Filter):
         b, a = signal.iirnotch(
             self.fundamental_freq, self.quality_factor, fs=self.sample_freq
         )
-        self.sos = signal.tf2sos(a, b, analog=False)
+        self.sos = signal.tf2sos(b, a, analog=False)
         self.coeffs = TransferFunction(b, a)
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
 
@@ -1040,7 +1040,7 @@ class Peak(Filter):
         b, a = signal.iirpeak(
             self.fundamental_freq, self.quality_factor, fs=self.sample_freq
         )
-        self.sos = signal.tf2sos(a, b, analog=False)
+        self.sos = signal.tf2sos(b, a, analog=False)
         self.coeffs = TransferFunction(b, a)
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
 
@@ -1088,7 +1088,7 @@ class Comb(Filter):
             pass_zero=self.pass_zero,
             fs=self.sample_freq,
         )
-        self.sos = signal.tf2sos(a, b, analog=False)
+        self.sos = signal.tf2sos(b, a, analog=False)
         self.coeffs = TransferFunction(b, a)
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
 
