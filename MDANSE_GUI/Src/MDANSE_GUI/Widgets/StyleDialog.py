@@ -29,10 +29,10 @@ from MDANSE.Framework.Jobs.IJob import IJob
 sample_styles = {
     "blank_stylesheet": "",
     "initial_stylesheet": """QWidget
-{   border-radius: 1px;
-    border-style: 1nset;
-    border-width: 0px;
-    border-color: rgb(30,250,250);
+{   border-radius: 3px;
+    border-style: inset;
+    border-width: 1px;
+    border-color: rgb(80,0,250);
     font: bold 14px;
     padding: 2px;
 }""",
