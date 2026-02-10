@@ -319,6 +319,7 @@ class Filter(ABC):
         DIGITAL_ONLY: int = 0
         DIGITAL_AND_ANALOGUE: int = 1
         FUNDAMENTAL_EVENLY_DIVIDES_FS: int = 2
+        BOUNDED_FILTER: int = 3
 
     @abstractmethod
     def __init__(self, **kwargs):
@@ -391,8 +392,9 @@ class Filter(ABC):
 
         """
         return TransferFunction(
-            self.coeffs.numerator,
-            self.coeffs.denominator,
+            *signal.bilinear(
+                self.coeffs.numerator, self.coeffs.denominator, self.sample_freq
+            )
         )
 
     @property
@@ -761,7 +763,7 @@ class Butterworth(Filter):
 
     """
 
-    flags = {Filter.Flags.DIGITAL_ONLY}
+    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.BOUNDED_FILTER}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -801,7 +803,7 @@ class ChebyshevTypeI(Filter):
 
     """
 
-    flags = {Filter.Flags.DIGITAL_ONLY}
+    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.BOUNDED_FILTER}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -846,7 +848,7 @@ class ChebyshevTypeII(Filter):
 
     """
 
-    flags = {Filter.Flags.DIGITAL_ONLY}
+    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.BOUNDED_FILTER}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -891,7 +893,7 @@ class Elliptical(Filter):
 
     """
 
-    flags = {Filter.Flags.DIGITAL_ONLY}
+    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.BOUNDED_FILTER}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},
@@ -941,7 +943,7 @@ class Bessel(Filter):
 
     """
 
-    flags = {Filter.Flags.DIGITAL_ONLY}
+    flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.BOUNDED_FILTER}
 
     default_settings = {
         "order": {"description": "The order of the filter", "value": 1},

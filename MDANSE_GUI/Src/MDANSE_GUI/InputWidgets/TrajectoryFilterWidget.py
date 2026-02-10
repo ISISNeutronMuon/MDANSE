@@ -1230,9 +1230,9 @@ class FilterDesigner(QDialog):
 
         for name, filter_class in FILTER_MAP.items():
             template = (
-                FilterSettingGroup
-                if Filter.Flags.DIGITAL_ONLY in filter_class.flags
-                else BoundedFilterSettingsGroup
+                BoundedFilterSettingsGroup
+                if Filter.Flags.BOUNDED_FILTER in filter_class.flags
+                else FilterSettingGroup
             )
             group_obj = template(
                 parent_attributes=copy.deepcopy(self.settings["attributes"]),
