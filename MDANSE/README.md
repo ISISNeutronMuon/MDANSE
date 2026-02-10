@@ -30,12 +30,12 @@ J Chem Inf Model. 57(1):1-5 (2017).
 
 ## Version information
 
-This is the second release candidate of MDANSE 2.0.0. The set of features it
-contains will not change by the time the full release has been made. However,
-there still may be some problems with the code at this stage that need to be
-identified and corrected. Please help us develop MDANSE by reporting any
-problems you experience when using the code. The preferred way of reporting
-problems is by adding them to the
+This is the first release of MDANSE 2.0.0.
+
+Considering the large number of different MD engines and analysis types,
+it is still possible that some conversion or analysis runs will not
+produce the expected results. Please report any problems
+you experience while using MDANSE by adding them to the
 [GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
 You can also send a message to MDANSE-help@stfc.ac.uk to get in touch
 with MDANSE developers.
@@ -66,6 +66,13 @@ which will allow you to execute MDANSE scripts, as long as your
 virtual environment is active. (This means that you will have to
 activate it when you start a new shell.)
 
+If you are using a virtual environment in which you had installed
+MDANSE in the past, you can upgrade MDANSE to the current version
+by typing:
+```
+pip install --upgrade MDANSE
+```
+
 If you experience problems with the installation, you may want to upgrade pip
 ```
 pip install --upgrade pip
@@ -95,7 +102,7 @@ The typical workflow of MDANSE:
 3. Perform an analysis,
 4. Check the results with the plotter.
 
-The most complete user documentation of MDANSE can be found on [our Read the Docs page](https://mdanse.readthedocs.io/en/protos).
+The most complete user documentation of MDANSE can be found on [our Read the Docs page](https://mdanse.readthedocs.io).
 
 Other information including example scripts can be found on the [MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx) 
 
@@ -189,7 +196,7 @@ can be saved in an MDA file (HDF5 format), or a set of DAT files
 
 More detailed information on how MDANSE works, what it can do,
 and the science can all be found on
-[our Read the Docs page](https://mdanse.readthedocs.io/en/protos).
+[our Read the Docs page](https://mdanse.readthedocs.io).
 
 ## Citing MDANSE
 

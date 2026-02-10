@@ -5,7 +5,7 @@
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/mdanse?label=mdanse)](https://pypi.org/project/MDANSE/)
 [![PyPI - Version](https://img.shields.io/pypi/v/mdanse_gui?label=mdanse_gui)](https://pypi.org/project/MDANSE/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/mdanse_gui?label=mdanse_gui)](https://pypi.org/project/MDANSE/)
-[![Read the Docs](https://img.shields.io/readthedocs/mdanse)](https://mdanse.readthedocs.io/en/protos/)
+[![Read the Docs](https://img.shields.io/readthedocs/mdanse)](https://mdanse.readthedocs.io/)
 
 
 ## Molecular Dynamics Analysis for Neutron Scattering Experiments
@@ -30,18 +30,13 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5](https://doi.org/10.1021/acs.jcim.6b0057
 
 ## Version information
 
-This is the 2.x branch of MDANSE, which consists of two Python packages,
+This is the first full release of MDANSE 2.0, consistig of two Python packages,
 MDANSE (the analysis code) and MDANSE_GUI (the graphical user interface).
-The final version in the 1.5.x series can still be found in the **legacy**
-branch, but is not being actively developed or supported.
 
-The current version of MDANSE is currently approaching the first release,
-and the second release candidate has been created. The set of features it
-contains will not change by the time the full release has been made. However,
-there still may be some problems with the code at this stage that need to be
-identified and corrected. You can help the developers by reporting problems
-you experience while using MDANSE. The preferred way of reporting
-problems is by adding them to the
+Considering the large number of different MD engines and analysis types,
+it is still possible that some conversion or analysis runs will not
+produce the expected results. Please report any problems
+you experience while using MDANSE by adding them to the
 [GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
 You can also send a message to MDANSE-help@stfc.ac.uk to get in touch
 with MDANSE developers.
@@ -68,7 +63,12 @@ While your virtual environment is active, you can install MDANSE:
 ```
 pip install MDANSE MDANSE_GUI
 ```
-and start the graphical interface by typing
+If you are using a virtual environment in which you had installed pre-release
+versions of MDANSE, you can upgrade by typing:
+```
+pip install --upgrade MDANSE MDANSE_GUI
+```
+Then, start the graphical interface by typing
 ```
 mdanse_gui
 ```
@@ -108,7 +108,7 @@ The typical workflow of MDANSE:
 4. Check the results with the plotter.
 
 The most complete user documentation of MDANSE can be found on
-[our Read the Docs page](https://mdanse.readthedocs.io/en/protos).
+[our Read the Docs page](https://mdanse.readthedocs.io).
 
 Other information including example scripts can be found on the
 [MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx)
@@ -205,7 +205,7 @@ can be saved in an MDA file (HDF5 format), or a set of DAT files
 
 More detailed information on how MDANSE works, what it can do,
 and the science can all be found on
-[our Read the Docs page](https://mdanse.readthedocs.io/en/protos).
+[our Read the Docs page](https://mdanse.readthedocs.io).
 
 ## Citing MDANSE
 

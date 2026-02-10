@@ -3,10 +3,6 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. note::
-   This is the documentation of MDANSE 2.0.
-   MDANSE 2 is currently (September 2025) approaching its first release.
-
 Welcome to MDANSE's documentation!
 ==================================
 

@@ -97,7 +97,7 @@ class ConverterTab(GeneralTab):
                     TextInfo(
                         header="MDANSE Converter",
                         footer="Look up our "
-                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                        + '<a href="https://mdanse.readthedocs.io/">Read The Docs</a>'
                         + " page.",
                     )
                 ],

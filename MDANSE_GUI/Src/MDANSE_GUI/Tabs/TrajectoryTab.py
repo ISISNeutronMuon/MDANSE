@@ -103,7 +103,7 @@ class TrajectoryTab(GeneralTab):
                     TrajectoryInfo(
                         header="MDANSE Trajectory",
                         footer="Look up our "
-                        + '<a href="https://mdanse.readthedocs.io/en/protos/">Read The Docs</a>'
+                        + '<a href="https://mdanse.readthedocs.io/">Read The Docs</a>'
                         + " page.",
                     )
                 ],
