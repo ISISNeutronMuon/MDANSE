@@ -20,7 +20,7 @@ from abc import ABC, abstractmethod
 from collections import namedtuple
 from copy import copy
 from enum import Enum
-from typing import NamedTuple
+from typing import ClassVar, Final, Literal, NamedTuple
 
 import numpy as np
 from scipy import fftpack, signal
@@ -32,6 +32,12 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 
 class SignalError(Error):
     pass
+
+
+class RationalPolynomial(NamedTuple):
+    unit: Literal["S", "Z"]
+    numerator: str
+    denominator: str
 
 
 INTERPOLATION_ORDER = {}
@@ -279,6 +285,8 @@ class FrequencyDomain(NamedTuple):
 class Filter(ABC):
     """Base class for a filter operating on a signal."""
 
+    default_settings = {}
+
     # Symbolic variable for analog filter transfer function (Laplace plane)
     S = "iw"
 
@@ -321,14 +329,16 @@ class Filter(ABC):
         FUNDAMENTAL_EVENLY_DIVIDES_FS: int = 2
         BOUNDED_FILTER: int = 3
 
+    flags: ClassVar[set[Flags]]
+
     @abstractmethod
-    def __init__(self, **kwargs):
+    def __init__(self, *, n_steps: int, time_step_ps: float, **kwargs):
         # Custom frequency range (assumes frequencies are angular) around which to compute the filter frequency response
         self.custom_freq_range = []
         # Number of simulation steps
-        self.n_steps = kwargs.pop("n_steps")
+        self.n_steps = n_steps
         # Simulation sample frequency in THz
-        self.sample_freq = 1 / kwargs.pop("time_step_ps")
+        self.sample_freq = 1 / time_step_ps
         self.set_filter_attributes(kwargs)
 
     def compute_frequencies(self, filt_range: np.ndarray):
@@ -447,7 +457,7 @@ class Filter(ABC):
         self._freq_response = FrequencyDomain(*response)
 
     @classmethod
-    def frequency_resolution(cls, num_steps: float, timestep: float, units):
+    def frequency_resolution(cls, num_steps: float, timestep: float, units) -> float:
         """Returns the frequency resolution of the trajectory given N fixed timesteps.
         Analogous to the bin-width of an FFT of the trajectory.
 
@@ -590,9 +600,9 @@ class Filter(ABC):
         return expr
 
     @classmethod
-    def rational_polynomial_string(
-        cls, numerator, denominator, analog=True
-    ) -> dict[str, str]:
+    def rational_polynomial(
+        cls, numerator: np.ndarray, denominator: np.ndarray, analog: bool = True
+    ) -> RationalPolynomial:
         """Formats a transfer function rational polynomial into a pair of strings.
 
         Parameters
@@ -606,24 +616,24 @@ class Filter(ABC):
 
         Returns
         -------
-        dict[str, str]
-            Dictionary of string coefficients representing the transfer function rational polynomial.
+        RationalPolynomial
+            Coefficients representing the transfer function rational polynomial.
 
         """
         if analog:
             # Analogue (Laplace-domain) transfer function
             numerator_str = cls.polynomial_string(numerator, cls.S)
             denominator_str = Filter.polynomial_string(denominator, cls.S)
-            return {
-                "unit": "S",
-                "numerator": numerator_str,
-                "denominator": denominator_str,
-            }
+            return RationalPolynomial(
+                unit="S",
+                numerator=numerator_str,
+                denominator=denominator_str,
+            )
 
         # Digital (Z-domain) transfer function
         numerator_str = Filter.polynomial_string(numerator, cls.Z, False)
         denominator_str = Filter.polynomial_string(denominator, cls.Z, False)
-        return {"unit": "Z", "numerator": numerator_str, "denominator": denominator_str}
+        return RationalPolynomial(unit="Z", numerator=numerator_str, denominator=denominator_str)
 
     def attributes_to_string(self, description) -> str:
         """Formats the given filter attribute into a description string.
@@ -1083,7 +1093,7 @@ class Comb(Filter):
         self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
-FILTERS = (
+FILTERS: Final = (
     Butterworth,
     ChebyshevTypeI,
     ChebyshevTypeII,
@@ -1094,15 +1104,17 @@ FILTERS = (
     Comb,
 )
 
-FILTER_MAP = {filter_class.__name__: filter_class for filter_class in FILTERS}
+FILTER_MAP: dict[str, type[Filter]] = {
+    filter_class.__name__: filter_class for filter_class in FILTERS
+}
 
 # Default filter type is Butterworth
-DEFAULT_FILTER = Butterworth
+DEFAULT_FILTER: Final[type[Filter]] = Butterworth
 # Default simulation time step in picoseconds
-DEFAULT_TIME_STEP = 0.005
+DEFAULT_TIME_STEP: Final[float] = 0.005
 
 # Default number of simulation steps
-DEFAULT_N_STEPS = 320
+DEFAULT_N_STEPS: Final[int] = 320
 
 
 def filter_default_attributes(filter=DEFAULT_FILTER):

@@ -94,6 +94,55 @@ def _(value: Path) -> dict[Any, Any]:
         raise ValueError("Unable to load JSON string.") from err
 
 
+def standardise_name(name: str, transform: Callable[[str], str]=str.capitalize) -> str:
+    """Standardise dictionary keys to display name.
+
+    Parameters
+    ----------
+    name : str
+        String to standardise.
+    transform : Callable
+        String transformation function.
+
+    Returns
+    -------
+    str
+        Standardised name.
+
+    Examples
+    --------
+    >>> standardise_name("a_key")
+    'A key'
+    >>> standardise_name("another_key", transform=str.title)
+    'Another Key'
+    """
+    return transform(name.replace("_", " "))
+
+def destandardise_name(name: str) -> str:
+    """Returns key-like name (all lower, underscore-separated)
+
+    Parameters
+    ----------
+    name : str
+        Name to make key-like.
+
+    Returns
+    -------
+    str
+        Key-like name.
+
+    Examples
+    --------
+    >>> destandardise_name("My name")
+    'my_name'
+    >>> destandardise_name("a_string")
+    'a_string'
+    >>> destandardise_name("AaaAa")
+    'aaaaa'
+    """
+    return "_".join(map(str.lower, name.split()))
+
+
 def _strip_inline_comments(
     data: Iterable[str],
     *,

@@ -25,7 +25,7 @@ from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfig
 class HDFInputFileConfigurator(InputFileConfigurator):
     """Uses an .mda file from another analysis as input."""
 
-    _default = ""
+    _default = "INPUT_FILENAME.mda"
 
     def __init__(
         self,
@@ -59,7 +59,10 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         :param value: the path for the HDF file.
         :type value: str
         """
+        if not self.update_needed(value):
+            return
 
+        self._original_input = value
         super().configure(value)
 
         if not value and self.optional:
