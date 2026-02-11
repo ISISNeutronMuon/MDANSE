@@ -1113,6 +1113,16 @@ class FilterDesigner(QDialog):
         """Make the checkbox clickable after the calculation thread has finshed."""
         self.preferences_group.enable_pps(True)
 
+    def update_frames(self) -> None:
+        """ """
+        config = self.configurator.configurable._configuration
+        self.settings["attributes"].update(
+            {
+                "n_steps": config["frames"]["n_frames"],
+                "time_step_ps": config["frames"]["time_step"],
+            }
+        )
+
     def update_pps(self):
         """Run another PositionPowerSpectrum calculation.
 
@@ -1408,6 +1418,8 @@ class FilterDesigner(QDialog):
             Filter attributes dictionary.
 
         """
+        self.update_frames()
+
         if not self.graph_ready:
             return
 
@@ -1614,6 +1626,7 @@ class TrajectoryFilterWidget(WidgetBase):
             self.filter_designer.close()
         else:
             self.filter_designer.update_pps()
+            self.filter_designer.render_canvas_assets()
             self.filter_designer.show()
 
     def get_widget_value(self) -> str:

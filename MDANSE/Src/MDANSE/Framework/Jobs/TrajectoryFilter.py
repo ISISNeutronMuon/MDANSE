@@ -177,11 +177,10 @@ class TrajectoryFilter(IJob):
             filter_config["attributes"],
         )
 
-        filter_attributes.setdefault(
-            "n_steps", self.configuration["trajectory"]["length"]
-        )
-        filter_attributes.setdefault(
-            "time_step_ps", self.configuration["trajectory"]["md_time_step"]
+        update_frames(
+            filter_attributes,
+            self.configuration["frames"]["n_frames"],
+            self.configuration["frames"]["time_step"],
         )
 
         filter = filter_class(**filter_attributes)
@@ -259,6 +258,11 @@ class TrajectoryFilter(IJob):
         outputFile.close()
 
         super().finalize()
+
+
+def update_frames(attributes: dict, nsteps: int, step: np.float64) -> None:
+    """ """
+    attributes.update({"n_steps": nsteps, "time_step_ps": step})
 
 
 def apply(filter: Filter, trajectories: np.ndarray, apply_offsets: bool) -> np.ndarray:
