@@ -258,8 +258,8 @@ def get_spectrum(signal, window=None, timeStep=1.0, axis=0, fft="fft"):
     return fftSignal.real
 
 
-# Default filter cutoff frequency
-DEFAULT_FILTER_CUTOFF = 25.0
+# Fraction of the sampling frequency
+DEFAULT_FREQ_RATIO = 0.25
 
 
 class TransferFunction(NamedTuple):
@@ -774,12 +774,15 @@ class Butterworth(Filter):
         },
         "cutoff_freq": {
             "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": None,
         },
     }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        if self.cutoff_freq is None:
+            self.cutoff_freq = DEFAULT_FREQ_RATIO * self.sample_freq
 
         self.sos = signal.butter(
             self.order,
@@ -818,12 +821,15 @@ class ChebyshevTypeI(Filter):
         },
         "cutoff_freq": {
             "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": None,
         },
     }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        if self.cutoff_freq is None:
+            self.cutoff_freq = DEFAULT_FREQ_RATIO * self.sample_freq
 
         self.sos = signal.cheby1(
             self.order,
@@ -863,12 +869,15 @@ class ChebyshevTypeII(Filter):
         },
         "cutoff_freq": {
             "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": None,
         },
     }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        if self.cutoff_freq is None:
+            self.cutoff_freq = DEFAULT_FREQ_RATIO * self.sample_freq
 
         self.sos = signal.cheby2(
             self.order,
@@ -912,12 +921,15 @@ class Elliptical(Filter):
         },
         "cutoff_freq": {
             "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": None,
         },
     }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        if self.cutoff_freq is None:
+            self.cutoff_freq = DEFAULT_FREQ_RATIO * self.sample_freq
 
         self.sos = signal.ellip(
             self.order,
@@ -959,12 +971,15 @@ class Bessel(Filter):
         },
         "cutoff_freq": {
             "description": "Cutoff frequency/vibrational energy (may be a 2-length array if bandpass/stop)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": None,
         },
     }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        if self.cutoff_freq is None:
+            self.cutoff_freq = DEFAULT_FREQ_RATIO * self.sample_freq
 
         self.sos = signal.bessel(
             self.order,
@@ -994,7 +1009,7 @@ class Notch(Filter):
     default_settings = {
         "fundamental_freq": {
             "description": "Spacing between filter peaks (value must satisfy 0 < w0 < nyquist)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": None,
         },
         "quality_factor": {
             "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
@@ -1004,6 +1019,9 @@ class Notch(Filter):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        if self.fundamental_freq is None:
+            self.fundamental_freq = DEFAULT_FREQ_RATIO * self.sample_freq
 
         b, a = signal.iirnotch(
             self.fundamental_freq, self.quality_factor, fs=self.sample_freq
@@ -1028,7 +1046,7 @@ class Peak(Filter):
     default_settings = {
         "fundamental_freq": {
             "description": "Spacing between filter peaks (value must satisfy 0 < w0 < nyquist)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": None,
         },
         "quality_factor": {
             "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
@@ -1038,6 +1056,9 @@ class Peak(Filter):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        if self.fundamental_freq is None:
+            self.fundamental_freq = DEFAULT_FREQ_RATIO * self.sample_freq
 
         b, a = signal.iirpeak(
             self.fundamental_freq, self.quality_factor, fs=self.sample_freq
@@ -1062,7 +1083,7 @@ class Comb(Filter):
     default_settings = {
         "fundamental_freq": {
             "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": None,
         },
         "quality_factor": {
             "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
@@ -1082,6 +1103,9 @@ class Comb(Filter):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        if self.fundamental_freq is None:
+            self.fundamental_freq = DEFAULT_FREQ_RATIO * self.sample_freq
 
         b, a = signal.iircomb(
             self.fundamental_freq,
