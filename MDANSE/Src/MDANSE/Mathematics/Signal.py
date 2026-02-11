@@ -380,7 +380,10 @@ class Filter(ABC):
             if Filter.Flags.DIGITAL_ONLY not in self.flags
             else self.coeffs
         )
-        return signal.filtfilt(coeffs.numerator, coeffs.denominator, input)
+        b, a = coeffs.numerator, coeffs.denominator
+        scale = input[0] * signal.lfilter_zi(b, a)
+        filtered, _ = signal.lfilter(coeffs.numerator, coeffs.denominator, input, zi=scale)
+        return filtered
 
     def to_digital_coeffs(self) -> TransferFunction:
         """Returns the filter instance digital coefficients converted from analog, by performing a bilinear transform.
@@ -511,6 +514,23 @@ class Filter(ABC):
             limit *= cls._cyclic_to_angular
 
         return limit
+
+    @staticmethod
+    def squared_magnitudes(array: np.array):
+        """Returns the squared magnitudes of a complex numpy array.
+
+        Parameters
+        __________
+        array: np.array
+            Complex array.
+
+        Returns
+        _______
+        np.array
+            Real array of squared magnitudes
+
+        """
+        return abs(array)**2
 
     @staticmethod
     def frequency_range(
