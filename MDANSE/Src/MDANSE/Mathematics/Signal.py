@@ -382,7 +382,9 @@ class Filter(ABC):
         )
         b, a = coeffs.numerator, coeffs.denominator
         scale = input[0] * signal.lfilter_zi(b, a)
-        filtered, _ = signal.lfilter(coeffs.numerator, coeffs.denominator, input, zi=scale)
+        filtered, _ = signal.lfilter(
+            coeffs.numerator, coeffs.denominator, input, zi=scale
+        )
         return filtered
 
     def to_digital_coeffs(self) -> TransferFunction:
@@ -530,7 +532,7 @@ class Filter(ABC):
             Real array of squared magnitudes
 
         """
-        return abs(array)**2
+        return abs(array) ** 2
 
     @staticmethod
     def frequency_range(

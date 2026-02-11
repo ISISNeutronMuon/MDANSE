@@ -1305,7 +1305,8 @@ class FilterDesigner(QDialog):
             file_freqs,
             normalised,
             att_freqs,
-            normalised[overlap_mask] * Filter.squared_magnitudes(attenuation(att_freqs)),
+            normalised[overlap_mask]
+            * Filter.squared_magnitudes(attenuation(att_freqs)),
         )
 
     def create_settings_layout(self, widget_area: QVBoxLayout) -> None:
@@ -1454,7 +1455,9 @@ class FilterDesigner(QDialog):
         axes = self._figure.add_axes([0.1, 0.1, 0.8, 0.8])
         axes.plot(
             x,
-            20 * np.log10(Filter.squared_magnitudes(y)) if db_response else Filter.squared_magnitudes(y),
+            20 * np.log10(Filter.squared_magnitudes(y))
+            if db_response
+            else Filter.squared_magnitudes(y),
             label="Filter response",
         )
 
