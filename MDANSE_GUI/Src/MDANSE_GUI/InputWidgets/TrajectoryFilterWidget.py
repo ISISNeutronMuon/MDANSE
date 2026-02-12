@@ -1192,7 +1192,7 @@ class FilterDesigner(QDialog):
         if self.current_filter_units() == Filter.FrequencyUnits.CYCLIC:
             freqs /= 2 * np.pi
 
-        return (freqs, normalised, normalised * attenuation(freqs))
+        return (freqs, normalised, normalised * abs(attenuation(freqs))**4)
 
     def create_settings_layout(self, widget_area: QVBoxLayout) -> None:
         """Create the filter settings vertical layout.
@@ -1317,7 +1317,7 @@ class FilterDesigner(QDialog):
         axes = self._figure.add_axes([0.1, 0.1, 0.8, 0.8])
         axes.plot(
             x,
-            20 * np.log10(abs(y)) if db_response else y,
+            20 * np.log10(abs(y)**4) if db_response else abs(y)**4,
             label="Filter response",
         )
 
