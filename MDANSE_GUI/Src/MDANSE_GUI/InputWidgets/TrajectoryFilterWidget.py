@@ -1326,13 +1326,13 @@ class FilterDesigner(QDialog):
             psx, ps, attenuated_ps = trajectory_power_spectrum
             axes.plot(
                 psx,
-                20 * np.log10(abs(ps)) if db_response else ps,
+                20 * np.log10(ps) if db_response else ps,
                 label="Trajectory response",
                 color="grey",
             )
             axes.plot(
                 psx,
-                20 * np.log10(abs(attenuated_ps)) if db_response else attenuated_ps,
+                20 * np.log10(attenuated_ps) if db_response else attenuated_ps,
                 label="Attenuation",
                 color="black",
             )
