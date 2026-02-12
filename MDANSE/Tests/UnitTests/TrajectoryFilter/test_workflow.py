@@ -477,10 +477,7 @@ def test_convolution(
 
     # Supply frequencies against which to calculate response H(w)
     filter_object.custom_freq_range = u_x_axis
-    filter_object.freq_response = (
-        filter_object.coeffs,
-        Filter.FrequencyRangeMethod.CUSTOM,
-    )
+    filter_object.set_freq_response(Filter.FrequencyRangeMethod.CUSTOM)
 
     # Resample H(w) to length of U(w)
     hw = np.abs(scipy.signal.resample(filter_object.freq_response.magnitudes, len(uw)))

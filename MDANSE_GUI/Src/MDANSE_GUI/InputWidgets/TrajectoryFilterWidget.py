@@ -1177,7 +1177,7 @@ class FilterDesigner(QDialog):
             freqs.max(),
             len(response.frequencies),
         )
-        tr_filter.freq_response = (tr_filter.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
+        tr_filter.set_freq_response(Filter.FrequencyRangeMethod.CUSTOM)
 
         # Normalise trajectory power spectrum (y-axis)
         normalised = values / np.max(values)

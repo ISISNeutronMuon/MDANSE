@@ -331,20 +331,16 @@ class Filter(ABC):
         self.sample_freq = 1 / kwargs.pop("time_step_ps")
         self.set_filter_attributes(kwargs)
 
-    def compute_frequencies(
-        self, transfer_function: TransferFunction, range: np.ndarray
-    ):
-        """Computes the frequency magnitudes over given angular frequency range, from the filter transfer function.
+    def compute_frequencies(self, range: np.ndarray):
+        """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
 
         See Also
         ________
-        scipy.signal.freqs :
-            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqs.html
+        scipy.signal.freqz_sos :
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqz_sos.html
 
         Parameters
         ----------
-        transfer_function : TransferFunction
-            Numerator and denominator of the filter transfer function.
         range : np.ndarray
             Range of frequency values over which to compute.
 
@@ -361,8 +357,8 @@ class Filter(ABC):
 
         See Also
         ________
-        scipy.signal.filtfilt:
-            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.filtfilt.html
+        scipy.signal.sosfiltfilt:
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.sosfiltfilt.html
 
         Parameters
         ----------
@@ -409,23 +405,17 @@ class Filter(ABC):
         """
         return self._freq_response
 
-    @freq_response.setter
-    def freq_response(
-        self, params: tuple[TransferFunction, FrequencyRangeMethod]
-    ) -> None:
+    def set_freq_response(self, method: FrequencyRangeMethod) -> None:
         """Calculates the frequency response of the filter from the filter's transfer function numerator and denominator
         coefficients.
 
         Parameters
         ----------
-        params : tuple[TransferFunction, FrequencyRangeMethod]
-            Tuple contains the following elements:
-                - the rational polynomial expression for the filter transfer function, in terms of its numerator and
-                denominator coefficients.
-                - the method by which to compute the frequency range for displaying the filter.
+        method : FrequencyRangeMethod
+            The rational polynomial expression for the filter transfer function,
+            in terms of its numerator and denominator coefficients.
 
         """
-        expr, method = params
         units = (
             Filter.FrequencyUnits.CYCLIC
             if Filter.Flags.DIGITAL_ONLY in self.flags
@@ -453,9 +443,7 @@ class Filter(ABC):
             )
 
         # Compute filter response around frequencies given in range
-        response = self.compute_frequencies(
-            transfer_function=expr, range=np.abs(freq_range)
-        )
+        response = self.compute_frequencies(range=np.abs(freq_range))
         self._freq_response = FrequencyDomain(*response)
 
     @classmethod
@@ -790,7 +778,7 @@ class Butterworth(Filter):
             fs=self.sample_freq,
         )
         self.coeffs = TransferFunction(*signal.sos2tf(self.sos))
-        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+        self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
 class ChebyshevTypeI(Filter):
@@ -835,7 +823,7 @@ class ChebyshevTypeI(Filter):
             fs=self.sample_freq,
         )
         self.coeffs = TransferFunction(*signal.sos2tf(self.sos))
-        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+        self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
 class ChebyshevTypeII(Filter):
@@ -880,7 +868,7 @@ class ChebyshevTypeII(Filter):
             fs=self.sample_freq,
         )
         self.coeffs = TransferFunction(*signal.sos2tf(self.sos))
-        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+        self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
 class Elliptical(Filter):
@@ -930,7 +918,7 @@ class Elliptical(Filter):
             fs=self.sample_freq,
         )
         self.coeffs = TransferFunction(*signal.sos2tf(self.sos))
-        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+        self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
 class Bessel(Filter):
@@ -976,7 +964,7 @@ class Bessel(Filter):
             fs=self.sample_freq,
         )
         self.coeffs = TransferFunction(*signal.sos2tf(self.sos))
-        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+        self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
 class Notch(Filter):
@@ -1010,7 +998,7 @@ class Notch(Filter):
         )
         self.sos = signal.tf2sos(b, a, analog=False)
         self.coeffs = TransferFunction(b, a)
-        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+        self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
 class Peak(Filter):
@@ -1044,7 +1032,7 @@ class Peak(Filter):
         )
         self.sos = signal.tf2sos(b, a, analog=False)
         self.coeffs = TransferFunction(b, a)
-        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+        self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
 class Comb(Filter):
@@ -1092,7 +1080,7 @@ class Comb(Filter):
         )
         self.sos = signal.tf2sos(b, a, analog=False)
         self.coeffs = TransferFunction(b, a)
-        self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+        self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
 FILTERS = (
