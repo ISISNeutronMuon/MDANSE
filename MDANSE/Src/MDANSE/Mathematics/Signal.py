@@ -997,9 +997,9 @@ class Notch(Filter):
     flags = {Filter.Flags.DIGITAL_ONLY}
 
     default_settings = {
-        "fundamental_freq": {
+        "fundamental_freq_divisor": {
             "description": "Spacing between filter peaks (value must satisfy 0 < w0 < nyquist)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": 2,
         },
         "quality_factor": {
             "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
@@ -1056,9 +1056,9 @@ class Peak(Filter):
     flags = {Filter.Flags.DIGITAL_ONLY}
 
     default_settings = {
-        "fundamental_freq": {
+        "fundamental_freq_divisor": {
             "description": "Spacing between filter peaks (value must satisfy 0 < w0 < nyquist)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": 2,
         },
         "quality_factor": {
             "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
@@ -1116,9 +1116,9 @@ class Comb(Filter):
     flags = {Filter.Flags.DIGITAL_ONLY, Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS}
 
     default_settings = {
-        "fundamental_freq": {
+        "fundamental_freq_divisor": {
             "description": "Spacing between filter peaks (value must evenly divide sample frequency)",
-            "value": DEFAULT_FILTER_CUTOFF,
+            "value": 2,
         },
         "quality_factor": {
             "description": "Specifies bandwidth, proportional to time taken for filter to decay by a factor of 1/e",
@@ -1149,6 +1149,10 @@ class Comb(Filter):
             )
         )
         self.freq_response = (self.coeffs, Filter.FrequencyRangeMethod.FFT)
+
+    @property
+    def fundamental_freq(self):
+        return self.sample_freq / self.fundamental_freq_divisor
 
     def compute_frequencies(
         self, transfer_function: TransferFunction, range: np.ndarray

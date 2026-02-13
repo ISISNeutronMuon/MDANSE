@@ -528,7 +528,8 @@ class FilterSettingGroup(QObject):
         )
         if self.units is Filter.FrequencyUnits.ANGULAR:
             initial_value *= Filter._cyclic_to_angular
-        self.attributes.update({freq_key.pop(): initial_value})
+        if freq_key:
+            self.attributes.update({freq_key.pop(): initial_value})
 
         # Indices for populating the settings grid layout
         self.indices = list(self.generate_grid_indices(len(self.schema.items())))
@@ -669,36 +670,37 @@ class FilterSettingGroup(QObject):
         if isinstance(setting, int) and not setting_group:
             widget = QSpinBox()
             widget.setValue(setting)
-            widget.setMinimum(0)
+            if "divisor" in setting_key:
+                widget.setMinimum(3)
+                widget.setMaximum(
+                    self.parent_attributes.get("n_steps", DEFAULT_N_STEPS) - 1
+                )
+            else:
+                widget.setMinimum(0)
             widget.setSingleStep(1)
             signal = widget.valueChanged
 
         if isinstance(setting, float):
-            if setting_key in {"cutoff_freq", "fundamental_freq"}:
+            if setting_key in {"cutoff_freq"}:
                 # Filter frequency spinbox with constrained values
                 n_steps = self.parent_attributes.get("n_steps", DEFAULT_N_STEPS)
                 time_step = self.parent_attributes.get(
                     "time_step_ps", DEFAULT_TIME_STEP
                 )
-
-                bin_width = np.round(
-                    Filter.frequency_resolution(n_steps, time_step, units=self.units),
-                    FLOAT_SPINBOX_DECIMALS,
+                bin_width = Filter.frequency_resolution(
+                    n_steps, time_step, units=self.units
                 )
-
-                vmax = np.round(
-                    Filter.nyquist(time_step, units=self.units) - bin_width,
-                    FLOAT_SPINBOX_DECIMALS,
-                )
+                vmax = Filter.nyquist(time_step, units=self.units) - bin_width
 
                 # Configure constrained spinbox based on filter type
                 if Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags:
                     widget = ConstrainedDoubleSpinBox(
-                        minimum=bin_width,
-                        maximum=vmax,
+                        minimum=0,
+                        maximum=1 / (2 * time_step),
                         step=bin_width,
                         value=bin_width,
                     )
+                    widget.setDecimals(FLOAT_SPINBOX_DECIMALS)
                     widget.set_search(
                         constraint_func=lambda x: ((1 / time_step) % x) == 0
                     )
@@ -1458,9 +1460,10 @@ class FilterDesigner(QDialog):
             ),
             self.settings["attributes"].get(
                 "cutoff_freq",
-                self.settings["attributes"].get(
-                    "fundamental_freq",
-                    DEFAULT_FILTER_CUTOFF,
+                (1 / self.settings["attributes"]["time_step_ps"])
+                / self.settings["attributes"].get(
+                    "fundamental_freq_divisor",
+                    2,
                 ),
             ),
             filter_preview.sample_freq,
