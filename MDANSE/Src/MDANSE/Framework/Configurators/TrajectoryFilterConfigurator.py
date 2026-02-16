@@ -16,10 +16,12 @@
 from __future__ import annotations
 
 import json
+from traceback import format_exc
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Mathematics.Signal import (
     DEFAULT_FILTER,
+    FILTER_MAP,
     filter_default_attributes,
     filter_description_string,
 )
@@ -76,10 +78,20 @@ class TrajectoryFilterConfigurator(IConfigurator):
             dict_value = json.loads(value)
 
             if not self._expected_keys <= dict_value.keys():
-                self.error_status = f"The dictionary \n{dict_value}\n does not contain the expected keys {self._expected_keys}."
+                self.error_status = f"The input dictionary does not contain the expected keys {self._expected_keys}."
+                return
 
         except (TypeError, ValueError):
-            self.error_status = f"Value \n{value}\n in {self} is not of correct format (expected JSON string)."
+            self.error_status = (
+                f"Input {value} is not of correct format (expected JSON string)."
+            )
+            return
+
+        try:
+            _ = FILTER_MAP[dict_value["filter"]](**dict_value["attributes"])
+        except Exception as e:
+            self.error_status = f"Could not create the filter. {e}: {format_exc()}"
+            return
 
         self.error_status = "OK"
         self["value"] = self._settings
