@@ -644,6 +644,15 @@ class FilterSettingGroup(QObject):
         return self.grid
 
     def update_widget_step(self, n_steps: int, time_step: float):
+        """Update the spin box settings based on frames settings.
+
+        Parameters
+        ----------
+        n_steps : int
+            Number of trajectory steps currently selected by frames widget.
+        time_step : float
+            Time step between consecutive trajectory frames.
+        """
         bin_width = Filter.frequency_resolution(n_steps, time_step, units=self.units)
         vmax = Filter.nyquist(time_step, units=self.units) - bin_width
         with block_signals(self):
@@ -977,6 +986,15 @@ class FilterDesigner(QDialog):
         self.preferences_group.pps_checkbox.checkStateChanged.connect(self.update_pps)
 
     def accept_time_steps(self, n_steps: int, time_step_ps: float):
+        """Save the new time parameters given by the frames settings.
+
+        Parameters
+        ----------
+        n_steps : int
+            Number of trajectory steps currently selected.
+        time_step_ps : float
+            Time interval between consecutive trajectory frames.
+        """
         self.n_steps = n_steps
         self.time_step_ps = time_step_ps
         self.settings["attributes"]["n_steps"] = n_steps
@@ -1545,8 +1563,6 @@ class FilterDesigner(QDialog):
 
     def apply(self) -> None:
         """Pass the filter parameters to the main widget."""
-        self.configurator.configure(self.settings)
-
         filter_class = FILTER_MAP[self.settings["filter"]]
 
         # update widget field text to reflect filter designer
@@ -1615,6 +1631,7 @@ class TrajectoryFilterWidget(WidgetBase):
         self.filter_designer.apply()
 
     def update_time_steps(self):
+        """Configure filters using the new frames settings."""
         frames_configurator = self._frames_widget._configurator
         time_step_ps = frames_configurator["time_step"]
         n_steps = frames_configurator["number"]
