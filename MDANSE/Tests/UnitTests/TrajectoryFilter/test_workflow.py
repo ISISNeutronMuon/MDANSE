@@ -23,6 +23,9 @@ GLYCYL_L_ALANINE_TRAJ = "glycyl_l_alanine_charmm_unfiltered.mdt"
 SUFFIX = "_unfiltered_power_spectrum"
 
 
+TWOPI = 2 * np.pi
+
+
 def safe_mda(filename):
     ext = filename.suffix
     stripped = filename.with_suffix("").name
@@ -247,7 +250,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
                 "time_step_ps": 0.005,
                 "order": 1,
                 "attenuation_type": "lowpass",
-                "cutoff_freq": 19.635 / (2 * np.pi),
+                "cutoff_freq": 19.635 / TWOPI,
             },
         },
         {
@@ -261,7 +264,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
                 "time_step_ps": 0.005,
                 "order": 1,
                 "attenuation_type": "highpass",
-                "cutoff_freq": 31.416 / (2 * np.pi),
+                "cutoff_freq": 31.416 / TWOPI,
             },
         },
         {
@@ -276,7 +279,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
                 "order": 1,
                 "min_attenuation": 12.7,
                 "attenuation_type": "bandpass",
-                "cutoff_freq": [27.489000000000004 / (2 * np.pi), 376.992 / (2 * np.pi)],
+                "cutoff_freq": [27.489000000000004 / TWOPI, 376.992 / TWOPI],
             },
         },
         {
@@ -291,7 +294,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
                 "order": 1,
                 "norm": "phase",
                 "attenuation_type": "bandstop",
-                "cutoff_freq": [27.489000000000004 / (2 * np.pi), 70.686 / (2 * np.pi)],
+                "cutoff_freq": [27.489000000000004 / TWOPI, 70.686 / TWOPI],
             },
         },
         {
@@ -306,7 +309,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
                 "order": 2,
                 "min_attenuation": 20.0,
                 "attenuation_type": "bandpass",
-                "cutoff_freq": [15.708000000000002 / (2 * np.pi), 145.299 / (2 * np.pi)],
+                "cutoff_freq": [15.708000000000002 / TWOPI, 145.299 / TWOPI],
             },
         },
         {
@@ -321,7 +324,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
                 "order": 2,
                 "min_attenuation": 2.0,
                 "attenuation_type": "bandpass",
-                "cutoff_freq": [15.708000000000002 / (2 * np.pi), 145.299 / (2 * np.pi)],
+                "cutoff_freq": [15.708000000000002 / TWOPI, 145.299 / TWOPI],
             },
         },
         {
@@ -377,7 +380,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
                 "order": 1,
                 "min_attenuation": 10.0,
                 "attenuation_type": "bandstop",
-                "cutoff_freq": [0.00031415 / (2 * np.pi), 0.00043981 / (2 * np.pi)],
+                "cutoff_freq": [0.00031415 / TWOPI, 0.00043981 / TWOPI],
             },
         },
         {
@@ -393,7 +396,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
                 "max_ripple": 1.0,
                 "min_attenuation": 20.0,
                 "attenuation_type": "bandpass",
-                "cutoff_freq": [0.00006283 / (2 * np.pi), 0.00018849 / (2 * np.pi)],
+                "cutoff_freq": [0.00006283 / TWOPI, 0.00018849 / TWOPI],
             },
         },
         {
@@ -408,7 +411,7 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
                 "order": 1,
                 "max_ripple": 5.0,
                 "attenuation_type": "bandstop",
-                "cutoff_freq": [0.00006283 / (2 * np.pi), 0.00012566 / (2 * np.pi)],
+                "cutoff_freq": [0.00006283 / TWOPI, 0.00012566 / TWOPI],
             },
         },
     ],
@@ -532,7 +535,7 @@ def test_convolution(
             "attributes": {
                 "n_steps": 25,
                 "time_step_ps": 4000.0,
-                "cutoff_freq": 0.000377 / (2 * np.pi),
+                "cutoff_freq": 0.000377 / TWOPI,
             },
         },
         {
@@ -542,7 +545,7 @@ def test_convolution(
             "attributes": {
                 "n_steps": 25,
                 "time_step_ps": 4000.0,
-                "cutoff_freq": 0.000377 / (2 * np.pi),
+                "cutoff_freq": 0.000377 / TWOPI,
             },
         },
         {
@@ -552,7 +555,7 @@ def test_convolution(
             "attributes": {
                 "n_steps": 25,
                 "time_step_ps": 4000.0,
-                "cutoff_freq": 0.000377 / (2 * np.pi),
+                "cutoff_freq": 0.000377 / TWOPI,
                 "min_attenuation": 10.0,
             },
         },
@@ -564,7 +567,7 @@ def test_convolution(
                 "n_steps": 25,
                 "time_step_ps": 4000.0,
                 "attenuation_type": "bandpass",
-                "cutoff_freq": [0.000377 / (2 * np.pi), 0.000577 / (2 * np.pi)],
+                "cutoff_freq": [0.000377 / TWOPI, 0.000577 / TWOPI],
             },
         },
         {
@@ -575,7 +578,7 @@ def test_convolution(
                 "n_steps": 25,
                 "time_step_ps": 4000.0,
                 "attenuation_type": "bandpass",
-                "cutoff_freq": [0.000377 / (2 * np.pi), 0.000577 / (2 * np.pi)],
+                "cutoff_freq": [0.000377 / TWOPI, 0.000577 / TWOPI],
             },
         },
         {
@@ -652,7 +655,7 @@ def test_default_settings(
                 "time_step_ps": 0.005,
                 "order": 1,
                 "attenuation_type": "highpass",
-                "cutoff_freq": 19.635 / (2 * np.pi),
+                "cutoff_freq": 19.635 / TWOPI,
             },
         },
         {
@@ -666,7 +669,7 @@ def test_default_settings(
                 "time_step_ps": 0.005,
                 "order": 2,
                 "attenuation_type": "bandpass",
-                "cutoff_freq": [19.635 / (2 * np.pi), 31.416 / (2 * np.pi)],
+                "cutoff_freq": [19.635 / TWOPI, 31.416 / TWOPI],
             },
         },
         {
@@ -681,7 +684,7 @@ def test_default_settings(
                 "order": 1,
                 "min_attenuation": 12.7,
                 "attenuation_type": "highpass",
-                "cutoff_freq": 376.992 / (2 * np.pi),
+                "cutoff_freq": 376.992 / TWOPI,
             },
         },
         {
@@ -766,7 +769,7 @@ def test_default_settings(
                 "order": 4,
                 "min_attenuation": 10.0,
                 "attenuation_type": "highpass",
-                "cutoff_freq": 0.00006283 / (2 * np.pi),
+                "cutoff_freq": 0.00006283 / TWOPI,
             },
         },
         {
@@ -781,7 +784,7 @@ def test_default_settings(
                 "order": 2,
                 "min_attenuation": 0.1,
                 "attenuation_type": "lowpass",
-                "cutoff_freq": 0.00006283 / (2 * np.pi),
+                "cutoff_freq": 0.00006283 / TWOPI,
             },
         },
         {
@@ -796,7 +799,7 @@ def test_default_settings(
                 "order": 1,
                 "max_ripple": 0.4,
                 "attenuation_type": "bandpass",
-                "cutoff_freq": [0.00018849 / (2 * np.pi), 0.00062830 / (2 * np.pi)],
+                "cutoff_freq": [0.00018849 / TWOPI, 0.00062830 / TWOPI],
             },
         },
     ],

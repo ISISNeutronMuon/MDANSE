@@ -331,7 +331,7 @@ class Filter(ABC):
         self.sample_freq = 1 / kwargs.pop("time_step_ps")
         self.set_filter_attributes(kwargs)
 
-    def compute_frequencies(self, range: np.ndarray):
+    def compute_frequencies(self, filt_range: np.ndarray):
         """Computes the frequency magnitudes over given cyclic frequency range, from the filter transfer function.
 
         See Also
@@ -341,7 +341,7 @@ class Filter(ABC):
 
         Parameters
         ----------
-        range : np.ndarray
+        filt_range : np.ndarray
             Range of frequency values over which to compute.
 
         Returns
@@ -350,7 +350,7 @@ class Filter(ABC):
             Frequency response over a given range of angular frequencies.
 
         """
-        return signal.freqz_sos(self.sos, worN=range, fs=self.sample_freq)
+        return signal.freqz_sos(self.sos, worN=filt_range, fs=self.sample_freq)
 
     def apply(self, input: np.array) -> np.ndarray:
         """Returns the convolution of the digital designed filter with an input signal.
@@ -443,7 +443,7 @@ class Filter(ABC):
             )
 
         # Compute filter response around frequencies given in range
-        response = self.compute_frequencies(range=np.abs(freq_range))
+        response = self.compute_frequencies(filt_range=np.abs(freq_range))
         self._freq_response = FrequencyDomain(*response)
 
     @classmethod
