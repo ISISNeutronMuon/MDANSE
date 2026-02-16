@@ -77,8 +77,10 @@ class TrajectoryFilterConfigurator(IConfigurator):
         try:
             dict_value = json.loads(value)
 
-            if not self._expected_keys <= dict_value.keys():
-                self.error_status = f"The input dictionary does not contain the expected keys {self._expected_keys}."
+            if missing := self._expected_keys - dict_value.keys():
+                self.error_status = (
+                    f"The input dictionary does is missing the expected keys {missing}."
+                )
                 return
 
         except (TypeError, ValueError):
@@ -90,7 +92,9 @@ class TrajectoryFilterConfigurator(IConfigurator):
         frames_configurator = self.configurable[self.dependencies["frames"]]
 
         dict_value["attributes"].setdefault("n_steps", frames_configurator["number"])
-        dict_value["attributes"].setdefault("time_step_ps", frames_configurator["time_step"])
+        dict_value["attributes"].setdefault(
+            "time_step_ps", frames_configurator["time_step"]
+        )
 
         try:
             FILTER_MAP[dict_value["filter"]](**dict_value["attributes"])
