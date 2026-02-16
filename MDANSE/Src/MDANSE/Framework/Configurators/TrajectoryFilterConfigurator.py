@@ -76,17 +76,14 @@ class TrajectoryFilterConfigurator(IConfigurator):
 
         try:
             dict_value = json.loads(value)
-
-            if missing := self._expected_keys - dict_value.keys():
-                self.error_status = (
-                    f"The input dictionary does is missing the expected keys {missing}."
-                )
-                return
-
-        except (TypeError, ValueError):
+        except (TypeError, json.JSONDecodeError):
             self.error_status = (
                 f"Input {value} is not of correct format (expected JSON string)."
             )
+            return
+
+        if missing := self._expected_keys - dict_value.keys():
+            self.error_status = f"The input dictionary is missing the expected keys: {', '.join(missing)}."
             return
 
         frames_configurator = self.configurable[self.dependencies["frames"]]
