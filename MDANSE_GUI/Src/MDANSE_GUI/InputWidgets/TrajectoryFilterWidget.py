@@ -958,6 +958,9 @@ class FilterDesigner(QDialog):
         self.field = field
         self.configurator = configurator
 
+        self.n_steps = DEFAULT_N_STEPS
+        self.time_step_ps = DEFAULT_TIME_STEP
+
         self.graph_ready = False
 
         self.setting_stack_layout = QStackedLayout()
@@ -974,6 +977,12 @@ class FilterDesigner(QDialog):
         self.set_filter(self.configurator._default_filter.__name__)
         self.create_designer()
         self.preferences_group.pps_checkbox.checkStateChanged.connect(self.update_pps)
+
+    def accept_time_steps(self, n_steps: int, time_step_ps: float):
+        self.n_steps = n_steps
+        self.time_step_ps = time_step_ps
+        self.settings["attributes"]["n_steps"] = n_steps
+        self.settings["attributes"]["time_step_ps"] = time_step_ps
 
     def find_configuration(self) -> dict[str, str]:
         """Find the configuration of the main filter job.
@@ -1017,13 +1026,9 @@ class FilterDesigner(QDialog):
             "filter": filter_type,
             "attributes": {
                 # Number of simulation steps
-                "n_steps": self.configurator.configurable.settings["trajectory"][1][
-                    "configurator"
-                ]["length"],
+                "n_steps": self.n_steps,
                 # Simulation time step in picoseconds
-                "time_step_ps": self.configurator.configurable.settings["trajectory"][
-                    1
-                ]["configurator"]["md_time_step"],
+                "time_step_ps": self.time_step_ps,
             },
         }
 
@@ -1588,7 +1593,18 @@ class TrajectoryFilterWidget(WidgetBase):
         self._field.setPlaceholderText(self._default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
         self._field.textChanged.connect(self.updateValue)
+        for widget in self.parent()._widgets:
+            if (
+                widget._configurator
+                is self._configurator.configurable[
+                    self._configurator.dependencies["frames"]
+                ]
+            ):
+                self._frames_widget = widget
+                break
+        self._frames_widget.value_changed.connect(self.update_time_steps)
         self.filter_designer = self.create_helper()
+        self.update_time_steps()
         helper_button = QPushButton(self._push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
         self._layout.addWidget(self._field)
@@ -1596,6 +1612,12 @@ class TrajectoryFilterWidget(WidgetBase):
         self.update_labels()
         self.updateValue()
         self._field.setToolTip(self._tooltip_text)
+
+    def update_time_steps(self):
+        frames_configurator = self._frames_widget._configurator
+        time_step_ps = frames_configurator["time_step"]
+        n_steps = frames_configurator["number"]
+        self.filter_designer.accept_time_steps(n_steps, time_step_ps)
 
     def create_helper(self) -> FilterDesigner:
         """

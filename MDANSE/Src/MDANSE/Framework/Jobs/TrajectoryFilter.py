@@ -74,7 +74,7 @@ class TrajectoryFilter(IJob):
     )
     settings["trajectory_filter"] = (
         "TrajectoryFilterConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",

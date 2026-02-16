@@ -87,6 +87,13 @@ class TrajectoryFilterConfigurator(IConfigurator):
             )
             return
 
+        frames_configurator = self.configurable[self.dependencies["frames"]]
+
+        if "n_steps" not in dict_value["attributes"]:
+            dict_value["attributes"]["n_steps"] = frames_configurator["number"]
+        if "time_step_ps" not in dict_value["attributes"]:
+            dict_value["attributes"]["time_step_ps"] = frames_configurator["time_step"]
+
         try:
             _ = FILTER_MAP[dict_value["filter"]](**dict_value["attributes"])
         except Exception as e:
