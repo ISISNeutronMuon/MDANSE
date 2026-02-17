@@ -51,6 +51,16 @@ jobs:
           args: "check"
           version: "0.13.0"
 
+  lint_copyright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          src: "./MDANSE_GUI/Src"
+          args: "check --preview --select 'CPY'"
+          version: "0.13.0"
+
   lint_vermin:
     runs-on: ubuntu-latest
     steps:
