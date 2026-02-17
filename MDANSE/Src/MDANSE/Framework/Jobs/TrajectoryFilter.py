@@ -22,7 +22,10 @@ import h5py
 import numpy as np
 from more_itertools import always_iterable
 
-from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+from MDANSE.Chemistry.ChemicalSystem import (
+    ChemicalSystem,
+    assign_molecules_after_atom_selection,
+)
 from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import FILTER_MAP, Filter
@@ -201,12 +204,17 @@ class TrajectoryFilter(IJob):
             name = "filtered_traj_chemical_system"
         output_chemical_system = ChemicalSystem(name)
         output_chemical_system.initialise_atoms(self._selected_atoms)
+        assign_molecules_after_atom_selection(
+            self.trajectory.atom_indices,
+            self.trajectory.chemical_system,
+            output_chemical_system,
+        )
 
         # Create trajectory writer object
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
             output_chemical_system,
-            filter_attributes["n_steps"],
+            self.configuration["frames"]["number"],
             None,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
@@ -215,10 +223,22 @@ class TrajectoryFilter(IJob):
         # Write trajectory
         write_filtered_trajectory(
             parent_configuration=self.configuration,
-            nsteps=filter_attributes["n_steps"],
+            nsteps=self.configuration["frames"]["number"],
             filtered_coordinates=filtered_coords,
             output_trajectory=self._output_trajectory,
         )
+
+        for out_frame, in_frame in enumerate(
+            range(
+                self.configuration["frames"]["first"],
+                self.configuration["frames"]["last"] + 1,
+                self.configuration["frames"]["step"],
+            )
+        ):
+            self._output_trajectory.write_charges(
+                self.trajectory.charges(in_frame)[self.trajectory.atom_indices],
+                out_frame,
+            )
 
         # The input trajectory is closed.
         self.trajectory.close()

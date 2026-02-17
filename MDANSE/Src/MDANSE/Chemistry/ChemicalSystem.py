@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import copy
 import itertools as it
+from collections import defaultdict
 from collections.abc import Iterable
 from functools import reduce
 from pathlib import Path
@@ -33,6 +34,45 @@ from rdkit.Geometry import Point3D
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+
+
+def assign_molecules_after_atom_selection(
+    selected_indices: Iterable[int], original_cs: ChemicalSystem, new_cs: ChemicalSystem
+):
+    """Create molecule definitions for the output trajectory based on selection.
+
+    Used by jobs which have both an input and an output trajectory.
+    Some molecules may not be completely selected in the input trajectory,
+    but they will keep the original molecule label in the output.
+
+    Parameters
+    ----------
+    selected_indices : Iterable[int]
+        The atom selection of the current analysis job.
+    original_cs : ChemicalSystem
+        The ChemicalSystem of the input trajectory.
+    new_cs : ChemicalSystem
+        The ChemicalSystem of the output trajectory.
+    """
+    selected_idxs = set(selected_indices)
+    indx_map = {j: i for i, j in enumerate(selected_indices)}
+
+    selected_bonds = [
+        (indx_map[i], indx_map[j])
+        for i, j in original_cs._bonds
+        if i in selected_idxs and j in selected_idxs
+    ]
+    new_cs.add_bonds(selected_bonds)
+
+    selected_clusters = defaultdict(list)
+    for key, vals in original_cs._clusters.items():
+        for val in vals:
+            new_cluster = set(val) & selected_idxs
+            if new_cluster:
+                new_cluster = sorted(indx_map[i] for i in new_cluster)
+                selected_clusters[key].append(new_cluster)
+
+    new_cs._clusters = selected_clusters
 
 
 class ChemicalSystem:

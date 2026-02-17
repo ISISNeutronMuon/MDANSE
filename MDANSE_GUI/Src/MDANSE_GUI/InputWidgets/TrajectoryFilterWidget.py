@@ -1177,7 +1177,7 @@ class FilterDesigner(QDialog):
             freqs.max(),
             len(response.frequencies),
         )
-        tr_filter.freq_response = (tr_filter.coeffs, Filter.FrequencyRangeMethod.CUSTOM)
+        tr_filter.set_freq_response(Filter.FrequencyRangeMethod.CUSTOM)
 
         # Normalise trajectory power spectrum (y-axis)
         normalised = values / np.max(values)
@@ -1192,7 +1192,7 @@ class FilterDesigner(QDialog):
         if self.current_filter_units() == Filter.FrequencyUnits.CYCLIC:
             freqs /= 2 * np.pi
 
-        return (freqs, normalised, normalised * attenuation(freqs))
+        return (freqs, normalised, normalised * abs(attenuation(freqs)) ** 4)
 
     def create_settings_layout(self, widget_area: QVBoxLayout) -> None:
         """Create the filter settings vertical layout.
@@ -1230,9 +1230,9 @@ class FilterDesigner(QDialog):
 
         for name, filter_class in FILTER_MAP.items():
             template = (
-                FilterSettingGroup
-                if Filter.Flags.DIGITAL_ONLY in filter_class.flags
-                else BoundedFilterSettingsGroup
+                BoundedFilterSettingsGroup
+                if Filter.Flags.BOUNDED_FILTER in filter_class.flags
+                else FilterSettingGroup
             )
             group_obj = template(
                 parent_attributes=copy.deepcopy(self.settings["attributes"]),
@@ -1317,7 +1317,7 @@ class FilterDesigner(QDialog):
         axes = self._figure.add_axes([0.1, 0.1, 0.8, 0.8])
         axes.plot(
             x,
-            20 * np.log10(abs(y)) if db_response else y,
+            20 * np.log10(abs(y) ** 4) if db_response else abs(y) ** 4,
             label="Filter response",
         )
 
@@ -1326,13 +1326,13 @@ class FilterDesigner(QDialog):
             psx, ps, attenuated_ps = trajectory_power_spectrum
             axes.plot(
                 psx,
-                20 * np.log10(abs(ps)) if db_response else ps,
+                20 * np.log10(ps) if db_response else ps,
                 label="Trajectory response",
                 color="grey",
             )
             axes.plot(
                 psx,
-                20 * np.log10(abs(attenuated_ps)) if db_response else attenuated_ps,
+                20 * np.log10(attenuated_ps) if db_response else attenuated_ps,
                 label="Attenuation",
                 color="black",
             )
