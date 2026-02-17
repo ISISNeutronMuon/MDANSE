@@ -50,7 +50,6 @@ class Heatmap(Plotter):
         self._backup_limits = {}
         self._initial_values = [0.0, 100.0]
         self._slider_values = [0.0, 100.0]
-        self._last_minmax = [-1, -1]
         self._slice_axis = 2
         self._plot_limit = 1
 
@@ -210,7 +209,9 @@ class Heatmap(Plotter):
                 self._backup_scale_interpolators[databundle.row](51.2)
             except Exception:
                 percentiles = np.linspace(0, 100.0, 21)
-                results = [np.percentile(ds._data, perc) for perc in percentiles]
+                results = [
+                    np.percentile(np.nan_to_num(ds._data), perc) for perc in percentiles
+                ]
                 self._backup_scale_interpolators[databundle.row] = interp1d(
                     percentiles,
                     results,
