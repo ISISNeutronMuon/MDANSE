@@ -110,13 +110,23 @@ class TrajectoryFilterConfigurator(IConfigurator):
             self.error_status = f"Could not apply the filter. {e}: {format_exc()}"
             return
 
-        expected_attributes = set(filter_instance.default_settings) | {
+        expected_attributes = filter_instance.default_settings.keys() | {
             "n_steps",
             "time_step_ps",
         }
         if unknown_attributes := dict_value["attributes"].keys() - expected_attributes:
             self.warning_status = (
                 f"Unexpected filter attributes: {','.join(unknown_attributes)}"
+            )
+        if (
+            missing_attributes := filter_instance.default_settings.keys()
+            - dict_value["attributes"].keys()
+        ):
+            self.warning_status = "\n".join(
+                [
+                    self.warning_status,
+                    f"No values were given to expected filter attributes: {','.join(missing_attributes)}",
+                ]
             )
 
         self.error_status = "OK"
