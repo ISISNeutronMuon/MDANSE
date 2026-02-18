@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import copy
 import json
-from collections import defaultdict
+from collections import ChainMap, defaultdict
 from collections.abc import ItemsView
 from pathlib import Path
 from typing import Any, SupportsComplex
@@ -160,7 +160,7 @@ class _Database(metaclass=Singleton):
         If the user database already exists, calling this function will overwrite it.
         """
         with open(self._USER_DATABASE, "w") as f:
-            json.dump(self._data, f, indent=4)
+            json.dump(dict(self._data), f, indent=4)
 
 
 class AtomsDatabaseError(Error):
@@ -237,9 +237,16 @@ class AtomsDatabase(_Database):
 
         if self._OLD_USER_DATABASE.exists():
             LOG.warning(
-                "The old atom database %s will be ignored! MDANSE will use %s instead",
+                "The old atom database %s will be ignored!",
                 self._OLD_USER_DATABASE,
+            )
+        if self._USER_DATABASE.exists():
+            LOG.warning(
+                "The custom atom database %s will be used only for custom atoms. "
+                "The atom properties in %s cannot be changed by users anymore. "
+                "The only way to use non-standard atom properties is to create custom chemical elements.",
                 self._USER_DATABASE,
+                self._DEFAULT_DATABASE,
             )
 
     def __contains__(self, element: str) -> bool:
@@ -296,17 +303,12 @@ class AtomsDatabase(_Database):
         """
         self._properties = defaultdict(lambda: "str")
         self._units = defaultdict(lambda: "none")
-        super()._load(default_database)
 
-        self._properties.update(self._data["properties"])
-        self._units.update(self._data["units"])
-        self._data = self._data["atoms"]
+        super()._load(user_database=user_database, default_database=default_database)
+        self._properties.update(self._default_data["properties"])
+        self._units.update(self._default_data["units"])
 
-        super()._load(user_database)
-
-        self._properties.update(self._data["properties"])
-        self._units.update(self._data["units"])
-        self._data = self._data["atoms"]
+        self._data = ChainMap(self._default_data["atoms"], self._data["atoms"])
 
         try:
             number_of_protons = self.get_property("proton")
@@ -680,7 +682,11 @@ class AtomsDatabase(_Database):
         This database will then be used in the future.
         If the user database already exists, calling this function will overwrite it.
         """
-        d = {"properties": self._properties, "units": self._units, "atoms": self._data}
+        d = {
+            "properties": self._properties,
+            "units": self._units,
+            "atoms": dict(self._data),
+        }
 
         with open(AtomsDatabase._USER_DATABASE, "w") as fout:
             fout.write(json.dumps(d, indent=4, cls=MDANSEEncoder))
