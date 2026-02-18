@@ -596,14 +596,13 @@ class FilterSettingGroup(QObject):
             The widget value.
 
         """
-        if isinstance(widget, (QSpinBox, QDoubleSpinBox)):
-            return widget.value()
-
-        if isinstance(widget, QComboBox):
-            return widget.currentText()
-
-        if isinstance(widget, QCheckBox):
-            return widget.isChecked()
+        match widget:
+            case QComboBox():
+                return widget.currentText()
+            case QCheckBox():
+                return widget.isChecked()
+            case _:
+                return widget.value()
 
     @Slot()
     def collect_inputs(self) -> None:
@@ -656,16 +655,15 @@ class FilterSettingGroup(QObject):
         bin_width = Filter.frequency_resolution(n_steps, time_step, units=self.units)
         vmax = Filter.nyquist(time_step, units=self.units) - bin_width
         with block_signals(self):
-            for key in ("cutoff_freq", "fundamental_freq"):
-                if key in self.widgets:
-                    widget_instance: ConstrainedDoubleSpinBox = self.widgets[key]
-                    temp_value = widget_instance.value()
-                    widget_instance.setSingleStep(bin_width)
-                    widget_instance.set_snap(snap_to=bin_width)
-                    widget_instance.setMaximum(vmax)
-                    widget_instance.setMinimum(bin_width)
-                    new_value = bin_width * (min(temp_value, vmax) // bin_width)
-                    widget_instance.setValue(new_value)
+            for key in {"cutoff_freq", "fundamental_freq"} & self.widgets.keys():
+                widget_instance: ConstrainedDoubleSpinBox = self.widgets[key]
+                temp_value = widget_instance.value()
+                widget_instance.setSingleStep(bin_width)
+                widget_instance.set_snap(snap_to=bin_width)
+                widget_instance.setMaximum(vmax)
+                widget_instance.setMinimum(bin_width)
+                new_value = bin_width * (min(temp_value, vmax) // bin_width)
+                widget_instance.setValue(new_value)
 
     def setting_to_widget(self, setting_key: str, val_group: dict) -> QWidget:
         """Convert the setting dictionary to the corresponding setting widget and sets up connections.
