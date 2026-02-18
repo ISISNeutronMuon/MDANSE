@@ -18,6 +18,8 @@ from __future__ import annotations
 import json
 from traceback import format_exc
 
+import numpy as np
+
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Mathematics.Signal import (
     DEFAULT_FILTER,
@@ -94,9 +96,17 @@ class TrajectoryFilterConfigurator(IConfigurator):
         )
 
         try:
-            FILTER_MAP[dict_value["filter"]](**dict_value["attributes"])
+            filter_instance = FILTER_MAP[dict_value["filter"]](
+                **dict_value["attributes"]
+            )
         except Exception as e:
             self.error_status = f"Could not create the filter. {e}: {format_exc()}"
+            return
+
+        try:
+            filter_instance.apply(np.empty((frames_configurator["number"],)))
+        except Exception as e:
+            self.error_status = f"Could not apply the filter. {e}: {format_exc()}"
             return
 
         self.error_status = "OK"
