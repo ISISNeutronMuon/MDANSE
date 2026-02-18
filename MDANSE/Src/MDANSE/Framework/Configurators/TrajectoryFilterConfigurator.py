@@ -73,6 +73,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
         """
         if not self.update_needed(value):
             return
+        self.warning_status = ""
 
         self._settings = value
 
@@ -108,6 +109,15 @@ class TrajectoryFilterConfigurator(IConfigurator):
         except Exception as e:
             self.error_status = f"Could not apply the filter. {e}: {format_exc()}"
             return
+
+        expected_attributes = set(filter_instance.default_settings) | {
+            "n_steps",
+            "time_step_ps",
+        }
+        if unknown_attributes := dict_value["attributes"].keys() - expected_attributes:
+            self.warning_status = (
+                f"Unexpected filter attributes: {','.join(unknown_attributes)}"
+            )
 
         self.error_status = "OK"
         self["value"] = self._settings
