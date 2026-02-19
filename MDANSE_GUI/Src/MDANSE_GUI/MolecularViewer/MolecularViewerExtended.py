@@ -160,7 +160,7 @@ class MolecularViewerExtended(MolecularViewer):
 
     def animate_rotation(self):
         """Continuously rotate the 3D model."""
-        if self._animation_timer.isActive():
+        if self._animation_timer.isActive() and self._viewer_is_visible:
             for i, actor in enumerate(self.placeholder_actors):
                 if i == 0:  # center sphere
                     actor.RotateZ(self.rotation_speed)
