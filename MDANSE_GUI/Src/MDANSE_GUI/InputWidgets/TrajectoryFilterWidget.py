@@ -1757,6 +1757,13 @@ class TrajectoryFilterWidget(WidgetBase):
                 ]
             ):
                 self._frames_widget = widget
+            elif (
+                widget._configurator
+                is self._configurator.configurable[
+                    self._configurator.dependencies["pps_input_file"]
+                ]
+            ):
+                self._pps_file_widget = widget
                 break
         self._frames_widget.value_changed.connect(self.update_time_steps)
         self.filter_designer = self.create_helper()
@@ -1768,15 +1775,6 @@ class TrajectoryFilterWidget(WidgetBase):
         self.update_labels()
         self.updateValue()
         self._field.setToolTip(self._tooltip_text)
-        for widget in self.parent()._widgets:
-            if (
-                widget._configurator
-                is self._configurator.configurable[
-                    self._configurator.dependencies["pps_input_file"]
-                ]
-            ):
-                self._pps_file_widget = widget
-                break
         self._pps_file_widget.value_changed.connect(
             self.filter_designer.render_canvas_assets
         )

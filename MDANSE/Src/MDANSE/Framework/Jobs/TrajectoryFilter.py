@@ -61,7 +61,7 @@ class TrajectoryFilter(IJob):
     settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "CorrelationFramesConfigurator",
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["pps_input_file"] = (
@@ -77,7 +77,8 @@ class TrajectoryFilter(IJob):
         "TrajectoryFilterConfigurator",
         {
             "dependencies": {
-                "trajectory": "trajectory", "frames": "frames",
+                "trajectory": "trajectory",
+                "frames": "frames",
                 "pps_input_file": "pps_input_file",
             }
         },
