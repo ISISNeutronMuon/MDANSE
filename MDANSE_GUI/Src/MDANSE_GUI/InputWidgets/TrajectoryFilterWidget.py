@@ -1249,9 +1249,6 @@ class FilterDesigner(QDialog):
             raise ValueError("Unknown attenuation functional form")
         normalised = values / np.max(values)
 
-        if self.current_filter_units() == Filter.FrequencyUnits.CYCLIC:
-            freqs /= 2 * np.pi
-
         return (
             freqs,
             normalised,
@@ -1290,6 +1287,7 @@ class FilterDesigner(QDialog):
 
         file_freqs, file_values = read_pps_from_file(pps_filename)
         freqs, _ = response
+        file_freqs /= 2 * np.pi
 
         if file_freqs is None:
             file_freqs = freqs
@@ -1298,12 +1296,6 @@ class FilterDesigner(QDialog):
 
         # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain, setting
         # custom frequency range on filter object
-        tr_filter.custom_freq_range = np.linspace(
-            freqs.min(),
-            freqs.max(),
-            len(response.frequencies),
-        )
-        tr_filter.set_freq_response(Filter.FrequencyRangeMethod.CUSTOM)
 
         overlap_mask = (file_freqs >= max(freqs.min(), file_freqs.min())) & (
             file_freqs <= min(freqs.max(), file_freqs.max())
@@ -1319,9 +1311,6 @@ class FilterDesigner(QDialog):
             fill_value=0.0,
             bounds_error=False,
         )
-
-        if self.current_filter_units() == Filter.FrequencyUnits.CYCLIC:
-            freqs /= 2 * np.pi
 
         return (
             file_freqs,
@@ -1471,7 +1460,6 @@ class FilterDesigner(QDialog):
         self._figure.clear()
 
         x, y = freqs.frequencies, freqs.magnitudes
-        x_max = x.max()
 
         axes = self._figure.add_axes([0.1, 0.1, 0.8, 0.8])
         axes.plot(
@@ -1502,8 +1490,6 @@ class FilterDesigner(QDialog):
                 Filter.freq_to_energy(axes.get_xticks(), self.current_filter_units()),
             ).astype(int)
             axes.set_xticks(axes.get_xticks(), labels=energy_ticks)
-
-        axes.set_xlim(0.0, x_max)
 
         frequency_units = self.current_filter_units().value
         axes.set_xlabel(
