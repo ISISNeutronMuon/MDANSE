@@ -104,10 +104,10 @@ class Single(Plotter):
             curve.set_ydata(new_ydata)
             xmin, xmax = np.nanmin(new_xdata), np.nanmax(new_xdata)
             ymin, ymax = np.nanmin(new_ydata), np.nanmax(new_ydata)
-            saved_xmin = min(xmin, saved_xmin)
-            saved_xmax = max(xmax, saved_xmax)
-            saved_ymin = min(ymin, saved_ymin)
-            saved_ymax = max(ymax, saved_ymax)
+            saved_xmin = np.nanmin([xmin, saved_xmin])
+            saved_xmax = np.nanmax([xmax, saved_xmax])
+            saved_ymin = np.nanmin([ymin, saved_ymin])
+            saved_ymax = np.nanmax([ymax, saved_ymax])
         self._backup_limits = [saved_xmin, saved_xmax, saved_ymin, saved_ymax]
         self._axes[0].relim()
         self._axes[0].autoscale()
@@ -204,8 +204,12 @@ class Single(Plotter):
                         temp.set_marker(int(databundle.marker))
                 self._active_curves.append(temp)
                 self._backup_curves.append([temp.get_xdata(), temp.get_ydata()])
-                self.height_max = max(self.height_max, np.nanmax(temp.get_ydata()))
-                self.length_max = max(self.length_max, np.nanmax(temp.get_xdata()))
+                self.height_max = np.nanmax(
+                    [self.height_max, np.nanmax(temp.get_ydata())]
+                )
+                self.length_max = np.nanmax(
+                    [self.length_max, np.nanmax(temp.get_xdata())]
+                )
             else:
                 multi_curves = dataset.curves_vs_axis(
                     (best_unit, best_axis), max_limit=self._curve_limit_per_dataset
@@ -232,11 +236,11 @@ class Single(Plotter):
                                 temp.set_marker(int(databundle.marker))
                         self._active_curves.append(temp)
                         self._backup_curves.append([temp.get_xdata(), temp.get_ydata()])
-                        self.height_max = max(
-                            self.height_max, np.nanmax(temp.get_ydata())
+                        self.height_max = np.nanmax(
+                            [self.height_max, np.nanmax(temp.get_ydata())]
                         )
-                        self.length_max = max(
-                            self.length_max, np.nanmax(temp.get_xdata())
+                        self.length_max = np.nanmax(
+                            [self.length_max, np.nanmax(temp.get_xdata())]
                         )
                     except ValueError:
                         LOG.error(f"Plotting failed for {plotlabel} using {best_axis}")

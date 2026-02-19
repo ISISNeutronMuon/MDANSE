@@ -36,6 +36,7 @@ select = [
     # "D",   # Pydocstyle
     "UP",  # Pyupgrade
     "T20",   # Print
+    "CPY",  # Copyright check
 ]
 ignore = [
     "E501",     # Line too long
@@ -52,3 +53,6 @@ ignore = [
 [lint.isort]
 known-first-party = ["MDANSE", "MDANSE_GUI"]
 required-imports = ["from __future__ import annotations"]
+
+[lint.flake8-copyright]
+notice-rgx = "it under the terms of the GNU General Public License as published by"
