@@ -1243,8 +1243,6 @@ class FilterDesigner(QDialog):
             values = attenuation_fn(freqs, freqs.max() / 2, freqs.max() / 4)
         elif source == "Double gaussian":
             values = attenuation_fn(freqs, freqs.max() / 2, freqs.max() / 8)
-        elif source in {"Gaussian noise", "Uniform noise"}:
-            values = attenuation_fn(freqs)
         else:
             raise ValueError("Unknown attenuation functional form")
         normalised = values / np.max(values)
@@ -1287,10 +1285,8 @@ class FilterDesigner(QDialog):
 
         file_freqs, file_values = read_pps_from_file(pps_filename)
         freqs, _ = response
-        file_freqs /= 2 * np.pi
 
-        if file_freqs is None:
-            file_freqs = freqs
+        file_freqs = freqs if file_freqs is None else file_freqs / (2 * np.pi)
         if file_values is None:
             file_values = np.ones_like(freqs)
 
