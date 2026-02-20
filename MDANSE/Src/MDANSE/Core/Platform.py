@@ -20,10 +20,8 @@ import os
 import platform
 from pathlib import Path
 
-from MDANSE.Core.Error import Error
 
-
-class PlatformError(Error):
+class PlatformError(Exception):
     """
     This class handles error related to Platform derived classes.
     """

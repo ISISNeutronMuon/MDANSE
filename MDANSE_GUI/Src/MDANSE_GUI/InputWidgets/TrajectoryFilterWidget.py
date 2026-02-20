@@ -1803,4 +1803,4 @@ class TrajectoryFilterWidget(WidgetBase):
         """
         selection_string = self._field.text()
         self._empty = not selection_string
-        return selection_string if selection_string else self._default_value
+        return selection_string or self._default_value

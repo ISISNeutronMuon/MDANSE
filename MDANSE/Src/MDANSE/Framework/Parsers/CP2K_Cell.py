@@ -21,12 +21,10 @@ from pathlib import Path
 import numpy as np
 from more_itertools import ilen, take
 
-from MDANSE.Core.Error import Error
-
 from .Parser import Parser
 
 
-class CellFileError(Error):
+class CellFileError(Exception):
     pass
 
 

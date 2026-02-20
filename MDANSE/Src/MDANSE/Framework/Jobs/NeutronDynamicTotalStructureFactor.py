@@ -19,7 +19,6 @@ from math import sqrt
 
 import numpy as np
 
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
     pair_labels,
@@ -27,7 +26,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
-class NeutronDynamicTotalStructureFactorError(Error):
+class NeutronDynamicTotalStructureFactorError(Exception):
     pass
 
 

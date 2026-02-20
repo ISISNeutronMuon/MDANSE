@@ -26,7 +26,6 @@ from ase.io.trajectory import Trajectory as ASETrajectory
 from more_itertools import ilen
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Parsers import ASEParser
@@ -40,7 +39,7 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-class ASETrajectoryFileError(Error):
+class ASETrajectoryFileError(Exception):
     pass
 
 

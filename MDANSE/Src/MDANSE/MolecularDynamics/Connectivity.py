@@ -83,7 +83,7 @@ class Connectivity:
         selection: list[int] | None = None,
         parallel_workers: int | None = None,
     ):
-        self.worker_limit = parallel_workers if parallel_workers else -1
+        self.worker_limit = parallel_workers or -1
         self._input_trajectory = trajectory
         self._selection = selection or trajectory._selection or trajectory.atom_indices
         self._periodic = self._input_trajectory.configuration(0).is_periodic

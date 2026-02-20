@@ -37,7 +37,6 @@ from typing import Any
 from more_itertools import consumer, first_true
 
 from MDANSE import PLATFORM
-from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStates, JobStatus
@@ -99,7 +98,7 @@ except ImportError:
             pass
 
 
-class JobError(Error):
+class JobError(Exception):
     """This class handles any exception related to IJob-derived objects"""
 
     def __init__(self, job: IJob, message: str = ""):

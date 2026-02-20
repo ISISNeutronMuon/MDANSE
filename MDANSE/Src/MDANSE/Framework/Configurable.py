@@ -17,11 +17,10 @@ from __future__ import annotations
 
 from more_itertools import value_chain
 
-from MDANSE.Core.Error import Error
 from MDANSE.MLogging import LOG
 
 
-class ConfigurationError(Error):
+class ConfigurationError(Exception):
     """
     Handles the exception that may occurs when configuring an object that derives from MDANSE.Core.Configurable class.
     """

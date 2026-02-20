@@ -21,11 +21,10 @@ import numpy as np
 import numpy.typing as npt
 from scipy.spatial.transform import Rotation
 
-from MDANSE.Core.Error import Error
 from MDANSE.Mathematics.LinearAlgebra import Vector
 
 
-class GeometryError(Error):
+class GeometryError(Exception):
     pass
 
 

@@ -25,12 +25,11 @@ from typing import NamedTuple
 import numpy as np
 from scipy import fftpack, signal
 
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
-class SignalError(Error):
+class SignalError(Exception):
     pass
 
 

@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Parsers import XDATCARFile
@@ -26,7 +25,7 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-class VASPConverterError(Error):
+class VASPConverterError(Exception):
     pass
 
 

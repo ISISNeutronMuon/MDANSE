@@ -20,7 +20,6 @@ from math import sqrt
 import numpy as np
 from scipy.signal import correlate
 
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
     pair_labels,
@@ -34,7 +33,7 @@ from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-class DynamicCoherentStructureFactorError(Error):
+class DynamicCoherentStructureFactorError(Exception):
     pass
 
 

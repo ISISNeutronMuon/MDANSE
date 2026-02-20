@@ -17,11 +17,10 @@ from __future__ import annotations
 
 import numpy as np
 
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
-class ScatteringLengthDensityProfileError(Error):
+class ScatteringLengthDensityProfileError(Exception):
     pass
 
 
