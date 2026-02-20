@@ -16,8 +16,15 @@
 from __future__ import annotations
 
 import abc
+import ctypes
+import datetime
+import getpass
+import inspect
 import os
 import platform
+import re
+import subprocess
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 
@@ -29,7 +36,7 @@ class PlatformError(Exception):
     pass
 
 
-class Platform(metaclass=abc.ABCMeta):
+class Platform(ABC):
     """
     This is the base class for OS-free standard operations.
     """
@@ -50,8 +57,9 @@ class Platform(metaclass=abc.ABCMeta):
 
         return cls.__instance
 
-    @abc.abstractmethod
-    def application_directory(self) -> Path:
+    @staticmethod
+    @abstractmethod
+    def application_directory() -> Path:
         """
         Returns the path for MDANSE application directory.
 
@@ -183,7 +191,8 @@ class PlatformWin(Platform):
 
     name = "windows"
 
-    def application_directory(self) -> Path:
+    @staticmethod
+    def application_directory() -> Path:
         """
         Returns the path for MDANSE application directory.
 

@@ -15,8 +15,8 @@
 #
 from __future__ import annotations
 
-import abc
 import copy
+from abc import ABC, abstractmethod
 from functools import reduce
 from typing import TYPE_CHECKING
 
@@ -287,7 +287,7 @@ class ConfigurationError(Exception):
     pass
 
 
-class _Configuration(metaclass=abc.ABCMeta):
+class _Configuration(ABC):
     is_periodic: bool
 
     def __init__(self, chemical_system: ChemicalSystem, coords: ArrayLike, **variables):
@@ -380,7 +380,7 @@ class _Configuration(metaclass=abc.ABCMeta):
         """
         return self._chemical_system
 
-    @abc.abstractmethod
+    @abstractmethod
     def clone(self, chemical_system: ChemicalSystem):
         """
         Clones this configuration.
@@ -400,7 +400,7 @@ class _Configuration(metaclass=abc.ABCMeta):
         """
         return self._variables["coordinates"]
 
-    @abc.abstractmethod
+    @abstractmethod
     def to_real_coordinates(self):
         """
         Return the coordinates of this configuration converted to real coordinates.
@@ -487,7 +487,7 @@ class _PeriodicConfiguration(_Configuration):
 
         self._variables["coordinates"] = (coords @ inverse_unit_cell % 1) @ unit_cell
 
-    @abc.abstractmethod
+    @abstractmethod
     def to_box_coordinates(self):
         """Return this configuration converted to box coordinates.
 

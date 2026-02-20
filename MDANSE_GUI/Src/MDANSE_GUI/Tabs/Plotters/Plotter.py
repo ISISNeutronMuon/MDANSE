@@ -19,7 +19,7 @@ import copy
 import csv
 import enum
 from itertools import count
-from typing import TYPE_CHECKING, Any, Literal, TextIO
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, TextIO
 
 import numpy as np
 from more_itertools import consumer
@@ -98,6 +98,9 @@ NORMALISATION_DEFAULTS = {
 class Plotter(metaclass=SubclassFactory):
     """Parent class to all classes used for displaying data."""
 
+    slider_labels: ClassVar[tuple[str, ...]] = "Slider 1", "Slider 2"
+    sliders_coupled: ClassVar[bool] = False
+
     def __init__(self) -> None:
         """Create defaults common to all plotters."""
         self._figure = None
@@ -133,17 +136,9 @@ class Plotter(metaclass=SubclassFactory):
             return
         target.clear()
 
-    def slider_labels(self) -> list[str]:
-        """Get text to be shown next to sliders."""
-        return ["Slider 1", "Slider 2"]
-
     def slider_limits(self) -> list[tuple[float, float, float]]:
         """Get default limit values for sliders."""
         return [(-1.0, 1.0, 0.01)] * self._number_of_sliders
-
-    def sliders_coupled(self) -> bool:
-        """Check if the slider values depend on each other."""
-        return False
 
     def get_figure(self, figure: Figure | None = None):
         """Get the reference to the current figure, if present."""
@@ -154,7 +149,8 @@ class Plotter(metaclass=SubclassFactory):
         target.clear()
         return target
 
-    def apply_settings(self, plotting_context: PlottingContext):
+    @staticmethod
+    def apply_settings(plotting_context: PlottingContext):
         """Check that the plotting context can be used."""
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")

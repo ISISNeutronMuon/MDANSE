@@ -274,7 +274,7 @@ class ReusableSelection:
             All the operations of this selection, encoded as string
 
         """
-        with open(filename, "w") as target:
+        with open(filename, "w", encoding="utf-8") as target:
             json.dump(self.operations, target)
 
     def load_from_hdf5(self, filename: str):

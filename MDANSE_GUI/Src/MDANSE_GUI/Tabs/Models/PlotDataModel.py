@@ -43,7 +43,7 @@ class BasicPlotDataItem(QStandardItem):
         self.has_vectors = False
 
     @abstractmethod
-    def data_path(self):
+    def data_path(self) -> str:
         """Return the path to the object inside the HDF5 file."""
         pass
 

@@ -17,12 +17,9 @@ from __future__ import annotations
 
 import csv
 import math
-from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any, TextIO
+from typing import TYPE_CHECKING, Any, ClassVar, TextIO
 
 import numpy as np
-from matplotlib.axes import Axes
-from matplotlib.image import AxesImage
 from matplotlib.pyplot import colorbar as mpl_colorbar
 from scipy.interpolate import interp1d
 
@@ -30,13 +27,20 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from matplotlib.axes import Axes
     from matplotlib.figure import Figure
+    from matplotlib.image import AxesImage
 
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
 class Heatmap(Plotter):
     """Creates a 2D heatmap plot."""
+
+    sliders_coupled: ClassVar[bool] = False
+    slider_labels = "Minimum (percentile)", "Maximum (percentile)"
 
     def __init__(self) -> None:
         """Initialise all plotting parameters to defaults."""
@@ -60,17 +64,9 @@ class Heatmap(Plotter):
             return
         target.clear()
 
-    def slider_labels(self) -> list[str]:
-        """Return labels for the sliders in heatmap mode."""
-        return ["Minimum (percentile)", "Maximum (percentile)"]
-
     def slider_limits(self) -> list[str]:
         """Return slider limits for the colormap, in percent."""
         return self._number_of_sliders * [[0.0, 100.0, 0.01]]
-
-    def sliders_coupled(self) -> bool:
-        """Confirm that sliders are coupled in heatmap mode."""
-        return True
 
     def get_figure(self, figure: Figure = None):
         """Return current figure which will be used for plotting."""

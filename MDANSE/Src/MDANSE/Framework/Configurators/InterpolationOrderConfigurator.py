@@ -47,7 +47,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
 
         IntegerConfigurator.__init__(self, name, **kwargs)
 
-    def configure(self, value):
+    def configure(self, value: str):
         """
         Configure the input interpolation order.
 
@@ -64,7 +64,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
             return
 
         self._original_input = value
-        if value is None or value == "":
+        if not value:
             value = self._default
 
         IntegerConfigurator.configure(self, value)

@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from math import isclose
+
 import numpy as np
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
@@ -80,7 +82,7 @@ class VectorConfigurator(IConfigurator):
         if self.normalize:
             vector = vector.normal()
 
-        if self.notNull and vector.length() == 0.0:
+        if self.notNull and isclose(vector.length(), 0):
             self.error_status = "The vector is null."
             return
 

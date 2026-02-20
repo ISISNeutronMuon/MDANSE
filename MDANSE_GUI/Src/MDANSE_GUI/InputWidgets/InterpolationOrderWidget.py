@@ -83,9 +83,9 @@ class InterpolationOrderWidget(WidgetBase):
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "InterpolationOrderWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "The order of the polynomial function used for interpolating velocity values from atom positions. If zero, velocity values present in the trajectory will be used."
 
     @Slot(int)

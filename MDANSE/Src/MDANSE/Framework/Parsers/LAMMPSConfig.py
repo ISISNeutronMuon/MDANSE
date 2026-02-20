@@ -357,7 +357,7 @@ class LAMMPSConfigFile(Parser, dict):
         header = {
             match[2].strip(): match[1]
             for line in lines
-            if (match := re.search("(.*?)([a-z ]+)$", line))
+            if (match := re.search(r"(.*?)([a-z ]+)$", line))
         }
 
         accum = {
@@ -675,7 +675,7 @@ class LAMMPSConfigFile(Parser, dict):
         #                   "BondBond13 Coeffs", "AngleAngle Coeffs"), float_list_parser),
     }
 
-    _is_block = re.compile("^[A-Z]").match
+    _is_block = re.compile(r"^[A-Z]").match
 
     @staticmethod
     def scan(filename: Path | str) -> list[str]:

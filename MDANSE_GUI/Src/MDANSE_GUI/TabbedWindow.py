@@ -270,8 +270,8 @@ class TabbedWindow(QMainWindow):
         QApplication.quit()
         self.destroy(True, True)
 
+    @staticmethod
     def populate_recent_menu(
-        self,
         menu: QMenu,
         recent_filepath: Path,
         open_recent_file_function: Callable,
@@ -359,13 +359,16 @@ class TabbedWindow(QMainWindow):
         version += f"MDANSE_GUI version: {MDANSE_GUI.__version__}\n"
         _popup = QMessageBox.about(self, "MDANSE Version Information", version)
 
-    def show_website_code(self):
+    @staticmethod
+    def show_website_code():
         QDesktopServices.openUrl(MDANSE_CODE_WEBSITE)
 
-    def show_website_examples(self):
+    @staticmethod
+    def show_website_examples():
         QDesktopServices.openUrl(MDANSE_EXAMPLES_WEBSITE)
 
-    def show_website_docs(self):
+    @staticmethod
+    def show_website_docs():
         QDesktopServices.openUrl(MDANSE_DOCS_WEBSITE)
 
     def setupToolbar(self):
@@ -422,7 +425,8 @@ class TabbedWindow(QMainWindow):
     def launchElementsEditor(self):
         self.launch_dialog(self.element_editor)
 
-    def launch_dialog(self, dialog) -> None:
+    @staticmethod
+    def launch_dialog(dialog) -> None:
         if dialog.isVisible():
             geometry = dialog.saveGeometry()
             dialog.previous_geometry = geometry

@@ -625,10 +625,10 @@ class SelectionHelper(QDialog):
         self.selection_line.setToolTip("")
         selection_text = self.selection_line.text()
         validation = self.selection_model.rebuild_selection(selection_text)
-        if validation in (
+        if validation in {
             SelectionValidity.MALFORMED_SELECTION,
             SelectionValidity.USELESS_SELECTION,
-        ):
+        }:
             self.selection_line.setStyleSheet(
                 "QWidget#InputWidget { background-color:rgb(180,20,180); font-weight: bold }"
             )

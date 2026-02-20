@@ -104,7 +104,7 @@ class Settings(Generic[T], QStandardItemModel):
                 key_item.setEditable(False)
                 if (section, key) not in self._entries_present:
                     section_item.appendRow([key_item, value_item, comment_item])
-                    self._entries_present[(section, key)] = [
+                    self._entries_present[section, key] = [
                         value_item.index(),
                         comment_item.index(),
                     ]
@@ -359,7 +359,7 @@ class SettingsContainer:
         group = self.group(group_name)
         group.update(values, comments)
         for key, value in values.items():
-            self._defaults[(group_name, key)] = value
+            self._defaults[group_name, key] = value
 
     def check_settings(
         self, group_name: str, values: Iterable[Any], comments: Iterable[str]

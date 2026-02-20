@@ -161,7 +161,7 @@ class _Database(metaclass=Singleton):
         This database will then be used in the future.
         If the user database already exists, calling this function will overwrite it.
         """
-        with open(self._USER_DATABASE, "w") as f:
+        with open(self._USER_DATABASE, "w", encoding="utf-8") as f:
             json.dump(dict(self._data), f, indent=4)
 
 
@@ -608,7 +608,7 @@ class AtomsDatabase(_Database):
 
         """
         try:
-            if self._properties[pname] not in ["int", "float", "complex"]:
+            if self._properties[pname] not in {"int", "float", "complex"}:
                 raise AtomsDatabaseError(
                     f'The provided property must be numeric, but "{pname}" has type '
                     f"{self._properties[pname]}.",
@@ -670,7 +670,7 @@ class AtomsDatabase(_Database):
         return [
             pname
             for pname, prop in self._properties.items()
-            if prop in ["int", "float", "complex"]
+            if prop in {"int", "float", "complex"}
         ]
 
     def _reset(self) -> None:
@@ -691,7 +691,7 @@ class AtomsDatabase(_Database):
         }
 
         with open(AtomsDatabase._USER_DATABASE, "w") as fout:
-            fout.write(json.dumps(d, indent=4, cls=MDANSEEncoder))
+            json.dump(d, fout, indent=4, cls=MDANSEEncoder)
 
     def get_atom_property(
         self,

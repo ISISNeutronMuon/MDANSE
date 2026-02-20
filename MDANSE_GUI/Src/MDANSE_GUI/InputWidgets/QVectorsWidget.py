@@ -165,27 +165,19 @@ class VectorModel(QStandardItemModel):
 
     def parse_vtype(self, vtype: str, value: str, vname: str):
         """Validate the inputs of a type accepting multiple numbers."""
-        if vtype in ("RangeConfigurator", "VectorConfigurator"):
-            inner_type = self._generator.settings[vname][1]["valueType"]
-            tempstring = value.strip("()[] ")
-            result = [inner_type(x) for x in tempstring.split(",")]
-            if len(result) == 3:
-                return result
-        elif vtype == "FloatConfigurator":
-            return float(value)
-        elif vtype == "IntegerConfigurator":
-            return int(value)
-        elif vtype == "BooleanConfigurator":
-            try:
-                value = BOOL_MAPPING[value.lower() if isinstance(value, str) else value]
-            except (KeyError, ValueError):
-                LOG.warning("Could not parse %s as logical true/false value", value)
-            else:
+        match vtype:
+            case "RangeConfigurator" | "VectorConfigurator":
+                inner_type = self._generator.settings[vname][1]["valueType"]
+                tempstring = value.strip("()[] ")
+                result = [inner_type(x) for x in tempstring.split(",")]
+                if len(result) == 3:
+                    return result
+            case "FloatConfigurator":
+                return float(value)
+            case "IntegerConfigurator":
+                return int(value)
+            case _:
                 return value
-        else:
-            return value
-
-        return "failed"
 
 
 class ShellPanel(QWidget):

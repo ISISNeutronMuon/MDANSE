@@ -116,7 +116,7 @@ class TrjFile(Parser):
             next(parser)
             self._header_size = 8
 
-            ### FRAME
+            # FRAME
             if version <= 2000:
                 self.main_rec_size = f"!{self._fp}i33{self._fp}5i"
             elif 2000 < version <= 2010:

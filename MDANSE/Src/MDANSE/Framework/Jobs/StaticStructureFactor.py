@@ -312,8 +312,8 @@ class StaticStructureFactor(DistanceHistogram):
                     intra=i == "/intra",
                     axis="ssf/axes/q",
                     units="au",
-                    main_result=i == "",
-                    partial_result=i == "",
+                    main_result=not i,
+                    partial_result=not i,
                 )
         else:
             assign_weights(self._outputData, weight_dict, "ssf/%s", self.labels)

@@ -487,7 +487,7 @@ class Action(QWidget):
             str(currentpath),
             "Python script (*.py)",
         )
-        if result == "":
+        if not result:
             return None
         path = Path(result).parent
         try:

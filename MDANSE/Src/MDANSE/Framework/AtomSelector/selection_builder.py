@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 from enum import Enum, auto
+from operator import itemgetter
 from typing import TYPE_CHECKING, Any
 
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
@@ -99,7 +100,7 @@ class SelectionBuilder:
 
         """
         value = json_handler(source)
-        for _, val in sorted(value.items(), key=lambda x: x[0]):
+        for _, val in sorted(value.items(), key=itemgetter(0)):
             params = val.copy()
             self.ops.append(params.pop("function_name"), params)
 
@@ -425,7 +426,7 @@ class SelectionBuilder:
             All the operations of this selection, encoded as string
 
         """
-        with open(filename, "w") as target:
+        with open(filename, "w", encoding="utf-8") as target:
             json.dump(self.as_dict, target, indent=2)
 
     def __str__(self) -> str:

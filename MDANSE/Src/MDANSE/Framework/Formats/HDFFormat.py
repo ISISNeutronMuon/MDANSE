@@ -151,7 +151,7 @@ class HDFFormat(IFormat):
         extension: str | None = None,
         *,
         in_memory: bool = False,
-    ) -> None | h5py.File:
+    ) -> h5py.File | None:
         """Write a set of output variables into an HDF file.
 
         Parameters

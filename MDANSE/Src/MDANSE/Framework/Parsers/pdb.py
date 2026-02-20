@@ -116,7 +116,7 @@ class PDBFile(Parser):
 
     @staticmethod
     def _parse_name(name: str) -> str:
-        trial = max(re.findall("[A-Za-z]+", name), key=len).capitalize()
+        trial = max(re.findall(r"[A-Za-z]+", name), key=len).capitalize()
         if trial[0] in ATOMS_DATABASE.atoms:
             return trial[0]
         if trial[:2] in ATOMS_DATABASE.atoms:

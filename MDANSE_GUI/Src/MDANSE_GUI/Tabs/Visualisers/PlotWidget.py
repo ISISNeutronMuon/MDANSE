@@ -245,9 +245,9 @@ class PlotWidget(QWidget):
         except Exception:
             self._plotter = Plotter()
         self._plotter._figure = self._figure
-        self.change_slider_labels.emit(self._plotter.slider_labels())
+        self.change_slider_labels.emit(self._plotter.slider_labels)
         self.change_slider_limits.emit(self._plotter.slider_limits())
-        self.change_slider_coupling.emit(self._plotter.sliders_coupled())
+        self.change_slider_coupling.emit(self._plotter.sliders_coupled)
         self.reset_slider_values.emit(self._plotter._value_reset_needed)
         self._plotter._slider_reference = self._sliderpack
         self._sliderpack.setEnabled(False)
@@ -280,7 +280,8 @@ class PlotWidget(QWidget):
             values = self._plotter._initial_values
             self._sliderpack.set_values(values)
 
-    def available_plotters(self) -> list[str]:
+    @staticmethod
+    def available_plotters() -> list[str]:
         """List all the plotters supported by this widget."""
         return [str(x) for x in Plotter.indirect_subclasses() if str(x) not in ("Text")]
 
@@ -432,7 +433,7 @@ class PlotWidget(QWidget):
             index = model.index(i, 0)
             item = model.itemFromIndex(index)
             item_text = model.data(index)
-            if item_text in ("Text", "Vectors", "Vectors3D"):
+            if item_text in {"Text", "Vectors", "Vectors3D"}:
                 item.setSelectable(False)
 
     def _save_data(self) -> None:

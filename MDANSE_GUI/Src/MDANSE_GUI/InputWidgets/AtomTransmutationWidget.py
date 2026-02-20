@@ -186,7 +186,7 @@ class AtomTransmutationWidget(AtomSelectionWidget):
         " the helper dialog."
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, use_list_view: bool = False, **kwargs):
         """Create the main widget for transmuting atom types.
 
         Parameters
@@ -195,7 +195,7 @@ class AtomTransmutationWidget(AtomSelectionWidget):
             If True, a ListView will replace LineEdit, by default True
 
         """
-        if kwargs.get("use_list_view", False):
+        if use_list_view:
             raise TypeError(f"Cannot use list view with {type(self).__name__}.")
         super().__init__(*args, use_list_view=False, **kwargs)
         self._field.textChanged.connect(self.updateValue)
@@ -232,5 +232,4 @@ class AtomTransmutationWidget(AtomSelectionWidget):
             The JSON selector setting.
 
         """
-        text = self._field.text()
-        return text or self._default_value
+        return self._field.text() or self._default_value

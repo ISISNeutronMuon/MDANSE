@@ -215,7 +215,7 @@ class LocalSession(Session):
                 fname = self._filename
 
         try:
-            with open(fname, "w") as target:
+            with open(fname, "w", encoding="utf-8") as target:
                 json.dump(self._configs, target, cls=json_encoder)
         except Exception:
             return

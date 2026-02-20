@@ -16,7 +16,7 @@
 from collections import ChainMap
 
 import unittest
-from unittest.mock import patch, mock_open
+from unittest.mock import patch, mock_open, ANY
 
 from MDANSE.Chemistry import (
     ATOMS_DATABASE,
@@ -207,7 +207,7 @@ class TestAtomsDatabase(unittest.TestCase):
         next(lines)
         self.assertEqual(next(lines).strip(), "H")
         self.assertTrue({"property", "value", "unit"}.issubset(next(lines).split()))
-        
+
         properties = {
             tokens[0] for line in lines if len(tokens := line.split()) > 2
         }
@@ -260,12 +260,12 @@ class TestAtomsDatabase(unittest.TestCase):
     def test_save(self):
         with (
             patch("builtins.open", new_callable=mock_open) as op,
-            patch("json.dumps") as dump,
+            patch("json.dump") as dump,
         ):
             ATOMS_DATABASE.save()
             op.assert_called_with(ATOMS_DATABASE._USER_DATABASE, "w")
             dump.assert_called_with(
-                {"properties": self.properties, "units": self.units, "atoms": self.data}, indent=4, cls=MDANSEEncoder
+                {"properties": self.properties, "units": self.units, "atoms": self.data}, ANY, indent=4, cls=MDANSEEncoder
             )
 
     def test_remove_atom(self):

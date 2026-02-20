@@ -26,9 +26,10 @@ from vtk.util.numpy_support import numpy_to_vtk
 if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
-RGB_COLOURS = []
-RGB_COLOURS.append((1.00, 0.20, 1.00))  # selection
-RGB_COLOURS.append((1.00, 0.90, 0.90))  # background
+RGB_COLOURS = [
+    (1.00, 0.20, 1.00),  # selection
+    (1.00, 0.90, 0.90),  # background
+]
 
 
 def ndarray_to_vtkarray(colors, scales, indices):
@@ -137,7 +138,7 @@ class AtomProperties(QStandardItemModel):
         Returns:
             int - the index of the colour in the list
         """
-        float_rgb = tuple([x / 255.0 for x in rgb])
+        float_rgb = tuple(x / 255.0 for x in rgb)
         for index, value in enumerate(self._colour_list):
             if value == float_rgb:
                 return index

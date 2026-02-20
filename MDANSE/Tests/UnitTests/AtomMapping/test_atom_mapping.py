@@ -26,7 +26,7 @@ from MDANSE.Framework.Units import measure
     ("aaa", None, pytest.raises(AttributeError, match="Unable to guess")),
     ("C", -1, pytest.raises(AtomsDatabaseError, match="must be a numeric type")),
     (1, None, pytest.raises(AttributeError, match=" no attribute 'upper'")),
-    ("H", "mass", pytest.raises(TypeError, match="unsupported operand")),
+    ("H", "mass", pytest.raises(TypeError, match="must be real number")),
     ("H", measure(1., "kg"), pytest.raises(AttributeError,
                                            match="no attribute '_dimension'")),
 ])

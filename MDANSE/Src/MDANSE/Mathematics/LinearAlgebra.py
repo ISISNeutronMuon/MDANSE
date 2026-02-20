@@ -103,21 +103,14 @@ class Vector:
     def __rmul__(self, other):
         return Vector(np.multiply(self.array, other))
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         if is_vector(other):
             raise TypeError("Can't divide by a vector")
         else:
             return Vector(np.divide(self.array, 1.0 * other))
 
-    __truediv__ = __div__
-
-    def __rdiv__(self, other):
+    def __rtruediv__(self, other):
         raise TypeError("Can't divide by a vector")
-
-    def __cmp__(self, other):
-        if is_vector(other):
-            return cmp(np.add.reduce(abs(self.array - other.array)), 0)
-        return NotImplemented
 
     def __len__(self):
         return 3

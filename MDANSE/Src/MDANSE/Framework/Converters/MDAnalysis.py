@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from math import isclose
+
 import MDAnalysis as mda
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
@@ -230,7 +232,7 @@ class MDAnalysis(Converter):
                     1.0, "kJ/mol ang", equivalent=True
                 ).toval("Da nm/ps2")
 
-        if float(self.configuration["time_step"]["value"]) == 0.0:
+        if isclose(float(self.configuration["time_step"]["value"]), 0):
             time = index * self.u.trajectory.ts.dt
         else:
             time = index * float(self.configuration["time_step"]["value"])

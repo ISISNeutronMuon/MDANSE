@@ -48,7 +48,7 @@ class OutputFilesWidget(WidgetBase):
         except Exception:
             jobname = "MDANSE_analysis"
             LOG.error("It was not possible to get the job name from the parent")
-        self.default_path = self.default_path / "output"
+        self.default_path /= "output"
         guess_name = unused_standard_output_filename(self.default_path, jobname)
         self.file_association = "Output file name (*)"
         self._value = default_value
@@ -93,9 +93,9 @@ class OutputFilesWidget(WidgetBase):
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "OutputFilesWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "Analysis output will be saved under this name, and using the selected file types"
 
     @Slot()

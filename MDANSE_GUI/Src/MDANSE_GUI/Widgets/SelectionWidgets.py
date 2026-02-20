@@ -150,11 +150,13 @@ class BasicSelectionWidget(QGroupBox):
         if add_standard_widgets:
             self.add_standard_widgets()
 
-    def parameter_dictionary(self) -> dict[str, Any]:
+    @staticmethod
+    def parameter_dictionary() -> dict[str, Any]:
         """Collect and return selection function parameters."""
         return {}
 
-    def add_specific_widgets(self):
+    @staticmethod
+    def add_specific_widgets():
         """Add additional widgets to layout, depending on the selection function."""
         return
 
@@ -247,7 +249,8 @@ class AllAtomSelection(BasicSelectionWidget):
         """Emit the string for inverting the selection."""
         self.new_selection.emit(json.dumps({"function_name": "invert_selection"}))
 
-    def parameter_dictionary(self):
+    @staticmethod
+    def parameter_dictionary():
         """Collect and return selection function parameters."""
         return {"function_name": "select_all"}
 

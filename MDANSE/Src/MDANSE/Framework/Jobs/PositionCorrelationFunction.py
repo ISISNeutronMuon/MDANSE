@@ -44,6 +44,6 @@ class PositionCorrelationFunction(CartesianCorrelationFunction):
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
         )
-        series = series - np.average(series, axis=0)
+        series -= np.average(series, axis=0)
         series = self.configuration["projection"]["projector"](series)
         return series

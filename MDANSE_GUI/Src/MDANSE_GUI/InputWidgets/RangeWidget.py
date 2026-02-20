@@ -74,9 +74,9 @@ class RangeWidget(WidgetBase):
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "RangeWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "Values to be used, given as (First, Last, StepSize)"
 
     def value_from_configurator(self):

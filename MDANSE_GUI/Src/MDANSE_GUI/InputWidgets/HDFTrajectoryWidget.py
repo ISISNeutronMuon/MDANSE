@@ -60,9 +60,9 @@ class HDFTrajectoryWidget(WidgetBase):
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "HDFTrajectoryWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "The input trajectory to be processed"
 
     def get_value(self):

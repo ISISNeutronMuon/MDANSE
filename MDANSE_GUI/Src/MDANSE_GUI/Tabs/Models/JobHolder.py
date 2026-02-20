@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import time
 import traceback
-from itertools import count
+from itertools import count, starmap
 from logging import Handler
 from logging.handlers import QueueListener
 from multiprocessing import Event, Pipe, Process, Queue
@@ -175,7 +175,7 @@ class JobEntry(QObject):
         return f"""\
 Job type: {self._command}
 Parameters:
-{nl.join(" - {} = {}".format(*kv) for kv in self.parameters.items())}
+{nl.join(starmap(" - {} = {}".format, self.parameters.items()))}
 Status:
   Current state: {self.job.state.name.title()}
   Percent complete: {self.job.progress}

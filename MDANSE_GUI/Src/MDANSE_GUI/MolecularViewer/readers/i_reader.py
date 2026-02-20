@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import abc
+from string import digits
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 
@@ -143,7 +144,7 @@ class IReader(abc.ABC):
 
             # Remove the trailing and initial digits from the upperized atom names
             upper_atom_name = atom_name.upper()
-            upper_atom_name = upper_atom_name.lstrip("0123456789").rstrip("0123456789")
+            upper_atom_name = upper_atom_name.strip(digits)
 
             # Case of the an atom that belongs to a standard residue
             # Guess the atom type by the starting from the first alpha letter from the left,

@@ -83,9 +83,9 @@ class OutputStructureWidget(WidgetBase):
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "OutputStructureWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = (
                 "The average structure of the trajectory"
                 "will be saved under this name,"

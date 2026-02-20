@@ -165,9 +165,11 @@ class PlotSettings(QWidget):
         style_selector = QComboBox(self)
         style_selector.addItem("default")
         style_list_mpl = mpl.style.available
-        style_list_filtered = [x for x in style_list_mpl if x[0] != "_"]
-        style_list_filtered = [x for x in style_list_filtered if "lorbli" not in x]
-        style_list_filtered = [x for x in style_list_filtered if x != "fast"]
+        style_list_filtered = [
+            x
+            for x in style_list_mpl
+            if not x.startswith("_") and "lorbli" not in x and x != "fast"
+        ]
         style_selector.addItems(style_list_filtered)
         try:
             style_string = self._settings.group("matplotlib").get("style")

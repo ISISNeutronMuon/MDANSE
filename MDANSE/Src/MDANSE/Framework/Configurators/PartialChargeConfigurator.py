@@ -138,7 +138,7 @@ class PartialChargeConfigurator(IConfigurator):
     label = "Partial electrical charges"
     tooltip = "Values can be set separately for each atom and will be constant in time."
 
-    def configure(self, value):
+    def configure(self, value: str):
         """
         Parameters
         ----------
@@ -150,7 +150,7 @@ class PartialChargeConfigurator(IConfigurator):
 
         self["charges"] = {}
 
-        if value is None or value == "":
+        if not value:
             value = self._default
         self._original_input = value
 

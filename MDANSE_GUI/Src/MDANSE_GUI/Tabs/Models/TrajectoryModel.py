@@ -150,13 +150,14 @@ class TrajectoryModel(QStandardItemModel):
         self._loading_threads[index] = thread
         thread.start()
 
-    def get_trajectory(self, index: int) -> None | str | Trajectory:
-        result = None
+    def get_trajectory(self, index: int) -> str | Trajectory | None:
         if index not in self._loading_threads:
             LOG.info("Requesting a missing trajectory with index %s", index)
-            return result
+            return None
+
         if index not in self._trajectory_instances:
             return f"Loading trajectory {self._trajectory_paths[index]}"
+
         return self._trajectory_instances[index]
 
     @Slot(object)

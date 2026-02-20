@@ -60,9 +60,9 @@ class IntegerWidget(WidgetBase):
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "IntegerWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "A single integer number"
 
     def get_widget_value(self):

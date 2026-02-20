@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import re
+from math import isclose
 from typing import TypeVar
 
 import numpy as np
@@ -116,15 +117,15 @@ def guess_element(atm_label: str, mass: float | int | None = None) -> str:
     AttributeError
         Error if unable to match to an element.
     """
-    if (mass is not None and mass == 0.0) or atm_label.upper() in [
+    if (mass is not None and isclose(mass, 0.0)) or atm_label.upper() in {
         "DUMMY",
         "DU",
         "D",
         "M",
-    ]:
+    }:
         return "Du"
 
-    regex = "([A-Za-z][A-Za-z]?)"
+    regex = r"([A-Za-z][A-Za-z]?)"
 
     guesses = []
     guess_0 = re.findall(regex, atm_label)

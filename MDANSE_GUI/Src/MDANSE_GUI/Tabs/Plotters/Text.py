@@ -99,12 +99,14 @@ class DatasetFormatter:
     def datasets_for_csv(self):
         """Return the datasets to be saved in a text file."""
         if self._plotting_context is None:
-            return ["No data selected"]
+            yield "No data selected"
+            return
 
         for databundle in self._plotting_context.datasets().values():
             yield self.process_data(databundle, main_axis=databundle.main_axis)
 
-    def make_dataset_header(self, dataset: SingleDataset, comment_character="#"):
+    @staticmethod
+    def make_dataset_header(dataset: SingleDataset, comment_character="#"):
         """Return the dataset informartion as text.
 
         Extracts information related to the input dataset, and converts them
@@ -481,7 +483,8 @@ class Text(Plotter):
         target.clear()
         return target
 
-    def apply_settings(self, plotting_context: PlottingContext, colours=None):
+    @staticmethod
+    def apply_settings(plotting_context: PlottingContext, colours=None):
         """Do nothing.
 
         Not relevant to the Text plotter, added for compatibility

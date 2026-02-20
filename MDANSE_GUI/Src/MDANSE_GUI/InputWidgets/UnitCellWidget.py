@@ -50,7 +50,7 @@ class UnitCellWidget(WidgetBase):
                 temp.setEnabled(False)
                 temp.setPlaceholderText(str(round(self.start_values[row][column], 5)))
                 self._layout.addWidget(temp, row, column + 1)
-                self._array_fields[(row, column)] = temp
+                self._array_fields[row, column] = temp
         self._mode = 0
         self.updateValue()
         if self._tooltip:

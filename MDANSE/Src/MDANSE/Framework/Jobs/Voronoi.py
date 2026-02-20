@@ -159,9 +159,7 @@ class Voronoi(IJob):
         points_ids = Voronoi.regions  # Option qhull v FN
         valid_regions_points_ids = []
         valid_region_id = []
-        region_id = -1
-        for p in Voronoi.point_region:
-            region_id += 1
+        for region_id, p in enumerate(Voronoi.point_region):
             id_list = points_ids[p]
             if no_exc_min(id_list) >= 0:
                 valid_regions_points_ids.append(id_list)

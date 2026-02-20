@@ -405,14 +405,15 @@ class LAMMPScustom(LAMMPSReader):
             elif line.startswith("ITEM: BOX BOUNDS"):
                 style = line.removeprefix("ITEM: BOX BOUNDS").split()
 
-                if len(style) in (0, 3):  # "xx yy zz"
-                    self._style = BoxStyle.ORTHOGONAL
-                elif len(style) == 6:  # "xy xz yz xx yy zz"
-                    self._style = BoxStyle.NONORTHOGONAL
-                elif len(style) == 2:  # "abc origin"
-                    self._style = BoxStyle.TRICLINIC
-                else:
-                    raise LAMMPSTrajectoryFileError(f"Unrecognised style {line!r}")
+                match len(style):
+                    case 0 | 3:
+                        self._style = BoxStyle.ORTHOGONAL
+                    case 6:  # "xy xz yz xx yy zz"
+                        self._style = BoxStyle.NONORTHOGONAL
+                    case 2:  # "abc origin"
+                        self._style = BoxStyle.TRICLINIC
+                    case _:
+                        raise LAMMPSTrajectoryFileError(f"Unrecognised style {line!r}")
 
                 self._item_location["BOX BOUNDS"] = (curr_line + 1, curr_line + 4)
 

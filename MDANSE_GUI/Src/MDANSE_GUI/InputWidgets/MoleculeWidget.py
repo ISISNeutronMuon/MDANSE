@@ -162,9 +162,9 @@ class MoleculeWidget(WidgetBase):
         values are provided in the settings of the job that
         is being configured.
         """
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "ComboWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "You only have one option. Choose wisely."
 
     def toggle_button(self):

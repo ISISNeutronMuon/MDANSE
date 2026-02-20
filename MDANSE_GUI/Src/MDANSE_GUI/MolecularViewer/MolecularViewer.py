@@ -695,8 +695,8 @@ class MolecularViewer(QtWidgets.QWidget):
         )
         self._atm_polydata.SetLines(bonds)
 
+    @staticmethod
     def create_bond_cell_array(
-        self,
         *,
         rs: np.ndarray,
         covs: np.typing.NDArray[float],
@@ -853,7 +853,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         vals = np.zeros(grid.shape[0])
         np.add.at(vals, ks, exp_res)
-        vals = vals / np.max(vals)
+        vals /= np.max(vals)
         vals = vals.reshape(grid_steps)
 
         self._image = array_to_3d_imagedata(vals, (grid_step, grid_step, grid_step))
@@ -1079,7 +1079,7 @@ class MolecularViewer(QtWidgets.QWidget):
         if self.bond_calc == BondCalc.EVERY:
             self.change_atm_polydata_lines()
         self.update_uc_polydata()
-        if self.axes_type in (AxesType.DIRECT, AxesType.RECIPROCAL):
+        if self.axes_type in {AxesType.DIRECT, AxesType.RECIPROCAL}:
             self.create_axes()
         self.update_atom_labels()
 

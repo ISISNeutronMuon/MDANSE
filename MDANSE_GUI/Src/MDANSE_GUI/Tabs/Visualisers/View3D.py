@@ -52,7 +52,7 @@ class View3D(QWidget):
 
     @Slot(tuple)
     def update_panel(self, data: tuple[str, Trajectory] | None):
-        if data is None or data[0] == "":
+        if data is None or not data[0]:
             self._viewer.clear_panel()
             self._controls._property_widget.clear_viewer()
             return

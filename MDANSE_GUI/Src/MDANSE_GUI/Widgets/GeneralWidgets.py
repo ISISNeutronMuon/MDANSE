@@ -133,7 +133,8 @@ class InputVariable(QObject):
             result = text
         return result
 
-    def inputValid(self) -> bool:
+    @staticmethod
+    def inputValid() -> bool:
         """Should be overridden to allow for more complex input
         validation checks.
 
@@ -179,7 +180,7 @@ class InputDialog(QDialog):
         self.setModal(True)
         self.setWindowTitle(title)
 
-        self.fields = fields  #  we need to store it for later
+        self.fields = fields  # we need to store it for later
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         # now some basic elements

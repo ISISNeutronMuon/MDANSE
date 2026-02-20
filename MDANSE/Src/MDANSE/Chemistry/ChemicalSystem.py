@@ -410,7 +410,7 @@ class ChemicalSystem:
         cs = ChemicalSystem(self.name)
 
         for attribute_name, attribute_value in self.__dict__.items():
-            if attribute_name in ["rdkit_mol", "_configuration"]:
+            if attribute_name in {"rdkit_mol", "_configuration"}:
                 continue
             setattr(cs, attribute_name, copy.deepcopy(attribute_value))
 

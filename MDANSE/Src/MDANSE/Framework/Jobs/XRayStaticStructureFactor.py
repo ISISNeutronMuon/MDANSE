@@ -329,8 +329,8 @@ class XRayStaticStructureFactor(DistanceHistogram):
                     intra=i == "/intra",
                     axis="xssf/axes/q",
                     units="au",
-                    main_result=i == "",
-                    partial_result=i == "",
+                    main_result=not i,
+                    partial_result=not i,
                 )
 
         else:

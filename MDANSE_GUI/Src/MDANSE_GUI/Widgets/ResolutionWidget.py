@@ -82,11 +82,11 @@ def convert_parameters(
     elif peak_type == "triangular":
         pass
     elif peak_type == "square":
-        fwhm = fwhm / 2
+        fwhm /= 2
     elif peak_type == "gaussian":
-        fwhm = fwhm / gauss_denum
+        fwhm /= gauss_denum
     elif peak_type == "lorentzian":
-        fwhm = fwhm / 2
+        fwhm /= 2
 
     return fwhm, centre
 

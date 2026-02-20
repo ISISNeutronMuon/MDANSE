@@ -32,6 +32,8 @@ if TYPE_CHECKING:
 class Vectors3D(Plotter):
     """Plots all the datasets in the same figure."""
 
+    slider_labels = "Inactive", "Inactive"
+
     def __init__(self) -> None:
         """Initialise all ploting parameters to default values."""
         super().__init__()
@@ -39,10 +41,6 @@ class Vectors3D(Plotter):
         self._backup_limits = []
         self._curve_limit_per_dataset = 36
         self._legend_limit_for_histogram = 6
-
-    def slider_labels(self) -> list[str]:
-        """Return labels to show that sliders are not used."""
-        return ["Inactive", "Inactive"]
 
     def slider_limits(self) -> list[str]:
         """Return generic slider limit values."""

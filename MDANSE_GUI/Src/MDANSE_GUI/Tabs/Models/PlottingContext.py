@@ -69,7 +69,7 @@ def get_mpl_markers():
 
 def get_mpl_lines():
     """Return valid plot line styles used by matplotlib."""
-    return {key: value for key, value in lineStyles.items() if key not in ["", " "]}
+    return {key: value for key, value in lineStyles.items() if key not in {"", " "}}
 
 
 def get_mpl_colours():
@@ -580,8 +580,8 @@ class SingleDataset:
         self._curve_labels = {}
 
         if self._data.ndim == 1:
-            self._curves[(0,)] = self.data
-            self._curve_labels[(0,)] = ""
+            self._curves[0,] = self.data
+            self._curve_labels[0,] = ""
             return self.data
 
         data_shape = self._data.shape

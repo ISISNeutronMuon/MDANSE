@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  ruff_version: 0.13.0
+  ruff_version: 0.15.2
 
 jobs:
 

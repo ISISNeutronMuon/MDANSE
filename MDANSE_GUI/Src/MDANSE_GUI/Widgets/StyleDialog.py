@@ -102,7 +102,8 @@ class StyleDialog(QDialog):
         for x in [self._selector, self._display, self._confirm]:
             layout.addWidget(x)
 
-    def is_dark_mode(self) -> bool:
+    @staticmethod
+    def is_dark_mode() -> bool:
         """Check if the OS believes it is set to dark mode.
 
         Returns

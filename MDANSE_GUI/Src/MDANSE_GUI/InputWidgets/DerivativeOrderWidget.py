@@ -68,9 +68,9 @@ class DerivativeOrderWidget(WidgetBase):
         """This is too simple to have a default value"""
 
     def default_labels(self):
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "DerivativeOrderWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "The order of the polynomial function used for interpolating time-dependent variables."
 
     @Slot(int)

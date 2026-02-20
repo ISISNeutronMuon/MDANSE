@@ -43,11 +43,17 @@ ignore = [
     "F401",     # Unused import in init
     "E402",     # Import not at top
     "PLR2004",  # Magic number in comparison
+    "PLR0904",  # Too many public methods
     "PLR0912",  # Too many branches
     "PLR0913",  # Too many arguments
+    "PLR0914",  # Too many locals
     "PLR0915",  # Too many statements
+    "PLR0917",  # Too many positionals
+    "PLR1702",  # Too many nested blocks
     "PLC0415",  # Top-level imports
     "RUF012",   # Unannotated ClassVar
+    "RUF067",   # __init__ should be re-exports
+
 ]
 
 [lint.isort]

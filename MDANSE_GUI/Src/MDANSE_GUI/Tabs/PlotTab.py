@@ -67,7 +67,8 @@ class PlotTab(GeneralTab):
         self.matplotlib_dialog.values_changed.connect(self._visualiser.update_plots)
         self._core.add_button("Change matplotlib settings", self.edit_matplotlib)
 
-    def launch_dialog(self, dialog: QDialog) -> None:
+    @staticmethod
+    def launch_dialog(dialog: QDialog) -> None:
         if dialog.isVisible():
             geometry = dialog.saveGeometry()
             dialog.previous_geometry = geometry

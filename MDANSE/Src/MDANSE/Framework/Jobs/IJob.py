@@ -325,22 +325,24 @@ class IJob(Configurable, metaclass=SubclassFactory):
         if parameters is None:
             parameters = cls.get_default_parameters()
 
+        jobFile = Path(jobFile)
+
         parameters = {
             key: (val, label) if not isinstance(val, Path) else (str(val), label)
             for key, (val, label) in sorted(parameters.items())
         }
 
-        with open(jobFile, "w") as f:
-            f.write(
-                RUNSCRIPT.format(
-                    executable=sys.executable,
-                    import_line=cls.runscript_import_line,
-                    param_str=_format_params(parameters),
-                    parent=cls.runscript_import_line.split(" ")[-1],
-                    var_name=cls.__name__.lower(),
-                    job_name=cls.__name__,
-                )
-            )
+        jobFile.write_text(
+            RUNSCRIPT.format(
+                executable=sys.executable,
+                import_line=cls.runscript_import_line,
+                param_str=_format_params(parameters),
+                parent=cls.runscript_import_line.split(" ")[-1],
+                var_name=cls.__name__.lower(),
+                job_name=cls.__name__,
+            ),
+            encoding="utf-8",
+        )
 
         os.chmod(jobFile, stat.S_IRWXU)
 

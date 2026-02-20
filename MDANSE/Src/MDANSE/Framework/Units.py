@@ -541,7 +541,7 @@ class _Unit:
         """
         return self.__add__(other)
 
-    def __rdiv__(self, other):
+    def __rtruediv__(self, other):
         u = copy.deepcopy(self)
         if isinstance(other, numbers.Number | numbers.Complex):
             u._factor /= other
@@ -640,7 +640,7 @@ class _Unit:
         else:
             self._factor /= other._factor
             for i in range(len(self._dimension)):
-                self._dimension[i] = self._dimension[i] - other._dimension[i]
+                self._dimension[i] -= other._dimension[i]
 
         self._ounit = None
         self._out_factor = None
@@ -668,7 +668,7 @@ class _Unit:
         if self.is_analog(other):
             self._factor *= other._factor
             for i in range(len(self._dimension)):
-                self._dimension[i] = 2.0 * self._dimension[i]
+                self._dimension[i] *= 2.0
         elif self._equivalent:
             equivalence_factor = self.get_equivalence_factor(other)
             if equivalence_factor is None:
@@ -676,12 +676,12 @@ class _Unit:
 
             self._factor *= other._factor / equivalence_factor
             for i in range(len(self._dimension)):
-                self._dimension[i] = 2 * self._dimension[i]
+                self._dimension[i] *= 2
             return
         else:
             self._factor *= other._factor
             for i in range(len(self._dimension)):
-                self._dimension[i] = self._dimension[i] + other._dimension[i]
+                self._dimension[i] += other._dimension[i]
 
         self._ounit = None
         self._out_factor = None
@@ -1017,22 +1017,24 @@ class UnitsManager(metaclass=Singleton):
     def __init__(self):
         self.load()
 
+    @classmethod
     def add_unit(
-        self, uname, factor, kg=0, m=0, s=0, K=0, mol=0, A=0, cd=0, rad=0, sr=0
+        cls, uname, factor, kg=0, m=0, s=0, K=0, mol=0, A=0, cd=0, rad=0, sr=0
     ):
-        UnitsManager._UNITS[uname] = _Unit(
-            uname, factor, kg, m, s, K, mol, A, cd, rad, sr
-        )
+        cls._UNITS[uname] = _Unit(uname, factor, kg, m, s, K, mol, A, cd, rad, sr)
 
-    def delete_unit(self, uname) -> None:
-        if uname in UnitsManager._UNITS:
-            del UnitsManager._UNITS[uname]
+    @classmethod
+    def delete_unit(cls, uname) -> None:
+        if uname in cls._UNITS:
+            del cls._UNITS[uname]
 
-    def get_unit(self, uname) -> _Unit | None:
-        return UnitsManager._UNITS.get(uname, None)
+    @classmethod
+    def get_unit(cls, uname) -> _Unit | None:
+        return cls._UNITS.get(uname, None)
 
-    def has_unit(self, uname) -> bool:
-        return uname in UnitsManager._UNITS
+    @classmethod
+    def has_unit(cls, uname) -> bool:
+        return uname in cls._UNITS
 
     def load(self) -> None:
         """Load units from databases.
@@ -1059,10 +1061,11 @@ class UnitsManager(metaclass=Singleton):
                 dim = udict.get("dimension", [0, 0, 0, 0, 0, 0, 0, 0, 0])
                 UnitsManager._UNITS[uname] = _Unit(uname, factor, *dim)
 
-    def save(self):
+    @classmethod
+    def save(cls):
         """Write self to custom user database."""
-        with open(UnitsManager._USER_DATABASE, "w") as fout:
-            json.dump(UnitsManager._UNITS, fout, indent=4, cls=UnitsManagerEncoder)
+        with open(cls._USER_DATABASE, "w", encoding="utf-8") as fout:
+            json.dump(cls._UNITS, fout, indent=4, cls=UnitsManagerEncoder)
 
     @property
     def units(self):

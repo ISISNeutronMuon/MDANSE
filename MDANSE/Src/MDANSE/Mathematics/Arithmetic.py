@@ -114,7 +114,7 @@ def adjust_weights(
         for el, property_product in props.items():
             atom_conc_product = contents[el] / n_atms
             factor = atom_conc_product**conc_exp * property_product
-            weights[(el,)] = factor
+            weights[el,] = factor
             normFactor += atom_conc_product * property_product
     elif dim == 2:
         cartesianProduct = itertools.product(props, repeat=2)
@@ -126,7 +126,7 @@ def adjust_weights(
             # E.g. for property b_coh, 5 Cu atoms, 100 total atoms, and dim=2
             # factor = (5*5/(100*100))**conc_exp * b_coh_cu.conjugate() * b_coh_cu
 
-            weights[(el_a, el_b)] = factor
+            weights[el_a, el_b] = factor
             normFactor += atom_conc_product * property_product
     else:
         raise NotImplementedError(f"Dimension {dim} not implemented.")

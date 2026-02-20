@@ -187,7 +187,7 @@ class DataWidget(QWidget):
 
         PLATFORM.create_directory(target_path.parent)
         try:
-            with open(target_path, "w", newline="") as target:
+            with open(target_path, "w", encoding="utf-8", newline="") as target:
                 writer = csv.writer(
                     target,
                     dialect=self._dialect_combo.currentText,
@@ -254,7 +254,8 @@ class DataWidget(QWidget):
             values = self._plotter._initial_values
             self._sliderpack.set_values(values)
 
-    def available_plotters(self) -> list[str]:
+    @staticmethod
+    def available_plotters() -> list[str]:
         return ["Text"]
 
     def plot_data(self, update_only=False):

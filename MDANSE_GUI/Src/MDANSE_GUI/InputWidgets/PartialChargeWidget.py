@@ -180,7 +180,7 @@ class PartialChargeWidget(AtomSelectionWidget):
         " the helper dialog."
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, use_list_view: bool = False, **kwargs):
         """Create the widget for setting atom charges.
 
         Parameters
@@ -189,7 +189,7 @@ class PartialChargeWidget(AtomSelectionWidget):
             ignored here. This widget always sets use_list_view=False
 
         """
-        if kwargs.get("use_list_view", False):
+        if use_list_view:
             raise TypeError(f"Cannot use list view with {type(self).__name__}.")
         super().__init__(*args, use_list_view=False, **kwargs)
         self._field.textChanged.connect(self.updateValue)
@@ -226,5 +226,4 @@ class PartialChargeWidget(AtomSelectionWidget):
             The JSON selector setting.
 
         """
-        text = self._field.text()
-        return text or self._default_value
+        return self._field.text() or self._default_value

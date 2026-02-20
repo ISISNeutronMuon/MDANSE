@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from operator import itemgetter
+
 from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
 from qtpy.QtGui import (
     QBrush,
@@ -619,7 +621,7 @@ class ElementModel(QStandardItemModel):
 
         idxs = view.selectionModel().selectedIndexes()
         row_idxs = {(idx.row(), view.model().mapToSource(idx).row()) for idx in idxs}
-        row_idxs = sorted(row_idxs, key=lambda x: x[0])
+        row_idxs = sorted(row_idxs, key=itemgetter(0))
 
         for _, idx in row_idxs:
             atm_sym = self.verticalHeaderItem(idx).text()
@@ -658,7 +660,7 @@ class ElementModel(QStandardItemModel):
 
         idxs = view.selectionModel().selectedIndexes()
         row_idxs = {(idx.row(), view.model().mapToSource(idx).row()) for idx in idxs}
-        row_idxs = sorted(row_idxs, key=lambda x: x[0], reverse=True)
+        row_idxs = sorted(row_idxs, key=itemgetter(0), reverse=True)
         row_idxs_atm_syms = [
             (i, self.verticalHeaderItem(j).text()) for i, j in row_idxs
         ]

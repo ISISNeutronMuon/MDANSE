@@ -492,9 +492,9 @@ class MdanseTrajectory(TrajectoryFile):
             value = self._h5_file[f"/atom_database/{atom_symbol}"][index]
             if data_type != b"complex":
                 value = value.real
-            self._property_cache[(atom_symbol, index)] = value
+            self._property_cache[atom_symbol, index] = value
 
-        value = self._property_cache[(atom_symbol, index)]
+        value = self._property_cache[atom_symbol, index]
 
         if atom_property == "color":
             value = str_to_num(value)

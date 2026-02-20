@@ -168,20 +168,21 @@ class SimpleInstrument:
             return (cov_type, {})
         qvec_generator.build_configuration()
         param_dictionary = {}
-        _q_step, _q_min, _q_max, _q_width = self.sanitize_numbers()
+        q_step_tmp, q_min_tmp, q_max_tmp, q_width_tmp = self.sanitize_numbers()
         try:
             conversion_factor = measure(1.0, iunit=self._q_unit).toval("1/nm")
         except Exception as err:
             raise ValueError(f"Could not convert unit: {self._q_unit}") from err
-        else:
-            conversion_factor = float(conversion_factor)
+
+        conversion_factor = float(conversion_factor)
+
         if "shells" in qvec_generator._configuration:
-            q_step = round(conversion_factor * float(_q_step), 6)
-            q_min = round(conversion_factor * float(_q_min), 6)
-            q_max = round(conversion_factor * float(_q_max), 6)
+            q_step = round(conversion_factor * float(q_step_tmp), 6)
+            q_min = round(conversion_factor * float(q_min_tmp), 6)
+            q_max = round(conversion_factor * float(q_max_tmp), 6)
             param_dictionary["shells"] = [q_min, q_max, q_step]
         if "width" in qvec_generator._configuration:
-            width = round(conversion_factor * float(_q_width), 6)
+            width = round(conversion_factor * float(q_width_tmp), 6)
             param_dictionary["width"] = width
         if "n_samples" in qvec_generator._configuration:
             num_samples = int(self._number_of_samples)

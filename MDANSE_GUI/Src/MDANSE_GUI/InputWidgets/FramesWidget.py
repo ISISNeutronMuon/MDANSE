@@ -69,9 +69,9 @@ class FramesWidget(WidgetBase):
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "FramesWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = (
                 "Trajectory frames to be used, given as (First, Last, StepSize)"
             )

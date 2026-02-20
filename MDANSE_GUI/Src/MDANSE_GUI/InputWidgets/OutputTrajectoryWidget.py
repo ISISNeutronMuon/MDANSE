@@ -55,7 +55,7 @@ class OutputTrajectoryWidget(WidgetBase):
         except Exception:
             jobname = "converted_trajectory"
             LOG.error("It was not possible to get the job name from the parent")
-        self.default_path = self.default_path / "trajectory"
+        self.default_path /= "trajectory"
         guess_name = unused_standard_output_filename(
             self.default_path, jobname, extra_text="_trajectory", extension=".mdt"
         )
@@ -119,9 +119,9 @@ class OutputTrajectoryWidget(WidgetBase):
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "OutputTrajectoryWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = (
                 "The output trajectory will be saved under this name,"
                 "with the selected floating point number precision"

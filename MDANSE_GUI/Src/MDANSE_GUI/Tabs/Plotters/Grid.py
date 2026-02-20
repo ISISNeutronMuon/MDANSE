@@ -34,6 +34,8 @@ if TYPE_CHECKING:
 class Grid(Plotter):
     """Plots each curve in its own subplot."""
 
+    slider_labels = "Inactive", "Inactive"
+
     def __init__(self) -> None:
         super().__init__()
         self._figure = None
@@ -42,10 +44,6 @@ class Grid(Plotter):
         self._backup_curves = []
         self._plot_limit = 8
         self._title_length_limit = 30
-
-    def slider_labels(self) -> list[str]:
-        """Return labels to show that sliders are not used."""
-        return ["Inactive", "Inactive"]
 
     def slider_limits(self) -> list[str]:
         """Return generic slider limit values."""

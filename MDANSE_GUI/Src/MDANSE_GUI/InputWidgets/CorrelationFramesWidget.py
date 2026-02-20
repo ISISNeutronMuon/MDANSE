@@ -47,7 +47,7 @@ class CorrelationFramesWidget(FramesWidget):
         self._default_values.append(c_frames)
 
     def default_labels(self):
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "CorrelationFramesWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "Correlation frames to be used, given as (First, Last, StepSize, CorrelationFrames)"

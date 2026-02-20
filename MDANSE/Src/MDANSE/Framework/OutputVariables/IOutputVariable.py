@@ -34,11 +34,7 @@ class OutputVariableError(Exception):
 
 class OutputData(collections.OrderedDict):
     def add(self, dataName, dataType, data, **kwargs):
-        collections.OrderedDict.__setitem__(
-            self,
-            dataName,
-            IOutputVariable.create(dataType, data, dataName, **kwargs),
-        )
+        self[dataName] = IOutputVariable.create(dataType, data, dataName, **kwargs)
 
     def write(self, basename, formats, header=None, inputs=None):
         for fmt in formats:

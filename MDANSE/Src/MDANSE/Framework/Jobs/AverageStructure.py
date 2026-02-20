@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from string import digits
 
 import numpy as np
 from ase.atoms import Atom, Atoms
@@ -141,7 +142,7 @@ class AverageStructure(IJob):
         try:
             the_atom = Atom(element, x)
         except KeyError:
-            the_atom = Atom(str(element).strip("0123456789"), x)
+            the_atom = Atom(str(element).strip(digits), x)
 
         self._ase_atoms.append(the_atom)
 
