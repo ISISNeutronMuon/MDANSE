@@ -452,13 +452,13 @@ class LAMMPSConfigFile(Parser, dict):
 
         Examples
         --------
-        >>> ConfigFileConfigurator._guess_type("0")
+        >>> LAMMPSConfigFile._guess_type("0")
         <class 'bool'>
-        >>> ConfigFileConfigurator._guess_type("1.3")
+        >>> LAMMPSConfigFile._guess_type("1.3")
         <class 'float'>
-        >>> ConfigFileConfigurator._guess_type("17")
+        >>> LAMMPSConfigFile._guess_type("17")
         <class 'int'>
-        >>> ConfigFileConfigurator._guess_type("Hello")
+        >>> LAMMPSConfigFile._guess_type("Hello")
         <class 'str'>
         """
         if word in "01":
@@ -535,7 +535,7 @@ class LAMMPSConfigFile(Parser, dict):
 
         See Also
         --------
-        ConfigFileConfigurator._guess_atom_type : Mechanism for guessing atom type.
+        ~LAMMPSConfigFile._guess_atom_type : Mechanism for guessing atom type.
         """
         lines = filter(None, lines)
         trial, lines = spy(lines)
