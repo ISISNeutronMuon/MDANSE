@@ -61,44 +61,38 @@ class TrajectoryFilter(IJob):
     settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "CorrelationFramesConfigurator",
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["instrument_resolution"] = (
-        "InstrumentResolutionConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
-    )
-    settings["projection"] = (
-        "ProjectionConfigurator",
-        {},
+    settings["pps_input_file"] = (
+        "HDFInputFileConfigurator",
+        {
+            "label": "MDANSE Position Power Spectrum",
+            "default": "",
+            "optional": True,
+            "variables": ("pps/axes/romega", "/pps/isotropic/total"),
+        },
     )
     settings["trajectory_filter"] = (
         "TrajectoryFilterConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "frames": "frames",
+                "pps_input_file": "pps_input_file",
+            }
+        },
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory"},
-            "default": """\
-{
-   "0": {"function_name": "select_all", "operation_type": "union"}
-}""",
-        },
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["weights"] = (
-        "WeightsConfigurator",
         {
-            "default": "atomic_weight",
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            },
+            }
         },
     )
     settings["output_files"] = (
@@ -107,7 +101,6 @@ class TrajectoryFilter(IJob):
             "format": "MDTFormat",
         },
     )
-    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
@@ -125,6 +118,20 @@ class TrajectoryFilter(IJob):
         self.atomic_trajectory_array = np.zeros(
             (len(self._selected_atoms), 3, len(self.configuration["frames"]["value"]))
         )
+
+        filter_config = json.loads(self.configuration["trajectory_filter"]["value"])
+
+        filter_class, filter_attributes = (
+            FILTER_MAP[filter_config["filter"]],
+            filter_config["attributes"],
+        )
+
+        filter_attributes.setdefault("n_steps", self.configuration["frames"]["number"])
+        filter_attributes.setdefault(
+            "time_step_ps", self.configuration["frames"]["time_step"]
+        )
+
+        self.filter = filter_class(**filter_attributes)
 
     def run_step(self, index):
         """Run the filter for a single atom.
@@ -170,30 +177,15 @@ class TrajectoryFilter(IJob):
     def finalize(self):
         """Write out the new trajectory."""
         # Get filter class and instantiate filter object
-        filter_config = json.loads(self.configuration["trajectory_filter"]["value"])
-
-        filter_class, filter_attributes = (
-            FILTER_MAP[filter_config["filter"]],
-            filter_config["attributes"],
-        )
-
-        filter_attributes.setdefault(
-            "n_steps", self.configuration["trajectory"]["length"]
-        )
-        filter_attributes.setdefault(
-            "time_step_ps", self.configuration["trajectory"]["md_time_step"]
-        )
-
-        filter = filter_class(**filter_attributes)
 
         trajectories = copy.deepcopy(self.atomic_trajectory_array)
 
         # Magnitude of zero frequency in filter response (equivalent to the average atomic positions)
-        zero_magnitude = np.abs(filter.freq_response.magnitudes[0])
+        zero_magnitude = np.abs(self.filter.freq_response.magnitudes[0])
 
         # Apply filter (only apply initial position offset to atoms if filter response f(0) != 1)
         filtered_coords = apply(
-            filter,
+            self.filter,
             trajectories,
             apply_offsets=not np.isclose(zero_magnitude, 1),
         )
@@ -252,7 +244,7 @@ class TrajectoryFilter(IJob):
         outputFile.create_group("metadata/filter").create_dataset(
             "trajectory_filter",
             (1,),
-            data=str(filter),
+            data=str(self.filter),
             dtype=h5py.string_dtype(),
         )
 

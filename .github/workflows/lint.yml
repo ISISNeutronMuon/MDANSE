@@ -10,46 +10,36 @@ concurrency:
   group: lint-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  ruff_version: 0.13.0
+
 jobs:
-  lint-mdanse:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/ruff-action@v3
-        with:
-          src: "./MDANSE/Src"
-          args: "format --check"
-          version: "0.13.0"
 
-  lint_check_ruff:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/ruff-action@v3
-        with:
-          src: "./MDANSE/Src"
-          args: "check"
-          version: "0.13.0"
+  lint:
+    name: ${{ matrix.mdanse }} -- (${{ matrix.type }})
+    strategy:
+      fail-fast: false
+      matrix:
+        mdanse: ["MDANSE", "MDANSE_GUI"]
+        type: ["check", "format --check"]
 
-  lint_format_ruff_gui:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
         with:
-          src: "./MDANSE_GUI/Src"
-          args: "format --check"
-          version: "0.13.0"
+          src: ./${{ matrix.mdanse }}/Src
+          args: ${{ matrix.type }}
+          version: ${{ env.ruff_version }}
 
-  lint_check_ruff_gui:
+  lint_copyright:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
         with:
-          src: "./MDANSE_GUI/Src"
-          args: "check"
-          version: "0.13.0"
+          args: check --preview --select CPY
+          version: ${{ env.ruff_version }}
 
   lint_vermin:
     runs-on: ubuntu-latest

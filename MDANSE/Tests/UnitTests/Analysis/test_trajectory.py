@@ -78,7 +78,7 @@ def test_SelectedTrajectoryFilter(tmp_path):
 
     parameters = {
         "atom_selection": '{"0": {"function_name": "select_atoms", "index_range": [0, 10], "operation_type": "union"}}',
-        "frames": [0, 10, 1, 5],
+        "frames": [0, 10, 1],
         "instrument_resolution": ("ideal", {}),
         "projection": None,
         "running_mode": ("single-core",),
@@ -100,7 +100,7 @@ def test_TrajectoryFilter(tmp_path):
     log_file = temp_name.with_suffix(".log")
 
     parameters = {
-        "frames": [0, 10, 1, 5],
+        "frames": [0, 10, 1],
         "instrument_resolution": ("ideal", {}),
         "projection": None,
         "running_mode": ("single-core",),

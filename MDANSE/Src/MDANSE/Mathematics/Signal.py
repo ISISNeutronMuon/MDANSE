@@ -1091,7 +1091,6 @@ FILTERS = (
     Bessel,
     Notch,
     Peak,
-    Comb,
 )
 
 FILTER_MAP = {filter_class.__name__: filter_class for filter_class in FILTERS}

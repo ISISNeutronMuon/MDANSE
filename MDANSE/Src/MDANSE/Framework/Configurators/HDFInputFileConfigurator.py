@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+import traceback
+
 import h5py
 
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
@@ -23,7 +25,7 @@ from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfig
 class HDFInputFileConfigurator(InputFileConfigurator):
     """Uses an .mda file from another analysis as input."""
 
-    _default = "INPUT_FILENAME.mda"
+    _default = ""
 
     def __init__(
         self,
@@ -42,7 +44,7 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         """
 
         # The base class constructor.
-        InputFileConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self.variables = variables if variables is not None else []
         self._units = {}
@@ -57,20 +59,19 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         :param value: the path for the HDF file.
         :type value: str
         """
-        if not self.update_needed(value):
-            return
 
-        self._original_input = value
+        super().configure(value)
 
-        InputFileConfigurator.configure(self, value)
-        if not self.valid:
+        if not value and self.optional:
+            self.error_status = "OK"
             return
 
         try:
             self["instance"] = h5py.File(self["value"], "r")
-
         except OSError:
-            self.error_status = f"Cannot open HDF file {value} for reading."
+            self.error_status = (
+                f"Cannot open {value} HDF file for reading: {traceback.format_exc()}"
+            )
             return
 
         for v in self.variables:

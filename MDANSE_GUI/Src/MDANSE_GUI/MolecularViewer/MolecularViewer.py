@@ -95,6 +95,8 @@ class MolecularViewer(QtWidgets.QWidget):
         self._line_scale_factor = 0.4
 
         self._element_database = None
+        self._viewer_is_visible = False
+        self.tab_index = -1
 
         self._iren = QVTKRenderWindowInteractor(self)
         self._iren.keyPressEvent = lambda *args, **kwargs: None
@@ -305,6 +307,10 @@ class MolecularViewer(QtWidgets.QWidget):
         self.axes_type = axes_option
         self.create_axes()
         self.update_renderer()
+
+    @Slot(int)
+    def change_visibility(self, current_tab_index: int):
+        self._viewer_is_visible = current_tab_index == self.tab_index
 
     def clear_atom_labels(self):
         """Clears the atom label actors and removes it from the renderer."""

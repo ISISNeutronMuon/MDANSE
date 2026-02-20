@@ -17,13 +17,15 @@ from __future__ import annotations
 
 import copy
 from collections.abc import Callable, Sequence
+from pathlib import Path
 from typing import Any
 
+import h5py
 import matplotlib.pyplot as mpl
 import numpy as np
 import numpy.typing as npt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from qtpy.QtCore import QObject, Qt, QThread, Signal, Slot
+from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -45,6 +47,9 @@ from qtpy.QtWidgets import (
 from scipy import signal
 from scipy.interpolate import interp1d
 
+from MDANSE.Framework.Configurators.HDFInputFileConfigurator import (
+    HDFInputFileConfigurator,
+)
 from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
     TrajectoryFilterConfigurator,
 )
@@ -59,8 +64,10 @@ from MDANSE.Mathematics.Signal import (
     FrequencyDomain,
     filter_description_string,
 )
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
+from MDANSE_GUI.Utils import block_signals
 
 # Default maximum value for a float spinbox
 DEFAULT_SPINBOX_MAX_FLOAT = 1000.0
@@ -72,39 +79,38 @@ DEFAULT_SPINBOX_STEP_FLOAT = 0.1
 FLOAT_SPINBOX_DECIMALS = 8
 
 
-class BackgroundThread(QThread):
-    """Runs one MDANSE job and returns the requested datasets."""
+def read_pps_from_file(
+    filename: str | Path,
+) -> tuple[npt.NDArray[float], npt.NDArray[float]] | tuple[None, None]:
+    """Reads a trajectory position power spectrum from an .mda filename,
+    returning the power spectrum as a dataset consisting of the energies (meV)
+    and the corresponding spectrum.
 
-    results = Signal(object)
+    Parameters
+    __________
+    filename: str | Path
+        Name of the external .mda filename containing the position power spectrum
 
-    def __init__(
-        self,
-        parent,
-        job_name: str,
-        parameters: dict[str, str],
-        result_keys: list[str],
-    ):
-        super().__init__(parent)
-        self.job_name = job_name
-        self.parameters = parameters
-        self.res_keys = result_keys
+    Returns
+    __________
+    tuple[npt.NDArray[float], npt.NDArray[float]] | tuple[None, None]
+        Energy axis and corresponding trajectory power spectrum
 
-    def run(self):
-        """Run the job and emit datasets with labels in self.res_keys.
-
-        This will be run automatically after the thread's .start() method
-        has been called.
-        """
-        job = IJob.create(self.job_name)
-        self.parameters["output_files"] = (
-            "OUTPUT_FILENAME",
-            ["FileInMemory"],
-            "no logs",
+    """
+    try:
+        with h5py.File(filename) as source:
+            energy_axis = source["pps/axes/romega"][:]
+            data_array = source["/pps/isotropic/total"][:]
+    except KeyError:
+        LOG.error("PPS data could not be found in file %s", filename)
+    except Exception:
+        LOG.error(
+            "Path %s could not be opened for reading a Position Power Spectrum",
+            filename,
         )
-        job.run(self.parameters, status=True)
-        output = job.results
-        res_dict = {key: output[key][:] for key in self.res_keys}
-        self.results.emit(res_dict)
+    else:
+        return energy_axis, data_array
+    return None, None
 
 
 class ConstrainedDoubleSpinBox(QDoubleSpinBox):
@@ -218,7 +224,7 @@ class ConstrainedDoubleSpinBox(QDoubleSpinBox):
 
         # New value is the closest value evenly dividing the constraint
         new_value = np.round(value / self.constraint) * self.constraint
-        self.setValue(np.round(new_value, FLOAT_SPINBOX_DECIMALS))
+        self.setValue(new_value)
 
     def search_by_function(self, value: Any) -> None:
         """Apply the constraint formalised in the lambda.
@@ -412,32 +418,7 @@ class FilterPreferencesGroup(QObject):
         )
         self.grid.addWidget(coeff_type_cbox, 2, 1)
 
-        # Display trajectory position power spectral attentuation for comparison
-        self.pps_label = QLabel("Show trajectory attenuation")
-        self.grid.addWidget(self.pps_label, 3, 0)
-        attenuation_checkbox = QCheckBox()
-        self.pps_checkbox = attenuation_checkbox
-        self.widgets.update({"show_attenuation": attenuation_checkbox})
-        attenuation_checkbox.setEnabled(True)
-        attenuation_checkbox.stateChanged.connect(self.collect_inputs)
-        attenuation_checkbox.setToolTip(
-            "Display trajectory power spectrum for comparison",
-        )
-        self.grid.addWidget(attenuation_checkbox, 3, 1)
-
         return self.grid
-
-    @Slot(bool)
-    def enable_pps(self, enable: bool):
-        """Allow or block another calculation of PositionPowerSpectrum.
-
-        The checkbox will not be possible to uncheck while the calculation
-        is running, and the label text will inform the user that the
-        calculation is in progres..
-        """
-        self.pps_checkbox.setEnabled(enable)
-        message = "Show trajectory attenuation" if enable else "Calculating PPS..."
-        self.pps_label.setText(message)
 
     @staticmethod
     def visit(widget: QWidget) -> Any:
@@ -459,6 +440,110 @@ class FilterPreferencesGroup(QObject):
 
         if isinstance(widget, QCheckBox):
             return widget.isChecked()
+
+
+class FilterAttenuationGroup(FilterPreferencesGroup):
+    """Interface for a filter attenuation group.
+
+    Provides a grid layout of settings for a given filter.
+
+    """
+
+    @staticmethod
+    def gaussian(x: np.array, mu: float, sigma: float) -> float:
+        """Returns a centered Gaussian, paramterised by values mu and sigma, over
+        a given input domain x.
+
+        Parameters
+        ----------
+        x : np.array
+            Domain values (x-axis) over which the Gaussian function will be computed
+        mu : float
+            Parameter mu of the Gaussian
+        sigma : float
+            Parameter sigma of the Gaussian
+
+        """
+        return (1 / 2 * np.pi) * np.exp(-0.5 * ((x - mu) / sigma) ** 2)
+
+    @staticmethod
+    def double_gaussian(x: np.array, mu: float, sigma: float) -> float:
+        """Returns a double Gaussian, paramterised by values mu and sigma, over
+        a given input domain x.
+
+        The Gaussian curves are centered symmetrically one quarter of the length
+        of x, either side of the midpoint.
+
+        Parameters
+        ----------
+        x : np.array
+            Domain values (x-axis) over which the Gaussian function will be computed
+        mu : float
+            Parameter mu of the Gaussian
+        sigma : float
+            Parameter sigma of the Gaussian
+
+        """
+        return FilterAttenuationGroup.gaussian(
+            x, mu / 2, sigma
+        ) + FilterAttenuationGroup.gaussian(x, mu + (mu / 2), sigma)
+
+    functional_forms = {"Gaussian": gaussian, "Double gaussian": double_gaussian}
+
+    def __init__(self, render_func: Callable):
+        super().__init__(render_func)
+
+    @staticmethod
+    def make_forms() -> list[str]:
+        """Returns a list of string options for the available attenuation functional forms combobox,
+        including:
+
+        Gaussian
+        Double gaussian
+        External file (.mda)
+
+        Returns
+        ----------
+        list[str]
+            List of strings representing the options for the attenuation functional form combobox
+
+        """
+        forms = list(FilterAttenuationGroup.functional_forms.keys())
+        forms.append("External file (.mda)")
+        return forms
+
+    def as_grid(self) -> QGridLayout:
+        """Populate the preferences grid layout with the filter designer preference widgets.
+
+        Parameters
+        ----------
+        grid : QGridLayout
+            Grid layout to which preference widgets will be added
+
+        """
+        # Attenuation form
+        self.grid.addWidget(QLabel("Form"), 0, 0)
+        form_cbox = self.add_combobox(
+            "form",
+            tuple(self.make_forms()),
+            "Select form of attenuated function, either an analytic functional form or a spectrum from an existing .mda file",
+        )
+        self.grid.addWidget(form_cbox, 0, 1)
+
+        # Show attenuation checkbox
+        self.show_label = QLabel("Show")
+        self.grid.addWidget(self.show_label, 1, 0)
+        attenuation_checkbox = QCheckBox()
+        self.show_checkbox = attenuation_checkbox
+        self.widgets.update({"show": attenuation_checkbox})
+        attenuation_checkbox.setEnabled(True)
+        attenuation_checkbox.stateChanged.connect(self.collect_inputs)
+        attenuation_checkbox.setToolTip(
+            "Display trajectory power spectrum for comparison",
+        )
+        self.grid.addWidget(attenuation_checkbox, 1, 1)
+
+        return self.grid
 
 
 class FilterSettingGroup(QObject):
@@ -595,17 +680,13 @@ class FilterSettingGroup(QObject):
             The widget value.
 
         """
-        if isinstance(widget, QSpinBox):
-            return widget.value()
-
-        if isinstance(widget, QDoubleSpinBox):
-            return np.round(widget.value(), FLOAT_SPINBOX_DECIMALS)
-
-        if isinstance(widget, QComboBox):
-            return widget.currentText()
-
-        if isinstance(widget, QCheckBox):
-            return widget.isChecked()
+        match widget:
+            case QComboBox():
+                return widget.currentText()
+            case QCheckBox():
+                return widget.isChecked()
+            case _:
+                return widget.value()
 
     @Slot()
     def collect_inputs(self) -> None:
@@ -645,6 +726,29 @@ class FilterSettingGroup(QObject):
 
         return self.grid
 
+    def update_widget_step(self, n_steps: int, time_step: float):
+        """Update the spin box settings based on frames settings.
+
+        Parameters
+        ----------
+        n_steps : int
+            Number of trajectory steps currently selected by frames widget.
+        time_step : float
+            Time step between consecutive trajectory frames.
+        """
+        bin_width = Filter.frequency_resolution(n_steps, time_step, units=self.units)
+        vmax = Filter.nyquist(time_step, units=self.units) - bin_width
+        with block_signals(self):
+            for key in {"cutoff_freq", "fundamental_freq"} & self.widgets.keys():
+                widget_instance: ConstrainedDoubleSpinBox = self.widgets[key]
+                temp_value = widget_instance.value()
+                widget_instance.setSingleStep(bin_width)
+                widget_instance.set_snap(snap_to=bin_width)
+                widget_instance.setMaximum(vmax)
+                widget_instance.setMinimum(bin_width)
+                new_value = bin_width * (min(temp_value, vmax) // bin_width)
+                widget_instance.setValue(new_value)
+
     def setting_to_widget(self, setting_key: str, val_group: dict) -> QWidget:
         """Convert the setting dictionary to the corresponding setting widget and sets up connections.
 
@@ -681,35 +785,20 @@ class FilterSettingGroup(QObject):
                     "time_step_ps", DEFAULT_TIME_STEP
                 )
 
-                bin_width = np.round(
-                    Filter.frequency_resolution(n_steps, time_step, units=self.units),
-                    FLOAT_SPINBOX_DECIMALS,
+                bin_width = Filter.frequency_resolution(
+                    n_steps, time_step, units=self.units
                 )
 
-                vmax = np.round(
-                    Filter.nyquist(time_step, units=self.units) - bin_width,
-                    FLOAT_SPINBOX_DECIMALS,
-                )
+                vmax = Filter.nyquist(time_step, units=self.units) - bin_width
 
                 # Configure constrained spinbox based on filter type
-                if Filter.Flags.FUNDAMENTAL_EVENLY_DIVIDES_FS in self.flags:
-                    widget = ConstrainedDoubleSpinBox(
-                        minimum=bin_width,
-                        maximum=vmax,
-                        step=bin_width,
-                        value=bin_width,
-                    )
-                    widget.set_search(
-                        constraint_func=lambda x: ((1 / time_step) % x) == 0
-                    )
-                else:
-                    widget = ConstrainedDoubleSpinBox(
-                        minimum=bin_width,
-                        maximum=vmax,
-                        step=bin_width,
-                        value=bin_width,
-                    )
-                    widget.set_snap(snap_to=bin_width)
+                widget = ConstrainedDoubleSpinBox(
+                    minimum=bin_width,
+                    maximum=vmax,
+                    step=bin_width,
+                    value=bin_width,
+                )
+                widget.set_snap(snap_to=bin_width)
             else:
                 # Other data spinbox
                 widget = QDoubleSpinBox()
@@ -943,7 +1032,6 @@ class FilterDesigner(QDialog):
 
     _helper_title = "Filter designer"
     _canvas_dimensions = {"width": 700, "height": 500}
-    _trajectory_power_spectrum = None
 
     def __init__(
         self,
@@ -951,6 +1039,7 @@ class FilterDesigner(QDialog):
         configurator: TrajectoryFilterConfigurator,
         parent,
         *args,
+        pps_configurator: HDFInputFileConfigurator | None = None,
         **kwargs,
     ):
         super().__init__(parent, *args, **kwargs)
@@ -958,22 +1047,41 @@ class FilterDesigner(QDialog):
         self.field = field
         self.configurator = configurator
 
+        self.n_steps = DEFAULT_N_STEPS
+        self.time_step_ps = DEFAULT_TIME_STEP
+
         self.graph_ready = False
 
         self.setting_stack_layout = QStackedLayout()
         self.preferences = {}
+        self.attenuation = {}
         self.settings_group = {}
         self.preferences_group = None
-
-        self.pps_thread = None
-        self.pps_last_params = {}
-        self.pps_last_result = []
+        self.attenuation_group = None
+        self.pps_configurator = pps_configurator
 
         self.layouts = QHBoxLayout()
 
         self.set_filter(self.configurator._default_filter.__name__)
         self.create_designer()
-        self.preferences_group.pps_checkbox.checkStateChanged.connect(self.update_pps)
+
+    def accept_time_steps(self, n_steps: int, time_step_ps: float):
+        """Save the new time parameters given by the frames settings.
+
+        Parameters
+        ----------
+        n_steps : int
+            Number of trajectory steps currently selected.
+        time_step_ps : float
+            Time interval between consecutive trajectory frames.
+        """
+        self.n_steps = n_steps
+        self.time_step_ps = time_step_ps
+        self.settings["attributes"]["n_steps"] = n_steps
+        self.settings["attributes"]["time_step_ps"] = time_step_ps
+        for settings_group in self.settings_group.values():
+            settings_group.update_widget_step(n_steps, time_step_ps)
+        self.settings_group[self.settings["filter"]].collect_inputs()
 
     def find_configuration(self) -> dict[str, str]:
         """Find the configuration of the main filter job.
@@ -1017,13 +1125,9 @@ class FilterDesigner(QDialog):
             "filter": filter_type,
             "attributes": {
                 # Number of simulation steps
-                "n_steps": self.configurator.configurable.settings["trajectory"][1][
-                    "configurator"
-                ]["length"],
+                "n_steps": self.n_steps,
                 # Simulation time step in picoseconds
-                "time_step_ps": self.configurator.configurable.settings["trajectory"][
-                    1
-                ]["configurator"]["md_time_step"],
+                "time_step_ps": self.time_step_ps,
             },
         }
 
@@ -1076,6 +1180,19 @@ class FilterDesigner(QDialog):
 
         self.render_canvas_assets()
 
+    def edit_attenuation(self, attenuation: dict) -> None:
+        """Re-renders the filter according to display preferences.
+
+        Parameters
+        ----------
+        attenuation: dict
+            A dictionary of filter settings.
+
+        """
+        self.attenuation.update(attenuation)
+
+        self.render_canvas_assets()
+
     def resample_and_normalise(self, values, to_len):
         """Resample the input signal values to a given length, with normalisation of output signal.
 
@@ -1094,56 +1211,53 @@ class FilterDesigner(QDialog):
         """
         return signal.resample(values, to_len) / values.max()
 
-    @Slot(object)
-    def accept_results(self, res_dict: dict[str, npt.NDArray[float]]):
-        """Store the results of the calculation inf a background thread.
+    def get_attenuation_function(
+        self, tr_filter: Filter, source: str
+    ) -> Sequence[npt.NDArray[float]]:
+        """Put curves on the same scale for the plot.
+
+        Generate an attenuation function to display alongside the filter frequency response,
+        returning the frequency values of the attenuation function, as well as its magnitudes
+        and magnitudes after attenuation.
 
         Parameters
         ----------
-        res_dict: dict[str, npt.NDArray[float]]
-            A dictionary of {dataset_name: dataset_array} pairs.
+        tr_filter : Filter
+            Filter class for the designed filter.
+        source : str
+            String name of the attenuation function to display.
+
+        Returns
+        -------
+        raw_power_spectrum_freqs : npt.NDArray[float]
+            Frequency axis of the original PPS result.
+        power_spectrum : npt.NDArray[float]
+            Trajectory power spectrum.
+        attenuated_power_spectrum : npt.NDArray[float]
+            Attenuated power spectrum due to the designed filter response.
 
         """
-        self._trajectory_power_spectrum = list(res_dict.values())
-        self.pps_thread = None
-        self.render_canvas_assets()
+        freqs = tr_filter.freq_response.frequencies
+        attenuation_fn = FilterAttenuationGroup.functional_forms[source]
+        if source == "Gaussian":
+            values = attenuation_fn(freqs, freqs.max() / 2, freqs.max() / 4)
+        elif source == "Double gaussian":
+            values = attenuation_fn(freqs, freqs.max() / 2, freqs.max() / 8)
+        else:
+            raise ValueError("Unknown attenuation functional form")
+        normalised = values / np.max(values)
 
-    @Slot()
-    def unblock_checkbox(self):
-        """Make the checkbox clickable after the calculation thread has finshed."""
-        self.preferences_group.enable_pps(True)
-
-    def update_pps(self):
-        """Run another PositionPowerSpectrum calculation.
-
-        It will only start a new calculation if the calculation is not running already,
-        there are no results so far, or the input parameters have changed.
-        """
-        if (
-            self.pps_thread is not None
-            or not self.preferences_group.pps_checkbox.isChecked()
-        ):
-            return
-        new_params = self.find_configuration()
-        if self.pps_last_params and all(
-            self.pps_last_params[k] == new_params[k] for k in new_params
-        ):
-            return
-        self.pps_last_params.update(new_params)
-        self.pps_thread = BackgroundThread(
-            None,
-            "PositionPowerSpectrum",
-            new_params,
-            ["pps/axes/romega", "pps/isotropic/total"],
+        return (
+            freqs,
+            normalised,
+            freqs,
+            normalised * tr_filter.freq_response.magnitudes,
         )
-        self.pps_thread.results.connect(self.accept_results)
-        self.pps_thread.finished.connect(self.unblock_checkbox)
-        self.preferences_group.enable_pps(False)
-        self.pps_thread.start()
 
-    def set_trajectory_power_spectrum(
+    def get_attenuation_power_spectrum(
         self,
         tr_filter: Filter,
+        pps_filename: str,
     ) -> Sequence[npt.NDArray[float]]:
         """Put curves on the same scale for the plot.
 
@@ -1154,6 +1268,8 @@ class FilterDesigner(QDialog):
         ----------
         tr_filter : Filter
             Filter class for the designed filter.
+        pps_filename : str | None
+            File name from which the reference spectrum will be loaded, optional.
 
         Returns
         -------
@@ -1167,20 +1283,23 @@ class FilterDesigner(QDialog):
         """
         response = tr_filter.freq_response
 
-        # Trajectory power spectrum data
-        freqs, values = copy.deepcopy(self._trajectory_power_spectrum)
+        file_freqs, file_values = read_pps_from_file(pps_filename)
+        freqs, _ = response
+
+        file_freqs = freqs if file_freqs is None else file_freqs / (2 * np.pi)
+        if file_values is None:
+            file_values = np.ones_like(freqs)
 
         # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain, setting
         # custom frequency range on filter object
-        tr_filter.custom_freq_range = np.linspace(
-            freqs.min(),
-            freqs.max(),
-            len(response.frequencies),
+
+        overlap_mask = (file_freqs >= max(freqs.min(), file_freqs.min())) & (
+            file_freqs <= min(freqs.max(), file_freqs.max())
         )
-        tr_filter.set_freq_response(Filter.FrequencyRangeMethod.CUSTOM)
+        att_freqs = file_freqs[overlap_mask]
 
         # Normalise trajectory power spectrum (y-axis)
-        normalised = values / np.max(values)
+        normalised = file_values / np.max(file_values)
 
         attenuation = interp1d(
             tr_filter.freq_response.frequencies,
@@ -1189,10 +1308,12 @@ class FilterDesigner(QDialog):
             bounds_error=False,
         )
 
-        if self.current_filter_units() == Filter.FrequencyUnits.CYCLIC:
-            freqs /= 2 * np.pi
-
-        return (freqs, normalised, normalised * abs(attenuation(freqs)) ** 4)
+        return (
+            file_freqs,
+            normalised,
+            att_freqs,
+            normalised[overlap_mask] * abs(attenuation(att_freqs)) ** 4,
+        )
 
     def create_settings_layout(self, widget_area: QVBoxLayout) -> None:
         """Create the filter settings vertical layout.
@@ -1274,6 +1395,29 @@ class FilterDesigner(QDialog):
             },
         )
 
+        # Add the filter designer attenuation stack layout
+        attenuation_groupbox = QGroupBox("Attenuation")
+        attenuation_groupbox.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Maximum,
+        )
+
+        self.attenuation_group = FilterAttenuationGroup(
+            render_func=self.edit_attenuation,
+        )
+        attenuation_groupbox.setLayout(self.attenuation_group.as_grid())
+
+        widget_area.addWidget(attenuation_groupbox)
+
+        # Get default attenuation
+        self.attenuation.update(
+            {
+                name: FilterAttenuationGroup.visit(widget)
+                for name, widget in self.attenuation_group.widgets.items()
+            },
+        )
+
+        # Set filter designer graph ready
         self.graph_ready = True
 
         # Render graph
@@ -1312,7 +1456,6 @@ class FilterDesigner(QDialog):
         self._figure.clear()
 
         x, y = freqs.frequencies, freqs.magnitudes
-        x_max = x.max()
 
         axes = self._figure.add_axes([0.1, 0.1, 0.8, 0.8])
         axes.plot(
@@ -1323,7 +1466,7 @@ class FilterDesigner(QDialog):
 
         # Conditionally display trajectory power spectral attenuation
         if trajectory_power_spectrum:
-            psx, ps, attenuated_ps = trajectory_power_spectrum
+            psx, ps, apsx, attenuated_ps = trajectory_power_spectrum
             axes.plot(
                 psx,
                 20 * np.log10(ps) if db_response else ps,
@@ -1331,7 +1474,7 @@ class FilterDesigner(QDialog):
                 color="grey",
             )
             axes.plot(
-                psx,
+                apsx,
                 20 * np.log10(attenuated_ps) if db_response else attenuated_ps,
                 label="Attenuation",
                 color="black",
@@ -1343,8 +1486,6 @@ class FilterDesigner(QDialog):
                 Filter.freq_to_energy(axes.get_xticks(), self.current_filter_units()),
             ).astype(int)
             axes.set_xticks(axes.get_xticks(), labels=energy_ticks)
-
-        axes.set_xlim(0.0, x_max)
 
         frequency_units = self.current_filter_units().value
         axes.set_xlabel(
@@ -1418,23 +1559,28 @@ class FilterDesigner(QDialog):
         analog_filter = self.preferences["coeff_type"] == "analog"
         db_response = self.preferences["response_units"] == "dB"
         energies = self.preferences["xaxis_units"] == "meV"
-        show_attenuation = self.preferences.get("show_attenuation", False)
+
+        # Set attenuation
+        source = self.attenuation.get("form", "Gaussian")
+        show_attenuation = self.attenuation.get("show", False)
 
         # Preview instantiation of the selected filter
         filter_class = FILTER_MAP[self.settings["filter"]]
         filter_preview = filter_class(**self.settings["attributes"])
 
-        # Check if we are displaying trajectory power spectral attenuation alongside filter response
+        # Get comparative attenuation from either an external trajectory PPS, or from an analytical functional form
         ps, attenuated_ps = None, None
-        if (
-            show_attenuation
-            and self.pps_thread is None
-            and self._trajectory_power_spectrum is not None
-        ):
-            ps_axis, ps, attenuated_ps = self.set_trajectory_power_spectrum(
-                filter_preview,
-            )
 
+        if show_attenuation:
+            if source not in FilterAttenuationGroup.functional_forms:
+                attenuation = self.get_attenuation_power_spectrum(
+                    filter_preview, pps_filename=self.pps_configurator["value"]
+                )
+            else:
+                attenuation = self.get_attenuation_function(filter_preview, source)
+            ps_axis, ps, attenuated_ps_axis, attenuated_ps = attenuation
+
+        # Get filter coefficients
         numerator, denominator = (
             filter_preview.to_digital_coeffs()
             if not analog_filter
@@ -1446,7 +1592,7 @@ class FilterDesigner(QDialog):
             filter_preview.freq_response,
             db_response=db_response,
             energies=energies,
-            trajectory_power_spectrum=(ps_axis, ps, attenuated_ps)
+            trajectory_power_spectrum=(ps_axis, ps, attenuated_ps_axis, attenuated_ps)
             if ps is not None and attenuated_ps is not None
             else None,
         )
@@ -1539,8 +1685,6 @@ class FilterDesigner(QDialog):
 
     def apply(self) -> None:
         """Pass the filter parameters to the main widget."""
-        self.configurator.configure(self.settings)
-
         filter_class = FILTER_MAP[self.settings["filter"]]
 
         # update widget field text to reflect filter designer
@@ -1549,7 +1693,6 @@ class FilterDesigner(QDialog):
             self.combine_attributes(filter_class, self.settings["attributes"]),
         )
         self.field.setText(field)
-        self.close()
 
     def create_buttons(self) -> list[QPushButton]:
         """Create button widgets needed by the filter interface.
@@ -1561,17 +1704,17 @@ class FilterDesigner(QDialog):
             create_layouts.
 
         """
-        apply = QPushButton("Use Setting")
         close = QPushButton("Close")
 
-        apply.setAutoDefault(False)
-        apply.setDefault(False)
         close.setAutoDefault(False)
         close.setDefault(False)
 
-        apply.clicked.connect(self.apply)
         close.clicked.connect(self.close)
-        return [apply, close]
+        return [close]
+
+    def closeEvent(self, a0):
+        self.apply()
+        return super().closeEvent(a0)
 
 
 class TrajectoryFilterWidget(WidgetBase):
@@ -1588,7 +1731,25 @@ class TrajectoryFilterWidget(WidgetBase):
         self._field.setPlaceholderText(self._default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
         self._field.textChanged.connect(self.updateValue)
+        for widget in self.parent()._widgets:
+            if (
+                widget._configurator
+                is self._configurator.configurable[
+                    self._configurator.dependencies["frames"]
+                ]
+            ):
+                self._frames_widget = widget
+            elif (
+                widget._configurator
+                is self._configurator.configurable[
+                    self._configurator.dependencies["pps_input_file"]
+                ]
+            ):
+                self._pps_file_widget = widget
+                break
+        self._frames_widget.value_changed.connect(self.update_time_steps)
         self.filter_designer = self.create_helper()
+        self.update_time_steps()
         helper_button = QPushButton(self._push_button_text, self._base)
         helper_button.clicked.connect(self.helper_dialog)
         self._layout.addWidget(self._field)
@@ -1596,6 +1757,18 @@ class TrajectoryFilterWidget(WidgetBase):
         self.update_labels()
         self.updateValue()
         self._field.setToolTip(self._tooltip_text)
+        self._pps_file_widget.value_changed.connect(
+            self.filter_designer.render_canvas_assets
+        )
+        self.filter_designer.apply()
+
+    def update_time_steps(self):
+        """Configure filters using the new frames settings."""
+        frames_configurator = self._frames_widget._configurator
+        time_step_ps = frames_configurator["time_step"]
+        n_steps = frames_configurator["number"]
+        self.filter_designer.accept_time_steps(n_steps, time_step_ps)
+        self.filter_designer.apply()
 
     def create_helper(self) -> FilterDesigner:
         """
@@ -1605,7 +1778,12 @@ class TrajectoryFilterWidget(WidgetBase):
             Create and return the filter designer QDialog.
 
         """
-        return FilterDesigner(self._field, self._configurator, self._base)
+        return FilterDesigner(
+            self._field,
+            self._configurator,
+            self._base,
+            pps_configurator=self._pps_file_widget._configurator,
+        )
 
     @Slot()
     def helper_dialog(self) -> None:
@@ -1613,7 +1791,6 @@ class TrajectoryFilterWidget(WidgetBase):
         if self.filter_designer.isVisible():
             self.filter_designer.close()
         else:
-            self.filter_designer.update_pps()
             self.filter_designer.show()
 
     def get_widget_value(self) -> str:
