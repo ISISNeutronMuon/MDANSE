@@ -87,13 +87,20 @@ class TrajectoryFilter(IJob):
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
+    settings["atom_transmutation"] = (
+        "AtomTransmutationConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+            }
+        },
+    )
     settings["output_files"] = (
         "OutputTrajectoryConfigurator",
         {
             "format": "MDTFormat",
         },
     )
-    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
