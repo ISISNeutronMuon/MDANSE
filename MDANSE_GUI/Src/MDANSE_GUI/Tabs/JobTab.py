@@ -231,9 +231,6 @@ class JobTab(GeneralTab):
                 left_panels=[
                     TextInfo(
                         header="MDANSE Analysis",
-                        footer="Look up our "
-                        + '<a href="https://mdanse.readthedocs.io/">Read The Docs</a>'
-                        + " page.",
                     )
                 ],
             ),

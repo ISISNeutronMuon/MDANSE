@@ -64,15 +64,12 @@ class RunTab(GeneralTab):
             logger=logger,
             model=kwargs.get("model", JobHolder()),
             view=RunTable(),
-            visualiser=JobLogInfo(header="MDANSE Logs"),
+            visualiser=JobLogInfo(header="MDANSE Logs", footer=""),
             layout=partial(
                 MultiPanel,
                 left_panels=[
                     TextInfo(
                         header="MDANSE Jobs",
-                        footer="Look up our "
-                        + '<a href="https://mdanse.readthedocs.io/">Read The Docs</a>'
-                        + " page.",
                     )
                 ],
             ),

@@ -59,7 +59,6 @@ from MDANSE_GUI.Widgets.StyleDialog import StyleDatabase, StyleDialog
 MDANSE_CODE_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE")
 MDANSE_EXAMPLES_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE-Examples")
 MDANSE_DOCS_WEBSITE = QUrl("https://mdanse.readthedocs.io/en/latest/")
-MDANSE_PROJECT_WEBSITE = QUrl("https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx")
 
 
 class RecentFileAction(QAction):
@@ -251,7 +250,6 @@ class TabbedWindow(QMainWindow):
         self.aboutAct.triggered.connect(self.version_information)
         self.website_actions = []
         for label, function in [
-            ("project", self.show_website_project),
             ("source code", self.show_website_code),
             ("examples", self.show_website_examples),
             ("documentation", self.show_website_docs),
@@ -362,9 +360,6 @@ class TabbedWindow(QMainWindow):
 
     def show_website_examples(self):
         QDesktopServices.openUrl(MDANSE_EXAMPLES_WEBSITE)
-
-    def show_website_project(self):
-        QDesktopServices.openUrl(MDANSE_PROJECT_WEBSITE)
 
     def show_website_docs(self):
         QDesktopServices.openUrl(MDANSE_DOCS_WEBSITE)

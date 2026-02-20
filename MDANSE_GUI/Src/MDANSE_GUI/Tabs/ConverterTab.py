@@ -96,9 +96,6 @@ class ConverterTab(GeneralTab):
                 left_panels=[
                     TextInfo(
                         header="MDANSE Converter",
-                        footer="Look up our "
-                        + '<a href="https://mdanse.readthedocs.io/">Read The Docs</a>'
-                        + " page.",
                     )
                 ],
             ),

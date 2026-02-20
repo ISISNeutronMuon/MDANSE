@@ -102,9 +102,6 @@ class TrajectoryTab(GeneralTab):
                 left_panels=[
                     TrajectoryInfo(
                         header="MDANSE Trajectory",
-                        footer="Look up our "
-                        + '<a href="https://mdanse.readthedocs.io/">Read The Docs</a>'
-                        + " page.",
                     )
                 ],
             ),

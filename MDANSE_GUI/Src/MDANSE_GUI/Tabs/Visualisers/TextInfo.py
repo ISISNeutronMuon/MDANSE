@@ -22,10 +22,18 @@ from qtpy.QtWidgets import QTextBrowser
 
 class TextInfo(QTextBrowser):
     error = Signal(str)
+    default_header = ""
+    default_footer = (
+        "Look up our "
+        + '<a href="https://mdanse.readthedocs.io/">Read The Docs</a>'
+        + " page."
+    )
 
-    def __init__(self, *args, **kwargs):
-        self._header = kwargs.pop("header", "")
-        self._footer = kwargs.pop("footer", "")
+    def __init__(
+        self, *args, header: str | None = None, footer: str | None = None, **kwargs
+    ):
+        self._header = header if header is not None else self.default_header
+        self._footer = footer if footer is not None else self.default_footer
         self._font = kwargs.pop("font", None)
         super().__init__(*args, **kwargs)
         if self._font is not None:

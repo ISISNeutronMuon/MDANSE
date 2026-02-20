@@ -112,7 +112,7 @@ class LoggingTab(GeneralTab):
             session=session,
             settings=settings,
             logger=logger,
-            visualiser=TextInfo(font="Courier New"),
+            visualiser=TextInfo(footer="", font="Courier New"),
             layout=SinglePanel,
             label_text=log_tab_label,
         )
