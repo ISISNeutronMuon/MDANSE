@@ -227,7 +227,7 @@ class AtomsDatabase(_Database):
     def __init__(self):
         self._properties = defaultdict(lambda: "str")
         self._units = defaultdict(lambda: "none")
-        self._atoms_by_atomic_number = {num: [] for num in range(140)}
+        self._atoms_by_atomic_number = defaultdict(list)
 
         super().__init__()
 
