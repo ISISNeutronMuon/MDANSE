@@ -1,4 +1,5 @@
 import json
+from typing import Generator, Any
 from pathlib import Path
 import pytest
 import h5py
@@ -18,6 +19,8 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
 # Trajectory constants
+SINGLE_BIMODAL_ATOM_TRAJ = "simple_bimodal_atom.mdt"
+
 SRTIO3_TRAJ = "cp2k_srtio3_unfiltered.mdt"
 
 CUAU_TRAJ = "CuAu_asap_10fs-step_unfiltered.mdt"
@@ -156,15 +159,17 @@ def run_power_spectrum(name: Path, frames: list, traj_path: Path) -> Path:
 
     return out_file
 
+
 @pytest.fixture(scope="module")
 def bimodal_spectrum_clean(tmp_path_factory):
-    """Fixture returns the output file of the PositionPowerSpectrum job with the cp2k SrTiO3 trajectory as the input."""
+    """Fixture returns the output file of the PositionPowerSpectrum job with the single atom containing two vibrational modes."""
 
     yield run_power_spectrum(
-        tmp_path_factory.mktemp("data") / f"{"SINGLE_BIMODAL_ATOM_TRAJ"}{SUFFIX}",
-        [0, 320, 1, 160],
-        CONV_DIR / "SINGLE_BIMODAL_ATOM_TRAJ",
+        tmp_path_factory.mktemp("data") / f"{SINGLE_BIMODAL_ATOM_TRAJ}{SUFFIX}",
+        [0, 4000, 1, 2000],
+        CONV_DIR / SINGLE_BIMODAL_ATOM_TRAJ,
     )
+
 
 @pytest.fixture(scope="module")
 def srtio3_spectrum_clean(tmp_path_factory):
@@ -201,53 +206,37 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
         CONV_DIR / GLYCYL_L_ALANINE_TRAJ,
     )
 
-@pytest.mark.parametrize(
-    {
-        "filter_config",
-        [
-            {
-                "filter": "ChebyshevII",
-                "attributes": {
-                    "n_steps": 320,
-                    "time_step_ps": 0.005,
-                    "order": 1,
-                    "attenuation_type": "bandpass",
-                    "cutoff_freq": 19.635 / TWOPI,
-                },
-            },
-            {
-                "filter": "Butterworth",
-                "attributes": {
-                    "n_steps": 320,
-                    "time_step_ps": 0.005,
-                    "order": 8,
-                    "attenuation_type": "highpass",
-                    "cutoff_freq": 19.635 / TWOPI,
-                },
-            },
-            {
-                "filter": "ChebyshevII",
-                "attributes": {
-                    "n_steps": 320,
-                    "time_step_ps": 0.005,
-                    "order": 1,
-                    "attenuation_type": "bandpass",
-                    "cutoff_freq": 19.635 / TWOPI,
-                },
-            }
-        ]
-    }
-)
-def test_convolution(
-    tmp_path,
-    bimodal_spectrum_clean,
-    filter_config,
+
+def run_convolution_test(
+    filter_config: dict,
+    trajectory_name: str,
+    frames: list[int],
+    n_atoms: int,
+    unfiltered_power_spectrum: Generator[Path, Any, None],
+    filter_type: str,
+    filter_attributes: dict,
+    max_freq: float,
+    max_freq_precision: int,
+    tmp_path: Path,
 ):
-    frames = filter_config["frames"]
+    """The performance of the MDANSE trajectory filter is tested by analysing functional form.
+    In this case we compare the form of the power spectrum function of the filtered trajectory against the
+    power spectrum of the unfiltered trajectory.
+
+    The convolution theorem
+
+        x(t) * h(t) = X(w)H(w)
+
+    states that convolution in the time domain is equivalent to multiplication in the frequency domain.
+    Therefore, the power spectrum of the filtered trajectory, F(w), should be close (with some tolerance) to the product
+    of the unfiltered trajectory power spectrum, U(w), and the filter frequency response, H(w).
+
+    Deviation from the convolution theorem is assessed by taking the mean of the absolute error, | U(w)H(w) - F(w) |.
+    """
 
     # Retrieve U(w), check the data is as expected
     original_data = LocalDataset(
-        "pps/isotropic/total", h5py.File(safe_mda(bimodal_spectrum_clean), "r+")
+        "pps/isotropic/total", h5py.File(unfiltered_power_spectrum, "r+")
     )
     u_x_axis_name = list(original_data._axes_units.keys())
 
@@ -256,17 +245,16 @@ def test_convolution(
 
     u_x_axis = original_data._axes["pps/axes/romega"]
 
-    max, precision = filter_config["max_frequency"]
     assert np.round(u_x_axis.min(), 0) == 0
-    assert np.round(u_x_axis.max(), precision) == max
+    assert np.round(u_x_axis.max(), max_freq_precision) == max_freq
 
     uw = original_data._data
 
     # Retrieve filter configuration dict
-    filter_class = FILTER_MAP[filter_config["filter"]]
+    filter_class = FILTER_MAP[filter_type]
 
     # Instantiate filter object
-    filter_object = filter_class(**filter_config["attributes"])
+    filter_object = filter_class(**filter_attributes)
 
     # Supply frequencies against which to calculate response H(w)
     filter_object.custom_freq_range = u_x_axis
@@ -290,11 +278,10 @@ def test_convolution(
     model = hw * uw
 
     # Run TrajectoryFilter job on the input trajectory
-    n_atoms = json.loads(filter_config["atom_selection"])["1"]["index_range"][1]
     f_name = "filtered_trajectory"
     temp_name = tmp_path / f_name
     f_trajectory_out_file = run_trajectory_filter(
-        temp_name, filter_config, frames, n_atoms, CONV_DIR / "simple_bimodal_atom.mdt"
+        temp_name, filter_config, frames, n_atoms, CONV_DIR / trajectory_name
     )
     assert f_trajectory_out_file.is_file()
 
@@ -314,14 +301,72 @@ def test_convolution(
     f_x_axis = filtered_data._axes["pps/axes/romega"]
 
     assert np.round(f_x_axis.min(), 0) == 0
-    assert np.round(f_x_axis.max(), precision) == max
+    assert np.round(f_x_axis.max(), max_freq_precision) == max_freq
 
     fw = filtered_data._data
 
     assert len(fw) == len(uw)
 
-    # H(w) and F(w) spectra should be very close
-    assert np.all(np.isclose(fw, model, rtol=0.01))
+    return model, fw
+
+
+@pytest.mark.parametrize(
+    "filter_config",
+    [
+        {
+            "filter": "ChebyshevTypeII",
+            "attributes": {
+                "n_steps": 4000,
+                "time_step_ps": 0.001,
+                "order": 1,
+                "attenuation_type": "bandpass",
+                "cutoff_freq": [12.5, 50.0],
+            },
+        },
+        {
+            "filter": "Butterworth",
+            "attributes": {
+                "n_steps": 4000,
+                "time_step_ps": 0.001,
+                "order": 8,
+                "attenuation_type": "highpass",
+                "cutoff_freq": 70.25,
+            },
+        },
+    ],
+)
+def test_convolution_simple(
+    tmp_path,
+    bimodal_spectrum_clean,
+    filter_config,
+):
+    TOLERANCE = 3
+
+    model, test = run_convolution_test(
+        filter_config=filter_config,
+        trajectory_name=SINGLE_BIMODAL_ATOM_TRAJ,
+        frames=[0, 4000, 1, 2000],
+        n_atoms=1,
+        unfiltered_power_spectrum=safe_mda(bimodal_spectrum_clean),
+        filter_type=filter_config["filter"],
+        filter_attributes=filter_config["attributes"],
+        max_freq=499.8749593476265 * TWOPI,
+        max_freq_precision=3,
+        tmp_path=tmp_path,
+    )
+
+    # H(w) and F(w) spectra should be very close - we expect a single dominant peak in either, with a magnitude error of 3%
+    get_peak_location = lambda x: x[0][0]
+    get_peak_magnitude = lambda x: x[1]["peak_heights"][0]
+    model_peaks = find_peaks(model, height=7.0e-6)
+    filtered_peaks = find_peaks(test, height=7.0e-6)
+    assert len(model_peaks[0] == 1) and len(filtered_peaks[0] == 1)
+    assert get_peak_location(model_peaks) == get_peak_location(filtered_peaks)
+    assert np.isclose(
+        get_peak_magnitude(model_peaks),
+        get_peak_magnitude(filtered_peaks),
+        rtol=1e-2 * TOLERANCE,
+    )
 
 
 @pytest.mark.parametrize(
@@ -525,11 +570,8 @@ def test_convolution(
 
     Deviation from the convolution theorem is assessed by taking the mean of the absolute error, | U(w)H(w) - F(w) |.
     """
-
     # Trajectory .mdt file name
     trajectory_name = filter_config["trajectory"]
-
-    frames = filter_config["frames"]
 
     # Select unfiltered power spectrum fixture
     if trajectory_name == SRTIO3_TRAJ:
@@ -541,85 +583,23 @@ def test_convolution(
     else:
         ValueError(f"{trajectory_name} is not a recognised .mdt file.")
 
-    # Retrieve U(w), check the data is as expected
-    original_data = LocalDataset(
-        "pps/isotropic/total", h5py.File(unfiltered_power_spectrum, "r+")
+    model, test = run_convolution_test(
+        filter_config=filter_config,
+        trajectory_name=trajectory_name,
+        frames=filter_config["frames"],
+        n_atoms=json.loads(filter_config["atom_selection"])["1"]["index_range"][1],
+        unfiltered_power_spectrum=unfiltered_power_spectrum,
+        filter_type=filter_config["filter"],
+        filter_attributes=filter_config["attributes"],
+        max_freq=filter_config["max_frequency"][0],
+        max_freq_precision=filter_config["max_frequency"][1],
+        tmp_path=tmp_path,
     )
-    u_x_axis_name = list(original_data._axes_units.keys())
-
-    assert u_x_axis_name == ["pps/axes/romega"]
-    assert original_data._axes_units[u_x_axis_name[0]] == "rad/ps"
-
-    u_x_axis = original_data._axes["pps/axes/romega"]
-
-    max, precision = filter_config["max_frequency"]
-    assert np.round(u_x_axis.min(), 0) == 0
-    assert np.round(u_x_axis.max(), precision) == max
-
-    uw = original_data._data
-
-    # Retrieve filter configuration dict
-    filter_class = FILTER_MAP[filter_config["filter"]]
-
-    # Instantiate filter object
-    filter_object = filter_class(**filter_config["attributes"])
-
-    # Supply frequencies against which to calculate response H(w)
-    filter_object.custom_freq_range = u_x_axis
-    filter_object.set_freq_response(Filter.FrequencyRangeMethod.CUSTOM)
-
-    # Resample H(w) to length of U(w)
-    attenuation = interp1d(
-        filter_object.freq_response.frequencies,
-        filter_object.freq_response.magnitudes,
-        fill_value=0.0,
-        bounds_error=False,
-    )
-
-    # Generate the modelled attenuation, assuming an exponentiation to the 4th power
-    # due to the contributions from sosfiltfilt, which makes two passes of the filter,
-    # and the Wiener-Khinchin theorem, which yields another squaring of the power spectrum
-    # by autocorrelation.
-    hw = abs(attenuation(filter_object.freq_response.frequencies)) ** 4
-
-    # Compute the frequency domain convolution U(w)H(w) that we will compare F(w) with
-    model = hw * uw
-
-    # Run TrajectoryFilter job on the input trajectory
-    n_atoms = json.loads(filter_config["atom_selection"])["1"]["index_range"][1]
-    f_name = "filtered_trajectory"
-    temp_name = tmp_path / f_name
-    f_trajectory_out_file = run_trajectory_filter(
-        temp_name, filter_config, frames, n_atoms, CONV_DIR / trajectory_name
-    )
-    assert f_trajectory_out_file.is_file()
-
-    # Run PositionPowerSpectrum job on the filtered trajectory
-    temp_name = tmp_path / "filtered_power_spectrum"
-    fw_out_file = run_power_spectrum(temp_name, frames, f_trajectory_out_file)
-
-    assert fw_out_file.is_file()
-
-    # Retrieve F(w), check the data is as expected
-    filtered_data = LocalDataset("pps/isotropic/total", h5py.File(fw_out_file, "r+"))
-    f_x_axis_name = list(filtered_data._axes_units.keys())
-
-    assert f_x_axis_name == ["pps/axes/romega"]
-    assert filtered_data._axes_units[f_x_axis_name[0]] == "rad/ps"
-
-    f_x_axis = filtered_data._axes["pps/axes/romega"]
-
-    assert np.round(f_x_axis.min(), 0) == 0
-    assert np.round(f_x_axis.max(), precision) == max
-
-    fw = filtered_data._data
-
-    assert len(fw) == len(uw)
 
     # Calculate the relative area under curve for model {U(w)H(w)} and F(w) and assert they are close to
     # within 15% at most
     assert (
-        np.abs(1e2 * (trap(np.abs(model)) - trap(np.abs(fw))) / trap(np.abs(model)))
+        np.abs(1e2 * (trap(np.abs(model)) - trap(np.abs(test))) / trap(np.abs(model)))
         < 15
     )
 
@@ -627,7 +607,9 @@ def test_convolution(
     model_peaks = find_peaks(
         model, height=np.mean(np.abs(model)) + 2 * np.std(np.abs(model))
     )
-    filtered_peaks = find_peaks(fw, height=np.mean(np.abs(fw)) + 2 * np.std(np.abs(fw)))
+    filtered_peaks = find_peaks(
+        test, height=np.mean(np.abs(test)) + 2 * np.std(np.abs(test))
+    )
 
     # Assert that the number of features satisfying the criteria is the same in both H(w) and F(w)
     assert len(model_peaks) == len(filtered_peaks)
