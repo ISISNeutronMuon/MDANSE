@@ -21,7 +21,6 @@ import numpy as np
 from mdtraj.formats.trr import TRRTrajectoryFile
 from mdtraj.formats.xtc import XTCTrajectoryFile
 
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Parsers import PDBFile
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
@@ -29,7 +28,7 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-class GromacsConverterError(Error):
+class GromacsConverterError(Exception):
     pass
 
 

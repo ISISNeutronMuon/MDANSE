@@ -898,7 +898,7 @@ class PlottingContext(QStandardItemModel):
                 "",
                 self.next_colour(),
                 new_dataset._linestyle,
-                new_dataset._marker if new_dataset._marker else "None",
+                new_dataset._marker or "None",
                 format(new_dataset._scaling_factor, SCALE_FACTOR_FORMAT)
                 if isinstance(new_dataset._scaling_factor, float)
                 else summarise_array(

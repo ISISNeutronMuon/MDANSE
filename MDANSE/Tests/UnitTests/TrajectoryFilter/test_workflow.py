@@ -122,22 +122,20 @@ def run_trajectory_filter(
     return out_file
 
 
-def run_power_spectrum(name: Path, frames: list, traj_path: Path) -> Path:
+def run_power_spectrum(name: Path, traj_path: Path) -> Path:
     """Runs the PositionPowerSpectrum job.
 
     Parameters
     ----------
     name : Path
-        Temporary path to output trajectory.
-    frames : list
-        List of trajectory frames.
-    name : Path
-        Temporary path to output trajectory.
+        Temporary path to output file.
+    traj_path : Path
+        Temporary path to trajectory.
 
     Returns
     -------
     Path
-        Path to output trajectory.
+        Path to output file.
 
     """
     out_file = name.with_suffix(".mda")
@@ -145,7 +143,6 @@ def run_power_spectrum(name: Path, frames: list, traj_path: Path) -> Path:
     parameters = {
         "atom_selection": '{"0": {"function_name": "select_all", "operation_type": "union"}, "1": {"function_name": "select_atoms", "index_range": [0, 60], "operation_type": "intersection"}}',
         "atom_transmutation": "{}",
-        "frames": frames,
         "instrument_resolution": ("ideal", {}),
         "output_files": (name, ["MDAFormat"], "no logs"),
         "projection": ("NullProjector", []),
@@ -177,7 +174,6 @@ def srtio3_spectrum_clean(tmp_path_factory):
 
     yield run_power_spectrum(
         tmp_path_factory.mktemp("data") / f"{SRTIO3_TRAJ}{SUFFIX}",
-        [0, 320, 1, 160],
         CONV_DIR / SRTIO3_TRAJ,
     )
 
@@ -188,7 +184,6 @@ def cuau_spectrum_clean(tmp_path_factory):
 
     yield run_power_spectrum(
         tmp_path_factory.mktemp("data") / f"{CUAU_TRAJ}{SUFFIX}",
-        [0, 1000, 1, 500],
         CONV_DIR / CUAU_TRAJ,
     )
 
@@ -202,7 +197,6 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
 
     yield run_power_spectrum(
         tmp_path_factory.mktemp("data") / f"{GLYCYL_L_ALANINE_TRAJ}{SUFFIX}",
-        [0, 25, 1, 13],
         CONV_DIR / GLYCYL_L_ALANINE_TRAJ,
     )
 
@@ -626,7 +620,6 @@ def test_convolution(
     (
         {
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
-            "frames": [0, 25, 1, 13],
             "filter": "Butterworth",
             "attributes": {
                 "n_steps": 25,
@@ -636,7 +629,6 @@ def test_convolution(
         },
         {
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
-            "frames": [0, 25, 1, 13],
             "filter": "ChebyshevTypeI",
             "attributes": {
                 "n_steps": 25,
@@ -646,7 +638,6 @@ def test_convolution(
         },
         {
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
-            "frames": [0, 25, 1, 13],
             "filter": "ChebyshevTypeII",
             "attributes": {
                 "n_steps": 25,
@@ -657,7 +648,6 @@ def test_convolution(
         },
         {
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
-            "frames": [0, 25, 1, 13],
             "filter": "Elliptical",
             "attributes": {
                 "n_steps": 25,
@@ -668,7 +658,6 @@ def test_convolution(
         },
         {
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
-            "frames": [0, 25, 1, 13],
             "filter": "Bessel",
             "attributes": {
                 "n_steps": 25,
@@ -679,7 +668,6 @@ def test_convolution(
         },
         {
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
-            "frames": [0, 25, 1, 13],
             "filter": "Notch",
             "attributes": {
                 "n_steps": 25,
@@ -689,33 +677,11 @@ def test_convolution(
         },
         {
             "trajectory": GLYCYL_L_ALANINE_TRAJ,
-            "frames": [0, 25, 1, 13],
             "filter": "Peak",
             "attributes": {
                 "n_steps": 25,
                 "time_step_ps": 4000.0,
                 "fundamental_freq": 0.000125,
-            },
-        },
-        {
-            "trajectory": GLYCYL_L_ALANINE_TRAJ,
-            "frames": [0, 25, 1, 13],
-            "filter": "Comb",
-            "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
-                "fundamental_freq": 6.25e-05,
-                "comb_type": "notch",
-            },
-        },
-        {
-            "trajectory": GLYCYL_L_ALANINE_TRAJ,
-            "frames": [0, 25, 1, 13],
-            "filter": "Comb",
-            "attributes": {
-                "n_steps": 25,
-                "time_step_ps": 4000.0,
-                "fundamental_freq": 6.25e-05,
             },
         },
     ),

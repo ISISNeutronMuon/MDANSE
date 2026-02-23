@@ -26,7 +26,6 @@ import numpy as np
 import numpy.typing as npt
 from more_itertools import chunked, one
 
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.Parsers.FortranUnformat import binary_file_reader
 from MDANSE.Framework.Parsers.Parser import Parser
 from MDANSE.Framework.Units import measure
@@ -36,15 +35,15 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 PI_2 = 0.5 * np.pi
 
 
-class EndOfFile(Error):
+class EndOfFile(Exception):
     pass
 
 
-class ByteOrderError(Error):
+class ByteOrderError(Exception):
     pass
 
 
-class DCDFileError(Error):
+class DCDFileError(Exception):
     pass
 
 

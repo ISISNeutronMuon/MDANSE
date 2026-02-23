@@ -30,7 +30,6 @@ from more_itertools import ilen, take
 from numpy.typing import NDArray
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Units import measure
 from MDANSE.IO.IOUtils import UCEnum
@@ -112,7 +111,7 @@ LAMMPS_UNITS = {
 UnitSchemes = Literal["real", "metal", "si", "cgs", "electron", "micro", "nano"]
 
 
-class LAMMPSTrajectoryFileError(Error):
+class LAMMPSTrajectoryFileError(Exception):
     pass
 
 

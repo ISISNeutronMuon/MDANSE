@@ -29,7 +29,6 @@ import h5py
 
 import MDANSE
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.IO.AtomInfo import atom_info
@@ -41,7 +40,7 @@ from MDANSE.MolecularDynamics.Trajectory import (
 )
 
 
-class CommandLineParserError(Error):
+class CommandLineParserError(Exception):
     pass
 
 

@@ -647,7 +647,7 @@ class SelectionHelper(QDialog):
             Number of atoms currently selected in 3D view, by default None
 
         """
-        num_sel = num_atoms_3dview if num_atoms_3dview else len(self.selected)
+        num_sel = num_atoms_3dview or len(self.selected)
         text = [f"Number of atoms selected:\n{num_sel}\n\nSelected atoms:\n"]
         for idx in self.selected:
             text.append(f"{idx}  ({self.atm_full_names[idx]})\n")

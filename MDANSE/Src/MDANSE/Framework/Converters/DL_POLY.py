@@ -21,7 +21,6 @@ import numpy as np
 from more_itertools import consume as drop
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Parsers import DLPField, DLPHistory
 from MDANSE.MolecularDynamics.Configuration import (
@@ -32,11 +31,11 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-class HistoryFileError(Error):
+class HistoryFileError(Exception):
     pass
 
 
-class DL_POLYConverterError(Error):
+class DL_POLYConverterError(Exception):
     pass
 
 

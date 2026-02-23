@@ -23,7 +23,6 @@ from warnings import warn
 
 from more_itertools import value_chain
 
-from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.IO.IOUtils import MDANSEEncoder
 from MDANSE.MLogging import LOG
@@ -42,40 +41,6 @@ class ConfiguratorWarning(Warning):
     but there are reasons to believe that the results may be scientifically
     incorrect.
     """
-
-
-class ConfiguratorError(Error):
-    """Error raised by a job input parser."""
-
-    def __init__(self, message: str, configurator: IConfigurator | None = None):
-        """Store the error message and configurator reference.
-
-        Parameters
-        ----------
-        message : str
-            Error message related to one of the job inputs
-        configurator : IConfigurator, optional
-            Reference to the input parser producing the error, by default None
-
-        """
-        self._message = message
-        self.configurator = configurator
-
-    def __str__(self) -> str:
-        """Return a readable summary of the error as string.
-
-        Returns
-        -------
-        str
-            Text and source of the error.
-
-        """
-        if self.configurator is not None:
-            self._message = (
-                f"Configurator: {self.configurator.name!r} --> {self._message}"
-            )
-
-        return self._message
 
 
 class PredictionSettings(NamedTuple):

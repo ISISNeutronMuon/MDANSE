@@ -452,8 +452,12 @@ class TabbedWindow(QMainWindow):
             self._logger,
             model=self._trajectory_model,
         )
-        self.tabs.addTab(trajectory_tab._core, name)
+        traj_tab_index = self.tabs.addTab(trajectory_tab._core, name)
+        trajectory_tab._visualiser._viewer.tab_index = traj_tab_index
         self._tabs[name] = trajectory_tab
+        self.tabs.currentChanged.connect(
+            trajectory_tab._visualiser._viewer.change_visibility
+        )
         self._job_holder.trajectory_for_loading.connect(trajectory_tab.load_trajectory)
         self._job_holder.trajectory_for_loading.connect(trajectory_tab.tab_notification)
 

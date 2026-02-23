@@ -61,44 +61,38 @@ class TrajectoryFilter(IJob):
     settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "CorrelationFramesConfigurator",
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["instrument_resolution"] = (
-        "InstrumentResolutionConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
-    )
-    settings["projection"] = (
-        "ProjectionConfigurator",
-        {},
+    settings["pps_input_file"] = (
+        "HDFInputFileConfigurator",
+        {
+            "label": "MDANSE Position Power Spectrum",
+            "default": "",
+            "optional": True,
+            "variables": ("pps/axes/romega", "/pps/isotropic/total"),
+        },
     )
     settings["trajectory_filter"] = (
         "TrajectoryFilterConfigurator",
-        {"dependencies": {"trajectory": "trajectory", "frames": "frames"}},
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "frames": "frames",
+                "pps_input_file": "pps_input_file",
+            }
+        },
     )
     settings["atom_selection"] = (
         "AtomSelectionConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory"},
-            "default": """\
-{
-   "0": {"function_name": "select_all", "operation_type": "union"}
-}""",
-        },
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["atom_transmutation"] = (
         "AtomTransmutationConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["weights"] = (
-        "WeightsConfigurator",
         {
-            "default": "atomic_weight",
             "dependencies": {
                 "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            },
+            }
         },
     )
     settings["output_files"] = (
@@ -107,7 +101,6 @@ class TrajectoryFilter(IJob):
             "format": "MDTFormat",
         },
     )
-    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""

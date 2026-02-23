@@ -27,7 +27,6 @@ import numpy as np
 from more_itertools import first, one, sort_together, split_before, spy
 from numpy.typing import NDArray
 
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Parsers.LAMMPS import BoxStyle
 from MDANSE.IO.IOUtils import strip_comments
@@ -36,7 +35,7 @@ from MDANSE.MLogging import LOG
 from .Parser import Parser
 
 
-class LAMMPSConfigFileError(Error):
+class LAMMPSConfigFileError(Exception):
     pass
 
 
@@ -452,13 +451,13 @@ class LAMMPSConfigFile(Parser, dict):
 
         Examples
         --------
-        >>> ConfigFileConfigurator._guess_type("0")
+        >>> LAMMPSConfigFile._guess_type("0")
         <class 'bool'>
-        >>> ConfigFileConfigurator._guess_type("1.3")
+        >>> LAMMPSConfigFile._guess_type("1.3")
         <class 'float'>
-        >>> ConfigFileConfigurator._guess_type("17")
+        >>> LAMMPSConfigFile._guess_type("17")
         <class 'int'>
-        >>> ConfigFileConfigurator._guess_type("Hello")
+        >>> LAMMPSConfigFile._guess_type("Hello")
         <class 'str'>
         """
         if word in "01":
@@ -535,7 +534,7 @@ class LAMMPSConfigFile(Parser, dict):
 
         See Also
         --------
-        ConfigFileConfigurator._guess_atom_type : Mechanism for guessing atom type.
+        ~LAMMPSConfigFile._guess_atom_type : Mechanism for guessing atom type.
         """
         lines = filter(None, lines)
         trial, lines = spy(lines)

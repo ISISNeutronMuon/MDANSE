@@ -37,7 +37,6 @@ from typing import Any
 from more_itertools import consumer, first_true
 
 from MDANSE import PLATFORM
-from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStates, JobStatus
@@ -99,7 +98,7 @@ except ImportError:
             pass
 
 
-class JobError(Error):
+class JobError(Exception):
     """This class handles any exception related to IJob-derived objects"""
 
     def __init__(self, job: IJob, message: str = ""):
@@ -200,23 +199,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
     ancestor = []
     PREDICTORS = ()
     runscript_import_line = "from MDANSE.Framework.Jobs.IJob import IJob"
-
-    @classmethod
-    def define_unique_name(cls):
-        """
-        Sets a name for the job that is not already in use by another running job.
-        """
-
-        cls.key_gen.send(f"{PLATFORM.username()[:4]}_{PLATFORM.pid():d}")
-
-        # The list of the registered jobs.
-        registeredJobs = {
-            f.name for f in PLATFORM.temporary_files_directory().glob("*")
-        }
-
-        name = first_true(cls.key_gen, pred=lambda x: x not in registeredJobs)
-
-        return name
 
     def __init__(self, trajectory_input="mdanse"):
         """
@@ -524,13 +506,9 @@ class IJob(Configurable, metaclass=SubclassFactory):
         """
         Run the job.
         """
-        if isinstance(self._status, JobStatus) and hasattr(self._status, "state"):
-            raise RuntimeError(
-                f"Unable to run an instance of job with name {self._name} more than once."
-            )
 
         try:
-            self._name = f"{type(self).__name__}_{IJob.define_unique_name()}"
+            self._name = f"{type(self).__name__}"
 
             if status and self._status is None:
                 self._status = self._status_constructor(self)
@@ -572,84 +550,6 @@ class IJob(Configurable, metaclass=SubclassFactory):
                 sorted(f"{key}: {value}" for key, value in self.settings.items())
             )
         )
-
-    @classmethod
-    def save_template(cls, shortname, classname):
-        if shortname in IJob.subclasses():
-            raise KeyError(
-                f"A job with {shortname!r} name is already stored in the registry"
-            )
-
-        templateFile = PLATFORM.macros_directory() / f"{classname}.py"
-
-        try:
-            label = "label of the class"
-            with templateFile.open("w") as f:
-                f.write(
-                    f'''from MDANSE.Framework.Jobs.IJob import IJob
-
-class {classname}(IJob):
-    """
-    You should enter the description of your job here ...
-    """
-
-    # You should enter the label under which your job will be viewed from the gui.
-    label = {label!r}
-
-    # You should enter the category under which your job will be references.
-    category = ('My jobs',)
-
-    # You should enter the configuration of your job here
-    # Here a basic example of a job that will use a HDF trajectory, a frame selection and an output file in HDF5 and Text file formats
-    settings = {{}}
-    settings['trajectory']=('hdf_trajectory',{{}})
-    settings['frames']=('frames', {{"dependencies":{{'trajectory':'trajectory'}}}})
-    settings['output_files']=('output_files', {{"formats":["HDFFormat","netcdf","TextFormat"]}})
-
-    def initialize(self):
-        """
-        Initialize the input parameters and analysis self variables
-        """
-
-        # Compulsory. You must enter the number of steps of your job.
-        # Here for example the number of selected frames
-        self.numberOfSteps = self.configuration['frames']['number']
-
-        # Create an output data for the selected frames.
-        self._outputData.add("x/axes/time", "LineOutputVariable", self.configuration['frames']['time'], units='ps')
-
-
-    def run_step(self, index):
-        """
-        Runs a single step of the job.
-        """
-
-        return index, None
-
-
-    def combine(self, index, x):
-        """
-        Synchronize the output of each individual run_step output.
-        """
-
-    def finalize(self):
-        """
-        Finalizes the job (e.g. averaging the total term, output files creations ...).
-        """
-
-        # The output data are written
-        self._outputData.write(self.configuration['output_files']['root'], self.configuration['output_files']['formats'], str(self),
-            self.output_configuration())
-
-        # The trajectory is closed
-        self.configuration['trajectory']['instance'].close()
-
-'''
-                )
-
-        except OSError:
-            return None
-        return templateFile
 
     def add_log_file_handler(self, filename: str, level: str) -> None:
         """Adds a file handle which is used to write the jobs logs.

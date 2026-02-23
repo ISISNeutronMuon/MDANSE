@@ -37,5 +37,3 @@ os.environ.update(
 __version__ = importlib.metadata.version("MDANSE")
 
 warnings.filterwarnings("ignore")
-
-PLATFORM.create_directory(PLATFORM.macros_directory())

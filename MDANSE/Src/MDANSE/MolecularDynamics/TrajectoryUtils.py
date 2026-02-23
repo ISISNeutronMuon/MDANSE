@@ -17,14 +17,12 @@ from __future__ import annotations
 
 import numpy as np
 
-from MDANSE.Core.Error import Error
 
-
-class MolecularDynamicsError(Error):
+class MolecularDynamicsError(Exception):
     pass
 
 
-class UniverseAdapterError(Error):
+class UniverseAdapterError(Exception):
     pass
 
 

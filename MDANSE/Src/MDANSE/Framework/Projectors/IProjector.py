@@ -15,11 +15,10 @@
 #
 from __future__ import annotations
 
-from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
 
 
-class ProjectorError(Error):
+class ProjectorError(Exception):
     pass
 
 
