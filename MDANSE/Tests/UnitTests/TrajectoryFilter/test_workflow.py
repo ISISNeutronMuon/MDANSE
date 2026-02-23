@@ -156,6 +156,15 @@ def run_power_spectrum(name: Path, frames: list, traj_path: Path) -> Path:
 
     return out_file
 
+@pytest.fixture(scope="module")
+def bimodal_spectrum_clean(tmp_path_factory):
+    """Fixture returns the output file of the PositionPowerSpectrum job with the cp2k SrTiO3 trajectory as the input."""
+
+    yield run_power_spectrum(
+        tmp_path_factory.mktemp("data") / f"{"SINGLE_BIMODAL_ATOM_TRAJ"}{SUFFIX}",
+        [0, 320, 1, 160],
+        CONV_DIR / "SINGLE_BIMODAL_ATOM_TRAJ",
+    )
 
 @pytest.fixture(scope="module")
 def srtio3_spectrum_clean(tmp_path_factory):
@@ -191,6 +200,128 @@ def glycl_l_alanine_spectrum_clean(tmp_path_factory):
         [0, 25, 1, 13],
         CONV_DIR / GLYCYL_L_ALANINE_TRAJ,
     )
+
+@pytest.mark.parametrize(
+    {
+        "filter_config",
+        [
+            {
+                "filter": "ChebyshevII",
+                "attributes": {
+                    "n_steps": 320,
+                    "time_step_ps": 0.005,
+                    "order": 1,
+                    "attenuation_type": "bandpass",
+                    "cutoff_freq": 19.635 / TWOPI,
+                },
+            },
+            {
+                "filter": "Butterworth",
+                "attributes": {
+                    "n_steps": 320,
+                    "time_step_ps": 0.005,
+                    "order": 8,
+                    "attenuation_type": "highpass",
+                    "cutoff_freq": 19.635 / TWOPI,
+                },
+            },
+            {
+                "filter": "ChebyshevII",
+                "attributes": {
+                    "n_steps": 320,
+                    "time_step_ps": 0.005,
+                    "order": 1,
+                    "attenuation_type": "bandpass",
+                    "cutoff_freq": 19.635 / TWOPI,
+                },
+            }
+        ]
+    }
+)
+def test_convolution(
+    tmp_path,
+    bimodal_spectrum_clean,
+    filter_config,
+):
+    frames = filter_config["frames"]
+
+    # Retrieve U(w), check the data is as expected
+    original_data = LocalDataset(
+        "pps/isotropic/total", h5py.File(safe_mda(bimodal_spectrum_clean), "r+")
+    )
+    u_x_axis_name = list(original_data._axes_units.keys())
+
+    assert u_x_axis_name == ["pps/axes/romega"]
+    assert original_data._axes_units[u_x_axis_name[0]] == "rad/ps"
+
+    u_x_axis = original_data._axes["pps/axes/romega"]
+
+    max, precision = filter_config["max_frequency"]
+    assert np.round(u_x_axis.min(), 0) == 0
+    assert np.round(u_x_axis.max(), precision) == max
+
+    uw = original_data._data
+
+    # Retrieve filter configuration dict
+    filter_class = FILTER_MAP[filter_config["filter"]]
+
+    # Instantiate filter object
+    filter_object = filter_class(**filter_config["attributes"])
+
+    # Supply frequencies against which to calculate response H(w)
+    filter_object.custom_freq_range = u_x_axis
+    filter_object.set_freq_response(Filter.FrequencyRangeMethod.CUSTOM)
+
+    # Resample H(w) to length of U(w)
+    attenuation = interp1d(
+        filter_object.freq_response.frequencies,
+        filter_object.freq_response.magnitudes,
+        fill_value=0.0,
+        bounds_error=False,
+    )
+
+    # Generate the modelled attenuation, assuming an exponentiation to the 4th power
+    # due to the contributions from sosfiltfilt, which makes two passes of the filter,
+    # and the Wiener-Khinchin theorem, which yields another squaring of the power spectrum
+    # by autocorrelation.
+    hw = abs(attenuation(filter_object.freq_response.frequencies)) ** 4
+
+    # Compute the frequency domain convolution U(w)H(w) that we will compare F(w) with
+    model = hw * uw
+
+    # Run TrajectoryFilter job on the input trajectory
+    n_atoms = json.loads(filter_config["atom_selection"])["1"]["index_range"][1]
+    f_name = "filtered_trajectory"
+    temp_name = tmp_path / f_name
+    f_trajectory_out_file = run_trajectory_filter(
+        temp_name, filter_config, frames, n_atoms, CONV_DIR / "simple_bimodal_atom.mdt"
+    )
+    assert f_trajectory_out_file.is_file()
+
+    # Run PositionPowerSpectrum job on the filtered trajectory
+    temp_name = tmp_path / "filtered_power_spectrum"
+    fw_out_file = run_power_spectrum(temp_name, frames, f_trajectory_out_file)
+
+    assert fw_out_file.is_file()
+
+    # Retrieve F(w), check the data is as expected
+    filtered_data = LocalDataset("pps/isotropic/total", h5py.File(fw_out_file, "r+"))
+    f_x_axis_name = list(filtered_data._axes_units.keys())
+
+    assert f_x_axis_name == ["pps/axes/romega"]
+    assert filtered_data._axes_units[f_x_axis_name[0]] == "rad/ps"
+
+    f_x_axis = filtered_data._axes["pps/axes/romega"]
+
+    assert np.round(f_x_axis.min(), 0) == 0
+    assert np.round(f_x_axis.max(), precision) == max
+
+    fw = filtered_data._data
+
+    assert len(fw) == len(uw)
+
+    # H(w) and F(w) spectra should be very close
+    assert np.all(np.isclose(fw, model, rtol=0.01))
 
 
 @pytest.mark.parametrize(
