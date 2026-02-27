@@ -94,7 +94,9 @@ def _(value: Path) -> dict[Any, Any]:
         raise ValueError("Unable to load JSON string.") from err
 
 
-def standardise_name(name: str, transform: Callable[[str], str]=str.capitalize) -> str:
+def standardise_name(
+    name: str, transform: Callable[[str], str] = str.capitalize
+) -> str:
     """Standardise dictionary keys to display name.
 
     Parameters
@@ -117,6 +119,7 @@ def standardise_name(name: str, transform: Callable[[str], str]=str.capitalize) 
     'Another Key'
     """
     return transform(name.replace("_", " "))
+
 
 def destandardise_name(name: str) -> str:
     """Returns key-like name (all lower, underscore-separated)

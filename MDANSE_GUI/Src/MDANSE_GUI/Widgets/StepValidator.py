@@ -47,6 +47,9 @@ class SnapSpinBox(QDoubleSpinBox):
         if suffix is not None:
             self.setSuffix(suffix)
 
+    def nearest(self, val) -> float:
+        return self.singleStep() * round(val / self.singleStep())
+
     def validate(
         self, input: str | None, pos: int
     ) -> tuple[QValidator.State, str, int]:
@@ -58,17 +61,15 @@ class SnapSpinBox(QDoubleSpinBox):
         fval = float(value.removesuffix(self.suffix()))
         valid = (
             valid
-            if isclose(fval, self.singleStep() * (fval // self.singleStep()))
+            if isclose(fval, self.nearest(fval), abs_tol=10 ** (-self.decimals()))
             else QValidator.State.Intermediate
         )
+
         return valid, value, pos
 
     def fixup(self, value: str) -> str:
         value = super().fixup(value)
-        snapped = self.singleStep() * round(
-            float(value.removesuffix(self.suffix())) / self.singleStep(),
-            self.decimals(),
-        )
+        snapped = self.nearest(float(value.removesuffix(self.suffix())))
         return super().fixup(str(snapped))
 
 

@@ -18,6 +18,7 @@ from __future__ import annotations
 import copy
 import json
 from collections.abc import Callable, Iterable, Iterator, Sequence
+from enum import auto
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -64,7 +65,7 @@ from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
 )
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Jobs.PositionPowerSpectrum import PositionPowerSpectrum
-from MDANSE.IO.IOUtils import standardise_name
+from MDANSE.IO.IOUtils import UCEnum, standardise_name
 from MDANSE.Mathematics.Signal import (
     DEFAULT_FILTER_CUTOFF,
     DEFAULT_N_STEPS,
@@ -101,26 +102,47 @@ FLOAT_SPINBOX_DECIMALS: Final[int] = 8
 
 T = TypeVar("T")
 
+if TYPE_CHECKING:  # 3.10 doesn't support generic Namedtuple
 
-class Param(NamedTuple, Generic[T]):
-    name: str
-    value: T | Iterable[T]
-    tooltip: str
-    initial: T | None = None
-    connect: Callable | None = None
-    internal_name: str | None = None
-    extra_args: dict[str, Any] | None = None
+    class Param(NamedTuple, Generic[T]):
+        name: str
+        value: T | Iterable[T]
+        tooltip: str
+        initial: T | None = None
+        connect: Callable | None = None
+        internal_name: str | None = None
+        extra_args: dict[str, Any] | None = None
 
-    @property
-    def args(self):
-        if self.extra_args is None:
-            return {}
-        return self.extra_args.copy()
+        @property
+        def args(self):
+            if self.extra_args is None:
+                return {}
+            return self.extra_args.copy()
 
+    class Field(NamedTuple, Generic[T]):
+        label: QLabel
+        widget: T
 
-class Field(NamedTuple, Generic[T]):
-    label: QLabel
-    widget: T
+else:
+
+    class Param(NamedTuple):
+        name: str
+        value: Any | Iterable[Any]
+        tooltip: str
+        initial: Any | None = None
+        connect: Callable | None = None
+        internal_name: str | None = None
+        extra_args: dict[str, Any] | None = None
+
+        @property
+        def args(self):
+            if self.extra_args is None:
+                return {}
+            return self.extra_args.copy()
+
+    class Field(NamedTuple):
+        label: QLabel
+        widget: Any
 
 
 class FilterDesSettings(TypedDict):
@@ -201,6 +223,8 @@ def get_val(widget: QWidget) -> Any:  # noqa: PLR0911
             return float(widget.text())
         case QLineEdit():
             return widget.text()
+        case WidgetBase():
+            return widget.get_widget_value()
 
 
 def set_val(widget: QWidget, value):
@@ -253,7 +277,6 @@ def _build_filter_settings_block(
     obj, *, grid_width: int, connect: Callable | None = None
 ):
     def _custom_validators(obj, filter_name: str, params: dict[str, Param]):
-
         current_filter = FILTER_MAP[filter_name]
         flags = current_filter.flags
         units = (
@@ -378,7 +401,7 @@ def read_pps_from_file(
 
     Returns
     -------
-    tuple[npt.NDArray[float], npt.NDArray[float]] | tuple[None, None]
+    tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]] | tuple[None, None]
         Energy axis and corresponding trajectory power spectrum
 
     """
@@ -435,7 +458,10 @@ def double_gaussian(x: npt.NDArray[np.floating], mu: float, sigma: float) -> flo
     return gaussian(x, 0.5 * mu, sigma) + gaussian(x, 1.5 * mu, sigma)
 
 
-attenuation_examples = {"Gaussian": gaussian, "Double gaussian": double_gaussian}
+class AttenuationFunction(UCEnum):
+    GAUSSIAN = auto()
+    DOUBLE_GAUSSIAN = auto()
+    EXTERNAL_FILE = auto()
 
 
 class FilterDesigner(QDialog):
@@ -449,7 +475,7 @@ class FilterDesigner(QDialog):
         Title of the helper dialog window.
     _canvas_dimensions : dict
         Dimensions of the filter graph canvas.
-    _trajectory_power_spectrum :  Sequence[npt.NDArray[float]] | None
+    _trajectory_power_spectrum :  Sequence[npt.NDArray[np.floating]] | None
         Trajectory power spectrum as a tuple containing the x-axis values (frequency domain) and the y-axis values (magnitudes).
 
     """
@@ -473,13 +499,13 @@ class FilterDesigner(QDialog):
         self.parent_widget._pps_file_widget.value_changed.connect(
             self.render_canvas_assets
         )
-
+        self.parent_widget._type_combo.currentTextChanged.connect(self.update_filter)
         self.graph_ready = False
 
         self.layouts = QHBoxLayout()
-
         self.create_designer()
-        self.update_filter(self.configurator._default_filter.__name__)
+
+        self.update_filter(self.parent_widget._type_combo.currentText())
 
     def create_settings_layout(self, widget_area: QVBoxLayout) -> None:
         """Create the filter settings vertical layout.
@@ -565,22 +591,18 @@ class FilterDesigner(QDialog):
 
         attenuation = Param(
             "Form",
-            (*attenuation_examples, "External file (.mda)"),
+            ("Gaussian", "Double Gaussian", "External file"),
             "Select form of attenuated function, either an analytic functional form or a spectrum from an existing .mda file",
             internal_name="form",
         )
         show = Param(
             "Show",
-            True,
+            False,
             "Display trajectory power spectrum for comparison",
             internal_name="show",
         )
         self.attenuation_grid, self.attenuation_fields = build_grid(
-            attenuation, show, grid_width=1
-        )
-
-        self.attenuation_fields["show"].widget.stateChanged.connect(
-            self.render_canvas_assets
+            attenuation, show, grid_width=1, connect=self.render_canvas_assets
         )
 
         attenuation_groupbox.setLayout(self.attenuation_grid)
@@ -680,6 +702,7 @@ class FilterDesigner(QDialog):
 
         """
         # Set current index for settings stack layout
+        set_val(self.type_cbox, filter_type)
         index = list(FILTER_MAP).index(filter_type)
         self._settings_layout.setCurrentIndex(index)
 
@@ -705,9 +728,9 @@ class FilterDesigner(QDialog):
             },
             "attributes": {
                 # Number of simulation steps
-                "n_steps": self.parent_widget.n_steps,
+                "n_steps": self.n_steps,
                 # Simulation time step in picoseconds
-                "time_step_ps": self.parent_widget.time_step,
+                "time_step_ps": self.time_step,
             },
         }
 
@@ -731,7 +754,12 @@ class FilterDesigner(QDialog):
 
     def get_attenuation_function(
         self, tr_filter: Filter, source: str
-    ) -> Sequence[npt.NDArray[np.floating]]:
+    ) -> tuple[
+        npt.NDArray[np.floating],
+        npt.NDArray[np.floating],
+        npt.NDArray[np.floating],
+        npt.NDArray[np.floating],
+    ]:
         """Put curves on the same scale for the plot.
 
         Generate an attenuation function to display alongside the filter frequency response,
@@ -747,21 +775,37 @@ class FilterDesigner(QDialog):
 
         Returns
         -------
-        raw_power_spectrum_freqs : npt.NDArray[float]
+        raw_power_spectrum_freqs : npt.NDArray[np.floating]
             Frequency axis of the original PPS result.
-        power_spectrum : npt.NDArray[float]
+        power_spectrum : npt.NDArray[np.floating]
             Trajectory power spectrum.
-        attenuated_power_spectrum : npt.NDArray[float]
+        attenuated_power_spectrum : npt.NDArray[np.floating]
             Attenuated power spectrum due to the designed filter response.
-
+        normalised_response : npt.NDArray[np.floating]
+            Normalised response.
         """
         freqs = tr_filter.freq_response.frequencies
-        attenuation_fn = attenuation_examples[source]
-        match source:
-            case "Gaussian":
-                values = attenuation_fn(freqs, freqs.max() / 2, freqs.max() / 4)
-            case "Double gaussian":
-                values = attenuation_fn(freqs, freqs.max() / 2, freqs.max() / 8)
+
+        match AttenuationFunction(source):
+            case AttenuationFunction.GAUSSIAN:
+                values = gaussian(freqs, freqs.max() / 2, freqs.max() / 4)
+            case AttenuationFunction.DOUBLE_GAUSSIAN:
+                values = double_gaussian(freqs, freqs.max() / 2, freqs.max() / 8)
+            case AttenuationFunction.EXTERNAL_FILE:
+                (
+                    raw_freqs,
+                    power_spectrum,
+                    attenuated_power_spectrum,
+                    normalised_response,
+                ) = self.get_attenuation_power_spectrum(
+                    tr_filter, get_val(self.parent_widget._pps_file_widget)
+                )
+                return (
+                    raw_freqs,
+                    power_spectrum,
+                    attenuated_power_spectrum,
+                    normalised_response,
+                )
             case _:
                 raise ValueError("Unknown attenuation functional form")
 
@@ -778,7 +822,12 @@ class FilterDesigner(QDialog):
         self,
         tr_filter: Filter,
         pps_filename: str,
-    ) -> Sequence[npt.NDArray[np.floating]]:
+    ) -> tuple[
+        npt.NDArray[np.floating],
+        npt.NDArray[np.floating],
+        npt.NDArray[np.floating],
+        npt.NDArray[np.floating],
+    ]:
         """Put curves on the same scale for the plot.
 
         Generate an appropriately resampled power spectrum for the input trajectory,
@@ -793,25 +842,28 @@ class FilterDesigner(QDialog):
 
         Returns
         -------
-        raw_power_spectrum_freqs : npt.NDArray[float]
+        raw_power_spectrum_freqs : npt.NDArray[np.floating]
             Frequency axis of the original PPS result.
-        power_spectrum : npt.NDArray[float]
+        power_spectrum : npt.NDArray[np.floating]
             Trajectory power spectrum.
-        attenuated_power_spectrum : npt.NDArray[float]
+        attenuated_power_spectrum : npt.NDArray[np.floating]
             Attenuated power spectrum due to the designed filter response.
+        normalised_response : npt.NDArray[np.floating]
+            Normalised response.
         """
         freqs, _ = tr_filter.freq_response
 
         file_freqs, file_values = read_pps_from_file(pps_filename)
 
         file_freqs = freqs if file_freqs is None else file_freqs / (2 * np.pi)
+
         if file_values is None:
             file_values = np.ones_like(freqs)
 
         # Resample trajectory power spectrum energies (x-axis) and convert to frequency domain, setting
         # custom frequency range on filter object
 
-        overlap_mask = file_freqs >= freqs.min() & file_freqs <= freqs.max()
+        overlap_mask = (file_freqs >= freqs.min()) & (file_freqs <= freqs.max())
         att_freqs = file_freqs[overlap_mask]
 
         # Normalise trajectory power spectrum (y-axis)
@@ -890,7 +942,7 @@ class FilterDesigner(QDialog):
             Display response (y-axis) in decibels, else magnitude.
         energies : bool
             Display response domain (x-axis) in meV, else frequency in terahertz.
-        trajectory_power_spectrum : Sequence[npt.NDArray[float]]
+        trajectory_power_spectrum : Sequence[npt.NDArray[np.floating]]
             Tuple containing trajectory power spectrum and attenuation due to filter.
 
         """
@@ -978,7 +1030,7 @@ class FilterDesigner(QDialog):
             f"Cutoff energy: {np.round(Filter.freq_to_energy(cutoff, self.current_filter_units()), FLOAT_SPINBOX_DECIMALS)} meV, Sample frequency: {sample_freq} THz",
         )
 
-    def render_canvas_assets(self, attributes: dict | None = None) -> None:
+    def render_canvas_assets(self, attributes: dict[str, Any] | None = None) -> None:
         """Render all elements of the filter designer graphing area, including data text.
 
         Parameters
@@ -1026,8 +1078,9 @@ class FilterDesigner(QDialog):
         ps, attenuated_ps = None, None
 
         if show_attenuation:
-            attenuation = self.get_attenuation_function(filter_preview, source)
-            ps_axis, ps, attenuated_ps_axis, attenuated_ps = attenuation
+            ps_axis, ps, attenuated_ps_axis, attenuated_ps = (
+                self.get_attenuation_function(filter_preview, source)
+            )
 
         # Get filter coefficients
         numerator, denominator = (
@@ -1212,7 +1265,9 @@ class TrajectoryFilterWidget(WidgetBase):
         return self._frames_widget._configurator["number"]
 
     def _build_filter_settings_block(self) -> QGroupBox:
-        return _build_filter_settings_block(self, grid_width=3, connect=self.synchronise_freqs)
+        return _build_filter_settings_block(
+            self, grid_width=3, connect=self.synchronise_freqs
+        )
 
     @property
     def current_filter_name(self) -> str:
@@ -1248,16 +1303,15 @@ class TrajectoryFilterWidget(WidgetBase):
         }
 
     def synchronise_freqs(self) -> None:
+        if "attenuation_type" not in self.attributes:
+            return
+
         bound_freq_widget: ConstrainedSnapSpinBox = self.current_fields[
             "bound_freq"
         ].widget
         cutoff_freq_widget: ConstrainedSnapSpinBox = self.current_fields[
             "cutoff_freq"
         ].widget
-
-        if "attenuation_type" not in self.attributes:
-            return
-
         if self.attributes.get("attenuation_type") in {"highpass", "lowpass"}:
             bound_freq_widget.setEnabled(False)
         else:

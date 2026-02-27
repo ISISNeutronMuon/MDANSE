@@ -606,7 +606,10 @@ class Filter(ABC):
 
     @classmethod
     def rational_polynomial(
-        cls, numerator: npt.NDArray[np.floating], denominator: npt.NDArray[np.floating], analog: bool = True
+        cls,
+        numerator: npt.NDArray[np.floating],
+        denominator: npt.NDArray[np.floating],
+        analog: bool = True,
     ) -> RationalPolynomial:
         """Formats a transfer function rational polynomial into a pair of strings.
 
@@ -638,7 +641,9 @@ class Filter(ABC):
         # Digital (Z-domain) transfer function
         numerator_str = Filter.polynomial_string(numerator, cls.Z, False)
         denominator_str = Filter.polynomial_string(denominator, cls.Z, False)
-        return RationalPolynomial(unit="Z", numerator=numerator_str, denominator=denominator_str)
+        return RationalPolynomial(
+            unit="Z", numerator=numerator_str, denominator=denominator_str
+        )
 
     def attributes_to_string(self, description) -> str:
         """Formats the given filter attribute into a description string.
