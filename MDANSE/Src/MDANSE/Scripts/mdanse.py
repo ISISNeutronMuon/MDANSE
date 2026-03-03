@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import os
 import textwrap
 from argparse import (
     ArgumentParser,
@@ -65,7 +66,11 @@ def show_trajectory_contents(args: Namespace):
     if not trajectory_path:
         return
     trajectory_name = Path.cwd() / trajectory_path
-    instance = Trajectory(trajectory_name)
+    instance = (
+        Trajectory(trajectory_name, hdf5_driver="core")
+        if int(os.environ["MDANSE_FILE_IN_MEMORY"])
+        else Trajectory(trajectory_name)
+    )
     result = trajectory_summary(instance)
     result += chemical_system_summary(instance.chemical_system)
     traj_arrays = get_hdf5_contents(instance.file)

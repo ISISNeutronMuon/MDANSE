@@ -55,7 +55,7 @@ class MdanseTrajectory(TrajectoryFile):
     is the specific implementation for the Mdanse HDF5 format.
     """
 
-    def __init__(self, h5_filename: Path | str):
+    def __init__(self, h5_filename: Path | str, hdf5_driver: str | None = None):
         """Open the file and build a trajectory.
 
         Parameters
@@ -73,7 +73,7 @@ class MdanseTrajectory(TrajectoryFile):
         self.unit_cell_warning = ""
         self._h5_filename = Path(h5_filename)
 
-        self._h5_file = h5py.File(self._h5_filename, "r")
+        self._h5_file = h5py.File(self._h5_filename, "r", driver=hdf5_driver)
         self._has_database = "atom_database" in self._h5_file
         self._has_atoms = []
 

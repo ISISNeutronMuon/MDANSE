@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import itertools
+import os
 import traceback
 from enum import Enum, auto
 
@@ -65,7 +66,11 @@ class LoaderThread(QThread):
 
     def run(self):
         try:
-            trajectory = Trajectory(self._filename)
+            trajectory = (
+                Trajectory(self._filename, hdf5_driver="core")
+                if int(os.environ["MDANSE_FILE_IN_MEMORY"])
+                else Trajectory(self._filename)
+            )
         except Exception as e:
             LOG.error(
                 "Failed loading file %s, exception %s traceback %s",
