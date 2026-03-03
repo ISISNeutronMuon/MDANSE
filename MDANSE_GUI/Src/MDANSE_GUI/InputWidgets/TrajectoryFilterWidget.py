@@ -1261,9 +1261,13 @@ class TrajectoryFilterWidget(WidgetBase):
         return self._frames_widget._configurator["number"]
 
     def _build_filter_settings_block(self) -> QGroupBox:
-        return _build_filter_settings_block(
+        box = _build_filter_settings_block(
             self, grid_width=3, connect=self.synchronise_freqs
         )
+        for filter_settings in self.parameter_fields.values():
+            for _, widget in filter_settings.values():
+                get_changed_signal(widget).connect(self.updateValue)
+        return box
 
     @property
     def current_filter_name(self) -> str:
