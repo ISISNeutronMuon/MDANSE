@@ -65,15 +65,8 @@ def check_hdf5_driver() -> bool:
     bool
         True if MDANSE_FILE_IN_MEMORY is set to a non-zero number, False otherwise.
     """
-    try:
-        env_var = os.environ["MDANSE_FILE_IN_MEMORY"]
-    except KeyError:
-        return False
-    try:
-        flag_value = int(env_var)
-    except (ValueError, TypeError):
-        return False
-    return flag_value > 0
+    env_var = os.environ.get("MDANSE_FILE_IN_MEMORY", "0")
+    return env_var.isdigit() and int(env_var)
 
 
 class GroupingLevels(UCEnum):
