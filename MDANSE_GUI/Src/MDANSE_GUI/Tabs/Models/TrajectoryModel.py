@@ -34,7 +34,7 @@ from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MolecularDynamics.Trajectory import Trajectory, check_hdf5_driver
 from MDANSE_GUI.Session.RecentFiles import RecentFiles
 
 
@@ -68,7 +68,7 @@ class LoaderThread(QThread):
         try:
             trajectory = (
                 Trajectory(self._filename, hdf5_driver="core")
-                if int(os.environ["MDANSE_FILE_IN_MEMORY"])
+                if check_hdf5_driver
                 else Trajectory(self._filename)
             )
         except Exception as e:

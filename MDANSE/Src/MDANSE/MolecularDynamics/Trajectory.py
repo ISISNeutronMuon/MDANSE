@@ -18,6 +18,7 @@ from __future__ import annotations
 import copy
 import html
 import math
+import os
 from collections import Counter, defaultdict
 from enum import auto
 from operator import itemgetter
@@ -52,6 +53,27 @@ available_formats = {
 }
 ValidFormats = Literal["MDANSE", "H5MD"]
 SLICE_ALL = np.s_[:]
+
+
+def check_hdf5_driver() -> bool:
+    """Return True if 'core' driver should be used for HDF5 files.
+
+    Checks if MDANSE_FILE_IN_MEMORY environment is set to a non-zero int value.
+
+    Returns
+    -------
+    bool
+        True if MDANSE_FILE_IN_MEMORY is set to a non-zero number, False otherwise.
+    """
+    try:
+        env_var = os.environ["MDANSE_FILE_IN_MEMORY"]
+    except KeyError:
+        return False
+    try:
+        flag_value = int(env_var)
+    except (ValueError, TypeError):
+        return False
+    return flag_value > 0
 
 
 class GroupingLevels(UCEnum):
