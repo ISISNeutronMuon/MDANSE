@@ -68,7 +68,7 @@ class LoaderThread(QThread):
         try:
             trajectory = (
                 Trajectory(self._filename, hdf5_driver="core")
-                if check_hdf5_driver
+                if check_hdf5_driver()
                 else Trajectory(self._filename)
             )
         except Exception as e:
