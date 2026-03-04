@@ -181,7 +181,7 @@ class ViewerControls(QWidget):
             layout.addWidget(temp)
             self._buttons[button_name] = temp
         self._buttons["stop"].clicked.connect(self.stop_animation)
-        self._buttons["play"].clicked.connect(lambda: self.animate())
+        self._buttons["play"].clicked.connect(lambda: self.animate(step_size=1))
         self._buttons["fwd"].clicked.connect(lambda: self.animate(step_size=10))
         self._buttons["back"].clicked.connect(lambda: self.animate(step_size=-10))
         self._buttons["start"].clicked.connect(lambda: self.go_to_end(last_frame=False))

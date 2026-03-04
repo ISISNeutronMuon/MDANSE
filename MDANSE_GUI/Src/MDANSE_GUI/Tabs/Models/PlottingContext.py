@@ -103,6 +103,7 @@ class SingleDataset:
         self._imaginary_data = None
         self._valid = True
         self._scaling_factor = 1.0
+        self._main_axis = None
         self._axes = {}
         self._axes_units = {}
         self._current_units = {}
@@ -405,7 +406,7 @@ class SingleDataset:
 
         return (int(token),)
 
-    def set_data_limits(self, limit_string: str):
+    def set_data_limits(self, limit_string: str, main_axis: str = ""):
         """Parse the string used for selecting a subset of data.
 
         Parameters
@@ -420,6 +421,7 @@ class SingleDataset:
 
         complete_subset = {}
 
+        self._main_axis = main_axis
         axes = map(len, self.dep_axes.values())
 
         max_len = prod(axes)
@@ -473,7 +475,7 @@ class SingleDataset:
     @property
     def dep_axes(self) -> dict[str, npt.NDArray]:
         """Axes which are likely to be dependent."""
-        _, la = self.longest_axis()
+        la = self.longest_axis()[1] if not self._main_axis else self._main_axis
         return {aname: axis for aname, axis in self._axes.items() if aname != la}
 
     @property
@@ -850,17 +852,18 @@ class PlottingContext(QStandardItemModel):
                 continue
 
             data_number_string = row_data["Use it?"].text()
+            main_axis = row_data["Main axis"].text()
 
             plot_args = {
                 "colour": row_data["Colour"].text(),
                 "line_style": row_data["Line style"].text(),
                 "marker": row_data["Marker"].text(),
                 "row": row,
-                "main_axis": row_data["Main axis"].text(),
+                "main_axis": main_axis,
                 "legend_label": row_data["Legend label"].text(),
             }
 
-            self._datasets[key].set_data_limits(data_number_string)
+            self._datasets[key].set_data_limits(data_number_string, main_axis=main_axis)
             self._datasets[key].set_current_units(self._unit_lookup)
             result[key] = PlotArgs(self._datasets[key], **plot_args)
 
