@@ -38,7 +38,7 @@ import numpy.typing as npt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from more_itertools import first_true, nth, numeric_range
 from qtpy.QtCore import QObject, Qt, QThread, Signal, Slot
-from qtpy.QtGui import QDoubleValidator, QIntValidator
+from qtpy.QtGui import QColor, QDoubleValidator, QIntValidator
 from qtpy.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -1049,8 +1049,7 @@ class FilterDesigner(QDialog):
         preferences = settings["preferences"]
         attenuation = settings["attenuation"]
 
-        if "attenuation_type" in parameters:
-            self.synchronise_freqs(filter, parameters)
+        self.synchronise_freqs(filter, parameters)
 
         if isinstance(attributes, dict):
             attributes = settings["attributes"] | attributes
@@ -1071,8 +1070,10 @@ class FilterDesigner(QDialog):
         try:
             filter_preview = filter_class(**parameters, **attributes)
         except Exception as exc:
+            self.mark_error(str(exc))
             LOG.error("%s", exc)
             return
+        self.clear_error()
 
         # Get comparative attenuation from either an external trajectory PPS, or from an analytical functional form
         ps, attenuated_ps = None, None
@@ -1112,20 +1113,23 @@ class FilterDesigner(QDialog):
         )
 
     def synchronise_freqs(self, filter: str, parameters: dict[str, Any]) -> None:
+        if "attenuation_type" not in parameters:
+            return
+
         bound_freq_widget: ConstrainedSnapSpinBox = self.parameter_fields[filter][
             "bound_freq"
         ].widget
         cutoff_freq_widget: ConstrainedSnapSpinBox = self.parameter_fields[filter][
             "cutoff_freq"
         ].widget
+        bound_freq_widget.setMinimum(
+            get_val(cutoff_freq_widget) + cutoff_freq_widget.singleStep()
+        )
 
         if parameters["attenuation_type"] in {"highpass", "lowpass"}:
             bound_freq_widget.setEnabled(False)
         else:
             bound_freq_widget.setEnabled(True)
-            bound_freq_widget.setMinimum(
-                get_val(cutoff_freq_widget) + cutoff_freq_widget.singleStep()
-            )
             parameters["cutoff_freq"] = (
                 get_val(cutoff_freq_widget),
                 get_val(bound_freq_widget),
@@ -1173,6 +1177,32 @@ class FilterDesigner(QDialog):
         self._figure = figure
         self._toolbar = toolbar
         return canvas
+
+    def mark_error(self, error_text: str, *, silent: bool = False):
+        """Highlight an erroneous entry and display given error_text.
+
+        Parameters
+        ----------
+        error_text : str
+            Message displayed on hover-over.
+        silent : bool
+            If True, update the widget's error without sending signals
+
+        """
+        font = self.settings_box.font()
+        font.setBold(True)
+        self.settings_box.setStyleSheet("QGroupBox {background-color: rgb(180,20,180)}")
+        self.settings_box.setFont(font)
+        self.settings_box.setToolTip(error_text)
+
+    def clear_error(self):
+        """Remove error highlighting."""
+
+        font = self.settings_box.font()
+        font.setBold(False)
+        self.settings_box.setStyleSheet("")
+        self.settings_box.setFont(font)
+        self.settings_box.setToolTip("")
 
     def create_graph_layout(self, widget_area: QVBoxLayout) -> None:
         """Create the canvas for the graphing area of the filter designer.
@@ -1312,12 +1342,16 @@ class TrajectoryFilterWidget(WidgetBase):
         cutoff_freq_widget: ConstrainedSnapSpinBox = self.current_fields[
             "cutoff_freq"
         ].widget
-        if self.attributes.get("attenuation_type") in {"highpass", "lowpass"}:
+        bound_freq_widget.setMinimum(
+            get_val(cutoff_freq_widget) + cutoff_freq_widget.singleStep()
+        )
+        if self.attributes["attenuation_type"] in {"highpass", "lowpass"}:
             bound_freq_widget.setEnabled(False)
         else:
             bound_freq_widget.setEnabled(True)
-            bound_freq_widget.setMinimum(
-                get_val(cutoff_freq_widget) + cutoff_freq_widget.singleStep()
+            self.attributes["cutoff_freq"] = (
+                get_val(cutoff_freq_widget),
+                get_val(bound_freq_widget),
             )
 
     def filter_changed(self, new_filter: str):
@@ -1332,6 +1366,7 @@ class TrajectoryFilterWidget(WidgetBase):
                 self.current_filter = new_filter
 
         self._settings_layout.setCurrentIndex(self.filter_index)
+        self.synchronise_freqs()
 
         if extra := parameters.keys() - self.current_fields.keys():
             raise KeyError(f"Extra keys ({', '.join(extra)}) in passed parameters")
@@ -1387,7 +1422,7 @@ class TrajectoryFilterWidget(WidgetBase):
         settings = self.settings
         if "attenuation_type" not in settings["attributes"]:
             pass
-        elif settings["attributes"]["attenuation_type"] not in {"bandpass", "bandstep"}:
+        elif settings["attributes"]["attenuation_type"] not in {"bandpass", "bandstop"}:
             settings["attributes"].pop("bound_freq")
         else:
             settings["attributes"]["cutoff_freq"] = (
