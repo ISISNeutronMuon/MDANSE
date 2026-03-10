@@ -1367,11 +1367,7 @@ class TrajectoryFilterWidget(WidgetBase):
 
         self._settings_layout.setCurrentIndex(self.filter_index)
         self.synchronise_freqs()
-
-        if extra := parameters.keys() - self.current_fields.keys():
-            raise KeyError(f"Extra keys ({', '.join(extra)}) in passed parameters")
-
-        self.current_fields.update(parameters)
+        self.updateValue()
 
     def create_helper(self) -> FilterDesigner:
         """
