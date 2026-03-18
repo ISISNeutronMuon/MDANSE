@@ -45,7 +45,7 @@ authors:
     orcid: https://orcid.org/0009-0004-9147-3475
 
 repository-code: 'https://github.com/ISISNeutronMuon/MDANSE/tree/protos/MDANSE_GUI'
-url: 'https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx'
+url: 'https://pypi.org/project/MDANSE'
 
 keywords:
   - molecular dynamics

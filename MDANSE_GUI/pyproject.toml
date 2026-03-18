@@ -47,7 +47,7 @@ test=["pytest", "pytest-timeout", "pytest-qt"]
 lint=["ruff<0.14"]
 
 [project.urls]
-homepage = "https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx"
+homepage = "https://pypi.org/project/MDANSE"
 documentation = "https://mdanse.readthedocs.io/"
 repository = "https://github.com/ISISNeutronMuon/MDANSE"
 

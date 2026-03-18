@@ -30,7 +30,7 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5](https://doi.org/10.1021/acs.jcim.6b0057
 
 ## Version information
 
-This is the first full release of MDANSE 2.0, consistig of two Python packages,
+This is the first full release of MDANSE 2.0, consisting of two Python packages,
 MDANSE (the analysis code) and MDANSE_GUI (the graphical user interface).
 
 Considering the large number of different MD engines and analysis types,
@@ -110,9 +110,7 @@ The typical workflow of MDANSE:
 The most complete user documentation of MDANSE can be found on
 [our Read the Docs page](https://mdanse.readthedocs.io).
 
-Other information including example scripts can be found on the
-[MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx)
-while the most recent tutorials are stored in the
+Other information, including tutorials, can be found in the
 [MDANSE-Examples repository](https://github.com/ISISNeutronMuon/MDANSE-Examples).
 
 ## What can MDANSE do?
@@ -120,7 +118,16 @@ while the most recent tutorials are stored in the
 Firstly, MDANSE can read the output of MD simulation software.
 It does this by providing converters for different file formats
 into an .MDT file (HDF format), which is then used for all
-calculations. The following MD packages are supported:
+calculations. General-purpose converters are implemented using
+external libraries:
+
+- ASE,
+- MDAnalysis,
+- MDTraj,
+
+which means that if your trajectories have worked with any of
+these libraries, then you can expect them to work with MDANSE too.
+Additionally, the following converters for specific MD packages are supported:
 
 - CASTEP
 - CHARMM
@@ -134,7 +141,6 @@ calculations. The following MD packages are supported:
 - NAMD
 - VASP
 - XPLOR
-- ASE
 
 The converted trajectory can then be loaded into MDANSE, where
 it can be visualised via the Molecular Viewer and animated.
@@ -227,14 +233,13 @@ nMOLDYN was originally developed by Gerald Kneller in 1995 and
 subsequently also by Konrad Hinsen, Tomasz Rog, Krzysztof Murzyn,
 Slawomir Stachura, and Eric Pellegrini. MDANSE includes most of the
 code of nMOLDYN3, and also code from the libraries
-[MMTK](https://github.com/khinsen/MMTK),
-[ScientificPython](https://github.com/khinsen/ScientificPython)
-and [MDTraj](https://github.com/mdtraj/mdtraj).
+[MMTK](https://github.com/khinsen/MMTK) and
+[ScientificPython](https://github.com/khinsen/ScientificPython).
 
 For more information see:
 
 >nMoldyn 3: Using task farming for a parallel spectroscopy-oriented analysis of molecular dynamics simulations.
-K. Hinsen, E. Pellegrini, S. Stachura, G.R. Kneller J. Comput. Chem. (2012) 33:2043-2048 [https://doi.org/10.1002/jcc.23035][https://doi.org/10.1002/jcc.23035].
+K. Hinsen, E. Pellegrini, S. Stachura, G.R. Kneller J. Comput. Chem. (2012) 33:2043-2048 [https://doi.org/10.1002/jcc.23035](https://doi.org/10.1002/jcc.23035).
 
 We are grateful to all the people who have helped in some way or
 another to improve nMOLDYN and/or MDANSE along those years.

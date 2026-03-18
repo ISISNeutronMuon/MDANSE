@@ -5,7 +5,7 @@
 This is the module containing the Graphical User Interface (GUI) of the
 Molecular Dynamics Analysis for Neutron Scattering Experiments (MDANSE) software package.
 
-The GUI depends on the [MDANSE package](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx).
+The GUI depends on the [MDANSE package](https://pypi.org/project/MDANSE).
 
 ## Version information
 
@@ -79,8 +79,8 @@ and the other for viewing and customising the plot.
 The most complete user documentation of MDANSE can be found on
 [our Read the Docs page](https://mdanse.readthedocs.io).
 
-Other information including example scripts can be found on the
-[MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx) 
+Other information, including tutorials, can be found in the
+[MDANSE-Examples repository](https://github.com/ISISNeutronMuon/MDANSE-Examples).
 
 ## Citing MDANSE
 

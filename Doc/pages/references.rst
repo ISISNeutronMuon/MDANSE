@@ -52,8 +52,6 @@ References
 
 .. [Ref7] “The HDF Group.” https://www.hdfgroup.org/.
 
-.. [Ref8] “MDANSE.” https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx
-
 .. [Ref9] “MDANSE GitHub Issues.”
    https://github.com/ISISNeutronMuon/MDANSE/issues.
 
@@ -137,7 +135,7 @@ References
 .. [Ref31] “Materials Studio.”
    https://www.3ds.com/products-services/biovia/products/molecular-modeling-simulation/biovia-materials-studio/.
 
-.. [Ref32] “DL_POLY.” https://www.scd.stfc.ac.uk/Pages/DL_POLY.aspx.
+.. [Ref32] “DL_POLY.” https://www.sc.stfc.ac.uk/software/type/computational-materials-and-molecular-science/?searchquery=dl_poly#.
 
 .. [Ref33] “Gromacs.” https://www.gromacs.org/.
    

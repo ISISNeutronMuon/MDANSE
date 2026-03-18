@@ -104,14 +104,24 @@ The typical workflow of MDANSE:
 
 The most complete user documentation of MDANSE can be found on [our Read the Docs page](https://mdanse.readthedocs.io).
 
-Other information including example scripts can be found on the [MDANSE website](https://www.isis.stfc.ac.uk/Pages/MDANSEproject.aspx) 
+Other information, including tutorials, can be found in the
+[MDANSE-Examples repository](https://github.com/ISISNeutronMuon/MDANSE-Examples).
 
 ## What can MDANSE do?
 
-Firstly, MDANSE can read the output of many MD simulation packages.
+Firstly, MDANSE can read the output of MD simulation software.
 It does this by providing converters for different file formats
 into an .MDT file (HDF format), which is then used for all
-calculations. The following MD packages are supported:
+calculations. General-purpose converters are implemented using
+external libraries:
+
+- ASE,
+- MDAnalysis,
+- MDTraj,
+
+which means that if your trajectories have worked with any of
+these libraries, then you can expect them to work with MDANSE too.
+Additionally, the following converters for specific MD packages are supported:
 
 - CASTEP
 - CHARMM
@@ -125,7 +135,6 @@ calculations. The following MD packages are supported:
 - NAMD
 - VASP
 - XPLOR
-- ASE
 
 The converted trajectory can then be loaded into MDANSE, where
 it can be visualised via the Molecular Viewer and animated.
