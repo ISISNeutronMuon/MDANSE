@@ -349,6 +349,7 @@ class LAMMPScustom(LAMMPSReader):
         """
         self._file = open(filename, encoding="utf-8")  # noqa: SIM115
         self._start = 0
+        self._first_origin = None
 
     def parse_first_step(
         self, aliases: dict[str, dict[str, str]], config: dict[str, Any]
@@ -516,6 +517,9 @@ class LAMMPScustom(LAMMPSReader):
 
         cell = np.fromstring(" ".join(take(3, file)), dtype=np.float64, sep=" ")
         unit_cell, origin = self._style.to_cell(cell, bounds=True)
+        self._first_origin = (
+            origin if self._first_origin is None else self._first_origin
+        )
 
         len_conv = measure(1.0, self.units["length"]).toval("nm")
 
@@ -579,7 +583,7 @@ class LAMMPScustom(LAMMPSReader):
 
         if self._fractionalCoordinates:
             # MDANSE origin is always 0,0,0
-            origin *= len_conv
+            origin = self._first_origin * len_conv
             origin_recip = np.matmul(origin, unit_cell.inverse)
 
             coords -= origin_recip
@@ -592,7 +596,7 @@ class LAMMPScustom(LAMMPSReader):
 
         else:
             # MDANSE origin is always 0,0,0
-            coords -= origin
+            coords -= self._first_origin
             coords *= len_conv
 
             real_conf = PeriodicRealConfiguration(
