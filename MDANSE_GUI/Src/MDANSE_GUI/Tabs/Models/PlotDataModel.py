@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from pathlib import Path
+from traceback import format_exc
 from typing import TypeVar
 
 import h5py
@@ -198,7 +199,7 @@ class PlotDataModel(QStandardItemModel):
         try:
             new_datafile = MDADataStructure(filename)
         except Exception as e:
-            LOG.error("Invalid: %s", e)
+            LOG.error("Invalid: %s, error message: %s", e, format_exc())
         else:
             self._nodes[self._next_number] = new_datafile
             new_item = DataFileItem()

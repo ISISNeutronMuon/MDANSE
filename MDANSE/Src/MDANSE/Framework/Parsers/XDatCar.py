@@ -24,7 +24,6 @@ import numpy as np
 import numpy.typing as npt
 from more_itertools import run_length
 
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -39,7 +38,7 @@ class HeaderInfo(NamedTuple):
     system_name: str
 
 
-class XDATCARFileError(Error):
+class XDATCARFileError(Exception):
     pass
 
 

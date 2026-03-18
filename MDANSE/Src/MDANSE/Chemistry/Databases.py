@@ -22,7 +22,6 @@ from collections.abc import ItemsView
 from pathlib import Path
 from typing import Any, SupportsComplex
 
-from MDANSE.Core.Error import Error
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
 from MDANSE.Framework.Units import measure
@@ -163,7 +162,7 @@ class _Database(metaclass=Singleton):
             json.dump(dict(self._data), f, indent=4)
 
 
-class AtomsDatabaseError(Error):
+class AtomsDatabaseError(Exception):
     """Error type for the exceptions related to AtomsDatabase."""
 
     pass
@@ -228,7 +227,7 @@ class AtomsDatabase(_Database):
     def __init__(self):
         self._properties = defaultdict(lambda: "str")
         self._units = defaultdict(lambda: "none")
-        self._atoms_by_atomic_number = {num: [] for num in range(140)}
+        self._atoms_by_atomic_number = defaultdict(list)
 
         super().__init__()
 

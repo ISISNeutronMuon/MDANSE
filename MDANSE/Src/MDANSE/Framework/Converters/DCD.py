@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import numpy as np
 
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Parsers import DCDFile, PDBFile
 from MDANSE.Framework.Units import measure

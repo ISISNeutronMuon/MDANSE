@@ -19,11 +19,10 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.signal import correlate
 
-from MDANSE.Core.Error import Error
 from MDANSE.Mathematics.Geometry import center_of_mass
 
 
-class AnalysisError(Error):
+class AnalysisError(Exception):
     pass
 
 

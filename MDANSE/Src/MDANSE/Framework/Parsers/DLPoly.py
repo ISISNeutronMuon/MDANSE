@@ -26,7 +26,6 @@ from more_itertools import first, first_true, ilen, split_at, split_before, take
 from numpy.typing import NDArray
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
 from MDANSE.Framework.Units import measure
 from MDANSE.IO.IOUtils import strip_comments
@@ -46,7 +45,7 @@ class Molecule(NamedTuple):
     bonds: list[tuple[int, int]]
 
 
-class FieldFileError(Error):
+class FieldFileError(Exception):
     pass
 
 

@@ -33,7 +33,7 @@ from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MolecularDynamics.Trajectory import Trajectory, check_hdf5_driver
 from MDANSE_GUI.Session.RecentFiles import RecentFiles
 
 
@@ -65,7 +65,11 @@ class LoaderThread(QThread):
 
     def run(self):
         try:
-            trajectory = Trajectory(self._filename)
+            trajectory = (
+                Trajectory(self._filename, hdf5_driver="core")
+                if check_hdf5_driver()
+                else Trajectory(self._filename)
+            )
         except Exception as e:
             LOG.error(
                 "Failed loading file %s, exception %s traceback %s",

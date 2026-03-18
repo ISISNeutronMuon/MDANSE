@@ -27,7 +27,6 @@ import numpy as np
 from more_itertools import first, one, sort_together, split_before, spy
 from numpy.typing import NDArray
 
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Parsers.LAMMPS import BoxStyle
 from MDANSE.IO.IOUtils import strip_comments
@@ -36,7 +35,7 @@ from MDANSE.MLogging import LOG
 from .Parser import Parser
 
 
-class LAMMPSConfigFileError(Error):
+class LAMMPSConfigFileError(Exception):
     pass
 
 

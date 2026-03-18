@@ -227,4 +227,4 @@ class PartialChargeWidget(AtomSelectionWidget):
 
         """
         text = self._field.text()
-        return text if text else self._default_value
+        return text or self._default_value

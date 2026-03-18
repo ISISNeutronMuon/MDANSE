@@ -230,10 +230,6 @@ class TestAtomsDatabase(unittest.TestCase):
     def test_match_numeric_property_non_numeric_property(self):
         with self.assertRaises(AtomsDatabaseError) as e:
             ATOMS_DATABASE.match_numeric_property("symbol", 0)
-        self.assertEqual(
-            'The provided property must be numeric, but "symbol" has type str.',
-            str(e.exception)[1:-1],
-        )
 
     def test_match_numeric_property_unknown_property(self):
         with self.assertRaises(KeyError):

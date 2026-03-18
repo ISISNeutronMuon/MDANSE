@@ -21,12 +21,11 @@ from collections.abc import Sequence
 import numpy as np
 import numpy.typing as npt
 
-from MDANSE.Core.Error import Error
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 
-class OutputVariableError(Error):
+class OutputVariableError(Exception):
     pass
 
 

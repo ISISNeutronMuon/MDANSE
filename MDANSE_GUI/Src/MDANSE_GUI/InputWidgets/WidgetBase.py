@@ -18,6 +18,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Literal
 
+from more_itertools import first_true
 from qtpy.QtCore import QObject, Signal, Slot
 from qtpy.QtGui import QColor, QPalette
 from qtpy.QtWidgets import (
@@ -234,3 +235,14 @@ class WidgetBase(QObject):
     @default_path.setter
     def default_path(self, value: str) -> None:
         self._parent_dialog.default_path = value
+
+    def get_dep(self, dependency: str, default=None):
+        return first_true(
+            self.parent()._widgets,
+            pred=lambda x: (
+                x._configurator
+                is self._configurator.configurable[
+                    self._configurator.dependencies[dependency]
+                ]
+            ),
+        )

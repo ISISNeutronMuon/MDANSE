@@ -467,23 +467,10 @@ class ChemicalSystem:
         grp = h5_file.create_group("/composition")
         grp.attrs["name"] = self.name
 
-        try:
-            grp.create_dataset("atom_types", data=self._atom_types, dtype=string_dt)
-        except TypeError:
-            LOG.error(f"Bad array: {self._atom_types}")
-            import sys
-
-            sys.exit(1)
+        grp.create_dataset("atom_types", data=self._atom_types, dtype=string_dt)
         if self._atom_names is not None:
-            try:
-                grp.create_dataset("atom_names", data=self._atom_names, dtype=string_dt)
-            except TypeError:
-                LOG.error(f"Bad array: {self._atom_names}")
-                import sys
-
-                sys.exit(1)
+            grp.create_dataset("atom_names", data=self._atom_names, dtype=string_dt)
         grp.create_dataset("atom_indices", data=self._atom_indices)
-
         grp.create_dataset("bonds", data=np.array(self._bonds))
 
         label_group = grp.create_group("labels")

@@ -29,7 +29,7 @@ from more_itertools import first_true, last, take, value_chain
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Sequence
+    from collections.abc import Callable, Iterable, Iterator, Sequence
 
 MAX_FILE_COUNT = 2048
 
@@ -92,6 +92,58 @@ def _(value: Path) -> dict[Any, Any]:
         raise FileNotFoundError(f"Unable to open ({value}) as json file .") from _
     except Exception as err:
         raise ValueError("Unable to load JSON string.") from err
+
+
+def standardise_name(
+    name: str, transform: Callable[[str], str] = str.capitalize
+) -> str:
+    """Standardise dictionary keys to display name.
+
+    Parameters
+    ----------
+    name : str
+        String to standardise.
+    transform : Callable
+        String transformation function.
+
+    Returns
+    -------
+    str
+        Standardised name.
+
+    Examples
+    --------
+    >>> standardise_name("a_key")
+    'A key'
+    >>> standardise_name("another_key", transform=str.title)
+    'Another Key'
+    """
+    return transform(name.replace("_", " "))
+
+
+def destandardise_name(name: str) -> str:
+    """Returns key-like name (all lower, underscore-separated)
+
+    Parameters
+    ----------
+    name : str
+        Name to make key-like.
+
+    Returns
+    -------
+    str
+        Key-like name.
+
+    Examples
+    --------
+    >>> destandardise_name("My name")
+    'my_name'
+    >>> destandardise_name("a_string")
+    'a_string'
+    >>> destandardise_name("AaaAa")
+    'aaaaa'
+    """
+    return "_".join(map(str.lower, name.split()))
 
 
 def _strip_inline_comments(

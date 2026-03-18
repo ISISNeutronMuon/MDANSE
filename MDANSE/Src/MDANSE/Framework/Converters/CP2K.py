@@ -21,7 +21,6 @@ import numpy as np
 from more_itertools import all_equal
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Core.Error import Error
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Parsers import CP2KCellFile, XYZFile
@@ -32,7 +31,7 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-class CP2KConverterError(Error):
+class CP2KConverterError(Exception):
     pass
 
 
