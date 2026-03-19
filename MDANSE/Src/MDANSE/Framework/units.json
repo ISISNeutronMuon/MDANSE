@@ -433,6 +433,20 @@
         ], 
         "factor": 1.0
     }, 
+    "erg": {
+        "dimension": [
+            1, 
+            2, 
+            -2, 
+            0, 
+            0, 
+            0, 
+            0, 
+            0, 
+            0
+        ], 
+        "factor": 1e-7
+    }, 
     "inv_nm": {
         "dimension": [
             0, 
@@ -460,6 +474,20 @@
             0
         ], 
         "factor": 1.0
+    }, 
+    "dyn": {
+        "dimension": [
+            1, 
+            1, 
+            -2, 
+            0, 
+            0, 
+            0, 
+            0, 
+            0, 
+            0
+        ], 
+        "factor": 1e-5
     }, 
     "cyc": {
         "dimension": [
