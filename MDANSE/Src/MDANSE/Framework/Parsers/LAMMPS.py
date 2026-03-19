@@ -530,7 +530,9 @@ class LAMMPScustom(LAMMPSReader):
 
         len_conv = measure(1.0, self.units["length"]).toval("nm")
         vel_conv = measure(1.0, self.units["velocity"]).toval("nm/ps")
-        force_conv = measure(1.0, self.units["force"], equivalent=True).toval("Da nm/ps2")
+        force_conv = measure(1.0, self.units["force"], equivalent=True).toval(
+            "Da nm/ps2"
+        )
 
         unit_cell *= len_conv
         unit_cell = UnitCell(unit_cell)
