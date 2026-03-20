@@ -205,10 +205,11 @@ class ChemicalSystem:
                     LOG.warning(
                         f"Number of atoms in {cluster_name} with idx {idx} "
                         f"is very large - skipping bond type determination. "
-                        f"SMARTS pattern matching will not work as expected. "
-                        f"Bond types set to UNSPECIFIED, use the bond type wildcard "
-                        f"~ to match bonds in this molecule and use general atom symbols "
-                        f"e.g. [#6] instead of [C] or [c]. See "
+                        f"SMARTS pattern matching in the atom selection will not "
+                        f"work as expected. Bond types set to UNSPECIFIED, use "
+                        f"the bond type wildcard ~ to match bonds in this "
+                        f"molecule and use general atom symbols e.g. [#6] instead "
+                        f"of [C] or [c]. See "
                         f"https://www.daylight.com/dayhtml/doc/theory/theory.smarts.html "
                         f"for more details on SMARTS pattern matching."
                     )
@@ -256,12 +257,13 @@ class ChemicalSystem:
                             maxIterations=max_iters,
                         )
                     except Exception as e:
-                        LOG.error(
+                        LOG.warning(
                             f"Error determining bond orders for molecule "
-                            f"{cluster_name} with index {idx}: {e}. SMARTS "
-                            f"pattern matching will not work as expected. Bond "
-                            f"types set to UNSPECIFIED use bond type wildcard "
-                            f"~ to match bonds in this molecule."
+                            f"{cluster_name} with index {idx} from RDKit: {e}. "
+                            f"SMARTS pattern matching in the atoms selection "
+                            f"will not work as expected. Bond types set to "
+                            f"UNSPECIFIED use bond type wildcard ~ to match "
+                            f"bonds in this molecule."
                         )
                     uniq_submols[smiles] = submolecule
 
