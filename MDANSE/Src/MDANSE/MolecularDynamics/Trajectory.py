@@ -1113,7 +1113,6 @@ class TrajectoryWriter:
 
         else:
             # Get str/bytes from possible array
-            print(colour)
             colour = first(always_iterable(colour))
 
             assert isinstance(colour, (str, bytes))
