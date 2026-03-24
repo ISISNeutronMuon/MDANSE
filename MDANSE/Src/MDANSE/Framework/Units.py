@@ -834,7 +834,7 @@ class _Unit:
             return self
 
         else:
-            raise UnitError("The units are not compatible")
+            raise UnitError(f"The units {self} and {ounit} are not compatible.")
 
     def sqrt(self):
         """Square root of a _Unit.
@@ -893,7 +893,7 @@ class _Unit:
                 else:
                     raise UnitError("The units are not equivalents")
             else:
-                raise UnitError("The units are not compatible")
+                raise UnitError(f"The units {newu} and {ounit} are not compatible")
         else:
             return newu._factor
 

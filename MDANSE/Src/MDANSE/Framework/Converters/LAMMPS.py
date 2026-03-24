@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal
+from typing import Any, Literal
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Converters.Converter import Converter
@@ -26,11 +26,6 @@ from MDANSE.Framework.Parsers import (
     LAMMPSxyz,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
-
-if TYPE_CHECKING:
-    from MDANSE.Framework.Configurators.ConfigFileConfigurator import (
-        ConfigFileConfigurator,
-    )
 
 
 class LAMMPS(Converter):

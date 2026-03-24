@@ -57,6 +57,7 @@ LAMMPS_UNITS = {
         "velocity": "ang/fs",
         "mass": "Da",
         "charge_conv": 1.0,
+        "force": "kcal_per_mole/ang",
     },
     "metal": {
         "energy": "eV",
@@ -65,6 +66,7 @@ LAMMPS_UNITS = {
         "velocity": "ang/ps",
         "mass": "Da",
         "charge_conv": 1.0,
+        "force": "eV/ang",
     },
     "si": {
         "energy": "J",
@@ -73,6 +75,7 @@ LAMMPS_UNITS = {
         "velocity": "m/s",
         "mass": "kg",
         "charge_conv": 1.0 / ELECTRON_CHARGE,
+        "force": "N",
     },
     "cgs": {
         "energy": "erg",  # this will fail
@@ -81,6 +84,7 @@ LAMMPS_UNITS = {
         "velocity": "cm/s",
         "mass": "g",
         "charge_conv": 1.0 / 4.8032044e-10,
+        "force": "dyn",
     },
     "electron": {
         "energy": "Ha",
@@ -89,22 +93,25 @@ LAMMPS_UNITS = {
         "velocity": "ang/fs",
         "mass": "Da",
         "charge_conv": 1.0,
+        "force": "Ha/Bohr",
     },
     "micro": {
-        "energy": "pg*m/s",
+        "energy": "pg m2/s2",
         "time": "us",
         "length": "um",
         "velocity": "m/s",
         "mass": "pg",
         "charge_conv": 1.0 / (ELECTRON_CHARGE * 1e12),
+        "force": "pg um/us2",
     },
     "nano": {
-        "energy": "ag*m/s",
+        "energy": "ag m2/s2",
         "time": "ns",
         "length": "nm",
         "velocity": "m/s",
         "mass": "ag",
         "charge_conv": 1.0,
+        "force": "ag nm/ns2",
     },
 }
 
@@ -349,6 +356,7 @@ class LAMMPScustom(LAMMPSReader):
         """
         self._file = open(filename, encoding="utf-8")  # noqa: SIM115
         self._start = 0
+        self._first_origin = None
 
     def parse_first_step(
         self, aliases: dict[str, dict[str, str]], config: dict[str, Any]
@@ -516,8 +524,15 @@ class LAMMPScustom(LAMMPSReader):
 
         cell = np.fromstring(" ".join(take(3, file)), dtype=np.float64, sep=" ")
         unit_cell, origin = self._style.to_cell(cell, bounds=True)
+        self._first_origin = (
+            origin if self._first_origin is None else self._first_origin
+        )
 
         len_conv = measure(1.0, self.units["length"]).toval("nm")
+        vel_conv = measure(1.0, self.units["velocity"]).toval("nm/ps")
+        force_conv = measure(1.0, self.units["force"], equivalent=True).toval(
+            "Da nm/ps2"
+        )
 
         unit_cell *= len_conv
         unit_cell = UnitCell(unit_cell)
@@ -579,7 +594,7 @@ class LAMMPScustom(LAMMPSReader):
 
         if self._fractionalCoordinates:
             # MDANSE origin is always 0,0,0
-            origin *= len_conv
+            origin = self._first_origin * len_conv
             origin_recip = np.matmul(origin, unit_cell.inverse)
 
             coords -= origin_recip
@@ -592,7 +607,7 @@ class LAMMPScustom(LAMMPSReader):
 
         else:
             # MDANSE origin is always 0,0,0
-            coords -= origin
+            coords -= self._first_origin
             coords *= len_conv
 
             real_conf = PeriodicRealConfiguration(
@@ -604,9 +619,9 @@ class LAMMPScustom(LAMMPSReader):
             real_conf.fold_coordinates()
 
         if "v" in self.keywords:
-            real_conf["velocities"] = velocities
+            real_conf["velocities"] = velocities * vel_conv
         if "f" in self.keywords:
-            real_conf["gradients"] = forces
+            real_conf["gradients"] = forces * force_conv
 
         # A snapshot is created out of the current configuration.
         self._trajectory.dump_configuration(
