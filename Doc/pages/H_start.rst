@@ -146,3 +146,27 @@ of the design principles of MDANSE 2 is that the scripts
 should not depend on any settings stored locally on
 a specific computer, but should instead contain all the
 information needed to run a specific analysis type.
+
+Alternately, you can create the scripts using the CLI.
+Examples of valid commands include
+
+.. code-block:: bash
+
+   $ mdanse convert --help  # Basic explanation of valid commands.
+   $ mdanse convert -l  # Shows the list of available converters.
+   $ mdanse convert CP2K -o convert_cp2k.py  # Saves a template script for the CP2K converter.
+
+or
+
+.. code-block:: bash
+
+   $ mdanse analysis --help  # Valid commands for analysis jobs.
+   $ mdanse analysis -l  # Shows the list available analysis tasks
+   $ mdanse analysis DensityOfStates -o mdanse_dos.py  # Saves a template script for the DOS analysis.
+
+for converter and analysis runs. You can start by just running
+:code:`mdanse --help` to get more information on what else you can
+do in the CLI. The main drawback compared to the GUI approach is that
+the scripts output by the CLI will not contain reasonable starting values
+for your specific files and you will need to set all the parameters
+manually.
