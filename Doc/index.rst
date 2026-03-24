@@ -88,6 +88,7 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
    pages/H_start
    pages/H_conv
    pages/H_Plotting
+   pages/H_cluster
 
 .. toctree::
    :maxdepth: 5
