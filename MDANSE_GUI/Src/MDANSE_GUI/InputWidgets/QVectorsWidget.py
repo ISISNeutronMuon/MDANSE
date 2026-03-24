@@ -455,6 +455,7 @@ class QVectorsWidget(WidgetBase):
         """Update the widget appearance based on the input validation results."""
         if all_are_correct:
             self.clear_error()
+            self.mark_warning(self._configurator.warning_status)
         else:
             self.mark_error("Some entries in the parameter table are invalid.")
 
