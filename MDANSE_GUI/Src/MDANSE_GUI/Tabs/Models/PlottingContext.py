@@ -496,6 +496,7 @@ class SingleDataset:
         self,
         index_tuple: list[int],
         axis_lookup: list[str],
+        *,
         skip_text: bool = False,
     ) -> str | float:
         """Get a meaningful label for a subset of data.
@@ -551,6 +552,7 @@ class SingleDataset:
         self,
         x_axis_details: tuple[str, str],
         max_limit: int = 1,
+        *,
         skip_label_text: bool = False,
     ) -> dict[int, np.ndarray]:
         """Prepare a set of curves for plotting.

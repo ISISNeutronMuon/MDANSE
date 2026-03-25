@@ -304,7 +304,7 @@ class DatasetFormatter:
             )
         )
         # Add corner nil
-        xaxis = prepend(0.0, new_axes[axis_numbers[1 if flip_array else 0]].flat)
+        xaxis = prepend(0.0, new_axes[axis_numbers[flip_array]].flat)
 
         # Add axes to data
         data_lines = zip(
