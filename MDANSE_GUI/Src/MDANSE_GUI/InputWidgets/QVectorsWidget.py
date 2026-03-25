@@ -440,7 +440,6 @@ class QVectorsWidget(WidgetBase):
         self._selector.setToolTip(
             "The q vectors will be generated using the method chosen here.",
         )
-        self._model.input_is_valid.connect(self.validate_model_parameters)
         policy = self._view.sizePolicy()
         policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
         self._view.setSizePolicy(policy)
@@ -449,15 +448,6 @@ class QVectorsWidget(WidgetBase):
             QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
         )
         self.value_changed.connect(self.preview_vectors)
-
-    @Slot(bool)
-    def validate_model_parameters(self, all_are_correct: bool):
-        """Update the widget appearance based on the input validation results."""
-        if all_are_correct:
-            self.clear_error()
-            self.mark_warning(self._configurator.warning_status)
-        else:
-            self.mark_error("Some entries in the parameter table are invalid.")
 
     @Slot()
     def fail_early(self):
