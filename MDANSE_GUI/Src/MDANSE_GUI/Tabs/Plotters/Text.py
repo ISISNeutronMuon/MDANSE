@@ -145,7 +145,12 @@ class DatasetFormatter:
             data = data_array
 
         text_data = "\n".join(
-            separator.join(str(round(x, self._rounding_prec)) for x in line)
+            separator.join(
+                str(round(x, self._rounding_prec))
+                if hasattr(x, "__round__")
+                else str(x)
+                for x in line
+            )
             for line in data
         )
 
@@ -304,7 +309,7 @@ class DatasetFormatter:
             )
         )
         # Add corner nil
-        xaxis = prepend(0.0, new_axes[axis_numbers[flip_array]].flat)
+        xaxis = prepend("_", new_axes[axis_numbers[flip_array]].flat)
 
         # Add axes to data
         data_lines = zip(
