@@ -275,6 +275,9 @@ results, has a peak at an incorrect position, and falls off towards zero far too
 Q Vector Sampling
 ~~~~~~~~~~~~~~~~~
 
+A note on crystals
+------------------
+
 If you are simulating a crystal (i.e. a highly ordered, anisotropic material), you will
 be interested in calculating the observables such as the :math:`S(Q,\omega)` at specific
 points in reciprocal space. You will most likely pick a q-vector generator such as
@@ -287,7 +290,11 @@ Isotropic systems
 
 For isotropic, disordered systems, the calculation results will be averaged over
 vectors with similar :math:`|Q|` and output as a function of :math:`|Q|`. Spherical
-averaging is most commonly applied, as many systems can be assumed to be fully isotropic. This
+averaging is most commonly applied, as many systems can be assumed to be fully isotropic.
+:ref:`qvectors-reference-SphericalLatticeQVectors` is normally used for calculating
+the quasielastic neutron scattering results in isotropic systems.
+
+Generating the vectors on a sphere
 is equivalent to assuming that all the possible scattering geometries are possible,
 or rotating the simulated system to calculate the scattering results for different
 orientations of the system. This allows to approximate the correct scattering
@@ -367,8 +374,7 @@ number of vectors is being used.
   1. Reproducibility test. The same calculation is repeated several times
      using different random seeds. The deviation of the calculated results
      can be used as an estimate of the uncertainty of the results.
-
-   2. Convergence test. The same calculation is repeated with increasing
+  2. Convergence test. The same calculation is repeated with increasing
      number of vectors used for sampling. The difference between the
      consecutive runs will keep decreasing.
 
