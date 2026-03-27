@@ -37,7 +37,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
     Attributes
     ----------
     _default : str
-        The defaults selection setting.
+        The default selection setting.
 
     """
 

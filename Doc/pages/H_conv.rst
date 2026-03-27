@@ -301,20 +301,11 @@ orientations of the system. This allows to approximate the correct scattering
 experiment results which would otherwise require a significantly larger simulation.
 A physical sample in a real-life experiment typically contains atoms in
 amounts close to :math:`10^23` (the order of magnitude of the Avogadro number), while
-many MD trajectories contain less than :math:`10^6` atoms. Therefore an actual experiment will
-sample many more configurations of atoms than is possible in a single MD simulation.
-Repeating the calculation for multiple Q vectors maximises the amount the information
+many MD trajectories contain less than :math:`10^6` atoms. Therefore, an actual experiment will
+sample many more configurations of atoms than it is possible to sample in a single MD simulation.
+Performing the calculation on multiple Q vectors maximises the amount the information
 that can be extracted from an MD trajectory. At the same time, the computational effort
-of the calculation increases with every additional vector sampled.
-
-For properties such as :ref:`analysis-reference-DynamicIncoherentStructureFactor` there is
-no restriction on which vectors can be used in the calculations. In principle,
-:ref:`qvectors-reference-SphericalQVectors` generator *could* be used in this case.
-However, the matching :ref:`analysis-reference-DynamicCoherentStructureFactor` calculation
-imposes the additional requirement of only lattice vectors being used in the calculation.
-In order to be able to combine the results of the two calculations into the 
-total dynamic structure factor (e.g. using the :ref:`analysis-reference-NeutronDynamicTotalStructureFactor`
-analysis), lattice vectors should be used for both parts of the calculation.
+of the calculation increases with every additional vector sampled. Also, 
 
 Random vector generation
 ------------------------

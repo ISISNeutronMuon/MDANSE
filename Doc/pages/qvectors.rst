@@ -12,7 +12,20 @@ Structure Factor), and a spherical vector generator to simulate the random orien
 of the simulated objects in respect to the beam. This means that the
 :ref:`qvectors-reference-SphericalLatticeQVectors` generator should be the best
 choice for most users, unless you are simulating a highly ordered sample with a
-well known orientation (e.g. a single crystal).
+well known orientation (e.g. a single crystal). Typically, higher levels of order
+impose more restrictions on the generated q vectors. :ref:`qvectors-reference-LinearQVectors` can be
+used for planar (i.e. 2D order) systems, and :ref:`qvectors-reference-CircularQVectors`
+for nematic or axially aligned systems (i.e. 1D order).
+
+For properties such as :ref:`analysis-reference-DynamicIncoherentStructureFactor` there is
+no restriction on which vectors can be used in the calculations. In principle,
+:ref:`qvectors-reference-SphericalQVectors` generator *could* be used in this case.
+However, the matching :ref:`analysis-reference-DynamicCoherentStructureFactor` calculation
+imposes the additional requirement of only lattice vectors being used in the calculation.
+In order to be able to combine the results of the two calculations into the 
+total dynamic structure factor (e.g. using the :ref:`analysis-reference-NeutronDynamicTotalStructureFactor`
+analysis), lattice vectors should be used for both parts of the calculation.
+
 
 Reciprocal Lattice q-Vectors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
