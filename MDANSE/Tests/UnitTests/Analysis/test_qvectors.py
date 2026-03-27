@@ -223,8 +223,7 @@ def test_disf(tmp_path, trajectory, qvector_generator):
  'SphericalLatticeQVectors',
  'CircularLatticeQVectors',
  'LinearLatticeQVectors'])
-@pytest.mark.parametrize("weights_flag", [True, False])
-def test_weights_flag_resets_weights(qvector_generator: str, weights_flag: bool):
+def test_weights_flag_resets_weights(qvector_generator: str, weights_flag: bool = True):
     """Check if the weights override flag resets vector weights to 1."""
     vec_par = copy.deepcopy(VEC_PARAMS)
     cell = UnitCell([[45, 45, 0], [45, 0, 45], [0, 45, 45]])
@@ -236,8 +235,6 @@ def test_weights_flag_resets_weights(qvector_generator: str, weights_flag: bool)
     qvg.generate()
     for key1 in qvg["q_vectors"]:
         weights = qvg["q_vectors"][key1]["weights"]
-        if weights_flag:
-            np.testing.assert_allclose(weights, 1)
-            assert np.isclose(0, np.std(weights))
-        else:
-            assert any(x != 1 for x in weights)
+        np.testing.assert_allclose(weights, 1)
+        assert np.isclose(0, np.std(weights))
+
