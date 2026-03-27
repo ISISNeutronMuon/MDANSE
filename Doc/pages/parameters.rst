@@ -202,7 +202,10 @@ Analysis Inputs
 AtomSelectionConfigurator
 -------------------------
 
-default={}
+default={
+        "0": {"function_name": "select_all", "operation_type": "union"},
+        "1": {"function_name": "select_dummy", "operation_type": "difference"}
+    }
 
 Selects atoms in trajectory based on the input string.
 
@@ -345,6 +348,28 @@ GridStepConfigurator
 
 default=0
 
+Configurator to manage a finite element grid within the unit cell.
+
+This configurator provides extra information about a grid in a
+trajectory's unit cell.
+
+It can also read a primary cell-vector along which the spacing is defined
+which is specified in the optional `axis` dependency
+(an :class:`AxisSelectionConfigurator` instance).
+
+If any frame does not have a unit cell, the maximum span of the atoms is
+used, otherwise the average unit cell is used.
+
+The input value specifies the grid spacing in `nm`.
+
+If `axis` is present, information about the prediction is stored in `grid`
+and is a single range along the primary axis.
+
+If `axis` is not present, information about the prediction is stored in the keys:
+
+- `a-direction grid`
+- `b-direction grid`
+- `c-direction grid`
 
 
 .. _configurator-analysis-GroupingLevelConfigurator:
@@ -593,7 +618,7 @@ Q vectors on Q-shells, each shell containing a set of Q vectors whose
 norm match the Q shell value within a given tolerance.
 
 Depending on the generator selected, Q vectors can be generated
-isotropically or anistropically, on a lattice or randomly.
+isotropically or anisotropically, on a lattice or randomly.
 
 
 
@@ -637,7 +662,7 @@ Selects a single item from multiple choices.
 TrajectoryFilterConfigurator
 ----------------------------
 
-default={"filter": "Butterworth", "attributes": {"order": 1, "attenuation_type": "lowpass", "cutoff_freq": 25.0}}
+default={"filter": "Butterworth", "attributes": {"order": 1, "attenuation_type": "lowpass", "cutoff_freq": 0.0001}}
 
 Defines the filter that will be applied to atom positions.
 
