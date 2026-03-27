@@ -171,6 +171,8 @@ class VectorModel(QStandardItemModel):
             return float(value)
         elif vtype == "IntegerConfigurator":
             return int(value)
+        elif vtype == "BooleanConfigurator":
+            return bool(value)
         else:
             return value
 

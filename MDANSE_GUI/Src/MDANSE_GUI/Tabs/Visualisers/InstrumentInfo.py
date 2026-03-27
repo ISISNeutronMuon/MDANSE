@@ -88,6 +88,7 @@ class SimpleInstrument:
         self._axis_1 = [1, 0, 0]
         self._axis_2 = [0, 1, 0]
         self._vectors_per_shell = 100
+        self._force_equal_weights = False
         self._configured = False
         self._model_index = -1
 
@@ -107,6 +108,7 @@ class SimpleInstrument:
             ["_q_step", "QLineEdit", "float"],
             ["_q_width", "QLineEdit", "float"],
             ["_vectors_per_shell", "QLineEdit", "int"],
+            ["_force_equal_weights", "QCheckBox", "bool"],
             ["_axis_1", "VectorWidget", "float"],
             ["_axis_2", "VectorWidget", "float"],
         ]
@@ -191,6 +193,8 @@ class SimpleInstrument:
         if "axis_2" in qvec_generator._configuration:
             ax_vector = [float(x) for x in self._axis_2.split(",")]
             param_dictionary["axis_2"] = ax_vector
+        if "force_equal_weights" in qvec_generator._configuration:
+            param_dictionary["force_equal_weights"] = bool(self._force_equal_weights)
         mdanse_tuple = (
             cov_type,
             param_dictionary,
