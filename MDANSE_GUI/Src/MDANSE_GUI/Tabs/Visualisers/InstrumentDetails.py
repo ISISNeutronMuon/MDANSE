@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator, QIntValidator, QValidator
 from qtpy.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QGridLayout,
     QLabel,
@@ -166,6 +167,10 @@ class InstrumentDetails(QWidget):
             instance = VectorWidget(self)
             instance.set_value([0, 0, 0])
             instance.value_changed.connect(self.update_values)
+        elif widget == "QCheckBox":
+            instance = QCheckBox("", self)
+            instance.setChecked(False)
+            instance.checkStateChanged.connect(self.update_values)
         qlabel = QLabel(label, self)
         layout.addWidget(qlabel, next_row, 0)
         layout.addWidget(instance, next_row, 1)
@@ -192,6 +197,10 @@ class InstrumentDetails(QWidget):
     @Slot()
     def update_values(self):
         for key, value in self._widgets.items():
+            if hasattr(value, "isChecked"):
+                new_val = value.isChecked()
+                self._values[key] = new_val
+                continue
             try:
                 new_val = value.text()
             except AttributeError:
@@ -256,6 +265,9 @@ class InstrumentDetails(QWidget):
         self._current_instrument = None
         for key, widget in self._widgets.items():
             new_value = getattr(instrument_instance, key, "Nothing!")
+            if hasattr(widget, "setChecked"):
+                widget.setChecked(new_value)
+                continue
             try:
                 widget.setText(str(new_value))
             except AttributeError:

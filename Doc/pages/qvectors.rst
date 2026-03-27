@@ -52,3 +52,28 @@ handling jumps in particle trajectories. Here :math:`h`, :math:`k`, and :math:`l
 are integers, jumps in the particle trajectories
 produce phase changes of multiples of :math:`2\pi` in the Fourier transformed
 particle density, i.e. leave it unchanged.
+
+
+Random sampling of reciprocal space
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The current implementation of the lattice vector generators 
+:ref:`qvectors-reference-SphericalLatticeQVectors`,
+:ref:`qvectors-reference-CircularLatticeQVectors` and
+:ref:`qvectors-reference-LinearLatticeQVectors` assumes
+that different vectors can have different weights. This
+is meant to approximate a spherical distribution of vectors
+in low-symmetry systems where lattice vectors are not uniformly
+spaced, and also to give preference to vectors with :math:`|Q|`
+close to the nominal value for a specific shell. This behaviour
+is different from MDANSE 1.5, where the shell population was
+deterministic for shells containing less lattice vectors than
+the requested number, and stochastic with binary (0 or 1) weights
+for other shells.
+
+If you prefer to revert to the original weights scheme of MDANSE 1.5,
+you can set the variable :code:`force_equal_weights=True` for these
+vector generators. You can also save the value of this variable in your
+instrument profiles, so it is set to :code:`True` every time you set
+the vector parameters using these profiles.
+

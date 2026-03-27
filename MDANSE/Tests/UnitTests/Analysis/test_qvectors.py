@@ -218,3 +218,23 @@ def test_disf(tmp_path, trajectory, qvector_generator):
 
     assert out_file.is_file()
     assert log_file.is_file()
+
+@pytest.mark.parametrize("qvector_generator", [
+ 'SphericalLatticeQVectors',
+ 'CircularLatticeQVectors',
+ 'LinearLatticeQVectors'])
+def test_weights_flag_resets_weights(qvector_generator: str, weights_flag: bool = True):
+    """Check if the weights override flag resets vector weights to 1."""
+    vec_par = copy.deepcopy(VEC_PARAMS)
+    cell = UnitCell([[45, 45, 0], [45, 0, 45], [0, 45, 45]])
+    qvg = IQVectors.create(qvector_generator, cell)
+    vec_par["force_equal_weights"] = weights_flag
+    vec_par["n_vectors"] = 1000
+    vec_par["shells"] =  (6.0, 7.0, 2.0)
+    qvg.setup(vec_par)
+    qvg.generate()
+    for key1 in qvg["q_vectors"]:
+        weights = qvg["q_vectors"][key1]["weights"]
+        np.testing.assert_allclose(weights, 1)
+        assert np.isclose(0, np.std(weights))
+
