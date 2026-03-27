@@ -231,6 +231,7 @@ def test_weights_flag_resets_weights(qvector_generator: str, weights_flag: bool)
     qvg = IQVectors.create(qvector_generator, cell)
     vec_par["force_equal_weights"] = weights_flag
     vec_par["n_vectors"] = 1000
+    vec_par["shells"] =  (6.0, 7.0, 2.0)
     qvg.setup(vec_par)
     qvg.generate()
     for key1 in qvg["q_vectors"]:
@@ -239,5 +240,4 @@ def test_weights_flag_resets_weights(qvector_generator: str, weights_flag: bool)
             np.testing.assert_allclose(weights, 1)
             assert np.isclose(0, np.std(weights))
         else:
-            print(weights)
             assert any(x != 1 for x in weights)
