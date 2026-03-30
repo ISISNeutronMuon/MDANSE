@@ -297,10 +297,10 @@ the quasielastic neutron scattering results in isotropic systems.
 Generating the vectors on a sphere
 is equivalent to assuming that all the possible scattering geometries are possible,
 or rotating the simulated system to calculate the scattering results for different
-orientations of the system. This allows to approximate the correct scattering
+orientations of the system. This allows the code to approximate the correct scattering
 experiment results which would otherwise require a significantly larger simulation.
-A physical sample in a real-life experiment typically contains atoms in
-amounts close to :math:`10^23` (the order of magnitude of the Avogadro number), while
+A physical sample in a real-life experiment typically contains in
+the order of :math:`10^23` atoms (the Avogadro number), while
 many MD trajectories contain less than :math:`10^6` atoms. Therefore, an actual experiment will
 sample many more configurations of atoms than it is possible to sample in a single MD simulation.
 Performing the calculation on multiple Q vectors maximises the amount the information
@@ -312,7 +312,7 @@ Random vector generation
 
 For 1D, 2D and 3D averaging (which could be relevant to calculations on layered,
 nematic and completely disordered systems, respectively), there exist three
-vector generators which apply the same approach in different number of dimensions:
+vector generators which apply the same approach in different numbers of dimensions:
 
   * :ref:`qvectors-reference-LinearQVectors`,
   * :ref:`qvectors-reference-CircularQVectors`,
@@ -331,7 +331,7 @@ Lattice vector generators
 -------------------------
 
 Once the random vector distribution has been created, the lattice vector generators
-round the HKL coordinates of all the vectors to the nearest integer values.
+round the **hkl** coordinates of all the vectors to the nearest integer values.
 This will result in some of the vectors arriving at values of :math:`|Q|` outside of
 the specified range, which will then be discarded from the total population.
 From the remaining vectors, it is likely that multiple randomly generated vectors
