@@ -36,6 +36,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE.Framework.Configurators.BooleanConfigurator import BOOL_MAPPING
 from MDANSE.Framework.Configurators.QVectorsConfigurator import QVectorsConfigurator
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.MLogging import LOG
@@ -172,7 +173,12 @@ class VectorModel(QStandardItemModel):
         elif vtype == "IntegerConfigurator":
             return int(value)
         elif vtype == "BooleanConfigurator":
-            return bool(value)
+            try:
+                value = BOOL_MAPPING[value.lower() if isinstance(value, str) else value]
+            except (KeyError, ValueError):
+                LOG.warning("Could not parse %s as logical true/false value", value)
+            else:
+                return value
         else:
             return value
 

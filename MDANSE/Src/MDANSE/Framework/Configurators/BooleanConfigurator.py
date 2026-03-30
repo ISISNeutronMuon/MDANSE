@@ -17,6 +17,19 @@ from __future__ import annotations
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
+BOOL_MAPPING = {
+    True: True,
+    "true": True,
+    "yes": True,
+    "y": True,
+    "1": True,
+    False: False,
+    "false": False,
+    "no": False,
+    "n": False,
+    "0": False,
+}
+
 
 class BooleanConfigurator(IConfigurator):
     """Sets a value to a logical True or False.
@@ -27,19 +40,6 @@ class BooleanConfigurator(IConfigurator):
     """
 
     _default = False
-
-    _shortCuts = {
-        True: True,
-        "true": True,
-        "yes": True,
-        "y": True,
-        "1": True,
-        False: False,
-        "false": False,
-        "no": False,
-        "n": False,
-        "0": False,
-    }
 
     def configure(self, value):
         """
@@ -57,8 +57,9 @@ class BooleanConfigurator(IConfigurator):
 
         self._original_input = value
 
-        if value not in self._shortCuts:
+        value = value.lower() if isinstance(value, str) else value
+        if value not in BOOL_MAPPING:
             self.error_status = "Input is not recognised as a true/false value."
         else:
             self.error_status = "OK"
-            self["value"] = self._shortCuts[value]
+            self["value"] = BOOL_MAPPING[value]
