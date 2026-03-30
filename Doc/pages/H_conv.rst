@@ -303,9 +303,10 @@ A physical sample in a real-life experiment typically contains in
 the order of :math:`10^23` atoms (the Avogadro number), while
 many MD trajectories contain less than :math:`10^6` atoms. Therefore, an actual experiment will
 sample many more configurations of atoms than it is possible to sample in a single MD simulation.
-Performing the calculation on multiple Q vectors maximises the amount the information
-that can be extracted from an MD trajectory. At the same time, the computational effort
-of the calculation increases with every additional vector sampled. Also, 
+Performing the calculation on multiple Q vectors maximises the information
+that can be extracted from an MD trajectory. The computational effort
+of the calculation increases linearly with every additional vector for which
+the calculation is performed.
 
 Random vector generation
 ------------------------
