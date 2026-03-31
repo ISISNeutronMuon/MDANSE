@@ -68,16 +68,21 @@ class SphericalLatticeQVectors(LatticeQVectors):
         self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            # q + 2 * width just to make sure we don't miss any out.
-            lattice_hkl_vectors = self.get_reciprocal_lattice_hkl(q + 2 * width)
+            # 1.2 * (q + width) just to make sure we don't miss any out.
+            lattice_hkl_vectors = self.get_reciprocal_lattice_hkl(1.2 * (q + width))
             selection = self.vectors_within_limits(
                 self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),
                 q_min=q - 0.5 * width,
                 q_max=q + 0.5 * width,
             )
-            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
 
+            if not np.any(selection):
+                self._configuration["q_vectors"][q] = None
+                continue
+
+            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell)
+
             if q_vectors.shape[1] > nvecs_per_shell:
                 selection = fpsample.fps_sampling(q_vectors.T, nvecs_per_shell)
                 q_vectors = q_vectors.T[selection].T
@@ -90,10 +95,6 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 _, indices = tree.query(samples.T)
                 weights = np.bincount(indices, minlength=q_vectors.shape[1])
                 weights = q_vectors.shape[1] * weights / n_samples
-
-            if not len(weights):
-                self._configuration["q_vectors"][q] = None
-                continue
 
             self._configuration["q_vectors"][q] = {
                 "q_vectors": q_vectors,
