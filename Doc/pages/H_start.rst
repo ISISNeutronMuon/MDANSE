@@ -147,7 +147,7 @@ should not depend on any settings stored locally on
 a specific computer, but should instead contain all the
 information needed to run a specific analysis type.
 
-Alternately, you can create the scripts using the CLI.
+Alternatively, you can create the scripts using the CLI.
 Examples of valid commands include
 
 .. code-block:: bash

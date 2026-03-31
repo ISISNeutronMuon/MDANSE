@@ -5,7 +5,7 @@ Running MDANSE on a cluster
 
 We expect that you will be running your MDANSE analysis on a cluster
 using Python scripts which can be run from the shell. These will be
-called within a batch script which you submit to the clusters queuing system.
+called within a batch script which you submit to the cluster's queuing system.
 
 If you installed MDANSE yourself, just activate the MDANSE Python virtual environment
 in your batch scripts. On clusters using
@@ -16,8 +16,10 @@ environment.
 Progress bar
 ~~~~~~~~~~~~
 
-Normally, when you are running a Python script with an MDANSE analysis, it will
-display a progress bar. As cluster jobs are not interactive, the progress bar
+Normally, when you are running a Python script with an MDANSE analysis 
+and `tqdm` is available (possibly through installing the `cli` extra), 
+it will attempt to display a progress bar. 
+As cluster jobs are not interactive, the progress bar
 will be repeatedly written into the standard output and most likely saved
 in your log file. Depending on your preference, you may decide just to disable
 the progress bar in the run method:
