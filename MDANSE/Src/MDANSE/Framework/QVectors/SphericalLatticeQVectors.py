@@ -87,7 +87,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
             else:
                 samples = spherical_vectors(q, width, n_samples)
                 tree = KDTree(q_vectors.T)
-                distances, indices = tree.query(samples.T)
+                _, indices = tree.query(samples.T)
                 weights = np.bincount(indices, minlength=q_vectors.shape[1])
                 weights = q_vectors.shape[1] * weights / n_samples
 
