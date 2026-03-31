@@ -15,6 +15,9 @@
 #
 from __future__ import annotations
 
+from ase.neighborlist import _calc_expansion
+import numpy as np
+
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -29,3 +32,31 @@ class LatticeQVectors(IQVectors):
 
         if unit_cell is None:
             raise ValueError("The trajectory does not contain unit cell information.")
+
+    def get_reciprocal_lattice_hkl(self, cutoff):
+        """Use _calc_expansion function to "determines the minimum supercell
+        (parallelepiped) that contains a sphere of radius `2.0 * rcmax`" and
+        then generated the reciprocal lattice points within a cutoff radius.
+
+        Parameters
+        ----------
+        cutoff : float
+            The cutoff to distance of the hkl vector to generate.
+
+        Returns
+        -------
+        np.array
+            Numpy array of reciprocal lattice vectors.
+        """
+        max_h, max_k, max_l = _calc_expansion(
+            2 * np.pi * self._unit_cell.inverse, (True, True, True), cutoff / 2)
+
+        h_range = np.arange(-max_h, max_h + 1)
+        k_range = np.arange(-max_k, max_k + 1)
+        l_range = np.arange(-max_l, max_l + 1)
+
+        recip_lattice_points = np.array(
+            [[h, k, l] for h in h_range for k in k_range for l in l_range]
+        )
+
+        return recip_lattice_points.T
