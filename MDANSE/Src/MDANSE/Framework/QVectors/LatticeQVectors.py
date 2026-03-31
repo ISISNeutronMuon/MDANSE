@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import numpy as np
-from ase.neighborlist import _calc_expansion
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -48,6 +47,8 @@ class LatticeQVectors(IQVectors):
         np.array
             Numpy array of reciprocal lattice vectors.
         """
+        from ase.neighborlist import _calc_expansion
+
         max_h, max_k, max_l = _calc_expansion(
             2 * np.pi * self._unit_cell.inverse, (True, True, True), cutoff / 2
         )
