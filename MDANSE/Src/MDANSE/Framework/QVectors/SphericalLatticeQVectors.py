@@ -47,6 +47,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
         },
     )
     settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
+    settings["force_equal_weights"] = ("BooleanConfigurator", {"default": False})
     settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
 
     def _generate(self):
@@ -78,6 +79,8 @@ class SphericalLatticeQVectors(LatticeQVectors):
             if not len(weights):
                 self._configuration["q_vectors"][q] = None
                 continue
+            if self._configuration["force_equal_weights"]["value"]:
+                weights[:] = 1.0
 
             self._configuration["q_vectors"][q] = {
                 "q_vectors": self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),

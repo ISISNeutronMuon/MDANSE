@@ -28,6 +28,7 @@ Inputs:
 - shells: :ref:`configurator-analysis-RangeConfigurator` default=(0.0, 5.0, 0.5)
 - n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=50
 - width: :ref:`configurator-analysis-FloatConfigurator` default=1.0
+- force_equal_weights: :ref:`configurator-analysis-BooleanConfigurator` default=False
 - axis: :ref:`configurator-analysis-VectorConfigurator` default=[0, 0, 1]
 
 
@@ -110,7 +111,7 @@ Inputs:
 - hrange: :ref:`configurator-analysis-RangeConfigurator` default=(0, 8, 1)
 - krange: :ref:`configurator-analysis-RangeConfigurator` default=(0, 8, 1)
 - lrange: :ref:`configurator-analysis-RangeConfigurator` default=(0, 8, 1)
-- qstep: :ref:`configurator-analysis-FloatConfigurator` default=0.01
+- q_step: :ref:`configurator-analysis-FloatConfigurator` default=0.2
 
 
 .. _qvectors-reference-LinearLatticeQVectors:
@@ -136,6 +137,7 @@ Inputs:
 - shells: :ref:`configurator-analysis-RangeConfigurator` default=(0, 5.0, 0.5)
 - n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=50
 - width: :ref:`configurator-analysis-FloatConfigurator` default=1.0
+- force_equal_weights: :ref:`configurator-analysis-BooleanConfigurator` default=False
 - axis: :ref:`configurator-analysis-VectorConfigurator` default=[1, 0, 0]
 
 
@@ -205,6 +207,7 @@ Inputs:
 - seed: :ref:`configurator-analysis-IntegerConfigurator` default=0
 - shells: :ref:`configurator-analysis-RangeConfigurator` default=(0, 5.0, 0.5)
 - n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=50
+- force_equal_weights: :ref:`configurator-analysis-BooleanConfigurator` default=False
 - width: :ref:`configurator-analysis-FloatConfigurator` default=1.0
 
 

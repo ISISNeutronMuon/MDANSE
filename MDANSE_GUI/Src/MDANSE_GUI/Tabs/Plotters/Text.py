@@ -30,7 +30,11 @@ from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 if TYPE_CHECKING:
     from qtpy.QtWidgets import QTextBrowser
 
-    from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
+    from MDANSE_GUI.Tabs.Models.PlottingContext import (
+        PlotArgs,
+        PlottingContext,
+        SingleDataset,
+    )
 
 
 class DatasetFormatter:
@@ -82,7 +86,7 @@ class DatasetFormatter:
 
         for databundle in self._plotting_context.datasets().values():
             header, data = self.process_data(
-                databundle.dataset,
+                databundle,
                 main_axis=databundle.main_axis,
             )
             self._new_text.append(
@@ -97,7 +101,7 @@ class DatasetFormatter:
             return ["No data selected"]
 
         for databundle in self._plotting_context.datasets().values():
-            yield self.process_data(databundle.dataset, main_axis=databundle.main_axis)
+            yield self.process_data(databundle, main_axis=databundle.main_axis)
 
     def make_dataset_header(self, dataset: SingleDataset, comment_character="#"):
         """Return the dataset informartion as text.
@@ -141,7 +145,12 @@ class DatasetFormatter:
             data = data_array
 
         text_data = "\n".join(
-            separator.join(str(round(x, self._rounding_prec)) for x in line)
+            separator.join(
+                str(round(x, self._rounding_prec))
+                if hasattr(x, "__round__")
+                else str(x)
+                for x in line
+            )
             for line in data
         )
 
@@ -154,21 +163,22 @@ class DatasetFormatter:
 
     def process_data(
         self,
-        dataset: SingleDataset,
+        databundle: PlotArgs,
         main_axis: str | None = None,
     ):
-        """Wrapper for approriately handling ND data."""
+        """Wrapper for appropriately handling ND data."""
+        dataset = databundle.dataset
 
         if dataset._n_dim == 1:
-            return self.process_1D_data(dataset)
+            return self.process_1D_data(databundle)
         if dataset._n_dim == 2:
-            return self.process_2D_data(dataset, main_axis=main_axis)
+            return self.process_2D_data(databundle, main_axis=main_axis)
 
-        return self.process_ND_data(dataset)
+        return self.process_ND_data(databundle)
 
     def process_1D_data(
         self,
-        dataset: SingleDataset,
+        databundle: PlotArgs,
     ) -> tuple[list[str], Iterator[Iterator[float]]]:
         """Turn a 1D array into text.
 
@@ -178,8 +188,8 @@ class DatasetFormatter:
 
         Parameters
         ----------
-        dataset : SingleDataset
-            A SingleDataset read from an .MDA file (HDF5).
+        dataset : PlotArgs
+            A SingleDataset with the GUI parameters.
 
         Returns
         -------
@@ -189,6 +199,7 @@ class DatasetFormatter:
             A data table with 2 columns.
 
         """
+        dataset = databundle.dataset
         header_lines, _ = self.make_dataset_header(
             dataset, comment_character=self._comment
         )
@@ -214,7 +225,7 @@ class DatasetFormatter:
 
     def process_2D_data(
         self,
-        dataset: SingleDataset,
+        databundle: PlotArgs,
         *,
         main_axis: str | None = None,
     ) -> tuple[list[str], Iterator[Iterator[float]]]:
@@ -222,8 +233,8 @@ class DatasetFormatter:
 
         Parameters
         ----------
-        dataset : SingleDataset
-            A SingleDataset read from an .MDA file (HDF5).
+        dataset : PlotArgs
+            A SingleDataset with the GUI parameters.
         main_axis : str or None
             Main axis to plot.
 
@@ -243,6 +254,8 @@ class DatasetFormatter:
             v
 
         """
+        dataset = databundle.dataset
+
         header_lines, comment_char = self.make_dataset_header(
             dataset, comment_character=self._comment
         )
@@ -267,18 +280,43 @@ class DatasetFormatter:
 
             LOG.debug(f"process_2D_data: axis {ax_key} has length {len(axis)}")
 
-            rc = "column" if n == flip_array else "row"
+            rc = "column" if n else "row"
             header_lines.append(
                 f"{comment_char} first {rc} is {ax_key} in units {new_unit}"
             )
 
         LOG.debug(f"Data shape: {dataset._data.shape}")
+        try:
+            best_unit, best_axis = (
+                dataset._axes_units[databundle.main_axis],
+                databundle.main_axis,
+            )
+        except KeyError:
+            best_unit, best_axis = dataset.longest_axis()
 
+        if self._is_preview:
+            curves_limit = self._preview_columns if flip_array else self._preview_lines
+        else:
+            curves_limit = (
+                dataset._data.shape[0] if flip_array else dataset._data.shape[1]
+            )
+
+        multi_curves = np.vstack(
+            list(
+                dataset.curves_vs_axis(
+                    (best_unit, best_axis), max_limit=curves_limit, skip_label_text=True
+                ).values()
+            )
+        )
         # Add corner nil
-        xaxis = prepend(0.0, new_axes[axis_numbers[1]].flat)
+        xaxis = prepend("_", new_axes[axis_numbers[flip_array]].flat)
 
         # Add axes to data
-        data_lines = zip(new_axes[axis_numbers[0]].flat, dataset.data, strict=True)
+        data_lines = zip(
+            dataset._curve_labels.values(),
+            multi_curves,
+            strict=True,
+        )
 
         # Put xaxis in
         temp = prepend(xaxis, data_lines)

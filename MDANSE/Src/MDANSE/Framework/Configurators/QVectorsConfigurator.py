@@ -69,7 +69,8 @@ class QVectorsConfigurator(IConfigurator):
         self._original_input = value
 
         trajConfig = self.configurable[self.dependencies["trajectory"]]
-        self.error_status = "NONE"
+        self.error_status = "OK"
+        self.warning_status = ""
         try:
             if not isinstance(value, tuple):
                 raise Exception(f"Q vectors setting must be a tuple {value}")

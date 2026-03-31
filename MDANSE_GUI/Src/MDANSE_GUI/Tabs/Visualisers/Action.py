@@ -443,11 +443,11 @@ class Action(QWidget):
         has_warning = False
         for widget in self._widgets:
             widget.clear_error()
+            widget.mark_warning(widget._configurator.warning_status)
+            has_warning = has_warning or widget.has_warning
             if not widget._configurator.valid:
                 allow = False
                 widget.mark_error(widget._configurator.error_status, silent=True)
-            widget.mark_warning(widget._configurator.warning_status)
-            has_warning = has_warning or widget.has_warning
         if self.execute_button is not None:
             self.execute_button.setEnabled(allow)
             self.save_button.setEnabled(allow)

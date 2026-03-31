@@ -496,7 +496,9 @@ class SingleDataset:
         self,
         index_tuple: list[int],
         axis_lookup: list[str],
-    ) -> str:
+        *,
+        skip_text: bool = False,
+    ) -> str | float:
         """Get a meaningful label for a subset of data.
 
         Used when plotting 1D arrays out of a multidimensional array.
@@ -504,14 +506,16 @@ class SingleDataset:
         Parameters
         ----------
         index_tuple : list[int]
-            indices of the 1D data array position in the ND array
+            indices of the 1D data array position in the ND array.
         axis_lookup : list[str]
-            Names of the axes to use
+            Names of the axes to use.
+        skip_text : bool, optional
+            If set to true, omits the text parts of the label. By default False.
 
         Returns
         -------
-        str
-            A string label for the plot legend.
+        str | float
+            A string label for the plot legend or a number for Text plotter.
 
         """
         if self._n_dim < 2:
@@ -540,13 +544,17 @@ class SingleDataset:
                 picked_value = round(picked_value, 1)
 
             label += f"{axis_label}={picked_value} {axis_unit}, "
+            if skip_text:
+                return float(picked_value)
         return label.rstrip(", ")
 
     def curves_vs_axis(
         self,
         x_axis_details: tuple[str, str],
         max_limit: int = 1,
-    ) -> list[np.ndarray]:
+        *,
+        skip_label_text: bool = False,
+    ) -> dict[int, np.ndarray]:
         """Prepare a set of curves for plotting.
 
         Parameters
@@ -555,10 +563,12 @@ class SingleDataset:
             Name and original unit of the primary plotting axis
         max_limit : int, optional
             Maximum number of curves allowed by plotter, by default 1
+        skip_label_text: bool, optional
+            Whether to skip the axis name and unit in the curve label, by default False.
 
         Returns
         -------
-        list[np.ndarray]
+        dict[int, np.ndarray]
             List of data arrays ready for plotting
 
         """
@@ -610,6 +620,7 @@ class SingleDataset:
                 self._curve_labels[index_tuple] = self.generate_curve_label(
                     index_tuple,
                     label_lookup,
+                    skip_text=skip_label_text,
                 )
 
         return self._curves

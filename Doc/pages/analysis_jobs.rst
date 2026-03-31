@@ -69,9 +69,8 @@ Inputs:
 
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=(0, 1, 1)
-- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default={"0": {"function_name": "select_all", "operation_type": "union"}}
 - fold: :ref:`configurator-analysis-BooleanConfigurator` default=False
-- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=molecule
 - output_files: :ref:`configurator-analysis-OutputTrajectoryConfigurator` default=N/A
 
 
@@ -160,7 +159,7 @@ Calculate the vibrational density of states of the trajectory.
 
 The Density Of States describes the number of vibrations per unit frequency.
 In MDANSE the DOS calculation returns the Fourier transform (FT) of the weighted
-Velocity AutoCorrelation Function (VACF). With an atomic mass weighting scheme
+Velocity Correlation Function (vcf). With an atomic mass weighting scheme
 the MDANSE DOS result is proportional to the actual vibrational DOS.
 The partial DOS corresponds to selected sets of atoms or molecules.
 
@@ -404,7 +403,6 @@ Inputs:
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
-- weights: :ref:`configurator-analysis-WeightsConfigurator` default=N/A
 - output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
@@ -498,14 +496,14 @@ Inputs:
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
 
-.. _analysis-reference-PositionAutoCorrelationFunction:
+.. _analysis-reference-PositionCorrelationFunction:
 
-PositionAutoCorrelationFunction
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PositionCorrelationFunction
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Calculates the position autocorrelation function.
+Calculates the position correlation function.
 
-Like the velocity autocorrelation function, but using positions instead of
+Like the velocity correlation function, but using positions instead of
 velocities.
 
 Inputs:
@@ -529,9 +527,9 @@ PositionPowerSpectrum
 Calculates the position power spectrum.
 
 Power spectrum (using Fast Fourier Transform) of atomic trajectories calculated
-from the Positional Autocorrelation Function (PACF). The calculation result
+from the Positional correlation Function (PCF). The calculation result
 is similar to the density of states, which is calculated from the velocity
-autocorrelation function. In fact, PPS and DOS may show the same features
+correlation function. In fact, PPS and DOS may show the same features
 in systems where position and velocity are strongly correlated (i.e. solids).
 
 This calculation is used by TrajectoryFilter to create a preview of the spectrum,
@@ -836,7 +834,7 @@ Inputs:
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=(0, 1, 1)
 - unit_cell: :ref:`configurator-analysis-UnitCellConfigurator` default=([[1, 0, 0], [0, 1, 0], [0, 0, 1]], False)
-- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default={"0": {"function_name": "select_all", "operation_type": "union"}}
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
 - atom_charges: :ref:`configurator-analysis-PartialChargeConfigurator` default={}
 - molecule_tolerance: :ref:`configurator-analysis-OptionalFloatConfigurator` default=[False, 0.04]
@@ -863,15 +861,12 @@ and the modified spectrum is Fourier-transformed back into positions.
 Inputs:
 
 - trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
-- frames: :ref:`configurator-analysis-CorrelationFramesConfigurator` default=N/A
-- instrument_resolution: :ref:`configurator-analysis-InstrumentResolutionConfigurator` default=N/A
-- projection: :ref:`configurator-analysis-ProjectionConfigurator` default=N/A
+- frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
+- pps_input_file: :ref:`configurator-analysis-HDFInputFileConfigurator` default=
 - trajectory_filter: :ref:`configurator-analysis-TrajectoryFilterConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
-- weights: :ref:`configurator-analysis-WeightsConfigurator` default=atomic_weight
 - output_files: :ref:`configurator-analysis-OutputTrajectoryConfigurator` default=N/A
-- running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
 
 .. _analysis-reference-VanHoveFunctionDistinct:
@@ -936,14 +931,14 @@ Inputs:
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
 
-.. _analysis-reference-VelocityAutoCorrelationFunction:
+.. _analysis-reference-VelocityCorrelationFunction:
 
-VelocityAutoCorrelationFunction
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+VelocityCorrelationFunction
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Calculates the velocity autocorrelation function of the selected atoms.
+Calculates the velocity correlation function of the selected atoms.
 
-The Velocity AutoCorrelation Function (VACF) is a property describing the dynamics
+The Velocity Correlation Function (VCF) is a property describing the dynamics
 of a molecular system. It reveals the underlying nature of the forces acting on
 the system. Its Fourier Transform gives the cartesian density of states for a set
 of atoms.

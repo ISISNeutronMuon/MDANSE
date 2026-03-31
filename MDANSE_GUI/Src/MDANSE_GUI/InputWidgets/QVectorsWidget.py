@@ -36,6 +36,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE.Framework.Configurators.BooleanConfigurator import BOOL_MAPPING
 from MDANSE.Framework.Configurators.QVectorsConfigurator import QVectorsConfigurator
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.MLogging import LOG
@@ -171,6 +172,13 @@ class VectorModel(QStandardItemModel):
             return float(value)
         elif vtype == "IntegerConfigurator":
             return int(value)
+        elif vtype == "BooleanConfigurator":
+            try:
+                value = BOOL_MAPPING[value.lower() if isinstance(value, str) else value]
+            except (KeyError, ValueError):
+                LOG.warning("Could not parse %s as logical true/false value", value)
+            else:
+                return value
         else:
             return value
 
@@ -440,7 +448,6 @@ class QVectorsWidget(WidgetBase):
         self._selector.setToolTip(
             "The q vectors will be generated using the method chosen here.",
         )
-        self._model.input_is_valid.connect(self.validate_model_parameters)
         policy = self._view.sizePolicy()
         policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
         self._view.setSizePolicy(policy)
@@ -449,14 +456,6 @@ class QVectorsWidget(WidgetBase):
             QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
         )
         self.value_changed.connect(self.preview_vectors)
-
-    @Slot(bool)
-    def validate_model_parameters(self, all_are_correct: bool):
-        """Update the widget appearance based on the input validation results."""
-        if all_are_correct:
-            self.clear_error()
-        else:
-            self.mark_error("Some entries in the parameter table are invalid.")
 
     @Slot()
     def fail_early(self):
