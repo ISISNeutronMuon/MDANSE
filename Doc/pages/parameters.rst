@@ -606,7 +606,7 @@ Range configurator for Q vector generation.
 QVectorsConfigurator
 --------------------
 
-default=('SphericalLatticeQVectors', {'shells': (0.1, 5, 0.1), 'width': 0.1, 'n_vectors': 50, 'seed': 0})
+default=('SphericalLatticeQVectors', {'shells': (0.1, 5, 0.1), 'width': 0.1, 'n_vectors': 1000, 'seed': 0})
 
 Creates and configures a q-vector generator.
 
