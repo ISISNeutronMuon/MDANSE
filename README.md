@@ -33,13 +33,14 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5](https://doi.org/10.1021/acs.jcim.6b0057
 This is the first full release of MDANSE 2.0, consisting of two Python packages,
 MDANSE (the analysis code) and MDANSE_GUI (the graphical user interface).
 
-Considering the large number of different MD engines and analysis types,
-it is still possible that some conversion or analysis runs will not
-produce the expected results. Please report any problems
-you experience while using MDANSE by adding them to the
-[GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
-You can also send a message to MDANSE-help@stfc.ac.uk to get in touch
-with MDANSE developers.
+> [!NOTE]
+> Considering the large number of different MD engines and analysis types,
+> it is still possible that some conversion or analysis runs will not
+> produce the expected results. Please report any problems
+> you experience while using MDANSE by adding them to the
+> [GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
+> You can also send a message to MDANSE-help@stfc.ac.uk to get in touch
+> with MDANSE developers.
 
 ## Quick start: installation
 

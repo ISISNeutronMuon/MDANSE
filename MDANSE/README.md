@@ -32,13 +32,14 @@ J Chem Inf Model. 57(1):1-5 (2017).
 
 This is the first release of MDANSE 2.0.0.
 
-Considering the large number of different MD engines and analysis types,
-it is still possible that some conversion or analysis runs will not
-produce the expected results. Please report any problems
-you experience while using MDANSE by adding them to the
-[GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
-You can also send a message to MDANSE-help@stfc.ac.uk to get in touch
-with MDANSE developers.
+> [!NOTE]
+> Considering the large number of different MD engines and analysis types,
+> it is still possible that some conversion or analysis runs will not
+> produce the expected results. Please report any problems
+> you experience while using MDANSE by adding them to the
+> [GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
+> You can also send a message to MDANSE-help@stfc.ac.uk to get in touch
+> with MDANSE developers.
 
 ## Quick start: installation
 
