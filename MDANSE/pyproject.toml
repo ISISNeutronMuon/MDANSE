@@ -41,7 +41,6 @@ dependencies = [
     "mdtraj",
     "networkx",
     "more-itertools",
-    "fpsample>=1.0.2",
 ]
 
 [project.optional-dependencies]
