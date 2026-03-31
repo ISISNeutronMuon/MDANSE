@@ -279,7 +279,7 @@ A note on crystals
 ------------------
 
 If you are simulating a crystal (i.e. a highly ordered, anisotropic material), you will
-be interested in calculating the observables such as the :math:`S(Q,\omega)` at specific
+be interested in calculating the observables such as the :math:`S(\mathbf{q},\omega)` at specific
 points in reciprocal space. You will most likely pick a q-vector generator such as
 :ref:`qvectors-reference-DispersionLatticeQVectors`, which will generate a single
 lattice vector per calculated data point. The concept of convergence in respect to
@@ -289,7 +289,7 @@ Isotropic systems
 -----------------
 
 For isotropic, disordered systems, the calculation results will be averaged over
-vectors with similar :math:`|Q|` and output as a function of :math:`|Q|`. Spherical
+vectors with similar :math:`\vert \mathbf{q} \vert = q` and output as a function of :math:`q`. Spherical
 averaging is most commonly applied, as many systems can be assumed to be fully isotropic.
 :ref:`qvectors-reference-SphericalLatticeQVectors` is normally used for calculating
 the quasielastic neutron scattering results in isotropic systems.
@@ -300,7 +300,7 @@ or rotating the simulated system to calculate the scattering results for differe
 orientations of the system. This allows the code to approximate the correct scattering
 experiment results which would otherwise require a significantly larger simulation.
 A physical sample in a real-life experiment typically contains in
-the order of :math:`10^23` atoms (the Avogadro number), while
+the order of :math:`10^{23}` atoms (the Avogadro number), while
 many MD trajectories contain less than :math:`10^6` atoms. Therefore, an actual experiment will
 sample many more configurations of atoms than it is possible to sample in a single MD simulation.
 Performing the calculation on multiple Q vectors maximises the information
@@ -320,7 +320,7 @@ vector generators which apply the same approach in different numbers of dimensio
   * :ref:`qvectors-reference-SphericalQVectors`.
 
 Each of these will generate vectors randomly within "shells", following a normal distribution
-of :math:`|Q|` around the specified mean value for each shell. The spatial distribution
+of :math:`q` around the specified mean value for each shell. The spatial distribution
 is constrained to a single line for the
 linear generator, while for the other two it will be uniform in angles on a circle
 and a sphere, respectively.
@@ -333,7 +333,7 @@ Lattice vector generators
 
 Once the random vector distribution has been created, the lattice vector generators
 round the **hkl** coordinates of all the vectors to the nearest integer values.
-This will result in some of the vectors arriving at values of :math:`|Q|` outside of
+This will result in some of the vectors arriving at values of :math:`q` outside of
 the specified range, which will then be discarded from the total population.
 From the remaining vectors, it is likely that multiple randomly generated vectors
 will end up at the same HKL coordinates after rounding. The number of random
@@ -346,10 +346,10 @@ the number of unique vectors will be small (possibly as low as 6 for the
 smallest shell in a cubic system). For these, the number of vectors can
 be increased without increasing the total calculation time, resulting
 in the relative vector weights converging to equal values. However,
-for wider shells including vectors with different values of :math:`|Q|`,
+for wider shells including vectors with different values of :math:`q`,
 the weights will also scale the contributions of vectors to the results
-based on the difference between the nominal value of :math:`|Q|` for the
-shell and actual values of :math:`|Q|` for specific vectors.
+based on the difference between the nominal value of :math:`q` for the
+shell and actual values of :math:`q` for specific vectors.
 
 For large vector shells which contain many unique vectors, increasing the
 number of vectors used for sampling will add new lattice vectors to the
