@@ -50,7 +50,7 @@ class LatticeQVectors(IQVectors):
         from ase.neighborlist import _calc_expansion
 
         max_h, max_k, max_l = _calc_expansion(
-            2 * np.pi * self._unit_cell.inverse, (True, True, True), cutoff / 2
+            2 * np.pi * self._unit_cell.inverse.T, (True, True, True), cutoff / 2
         )
 
         h_range = np.arange(-max_h, max_h + 1)
