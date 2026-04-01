@@ -25,13 +25,13 @@ class AtomSelectionConfigurator(IConfigurator):
     """Selects atoms in trajectory based on the input string.
 
     This configurator allows the selection of a specific set of
-    atoms on which the analysis will be performed. The defaults setting
+    atoms on which the analysis will be performed. The default setting
     selects all atoms.
 
     Attributes
     ----------
     _default : str
-        The defaults selection setting.
+        The default selection setting.
 
     """
 

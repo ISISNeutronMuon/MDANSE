@@ -48,7 +48,7 @@ class LinearLatticeQVectors(LatticeQVectors):
             "default": (0, 5.0, 0.5),
         },
     )
-    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
+    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 1000})
     settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
     settings["force_equal_weights"] = ("BooleanConfigurator", {"default": False})
     settings["axis"] = (

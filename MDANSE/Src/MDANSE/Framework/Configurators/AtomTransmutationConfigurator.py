@@ -104,7 +104,7 @@ class AtomTransmutationConfigurator(IConfigurator):
     Attributes
     ----------
     _default : str
-        The defaults transmutation setting.
+        The default transmutation setting.
 
     """
 

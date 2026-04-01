@@ -538,7 +538,9 @@ class SingleDataset:
                 label += f"{axis_label} has no values, unit {axis_unit}"
                 continue
 
-            if significant_digit < 0:
+            if significant_digit < -20:
+                picked_value = 0
+            elif significant_digit < 0:
                 picked_value = round(picked_value, abs(significant_digit) + 2)
             else:
                 picked_value = round(picked_value, 1)
