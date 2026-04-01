@@ -83,6 +83,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
             q_vectors = self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell)
 
             selection = fpsampling(q_vectors.T, nvecs_per_shell)
+            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
 
             if self._configuration["force_equal_weights"]["value"]:
