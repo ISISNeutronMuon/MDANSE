@@ -46,7 +46,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
             "default": (0, 5.0, 0.5),
         },
     )
-    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
+    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 1000})
     settings["force_equal_weights"] = ("BooleanConfigurator", {"default": False})
     settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
 

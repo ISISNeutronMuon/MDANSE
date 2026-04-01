@@ -201,22 +201,24 @@ Analysis Inputs
 
 AtomSelectionConfigurator
 -------------------------
+.. code-block:: Python
 
-default={
-        "0": {"function_name": "select_all", "operation_type": "union"},
-        "1": {"function_name": "select_dummy", "operation_type": "difference"}
-    }
+  default={
+           "0": {"function_name": "select_all", "operation_type": "union"},
+           "1": {"function_name": "select_dummy", "operation_type": "difference"}
+          }
 
 Selects atoms in trajectory based on the input string.
 
 This configurator allows the selection of a specific set of
-atoms on which the analysis will be performed. The defaults setting
+atoms on which the analysis will be performed. The default setting
 selects all atoms.
 
 Attributes
 ----------
 _default : str
-The defaults selection setting.
+
+The default selection setting.
 
 
 
@@ -240,7 +242,8 @@ part of the molecular system.
 Attributes
 ----------
 _default : str
-The defaults transmutation setting.
+
+The default transmutation setting.
 
 
 
@@ -603,7 +606,7 @@ Range configurator for Q vector generation.
 QVectorsConfigurator
 --------------------
 
-default=('SphericalLatticeQVectors', {'shells': (0.1, 5, 0.1), 'width': 0.1, 'n_vectors': 50, 'seed': 0})
+default=('SphericalLatticeQVectors', {'shells': (0.1, 5, 0.1), 'width': 0.1, 'n_vectors': 1000, 'seed': 0})
 
 Creates and configures a q-vector generator.
 
@@ -671,7 +674,8 @@ The filters are provided by the scipy.signal library.
 Attributes
 ----------
 _default : str
-The defaults selection setting.
+
+The default selection setting.
 
 
 
