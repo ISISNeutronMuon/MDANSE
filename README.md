@@ -203,6 +203,7 @@ potential experiment. The following properties can be computed:
 <details><summary>Trajectory</summary><ul>
 <li>Average Structure</li>
 <li>Center of Masses Trajectory</li>
+<li>Trajectory Editor</li>
 <li>Trajectory Filter</li>
 </ul></details>
 
