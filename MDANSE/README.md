@@ -210,10 +210,9 @@ and the science can all be found on
 
 ## Citing MDANSE
 
-If you used MDANSE in your research, please cite the following paper:
-
->MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations.
-G. Goret, B. Aoun, E. Pellegrini. J Chem Inf Model. (2017) 57(1):1-5.
+If you used MDANSE in your research, please cite it according to the CITATION.cff file
+in the [MDANSE GitHub repository](https://github.com/ISISNeutronMuon/MDANSE).
+On GitHub, you can use the "cite this repository" link to generate the citation.
 
 ## License
 

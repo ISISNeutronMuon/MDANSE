@@ -216,10 +216,8 @@ and the science can all be found on
 
 ## Citing MDANSE
 
-If you used MDANSE in your research, please cite the following paper:
-
->[G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations",
-J. Chem. Inf. Model. 2017, 57, 1, 1–5](https://doi.org/10.1021/acs.jcim.6b00571)
+If you used MDANSE in your research, please cite it according to the CITATION.cff file.
+You can use the "cite this repository" link to generate the citation.
 
 ## License
 
