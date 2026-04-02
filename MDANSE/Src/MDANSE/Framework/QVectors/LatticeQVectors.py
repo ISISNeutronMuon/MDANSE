@@ -57,8 +57,5 @@ class LatticeQVectors(IQVectors):
         k_range = np.arange(-max_k, max_k + 1)
         l_range = np.arange(-max_l, max_l + 1)
 
-        recip_lattice_points = np.array(
-            [[h, k, ll] for h in h_range for k in k_range for ll in l_range]
-        )
-
-        return recip_lattice_points.T
+        hs, ks, ls = np.meshgrid(h_range, k_range, l_range, indexing="ij")
+        return np.vstack((hs.ravel(), ks.ravel(), ls.ravel()))
