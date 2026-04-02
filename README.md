@@ -1,4 +1,7 @@
-# MDANSE
+<h1 align="center">
+<img src="https://raw.githubusercontent.com/ISISNeutronMuon/MDANSE/protos/MDANSE_GUI/Src/MDANSE_GUI/Resources/frontpage_logo_mdanse.svg" width="400">
+</h1><br>
+
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mdanse)](https://pypi.org/project/MDANSE/)
 [![PyPI - Version](https://img.shields.io/pypi/v/mdanse?label=mdanse)](https://pypi.org/project/MDANSE/)
