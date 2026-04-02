@@ -147,14 +147,14 @@ potential experiment. The following properties can be computed:
 <details><summary>Dynamics</summary><ul>
 <li>Density of States</li>
 <li>Mean Square Displacement</li>
-<li>Position Autocorrelation Function</li>
+<li>Position Correlation Function</li>
 <li>Position Power Spectrum</li>
 <li>Reorientational Time Correlation Function</li>
 <li>Root Mean Square Deviation</li>
 <li>Root Mean Square Fluctuation</li>
 <li>van Hove function (self)</li>
 <li>van Hove function (distinct)</li>
-<li>Velocity Autocorrelation Function</li>
+<li>Velocity Correlation Function</li>
 </ul></details>
 
 <details><summary>Infrared</summary><ul>
@@ -177,7 +177,6 @@ potential experiment. The following properties can be computed:
 
 <details><summary>Structure</summary><ul>
 <li>Area Per Molecule</li>
-<li>Average Structure</li>
 <li>Coordination Number</li>
 <li>Eccentricity</li>
 <li>Molecular Trace</li>
@@ -193,7 +192,9 @@ potential experiment. The following properties can be computed:
 </ul></details>
 
 <details><summary>Trajectory</summary><ul>
+<li>Average Structure</li>
 <li>Center of Masses Trajectory</li>
+<li>Trajectory Editor</li>
 <li>Trajectory Filter</li>
 </ul></details>
 
