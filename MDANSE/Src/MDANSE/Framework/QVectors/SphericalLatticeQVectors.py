@@ -101,7 +101,9 @@ class SphericalLatticeQVectors(LatticeQVectors):
                     return
                 self._status.update()
 
-    def vectors_within_limits(self, q_min, q_max, batch_size=10000):
+    def vectors_within_limits(
+        self, q_min: float, q_max: float, batch_size: int = 10000
+    ) -> np.ndarray[float] | None:
         """Use _calc_expansion function to "determines the minimum supercell
         (parallelepiped) that contains a sphere of radius `2.0 * rcmax`" and
         then generated the reciprocal lattice points within a shell.
@@ -117,7 +119,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
 
         Returns
         -------
-        npt.NDArray[float]
+        npt.NDArray[float] or None
             Shell of q-vectors.
         """
         from ase.neighborlist import _calc_expansion
