@@ -15,6 +15,9 @@
 #
 from __future__ import annotations
 
+import itertools as it
+
+import more_itertools
 import numpy as np
 from scipy.spatial import KDTree
 
@@ -67,23 +70,14 @@ class SphericalLatticeQVectors(LatticeQVectors):
         self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            # 1.2 * (q + width) just to make sure we don't miss any out.
-            lattice_hkl_vectors = self.get_reciprocal_lattice_hkl(1.2 * (q + width))
-            selection = self.vectors_within_limits(
-                self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),
-                q_min=q - 0.5 * width,
-                q_max=q + 0.5 * width,
+            q_vectors = self.vectors_within_limits(
+                q_min=q - 0.5 * width, q_max=q + 0.5 * width
             )
-
-            if not np.any(selection):
+            if q_vectors is None:
                 self._configuration["q_vectors"][q] = None
                 continue
 
-            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
-            q_vectors = self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell)
-
             selection = fpsampling(q_vectors.T, nvecs_per_shell)
-            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
 
             if self._configuration["force_equal_weights"]["value"]:
@@ -100,12 +94,55 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 "n_q_vectors": q_vectors.shape[1],
                 "weights": weights,
                 "q": q,
-                "hkls": lattice_hkl_vectors,
+                "hkls": self.qvectors_to_hkl(q_vectors, self._unit_cell),
             }
             if self._status is not None:
                 if self._status.is_stopped():
                     return
                 self._status.update()
+
+    def vectors_within_limits(self, q_min, q_max, batch_size=10000):
+        """Use _calc_expansion function to "determines the minimum supercell
+        (parallelepiped) that contains a sphere of radius `2.0 * rcmax`" and
+        then generated the reciprocal lattice points within a shell.
+
+        Parameters
+        ----------
+        q_min : float
+            Lower limit of |q|
+        q_max : float
+            Upper limit of |q|
+        batch_size : int
+            Number of hkl vectors to convert at a time.
+
+        Returns
+        -------
+        npt.NDArray[float]
+            Shell of q-vectors.
+        """
+        from ase.neighborlist import _calc_expansion
+
+        max_h, max_k, max_l = _calc_expansion(
+            2 * np.pi * self._unit_cell.inverse.T, (True, True, True), 1.2 * q_max / 2
+        )
+        h_range = np.arange(-max_h, max_h + 1)
+        k_range = np.arange(-max_k, max_k + 1)
+        l_range = np.arange(-max_l, max_l + 1)
+
+        selected = []
+        for hkl in more_itertools.chunked(
+            it.product(h_range, k_range, l_range), batch_size
+        ):
+            q_vectors = self.hkl_to_qvectors(np.array(hkl).T, self._unit_cell)
+            lengths = np.linalg.norm(q_vectors, axis=0)
+            mask = (lengths >= q_min) & (lengths <= q_max)
+            if np.any(mask):
+                selected.append(q_vectors[:, mask])
+
+        if selected:
+            return np.hstack(selected)
+        else:
+            return None
 
 
 def fpsampling(q_vectors: np.ndarray, n_vecs: int) -> np.ndarray:
