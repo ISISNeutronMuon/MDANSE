@@ -24,7 +24,7 @@ from MDANSE.Framework.QVectors.CircularQVectors import (
     circle_of_vectors,
     circle_rotation_matrix,
 )
-from MDANSE.Framework.QVectors.LatticeQVectors import fpsampling, LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors, fpsampling
 
 
 class CircularLatticeQVectors(LatticeQVectors):

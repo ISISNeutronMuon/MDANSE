@@ -20,7 +20,7 @@ import random
 import numpy as np
 from scipy.spatial import KDTree
 
-from MDANSE.Framework.QVectors.LatticeQVectors import fpsampling, LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors, fpsampling
 from MDANSE.Framework.QVectors.LinearQVectors import linear_vectors
 
 

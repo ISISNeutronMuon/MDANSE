@@ -18,7 +18,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.spatial import KDTree
 
-from MDANSE.Framework.QVectors.LatticeQVectors import fpsampling, LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors, fpsampling
 from MDANSE.Framework.QVectors.SphericalQVectors import spherical_vectors
 
 
