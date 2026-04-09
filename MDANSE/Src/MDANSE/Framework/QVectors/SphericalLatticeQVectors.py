@@ -15,13 +15,10 @@
 #
 from __future__ import annotations
 
-import itertools as it
-
-import more_itertools
 import numpy as np
 from scipy.spatial import KDTree
 
-from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import fpsampling, LatticeQVectors
 from MDANSE.Framework.QVectors.SphericalQVectors import spherical_vectors
 
 
@@ -70,14 +67,27 @@ class SphericalLatticeQVectors(LatticeQVectors):
         self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            q_vectors = self.vectors_within_limits(
-                q_min=q - 0.5 * width, q_max=q + 0.5 * width
+            samples = spherical_vectors(q, width, n_samples)
+            lattice_hkl_vectors, _ = self.lattice_vectors_with_weights(
+                samples,
+                self._unit_cell,
             )
-            if q_vectors is None:
+            q_vectors = self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell)
+
+            selection = self.vectors_within_limits(
+                q_vectors,
+                q_min=q - 0.5 * width,
+                q_max=q + 0.5 * width,
+            )
+            if not np.any(selection):
                 self._configuration["q_vectors"][q] = None
                 continue
 
+            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
+            q_vectors = q_vectors.T[selection].T
+
             selection = fpsampling(q_vectors.T, nvecs_per_shell)
+            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
 
             if self._configuration["force_equal_weights"]["value"]:
@@ -94,97 +104,9 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 "n_q_vectors": q_vectors.shape[1],
                 "weights": weights,
                 "q": q,
-                "hkls": self.qvectors_to_hkl(q_vectors, self._unit_cell),
+                "hkls": lattice_hkl_vectors,
             }
             if self._status is not None:
                 if self._status.is_stopped():
                     return
                 self._status.update()
-
-    def vectors_within_limits(
-        self, q_min: float, q_max: float, batch_size: int = 10000
-    ) -> np.ndarray[float] | None:
-        """Use _calc_expansion function to "determines the minimum supercell
-        (parallelepiped) that contains a sphere of radius `2.0 * rcmax`" and
-        then generated the reciprocal lattice points within a shell.
-
-        Parameters
-        ----------
-        q_min : float
-            Lower limit of |q|
-        q_max : float
-            Upper limit of |q|
-        batch_size : int
-            Number of hkl vectors to convert at a time.
-
-        Returns
-        -------
-        npt.NDArray[float] or None
-            Shell of q-vectors.
-        """
-        from ase.neighborlist import _calc_expansion
-
-        max_h, max_k, max_l = _calc_expansion(
-            2 * np.pi * self._unit_cell.inverse.T, (True, True, True), 1.2 * q_max / 2
-        )
-        h_range = np.arange(-max_h, max_h + 1)
-        k_range = np.arange(-max_k, max_k + 1)
-        l_range = np.arange(-max_l, max_l + 1)
-
-        selected = []
-        for hkl in more_itertools.chunked(
-            it.product(h_range, k_range, l_range), batch_size
-        ):
-            q_vectors = self.hkl_to_qvectors(np.array(hkl).T, self._unit_cell)
-            lengths = np.linalg.norm(q_vectors, axis=0)
-            mask = (lengths >= q_min) & (lengths <= q_max)
-            if np.any(mask):
-                selected.append(q_vectors[:, mask])
-
-        if selected:
-            return np.hstack(selected)
-        else:
-            return None
-
-
-def fpsampling(q_vectors: np.ndarray, n_vecs: int) -> np.ndarray:
-    """Basic farthest point sampling function used to sample q-vectors.
-
-    Parameters
-    ----------
-    q_vectors : np.ndarray
-        Array of q_vectors.
-    n_vecs : int
-        Number of vectors to sample.
-
-    Returns
-    -------
-    np.ndarray
-        Index of selected q-vectors.
-
-    Raises
-    ------
-    ValueError
-        When `n_vecs` is zero or less than zero.
-    """
-    n_points = q_vectors.shape[0]
-    if n_vecs >= n_points:
-        return np.arange(n_points)
-    elif n_points == 1:
-        return np.array([np.random.randint(0, n_points)])
-    elif n_points <= 0:
-        raise ValueError("n_vecs should be greater than zero.")
-
-    dists = np.full(n_points, np.inf)
-    selected = np.random.randint(n_points)
-    selection = np.zeros(n_vecs, dtype=int)
-    selection[0] = selected
-
-    for i in range(1, n_vecs):
-        diff = q_vectors - q_vectors[selected]
-        dist_sq = np.sum(diff**2, axis=1)
-        dists = np.minimum(dists, dist_sq)
-        selected = np.argmax(dists)
-        selection[i] = selected
-
-    return selection

@@ -18,8 +18,9 @@ from __future__ import annotations
 import random
 
 import numpy as np
+from scipy.spatial import KDTree
 
-from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
+from MDANSE.Framework.QVectors.LatticeQVectors import fpsampling, LatticeQVectors
 from MDANSE.Framework.QVectors.LinearQVectors import linear_vectors
 
 
@@ -48,7 +49,8 @@ class LinearLatticeQVectors(LatticeQVectors):
             "default": (0, 5.0, 0.5),
         },
     )
-    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 1000})
+    settings["n_samples"] = ("IntegerConfigurator", {"mini": 1, "default": 100000})
+    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 100})
     settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
     settings["force_equal_weights"] = ("BooleanConfigurator", {"default": False})
     settings["axis"] = (
@@ -65,6 +67,7 @@ class LinearLatticeQVectors(LatticeQVectors):
         axis = self._configuration["axis"]["vector"].array
 
         nvecs_per_shell = self._configuration["n_vectors"]["value"]
+        n_samples = self._configuration["n_samples"]["value"]
 
         if self._status is not None:
             self._status.start(self._configuration["shells"]["number"])
@@ -72,28 +75,42 @@ class LinearLatticeQVectors(LatticeQVectors):
         self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            q_vectors = linear_vectors(q, width, nvecs_per_shell, axis)
-            lattice_hkl_vectors, weights = self.lattice_vectors_with_weights(
-                q_vectors,
+            samples = linear_vectors(q, width, n_samples, axis)
+            lattice_hkl_vectors, _ = self.lattice_vectors_with_weights(
+                samples,
                 self._unit_cell,
             )
+            q_vectors = self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell)
+
             selection = self.vectors_within_limits(
-                self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),
+                q_vectors,
                 q_min=q - 0.5 * width,
                 q_max=q + 0.5 * width,
             )
-            weights = weights[selection]
-            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
-            if not len(weights):
+            if not np.any(selection):
                 self._configuration["q_vectors"][q] = None
                 continue
+
+            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
+            q_vectors = q_vectors.T[selection].T
+
+            selection = fpsampling(q_vectors.T, nvecs_per_shell)
+            lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
+            q_vectors = q_vectors.T[selection].T
+
             if self._configuration["force_equal_weights"]["value"]:
-                weights[:] = 1.0
+                weights = np.ones(q_vectors.shape[1])
+            else:
+                samples = linear_vectors(q, width, n_samples, axis)
+                tree = KDTree(q_vectors.T)
+                _, indices = tree.query(samples.T)
+                weights = np.bincount(indices, minlength=q_vectors.shape[1])
+                weights = q_vectors.shape[1] * weights / n_samples
 
             self._configuration["q_vectors"][q] = {
-                "q_vectors": self.hkl_to_qvectors(lattice_hkl_vectors, self._unit_cell),
+                "q_vectors": q_vectors,
+                "n_q_vectors": q_vectors.shape[1],
                 "weights": weights,
-                "n_q_vectors": np.sum(weights),
                 "q": q,
                 "hkls": lattice_hkl_vectors,
             }
