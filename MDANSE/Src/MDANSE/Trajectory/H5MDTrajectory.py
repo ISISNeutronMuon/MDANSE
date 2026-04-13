@@ -416,9 +416,12 @@ class H5MDTrajectory(TrajectoryFile):
 
         try:
             time = self._h5_file[self.time_key][:] * self.unit_conv["time"]
-        except Exception:
-            LOG.warning("Time may be invalid in H5MD file.")
-            time = np.array([], dtype=np.float64)
+        except ValueError:
+            time_dset = self._h5_file[self.time_key]
+            time_offset = time_dset.attrs.get("offset", 0.0)
+            time = (
+                np.arange(len(self)) * time_dset[()] + time_offset
+            ) * self.unit_conv["time"]
 
         return time
 
