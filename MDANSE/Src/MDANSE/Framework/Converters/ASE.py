@@ -183,10 +183,13 @@ class ASE(Converter):
         if self._isPeriodic:
             unitCell = frame.cell.array
             if np.allclose(unitCell, 0.0):
-                LOG.warning(f"Using initial unit cell: {self._backup_cell}")
+                LOG.warning(
+                    "Unit cell missing at frame %s. Using initial unit cell: %s",
+                    index,
+                    self._backup_cell,
+                )
                 unitCell = self._backup_cell * self.units["length"]
             else:
-                LOG.info(f"Unit cell from frame: {unitCell}")
                 unitCell *= self.units["length"]
             unitCell = UnitCell(unitCell)
 

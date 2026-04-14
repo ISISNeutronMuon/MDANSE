@@ -169,4 +169,4 @@ class DataPlotter(QWidget):
         self._model.clear()
         for col_num in range(4, 10):
             self._selection_viewer.hideColumn(col_num)
-        LOG.info("Cleared the plot")
+        LOG.debug("Cleared the plot")

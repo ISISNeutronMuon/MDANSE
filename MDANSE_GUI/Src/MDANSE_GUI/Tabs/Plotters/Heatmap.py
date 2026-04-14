@@ -388,8 +388,6 @@ class Heatmap(Plotter):
         data = line.get_array().T
         extent = line.get_extent()
 
-        LOG.warning("%s", data.shape)
-
         x, y = (
             np.linspace(start, stop, n)
             for (start, stop), n in zip(

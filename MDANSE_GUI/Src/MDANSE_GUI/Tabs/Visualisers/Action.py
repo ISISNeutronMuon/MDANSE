@@ -271,7 +271,7 @@ class Action(QWidget):
                 self._widgets_in_layout[key] = widget
                 self._widgets.append(input_widget)
                 self._trajectory_configurator = input_widget._configurator
-            LOG.info("Set up input trajectory")
+            LOG.debug("Set up input trajectory")
         for key, value in settings.items():
             if key in self._widgets_in_layout:
                 continue
@@ -310,7 +310,7 @@ class Action(QWidget):
                 )
                 if self._use_preview and has_preview:
                     input_widget.value_changed.connect(self.show_output_prediction)
-                LOG.info(f"Set up the right widget for {key}")
+                LOG.debug(f"Set up the right widget for {key}")
             # self.handlers[key] = data_handler
         self._has_been_initialised = True
         self.check_inputs()

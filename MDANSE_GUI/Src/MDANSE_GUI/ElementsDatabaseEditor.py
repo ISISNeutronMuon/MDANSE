@@ -410,8 +410,8 @@ class ElementModel(QStandardItemModel):
         column = idx.column()
         row_name = self.verticalHeaderItem(row).text()
         column_name = self.horizontalHeaderItem(column).text()
-        LOG.info(f"data:{data}, text:{text}, row:{row}, column:{column}")
-        LOG.info(f"column name={column_name}, row name={row_name}")
+        LOG.debug(f"data:{data}, text:{text}, row:{row}, column:{column}")
+        LOG.debug(f"column name={column_name}, row name={row_name}")
         self.database.set_value(row_name, column_name, text)
         self.save_changes()
 
@@ -610,7 +610,7 @@ class ElementModel(QStandardItemModel):
         if new_label not in self.database.default_atoms_types:
             item.setForeground(self.custom_header_brush)
         self.setVerticalHeaderItem(self.rowCount() - 1, item)
-        LOG.info(f"self.all_row_names has length: {len(self.all_row_names)}")
+        LOG.debug(f"self.all_row_names has length: {len(self.all_row_names)}")
 
     @Slot()
     def copy_rows(self):
@@ -708,7 +708,7 @@ class ElementModel(QStandardItemModel):
             item.setForeground(self.custom_header_brush)
         self.setHorizontalHeaderItem(self.columnCount() - 1, item)
         self.parent().set_column_delegate(self.columnCount() - 1)
-        LOG.info(f"self.all_column_names has length: {len(self.all_column_names)}")
+        LOG.debug(f"self.all_column_names has length: {len(self.all_column_names)}")
 
     @Slot(dict)
     def add_new_column(self, input_variables: dict):

@@ -49,7 +49,7 @@ class ActionsTree(QTreeView):
         model = self.model()
         item = model.itemFromIndex(index)
         text = item.text()
-        LOG.info(f"tree: clicked on {text}")
+        LOG.debug(f"tree: clicked on {text}")
         self.jobname_selected.emit(text)
 
     @Slot(QModelIndex)

@@ -428,12 +428,10 @@ class Text(Plotter):
             optionally, new QTextBrowser to be used
 
         """
-        LOG.debug("Text.clear stared")
         target = self._figure if figure is None else figure
         if target is None:
             return
         target.clear()
-        LOG.debug("Text.clear finished")
 
     def adjust_formatter(
         self,
@@ -475,13 +473,11 @@ class Text(Plotter):
             for displaying text.
 
         """
-        LOG.debug("Text.get_figure stared")
         target = self._figure if figure is None else figure
         if target is None:
             LOG.error(f"PlottingContext can't plot to {target}")
             return None
         target.clear()
-        LOG.debug("Text.get_figure finished")
         return target
 
     def apply_settings(self, plotting_context: PlottingContext, colours=None):
@@ -526,7 +522,6 @@ class Text(Plotter):
             ignored
 
         """
-        LOG.debug("Text.plot stared")
         target = self.get_figure(figure)
         if target is None:
             return

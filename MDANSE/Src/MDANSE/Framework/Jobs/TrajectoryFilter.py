@@ -142,7 +142,6 @@ class TrajectoryFilter(IJob):
             The index of the step.
 
         """
-        LOG.debug(f"Running step: {index}")
         trajectory = self.trajectory
 
         # get atom index

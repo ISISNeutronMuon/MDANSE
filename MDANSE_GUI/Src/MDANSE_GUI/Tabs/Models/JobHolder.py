@@ -379,7 +379,7 @@ class JobHolder(QStandardItemModel):
         communicator.finished.connect(item_th.on_finished)  # bool
         communicator.oscillate.connect(item_th.on_oscillate)  # nothing
 
-        LOG.info("Watcher thread ready to start!")
+        LOG.debug("Watcher thread ready to start!")
         watcher_thread.start()
         try:
             task_name = str(job_name)
@@ -407,7 +407,7 @@ class JobHolder(QStandardItemModel):
             listener=listener,
         )
 
-        LOG.info("Subprocess ready to start!")
+        LOG.debug("Subprocess ready to start!")
         subprocess_ref.start()
 
     def startProcessAndLoad(self, job_vars: list):
