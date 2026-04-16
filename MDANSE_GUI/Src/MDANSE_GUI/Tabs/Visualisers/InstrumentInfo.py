@@ -87,6 +87,7 @@ class SimpleInstrument:
         self._q_width = 1.0
         self._axis_1 = [1, 0, 0]
         self._axis_2 = [0, 1, 0]
+        self._number_of_samples = 100000
         self._vectors_per_shell = 100
         self._force_equal_weights = False
         self._configured = False
@@ -107,6 +108,7 @@ class SimpleInstrument:
             ["_q_max", "QLineEdit", "float"],
             ["_q_step", "QLineEdit", "float"],
             ["_q_width", "QLineEdit", "float"],
+            ["_number_of_samples", "QLineEdit", "int"],
             ["_vectors_per_shell", "QLineEdit", "int"],
             ["_force_equal_weights", "QCheckBox", "bool"],
             ["_axis_1", "VectorWidget", "float"],
@@ -181,6 +183,9 @@ class SimpleInstrument:
         if "width" in qvec_generator._configuration:
             width = round(conversion_factor * float(_q_width), 6)
             param_dictionary["width"] = width
+        if "n_samples" in qvec_generator._configuration:
+            num_samples = int(self._number_of_samples)
+            param_dictionary["n_samples"] = num_samples
         if "n_vectors" in qvec_generator._configuration:
             num_vectors = int(self._vectors_per_shell)
             param_dictionary["n_vectors"] = num_vectors
