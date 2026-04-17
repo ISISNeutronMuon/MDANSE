@@ -116,6 +116,7 @@ class DispersionQVectors(IQVectors):
                 "q": keyval,
                 "q_vectors": q_vectors[:, index][:, np.newaxis],
                 "n_q_vectors": 1,
+                "n_q_found": 1,
                 "weights": np.ones(1),
                 "hkls": hkls[:, index][:, np.newaxis] if hkls is not None else None,
             }

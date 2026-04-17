@@ -93,6 +93,7 @@ class LinearLatticeQVectors(LatticeQVectors):
 
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
+            n_found = q_vectors.shape[1]
 
             selection = fpsampling(q_vectors.T, nvecs_per_shell)
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
@@ -110,6 +111,7 @@ class LinearLatticeQVectors(LatticeQVectors):
             self._configuration["q_vectors"][q] = {
                 "q_vectors": q_vectors,
                 "n_q_vectors": q_vectors.shape[1],
+                "n_q_found": n_found,
                 "weights": weights,
                 "q": q,
                 "hkls": lattice_hkl_vectors,

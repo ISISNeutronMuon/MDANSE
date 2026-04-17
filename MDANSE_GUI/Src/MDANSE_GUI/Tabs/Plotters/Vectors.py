@@ -121,8 +121,8 @@ class Vectors(Plotter):
             target.canvas.draw()
         single_plot_stack = [222, 221]
         label_stack = [
-            "Unique",
-            "Total",
+            "Used",
+            "Found",
         ]
         for databundle in plotting_context.datasets().values():
             dataset = databundle.dataset

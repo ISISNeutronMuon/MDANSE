@@ -384,9 +384,13 @@ def vector_q_statistics_datasets(
             for shell_index in valid_shells
         ):
             vec_weights = [dat[:] for dat in q_data("weights")]
-            unique_vectors = np.array([len(dat) for dat in q_data("weights")])
-            all_vectors = np.array([sum(dat[:]) for dat in q_data("weights")])
-            available_vectors = np.vstack((all_vectors, unique_vectors)).T
+            if "n_q_vectors" in parent_dset and "n_q_found" in parent_dset:
+                used = np.array(parent_dset["n_q_vectors"])
+                found = np.array(parent_dset["n_q_found"])
+            else:
+                used = np.array([len(dat) for dat in q_data("weights")])
+                found = np.array([sum(dat[:]) for dat in q_data("weights")])
+            available_vectors = np.vstack((found, used)).T
         else:
             vec_weights = [np.ones_like(modq_shell) for modq_shell in modq_per_shell]
     elif isinstance(source, QVectorsConfigurator):
@@ -407,10 +411,10 @@ def vector_q_statistics_datasets(
         available_vectors = np.array(
             [
                 (
-                    sum(dat),
-                    len(dat),
+                    n_found,
+                    n_used,
                 )
-                for dat in q_data("weights")
+                for n_found, n_used in zip(q_data("n_q_found"), q_data("n_q_vectors"))
             ],
         )
         vec_weights = [dat[:] for dat in q_data("weights")]

@@ -138,6 +138,7 @@ class CircularQVectors(IQVectors):
             self._configuration["q_vectors"][q] = {
                 "q_vectors": q_vectors,
                 "n_q_vectors": nvecs_per_shell,
+                "n_q_found": nvecs_per_shell,
                 "weights": np.ones(nvecs_per_shell),
                 "q": q,
                 "hkls": self.qvectors_to_hkl(q_vectors, self._unit_cell)

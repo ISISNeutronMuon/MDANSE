@@ -71,6 +71,7 @@ class DispersionLatticeQVectors(LatticeQVectors):
             self._configuration["q_vectors"][v] = {
                 "q_vectors": q_vectors[:, i][:, np.newaxis],
                 "n_q_vectors": weights[i],
+                "n_q_found": weights[i],
                 "weights": weights[i : i + 1],
                 "q": v,
                 "hkls": hkl_vectors[:, i][:, np.newaxis],

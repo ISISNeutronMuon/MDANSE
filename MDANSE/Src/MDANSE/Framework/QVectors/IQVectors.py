@@ -237,6 +237,19 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
             units="au",
         )
 
+        output_data.add(
+            f"vector_generator/n_q_vectors",
+            "LineOutputVariable",
+            [qvector_info[q]["n_q_vectors"] if qvector_info[q] is not None else 0 for q in q_values],
+            units="au",
+        )
+        output_data.add(
+            f"vector_generator/n_q_found",
+            "LineOutputVariable",
+            [qvector_info[q]["n_q_found"] if qvector_info[q] is not None else 0 for q in q_values],
+            units="au",
+        )
+
         for nq, q in enumerate(q_values):
             current = f"vector_generator/shell_{nq}/qvector_array"
             output_data.add(

@@ -93,6 +93,7 @@ class GridQVectors(LatticeQVectors):
                 "q": q,
                 "q_vectors": vects[:, v],
                 "n_q_vectors": len(v),
+                "n_q_found": len(v),
                 "weights": np.ones_like(v),
                 "hkls": hkls[:, v],
             }
