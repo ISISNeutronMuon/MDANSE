@@ -414,7 +414,7 @@ def vector_q_statistics_datasets(
                     n_found,
                     n_used,
                 )
-                for n_found, n_used in zip(q_data("n_q_found"), q_data("n_q_vectors"))
+                for n_found, n_used in zip(q_data("n_q_found"), q_data("n_q_vectors"), strict=False)
             ],
         )
         vec_weights = [dat[:] for dat in q_data("weights")]
