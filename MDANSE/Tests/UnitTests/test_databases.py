@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+from collections import ChainMap
+
 import unittest
 from unittest.mock import patch, mock_open
 
@@ -73,7 +75,7 @@ class TestAtomsDatabase(unittest.TestCase):
         ATOMS_DATABASE._load()
 
     def overwrite_database(self):
-        ATOMS_DATABASE._data = self.data
+        ATOMS_DATABASE._data = ChainMap(self.data)
         ATOMS_DATABASE._properties = self.properties
         ATOMS_DATABASE._units = self.units
 
@@ -252,7 +254,7 @@ class TestAtomsDatabase(unittest.TestCase):
 
     def test__reset(self):
         ATOMS_DATABASE._reset()
-        self.assertDictEqual({}, ATOMS_DATABASE._data)
+        self.assertDictEqual({}, dict(ATOMS_DATABASE._data))
         self.assertDictEqual({}, ATOMS_DATABASE._properties)
 
     def test_save(self):
