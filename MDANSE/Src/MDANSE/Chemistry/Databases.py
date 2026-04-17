@@ -749,8 +749,11 @@ class AtomsDatabase(_Database):
         """
         try:
             del self._data[symbol]
-        except KeyError as err:
-            raise AtomsDatabaseError(f"Atom {symbol} does not exist.") from err
+        except KeyError:
+            try:
+                del self._data.parents[symbol]
+            except KeyError as err:
+                raise AtomsDatabaseError(f"Atom {symbol} does not exist.") from err
 
     def remove_property(self, label: str):
         """Remove an atom property from the database.
@@ -787,7 +790,10 @@ class AtomsDatabase(_Database):
                 f"Cannot rename atom from {old_key} to {new_key} as {new_key}"
                 " already exists.",
             )
-        self._data[new_key] = self._data.pop(old_key)
+        try:
+            self._data[new_key] = self._data.pop(old_key)
+        except KeyError:
+            self._data[new_key] = self._data.parents.pop(old_key)
 
     def rename_atom_property(self, old_key: str, new_key: str):
         """Rename the atom property in the atom database.
