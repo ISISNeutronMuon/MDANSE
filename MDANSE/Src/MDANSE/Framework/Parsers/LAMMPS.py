@@ -17,13 +17,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from contextlib import suppress
-from enum import Enum, auto
+from enum import auto
 from itertools import count
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Literal
 
-import h5py
 import numpy as np
 from more_itertools import consume as drop
 from more_itertools import ilen, take
@@ -40,11 +38,6 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
-
-if TYPE_CHECKING:
-    from MDANSE.Framework.Configurators.ConfigFileConfigurator import (
-        ConfigFileConfigurator,
-    )
 
 ELECTRON_CHARGE = 1.6021765e-19
 DIMS = ("x", "y", "z")
@@ -220,6 +213,8 @@ class LAMMPSReader(ABC):
         self._timestep = timestep
         self._fold = fold_coordinates
         self._file = None
+        self._last_timestep = None
+        self._last_timestep_difference = None
 
     @staticmethod
     def _add_bonds(config, chemical_system):
@@ -247,6 +242,20 @@ class LAMMPSReader(ABC):
             Scheme to set.
         """
         self.units = LAMMPS_UNITS[units]
+
+    def check_timestep_change(self, new_timestep: int):
+        if self._last_timestep is not None:
+            new_timestep_difference = new_timestep - self._last_timestep
+            if (
+                self._last_timestep_difference is not None
+                and new_timestep_difference != self._last_timestep_difference
+            ):
+                LOG.error(
+                    "Time step in LAMMPS trajectory has changed at frame with timestep %s",
+                    new_timestep,
+                )
+            self._last_timestep_difference = new_timestep_difference
+        self._last_timestep = new_timestep
 
     @staticmethod
     @abstractmethod
@@ -517,6 +526,8 @@ class LAMMPScustom(LAMMPSReader):
 
         time = int(step) * self._timestep * measure(1.0, self.units["time"]).toval("ps")
 
+        self.check_timestep_change(int(step))
+
         drop(
             file,
             self._item_location["BOX BOUNDS"][0] - self._item_location["TIMESTEP"][1],
@@ -686,6 +697,8 @@ class LAMMPSxyz(LAMMPSReader):
         number_of_atoms = int(line)
         line = self._file.readline()
         timestep = int(line.rsplit(maxsplit=1)[-1])
+
+        self.check_timestep_change(timestep)
 
         positions = np.empty((number_of_atoms, 3), dtype=np.float64)
         atom_types = np.empty(number_of_atoms, dtype=int)

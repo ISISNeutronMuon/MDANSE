@@ -15,9 +15,13 @@
 #
 from __future__ import annotations
 
+import numpy as np
+
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+TIME_STEP_TOL = 1e-8
 
 
 class HDFTrajectoryConfigurator(InputFileConfigurator):
@@ -57,6 +61,8 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         if value == self._original_input:
             return
         self._original_input = value
+        self.error_status = "OK"
+        self.warning_status = ""
 
         InputFileConfigurator.configure(self, value)
         try:
@@ -65,9 +71,8 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             self.error_status = f"Could not use {value} as input trajectory."
             return
         self.extract_information(trajectory_instance)
-        self.error_status = "OK"
         if not trajectory_instance.non_dummy_elements:
-            self.warning_status = (
+            self.warning_status += (
                 "This trajectory contains only dummy atoms. "
                 "Analysis runs will fail or produce meaningless results."
             )
@@ -82,6 +87,20 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         self["length"] = len(self["instance"])
 
         time_axis = self["instance"].time()
+        if len(time_axis) == 0:
+            self.error_status = "The trajectory does not contain any time steps"
+            return
+        if len(time_axis) == 1:
+            self["md_time_step"] = 1.0
+        else:
+            time_steps = np.diff(time_axis)
+            self["md_time_step"] = np.mean(time_steps)
+            if not np.std(time_steps) < TIME_STEP_TOL:
+                self.warning_status += (
+                    f"Time step size changes between {np.min(time_steps)} and {np.max(time_steps)}."
+                    " Most analysis types will not work correctly unless the time step is constant."
+                )
+
         try:
             self["md_time_step"] = time_axis[1] - time_axis[0]
         except IndexError:
@@ -89,6 +108,8 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         except ValueError:
             self["md_time_step"] = 1.0
 
+        self["time_axis"] = time_axis
+
         self["has_velocities"] = "velocities" in self["instance"].variables()
 
-        self.warning_status = trajectory_instance.unit_cell_warning()
+        self.warning_status += trajectory_instance.unit_cell_warning()

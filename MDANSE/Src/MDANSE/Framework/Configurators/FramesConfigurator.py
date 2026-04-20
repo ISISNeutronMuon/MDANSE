@@ -97,12 +97,8 @@ class FramesConfigurator(RangeConfigurator):
 
         self["n_frames"] = self["number"]
 
-        self["time"] = trajConfig["md_time_step"] * self["value"]
+        self["time"] = trajConfig["time_axis"][self["value"]]
 
-        # case of single frame selected
-        try:
-            self["time_step"] = self["time"][1] - self["time"][0]
-        except IndexError:
-            self["time_step"] = 1.0
+        self["time_step"] = trajConfig["md_time_step"]
 
         self["duration"] = self["time"] - self["time"][0]
