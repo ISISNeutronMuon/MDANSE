@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from functools import partial
+
 import numpy as np
 from scipy.spatial import KDTree
 
@@ -87,7 +89,11 @@ class SphericalLatticeQVectors(LatticeQVectors):
             q_vectors = q_vectors.T[selection].T
             n_found = q_vectors.shape[1]
 
-            selection = fpsampling(q_vectors.T, nvecs_per_shell)
+            selection = fpsampling(
+                q_vectors.T,
+                nvecs_per_shell,
+                partial(spherical_vectors, q=1, q_width=0, n_vecs=1),
+            )
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
 

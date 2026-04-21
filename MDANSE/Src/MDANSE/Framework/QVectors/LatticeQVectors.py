@@ -15,6 +15,9 @@
 #
 from __future__ import annotations
 
+from functools import partial
+from typing import Callable
+
 import numpy as np
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
@@ -22,7 +25,9 @@ from MDANSE.Framework.QVectors.SphericalQVectors import spherical_vectors
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-def fpsampling(q_vectors: np.ndarray, n_vecs: int) -> np.ndarray:
+def fpsampling(
+    q_vectors: np.ndarray, n_vecs: int, random_vector_func: Callable[[], np.ndarray]
+) -> np.ndarray:
     """Basic farthest point sampling function used to sample q-vectors.
     Q-vectors are normalised to avoid sampling vectors from the ends of
     the shell. Distances between vectors are calculated on the angle
@@ -34,6 +39,8 @@ def fpsampling(q_vectors: np.ndarray, n_vecs: int) -> np.ndarray:
         Array of q_vectors.
     n_vecs : int
         Number of vectors to sample.
+    random_vector_func : Callable[[], np.ndarray]
+        A function which generates a single random vector.
 
     Returns
     -------
@@ -57,7 +64,7 @@ def fpsampling(q_vectors: np.ndarray, n_vecs: int) -> np.ndarray:
     if np.any(mag_q == 0):
         # deal with the vector at the origin by turning into some
         # random unit vector
-        random_vector = spherical_vectors(1, 0, 1).T[0]
+        random_vector = random_vector_func().T[0]
         zero_idx = np.where(mag_q == 0)[0]
         q_vectors[zero_idx] = random_vector
         mag_q[zero_idx] = 1
