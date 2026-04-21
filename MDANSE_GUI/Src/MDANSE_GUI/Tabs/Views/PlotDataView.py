@@ -41,6 +41,8 @@ MAX_BINS_PER_SHELL = 20
 MIN_BINS_PER_SHELL = 1
 MAX_BINS_PER_PLOT = 180
 
+WEIGHTS_MULTIPLIER = 100
+
 
 def qvector_binning_from_dict(
     qvector_params: dict[str, Any],
@@ -452,7 +454,7 @@ def vector_q_statistics_datasets(
         data=[
             np.concatenate(
                 [
-                    int(vec_weights[shellindex][vecindex])
+                    int(vec_weights[shellindex][vecindex] * WEIGHTS_MULTIPLIER)
                     * list(always_iterable(veclen))
                     for vecindex, veclen in enumerate(
                         modq_per_shell[shellindex] - qvals[shell],
