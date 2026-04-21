@@ -81,6 +81,35 @@ def truncated_normal_distribution(
     )
 
 
+def calculate_average_q_per_shell(vector_config: IQVectors) -> npt.NDArray[float]:
+    r"""Calculates the average :math:`\mathbf{q}` per shell.
+
+    The averaging uses the weights determined by sampling the reciprocal space.
+
+    Parameters
+    ----------
+    vector_config : IQVectors
+        An instance of a q-vector generator. A subclass of IQVectors.
+
+    Returns
+    -------
+    npt.NDArray[float]
+        Array of average q per shell.
+    """
+    results = np.empty(len(vector_config._configuration["q_vectors"]))
+    for shell_index, shell_dict in enumerate(
+        vector_config._configuration["q_vectors"].values()
+    ):
+        if shell_dict is None or len(shell_dict["q_vectors"]) == 0:
+            results[shell_index] = np.nan
+            continue
+        results[shell_index] = np.average(
+            np.linalg.norm(shell_dict["q_vectors"], axis=0),
+            weights=shell_dict["weights"],
+        )
+    return results
+
+
 class IQVectors(Configurable, metaclass=SubclassFactory):
     """Parent class of all Q vector generators."""
 
@@ -228,6 +257,12 @@ class IQVectors(Configurable, metaclass=SubclassFactory):
             "vector_generator/q",
             "LineOutputVariable",
             q_values,
+            units="1/nm",
+        )
+        output_data.add(
+            "vector_generator/average_q",
+            "LineOutputVariable",
+            calculate_average_q_per_shell(self),
             units="1/nm",
         )
         output_data.add(
