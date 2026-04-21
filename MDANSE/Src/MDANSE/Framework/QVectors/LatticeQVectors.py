@@ -23,6 +23,9 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 def fpsampling(q_vectors: np.ndarray, n_vecs: int) -> np.ndarray:
     """Basic farthest point sampling function used to sample q-vectors.
+    Q-vectors are normalised to avoid sampling vectors from the ends of
+    the shell. Distances between vectors are calculated on the angle
+    between them.
 
     Parameters
     ----------
@@ -49,15 +52,16 @@ def fpsampling(q_vectors: np.ndarray, n_vecs: int) -> np.ndarray:
     elif n_points <= 0:
         raise ValueError("n_vecs should be greater than zero.")
 
+    q_vectors = q_vectors / np.linalg.norm(q_vectors, axis=0)
+
     dists = np.full(n_points, np.inf)
     selected = np.random.randint(n_points)
     selection = np.zeros(n_vecs, dtype=int)
     selection[0] = selected
 
     for i in range(1, n_vecs):
-        diff = q_vectors - q_vectors[selected]
-        dist_sq = np.sum(diff**2, axis=1)
-        dists = np.minimum(dists, dist_sq)
+        theta = np.arccos(np.clip(np.dot(q_vectors, q_vectors[selected]), -1.0, 1.0))
+        dists = np.minimum(dists, theta)
         selected = np.argmax(dists)
         selection[i] = selected
 
