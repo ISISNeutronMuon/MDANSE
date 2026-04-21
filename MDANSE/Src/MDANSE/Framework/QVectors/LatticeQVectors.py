@@ -18,6 +18,7 @@ from __future__ import annotations
 import numpy as np
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
+from MDANSE.Framework.QVectors.SphericalQVectors import spherical_vectors
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
@@ -53,23 +54,21 @@ def fpsampling(q_vectors: np.ndarray, n_vecs: int) -> np.ndarray:
         raise ValueError("n_vecs should be greater than zero.")
 
     mag_q = np.linalg.norm(q_vectors, axis=1)
-    q_vectors = q_vectors / mag_q[:,None]
+    if np.any(mag_q == 0):
+        # deal with the vector at the origin by turning into some
+        # random unit vector
+        random_vector = spherical_vectors(1, 0, 1).T[0]
+        zero_idx = np.where(mag_q == 0)[0]
+        q_vectors[zero_idx] = random_vector
+        mag_q[zero_idx] = 1
+    q_vectors = q_vectors / mag_q[:, None]
 
     dists = np.full(n_points, np.inf)
-    selection = np.zeros(n_vecs, dtype=int)
-    start = 0
-
-    if np.any(mag_q == 0):
-        # always select the q-vector at the origin since the angle
-        # between that and other vectors are undefined
-        zero_idx = np.where(mag_q == 0)[0]
-        dists[zero_idx] = 0
-        selection[start] = zero_idx
-        start = 1
-
     selected = np.random.randint(n_points)
-    selection[start] = selected
-    for i in range(start + 1, n_vecs):
+    selection = np.zeros(n_vecs, dtype=int)
+    selection[0] = selected
+
+    for i in range(1, n_vecs):
         theta = np.arccos(np.clip(np.dot(q_vectors, q_vectors[selected]), -1.0, 1.0))
         dists = np.minimum(dists, theta)
         selected = np.argmax(dists)
