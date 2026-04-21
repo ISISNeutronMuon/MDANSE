@@ -52,14 +52,24 @@ def fpsampling(q_vectors: np.ndarray, n_vecs: int) -> np.ndarray:
     elif n_points <= 0:
         raise ValueError("n_vecs should be greater than zero.")
 
-    q_vectors = q_vectors / np.linalg.norm(q_vectors, axis=0)
+    mag_q = np.linalg.norm(q_vectors, axis=1)
+    q_vectors = q_vectors / mag_q[:,None]
 
     dists = np.full(n_points, np.inf)
-    selected = np.random.randint(n_points)
     selection = np.zeros(n_vecs, dtype=int)
-    selection[0] = selected
+    start = 0
 
-    for i in range(1, n_vecs):
+    if np.any(mag_q == 0):
+        # always select the q-vector at the origin since the angle
+        # between that and other vectors are undefined
+        zero_idx = np.where(mag_q == 0)[0]
+        dists[zero_idx] = 0
+        selection[start] = zero_idx
+        start = 1
+
+    selected = np.random.randint(n_points)
+    selection[start] = selected
+    for i in range(start + 1, n_vecs):
         theta = np.arccos(np.clip(np.dot(q_vectors, q_vectors[selected]), -1.0, 1.0))
         dists = np.minimum(dists, theta)
         selected = np.argmax(dists)
