@@ -442,7 +442,11 @@ def vector_q_statistics_datasets(
         linestyle=":",
         marker="o",
         data=available_vectors,
-        plot_axes={"|q|": qvals[valid_shells]},
+        plot_axes={
+            "|q|": qvals
+            if len(qvals) == len(available_vectors)
+            else qvals[valid_shells]
+        },
         axes_units={"|q|": "1/nm"},
         optional_filename=filename,
     )
