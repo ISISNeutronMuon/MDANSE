@@ -50,10 +50,10 @@ class CircularLatticeQVectors(LatticeQVectors):
             "valueType": float,
             "includeLast": True,
             "mini": 0.0,
-            "default": (0.0, 5.0, 0.5),
+            "default": (0.0, 5.0, 1.0),
         },
     )
-    settings["n_samples"] = ("IntegerConfigurator", {"mini": 1, "default": 100000})
+    settings["n_samples"] = ("IntegerConfigurator", {"mini": 1, "default": 50000})
     settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 100})
     settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
     settings["force_equal_weights"] = ("BooleanConfigurator", {"default": False})

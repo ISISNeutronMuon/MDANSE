@@ -43,7 +43,14 @@ class QVectorsConfigurator(IConfigurator):
 
     _default = (
         "SphericalLatticeQVectors",
-        {"shells": (0.1, 5, 0.1), "width": 0.1, "n_vectors": 1000, "seed": 0},
+        {
+            "shells": (0.0, 5.0, 1.0),
+            "width": 1.0,
+            "n_samples": 100000,
+            "n_vectors": 1000,
+            "seed": 0,
+            "force_equal_weights": False,
+        },
     )
     label = "Q vector generator"
     tooltip = "Determines how the q vectors will be generated and grouped into shells."

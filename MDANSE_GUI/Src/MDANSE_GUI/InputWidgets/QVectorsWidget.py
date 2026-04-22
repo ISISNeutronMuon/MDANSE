@@ -141,22 +141,25 @@ class VectorModel(QStandardItemModel):
         """Validate input types and return a dictionary of input parameters."""
         params = {}
         all_inputs_are_valid = True
-        for rownum in range(self.rowCount()):
-            name = str(self.item(rownum, 0).text())
-            value = str(self.item(rownum, 1).text())
-            vtype = str(self.item(rownum, 2).text())
-            try:
-                params[name] = self.parse_vtype(vtype, value, name)
-            except ValueError:
-                params[name] = "failed"
-            if params[name] == "failed":
-                self.item(rownum, 1).setData(
-                    QBrush(Qt.GlobalColor.red),
-                    role=Qt.ItemDataRole.BackgroundRole,
-                )
-                all_inputs_are_valid = False
-            else:
-                self.item(rownum, 1).setData(0, role=Qt.ItemDataRole.BackgroundRole)
+        with block_signals(self):
+            # block signals to stop updateValue call on the colour
+            # background change
+            for rownum in range(self.rowCount()):
+                name = str(self.item(rownum, 0).text())
+                value = str(self.item(rownum, 1).text())
+                vtype = str(self.item(rownum, 2).text())
+                try:
+                    params[name] = self.parse_vtype(vtype, value, name)
+                except ValueError:
+                    params[name] = "failed"
+                if params[name] == "failed":
+                    self.item(rownum, 1).setData(
+                        QBrush(Qt.GlobalColor.red),
+                        role=Qt.ItemDataRole.BackgroundRole,
+                    )
+                    all_inputs_are_valid = False
+                else:
+                    self.item(rownum, 1).setData(0, role=Qt.ItemDataRole.BackgroundRole)
         self.input_is_valid.emit(all_inputs_are_valid)
         return params
 

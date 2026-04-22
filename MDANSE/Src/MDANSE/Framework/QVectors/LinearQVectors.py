@@ -69,7 +69,7 @@ class LinearQVectors(IQVectors):
             "valueType": float,
             "includeLast": True,
             "mini": 0.0,
-            "default": (0, 5.0, 0.5),
+            "default": (0.0, 5.0, 1.0),
         },
     )
     settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
