@@ -30,7 +30,8 @@ J Chem Inf Model. 57(1):1-5 (2017).
 
 ## Version information
 
-This is the first release of MDANSE 2.0.0.
+This is MDANSE 2.0.1. The main change since the original release is
+the improved vector generation scheme. 
 
 > [!NOTE]
 > Considering the large number of different MD engines and analysis types,

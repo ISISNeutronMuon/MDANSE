@@ -9,7 +9,8 @@ The GUI depends on the [MDANSE package](https://pypi.org/project/MDANSE).
 
 ## Version information
 
-This is the first release of MDANSE_GUI 2.0.0.
+This is MDANSE_GUI 2.0.1. From now on, the PyQt6 version used by the GUI
+will be 6.8.1, while it was capped at 6.7.0 before.
 
 > [!NOTE]
 > Considering the large number of different MD engines and analysis types,
