@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import copy
 import math
+import sys
 from collections import ChainMap
 from enum import Enum
 from typing import Any, TypeAlias
@@ -25,7 +26,7 @@ import more_itertools
 import numpy as np
 import vtk
 from qtpy import QtWidgets
-from qtpy.QtCore import Signal, Slot
+from qtpy.QtCore import QTimer, Signal, Slot
 from qtpy.QtWidgets import QSizePolicy
 from scipy.interpolate import CubicSpline
 from scipy.spatial import cKDTree as KDTree
@@ -80,6 +81,39 @@ class BondCalc(Enum):
     FILE = "from file"
 
 
+class SafeQVTKRenderWindowInteractor(QVTKRenderWindowInteractor):
+    """Defers VTK rendering outside of Qt's synchronous paintEvent cycle.
+    This prevents the known deadlock on macOS with Qt 6.9+ where
+    vtkCocoaRenderWindow and Qt conflict over the Cocoa event loop.
+    """
+    def __init__(self, parent=None, **kwargs):
+        super().__init__(parent, **kwargs)
+        self._is_exposed = False
+        self._render_timer = QTimer(self)
+        self._render_timer.setSingleShot(True)
+        self._render_timer.timeout.connect(self._do_render)
+
+    def showEvent(self, ev):
+        super().showEvent(ev)
+        self._is_exposed = True
+
+    def hideEvent(self, ev):
+        super().hideEvent(ev)
+        self._is_exposed = False
+
+    def _do_render(self):
+        if self._is_exposed:
+            self._Iren.Render()
+
+    def paintEvent(self, ev):
+        if sys.platform == "darwin":
+            # Defer the render to avoid the nested event loop deadlock
+            self._render_timer.start(0)
+        else:
+            # Normal behavior on Windows/Linux
+            super().paintEvent(ev)
+
+
 class MolecularViewer(QtWidgets.QWidget):
     """MolecularViewer is a Qt widget containing a 3D viewer
     of molecular structures, currently implemented in VTK."""
@@ -98,7 +132,7 @@ class MolecularViewer(QtWidgets.QWidget):
         self._viewer_is_visible = False
         self.tab_index = -1
 
-        self._iren = QVTKRenderWindowInteractor(self)
+        self._iren = SafeQVTKRenderWindowInteractor(self)
         self._iren.keyPressEvent = lambda *args, **kwargs: None
 
         # the main render which includes the trajectory
