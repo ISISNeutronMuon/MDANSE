@@ -25,8 +25,9 @@ which is the nominal centre of the shell.
 Inputs:
 
 - seed: :ref:`configurator-analysis-IntegerConfigurator` default=0
-- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0.0, 5.0, 0.5)
-- n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=50
+- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0.0, 5.0, 1.0)
+- n_samples: :ref:`configurator-analysis-IntegerConfigurator` default=50000
+- n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=100
 - width: :ref:`configurator-analysis-FloatConfigurator` default=1.0
 - force_equal_weights: :ref:`configurator-analysis-BooleanConfigurator` default=False
 - axis: :ref:`configurator-analysis-VectorConfigurator` default=[0, 0, 1]
@@ -49,7 +50,7 @@ around the shell centre defined by the 'shells' input.
 Inputs:
 
 - seed: :ref:`configurator-analysis-IntegerConfigurator` default=0
-- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0.0, 5.0, 0.5)
+- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0.0, 5.0, 1.0)
 - n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=50
 - width: :ref:`configurator-analysis-FloatConfigurator` default=1.0
 - axis: :ref:`configurator-analysis-VectorConfigurator` default=[0, 0, 1]
@@ -134,8 +135,9 @@ over all vectors in the group, which is still called a shell.
 Inputs:
 
 - seed: :ref:`configurator-analysis-IntegerConfigurator` default=0
-- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0, 5.0, 0.5)
-- n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=50
+- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0.0, 5.0, 1.0)
+- n_samples: :ref:`configurator-analysis-IntegerConfigurator` default=50000
+- n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=100
 - width: :ref:`configurator-analysis-FloatConfigurator` default=1.0
 - force_equal_weights: :ref:`configurator-analysis-BooleanConfigurator` default=False
 - axis: :ref:`configurator-analysis-VectorConfigurator` default=[1, 0, 0]
@@ -158,7 +160,7 @@ around the shell centre defined by the 'shells' input.
 Inputs:
 
 - seed: :ref:`configurator-analysis-IntegerConfigurator` default=0
-- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0, 5.0, 0.5)
+- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0.0, 5.0, 1.0)
 - n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=50
 - width: :ref:`configurator-analysis-FloatConfigurator` default=1.0
 - axis: :ref:`configurator-analysis-VectorConfigurator` default=[1, 0, 0]
@@ -178,7 +180,7 @@ their length.
 
 Inputs:
 
-- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0, 5.0, 0.5)
+- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0.0, 5.0, 1.0)
 - width: :ref:`configurator-analysis-FloatConfigurator` default=1.0
 - h: :ref:`configurator-analysis-RangeConfigurator` default=(0, 8, 1)
 - k: :ref:`configurator-analysis-RangeConfigurator` default=(0, 8, 1)
@@ -205,8 +207,9 @@ over all vectors in the shell.
 Inputs:
 
 - seed: :ref:`configurator-analysis-IntegerConfigurator` default=0
-- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0, 5.0, 0.5)
-- n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=50
+- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0.0, 5.0, 1.0)
+- n_samples: :ref:`configurator-analysis-IntegerConfigurator` default=50000
+- n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=100
 - force_equal_weights: :ref:`configurator-analysis-BooleanConfigurator` default=False
 - width: :ref:`configurator-analysis-FloatConfigurator` default=1.0
 
@@ -228,7 +231,7 @@ around the shell centre defined by the 'shells' input.
 Inputs:
 
 - seed: :ref:`configurator-analysis-IntegerConfigurator` default=0
-- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0, 5.0, 0.5)
+- shells: :ref:`configurator-analysis-RangeConfigurator` default=(0.0, 5.0, 1.0)
 - n_vectors: :ref:`configurator-analysis-IntegerConfigurator` default=50
 - width: :ref:`configurator-analysis-FloatConfigurator` default=1.0
 

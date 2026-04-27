@@ -242,7 +242,6 @@ part of the molecular system.
 Attributes
 ----------
 _default : str
-
 The default transmutation setting.
 
 
@@ -606,7 +605,7 @@ Range configurator for Q vector generation.
 QVectorsConfigurator
 --------------------
 
-default=('SphericalLatticeQVectors', {'shells': (0.1, 5, 0.1), 'width': 0.1, 'n_vectors': 1000, 'seed': 0})
+default=('SphericalLatticeQVectors', {'shells': (0.0, 5.0, 1.0), 'width': 1.0, 'n_samples': 100000, 'n_vectors': 1000, 'seed': 0, 'force_equal_weights': False})
 
 Creates and configures a q-vector generator.
 
@@ -674,7 +673,6 @@ The filters are provided by the scipy.signal library.
 Attributes
 ----------
 _default : str
-
 The default selection setting.
 
 
