@@ -58,7 +58,7 @@ from MDANSE_GUI.Widgets.StyleDialog import StyleDatabase, StyleDialog
 
 MDANSE_CODE_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE")
 MDANSE_EXAMPLES_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE-Examples")
-MDANSE_DOCS_WEBSITE = QUrl("https://mdanse.readthedocs.io/en/latest/")
+MDANSE_DOCS_WEBSITE = QUrl("https://mdanse.readthedocs.io/en/v2.0.1/")
 
 
 class RecentFileAction(QAction):
