@@ -86,6 +86,7 @@ class SafeQVTKRenderWindowInteractor(QVTKRenderWindowInteractor):
     This prevents the known deadlock on macOS with Qt 6.9+ where
     vtkCocoaRenderWindow and Qt conflict over the Cocoa event loop.
     """
+
     def __init__(self, parent=None, **kwargs):
         super().__init__(parent, **kwargs)
         self._is_exposed = False
