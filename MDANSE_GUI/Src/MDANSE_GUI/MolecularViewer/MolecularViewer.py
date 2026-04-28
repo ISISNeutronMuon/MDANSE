@@ -1010,35 +1010,27 @@ class MolecularViewer(QtWidgets.QWidget):
         )
         self._colour_manager.rebuild_colours()
 
-        self.du_log = np.array(
-            [
-                self._element_database.get_atom_property(at, "dummy") == 0
-                for at in self._reader.atom_types
-            ]
-        )
-        self.not_du = np.array(
-            [
-                i
-                for i, at in enumerate(self._reader.atom_types)
-                if self._element_database.get_atom_property(at, "dummy") == 0
-            ]
-        )
-        self.covs = np.array(
-            [
-                self._element_database.get_atom_property(at, "covalent_radius")
-                for at in self._reader.atom_types
-            ]
-        )
+        self.du_log = np.array([
+            self._element_database.get_atom_property(at, "dummy") == 0
+            for at in self._reader.atom_types
+        ])
+        self.not_du = np.array([
+            i
+            for i, at in enumerate(self._reader.atom_types)
+            if self._element_database.get_atom_property(at, "dummy") == 0
+        ])
+        self.covs = np.array([
+            self._element_database.get_atom_property(at, "covalent_radius")
+            for at in self._reader.atom_types
+        ])
         self._current_coords = self._reader.read_frame(self._current_frame)
 
         self.clear_atom_trace()
 
-        self.set_atm_polydata_scalars(
-            (
-                self._colour_manager.colours,
-                self._colour_manager.radii,
-            )
-        )
+        self.set_atm_polydata_scalars((
+            self._colour_manager.colours,
+            self._colour_manager.radii,
+        ))
         self.update_atm_polydata()
         self.change_atm_polydata_lines()
         self.update_uc_polydata()
