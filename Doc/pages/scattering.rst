@@ -1,4 +1,9 @@
 
+.. |modq| replace:: :math:`|\mathbf{q}|`
+.. |q| replace:: :math:`\mathbf{q}`
+
+
+
 This section is dealing with specific types of analysis performed by
 MDANSE. If you are not sure where these fit into the general workflow
 of data analysis, please read :ref:`workflow-of-analysis`.
@@ -23,7 +28,7 @@ This section discusses plugins used
 to calculate neutron spectroscopy observables from the trajectory.
 These plugins will be explored in depth in further sections, however,
 before that, it is important to understand how MDANSE performs these
-analyses. A part of that depends on how the :math:`\mathbf{q}`-vectors
+analyses. A part of that depends on how the |q|-vectors
 are used to perform these analyses, see Section :ref:`qvector-generation`
 for details.
 
@@ -33,7 +38,7 @@ Scattering Background
 '''''''''''''''''''''
 **Dynamic Structure Factor** :math:`S(\mathbf{q}, \omega)`: This is a central
 concept in neutron scattering experiments. This factor characterizes how
-scattering intensity changes with alterations in momentum :math:`\mathbf{q}` and energy :math:`\hbar\omega`
+scattering intensity changes with alterations in momentum |q| and energy :math:`\hbar\omega`
 during scattering events. It is instrumental in unraveling the atomic and
 molecular structures of materials.
 
@@ -70,7 +75,7 @@ using the mass of the neutron :math:`m_{\mathrm{n}}`. They are fundamental for
 connecting energy and momentum in neutron scattering.
 
 **Momentum and Energy Transfer**: These equations below define the
-momentum :math:`\mathbf{q}` and energy transfer :math:`\hbar\omega`
+momentum |q| and energy transfer :math:`\hbar\omega`
 based on the incident and scattered wavevectors and energies
 
 .. math::
@@ -196,7 +201,7 @@ has been suggested by Schofield [Ref17]_
 One can easily verify that the resulting dynamic structure factor
 fulfils the relation of detailed balance. Formally, the correction :math:numref:`scattering14`
 is correct to first order in :math:`\hbar` and cannot be used
-for large :math:`\mathbf{q}`-values which correspond to large momentum transfers
+for large |q|-values which correspond to large momentum transfers
 :math:`\hbar q`. This is actually true for all correction
 methods which have suggested so far. For more details we refer to [Ref18]_.
 
@@ -232,7 +237,7 @@ where :math:`\mu` and  :math:`\nu` are the cartesian directions
    j_{\alpha\mu}(\mathbf{q}, t) = \sum_{k \in \alpha} v_{k\mu}(t) \exp(i\mathbf{q} \cdot \mathbf{r}_{k}(t)).
 
 The particle currents can be projected onto
-longitudinal and transverse components of the :math:`\mathbf{q}`-vector. The
+longitudinal and transverse components of the |q|-vector. The
 longitudinal and transverse particle current are
 
 .. math::
@@ -245,7 +250,7 @@ longitudinal and transverse particle current are
 
     \mathbf{j}^{\mathrm{T}}_{\alpha}(\mathbf{q}, t) = \sum_{k \in \alpha} \left\{\mathbf{v}_{k}(t) - \hat{\mathbf{q}}\left[\mathbf{v}_{k}(t) \cdot \hat{\mathbf{q}}\right] \right\}\exp(i \mathbf{q}\cdot \mathbf{r}_k(t))
 
-where :math:`\hat{\mathbf{q}}` are unit vectors of :math:`\mathbf{q}`. The
+where :math:`\hat{\mathbf{q}}` are unit vectors of |q|. The
 partial longitudinal and transverse current correlation functions are
 
 .. math::

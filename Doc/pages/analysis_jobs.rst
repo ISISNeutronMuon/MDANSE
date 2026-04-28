@@ -1,3 +1,5 @@
+.. |q| replace:: :math:`\mathbf{q}`
+
 .. _analysis-list:
 
 List of analysis types
@@ -209,7 +211,7 @@ It can be compared to experimental data e.g. the energy-integrated, static struc
 factor :math:`S_{\text{coh}}(q)` or the dispersion and intensity of phonons.
 
 The coherent part is derived from correlations between pairs of atoms.
-This analysis requires the :math:`\mathbf{q}`-vectors to be commensurate
+This analysis requires the |q|-vectors to be commensurate
 with the reciprocal lattice of the simulation box.
 
 Inputs:
@@ -237,7 +239,7 @@ It can be compared to experimental data e.g. the quasielastic scattering due to
 diffusion processes.
 
 This property is derived from the self-correlation of individual atoms over time.
-While it does not require the :math:`\mathbf{q}`-vectors to be commensurate with the simulation
+While it does not require the |q|-vectors to be commensurate with the simulation
 box reciprocal lattice, a "lattice" vector generator should be chosen if you
 intend to combine the result with the coherent part into the total
 dynamic structure factor.
@@ -322,8 +324,8 @@ Computes the dynamic incoherent structure factor in the Gaussian approximation.
 Gaussian approximation is exact for a system of free particles and a system of
 particles undergoing brownian motion. The results of this analysis will be close
 to the Dynamic Incoherent Structure Factor analysis in the limits of very
-short :math:`\mathbf{q}` and very long :math:`\mathbf{q}`, and will differ from
-it for intermediate :math:`\mathbf{q}` values.
+short |q| and very long |q|, and will differ from
+it for intermediate |q| values.
 
 Inputs:
 
@@ -446,7 +448,7 @@ Combines the coherent and incoherent dynamic structure factors.
 
 The partial results need to be calculated before using the Dynamic
 Coherent/Incoherent Structure Factor jobs with the same
-:math:`\mathbf{q}`-vector settings.
+|q|-vector settings.
 
 The partial results will be scaled by neutron scattering lengths, producing
 a total result with coherent and incoherent parts on the same scale,

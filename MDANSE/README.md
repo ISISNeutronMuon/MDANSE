@@ -28,20 +28,6 @@ This project is built on the development published previously: \
 G. Goret, B. Aoun, E. Pellegrini, "MDANSE: An Interactive Analysis Environment for Molecular Dynamics Simulations", 
 J Chem Inf Model. 57(1):1-5 (2017).
 
-## Version information
-
-This is MDANSE 2.0.1. The main change since the original release is
-the improved vector generation scheme. 
-
-> [!NOTE]
-> Considering the large number of different MD engines and analysis types,
-> it is still possible that some conversion or analysis runs will not
-> produce the expected results. Please report any problems
-> you experience while using MDANSE by adding them to the
-> [GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
-> You can also send a message to MDANSE-help@stfc.ac.uk to get in touch
-> with MDANSE developers.
-
 ## Quick start: installation
 
 We recommend that you install MDANSE in a Python virtual environment. You can

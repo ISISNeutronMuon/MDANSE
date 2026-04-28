@@ -7,20 +7,6 @@ Molecular Dynamics Analysis for Neutron Scattering Experiments (MDANSE) software
 
 The GUI depends on the [MDANSE package](https://pypi.org/project/MDANSE).
 
-## Version information
-
-This is MDANSE_GUI 2.0.1. From now on, the PyQt6 version used by the GUI
-will be 6.8.1, while it was capped at 6.7.0 before.
-
-> [!NOTE]
-> Considering the large number of different MD engines and analysis types,
-> it is still possible that some conversion or analysis runs will not
-> produce the expected results. Please report any problems
-> you experience while using MDANSE by adding them to the
-> [GitHub issue tracker](https://github.com/ISISNeutronMuon/MDANSE/issues).
-> You can also send a message to MDANSE-help@stfc.ac.uk to get in touch
-> with MDANSE developers.
-
 ## Quick start: installation
 
 We recommend that you install MDANSE in a Python virtual environment.

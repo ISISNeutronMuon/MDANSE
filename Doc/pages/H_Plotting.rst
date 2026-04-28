@@ -1,3 +1,6 @@
+
+.. |modq| replace:: :math:`|\mathbf{q}|`
+
 .. _plotting-options:
 
 Plotting the Results
@@ -339,16 +342,16 @@ For any file containing a :code:`/vector_generator` group, it is possible
 to create a vector statistics plot by right-clicking the file name in the
 Plot Creator tab and selecting the "Vector summary" option. This will create
 a new tab in the Plot Holder section, containing the information about the
-number of vectors in each shell and the distribution of :math:`|\mathbf{q}|`.
+number of vectors in each shell and the distribution of |modq|.
 
 Right-clicking an individual vector shell data group, such as
 :code:`/vector_generator/shell_0` will present a "Vector positions" option
 which creates a plot of vector distribution within a single shell.
 
-The weighted average of :math:`|\mathbf{q}|` is calculated
+The weighted average of |modq| is calculated
 for each shell and included in the output file in a dataset named
 :code:`/vector_generator/average_q`. Ideally, this dataset should coincide with
-the nominal values of :math:`|\mathbf{q}|` per shell
+the nominal values of |modq| per shell
 (:code:`/vector_generator/q`). This can be checked by plotting the two
 datasets together.
 

@@ -1,4 +1,7 @@
 
+.. |modq| replace:: :math:`|\mathbf{q}|`
+.. |q| replace:: :math:`\mathbf{q}`
+
 .. _qvector-generation:
 
 q-Vector Generation
@@ -53,14 +56,14 @@ where
 
    \mathbf{a}^* = \frac{2 \pi}{V} \mathbf{b} \times \mathbf{c}, \qquad \mathbf{b}^* = \frac{2 \pi}{V} \mathbf{c} \times \mathbf{a}, \qquad \mathbf{c}^* = \frac{2 \pi}{V} \mathbf{a} \times \mathbf{b}.
 
-If the :math:`\mathbf{q}`-vectors are now chosen as
+If the |q|-vectors are now chosen as
 
 .. math::
    :label: qvector3
 
    \mathbf{q} =  h\mathbf{a}^* + k\mathbf{b}^* + l\mathbf{c}^*
 
-so that this selection of :math:`\mathbf{q}`-vectors produces phase changes for
+so that this selection of |q|-vectors produces phase changes for
 handling jumps in particle trajectories. Here :math:`h`, :math:`k`, and :math:`l`
 are integers, jumps in the particle trajectories
 produce phase changes of multiples of :math:`2\pi` in the Fourier transformed
@@ -77,7 +80,7 @@ The current implementation of the lattice vector generators
 that different vectors can have different weights. This
 is meant to approximate a spherical distribution of vectors
 in low-symmetry systems where lattice vectors are not uniformly
-spaced, and also to give preference to vectors with :math:`|\mathbf{q}|`
+spaced, and also to give preference to vectors with |modq|
 close to the nominal value for a specific shell. This behaviour
 is different from MDANSE 1.5, where the shell population was
 deterministic for shells containing less lattice vectors than
@@ -101,8 +104,8 @@ each other will contribute less to the calculation results than the vectors
 from the reciprocal space regions containing few lattice vectors. This is meant
 to produce a better approximation of spherical sampling with a uniform distribution
 of angles. Additionally, the random points used for sampling follow a normal distribution
-in :math:`\mathbf{q}`, assigning a larger weight to the vectors close to the
-nominal :math:`\mathbf{q}` value of the shell.
+in |q|, assigning a larger weight to the vectors close to the
+nominal |q| value of the shell.
 
 The MDANSE GUI offers a preview dialog, visualising the vector distribution that
 should be created based on the input parameters. Additionally, the same
