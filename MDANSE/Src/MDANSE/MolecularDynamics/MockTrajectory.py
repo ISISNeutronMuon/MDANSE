@@ -507,14 +507,15 @@ class MockTrajectory:
         return list(grp.keys())
 
     @classmethod
-    def from_json(cls, filename: str) -> Trajectory:
-        """Builds and returns an instance of MockTrajectory
-        using the parameters in a JSON file.
+    def from_json(cls, text_input: str) -> Trajectory:
+        """Build and return an instance of MockTrajectory from a JSON definition.
+
+        It can be passed a JSON string or a filename of a JSON file.
 
         Parameters
         ----------
-        filename : str
-            must be a valid JSON file with "parameters",
+        text_input : str
+            Must be a JSON filename or a valid JSON string with "parameters",
             "coordinates" and "modulations" sections.
 
         Returns
@@ -522,8 +523,11 @@ class MockTrajectory:
         Trajectory
             a Trajectory instance with a MockTrajectory as internal object
         """
-        with open(filename, encoding="utf-8") as source:
-            struct = json.load(source)
+        try:
+            struct = json.loads(text_input)
+        except json.JSONDecodeError:
+            with open(text_input, encoding="utf-8") as source:
+                struct = json.load(source)
         temp = struct["parameters"]
         temp["box_size"] = np.array(temp["box_size"])
         instance = cls(**temp)

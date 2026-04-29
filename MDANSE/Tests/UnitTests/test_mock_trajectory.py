@@ -25,6 +25,24 @@ file_wd = os.path.dirname(os.path.realpath(__file__))
 
 mock_json = os.path.join(file_wd, "Data", "mock.json")
 
+mock_json_as_text = """{"parameters":
+{"number_of_frames": 100,
+"atoms_in_box": ["Si", "O", "H"],
+"box_repetitions": [3, 3, 3],
+"box_size": [[4.0, 0.0, 0.0], [0.0, 4.0, 0.0], [0.0, 0.0, 4.0]],
+"pbc": true},
+"coordinates":
+[[1.0, 1.0, 1.0], [1.0, 2.0, 1.0], [1.0, 2.0, 1.9]],
+"modulations": [
+    {"polarisation": [[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]],
+    "propagation_vector": [0.0, 0.0, 0.0],
+    "period": 20,
+    "amplitude": 0.2},
+    {"polarisation": [[0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [0.0, 1.0, 0.0]],
+    "propagation_vector": [1.0, 0.0, 0.0],
+    "period": 10,
+    "amplitude": 0.1}]}
+"""
 
 @pytest.fixture(scope="module")
 def static_trajectory():
@@ -129,6 +147,26 @@ def test_from_json(full_trajectory):
         0.1,
     )
     instance = MockTrajectory.from_json(mock_json)
+    assert full_trajectory._atom_types == instance.atom_types
+    print(full_trajectory.coordinates(25) - instance.coordinates(25))
+    assert np.allclose(full_trajectory.coordinates(25), instance.coordinates(25))
+    assert not np.allclose(full_trajectory.coordinates(25), instance.coordinates(22))
+
+
+def test_from_json_using_text(full_trajectory):
+    full_trajectory.modulate_structure(
+        np.array([[1.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]),
+        np.array([0.0, 0.0, 0.0]),
+        20,
+        0.2,
+    )
+    full_trajectory.modulate_structure(
+        np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [0.0, 1.0, 0.0]]),
+        np.array([1.0, 0.0, 0.0]),
+        10,
+        0.1,
+    )
+    instance = MockTrajectory.from_json(mock_json_as_text)
     assert full_trajectory._atom_types == instance.atom_types
     print(full_trajectory.coordinates(25) - instance.coordinates(25))
     assert np.allclose(full_trajectory.coordinates(25), instance.coordinates(25))
