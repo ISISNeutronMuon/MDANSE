@@ -525,7 +525,7 @@ class MockTrajectory:
         """
         try:
             struct = json.loads(text_input)
-        except json.JSONDecodeError:
+        except (TypeError, json.JSONDecodeError):
             with open(text_input, encoding="utf-8") as source:
                 struct = json.load(source)
         temp = struct["parameters"]
