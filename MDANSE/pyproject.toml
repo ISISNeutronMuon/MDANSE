@@ -58,9 +58,10 @@ cli=["tqdm"]
 ase=["ase"]
 mdanalysis=["MDAnalysis"]
 mdtraj=["mdtraj"]
+castep=["castep_outputs>=0.3.4"]
 finufft=["finufft"]
 pymixbox=["pymixbox"]
-all=["MDANSE[ase,cli,mdanalysis,mdtraj,finufft,pymixbox]"]
+all=["MDANSE[ase,cli,mdanalysis,mdtraj,finufft,pymixbox,castep]"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"
