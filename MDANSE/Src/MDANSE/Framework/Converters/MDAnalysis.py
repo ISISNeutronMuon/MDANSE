@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from importlib.util import find_spec
+
 from more_itertools import first
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
@@ -29,12 +31,7 @@ from MDANSE.MolecularDynamics.Configuration import (
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
-try:
-    import MDAnalysis as mda  # ruff: ignore[F401]
-
-    mda_available = True
-except ImportError:
-    mda_available = False
+mda_available = find_spec("MDAnalysis") is not None
 
 
 @IJob.register("MDAnalysis")
