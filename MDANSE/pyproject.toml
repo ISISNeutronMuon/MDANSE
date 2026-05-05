@@ -43,11 +43,16 @@ dependencies = [
     "more-itertools",
 ]
 
-[project.optional-dependencies]
-cli=["tqdm"]
+[dependency-groups]
+dev = [
+  {include-group = "test"},
+  {include-group = "lint"}
+]
 test=["pytest", "pytest-timeout"]
 lint=["ruff<0.14"]
-# dynamic = ["version", "description"]
+
+[project.optional-dependencies]
+cli=["tqdm"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"

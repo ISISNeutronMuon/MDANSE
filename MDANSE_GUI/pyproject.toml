@@ -42,7 +42,11 @@ dependencies = [
     "tomlkit"
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
+dev = [
+  {include-group = "test"},
+  {include-group = "lint"}
+]
 test=["pytest", "pytest-timeout", "pytest-qt"]
 lint=["ruff<0.14"]
 
