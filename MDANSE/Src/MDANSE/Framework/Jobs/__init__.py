@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from .AreaPerMolecule import AreaPerMolecule as AreaPerMolecule
 from .AverageStructure import AverageStructure as AverageStructure
+from .BondAngleStatistics import BondAngleStatistics as BondAngleStatistics
 from .CartesianCorrelationFunction import (
     CartesianCorrelationFunction as CartesianCorrelationFunction,
 )
