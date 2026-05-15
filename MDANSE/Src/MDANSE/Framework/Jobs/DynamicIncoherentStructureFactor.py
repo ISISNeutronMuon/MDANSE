@@ -246,6 +246,7 @@ class DynamicIncoherentStructureFactor(IJob):
         """
 
         atom_index_group = self.grouped_indices[index]
+        n_atoms = len(atom_index_group)
 
         series = self.trajectory.read_atomic_trajectory_many(
             atom_index_group,
@@ -258,17 +259,21 @@ class DynamicIncoherentStructureFactor(IJob):
 
         disf_per_q_shell = {}
         for q in self.configuration["q_vectors"]["shells"]:
-            disf_per_q_shell[q] = np.zeros((self._nFrames,), dtype=np.float64)
+            if self.configuration["q_vectors"]["value"][q] is None:
+                disf_per_q_shell[q] = np.nan
+                continue
+            disf_per_q_shell[q] = np.zeros((self._nFrames, n_atoms), dtype=np.float64)
 
         n_configs = self.configuration["frames"]["n_configs"]
         for q in self.configuration["q_vectors"]["shells"]:
             if self.configuration["q_vectors"]["value"][q] is None:
-                disf_per_q_shell[q] = np.nan
                 continue
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
             qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
 
-            rho = np.exp(1j * np.dot(series, qVectors)) * np.sqrt(qvec_weights[None, :])
+            rho = np.exp(1j * np.einsum("inj,jk->in", series, qVectors)) * np.sqrt(
+                qvec_weights[None, :]
+            )
             res = correlate(rho, rho[:n_configs], mode="valid").T[0] / (
                 n_configs * np.sum(qvec_weights)
             )
@@ -284,10 +289,11 @@ class DynamicIncoherentStructureFactor(IJob):
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """
-
-        element = self._atoms[self.trajectory.atom_indices[index]]
-        for i, v in enumerate(disf_per_q_shell.values()):
-            self._outputData[f"disf/f(q,t)/{element}"][i, :] += v
+        at_indices = self.grouped_indices[index]
+        for rel_index, abs_index in enumerate(at_indices):
+            element = self._atoms[abs_index]
+            for i, v in enumerate(disf_per_q_shell.values()):
+                self._outputData[f"disf/f(q,t)/{element}"][i, :] += v[:, rel_index]
 
     def finalize(self):
         """
