@@ -302,7 +302,10 @@ class DynamicIncoherentStructureFactor(IJob):
         for rel_index, abs_index in enumerate(at_indices):
             element = self._atoms[abs_index]
             for i, v in enumerate(disf_per_q_shell.values()):
-                self._outputData[f"disf/f(q,t)/{element}"][i, :] += v[:, rel_index]
+                if hasattr(v, "shape"):
+                    self._outputData[f"disf/f(q,t)/{element}"][i, :] += v[:, rel_index]
+                else:
+                    self._outputData[f"disf/f(q,t)/{element}"][i, :] += v
 
     def finalize(self):
         """
