@@ -24,6 +24,25 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+CHUNK_SIZE_LIMIT = 2**28  # 256 MB for now
+
+
+def group_atom_indices(
+    traj_instance: Trajectory, n_proc: int = 1, size_limit: int = CHUNK_SIZE_LIMIT
+) -> list[list[int]]:
+    selected_indices = sorted(traj_instance.atom_indices)
+    total_dimensions = traj_instance.variable("position").shape
+    chunk_size = traj_instance.chunk_size(array_name="position")
+    chunk_limits = np.concatenate(
+        [np.arange(0, total_dimensions[1], chunk_size), [total_dimensions[1]]]
+    )
+    initial_sets = [
+        sorted(set(range(chunk[0], chunk[1])).intersection(selected_indices))
+        for chunk in chunk_limits
+    ]
+    return [ind_list for ind_list in initial_sets if len(ind_list)]
 
 
 @IJob.register("DynamicIncoherentStructureFactor")
@@ -110,7 +129,8 @@ class DynamicIncoherentStructureFactor(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = len(self.trajectory.atom_indices)
+        self.grouped_indices = group_atom_indices(self.trajectory)
+        self.numberOfSteps = len(self.grouped_indices)
 
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
 
@@ -225,10 +245,10 @@ class DynamicIncoherentStructureFactor(IJob):
             #. atomicSF (np.array): The atomic structure factor
         """
 
-        atom_index = self.trajectory.atom_indices[index]
+        atom_index_group = self.grouped_indices[index]
 
-        series = self.trajectory.read_atomic_trajectory(
-            atom_index,
+        series = self.trajectory.read_atomic_trajectory_many(
+            atom_index_group,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],

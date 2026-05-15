@@ -59,3 +59,39 @@ def atomic_trajectory(
     if not box_coordinates:
         trajectory = np.einsum("ij,ijk->ik", trajectory, cell)
     return trajectory
+
+
+def atomic_trajectory_many(
+    config: np.ndarray,
+    cell: np.ndarray,
+    rcell: np.ndarray,
+    *,
+    box_coordinates: bool = False,
+) -> np.ndarray:
+    """For the coordinates of a specific atom, remove all unit cell jumps.
+
+    Parameters
+    ----------
+    config : np.ndarray
+        The coordinates for a specific atoms.
+    cell : np.ndarray
+        The direct matrices.
+    rcell : np.ndarray
+        The inverse matrices.
+    box_coordinates : bool
+        Returns the coordinates in fractional coordinates if true.
+
+    Returns
+    -------
+    np.ndarray
+        The input config but the unit cell jumps removed.
+
+    """
+    # i is time, j is the XYZ coordinate
+    trajectory = np.einsum("inj,ijk->ink", config, rcell)
+    sdxyz = trajectory[1:, :] - trajectory[:-1, :]
+    sdxyz -= np.cumsum(np.round(sdxyz), axis=0)
+    trajectory[1:, :] = trajectory[:-1, :] + sdxyz
+    if not box_coordinates:
+        trajectory = np.einsum("inj,ijk->ink", trajectory, cell)
+    return trajectory

@@ -43,7 +43,7 @@ from MDANSE.MolecularDynamics.UnitCell import (
     UnitCell,
 )
 
-from .FileTrajBase import TrajectoryFile
+from .FileTrajBase import TrajDataArray, TrajectoryFile
 
 SLICE_ALL = np.s_[:]
 
@@ -220,6 +220,27 @@ class MdanseTrajectory(TrajectoryFile):
 
         n_req = len(range(*indices.indices(self.chemical_system.number_of_atoms)))
         return np.zeros(n_req, dtype=np.float64)
+
+    def chunk_size(self, dataset_type: TrajDataArray = TrajDataArray.POSITION) -> int:
+        if dataset_type == TrajDataArray.POSITION:
+            data_key = "/configuration/coordinates"
+        elif dataset_type == TrajDataArray.VELOCITY:
+            data_key = "/configuration/velocities"
+        elif dataset_type == TrajDataArray.FORCE:
+            data_key = "/configuration/gradients"
+        try:
+            dataset = self._h5_file[data_key]
+        except KeyError:
+            LOG.error("Dataset %s was not in the trajectory file", data_key)
+            return -1
+        if not hasattr(dataset, "chunks"):
+            LOG.warning("Dataset %s is not chunked, and was expected to be", data_key)
+            return -1
+        chunk_shape = dataset.chunks
+        if len(chunk_shape) < 2:
+            LOG.warning("Dataset %s does not have enough dimensions", data_key)
+            return -1
+        return chunk_shape[1]
 
     def coordinates(
         self, frame: slice | int, indices: slice | int = np.s_[:]
