@@ -35,12 +35,18 @@ def group_atom_indices(
     selected_indices = sorted(traj_instance.atom_indices)
     total_dimensions = traj_instance.variable("position").shape
     chunk_size = traj_instance.chunk_size(array_name="position")
+    if chunk_size < 0:
+        return [[ind] for ind in selected_indices]
     chunk_limits = np.concatenate(
         [np.arange(0, total_dimensions[1], chunk_size), [total_dimensions[1]]]
     )
     initial_sets = [
-        sorted(set(range(chunk[0], chunk[1])).intersection(selected_indices))
-        for chunk in chunk_limits
+        sorted(
+            set(range(chunk_limits[n], chunk_limits[n + 1])).intersection(
+                selected_indices
+            )
+        )
+        for n in range(len(chunk_limits) - 1)
     ]
     return [ind_list for ind_list in initial_sets if len(ind_list)]
 
@@ -270,16 +276,19 @@ class DynamicIncoherentStructureFactor(IJob):
                 continue
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
             qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
-
-            rho = np.exp(1j * np.einsum("inj,jk->in", series, qVectors)) * np.sqrt(
-                qvec_weights[None, :]
+            rho = np.exp(
+                1j * np.einsum("inj,jk,k->in", series, qVectors, np.sqrt(qvec_weights))
             )
-            res = correlate(rho, rho[:n_configs], mode="valid").T[0] / (
-                n_configs * np.sum(qvec_weights)
-            )
+            res = np.vstack(
+                [
+                    correlate(rho[:, n], rho[:n_configs, n], mode="valid")
+                    for n in range(rho.shape[1])
+                ]
+            ).T
+            norm = n_configs * np.sum(qvec_weights)
+            res /= norm
 
             disf_per_q_shell[q] += res.real
-
         return index, disf_per_q_shell
 
     def combine(self, index, disf_per_q_shell):

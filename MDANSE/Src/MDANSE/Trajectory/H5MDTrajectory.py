@@ -325,7 +325,7 @@ class H5MDTrajectory(TrajectoryFile):
         except KeyError:
             LOG.error("Dataset %s was not in the trajectory file", data_key)
             return -1
-        if not hasattr(dataset, "chunks"):
+        if not hasattr(dataset, "chunks") or dataset.chunks is None:
             LOG.warning("Dataset %s is not chunked, and was expected to be", data_key)
             return -1
         chunk_shape = dataset.chunks

@@ -55,6 +55,12 @@ class MdanseTrajectory(TrajectoryFile):
     is the specific implementation for the Mdanse HDF5 format.
     """
 
+    KEYS = {
+        "position": "/configuration/coordinates",
+        "velocity": "/configuration/velocities",
+        "force": "/configuration/gradients",
+    }
+
     def __init__(self, h5_filename: Path | str, hdf5_driver: str | None = None):
         """Open the file and build a trajectory.
 
@@ -591,7 +597,7 @@ class MdanseTrajectory(TrajectoryFile):
 
     def variable(self, name: str):
         """Return a specific dataset corresponding to a variable called 'name'."""
-        return self._h5_file["/configuration/" + name]
+        return self._h5_file[self.KEYS[name]]
 
     def variables(self) -> list[str]:
         """Return the configuration variables stored in this trajectory.
