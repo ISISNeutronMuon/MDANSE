@@ -19,20 +19,20 @@ import copy
 from collections.abc import Sequence
 
 import numpy as np
-import numpy.typing as npt
 from scipy.spatial import KDTree
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import generate_sphere_points
 from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.util_types import FloatArray, IntArray
 
 
 def compare_trees(
     sphere_tree: KDTree,
     atom_tree: KDTree,
     sphere_indices: set[int],
-    vdw_radii: npt.NDArray[float],
+    vdw_radii: FloatArray,
     max_dist: float,
     min_dist: float,
     probe_radius: float,
@@ -50,7 +50,7 @@ def compare_trees(
         Atom positions in a KDTree.
     sphere_indices : set[int]
         Set of indices of all the points on the sphere.
-    vdw_radii : npt.NDArray[float]
+    vdw_radii : FloatArray
         Array of van der Waals radii for all the point in atom_tree.
     max_dist : float
         Distance between points above which blocking is not possible.
@@ -97,12 +97,12 @@ def compare_trees(
 
 
 def solvent_accessible_surface(
-    coords: npt.NDArray[float],
-    all_indices: npt.NDArray[int],
+    coords: FloatArray,
+    all_indices: IntArray,
     selected_indices: Sequence[int],
-    grouping_indices: npt.NDArray[int],
-    vdw_radii: npt.NDArray[float],
-    sphere_points: npt.NDArray[float],
+    grouping_indices: IntArray,
+    vdw_radii: FloatArray,
+    sphere_points: FloatArray,
     probe_radius_value: float,
     *,
     calculate_blocking: bool = False,
@@ -122,17 +122,17 @@ def solvent_accessible_surface(
 
     Parameters
     ----------
-    coords : np.ndarray[float]
+    coords : FloatArray
         Coordinates of all atoms plus their copies in padding region.
-    all_indices : np.ndarray[int]
+    all_indices : IntArray
         An array of all the atom indices.
     indices : Sequence[int]
         Indices of only the selected atoms.
-    grouping_indices : np.ndarray[int]
+    grouping_indices : IntArray
         Index of the results group (e.g. 'Cu', '<H2_O1>/H') to which each atom belongs.
-    vdw_radii : np.ndarray
+    vdw_radii : FloatArray
         For each atom, its van der Waals radius.
-    sphere_points : np.ndarray
+    sphere_points : FloatArray
         Pre-generated near-equidistant points on a sphere.
     probe_radius_value : float
         Radius of the probe particle.
@@ -259,7 +259,7 @@ def make_grouping_indices(
     type_mapping: dict[str, int],
     grouping_level: str,
     cs_clusters: dict[str, list[int]],
-) -> npt.NDArray[int]:
+) -> IntArray:
     """Assign each atom the number of its corresponding dataset in the output data.
 
     Parameters
@@ -279,7 +279,7 @@ def make_grouping_indices(
 
     Returns
     -------
-    npt.NDArray[int]
+    IntArray
         For each atom, a number representing its group in the output data.
     """
     grouping_indices = len(all_indices) * [0]

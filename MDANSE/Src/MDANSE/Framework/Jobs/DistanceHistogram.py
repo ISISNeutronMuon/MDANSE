@@ -234,7 +234,7 @@ class DistanceHistogram(IJob):
         ----------
         index : int
             step number, not used
-        x : tuple[float, np.ndarray, np.ndarray]
+        x : tuple[float, FloatArray, FloatArray]
             output of the run_step method
 
         """

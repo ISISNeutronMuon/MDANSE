@@ -20,9 +20,10 @@ from qtpy.QtCore import QDir, QSize
 from qtpy.QtGui import QIcon, QImage, QPixmap
 
 from MDANSE.MLogging import LOG
+from MDANSE.util_types import ByteArray
 
 
-def qimage_to_array(image: QImage) -> np.ndarray:
+def qimage_to_array(image: QImage) -> ByteArray:
     image.convertToFormat(QImage.Format.Format_RGBA8888)
     w, h = image.width(), image.height()
     temp = image.bits()
@@ -30,7 +31,7 @@ def qimage_to_array(image: QImage) -> np.ndarray:
     return np.frombuffer(temp, np.uint8).reshape((h, w, 4))
 
 
-def mean_rgb(image_array: np.ndarray) -> float:
+def mean_rgb(image_array: ByteArray) -> float:
     luminance = (
         0.3 * image_array[:, :, 0]
         + 0.59 * image_array[:, :, 1]

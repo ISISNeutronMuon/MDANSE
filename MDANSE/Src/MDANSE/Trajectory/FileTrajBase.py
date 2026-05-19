@@ -28,6 +28,7 @@ from MDANSE.MolecularDynamics.TrajectoryUtils import (
     atomic_trajectory,
     atomic_trajectory_many,
 )
+from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -107,7 +108,7 @@ class TrajectoryFile(ABC):
     def close(self) -> None: ...
 
     @abstractmethod
-    def __getitem__(self, frame: int) -> dict[str, npt.NDArray[float]]: ...
+    def __getitem__(self, frame: int) -> dict[str, FloatArray]: ...
 
     @abstractmethod
     def __len__(self) -> int: ...
@@ -117,18 +118,18 @@ class TrajectoryFile(ABC):
         self,
         frame: int,
         indices: slice | int = np.s_[:],
-    ) -> npt.NDArray[float]: ...
+    ) -> FloatArray: ...
 
     @abstractmethod
     def coordinates(
         self, frame: slice | int, indices: slice | int = np.s_[:]
-    ) -> npt.NDArray[float]: ...
+    ) -> FloatArray: ...
 
     @abstractmethod
     def configuration(self, frame: int = 0) -> _Configuration: ...
 
     @abstractmethod
-    def time(self) -> npt.NDArray[float]: ...
+    def time(self) -> FloatArray: ...
 
     @abstractmethod
     def chunk_size(
@@ -139,7 +140,7 @@ class TrajectoryFile(ABC):
     def unit_cell(self, frame: int) -> UnitCell | None: ...
 
     @abstractmethod
-    def masses(self) -> npt.NDArray[float]: ...
+    def masses(self) -> FloatArray: ...
 
     @abstractmethod
     def variables(self) -> list[str]: ...
@@ -167,7 +168,7 @@ class TrajectoryFile(ABC):
         last: int | None = None,
         step: int = 1,
         variable: str = "velocities",
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Return trajectory values for one atom for a subset of frames.
 
         Parameters
@@ -206,11 +207,11 @@ class TrajectoryFile(ABC):
 
     def to_real_coordinates(
         self,
-        box_coordinates: npt.NDArray[float],
+        box_coordinates: FloatArray,
         first: int = 0,
         last: int | None = None,
         step: int | None = None,
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Convert box coordinates to real coordinates for a set of frames.
 
         Parameters
@@ -247,7 +248,7 @@ class TrajectoryFile(ABC):
         step: int | None = 1,
         *,
         box_coordinates: bool = False,
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
         Parameters
@@ -293,7 +294,7 @@ class TrajectoryFile(ABC):
         step: int | None = 1,
         *,
         box_coordinates: bool = False,
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
         Parameters

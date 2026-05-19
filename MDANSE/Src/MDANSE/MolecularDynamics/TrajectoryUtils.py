@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 
 CHUNK_SIZE_LIMIT = 2**29  # 512 MB memory limit per process for now
 
+from MDANSE.util_types import FloatArray
+
 
 class MolecularDynamicsError(Exception):
     pass
@@ -36,28 +38,28 @@ class UniverseAdapterError(Exception):
 
 
 def atomic_trajectory(
-    config: np.ndarray,
-    cell: np.ndarray,
-    rcell: np.ndarray,
+    config: FloatArray,
+    cell: FloatArray,
+    rcell: FloatArray,
     *,
     box_coordinates: bool = False,
-) -> np.ndarray:
+) -> FloatArray:
     """For the coordinates of a specific atom, remove all unit cell jumps.
 
     Parameters
     ----------
-    config : np.ndarray
+    config : FloatArray
         The coordinates for a specific atoms.
-    cell : np.ndarray
+    cell : FloatArray
         The direct matrices.
-    rcell : np.ndarray
+    rcell : FloatArray
         The inverse matrices.
     box_coordinates : bool
         Returns the coordinates in fractional coordinates if true.
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         The input config but the unit cell jumps removed.
 
     """
@@ -71,28 +73,28 @@ def atomic_trajectory(
 
 
 def atomic_trajectory_many(
-    config: np.ndarray,
-    cell: np.ndarray,
-    rcell: np.ndarray,
+    config: FloatArray,
+    cell: FloatArray,
+    rcell: FloatArray,
     *,
     box_coordinates: bool = False,
-) -> np.ndarray:
+) -> FloatArray:
     """For the coordinates of a specific atom, remove all unit cell jumps.
 
     Parameters
     ----------
-    config : np.ndarray
+    config : FloatArray
         The coordinates for a specific atoms.
-    cell : np.ndarray
+    cell : FloatArray
         The direct matrices.
-    rcell : np.ndarray
+    rcell : FloatArray
         The inverse matrices.
     box_coordinates : bool
         Returns the coordinates in fractional coordinates if true.
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         The input config but the unit cell jumps removed.
 
     """

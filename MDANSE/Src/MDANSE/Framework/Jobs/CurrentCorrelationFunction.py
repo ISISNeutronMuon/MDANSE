@@ -34,6 +34,7 @@ from MDANSE.Mathematics.Signal import (
 )
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.util_types import ComplexArray
 
 
 class CurrentCorrelationFunctionError(Exception):
@@ -312,7 +313,11 @@ class CurrentCorrelationFunction(IJob):
                 ),
             )
 
-    def run_step(self, index: int):
+    def run_step(
+        self, index: int
+    ) -> tuple[
+        int, tuple[dict[str, ComplexArray], dict[str, ComplexArray], float] | None
+    ]:
         """Calculate the current densities for the input q vector shell index.
 
         Parameters
@@ -473,16 +478,20 @@ class CurrentCorrelationFunction(IJob):
 
         return index, (rho_l, rho_t, np.sum(qvec_weights))
 
-    def combine(self, index: int, x: tuple[np.ndarray, np.ndarray] | None):
+    def combine(
+        self,
+        index: int,
+        x: tuple[dict[str, ComplexArray], dict[str, ComplexArray], float] | None,
+    ):
         """Calculate the correlation functions of the current densities.
 
         Parameters
         ----------
         index : int
             The index of the q vector shell that we are calculating.
-        x : tuple[np.ndarray, np.ndarray]
+        x : tuple[dict[str, ComplexArray], dict[str, ComplexArray], float] | None
             A tuple of numpy arrays of the longitudinal and transverse
-            currents.
+            currents and normalisation factor.
 
         """
         if x is None:

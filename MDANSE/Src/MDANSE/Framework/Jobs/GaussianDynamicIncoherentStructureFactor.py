@@ -24,6 +24,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
+from MDANSE.util_types import FloatArray
 
 
 @IJob.register("GaussianDynamicIncoherentStructureFactor")
@@ -231,7 +232,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         self._atoms = self.trajectory.atom_names
 
-    def run_step(self, index: int):
+    def run_step(self, index: int) -> tuple[int, tuple[FloatArray, FloatArray]]:
         """Calculates the GDISF and MSD of an atom.
 
         Parameters
@@ -241,7 +242,7 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         Returns
         -------
-        tuple[int, tuple[np.ndarray, np.ndarray]]
+        tuple[int, tuple[FloatArray, FloatArray]]
             A tuple which contains the job index and a tuple of the
             GDISF and MSD of an atom.
         """
@@ -270,14 +271,14 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
 
         return index, (atomicSF, msd)
 
-    def combine(self, index: int, x: tuple[np.ndarray, np.ndarray]):
+    def combine(self, index: int, x: tuple[FloatArray, FloatArray]):
         """Add the results to the output files.
 
         Parameters
         ----------
         index : int
             The atom index that the calculation was run over.
-        x : tuple[np.ndarray, np.ndarray]
+        x : tuple[FloatArray, FloatArray]
             A tuple of the GDISF and MSD of an atom.
         """
         element = self._atoms[self.trajectory.atom_indices[index]]

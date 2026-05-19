@@ -25,12 +25,12 @@ from typing import Any, Literal
 
 import numpy as np
 from more_itertools import first, one, sort_together, split_before, spy
-from numpy.typing import NDArray
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Parsers.LAMMPS import BoxStyle
 from MDANSE.IO.IOUtils import strip_comments
 from MDANSE.MLogging import LOG
+from MDANSE.util_types import FloatArray
 
 from .Parser import Parser
 
@@ -608,7 +608,7 @@ class LAMMPSConfigFile(Parser, dict):
 
     def mass_parser(
         self, lines: Iterable[str], *_
-    ) -> dict[Literal["mass"], NDArray[float]]:
+    ) -> dict[Literal["mass"], FloatArray]:
         """Get atom-type masses.
 
         Parameters

@@ -34,6 +34,7 @@ from rdkit.Geometry import Point3D
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -174,13 +175,13 @@ class ChemicalSystem:
                 self.rdkit_mol.AddBond(i, j, Chem.rdchem.BondType.UNSPECIFIED)
 
     def set_bond_orders(
-        self, coords: np.ndarray, *, max_iters: int = 1000, max_natms: int = 100
+        self, coords: FloatArray, *, max_iters: int = 1000, max_natms: int = 100
     ):
         """Set the bond types for the bonds in the rdkit_mol.
 
         Parameters
         ----------
-        coords : np.ndarray
+        coords : FloatArray
             The coordinates of the system to determine the bond types
             from.
         max_iters: int

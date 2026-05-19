@@ -32,6 +32,7 @@ from MDANSE.Framework.Configurators.QVectorsConfigurator import QVectorsConfigur
 from MDANSE.Framework.QVectors.IQVectors import WIDTH_NONZERO_LIMIT
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+from MDANSE.util_types import FloatArray
 from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem, MDADataStructure
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
@@ -47,7 +48,7 @@ WEIGHTS_MULTIPLIER = 100
 def qvector_binning_from_dict(
     qvector_params: dict[str, Any],
     n_segments: int = 10,
-) -> npt.NDArray[float] | None:
+) -> FloatArray | None:
     """Calculate the range of |q| bins from the vector generator parameters.
 
     Parameters
@@ -59,7 +60,7 @@ def qvector_binning_from_dict(
 
     Returns
     -------
-    npt.NDArray[float] | None
+    FloatArray | None
         A 1D array of |q| bin limits.
     """
     if (step_params := qvector_params.get("shells")) is None:
@@ -75,7 +76,7 @@ def qvector_binning_general(
     step_size: float,
     width: float | None,
     n_segments: int,
-) -> npt.NDArray[float]:
+) -> FloatArray:
     """Calculate the |q| bin limits based of vector shell limits and steps.
 
     Parameters
@@ -93,7 +94,7 @@ def qvector_binning_general(
 
     Returns
     -------
-    npt.NDArray[float]
+    FloatArray
         A 1D array of |q| histogram bin limits.
     """
     if end < start:
@@ -154,7 +155,7 @@ def qvector_binning_general(
     return common_binning
 
 
-def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[float]:
+def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> FloatArray:
     """Find the vector shell dataset and returns arrays of q vector lengths.
 
     Parameters
@@ -166,7 +167,7 @@ def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[float]:
 
     Returns
     -------
-    npt.NDArray[float]
+    FloatArray
         A 1D array of q-vector lengths.
     """
     qvectors = parent[f"shell_{shell_index}/qvector_array"][:]
@@ -197,17 +198,17 @@ def vector_angular_datasets(
 
 
 def angular_datasets_from_qarray(
-    q_array: npt.NDArray[float],
-    weight_array: npt.NDArray[float],
+    q_array: FloatArray,
+    weight_array: FloatArray,
     filename: str | None = None,
 ) -> tuple[SingleDataset, SingleDataset]:
     """Convert an array of q vectors into two datasets of spherical angles.
 
     Parameters
     ----------
-    q_array : npt.NDArray[float]
+    q_array : FloatArray
         A (3,N) array of reciprocal space vectors.
-    weight_array: npt.NDArray[float],
+    weight_array: FloatArray,
         Array of weights per vector, based the multiplicity of each vector.
     filename : str | None, optional
         Name of the file to be shown in plot details, by default None
@@ -279,14 +280,14 @@ def vector_projection_datasets(
 
 
 def projection_datasets_from_qarray(
-    q_array: npt.NDArray[float],
+    q_array: FloatArray,
     filename: str | None = None,
 ) -> tuple[SingleDataset, SingleDataset, SingleDataset, SingleDataset]:
     """Convert a q vector array to datasets of Cartesian coordinates.
 
     Parameters
     ----------
-    q_array : npt.NDArray[float]
+    q_array : FloatArray
         A (3,N) array of reciprocal space vectors.
     filename : str | None, optional
         Name of the file to be shown in plot details, by default None
@@ -346,7 +347,7 @@ def projection_datasets_from_qarray(
 def vector_q_statistics_datasets(
     source: h5py.File | QVectorsConfigurator,
     main_dset: str = "vector_generator",
-    q_bin_limits: npt.NDArray[float] | None = None,
+    q_bin_limits: FloatArray | None = None,
 ) -> tuple[SingleDataset, SingleDataset]:
     """Create plottable SingleDataset instances showing |q| of generated vectors.
 
@@ -356,7 +357,7 @@ def vector_q_statistics_datasets(
         An object containing vector parameters: configurator or an .mda file.
     main_dset : str, optional
         Name of the group with q vector shells, by default "vector_generator".
-    q_bin_limits : npt.NDArray[float], optional
+    q_bin_limits : FloatArray, optional
         Bin limits for the |q| histogram. If not given, it will be determined from |q| values.
 
     Returns

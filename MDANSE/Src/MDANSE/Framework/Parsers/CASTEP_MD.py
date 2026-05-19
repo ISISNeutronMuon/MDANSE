@@ -22,12 +22,12 @@ from itertools import dropwhile
 from typing import Any
 
 import numpy as np
-import numpy.typing as npt
 from ase.io.trajectory import Trajectory as ASETrajectory
 from more_itertools import first, one, split_at
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Units import measure
+from MDANSE.util_types import FloatArray
 
 from .Parser import Parser
 
@@ -39,7 +39,7 @@ AUT = measure(2.4188843265864e-17, "s").toval("ps")
 
 class CASTEPMDFile(Parser):
     @staticmethod
-    def float_list_handler(x: str) -> npt.NDArray[float]:
+    def float_list_handler(x: str) -> FloatArray:
         return np.array(x.split(), dtype=np.float64)
 
     @staticmethod

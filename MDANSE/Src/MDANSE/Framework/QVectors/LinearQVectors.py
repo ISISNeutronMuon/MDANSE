@@ -16,16 +16,16 @@
 from __future__ import annotations
 
 import numpy as np
-import numpy.typing as npt
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
+from MDANSE.util_types import FloatArray
 
 
 def linear_vectors(
     q: float,
     q_width: float,
     n_vecs: int,
-    axis: npt.NDArray[float],
+    axis: FloatArray,
     rng: np.random.Generator,
 ):
     """Generate vectors on a line.
@@ -41,14 +41,14 @@ def linear_vectors(
         The width of the |q| distribution.
     n_vecs : int
         Number of vectors to generate.
-    axis: npt.NDArray[float]
+    axis: FloatArray
         Defines a line in space on which the vectors are generated.
     rng : np.random.Generator
         A numpy random number generator object.
 
     Returns
     -------
-    npt.NDArray[float]
+    FloatArray
         A (3,N) array of vectors.
     """
     qmin = max(0.01 * abs(q), q - q_width / 2)

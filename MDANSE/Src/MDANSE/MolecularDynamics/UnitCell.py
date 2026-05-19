@@ -19,6 +19,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from MDANSE.util_types import FloatArray
+
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
@@ -72,7 +74,7 @@ class UnitCell:
         return f"MDANSE.MolecularDynamics.UnitCell.UnitCell({self._unit_cell!r})"
 
     @property
-    def a_vector(self) -> np.ndarray:
+    def a_vector(self) -> FloatArray:
         """
         Return the a vector.
 
@@ -82,7 +84,7 @@ class UnitCell:
         return self._unit_cell[0, :]
 
     @property
-    def b_vector(self) -> np.ndarray:
+    def b_vector(self) -> FloatArray:
         """
         Return the b vector.
 
@@ -92,7 +94,7 @@ class UnitCell:
         return self._unit_cell[1, :]
 
     @property
-    def c_vector(self) -> np.ndarray:
+    def c_vector(self) -> FloatArray:
         """Return the c vector.
 
         :return: the c vector
@@ -101,7 +103,7 @@ class UnitCell:
         return self._unit_cell[2, :]
 
     @property
-    def direct(self) -> np.ndarray:
+    def direct(self) -> FloatArray:
         """
         Return the unit cell matrix.
 
@@ -111,7 +113,7 @@ class UnitCell:
         return self._unit_cell
 
     @property
-    def inverse(self) -> np.ndarray:
+    def inverse(self) -> FloatArray:
         """
         Return the inverse of the unit cell matrix.
 
@@ -151,7 +153,7 @@ class UnitCell:
         """
         Returns
         -------
-        np.ndarray
+        FloatArray
             The positions of the vertices of the unit cell.
         """
         a = self.a_vector

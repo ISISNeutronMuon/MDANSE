@@ -21,6 +21,7 @@ from scipy.spatial.transform import Rotation
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
+from MDANSE.util_types import FloatArray
 
 
 @IJob.register("RotationAutocorrelation")
@@ -130,7 +131,7 @@ class RotationAutocorrelation(IJob):
                 main_result=True,
             )
 
-    def run_step(self, index: int) -> tuple[int, np.ndarray]:
+    def run_step(self, index: int) -> tuple[int, FloatArray]:
         """Run the analysis for a single molecule.
 
         Parameters
@@ -140,7 +141,7 @@ class RotationAutocorrelation(IJob):
 
         Returns
         -------
-        tuple[int, np.ndarray]
+        tuple[int, FloatArray]
             Molecule index and the correlation array.
 
         """
@@ -179,18 +180,18 @@ class RotationAutocorrelation(IJob):
         ]
         return index, (ac, euler_angles)
 
-    def combine(self, index: int, x: np.ndarray):
+    def combine(self, index: int, x: FloatArray):
         """Add the partial result to the results.
 
         Parameters
         ----------
         index : int
             index of the molecule
-        x : np.ndarray
+        x : FloatArray
             array of the correlation results
 
         """
-        for ax_ind, axis in "xyz":
+        for ax_ind, axis in enumerate("xyz"):
             self._outputData[f"{axis}_rotation_ac"] += x[0][ax_ind]
             self._outputData[f"rotation_around_{axis}"] += x[1][:, ax_ind]
 

@@ -19,6 +19,8 @@ import typing
 
 import numpy as np
 
+from MDANSE.util_types import FloatArray
+
 if typing.TYPE_CHECKING:
     from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
@@ -44,7 +46,7 @@ class HDF5Wrapper(IReader):
             )
         ]
 
-    def read_frame(self, frame: int) -> np.ndarray:
+    def read_frame(self, frame: int) -> FloatArray:
         coords = self._trajectory.coordinates(frame)
         return np.array(coords)
 

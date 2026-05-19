@@ -31,6 +31,7 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 from MDANSE.Mathematics.Signal import get_spectrum
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.util_types import FloatArray
 
 
 class DynamicCoherentStructureFactorError(Exception):
@@ -245,7 +246,7 @@ class DynamicCoherentStructureFactor(IJob):
                 ),
             )
 
-    def run_step(self, index: int) -> tuple[int, dict[str, np.ndarray] | None]:
+    def run_step(self, index: int) -> tuple[int, dict[str, FloatArray] | None]:
         """Run the analysis for a single Q shell.
 
         Parameters
@@ -255,7 +256,7 @@ class DynamicCoherentStructureFactor(IJob):
 
         Returns
         -------
-        int, np.ndarray
+        int, FloatArray
             shell index, rho density array
 
         """
@@ -332,7 +333,7 @@ class DynamicCoherentStructureFactor(IJob):
 
         return index, (rho, np.sum(qvec_weights))
 
-    def combine(self, index: int, x: np.ndarray):
+    def combine(self, index: int, x: FloatArray | None):
         """Add partial results to the final array."""
         if x is not None:
             norm = x[1]

@@ -23,6 +23,8 @@ from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 from vtk.util.numpy_support import numpy_to_vtk
 
+from MDANSE.util_types import ByteArray, FloatArray, IntArray
+
 if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
@@ -31,13 +33,17 @@ RGB_COLOURS.append((1.00, 0.20, 1.00))  # selection
 RGB_COLOURS.append((1.00, 0.90, 0.90))  # background
 
 
-def ndarray_to_vtkarray(colors, scales, indices):
+def ndarray_to_vtkarray(colors: ByteArray, scales: FloatArray, indices: IntArray):
     """Convert the colors and scales NumPy arrays to vtk arrays.
 
-    Args:
-        colors (numpy.array): the colors
-        scales (numpy.array): the scales
-        n_atoms (int): the number of atoms
+    Parameters
+    ----------
+    colors : ByteArray
+        the colors
+    scales : FloatArray
+        the scales
+    n_atoms : int
+        the number of atoms
     """
     # define the colours
     color_scalars = numpy_to_vtk(colors)
@@ -104,8 +110,8 @@ class AtomProperties(QStandardItemModel):
         self.itemChanged.connect(self.onNewValues)
         self._groups = []
         self._total_length = 0
-        self.colours = np.array([], dtype=int)
-        self.radii = np.array([], dtype=float)
+        self.colours: IntArray = np.array([], dtype=int)
+        self.radii: FloatArray = np.array([], dtype=float)
 
     def clear_table(self):
         """This was meant to be used for cleaning up,

@@ -20,6 +20,7 @@ from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
+from MDANSE.util_types import FloatArray
 
 
 @IJob.register("DipoleAutoCorrelationFunction")
@@ -95,7 +96,7 @@ class DipoleAutoCorrelationFunction(IJob):
             main_result=True,
         )
 
-    def run_step(self, index) -> tuple[int, np.ndarray]:
+    def run_step(self, index) -> tuple[int, FloatArray]:
         """Runs a single step of the job.
 
         Parameters
@@ -105,7 +106,7 @@ class DipoleAutoCorrelationFunction(IJob):
 
         Returns
         -------
-        tuple[int, np.ndarray]
+        tuple[int, FloatArray]
             The index of the step and the calculated dipole
             auto-correlation function for a molecule.
         """

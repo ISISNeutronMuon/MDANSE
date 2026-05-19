@@ -19,6 +19,7 @@ import numpy as np
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MLogging import LOG
+from MDANSE.util_types import FloatArray
 
 
 @IConfigurator.register("UnitCellConfigurator")
@@ -90,12 +91,13 @@ class UnitCellConfigurator(IConfigurator):
 
         self.recommended_cell = self.recommended_cell.tolist()
 
-    def configure(self, value):
-        """
-        Configure the unit cell as a 3x3 array.
+    def configure(self, value: tuple[FloatArray, bool]) -> None:
+        """Configure the unit cell as a 3x3 array.
 
-        :param value: the vector components.
-        :type value: (np.ndarray, bool) tuple
+        Parameters
+        ----------
+        value : tuple[FloatArray, bool]
+            the vector components.
         """
         if not self.update_needed(value):
             return

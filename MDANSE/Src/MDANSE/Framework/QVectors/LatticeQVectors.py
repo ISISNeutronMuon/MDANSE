@@ -21,14 +21,15 @@ import numpy as np
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.util_types import FloatArray
 
 
 def fpsampling(
     q_vectors: np.ndarray,
     n_vecs: int,
-    random_vector_func: Callable[[], np.ndarray],
+    random_vector_func: Callable[[], FloatArray],
     rng: np.random.Generator,
-) -> np.ndarray:
+) -> FloatArray:
     """Basic farthest point sampling function used to sample q-vectors.
     Q-vectors are normalised to avoid sampling vectors from the ends of
     the shell. Distances between vectors are calculated on the angle
@@ -36,18 +37,18 @@ def fpsampling(
 
     Parameters
     ----------
-    q_vectors : np.ndarray
+    q_vectors : FloatArray
         Array of q_vectors.
     n_vecs : int
         Number of vectors to sample.
-    random_vector_func : Callable[[], np.ndarray]
+    random_vector_func : Callable[[], FloatArray]
         A function which generates a single random vector.
     rng : np.random.Generator
         A numpy random number generator object.
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         Index of selected q-vectors.
 
     Raises

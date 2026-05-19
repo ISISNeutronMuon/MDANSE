@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     import numpy.typing as npt
 
     from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
+    from MDANSE.util_types import NumArray
 
 GROUP_TEMPLATE = "{}/<{}>/{}"
 PAIR_GROUP_TEMPLATE = "{}/<{}><{}>/{}"
@@ -42,7 +43,7 @@ def add_grouped_totals(
     *,
     intra: bool = False,
     scaling_factor: bool = True,
-    post_func: Callable[[npt.NDArray], npt.NDArray] = lambda x: x,
+    post_func: Callable[[NumArray], NumArray] = lambda x: x,
     post_label: str = "total",
     **kwargs,
 ):
@@ -52,7 +53,7 @@ def add_grouped_totals(
     ----------
     trajectory: Trajectory
         Current state of the trajectory, including selection and transmutation
-    output_data : dict[str, npt.NDArray]
+    output_data : dict[str, NumArray]
         Dictionary of data arrays containing analysis results.
     result_name : str
         The name of the results.
@@ -67,7 +68,7 @@ def add_grouped_totals(
         Add total results for intra results.
     scaling_factor: bool
         Add the scaling factor to the output data if True.
-    post_func: Callable[[npt.NDArray], npt.NDArray]
+    post_func: Callable[[NumArray], NumArray]
         A function which is applied to the results.
     post_label: str
         The label to be added for grouped summed results.
@@ -110,7 +111,7 @@ def add_grouped_totals_1D(
     data_type: str,
     *,
     scaling_factor: bool = True,
-    post_func: Callable[[npt.NDArray], npt.NDArray] = lambda x: x,
+    post_func: Callable[[NumArray], NumArray] = lambda x: x,
     post_label: str = "total",
     **kwargs,
 ):
@@ -120,7 +121,7 @@ def add_grouped_totals_1D(
     ----------
     trajectory: Trajectory
         Current state of the trajectory, including selection and transmutation
-    output_data : dict[str, npt.NDArray]
+    output_data : dict[str, NumArray]
         Dictionary of data arrays containing analysis results.
     result_name : str
         The name of the results.
@@ -128,7 +129,7 @@ def add_grouped_totals_1D(
         The plotting type of the data.
     scaling_factor: bool
         Add the scaling factor to the output data if True.
-    post_func: Callable[[npt.NDArray], npt.NDArray]
+    post_func: Callable[[NumArray], NumArray]
         A function which is applied to the results.
     post_label: str
         The label to be added for grouped summed results.
@@ -163,7 +164,7 @@ def add_grouped_totals_2D(
     *,
     intra: bool = False,
     scaling_factor: bool = True,
-    post_func: Callable[[npt.NDArray], npt.NDArray] = lambda x: x,
+    post_func: Callable[[NumArray], NumArray] = lambda x: x,
     post_label: str = "total",
     **kwargs,
 ):
@@ -173,7 +174,7 @@ def add_grouped_totals_2D(
     ----------
     trajectory: Trajectory
         Current state of the trajectory, including selection and transmutation
-    output_data : dict[str, npt.NDArray]
+    output_data : dict[str, NumArray]
         Dictionary of data arrays containing analysis results.
     result_name : str
         The name of the results.
@@ -186,7 +187,7 @@ def add_grouped_totals_2D(
         Add total results for intra results.
     scaling_factor: bool
         Add the scaling factor to the output data if True.
-    post_func: Callable[[npt.NDArray], npt.NDArray]
+    post_func: Callable[[NumArray], NumArray]
         A function which is applied to the results.
     post_label: str
         The label to be added for grouped summed results.
@@ -332,7 +333,7 @@ def pair_labels(
 
 def update_pair_results(
     trajectory: Trajectory,
-    calc_func: Callable[[str, str], Iterable[tuple[str, bool, npt.NDArray]]],
+    calc_func: Callable[[str, str], Iterable[tuple[str, bool, NumArray]]],
     output_data: OutputData,
     all_pairs: bool = False,
 ):
@@ -342,7 +343,7 @@ def update_pair_results(
     ----------
     trajectory: Trajectory
         Current state of the trajectory, including selection and transmutation
-    calc_func : Callable[[str, str], Iterable[tuple[str, bool, npt.NDArray]]]
+    calc_func : Callable[[str, str], Iterable[tuple[str, bool, NumArray]]]
         A function which yields the results name, a bool which
         specifies whether it correspond to intermolecular atom
         pairs and the results.

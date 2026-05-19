@@ -22,7 +22,6 @@ from typing import TYPE_CHECKING
 
 import h5py
 import numpy as np
-import numpy.typing as npt
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
@@ -40,6 +39,7 @@ from MDANSE.MolecularDynamics.UnitCell import (
     NO_CELL,
     UnitCell,
 )
+from MDANSE.util_types import FloatArray
 
 from .FileTrajBase import TrajDataArray, TrajectoryFile
 
@@ -255,7 +255,7 @@ class H5MDTrajectory(TrajectoryFile):
 
         self._h5_file.close()
 
-    def __getitem__(self, frame: int) -> dict[str, npt.NDArray[float]]:
+    def __getitem__(self, frame: int) -> dict[str, FloatArray]:
         """Return the configuration at a given frame.
 
         Parameters
@@ -265,7 +265,7 @@ class H5MDTrajectory(TrajectoryFile):
 
         Returns
         -------
-        dict[str, npt.NDArray[float]]
+        dict[str, FloatArray]
             Configuration at frame.
         """
         self._check_frame(frame)
@@ -294,7 +294,7 @@ class H5MDTrajectory(TrajectoryFile):
         self,
         frame: int,
         indices: slice | int = np.s_[:],
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Return the electrical charge of atoms at a given frame.
 
         Parameters
@@ -344,7 +344,7 @@ class H5MDTrajectory(TrajectoryFile):
         self,
         frame: slice | int,
         atom_indices: slice | int = SLICE_ALL,
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Return the coordinates at a given frame.
 
         Parameters
@@ -439,7 +439,7 @@ class H5MDTrajectory(TrajectoryFile):
                     self.unit_cell_warning = CHANGING_CELL
                     return
 
-    def time(self) -> npt.NDArray[float]:
+    def time(self) -> FloatArray:
         """Time timesteps from file."""
 
         try:
@@ -489,7 +489,7 @@ class H5MDTrajectory(TrajectoryFile):
 
         return self.positions.shape[0]
 
-    def masses(self) -> npt.NDArray[float]:
+    def masses(self) -> FloatArray:
         """Get masses from databases.
 
         Parameters
@@ -499,7 +499,7 @@ class H5MDTrajectory(TrajectoryFile):
 
         Returns
         -------
-        npt.NDArray[float]
+        FloatArray
             Atomic masses.
         """
         key = self.mass_key

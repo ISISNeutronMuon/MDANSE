@@ -25,7 +25,6 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 from more_itertools import consume as drop
 from more_itertools import ilen, take
-from numpy.typing import NDArray
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
@@ -38,6 +37,7 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.util_types import FloatArray, IntArray
 
 ELECTRON_CHARGE = 1.6021765e-19
 DIMS = ("x", "y", "z")
@@ -126,13 +126,13 @@ class BoxStyle(UCEnum):
     TRICLINIC = auto()
 
     def to_cell(
-        self, value: NDArray[float], *, bounds: bool = False
-    ) -> tuple[NDArray[float], NDArray[float]]:
+        self, value: FloatArray, *, bounds: bool = False
+    ) -> tuple[FloatArray, FloatArray]:
         """Convert from LAMMPS box definition to unit cell, origin.
 
         Parameters
         ----------
-        value : NDArray[float]
+        value : FloatArray
             LAMMPS unit cell specification.
         bounds : bool
             For LAMMPS' non-orthogonal cells dumps provide *bounds*
@@ -140,9 +140,9 @@ class BoxStyle(UCEnum):
 
         Returns
         -------
-        NDArray[float]
+        FloatArray
             Unit cell as 3x3 matrix.
-        NDArray[float]
+        FloatArray
             Origin as 3-vector.
 
         Examples
@@ -681,16 +681,16 @@ class LAMMPSxyz(LAMMPSReader):
         """
         self._file = open(filename, encoding="utf-8")  # noqa: SIM115
 
-    def read_step(self) -> tuple[int, NDArray[int], NDArray[float]]:
+    def read_step(self) -> tuple[int, IntArray, FloatArray]:
         """Read an XYZ file step.
 
         Returns
         -------
         int
             Current timestep.
-        NDArray[int]
+        IntArray
             Atom type indices.
-        NDArray[float]
+        FloatArray
             Atomic positions.
         """
         line = self._file.readline()

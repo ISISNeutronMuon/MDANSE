@@ -25,15 +25,14 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.MolecularDynamics.Configuration import padded_coordinates
 
 if TYPE_CHECKING:
-    import numpy.typing as npt
-
     from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
+    from MDANSE.util_types import FloatArray, IntArray
 
 
 def distance_calculation(
-    coordinates: npt.NDArray[float], max_distance: float, worker_limit: int = -1
-) -> tuple[npt.NDArray[float], npt.NDArray[int], npt.NDArray[int], npt.NDArray[float]]:
+    coordinates: FloatArray, max_distance: float, worker_limit: int = -1
+) -> tuple[FloatArray, IntArray, IntArray, FloatArray]:
     """Calculate distances between atoms in the input array.
 
     KDTree is used to calculate distances, and only distances within
@@ -44,7 +43,7 @@ def distance_calculation(
 
     Parameters
     ----------
-    coordinates : npt.NDArray[float]
+    coordinates : FloatArray
         An (N,3) array of atom coordinates.
     max_distance : float
         The largest distance to be considered in the calculation.
@@ -53,7 +52,7 @@ def distance_calculation(
 
     Returns
     -------
-    tuple[npt.NDArray[float], npt.NDArray[int], npt.NDArray[int], npt.NDArray[float]]
+    tuple[FloatArray, IntArray, IntArray, FloatArray]
         Distance array, Indices of first atom, Indices of second atom, Coordinate difference array.
     """
     tree = KDTree(coordinates)
