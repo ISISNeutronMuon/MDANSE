@@ -78,6 +78,7 @@ from .SolventAccessibleSurface import (
     SolventAccessibleSurface as SolventAccessibleSurface,
 )
 from .StaticStructureFactor import StaticStructureFactor as StaticStructureFactor
+from .StaticStructureFactor3D import StaticStructureFactor3D as StaticStructureFactor3D
 from .StructureFactorFromScatteringFunction import (
     StructureFactorFromScatteringFunction as StructureFactorFromScatteringFunction,
 )
