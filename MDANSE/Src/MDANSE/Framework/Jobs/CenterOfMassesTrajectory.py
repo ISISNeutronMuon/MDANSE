@@ -76,9 +76,9 @@ class CenterOfMassesTrajectory(IJob):
         self.numberOfSteps = self.configuration["frames"]["number"]
         chemical_system = self.trajectory.chemical_system
 
-        self.cluster_composition = {}
+        self.cluster_composition: dict[str, list[str]] = {}
         original_atom_list = chemical_system.atom_list
-        selected_indices = (
+        selected_indices: set[int] = (
             set(self.trajectory._selection)
             if self.trajectory._selection
             else set(chemical_system._atom_indices)

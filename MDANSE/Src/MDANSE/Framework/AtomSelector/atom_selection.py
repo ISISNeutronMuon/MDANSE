@@ -15,9 +15,12 @@
 #
 from __future__ import annotations
 
-from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 def select_atoms(
@@ -64,6 +67,7 @@ def select_atoms(
     element_list = system.atom_list
     name_list = system.name_list
     indices = system.all_indices
+
     if index_list is not None:
         selection |= indices & set(index_list)
     if index_range is not None:
@@ -76,6 +80,7 @@ def select_atoms(
     if atom_names:
         new_indices = {index for index in indices if name_list[index] in atom_names}
         selection |= new_indices
+
     return selection
 
 

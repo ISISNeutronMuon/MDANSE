@@ -19,8 +19,8 @@ import json
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
-import more_itertools
 import numpy as np
+from more_itertools import first
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator, QValidator
 from qtpy.QtWidgets import (
@@ -34,10 +34,10 @@ from qtpy.QtWidgets import (
 )
 from rdkit.Chem import MolFromSmarts
 
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.InputWidgets.CheckableComboBox import CheckableComboBox
 
 if TYPE_CHECKING:
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
     from MDANSE_GUI.MolecularViewer import MolecularViewer
 
 
@@ -71,7 +71,9 @@ class XYZValidator(QValidator):
 
     PARAMETERS_NEEDED = 3
 
-    def validate(self, input_string: str, position: int) -> tuple[int, str]:
+    def validate(
+        self, input_string: str, position: int
+    ) -> tuple[QValidator.State, str, int]:
         """Check the input string from a widget.
 
         Implementation of the virtual method of QValidator.
@@ -256,7 +258,7 @@ class AtomSelection(BasicSelectionWidget):
     def __init__(
         self,
         parent=None,
-        trajectory: Trajectory = None,
+        trajectory: Trajectory | None = None,
         widget_label="Select atoms",
     ):
         """Create the widgets for select_atoms.
@@ -385,7 +387,7 @@ class MoleculeSelection(BasicSelectionWidget):
     def __init__(
         self,
         parent=None,
-        trajectory: Trajectory = None,
+        trajectory: Trajectory | None = None,
         widget_label="Select molecules",
     ):
         """Create the widgets for select_atoms.
@@ -427,7 +429,7 @@ class LabelSelection(BasicSelectionWidget):
     def __init__(
         self,
         parent=None,
-        trajectory: Trajectory = None,
+        trajectory: Trajectory | None = None,
         widget_label="Select by label",
     ):
         """Create the widgets for select_atoms.
@@ -502,9 +504,7 @@ class PatternSelection(BasicSelectionWidget):
         layout.addWidget(self.selection_field)
         self.selection_field.addItems(self.pattern_dictionary.keys())
         layout.addWidget(QLabel("pattern:"))
-        self.input_field = QLineEdit(
-            more_itertools.first(self.pattern_dictionary.values()), self
-        )
+        self.input_field = QLineEdit(first(self.pattern_dictionary.values()), self)
         self.input_field.setPlaceholderText("can be edited")
         layout.addWidget(self.input_field)
         self.selection_field.currentTextChanged.connect(self.update_string)
@@ -541,9 +541,9 @@ class PositionSelection(BasicSelectionWidget):
 
     def __init__(
         self,
-        parent=None,
-        trajectory: Trajectory = None,
-        molecular_viewer: MolecularViewer = None,
+        parent: QWidget | None = None,
+        trajectory: Trajectory | None = None,
+        molecular_viewer: MolecularViewer | None = None,
         widget_label="Select by position",
     ):
         """Create the widgets for select_atoms.
@@ -624,9 +624,9 @@ class SphereSelection(BasicSelectionWidget):
 
     def __init__(
         self,
-        parent=None,
-        trajectory: Trajectory = None,
-        molecular_viewer: MolecularViewer = None,
+        parent: QWidget | None = None,
+        trajectory: Trajectory | None = None,
+        molecular_viewer: MolecularViewer | None = None,
         widget_label="Select in a sphere",
     ):
         """Create the widgets for select_atoms.

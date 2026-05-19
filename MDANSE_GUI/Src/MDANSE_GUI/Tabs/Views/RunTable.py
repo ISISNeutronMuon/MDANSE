@@ -15,16 +15,21 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import QAbstractItemView, QMenu, QMessageBox, QTableView
 
 from MDANSE.Framework.Jobs.JobStatus import ALLOWED_ACTIONS
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Tabs.Models.JobHolder import Job, JobHolder
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+if TYPE_CHECKING:
+    from qtpy.QtGui import QContextMenuEvent, QStandardItem, QStandardItemModel
+
+    from MDANSE_GUI.Tabs.Models.JobHolder import Job, JobHolder
 
 PROGBAR_COLUMN = 1
 

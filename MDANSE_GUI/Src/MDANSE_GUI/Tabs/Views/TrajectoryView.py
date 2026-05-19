@@ -15,14 +15,18 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import QModelIndex, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QStandardItem
 from qtpy.QtWidgets import QAbstractItemView, QListView, QMenu
 
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.Tabs.Models.TrajectoryModel import LoadStatus
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
+
+if TYPE_CHECKING:
+    from qtpy.QtGui import QContextMenuEvent, QStandardItem
 
 
 class TrajectoryView(QListView):

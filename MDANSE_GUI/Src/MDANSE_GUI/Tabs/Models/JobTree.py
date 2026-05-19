@@ -17,13 +17,17 @@ from __future__ import annotations
 
 from collections import defaultdict
 from contextlib import suppress
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
-from MDANSE.Core.SubclassFactory import SubclassFactory
-from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
+
+if TYPE_CHECKING:
+    from MDANSE.Core.SubclassFactory import SubclassFactory
+    from MDANSE.Framework.Converters.Converter import Converter
+    from MDANSE.Framework.Parameters.Parameters import Configurable
 
 
 class JobTree(QStandardItemModel):
@@ -92,7 +96,7 @@ class JobTree(QStandardItemModel):
             if class_object.enabled:
                 self.createNode(class_name, class_object, filter)
 
-    def createNode(self, name: str, thing, filter: str = ""):
+    def createNode(self, name: str, thing: Configurable, filter: str = ""):
         """Creates a new QStandardItem. It will store
         the node number as user data. The 'thing' passed to this method
         will be stored by the model in an internal dictionary, where

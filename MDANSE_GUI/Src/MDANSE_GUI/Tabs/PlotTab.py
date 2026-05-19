@@ -16,18 +16,22 @@
 from __future__ import annotations
 
 from functools import partial
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QDialog, QWidget
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Views.PlotDetailsView import PlotDetailsView
 from MDANSE_GUI.Tabs.Visualisers.PlotHolder import PlotHolder
 from MDANSE_GUI.Tabs.Visualisers.PlotSettings import PlotSettings
 from MDANSE_GUI.Widgets.PlotSettingsDialog import PlotSettingsEditor
+
+if TYPE_CHECKING:
+    from qtpy.QtWidgets import QDialog, QWidget
+
+    from MDANSE_GUI.Session.Session import Session
 
 label_text = """<b>View and customise the existing plots.</b>
 <br><br>

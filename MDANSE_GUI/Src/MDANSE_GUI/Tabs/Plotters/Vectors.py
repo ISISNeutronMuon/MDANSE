@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
-def violin_plot_width(positions: npt.NDArray[float]) -> float:
+def violin_plot_width(positions: npt.NDArray[np.floating]) -> float:
     """Return the width of the violin plot based on the spacing between points."""
     return np.mean(np.diff(positions)) if len(positions) > 1 else 0.5
 
@@ -104,28 +104,35 @@ class Vectors(Plotter):
         """
         self.enable_slider(allow_slider=False)
         target = self.get_figure(figure)
+
         if target is None:
             return
         if toolbar is not None:
             self._toolbar = toolbar
+
         self._figure = target
         self._normalisation_errors = []
         self._axes = []
         self.apply_settings(plotting_context)
         x_axis_labels = []
+
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
+
         if not plotting_context.datasets():
             target.clear()
             target.canvas.draw()
+
         single_plot_stack = [222, 221]
         label_stack = [
             "Used",
             "Found",
         ]
+
         for databundle in plotting_context.datasets().values():
             dataset = databundle.dataset
+
             try:
                 best_unit, best_axis = (
                     dataset._axes_units[databundle.main_axis],

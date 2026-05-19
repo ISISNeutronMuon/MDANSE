@@ -18,20 +18,21 @@ from __future__ import annotations
 import copy
 import csv
 import enum
-from collections.abc import Iterator
 from itertools import count
 from typing import TYPE_CHECKING, Any, Literal, TextIO
 
 import numpy as np
-from matplotlib.axes import Axes
-from matplotlib.lines import Line2D
 from more_itertools import consumer
 
 from MDANSE.Core.SubclassFactory import SubclassFactory
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from matplotlib.axes import Axes
     from matplotlib.figure import Figure
+    from matplotlib.lines import Line2D
 
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
@@ -117,7 +118,7 @@ class Plotter(metaclass=SubclassFactory):
             return
         self._slider_reference.collect_values()
 
-    def clear(self, figure: Figure = None):
+    def clear(self, figure: Figure | None = None):
         """Clear the figure, usually before plotting again.
 
         Parameters
@@ -136,15 +137,15 @@ class Plotter(metaclass=SubclassFactory):
         """Get text to be shown next to sliders."""
         return ["Slider 1", "Slider 2"]
 
-    def slider_limits(self) -> list[str]:
+    def slider_limits(self) -> list[tuple[float, float, float]]:
         """Get default limit values for sliders."""
-        return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
+        return [(-1.0, 1.0, 0.01)] * self._number_of_sliders
 
     def sliders_coupled(self) -> bool:
         """Check if the slider values depend on each other."""
         return False
 
-    def get_figure(self, figure: Figure = None):
+    def get_figure(self, figure: Figure | None = None):
         """Get the reference to the current figure, if present."""
         target = self._figure if figure is None else figure
         if target is None:
@@ -191,7 +192,7 @@ class Plotter(metaclass=SubclassFactory):
 
     def normalise_curve(
         self, xdata: np.ndarray, ydata: np.ndarray
-    ) -> tuple[np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Scale a 1D curve according to the current normalisation parameters.
 
         Parameters
@@ -272,8 +273,8 @@ class Plotter(metaclass=SubclassFactory):
     def plot(
         self,
         plotting_context: PlottingContext,
-        figure: Figure = None,
-        update_only=False,
+        figure: Figure | None = None,
+        update_only: bool = False,
         toolbar=None,
     ):
         """Plot the selected data in the figure.
@@ -292,11 +293,12 @@ class Plotter(metaclass=SubclassFactory):
         """
         LOG.info(f"normalisation errors {self._normalisation_errors}, setting to []")
         self._normalisation_errors = []
-        target = self.get_figure(figure)
-        if target is None:
+        if (target := self.get_figure(figure)) is None:
             return
+
         if toolbar is not None:
             self._toolbar = toolbar
+
         axes = target.add_subplot(111)
         self._axes = [axes]
         self.apply_settings(plotting_context)

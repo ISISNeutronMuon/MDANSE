@@ -18,9 +18,9 @@ from __future__ import annotations
 import json
 import os
 from collections import defaultdict
-from collections.abc import Callable
 from importlib import metadata
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QMessageLogger, QSize, Qt, QTimer, QUrl, Signal, Slot
 from qtpy.QtGui import QDesktopServices
@@ -55,6 +55,9 @@ from MDANSE_GUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.UserSettingsEditor import UserSettingsEditor
 from MDANSE_GUI.Widgets.NotificationTabWidget import NotificationTabWidget
 from MDANSE_GUI.Widgets.StyleDialog import StyleDatabase, StyleDialog
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 MDANSE_CODE_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE")
 MDANSE_EXAMPLES_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE-Examples")

@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterator
 from itertools import islice
 from itertools import product as cart_prod
 from typing import TYPE_CHECKING
@@ -28,6 +27,8 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from qtpy.QtWidgets import QTextBrowser
 
     from MDANSE_GUI.Tabs.Models.PlottingContext import (

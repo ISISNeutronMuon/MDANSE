@@ -19,11 +19,10 @@ import typing
 
 import numpy as np
 
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
-
 if typing.TYPE_CHECKING:
     from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
+    from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 from MDANSE_GUI.MolecularViewer.readers.i_reader import IReader
 

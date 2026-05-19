@@ -15,9 +15,8 @@
 #
 from __future__ import annotations
 
-import collections
 import itertools as it
-from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
@@ -27,6 +26,9 @@ from MDANSE.Framework.AtomGrouping.grouping import (
     update_pair_results,
 )
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class CoordinationNumber(DistanceHistogram):

@@ -18,17 +18,20 @@ from __future__ import annotations
 import os
 from functools import partial
 from pathlib import PurePath
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
-from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.PlotDataModel import PlotDataModel
 from MDANSE_GUI.Tabs.Views.PlotDataView import PlotDataView
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+if TYPE_CHECKING:
+    from MDANSE_GUI.Session.Session import Session
 
 label_text = """Load files and <b>assign data sets
 to a plot.</b>

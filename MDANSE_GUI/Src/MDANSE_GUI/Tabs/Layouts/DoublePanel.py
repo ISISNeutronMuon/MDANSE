@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import (
     QHBoxLayout,
@@ -26,7 +28,8 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
+if TYPE_CHECKING:
+    from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 
 
 class DoublePanel(QWidget):

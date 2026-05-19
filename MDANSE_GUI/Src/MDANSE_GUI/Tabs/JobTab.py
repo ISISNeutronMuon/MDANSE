@@ -16,9 +16,9 @@
 from __future__ import annotations
 
 from functools import partial
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import Qt, Slot
-from qtpy.QtGui import QFontMetrics
 from qtpy.QtWidgets import (
     QApplication,
     QComboBox,
@@ -29,13 +29,20 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
+from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+if TYPE_CHECKING:
+    from qtpy.QtGui import QFontMetrics
+
+    from MDANSE_GUI.Session.Session import Session
+    from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
+    from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 
 job_tab_label = """This is the list of <b>analysis tasks</b>
 you can run using MDANSE.
@@ -73,7 +80,12 @@ class JobTab(GeneralTab):
     """The tab for choosing and starting a new job."""
 
     def __init__(
-        self, *args, action=None, combo_model=None, instrument_model=None, **kwargs
+        self,
+        *args,
+        action: Action | None = None,
+        combo_model: TrajectoryModel | None = None,
+        instrument_model: GeneralModel | None = None,
+        **kwargs,
     ):
         self._needs_updating = False
         self.action = action

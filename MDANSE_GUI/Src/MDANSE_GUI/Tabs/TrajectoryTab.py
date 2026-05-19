@@ -17,18 +17,21 @@ from __future__ import annotations
 
 from functools import partial
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
 from MDANSE_GUI.MolecularViewer import MolecularViewerExtended
-from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Views.TrajectoryView import TrajectoryView
 from MDANSE_GUI.Tabs.Visualisers.TrajectoryInfo import TrajectoryInfo
 from MDANSE_GUI.Tabs.Visualisers.View3D import View3D
+
+if TYPE_CHECKING:
+    from MDANSE_GUI.Session.Session import Session
 
 label_text = """<b>Load and view trajectories.</b>
 <br><br>

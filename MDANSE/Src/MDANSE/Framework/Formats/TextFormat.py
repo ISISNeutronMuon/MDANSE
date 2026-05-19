@@ -100,7 +100,7 @@ class TextFormat(IFormat):
                 info.mtime = time.time()
                 tf.addfile(tarinfo=info, fileobj=real_buffer)
 
-            for var in list(data.values()):
+            for var in data.values():
                 real_buffer = io.BytesIO()
                 tempStr = codecs.getwriter("utf-8")(real_buffer)
                 tempStr.write(var.info())

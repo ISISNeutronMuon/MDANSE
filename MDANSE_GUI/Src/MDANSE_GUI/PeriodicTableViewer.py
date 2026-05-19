@@ -15,8 +15,9 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import QPoint, Qt, Signal, Slot
-from qtpy.QtGui import QEnterEvent
 from qtpy.QtWidgets import (
     QApplication,
     QDialog,
@@ -32,6 +33,9 @@ from qtpy.QtWidgets import (
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.IO.AtomInfo import atom_info
+
+if TYPE_CHECKING:
+    from qtpy.QtGui import QEnterEvent
 
 # from MDANSE.GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 

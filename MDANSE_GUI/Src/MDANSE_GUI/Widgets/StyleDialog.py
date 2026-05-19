@@ -14,6 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtWidgets import (
     QApplication,
@@ -24,7 +26,8 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
 )
 
-from MDANSE.Framework.Jobs.IJob import IJob
+if TYPE_CHECKING:
+    from MDANSE.Framework.Jobs.IJob import IJob
 
 sample_styles = {
     "blank_stylesheet": "",

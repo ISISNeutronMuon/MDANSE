@@ -16,17 +16,20 @@
 from __future__ import annotations
 
 from collections import ChainMap
-from collections.abc import Callable, Sequence
 from enum import Enum, auto
 from functools import partial
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import QComboBox, QTableView, QVBoxLayout, QWidget
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
+
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class Const:

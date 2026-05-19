@@ -41,6 +41,7 @@ dependencies = [
     "mdtraj",
     "networkx",
     "more-itertools",
+    "typing_extensions",
 ]
 
 [dependency-groups]

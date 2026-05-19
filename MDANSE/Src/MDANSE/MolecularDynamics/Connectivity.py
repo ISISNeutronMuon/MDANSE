@@ -15,17 +15,20 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable
 from itertools import product
+from typing import TYPE_CHECKING
 
 import numpy as np
-import numpy.typing as npt
 from scipy.spatial import KDTree
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.MolecularDynamics.Configuration import padded_coordinates
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+if TYPE_CHECKING:
+    import numpy.typing as npt
+
+    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 def distance_calculation(

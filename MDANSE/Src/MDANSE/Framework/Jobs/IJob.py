@@ -27,12 +27,11 @@ import string
 import sys
 import time
 import traceback
-from collections.abc import Sequence
 from logging import FileHandler
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from more_itertools import consumer, first_true
 
@@ -42,6 +41,28 @@ from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStates, JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.MLogging import FMT, LOG
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    LOG.debug("TQDM not installed, no progress bars")
+
+    class tqdm:
+        """Return dummy function for tqdm."""
+
+        def __init__(self, x, *_args, **_kwargs):
+            self.x = x
+
+        def __iter__(self):
+            return iter(self.x)
+
+        def update(self, *_args, **_kwargs):
+            pass
+
 
 RUNSCRIPT = """\
 #!{executable}
@@ -78,24 +99,6 @@ if __name__ == "__main__":
     # Install with `cli` optional dependency.
     {var_name}.run(parameters, status=True, prog_bar=True)
 """
-
-
-try:
-    from tqdm import tqdm
-except ImportError:
-    LOG.debug("TQDM not installed, no progress bars")
-
-    class tqdm:
-        """Return dummy function for tqdm."""
-
-        def __init__(self, x, *_args, **_kwargs):
-            self.x = x
-
-        def __iter__(self):
-            return iter(self.x)
-
-        def update(self, *_args, **_kwargs):
-            pass
 
 
 class JobError(Exception):
@@ -196,8 +199,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
 
     section = "job"
     key_gen = key_generator(6)
-    ancestor = []
-    PREDICTORS = ()
+    ancestor: ClassVar[list[str]] = []
+    PREDICTORS: ClassVar[tuple[str, ...]] = ()
     runscript_import_line = "from MDANSE.Framework.Jobs.IJob import IJob"
 
     def __init__(self, trajectory_input="mdanse"):
@@ -316,7 +319,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         ----------
         jobFile : Path
             The name of the output job file.
-        parameters : Optional[dict[str, Any]]
+        parameters : dict[str, Any], optional
             If not None, the parameters with which the job file will be built.
         """
         if parameters is None:
@@ -502,10 +505,18 @@ class IJob(Configurable, metaclass=SubclassFactory):
         "remote": _run_remote,
     }
 
-    def run(self, parameters, status: bool = False, prog_bar: bool = False):
+    def run(
+        self,
+        parameters: dict[str, Any] | None = None,
+        status: bool = False,
+        prog_bar: bool = False,
+    ):
         """
         Run the job.
         """
+
+        if parameters is None:
+            parameters = {}
 
         try:
             self._name = f"{type(self).__name__}"

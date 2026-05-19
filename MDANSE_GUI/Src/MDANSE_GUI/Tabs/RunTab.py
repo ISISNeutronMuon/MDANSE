@@ -16,16 +16,19 @@
 from __future__ import annotations
 
 from functools import partial
+from typing import TYPE_CHECKING
 
-from qtpy.QtWidgets import QWidget
-
-from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
 from MDANSE_GUI.Tabs.Views.RunTable import RunTable
 from MDANSE_GUI.Tabs.Visualisers.JobLogInfo import JobLogInfo
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+if TYPE_CHECKING:
+    from qtpy.QtWidgets import QWidget
+
+    from MDANSE_GUI.Session.Session import Session
 
 run_tab_label = """Shows the <b>status of jobs</b>
 which have been started in your session.

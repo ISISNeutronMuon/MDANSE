@@ -16,19 +16,23 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QWidget
 
 from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
-from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Views.InstrumentList import InstrumentList
 from MDANSE_GUI.Tabs.Visualisers.InstrumentDetails import InstrumentDetails
+
+if TYPE_CHECKING:
+    from qtpy.QtWidgets import QWidget
+
+    from MDANSE_GUI.Session.Session import Session
 
 label_text = """Here you can browse, edit and add <b>instrument profiles.</b>
 <br><br>

@@ -15,13 +15,17 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QMouseEvent
 from qtpy.QtWidgets import QAbstractItemView, QTreeView
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+if TYPE_CHECKING:
+    from qtpy.QtGui import QMouseEvent
 
 
 class ActionsTree(QTreeView):
