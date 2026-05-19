@@ -26,20 +26,62 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 from MDANSE.Mathematics.Signal import get_spectrum
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
-CHUNK_SIZE_LIMIT = 2**28  # 256 MB for now
+CHUNK_SIZE_LIMIT = 2**29  # 512 MB memory limit per process for now
 
 
 def group_atom_indices(
-    traj_instance: Trajectory, n_proc: int = 1, size_limit: int = CHUNK_SIZE_LIMIT
+    traj_instance: Trajectory,
+    n_proc: int = 1,
+    memory_scale_factor: int = 10,
+    size_limit: int = CHUNK_SIZE_LIMIT,
 ) -> list[list[int]]:
+    """Create groups of atom indices coaligned with the chunk size in the input file.
+
+    This function is meant to group indices so that a single process loads data
+    from a single chunk per frame. Additionally, indices will be split into smaller
+    sets if a process is expected to use more memory than the specified limits, or
+    if there are less index sets than there are worker processes.
+
+    Typically, the memory requirements will be proportional to the size of the
+    input array, but larger. For example, DISF analysis allocates an array
+    of the size of N_ATOMSxN_VECTORS, which means that the worker process
+    will need significantly more memory that the size of the input coordinate
+    array.
+
+    Parameters
+    ----------
+    traj_instance : Trajectory
+        The current input trajectory.
+    n_proc : int, optional
+        Number of available CPU cores or worker processes, by default 1
+    memory_scale_factor : int, optional
+        Multiplier of the expected memory requirements of the job, by default 10
+    size_limit : int, optional
+        Limit of memory per worker process, by default CHUNK_SIZE_LIMIT
+
+    Returns
+    -------
+    list[list[int]]
+        _description_
+    """
     selected_indices = sorted(traj_instance.atom_indices)
     total_dimensions = traj_instance.variable("position").shape
     chunk_size = traj_instance.chunk_size(array_name="position")
     if chunk_size < 0:
-        return [[ind] for ind in selected_indices]
-    chunk_limits = np.concatenate(
-        [np.arange(0, total_dimensions[1], chunk_size), [total_dimensions[1]]]
-    )
+        max_chunk_size = size_limit // (
+            total_dimensions[0] * 3 * 8 * memory_scale_factor
+        )
+        chunk_limits = np.array([0, total_dimensions[1]])
+    else:
+        predicted_memory = (
+            total_dimensions[0] * chunk_size * 3 * 8 * memory_scale_factor
+        )
+        downscale_factor = np.ceil(predicted_memory / size_limit)
+        max_chunk_size = chunk_size // downscale_factor
+        chunk_limits = np.concatenate(
+            [np.arange(0, total_dimensions[1], chunk_size), [total_dimensions[1]]]
+        )
+    min_chunk_count = n_proc
     initial_sets = [
         sorted(
             set(range(chunk_limits[n], chunk_limits[n + 1])).intersection(
@@ -48,7 +90,61 @@ def group_atom_indices(
         )
         for n in range(len(chunk_limits) - 1)
     ]
-    return [ind_list for ind_list in initial_sets if len(ind_list)]
+    return balance_index_groups(
+        initial_sets, max_size=max_chunk_size, min_count=min_chunk_count
+    )
+
+
+def single_sweep(index_sets: list[set[int]], max_size: int) -> list[set[int]]:
+    """Check the size of each atom index set and split those exceeding the size limit.
+
+    Parameters
+    ----------
+    index_sets : list[set[int]]
+        List of atom index sets to be used by worker processes.
+    max_size : int
+        Maximum number of atoms per set.
+
+    Returns
+    -------
+    list[set[int]]
+        List of index sets after splitting into smaller sets.
+    """
+    result = []
+    for ind_set in index_sets:
+        set_len = len(ind_set)
+        if set_len < max_size:
+            result.append(ind_set)
+            continue
+        result.append(ind_set[: set_len // 2])
+        result.append(ind_set[set_len // 2 :])
+    return result
+
+
+def balance_index_groups(
+    index_sets: list[set[int]], max_size: int, min_count: int
+) -> list[set[int]]:
+    """Iteratively split atom index sets until the optimal size has been reached.
+
+    Parameters
+    ----------
+    index_sets : list[set[int]]
+        List of atom index set, one set per analysis step.
+    max_size : int
+        Maximum number of atoms per set.
+    min_count : int
+        Minimum number of sets needed by the analysis.
+
+    Returns
+    -------
+    list[set[int]]
+        List of index sets after splitting into smaller sets.
+    """
+    while any(len(ind_set) > max_size for ind_set in index_sets):
+        index_sets = single_sweep(index_sets, max_size)
+        if len(index_sets) < min_count:
+            max_size = 3 * max_size // 4
+    return index_sets
 
 
 @IJob.register("DynamicIncoherentStructureFactor")
@@ -135,7 +231,14 @@ class DynamicIncoherentStructureFactor(IJob):
         """
         super().initialize()
 
-        self.grouped_indices = group_atom_indices(self.trajectory)
+        vectors_per_shell = self.configuration["q_vectors"]["parameters"].get(
+            "n_vectors", 1
+        )
+        n_proc = self.configuration["running_mode"].get("slots", 1)
+
+        self.grouped_indices = group_atom_indices(
+            self.trajectory, n_proc=n_proc, memory_scale_factor=vectors_per_shell
+        )
         self.numberOfSteps = len(self.grouped_indices)
 
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
@@ -281,7 +384,7 @@ class DynamicIncoherentStructureFactor(IJob):
             )
             res = np.hstack(
                 [
-                    correlate(rho[:,:, n], rho[:n_configs,:, n], mode="valid")
+                    correlate(rho[:, :, n], rho[:n_configs, :, n], mode="valid")
                     for n in range(rho.shape[2])
                 ]
             )
