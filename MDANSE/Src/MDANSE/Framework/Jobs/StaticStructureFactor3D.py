@@ -158,7 +158,9 @@ class StaticStructureFactor3D(IJob):
 
         grid = np.zeros(self.gdim)
         for _, (label_i, label_j) in self.labels:
-            np.add.at(grid, tuple(self.q_idxs.T), (rho[label_i] * rho[label_j].conj()).real)
+            np.add.at(
+                grid, tuple(self.q_idxs.T), (rho[label_i] * rho[label_j].conj()).real
+            )
         return index, grid
 
     def combine(self, index, x):
