@@ -21,12 +21,11 @@ import numpy as np
 
 from MDANSE.Framework.AtomGrouping.grouping import pair_labels
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-def q_vectors_in_cube(direct, inverse, q_min, q_max):
+def q_vectors_in_cube(direct, inverse, q_mins, q_maxs):
     max_hkl = np.zeros(3)
-    for point in list(it.product(*zip(q_min, q_max))):
+    for point in it.product(*zip(q_mins, q_maxs, strict=False)):
         hkl = np.dot(direct, point) / (2 * np.pi)
         max_hkl = np.maximum(max_hkl, np.ceil(np.abs(hkl)))
 
@@ -35,14 +34,17 @@ def q_vectors_in_cube(direct, inverse, q_min, q_max):
     ls = np.arange(-max_hkl[2], max_hkl[2] + 1)
 
     q_vectors = []
-    for h, k, l, in it.product(hs, ks, ls):
+    for (
+        h,
+        k,
+        l,  # noqa: E741
+    ) in it.product(hs, ks, ls):
         q_vectors.append(2 * np.pi * np.dot(inverse, [h, k, l]))
     q_vectors = np.vstack(q_vectors)
-    return q_vectors[np.all((q_vectors >= q_min) & (q_vectors <= q_max), axis=1)].T
+    return q_vectors[np.all((q_vectors >= q_mins) & (q_vectors <= q_maxs), axis=1)].T
 
 
 class StaticStructureFactor3D(IJob):
-
     label = "Static Structure Factor 3D"
 
     category = (
@@ -101,7 +103,9 @@ class StaticStructureFactor3D(IJob):
 
         self._outputData.add("origin", "LineOutputVariable", self.min, units="nm")
 
-        self.gdim = np.ceil(np.array([dim_qx, dim_qy, dim_qz]) / self.spacing).astype(int)
+        self.gdim = np.ceil(np.array([dim_qx, dim_qy, dim_qz]) / self.spacing).astype(
+            int
+        )
         self._outputData.add(
             "spacing",
             "LineOutputVariable",
@@ -118,7 +122,8 @@ class StaticStructureFactor3D(IJob):
             self._outputData.add(
                 labels[naxis],
                 "LineOutputVariable",
-                np.arange(0, self.gdim[naxis], 1) * self.spacing[naxis] + self.min[naxis],
+                np.arange(0, self.gdim[naxis], 1) * self.spacing[naxis]
+                + self.min[naxis],
                 units="nm",
             )
 
@@ -139,25 +144,20 @@ class StaticStructureFactor3D(IJob):
 
         unit_cell = self.trajectory.unit_cell(frame)
         q_vectors = q_vectors_in_cube(
-            unit_cell.direct,
-            unit_cell.inverse,
-            self.min,
-            self.max
+            unit_cell.direct, unit_cell.inverse, self.min, self.max
         )
         q_idxs = np.floor((q_vectors.T - self.min) / self.spacing).astype(int)
 
         rho = {}
         for element, idxs in self._indicesPerElement.items():
             selectedCoordinates = np.take(coords, idxs, axis=0)
-            rho[element] = np.sum(np.exp(1j * np.dot(selectedCoordinates, q_vectors)), axis=0)
+            rho[element] = np.sum(
+                np.exp(1j * np.dot(selectedCoordinates, q_vectors)), axis=0
+            )
 
         grid = np.zeros(self.gdim)
-        for pair_str, (label_i, label_j) in self.labels:
-            np.add.at(
-                grid,
-                tuple(q_idxs.T),
-                np.abs(rho[label_i] * rho[label_j])
-            )
+        for _, (label_i, label_j) in self.labels:
+            np.add.at(grid, tuple(q_idxs.T), np.abs(rho[label_i] * rho[label_j]))
         return index, grid
 
     def combine(self, index, x):
