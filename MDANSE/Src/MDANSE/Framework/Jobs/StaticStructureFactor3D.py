@@ -69,7 +69,7 @@ class StaticStructureFactor3D(IJob):
     )
     settings["q_shells"] = (
         "QRangeConfigurator",
-        {"valueType": float, "includeLast": True},
+        {"default": [-10, 10, 1], "valueType": float, "includeLast": True},
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
@@ -157,7 +157,7 @@ class StaticStructureFactor3D(IJob):
 
         grid = np.zeros(self.gdim)
         for _, (label_i, label_j) in self.labels:
-            np.add.at(grid, tuple(q_idxs.T), np.abs(rho[label_i] * rho[label_j]))
+            np.add.at(grid, tuple(q_idxs.T), (rho[label_i] * rho[label_j].conj()).real)
         return index, grid
 
     def combine(self, index, x):

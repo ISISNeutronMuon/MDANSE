@@ -44,6 +44,7 @@ ALL_JOBS = [
     "CoordinationNumber",
     "PairDistributionFunction",
     "StaticStructureFactor",
+    "StaticStructureFactor3D",
     "XRayStaticStructureFactor",
     "ASE",
     "CASTEP",
