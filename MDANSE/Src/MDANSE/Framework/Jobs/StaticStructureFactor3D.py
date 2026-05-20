@@ -126,22 +126,31 @@ class StaticStructureFactor3D(IJob):
         max_qx = self.qxs[-1]
         max_qy = self.qys[-1]
         max_qz = self.qzs[-1]
-        spacing_qx = self.qxs[1] - min_qx
-        spacing_qy = self.qys[1] - min_qy
-        spacing_qz = self.qzs[1] - min_qz
-        dim_qx = max_qx - min_qx + spacing_qx
-        dim_qy = max_qy - min_qy + spacing_qy
-        dim_qz = max_qz - min_qz + spacing_qz
 
-        self.min = np.array([min_qx, min_qy, min_qz], dtype=np.float64)
-        self.max = np.array([max_qx, max_qy, max_qz], dtype=np.float64)
-        self.spacing = np.array([spacing_qx, spacing_qy, spacing_qz])
+        # TODO if NPT then we should do this per run step
+        unit_cell = self.trajectory.unit_cell(0)
+        self.q_vectors = q_vectors_in_cube(
+            unit_cell.direct,
+            unit_cell.inverse,
+            np.array([min_qx, min_qy, min_qz]),
+            np.array([max_qx, max_qy, max_qz])
+        )
+
+        # determine grid spacing from q-vectors
+        self.spacing = np.zeros(3)
+        for axis in range(3):
+            unique_vals = np.unique(self.q_vectors[axis])
+            diffs = np.diff(unique_vals)
+            self.spacing[axis] = np.min(diffs[diffs > 1e-8])
+
+        self.min = np.min(self.q_vectors.T, axis=0)
+        self.max = np.max(self.q_vectors.T, axis=0)
+        dims = self.max - self.min
+
+        self.q_idxs = np.floor((self.q_vectors.T - self.min) / self.spacing).astype(int)
+        self.gdim = np.ceil(dims / self.spacing).astype(int)
 
         self._outputData.add("origin", "LineOutputVariable", self.min, units="1/nm")
-
-        self.gdim = np.ceil(np.array([dim_qx, dim_qy, dim_qz]) / self.spacing).astype(
-            int
-        )
         self._outputData.add(
             "spacing",
             "LineOutputVariable",
@@ -178,13 +187,6 @@ class StaticStructureFactor3D(IJob):
             axis="|".join(labels),
             main_result=True,
         )
-
-        # TODO if NPT then we should do this per run step
-        unit_cell = self.trajectory.unit_cell(0)
-        self.q_vectors = q_vectors_in_cube(
-            unit_cell.direct, unit_cell.inverse, self.min, self.max
-        )
-        self.q_idxs = np.floor((self.q_vectors.T - self.min) / self.spacing).astype(int)
 
     def run_step(self, index):
         traj = self.trajectory
