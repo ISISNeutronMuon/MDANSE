@@ -16,11 +16,16 @@
 from __future__ import annotations
 
 import itertools as it
+from math import sqrt
 
 import numpy as np
 
-from MDANSE.Framework.AtomGrouping.grouping import pair_labels
+from MDANSE.Framework.AtomGrouping.grouping import (
+    add_grouped_totals,
+    pair_labels,
+)
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
 def q_vectors_in_cube(direct, inverse, q_mins, q_maxs):
@@ -71,6 +76,37 @@ class StaticStructureFactor3D(IJob):
         "QRangeConfigurator",
         {"default": [-10, 10, 1], "valueType": float, "includeLast": True},
     )
+    settings["grouping_level"] = (
+        "GroupingLevelConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+            }
+        },
+    )
+    settings["atom_selection"] = (
+        "AtomSelectionConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
+    settings["atom_transmutation"] = (
+        "AtomTransmutationConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+            }
+        },
+    )
+    settings["weights"] = (
+        "WeightsConfigurator",
+        {
+            "default": "b_coherent",
+            "dependencies": {
+                "trajectory": "trajectory",
+                "atom_selection": "atom_selection",
+                "atom_transmutation": "atom_transmutation",
+            },
+        },
+    )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
@@ -90,12 +126,12 @@ class StaticStructureFactor3D(IJob):
         max_qx = self.qxs[-1]
         max_qy = self.qys[-1]
         max_qz = self.qzs[-1]
-        dim_qx = max_qx - min_qx
-        dim_qy = max_qy - min_qy
-        dim_qz = max_qz - min_qz
         spacing_qx = self.qxs[1] - min_qx
         spacing_qy = self.qys[1] - min_qy
         spacing_qz = self.qzs[1] - min_qz
+        dim_qx = max_qx - min_qx + spacing_qx
+        dim_qy = max_qy - min_qy + spacing_qy
+        dim_qz = max_qz - min_qz + spacing_qz
 
         self.min = np.array([min_qx, min_qy, min_qz], dtype=np.float64)
         self.max = np.array([max_qx, max_qy, max_qz], dtype=np.float64)
@@ -112,10 +148,9 @@ class StaticStructureFactor3D(IJob):
             self.spacing,
             units="1/nm",
         )
-        self.grid = np.zeros(self.gdim, dtype=float)
 
         self._indicesPerElement = self.trajectory.get_indices()
-        self.labels = pair_labels(self.trajectory, all_pairs=True)
+        self.labels = pair_labels(self.trajectory)
 
         labels = ["x_position", "y_position", "z_position"]
         for naxis in range(3):
@@ -127,9 +162,17 @@ class StaticStructureFactor3D(IJob):
                 units="1/nm",
             )
 
-        # TODO static structure factor between different element types
+        for label, _ in self.labels:
+            self._outputData.add(
+                f"ssf3d/{label}",
+                "VolumeOutputVariable",
+                tuple(self.gdim),
+                axis="|".join(labels),
+                main_result=True,
+                partial_result=True,
+            )
         self._outputData.add(
-            "static_structure_factor_3d",
+            "ssf3d/total",
             "VolumeOutputVariable",
             tuple(self.gdim),
             axis="|".join(labels),
@@ -156,18 +199,55 @@ class StaticStructureFactor3D(IJob):
                 np.exp(1j * np.dot(selectedCoordinates, self.q_vectors)), axis=0
             )
 
-        grid = np.zeros(self.gdim)
-        for _, (label_i, label_j) in self.labels:
-            np.add.at(
-                grid, tuple(self.q_idxs.T), (rho[label_i] * rho[label_j].conj()).real
-            )
-        return index, grid
+        return index, rho
 
-    def combine(self, index, x):
-        np.add(self.grid, x, self.grid)
+    def combine(self, index, rho):
+        for pair_str, (label_i, label_j) in self.labels:
+            grid = np.zeros(self.gdim)
+            np.add.at(
+                grid,
+                tuple(self.q_idxs.T),
+                (rho[label_i] * rho[label_j].conj()).real,
+            )
+            self._outputData[f"ssf3d/{pair_str}"][...] += grid
 
     def finalize(self):
-        self._outputData["static_structure_factor_3d"][:] = self.grid
+        nAtomsPerElement = self.trajectory.get_natoms()
+        selected_weights, all_weights = self.trajectory.get_weights(
+            prop=self.configuration["weights"]["property"]
+        )
+        weight_dict = get_weights(
+            selected_weights,
+            all_weights,
+            nAtomsPerElement,
+            self.trajectory.get_all_natoms(),
+            2,
+            conc_exp=0.5,
+        )
+        assign_weights(self._outputData, weight_dict, "ssf3d/%s", self.labels)
+        for pair_str, (label_i, label_j) in self.labels:
+            ni = nAtomsPerElement[label_i]
+            nj = nAtomsPerElement[label_j]
+            self._outputData[f"ssf3d/{pair_str}"] /= sqrt(ni * nj)
+
+        n_selected = sum(nAtomsPerElement.values())
+        n_total = len(self.trajectory.atom_types)
+        fact = n_selected / n_total
+
+        self._outputData["ssf3d/total"][:] = (
+            weighted_sum(self._outputData, "ssf3d/%s", self.labels) / fact
+        )
+        self._outputData["ssf3d/total"].scaling_factor = fact
+
+        add_grouped_totals(
+            self.trajectory,
+            self._outputData,
+            "ssf3d",
+            "VolumeOutputVariable",
+            dim=2,
+            conc_exp=0.5,
+            axis="x_position|y_position|z_position",
+        )
 
         # Write the output variables.
         self._outputData.write(
