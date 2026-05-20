@@ -34,6 +34,11 @@ CHUNK_SIZE_LIMIT = (
     int(mb_ram_per_process) * 2**20
 )  # 512 MB memory limit per process for now
 
+if TYPE_CHECKING:
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+CHUNK_SIZE_LIMIT = 2**29  # 512 MB memory limit per process for now
+
 
 class MolecularDynamicsError(Exception):
     pass
