@@ -22,6 +22,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 from more_itertools import chunked_even
 
+from MDANSE.util_types import FloatArray
+
 if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
@@ -29,8 +31,6 @@ mb_ram_per_process = os.environ.get("MDANSE_MAX_RAM_PER_PROCESS", "512")
 CHUNK_SIZE_LIMIT = (
     int(mb_ram_per_process) * 2**20
 )  # 512 MB memory limit per process for now
-
-from MDANSE.util_types import FloatArray
 
 
 class MolecularDynamicsError(Exception):
