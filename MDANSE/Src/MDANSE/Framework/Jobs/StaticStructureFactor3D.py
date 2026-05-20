@@ -133,7 +133,7 @@ class StaticStructureFactor3D(IJob):
             unit_cell.direct,
             unit_cell.inverse,
             np.array([min_qx, min_qy, min_qz]),
-            np.array([max_qx, max_qy, max_qz])
+            np.array([max_qx, max_qy, max_qz]),
         )
 
         # determine grid spacing from q-vectors
