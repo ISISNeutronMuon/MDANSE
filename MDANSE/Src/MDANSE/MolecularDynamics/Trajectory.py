@@ -173,16 +173,21 @@ class Trajectory:
     such as the atom selection, atom transmutation and grouping.
     """
 
-    def __init__(self, filename, trajectory_format: ValidFormats | None = None,
-                 hdf5_driver: str | None = None):
+    def __init__(self, filename,
+                 trajectory_format: ValidFormats | None = None,
+                 hdf5_driver: str | None = None,
+                 dataset_cache_size: int | None = None):
         self._filename = filename
         self._hdf5_driver = hdf5_driver
+        self._dataset_cache_size = dataset_cache_size
         self._format = (
             trajectory_format if trajectory_format else self.guess_correct_format()
         )
 
         if self._format not in {"mock"}:
-            self._trajectory = self.open_trajectory(self._format, self._hdf5_driver)
+            self._trajectory = self.open_trajectory(self._format,
+                                                    self._hdf5_driver,
+                                                    self._dataset_cache_size)
         self._min_span = None
         self._max_span = None
         self._grouping_level = GroupingLevels.ATOM
@@ -447,9 +452,9 @@ class Trajectory:
 
         return "MDANSE"
 
-    def open_trajectory(self, trajectory_format, hdf5_driver):
+    def open_trajectory(self, trajectory_format, hdf5_driver, dataset_cache_size):
         trajectory_class = available_formats[trajectory_format]
-        trajectory = trajectory_class(self._filename, hdf5_driver=hdf5_driver)
+        trajectory = trajectory_class(self._filename, hdf5_driver=hdf5_driver, rdcc_nbytes=dataset_cache_size)
         return trajectory
 
     def close(self):
@@ -478,7 +483,7 @@ class Trajectory:
 
     def __setstate__(self, state):
         self.__dict__ = state
-        self._trajectory = self.open_trajectory(self._format, self._hdf5_driver)
+        self._trajectory = self.open_trajectory(self._format, self._hdf5_driver, self._dataset_cache_size)
 
     def __len__(self):
         return len(self._trajectory)

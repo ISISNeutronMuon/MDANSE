@@ -130,7 +130,12 @@ class H5MDTrajectory(TrajectoryFile):
     def velocities(self) -> h5py.Dataset:
         return self._h5_file[self.vel_key]
 
-    def __init__(self, h5_filename: Path | str, hdf5_driver: str | None = None):
+    def __init__(
+        self,
+        h5_filename: Path | str,
+        hdf5_driver: str | None = None,
+        rdcc_nbytes: int | None = None,
+    ):
         """Constructor.
 
         Parameters
@@ -141,8 +146,15 @@ class H5MDTrajectory(TrajectoryFile):
         self.unit_cell_warning = ""
 
         self._h5_filename = Path(h5_filename)
+        self._h5_driver = hdf5_driver
+        self._h5_cache_size = rdcc_nbytes
 
-        self._h5_file = h5py.File(self._h5_filename, "r", driver=hdf5_driver)
+        self._h5_file = h5py.File(
+            self._h5_filename,
+            "r",
+            driver=self._h5_driver,
+            rdcc_nbytes=self._h5_cache_size,
+        )
 
         particle_types = self._h5_file["/particles/all/species"]
         particle_lookup = h5py.check_enum_dtype(

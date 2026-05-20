@@ -61,7 +61,12 @@ class MdanseTrajectory(TrajectoryFile):
         "force": "/configuration/gradients",
     }
 
-    def __init__(self, h5_filename: Path | str, hdf5_driver: str | None = None):
+    def __init__(
+        self,
+        h5_filename: Path | str,
+        hdf5_driver: str | None = None,
+        rdcc_nbytes: int | None = None,
+    ):
         """Open the file and build a trajectory.
 
         Parameters
@@ -78,8 +83,15 @@ class MdanseTrajectory(TrajectoryFile):
 
         self.unit_cell_warning = ""
         self._h5_filename = Path(h5_filename)
+        self._h5_driver = hdf5_driver
+        self._h5_cache_size = rdcc_nbytes
 
-        self._h5_file = h5py.File(self._h5_filename, "r", driver=hdf5_driver)
+        self._h5_file = h5py.File(
+            self._h5_filename,
+            "r",
+            driver=self._h5_driver,
+            rdcc_nbytes=self._h5_cache_size,
+        )
         self._has_database = "atom_database" in self._h5_file
         self._has_atoms = []
 
@@ -597,7 +609,7 @@ class MdanseTrajectory(TrajectoryFile):
 
     def variable(self, name: str):
         """Return a specific dataset corresponding to a variable called 'name'."""
-        return self._h5_file[self.KEYS[name]]
+        return self._h5_file[self.KEYS.get(name, f"/configuration/{name}")]
 
     def variables(self) -> list[str]:
         """Return the configuration variables stored in this trajectory.

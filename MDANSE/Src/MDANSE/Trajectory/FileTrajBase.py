@@ -64,7 +64,12 @@ class TrajectoryFile(ABC):
 
     def __setstate__(self, state: dict) -> None:
         self.__dict__ = state
-        self._h5_file = h5py.File(state["_h5_filename"], "r")
+        self._h5_file = h5py.File(
+            state["_h5_filename"],
+            "r",
+            driver=state["_h5_driver"],
+            rdcc_nbytes=state["_h5_cache_size"],
+        )
 
     def _check_frame(self, frame: slice | int) -> None:
         """Check frame in bounds.
