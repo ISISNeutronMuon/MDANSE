@@ -147,7 +147,7 @@ class StaticStructureFactor3D(IJob):
         self.max = np.max(self.q_vectors.T, axis=0)
         dims = self.max - self.min
 
-        self.q_idxs = np.floor((self.q_vectors.T - self.min) / self.spacing).astype(int)
+        self.q_idxs = np.round((self.q_vectors.T - self.min) / self.spacing).astype(int)
         self.gdim = np.ceil(dims / self.spacing).astype(int)
 
         self._outputData.add("origin", "LineOutputVariable", self.min, units="1/nm")
