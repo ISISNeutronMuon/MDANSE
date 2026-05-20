@@ -24,6 +24,8 @@ from more_itertools import chunked_even, flatten
 
 from MDANSE.util_types import FloatArray
 
+from MDANSE.util_types import FloatArray
+
 if TYPE_CHECKING:
     from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
