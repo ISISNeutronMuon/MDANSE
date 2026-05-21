@@ -29,10 +29,10 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 
 
 def q_vectors_in_cube(direct, inverse, q_mins, q_maxs):
-    max_hkl = np.zeros(3)
+    max_hkl = np.zeros(3, dtype=int)
     for point in it.product(*zip(q_mins, q_maxs, strict=False)):
         hkl = np.dot(direct, point) / (2 * np.pi)
-        max_hkl = np.maximum(max_hkl, np.ceil(np.abs(hkl)))
+        max_hkl = np.maximum(max_hkl, np.ceil(np.abs(hkl)).astype(int))
 
     hs = np.arange(-max_hkl[0], max_hkl[0] + 1)
     ks = np.arange(-max_hkl[1], max_hkl[1] + 1)
