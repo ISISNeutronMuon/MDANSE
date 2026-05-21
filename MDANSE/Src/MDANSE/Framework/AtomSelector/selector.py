@@ -16,9 +16,10 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import h5py
+from typing_extensions import NotRequired, TypedDict
 
 from MDANSE.Framework.AtomSelector.atom_selection import select_atoms, select_dummy
 from MDANSE.Framework.AtomSelector.general_selection import (
@@ -37,6 +38,7 @@ from MDANSE.IO.IOUtils import json_handler
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from pathlib import Path
 
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
@@ -56,6 +58,78 @@ function_lookup = {
         select_sphere,
     ]
 }
+
+
+class Operation(TypedDict):
+    operation_type: Literal["union", "difference", "intersection"]
+
+
+class OpAll(Operation):
+    function_name: Literal["select_all"]
+
+
+class OpNone(Operation):
+    function_name: Literal["select_none"]
+
+
+class OpInvert(Operation):
+    function_name: Literal["invert_selection"]
+
+
+class OpDummy(Operation):
+    function_name: Literal["select_dummy"]
+
+
+class OpAtoms(Operation):
+    function_name: Literal["select_atoms"]
+    index_list: NotRequired[Sequence[int]]
+    index_range: NotRequired[Sequence[int]]
+    index_slice: NotRequired[Sequence[int]]
+    atom_types: NotRequired[Sequence[str]]
+    atom_names: NotRequired[Sequence[str]]
+
+
+class OpMolecules(Operation):
+    function_name: Literal["select_molecules"]
+    molecule_names: NotRequired[Sequence[str]]
+
+
+class OpLabels(Operation):
+    function_name: Literal["select_labels"]
+    atom_labels: NotRequired[Sequence[str]]
+
+
+class OpPattern(Operation):
+    function_name: Literal["select_pattern"]
+    rdkit_pattern: str
+
+
+class OpPositions(Operation):
+    function_name: Literal["select_positions"]
+    frame_number: NotRequired[int]
+    position_minimum: NotRequired[Sequence[float] | None]
+    position_maximum: NotRequired[Sequence[float] | None]
+
+
+class OpSphere(Operation):
+    function_name: Literal["select_sphere"]
+    frame_number: NotRequired[int]
+    sphere_centre: Sequence[float]
+    sphere_radius: float
+
+
+SelectionOperations = (
+    OpAll
+    | OpNone
+    | OpInvert
+    | OpDummy
+    | OpAtoms
+    | OpMolecules
+    | OpLabels
+    | OpPattern
+    | OpPositions
+    | OpSphere
+)
 
 
 class ReusableSelection:
