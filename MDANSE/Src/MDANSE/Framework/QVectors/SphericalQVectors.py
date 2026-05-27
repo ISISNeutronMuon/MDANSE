@@ -45,9 +45,8 @@ def spherical_vectors(q: float, q_width: float, n_vecs: int) -> npt.NDArray[floa
     qmax = q + q_width / 2
     all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)
     radii = np.array(all_radii)[:n_vecs]
-    rng = np.random.default_rng()
-    theta = np.arccos(2 * rng.random(size=n_vecs) - 1)
-    phi = 2 * np.pi * rng.random(size=n_vecs)
+    theta = np.arccos(2 * np.random.random(size=n_vecs) - 1)
+    phi = 2 * np.pi * np.random.random(size=n_vecs)
     return np.vstack(
         (
             radii * np.sin(theta) * np.cos(phi),
