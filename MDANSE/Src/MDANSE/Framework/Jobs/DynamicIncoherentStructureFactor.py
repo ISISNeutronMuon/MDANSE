@@ -121,6 +121,7 @@ class DynamicIncoherentStructureFactor(IJob):
         )
         self.numberOfSteps = len(self.grouped_indices)
 
+        self._using_lattice_vectors = self.configuration["q_vectors"]["is_lattice"]
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
 
         self._nFrames = self.configuration["frames"]["n_frames"]
@@ -237,12 +238,22 @@ class DynamicIncoherentStructureFactor(IJob):
         atom_index_group = self.grouped_indices[index]
         n_atoms = len(atom_index_group)
 
-        series = self.trajectory.read_atomic_trajectory_many(
-            atom_index_group,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
-        )
+        if self._using_lattice_vectors:
+            series = self.trajectory.coordinates(
+                slice(
+                    self.configuration["frames"]["first"],
+                    self.configuration["frames"]["last"] + 1,
+                    self.configuration["frames"]["step"],
+                ),
+                atom_index_group,
+            )
+        else:
+            series = self.trajectory.read_atomic_trajectory_many(
+                atom_index_group,
+                first=self.configuration["frames"]["first"],
+                last=self.configuration["frames"]["last"] + 1,
+                step=self.configuration["frames"]["step"],
+            )
 
         series = self.configuration["projection"]["projector"](series)
 
