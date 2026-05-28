@@ -16,17 +16,18 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from functools import partial
 
 import numpy as np
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
-from MDANSE.Framework.QVectors.SphericalQVectors import spherical_vectors
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 def fpsampling(
-    q_vectors: np.ndarray, n_vecs: int, random_vector_func: Callable[[], np.ndarray]
+    q_vectors: np.ndarray,
+    n_vecs: int,
+    random_vector_func: Callable[[], np.ndarray],
+    rng: np.random.Generator,
 ) -> np.ndarray:
     """Basic farthest point sampling function used to sample q-vectors.
     Q-vectors are normalised to avoid sampling vectors from the ends of
@@ -41,6 +42,8 @@ def fpsampling(
         Number of vectors to sample.
     random_vector_func : Callable[[], np.ndarray]
         A function which generates a single random vector.
+    rng : np.random.Generator
+        A numpy random number generator object.
 
     Returns
     -------
@@ -56,7 +59,7 @@ def fpsampling(
     if n_vecs >= n_points:
         return np.arange(n_points)
     elif n_points == 1:
-        return np.array([np.random.randint(0, n_points)])
+        return np.array([rng.integers(low=0, high=n_points)])
     elif n_points <= 0:
         raise ValueError("n_vecs should be greater than zero.")
 
@@ -71,7 +74,7 @@ def fpsampling(
     q_vectors = q_vectors / mag_q[:, None]
 
     dists = np.full(n_points, np.inf)
-    selected = np.random.randint(n_points)
+    selected = rng.integers(low=0, high=n_points)
     selection = np.zeros(n_vecs, dtype=int)
     selection[0] = selected
 

@@ -40,6 +40,7 @@ def truncated_normal_distribution(
     right_limit: float,
     width: float,
     centre: float,
+    rng: np.random.Generator,
     zero_width_limit: float = 0.1,
 ) -> npt.NDArray[float]:
     """Generate a normal distribution of values within the specified limits.
@@ -58,6 +59,8 @@ def truncated_normal_distribution(
         Position of the maximum of the distribution.
     zero_width_limit : float, optional
         Limits used when width is 0 to guarantee non-zero domain width, by default 0.1.
+    rng : np.random.Generator
+        A numpy random number generator object.
 
     Returns
     -------
@@ -71,6 +74,7 @@ def truncated_normal_distribution(
             loc=centre,
             scale=0,
             size=n_elements,
+            random_state=rng,
         )
     return truncnorm.rvs(
         GAUSS_WIDTH_FACTOR * (left_limit - centre) / width,
@@ -78,6 +82,7 @@ def truncated_normal_distribution(
         loc=centre,
         scale=width / GAUSS_WIDTH_FACTOR,
         size=n_elements,
+        random_state=rng,
     )
 
 
