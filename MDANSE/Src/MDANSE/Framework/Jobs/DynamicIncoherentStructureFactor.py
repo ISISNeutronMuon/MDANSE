@@ -270,9 +270,11 @@ class DynamicIncoherentStructureFactor(IJob):
                 continue
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
             qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
-            rho = np.exp(
-                1j * np.einsum("inj,jk,k->ikn", series, qVectors, np.sqrt(qvec_weights))
+            rho = (
+                np.exp(1j * np.dot(qVectors.T, np.swapaxes(series, 1, 2)))
+                * np.sqrt(qvec_weights)[:, None, None]
             )
+            rho = np.swapaxes(rho, 0, 1)
             res = np.hstack(
                 [
                     correlate(rho[:, :, n], rho[:n_configs, :, n], mode="valid")

@@ -15,9 +15,11 @@
 #
 from __future__ import annotations
 
+from itertools import pairwise
 from typing import TYPE_CHECKING
 
 import numpy as np
+from more_itertools import chunked_even
 
 if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
@@ -136,10 +138,10 @@ def group_atom_indices(
 
     Returns
     -------
-    list[list[int]]
-        _description_
+    list[set[int]]
+        List of atom index set, each set containing indices from a single HDF5 chunk
     """
-    selected_indices = sorted(traj_instance.atom_indices)
+    selected_indices = set(traj_instance.atom_indices)
     total_dimensions = traj_instance.variable("position").shape
     chunk_size = traj_instance.chunk_size(array_name="position")
     if chunk_size < 0:
@@ -158,13 +160,10 @@ def group_atom_indices(
         )
     min_chunk_count = n_proc
     initial_sets = [
-        sorted(
-            set(range(chunk_limits[n], chunk_limits[n + 1])).intersection(
-                selected_indices
-            )
-        )
-        for n in range(len(chunk_limits) - 1)
+        sorted(selected_indices.intersection(range(*chunk_block)))
+        for chunk_block in pairwise(chunk_limits)
     ]
+    initial_sets = [index_set for index_set in initial_sets if len(index_set)]
     return balance_index_groups(
         initial_sets, max_size=max_chunk_size, min_count=min_chunk_count
     )
@@ -185,15 +184,9 @@ def split_index_sets(index_sets: list[set[int]], max_size: int) -> list[set[int]
     list[set[int]]
         List of index sets after splitting into smaller sets.
     """
-    result = []
-    for ind_set in index_sets:
-        set_len = len(ind_set)
-        if set_len < max_size:
-            result.append(ind_set)
-            continue
-        result.append(ind_set[: set_len // 2])
-        result.append(ind_set[set_len // 2 :])
-    return result
+    return [
+        chunk for ind_set in index_sets for chunk in chunked_even(ind_set, max_size)
+    ]
 
 
 def balance_index_groups(
