@@ -55,10 +55,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
     settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
 
     def _generate(self):
-        if self._configuration["seed"]["value"] != 0:
-            rng = np.random.default_rng(self._configuration["seed"]["value"])
-        else:
-            rng = np.random.default_rng()
+        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
         width = self._configuration["width"]["value"]
 

@@ -63,10 +63,7 @@ class CircularLatticeQVectors(LatticeQVectors):
     )
 
     def _generate(self):
-        if self._configuration["seed"]["value"] != 0:
-            rng = np.random.default_rng(self._configuration["seed"]["value"])
-        else:
-            rng = np.random.default_rng()
+        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
         nvecs_per_shell = self._configuration["n_vectors"]["value"]
         n_samples = self._configuration["n_samples"]["value"]

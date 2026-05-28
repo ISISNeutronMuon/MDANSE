@@ -84,10 +84,7 @@ class LinearQVectors(IQVectors):
     )
 
     def _generate(self):
-        if self._configuration["seed"]["value"] != 0:
-            rng = np.random.default_rng(self._configuration["seed"]["value"])
-        else:
-            rng = np.random.default_rng()
+        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
         axis = self._configuration["axis"]["vector"].array
 

@@ -59,16 +59,16 @@ def fpsampling(
     if n_vecs >= n_points:
         return np.arange(n_points)
     elif n_points == 1:
-        return np.array([rng.integers(low=0, high=n_points)])
+        return rng.integers(low=0, high=n_points, size=1)
     elif n_points <= 0:
         raise ValueError("n_vecs should be greater than zero.")
 
     mag_q = np.linalg.norm(q_vectors, axis=1)
-    if np.any(mag_q == 0):
+    if np.any(mag_q < 1e-9):
         # deal with the vector at the origin by turning into some
         # random unit vector
         random_vector = random_vector_func().T[0]
-        zero_idx = np.where(mag_q == 0)[0]
+        zero_idx = np.where(mag_q < 1e-9)[0]
         q_vectors[zero_idx] = random_vector
         mag_q[zero_idx] = 1
     q_vectors = q_vectors / mag_q[:, None]
