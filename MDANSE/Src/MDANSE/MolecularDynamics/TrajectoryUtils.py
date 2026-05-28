@@ -165,7 +165,7 @@ def group_atom_indices(
     ]
     initial_sets = [index_set for index_set in initial_sets if len(index_set)]
     return balance_index_groups(
-        initial_sets, max_size=max_chunk_size, min_count=min_chunk_count
+        initial_sets, max_size=int(max_chunk_size), min_count=min_chunk_count
     )
 
 

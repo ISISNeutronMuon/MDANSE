@@ -246,10 +246,9 @@ class MdanseTrajectory(TrajectoryFile):
         except KeyError:
             LOG.error("Dataset %s was not in the trajectory file", data_key)
             return -1
-        if not hasattr(dataset, "chunks"):
+        if (chunk_shape := getattr(dataset, "chunks", None)) is None:
             LOG.warning("Dataset %s is not chunked, and was expected to be", data_key)
             return -1
-        chunk_shape = dataset.chunks
         if len(chunk_shape) < 2:
             LOG.warning("Dataset %s does not have enough dimensions", data_key)
             return -1
