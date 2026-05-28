@@ -22,7 +22,11 @@ from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_dist
 
 
 def linear_vectors(
-    q: float, q_width: float, n_vecs: int, axis: npt.NDArray[float], rng
+    q: float,
+    q_width: float,
+    n_vecs: int,
+    axis: npt.NDArray[float],
+    rng: np.random.Generator,
 ):
     """Generate vectors on a line.
 
