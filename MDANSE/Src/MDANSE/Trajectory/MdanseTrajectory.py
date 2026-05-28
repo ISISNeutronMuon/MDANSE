@@ -240,12 +240,7 @@ class MdanseTrajectory(TrajectoryFile):
         return np.zeros(n_req, dtype=np.float64)
 
     def chunk_size(self, dataset_type: TrajDataArray = TrajDataArray.POSITION) -> int:
-        if dataset_type == TrajDataArray.POSITION:
-            data_key = "/configuration/coordinates"
-        elif dataset_type == TrajDataArray.VELOCITY:
-            data_key = "/configuration/velocities"
-        elif dataset_type == TrajDataArray.FORCE:
-            data_key = "/configuration/gradients"
+        data_key = self.KEYS[dataset_type.name.lower()]
         try:
             dataset = self._h5_file[data_key]
         except KeyError:
