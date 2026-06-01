@@ -28,25 +28,15 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
-def q_vectors_in_cube(direct, inverse, q_mins, q_maxs):
-    max_hkl = np.zeros(3, dtype=int)
-    for point in it.product(*zip(q_mins, q_maxs, strict=False)):
-        hkl = np.dot(direct, point) / (2 * np.pi)
-        max_hkl = np.maximum(max_hkl, np.ceil(np.abs(hkl)).astype(int))
-
+def q_vectors_in_cube(inverse, max_hkl, start, stop):
     hs = np.arange(-max_hkl[0], max_hkl[0] + 1)
     ks = np.arange(-max_hkl[1], max_hkl[1] + 1)
     ls = np.arange(-max_hkl[2], max_hkl[2] + 1)
 
-    q_vectors = []
-    for (
-        h,
-        k,
-        l,  # noqa: E741
-    ) in it.product(hs, ks, ls):
-        q_vectors.append(2 * np.pi * np.dot(inverse, [h, k, l]))
-    q_vectors = np.vstack(q_vectors)
-    return q_vectors[np.all((q_vectors >= q_mins) & (q_vectors <= q_maxs), axis=1)].T
+    hkls = np.array(
+        list(it.islice(it.product(hs, ks, ls), start, stop)),
+    )
+    return 2 * np.pi * inverse @ hkls.T, tuple((hkls + max_hkl).T)
 
 
 class StaticStructureFactor3D(IJob):
@@ -113,8 +103,6 @@ class StaticStructureFactor3D(IJob):
     def initialize(self):
         super().initialize()
 
-        self.numberOfSteps = self.configuration["frames"]["number"]
-
         # TODO add so q_x q_y q_x ranges can be changed
         self.qxs = self.configuration["q_shells"]["value"]
         self.qys = self.configuration["q_shells"]["value"]
@@ -127,29 +115,28 @@ class StaticStructureFactor3D(IJob):
         max_qy = self.qys[-1]
         max_qz = self.qzs[-1]
 
-        # TODO if NPT then we should do this per run step
         unit_cell = self.trajectory.unit_cell(0)
-        self.q_vectors = q_vectors_in_cube(
-            unit_cell.direct,
-            unit_cell.inverse,
-            np.array([min_qx, min_qy, min_qz]),
-            np.array([max_qx, max_qy, max_qz]),
-        )
+        self.inverse = unit_cell.inverse
 
-        # determine grid spacing from q-vectors
-        self.spacing = np.zeros(3)
-        for axis in range(3):
-            unique_vals = np.unique(self.q_vectors[axis])
-            diffs = np.diff(unique_vals)
-            self.spacing[axis] = np.min(diffs[diffs > 1e-8])
+        self.max_hkl = np.zeros(3, dtype=int)
+        for point in it.product(
+            *zip([min_qx, min_qy, min_qz], [max_qx, max_qy, max_qz], strict=False)
+        ):
+            hkl = np.dot(unit_cell.direct, point) / (2 * np.pi)
+            self.max_hkl = np.maximum(self.max_hkl, np.floor(np.abs(hkl)).astype(int))
 
-        self.min = np.min(self.q_vectors.T, axis=0)
-        self.max = np.max(self.q_vectors.T, axis=0)
+        self.gdim = 2 * self.max_hkl + 1
 
-        self.q_idxs = np.floor(
-            np.clip(self.q_vectors.T - self.min, a_min=0, a_max=None) / self.spacing
-        ).astype(int)
-        self.gdim = np.max(self.q_idxs, axis=0) + 1
+        self.n_q_vecs = np.prod(self.gdim)
+        self.q_vec_chunk_size = 100
+        self.q_vec_n_chunks = self.n_q_vecs // self.q_vec_chunk_size + 1
+        self.n_frames = self.configuration["frames"]["number"]
+
+        self.numberOfSteps = self.n_frames * self.q_vec_n_chunks
+
+        self.min = -2 * np.pi * np.dot(unit_cell.inverse, self.max_hkl)
+        self.max = -self.min
+        self.spacing = 2 * np.pi * np.sum(unit_cell.inverse, axis=0)
 
         self._outputData.add("origin", "LineOutputVariable", self.min, units="1/nm")
         self._outputData.add(
@@ -190,29 +177,33 @@ class StaticStructureFactor3D(IJob):
         )
 
     def run_step(self, index):
-        traj = self.trajectory
+        frame_idx = index // self.q_vec_n_chunks
+        chunk_idx = index % self.q_vec_n_chunks
 
-        frame = self.configuration["frames"]["value"][index]
-        coords = traj.configuration(frame)["coordinates"]
+        frame = self.configuration["frames"]["value"][frame_idx]
+        coords = self.trajectory.configuration(frame)["coordinates"]
+        start = chunk_idx * self.q_vec_chunk_size
+        stop = min((chunk_idx + 1) * self.q_vec_chunk_size, self.n_q_vecs)
+
+        q_vectors, q_idxs = q_vectors_in_cube(self.inverse, self.max_hkl, start, stop)
 
         rho = {}
         for element, idxs in self._indicesPerElement.items():
             selectedCoordinates = np.take(coords, idxs, axis=0)
             rho[element] = np.sum(
-                np.exp(1j * np.dot(selectedCoordinates, self.q_vectors)), axis=0
+                np.exp(1j * np.dot(selectedCoordinates, q_vectors)), axis=0
             )
 
-        return index, rho
+        return index, (q_idxs, rho)
 
-    def combine(self, index, rho):
+    def combine(self, index, results):
+        q_idxs, rho = results
         for pair_str, (label_i, label_j) in self.labels:
-            grid = np.zeros(self.gdim)
             np.add.at(
-                grid,
-                tuple(self.q_idxs.T),
+                self._outputData[f"ssf3d/{pair_str}"],
+                q_idxs,
                 (rho[label_i] * rho[label_j].conj()).real,
             )
-            self._outputData[f"ssf3d/{pair_str}"][...] += grid
 
     def finalize(self):
         nAtomsPerElement = self.trajectory.get_natoms()
