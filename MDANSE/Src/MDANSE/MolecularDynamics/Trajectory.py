@@ -178,8 +178,8 @@ class Trajectory:
                  hdf5_driver: str | None = None,
                  *,
                  rdcc_nbytes: int | None = None,
-                 rdcc_nslots: int | None = None,
                  rdcc_w0: float | None = None,
+                 rdcc_nslots: int | None = None,
                  fast_load: bool = False):
         self._filename = filename
         self._hdf5_driver = hdf5_driver
@@ -193,8 +193,8 @@ class Trajectory:
         self._trajectory = self.open_trajectory(self._format,
                                                     self._hdf5_driver,
                                                     rdcc_nbytes=self._rdcc_nbytes,
-                                                    rdcc_nslots=self._rdcc_nslots,
                                                     rdcc_w0=self._rdcc_w0,
+                                                    rdcc_nslots=self._rdcc_nslots,
                                                     fast_load = fast_load
                                                     )
         self._min_span = None
@@ -471,8 +471,8 @@ class Trajectory:
                         hdf5_driver,
                         *,
                         rdcc_nbytes: int | None = None,
-                        rdcc_nslots: int | None = None,
                         rdcc_w0: float | None = None,
+                        rdcc_nslots: int | None = None,
                         fast_load: bool = False
                         ):
         trajectory_class = available_formats[trajectory_format]

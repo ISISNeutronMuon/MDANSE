@@ -137,8 +137,8 @@ class H5MDTrajectory(TrajectoryFile):
         hdf5_driver: str | None = None,
         *,
         rdcc_nbytes: int | None = None,
-        rdcc_nslots: int | None = None,
         rdcc_w0: float | None = None,
+        rdcc_nslots: int | None = None,
         fast_load: bool = False,
     ):
         """Constructor.
@@ -159,8 +159,8 @@ class H5MDTrajectory(TrajectoryFile):
             "r",
             driver=hdf5_driver,
             rdcc_nbytes=rdcc_nbytes,
-            rdcc_nslots=rdcc_nslots,
             rdcc_w0=rdcc_w0,
+            rdcc_nslots=rdcc_nslots,
         )
 
         particle_types = self._h5_file["/particles/all/species"]
