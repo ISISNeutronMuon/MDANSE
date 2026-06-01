@@ -16,8 +16,17 @@
 from __future__ import annotations
 
 import numpy as np
+import numpy.typing as npt
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    FrameSelect,
+    GridStep,
+    MDANSETrajectory,
+    OutputFile,
+    RunningMode,
+)
 
 
 class MolecularTrace(IJob):
@@ -47,137 +56,116 @@ class MolecularTrace(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory"},
-        },
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    spatial_resolution = GridStep(
+        minimum=0.0,
+        default=0.1,
+        depends={"frames": "frames", "trajectory": "trajectory"},
     )
-    settings["spatial_resolution"] = (
-        "GridStepConfigurator",
-        {
-            "mini": 0.01,
-            "default": 0.1,
-            "dependencies": {
-                "trajectory": "trajectory",
-                "frames": "frames",
-            },
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         super().initialize()
 
-        self.numberOfSteps = self.configuration["frames"]["number"]
+        self.numberOfSteps = len(self.frames)
 
         # Generate the grids that will be used to quantify the presence of atoms in an area.
-        self.resolution = self.configuration["spatial_resolution"]["value"]
 
-        maxx, maxy, maxz = 0, 0, 0
-        minx, miny, minz = 10**9, 10**9, 10**9
-        for i in range(self.numberOfSteps):
-            frameIndex = self.configuration["frames"]["value"][i]
-            conf = self.trajectory.configuration(frameIndex)
+        self.min = np.full(3, np.inf, dtype=np.float64)
+        self.max = np.full(3, -np.inf, dtype=np.float64)
+        for frame_index in self.frames.indices:
+            conf = self.trajectory.configuration(frame_index)
             conf = conf.continuous_configuration()
             coords = conf["coordinates"]
 
-            minx_loc = coords[:, 0].min()
-            miny_loc = coords[:, 1].min()
-            minz_loc = coords[:, 2].min()
+            self.min = np.minimum(self.min, coords.min(axis=0))
+            self.max = np.maximum(self.max, coords.max(axis=0))
 
-            maxx_loc = coords[:, 0].max()
-            maxy_loc = coords[:, 1].max()
-            maxz_loc = coords[:, 2].max()
+        dim = self.max - self.min
 
-            maxx = max(maxx_loc, maxx)
-            maxy = max(maxy_loc, maxy)
-            maxz = max(maxz_loc, maxz)
-
-            minx = min(minx, minx_loc)
-            miny = min(miny, miny_loc)
-            minz = min(minz, minz_loc)
-
-        dimx = maxx - minx
-        dimy = maxy - miny
-        dimz = maxz - minz
-
-        self.min = np.array([minx, miny, minz], dtype=np.float64)
         self._outputData.add("origin", "LineOutputVariable", self.min, units="nm")
 
-        self.gdim = np.ceil(np.array([dimx, dimy, dimz]) / self.resolution).astype(int)
-        spacing = self.configuration["spatial_resolution"]["value"]
+        self.gdim = np.ceil(dim / self.spatial_resolution).astype(int)
+
         self._outputData.add(
             "spacing",
             "LineOutputVariable",
-            np.array([spacing, spacing, spacing]),
+            np.array([self.spatial_resolution] * 3),
             units="nm",
         )
+
         self.grid = np.zeros(self.gdim, dtype=np.int32)
 
         labels = ["x_position", "y_position", "z_position"]
-        for naxis in range(3):
+        for label, gdim, mini in zip(labels, self.gdim, self.min, strict=True):
             self._outputData.add(
-                labels[naxis],
+                label,
                 "LineOutputVariable",
-                np.arange(0, self.gdim[naxis], 1) * self.resolution + self.min[naxis],
+                np.arange(0, gdim, 1) * self.spatial_resolution + mini,
                 units="nm",
             )
 
         self._outputData.add(
             "molecular_trace",
             "VolumeOutputVariable",
-            tuple(np.ceil(np.array([dimx, dimy, dimz]) / self.resolution).astype(int)),
+            tuple(self.gdim),
             axis="|".join(labels),
             main_result=True,
         )
 
         self._indices = self.trajectory.atom_indices
 
-    def run_step(self, index):
-        """
-        Runs a single step of the job.
+    def run_step(self, index: int) -> npt.NDArray[int]:
+        """Runs a single step of the job.
 
-        @param index: the index of the step.
-        @type index: int.
+        Parameters
+        ----------
+        index : int.
+            the index of the step.
+
+        Returns
+        -------
+        numpy.ndarray
+            Grid trace.
         """
 
         # This is the actual index of the frame corresponding to the loop index.
-        frameIndex = self.configuration["frames"]["value"][index]
+        frame = self.frames[index]
 
-        conf = self.trajectory.configuration(frameIndex)
+        conf = self.trajectory.configuration(frame.ind)
         conf = conf.continuous_configuration()
 
         grid = np.zeros(self.gdim, dtype=np.int32)
 
-        resolution = self.configuration["spatial_resolution"]["value"]
-
         indices = np.floor(
             (conf["coordinates"][self._indices, :] - self.min.reshape((1, 3)))
-            / resolution
+            / self.spatial_resolution
         ).astype(int)
         unique_indices, counts = np.unique(indices, return_counts=True, axis=0)
         grid[tuple(unique_indices.T)] += counts
 
         return index, grid
 
-    def combine(self, index, x):
-        """
-        @param index: the index of the step.
-        @type index: int.
-
-        @param x: the output of run_step method.
-        @type x: no specific type.
+    def combine(self, index: int, grid: npt.NDArray[int]) -> None:
         """
 
-        np.add(self.grid, x, self.grid)
+        Parameters
+        ----------
+        index : int.
+            The index of the step.
+        x : ~numpy.ndarray
+            The output of run_step method.
+
+        Returns
+        -------
+
+        """
+        self.grid += grid
 
     def finalize(self):
         """
@@ -188,8 +176,8 @@ class MolecularTrace(IJob):
 
         # Write the output variables.
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

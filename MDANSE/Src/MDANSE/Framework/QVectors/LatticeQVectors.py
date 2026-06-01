@@ -16,11 +16,18 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from functools import partial
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 def fpsampling(
@@ -92,8 +99,8 @@ class LatticeQVectors(IQVectors):
 
     is_lattice = True
 
-    def __init__(self, unit_cell: UnitCell | None, status=None):
-        super().__init__(unit_cell, status)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        if unit_cell is None:
+        if self._unit_cell is None:
             raise ValueError("The trajectory does not contain unit cell information.")

@@ -16,13 +16,16 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Collection, Iterable, Iterator
 from functools import cached_property
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from more_itertools import ilen
 
 from MDANSE.Framework.AtomMapping import AtomLabel
+
+if TYPE_CHECKING:
+    from collections.abc import Collection, Iterable, Iterator
 
 
 class Parser(ABC):

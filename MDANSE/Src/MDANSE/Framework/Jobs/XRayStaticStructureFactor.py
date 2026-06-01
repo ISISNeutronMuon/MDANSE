@@ -15,7 +15,8 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterator
+import collections
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
@@ -26,7 +27,21 @@ from MDANSE.Framework.AtomGrouping.grouping import (
     update_pair_results,
 )
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    FrameSelect,
+    GroupingLevel,
+    MDANSETrajectory,
+    OutputFile,
+    Range,
+    RangeCellCutoff,
+    RunningMode,
+)
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 def atomic_scattering_factor(element, qvalues, trajectory):
@@ -70,85 +85,57 @@ class XRayStaticStructureFactor(DistanceHistogram):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        grouping="grouping_level",
+        transmutation="atom_transmutation",
     )
-    settings["r_values"] = (
-        "DistHistCutoffConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "dependencies": {"trajectory": "trajectory"},
-        },
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    r_values = RangeCellCutoff(
+        label="r values",
+        include_last=True,
+        minimum=0.0,
+        depends={"trajectory": "trajectory"},
+        units="nm",
     )
-    settings["q_values"] = (
-        "QRangeConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "default": (0, 500, 1),
-        },
+    q_values = Range[float](
+        label="Q values",
+        include_last=True,
+        minimum=0.0,
+        default=(0, 500, 1),
+        units="nm",
     )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
-        nq = self.configuration["q_values"]["number"]
-
-        nFrames = self.configuration["frames"]["number"]
-
-        self.averageDensity /= nFrames
-
-        densityFactor = 4.0 * np.pi * self.configuration["r_values"]["mid_points"]
-
-        shellSurfaces = densityFactor * self.configuration["r_values"]["mid_points"]
-
-        shellVolumes = shellSurfaces * self.configuration["r_values"]["step"]
+        nq = len(self.q_values)
+        n_frames = len(self.frames)
+        self.average_density /= n_frames
+        density_factor = 4.0 * np.pi * self.r_values.mid_points
+        shell_surfaces = density_factor * self.r_values.mid_points
+        shell_volumes = shell_surfaces * self.r_values.binning.step
 
         self._outputData.add(
             "xssf/axes/q",
             "LineOutputVariable",
-            self.configuration["q_values"]["value"],
+            self.q_values,
             units="1/nm",
         )
 
         q = self._outputData["xssf/axes/q"]
-        r = self.configuration["r_values"]["mid_points"]
+        r = self.r_values.mid_points
 
-        fact1 = 4.0 * np.pi * self.averageDensity
-
+        fact1 = 4.0 * np.pi * self.average_density
         sincqr = np.sinc(np.outer(q, r) / np.pi)
-
-        dr = self.configuration["r_values"]["step"]
+        dr = self.r_values.binning.step
 
         for label, _ in self.labels:
             self._outputData.add(
@@ -227,8 +214,8 @@ class XRayStaticStructureFactor(DistanceHistogram):
             ni = nAtomsPerElement[label_i]
             nj = nAtomsPerElement[label_j]
 
-            idi = self.selectedElements.index(label_i)
-            idj = self.selectedElements.index(label_j)
+            idi = self.selected_elements.index(label_i)
+            idj = self.selected_elements.index(label_j)
 
             if label_i == label_j:
                 nij = ni**2 / 2.0
@@ -238,7 +225,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
                     self.h_intra[idi, idj] += self.h_intra[idj, idi]
                 self.h_total[idi, idj] += self.h_total[idj, idi]
 
-            fact = 2 * nij * nFrames * shellVolumes
+            fact = 2 * nij * n_frames * shell_volumes
 
             pdfTotal = self.h_total[idi, idj, :] / fact
             yield (
@@ -341,8 +328,8 @@ class XRayStaticStructureFactor(DistanceHistogram):
             self._outputData["xssf/total"].scaling_factor = fact
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

@@ -51,6 +51,7 @@ class MultipleCombosWidget(WidgetBase):
         self._configurator = configurator
         self.default_labels()
         self.update_labels()
+        self.toggle_widgets()
         self.updateValue()
 
     def configure_using_default(self):

@@ -15,6 +15,10 @@
 #
 from __future__ import annotations
 
+from itertools import count
+from typing import TYPE_CHECKING
+
+from more_itertools import padded
 from qtpy.QtCore import Slot
 from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import (
@@ -24,165 +28,124 @@ from qtpy.QtWidgets import (
     QPushButton,
 )
 
+from MDANSE.Framework.Parameters import InstrumentResolution
+from MDANSE_GUI.InputWidgets.ComboWidget import ComboWidget
+from MDANSE_GUI.InputWidgets.FloatWidget import FloatWidget
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.ResolutionDialog import ResolutionDialog
-from MDANSE_GUI.Widgets.ResolutionWidget import widget_text_map
-
-reverse_text_map = {value: key for key, value in widget_text_map.items()}
+from MDANSE_GUI.Widgets.ResolutionWidget import WIDGET_TEXT_MAP
 
 
-init_parameters = {
-    "ideal": {},
-    "Gaussian": {"mu": 0.0, "sigma": 1.0},
-    "Lorentzian": {"mu": 0.0, "sigma": 1.0},
-    "triangular": {"mu": 0.0, "sigma": 1.0},
-    "square": {"mu": 0.0, "sigma": 1.0},
-    "pseudo-Voigt": {
-        "mu_gaussian": 0.0,
-        "sigma_gaussian": 1.0,
-        "eta": 0.5,
-        "mu_lorentzian": 0.0,
-        "sigma_lorentzian": 1.0,
-    },
-}
+class InstrumentResolutionWidget(WidgetBase[InstrumentResolution]):
+    def __init__(self, *args, layout_type: None = None, **kwargs):
+        if layout_type is not None:
+            raise ValueError("layout_type may not be non-None")
 
+        super().__init__(*args, layout_type="QGridLayout", **kwargs)
 
-class InstrumentResolutionWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
-        kwargs["layout_type"] = "QGridLayout"
-        super().__init__(*args, **kwargs)
-        # self._layout.addWidget(QLabel("Resolution function", self._base), 0, 0)
-        self._type_combo = QComboBox(parent=self._base)
+        if self._tooltip:
+            tooltip_text = self._tooltip
+        else:
+            tooltip_text = "The peak function used for smearing/smooting the results. Pick 'ideal' for no smearing."
+
         self._dialog_button = QPushButton("Helper Dialog", self._base)
         self._dialog_button.clicked.connect(self.helper_dialog)
         self._dialog_button.setEnabled(True)
         self.helper = ResolutionDialog(self._base)
         self.helper._panel.parameters_changed.connect(self.set_parameters_from_dialog)
-        self._layout.addWidget(self._type_combo, 0, 1)
         self._layout.addWidget(self._dialog_button, 0, 0)
-        self._labels = []
-        self._fields = []
-        self._defaults = []
-        if self._tooltip:
-            tooltip_text = self._tooltip
-        else:
-            tooltip_text = "The peak function used for smearing/smooting the results. Pick 'ideal' for no smearing."
-        # first row
-        for num in range(1, 3):
-            label = QLabel("", parent=self._base)
-            field = QLineEdit("N/A", parent=self._base)
-            field.setEnabled(False)
-            self._layout.addWidget(label, 0, 2 * num)
-            self._layout.addWidget(field, 0, 2 * num + 1)
-            self._labels.append(label)
-            self._fields.append(field)
-            val = QDoubleValidator(field)
-            field.setValidator(val)
-            self._defaults.append(0.0)
-        # first row
-        for num in range(0, 3):
-            label = QLabel("", parent=self._base)
-            field = QLineEdit("N/A", parent=self._base)
-            field.setEnabled(False)
-            self._layout.addWidget(label, 1, 2 * num)
-            self._layout.addWidget(field, 1, 2 * num + 1)
-            self._labels.append(label)
-            self._fields.append(field)
-            val = QDoubleValidator(field)
-            if num == 0:  # this is the pseudoVoigt eta
-                val.setBottom(0.0)
-                val.setTop(1.0)
-            field.setValidator(val)
-            self._defaults.append(0.0)
-        self._type_combo.addItems([str(x) for x in init_parameters])
-        self._type_combo.setEditable(False)
-        self._type_combo.currentTextChanged.connect(self.change_function)
-        for field in self._fields:
-            field.textChanged.connect(self.updateValue)
-            field.setToolTip(tooltip_text)
+
+        self._type_combo = ComboWidget(
+            parent=self._base,
+            base_type="QWidget",
+            label="Kernel",
+            tooltip=tooltip_text,
+            configurable=self.parameter,
+            choices=tuple(map(str.capitalize, WIDGET_TEXT_MAP.keys())),
+            prop="kernel",
+            parameter=self.parameter.descriptors["kernel"],
+        )
+        self.add_widget(self._type_combo, "kernel", add_to_layout=False)
+        self._type_combo._field.currentTextChanged.connect(self.change_function)
+        self._layout.addWidget(self._type_combo._base, 0, 1)
+
+        self.change_function()
         self.updateValue()
 
-    def configure_using_default(self):
-        """This is too complex to have a default value"""
+    def set_value(self, value: tuple[str, dict]) -> None:
+        self.change_function(*value)
 
-    def set_field_values(self, new_params: dict):
-        np = list(new_params.items())
-        for index in range(5):
-            try:
-                kv = np[index]
-                self._fields[index].setEnabled(True)
-                self._labels[index].setText(str(kv[0]))
-                self._fields[index].setText(str(kv[1]))
-                self._fields[index].setPlaceholderText(str(kv[1]))
-                self._defaults[index] = float(kv[1])
-            except IndexError:
-                self._labels[index].setText("")
-                self._fields[index].setText("")
-                self._fields[index].setPlaceholderText("N/A")
-                self._fields[index].setEnabled(False)
-                self._defaults[index] = 0.0
+    def set_field_values(self, new_params: dict) -> None:
+        for key, val in new_params.items():
+            self._widgets_in_layout[f"param_{key}"].setValue(val)
 
-    @Slot(str)
-    def change_function(self, function: str, optional_parameters: dict | None = None):
-        # need to disconnect textChanged otherwise updateValue will
-        # be called multiple times as the field data will be changed
-        # during the function change
-        [field.textChanged.disconnect() for field in self._fields]
-        if optional_parameters is None:
-            if function in init_parameters:
-                new_params = init_parameters[function]
-            else:
-                new_params = init_parameters[widget_text_map[function]]
-        else:
-            new_params = optional_parameters
-
-        with block_signals(self._type_combo):
-            if function in widget_text_map:
-                self._type_combo.setCurrentText(widget_text_map[function])
-            elif function in reverse_text_map:
-                self._type_combo.setCurrentText(reverse_text_map[function])
-            else:
-                self._type_combo.setCurrentText(function)
-
-        self.set_field_values(new_params)
-        self.updateValue()
-        [field.textChanged.connect(self.updateValue) for field in self._fields]
-
-    def get_widget_value(self):
-        function = widget_text_map[self._type_combo.currentText()]
-        params = {}
-        for index in range(5):
-            key = self._labels[index].text()
-            if len(key) > 0:
-                try:
-                    value = float(self._fields[index].text())
-                except ValueError:
-                    value = self._defaults[index]
-                else:
-                    self._fields[index].setStyleSheet("")
-                params[key] = value
-        self.helper._panel.update_fields((function, params))
-        return (function, params)
-
-    @Slot(dict)
-    def set_parameters_from_dialog(self, input: dict):
-        peak_function = input.get("function")
-        if peak_function is None:
-            return
-        self._type_combo.setCurrentText(peak_function)
-        temp_parameters = init_parameters[peak_function]
-        for key in temp_parameters:
-            temp_parameters[key] = input.get(key, 0.0)
-        self.set_field_values(temp_parameters)
+    @property
+    def param_widgets(self) -> dict[str, FloatWidget]:
+        return {
+            key: val
+            for key, val in self._raw_widgets.items()
+            if key.startswith("param_")
+        }
 
     @Slot()
-    def helper_dialog(self):
+    def change_function(
+        self,
+        new_kernel: str | None = None,
+        new_parameters: dict[str, float] | None = None,
+    ) -> None:
+        if new_kernel is not None:
+            self._type_combo._field.currentTextChanged.disconnect()
+            self.parameter.kernel = new_kernel
+            self._type_combo._field.setCurrentText(new_kernel)
+            self._type_combo._field.currentTextChanged.connect(self.change_function)
+
+        kernel = self.parameter.kernel
+
+        for key in self.param_widgets:
+            self.remove_widget(key)
+
+        for i, key in enumerate(kernel.parameters):
+            widget = FloatWidget(
+                parent=self._base,
+                base_type="QWidget",
+                label=key,
+                tooltip=f"Set the {key} parameter.",
+                configurable=self.parameter.kernel,
+                prop=key,
+                parameter=self.parameter.kernel.descriptors[key],
+            )
+            self.add_widget(widget, f"param_{key}", add_to_layout=False)
+
+            row, col = divmod(i, 2)
+            self._layout.addWidget(widget._base, row + 1, col)
+
+        if new_parameters:
+            for key, val in new_parameters.items():
+                self.param_widgets[f"param_{key}"]._field.setValue(val)
+
+    def get_widget_value(self) -> dict[str, float]:
+        function = type(self.parameter.kernel).__name__
+        params = self.parameter.kernel.configuration
+        self.helper._panel.update_fields((function, params))
+        return params
+
+    @Slot(dict)
+    def set_parameters_from_dialog(self, inp: dict) -> None:
+        peak_function = inp.pop("function", None)
+        if peak_function is None:
+            return
+
+        self.change_function(new_kernel=peak_function, new_parameters=inp)
+
+    @Slot()
+    def helper_dialog(self) -> None:
         if self.helper.isVisible():
             geometry = self.helper.saveGeometry()
             self.helper.previous_geometry = geometry
             self.helper.close()
-        else:
-            if hasattr(self.helper, "previous_geometry"):
-                self.helper.restoreGeometry(self.helper.previous_geometry)
-            self.helper.show()
+            return
+
+        if hasattr(self.helper, "previous_geometry"):
+            self.helper.restoreGeometry(self.helper.previous_geometry)
+        self.helper.show()

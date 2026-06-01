@@ -15,86 +15,91 @@
 #
 from __future__ import annotations
 
-from qtpy.QtGui import QIntValidator
-from qtpy.QtWidgets import QLabel, QLineEdit
+import traceback
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
+from qtpy.QtGui import QIntValidator
+from qtpy.QtWidgets import QLabel, QSpinBox
+
+from MDANSE.Framework.Parameters import FrameSelect
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.Utils import block_signals
 
 
-class FramesWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
+class FramesWidget(WidgetBase[FrameSelect]):
+    def __init__(
+        self,
+        *args,
+        layout_type: None = None,
+        **kwargs,
+    ):
         super().__init__(*args, layout_type="QGridLayout", **kwargs)
-        trajectory_configurator = kwargs.get("trajectory_configurator")
-        if trajectory_configurator is not None:
-            try:
-                self._last_frame = trajectory_configurator["length"]
-            except Exception:
-                self._last_frame = -1
-        else:
-            self._last_frame = -1
 
-        self.build_fields()
+        self._labels = []
+        self._fields = []
+
+        labels = ("First frame", "Last frame", "in steps of")
+
+        tooltip_text = self._tooltip or "Frames to use (inclusive)."
+
+        for i, label_name in enumerate(labels):
+            label = QLabel(label_name, self._base)
+            field = QSpinBox(self._base)
+
+            field.setToolTip(tooltip_text)
+            field.valueChanged.connect(self.updateValue)
+
+            self._labels.append(label)
+            self._fields.append(field)
+
+            self._layout.addWidget(label, 0, 2 * i)
+            self._layout.addWidget(field, 0, 2 * i + 1)
+
+        self.trajectory_changed()
         self.default_labels()
-        for field in self._fields:
-            field.setToolTip(self._tooltip)
         self.update_labels()
+        self.toggle_widgets()
         self.updateValue()
 
-    def build_fields(self):
-        labels = [
-            QLabel("First frame", self._base),
-            QLabel("Last frame", self._base),
-            QLabel("in steps of", self._base),
-        ]
-        fields = [
-            QLineEdit("0", self._base),
-            QLineEdit(str(self._last_frame), self._base),
-            QLineEdit("1", self._base),
-        ]
-        placeholders = ["0", str(self._last_frame), "1"]
-        validators = [QIntValidator(parent_field) for parent_field in fields]
-        for field_num in range(3):
-            self._layout.addWidget(labels[field_num], 0, 2 * field_num)
-            self._layout.addWidget(fields[field_num], 0, 2 * field_num + 1)
-            fields[field_num].setValidator(validators[field_num])
-            fields[field_num].textChanged.connect(self.updateValue)
-            fields[field_num].setPlaceholderText(placeholders[field_num])
-        self._fields = fields
-        self._validators = validators
-        self._default_values = placeholders
+    def set_value(self, value: Sequence[int]) -> None:
+        if len(value) != 3:
+            raise ValueError(f"Expected start, stop, step, received: {len(value)}.")
+
+        with block_signals(self):
+            for field, elem in zip(self._fields, value, strict=True):
+                field.setValue(elem)
+
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "FramesWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = (
                 "Trajectory frames to be used, given as (First, Last, StepSize)"
             )
 
-    def value_from_configurator(self):
-        if self._last_frame > 0:
-            for val in self._validators:
-                val.setBottom(-abs(self._last_frame))
-                val.setTop(abs(self._last_frame))
-        elif self._configurator.check_dependencies():
-            minval, maxval = self._configurator.mini, self._configurator.maxi
-            LOG.info(f"Configurator min/max: {minval}, {maxval}")
-            for val in self._validators:
-                val.setBottom(-abs(maxval))
-                val.setTop(abs(maxval))
+    def trajectory_changed(self) -> None:
+        mini, maxi = self.ranges
+        maxi -= 2
+        defaults = [
+            default if default is not None else std_default
+            for default, std_default in zip((mini, maxi, 1), (0, -1, 1), strict=True)
+        ]
+
+        for field, val in zip(self._fields, defaults, strict=True):
+            field.setValue(val)
+            limit = maxi if maxi is not None else 0
+            field.setEnabled(True)
+            field.setRange(-limit, limit)
 
     def get_widget_value(self):
-        result = []
-        for n, field in enumerate(self._fields):
-            strval = field.text()
-            try:
-                val = int(strval)
-            except Exception:
-                val = int(self._default_values[n])
-            result.append(val)
-        return result
+        values = [field.value() for field in self._fields]
+        values[1] += 1  # Include last
+        return tuple(values)

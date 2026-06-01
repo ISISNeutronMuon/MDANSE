@@ -17,14 +17,16 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from collections.abc import Iterable, Iterator
-from pathlib import Path
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
 from MDANSE.Framework.Parsers.Parser import Parser
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
+    from pathlib import Path
 
 
 class PDBAtom(NamedTuple):
@@ -150,7 +152,9 @@ class PDBFile(Parser):
                         )
                     )
 
-    def build_chemical_system(self, aliases) -> ChemicalSystem:
+    def build_chemical_system(
+        self, aliases: dict[str, dict[str, str]]
+    ) -> ChemicalSystem:
         """
         Build a :class:`~MDANSE.Chemistry.ChemicalSystem.ChemicalSystem`.
 

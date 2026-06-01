@@ -21,11 +21,23 @@ from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 
-from MDANSE.Framework.AtomGrouping.grouping import (
-    pair_labels,
-    update_pair_results,
-)
+from MDANSE.Framework.AtomGrouping.grouping import pair_labels, update_pair_results
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    FrameSelect,
+    GroupingLevel,
+    MDANSETrajectory,
+    OutputFile,
+    RangeCellCutoff,
+    RunningMode,
+    Weights,
+)
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -55,55 +67,35 @@ class CoordinationNumber(DistanceHistogram):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        transmutation="atom_transmutation",
+        grouping="grouping_level",
     )
-    settings["r_values"] = (
-        "DistHistCutoffConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "dependencies": {"trajectory": "trajectory"},
-        },
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    r_values = RangeCellCutoff(
+        label="r values (nm)",
+        include_last=True,
+        minimum=0.0,
+        depends={"trajectory": "trajectory"},
     )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
-
-        npoints = len(self.configuration["r_values"]["mid_points"])
+        mid_points = self.r_values.mid_points
+        npoints = len(mid_points)
 
         self._outputData.add(
             "cn/axes/r",
             "LineOutputVariable",
-            self.configuration["r_values"]["mid_points"],
+            mid_points,
             units="nm",
         )
 
@@ -137,27 +129,24 @@ class CoordinationNumber(DistanceHistogram):
                     units="au",
                 )
 
-        nFrames = self.configuration["frames"]["number"]
+        n_frames = len(self.frames)
+        density_factor = 4.0 * np.pi * mid_points
+        shell_surfaces = density_factor * mid_points
+        shell_volumes = shell_surfaces * self.r_values.step
 
-        densityFactor = 4.0 * np.pi * self.configuration["r_values"]["mid_points"]
+        self.average_density *= 4.0 * np.pi / n_frames
 
-        shellSurfaces = densityFactor * self.configuration["r_values"]["mid_points"]
-
-        shellVolumes = shellSurfaces * self.configuration["r_values"]["step"]
-
-        self.averageDensity *= 4.0 * np.pi / nFrames
-
-        r2 = self.configuration["r_values"]["mid_points"] ** 2
-        dr = self.configuration["r_values"]["step"]
+        r2 = mid_points**2
+        dr = self.r_values.step
 
         for k in self._concentrations:
-            self._concentrations[k] /= nFrames
+            self._concentrations[k] /= n_frames
 
         nAtomsPerElement = self.trajectory.get_natoms()
 
         # symmetrize the data
         for (idi, i), (idj, j) in it.combinations_with_replacement(
-            enumerate(self.selectedElements), 2
+            enumerate(self.selected_elements), 2
         ):
             if i == j:
                 continue
@@ -193,14 +182,14 @@ class CoordinationNumber(DistanceHistogram):
             ni = nAtomsPerElement[label_i]
             nj = nAtomsPerElement[label_j]
 
-            idi = self.selectedElements.index(label_i)
-            idj = self.selectedElements.index(label_j)
+            idi = self.selected_elements.index(label_i)
+            idj = self.selected_elements.index(label_j)
 
             nij = ni**2 / 2.0 if label_i == label_j else ni * nj
 
-            fact = 2 * nij * nFrames * shellVolumes
+            fact = 2 * nij * n_frames * shell_volumes
 
-            rho_j = self.averageDensity * self._concentrations[label_j]
+            rho_j = self.average_density * self._concentrations[label_j]
 
             self.h_total[idi, idj, :] /= fact
             cnTotal = np.add.accumulate(self.h_total[idi, idj, :] * r2) * dr
@@ -218,8 +207,8 @@ class CoordinationNumber(DistanceHistogram):
         )
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

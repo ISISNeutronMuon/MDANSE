@@ -15,9 +15,19 @@
 #
 from __future__ import annotations
 
+import collections
+
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    DynamicSingleChoice,
+    FrameSelect,
+    MDANSETrajectory,
+    OutputFile,
+    RunningMode,
+    SingleChoice,
+)
 
 
 class AreaPerMoleculeError(Exception):
@@ -44,35 +54,28 @@ class AreaPerMolecule(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["axis"] = (
-        "SingleChoiceConfigurator",
-        {
-            "label": "Surface defined by unit cell vectors",
-            "choices": ["ab", "bc", "ac"],
-            "default": "ab",
-        },
-    )
-    settings["molecule_name"] = (
-        "MoleculeSelectionConfigurator",
-        {
-            "default": "",
-            "dependencies": {"trajectory": "trajectory"},
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
-
     _AXIS_MAP = {
         "ab": (0, 1),
         "bc": (1, 2),
         "ac": (0, 2),
     }
+
+    trajectory = MDANSETrajectory()
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    axis = SingleChoice[str, str](
+        choices=_AXIS_MAP.keys(),
+        default="ab",
+        label="Surface defined by unit cell vectors",
+    )
+    molecule_name = DynamicSingleChoice[str, str](
+        choices="chemical_system._clusters.keys()", depends={"choices": "trajectory"}
+    )
+    output_files = OutputFile()
+    running_mode = RunningMode()
+
+    @property
+    def axis_indices(self):
+        return self._AXIS_MAP[self.axis]
 
     def initialize(self):
         """
@@ -81,34 +84,29 @@ class AreaPerMolecule(IJob):
         super().initialize()
 
         # This will define the number of steps of the analysis. MUST be defined for all analysis.
-        self.numberOfSteps = self.configuration["frames"]["number"]
-
-        # Extract the indices corresponding to the axis selection (a=0,b=1,c=2).
-        axis_labels = self.configuration["axis"]["value"]
-        self._axisIndexes = self._AXIS_MAP[axis_labels]
+        self.numberOfSteps = len(self.frames)
 
         # The number of molecules that match the input name. Must be > 0.
         self._nMolecules = len(
-            self.trajectory.chemical_system._clusters[
-                self.configuration["molecule_name"]["value"]
-            ]
+            self.trajectory.chemical_system._clusters[self.molecule_name]
         )
+
         if self._nMolecules == 0:
             raise AreaPerMoleculeError(
-                f"No molecule matches {self.configuration['molecule_name']['value']!r} name."
+                f"No molecule matches {self.molecule_name!r} name."
             )
 
         self._outputData.add(
             "apm/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["time"],
+            self.frames.times,
             units="ps",
         )
 
         self._outputData.add(
             "apm/area_per_molecule",
             "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
+            (len(self.frames),),
             axis="apm/axes/time",
             units="1/nm2",
             main_result=True,
@@ -126,22 +124,22 @@ class AreaPerMolecule(IJob):
         """
 
         # Get the frame index
-        frame_index = self.configuration["frames"]["value"][index]
+        frame_index = self.frames[index].ind
 
         configuration = self.trajectory.configuration(frame_index)
 
         try:
             unit_cell = configuration.unit_cell._unit_cell
             normalVect = np.cross(
-                unit_cell[self._axisIndexes[0]], unit_cell[self._axisIndexes[1]]
+                unit_cell[self.axis_indices[0]], unit_cell[self.axis_indices[1]]
             )
-        except Exception:
+        except Exception as err:
             raise AreaPerMoleculeError(
                 "The unit cell must be defined for AreaPerMolecule. "
                 "You can add a box using TrajectoryEditor."
-            ) from None
+            ) from err
 
-        apm = np.sqrt(np.sum(normalVect**2)) / self._nMolecules
+        apm = np.linalg.norm(normalVect) / self._nMolecules
 
         return index, apm
 
@@ -158,8 +156,8 @@ class AreaPerMolecule(IJob):
         """
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.root,
+            self.output_files.out_format,
             str(self),
             self,
         )

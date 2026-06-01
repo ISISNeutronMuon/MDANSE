@@ -28,10 +28,11 @@ ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.enabled}
 
 DATA_DIR = Path(__file__).parents[3] / "MDANSE/Tests/UnitTests/Converted"
 
-
-NeutronDynamicTotalStructureFactor.settings["dcsf_input_file"][1]["default"] = Path(__file__).parent / "dcsf.mda"
-NeutronDynamicTotalStructureFactor.settings["disf_input_file"][1]["default"] = Path(__file__).parent / "disf.mda"
-StructureFactorFromScatteringFunction.settings["dcsf_input_file"][1]["default"] = Path(__file__).parent / "dcsf.mda"
+@pytest.fixture
+def patch_paths(monkeypatch):
+    monkeypatch.setattr(NeutronDynamicTotalStructureFactor._get_descriptors()["dcsf_input_file"], "default", Path(__file__).parent / "dcsf.mda")
+    monkeypatch.setattr(NeutronDynamicTotalStructureFactor._get_descriptors()["disf_input_file"], "default", Path(__file__).parent / "disf.mda")
+    monkeypatch.setattr(StructureFactorFromScatteringFunction._get_descriptors()["dcsf_input_file"], "default", Path(__file__).parent / "dcsf.mda")
 
 @pytest.fixture
 def trajectory():

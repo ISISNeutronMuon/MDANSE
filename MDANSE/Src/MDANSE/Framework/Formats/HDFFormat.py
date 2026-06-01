@@ -117,13 +117,13 @@ def write_metadata(job: IJob, output_file: h5py.File):
         dtype=string_dt,
     )
 
-    inputs = job.output_configuration()
+    inputs = job.configuration
 
     if inputs is not None:
         LOG.info(inputs)
         dgroup = meta.create_group("inputs")
         for key, value in inputs.items():
-            dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
+            dgroup.create_dataset(key, (1,), data=str(value), dtype=string_dt)
 
 
 class HDFFormat(IFormat):
@@ -208,17 +208,23 @@ class HDFFormat(IFormat):
                 dtype=string_dt,
             )
             meta.create_dataset(
+                "file_type",
+                (1,),
+                data=extension.strip("."),
+                dtype=string_dt,
+            )
+            meta.create_dataset(
                 "MDANSE_version",
                 (1,),
                 data=MDANSE.__version__,
                 dtype=string_dt,
             )
 
-            if inputs := run_instance.output_configuration():
+            if inputs := run_instance.configuration:
                 LOG.info(inputs)
                 dgroup = meta.create_group("inputs")
                 for key, value in inputs.items():
-                    dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
+                    dgroup.create_dataset(key, (1,), data=str(value), dtype=string_dt)
 
         # Loop over the OutputVariable instances to write.
 

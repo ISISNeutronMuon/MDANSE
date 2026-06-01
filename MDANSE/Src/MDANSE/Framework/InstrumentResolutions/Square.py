@@ -20,23 +20,24 @@ import numpy as np
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )
+from MDANSE.Framework.Parameters import Float
 
 
 class Square(IInstrumentResolution):
     """Defines an instrument resolution with a square response"""
 
-    settings = {}
-    settings["mu"] = ("FloatConfigurator", {"default": 0.0})
-    settings["sigma"] = ("FloatConfigurator", {"default": 1.0})
+    mu = Float(default=0.0)
+    sigma = Float(default=1.0)
 
     def set_kernel(self, omegas, dt):
-        mu = self._configuration["mu"]["value"]
-        sigma = self._configuration["sigma"]["value"]
-
         self._omegaWindow = (
             2.0
             * np.pi
-            * np.where((np.abs(omegas - mu) - sigma) > 0, 0.0, 1.0 / (2.0 * sigma))
+            * np.where(
+                (np.abs(omegas - self.mu) - self.sigma) > 0,
+                0.0,
+                1.0 / (2.0 * self.sigma),
+            )
         )
 
         self._timeWindow = self.apply_fft(self._omegaWindow, dt)

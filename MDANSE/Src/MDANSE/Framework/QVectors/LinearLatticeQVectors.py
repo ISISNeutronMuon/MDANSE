@@ -21,6 +21,7 @@ from functools import partial
 import numpy as np
 from scipy.spatial import KDTree
 
+from MDANSE.Framework.Parameters import Boolean, Float, Integer, Range, Vector
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors, fpsampling
 from MDANSE.Framework.QVectors.LinearQVectors import linear_vectors
 
@@ -39,42 +40,24 @@ class LinearLatticeQVectors(LatticeQVectors):
     over all vectors in the group, which is still called a shell.
     """
 
-    settings = {}
-    settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
-    settings["shells"] = (
-        "RangeConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "default": (0.0, 5.0, 1.0),
-        },
-    )
-    settings["n_samples"] = ("IntegerConfigurator", {"mini": 1, "default": 50000})
-    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 100})
-    settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
-    settings["force_equal_weights"] = ("BooleanConfigurator", {"default": False})
-    settings["axis"] = (
-        "VectorConfigurator",
-        {"normalize": True, "notNull": True, "valueType": float, "default": [1, 0, 0]},
-    )
+    seed = Integer(minimum=0, default=0)
+    shells = Range[float](minimum=0.0, default=(0.0, 5.0, 1.0), include_last=True)
+    n_samples = Integer(minimum=1, default=50_000)
+    n_vectors = Integer(minimum=1, default=100)
+    width = Float(minimum=1e-6, default=1.0)
+    force_equal_weights = Boolean()
+    axis = Vector(non_zero=True, normalise=True, default=(1.0, 0.0, 0.0))
 
     def _generate(self):
-        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
-
-        width = self._configuration["width"]["value"]
-        axis = self._configuration["axis"]["vector"].array
-
-        nvecs_per_shell = self._configuration["n_vectors"]["value"]
-        n_samples = self._configuration["n_samples"]["value"]
+        rng = np.random.default_rng(self.seed or None)
 
         if self._status is not None:
-            self._status.start(self._configuration["shells"]["number"])
+            self._status.start(len(self.shells))
 
-        self._configuration["q_vectors"] = {}
+        self.q_vectors = {}
 
-        for q in self._configuration["shells"]["value"]:
-            samples = linear_vectors(q, width, n_samples, axis, rng)
+        for q in self.shells:
+            samples = linear_vectors(q, self.width, self.n_samples, self.axis, rng)
             lattice_hkl_vectors, _ = self.lattice_vectors_with_weights(
                 samples,
                 self._unit_cell,
@@ -83,11 +66,12 @@ class LinearLatticeQVectors(LatticeQVectors):
 
             selection = self.vectors_within_limits(
                 q_vectors,
-                q_min=q - 0.5 * width,
-                q_max=q + 0.5 * width,
+                q_min=q - 0.5 * self.width,
+                q_max=q + 0.5 * self.width,
             )
+
             if not np.any(selection):
-                self._configuration["q_vectors"][q] = None
+                self.q_vectors[q] = None
                 continue
 
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
@@ -96,23 +80,23 @@ class LinearLatticeQVectors(LatticeQVectors):
 
             selection = fpsampling(
                 q_vectors.T,
-                nvecs_per_shell,
-                partial(linear_vectors, q=1, q_width=0, n_vecs=1, axis=axis, rng=rng),
-                rng,
+                self.n_vectors,
+                partial(linear_vectors, q=1, q_width=0, n_vecs=1, axis=self.axis, rng=rng),
+                rng=rng,
             )
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
 
-            if self._configuration["force_equal_weights"]["value"]:
+            if self.force_equal_weights:
                 weights = np.ones(q_vectors.shape[1])
             else:
-                samples = linear_vectors(q, width, n_samples, axis, rng)
+                samples = linear_vectors(q, self.width, self.n_samples, self.axis, rng)
                 tree = KDTree(q_vectors.T)
                 _, indices = tree.query(samples.T)
                 weights = np.bincount(indices, minlength=q_vectors.shape[1])
-                weights = q_vectors.shape[1] * weights / n_samples
+                weights = q_vectors.shape[1] * weights / self.n_samples
 
-            self._configuration["q_vectors"][q] = {
+            self.q_vectors[q] = {
                 "q_vectors": q_vectors,
                 "n_q_vectors": q_vectors.shape[1],
                 "n_q_found": n_found,
@@ -120,6 +104,7 @@ class LinearLatticeQVectors(LatticeQVectors):
                 "q": q,
                 "hkls": lattice_hkl_vectors,
             }
+
             if self._status is not None:
                 if self._status.is_stopped():
                     return

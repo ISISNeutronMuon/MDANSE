@@ -1,8 +1,12 @@
-import os
-import pytest
-import tempfile
-from MDANSE.Framework.Jobs.IJob import IJob
+from __future__ import annotations
 
+import os
+import tempfile
+
+import pytest
+
+from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 
 ALL_JOBS = [
     "AreaPerMolecule",
@@ -40,11 +44,13 @@ ALL_JOBS = [
     "VanHoveFunctionSelf",
     "VelocityCorrelationFunction",
     "Voronoi",
-    "Converter",
     "CoordinationNumber",
     "PairDistributionFunction",
     "StaticStructureFactor",
     "XRayStaticStructureFactor",
+    "Infrared",
+    # Converter
+    "Converter",
     "ASE",
     "CASTEP",
     "DCD",
@@ -60,7 +66,24 @@ ALL_JOBS = [
     "NAMD",
     "XPLOR",
     "DFTB",
-    "Infrared",
+]
+
+CONVERTER_JOBS = [
+    "ASE",
+    "CASTEP",
+    "DCD",
+    "CP2K",
+    "Forcite",
+    "DL_POLY",
+    "Gromacs",
+    "LAMMPS",
+    "MDAnalysis",
+    "MDTraj",
+    "VASP",
+    "CHARMM",
+    "NAMD",
+    "XPLOR",
+    "DFTB",
 ]
 
 
@@ -74,10 +97,12 @@ def test_indirect_subclasses_creates_list_of_all_possible_jobs():
     assert set(ALL_JOBS) == set(IJob.indirect_subclasses())
 
 
+def test_indirect_subclasses_creates_list_of_all_possible_converters():
+    assert set(CONVERTER_JOBS) == set(Converter.indirect_subclasses())
+
+
 @pytest.mark.parametrize("jobname", ALL_JOBS)
-def test_create_template_with_correct_jobname(jobname):
-    temp_name = tempfile.mktemp()
+def test_create_template_with_correct_jobname(tmp_path, jobname):
+    temp_name = tmp_path / jobname
     IJob.create(jobname).save(temp_name)
-    assert os.path.exists(temp_name)
-    assert os.path.isfile(temp_name)
-    os.remove(temp_name)
+    assert temp_name.is_file()

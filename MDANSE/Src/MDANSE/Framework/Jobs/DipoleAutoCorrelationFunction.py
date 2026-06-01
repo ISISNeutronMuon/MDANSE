@@ -19,6 +19,15 @@ import numpy as np
 from scipy.signal import correlate
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    CorrelationWindow,
+    DynamicSingleChoice,
+    FrameSelect,
+    MDANSETrajectory,
+    OutputFile,
+    PartialCharge,
+    RunningMode,
+)
 from MDANSE.Mathematics.Geometry import center_of_mass
 
 
@@ -41,40 +50,25 @@ class DipoleAutoCorrelationFunction(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory()
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    molecule_name = DynamicSingleChoice[str, str](
+        choices="chemical_system._clusters.keys()",
+        depends={"choices": "trajectory"},
+        label="Molecule name",
     )
-    settings["molecule_name"] = (
-        "MoleculeSelectionConfigurator",
-        {
-            "default": "",
-            "dependencies": {"trajectory": "trajectory"},
-        },
-    )
-    settings["atom_charges"] = (
-        "PartialChargeConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory"},
-            "default": {},
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    atom_charges = PartialCharge(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        self.chemical_system = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system
+        self.chemical_system = self.trajectory.chemical_system
 
-        self.molecules = self.chemical_system._clusters[
-            self.configuration["molecule_name"]["value"]
-        ]
+        self.molecules = self.chemical_system._clusters[self.molecule_name]
 
         self.numberOfSteps = len(self.molecules)
 
@@ -82,14 +76,14 @@ class DipoleAutoCorrelationFunction(IJob):
         self._outputData.add(
             "dacf/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.frame_window.duration,
             units="ps",
         )
 
         self._outputData.add(
             "dacf/dacf",
             "LineOutputVariable",
-            (self.configuration["frames"]["n_frames"],),
+            (self.frame_window.n_frames,),
             axis="dacf/axes/time",
             main_result=True,
         )
@@ -109,14 +103,12 @@ class DipoleAutoCorrelationFunction(IJob):
             auto-correlation function for a molecule.
         """
         molecule = self.molecules[index]
-        dipoles = np.zeros(
-            (self.configuration["frames"]["number"], 3), dtype=np.float64
-        )
+        dipoles = np.zeros((len(self.frames), 3), dtype=np.float64)
         for i, frame_index in enumerate(
             range(
-                self.configuration["frames"]["first"],
-                self.configuration["frames"]["last"] + 1,
-                self.configuration["frames"]["step"],
+                self.frames.index_start,
+                self.frames.index_stop + 1,
+                self.frames.index_step,
             )
         ):
             configuration = self.trajectory.configuration(frame_index)
@@ -133,14 +125,14 @@ class DipoleAutoCorrelationFunction(IJob):
 
             for idx in molecule:
                 try:
-                    q = self.configuration["atom_charges"]["charges"][idx]
+                    q = self.atom_charges[idx]
                 except KeyError:
                     q = charges[idx]
                 dipoles[i] += q * (
                     contiguous_configuration["coordinates"][idx, :] - com
                 )
 
-        n_configs = self.configuration["frames"]["n_configs"]
+        n_configs = self.frame_window.n_configs
         mol_dacf = correlate(dipoles, dipoles[:n_configs], mode="valid") / (
             3 * n_configs
         )
@@ -157,8 +149,8 @@ class DipoleAutoCorrelationFunction(IJob):
         self._outputData["dacf/dacf"] /= self.numberOfSteps
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.root,
+            self.output_files.out_format,
             str(self),
             self,
         )

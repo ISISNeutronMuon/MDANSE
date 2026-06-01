@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import pytest
-from MDANSE.MolecularDynamics.Trajectory import \
-    Trajectory
-from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import \
-    IInstrumentResolution
-from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
+
+from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
+    IInstrumentResolution,
+)
+from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
@@ -14,6 +17,7 @@ short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 def trajectory():
     trajectory = Trajectory(short_traj)
     yield trajectory
+
 
 @pytest.mark.parametrize("resolution_generator", IInstrumentResolution.subclasses())
 def test_disf(tmp_path, trajectory, resolution_generator):
@@ -37,9 +41,7 @@ def test_disf(tmp_path, trajectory, resolution_generator):
 
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
     instance = IInstrumentResolution.create(resolution_generator)
-    resolution_defaults = {
-        name: value[1]["default"] for name, value in instance.settings.items()
-    }
+    resolution_defaults = instance._get_default_parameters()
 
     print(resolution_generator)
     print(resolution_defaults)
@@ -80,9 +82,7 @@ def test_dos(generate_benchmarks, tmp_path, trajectory, resolution_generator):
     parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
 
     instance = IInstrumentResolution.create(resolution_generator)
-    resolution_defaults = {
-        name: value[1]["default"] for name, value in instance.settings.items()
-    }
+    resolution_defaults = instance._get_default_parameters()
 
     print(resolution_generator)
     print(resolution_defaults)
@@ -102,17 +102,21 @@ def test_dos(generate_benchmarks, tmp_path, trajectory, resolution_generator):
     assert log_file.is_file()
     assert text_file.is_file()
 
-    keys = [f"{fn}/{comp}/{elem}"
-            for fn in ("dos", "vcf")
-            for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz", "zz")
-            for elem in ("Cu", "S", "Sb", "total")]
+    keys = [
+        f"{fn}/{comp}/{elem}"
+        for fn in ("dos", "vcf")
+        for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz", "zz")
+        for elem in ("Cu", "S", "Sb", "total")
+    ]
 
-    compare_hdf5(out_file,
-                 result_file,
-                 keys,
-                 scale_result=True,
-                 scale_benchmark=True,
-                 compare_axis=True)
+    compare_hdf5(
+        out_file,
+        result_file,
+        keys,
+        scale_result=True,
+        scale_benchmark=True,
+        compare_axis=True,
+    )
 
 
 def test_dos_is_reproducible(tmp_path, trajectory):
@@ -136,9 +140,7 @@ def test_dos_is_reproducible(tmp_path, trajectory):
         parameters["output_files"] = (temp_name, ("MDAFormat", "TextFormat"), "INFO")
 
         instance = IInstrumentResolution.create(resolution_generator)
-        resolution_defaults = {
-            name: value[1]["default"] for name, value in instance.settings.items()
-        }
+        resolution_defaults = instance._get_default_parameters()
 
         print(resolution_generator)
         print(resolution_defaults)
@@ -151,20 +153,26 @@ def test_dos_is_reproducible(tmp_path, trajectory):
         disf = IJob.create("DensityOfStates")
         disf.run(parameters, status=True)
 
-    keys = [f"{fn}/{comp}/{elem}"
-            for fn in ("dos", "vcf")
-            for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz", "zz")
-            for elem in ("Cu", "S", "Sb", "total")]
+    keys = [
+        f"{fn}/{comp}/{elem}"
+        for fn in ("dos", "vcf")
+        for comp in ("isotropic", "xx", "xy", "xz", "yy", "yz", "zz")
+        for elem in ("Cu", "S", "Sb", "total")
+    ]
 
-    compare_hdf5(temp_name1.with_suffix(".mda"),
-                 temp_name2.with_suffix(".mda"),
-                 keys,
-                 scale_result=True,
-                 scale_benchmark=True,
-                 compare_axis=True)
-    compare_hdf5(temp_name1.with_suffix(".mda"),
-                 temp_name3.with_suffix(".mda"),
-                 keys,
-                 scale_result=True,
-                 scale_benchmark=True,
-                 compare_axis=True)
+    compare_hdf5(
+        temp_name1.with_suffix(".mda"),
+        temp_name2.with_suffix(".mda"),
+        keys,
+        scale_result=True,
+        scale_benchmark=True,
+        compare_axis=True,
+    )
+    compare_hdf5(
+        temp_name1.with_suffix(".mda"),
+        temp_name3.with_suffix(".mda"),
+        keys,
+        scale_result=True,
+        scale_benchmark=True,
+        compare_axis=True,
+    )

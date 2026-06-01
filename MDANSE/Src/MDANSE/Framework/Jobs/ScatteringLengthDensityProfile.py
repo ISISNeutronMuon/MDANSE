@@ -18,6 +18,17 @@ from __future__ import annotations
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    Float,
+    FrameSelect,
+    GridStep,
+    MDANSETrajectory,
+    OutputFile,
+    RunningMode,
+    SingleChoice,
+)
 
 
 class ScatteringLengthDensityProfileError(Exception):
@@ -51,49 +62,30 @@ class ScatteringLengthDensityProfile(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        transmutation="atom_transmutation",
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    axis = SingleChoice(
+        choices=("a", "b", "c"),
+        default="c",
+        label="Profile axis",
+        tooltip="Calculate the profile along this vector of the unit cell.",
     )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-            }
+    dr = GridStep(
+        default=0.01,
+        minimum=1e-9,
+        depends={
+            "trajectory": "trajectory",
+            "axis": "axis",
+            "frames": "frames",
         },
     )
-    settings["axis"] = (
-        "SingleChoiceConfigurator",
-        {
-            "choices": ["a", "b", "c"],
-            "default": "c",
-            "label": "Profile axis",
-            "tooltip": "Calculate the profile along this vector of the unit cell",
-        },
-    )
-    settings["dr"] = (
-        "GridStepConfigurator",
-        {
-            "default": 0.01,
-            "mini": 1.0e-9,
-            "dependencies": {
-                "trajectory": "trajectory",
-                "axis": "axis",
-                "frames": "frames",
-            },
-            "prediction_label": "bin centres along axis",
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """
@@ -102,11 +94,9 @@ class ScatteringLengthDensityProfile(IJob):
         super().initialize()
 
         # The number of steps of the analysis.
-        self.numberOfSteps = self.configuration["frames"]["number"]
+        self.numberOfSteps = len(self.frames)
 
-        self._dr = self.configuration["dr"]["value"]
-
-        self.axis_index = self.configuration["axis"]["index"]
+        self.axis_index = "abc".index(self.axis)
         trajectory = self.trajectory
         first_conf = self.trajectory.configuration()
 
@@ -118,8 +108,8 @@ class ScatteringLengthDensityProfile(IJob):
                 "You can add a box using TrajectoryEditor."
             ) from None
 
-        axis_length = np.sqrt(np.sum(axis**2))
-        self._n_bins = int(axis_length / self._dr) + 1
+        axis_length = np.linalg.norm(axis)
+        self._n_bins = int(axis_length / self.dr) + 1
 
         self._outputData.add(
             "dp/axes/r", "LineOutputVariable", (self._n_bins,), units="nm"
@@ -178,15 +168,16 @@ class ScatteringLengthDensityProfile(IJob):
         """
 
         # get the Frame index
-        frame_index = self.configuration["frames"]["value"][index]
+        frame_index = self.frames[index].ind
 
         conf = self.trajectory.configuration(frame_index)
 
         box_coords = conf.to_box_coordinates()
         box_coords = box_coords - np.floor(box_coords)
 
-        axis_index = self.configuration["axis"]["index"]
-        self._extent += np.linalg.norm(conf.unit_cell.direct[axis_index])
+        axis = conf.unit_cell.direct[self.axis_index, :]
+        axis_length = np.linalg.norm(axis)
+        self._extent += axis_length
 
         slice_volume_ang3 = 1e3 * conf.unit_cell.volume / self._n_bins
 
@@ -194,7 +185,7 @@ class ScatteringLengthDensityProfile(IJob):
 
         for element, indices in self._indices_per_element.items():
             dp_per_frame[element], _bins = np.histogram(
-                box_coords[indices, axis_index],
+                box_coords[indices, self.axis_index],
                 bins=self._n_bins,
                 range=(0.0, 1.0),
             )
@@ -246,8 +237,8 @@ class ScatteringLengthDensityProfile(IJob):
         self._outputData["sldp/sldp"] *= 1e6 / self.numberOfSteps
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

@@ -20,6 +20,13 @@ import numpy as np
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Parameters import (
+    AtomMapping,
+    Boolean,
+    OutputTrajectory,
+    PathParam,
+    to_class,
+)
 from MDANSE.Framework.Parsers import TrjFile, XTDFile
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
@@ -36,55 +43,31 @@ class Forcite(Converter):
 
     label = "Forcite"
 
-    settings = {}
-    settings["xtd_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "XTD files (*.xtd);;All files (*)",
-            "default": "INPUT_FILENAME.xtd",
-            "label": "Input XTD file",
-            "parser": XTDFile,
-        },
+    xtd_file = PathParam[XTDFile](
+        mode="r",
+        extensions={"XTD files": "*.xtd"},
+        label="Input XTD file",
+        on_set=to_class(XTDFile),
     )
-    settings["trj_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "TRJ files (*.trj);;All files (*)",
-            "default": "INPUT_FILENAME.trj",
-            "label": "Input TRJ file",
-            "parser": TrjFile,
-        },
+    trj_file = PathParam[TrjFile](
+        mode="r",
+        extensions={"TRJ files": "*.trj"},
+        label="Input TRJ file",
+        on_set=to_class(TrjFile),
     )
-    settings["atom_aliases"] = (
-        "AtomMappingConfigurator",
-        {
-            "default": "{}",
-            "label": "Atom mapping",
-            "dependencies": {"input_file": "xtd_file"},
-        },
+    atom_aliases = AtomMapping(
+        depends={"trajectory": "xtd_file"},
+        label="Atom mapping",
+        default={},
     )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates into box"},
-    )
-    settings["output_files"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "formats": ["MDTFormat"],
-            "root": "xtd_file",
-        },
-    )
+    fold = Boolean(label="Fold coordinates into box")
+    output_files = OutputTrajectory()
 
     def initialize(self):
         """
         Initialize the job.
         """
         super().initialize()
-
-        self.atom_aliases = self.configuration["atom_aliases"]["value"]
-
-        self.xtd_file = self.configuration["xtd_file"].instance
-        self.trj_file = self.configuration["trj_file"].instance
 
         self._chemical_system = ChemicalSystem()
         coordinates = np.vstack([atom.xyz for atom in self.xtd_file._atoms.values()])
@@ -118,7 +101,7 @@ class Forcite(Converter):
             )
 
         real_conf.fold_coordinates()
-        self.system = real_conf
+        self._configuration = real_conf
 
         # The number of steps of the analysis.
         self.numberOfSteps = self.trj_file.n_frames - 1
@@ -141,12 +124,12 @@ class Forcite(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["file"],
+            self.output_files.path,
             self._chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_files"]["dtype"],
-            chunking_limit=self.configuration["output_files"]["chunk_size"],
-            compression=self.configuration["output_files"]["compression"],
+            positions_dtype=self.output_files.dtype,
+            chunking_limit=self.output_files.chunk_size,
+            compression=self.output_files.compression,
             initial_charges=charges,
         )
 
@@ -166,12 +149,12 @@ class Forcite(Converter):
         frame = next(self.frames)
 
         # # If the universe is periodic set its shape with the current dimensions of the unit cell.
-        conf = self.system
+        conf = self._configuration
         conf["coordinates"][self.trj_file.movable_atoms, :] = frame["pos"]
         if conf.is_periodic:
             if self.trj_file.options.defcel:
                 conf.unit_cell = frame["cell"]
-            if self.configuration["fold"]["value"]:
+            if self.fold:
                 conf.fold_coordinates()
 
         if self._velocities is not None:

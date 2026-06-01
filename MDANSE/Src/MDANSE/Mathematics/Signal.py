@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import json
 from abc import ABC, abstractmethod
-from collections import namedtuple
 from copy import copy
 from enum import Enum
 from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, NamedTuple
@@ -27,6 +26,7 @@ import numpy.typing as npt
 from scipy import fftpack, signal
 
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
+from MDANSE.IO.IOUtils import UCEnum
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 if TYPE_CHECKING:
@@ -309,13 +309,15 @@ class Filter(ABC):
     # Conversion factor: cyclic frequency to angular frequency
     _cyclic_to_angular = 2 * np.pi
 
-    class FrequencyUnits(Enum):
+    default_settings: dict[str, Any]
+
+    class FrequencyUnits(UCEnum):
         """Enumeration for frequency unit type."""
 
         CYCLIC = "THz"
         ANGULAR = "rad/ps"
 
-    class FrequencyRangeMethod(Enum):
+    class FrequencyRangeMethod(UCEnum):
         """Enumeration for custom (externally provided) and FFT-derived frequency ranges for plotting the
         filter response.
 
@@ -324,7 +326,7 @@ class Filter(ABC):
         CUSTOM = 0
         FFT = 1
 
-    class Flags(Enum):
+    class Flags(UCEnum):
         """Enumeration for flags associated with usage of filters."""
 
         DIGITAL_ONLY = 0
@@ -1119,6 +1121,7 @@ FILTER_MAP: Final[dict[str, type[Filter]]] = {
 
 # Default filter type is Butterworth
 DEFAULT_FILTER: Final[type[Filter]] = Butterworth
+
 # Default simulation time step in picoseconds
 DEFAULT_TIME_STEP: Final[float] = 0.005
 

@@ -15,7 +15,9 @@
 #
 from __future__ import annotations
 
+from itertools import count
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
@@ -27,45 +29,52 @@ from qtpy.QtWidgets import (
     QSpinBox,
 )
 
-from MDANSE.Framework.Configurators.OutputTrajectoryConfigurator import (
-    OutputTrajectoryConfigurator,
-)
+from MDANSE.Framework.Parameters import OutputTrajectory
 from MDANSE.IO.IOUtils import unused_standard_output_filename
-from MDANSE.MLogging import LOG
+from MDANSE.MLogging import LOG, LogLevels
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
-dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
+if TYPE_CHECKING:
+    from MDANSE.Framework.Parameters import OutputTrajectory
 
 
-class OutputTrajectoryWidget(WidgetBase):
+class OutputTrajectoryWidget(WidgetBase[OutputTrajectory]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, layout_type="QGridLayout", **kwargs)
-        default_value = self._configurator.default
+
         try:
-            self._parent = kwargs.get("parent")
             self.default_path = Path(self._parent._default_path)
-        except (KeyError, AttributeError) as e:
-            self.default_path = Path(".").absolute()
-            LOG.error("%s in OutputTrajectoryWidget - can't get default path.", str(e))
+        except (KeyError, AttributeError) as err:
+            self.default_path = Path.cwd()
+            LOG.error(
+                "%s in %s - can't get default path.",
+                type(err).__name__,
+                type(self).__name__,
+            )
         else:
             self._session = self._parent._parent_tab._session
+
         try:
-            self._parent = kwargs.get("parent")
             jobname = str(self._parent._job_instance.label).replace(" ", "")
+
         except Exception:
-            jobname = "converted_trajectory"
+            jobname = self.parameter.descriptors["path"].default
             LOG.error("It was not possible to get the job name from the parent")
+
         self.default_path = self.default_path / "trajectory"
         guess_name = unused_standard_output_filename(
             self.default_path, jobname, extra_text="_trajectory", extension=".mdt"
         )
         self.file_association = "MDT trajectory (*.mdt)"
-        self._value = default_value
+
+        self._value = guess_name
         self._field = QLineEdit(str(guess_name), self._base)
         self._field.setPlaceholderText(str(guess_name))
+
         self.dtype_box = QComboBox(self._base)
         self.dtype_box.addItems(["float16", "float32", "float64"])
         self.dtype_box.setCurrentText("float64")
+
         self.chunk_box = QSpinBox(self._base)
         self.chunk_box.setMinimum(1)
         self.chunk_box.setMaximum(0xFFFF)
@@ -75,10 +84,13 @@ class OutputTrajectoryWidget(WidgetBase):
             "Specifies the size of a single chunk in the HDF5 file."
             "Affects the performance of reading and writing the trajectory."
         )
+
         self.compression_box = QComboBox(self._base)
-        self.compression_box.addItems(["none", "gzip"])
+        self.compression_box.addItems(
+            sorted(self.parameter.descriptors["compression"].choices)
+        )
         self.compression_box.setCurrentText("gzip")
-        # self.type_box.setCurrentText(default_value[1])
+
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)
         label = QLabel("Log file output:")
@@ -89,8 +101,10 @@ class OutputTrajectoryWidget(WidgetBase):
             "Specifies the size of a single chunk in the HDF5 file."
             "Affects the performance of reading and writing the trajectory."
         )
+
         self.logs_combo = QComboBox(self._base)
-        self.logs_combo.addItems(OutputTrajectoryConfigurator.log_options)
+        self.logs_combo.addItems([level.name for level in LogLevels])
+
         self._layout.addWidget(self._field, 0, 0)
         self._layout.addWidget(self.dtype_box, 0, 1)
         self._layout.addWidget(self.compression_box, 0, 2)
@@ -99,11 +113,14 @@ class OutputTrajectoryWidget(WidgetBase):
         self._layout.addWidget(self.logs_combo, 1, 1)
         self._layout.addWidget(label2, 1, 2)
         self._layout.addWidget(self.chunk_box, 1, 3)
-        self._default_value = default_value
+
+        self._default_value = guess_name
+
         self._field.textChanged.connect(self.updateValue)
         self.default_labels()
         self.update_labels()
         self.updateValue()
+
         if self._tooltip:
             tooltip_text = self._tooltip
         else:
@@ -119,9 +136,9 @@ class OutputTrajectoryWidget(WidgetBase):
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "OutputTrajectoryWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = (
                 "The output trajectory will be saved under this name,"
                 "with the selected floating point number precision"
@@ -135,24 +152,25 @@ class OutputTrajectoryWidget(WidgetBase):
         This will start a FileDialog, take the resulting path,
         and emit a signal to update the value show by the GUI.
         """
-        self.default_path = self._parent._default_path
         new_value = QFileDialog.getSaveFileName(
             self._base,  # the parent of the dialog
             "Save file",  # the label of the window
             str(self.default_path),  # the initial search path
             self.file_association,  # text string specifying the file name filter.
         )
-        if len(new_value[0]) > 0:
+
+        if new_value[0]:
             self._field.setText(str(Path(new_value[0])))
             self.updateValue()
 
-    def get_widget_value(self):
-        self._configurator.forbidden_files = self._session.reserved_filenames()
+    def set_parameter(self):
         filename = self._field.text()
-        if len(filename) < 1:
-            filename = self._default_value[0]
-        dtype = dtype_lookup[self.dtype_box.currentText()]
-        chunk_size = self.chunk_box.value()
-        compression = self.compression_box.currentText()
-        logs = self.logs_combo.currentText()
-        return (filename, dtype, chunk_size, compression, logs)
+
+        if not filename:
+            filename = self.default_value
+
+        self.parameter.path = filename
+        self.parameter.dtype = self.dtype_box.currentText()
+        self.parameter.chunk_size = self.chunk_box.value()
+        self.parameter.compression = self.compression_box.currentText()
+        self.parameter.log_level = self.logs_combo.currentText()

@@ -91,6 +91,14 @@ if TYPE_CHECKING:
         HDFInputFileConfigurator,
     )
 
+if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
+    from pathlib import Path
+
+    from MDANSE.Framework.Configurators.HDFInputFileConfigurator import (
+        HDFInputFileConfigurator,
+    )
+
 # Default maximum value for a float spinbox
 DEFAULT_SPINBOX_MAX_FLOAT: Final[float] = 1000.0
 

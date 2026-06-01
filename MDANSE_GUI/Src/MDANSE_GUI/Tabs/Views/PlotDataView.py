@@ -17,19 +17,20 @@ from __future__ import annotations
 
 import html
 import json
-from collections.abc import Generator
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import h5py
 import numpy as np
 import numpy.typing as npt
 from more_itertools import always_iterable
 from qtpy.QtCore import QAbstractItemModel, QModelIndex, QPoint, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QMouseEvent
 from qtpy.QtWidgets import QAbstractItemView, QMenu, QTreeView
 
-from MDANSE.Framework.Configurators.QVectorsConfigurator import QVectorsConfigurator
-from MDANSE.Framework.QVectors.IQVectors import WIDTH_NONZERO_LIMIT
+from MDANSE.Framework.Parameters import QVectors
+from MDANSE.Framework.QVectors.IQVectors import (
+    WIDTH_NONZERO_LIMIT,
+    IQVectors,
+)
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem, MDADataStructure
@@ -37,6 +38,12 @@ from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDatase
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from qtpy.QtGui import QContextMenuEvent, QMouseEvent
+
+WEIGHTS_MULTIPLIER = 100
 MAX_BINS_PER_SHELL = 20
 MIN_BINS_PER_SHELL = 1
 MAX_BINS_PER_PLOT = 180
@@ -47,7 +54,7 @@ WEIGHTS_MULTIPLIER = 100
 def qvector_binning_from_dict(
     qvector_params: dict[str, Any],
     n_segments: int = 10,
-) -> npt.NDArray[float] | None:
+) -> npt.NDArray[np.floating] | None:
     """Calculate the range of |q| bins from the vector generator parameters.
 
     Parameters
@@ -75,7 +82,7 @@ def qvector_binning_general(
     step_size: float,
     width: float | None,
     n_segments: int,
-) -> npt.NDArray[float]:
+) -> npt.NDArray[np.floating]:
     """Calculate the |q| bin limits based of vector shell limits and steps.
 
     Parameters
@@ -154,7 +161,7 @@ def qvector_binning_general(
     return common_binning
 
 
-def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[float]:
+def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[np.floating]:
     """Find the vector shell dataset and returns arrays of q vector lengths.
 
     Parameters
@@ -174,15 +181,15 @@ def shell_to_modq(shell_index: int, parent: h5py.Dataset) -> npt.NDArray[float]:
 
 
 def vector_angular_datasets(
-    source: QVectorsConfigurator,
+    source: IQVectors,
     shell_key: float,
 ) -> tuple[SingleDataset, SingleDataset]:
     """Return a specific q-vector shell as spherical coordinate angle datasets.
 
     Parameters
     ----------
-    source : QVectorsConfigurator
-        An instance of the QVectorsConfigurator in the GUI.
+    source : IQVectors
+        An instance of the QVectors.
     shell_key : float
         The |q| of the vector shell.
 
@@ -191,8 +198,8 @@ def vector_angular_datasets(
     tuple[SingleDataset, SingleDataset]
         Datasets of polar and azimuthal angles.
     """
-    q_array = source["q_vectors"][shell_key]["q_vectors"]
-    q_weights = source["q_vectors"][shell_key]["weights"]
+    q_array = source.q_vectors[shell_key]["q_vectors"]
+    q_weights = source.q_vectors[shell_key]["weights"]
     return angular_datasets_from_qarray(q_array, q_weights)
 
 
@@ -254,7 +261,7 @@ def angular_datasets_from_qarray(
 
 
 def vector_projection_datasets(
-    source: QVectorsConfigurator,
+    source: IQVectors,
     shell_key: float,
 ) -> tuple[SingleDataset, SingleDataset, SingleDataset, SingleDataset]:
     """Return a specific q-vector shell as Cartesian coordinate datasets.
@@ -271,7 +278,7 @@ def vector_projection_datasets(
     tuple[SingleDataset, SingleDataset, SingleDataset, SingleDataset]
         Datasets of coordinates grouped as y(x), z(x), z(y) and z(x,y).
     """
-    q_array = source["q_vectors"][shell_key]["q_vectors"] * measure(
+    q_array = source.q_vectors[shell_key]["q_vectors"] * measure(
         1.0,
         iunit="1/nm",
     ).toval("1/ang")
@@ -344,7 +351,7 @@ def projection_datasets_from_qarray(
 
 
 def vector_q_statistics_datasets(
-    source: h5py.File | QVectorsConfigurator,
+    source: h5py.File | IQVectors | QVectors,
     main_dset: str = "vector_generator",
     q_bin_limits: npt.NDArray[float] | None = None,
 ) -> tuple[SingleDataset, SingleDataset]:
@@ -364,78 +371,97 @@ def vector_q_statistics_datasets(
     Iterable[SingleDataset]
         1D array of vector count vs. |q|, 2D histogram of q vector counts per shell.
     """
-    if isinstance(source, h5py.File):
-        filename = source.filename
-        parent_dset = source[main_dset]
-        qvals = parent_dset["q"][:]
-        nshells = len(qvals)
-        valid_shells = [
-            index
-            for index in range(nshells)
-            if len(parent_dset[f"shell_{index}/qvector_array"][0])
-        ]
-        modq_per_shell = [shell_to_modq(n, parent_dset) for n in valid_shells]
-        available_vectors = np.array([len(qvecs) for qvecs in modq_per_shell])
+    if isinstance(source, QVectors):
+        source = source.generator
 
-        def q_data(elem: str) -> Generator:
-            for index in valid_shells:
-                yield parent_dset[f"shell_{index}/{elem}"]
+    match source:
+        case h5py.File():
+            filename = source.filename
+            parent_dset = source[main_dset]
+            qvals = parent_dset["q"][:]
+            nshells = len(qvals)
+            valid_shells = [
+                index
+                for index in range(nshells)
+                if len(parent_dset[f"shell_{index}/qvector_array"][0])
+            ]
+            modq_per_shell = [shell_to_modq(n, parent_dset) for n in valid_shells]
+            available_vectors = np.array([len(qvecs) for qvecs in modq_per_shell])
 
-        if all(
-            "weights" in parent_dset[f"shell_{shell_index}"]
-            for shell_index in valid_shells
-        ):
-            vec_weights = [dat[:] for dat in q_data("weights")]
-            if "n_q_vectors" in parent_dset and "n_q_found" in parent_dset:
-                used = np.array(parent_dset["n_q_vectors"])
-                found = np.array(parent_dset["n_q_found"])
+            def q_data(elem: str) -> Generator:
+                for index in valid_shells:
+                    yield parent_dset[f"shell_{index}/{elem}"]
+
+            if all(
+                "weights" in parent_dset[f"shell_{shell_index}"]
+                for shell_index in valid_shells
+            ):
+                vec_weights = [dat[:] for dat in q_data("weights")]
+                if "n_q_vectors" in parent_dset and "n_q_found" in parent_dset:
+                    used = np.array(parent_dset["n_q_vectors"])
+                    found = np.array(parent_dset["n_q_found"])
+                else:
+                    used = np.array([len(dat) for dat in q_data("weights")])
+                    found = np.array([sum(dat[:]) for dat in q_data("weights")])
+                available_vectors = np.vstack((found, used)).T
             else:
-                used = np.array([len(dat) for dat in q_data("weights")])
-                found = np.array([sum(dat[:]) for dat in q_data("weights")])
-            available_vectors = np.vstack((found, used)).T
-        else:
-            vec_weights = [np.ones_like(modq_shell) for modq_shell in modq_per_shell]
-    elif isinstance(source, QVectorsConfigurator):
-        filename = None
-        qvals = np.array([float(x) for x in source["q_vectors"]])
-        valid_shells = [
-            index
-            for index in range(len(qvals))
-            if source["q_vectors"][qvals[index]] is not None
-        ]
-        nshells = len(valid_shells)
+                vec_weights = [
+                    np.ones_like(modq_shell) for modq_shell in modq_per_shell
+                ]
 
-        def q_data(elem: str) -> Generator:
-            for index in valid_shells:
-                yield source["q_vectors"][qvals[index]][elem]
+        case IQVectors():
+            filename = None
+            qvals = np.array([float(x) for x in source.q_vectors])
+            valid_shells = [
+                index
+                for index in range(len(qvals))
+                if source.q_vectors[qvals[index]] is not None
+            ]
+            nshells = len(valid_shells)
 
-        modq_per_shell = [np.linalg.norm(dat, axis=0) for dat in q_data("q_vectors")]
-        available_vectors = np.array(
-            [
-                (
-                    n_found,
-                    n_used,
-                )
-                for n_found, n_used in zip(
-                    q_data("n_q_found"), q_data("n_q_vectors"), strict=False
-                )
-            ],
-        )
-        vec_weights = [dat[:] for dat in q_data("weights")]
+            def q_data(elem: str) -> Generator:
+                for index in valid_shells:
+                    yield source.q_vectors[qvals[index]][elem]
+
+            modq_per_shell = [
+                np.linalg.norm(dat, axis=0) for dat in q_data("q_vectors")
+            ]
+
+            available_vectors = np.array(
+                [
+                    (
+                        n_found,
+                        n_used,
+                    )
+                    for n_found, n_used in zip(
+                        q_data("n_q_found"), q_data("n_q_vectors"), strict=False
+                    )
+                ],
+            )
+
+            vec_weights = [dat[:] for dat in q_data("weights")]
+
+        case _:
+            raise TypeError(f"Unable to compute from {type(source).__name__}")
+
     if q_bin_limits is None:
         qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[-1])
         q_step = np.mean(np.abs(np.diff(qvals))) if len(qvals) > 1 else 0.1
         bin_width = 0.4 * np.min([np.std(one_shell) for one_shell in modq_per_shell])
         common_bins = qvector_binning_general(qmin, qmax, q_step, bin_width, 10)
+
     else:
         common_bins = q_bin_limits
+
     if np.any(common_bins < 0):
         start_index = np.argmax(common_bins >= 0) - 1
         if start_index >= 0:
             common_bins = common_bins[start_index:]
+
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
     stacked_histograms = np.vstack(qmod_histograms)
     xvals = common_bins[1:] - np.diff(common_bins) / 2
+
     nvec_per_q = SingleDataset(
         "Available vectors",
         None,
@@ -450,6 +476,7 @@ def vector_q_statistics_datasets(
         axes_units={"|q|": "1/nm"},
         optional_filename=filename,
     )
+
     real_q_ideal_q = SingleDataset(
         r"<|q|> - q$_{target}$",
         None,
@@ -473,6 +500,7 @@ def vector_q_statistics_datasets(
         optional_filename=filename,
         uneven_array=True,
     )
+
     vecs_per_qbin = SingleDataset(
         "Shell population",
         None,

@@ -15,15 +15,12 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable
 from os import SEEK_SET
-from pathlib import Path
-from typing import NamedTuple, TextIO
+from typing import TYPE_CHECKING, NamedTuple, TextIO
 
 import numpy as np
 from more_itertools import consume as drop
 from more_itertools import first, first_true, ilen, split_at, split_before, take
-from numpy.typing import NDArray
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
@@ -34,14 +31,22 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 from .Parser import Parser
 
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
+
+    from numpy.typing import NDArray
+
+    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+
 
 class Molecule(NamedTuple):
     name: str
     n_mols: int
     n_atoms: int
-    species: NDArray[float]
-    masses: NDArray[float]
-    charges: NDArray[float]
+    species: NDArray[np.floating]
+    masses: NDArray[np.floating]
+    charges: NDArray[np.floating]
     bonds: list[tuple[int, int]]
 
 

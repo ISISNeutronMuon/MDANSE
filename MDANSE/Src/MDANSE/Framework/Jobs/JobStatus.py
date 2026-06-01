@@ -22,9 +22,10 @@ from typing import Literal
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Status import Status
+from MDANSE.IO.IOUtils import UCEnum
 
 
-class JobStates(Enum):
+class JobStates(UCEnum):
     """Possible states of jobs."""
 
     STARTING = auto()

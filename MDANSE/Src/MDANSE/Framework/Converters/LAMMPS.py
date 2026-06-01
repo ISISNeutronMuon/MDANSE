@@ -15,17 +15,38 @@
 #
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Parameters import (
+    AtomMapping,
+    Boolean,
+    Float,
+    Integer,
+    OutputTrajectory,
+    PathParam,
+    SingleChoice,
+    to_class,
+)
 from MDANSE.Framework.Parsers import (
     LAMMPSConfigFile,
     LAMMPScustom,
     LAMMPSReader,
     LAMMPSxyz,
 )
+from MDANSE.Framework.Parsers.LAMMPS import LAMMPS_UNITS
+from MDANSE.Framework.Parsers.LAMMPSConfig import ATOM_TYPES_MAP
+from MDANSE.Framework.Units import measure
+from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Configuration import (
+    PeriodicBoxConfiguration,
+    RealConfiguration,
+)
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+
+if TYPE_CHECKING:
+    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 
 
 class LAMMPS(Converter):
@@ -38,123 +59,56 @@ class LAMMPS(Converter):
         "xyz": LAMMPSxyz,
     }
 
-    settings = {}
-    settings["config_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "label": "LAMMPS configuration file",
-            "wildcard": "All files (*);;Config files (*.config)",
-            "default": "INPUT_FILENAME.config",
-            "parser": LAMMPSConfigFile,
+    config_file = PathParam[LAMMPSConfigFile](
+        mode="r",
+        label="LAMMPS configuration file.",
+        extensions={"LAMMPS config": "*.config"},
+        default="INPUT_FILENAME.config",
+        on_set=to_class(LAMMPSConfigFile),
+    )
+    trajectory_file = PathParam(
+        mode="r",
+        label="LAMMPS trajectory file.",
+        extensions={
+            "XYZ files": "*.xyz",
+            "Dump files": "*.dump",
+            "HDF5 files": "*.h5",
+            "LAMMPS files": "*.lammps",
         },
+        default="INPUT_FILENAME.lammps",
     )
-    settings["trajectory_file"] = (
-        "InputFileConfigurator",
-        {
-            "label": "LAMMPS trajectory file",
-            "wildcard": "All files (*);;XYZ files (*.xyz);;H5MD files (*.h5);;lammps files (*.lammps)",
-            "default": "INPUT_FILENAME.lammps",
-        },
+    trajectory_format = SingleChoice(
+        label="LAMMPS trajectory format",
+        choices=("custom", "xyz"),
+        default="custom",
     )
-    settings["trajectory_format"] = (
-        "SingleChoiceConfigurator",
-        {
-            "label": "LAMMPS trajectory format",
-            "choices": ["custom", "xyz"],
-            "default": "custom",
-        },
+    lammps_units = SingleChoice(
+        label="LAMMPS unit system",
+        default="real",
+        choices=LAMMPS_UNITS.keys() | {"From config"},
     )
-    settings["lammps_units"] = (
-        "SingleChoiceConfigurator",
-        {
-            "label": "LAMMPS unit system",
-            "choices": [
-                "From config",
-                "real",
-                "metal",
-                "si",
-                "cgs",
-                "electron",
-                "micro",
-                "nano",
-            ],
-            "default": "real",
-        },
+    atom_type = SingleChoice(
+        label="LAMMPS atom type",
+        choices=ATOM_TYPES_MAP.keys() | {"From config"},
+        default="From config",
     )
-    settings["atom_type"] = (
-        "SingleChoiceConfigurator",
-        {
-            "label": "LAMMPS atom type",
-            "choices": [
-                "From config",
-                "angle",
-                "atomic",
-                "body",
-                "bond",
-                "bpm/sphere",
-                "charge",
-                "dielectric",
-                "dipole",
-                "dpd",
-                "edpd",
-                "electron",
-                "ellipsoid",
-                "full",
-                "hybrid",
-                "line",
-                "mdpd",
-                "molecular",
-                "peri",
-                "rheo",
-                "rheo/thermal",
-                "smd",
-                "sph",
-                "sphere",
-                "spin",
-                "tdpd",
-                "template",
-                "tri",
-                "wavepacket",
-            ],
-            "default": "From config",
-        },
+    atom_aliases = AtomMapping(
+        depends={"trajectory": "config_file"},
+        label="Atom mapping",
+        default={},
     )
-
-    settings["atom_aliases"] = (
-        "AtomMappingConfigurator",
-        {
-            "default": "{}",
-            "label": "Atom mapping",
-            "dependencies": {"input_file": "config_file"},
-        },
+    time_step = Float(
+        label="Time step (lammps units, depends on unit system)",
+        default=1.0,
+        minimum=1e-9,
     )
-    settings["time_step"] = (
-        "FloatConfigurator",
-        {
-            "label": "Time step (lammps units, depends on unit system)",
-            "default": 1.0,
-            "mini": 1.0e-9,
-        },
+    n_steps = Integer(
+        label="Number of time steps (0 for automatic detection)",
+        default=0,
+        minimum=0,
     )
-    settings["n_steps"] = (
-        "IntegerConfigurator",
-        {
-            "label": "Number of time steps (0 for automatic detection)",
-            "default": 0,
-            "mini": 0,
-        },
-    )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates into box"},
-    )
-    settings["output_files"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "formats": ["MDTFormat"],
-            "root": "config_file",
-        },
-    )
+    fold = Boolean(label="Fold coordinates into box")
+    output_files = OutputTrajectory()
 
     def initialize(self):
         """
@@ -162,35 +116,24 @@ class LAMMPS(Converter):
         """
         super().initialize()
 
-        self._atomicAliases = self.configuration["atom_aliases"]["value"]
-
         # The number of steps of the analysis.
-        self.numberOfSteps = self.configuration["n_steps"]["value"]
+        self.numberOfSteps = self.n_steps
 
-        self._lammpsConfig = self.configuration["config_file"].instance
-
-        self._lammps_units = self.configuration["lammps_units"]["value"]
-        self._atom_type = self.configuration["atom_type"]["value"]
-
-        if self._lammps_units == "From config":
-            if "units" not in self._lammpsConfig:
+        if self.lammps_units == "From config":
+            if "units" not in self.config_file:
                 raise KeyError("Units not found in lammps config")
-            self._lammps_units = self._lammpsConfig["units"]
+            self.lammps_units = self.config_file["units"]
 
-        self._lammps_format = self.configuration["trajectory_format"]["value"]
+        self._reader = self.create_reader(self.trajectory_format)
 
-        self._reader = self.create_reader(self._lammps_format)
-
-        self._reader.set_units(self._lammps_units)
-        self._chemical_system = self.parse_first_step(self._atomicAliases)
+        self._reader.set_units(self.lammps_units)
+        self._chemical_system = self.parse_first_step(self.atom_aliases)
         self._chemical_system.find_clusters_from_bonds()
 
         if self.numberOfSteps == 0:
-            self.numberOfSteps = self._reader.get_time_steps(
-                self.configuration["trajectory_file"]["value"]
-            )
+            self.numberOfSteps = self._reader.get_time_steps(self.trajectory_file)
 
-        charges_single_cell = self._lammpsConfig["charges"]
+        charges_single_cell = self.config_file["charges"]
         charges_single_cell *= self._reader.units["charge_conv"]
 
         # Assume replicate
@@ -203,17 +146,17 @@ class LAMMPS(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["file"],
+            self.output_files.path,
             self._chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_files"]["dtype"],
-            chunking_limit=self.configuration["output_files"]["chunk_size"],
-            compression=self.configuration["output_files"]["compression"],
+            positions_dtype=self.output_files.dtype,
+            chunking_limit=self.output_files.chunk_size,
+            compression=self.output_files.compression,
             initial_charges=charges,
         )
 
         self._start = 0
-        self._reader.open_file(self.configuration["trajectory_file"]["value"])
+        self._reader.open_file(self.trajectory_file)
         self._reader.set_output(self._trajectory)
 
     def create_reader(self, trajectory_type: Literal["custom", "xyz"]) -> LAMMPSReader:
@@ -230,10 +173,10 @@ class LAMMPS(Converter):
             Configured reader.
         """
         return self._READERS[trajectory_type](
-            lammps_units=self._lammps_units,
-            atom_type=self._atom_type,
-            timestep=self.configuration["time_step"]["value"],
-            fold_coordinates=self.configuration["fold"]["value"],
+            lammps_units=self.lammps_units,
+            atom_type=self.atom_type,
+            timestep=self.time_step,
+            fold_coordinates=self.fold,
         )
 
     def run_step(self, index) -> tuple[int, None]:
@@ -299,7 +242,7 @@ class LAMMPS(Converter):
         LAMMPSxyz.parse_first_step
         """
 
-        self._reader.open_file(self.configuration["trajectory_file"]["value"])
-        chemical_system = self._reader.parse_first_step(aliases, self._lammpsConfig)
+        self._reader.open_file(self.trajectory_file)
+        chemical_system = self._reader.parse_first_step(aliases, self.config_file)
         self._reader.close()
         return chemical_system

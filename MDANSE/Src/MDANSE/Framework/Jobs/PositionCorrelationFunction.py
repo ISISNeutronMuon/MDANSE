@@ -20,6 +20,19 @@ import numpy as np
 from MDANSE.Framework.Jobs.CartesianCorrelationFunction import (
     CartesianCorrelationFunction,
 )
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    CorrelationWindow,
+    FrameSelect,
+    GroupingLevel,
+    MDANSETrajectory,
+    OutputFile,
+    PartialCharge,
+    Projection,
+    RunningMode,
+    Weights,
+)
 
 
 class PositionCorrelationFunction(CartesianCorrelationFunction):
@@ -35,15 +48,30 @@ class PositionCorrelationFunction(CartesianCorrelationFunction):
     CF_UNITS = "nm2"
     MAIN_RESULTS = "pcf/isotropic/"
 
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        grouping="grouping_level",
+        transmutation="atom_transmutation",
+    )
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    projection = Projection()
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    weights = Weights(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
+
     def get_series(self, index):
         atom_index = self.trajectory.atom_indices[index]
 
         series = self.trajectory.read_atomic_trajectory(
             atom_index,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
+            first=self.frames.index_start,
+            last=self.frames.index_stop + 1,
+            step=self.frames.index_step,
         )
         series = series - np.average(series, axis=0)
-        series = self.configuration["projection"]["projector"](series)
+        series = self.projection.projector(series)
         return series

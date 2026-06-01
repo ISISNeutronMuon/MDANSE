@@ -16,9 +16,10 @@
 from __future__ import annotations
 
 from collections import ChainMap, defaultdict
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable
 from functools import cached_property
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import h5py
 import numpy as np
@@ -42,8 +43,10 @@ from MDANSE.MolecularDynamics.UnitCell import (
     NO_CELL,
     UnitCell,
 )
+from MDANSE.Trajectory.FileTrajBase import TrajectoryFile
 
-from .FileTrajBase import TrajectoryFile
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 SLICE_ALL = np.s_[:]
 
@@ -293,25 +296,24 @@ class MdanseTrajectory(TrajectoryFile):
 
     def _load_unit_cells(self):
         """Load all the unit cells."""
-        if "unit_cell" in self._h5_file:
-            self._unit_cells = [UnitCell(uc) for uc in self._h5_file["unit_cell"][:]]
-        else:
+        if "unit_cell" not in self._h5_file:
             self._unit_cells = None
             self.unit_cell_warning = NO_CELL
+            return
 
-        if not self.unit_cell_warning:
-            if self._unit_cells[0].volume < CELL_SIZE_LIMIT:
-                self.unit_cell_warning = BAD_CELL
-                return
+        self._unit_cells = [UnitCell(uc) for uc in self._h5_file["unit_cell"][:]]
 
-            reference_array = self._unit_cells[0].direct
+        if self._unit_cells[0].volume < CELL_SIZE_LIMIT:
+            self.unit_cell_warning = BAD_CELL
+            return
 
-            if any(
-                not np.allclose(reference_array, uc.direct)
-                for uc in self._unit_cells[1:]
-            ):
-                self.unit_cell_warning = CHANGING_CELL
-                return
+        reference_array = self._unit_cells[0].direct
+
+        if any(
+            not np.allclose(reference_array, uc.direct) for uc in self._unit_cells[1:]
+        ):
+            self.unit_cell_warning = CHANGING_CELL
+            return
 
     def time(self):
         """Return the time array for all the frames."""

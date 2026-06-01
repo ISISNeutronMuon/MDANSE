@@ -15,10 +15,9 @@
 #
 from __future__ import annotations
 
-from collections.abc import Collection, Iterable, Iterator
+from collections.abc import Iterable
 from itertools import count, islice
-from pathlib import Path
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
 import numpy.typing as npt
@@ -29,6 +28,10 @@ from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 from .Parser import Parser
+
+if TYPE_CHECKING:
+    from collections.abc import Collection, Iterator
+    from pathlib import Path
 
 
 class HeaderInfo(NamedTuple):

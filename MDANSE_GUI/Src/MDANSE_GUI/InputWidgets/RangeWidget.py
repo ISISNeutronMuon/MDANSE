@@ -15,87 +15,121 @@
 #
 from __future__ import annotations
 
-from qtpy.QtGui import QDoubleValidator, QIntValidator
-from qtpy.QtWidgets import QLabel, QLineEdit
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
-from MDANSE.MLogging import LOG
+from more_itertools import numeric_range
+from qtpy.QtWidgets import QDoubleSpinBox, QLabel, QSpinBox, QWidget
+
+from MDANSE.Framework.Parameters import NumericRange, Range
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.Utils import block_signals
 
 
-class RangeWidget(WidgetBase):
+class RangeWidget(WidgetBase[Range]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, layout_type="QGridLayout", **kwargs)
-        self.setup_fields(*args, **kwargs)
 
-    def setup_fields(self, *args, **kwargs):
-        start, end, step = kwargs.get("default", self._configurator.default)
-        num_type = kwargs.get("valueType", int)
+        box_type = QSpinBox if self.parameter.dtype is int else QDoubleSpinBox
 
-        labels = [
-            QLabel("From", self._base),
-            QLabel("to", self._base),
-            QLabel("in steps of", self._base),
-        ]
-        fields = [
-            QLineEdit(str(num_type(start)), self._base),
-            QLineEdit(str(num_type(end)), self._base),
-            QLineEdit(str(num_type(step)), self._base),
-        ]
-        placeholders = [str(num_type(start)), str(num_type(end)), str(num_type(step))]
-        if num_type is int:
-            validators = [QIntValidator(parent_field) for parent_field in fields]
-        else:
-            validators = [QDoubleValidator(parent_field) for parent_field in fields]
-        for field_num in range(3):
-            self._layout.addWidget(labels[field_num], 0, 2 * field_num)
-            self._layout.addWidget(fields[field_num], 0, 2 * field_num + 1)
-            fields[field_num].setValidator(validators[field_num])
-            fields[field_num].textChanged.connect(self.updateValue)
-            fields[field_num].setPlaceholderText(placeholders[field_num])
-        self._fields = fields
-        self._validators = validators
-        self._num_type = num_type
-        self._default_values = placeholders
+        self._labels = []
+        self._fields = []
+        labels = ("Start", "Stop", "Step")
+
+        tooltip_text = (
+            self._tooltip or "Values to be used, given as (First, Last, StepSize)"
+        )
+
+        # Label takes position 0 in QWidget
+        shift = isinstance(self._base, QWidget)
+
+        for i, label_name in enumerate(labels):
+            label = QLabel(label_name, self._base)
+            field = box_type(self._base)
+
+            field.setToolTip(tooltip_text)
+            field.valueChanged.connect(self.updateValue)
+
+            self._labels.append(label)
+            self._fields.append(field)
+
+            self._layout.addWidget(label, 0, 2 * i + shift)
+            self._layout.addWidget(field, 0, 2 * i + 1 + shift)
+
+        self.trajectory_changed()
         self.default_labels()
         self.update_labels()
+        self.toggle_widgets()
         self.updateValue()
-        if self._tooltip:
-            tooltip_text = self._tooltip
-        else:
-            tooltip_text = "Values to be used, given as (First, Last, StepSize)"
-        for wid in fields + labels:
-            wid.setToolTip(tooltip_text)
 
-    def configure_using_default(self):
-        """This is too complex to have a default value"""
+    def set_value(self, value: Sequence[int]) -> None:
+        if len(value) != 3:
+            raise ValueError(f"Expected start, stop, step, received: {len(value)}.")
+
+        with block_signals(self):
+            for field, elem in zip(self._fields, value, strict=True):
+                field.setValue(elem)
+
+        self.updateValue()
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "RangeWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "Values to be used, given as (First, Last, StepSize)"
 
-    def value_from_configurator(self):
-        if self._configurator.check_dependencies():
-            minval, maxval = self._configurator.mini, self._configurator.maxi
-            LOG.info(f"Configurator min/max: {minval}, {maxval}")
-            if maxval is None:
-                return
-            for val in self._validators:
-                val.setBottom(-abs(maxval))
-                val.setTop(abs(maxval))
+    def trajectory_changed(self) -> None:
+        if not self.ranges:
+            for field in self._fields:
+                field.setEnabled(True)
+                field.setRange(None, None)
+
+            return
+
+        match self.ranges:
+            case _ if self.default != "N/A":
+                if isinstance(self.default, (NumericRange, range)):
+                    defaults = self.default.start, self.default.stop, self.default.step
+                elif isinstance(self.default, numeric_range):
+                    defaults = (
+                        self.default._start,
+                        self.default._stop,
+                        self.default._step,
+                    )
+                else:
+                    defaults = self.default
+            case (None, None):
+                defaults = (0, -1, 1)
+            case (mini, None):
+                defaults = (mini, -1, 1)
+            case (None, maxi):
+                defaults = (0, maxi, 1)
+            case (mini, maxi) if self.parameter.dtype is not int:
+                step = round((maxi - mini) / 100, 2)
+                defaults = (mini, maxi, step)
+            case (mini, maxi):
+                defaults = (mini, maxi, 1)
+            case _:
+                raise NotImplementedError(f"Unable to handle {self.ranges=}")
+
+        mini, maxi = self.ranges
+
+        for field, val in zip(self._fields, defaults, strict=True):
+            field.setValue(val)
+            field.setEnabled(True)
+            field.setSingleStep(defaults[2])
+            if mini is not None:
+                field.setMinimum(mini)
+            if maxi is not None:
+                field.setMaximum(maxi)
 
     def get_widget_value(self):
-        result = []
-        for n, field in enumerate(self._fields):
-            strval = field.text()
-            try:
-                val = self._num_type(strval)
-            except Exception:
-                val = self._num_type(self._default_values[n])
-            result.append(val)
-        return result
+        values = [field.value() for field in self._fields]
+        if self.parameter.include_last:
+            values[1] -= values[2]  # Include last
+
+        return tuple(values)

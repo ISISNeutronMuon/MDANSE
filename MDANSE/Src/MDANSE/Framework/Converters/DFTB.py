@@ -15,7 +15,16 @@
 #
 from __future__ import annotations
 
+import collections
+
 from MDANSE.Framework.Converters.Forcite import Forcite
+from MDANSE.Framework.Parameters import (
+    AtomMapping,
+    Boolean,
+    OutputTrajectory,
+    PathParam,
+    to_class,
+)
 from MDANSE.Framework.Parsers import TrjFile, XTDFile
 
 
@@ -24,41 +33,23 @@ class DFTB(Forcite):
 
     label = "DFTB"
 
-    settings = {}
-    settings["xtd_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "XTD files (*.xtd);;All files (*)",
-            "default": "INPUT_FILENAME.xtd",
-            "label": "The XTD file",
-            "parser": XTDFile,
-        },
+    xtd_file = PathParam[XTDFile](
+        mode="r",
+        extensions={"XTD file": "*.xtd"},
+        label="The XTD file.",
+        on_set=to_class(XTDFile),
     )
-    settings["trj_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "TRJ files (*.trj);;All files (*)",
-            "default": "INPUT_FILENAME.trj",
-            "label": "The TRJ file",
-            "parser": TrjFile,
-        },
+    trj_file = PathParam[TrjFile](
+        mode="r",
+        extensions={"TRJ file": "*.trj"},
+        label="The TRJ file.",
+        on_set=to_class(TrjFile),
     )
-    settings["atom_aliases"] = (
-        "AtomMappingConfigurator",
-        {
-            "default": "{}",
-            "label": "Atom mapping",
-            "dependencies": {"input_file": "xtd_file"},
-        },
+    atom_aliases = AtomMapping(
+        depends={"trajectory": "xtd_file"},
+        label="Atom mapping",
+        default={},
     )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates into box"},
-    )
-    settings["output_files"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "formats": ["MDTFormat"],
-            "root": "xtd_file",
-        },
-    )
+    fold = Boolean(label="Fold coordinates into box")
+    output_files = OutputTrajectory()
+    settings = collections.OrderedDict()

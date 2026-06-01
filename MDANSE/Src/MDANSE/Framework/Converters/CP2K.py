@@ -15,7 +15,9 @@
 #
 from __future__ import annotations
 
-from typing import Any
+import collections
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from more_itertools import all_equal
@@ -23,6 +25,13 @@ from more_itertools import all_equal
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Parameters import (
+    AtomMapping,
+    Boolean,
+    OutputTrajectory,
+    PathParam,
+    to_class,
+)
 from MDANSE.Framework.Parsers import CP2KCellFile, XYZFile
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
@@ -38,6 +47,8 @@ class CP2KConverterError(Exception):
 class CP2K(Converter):
     """Converts a CP2K trajectory to an MDT trajectory."""
 
+    label = "CP2K"
+
     UNITS = {
         "coordinates": measure(1.0, iunit="ang").toval("nm"),
         "cell": measure(1.0, iunit="ang").toval("nm"),
@@ -46,66 +57,34 @@ class CP2K(Converter):
         "time": measure(1.0, iunit="fs").toval("ps"),
     }
 
-    label = "CP2K"
-
-    settings = {}
-    settings["pos_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "XYZ files (*.xyz);;All files (*)",
-            "default": "INPUT_FILENAME.xyz",
-            "label": "Positions file (XYZ)",
-            "parser": XYZFile,
-        },
+    pos_file = PathParam[XYZFile](
+        "r",
+        extensions={"XYZ file": "*.xyz"},
+        label="Positions file (XYZ)",
+        on_set=to_class(XYZFile),
     )
-    settings["vel_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "XYZ files (*.xyz);;All files (*)",
-            "default": "",
-            "label": "Velocity file (XYZ, optional)",
-            "parser": XYZFile,
-            "optional": True,
-        },
+    vel_file = PathParam[Path | None](
+        "r",
+        extensions={"XYZ file": "*.xyz"},
+        optional=True,
+        default=None,
+        label="Velocity file (XYZ, optional)",
     )
-    settings["force_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "XYZ files (*.xyz);;All files (*)",
-            "default": "",
-            "label": "Force file (XYZ, optional)",
-            "parser": XYZFile,
-            "optional": True,
-        },
+    force_file = PathParam[Path | None](
+        "r",
+        extensions={"XYZ file": "*.xyz"},
+        optional=True,
+        default=None,
+        label="Force file (XYZ, optional)",
     )
-    settings["cell_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "Cell files (*.cell);;All files (*)",
-            "default": "INPUT_FILENAME.cell",
-            "label": "CP2K unit cell file (.cell)",
-            "parser": CP2KCellFile,
-        },
+    cell_file = PathParam(
+        "r",
+        extensions={"CP2K cell file": "*.cell"},
+        label="CP2K unit cell file (.cell)",
     )
-    settings["atom_aliases"] = (
-        "AtomMappingConfigurator",
-        {
-            "default": "{}",
-            "label": "Atom mapping",
-            "dependencies": {"input_file": "pos_file"},
-        },
-    )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates into box"},
-    )
-    settings["output_files"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "formats": ["MDTFormat"],
-            "root": "pos_file",
-        },
-    )
+    atom_aliases = AtomMapping(depends={"trajectory": "pos_file"})
+    fold = Boolean(default=False, label="Fold coordinates into box")
+    output_files = OutputTrajectory(label="MDANSE trajectory (filename, format)")
 
     def initialize(self):
         """
@@ -115,15 +94,15 @@ class CP2K(Converter):
         super().initialize()
 
         self.files = {
-            "coordinates": self.configuration["pos_file"].instance,
-            "cell": self.configuration["cell_file"].instance,
+            "coordinates": self.pos_file,
+            "cell": CP2KCellFile(self.cell_file),
         }
 
-        if vfile := self.configuration["vel_file"].instance:
-            self.files["velocities"] = vfile
+        if self.vel_file is not None:
+            self.files["velocities"] = XYZFile(self.vel_file)
 
-        if ffile := self.configuration["force_file"].instance:
-            self.files["forces"] = ffile
+        if self.force_file is not None:
+            self.files["forces"] = XYZFile(self.force_file)
 
         for attr in ("time_step", "n_frames"):
             if not all_equal(getattr(file, attr) for file in self.files.values()):
@@ -137,21 +116,19 @@ class CP2K(Converter):
         self._chemical_system = ChemicalSystem()
 
         element_list = [
-            get_element_from_mapping(
-                self.configuration["atom_aliases"]["value"], symbol
-            )
+            get_element_from_mapping(self.atom_aliases, symbol)
             for symbol in self.files["coordinates"].atoms
         ]
 
         self._chemical_system.initialise_atoms(element_list)
 
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["file"],
+            self.output_files.path,
             self._chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_files"]["dtype"],
-            chunking_limit=self.configuration["output_files"]["chunk_size"],
-            compression=self.configuration["output_files"]["compression"],
+            positions_dtype=self.output_files.dtype,
+            chunking_limit=self.output_files.chunk_size,
+            compression=self.output_files.compression,
         )
 
         data_to_be_written = ["configuration", "time"]
@@ -169,6 +146,8 @@ class CP2K(Converter):
         @note: the argument index is the index of the loop not the index of the frame.
         """
 
+        # Read the current coordinates in the XYZ file.
+
         data = {
             key: next(frames) * self.UNITS[key] for key, frames in self.frames.items()
         }
@@ -181,7 +160,7 @@ class CP2K(Converter):
             **data,
         )
 
-        if self.configuration["fold"]["value"]:
+        if self.fold:
             real_conf.fold_coordinates()
 
         time = index * self.files["coordinates"].time_step * self.UNITS["time"]
@@ -219,7 +198,6 @@ class CP2K(Converter):
         Closes the files and calls the
         superclass finalize method.
         """
-
         # Close the output trajectory.
         self._trajectory.write_standard_atom_database()
         self._trajectory.close()

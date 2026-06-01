@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import collections
 from typing import Any
 
 import numpy as np
@@ -22,6 +23,13 @@ from more_itertools import consume as drop
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Parameters import (
+    AtomMapping,
+    Boolean,
+    OutputTrajectory,
+    PathParam,
+    to_class,
+)
 from MDANSE.Framework.Parsers import DLPField, DLPHistory
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
@@ -44,45 +52,27 @@ class DL_POLY(Converter):
 
     label = "DL-POLY"
 
-    settings = {}
-    settings["field_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "FIELD files (FIELD*);;All files (*)",
-            "default": "INPUT_FILENAME",
-            "label": "Input FIELD file",
-            "parser": DLPField,
-        },
+    field_file = PathParam[DLPField](
+        mode="r",
+        extensions={"FIELD files": "FIELD*"},
+        default="FIELD",
+        label="Input FIELD file",
+        on_set=to_class(DLPField),
     )
-    settings["history_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "HISTORY files (HISTORY*);;All files (*)",
-            "default": "INPUT_FILENAME",
-            "label": "Input HISTORY file",
-            "parser": DLPHistory,
-        },
+    history_file = PathParam[DLPHistory](
+        mode="r",
+        extensions={"HISTORY files": "HISTORY*"},
+        default="HISTORY",
+        label="Input HISTORY file",
+        on_set=to_class(DLPHistory),
     )
-    settings["atom_aliases"] = (
-        "AtomMappingConfigurator",
-        {
-            "default": "{}",
-            "label": "Atom mapping",
-            "dependencies": {"input_file": "field_file"},
-        },
+    atom_aliases = AtomMapping(
+        depends={"trajectory": "field_file"},
+        label="Atom mapping",
+        default={},
     )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates into box"},
-    )
-    # settings['output_files'] = ('output_files', {'formats':["HDFFormat"]})
-    settings["output_files"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "formats": ["MDTFormat"],
-            "root": "history_file",
-        },
-    )
+    fold = Boolean(label="Fold coordinates into box")
+    output_files = OutputTrajectory()
 
     def initialize(self):
         """
@@ -90,27 +80,21 @@ class DL_POLY(Converter):
         """
         super().initialize()
 
-        self._atomicAliases = self.configuration["atom_aliases"]["value"]
-
-        self.field_file = self.configuration["field_file"].instance
-        self.history_file = self.configuration["history_file"].instance
         self.frames = self.history_file.frames
 
         # The number of steps of the analysis.
         self.numberOfSteps = self.history_file.n_frames
         self._chemical_system = ChemicalSystem()
 
-        self.field_file.build_chemical_system(
-            self._chemical_system, self._atomicAliases
-        )
+        self.field_file.build_chemical_system(self._chemical_system, self.atom_aliases)
 
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["file"],
+            self.output_files.path,
             self._chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_files"]["dtype"],
-            chunking_limit=self.configuration["output_files"]["chunk_size"],
-            compression=self.configuration["output_files"]["compression"],
+            positions_dtype=self.output_files.dtype,
+            chunking_limit=self.output_files.chunk_size,
+            compression=self.output_files.compression,
             initial_charges=self.field_file.get_atom_charges(),
         )
 
@@ -144,7 +128,7 @@ class DL_POLY(Converter):
                 self._trajectory.chemical_system, frame["positions"]
             )
 
-        if self.configuration["fold"]["value"]:
+        if self.fold:
             conf.fold_coordinates()
 
         if "velocities" in frame:

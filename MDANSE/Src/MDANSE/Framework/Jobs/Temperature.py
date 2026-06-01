@@ -18,6 +18,13 @@ from __future__ import annotations
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    FrameSelect,
+    InterpOrder,
+    MDANSETrajectory,
+    OutputFile,
+    RunningMode,
+)
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Signal import differentiate
 
@@ -47,20 +54,13 @@ class Temperature(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory()
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    interpolation_order = InterpOrder(
+        depends={"trajectory": "trajectory", "frames": "frames"}
     )
-    settings["interpolation_order"] = (
-        "InterpolationOrderConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """
@@ -76,12 +76,12 @@ class Temperature(IJob):
 
         self.numberOfSteps = len(self.indices)
 
-        self._nFrames = self.configuration["frames"]["number"]
+        self._nFrames = len(self.frames)
 
         self._outputData.add(
             "temp/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["time"],
+            self.frames.times,
             units="ps",
         )
         self._outputData.add(
@@ -134,28 +134,27 @@ class Temperature(IJob):
 
         trajectory = self.trajectory
 
-        if self.configuration["interpolation_order"]["value"] == 0:
+        if self.interpolation_order == 0:
             series = trajectory.read_configuration_trajectory(
                 real_index,
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
+                first=self.frames.index_start,
+                last=self.frames.index_stop + 1,
+                step=self.frames.index_step,
                 variable="velocities",
             )
         else:
             series = trajectory.read_atomic_trajectory(
                 real_index,
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
+                first=self.frames.index_start,
+                last=self.frames.index_stop + 1,
+                step=self.frames.index_step,
             )
 
-            order = self.configuration["interpolation_order"]["value"]
             for axis in range(3):
                 series[:, axis] = differentiate(
                     series[:, axis],
-                    order=order,
-                    dt=self.configuration["frames"]["time_step"],
+                    order=self.interpolation_order,
+                    dt=self.frames.time_step,
                 )
 
         kineticEnergy = 0.5 * mass * np.sum(series**2, 1)
@@ -164,10 +163,14 @@ class Temperature(IJob):
 
     def combine(self, index, x):
         """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
+        Combines returned results of run_step.
+
+        Parameters
+        ----------
+        index : int
+            The index of the step.
+        x : Any
+            The returned result(s) of run_step.
         """
 
         self._outputData["temp/kinetic_energy"] += x
@@ -193,8 +196,8 @@ class Temperature(IJob):
         )
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

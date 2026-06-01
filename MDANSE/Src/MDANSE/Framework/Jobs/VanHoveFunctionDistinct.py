@@ -16,20 +16,36 @@
 from __future__ import annotations
 
 import itertools as it
-from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 from more_itertools import always_iterable
 
-from MDANSE.Chemistry import ChemicalSystem
 from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
     pair_labels,
     update_pair_results,
 )
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    CorrelationWindow,
+    FrameSelect,
+    GroupingLevel,
+    MDANSETrajectory,
+    OutputFile,
+    RangeCellCutoff,
+    RunningMode,
+    Weights,
+)
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from MDANSE.Chemistry import ChemicalSystem
 
 CELL_SIZE_LIMIT = 1e-9
 DETAILED_CELL_MESSAGE = (
@@ -345,63 +361,33 @@ class VanHoveFunctionDistinct(IJob):
     )
     PREDICTORS = ("frames", "r_values")
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        transmutation="atom_transmutation",
+        grouping="grouping_level",
     )
-    settings["r_values"] = (
-        "DistHistCutoffConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "dependencies": {"trajectory": "trajectory"},
-        },
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    r_values = RangeCellCutoff(
+        label="r values (nm)",
+        include_last=True,
+        minimum=0.0,
+        depends={"trajectory": "trajectory"},
     )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            },
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    weights = Weights(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """Get the input parameters from the job input parsers."""
         super().initialize()
 
-        self.numberOfSteps = self.configuration["frames"]["n_frames"]
-        self.n_configs = self.configuration["frames"]["n_configs"]
-        if self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.unique_molecules():
+        self.numberOfSteps = self.frame_window.window
+        self.n_configs = self.frame_window.n_configs
+        if self.trajectory.chemical_system.unique_molecules():
             self.indices_intra = intramolecular_lookup_dict(
                 self.trajectory.chemical_system,
             )
@@ -419,10 +405,10 @@ class VanHoveFunctionDistinct(IJob):
         )
         self.labels_intra = pair_labels(self.trajectory, intra=True)
 
-        self.n_mid_points = len(self.configuration["r_values"]["mid_points"])
+        self.n_mid_points = len(self.r_values.mid_points)
 
         conf = self.trajectory.configuration(
-            self.configuration["frames"]["first"],
+            self.frames.index_start,
         )
         if not hasattr(conf, "unit_cell"):
             raise ValueError(DETAILED_CELL_MESSAGE)
@@ -432,13 +418,13 @@ class VanHoveFunctionDistinct(IJob):
         self._outputData.add(
             "vh/axes/r",
             "LineOutputVariable",
-            self.configuration["r_values"]["mid_points"],
+            self.r_values.mid_points,
             units="nm",
         )
         self._outputData.add(
             "vh/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.frame_window.duration,
             units="ps",
         )
 
@@ -514,12 +500,8 @@ class VanHoveFunctionDistinct(IJob):
         self.shell_volumes = []
         for i in range(self.n_mid_points):
             self.shell_volumes.append(
-                (
-                    self.configuration["r_values"]["value"][i]
-                    + self.configuration["r_values"]["step"]
-                )
-                ** 3
-                - self.configuration["r_values"]["value"][i] ** 3,
+                (self.r_values.binning[i] + self.r_values.step) ** 3
+                - self.r_values.binning[i] ** 3,
             )
         self.shell_volumes = (4 / 3) * np.pi * np.array(self.shell_volumes)
 
@@ -556,13 +538,13 @@ class VanHoveFunctionDistinct(IJob):
         # average the distance histograms at the input time
         # difference over a number of configuration
         for i in range(self.n_configs):
-            frame_index_t0 = self.configuration["frames"]["value"][i]
+            frame_index_t0 = self.frames[i].ind
             conf_t0 = self.trajectory.configuration(
                 frame_index_t0,
             )
             coords_t0 = conf_t0.coordinates[self._indices]
 
-            frame_index_t1 = self.configuration["frames"]["value"][i + time]
+            frame_index_t1 = self.frames[i + time].ind
             conf_t1 = self.trajectory.configuration(
                 frame_index_t1,
             )
@@ -584,8 +566,8 @@ class VanHoveFunctionDistinct(IJob):
                     total,
                     frac_coords_t0,
                     frac_coords_t1,
-                    self.configuration["r_values"]["first"],
-                    self.configuration["r_values"]["step"],
+                    self.r_values.binning.start,
+                    self.r_values.binning.step,
                 )
                 bins_intra += conf_t1.unit_cell.volume * intra
                 bins_total += conf_t1.unit_cell.volume * total
@@ -598,8 +580,8 @@ class VanHoveFunctionDistinct(IJob):
                     total,
                     frac_coords_t0,
                     frac_coords_t1,
-                    self.configuration["r_values"]["first"],
-                    self.configuration["r_values"]["step"],
+                    self.r_values.binning.start,
+                    self.r_values.binning.step,
                 )
                 bins_total += conf_t1.unit_cell.volume * total
 
@@ -688,9 +670,7 @@ class VanHoveFunctionDistinct(IJob):
 
         nAtomsPerElement = self.trajectory.get_natoms()
 
-        selected_weights, all_weights = self.trajectory.get_weights(
-            prop=self.configuration["weights"]["property"]
-        )
+        selected_weights, all_weights = self.trajectory.get_weights(prop=self.weights)
         weight_dict = get_weights(
             selected_weights,
             all_weights,
@@ -731,8 +711,8 @@ class VanHoveFunctionDistinct(IJob):
             self._outputData["vh/g(r,t)/total"].scaling_factor = fact
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

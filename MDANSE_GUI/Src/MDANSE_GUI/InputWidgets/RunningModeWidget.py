@@ -16,68 +16,69 @@
 from __future__ import annotations
 
 import multiprocessing
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QComboBox, QSpinBox
 
+from MDANSE.Framework.Parameters import RunningMode
+from MDANSE_GUI.InputWidgets.ComboWidget import ComboWidget
+from MDANSE_GUI.InputWidgets.IntegerWidget import IntegerWidget
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class RunningModeWidget(WidgetBase):
+class RunningModeWidget(WidgetBase[RunningMode]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._totalNumberOfProcessors = multiprocessing.cpu_count()
-        self._last_numproc = None
-        default_value = self._configurator.default
-        self._value = default_value
-        self.mode_box = QComboBox(self._base)
-        self.mode_box.addItems(self._configurator.availablesModes)
-        self.mode_box.setCurrentText(self._configurator.availablesModes[0])
-        self._field = QSpinBox(self._base)
-        self._field.setValue(1)
-        self._field.setMinimum(1)
-        self._field.setMaximum(multiprocessing.cpu_count())
-        self._field.setEnabled(False)
-        self._layout.addWidget(self.mode_box)
-        self._layout.addWidget(self._field)
-        self.mode_box.currentIndexChanged.connect(self.mode_changed)
-        self._field.valueChanged.connect(self.numproc_changed)
-        self.update_labels()
-        self.updateValue()
+
+        self._value = self.default
+
         if self._tooltip:
             tooltip_text = self._tooltip
         else:
             tooltip_text = "Choose if the job should run on one or more cores."
-        for wid in [self._field, self.mode_box]:
-            wid.setToolTip(tooltip_text)
 
-    def configure_using_default(self):
-        """This is too complex to have a default value"""
+        self.mode_box = ComboWidget(
+            parent=self._base,
+            label="Mode",
+            tooltip=tooltip_text,
+            configurable=self.parameter,
+            prop="mode",
+            parameter=self.parameter.descriptors["mode"],
+        )
+
+        self._field = IntegerWidget(
+            parent=self._base,
+            label="Number of cores",
+            tooltip=tooltip_text,
+            configurable=self.parameter,
+            prop="n_procs",
+            parameter=self.parameter.descriptors["n_procs"],
+        )
+
+        self.add_widget(self.mode_box, key="mode")
+        self.add_widget(self._field, key="n_procs")
+
+        self.mode_box.value_changed.connect(self.mode_changed)
+
+        self.update_labels()
+        self.mode_changed()
+
+        self._field_map = {
+            "mode": self.mode_box,
+            "n_procs": self._field,
+        }
+
+    def trajectory_changed(self) -> None:
+        """Nothing to do."""
 
     @Slot()
     def mode_changed(self):
-        mode = self.mode_box.currentText()
-        if self._last_numproc is None:
-            nextval = self._totalNumberOfProcessors
-        else:
-            nextval = self._last_numproc
-        if mode == "single-core":
-            self._field.setValue(1)
-            self._field.setEnabled(False)
-        else:
-            self._field.setEnabled(True)
-            self._field.setValue(nextval)
-
-    @Slot()
-    def numproc_changed(self):
-        mode = self.mode_box.currentText()
-        numproc = self._field.value()
-        if mode == "single-core":
-            return
-        self._last_numproc = numproc
+        self._field._base.setEnabled(self.mode_box.value != "single-core")
+        self.updateValue()
 
     def get_widget_value(self):
-        mode = self.mode_box.currentText()
-        numproc = self._field.value()
+        mode = self.mode_box.value
+        numproc = self._field.value
 
-        return (mode,) if mode == "single-core" else (mode, numproc)
+        return (mode, numproc)

@@ -18,6 +18,13 @@ from __future__ import annotations
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    FrameSelect,
+    MDANSETrajectory,
+    OutputFile,
+    RunningMode,
+)
 from MDANSE.MolecularDynamics.Analysis import radius_of_gyration
 
 
@@ -41,18 +48,14 @@ class RadiusOfGyration(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    trajectory = MDANSETrajectory()
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """
@@ -60,20 +63,20 @@ class RadiusOfGyration(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["frames"]["number"]
+        self.numberOfSteps = len(self.frames)
 
         # Will store the time.
         self._outputData.add(
             "rog/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["time"],
+            self.frames.times,
             units="ps",
         )
 
         self._outputData.add(
             "rog/rog",
             "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
+            (len(self.frames),),
             axis="rog/axes/time",
             units="nm",
             main_result=True,
@@ -101,7 +104,7 @@ class RadiusOfGyration(IJob):
         """
 
         # get the Frame index
-        frameIndex = self.configuration["frames"]["value"][index]
+        frameIndex = self.frames[index].ind
 
         conf = self.trajectory.configuration(frameIndex)
 
@@ -115,10 +118,14 @@ class RadiusOfGyration(IJob):
 
     def combine(self, index, x):
         """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
+        Combines returned results of run_step.
+
+        Parameters
+        ----------
+        index : int
+            The index of the step.
+        x : Any
+            The returned result(s) of run_step.
         """
 
         self._outputData["rog/rog"][index] = x
@@ -129,8 +136,8 @@ class RadiusOfGyration(IJob):
         """
         # Write the output variables.
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

@@ -17,10 +17,18 @@ from __future__ import annotations
 
 import numpy as np
 
-from MDANSE.Framework.AtomGrouping.grouping import (
-    add_grouped_totals,
-)
+from MDANSE.Framework.AtomGrouping.grouping import add_grouped_totals
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    FrameSelect,
+    GroupingLevel,
+    Integer,
+    MDANSETrajectory,
+    OutputFile,
+    RunningMode,
+)
 
 
 class RootMeanSquareDeviation(IJob):
@@ -44,51 +52,33 @@ class RootMeanSquareDeviation(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        transmutation="atom_transmutation",
+        grouping="grouping_level",
     )
-    settings["reference_frame"] = (
-        "IntegerConfigurator",
-        {"mini": 0, "default": 0, "label": "Trajectory frame used as reference"},
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    reference_frame = Integer(
+        minimum=0,
+        default=0,
+        label="Trajectory frame used as reference",
     )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         super().initialize()
 
         self.numberOfSteps = len(self.trajectory.atom_indices)
 
-        self._referenceIndex = self.configuration["reference_frame"]["value"]
-
         # Will store the time.
         self._outputData.add(
             "rmsd/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.frames.times,
             units="ps",
         )
 
@@ -97,7 +87,7 @@ class RootMeanSquareDeviation(IJob):
             self._outputData.add(
                 f"rmsd/{element}",
                 "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
+                (len(self.frames),),
                 axis="rmsd/axes/time",
                 units="nm",
                 main_result=True,
@@ -106,7 +96,7 @@ class RootMeanSquareDeviation(IJob):
         self._outputData.add(
             "rmsd/total",
             "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
+            (len(self.frames),),
             axis="rmsd/axes/time",
             units="nm",
             main_result=True,
@@ -126,22 +116,26 @@ class RootMeanSquareDeviation(IJob):
 
         series = self.trajectory.read_atomic_trajectory(
             atom_index,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
+            first=self.frames.index_start,
+            last=self.frames.index_stop + 1,
+            step=self.frames.index_step,
         )
 
         # Compute the squared sum of the difference between all the coordinate of atoms i and the reference ones
-        squaredDiff = np.sum((series - series[self._referenceIndex, :]) ** 2, axis=1)
+        squaredDiff = np.sum((series - series[self.reference_frame, :]) ** 2, axis=1)
 
         return index, squaredDiff
 
     def combine(self, index, x):
         """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
+        Combines returned results of run_step.
+
+        Parameters
+        ----------
+        index : int
+            The index of the step.
+        x : Any
+            The returned result(s) of run_step.
         """
 
         element = self._atoms[self.trajectory.atom_indices[index]]
@@ -180,8 +174,8 @@ class RootMeanSquareDeviation(IJob):
         )
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

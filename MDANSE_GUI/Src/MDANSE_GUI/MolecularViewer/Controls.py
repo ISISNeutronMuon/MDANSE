@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from functools import partial
+
 from qtpy.QtCore import QMutex, Qt, QTimer, Slot
 from qtpy.QtWidgets import (
     QCheckBox,

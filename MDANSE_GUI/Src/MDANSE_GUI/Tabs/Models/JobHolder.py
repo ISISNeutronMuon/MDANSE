@@ -21,7 +21,7 @@ from itertools import count
 from logging import Handler
 from logging.handlers import QueueListener
 from multiprocessing import Event, Pipe, Process, Queue
-from typing import Any, NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
@@ -30,8 +30,11 @@ from MDANSE.Framework.Converters import Converter
 from MDANSE.Framework.Jobs.JobStatus import JobInfo, JobStates
 from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
-from MDANSE_GUI.Subprocess.Subprocess import Connection, Subprocess
+from MDANSE_GUI.Subprocess.Subprocess import Subprocess
 from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
+
+if TYPE_CHECKING:
+    from multiprocessing.connection import Connection
 
 
 class JobThread(QThread):
@@ -220,21 +223,21 @@ Status:
         self.update_fields()
 
     def expected_output(self) -> str:
-        try:
-            len(self.parameters["output_files"][1])
-        except TypeError:  # job is a converter
-            file_name = self.parameters["output_files"][0]
-            if ".mdt" not in file_name[-5:]:
+        # job is a converter
+        if "compression" in self.parameters["output_files"]:
+            file_name = self.parameters["output_files"]["path"]
+            if not file_name.endswith(".mdt"):
                 file_name += ".mdt"
             return file_name
-        else:  # job is an analysis
-            if "MDAFormat" in self.parameters["output_files"][1]:
-                file_name = self.parameters["output_files"][0]
-                if ".mda" not in file_name[-5:]:
-                    file_name += ".mda"
-                return file_name
-            else:
-                return self.parameters["output_files"][0]
+
+        # job is an analysis
+        if "MDAFormat" in self.parameters["output_files"]["out_format"]:
+            file_name = self.parameters["output_files"]["path"]
+            if not file_name.endswith(".mda"):
+                file_name += ".mda"
+            return file_name
+
+        return self.parameters["output_files"]["path"]
 
     @Slot(int)
     def on_started(self, target_steps: int):

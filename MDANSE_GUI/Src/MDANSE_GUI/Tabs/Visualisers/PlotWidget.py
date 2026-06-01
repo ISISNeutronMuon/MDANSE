@@ -207,9 +207,9 @@ class PlotWidget(QWidget):
     reset_slider_values = Signal(bool)
     change_slider_coupling = Signal(bool)
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, plotter_type: str = "Single", **kwargs) -> None:
         """Create an empty plot with the default plotter."""
-        plotter_type = kwargs.pop("plotter_type", "Single")
+
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None

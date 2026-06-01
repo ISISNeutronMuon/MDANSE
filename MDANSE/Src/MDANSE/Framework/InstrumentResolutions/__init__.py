@@ -15,6 +15,9 @@
 #
 from __future__ import annotations
 
+# Ensure imported first
+import MDANSE.Framework.Parameters
+
 from .Gaussian import Gaussian as Gaussian
 from .Ideal import Ideal as Ideal
 from .IInstrumentResolution import IInstrumentResolution as IInstrumentResolution

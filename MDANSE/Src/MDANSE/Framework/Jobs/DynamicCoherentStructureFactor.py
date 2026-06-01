@@ -25,6 +25,20 @@ from MDANSE.Framework.AtomGrouping.grouping import (
     pair_labels,
 )
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    CorrelationWindow,
+    FrameSelect,
+    GroupingLevel,
+    InstrumentResolution,
+    MDANSETrajectory,
+    OutputFile,
+    QVectors,
+    RangeCellCutoff,
+    RunningMode,
+    Weights,
+)
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
@@ -58,115 +72,83 @@ class DynamicCoherentStructureFactor(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        transmutation="atom_transmutation",
+        grouping="grouping_level",
     )
-    settings["instrument_resolution"] = (
-        "InstrumentResolutionConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-        },
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    q_vectors = QVectors(depends={"trajectory": "trajectory"})
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    instrument_resolution = InstrumentResolution(
+        depends={"trajectory": "trajectory", "window": "frame_window"},
     )
-    settings["q_vectors"] = (
-        "QVectorsConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {
-            "default": "b_coherent",
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            },
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    weights = Weights(default="b_coherent", depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        self.numberOfSteps = self.configuration["q_vectors"]["n_shells"]
+        self.generator: IQVectors = self.q_vectors.generator
+        self.generator.generate()
+        self.numberOfSteps = self.generator.n_shells
 
-        nQShells = self.configuration["q_vectors"]["n_shells"]
+        nQShells = self.generator.n_shells
         if not isinstance(
-            self.configuration["q_vectors"]["generator"],
+            self.generator,
             LatticeQVectors,
         ):
             LOG.warning(
-                f"This task should be used with a lattice-based Q vector generator. You have picked {self.configuration['q_vectors']['generator'].__class__}. The results are likely to be incorrect."
+                "This task should be used with a lattice-based Q vector generator. "
+                "You have picked {type(self.generator.__name__}}. "
+                "The results are likely to be incorrect."
             )
 
-        self._nFrames = self.configuration["frames"]["n_frames"]
+        self._nFrames = self.frame_window.n_frames
 
-        self._instrResolution = self.configuration["instrument_resolution"]
-
-        self._nOmegas = self._instrResolution["n_omegas"]
+        self.resolution = self.instrument_resolution.run_resolution
+        self._nOmegas = self.resolution.n_omegas
 
         self._outputData.add(
             "dcsf/axes/q",
             "LineOutputVariable",
-            self.configuration["q_vectors"]["shells"],
+            self.generator.shells,
             units="1/nm",
         )
 
         self._outputData.add(
             "dcsf/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.frame_window.duration,
             units="ps",
         )
         self._outputData.add(
             "dcsf/res/time_window",
             "LineOutputVariable",
-            self._instrResolution["time_window"],
+            self.resolution.time_window,
             units="au",
         )
 
         self._outputData.add(
             "dcsf/axes/omega",
             "LineOutputVariable",
-            self._instrResolution["omega"],
+            self.resolution.omega,
             units="rad/ps",
         )
         self._outputData.add(
             "dcsf/res/omega_window",
             "LineOutputVariable",
-            self._instrResolution["omega_window"],
+            self.resolution.omega_window,
             axis="dcsf/axes/omega",
             units="au",
         )
 
-        self._indicesPerElement = self.trajectory.get_indices()
-        self.add_ideal_results = (
-            self.configuration["instrument_resolution"]["kernel"].lower() != "ideal"
-        )
+        self.indices_per_element = self.trajectory.get_indices()
 
         self.labels = pair_labels(
             self.trajectory,
@@ -189,7 +171,7 @@ class DynamicCoherentStructureFactor(IJob):
                 main_result=True,
                 partial_result=True,
             )
-            if self.add_ideal_results:
+            if self.resolution.add_ideal:
                 self._outputData.add(
                     f"dcsf/s(q,f)/ideal/{pair_str}",
                     "SurfaceOutputVariable",
@@ -213,7 +195,7 @@ class DynamicCoherentStructureFactor(IJob):
             units="au",
             main_result=True,
         )
-        if self.add_ideal_results:
+        if self.resolution.add_ideal:
             self._outputData.add(
                 "dcsf/s(q,f)/ideal/total",
                 "SurfaceOutputVariable",
@@ -225,8 +207,7 @@ class DynamicCoherentStructureFactor(IJob):
         self._cell_std = 0.0
         try:
             all_cells = [
-                self.trajectory.unit_cell(frame)._unit_cell
-                for frame in self.configuration["frames"]["value"]
+                self.trajectory.unit_cell(frame.ind)._unit_cell for frame in self.frames
             ]
         except TypeError:
             self._average_unit_cell = None
@@ -258,35 +239,32 @@ class DynamicCoherentStructureFactor(IJob):
             shell index, rho density array
 
         """
-        shell = self.configuration["q_vectors"]["shells"][index]
+        shell = self.generator.shells[index]
 
         if (
-            shell not in self.configuration["q_vectors"]["value"]
-            or self.configuration["q_vectors"]["value"][shell] is None
+            shell not in self.generator.q_vectors
+            or self.generator.q_vectors[shell] is None
         ):
             return index, None
 
-        qvec_weights = self.configuration["q_vectors"]["value"][shell]["weights"]
-        qvec_weights_sqrt = np.sqrt(qvec_weights[None, :])
-
         traj = self.trajectory
 
-        nQVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"].shape[
-            1
-        ]
+        nQVectors = self.generator.q_vectors[shell]["q_vectors"].shape[1]
 
-        rho = {}
-        for element in self.trajectory.unique_names:
-            rho[element] = np.zeros(
-                (self.configuration["frames"]["number"], nQVectors),
+        rho = {
+            element: np.zeros(
+                (len(self.frames), nQVectors),
                 dtype=np.complex64,
             )
+            for element in self.trajectory.unique_names
+        }
 
         cell_present = True
         cell_fixed = True
         # loop over the trajectory time steps
-        for i, frame in enumerate(self.configuration["frames"]["value"]):
-            unit_cell = traj.unit_cell(frame)
+        for i, frame in enumerate(self.frames):
+            unit_cell = traj.unit_cell(frame.ind)
+
             if unit_cell is None:
                 cell_present = False
             elif not np.allclose(
@@ -294,30 +272,22 @@ class DynamicCoherentStructureFactor(IJob):
                 self._average_unit_cell.direct,
             ):
                 cell_fixed = False
-            if not cell_present:
-                qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
+
+            if (
+                cell_present
+                and (hkls := self.generator.q_vectors[shell].get("hkls")) is not None
+            ):
+                qVectors = IQVectors.hkl_to_qvectors(hkls, unit_cell)
             else:
-                try:
-                    hkls = self.configuration["q_vectors"]["value"][shell]["hkls"]
-                except KeyError:
-                    qVectors = self.configuration["q_vectors"]["value"][shell][
-                        "q_vectors"
-                    ]
-                else:
-                    if hkls is None:
-                        qVectors = self.configuration["q_vectors"]["value"][shell][
-                            "q_vectors"
-                        ]
-                    else:
-                        qVectors = IQVectors.hkl_to_qvectors(hkls, unit_cell)
+                qVectors = self.generator.q_vectors[shell]["q_vectors"]
 
-            coords = traj.configuration(frame)["coordinates"]
+            coords = traj.configuration(frame.ind)["coordinates"]
 
-            for element, idxs in self._indicesPerElement.items():
+            for element, idxs in self.indices_per_element.items():
                 selectedCoordinates = np.take(coords, idxs, axis=0)
+
                 rho[element][i, :] = np.sum(
-                    np.exp(1j * np.dot(selectedCoordinates, qVectors))
-                    * qvec_weights_sqrt,
+                    np.exp(1j * np.dot(selectedCoordinates, qVectors)),
                     axis=0,
                 )
         if not cell_present:
@@ -329,36 +299,28 @@ class DynamicCoherentStructureFactor(IJob):
                 f"The unit cell is VARIABLE with the standard deviation of {self._cell_std}. This analysis should not be used with NPT runs! PLEASE CHECK YOUR RESULTS CAREFULLY."
             )
 
-        return index, (rho, np.sum(qvec_weights))
+        return index, rho
 
     def combine(self, index: int, x: np.ndarray):
         """Add partial results to the final array."""
         if x is not None:
-            norm = x[1]
-            rho = x[0]
-            n_configs = self.configuration["frames"]["n_configs"]
+            n_configs = self.frame_window.n_configs
+
             for pair_str, (label_i, label_j) in self.labels:
                 # F_ab(Q,t) = F_ba(Q,t) this is valid as long as
                 # n_configs is sufficiently large
-                corr = correlate(
-                    rho[label_i], rho[label_j][:n_configs], mode="valid"
-                ).T[0] / (n_configs * norm)
+                corr = correlate(x[label_i], x[label_j][:n_configs], mode="valid").T[
+                    0
+                ] / (n_configs * x[label_i].shape[1])
                 self._outputData[f"dcsf/f(q,t)/{pair_str}"][index, :] += corr.real
-        else:
-            for pair_str, (_, _) in self.labels:
-                self._outputData[f"dcsf/f(q,t)/{pair_str}"][index, :] = np.nan
 
     def finalize(self):
         """Apply weights and write out the results."""
-        self.configuration["q_vectors"]["generator"].write_vectors_to_file(
-            self._outputData,
-        )
+        self.generator.write_vectors_to_file(self._outputData)
 
         nAtomsPerElement = self.trajectory.get_natoms()
 
-        selected_weights, all_weights = self.trajectory.get_weights(
-            prop=self.configuration["weights"]["property"]
-        )
+        selected_weights, all_weights = self.trajectory.get_weights(prop=self.weights)
         weight_dict = get_weights(
             selected_weights,
             all_weights,
@@ -369,7 +331,7 @@ class DynamicCoherentStructureFactor(IJob):
         )
         assign_weights(self._outputData, weight_dict, "dcsf/f(q,t)/%s", self.labels)
         assign_weights(self._outputData, weight_dict, "dcsf/s(q,f)/%s", self.labels)
-        if self.add_ideal_results:
+        if self.resolution.add_ideal:
             assign_weights(
                 self._outputData, weight_dict, "dcsf/s(q,f)/ideal/%s", self.labels
             )
@@ -379,15 +341,15 @@ class DynamicCoherentStructureFactor(IJob):
             self._outputData[f"dcsf/f(q,t)/{pair_str}"] /= sqrt(ni * nj)
             self._outputData[f"dcsf/s(q,f)/{pair_str}"][:] = get_spectrum(
                 self._outputData[f"dcsf/f(q,t)/{pair_str}"],
-                self.configuration["instrument_resolution"]["time_window"],
-                self.configuration["instrument_resolution"]["time_step"],
+                self.resolution.time_window,
+                self.frames.time_step,
                 axis=1,
             )
-            if self.add_ideal_results:
+            if self.resolution.add_ideal:
                 self._outputData[f"dcsf/s(q,f)/ideal/{pair_str}"][:] = get_spectrum(
                     self._outputData[f"dcsf/f(q,t)/{pair_str}"],
                     None,
-                    self.configuration["instrument_resolution"]["time_step"],
+                    self.frames.time_step,
                     axis=1,
                 )
 
@@ -429,7 +391,7 @@ class DynamicCoherentStructureFactor(IJob):
             partial_result=True,
         )
 
-        if self.add_ideal_results:
+        if self.resolution.add_ideal:
             self._outputData["dcsf/s(q,f)/ideal/total"][:] = (
                 weighted_sum(self._outputData, "dcsf/s(q,f)/ideal/%s", self.labels)
                 / fact
@@ -447,8 +409,8 @@ class DynamicCoherentStructureFactor(IJob):
             )
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.root,
+            self.output_files.out_format,
             str(self),
             self,
         )

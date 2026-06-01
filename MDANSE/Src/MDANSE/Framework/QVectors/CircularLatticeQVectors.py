@@ -20,6 +20,7 @@ from functools import partial
 import numpy as np
 from scipy.spatial import KDTree
 
+from MDANSE.Framework.Parameters import Boolean, Float, Integer, Range, Vector
 from MDANSE.Framework.QVectors.CircularQVectors import (
     circle_of_vectors,
     circle_rotation_matrix,
@@ -42,45 +43,28 @@ class CircularLatticeQVectors(LatticeQVectors):
     |Q| values for which no valid vectors can be found are omitted in the output.
     """
 
-    settings = {}
-    settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
-    settings["shells"] = (
-        "RangeConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "default": (0.0, 5.0, 1.0),
-        },
-    )
-    settings["n_samples"] = ("IntegerConfigurator", {"mini": 1, "default": 50000})
-    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 100})
-    settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
-    settings["force_equal_weights"] = ("BooleanConfigurator", {"default": False})
-    settings["axis"] = (
-        "VectorConfigurator",
-        {"normalize": False, "notNull": True, "valueType": float, "default": [0, 0, 1]},
-    )
+    seed = Integer(minimum=0, default=0)
+    shells = Range[float](minimum=0.0, default=(0.0, 5.0, 0.5))
+    n_samples = Integer(minimum=1, default=50_000)
+    n_vectors = Integer(minimum=1, default=100)
+    width = Float(minimum=1e-6, default=1)
+    force_equal_weights = Boolean()
+    axis = Vector(normalise=True, non_zero=True, default=(0, 0, 1))
 
     def _generate(self):
-        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
+        rng = np.random.default_rng(self.seed or None)
 
-        nvecs_per_shell = self._configuration["n_vectors"]["value"]
-        n_samples = self._configuration["n_samples"]["value"]
-        target_circle_axis = self._configuration["axis"]["value"] / np.linalg.norm(
-            self._configuration["axis"]["value"],
-        )
-        rot_mat = circle_rotation_matrix(target_circle_axis)
+        rot_mat = circle_rotation_matrix(self.axis)
 
-        width = self._configuration["width"]["value"] / 2
+        width = self.width / 2
 
         if self._status is not None:
-            self._status.start(self._configuration["shells"]["number"])
+            self._status.start(len(self.shells))
 
-        self._configuration["q_vectors"] = {}
+        self.q_vectors = {}
 
-        for q in self._configuration["shells"]["value"]:
-            samples = circle_of_vectors(q, width, n_samples, rot_mat=rot_mat, rng=rng)
+        for q in self.shells:
+            samples = circle_of_vectors(q, width, self.n_samples, rot_mat=rot_mat, rng=rng)
             lattice_hkl_vectors, _ = self.lattice_vectors_with_weights(
                 samples,
                 self._unit_cell,
@@ -92,8 +76,9 @@ class CircularLatticeQVectors(LatticeQVectors):
                 q_min=q - 0.5 * width,
                 q_max=q + 0.5 * width,
             )
+
             if not np.any(selection):
-                self._configuration["q_vectors"][q] = None
+                self.q_vectors[q] = None
                 continue
 
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
@@ -102,32 +87,23 @@ class CircularLatticeQVectors(LatticeQVectors):
 
             selection = fpsampling(
                 q_vectors.T,
-                nvecs_per_shell,
-                partial(
-                    circle_of_vectors,
-                    q=1,
-                    q_width=0,
-                    n_vecs=1,
-                    rot_mat=rot_mat,
-                    rng=rng,
-                ),
+                self.n_vectors,
+                partial(circle_of_vectors, q=1, q_width=0, n_vecs=1, rot_mat=rot_mat, rng=rng),
                 rng,
             )
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
 
-            if self._configuration["force_equal_weights"]["value"]:
+            if self.force_equal_weights:
                 weights = np.ones(q_vectors.shape[1])
             else:
-                samples = circle_of_vectors(
-                    q, width, n_samples, rot_mat=rot_mat, rng=rng
-                )
+                samples = circle_of_vectors(q, width, self.n_samples, rot_mat=rot_mat, rng=rng)
                 tree = KDTree(q_vectors.T)
                 _, indices = tree.query(samples.T)
                 weights = np.bincount(indices, minlength=q_vectors.shape[1])
-                weights = q_vectors.shape[1] * weights / n_samples
+                weights = q_vectors.shape[1] * weights / self.n_samples
 
-            self._configuration["q_vectors"][q] = {
+            self.q_vectors[q] = {
                 "q_vectors": q_vectors,
                 "n_q_vectors": q_vectors.shape[1],
                 "n_q_found": n_found,
@@ -135,6 +111,7 @@ class CircularLatticeQVectors(LatticeQVectors):
                 "q": q,
                 "hkls": lattice_hkl_vectors,
             }
+
             if self._status is not None:
                 if self._status.is_stopped():
                     return

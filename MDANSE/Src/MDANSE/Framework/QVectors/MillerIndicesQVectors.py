@@ -16,7 +16,9 @@
 from __future__ import annotations
 
 import numpy as np
+from more_itertools import numeric_range
 
+from MDANSE.Framework.Parameters import Float, Range
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
@@ -29,45 +31,27 @@ class MillerIndicesQVectors(LatticeQVectors):
     their length.
     """
 
-    settings = {}
-    settings["shells"] = (
-        "RangeConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "default": (0.0, 5.0, 1.0),
-        },
-    )
-    settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
-    settings["h"] = (
-        "RangeConfigurator",
-        {"includeLast": True, "default": (0, 8, 1), "valueType": int},
-    )
-    settings["k"] = (
-        "RangeConfigurator",
-        {"includeLast": True, "default": (0, 8, 1), "valueType": int},
-    )
-    settings["l"] = (
-        "RangeConfigurator",
-        {"includeLast": True, "default": (0, 8, 1), "valueType": int},
-    )
+    shells = Range[float](include_last=True, minimum=0.0, default=(0.0, 5.0, 0.5))
+    width = Float(minimum=1e-6, default=1.0)
+    hrange = Range[int](include_last=True, default=(0, 8, 1), dtype=int)
+    krange = Range[int](include_last=True, default=(0, 8, 1), dtype=int)
+    lrange = Range[int](include_last=True, default=(0, 8, 1), dtype=int)
 
     def _generate(self):
         hSlice = slice(
-            self._configuration["h"]["first"],
-            self._configuration["h"]["last"] + 1,
-            self._configuration["h"]["step"],
+            self.hrange.start,
+            self.hrange.stop + 1,
+            self.hrange.step,
         )
         kSlice = slice(
-            self._configuration["k"]["first"],
-            self._configuration["k"]["last"] + 1,
-            self._configuration["k"]["step"],
+            self.krange.start,
+            self.krange.stop + 1,
+            self.krange.step,
         )
         lSlice = slice(
-            self._configuration["l"]["first"],
-            self._configuration["l"]["last"] + 1,
-            self._configuration["l"]["step"],
+            self.lrange.start,
+            self.lrange.stop + 1,
+            self.lrange.step,
         )
 
         # The hkl matrix (3,n_hkls)
@@ -79,14 +63,14 @@ class MillerIndicesQVectors(LatticeQVectors):
 
         dists2 = np.sum(vects**2, axis=0)
 
-        halfWidth = self._configuration["width"]["value"] / 2
+        halfWidth = self.width / 2
 
         if self._status is not None:
-            self._status.start(len(self._configuration["shells"]["value"]))
+            self._status.start(len(self.shells))
 
-        self._configuration["q_vectors"] = {}
+        self.q_vectors = {}
 
-        for q in self._configuration["shells"]["value"]:
+        for q in self.shells:
             qmin = max(0, q - halfWidth)
 
             q2low = qmin * qmin
@@ -97,7 +81,7 @@ class MillerIndicesQVectors(LatticeQVectors):
             nHits = len(hits)
 
             if nHits != 0:
-                self._configuration["q_vectors"][q] = {
+                self.q_vectors[q] = {
                     "q_vectors": vects[:, hits],
                     "n_q_vectors": nHits,
                     "n_q_found": nHits,

@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import os
 from pathlib import PurePath
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from qtpy.QtCore import QMessageLogger, QObject, Signal, Slot
 from qtpy.QtWidgets import QListView
@@ -60,7 +60,7 @@ class GeneralTab(QObject):
         visualiser=None,
         view: QAbstractItemView | None = None,
         logger=None,
-        layout: SinglePanel | DoublePanel | MultiPanel = DoublePanel,
+        layout: Literal[SinglePanel, DoublePanel, MultiPanel] = DoublePanel,
         label_text: str = "An abstract GUI element",
         **kwargs,
     ):

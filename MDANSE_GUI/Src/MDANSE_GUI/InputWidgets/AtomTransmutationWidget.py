@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtWidgets import (
     QComboBox,
     QGroupBox,
@@ -28,13 +30,15 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Framework.Configurators.AtomTransmutationConfigurator import AtomTransmuter
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.Framework.Parameters.AtomMapping import AtomTransmutation, AtomTransmuter
 from MDANSE_GUI.InputWidgets.AtomSelectionWidget import (
     AtomSelectionWidget,
     SelectionHelper,
     SelectionModel,
 )
+
+if TYPE_CHECKING:
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class TransmutationHelper(SelectionHelper):
@@ -83,6 +87,7 @@ class TransmutationHelper(SelectionHelper):
         self.transmutation_textbox.setReadOnly(True)
         self.transmutation_combo = QComboBox()
         self.transmutation_combo.addItems(ATOMS_DATABASE.atoms)
+
         self._field = field
         self.inner_model = SelectionModel(traj_data[1])
         super().__init__(
@@ -142,7 +147,7 @@ class TransmutationHelper(SelectionHelper):
         """Apply the transmutation to the selected atoms."""
         self.inner_model.finalise_manual_selection()
         selection_string = self.selection_model.current_steps()
-        self.transmuter.apply_transmutation(
+        self.transmuter.apply(
             selection_string,
             self.transmutation_combo.currentText(),
         )
@@ -153,17 +158,21 @@ class TransmutationHelper(SelectionHelper):
         """Update the list of transmuted atoms in the text box."""
         substitutions = self.transmuter.get_setting()
 
-        text = [
-            f"Number of atoms transmuted:\n{len(substitutions)}\n\nTransmuted atoms:\n",
-        ]
-        for idx, symbol in substitutions.items():
-            text.append(f"{idx}  {self.atm_full_names[idx]} -> {symbol}\n")
+        text = f"""\
+Number of atoms transmuted:
+{len(substitutions)}
 
-        self.transmutation_textbox.setText("".join(text))
+Transmuted atoms:
+"""
+        transmutations = (
+            f"{idx}  {self.atm_full_names[idx]} -> {symbol}"
+            for idx, symbol in substitutions.items()
+        )
+        self.transmutation_textbox.setText(text + "\n".join(transmutations))
 
     def reset_transmuation(self):
         """Reset the transmuter so that no transmutation are set."""
-        self.transmuter.reset_setting()
+        self.transmuter.reset()
         self.update_transmutation_textbox()
         self.apply()
 
@@ -172,7 +181,7 @@ class TransmutationHelper(SelectionHelper):
         self._field.setText(self.transmuter.get_json_setting())
 
 
-class AtomTransmutationWidget(AtomSelectionWidget):
+class AtomTransmutationWidget(AtomSelectionWidget[AtomTransmutation]):
     """The atoms transmutation widget."""
 
     _push_button_text = "Atom transmutation helper"
@@ -186,16 +195,16 @@ class AtomTransmutationWidget(AtomSelectionWidget):
         " the helper dialog."
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, use_list_view: bool = False, **kwargs):
         """Create the main widget for transmuting atom types.
 
         Parameters
         ----------
-        _use_list_view : bool, optional
+        use_list_view : bool
             If True, a ListView will replace LineEdit, by default True
 
         """
-        if kwargs.get("use_list_view", False):
+        if use_list_view:
             raise TypeError(f"Cannot use list view with {type(self).__name__}.")
         super().__init__(*args, use_list_view=False, **kwargs)
         self._field.textChanged.connect(self.updateValue)
@@ -214,7 +223,7 @@ class AtomTransmutationWidget(AtomSelectionWidget):
             Create and return the transmutation helper QDialog.
 
         """
-        transmuter = self._configurator.get_transmuter()
+        transmuter = AtomTransmuter(traj_data[1])
         return TransmutationHelper(
             transmuter,
             traj_data,

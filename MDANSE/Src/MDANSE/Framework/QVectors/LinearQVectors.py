@@ -18,6 +18,7 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
+from MDANSE.Framework.Parameters import Float, Integer, Range, Vector
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
 
 
@@ -69,51 +70,34 @@ class LinearQVectors(IQVectors):
     around the shell centre defined by the 'shells' input.
     """
 
-    settings = {}
-    settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
-    settings["shells"] = (
-        "RangeConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "default": (0.0, 5.0, 1.0),
-        },
-    )
-    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
-    settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
-    settings["axis"] = (
-        "VectorConfigurator",
-        {"normalize": True, "notNull": True, "default": [1, 0, 0], "valueType": float},
-    )
+    seed = Integer(minimum=0, default=0)
+    shells = Range[float](minimum=0.0, default=(0.0, 5.0, 0.5))
+    n_vectors = Integer(minimum=1, default=50)
+    width = Float(minimum=1e-6, default=1.0)
+    axis = Vector(normalise=True, non_zero=True, default=np.array([1, 0, 0]))
 
     def _generate(self):
-        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
-
-        axis = self._configuration["axis"]["vector"].array
-
-        width = self._configuration["width"]["value"]
-
-        nvecs_per_shell = self._configuration["n_vectors"]["value"]
+        rng = np.random.default_rng(self.seed or None)
 
         if self._status is not None:
-            self._status.start(self._configuration["shells"]["number"])
+            self._status.start(len(self.shells))
 
-        self._configuration["q_vectors"] = {}
+        self.q_vectors = {}
 
-        for q in self._configuration["shells"]["value"]:
-            q_vectors = linear_vectors(q, width, nvecs_per_shell, axis, rng)
+        for q in self.shells:
+            q_vectors = linear_vectors(q, self.width, self.n_vectors, self.axis, rng)
 
-            self._configuration["q_vectors"][q] = {
+            self.q_vectors[q] = {
                 "q_vectors": q_vectors,
-                "n_q_vectors": nvecs_per_shell,
-                "n_q_found": nvecs_per_shell,
-                "weights": np.ones(nvecs_per_shell),
+                "n_q_vectors": self.n_vectors,
+                "n_q_found": self.n_vectors,
+                "weights": np.ones(self.n_vectors),
                 "q": q,
                 "hkls": self.qvectors_to_hkl(q_vectors, self._unit_cell)
                 if self._unit_cell is not None
                 else None,
             }
+
             if self._status is not None:
                 if self._status.is_stopped():
                     return

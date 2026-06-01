@@ -16,6 +16,27 @@
 from __future__ import annotations
 
 import logging
+from enum import Enum
+from typing import Any
+
+
+class LogLevels(Enum):
+    NONE = 0
+    DEBUG = logging.DEBUG
+    INFO = logging.INFO
+    WARN = logging.WARN
+    ERROR = logging.ERROR
+    CRITICAL = logging.CRITICAL
+
+    NO_LOGS = NONE
+
+    @classmethod
+    def _missing_(cls, value: str) -> Any:
+        if not isinstance(value, str):
+            return
+        value = "_".join(value.split()).upper()
+        return vars(cls).get(value)
+
 
 FMT = logging.Formatter(
     "%(asctime)s - %(levelname)s - process[%(process)d] - %(module)s %(lineno)d - %(message)s"

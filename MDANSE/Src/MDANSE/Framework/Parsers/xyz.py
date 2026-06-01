@@ -16,15 +16,19 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Iterator
 from itertools import islice
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
-import numpy.typing as npt
 from more_itertools import ilen, split_at
 
 from .Parser import Parser
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from pathlib import Path
+
+    import numpy.typing as npt
 
 
 class XYZFile(Parser):

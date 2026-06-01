@@ -18,6 +18,15 @@ from __future__ import annotations
 from itertools import groupby
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    FrameSelect,
+    GroupingLevel,
+    MDANSETrajectory,
+    OutputFile,
+    RunningMode,
+)
+from MDANSE.Framework.Parameters.AtomMapping import GroupingLevels
 from MDANSE.MolecularDynamics.Analysis import mean_square_fluctuation
 
 
@@ -38,38 +47,29 @@ class RootMeanSquareFluctuation(IJob):
         "Analysis",
         "Dynamics",
     )
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        grouping="grouping_level",
     )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "choices": ["atom", "molecule"],
-            "default": "atom",
-            "dependencies": {
-                "trajectory": "trajectory",
-            },
-        },
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    grouping_level = GroupingLevel(
+        depends={"trajectory": "trajectory"},
+        default="atom",
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables"""
         super().initialize()
         self.numberOfSteps = len(self.trajectory.atom_indices)
 
-        self.group_molecules = self.configuration["grouping_level"]["value"] != "atom"
+        self.group_molecules = self.grouping_level is not GroupingLevels.ATOM
         self.ele_idxs = {}
 
         all_names = self.trajectory.atom_names
@@ -135,7 +135,7 @@ class RootMeanSquareFluctuation(IJob):
                 units="nm",
             )
 
-    def run_step(self, index):
+    def run_step(self, index: int) -> tuple[int, float]:
         """Runs a single step of the job.
 
         Parameters
@@ -145,33 +145,36 @@ class RootMeanSquareFluctuation(IJob):
 
         Returns
         -------
-        set[int, float]
-            The atom index and the calculated root mean square
-            fluctuation for that atom.
+        index : int
+            The index of the step.
+        rmsf : npt.NDArray[float]
+            The calculated root mean square fluctuation for atom index.
         """
+        # read the trajectory
         atom_index = self.trajectory.atom_indices[index]
         series = self.trajectory.read_atomic_trajectory(
             atom_index,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
+            first=self.frames.index_start,
+            last=self.frames.index_stop + 1,
+            step=self.frames.index_step,
         )
+
         rmsf = mean_square_fluctuation(series, root=True)
         return index, rmsf
 
-    def combine(self, index, x):
+    def combine(self, index: int, rmsf: float) -> None:
         """Combines returned results of run_step.
 
         Parameters
         ----------
         index : int
-            The atom index.
-        x : float
+            The index of the step.
+        rmsf : float
             The RMSF results for the atom.
         """
-        self._outputData["rmsf/all"][index] = x
+        self._outputData["rmsf/all"][index] = rmsf
         name = self._names[index]
-        self._outputData[f"rmsf/{name}"][self.ele_idxs[name]] = x
+        self._outputData[f"rmsf/{name}"][self.ele_idxs[name]] = rmsf
         self.ele_idxs[name] += 1
 
     def finalize(self):
@@ -187,8 +190,8 @@ class RootMeanSquareFluctuation(IJob):
 
         # Write the output variables.
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

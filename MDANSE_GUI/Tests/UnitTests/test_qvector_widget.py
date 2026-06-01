@@ -86,11 +86,11 @@ def test_job_widgets_load(qapp, qtbot, caplog, trajectory, qvector_type):
     qvec_widget = action._widgets[widget_index]
     if "SphericalLattice" in qvector_type:
         with qtbot.waitSignal(qvec_widget.value_changed):
-            qvec_widget._selector.setCurrentText("SphericalQVectors")
+            qvec_widget._selector.selection = "SphericalQVectors"
     caplog.clear()
 
     with qtbot.waitSignal(qvec_widget.value_changed):
-        qvec_widget._selector.setCurrentText(qvector_type)
+        qvec_widget._selector.selection = qvector_type
 
     print(caplog.text)
     print(qvector_type)

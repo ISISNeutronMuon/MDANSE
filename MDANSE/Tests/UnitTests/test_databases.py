@@ -207,7 +207,7 @@ class TestAtomsDatabase(unittest.TestCase):
         next(lines)
         self.assertEqual(next(lines).strip(), "H")
         self.assertTrue({"property", "value", "unit"}.issubset(next(lines).split()))
-        
+
         properties = {
             tokens[0] for line in lines if len(tokens := line.split()) > 2
         }

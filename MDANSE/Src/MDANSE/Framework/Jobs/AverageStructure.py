@@ -15,14 +15,21 @@
 #
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
 from ase.atoms import Atom, Atoms
 from ase.io import write as ase_write
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    ASEOutputFormat,
+    AtomSelection,
+    Boolean,
+    FrameSelect,
+    MDANSETrajectory,
+    RunningMode,
+    SingleChoice,
+)
 from MDANSE.Framework.Units import measure
 
 
@@ -43,38 +50,24 @@ class AverageStructure(IJob):
     label = "Average Structure"
 
     category = ("Trajectory",)
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "default": (0, 1, 1)},
+    trajectory = MDANSETrajectory(selection="atom_selection")
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    fold = Boolean(
+        label="Fold coordinates in to box. Normally it should not be necessary."
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    output_units = SingleChoice[str, str](
+        label="Distance units of the output",
+        choices=("ang", "Bohr", "nm", "pm"),
+        aliases={"Angstrom": "ang"},
+        default="ang",
     )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {
-            "default": False,
-            "label": "Fold coordinates into box. Normally it should not be necessary.",
-        },
-    )
-    settings["output_units"] = (
-        "SingleChoiceConfigurator",
-        {
-            "label": "Distance unit of the output",
-            "choices": ["Angstrom", "Bohr", "nm", "pm"],
-            "default": "Angstrom",
-        },
-    )
-    settings["output_files"] = (
-        "OutputStructureConfigurator",
-        {"format": "vasp", "label": "Output structure file name and format"},
-    )
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    running_mode = RunningMode()
+    output_files = ASEOutputFormat()
 
     def initialize(self):
         """
@@ -86,50 +79,45 @@ class AverageStructure(IJob):
 
         self._atoms = self.trajectory.atom_names
 
-        target_unit = self.configuration["output_units"]["value"]
-        if target_unit == "Angstrom":
-            target_unit = "ang"
+        target_unit = self.output_units
 
         self._conversion_factor = measure(1.0, "nm").toval(target_unit)
 
         self._ase_atoms = Atoms()
 
-        frame_range = range(
-            self.configuration["frames"]["first"],
-            self.configuration["frames"]["last"] + 1,
-            self.configuration["frames"]["step"],
-        )
-
         try:
-            unit_cells = [
-                self.trajectory.unit_cell(frame)._unit_cell for frame in frame_range
+            self._unit_cells = [
+                self.trajectory.unit_cell(frame)._unit_cell
+                for frame in self.frames.samples
             ]
         except Exception:
             raise ValueError(
                 "Unit cell needs to be defined for the AverageStructure analysis. "
                 "You can add a unit cell using TrajectoryEditor."
             ) from None
-        else:
-            self._unit_cells = unit_cells
 
     def run_step(self, index):
-        """
-        Runs a single step of the job.
+        """Runs a single step of the job.
 
-        Args:
-            index (int): the index of the step
+        Parameters
+        ----------
+        index : int
+            the index of the step
 
-        Returns:
-            tuple: the result of the step
+        Returns
+        -------
+        tuple
+            the result of the step
+
         """
 
         # get selected atom indices sublist
         atom_index = self.trajectory.atom_indices[index]
         series = self.trajectory.read_atomic_trajectory(
             atom_index,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
+            first=self.frames.index_start,
+            last=self.frames.index_stop,
+            step=self.frames.index_step,
         )
 
         return index, np.mean(series, axis=0) * self._conversion_factor
@@ -162,17 +150,15 @@ class AverageStructure(IJob):
 
         self._ase_atoms.set_cell(average_unit_cell)
 
-        if self.configuration["fold"]["value"]:
+        if self.fold:
             temp = self._ase_atoms.get_scaled_positions()
             correction = np.floor(temp)
             self._ase_atoms.set_scaled_positions(temp - correction)
 
-        PLATFORM.create_directory(
-            Path(self.configuration["output_files"]["file"]).parent
-        )
+        PLATFORM.create_directory(self.output_files.path.parent)
         ase_write(
-            self.configuration["output_files"]["file"],
+            self.output_files.path,
             self._ase_atoms,
-            self.configuration["output_files"]["format"],
+            self.output_files.out_format,
         )
         super().finalize()

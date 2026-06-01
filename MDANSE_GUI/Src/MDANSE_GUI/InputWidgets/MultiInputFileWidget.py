@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import os
-from pathlib import PurePath
+from pathlib import Path
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog
@@ -42,24 +42,26 @@ class MultiInputFileWidget(InputFileWidget):
         except Exception:
             LOG.warning(f"session.get_path failed for {self._job_name}")
         new_value = self._file_dialog(
-            self.parent(),
+            self._parent,
             "Load file",
             str(self.default_path),
             self._qt_file_association,
         )
 
         if new_value is not None and new_value[0]:
-            values = ['"' + str(PurePath(value)) + '"' for value in new_value[0]]
-            self._field.setText("[" + ", ".join(values) + "]")
+            values = (str(Path(value)) for value in new_value[0])
+            self._field.setText(", ".join(values))
             self.updateValue()
+
+            pth = Path(new_value[0][0]).parent
+            LOG.info(f"Settings path of {self._job_name} to {pth}")
+
             try:
-                LOG.info(
-                    f"Settings path of {self._job_name} to {os.path.split(new_value[0][0])[0]}"
-                )
-                paths_group.set(
-                    self._job_name, str(PurePath(os.path.split(new_value[0][0])[0]))
-                )
+                paths_group.set(self._job_name, str(pth))
             except Exception:
                 LOG.error(
                     f"session.set_path failed for {self._job_name}, {os.path.split(new_value[0][0])[0]}"
                 )
+
+    def get_widget_value(self):
+        return [pth.strip('" ') for pth in self._field.text().split(",")]

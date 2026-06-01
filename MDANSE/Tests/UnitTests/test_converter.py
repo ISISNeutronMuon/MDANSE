@@ -9,9 +9,6 @@ from more_itertools import run_length
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, DATA_DIR
 
-from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
-    HDFTrajectoryConfigurator,
-)
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import JobError
 from MDANSE.Framework.Parsers import LAMMPSConfigFile
@@ -82,19 +79,17 @@ def _converter_test(
     parameters["output_files"] = (temp_name, 64, 128, compression, "INFO")
 
     converter = Converter.create(converter_type)
-    converter.run(parameters, status=True)
+    converter.configuration = parameters
+
+    converter.run(status=True)
 
     if generate_benchmarks:
         return
 
-    traj_conf = HDFTrajectoryConfigurator("trajectory")
-    traj_conf.configure(out_name)
-    traj_conf["instance"].close()
-
-    compare_hdf5(out_name, result_file, compare, atol=1e-6)
-
     assert out_name.is_file()
     assert log_name.is_file()
+
+    compare_hdf5(out_name, result_file, compare, atol=1e-6)
 
 
 @pytest.mark.parametrize(
@@ -143,7 +138,7 @@ def _converter_test(
             "VASP",
             "vasp.mdt",
             ("/configuration/coordinates", "/unit_cell", "/time"),
-            {"fold": False, "time_step": 1.0, "xdatcar_file": vasp_xdatcar},
+            {"fold": False, "time_step": 1.0, "trajectory_file": vasp_xdatcar},
         ),
         (
             "cp2k",
@@ -152,21 +147,20 @@ def _converter_test(
                 "/configuration/coordinates",
                 "/configuration/velocities",
                 "/time",
-                "/charge",
             ),
             {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": cp2k_vel},
         ),
         (
             "cp2k",
             "cp2k.mdt",
-            ("/configuration/coordinates", "/time", "/charge"),
+            ("/configuration/coordinates", "/time"),
             {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": None},
         ),
         (
             "cp2k",
             "cp2k.mdt",
-            ("/configuration/coordinates", "/time", "/charge"),
-            {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": ""},
+            ("/configuration/coordinates", "/time"),
+            {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": None},
         ),
         (
             "cp2k",
@@ -354,7 +348,7 @@ def _converter_test(
                 "/unit_cell",
                 "/time",
             ),
-            {"atom_aliases": "{}", "castep_file": pbanew_md, "fold": False},
+            {"atom_aliases": "{}", "trajectory_file": pbanew_md, "fold": False},
         ),
         (
             "DFTB",
@@ -407,17 +401,18 @@ def _converter_test(
             "md.mdt",
             ("/configuration/coordinates", "/unit_cell", "/time"),
             {
-                "topology_file": (md_pdb, "AUTO"),
-                "coordinate_files": ([str(md_xtc)], "XTC"),
+                "topology_file": md_pdb,
+                "coordinate_format": "XTC",
+                "coordinate_files": md_xtc,
             },
-        ),  # Does not work with Path
+        ),
         (
             "MDTraj",
             "hem_cam.mdt",
             ("/configuration/coordinates", "/unit_cell", "/time"),
             {
                 "topology_file": hem_cam_pdb,
-                "coordinate_files": [str(hem_cam_dcd)],  # Does not work with Path
+                "coordinate_files": hem_cam_dcd,
                 "time_step": 1.0,
             },
         ),
@@ -815,7 +810,7 @@ def test_lammps_config_parser(config_file, expected):
         (
             "VASP",
             '{"": {"O": "Os", "Mo": "Os", "Bi": "Os"}}',
-            {"fold": False, "time_step": 1.0, "xdatcar_file": vasp_xdatcar},
+            {"fold": False, "time_step": 1.0, "trajectory_file": vasp_xdatcar},
         ),
         (
             "cp2k",
@@ -845,7 +840,7 @@ def test_lammps_config_parser(config_file, expected):
         (
             "CASTEP",
             '{"": {"C": "Os", "Fe": "Os", "O": "Os", "H": "Os", "N": "Os"}}',
-            {"castep_file": pbanew_md, "fold": False},
+            {"trajectory_file": pbanew_md, "fold": False},
         ),
         (
             "DFTB",
@@ -869,8 +864,8 @@ def test_lammps_config_parser(config_file, expected):
             "MDAnalysis",
             '{"name=O;type=O;mass=15.999": {"O": "Os"}, "name=C;type=C;mass=12.011": {"C": "Os"}}',
             {
-                "topology_file": (cp2k_pos, "AUTO"),
-                "coordinate_files": ([], "AUTO"),
+                "topology_file": cp2k_pos,
+                "coordinate_files": [],
             },
         ),  # Does not work with Path
         (
@@ -1041,7 +1036,7 @@ def test_lammps_config_parser(config_file, expected):
                 }
             ),
             {
-                "coordinate_files": [str(mdtraj_small)],  # Does not work with Path
+                "coordinate_files": mdtraj_small,
                 "time_step": 1.0,
             },
         ),

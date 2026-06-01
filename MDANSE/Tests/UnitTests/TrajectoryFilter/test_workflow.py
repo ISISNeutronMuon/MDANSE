@@ -1,19 +1,18 @@
 import json
-from typing import Generator, Any
 from pathlib import Path
+from typing import Generator, Any
+
 import pytest
 import h5py
 import numpy as np
-
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
-
-from MDANSE.Mathematics.Signal import FILTER_MAP, Filter
-
+import numpy.typing as npt
+from scipy.integrate import trapezoid as trap
 from scipy.interpolate import interp1d
 from scipy.signal import find_peaks
-from scipy.integrate import trapezoid as trap
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Mathematics.Signal import FILTER_MAP, Filter
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
@@ -105,11 +104,11 @@ def run_trajectory_filter(
 
     trajectory_filter_parameters = {
         "atom_selection": f'{{"0": {{"function_name": "select_all", "operation_type": "union"}}, "1": {{"function_name": "select_atoms", "index_range": [0, {n_atoms}], "operation_type": "intersection"}}}}',
-        # "frames": frames,
-        "instrument_resolution": ("ideal", {}),
+        #"frames": frames,
+        # "instrument_resolution": ("ideal", {}),
         "output_files": (name, 64, 128, "gzip", "no logs"),
-        "projection": ("NullProjector", []),
-        "running_mode": ("single-core",),
+        # "projection": ("NullProjector", None),
+        # "running_mode": ("single-core",),
         "trajectory": traj_path,
         "trajectory_filter": json.dumps(config),
         "weights": "atomic_weight",
@@ -145,7 +144,7 @@ def run_power_spectrum(name: Path, frames, n_atoms, traj_path: Path) -> Path:
         "atom_transmutation": "{}",
         "instrument_resolution": ("ideal", {}),
         "output_files": (name, ["MDAFormat"], "no logs"),
-        "projection": ("NullProjector", []),
+        "projection": ("NullProjector", None),
         "running_mode": ("single-core",),
         "trajectory": traj_path,
         "weights": "atomic_weight",
@@ -247,7 +246,7 @@ def run_convolution_test(
     assert np.round(u_x_axis.min(), 0) == 0
     assert np.round(u_x_axis.max(), max_freq_precision) == max_freq
 
-    uw = original_data._data
+    uw: npt.NDArray[np.floating] = original_data._data
 
     # Retrieve filter configuration dict
     filter_class = FILTER_MAP[filter_type]
@@ -271,7 +270,7 @@ def run_convolution_test(
     # due to the contributions from sosfiltfilt, which makes two passes of the filter,
     # and the Wiener-Khinchin theorem, which yields another squaring of the power spectrum
     # by autocorrelation.
-    hw = abs(attenuation(filter_object.freq_response.frequencies)) ** 4
+    hw: npt.NDArray[np.floating] = abs(attenuation(filter_object.freq_response.frequencies)) ** 4
 
     # Compute the frequency domain convolution U(w)H(w) that we will compare F(w) with
     model = hw * uw
@@ -335,9 +334,9 @@ def run_convolution_test(
     ],
 )
 def test_convolution_simple(
-    tmp_path,
+    tmp_path: Path,
     bimodal_spectrum_clean,
-    filter_config,
+    filter_config: dict[str, str | dict[str, Any]],
 ):
     TOLERANCE = 3
 
@@ -897,4 +896,4 @@ def test_position_stability(tmp_path, filter_config):
     # Get distances (magnitudes) of initial and filtered atomic displacements and check they are within 10% of each other
     a = np.sqrt(np.array([np.sum(xyz**2) for xyz in initial_x0]))
     b = np.sqrt(np.array([np.sum(xyz**2) for xyz in filtered_x0]))
-    assert np.all(np.isclose(a, b, rtol=1e-2 * TOLERANCE))
+    assert np.testing.assert_allclose(a, b, rtol=1e-2 * TOLERANCE)

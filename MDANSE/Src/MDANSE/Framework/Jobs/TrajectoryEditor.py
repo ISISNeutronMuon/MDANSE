@@ -23,6 +23,17 @@ from MDANSE.Chemistry.ChemicalSystem import (
 )
 from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    Array,
+    AtomSelection,
+    AtomTransmutation,
+    Float,
+    FrameSelect,
+    MDANSETrajectory,
+    OutputTrajectory,
+    PartialCharge,
+    to_class,
+)
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
     RealConfiguration,
@@ -47,62 +58,36 @@ class TrajectoryEditor(IJob):
     label = "Trajectory Editor"
 
     category = ("Trajectory",)
+    PREDICTORS = ("frames",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}, "default": (0, 1, 1)},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        transmutation="atom_transmutation",
     )
-    settings["unit_cell"] = (
-        "UnitCellConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory"},
-            "default": ([[1, 0, 0], [0, 1, 0], [0, 0, 1]], False),
-        },
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    unit_cell = Array[UnitCell | None](
+        optional=True,
+        default=None,
+        non_zero=True,
+        on_set=to_class(UnitCell),
+        shape=(3, 3),
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory"},
-            "default": """\
-{
-   "0": {"function_name": "select_all", "operation_type": "union"}
-}""",
-        },
+    atom_selection = AtomSelection(
+        depends={"trajectory": "trajectory"},
+        default={"0": {"function_name": "select_all", "operation_type": "union"}},
     )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    atom_charges = PartialCharge(depends={"trajectory": "trajectory"}, default={})
+    molecule_tolerance = Float[float | None](
+        optional=True,
+        default=None,
+        tooltip="Accept bonds for distances lower than sum of the covalent radii and this tolerance margin",
+        label="Search for molecules (covalent radii plus the tolerance in nm)",
+        minimum=0.0,
     )
-    settings["atom_charges"] = (
-        "PartialChargeConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory"},
-            "default": "{}",
-        },
-    )
-    settings["molecule_tolerance"] = (
-        "OptionalFloatConfigurator",
-        {
-            "default": [False, 0.04],
-            "label": "Detect molecules",
-            "tooltip": "Accept bonds for distances lower than sum of the covalent radii and this tolerance margin",
-            "label_text": "Search for molecules (covalent radii plus the tolerance in nm)",
-        },
-    )
-    settings["output_files"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "format": "MDTFormat",
-        },
-    )
+    output_files = OutputTrajectory()
 
     def initialize(self):
         """
@@ -110,43 +95,39 @@ class TrajectoryEditor(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.configuration["frames"]["number"]
+        self.numberOfSteps = len(self.frames)
         self._input_trajectory = self.trajectory
-        self._input_chemical_system = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system
+        self._input_chemical_system = self.trajectory.chemical_system
 
-        if self.configuration["unit_cell"]["apply"]:
-            self._new_unit_cell = UnitCell(
-                np.array(self.configuration["unit_cell"]["value"])
+        if self.unit_cell is not None:
+            self._input_trajectory._trajectory._unit_cells = [self.unit_cell] * len(
+                self.trajectory
             )
-            self._input_trajectory._trajectory._unit_cells = [
-                self._new_unit_cell for _ in range(len(self._input_trajectory))
-            ]
 
         # The collection of atoms corresponding to the atoms selected for output.
         indices = self.trajectory.atom_indices
         self._indices = indices
         temp_copy = list(self._input_chemical_system.atom_list)
+
         indices_per_element = self.trajectory.get_indices()
+
         for element, numbers in indices_per_element.items():
             for num in numbers:
                 temp_copy[num] = element
+
         self._selectedAtoms = [temp_copy[ind] for ind in indices]
         name_list = [self._input_chemical_system.name_list[ind] for ind in indices]
 
         new_chemical_system = ChemicalSystem("Edited system")
         new_chemical_system.initialise_atoms(self._selectedAtoms, name_list)
-        if self.configuration["molecule_tolerance"]["use_it"]:
-            tolerance = self.configuration["molecule_tolerance"]["value"]
+        if self.molecule_tolerance is not None:
+            tolerance = self.molecule_tolerance
             conn = Connectivity(
                 trajectory=self._input_trajectory, selection=indices, parallel_workers=1
             )
             conn.find_bonds(tolerance=tolerance)
             conn.add_bond_information(new_chemical_system)
-            conf = self.trajectory.configuration(
-                self.configuration["frames"]["value"][0]
-            )
+            conf = self.trajectory.configuration(self.frames[0].ind)
             coords = conf.coordinates[indices]
             if conf.is_periodic:
                 com_conf = PeriodicRealConfiguration(
@@ -167,12 +148,12 @@ class TrajectoryEditor(IJob):
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["file"],
+            self.output_files.path,
             new_chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_files"]["dtype"],
-            chunking_limit=self.configuration["output_files"]["chunk_size"],
-            compression=self.configuration["output_files"]["compression"],
+            positions_dtype=self.output_files.dtype,
+            chunking_limit=self.output_files.chunk_size,
+            compression=self.output_files.compression,
         )
 
     def run_step(self, index):
@@ -185,9 +166,10 @@ class TrajectoryEditor(IJob):
             #. index (int): The index of the step.
             #. None
         """
-
         # get the Frame index
-        frameIndex = self.configuration["frames"]["value"][index]
+        frame = self.frames[index]
+        frameIndex = frame.ind
+        time = frame.time
 
         conf = self.trajectory.configuration(frameIndex)
         conf = conf.contiguous_configuration(bring_to_centre=True)
@@ -220,15 +202,9 @@ class TrajectoryEditor(IJob):
 
         new_charges = np.zeros(len(self._indices))
         for number, at_index in enumerate(self._indices):
-            try:
-                q = self.configuration["atom_charges"]["charges"][at_index]
-            except KeyError:
-                q = charges[at_index]
-            new_charges[number] = q
+            new_charges[number] = self.atom_charges.get(at_index, charges[at_index])
 
         # The times corresponding to the running index.
-        time = self.configuration["frames"]["time"][index]
-
         self._output_trajectory.dump_configuration(com_conf, time)
         self._output_trajectory.write_charges(new_charges, index)
 
@@ -236,10 +212,14 @@ class TrajectoryEditor(IJob):
 
     def combine(self, index, x):
         """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
+        Combines returned results of run_step.
+
+        Parameters
+        ----------
+        index : int
+            The index of the step.
+        x : Any
+            The returned result(s) of run_step.
         """
         pass
 
@@ -247,9 +227,6 @@ class TrajectoryEditor(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
-
-        # The input trajectory is closed.
-        self.trajectory.close()
 
         # The output trajectory is closed.
         self._output_trajectory.write_standard_atom_database()

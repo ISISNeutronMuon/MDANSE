@@ -20,6 +20,8 @@ from operator import itemgetter
 import numpy as np
 from more_itertools import map_reduce
 
+from MDANSE.Framework.Parameters import Float, Range
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
@@ -35,37 +37,24 @@ class GridQVectors(LatticeQVectors):
     into shells based on their length.
     """
 
-    settings = {}
-    settings["hrange"] = (
-        "RangeConfigurator",
-        {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
-    )
-    settings["krange"] = (
-        "RangeConfigurator",
-        {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
-    )
-    settings["lrange"] = (
-        "RangeConfigurator",
-        {"valueType": int, "includeLast": True, "default": (0, 8, 1)},
-    )
-    settings["q_step"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 0.2})
+    hrange = Range[int](include_last=True, default=range(0, 8, 1), dtype=int)
+    krange = Range[int](include_last=True, default=range(0, 8, 1), dtype=int)
+    lrange = Range[int](include_last=True, default=range(0, 8, 1), dtype=int)
+    qstep = Float(minimum=1e-6, default=0.01)
 
-    def _generate(self):
-        hrange = self._configuration["hrange"]["value"]
-        krange = self._configuration["krange"]["value"]
-        lrange = self._configuration["lrange"]["value"]
-        qstep = self._configuration["q_step"]["value"]
+    def _get_grid(self):
+        nh = len(self.hrange)
+        nk = len(self.krange)
+        nl = len(self.lrange)
 
-        nh = self._configuration["hrange"]["number"]
-        nk = self._configuration["krange"]["number"]
-        nl = self._configuration["lrange"]["number"]
+        return np.mgrid[
+            self.hrange[0] : self.hrange[-1] + 1,
+            self.krange[0] : self.krange[-1] + 1,
+            self.lrange[0] : self.lrange[-1] + 1,
+        ].reshape(3, nh * nk * nl)
 
-        hkls = np.mgrid[
-            hrange[0] : hrange[-1] + 1,
-            krange[0] : krange[-1] + 1,
-            lrange[0] : lrange[-1] + 1,
-        ]
-        hkls = hkls.reshape(3, nh * nk * nl)
+    def _get_qgroups(self):
+        hkls = self._get_grid()
 
         # The k matrix (3,n_hkls)
         vects = self.hkl_to_qvectors(hkls, self._unit_cell)
@@ -75,21 +64,26 @@ class GridQVectors(LatticeQVectors):
         minDist = dists.min()
         maxDist = dists.max()
 
-        bins = np.arange(minDist, maxDist + qstep / 2, qstep)
+        bins = np.arange(minDist, maxDist + self.qstep / 2, self.qstep)
         inds = np.digitize(dists, bins) - 1
 
         dists = enumerate(bins[inds])
+
         q_groups = map_reduce(dists, itemgetter(1), itemgetter(0))
+        return hkls, vects, {key: q_groups[key] for key in sorted(q_groups)}
+
+    def _generate(self):
+        hkls, vects, q_groups = self._get_qgroups()
         # Functions rely on ordered dicts for some reason?
-        q_groups = {key: q_groups[key] for key in sorted(q_groups)}
+        self.q_groups = {key: q_groups[key] for key in sorted(q_groups)}
 
         if self._status is not None:
-            self._status.start(len(q_groups))
+            self._status.start(len(self.q_groups))
 
-        self._configuration["q_vectors"] = {}
+        self.q_vectors = {}
 
-        for q, v in q_groups.items():
-            self._configuration["q_vectors"][q] = {
+        for q, v in self.q_groups.items():
+            self.q_vectors[q] = {
                 "q": q,
                 "q_vectors": vects[:, v],
                 "n_q_vectors": len(v),
@@ -102,3 +96,7 @@ class GridQVectors(LatticeQVectors):
                 if self._status.is_stopped():
                     return
                 self._status.update()
+
+    @property
+    def shells(self):
+        return sorted(self.q_vectors)

@@ -20,7 +20,7 @@ import abc
 import numpy as np
 
 from MDANSE.Core.SubclassFactory import SubclassFactory
-from MDANSE.Framework.Configurable import Configurable
+from MDANSE.Framework.Parameters.Parameters import Configurable
 
 
 class InstrumentResolutionError(Exception):
@@ -28,8 +28,8 @@ class InstrumentResolutionError(Exception):
 
 
 class IInstrumentResolution(Configurable, metaclass=SubclassFactory):
-    def __init__(self):
-        Configurable.__init__(self)
+    def __init__(self, **kwargs):
+        Configurable.__init__(self, **kwargs)
 
         self._omegaWindow = None
 

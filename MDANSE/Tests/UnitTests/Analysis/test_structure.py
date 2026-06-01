@@ -23,7 +23,7 @@ def parameters():
     parameters = {}
     # parameters['atom_selection'] = None
     # parameters['atom_transmutation'] = None
-    # parameters['frames'] = (0, 1000, 1)
+    # parameters["frames"] = "all"
     parameters["trajectory"] = short_traj
     parameters["running_mode"] = ("multicore", -4)
     parameters["q_vectors"] = (
@@ -98,6 +98,7 @@ def test_structure_analysis(
         parameters["frames"] = (0,2,1)
 
     job = IJob.create(job_info[0])
+    parameters = {key: val for key, val in parameters.items() if key in job.parameters}
     job.run(parameters, status=True)
 
     if generate_benchmarks:
@@ -140,9 +141,12 @@ def test_pdf_is_zero_at_low_distances(
     parameters["r_values"] = (0.0, 0.5, 0.01)
     parameters["output_files"] = (temp_name, ("FileInMemory",), "no logs")
 
-    print(parameters)
     job = IJob.create(job_type)
+    parameters = {key: val for key, val in parameters.items() if key in job.parameters}
+    print(parameters)
+
     job.run(parameters, status=True)
+
     results = job.results
 
     print(results.keys())
@@ -272,6 +276,7 @@ def test_intermolecular_part_is_zero_for_single_molecule(tmp_path, parameters):
     parameters["output_files"] = (temp_name, ("FileInMemory",), "no logs")
 
     job = IJob.create(job_type)
+    parameters = {key: val for key, val in parameters.items() if key in job.parameters}
     job.run(parameters, status=True)
     results = job.results
 

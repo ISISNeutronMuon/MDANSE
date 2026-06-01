@@ -16,11 +16,9 @@
 from __future__ import annotations
 
 import struct
-from collections.abc import Iterator
 from itertools import islice
 from os import SEEK_SET
-from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -31,6 +29,10 @@ from MDANSE.Framework.Parsers.Parser import Parser
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from pathlib import Path
 
 PI_2 = 0.5 * np.pi
 

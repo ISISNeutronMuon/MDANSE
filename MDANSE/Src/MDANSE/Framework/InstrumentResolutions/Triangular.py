@@ -20,21 +20,18 @@ import numpy as np
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )
+from MDANSE.Framework.Parameters import Float
 
 
 class Triangular(IInstrumentResolution):
     """Defines an instrument resolution with a triangular response"""
 
-    settings = {}
-    settings["mu"] = ("FloatConfigurator", {"default": 0.0})
-    settings["sigma"] = ("FloatConfigurator", {"default": 1.0})
+    mu = Float(default=0.0)
+    sigma = Float(default=1.0)
 
     def set_kernel(self, omegas, dt):
-        mu = self._configuration["mu"]["value"]
-        sigma = self._configuration["sigma"]["value"]
+        val = np.abs(omegas - self.mu) - self.sigma
 
-        val = np.abs(omegas - mu) - sigma
-
-        self._omegaWindow = 2.0 * np.pi * np.where(val >= 0, 0.0, -val / sigma**2)
+        self._omegaWindow = 2.0 * np.pi * np.where(val >= 0, 0.0, -val / self.sigma**2)
 
         self._timeWindow = self.apply_fft(self._omegaWindow, dt)

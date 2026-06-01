@@ -15,9 +15,7 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable
-from pathlib import Path
-from typing import NamedTuple, NoReturn
+from typing import TYPE_CHECKING, NamedTuple, NoReturn
 from xml.etree import ElementTree
 
 import numpy as np
@@ -29,6 +27,10 @@ from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 from .Parser import Parser
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
 
 
 class Atom(NamedTuple):

@@ -15,13 +15,18 @@
 #
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
 from mdtraj.formats.trr import TRRTrajectoryFile
 from mdtraj.formats.xtc import XTCTrajectoryFile
 
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Parameters import (
+    AtomMapping,
+    Boolean,
+    OutputTrajectory,
+    PathParam,
+    to_class,
+)
 from MDANSE.Framework.Parsers import PDBFile
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
@@ -37,43 +42,28 @@ class Gromacs(Converter):
 
     label = "Gromacs"
 
-    settings = {}
-    settings["pdb_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "wildcard": "PDB files (*.pdb);;All files (*)",
-            "default": "INPUT_FILENAME.pdb",
-            "label": "Input PDB file",
-            "parser": PDBFile,
-        },
+    pdb_file = PathParam[PDBFile](
+        mode="r",
+        extensions={"PDB file": "*.pdb"},
+        default="INPUT_FILENAME.pdb",
+        label="Input PDB file.",
+        on_set=to_class(PDBFile),
     )
-    settings["xtc_file"] = (
-        "InputFileConfigurator",
-        {
-            "wildcard": "XTC files (*.xtc);;TRR files (*.trr);;All files (*)",
-            "default": "INPUT_FILENAME.xtc",
-            "label": "xtc or trr file",
-        },
+    xtc_file = PathParam(
+        mode="r",
+        extensions={"XTC file": "*.xtc", "TRR file": "*.trr"},
+        default="INPUT_FILENAME.xtc",
+        label="Input XTC file.",
     )
-    settings["atom_aliases"] = (
-        "AtomMappingConfigurator",
-        {
-            "default": "{}",
-            "label": "Atom mapping",
-            "dependencies": {"input_file": "pdb_file"},
-        },
+    atom_aliases = AtomMapping(
+        depends={"trajectory": "pdb_file"},
+        label="Atom mapping",
+        default={},
     )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates into box"},
+    fold = Boolean(
+        label="Fold coordinates into box",
     )
-    settings["output_files"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "formats": ["MDTFormat"],
-            "root": "pdb_file",
-        },
-    )
+    output_files = OutputTrajectory()
 
     def initialize(self):
         """
@@ -83,13 +73,18 @@ class Gromacs(Converter):
 
         data_to_be_written = ["configuration", "time"]
 
-        filename = Path(self.configuration["xtc_file"]["filename"])
+        if self.xtc_file.suffix not in {".xtc", ".trr"}:
+            raise GromacsConverterError(
+                "Invalid file format: Gromacs converter can only convert XTC and TRR files, "
+                f"but {self.xtc_file.suffix} was provided."
+            )
+
         # Create XTC or TRR object depending on which kind of trajectory was loaded
-        if filename.suffix == ".xtc":
-            self._xdr_file = XTCTrajectoryFile(bytes(filename), "r")
+        if self.xtc_file.suffix == ".xtc":
+            self._xdr_file = XTCTrajectoryFile(bytes(self.xtc_file), "r")
             self._xtc = True
-        elif filename.suffix == ".trr":
-            self._xdr_file = TRRTrajectoryFile(bytes(filename), "r")
+        elif self.xtc_file.suffix == ".trr":
+            self._xdr_file = TRRTrajectoryFile(bytes(self.xtc_file), "r")
             self._xtc = False
 
             # Extract information about whether velocities and forces are present in the TRR file
@@ -116,28 +111,21 @@ class Gromacs(Converter):
                 data_to_be_written.append("velocities")
             if self._read_forces:
                 data_to_be_written.append("gradients")
-        else:
-            raise GromacsConverterError(
-                "Invalid file format: Gromacs converter can only convert XTC and TRR files, "
-                f"but {self.configuration['xtc_file']['filename'][-4:]} was provided."
-            )
 
         # The number of steps of the analysis.
         self.numberOfSteps = len(self._xdr_file)
 
         # Create all chemical entities from the PDB file.
-        chemical_system = self.configuration["pdb_file"].instance.build_chemical_system(
-            self.configuration["atom_aliases"]["value"]
-        )
+        chemical_system = self.pdb_file.build_chemical_system(self.atom_aliases)
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["file"],
+            self.output_files.path,
             chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_files"]["dtype"],
-            chunking_limit=self.configuration["output_files"]["chunk_size"],
-            compression=self.configuration["output_files"]["compression"],
+            positions_dtype=self.output_files.dtype,
+            chunking_limit=self.output_files.chunk_size,
+            compression=self.output_files.compression,
         )
 
     def run_step(self, index):
@@ -176,7 +164,7 @@ class Gromacs(Converter):
             **variables,
         )
 
-        if self.configuration["fold"]["value"]:
+        if self.fold:
             conf.fold_coordinates()
 
         # The current time.

@@ -20,6 +20,16 @@ from scipy.signal import correlate
 from scipy.special import legendre
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    Boolean,
+    CorrelationWindow,
+    FrameSelect,
+    Integer,
+    MDANSETrajectory,
+    MolecularAxis,
+    OutputFile,
+    RunningMode,
+)
 from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 
 
@@ -87,105 +97,76 @@ class ReorientationalTimeCorrelationFunction(IJob):
         "Analysis",
         "Dynamics",
     )
-    PREDICTORS = ("frames",)
+    PREDICTORS = ("frame_window",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory()
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    molecule_and_axis = MolecularAxis(
+        depends={"choices": "trajectory", "trajectory": "trajectory"}
     )
-    settings["molecule_and_axis"] = (
-        "AxisSelectionConfigurator",
-        {
-            "default": "",
-            "dependencies": {"trajectory": "trajectory"},
-        },
+    legendre_order = Integer(
+        label="Maximum Legendre polynomial order to be used",
+        default=2,
+        minimum=1,
+        maximum=6,
+        tooltip="All the orders up to this one will be calculated.",
     )
-    settings["polynomial_order"] = (
-        "IntegerConfigurator",
-        {
-            "label": "Maximum Legendre polynomial order",
-            "default": 2,
-            "mini": 1,
-            "maxi": 6,
-            "tooltip": "All the orders up to this one will be calculated.",
-        },
-    )
-    settings["per_axis"] = (
-        "BooleanConfigurator",
-        {
-            "label": "Decompose the results into per-axis contributions",
-            "default": False,
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    per_axis = Boolean(label="Decompose the results into per-axis contributions")
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        self.molecules = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system._clusters[self.configuration["molecule_and_axis"]["value"]]
+        self.molecules = self.trajectory.chemical_system._clusters[
+            self.molecule_and_axis.molecule
+        ]
 
-        self.inner_index1 = self.configuration["molecule_and_axis"]["index1"]
-        self.inner_index2 = self.configuration["molecule_and_axis"]["index2"]
+        self.n_molecules = self.trajectory.chemical_system.number_of_molecules(
+            self.molecule_and_axis.molecule
+        )
+        self.inner_index1 = self.molecule_and_axis.axis_1
+        self.inner_index2 = self.molecule_and_axis.axis_2
 
-        self.legendre_order = self.configuration["polynomial_order"]["value"]
         self.numberOfSteps = len(self.molecules)
 
         self.masses = np.array(
-            self.trajectory.chemical_system.atom_property(
-                "atomic_weight",
-            ),
+            self.trajectory.chemical_system.atom_property("atomic_weight"),
         )
 
         self._outputData.add(
             "rtcf/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.frame_window.duration,
             units="ps",
         )
 
         self._outputData.add(
             "rtcf/axes/axis_index",
             "LineOutputVariable",
-            np.arange(
-                self.configuration["trajectory"][
-                    "instance"
-                ].chemical_system.number_of_molecules(
-                    self.configuration["molecule_and_axis"]["value"],
-                ),
-            ),
+            np.arange(self.n_molecules),
             units="au",
         )
 
-        for l_order in range(1, self.legendre_order + 1):
+        for l_order in self.legendre_orders:
             self._outputData.add(
                 f"rtcf/l={l_order}",
                 "LineOutputVariable",
-                (self.configuration["frames"]["n_frames"],),
+                (self.frame_window.window,),
                 axis="rtcf/axes/time",
                 units="au",
                 main_result=True,
             )
 
-            if self.configuration["per_axis"]["value"]:
+            if self.per_axis:
                 self._outputData.add(
                     f"rtcf/per_axis/l={l_order}",
                     "SurfaceOutputVariable",
-                    (
-                        self.configuration["trajectory"][
-                            "instance"
-                        ].chemical_system.number_of_molecules(
-                            self.configuration["molecule_and_axis"]["value"],
-                        ),
-                        self.configuration["frames"]["n_frames"],
-                    ),
+                    (self.n_molecules, self.frame_window.window),
                     axis="rtcf/axes/axis_index|rtcf/axes/time",
                     units="au",
                     main_result=True,
@@ -213,24 +194,23 @@ class ReorientationalTimeCorrelationFunction(IJob):
         molecule = self.molecules[index]
         masses = self.masses[molecule]
 
-        diff = np.empty((self.configuration["frames"]["number"], 3))
+        diff = np.empty((len(self.frames), 3))
 
         for i, frame_index in enumerate(
             range(
-                self.configuration["frames"]["first"],
-                self.configuration["frames"]["last"] + 1,
-                self.configuration["frames"]["step"],
-            ),
-        ):
-            configuration = self.trajectory.configuration(
-                frame_index,
+                self.frames.index_start,
+                self.frames.index_stop + 1,
+                self.frames.index_step,
             )
+        ):
+            configuration = self.trajectory.configuration(frame_index)
             coordinates = configuration.contiguous_configuration().coordinates[molecule]
             if self.inner_index2 is not None:
                 ref_pos = coordinates[self.inner_index2]
             else:
                 centre_coordinates = center_of_mass(coordinates, masses)
                 ref_pos = centre_coordinates
+
             if self.inner_index1 is None:
                 moi = moment_of_inertia(
                     coordinates,
@@ -243,22 +223,21 @@ class ReorientationalTimeCorrelationFunction(IJob):
                 else:
                     diff[i] = eigenvectors[0]
                 continue
+
             diff[i] = coordinates[self.inner_index1] - ref_pos
         modulus = np.linalg.norm(diff, axis=1)
 
         diff /= modulus[:, np.newaxis]
 
-        n_configs = self.configuration["frames"]["n_configs"]
-        results = []
-        for legendre_order in self.legendre_orders:
-            if legendre_order == 1:
-                ac = correlate(diff, diff[:n_configs], mode="valid") / n_configs
-                results.append(ac.T[0])
-            else:
-                ac = correlate_legendre(
-                    diff, corr_window=n_configs, poly_order=legendre_order
-                )
-                results.append(ac)
+        n_configs = self.frame_window.n_configs
+
+        results = [correlate(diff, diff[:n_configs], mode="valid").T[0] / n_configs]
+        for legendre_order in self.legendre_orders[1:]:
+            ac = correlate_legendre(
+                diff, corr_window=n_configs, poly_order=legendre_order
+            )
+            results.append(ac)
+
         return index, results
 
     def combine(self, index: int, x: list[np.ndarray]):
@@ -272,26 +251,20 @@ class ReorientationalTimeCorrelationFunction(IJob):
             list of arrays of the correlation results
 
         """
-        for l_order in self.legendre_orders:
-            self._outputData[f"rtcf/l={l_order}"] += x[l_order - 1]
+        for l_order, data in enumerate(x, 1):
+            self._outputData[f"rtcf/l={l_order}"] += data
 
-            if self.configuration["per_axis"]["value"]:
-                self._outputData[f"rtcf/per_axis/l={l_order}"][index, :] = x[
-                    l_order - 1
-                ]
+            if self.per_axis:
+                self._outputData[f"rtcf/per_axis/l={l_order}"][index, :] = data
 
     def finalize(self):
         """Normalise and write out the results."""
         for l_order in self.legendre_orders:
-            self._outputData[f"rtcf/l={l_order}"] /= self.configuration["trajectory"][
-                "instance"
-            ].chemical_system.number_of_molecules(
-                self.configuration["molecule_and_axis"]["value"],
-            )
+            self._outputData[f"rtcf/l={l_order}"] /= self.n_molecules
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.root,
+            self.output_files.out_format,
             str(self),
             self,
         )

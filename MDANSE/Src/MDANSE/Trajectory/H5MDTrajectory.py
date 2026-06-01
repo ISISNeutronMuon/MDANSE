@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 from collections import ChainMap
-from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -27,6 +26,7 @@ import numpy.typing as npt
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Units import measure
+from MDANSE.IO.IOUtils import UCEnum
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
@@ -40,8 +40,13 @@ from MDANSE.MolecularDynamics.UnitCell import (
     NO_CELL,
     UnitCell,
 )
+from MDANSE.Trajectory.FileTrajBase import TrajectoryFile
 
-from .FileTrajBase import TrajectoryFile
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -75,14 +80,14 @@ class H5MDTrajectory(TrajectoryFile):
         "time": "/particles/all/position/time",
     }
 
-    class MassLoc(Enum):
+    class MassLoc(UCEnum):
         """Mass location in H5MD."""
 
         PER_STEP = "/particles/all/mass/value"
         GLOBAL = "/particles/all/mass"
         NONE = None
 
-    class ChargeLoc(Enum):
+    class ChargeLoc(UCEnum):
         """Charge location in H5MD."""
 
         PER_STEP = "/particles/all/charge/value"

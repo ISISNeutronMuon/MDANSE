@@ -18,14 +18,16 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
+from MDANSE.Framework.Parameters.BaseTypes import Float, Vector
+from MDANSE.Framework.Parameters.Parameters import ConfigError
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 
 
 def dispersion_vectors(
-    q_start: npt.NDArray[float],
-    q_end: npt.NDArray[float],
+    q_start: npt.NDArray[np.floating],
+    q_end: npt.NDArray[np.floating],
     q_step: float,
-) -> tuple[npt.NDArray[float], npt.NDArray[float]]:
+) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
     """Generate vectors in a straight line.
 
     Vectors are generated on a line from q_start to q_end in steps of q_step.
@@ -35,16 +37,16 @@ def dispersion_vectors(
 
     Parameters
     ----------
-    q_start : npt.NDArray[float]
+    q_start : npt.NDArray[np.floating]
         Starting point in reciprocal space.
-    q_end : npt.NDArray[float]
+    q_end : npt.NDArray[np.floating]
         End point in reciprocal space.
     q_step : float
         Interval of |q| used for generating vectors.
 
     Returns
     -------
-    tuple[npt.NDArray[float], npt.NDArray[float]]
+    tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]
         Q_vector array, array of dictionary keys to use in the generator.
     """
     distance = np.linalg.norm(q_end - q_start)
@@ -67,41 +69,15 @@ class DispersionQVectors(IQVectors):
     necessarily correspond to integer HKL values.
     """
 
-    settings = {}
-    settings["q_start"] = (
-        "VectorConfigurator",
-        {
-            "label": "Q start (nm^-1)",
-            "valueType": float,
-            "notNull": False,
-            "default": [0, 0, 0],
-        },
-    )
-    settings["q_end"] = (
-        "VectorConfigurator",
-        {
-            "label": "Q end (nm^-1)",
-            "valueType": float,
-            "notNull": False,
-            "default": [1, 0, 0],
-        },
-    )
-    settings["q_step"] = (
-        "FloatConfigurator",
-        {"label": "Q step (nm^-1)", "mini": 1.0e-6, "default": 0.1},
-    )
+    q_start = Vector(default=np.zeros(3), label="Q start (nm^-1)")
+    q_end = Vector(default=(1, 0, 0), label="Q end (nm^-1)")
+    q_step = Float(label="Q step (nm^-1)", minimum=1.0e-6, default=0.1)
 
     def _generate(self):
-        q_start = self._configuration["q_start"]["value"].array
-        q_end = self._configuration["q_end"]["value"].array
-        q_step = self._configuration["q_step"]["value"]
-        if np.allclose(q_start, q_end):
-            self._configuration[
-                "q_end"
-            ].error_status = "Zero-length vector cannot be used here"
-            return
+        if np.allclose(self.q_start, self.q_end):
+            raise ConfigError("Zero length vector cannot be used here.")
 
-        q_vectors, keyvals = dispersion_vectors(q_start, q_end, q_step)
+        q_vectors, keyvals = dispersion_vectors(self.q_start, self.q_end, self.q_step)
         if self._status is not None:
             self._status.start(len(keyvals))
         hkls = (
@@ -109,10 +85,10 @@ class DispersionQVectors(IQVectors):
             if self._unit_cell is not None
             else None
         )
-        self._configuration["q_vectors"] = {}
+        self.q_vectors = {}
 
         for index, keyval in enumerate(keyvals):
-            self._configuration["q_vectors"][keyval] = {
+            self.q_vectors[index] = {
                 "q": keyval,
                 "q_vectors": q_vectors[:, index][:, np.newaxis],
                 "n_q_vectors": 1,
@@ -124,3 +100,7 @@ class DispersionQVectors(IQVectors):
                 if self._status.is_stopped():
                     return
                 self._status.update()
+
+    @property
+    def shells(self):
+        return sorted(self.q_vectors)

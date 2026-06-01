@@ -15,11 +15,18 @@
 #
 from __future__ import annotations
 
+import random
 from functools import partial
 
 import numpy as np
 from scipy.spatial import KDTree
 
+from MDANSE.Framework.Parameters import (
+    Boolean,
+    Float,
+    Integer,
+    Range,
+)
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors, fpsampling
 from MDANSE.Framework.QVectors.SphericalQVectors import spherical_vectors
 
@@ -38,24 +45,15 @@ class SphericalLatticeQVectors(LatticeQVectors):
     over all vectors in the shell.
     """
 
-    settings = {}
-    settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
-    settings["shells"] = (
-        "RangeConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "default": (0.0, 5.0, 1.0),
-        },
-    )
-    settings["n_samples"] = ("IntegerConfigurator", {"mini": 1, "default": 50000})
-    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 100})
-    settings["force_equal_weights"] = ("BooleanConfigurator", {"default": False})
-    settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
+    seed = Integer(minimum=0, default=0)
+    shells = Range[float](minimum=0.0, default=(0, 5.0, 0.5), include_last=True)
+    n_samples = Integer(minimum=1, default=50_000)
+    n_vectors = Integer(minimum=1, default=100)
+    force_equal_weights = Boolean()
+    width = Float(minimum=1e-6, default=1.0)
 
     def _generate(self):
-        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
+        rng = np.random.default_rng(self.seed or None)
 
         width = self._configuration["width"]["value"]
 
@@ -63,12 +61,12 @@ class SphericalLatticeQVectors(LatticeQVectors):
         n_samples = self._configuration["n_samples"]["value"]
 
         if self._status is not None:
-            self._status.start(self._configuration["shells"]["number"])
+            self._status.start(len(self.shells))
 
-        self._configuration["q_vectors"] = {}
+        self.q_vectors = {}
 
-        for q in self._configuration["shells"]["value"]:
-            samples = spherical_vectors(q, width, n_samples, rng)
+        for q in self.shells:
+            samples = spherical_vectors(q, self.width, self.n_samples, rng)
             lattice_hkl_vectors, _ = self.lattice_vectors_with_weights(
                 samples,
                 self._unit_cell,
@@ -77,11 +75,12 @@ class SphericalLatticeQVectors(LatticeQVectors):
 
             selection = self.vectors_within_limits(
                 q_vectors,
-                q_min=q - 0.5 * width,
-                q_max=q + 0.5 * width,
+                q_min=q - 0.5 * self.width,
+                q_max=q + 0.5 * self.width,
             )
+
             if not np.any(selection):
-                self._configuration["q_vectors"][q] = None
+                self.q_vectors[q] = None
                 continue
 
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
@@ -90,23 +89,23 @@ class SphericalLatticeQVectors(LatticeQVectors):
 
             selection = fpsampling(
                 q_vectors.T,
-                nvecs_per_shell,
+                self.n_vectors,
                 partial(spherical_vectors, q=1, q_width=0, n_vecs=1),
                 rng,
             )
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
 
-            if self._configuration["force_equal_weights"]["value"]:
+            if self.force_equal_weights:
                 weights = np.ones(q_vectors.shape[1])
             else:
-                samples = spherical_vectors(q, width, n_samples, rng)
+                samples = spherical_vectors(q, self.width, self.n_samples, rng)
                 tree = KDTree(q_vectors.T)
                 _, indices = tree.query(samples.T)
                 weights = np.bincount(indices, minlength=q_vectors.shape[1])
-                weights = q_vectors.shape[1] * weights / n_samples
+                weights = q_vectors.shape[1] * weights / self.n_samples
 
-            self._configuration["q_vectors"][q] = {
+            self.q_vectors[q] = {
                 "q_vectors": q_vectors,
                 "n_q_vectors": q_vectors.shape[1],
                 "n_q_found": n_found,
@@ -114,6 +113,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 "q": q,
                 "hkls": lattice_hkl_vectors,
             }
+
             if self._status is not None:
                 if self._status.is_stopped():
                     return

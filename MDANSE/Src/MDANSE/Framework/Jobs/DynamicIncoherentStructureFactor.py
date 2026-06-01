@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+import collections
+
 import numpy as np
 from scipy.signal import correlate
 
@@ -22,6 +24,20 @@ from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
 )
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    CorrelationWindow,
+    FrameSelect,
+    GroupingLevel,
+    InstrumentResolution,
+    MDANSETrajectory,
+    OutputFile,
+    Projection,
+    QVectors,
+    RunningMode,
+    Weights,
+)
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
 
@@ -49,59 +65,24 @@ class DynamicIncoherentStructureFactor(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        grouping="grouping_level",
+        transmutation="atom_transmutation",
     )
-    settings["instrument_resolution"] = (
-        "InstrumentResolutionConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-        },
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    instrument_resolution = InstrumentResolution(
+        depends={"trajectory": "trajectory", "window": "frame_window"},
     )
-    settings["q_vectors"] = (
-        "QVectorsConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["projection"] = (
-        "ProjectionConfigurator",
-        {},
-    )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {
-            "default": "b_incoherent",
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            },
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    q_vectors = QVectors(depends={"trajectory": "trajectory"})
+    projection = Projection()
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    weights = Weights(default="b_incoherent", depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """
@@ -109,21 +90,17 @@ class DynamicIncoherentStructureFactor(IJob):
         """
         super().initialize()
 
+        self.generator = self.q_vectors.generator
+        self.generator.generate()
         self.numberOfSteps = len(self.trajectory.atom_indices)
-
-        self._nQShells = self.configuration["q_vectors"]["n_shells"]
-
-        self._nFrames = self.configuration["frames"]["n_frames"]
-
-        self._instrResolution = self.configuration["instrument_resolution"]
-
+        self._nQShells = len(self.generator.q_vectors)
+        self._nFrames = self.frame_window.n_frames
         self._atoms = self.trajectory.atom_names
+        self.resolution = self.instrument_resolution.run_resolution
 
-        self._nOmegas = self._instrResolution["n_omegas"]
+        self._nOmegas = self.resolution.n_omegas
 
-        self.add_ideal_results = (
-            self.configuration["instrument_resolution"]["kernel"].lower() != "ideal"
-        )
+        self.add_ideal_results = self.resolution.add_ideal
 
         self.labels = [
             (element, (element,)) for element in self.trajectory.get_natoms()
@@ -132,33 +109,33 @@ class DynamicIncoherentStructureFactor(IJob):
         self._outputData.add(
             "disf/axes/q",
             "LineOutputVariable",
-            self.configuration["q_vectors"]["shells"],
+            self.generator.shells,
             units="1/nm",
         )
 
         self._outputData.add(
             "disf/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.frame_window.duration,
             units="ps",
         )
         self._outputData.add(
             "disf/res/time_window",
             "LineOutputVariable",
-            self._instrResolution["time_window"],
+            self.resolution.time_window,
             units="au",
         )
 
         self._outputData.add(
             "disf/axes/omega",
             "LineOutputVariable",
-            self._instrResolution["omega"],
+            self.resolution.omega,
             units="rad/ps",
         )
         self._outputData.add(
             "disf/res/omega_window",
             "LineOutputVariable",
-            self._instrResolution["omega_window"],
+            self.resolution.omega_window,
             axis="disf/axes/omega",
             units="au",
         )
@@ -228,28 +205,27 @@ class DynamicIncoherentStructureFactor(IJob):
 
         series = self.trajectory.read_atomic_trajectory(
             atom_index,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
+            first=self.frames.index_start,
+            last=self.frames.index_stop + 1,
+            step=self.frames.index_step,
         )
 
-        series = self.configuration["projection"]["projector"](series)
+        series = self.projection.projector(series)
 
-        disf_per_q_shell = {}
-        for q in self.configuration["q_vectors"]["shells"]:
-            disf_per_q_shell[q] = np.zeros((self._nFrames,), dtype=np.float64)
+        disf_per_q_shell = {
+            q: np.zeros((self._nFrames,), dtype=np.float64)
+            for q in self.generator.q_vectors
+        }
 
-        n_configs = self.configuration["frames"]["n_configs"]
-        for q in self.configuration["q_vectors"]["shells"]:
-            if self.configuration["q_vectors"]["value"][q] is None:
-                disf_per_q_shell[q] = np.nan
+        n_configs = self.frame_window.n_configs
+        for q in self.generator.q_vectors:
+            if self.generator.q_vectors[q] is None:
                 continue
-            qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
-            qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
+            qVectors = self.generator.q_vectors[q]["q_vectors"]
 
-            rho = np.exp(1j * np.dot(series, qVectors)) * np.sqrt(qvec_weights[None, :])
+            rho = np.exp(1j * np.dot(series, qVectors))
             res = correlate(rho, rho[:n_configs], mode="valid").T[0] / (
-                n_configs * np.sum(qvec_weights)
+                n_configs * rho.shape[1]
             )
 
             disf_per_q_shell[q] += res.real
@@ -258,10 +234,14 @@ class DynamicIncoherentStructureFactor(IJob):
 
     def combine(self, index, disf_per_q_shell):
         """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
+        Combines returned results of run_step.
+
+        Parameters
+        ----------
+        index : int
+            The index of the step.
+        x : Any
+            The returned result(s) of run_step.
         """
 
         element = self._atoms[self.trajectory.atom_indices[index]]
@@ -272,18 +252,16 @@ class DynamicIncoherentStructureFactor(IJob):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...)
         """
-        self.configuration["q_vectors"]["generator"].write_vectors_to_file(
-            self._outputData
-        )
+        self.generator.write_vectors_to_file(self._outputData)
 
         nAtomsPerElement = self.trajectory.get_natoms()
 
-        selected_weights, all_weights = self.trajectory.get_weights(
-            prop=self.configuration["weights"]["property"]
-        )
+        selected_weights, all_weights = self.trajectory.get_weights(prop=self.weights)
+
         for weights in selected_weights, all_weights:
             for key, value in weights.items():
                 weights[key] = abs(value) ** 2
+
         weight_dict = get_weights(
             selected_weights,
             all_weights,
@@ -295,22 +273,25 @@ class DynamicIncoherentStructureFactor(IJob):
         assign_weights(self._outputData, weight_dict, "disf/s(q,f)/%s", self.labels)
         if self.add_ideal_results:
             assign_weights(
-                self._outputData, weight_dict, "disf/s(q,f)/ideal/%s", self.labels
+                self._outputData,
+                weight_dict,
+                "disf/s(q,f)/ideal/%s",
+                self.labels,
             )
         for element, number in list(nAtomsPerElement.items()):
             extra_scaling = 1.0 / number
             self._outputData[f"disf/f(q,t)/{element}"] *= extra_scaling
             self._outputData[f"disf/s(q,f)/{element}"][:] = get_spectrum(
                 self._outputData[f"disf/f(q,t)/{element}"],
-                self.configuration["instrument_resolution"]["time_window"],
-                self.configuration["instrument_resolution"]["time_step"],
+                self.resolution.time_window,
+                self.frames.time_step,
                 axis=1,
             )
             if self.add_ideal_results:
                 self._outputData[f"disf/s(q,f)/ideal/{element}"][:] = get_spectrum(
                     self._outputData[f"disf/f(q,t)/{element}"],
                     None,
-                    self.configuration["instrument_resolution"]["time_step"],
+                    self.frames.time_step,
                     axis=1,
                 )
 
@@ -364,8 +345,8 @@ class DynamicIncoherentStructureFactor(IJob):
             )
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.root,
+            self.output_files.out_format,
             str(self),
             self,
         )

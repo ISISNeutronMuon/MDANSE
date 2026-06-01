@@ -16,12 +16,14 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Literal
+from enum import EnumMeta
+from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar
 
 from more_itertools import first_true
-from qtpy.QtCore import QObject, Signal, Slot
+from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QPalette
 from qtpy.QtWidgets import (
+    QCheckBox,
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
@@ -30,24 +32,29 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE.MLogging import LOG
-
-if TYPE_CHECKING:
-    from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.Parameters.Parameters import (
+    ConfigError,
+    ConfigureDescriptor,
+    CustomChoices,
+    CustomConfig,
+    MinMax,
+    Parameter,
+)
+from MDANSE_GUI.Utils import block_signals
 
 Layouts = Literal["QHBoxLayout", "QVBoxLayout", "QGridLayout"]
 Bases = Literal["QWidget", "QGroupBox"]
+P = TypeVar("P", bound=Parameter)
 
-
-class WidgetBase(QObject):
+class WidgetBase(QObject, Generic[P]):
     """Object to serve as an ABC to GUI widgets in MDANSE.
 
     Parameters
     ----------
     parent : Optional[QObject]
         Parent of widget.
-    configurator : IConfigurator
-        Configurator controlled by this widget.
+    parameter : Parameter
+        Parameter controlled by this widget.
     label : str
         Label of widget.
     tooltip : str
@@ -59,19 +66,24 @@ class WidgetBase(QObject):
     """
 
     value_changed = Signal()
+    valid_changed = Signal()
 
     def __init__(
         self,
         parent: QObject | None = None,
         *args,
-        configurator: IConfigurator,
+        parameter: P,
+        configurable: object,
+        prop: str,
+        parent_widget: WidgetBase | None = None,
         label: str = "",
         tooltip: str = "",
         base_type: Bases = "QGroupBox",
         layout_type: Layouts = "QHBoxLayout",
         **kwargs,
     ):
-        super().__init__(*args, parent=parent)
+        super().__init__(*args, parent=parent, **kwargs)
+        self._parent = parent
         self._value = None
         self._relative_size = 1
         self._label_text = label
@@ -79,45 +91,83 @@ class WidgetBase(QObject):
         self._base_type = base_type
         self._layout_type = layout_type
 
-        if self._layout_type == "QHBoxLayout":
-            layoutClass = QHBoxLayout
-        elif self._layout_type == "QVBoxLayout":
-            layoutClass = QVBoxLayout
-        elif self._layout_type == "QGridLayout":
-            layoutClass = QGridLayout
-        else:
-            raise NotImplementedError(
-                f"Cannot create layout of type {self._layout_type}."
-            )
+        self.parameter = parameter
+        self._configurable = configurable
+        self._property = prop
+        self._parent_widget = parent_widget
 
-        if self._base_type == "QWidget":
-            base = QWidget(parent)
-            layout = layoutClass(base)
-            base.setLayout(layout)
-            self._label = QLabel(self._label_text, base)
-            layout.addWidget(self._label)
-        elif self._base_type == "QGroupBox":
-            base = QGroupBox(self._label_text, parent)
-            base.setToolTip(self._tooltip)
-            layout = layoutClass(base)
-            base.setLayout(layout)
-        else:
-            raise NotImplementedError(f"Cannot create base of type {self._base_type}.")
+        for dep in self.get_widget_deps().values():
+            dep.value_changed.connect(self.updateValue)
+
+        match self._layout_type:
+            case "QHBoxLayout":
+                layoutClass = QHBoxLayout
+            case "QVBoxLayout":
+                layoutClass = QVBoxLayout
+            case "QGridLayout":
+                layoutClass = QGridLayout
+            case _:
+                raise NotImplementedError(
+                    f"Cannot create layout of type {self._layout_type}."
+                )
+
+        match self._base_type:
+            case "QWidget":
+                base = QWidget(parent)
+                layout = layoutClass(base)
+                base.setLayout(layout)
+                self._label = QLabel(self._label_text, base)
+                layout.addWidget(self._label)
+            case "QGroupBox":
+                base = QGroupBox(self._label_text, parent)
+                base.setToolTip(self._tooltip)
+                layout = layoutClass(base)
+                base.setLayout(layout)
+            case _:
+                raise NotImplementedError(
+                    f"Cannot create base of type {self._base_type}."
+                )
 
         self._base = base
         self._base.setAutoFillBackground(True)
         self._layout = layout
-        self._configurator = configurator
         self._parent_dialog = parent
         self._empty = False
         self.has_warning = False
 
+        if self.parameter.optional:
+            self.setup_optional()
+
+        self._widgets_in_layout = {}
+        self._raw_widgets = {}
+
+    def setup_optional(self) -> None:
+        label = getattr(
+            self.parameter, "optional_label", f"Default ({self.parameter.default})"
+        )
+
+        self._apply_box = QCheckBox(label, self._base)
+        self._apply_box.setTristate(False)
+        self._apply_box.setChecked(self.default is None)
+        self._apply_box.checkStateChanged.connect(self.toggle_widgets)
+        self._layout.addWidget(self._apply_box)
+
+    @Slot()
+    def toggle_widgets(self) -> None:
+        if not self.parameter.optional:
+            return
+
+        self._field.setEnabled(self._apply_box.checkState() != Qt.CheckState.Checked)
+        self.updateValue()
+
     def update_labels(self):
         """Update contained labels (dependent on base_type)."""
-        if self._base_type == "QWidget":
-            self._label.setText(self._label_text)
-        elif self._base_type == "QGroupBox":
-            self._base.setTitle(self._label_text)
+
+        match self._base_type:
+            case "QWidget":
+                self._label.setText(self._label_text)
+            case "QGroupBox":
+                self._base.setTitle(self._label_text)
 
         for widget in self._layout.children():
             if issubclass(widget, QWidget):
@@ -137,23 +187,18 @@ class WidgetBase(QObject):
             self._tooltip = "A specific tooltip for this widget SHOULD have been set"
 
     @abstractmethod
-    def value_from_configurator(self):
-        """Set the widgets to the values of the underlying configurator object.
-
-        Should also check for dependencies of the configurator.
-        """
-
-    @abstractmethod
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
 
-    @abstractmethod
-    def configure_using_default(self):
-        """Use configurator's default value, and highlight in the GUI."""
-        default = self._configurator.default
-        LOG.info(f"Setting {default} as placeholder text")
-        self._field.setPlaceholderText(str(default))
-        self._configurator.configure(default)
+    def _get_widget_value(self):
+        """Get the widget value ignoring disabled optionals."""
+
+        if (
+            self.parameter.optional
+            and self._apply_box.checkState() == Qt.CheckState.Checked
+        ):
+            return None
+        return self.get_widget_value()
 
     def mark_error(self, error_text: str, *, silent: bool = False):
         """Highlight an erroneous entry and display given error_text.
@@ -173,6 +218,8 @@ class WidgetBase(QObject):
         font.setBold(True)
         self._base.setFont(font)
         self._base.setToolTip(error_text)
+        if not silent:
+            self.valid_changed.emit()
 
     def mark_warning(self, warning_text: str):
         """If the input caused a warning, display warning_text and highlight the widget.
@@ -193,8 +240,10 @@ class WidgetBase(QObject):
             font.setBold(True)
             self._base.setFont(font)
             self._base.setToolTip(warning_text)
+            self.valid_changed.emit()
             return
         self.has_warning = False
+        self.clear_error()
 
     def clear_error(self):
         """Remove error highlighting."""
@@ -203,29 +252,125 @@ class WidgetBase(QObject):
         font.setBold(False)
         self._base.setFont(font)
         self._base.setToolTip("")
+        self.valid_changed.emit()
 
-    @abstractmethod
-    @Slot()
-    def updateValue(self):
-        """Pass the GUI input to the backend's parser and validate."""
-        current_value = self.get_widget_value()
-        if self._empty:
-            self.configure_using_default()
-        try:
-            self._configurator.configure(current_value)
-        except Exception:
-            self.mark_error(
-                "COULD NOT SET THIS VALUE - you may need to change the values in other widgets",
-            )
-        self.value_changed.emit()
-        if not self._configurator.valid:
-            self.mark_error(self._configurator.error_status)
+    def set_parameter(self) -> None:
+        setattr(self._configurable, self._property, self._get_widget_value())
 
-    @abstractmethod
-    def get_value(self):
-        """Return the current value of the GUI input after validating."""
+    @property
+    def valid(self) -> bool:
+        return getattr(self._configurable, self.parameter.configured_var, False)
+
+    @property
+    def raw(self) -> Any:
+        return getattr(self._configurable, self.parameter.raw_name, None)
+
+    @property
+    def default(self) -> Any:
+        return self._configurable.default_parameters[self._property]
+
+    @property
+    def value(self) -> Any:
+        return self.get_value()
+
+    @value.setter
+    def value(self, value) -> None:
+        self.set_value(value)
+
+    def get_value(self) -> Any:
+        return getattr(self._configurable, self._property)
+
+    def set_value(self, value: Any) -> None:
+        with block_signals(self._field):
+            self._field.setText(str(value))
         self.updateValue()
-        return self._configurator["value"]
+
+    def trajectory_changed(self) -> None:
+        self.updateValue()
+
+    @property
+    def choices(self) -> set[Any] | None:
+        if isinstance(self.parameter.choices, EnumMeta):
+            return {member.name.capitalize() for member in self.parameter.choices}
+
+        if isinstance(self.parameter, CustomChoices):
+            if any(self.parameter._bad_deps(self._configurable)):
+                self.mark_error("Invalid dependencies")
+                return set()
+
+            deps = {key: widget.value for key, widget in self.get_widget_deps().items()}
+
+            try:
+                return self.parameter.get_choices(deps)
+            except ConfigError:
+                self.mark_error("No valid choices")
+                return set()
+
+        if self.parameter.choices:
+            return self.parameter.choices
+
+        return None
+
+    @property
+    def ranges(self) -> tuple[Any, Any] | None:
+        if not isinstance(self.parameter, MinMax):
+            return None
+
+        if any(self.parameter._bad_deps(self._configurable)):
+            self.mark_error("Invalid dependencies")
+            return (None, None)
+
+        deps = self.parameter._get_deps(self._configurable)
+        return self.parameter.get_ranges(deps)
+
+    def get_widget_deps(self) -> dict[str, WidgetBase]:
+        if isinstance(self._parent_widget, WidgetBase):
+            parent_deps = self._parent_widget.get_widget_deps()
+            return {
+                key: self._parent_widget._raw_widgets[val]
+                if val != "parent"
+                else parent_deps[key]
+                for key, val in self.parameter.depends.items()
+            }
+
+        return {
+            key: self._parent._raw_widgets[val]
+            for key, val in self.parameter.depends.items()
+        }
+
+    def add_widget(
+        self,
+        input_widget: WidgetBase,
+        key: str,
+        *,
+        add_to_layout: bool = True,
+    ) -> None:
+        if add_to_layout:
+            self._layout.addWidget(
+                input_widget._base, stretch=input_widget._relative_size
+            )
+        self._widgets_in_layout[key] = input_widget._base
+        self._raw_widgets[key] = input_widget
+        input_widget.value_changed.connect(self.value_changed.emit)
+
+    def remove_widget(self, key: str) -> None:
+        widget = self._raw_widgets.pop(key)
+        widget.value_changed.disconnect()
+        del self._widgets_in_layout[key]
+        self._layout.removeWidget(widget._base)
+        widget._base.hide()
+        widget._base.setParent(None)
+        widget._base.deleteLater()
+
+    @Slot()
+    def updateValue(self) -> None:
+        try:
+            self.set_parameter()
+            self.clear_error()
+        except ConfigError as err:
+            self.mark_error(str(err))
+
+        self.value_changed.emit()
 
     @property
     def default_path(self) -> str:

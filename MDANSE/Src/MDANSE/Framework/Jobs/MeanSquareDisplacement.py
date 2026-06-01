@@ -15,11 +15,19 @@
 #
 from __future__ import annotations
 
-from MDANSE.Framework.AtomGrouping.grouping import (
-    add_grouped_totals,
-)
+from MDANSE.Framework.AtomGrouping.grouping import add_grouped_totals
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    CorrelationWindow,
+    FrameSelect,
+    GroupingLevel,
+    MDANSETrajectory,
+    OutputFile,
+    Projection,
+    RunningMode,
+)
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 
 
@@ -60,38 +68,19 @@ class MeanSquareDisplacement(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        transmutation="atom_transmutation",
+        grouping="grouping_level",
     )
-    settings["projection"] = (
-        "ProjectionConfigurator",
-        {},
-    )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    projection = Projection()
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """
@@ -109,7 +98,7 @@ class MeanSquareDisplacement(IJob):
         self._outputData.add(
             "msd/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.frame_window.times,
             units="ps",
         )
 
@@ -118,7 +107,7 @@ class MeanSquareDisplacement(IJob):
             self._outputData.add(
                 f"msd/{element}",
                 "LineOutputVariable",
-                (self.configuration["frames"]["n_frames"],),
+                (self.frame_window.window,),
                 axis="msd/axes/time",
                 units="nm2",
                 main_result=True,
@@ -127,7 +116,7 @@ class MeanSquareDisplacement(IJob):
         self._outputData.add(
             "msd/total",
             "LineOutputVariable",
-            (self.configuration["frames"]["n_frames"],),
+            (self.frame_window.window,),
             axis="msd/axes/time",
             units="nm2",
             main_result=True,
@@ -136,39 +125,44 @@ class MeanSquareDisplacement(IJob):
         self._atoms = self.trajectory.atom_names
 
     def run_step(self, index):
-        """
-        Runs a single step of the job.
+        """Runs a single step of the job.
 
-        Args:
-            index (int): the index of the step
+        Parameters
+        ----------
+        index : int
+            The index of the step.
 
-        Returns:
-            tuple: the result of the step
+        Returns
+        -------
+        tuple
+            The result of the step.
+
         """
 
         # get selected atom indices sublist
         atom_index = self.trajectory.atom_indices[index]
-        series = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
+        series = self.trajectory.read_atomic_trajectory(
             atom_index,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
+            first=self.frames.index_start,
+            last=self.frames.index_stop + 1,
+            step=self.frames.index_step,
         )
 
-        series = self.configuration["projection"]["projector"](series)
+        series = self.projection.projector(series)
 
-        msd = mean_square_displacement(
-            series, self.configuration["frames"]["n_configs"]
-        )
+        msd = mean_square_displacement(series, self.frame_window.n_configs)
 
         return index, msd
 
-    def combine(self, index, result):
-        """
-        Combines returned results of run_step.
+    def combine(self, index: int, result):
+        """Combines returned results of run_step.
 
-        Args:
-            result (tuple): the output of run_step method
+        Parameters
+        ----------
+        result : tuple
+            the output of run_step method
+        index : int
+            Current step
         """
 
         # The symbol of the atom.
@@ -205,8 +199,8 @@ class MeanSquareDisplacement(IJob):
         self._outputData["msd/total"] /= n_atms
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

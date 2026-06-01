@@ -60,7 +60,10 @@ def test_structure_analysis(generate_benchmarks, tmp_path, parameters, job_info)
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
 
     job = IJob.create(job_info[0])
-    job.run(parameters, status=True)
+    job.configuration = {
+        key: value for key, value in parameters.items() if key in job.parameters
+    }
+    job.run(status=True)
 
     if generate_benchmarks:
         return
@@ -69,4 +72,3 @@ def test_structure_analysis(generate_benchmarks, tmp_path, parameters, job_info)
     assert log_file.is_file()
 
     compare_hdf5(out_file, result_file, job_info[1], compare_axis=True)
-

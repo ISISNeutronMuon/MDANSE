@@ -15,25 +15,24 @@
 #
 from __future__ import annotations
 
+import collections
+
 import numpy as np
 
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
     IInstrumentResolution,
 )
+from MDANSE.Framework.Parameters import Float
 
 
 class Gaussian(IInstrumentResolution):
     """Defines an instrument resolution with a gaussian response"""
 
-    settings = {}
-    settings["mu"] = ("FloatConfigurator", {"default": 0.0})
-    settings["sigma"] = ("FloatConfigurator", {"default": 1.0})
+    mu = Float(default=0.0)
+    sigma = Float(default=1.0)
 
     def set_kernel(self, omegas, dt):
-        mu = self._configuration["mu"]["value"]
-        sigma = self._configuration["sigma"]["value"]
-
-        self._omegaWindow = (np.sqrt(2.0 * np.pi) / sigma) * np.exp(
-            -0.5 * ((omegas - mu) / sigma) ** 2
+        self._omegaWindow = (np.sqrt(2.0 * np.pi) / self.sigma) * np.exp(
+            -0.5 * ((omegas - self.mu) / self.sigma) ** 2
         )
         self._timeWindow = self.apply_fft(self._omegaWindow, dt)

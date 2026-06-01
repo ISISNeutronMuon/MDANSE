@@ -19,22 +19,23 @@ import numpy as np
 import numpy.typing as npt
 from scipy.spatial.transform import Rotation
 
+from MDANSE.Framework.Parameters import Float, Integer, Range, Vector
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
 
 
 def circle_rotation_matrix(
-    target_circle_axis: npt.NDArray[float],
-) -> npt.NDArray[float] | None:
+    target_circle_axis: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating] | None:
     """Return rotation matrix that transforms 001 vector into target vector.
 
     Parameters
     ----------
-    target_circle_axis : npt.NDArray[float]
+    target_circle_axis : npt.NDArray[np.floating]
         A 3D vector defining the axis of a circle.
 
     Returns
     -------
-    npt.NDArray[float]
+    npt.NDArray[np.floating]
         a 3x3 rotation matrix
     """
     try:
@@ -48,9 +49,9 @@ def circle_of_vectors(
     q: float,
     q_width: float,
     n_vecs: int,
-    rot_mat: npt.NDArray[float] | None,
+    rot_mat: npt.NDArray[np.floating] | None,
     rng: np.random.Generator,
-) -> npt.NDArray[float]:
+) -> npt.NDArray[np.floating]:
     """Generate vectors on a circle in plane.
 
     The distribution of angles of the vectors on a circle is uniform.
@@ -64,14 +65,14 @@ def circle_of_vectors(
         Spread of |Q| of the generated vectors.
     n_vecs : int
         Number of vectors to generate.
-    rot_mat : npt.NDArray[float] | None
+    rot_mat : npt.NDArray[np.floating] | None
         Rotation matrix to be applied to the generated points.
     rng : np.random.Generator
         A numpy random number generator object.
 
     Returns
     -------
-    npt.NDArray[float]
+    npt.NDArray[np.floating]
         Array of 3D vectors in a circle with an arbitrary orientation.
     """
     parameter_points = rng.uniform(0.0, 2 * np.pi, n_vecs)
@@ -101,49 +102,32 @@ class CircularQVectors(IQVectors):
     around the shell centre defined by the 'shells' input.
     """
 
-    settings = {}
-    settings["seed"] = ("IntegerConfigurator", {"mini": 0, "default": 0})
-    settings["shells"] = (
-        "RangeConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "default": (0.0, 5.0, 1.0),
-        },
-    )
-    settings["n_vectors"] = ("IntegerConfigurator", {"mini": 1, "default": 50})
-    settings["width"] = ("FloatConfigurator", {"mini": 0.0, "default": 1.0})
-    settings["axis"] = (
-        "VectorConfigurator",
-        {"normalize": True, "notNull": True, "default": [0, 0, 1], "valueType": float},
-    )
+    seed = Integer(minimum=0, default=0)
+    shells = Range[float](minimum=0.0, default=(0.0, 5.0, 1.0), include_last=False)
+    n_vectors = Integer(minimum=1, default=50)
+    width = Float(minimum=0.0, default=1.0)
+    axis = Vector(normalise=True, non_zero=True, default=(0, 0, 1))
 
     def _generate(self):
-        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
+        rng = np.random.default_rng(self.seed or None)
 
-        nvecs_per_shell = self._configuration["n_vectors"]["value"]
-        target_circle_axis = self._configuration["axis"]["value"] / np.linalg.norm(
-            self._configuration["axis"]["value"],
-        )
-        rot_mat = circle_rotation_matrix(target_circle_axis)
-
-        width = self._configuration["width"]["value"]
+        rot_mat = circle_rotation_matrix(self.axis)
 
         if self._status is not None:
-            self._status.start(self._configuration["shells"]["number"])
+            self._status.start(len(self.shells))
 
-        self._configuration["q_vectors"] = {}
+        self.q_vectors = {}
 
-        for q in self._configuration["shells"]["value"]:
+        for q in self.shells:
             q_vectors = circle_of_vectors(
-                q, width, nvecs_per_shell, rot_mat=rot_mat, rng=rng
+                q, self.width, self.n_vectors, rot_mat=rot_mat, rng=rng
             )
-            self._configuration["q_vectors"][q] = {
+
+            self.q_vectors[q] = {
                 "q_vectors": q_vectors,
-                "n_q_vectors": nvecs_per_shell,
-                "n_q_found": nvecs_per_shell,
-                "weights": np.ones(nvecs_per_shell),
+                "n_q_vectors": self.n_vectors,
+                "n_q_found": self.n_vectors,
+                "weights": np.ones(self.n_vectors),
                 "q": q,
                 "hkls": self.qvectors_to_hkl(q_vectors, self._unit_cell)
                 if self._unit_cell is not None

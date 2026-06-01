@@ -1,10 +1,13 @@
-import tempfile
+from __future__ import annotations
+
 import os
+import tempfile
 from os import path
+
 import pytest
+from test_helpers.paths import CONV_DIR
 
 from MDANSE.Framework.Jobs.IJob import IJob
-from test_helpers.paths import CONV_DIR
 
 short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
 
@@ -17,7 +20,7 @@ def parameters():
     parameters = {}
     # parameters['atom_selection'] = None
     # parameters['atom_transmutation'] = None
-    # parameters['frames'] = (0, 1000, 1)
+    parameters["frames"] = "all"
     parameters["trajectory"] = short_traj
     parameters["running_mode"] = ("multicore", -4)
     parameters["q_vectors"] = (
@@ -40,9 +43,13 @@ def parameters():
     parameters["weights"] = "equal"
     return parameters
 
-@pytest.mark.parametrize("traj_type", [
-    "CenterOfMassesTrajectory",
-])
+
+@pytest.mark.parametrize(
+    "traj_type",
+    [
+        "CenterOfMassesTrajectory",
+    ],
+)
 def test_trajectory(tmp_path, parameters, traj_type):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mdt")
@@ -51,10 +58,12 @@ def test_trajectory(tmp_path, parameters, traj_type):
     parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
 
     job = IJob.create(traj_type)
+    parameters = {key: val for key, val in parameters.items() if key in job.parameters}
     job.run(parameters, status=True)
 
     assert out_file.is_file()
     assert log_file.is_file()
+
 
 def test_CenterOfMassesTrajectory(tmp_path, parameters):
     """This will need to detect molecules before it can
@@ -65,6 +74,7 @@ def test_CenterOfMassesTrajectory(tmp_path, parameters):
 
     parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
     job = IJob.create("CenterOfMassesTrajectory")
+    parameters = {key: val for key, val in parameters.items() if key in job.parameters}
     job.run(parameters, status=True)
 
     assert out_file.is_file()
@@ -89,10 +99,12 @@ def test_SelectedTrajectoryFilter(tmp_path):
     parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
 
     job = IJob.create("TrajectoryFilter")
-    job.run(parameters, status=True)
+    parameters = {key: val for key, val in parameters.items() if key in job.parameters}
+    job.run(parameters, status=True, prog_bar=True)
 
     assert out_file.is_file()
     assert log_file.is_file()
+
 
 def test_TrajectoryFilter(tmp_path):
     temp_name = tmp_path / "filtered_trajectory"
@@ -111,6 +123,7 @@ def test_TrajectoryFilter(tmp_path):
     parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
 
     job = IJob.create("TrajectoryFilter")
+    parameters = {key: val for key, val in parameters.items() if key in job.parameters}
     job.run(parameters, status=True)
 
     assert out_file.is_file()

@@ -19,6 +19,12 @@ import numpy as np
 from more_itertools import always_iterable
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    FrameSelect,
+    MDANSETrajectory,
+    OutputFile,
+)
 from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 from MDANSE.MLogging import LOG
 
@@ -47,33 +53,28 @@ class Eccentricity(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
 
     def initialize(self):
         super().initialize()
 
-        self.numberOfSteps = self.configuration["frames"]["number"]
+        self.numberOfSteps = len(self.frames)
 
         self._outputData.add(
             "ecc/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["time"],
+            self.frames.times,
             units="ps",
         )
         self._outputData.add(
             "ecc/eccentricity",
             "LineOutputVariable",
-            np.zeros((self.configuration["frames"]["number"]), dtype=np.float64),
+            np.zeros(len(self.frames), dtype=np.float64),
             axis="ecc/axes/time",
             main_result=True,
         )
@@ -89,7 +90,7 @@ class Eccentricity(IJob):
             ]
         )
 
-    def run_step(self, index: int):
+    def run_step(self, index: int) -> tuple[int, float]:
         """Calculate the eccentricity for the selected atoms at the
         frame index.
 
@@ -98,9 +99,9 @@ class Eccentricity(IJob):
         index : int
             The frame index.
         """
-        frameIndex = self.configuration["frames"]["value"][index]
+        frame = self.frames[index].ind
 
-        conf = self.trajectory.configuration(frameIndex)
+        conf = self.trajectory.configuration(frame)
         conf = conf.contiguous_configuration()
         series = conf["coordinates"][self._indices, :]
 
@@ -119,7 +120,7 @@ class Eccentricity(IJob):
         eccentricity = np.sqrt(pm3**2 - pm1**2) / pm3
         return index, eccentricity
 
-    def combine(self, frame_idx: int, eccentricity: float):
+    def combine(self, frame_idx: int, eccentricity: float) -> None:
         """Save the calculated eccentricity of the selected atoms.
 
         Parameters
@@ -131,10 +132,10 @@ class Eccentricity(IJob):
         """
         self._outputData["ecc/eccentricity"][frame_idx] = eccentricity
 
-    def finalize(self):
+    def finalize(self) -> None:
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

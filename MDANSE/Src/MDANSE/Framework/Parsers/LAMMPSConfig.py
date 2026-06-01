@@ -17,15 +17,11 @@ from __future__ import annotations
 
 import re
 from collections import namedtuple
-from collections.abc import Iterable, Sequence
 from itertools import starmap
-from pathlib import Path
-from string import ascii_uppercase as upcase
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-from more_itertools import first, one, sort_together, split_before, spy
-from numpy.typing import NDArray
+from more_itertools import first, one, split_before, spy
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Parsers.LAMMPS import BoxStyle
@@ -33,6 +29,12 @@ from MDANSE.IO.IOUtils import strip_comments
 from MDANSE.MLogging import LOG
 
 from .Parser import Parser
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+    from pathlib import Path
+
+    from numpy.typing import NDArray
 
 
 class LAMMPSConfigFileError(Exception):

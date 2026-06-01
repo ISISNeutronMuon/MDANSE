@@ -16,8 +16,7 @@
 from __future__ import annotations
 
 import struct
-from collections.abc import Collection
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
 from more_itertools import chunked, consume, prepend, take
@@ -27,6 +26,9 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 from .FortranUnformat import binary_file_reader
 from .Parser import Parser
+
+if TYPE_CHECKING:
+    from collections.abc import Collection
 
 
 class Options(NamedTuple):

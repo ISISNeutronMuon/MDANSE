@@ -25,7 +25,6 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 from more_itertools import consume as drop
 from more_itertools import ilen, take
-from numpy.typing import NDArray
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
@@ -36,8 +35,14 @@ from MDANSE.MolecularDynamics.Configuration import (
     PeriodicBoxConfiguration,
     PeriodicRealConfiguration,
 )
-from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from numpy.typing import NDArray
+
+    from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 ELECTRON_CHARGE = 1.6021765e-19
 DIMS = ("x", "y", "z")

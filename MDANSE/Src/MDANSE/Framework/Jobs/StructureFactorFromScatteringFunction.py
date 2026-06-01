@@ -15,13 +15,20 @@
 #
 from __future__ import annotations
 
+import collections
+import itertools as it
 from math import sqrt
 
-from MDANSE.Framework.AtomGrouping.grouping import (
-    add_grouped_totals,
-    pair_labels,
-)
+from MDANSE.Framework.AtomGrouping.grouping import add_grouped_totals, pair_labels
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    GroupingLevel,
+    MDANSEResult,
+    MDANSETrajectory,
+    OutputFile,
+)
 
 
 class StructureFactorFromScatteringFunction(IJob):
@@ -30,6 +37,13 @@ class StructureFactorFromScatteringFunction(IJob):
     The static structure factor is calculated from the intermediate
     scattering function of the dynamic coherent scattering function
     calculation results.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     label = "Structure Factor From Scattering Function"
@@ -41,48 +55,29 @@ class StructureFactorFromScatteringFunction(IJob):
 
     ancestor = ["hdf_data"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["dcsf_input_file"] = (
-        "HDFInputFileConfigurator",
-        {
-            "label": "MDANSE Coherent Structure Factor",
-            "default": "dcsf.mda",
-            "tooltip": "Calculated using DynamicCoherentStructureFactor analysis",
-        },
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        transmutation="atom_transmutation",
+        grouping="grouping_level",
     )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
+    dcsf_input_file = MDANSEResult(
+        tooltip="Input MDANSE result containing DCSF result.",
+        label="MDANSE Coherent Structure Factor",
+        choices=("dcsf",),
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
 
     def initialize(self):
-        """
-        Initialize the input parameters and analysis self variables
-        """
+        """Initialize the input parameters and analysis self variables"""
         super().initialize()
 
         # The number of steps is set to 1 as everything is performed in the finalize method
         self.numberOfSteps = 1
 
-        inputFile = self.configuration["dcsf_input_file"]["instance"]
+        inputFile = self.dcsf_input_file
 
         self._outputData.add(
             "ssf/axes/q",
@@ -115,26 +110,32 @@ class StructureFactorFromScatteringFunction(IJob):
             main_result=True,
         )
 
-    def run_step(self, index):
-        """
-        Runs a single step of the job.\n
+    def run_step(self, index: int) -> tuple[int, None]:
+        """Dummy run step.
 
-        :Parameters:
-            #. index (int): The index of the step.
-        :Returns:
-            #. index (int): The index of the step.
+        Parameters
+        ----------
+        index : int
+            Index of current step.
+
+        Returns
+        -------
+        tuple[int, None]
+            Index of current step.
         """
 
         return index, None
 
-    def combine(self, index, x):
+    def combine(self, _index, _x):
+        """Dummy combine step.
+
+        Parameters
+        ----------
+        _index : int
+            Unused.
+        _x : None
+            Unused.
         """
-        Combines returned results of run_step.\n
-        :Parameters:
-            #. index (int): The index of the step.\n
-            #. x (any): The returned result(s) of run_step
-        """
-        pass
 
     def finalize(self):
         """Calculate the static structure factor from the intermediate
@@ -147,9 +148,7 @@ class StructureFactorFromScatteringFunction(IJob):
         norm_natoms = 1.0 / n_total
 
         for pair_str, (label_i, label_j) in self.labels:
-            fqt = self.configuration["dcsf_input_file"]["instance"][
-                f"dcsf/f(q,t)/{pair_str}"
-            ]
+            fqt = self.dcsf_input_file[f"dcsf/f(q,t)/{pair_str}"]
             sqrt_cij = sqrt(
                 nAtomsPerElement[label_i] * nAtomsPerElement[label_j] * norm_natoms**2
             )
@@ -182,12 +181,12 @@ class StructureFactorFromScatteringFunction(IJob):
         )
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )
 
         self.trajectory.close()
-        self.configuration["dcsf_input_file"]["instance"].close()
+        self.dcsf_input_file.close()
         super().finalize()

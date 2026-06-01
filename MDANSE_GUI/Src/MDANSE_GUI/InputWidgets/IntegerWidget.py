@@ -15,62 +15,73 @@
 #
 from __future__ import annotations
 
-from qtpy.QtGui import QIntValidator
-from qtpy.QtWidgets import QLineEdit, QSpinBox
+import sys
+from typing import TYPE_CHECKING, SupportsInt
 
+from qtpy.QtCore import Qt, Slot
+from qtpy.QtGui import QIntValidator
+from qtpy.QtWidgets import QCheckBox, QLineEdit, QSpinBox
+
+from MDANSE.Framework.Parameters import Integer
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class IntegerWidget(WidgetBase):
+class IntegerWidget(WidgetBase[Integer]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        try:
-            default_option = int(self._configurator.default)
-        except ValueError:
-            default_option = 0
-        if self._configurator.choices:
-            field = QSpinBox(self._base)
-            field.setMinimum(self._configurator.choices[0])
-            field.setMaximum(self._configurator.choices[-1])
-            field.setValue(default_option)
-        else:
-            field = QLineEdit(self._base)
-            validator = QIntValidator(field)
-            minval, maxval = self._configurator.mini, self._configurator.maxi
-            if minval is not None:
-                validator.setBottom(minval)
-            if maxval is not None:
-                validator.setTop(maxval)
-            field.setValidator(validator)
-            field.setText(str(default_option))
-            field.setPlaceholderText(str(default_option))
-            field.textChanged.connect(self.updateValue)
-        self._field = field
-        self._default_value = default_option
-        self._layout.addWidget(field)
+
+        self._field = QSpinBox(self._base)
+
+        if self.choices:
+            self.reset_choices()
+        elif self.ranges:
+            self.reset_ranges()
+
+        self.set_value(self.default)
+
+        self._layout.addWidget(self._field)
+
         self.default_labels()
         self.update_labels()
+        self.toggle_widgets()
         self.updateValue()
 
-        tooltip_text = self._tooltip or "A single integer number"
-        field.setToolTip(tooltip_text)
+    @Slot()
+    def reset_choices(self) -> None:
+        choices = self.choices
+        self._field.setMinimum(min(choices))
+        self._field.setMaximum(max(choices))
+
+    @Slot()
+    def reset_ranges(self) -> None:
+        mini, maxi = self.ranges
+        if mini is not None:
+            self._field.setMinimum(mini)
+        else:
+            self._field.setMinimum(-(2**31) + 2)
+        if maxi is not None:  # Range exclusive.
+            self._field.setMaximum(maxi - 1)
+        else:
+            self._field.setMaximum(2**31 - 1)
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "IntegerWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "A single integer number"
+
+    def set_value(self, value: SupportsInt | None) -> None:
+        if self.parameter.optional and value is None:
+            self._apply_box.setChecked(False)
+            return
+
+        self._field.setValue(int(value))
+        self.updateValue()
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        strval = self._field.text().strip()
-        if len(strval) < 1:
-            self._empty = True
-            return self._default_value
-        else:
-            self._empty = False
-        return strval
+        return self._field.value()

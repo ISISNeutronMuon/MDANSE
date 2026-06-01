@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
@@ -25,7 +25,21 @@ from MDANSE.Framework.AtomGrouping.grouping import (
     update_pair_results,
 )
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    FrameSelect,
+    GroupingLevel,
+    MDANSETrajectory,
+    OutputFile,
+    RangeCellCutoff,
+    RunningMode,
+    Weights,
+)
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class PairDistributionFunction(DistanceHistogram):
@@ -56,15 +70,38 @@ class PairDistributionFunction(DistanceHistogram):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        transmutation="atom_transmutation",
+        grouping="grouping_level",
+    )
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    weights = Weights(
+        depends={
+            "trajectory": "trajectory",
+        }
+    )
+    r_values = RangeCellCutoff(
+        label="r values (nm)",
+        include_last=True,
+        minimum=0.0,
+        depends={"trajectory": "trajectory"},
+    )
+    output_files = OutputFile()
+    running_mode = RunningMode()
+
     def finalize(self):
         """Perform the last steps of the analysis and write out results."""
-        npoints = len(self.configuration["r_values"]["mid_points"])
+        npoints = len(self.r_values.mid_points)
 
         for i in ("pdf", "rdf", "tcf"):
             self._outputData.add(
                 f"{i}/axes/r",
                 "LineOutputVariable",
-                self.configuration["r_values"]["mid_points"],
+                self.r_values.mid_points,
                 units="nm",
             )
             for label, _ in self.labels:
@@ -77,6 +114,7 @@ class PairDistributionFunction(DistanceHistogram):
                     main_result=i == "pdf",
                     partial_result=i == "pdf",
                 )
+
             self._outputData.add(
                 f"{i}/total",
                 "LineOutputVariable",
@@ -85,6 +123,7 @@ class PairDistributionFunction(DistanceHistogram):
                 units="au",
                 main_result=i == "pdf",
             )
+
             if self.intra:
                 for label, _ in self.labels_intra:
                     self._outputData.add(
@@ -117,17 +156,11 @@ class PairDistributionFunction(DistanceHistogram):
                     units="au",
                 )
 
-        nFrames = self.configuration["frames"]["number"]
-
-        self.averageDensity /= nFrames
-
-        densityFactor = 4.0 * np.pi * self.configuration["r_values"]["mid_points"]
-
-        shellSurfaces = densityFactor * self.configuration["r_values"]["mid_points"]
-
-        shellVolumes = shellSurfaces * self.configuration["r_values"]["step"]
-
-        nAtomsPerElement = self.trajectory.get_natoms()
+        n_frames = len(self.frames)
+        self.average_density /= n_frames
+        density_factor = 4.0 * np.pi * self.r_values.mid_points
+        shell_surfaces = density_factor * self.r_values.mid_points
+        shell_volumes = shell_surfaces * self.r_values.binning.step
 
         def calc_func(
             label_i: str, label_j: str
@@ -151,11 +184,11 @@ class PairDistributionFunction(DistanceHistogram):
             results : npt.NDArray
                 The results.
             """
-            ni = nAtomsPerElement[label_i]
-            nj = nAtomsPerElement[label_j]
+            ni = self._n_atoms_per_element[label_i]
+            nj = self._n_atoms_per_element[label_j]
 
-            idi = self.selectedElements.index(label_i)
-            idj = self.selectedElements.index(label_j)
+            idi = self.selected_elements.index(label_i)
+            idj = self.selected_elements.index(label_j)
 
             if label_i == label_j:
                 nij = ni**2 / 2.0
@@ -165,7 +198,7 @@ class PairDistributionFunction(DistanceHistogram):
                     self.h_intra[idi, idj] += self.h_intra[idj, idi]
                 self.h_total[idi, idj] += self.h_total[idj, idi]
 
-            fact = 2 * nij * nFrames * shellVolumes
+            fact = 2 * nij * n_frames * shell_volumes
 
             for i, pdf in zip(
                 ("", "/intra", "/inter"),
@@ -182,13 +215,13 @@ class PairDistributionFunction(DistanceHistogram):
                 yield (
                     f"rdf{i}",
                     i == "/intra",
-                    shellSurfaces * self.averageDensity * pdf,
+                    shell_surfaces * self.average_density * pdf,
                 )
                 yield (
                     f"tcf{i}",
                     i == "/intra",
-                    densityFactor
-                    * self.averageDensity
+                    density_factor
+                    * self.average_density
                     * (pdf if i == "/intra" else pdf - 1),
                 )
                 if self.indices_intra is None:
@@ -196,18 +229,16 @@ class PairDistributionFunction(DistanceHistogram):
 
         update_pair_results(self.trajectory, calc_func, self._outputData)
 
-        selected_weights, all_weights = self.trajectory.get_weights(
-            prop=self.configuration["weights"]["property"]
-        )
+        selected_weights, all_weights = self.trajectory.get_weights(prop=self.weights)
         weight_dict = get_weights(
             selected_weights,
             all_weights,
-            nAtomsPerElement,
+            self._n_atoms_per_element,
             self.trajectory.get_all_natoms(),
             2,
         )
 
-        n_selected = sum(nAtomsPerElement.values())
+        n_selected = len(self.atom_selection)
         n_total = sum(self.trajectory.get_all_natoms().values())
         factor = (n_selected / n_total) ** 2
 
@@ -218,11 +249,11 @@ class PairDistributionFunction(DistanceHistogram):
                 pdf = weighted_sum(self._outputData, f"pdf{i}/%s", labels)
                 self._outputData[f"pdf{i}/total"][:] = pdf / factor
                 self._outputData[f"rdf{i}/total"][:] = (
-                    shellSurfaces * self.averageDensity * pdf / factor
+                    shell_surfaces * self.average_density * pdf / factor
                 )
                 self._outputData[f"tcf{i}/total"][:] = (
-                    densityFactor
-                    * self.averageDensity
+                    density_factor
+                    * self.average_density
                     * (pdf / factor if i == "/intra" else (pdf - factor) / factor)
                 )
                 for j in ("pdf", "rdf", "tcf"):
@@ -244,18 +275,18 @@ class PairDistributionFunction(DistanceHistogram):
             pdf = weighted_sum(self._outputData, "pdf/%s", self.labels)
             self._outputData["pdf/total"][:] = pdf / factor
             self._outputData["rdf/total"][:] = (
-                shellSurfaces * self.averageDensity * pdf / factor
+                shell_surfaces * self.average_density * pdf / factor
             )
             self._outputData["tcf/total"][:] = (
-                densityFactor * self.averageDensity * (pdf - factor) / factor
+                density_factor * self.average_density * (pdf - factor) / factor
             )
             self._outputData["pdf/total"].scaling_factor = factor
             self._outputData["rdf/total"].scaling_factor = factor
             self._outputData["tcf/total"].scaling_factor = factor
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

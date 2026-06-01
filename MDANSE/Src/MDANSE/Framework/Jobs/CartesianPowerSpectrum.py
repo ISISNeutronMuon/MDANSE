@@ -19,11 +19,28 @@ import collections
 import copy
 import itertools as it
 
+from more_itertools import value_chain
+
 from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
 )
 from MDANSE.Framework.Jobs.VelocityCorrelationFunction import (
     CartesianCorrelationFunction,
+)
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    CorrelationWindow,
+    FrameSelect,
+    GroupingLevel,
+    InstrumentResolution,
+    InterpOrder,
+    MDANSETrajectory,
+    OutputFile,
+    PartialCharge,
+    Projection,
+    RunningMode,
+    Weights,
 )
 from MDANSE.Mathematics.Arithmetic import assign_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
@@ -36,51 +53,46 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
     )
     PREDICTORS = ("instrument_resolution",)
 
-    settings = copy.deepcopy(CartesianCorrelationFunction.settings)
-    settings = list(settings.items())
-    settings.insert(
-        2,
-        (
-            "instrument_resolution",
-            (
-                "InstrumentResolutionConfigurator",
-                {
-                    "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-                },
-            ),
-        ),
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        grouping="grouping_level",
+        transmutation="atom_transmutation",
     )
-    settings = collections.OrderedDict(settings)
-    settings["weights"][1]["default"] = "atomic_weight"
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    projection = Projection(label="Project coordinates")
+    atom_charges = PartialCharge(
+        depends={"trajectory": "trajectory"},
+    )
+    weights = Weights(depends={"trajectory": "trajectory"}, default="atomic_weight")
+    instrument_resolution = InstrumentResolution(
+        depends={"trajectory": "trajectory", "window": "frame_window"}
+    )
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     PWR_NAME = ""
     PWR_UNITS = ""
 
-    def initialize(self):
-        """
-        Initialize the input parameters and analysis self variables
-        """
-        self.add_ideal_results = (
-            self.configuration["instrument_resolution"]["kernel"].lower() != "ideal"
-        )
-        super().initialize()
-
     def initialize_outputdata(self):
         super().initialize_outputdata()
 
-        instrResolution = self.configuration["instrument_resolution"]
+        self.resolution = self.instrument_resolution.run_resolution
 
         self._outputData.add(
             f"{self.PWR_NAME}/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.frame_window.duration,
             units="ps",
         )
 
         self._outputData.add(
             f"{self.PWR_NAME}/res/time_window",
             "LineOutputVariable",
-            instrResolution["time_window_positive"],
+            self.resolution.time_window_positive,
             axis=f"{self.PWR_NAME}/axes/time",
             units="au",
         )
@@ -88,37 +100,37 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
         self._outputData.add(
             f"{self.PWR_NAME}/axes/omega",
             "LineOutputVariable",
-            instrResolution["omega"],
+            self.resolution.omega,
             units="rad/ps",
         )
         self._outputData.add(
             f"{self.PWR_NAME}/axes/romega",
             "LineOutputVariable",
-            instrResolution["romega"],
+            self.resolution.romega,
             units="rad/ps",
         )
         self._outputData.add(
             f"{self.PWR_NAME}/res/omega_window",
             "LineOutputVariable",
-            instrResolution["omega_window"],
+            self.resolution.omega_window,
             axis=f"{self.PWR_NAME}/axes/omega",
             units="au",
         )
 
         self._pwr_components = self._cf_components.copy()
-        if self.add_ideal_results:
+        if self.resolution.add_ideal:
             self._pwr_components.append("ideal/isotropic")
-            for i, j in it.combinations_with_replacement(["x", "y", "z"], 2):
+            for i, j in it.combinations_with_replacement("xyz", 2):
                 self._pwr_components.append(f"ideal/{i}{j}")
 
         for component in self._pwr_components:
-            for result in [*list(self.trajectory.unique_names), "total"]:
+            for result in value_chain(self.trajectory.unique_names, "total"):
                 main_result = f"{self.PWR_NAME}/{component}/" == self.MAIN_RESULTS
                 partial_result = main_result and result != "total"
                 self._outputData.add(
                     f"{self.PWR_NAME}/{component}/{result}",
                     "LineOutputVariable",
-                    (instrResolution["n_romegas"],),
+                    (self.resolution.n_romegas,),
                     axis=f"{self.PWR_NAME}/axes/romega",
                     units="au",
                     main_result=main_result,
@@ -130,7 +142,7 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
 
         nAtomsPerElement = self.trajectory.get_natoms()
         fact = sum(nAtomsPerElement.values()) / len(self.trajectory.atom_types)
-        time_window = self.configuration["instrument_resolution"]["time_window"]
+        time_window = self.resolution.time_window
 
         for component in self._pwr_components:
             for element in nAtomsPerElement:
@@ -140,7 +152,7 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
                             f"{self.CF_NAME}/{component.split('/')[-1]}/{element}"
                         ],
                         None if "ideal" in component else time_window,
-                        self.configuration["instrument_resolution"]["time_step"],
+                        self.frames.time_step,
                         fft="rfft",
                     )
                 )

@@ -15,44 +15,51 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QCheckBox
 
+from MDANSE.Framework.Parameters import Boolean
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class BooleanWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        default_option = self._configurator.default
-        field = QCheckBox(self._base)
-        field.setTristate(False)
-        field.setChecked(default_option)
-        field.stateChanged.connect(self.updateValue)
+class BooleanWidget(WidgetBase[Boolean]):
+    def __init__(self, *args, parameter: Boolean, **kwargs):
+        super().__init__(*args, parameter=parameter, **kwargs)
+
+        default_option = self.parameter.default
+
+        self._field = QCheckBox(self._base)
+        self._field.setTristate(False)
+        self._field.setChecked(default_option)
+        self._field.stateChanged.connect(self.updateValue)
+
         if self._tooltip:
             tooltip_text = self._tooltip
         else:
             tooltip_text = "A single logical value that can be True of False"
-        field.setToolTip(tooltip_text)
-        self._field = field
-        self._layout.addWidget(field)
+        self._field.setToolTip(tooltip_text)
+
+        self._layout.addWidget(self._field)
+
         self.default_labels()
         self.update_labels()
         self.updateValue()
+
+    def set_value(self, value: Any) -> None:
+        self._field.setChecked(bool(value))
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "BooleanWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "A single logical value that can be True of False"
         self._field.setToolTip(self._tooltip)
-
-    def configure_using_default(self):
-        """No need to anything for Boolean"""
 
     def get_widget_value(self):
         return self._field.checkState() == Qt.CheckState.Checked

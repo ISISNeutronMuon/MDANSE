@@ -1,30 +1,38 @@
+from __future__ import annotations
+
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
-from MDANSE.Framework.Jobs.ReorientationalTimeCorrelationFunction import correlate_legendre, correlate
+from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Jobs.ReorientationalTimeCorrelationFunction import (
+    correlate,
+    correlate_legendre,
+)
 
 short_traj = CONV_DIR / "named_molecules.mdt"
 
 
 @pytest.fixture()
 def vector_array():
-    return np.array([[0.5, 0.5, 0.0],
-                     [0.6, 0.6, 0.6],
-                     [0.2, 0.2, 0.7],
-                     [0.3, 0.3, 0.3],
-                     [0.5, 0.5, 0.0],
-                     [0.2, 0.2, 0.7],
-                     [0.6, 0.6, 0.6],
-                     [0.3, 0.3, 0.3],
-                     [0.3, 0.3, 0.3],
-                     [0.5, 0.5, 0.0],
-                     [0.6, 0.6, 0.6],
-                     [0.2, 0.2, 0.7],
-                     ])
+    return np.array(
+        [
+            [0.5, 0.5, 0.0],
+            [0.6, 0.6, 0.6],
+            [0.2, 0.2, 0.7],
+            [0.3, 0.3, 0.3],
+            [0.5, 0.5, 0.0],
+            [0.2, 0.2, 0.7],
+            [0.6, 0.6, 0.6],
+            [0.3, 0.3, 0.3],
+            [0.3, 0.3, 0.3],
+            [0.5, 0.5, 0.0],
+            [0.6, 0.6, 0.6],
+            [0.2, 0.2, 0.7],
+        ]
+    )
 
 
 def test_manual_correlation_l1(vector_array):
@@ -72,21 +80,24 @@ def parameters():
     return parameters
 
 
-@pytest.mark.parametrize("polynomial_order", [1,2,3])
+@pytest.mark.parametrize("polynomial_order", [1, 2, 3])
 def test_rtcf(generate_benchmarks, tmp_path, parameters, polynomial_order):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
-    result_file = RESULTS_DIR / f"structure_analysis_rtcf_l{str(polynomial_order)}.mda"
+    result_file = RESULTS_DIR / f"structure_analysis_rtcf_l{polynomial_order!s}.mda"
 
     if generate_benchmarks:
         temp_name = result_file.with_suffix("")
 
-    parameters["polynomial_order"] = polynomial_order
+    parameters["legendre_order"] = polynomial_order
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
 
     job = IJob.create("ReorientationalTimeCorrelationFunction")
-    job.run(parameters, status=True)
+    job.configuration = {
+        key: value for key, value in parameters.items() if key in job.parameters
+    }
+    job.run(status=True)
 
     if generate_benchmarks:
         return
@@ -94,10 +105,9 @@ def test_rtcf(generate_benchmarks, tmp_path, parameters, polynomial_order):
     assert out_file.is_file()
     assert log_file.is_file()
 
-
     compare_hdf5(
         out_file,
         result_file,
-        [f"rtcf/l={pord}" for pord in range(1,polynomial_order+1)],
-        compare_axis=True
+        [f"rtcf/l={pord}" for pord in job.legendre_orders],
+        compare_axis=True,
     )

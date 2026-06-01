@@ -18,20 +18,29 @@ from __future__ import annotations
 from math import sqrt
 
 import numpy as np
+import numpy.typing as npt
 from more_itertools import always_iterable
 from scipy.signal import correlate
 
-from MDANSE.Framework.AtomGrouping.grouping import (
-    add_grouped_totals,
-    pair_labels,
-)
+from MDANSE.Framework.AtomGrouping.grouping import add_grouped_totals, pair_labels
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    CorrelationWindow,
+    FrameSelect,
+    GroupingLevel,
+    InstrumentResolution,
+    InterpOrder,
+    MDANSETrajectory,
+    OutputFile,
+    QVectors,
+    RunningMode,
+    Weights,
+)
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
-from MDANSE.Mathematics.Signal import (
-    differentiate,
-    get_spectrum,
-)
+from MDANSE.Mathematics.Signal import differentiate, get_spectrum
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -66,118 +75,83 @@ class CurrentCorrelationFunction(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        transmutation="atom_transmutation",
+        grouping="grouping_level",
     )
-    settings["instrument_resolution"] = (
-        "InstrumentResolutionConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-        },
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    instrument_resolution = InstrumentResolution(
+        depends={"trajectory": "trajectory", "window": "frame_window"},
     )
-    settings["interpolation_order"] = (
-        "InterpolationOrderConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-        },
+    interpolation_order = InterpOrder(
+        depends={"trajectory": "trajectory", "frames": "frames"}
     )
-    settings["q_vectors"] = (
-        "QVectorsConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {
-            "default": "equal",
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            },
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    q_vectors = QVectors(depends={"trajectory": "trajectory"})
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    weights = Weights(default="equal", depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        self.numberOfSteps = self.configuration["q_vectors"]["n_shells"]
+        self.generator = self.q_vectors.generator
 
-        nQShells = self.configuration["q_vectors"]["n_shells"]
+        self.numberOfSteps = self.generator.n_shells
 
-        self._instrResolution = self.configuration["instrument_resolution"]
+        nQShells = self.generator.n_shells
 
-        self._nOmegas = self._instrResolution["n_romegas"]
+        self.resolution = self.instrument_resolution.run_resolution
+        self._nOmegas = self.resolution.n_romegas
 
         self._outputData.add(
             "ccf/axes/q",
             "LineOutputVariable",
-            np.array(self.configuration["q_vectors"]["shells"]),
+            self.generator.shells,
             units="1/nm",
         )
 
         self._outputData.add(
             "ccf/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.frame_window.duration,
             units="ps",
         )
 
         self._outputData.add(
             "ccf/res/time_window",
             "LineOutputVariable",
-            self._instrResolution["time_window_positive"],
+            self.resolution.time_window_positive,
             units="au",
         )
 
         self._outputData.add(
             "ccf/axes/omega",
             "LineOutputVariable",
-            self._instrResolution["omega"],
+            self.resolution.omega,
             units="rad/ps",
         )
 
         self._outputData.add(
             "ccf/axes/romega",
             "LineOutputVariable",
-            self._instrResolution["romega"],
+            self.resolution.romega,
             units="rad/ps",
         )
 
         self._outputData.add(
             "ccf/res/omega_window",
             "LineOutputVariable",
-            self._instrResolution["omega_window"],
+            self.resolution.omega_window,
             axis="ccf/axes/omega",
             units="au",
         )
 
-        self._nFrames = self.configuration["frames"]["n_frames"]
         self._elements = set(
             always_iterable(
                 self.trajectory.selection_getter(self.trajectory.atom_names)
@@ -187,23 +161,20 @@ class CurrentCorrelationFunction(IJob):
             self.trajectory,
         )
 
-        self._indicesPerElement = self.trajectory.get_indices()
-        self.add_ideal_results = (
-            self.configuration["instrument_resolution"]["kernel"].lower() != "ideal"
-        )
+        self.indices_per_element = self.trajectory.get_indices()
 
         for pair_str, _ in self.labels:
             self._outputData.add(
                 f"ccf/j(q,t)_long/{pair_str}",
                 "SurfaceOutputVariable",
-                (nQShells, self._nFrames),
+                (nQShells, self.frame_window.n_frames),
                 axis="ccf/axes/q|ccf/axes/time",
                 units="au",
             )
             self._outputData.add(
                 f"ccf/j(q,t)_trans/{pair_str}",
                 "SurfaceOutputVariable",
-                (nQShells, self._nFrames),
+                (nQShells, self.frame_window.n_frames),
                 axis="ccf/axes/q|ccf/axes/time",
                 units="au",
             )
@@ -225,7 +196,7 @@ class CurrentCorrelationFunction(IJob):
                 main_result=True,
                 partial_result=True,
             )
-            if self.add_ideal_results:
+            if self.resolution.add_ideal:
                 self._outputData.add(
                     f"ccf/J(q,f)_long/ideal/{pair_str}",
                     "SurfaceOutputVariable",
@@ -244,14 +215,14 @@ class CurrentCorrelationFunction(IJob):
         self._outputData.add(
             "ccf/j(q,t)_long/total",
             "SurfaceOutputVariable",
-            (nQShells, self._nFrames),
+            (nQShells, self.frame_window.n_frames),
             axis="ccf/axes/q|ccf/axes/time",
             units="au",
         )
         self._outputData.add(
             "ccf/j(q,t)_trans/total",
             "SurfaceOutputVariable",
-            (nQShells, self._nFrames),
+            (nQShells, self.frame_window.n_frames),
             axis="ccf/axes/q|ccf/axes/time",
             units="au",
         )
@@ -271,7 +242,7 @@ class CurrentCorrelationFunction(IJob):
             units="au",
             main_result=True,
         )
-        if self.add_ideal_results:
+        if self.resolution.add_ideal:
             self._outputData.add(
                 "ccf/J(q,f)_long/ideal/total",
                 "SurfaceOutputVariable",
@@ -287,13 +258,12 @@ class CurrentCorrelationFunction(IJob):
                 units="au",
             )
 
-        self._order = self.configuration["interpolation_order"]["value"]
+        self._order = self.interpolation_order
 
         self._cell_std = 0.0
         try:
             all_cells = [
-                self.trajectory.unit_cell(frame)._unit_cell
-                for frame in self.configuration["frames"]["value"]
+                self.trajectory.unit_cell(frame.ind)._unit_cell for frame in self.frames
             ]
         except TypeError:
             self._average_unit_cell = None
@@ -311,7 +281,17 @@ class CurrentCorrelationFunction(IJob):
                 ),
             )
 
-    def run_step(self, index: int):
+    def run_step(
+        self, index: int
+    ) -> tuple[
+        int,
+        tuple[
+            dict[str, npt.NDArray[np.complexfloating]],
+            dict[str, npt.NDArray[np.complexfloating]],
+            float,
+        ]
+        | None,
+    ]:
         """Calculate the current densities for the input q vector shell index.
 
         Parameters
@@ -320,42 +300,40 @@ class CurrentCorrelationFunction(IJob):
             Index of the shell.
 
         """
-        shell = self.configuration["q_vectors"]["shells"][index]
-        if self.configuration["q_vectors"]["value"][shell] is None:
+        shell = self.generator.shells[index]
+
+        if self.generator.q_vectors.get(shell) is None:
+            LOG.warning("No q vecs at %f", shell)
             return index, None
 
-        qvec_weights = self.configuration["q_vectors"]["value"][shell]["weights"]
+        qvec_weights = self.generator.q_vectors[shell]["weights"]
         qvec_weights_sqrt = np.sqrt(qvec_weights)
 
         trajectory = self.trajectory
         cell_present = True
         cell_fixed = True
-        num_frames = len(self.configuration["frames"]["value"])
+        num_frames = len(self.frames)
+
         # loop over the trajectory time steps
-        for frame in self.configuration["frames"]["value"]:
-            unit_cell = trajectory.unit_cell(frame)
+        for frame in self.frames:
+            unit_cell = trajectory.unit_cell(frame.ind)
             if unit_cell is None:
                 cell_present = False
+                cell_fixed = False
             elif not np.allclose(
                 unit_cell._unit_cell,
                 self._average_unit_cell._unit_cell,
             ):
                 cell_fixed = False
-        if not cell_present:
-            qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
-            cell_fixed = False
+
+        if (
+            cell_present
+            and (hkls := self.generator.q_vectors[shell].get("hkls")) is not None
+        ):
+            qVectors = IQVectors.hkl_to_qvectors(hkls, unit_cell)
         else:
-            try:
-                hkls = self.configuration["q_vectors"]["value"][shell]["hkls"]
-            except KeyError:
-                qVectors = self.configuration["q_vectors"]["value"][shell]["q_vectors"]
-            else:
-                if hkls is None:
-                    qVectors = self.configuration["q_vectors"]["value"][shell][
-                        "q_vectors"
-                    ]
-                else:
-                    qVectors = IQVectors.hkl_to_qvectors(hkls, unit_cell)
+            qVectors = self.generator.q_vectors[shell]["q_vectors"]
+
 
         if not cell_present:
             LOG.warning(
@@ -363,24 +341,30 @@ class CurrentCorrelationFunction(IJob):
             )
         if not cell_fixed:
             LOG.warning(
-                f"The unit cell is VARIABLE with the standard deviation of {self._cell_std}. This analysis should not be used with NPT runs! PLEASE CHECK YOUR RESULTS CAREFULLY."
+                f"The unit cell is VARIABLE with the standard deviation of {self._cell_std}. "
+                "This analysis should not be used with NPT runs! PLEASE CHECK YOUR RESULTS CAREFULLY."
             )
+
         qVectors2 = np.sum(qVectors**2, axis=0)
 
         zero = qVectors2 == 0
         non_zero = qVectors2 != 0
-        if all(zero):
+
+        if np.all(zero):
             LOG.warning(
                 "All q-vectors for this shell have a magnitude "
                 "of zero, longitudinal and transverse currents "
                 "are not well-defined. The current correlation "
-                "for this shell will be set to zero.",
+                "for this shell will be set to zero @ %f.",
+                shell
             )
             # if they are all zero we can skip this shell, the
             # results for the longitudinal and transverse current
             # correlation for this shell will be zero
+
             return index, None
-        if any(zero):
+
+        if np.any(zero):
             LOG.warning(
                 "q-vectors with a magnitude of zero were used, "
                 "longitudinal and transverse currents are "
@@ -391,41 +375,46 @@ class CurrentCorrelationFunction(IJob):
         qvec_weights = qvec_weights[non_zero]
         qVectors2 = qVectors2[non_zero]
         nQVectors = qVectors.shape[1]
+
         if not cell_fixed:
-            hkls = self.configuration["q_vectors"]["value"][shell]["hkls"][:, non_zero]
+            hkls = self.generator.q_vectors[shell]["hkls"][:, non_zero]
             qVectors = np.empty((3, nQVectors, num_frames))
-            for nf, frame in enumerate(self.configuration["frames"]["value"]):
-                unit_cell = trajectory.unit_cell(frame)
+            for nf, frame in enumerate(self.frames):
+                unit_cell = trajectory.unit_cell(frame.ind)
                 qVectors[:, :, nf] = IQVectors.hkl_to_qvectors(hkls, unit_cell)
+
             qVectors2 = np.sum(qVectors**2, axis=0)
 
-        rho_l = {}
-        rho_t = {}
-        for element in self._elements:
-            rho_l[element] = np.zeros(
-                (self.configuration["frames"]["number"], 3, nQVectors),
+        rho_l = {
+            element: np.zeros(
+                (len(self.frames), 3, nQVectors),
                 dtype=np.complex64,
             )
-            rho_t[element] = np.zeros(
-                (self.configuration["frames"]["number"], 3, nQVectors),
+            for element in self._elements
+        }
+        rho_t = {
+            element: np.zeros(
+                (len(self.frames), 3, nQVectors),
                 dtype=np.complex64,
             )
+            for element in self._elements
+        }
 
-        for element, idxs in list(self._indicesPerElement.items()):
+        for element, idxs in self.indices_per_element.items():
             for idx in idxs:
                 coords = trajectory.read_atomic_trajectory(
                     idx,
-                    first=self.configuration["frames"]["first"],
-                    last=self.configuration["frames"]["last"] + 1,
-                    step=self.configuration["frames"]["step"],
+                    first=self.frames.index_start,
+                    last=self.frames.index_stop + 1,
+                    step=self.frames.index_step,
                 )
 
-                if self.configuration["interpolation_order"]["value"] == 0:
+                if not self.interpolation_order:
                     veloc = trajectory.read_configuration_trajectory(
                         idx,
-                        first=self.configuration["frames"]["first"],
-                        last=self.configuration["frames"]["last"] + 1,
-                        step=self.configuration["frames"]["step"],
+                        first=self.frames.index_start,
+                        last=self.frames.index_stop + 1,
+                        step=self.frames.index_step,
                         variable="velocities",
                     )
                 else:
@@ -433,8 +422,8 @@ class CurrentCorrelationFunction(IJob):
                     for axis in range(3):
                         veloc[:, axis] = differentiate(
                             coords[:, axis],
-                            order=self.configuration["interpolation_order"]["value"],
-                            dt=self.configuration["frames"]["time_step"],
+                            order=self.interpolation_order,
+                            dt=self.frames.time_step,
                         )
 
                 if qVectors.ndim > 2:
@@ -472,16 +461,25 @@ class CurrentCorrelationFunction(IJob):
 
         return index, (rho_l, rho_t, np.sum(qvec_weights))
 
-    def combine(self, index: int, x: tuple[np.ndarray, np.ndarray] | None):
+    def combine(
+        self,
+        index: int,
+        x: tuple[
+            dict[str, npt.NDArray[np.complexfloating]],
+            dict[str, npt.NDArray[np.complexfloating]],
+            float,
+        ]
+        | None,
+    ):
         """Calculate the correlation functions of the current densities.
 
         Parameters
         ----------
         index : int
             The index of the q vector shell that we are calculating.
-        x : tuple[np.ndarray, np.ndarray]
+        x : tuple[np.ndarray, np.ndarray, float]
             A tuple of numpy arrays of the longitudinal and transverse
-            currents.
+            currents and vector weights.
 
         """
         if x is None:
@@ -491,7 +489,7 @@ class CurrentCorrelationFunction(IJob):
             return
 
         rho_l, rho_t, norm = x
-        n_configs = self.configuration["frames"]["n_configs"]
+        n_configs = self.frame_window.n_configs
         for pair_str, (label_i, label_j) in self.labels:
             corr_l = correlate(
                 rho_l[label_i], rho_l[label_j][:n_configs], mode="valid"
@@ -512,9 +510,7 @@ class CurrentCorrelationFunction(IJob):
 
     def finalize(self):
         """Normalize, Fourier transform and write the results out."""
-        self.configuration["q_vectors"]["generator"].write_vectors_to_file(
-            self._outputData,
-        )
+        self.generator.write_vectors_to_file(self._outputData)
 
         nAtomsPerElement = self.trajectory.get_natoms()
         for pair_str, (label_i, label_j) in self.labels:
@@ -524,23 +520,23 @@ class CurrentCorrelationFunction(IJob):
             self._outputData[f"ccf/j(q,t)_trans/{pair_str}"][:] /= sqrt(ni * nj)
             self._outputData[f"ccf/J(q,f)_long/{pair_str}"][:] = get_spectrum(
                 self._outputData[f"ccf/j(q,t)_long/{pair_str}"],
-                self.configuration["instrument_resolution"]["time_window"],
-                self.configuration["instrument_resolution"]["time_step"],
+                self.resolution.time_window,
+                self.frames.time_step,
                 axis=1,
                 fft="rfft",
             )
             self._outputData[f"ccf/J(q,f)_trans/{pair_str}"][:] = get_spectrum(
                 self._outputData[f"ccf/j(q,t)_trans/{pair_str}"],
-                self.configuration["instrument_resolution"]["time_window"],
-                self.configuration["instrument_resolution"]["time_step"],
+                self.resolution.time_window,
+                self.frames.time_step,
                 axis=1,
                 fft="rfft",
             )
-            if self.add_ideal_results:
+            if self.resolution.add_ideal:
                 self._outputData[f"ccf/J(q,f)_long/ideal/{pair_str}"][:] = get_spectrum(
                     self._outputData[f"ccf/j(q,t)_long/{pair_str}"],
                     None,
-                    self.configuration["instrument_resolution"]["time_step"],
+                    self.frames.time_step,
                     axis=1,
                     fft="rfft",
                 )
@@ -548,15 +544,13 @@ class CurrentCorrelationFunction(IJob):
                     get_spectrum(
                         self._outputData[f"ccf/j(q,t)_trans/{pair_str}"],
                         None,
-                        self.configuration["instrument_resolution"]["time_step"],
+                        self.frames.time_step,
                         axis=1,
                         fft="rfft",
                     )
                 )
 
-        selected_weights, all_weights = self.trajectory.get_weights(
-            prop=self.configuration["weights"]["property"]
-        )
+        selected_weights, all_weights = self.trajectory.get_weights(prop=self.weights)
         weight_dict = get_weights(
             selected_weights,
             all_weights,
@@ -573,7 +567,7 @@ class CurrentCorrelationFunction(IJob):
         assign_weights(
             self._outputData, weight_dict, "ccf/J(q,f)_trans/%s", self.labels
         )
-        if self.add_ideal_results:
+        if self.resolution.add_ideal:
             assign_weights(
                 self._outputData,
                 weight_dict,
@@ -651,7 +645,7 @@ class CurrentCorrelationFunction(IJob):
             partial_result=True,
         )
 
-        if self.add_ideal_results:
+        if self.resolution.add_ideal:
             sqfLongTotal = weighted_sum(
                 self._outputData, "ccf/J(q,f)_long/ideal/%s", self.labels
             )
@@ -684,8 +678,8 @@ class CurrentCorrelationFunction(IJob):
             )
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.root,
+            self.output_files.out_format,
             str(self),
             self,
         )

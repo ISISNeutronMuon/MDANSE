@@ -16,7 +16,7 @@ def test_disf_selection_plus_inverse_results_equal_to_all_selection_results(tmp_
         "instrument_resolution": ("Ideal", {}),
         "q_vectors": (
             "GridQVectors",
-            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "q_step": 1},
+            {"hrange": [0, 3, 1], "krange": [0, 3, 1], "lrange": [0, 3, 1], "qstep": 1},
         ),
         "running_mode": ("single-core",),
         "trajectory": mdmc_traj,

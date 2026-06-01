@@ -24,6 +24,7 @@ select = [
     # "RSE", # Flake8 raise
     # "FA",  # Flake8 future
     # "FBT", # Flake8 boolean trap
+    # "TC",  # Flake8 Type Checking
     "C4",  # Flake8 comprehensions
     "Q",   # Flake8 Quotes
     # "RET", # Flake8 return

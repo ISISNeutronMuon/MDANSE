@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import collections
 from contextlib import suppress
+from enum import Enum, auto
 from math import sqrt
 
 import numpy as np
@@ -28,6 +29,16 @@ from more_itertools import ilen
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Parameters import (
+    AtomMapping,
+    Boolean,
+    Float,
+    Integer,
+    OutputTrajectory,
+    PathParam,
+    SingleChoice,
+    to_class,
+)
 from MDANSE.Framework.Parsers import ASEParser
 from MDANSE.Framework.Units import INTERNAL_UNITS, UnitError, measure
 from MDANSE.MLogging import LOG
@@ -57,51 +68,6 @@ class ASE(Converter):
     category = ("Converters", "General")
     label = "ASE"
 
-    settings = {}
-    settings["trajectory_file"] = (
-        "FileWithAtomDataConfigurator",
-        {
-            "label": "An MD trajectory file supported by ASE",
-            "default": "INPUT_FILENAME",
-            "parser": ASEParser,
-        },
-    )
-    settings["atom_aliases"] = (
-        "AtomMappingConfigurator",
-        {
-            "default": "{}",
-            "label": "Atom mapping",
-            "dependencies": {"input_file": "trajectory_file"},
-        },
-    )
-    settings["time_step"] = (
-        "FloatConfigurator",
-        {"label": "Time step", "default": 1.0, "mini": 1.0e-9},
-    )
-    settings["time_unit"] = (
-        "SingleChoiceConfigurator",
-        {"label": "Time step unit", "choices": ["fs", "ps", "ns"], "default": "fs"},
-    )
-    settings["n_steps"] = (
-        "IntegerConfigurator",
-        {
-            "label": "Number of time steps (0 for automatic detection)",
-            "default": 0,
-            "mini": 0,
-        },
-    )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates into box"},
-    )
-    settings["output_files"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "formats": ["MDTFormat"],
-            "root": "trajectory_file",
-        },
-    )
-
     UNIT_CONV = {
         "energy": measure(1.0, "eV").toval("Da nm2 / ps2"),
         "forces": measure(1.0, "eV/ang").toval("Da nm / ps2"),
@@ -110,27 +76,42 @@ class ASE(Converter):
         "length": measure(1.0, "ang").toval("nm"),
     }
 
+    trajectory_file = PathParam[ASEParser](
+        mode="r",
+        label="An MD trajectory file supported by ASE",
+        on_set=to_class(ASEParser),
+    )
+    atom_aliases = AtomMapping(
+        depends={"trajectory": "trajectory_file"}, label="Atom mapping", default={}
+    )
+    time_unit = SingleChoice(("fs", "ps", "ns"), default="fs", label="Time step unit")
+    time_step = Float(default=1.0, minimum=1e-9, label="Time step")
+    n_steps = Integer(
+        default=0, minimum=0, label="Number of time steps (0 for automatic detection)"
+    )
+    time_step = Float(default=1.0, minimum=1e-9, label="Time step")
+    fold = Boolean(label="Fold coordinates into box")
+    output_files = OutputTrajectory()
+
     def initialize(self):
         """
         Initialize the job.
         """
         super().initialize()
 
-        self.trajectory_file = self.configuration["trajectory_file"].instance
         self._isPeriodic = None
         self._backup_cell = None
         self._keep_running = True
         self._initial_masses = None
-        self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
         # The number of steps of the analysis.
-        self.numberOfSteps = self.configuration["n_steps"]["value"]
+        self.numberOfSteps = self.n_steps
 
-        self._timestep = float(self.configuration["time_step"]["value"]) * measure(
-            1.0, self.configuration["time_unit"]["value"]
-        ).toval("ps")
+        self._timestep = float(self.time_step) * measure(1.0, self.time_unit).toval(
+            "ps"
+        )
 
-        self.parse_first_step(self._atomicAliases)
+        self.parse_first_step(self.atom_aliases)
         LOG.info(f"isPeriodic after parse_first_step: {self._isPeriodic}")
         self._start = 0
 
@@ -139,12 +120,12 @@ class ASE(Converter):
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["file"],
+            self.output_files.path,
             self._chemical_system,
             self.numberOfSteps,
-            positions_dtype=self.configuration["output_files"]["dtype"],
-            chunking_limit=self.configuration["output_files"]["chunk_size"],
-            compression=self.configuration["output_files"]["compression"],
+            positions_dtype=self.output_files.dtype,
+            chunking_limit=self.output_files.chunk_size,
+            compression=self.output_files.compression,
             initial_charges=self._initial_charges,
         )
 
@@ -215,7 +196,7 @@ class ASE(Converter):
                 real_conf = PeriodicRealConfiguration(
                     self._trajectory.chemical_system, coords, unitCell, **variables
                 )
-                if self._configuration["fold"]["value"]:
+                if self.fold:
                     real_conf.fold_coordinates()
             else:
                 real_conf = RealConfiguration(

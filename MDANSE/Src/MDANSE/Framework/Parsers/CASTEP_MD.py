@@ -16,10 +16,9 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Collection, Iterable, Iterator
 from functools import cached_property
 from itertools import dropwhile
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import numpy.typing as npt
@@ -30,6 +29,9 @@ from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Units import measure
 
 from .Parser import Parser
+
+if TYPE_CHECKING:
+    from collections.abc import Collection, Iterable, Iterator
 
 HBAR = measure(1.05457182e-34, "kg m2 / s").toval("Da nm2 / ps")
 HARTREE = measure(27.2113845, "eV").toval("Da nm2 / ps2")

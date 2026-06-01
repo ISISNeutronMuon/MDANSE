@@ -15,9 +15,27 @@
 #
 from __future__ import annotations
 
+from enum import Enum, auto
+
 from .FileInMemory import FileInMemory as FileInMemory
 from .HDFFormat import HDFFormat as HDFFormat
 from .IFormat import IFormat as IFormat
 from .MDAFormat import MDAFormat as MDAFormat
 from .MDTFormat import MDTFormat as MDTFormat
 from .TextFormat import TextFormat as TextFormat
+
+
+class OutputFormats(Enum):
+    MDAFormat = auto()
+    TextFormat = auto()
+    FileInMemory = auto()
+    MDTFormat = auto()
+
+    @classmethod
+    def _missing_(cls, value):
+        if not isinstance(value, str):
+            return None
+
+        for member in cls:
+            if member.name == value:
+                return member

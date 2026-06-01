@@ -15,11 +15,26 @@
 #
 from __future__ import annotations
 
+import math
+from collections import defaultdict
+
 import MDAnalysis as mda
+from more_itertools import first, first_true
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Parameters import (
+    AtomMapping,
+    Boolean,
+    Float,
+    ManyPath,
+    OutputTrajectory,
+    PathParam,
+    SingleChoice,
+    to_class,
+)
+from MDANSE.Framework.Parsers import MDAnalysisTopology
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
@@ -44,142 +59,102 @@ class MDAnalysis(Converter):
 
     category = ("Converters", "General")
     label = "MDAnalysis"
-    settings = {}
-    settings["topology_file"] = (
-        "MDAnalysisTopologyFileConfigurator",
-        {
-            "wildcard": "All files (*)",
-            "default": "INPUT_FILENAME",
-            "label": "Topology file",
+
+    coordinate_format = SingleChoice(
+        choices=mda._READERS.keys() | {None},
+        aliases={"AUTO": None},
+        default=None,
+    )
+    coordinate_files = ManyPath[MDAnalysisTopology](
+        mode="r",
+        label="Coordinate file",
+        default="",
+    )
+    continuous = Boolean(label="Continuous frame stitching", default=False)
+    topology_format = SingleChoice(
+        choices=mda._PARSERS.keys() | {None},
+        aliases={"AUTO": None},
+        default=None,
+    )
+    topology_file = PathParam(
+        mode="r",
+        on_set_depends={
+            "topology_format": "topology_format",
+            "coordinate_format": "coordinate_format",
+            "coordinate_files": "coordinate_files",
+            "continuous": "continuous",
         },
+        label="Topology file",
+        on_set=MDAnalysisTopology,
     )
-    settings["coordinate_files"] = (
-        "MDAnalysisCoordinateFileConfigurator",
-        {
-            "wildcard": "All files (*)",
-            "default": "",
-            "label": "Coordinate files (optional)",
-            "dependencies": {"input_file": "topology_file"},
-        },
+    time_step = Float(
+        label="Time step (ps)",
+        tooltip="If 0.0 use timestep from files.",
+        default=0.0,
+        minimum=0.0,
     )
-    settings["atom_aliases"] = (
-        "AtomMappingConfigurator",
-        {
-            "default": "{}",
-            "label": "Atom mapping",
-            "dependencies": {"input_file": "topology_file"},
-        },
+    atom_aliases = AtomMapping(
+        depends={"trajectory": "topology_file"},
+        label="Atom mapping",
+        default={},
     )
-    settings["time_step"] = (
-        "MDAnalysisTimeStepConfigurator",
-        {
-            "label": "Time step (ps)",
-            "default": 0.0,
-            "mini": 0.0,
-            "dependencies": {
-                "topology_file": "topology_file",
-                "coordinate_files": "coordinate_files",
-            },
-        },
-    )
-    settings["fold"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Fold coordinates into box"},
-    )
-    settings["continuous"] = (
-        "BooleanConfigurator",
-        {"default": False, "label": "Continuous frame stitching"},
-    )
-    settings["output_files"] = (
-        "OutputTrajectoryConfigurator",
-        {
-            "formats": ["MDTFormat"],
-            "root": "config_file",
-        },
-    )
+    fold = Boolean(label="Fold coordinates into box")
+    output_files = OutputTrajectory()
 
     def initialize(self):
         """Load the trajectory using MDAnalysis and create the
         trajectory writer.
         """
-        coord_format = self.configuration["coordinate_files"]["format"]
-        coord_files = self.configuration["coordinate_files"]["filenames"]
+        super().initialize()
 
-        if len(coord_files) <= 1 or coord_format is None:
-            self.u = mda.Universe(
-                self.configuration["topology_file"]["filename"],
-                *coord_files,
-                continuous=self.configuration["continuous"]["value"],
-                format=coord_format,
-                topology_format=self.configuration["topology_file"]["format"],
-            )
-        else:
-            coord_files = [(i, coord_format) for i in coord_files]
-            self.u = mda.Universe(
-                self.configuration["topology_file"]["filename"],
-                coord_files,
-                continuous=self.configuration["continuous"]["value"],
-                topology_format=self.configuration["topology_file"]["format"],
-            )
-
-        self.numberOfSteps = len(self.u.trajectory)
+        self.numberOfSteps = self.topology_file.n_frames
 
         self._chemical_system = ChemicalSystem()
         element_list = []
         name_list = []
-        label_dict = {}
+        label_dict = defaultdict(list)
 
-        for at_number, at in enumerate(self.u.atoms):
-            kwargs = {}
-            for arg in ["element", "name", "type", "resname", "mass"]:
-                if hasattr(at, arg):
-                    kwargs[arg] = getattr(at, arg)
-            # the first out of the list above will be the main label
-            (k, main_label) = next(iter(kwargs.items()))
+        for at_number, atom in enumerate(self.topology_file.atom_labels):
+            kwargs = atom.kw
+
+            main_label = kwargs.pop("atm_label")
+
             # label_list will be populated too
-            if "resname" in kwargs:
-                tag = kwargs["resname"]
-            elif "type" in kwargs:
-                tag = kwargs["type"]
-            elif "name" in kwargs:
-                tag = kwargs["name"]
-            else:
-                tag = None
-            if tag:
-                if tag in label_dict:
-                    label_dict[tag] += [at_number]
-                else:
-                    label_dict[tag] = [at_number]
-            kwargs.pop(k)
-            element = get_element_from_mapping(
-                self.configuration["atom_aliases"]["value"], main_label, **kwargs
+            tag = kwargs.get(
+                first_true(("resname", "type", "name"), pred=kwargs.__contains__)
             )
 
-            name = None
-            for arg in ["name", "type", "element"]:
-                if hasattr(at, arg):
-                    name = getattr(at, arg)
+            if tag:
+                label_dict[tag].append(at_number)
+
+            element = get_element_from_mapping(self.atom_aliases, main_label, **kwargs)
+
+            for arg in ("name", "type", "element"):
+                if arg in self.topology_file.atom_props:
+                    name = getattr(self.topology_file.atoms[at_number], arg)
                     break
+            else:
+                name = None
+
             element_list.append(element)
             name_list.append(name)
+
         if None in name_list:
             name_list = None
+
         self._chemical_system.initialise_atoms(element_list, name_list)
         self._chemical_system.add_labels(label_dict)
 
-        kwargs = {
-            "positions_dtype": self.configuration["output_files"]["dtype"],
-            "chunking_limit": self.configuration["output_files"]["chunk_size"],
-            "compression": self.configuration["output_files"]["compression"],
-        }
-        if hasattr(self.u.atoms, "charges"):
-            kwargs["initial_charges"] = self.u.atoms.charges
+        self.frames = self.topology_file.frames
 
         self._trajectory = TrajectoryWriter(
-            self.configuration["output_files"]["file"],
+            self.output_files.path,
             self._chemical_system,
             self.numberOfSteps,
-            **kwargs,
+            positions_dtype=self.output_files.dtype,
+            chunking_limit=self.output_files.chunk_size,
+            compression=self.output_files.compression,
+            initial_charges=getattr(self.topology_file.atoms, "charges", None),
         )
         super().initialize()
 
@@ -197,43 +172,19 @@ class MDAnalysis(Converter):
         tuple[int, None]
             A tuple of the job index and None.
         """
-        self.u.trajectory[index]
+        data = next(self.frames)
 
-        # convert from MDAnalysis units to MDANSE units
-        # see https://userguide.mdanalysis.org/stable/units.html for
-        # default units in MDAnalysis
-        if self.u.trajectory.ts.triclinic_dimensions is None:
-            conf = RealConfiguration(
-                self._trajectory._chemical_system,
-                self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
-            )
-        else:
-            conf = PeriodicRealConfiguration(
-                self._trajectory._chemical_system,
-                self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
-                UnitCell(
-                    self.u.trajectory.ts.triclinic_dimensions
-                    * measure(1.0, "ang").toval("nm")
-                ),
-            )
-
-            if self.configuration["fold"]["value"]:
+        if "unit_cell" in data:
+            conf = PeriodicRealConfiguration(self._chemical_system, **data)
+            if self.fold:
                 conf.fold_coordinates()
-
-            if hasattr(self.u.trajectory.ts, "velocities"):
-                conf["velocities"] = self.u.trajectory.ts.velocities * measure(
-                    1.0, "ang/ps"
-                ).toval("nm/ps")
-
-            if hasattr(self.u.trajectory.ts, "forces"):
-                conf["gradients"] = self.u.trajectory.ts.forces * measure(
-                    1.0, "kJ/mol ang", equivalent=True
-                ).toval("Da nm/ps2")
-
-        if float(self.configuration["time_step"]["value"]) == 0.0:
-            time = index * self.u.trajectory.ts.dt
         else:
-            time = index * float(self.configuration["time_step"]["value"])
+            conf = RealConfiguration(self._chemical_system, **data)
+
+        if math.isclose(self.time_step, 0.0):
+            time = index * self.topology_file.timestep
+        else:
+            time = index * self.time_step
 
         self._trajectory.dump_configuration(
             conf,

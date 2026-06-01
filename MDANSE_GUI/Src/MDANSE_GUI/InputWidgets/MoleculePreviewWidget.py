@@ -15,17 +15,19 @@
 #
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import rdkit.Chem as chem
 import rdkit.Chem.AllChem as allchem
 import rdkit.Chem.Draw as draw
 from PIL.ImageQt import ImageQt
-from qtpy.QtCore import QObject
 from qtpy.QtGui import QFont, QPixmap
 from qtpy.QtWidgets import QDialog, QLabel, QVBoxLayout
 
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+if TYPE_CHECKING:
+    from qtpy.QtCore import QObject
+
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class MoleculePreviewWidget(QDialog):

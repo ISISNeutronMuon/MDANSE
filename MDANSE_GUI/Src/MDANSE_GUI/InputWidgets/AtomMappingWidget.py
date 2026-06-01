@@ -17,7 +17,9 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
+from more_itertools import first
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import (
     QComboBox,
@@ -34,8 +36,11 @@ from qtpy.QtWidgets import (
 
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.AtomMapping import guess_element
-from MDANSE_GUI.InputWidgets.InputFileWidget import InputFileWidget
+from MDANSE.Framework.Parameters import AtomMapping
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+
+if TYPE_CHECKING:
+    from MDANSE_GUI.InputWidgets.InputFileWidget import InputFileWidget
 
 
 class AtomMappingHelperDialog(QDialog):
@@ -44,7 +49,14 @@ class AtomMappingHelperDialog(QDialog):
     """
 
     def __init__(
-        self, field_widget: InputFileWidget, field: QLineEdit, parent, *args, **kwargs
+        self,
+        trajectory_widget: InputFileWidget,
+        field: QLineEdit,
+        parent: QWidget | None,
+        *args,
+        min_width: int = 500,
+        min_height: int = 600,
+        **kwargs,
     ):
         """
         Parameters
@@ -58,14 +70,14 @@ class AtomMappingHelperDialog(QDialog):
         """
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle("Atom mapping helper")
-        self.min_width = kwargs.get("min_width", 500)
-        self.min_height = kwargs.get("min_width", 600)
+        self.min_width = min_width
+        self.min_height = min_height
         self.resize(self.min_width, self.min_height)
         self.setMinimumWidth(self.min_width)
         self.setMinimumHeight(self.min_height)
         self._field = field
 
-        self._file_widget = field_widget
+        self._trajectory_widget = trajectory_widget
 
         self.layout = QVBoxLayout()
         buffer_0 = QWidget(self)
@@ -107,10 +119,11 @@ class AtomMappingHelperDialog(QDialog):
         widgets to the helper.
         """
         self.clear_panel()
-        if not self._file_widget._configurator.valid:
+        if not self._trajectory_widget.valid:
             return
 
-        self.labels = self._file_widget._configurator.labels
+        self.labels = self._trajectory_widget.get_value().labels
+
         for i, label in enumerate(self.labels):
             w0 = QLabel(label.grp_label.replace(";", "\n"))
             w1 = QLabel(label.atm_label)
@@ -157,7 +170,7 @@ class AtomMappingHelperDialog(QDialog):
         self._field.setText(json.dumps(settings))
 
 
-class AtomMappingWidget(WidgetBase):
+class AtomMappingWidget(WidgetBase[AtomMapping]):
     """The atom mapping widget."""
 
     def __init__(self, *args, **kwargs):
@@ -165,37 +178,37 @@ class AtomMappingWidget(WidgetBase):
         default_value = "{}"
         self._value = default_value
         self._field = QLineEdit(default_value, self._base)
+
         self._field.setPlaceholderText(default_value)
         self._field.setMaxLength(2147483647)  # set to the largest possible
+
         if self._tooltip:
             tooltip_text = self._tooltip
         else:
             tooltip_text = "Replace the chemical elements in the system. The order of symbols is <current>:<new>"
+
         self._field.setToolTip(tooltip_text)
 
-        # file input widgets should be loaded into the _widgets list
-        # before this one
-        for widget in self.parent()._widgets:
-            if (
-                widget._configurator
-                is self._configurator.configurable[
-                    self._configurator.dependencies["input_file"]
-                ]
-            ):
-                self._file_widget = widget
-                break
+        trajectory_name = self.parameter.depends["trajectory"]
+        self._trajectory_widget = self._parent._raw_widgets[trajectory_name]
 
         self.helper = AtomMappingHelperDialog(
-            self._file_widget, self._field, self._base
+            self._trajectory_widget,
+            self._field,
+            self._base,
         )
         self.helper_button = QPushButton("Atom mapping helper", self._base)
         self.helper_button.clicked.connect(self.helper_dialog)
         self.helper_button.setEnabled(False)
+
         self._field.textChanged.connect(self.updateValue)
         self._default_value = default_value
+
         self._layout.addWidget(self._field)
         self._layout.addWidget(self.helper_button)
-        self._file_widget.value_changed.connect(self.update_helper_button)
+
+        self._trajectory_widget.value_changed.connect(self.update_helper_button)
+
         self.update_labels()
         self.updateValue()
 
@@ -204,7 +217,7 @@ class AtomMappingWidget(WidgetBase):
         """Enables the helper button when the file widget has a valid
         file input.
         """
-        if self._file_widget._configurator.valid:
+        if self._trajectory_widget.valid:
             self.helper_button.setEnabled(True)
             self.helper.update_helper()
             self.helper.apply()
@@ -234,9 +247,9 @@ class AtomMappingWidget(WidgetBase):
             The JSON string map setting.
         """
         mapping_string = self._field.text()
-        if len(mapping_string) < 1:
-            self._empty = True
+        self._empty = not mapping_string
+
+        if self._empty:
             return self._default_value
-        else:
-            self._empty = False
+
         return mapping_string

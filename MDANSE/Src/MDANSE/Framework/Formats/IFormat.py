@@ -17,10 +17,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from typing_extensions import Self
+
 from MDANSE.Core.SubclassFactory import SubclassFactory
 
 if TYPE_CHECKING:
     from MDANSE.Framework.Jobs.IJob import IJob
+
+    from . import OutputFormats
 
 
 class IFormat(metaclass=SubclassFactory):
@@ -31,6 +35,12 @@ class IFormat(metaclass=SubclassFactory):
     subclass of IFormat and overload the "write" class method as defined in IFormat base class which will actually write the output variables,
     and redefine the "type", "extension" and "extensions" class attributes.
     """
+
+    @classmethod
+    def create(cls: type[Self], name: OutputFormats | str, *args, **kwargs):
+        if not isinstance(name, str):
+            name = name.name
+        return SubclassFactory.create(cls, name, *args, **kwargs)
 
     @classmethod
     def write(cls, filename, data, header="", run_instance: IJob | None = None):

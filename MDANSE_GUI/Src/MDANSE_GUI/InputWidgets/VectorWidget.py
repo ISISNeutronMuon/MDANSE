@@ -15,12 +15,63 @@
 #
 from __future__ import annotations
 
-from qtpy.QtWidgets import QLabel, QLineEdit
+from typing import TYPE_CHECKING
+
+import numpy as np
+from qtpy.QtGui import QStandardItem, QStandardItemModel
+from qtpy.QtWidgets import (
+    QAbstractScrollArea,
+    QLabel,
+    QLineEdit,
+    QSizePolicy,
+    QTableView,
+)
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
+if TYPE_CHECKING:
+    from MDANSE.Framework.Parameters import Array, Vector
 
-class VectorWidget(WidgetBase):
+
+class ArrayWidget(WidgetBase[Array | Vector]):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._view = QTableView(self._base)
+        self._model = QStandardItemModel(self._base)
+
+        policy = self._view.sizePolicy()
+        policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
+        self._view.setModel(self._model)
+        self._view.setSizePolicy(policy)
+        self._view.horizontalHeader().hide()
+        self._view.verticalHeader().hide()
+        self._view.setSizeAdjustPolicy(
+            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents
+        )
+
+        if len(self.parameter.shape) > 2:
+            raise NotImplementedError("3D data objects not supported")
+
+        val = np.atleast_2d(self.value)
+        for row in val:
+            items = [QStandardItem(str(elem)) for elem in row]
+            self._model.appendRow(items)
+
+        self.toggle_widgets()
+        self._model.itemChanged.connect(self.updateValue)
+
+    def get_widget_value(self) -> np.ndarray:
+        return np.array(
+            [
+                [self.item(row, col) for col in range(self.columnCount())]
+                for row in range(self.rowCount())
+            ],
+            dtype=float,
+        ).reshape(self.parameter.shape)
+
+
+class VectorWidget(WidgetBase[Vector]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._changing_label = QLabel("Vector", parent=self._base)

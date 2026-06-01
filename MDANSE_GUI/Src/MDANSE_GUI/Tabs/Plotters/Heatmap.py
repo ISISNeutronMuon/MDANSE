@@ -17,12 +17,9 @@ from __future__ import annotations
 
 import csv
 import math
-from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, TextIO
 
 import numpy as np
-from matplotlib.axes import Axes
-from matplotlib.image import AxesImage
 from matplotlib.pyplot import colorbar as mpl_colorbar
 from scipy.interpolate import interp1d
 
@@ -30,7 +27,11 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from matplotlib.axes import Axes
     from matplotlib.figure import Figure
+    from matplotlib.image import AxesImage
 
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
@@ -96,7 +97,7 @@ class Heatmap(Plotter):
             new_data = self.normalise_array(data)
             image.set_data(new_data)
             percentiles = np.linspace(0, 100.0, 21)
-            results = np.percentile(np.nan_to_num(new_data), percentiles)
+            results = [np.percentile(new_data, perc) for perc in percentiles]
             self._backup_scale_interpolators[ds_num] = interp1d(
                 percentiles,
                 results,
@@ -293,7 +294,9 @@ class Heatmap(Plotter):
                 colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
                 colorbar.set_label(dataset._data_unit)
                 xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
-            self._backup_arrays[databundle.row] = all_datasets[xnum][::-1, :]
+            self._backup_arrays[databundle.row] = np.nan_to_num(
+                all_datasets[xnum][::-1, :]
+            )
             if update_only:
                 interpolator = self._backup_scale_interpolators[databundle.row]
                 last_minmax = [
@@ -337,8 +340,8 @@ class Heatmap(Plotter):
                         f"Matplotlib could not set colorbar limits to {last_minmax}",
                     )
                 self._backup_minmax[databundle.row] = [
-                    np.nanmin(dataset._data),
-                    np.nanmax(dataset._data),
+                    dataset._data.min(),
+                    dataset._data.max(),
                 ]
                 self._backup_limits[databundle.row] = [
                     xlimits[0],

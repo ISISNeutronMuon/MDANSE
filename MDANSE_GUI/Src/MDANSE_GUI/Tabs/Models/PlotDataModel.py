@@ -144,9 +144,10 @@ class MDADataStructure:
     def __init__(self, filename: str):
         self._file = h5py.File(filename)
         self._metadata = check_metadata(self._file)
-        # Ensure only mda type file are loaded in Plot Creator Tab
         output_metadata = self._metadata["inputs/output_files"]
-        if (
+
+        # Ensure only mda type file are loaded in Plot Creator Tab
+        if self._metadata.get("file_type") != "mda" and (
             not isinstance(output_metadata[1], list)
             or "MDAFormat" not in output_metadata[1]
         ):

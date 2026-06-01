@@ -15,10 +15,18 @@
 #
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 from more_itertools import ilen
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    FrameSelect,
+    MDANSETrajectory,
+    OutputFile,
+    RunningMode,
+)
 from MDANSE.Framework.Units import measure
 
 NAVOGADRO = 6.02214129e23
@@ -44,22 +52,15 @@ class Density(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory"},
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    trajectory = MDANSETrajectory()
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         super().initialize()
 
-        self.numberOfSteps = self.configuration["frames"]["number"]
-
+        self.numberOfSteps = len(self.frames)
         self._n_frames = self.numberOfSteps
 
         self._n_atoms = ilen(
@@ -68,15 +69,13 @@ class Density(IJob):
             if symbol in self.trajectory.non_dummy_elements
         )
 
-        self._symbols = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.atom_list
+        self._symbols = self.trajectory.chemical_system.atom_list
 
         # Will store the time.
         self._outputData.add(
             "density/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["time"],
+            self.frames.times,
             units="ps",
         )
 
@@ -112,16 +111,20 @@ class Density(IJob):
             units="1/cm3",
         )
 
-    def run_step(self, index):
-        """
-        Runs a single step of the job.
+    def run_step(self, index: int) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
+        """Runs a single step of the job.
 
-        @param index: the index of the step.
-        @type index: int.
-        """
+        Parameters
+        ----------
+        index : int
+            Index of the loop.
 
+        Returns
+        -------
+        tuple[int, None]
+        """
         # get the Frame index
-        frame_index = self.configuration["frames"]["value"][index]
+        frame_index = self.frames[index].ind
 
         conf = self.trajectory.configuration(frame_index)
 
@@ -153,7 +156,7 @@ class Density(IJob):
 
         return index, (atomic_density, mass_density)
 
-    def combine(self, index, x):
+    def combine(self, index: int, x: Any):
         """
         @param index: the index of the step.
         @type index: int.
@@ -180,11 +183,22 @@ class Density(IJob):
         )
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.root,
+            self.output_files.out_format,
             str(self),
             self,
         )
 
         self.trajectory.close()
         super().finalize()
+
+    @property
+    def _configuration(self) -> dict:
+        return {
+            "trajectory": self.trajectory._filename,
+            "frames": self.frames.samples,
+        }
+
+    @_configuration.setter
+    def _configuration(self, _):
+        pass

@@ -20,6 +20,15 @@ from scipy.signal import correlate
 from scipy.spatial.transform import Rotation
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    CorrelationWindow,
+    DynamicSingleChoice,
+    FrameSelect,
+    MDANSETrajectory,
+    OutputFile,
+    RunningMode,
+)
 from MDANSE.Mathematics.Geometry import center_of_mass
 
 
@@ -43,33 +52,23 @@ class RotationAutocorrelation(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "CorrelationFramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
     )
-    settings["molecule"] = (
-        "MoleculeSelectionConfigurator",
-        {
-            "default": "",
-            "dependencies": {"trajectory": "trajectory"},
-        },
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    molecule_name = DynamicSingleChoice(
+        choices="chemical_system._clusters.keys()", depends={"choices": "trajectory"}
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        molecules = self.trajectory.chemical_system._clusters[
-            self.configuration["molecule"]["value"]
-        ]
+        molecules = self.trajectory.chemical_system._clusters[self.molecule_name]
 
         self._indices = set(self.trajectory.atom_indices)
 
@@ -88,14 +87,14 @@ class RotationAutocorrelation(IJob):
         self._outputData.add(
             "time",
             "LineOutputVariable",
-            self.configuration["frames"]["duration"],
+            self.frames.times,
             units="ps",
         )
 
         self._outputData.add(
             "frame",
             "LineOutputVariable",
-            np.arange(self.configuration["frames"]["number"]),
+            np.arange(len(self.frames)),
             units="ps",
         )
 
@@ -103,10 +102,8 @@ class RotationAutocorrelation(IJob):
             "axis_index",
             "LineOutputVariable",
             np.arange(
-                self.configuration["trajectory"][
-                    "instance"
-                ].chemical_system.number_of_molecules(
-                    self.configuration["molecule"]["value"],
+                self.trajectory.chemical_system.number_of_molecules(
+                    self.molecule_name,
                 ),
             ),
             units="au",
@@ -116,14 +113,14 @@ class RotationAutocorrelation(IJob):
             self._outputData.add(
                 f"rotation_around_{axis}",
                 "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
+                (len(self.frames),),
                 axis="frame",
                 units="au",
             )
             self._outputData.add(
                 f"{axis}_rotation_ac",
                 "LineOutputVariable",
-                (self.configuration["frames"]["n_frames"],),
+                (len(self.frames),),
                 axis="time",
                 units="au",
                 main_result=True,
@@ -146,16 +143,10 @@ class RotationAutocorrelation(IJob):
         molecule = self.valid_molecules[index]
         masses = self.masses[molecule]
 
-        euler_angles = np.empty((self.configuration["frames"]["number"], 3))
+        euler_angles = np.empty((len(self.frames), 3))
         ref_coords = None
 
-        for i, frame_index in enumerate(
-            range(
-                self.configuration["frames"]["first"],
-                self.configuration["frames"]["last"] + 1,
-                self.configuration["frames"]["step"],
-            ),
-        ):
+        for i, frame_index in enumerate(self.frames):
             configuration = self.trajectory.configuration(
                 frame_index,
             )
@@ -168,7 +159,7 @@ class RotationAutocorrelation(IJob):
                 rotation = Rotation.align_vectors(current_coords, ref_coords)[0]
                 euler_angles[i] = rotation.as_euler("xyz", degrees=True)
 
-        n_configs = self.configuration["frames"]["n_configs"]
+        n_configs = self.frame_window
         ac = [
             correlate(
                 euler_angles[:, ax_ind], euler_angles[:n_configs, ax_ind], mode="valid"
@@ -189,7 +180,7 @@ class RotationAutocorrelation(IJob):
             array of the correlation results
 
         """
-        for ax_ind, axis in "xyz":
+        for ax_ind, axis in enumerate("xyz"):
             self._outputData[f"{axis}_rotation_ac"] += x[0][ax_ind]
             self._outputData[f"rotation_around_{axis}"] += x[1][:, ax_ind]
 
@@ -201,8 +192,8 @@ class RotationAutocorrelation(IJob):
             self._outputData[f"rotation_around_{axis}"] /= self.numberOfSteps
 
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

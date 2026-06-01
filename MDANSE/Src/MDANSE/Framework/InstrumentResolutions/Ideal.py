@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+import collections
+
 import numpy as np
 
 from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
@@ -24,8 +26,6 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 
 class Ideal(IInstrumentResolution):
     """Defines an ideal instrument resolution with a Dirac response"""
-
-    settings = {}
 
     def set_kernel(self, omegas, dt):
         nOmegas = len(omegas)

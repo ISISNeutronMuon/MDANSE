@@ -15,13 +15,16 @@
 #
 from __future__ import annotations
 
-from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QComboBox
+from typing import TYPE_CHECKING
 
+from MDANSE.Framework.Parameters import MolecularAxis
+from MDANSE_GUI.InputWidgets.IntegerWidget import IntegerWidget
 from MDANSE_GUI.InputWidgets.MoleculeWidget import MoleculeWidget
+from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.Utils import block_signals
 
 
-class MoleculeAndAxisWidget(MoleculeWidget):
+class MoleculeAndAxisWidget(WidgetBase[MolecularAxis]):
     """Widget for selecting a molecule type and an orientation vector.
 
     If the atom indices are not defined, the calculation will use
@@ -37,77 +40,75 @@ class MoleculeAndAxisWidget(MoleculeWidget):
 
     def __init__(self, *args, **kwargs):
         """Populate the combo box with valid molecule names."""
-        super().__init__(*args, index_boxes=2, **kwargs)
-        self.enable_combo_boxes()
-        for cbox in self.index_combo_boxes:
-            cbox.currentIndexChanged.connect(self.enable_combo_boxes)
-        self._field.currentTextChanged.connect(self.update_combo_boxes)
+        super().__init__(*args, **kwargs)
 
-    @Slot()
-    def molecule_changed(self):
-        """Update atom index combo boxes."""
-        super().molecule_changed()
-        self.update_combo_boxes()
+        # Force deps
+        self.parameter.last_deps = self.parameter._get_deps(self._configurable)
+        tooltip_text = "Hello"
 
-    @Slot()
-    def update_combo_boxes(self):
-        """Set new atom index limits on molecule change."""
-        if self.selected_mol is None:
-            for cbox in self.index_combo_boxes:
-                cbox.clear()
-                cbox.addItems(["None"])
-                cbox.setCurrentText("None")
-                cbox.setEnabled(False)
-            return
-        n_atoms = len(self.selected_mol["atom_indices"])
-        index_elements = ["None"]
-        index_elements.extend(str(x) for x in range(n_atoms))
-        for box_index, cbox in enumerate(self.index_combo_boxes):
-            cbox: QComboBox
-            current_value = cbox.currentText()
-            cbox.clear()
-            cbox.addItems(index_elements)
-            cbox.setCurrentText("None") if box_index else cbox.setCurrentText("0")
-            try:
-                numval = int(current_value)
-            except (TypeError, ValueError):
-                continue
-            if numval in range(n_atoms):
-                cbox.setCurrentText(current_value)
+        self.molecule = MoleculeWidget(
+            parent=self._base,
+            base_type="QWidget",
+            label="Molecule",
+            tooltip=tooltip_text,
+            parent_widget=self,
+            configurable=self.parameter,
+            prop="molecule",
+            parameter=self.parameter.descriptors["molecule"],
+        )
 
-    def enable_combo_boxes(self):
-        """Activate or deactivate combo boxes based on other inputs.
+        self.add_widget(self.molecule, key="molecule")
 
-        The combo boxes of atom index are disabled if no molecule has been
-        selected. If the first index is already set to 'None', the second
-        combo box is disabled, since its index value will not be used.
-        """
-        if self.selected_mol is None:
-            for cbox in self.index_combo_boxes:
-                cbox.setEnabled(False)
-            return
-        for cbox in self.index_combo_boxes:
-            cbox.setEnabled(True)
-        if self.index_combo_boxes[0].currentText() == "None":
-            self.index_combo_boxes[1].setEnabled(False)
+        self.axis_1 = IntegerWidget(
+            parent=self._base,
+            base_type="QWidget",
+            label="Axis_1",
+            tooltip=tooltip_text,
+            parent_widget=self,
+            configurable=self.parameter,
+            prop="axis_1",
+            parameter=self.parameter.descriptors["axis_1"],
+        )
 
-    @staticmethod
-    def parse_combo_box(cbox: QComboBox) -> int | None:
-        try:
-            return int(cbox.currentText())
-        except (TypeError, ValueError):
-            return None
+        self.add_widget(self.axis_1, key="axis_1")
+
+        self.axis_2 = IntegerWidget(
+            parent=self._base,
+            base_type="QWidget",
+            label="Axis_2",
+            tooltip=tooltip_text,
+            parent_widget=self,
+            configurable=self.parameter,
+            prop="axis_2",
+            parameter=self.parameter.descriptors["axis_2"],
+        )
+
+        self.add_widget(self.axis_2, key="axis_2")
+
+        self._layout.addWidget(self.molecule._base)
+        self._layout.addWidget(self.axis_1._base)
+        self._layout.addWidget(self.axis_2._base)
+
+        self.molecule._field.currentTextChanged.connect(self.axis_1.reset_ranges)
+        self.molecule._field.currentTextChanged.connect(self.axis_2.reset_ranges)
+
+    def set_value(self, value: tuple[str, int | None, int | None]) -> None:
+        self.molecule.value, self.axis_1.value, self.axis_2.value = value
+
+        self.updateValue()
+
+    def trajectory_changed(self):
+        """Change molecule preview and molecule information."""
+        self.parameter.last_deps = self.parameter._get_deps(self._configurable)
+        self.molecule.trajectory_changed(self.get_widget_deps())
+        self.molecule.updateValue()
+        self.axis_1.updateValue()
+        self.axis_2.updateValue()
+
+    @property
+    def selected_mol(self) -> str | None:
+        return self.molecule.selected_mol
 
     def get_widget_value(self) -> tuple[str, int | None, int | None]:
-        """Get the molecule name and atom indices.
-
-        Returns
-        -------
-        tuple[str, int | None, int | None]
-            Molecule name, optional atom index 1, optional atom index 2
-
-        """
-        return (
-            super().get_widget_value(),
-            *map(self.parse_combo_box, self.index_combo_boxes),
-        )
+        """Widgets handle updates"""
+        return self.molecule.value, self.axis_1.value, self.axis_2.value

@@ -15,24 +15,43 @@
 #
 from __future__ import annotations
 
+import collections
 import copy
-from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 from scipy.spatial import KDTree
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    Boolean,
+    Float,
+    Frames,
+    FrameSelect,
+    GroupingLevel,
+    Integer,
+    MDANSETrajectory,
+    OutputFile,
+    RunningMode,
+    SingleChoice,
+)
 from MDANSE.Mathematics.Geometry import generate_sphere_points
 from MDANSE.MolecularDynamics.Configuration import padded_coordinates
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MolecularDynamics.Trajectory import GroupingLevels
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 def compare_trees(
     sphere_tree: KDTree,
     atom_tree: KDTree,
     sphere_indices: set[int],
-    vdw_radii: npt.NDArray[float],
+    vdw_radii: npt.NDArray[np.floating],
     max_dist: float,
     min_dist: float,
     probe_radius: float,
@@ -97,12 +116,12 @@ def compare_trees(
 
 
 def solvent_accessible_surface(
-    coords: npt.NDArray[float],
-    all_indices: npt.NDArray[int],
+    coords: npt.NDArray[np.floating],
+    all_indices: npt.NDArray[np.integer],
     selected_indices: Sequence[int],
-    grouping_indices: npt.NDArray[int],
-    vdw_radii: npt.NDArray[float],
-    sphere_points: npt.NDArray[float],
+    grouping_indices: npt.NDArray[np.integer],
+    vdw_radii: npt.NDArray[np.floating],
+    sphere_points: npt.NDArray[np.floating],
     probe_radius_value: float,
     *,
     calculate_blocking: bool = False,
@@ -157,6 +176,7 @@ def solvent_accessible_surface(
         for blocker in blockers
     }
     blocked_sas = dict.fromkeys(blockers, 0.0)
+
     for idx in selected_indices:
         sphere_coords = coords[idx] + sphere_points * (
             vdw_radii[idx] + probe_radius_value
@@ -178,6 +198,7 @@ def solvent_accessible_surface(
             4 * np.pi * (vdw_radii[idx] + probe_radius_value) ** 2 / len(sphere_points)
         )
         total_sas += len(total_free) * scale_factor
+
         if calculate_blocking:
             final_free = copy.copy(total_free)
             free_sphere_tree = KDTree(sphere_coords[list(total_free)])
@@ -186,6 +207,7 @@ def solvent_accessible_surface(
                 blocking_selection = np.where(
                     np.isin(all_indices, list(indices - {idx} - selected_set))
                 )
+
                 if len(blocking_selection[0]):
                     blocking_tree = KDTree(coords[blocking_selection])
                     remaining_free = compare_trees(
@@ -203,12 +225,13 @@ def solvent_accessible_surface(
                     blocked_sas[blocker] += (len(blocked_points)) * scale_factor
                     final_free -= blocked_points
             free_sas += len(final_free) * scale_factor
+
     return total_sas, free_sas, blocked_sas
 
 
 def create_type_mapping(
     atom_types: Sequence[str],
-    grouping_level: str,
+    grouping_level: GroupingLevels,
     molecule_names: Sequence[str] | None = None,
     atoms_in_molecule: dict[str, Sequence[str]] | None = None,
 ) -> tuple[dict[str, int], dict[int, str]]:
@@ -222,7 +245,7 @@ def create_type_mapping(
     ----------
     atom_types : Sequence[str]
         List of all atom types given as str, one entry per atom.
-    grouping_level : str
+    grouping_level : GroupingLevels
         Either "atom" or "molecule".
     molecule_names : Sequence[str] | None, optional
         Unique molecule names, not needed for "atom" grouping, by default None
@@ -242,13 +265,18 @@ def create_type_mapping(
     }
 
     next_index = max(type_mapping.values()) + 1 if type_mapping else 1
-    if grouping_level == "molecule":
-        for mol_name in molecule_names:
-            for atom_name in atoms_in_molecule[mol_name]:
-                new_key = f"<{mol_name}>/{atom_name}"
-                type_mapping[new_key] = next_index
-                grouping_keys[next_index] = new_key
-                next_index += 1
+    match grouping_level:
+        case GroupingLevels.MOLECULE:
+            for mol_name in molecule_names:
+                for atom_name in atoms_in_molecule[mol_name]:
+                    new_key = f"<{mol_name}>/{atom_name}"
+                    type_mapping[new_key] = next_index
+                    grouping_keys[next_index] = new_key
+                    next_index += 1
+        case GroupingLevels.ATOM:
+            pass
+        case _:
+            raise NotImplementedError(f"Unsupported GroupingLevel ({grouping_level})")
     return type_mapping, grouping_keys
 
 
@@ -257,9 +285,9 @@ def make_grouping_indices(
     selected_indices: Sequence[int],
     atom_types: Sequence[str],
     type_mapping: dict[str, int],
-    grouping_level: str,
+    grouping_level: GroupingLevels,
     cs_clusters: dict[str, list[int]],
-) -> npt.NDArray[int]:
+) -> npt.NDArray[np.integer]:
     """Assign each atom the number of its corresponding dataset in the output data.
 
     Parameters
@@ -282,24 +310,29 @@ def make_grouping_indices(
     npt.NDArray[int]
         For each atom, a number representing its group in the output data.
     """
-    grouping_indices = len(all_indices) * [0]
     grouping_indices = [type_mapping[atom] for atom in atom_types]
-    if grouping_level == "molecule":
-        reference_set = set(all_indices) - set(selected_indices)
-        for mol_name, mol_clusters in cs_clusters.items():
-            for mol_instance in mol_clusters:
-                if reference_set.issuperset(mol_instance):
+
+    match grouping_level:
+        case GroupingLevels.MOLECULE:
+            reference_set = set(all_indices) - set(selected_indices)
+            for mol_name, mol_clusters in cs_clusters.items():
+                for mol_instance in filter(reference_set.issuperset, mol_clusters):
                     for at_index in mol_instance:
                         grouping_indices[at_index] = type_mapping[
                             f"<{mol_name}>/{atom_types[at_index]}"
                         ]
+        case GroupingLevels.ATOM:
+            pass
+        case _:
+            raise NotImplementedError(f"Unsupported GroupingLevel ({grouping_level}")
+
     grouping_indices = np.array(grouping_indices)
     grouping_indices[selected_indices] = 0
     return grouping_indices
 
 
 def identify_loose_atoms(
-    trajectory: Trajectory, grouping_level: str
+    trajectory: Trajectory, grouping_level: GroupingLevels
 ) -> tuple[dict[str, list[str]], Sequence[str]]:
     """Find all the atoms that need to be included in the output outside of molecules.
 
@@ -307,7 +340,7 @@ def identify_loose_atoms(
     ----------
     trajectory : Trajectory
         The current trajectory with all the selection/transmutation applied.
-    grouping_level : str
+    grouping_level : GroupingLevels
         Either "atom" or "molecule"
 
     Returns
@@ -318,12 +351,18 @@ def identify_loose_atoms(
     all_indices = copy.deepcopy(trajectory.chemical_system.all_indices)
     atom_types = np.array(trajectory.chemical_system.atom_list)
     atoms_in_molecule = {}
-    if grouping_level == "molecule":
-        for mol_name in trajectory.chemical_system.unique_molecules():
-            atoms_in_molecule.setdefault(mol_name, set())
-            for mol_instance in trajectory.chemical_system._clusters[mol_name]:
-                all_indices -= set(mol_instance)
-                atoms_in_molecule[mol_name].update(atom_types[mol_instance])
+    match grouping_level:
+        case GroupingLevels.MOLECULE:
+            for mol_name in trajectory.chemical_system.unique_molecules():
+                atoms_in_molecule.setdefault(mol_name, set())
+                for mol_instance in trajectory.chemical_system._clusters[mol_name]:
+                    all_indices -= set(mol_instance)
+                    atoms_in_molecule[mol_name].update(atom_types[mol_instance])
+        case GroupingLevels.ATOM:
+            pass
+        case _:
+            raise NotImplementedError(f"Unsupported GroupingLevel ({grouping_level}")
+
     loose_atoms = list(
         {trajectory.chemical_system.atom_list[index] for index in all_indices}
     )
@@ -371,76 +410,51 @@ class SolventAccessibleSurface(IJob):
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        grouping="grouping_level",
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    n_sphere_points = Integer(
+        minimum=1,
+        default=1000,
+        label="Number of sphere points",
+        tooltip="The surface of each atom will be approximated by this number of near-evenly spaced points.",
     )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
+    probe_radius = Float(
+        minimum=0.0,
+        default=0.14,
+        label="Probe particle radius",
+        tooltip="Radius of the probe particle used for surface sampling",
     )
-    settings["n_sphere_points"] = (
-        "IntegerConfigurator",
-        {
-            "mini": 1,
-            "default": 1000,
-            "label": "Number of sphere points",
-            "tooltip": "The surface of each atom will be approximated by this number of near-evenly spaced points.",
-        },
+    radius_type = SingleChoice(
+        choices=("van der Waals", "covalent"),
+        default="van der Waals",
+        label="Atom radius type",
+        tooltip="Use van der Waals radius (adsorption) or covalent radius (chemisorption)",
     )
-    settings["probe_radius"] = (
-        "FloatConfigurator",
-        {
-            "mini": 0.0,
-            "default": 0.14,
-            "label": "Probe particle radius",
-            "tooltip": "Radius of the probe particle used for surface sampling",
-        },
+    calculate_blocked_surface = Boolean(
+        label="Calculate blocked surface per atom",
+        tooltip="Calculate which atoms are blocking the surface of the selection (expensive)",
     )
-    settings["radius_type"] = (
-        "SingleChoiceConfigurator",
-        {
-            "label": "Atom radius type",
-            "tooltip": "Use van der Waals radius (adsorption) or covalent radius (chemisorption)",
-            "choices": ["van der Waals", "covalent"],
-            "default": "van der Waals",
-        },
-    )
-    settings["calculate_blocked_surface"] = (
-        "BooleanConfigurator",
-        {
-            "default": False,
-            "label": "Calculate blocked surface per atom",
-            "tooltip": "Calculate which atoms are blocking the surface of the selection (expensive)",
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     def initialize(self):
         super().initialize()
 
-        self.check_blocking = self.configuration["calculate_blocked_surface"]["value"]
-        self.numberOfSteps = self.configuration["frames"]["number"]
         self.type_mapping = {}
         self.molecule_mapping = {}
         self.grouping_keys = {}
+        self.numberOfSteps = len(self.frames)
 
         # Will store the time.
         self._outputData.add(
             "sas/axes/time",
             "LineOutputVariable",
-            self.configuration["frames"]["time"],
+            self.frames.times,
             units="ps",
         )
 
@@ -448,51 +462,50 @@ class SolventAccessibleSurface(IJob):
         self._outputData.add(
             "sas/total",
             "LineOutputVariable",
-            (self.configuration["frames"]["number"],),
+            (len(self.frames),),
             axis="sas/axes/time",
             units="nm2",
             main_result=True,
         )
 
         atoms_in_molecule, loose_atoms = identify_loose_atoms(
-            self.trajectory, self.configuration["grouping_level"]["value"]
+            self.trajectory, self.grouping_level
         )
 
         # Generate the sphere points that will be used to evaluate the sas per atom.
         self.spherePoints = np.array(
-            generate_sphere_points(self.configuration["n_sphere_points"]["value"]),
+            generate_sphere_points(self.n_sphere_points),
             dtype=np.float64,
         ).T
 
         # A mapping between the atom indices and covalent_radius radius for the whole universe.
-        if self.configuration["radius_type"]["value"] == "van der Waals":
-            self.vdwRadii = self.configuration["trajectory"][
-                "instance"
-            ].chemical_system.atom_property("vdw_radius")
-        elif self.configuration["radius_type"]["value"] == "covalent":
-            self.vdwRadii = self.configuration["trajectory"][
-                "instance"
-            ].chemical_system.atom_property("covalent_radius")
-        else:
-            raise NotImplementedError(
-                f"Property {self.configuration['radius_type']['value']} cannot be used as radius in the SAS calculation."
-            )
+        match self.radius_type:
+            case "van der Waals":
+                self.vdwRadii = self.trajectory.chemical_system.atom_property("vdw_radius")
+            case "covalent":
+                self.vdwRadii = self.trajectory.chemical_system.atom_property(
+                    "covalent_radius"
+                )
+            case _:
+                raise NotImplementedError(
+                    f"Property {self.radius_type} cannot be used as radius in the SAS calculation."
+                )
 
         self.selected_indices = self.trajectory.atom_indices
         atom_types = self.trajectory.chemical_system.atom_list
 
         self.type_mapping, self.grouping_keys = create_type_mapping(
             atom_types,
-            self.configuration["grouping_level"]["value"],
+            self.grouping_level,
             molecule_names=set(self.trajectory.chemical_system._clusters),
             atoms_in_molecule=atoms_in_molecule,
         )
 
-        if self.check_blocking:
+        if self.calculate_blocked_surface:
             self._outputData.add(
                 "sas/free",
                 "LineOutputVariable",
-                (self.configuration["frames"]["number"],),
+                (len(self.frames),),
                 axis="sas/axes/time",
                 units="nm2",
                 main_result=True,
@@ -502,7 +515,7 @@ class SolventAccessibleSurface(IJob):
                     self._outputData.add(
                         f"sas/taken/{result_key}",
                         "LineOutputVariable",
-                        (self.configuration["frames"]["number"],),
+                        (len(self.frames),),
                         axis="sas/axes/time",
                         units="nm2",
                         main_result=False,
@@ -512,7 +525,7 @@ class SolventAccessibleSurface(IJob):
             self.selected_indices,
             atom_types,
             self.type_mapping,
-            self.configuration["grouping_level"]["value"],
+            self.grouping_level,
             self.trajectory.chemical_system._clusters,
         )
 
@@ -525,7 +538,7 @@ class SolventAccessibleSurface(IJob):
         """
 
         # This is the actual index of the frame corresponding to the loop index.
-        frameIndex = self.configuration["frames"]["value"][index]
+        frameIndex = self.frames[index].ind
 
         # Fetch the configuration.
         conf = self.trajectory.configuration(frameIndex)
@@ -535,9 +548,7 @@ class SolventAccessibleSurface(IJob):
         unit_cell = conf._unit_cell
 
         if conf.is_periodic:
-            padding_thickness = 1.05 * (
-                self.configuration["probe_radius"]["value"] + np.max(self.vdwRadii)
-            )
+            padding_thickness = 1.05 * (self.probe_radius + np.max(self.vdwRadii))
             coords, atom_indices = padded_coordinates(
                 conf["coordinates"],
                 unit_cell,
@@ -558,8 +569,8 @@ class SolventAccessibleSurface(IJob):
             self.grouping_indices,
             temp_vdw_radii,
             self.spherePoints,
-            self.configuration["probe_radius"]["value"],
-            calculate_blocking=self.check_blocking,
+            self.probe_radius,
+            calculate_blocking=self.calculate_blocked_surface,
         )
 
         return index, sas_and_occupations
@@ -575,7 +586,7 @@ class SolventAccessibleSurface(IJob):
         total_sas, free_sas, blocked_sas = x
         # The SAS is updated with the value obtained for frame |index|.
         self._outputData["sas/total"][index] = total_sas
-        if self.check_blocking:
+        if self.calculate_blocked_surface:
             for type_index, surface in blocked_sas.items():
                 self._outputData[f"sas/taken/{self.grouping_keys[type_index]}"][
                     index
@@ -589,8 +600,8 @@ class SolventAccessibleSurface(IJob):
 
         # Write the output variables.
         self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
+            self.output_files.path,
+            self.output_files.out_format,
             str(self),
             self,
         )

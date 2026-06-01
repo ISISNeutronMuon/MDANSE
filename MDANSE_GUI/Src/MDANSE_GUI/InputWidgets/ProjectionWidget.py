@@ -18,10 +18,11 @@ from __future__ import annotations
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QButtonGroup, QLabel, QLineEdit, QRadioButton
 
+from MDANSE.Framework.Parameters import Projection
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class ProjectionWidget(WidgetBase):
+class ProjectionWidget(WidgetBase[Projection]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         _source_object = kwargs.get("source_object")

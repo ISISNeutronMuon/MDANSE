@@ -40,7 +40,6 @@ def select_molecules(
     set[int]
         Set of indices of atoms belonging to molecules from molecule_names
     """
-    selection = set()
     system = trajectory.chemical_system
     selection = {
         index

@@ -163,7 +163,6 @@ class Single(Plotter):
         if toolbar is not None:
             self._toolbar = toolbar
         self._figure = target
-        self._figure.set_layout_engine("none")
         self._active_curves = []
         self._backup_curves = []
         self._normalisation_errors = []

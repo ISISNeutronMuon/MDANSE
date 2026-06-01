@@ -16,11 +16,10 @@
 from __future__ import annotations
 
 import numpy as np
+import numpy.typing as npt
 from more_itertools import always_iterable
 
-from MDANSE.Framework.AtomGrouping.grouping import (
-    pair_labels,
-)
+from MDANSE.Framework.AtomGrouping.grouping import pair_labels
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
     CELL_SIZE_LIMIT,
@@ -28,6 +27,17 @@ from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
     intramolecular_lookup_dict,
     van_hove_distinct,
     van_hove_distinct_all_inter,
+)
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    FrameSelect,
+    GroupingLevel,
+    MDANSETrajectory,
+    OutputFile,
+    RangeCellCutoff,
+    RunningMode,
+    Weights,
 )
 
 
@@ -47,59 +57,11 @@ class DistanceHistogram(IJob):
     )
     PREDICTORS = ("r_values",)
 
-    settings = {}
-    settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
-    settings["frames"] = (
-        "FramesConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["r_values"] = (
-        "DistHistCutoffConfigurator",
-        {
-            "valueType": float,
-            "includeLast": True,
-            "mini": 0.0,
-            "dependencies": {"trajectory": "trajectory"},
-        },
-    )
-    settings["grouping_level"] = (
-        "GroupingLevelConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
-    )
-    settings["atom_transmutation"] = (
-        "AtomTransmutationConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-            }
-        },
-    )
-    settings["weights"] = (
-        "WeightsConfigurator",
-        {
-            "dependencies": {
-                "trajectory": "trajectory",
-                "atom_selection": "atom_selection",
-                "atom_transmutation": "atom_transmutation",
-            },
-        },
-    )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
-
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        self.numberOfSteps = self.configuration["frames"]["number"]
+        self.numberOfSteps = len(self.frames)
 
         self._indices = np.array(self.trajectory.atom_indices, dtype=np.int32)
 
@@ -109,16 +71,17 @@ class DistanceHistogram(IJob):
             )
         else:
             self.indices_intra = None
+
         self.intra = self.indices_intra is not None
-        self.selectedElements = sorted(self.trajectory.unique_names)
+        self.selected_elements = sorted(self.trajectory.unique_names)
         if self.indices_intra is not None and len(self.indices_intra) > len(
             self._indices
         ):
             self.indices_intra = self.indices_intra[self._indices]
 
-        self.indexToSymbol = np.array(
+        self.index_to_symbol = np.array(
             [
-                self.selectedElements.index(name)
+                self.selected_elements.index(name)
                 for name in always_iterable(
                     self.trajectory.selection_getter(self.trajectory.atom_names)
                 )
@@ -126,16 +89,12 @@ class DistanceHistogram(IJob):
             dtype=np.int32,
         )
 
-        nElements = len(self.selectedElements)
+        n_elements = len(self.selected_elements)
 
         # The histogram of the intramolecular distances.
         if self.intra:
             self.h_intra = np.zeros(
-                (
-                    nElements,
-                    nElements,
-                    len(self.configuration["r_values"]["mid_points"]),
-                ),
+                (n_elements, n_elements, len(self.r_values.mid_points)),
                 dtype=np.float64,
             )
         else:
@@ -143,23 +102,21 @@ class DistanceHistogram(IJob):
 
         # The histogram of the intermolecular distances.
         self.h_total = np.zeros(
-            (nElements, nElements, len(self.configuration["r_values"]["mid_points"])),
+            (n_elements, n_elements, len(self.r_values.mid_points)),
             dtype=np.float64,
         )
 
-        self.averageDensity = 0.0
+        self.average_density = 0.0
 
-        self._nAtomsPerElement = self.trajectory.get_natoms()
-        self._concentrations = {}
-        for k in list(self._nAtomsPerElement.keys()):
-            self._concentrations[k] = 0.0
+        self._n_atoms_per_element = self.trajectory.get_natoms()
+        self._concentrations = dict.fromkeys(self._n_atoms_per_element, 0.0)
 
-        self.labels = pair_labels(
-            self.trajectory,
-        )
+        self.labels = pair_labels(self.trajectory)
         self.labels_intra = pair_labels(self.trajectory, intra=True)
 
-    def run_step(self, index):
+    def run_step(
+        self, index: int
+    ) -> tuple[int, tuple[npt.NDArray[float], npt.NDArray[float], npt.NDArray[float]]]:
         """Run a single step of the analysis.
 
         Parameters
@@ -176,9 +133,10 @@ class DistanceHistogram(IJob):
 
         """
         # get the Frame index
-        frame_index = self.configuration["frames"]["value"][index]
+        frame_index = self.frames[index].ind
 
         conf = self.trajectory.configuration(frame_index)
+
         if not hasattr(conf, "unit_cell"):
             raise ValueError(DETAILED_CELL_MESSAGE)
         if conf.unit_cell.volume < CELL_SIZE_LIMIT:
@@ -191,40 +149,40 @@ class DistanceHistogram(IJob):
         frac_coords = coords @ conf.unit_cell.inverse
 
         if self.intra:
-            hIntraTemp = np.zeros(self.h_intra.shape, dtype=np.float64)
-            hTotalTemp = np.zeros(self.h_total.shape, dtype=np.float64)
+            h_intra_temp = np.zeros(self.h_intra.shape, dtype=np.float64)
+            h_total_temp = np.zeros(self.h_total.shape, dtype=np.float64)
 
             van_hove_distinct(
                 direct_cell,
                 self.indices_intra,
-                self.indexToSymbol,
-                hIntraTemp,
-                hTotalTemp,
+                self.index_to_symbol,
+                h_intra_temp,
+                h_total_temp,
                 frac_coords,
                 frac_coords,
-                self.configuration["r_values"]["first"],
-                self.configuration["r_values"]["step"],
+                self.r_values.start,
+                self.r_values.step,
             )
 
-            np.multiply(hIntraTemp, cell_volume, hIntraTemp)
-            np.multiply(hTotalTemp, cell_volume, hTotalTemp)
+            np.multiply(h_intra_temp, cell_volume, h_intra_temp)
+            np.multiply(h_total_temp, cell_volume, h_total_temp)
         else:
-            hTotalTemp = np.zeros(self.h_total.shape, dtype=np.float64)
-            hIntraTemp = None
+            h_total_temp = np.zeros(self.h_total.shape, dtype=np.float64)
+            h_intra_temp = None
             van_hove_distinct_all_inter(
                 direct_cell,
                 self.indices_intra,
-                self.indexToSymbol,
+                self.index_to_symbol,
                 None,
-                hTotalTemp,
+                h_total_temp,
                 frac_coords,
                 frac_coords,
-                self.configuration["r_values"]["first"],
-                self.configuration["r_values"]["step"],
+                self.r_values.start,
+                self.r_values.step,
             )
-            np.multiply(hTotalTemp, cell_volume, hTotalTemp)
+            np.multiply(h_total_temp, cell_volume, h_total_temp)
 
-        return index, (cell_volume, hIntraTemp, hTotalTemp)
+        return index, (cell_volume, h_intra_temp, h_total_temp)
 
     def combine(self, _index, x):
         """Add the results of run_step to the output arrays.
@@ -237,11 +195,9 @@ class DistanceHistogram(IJob):
             output of the run_step method
 
         """
-        nAtoms = self.configuration["trajectory"][
-            "instance"
-        ].chemical_system.number_of_atoms
+        n_atoms = self.trajectory.chemical_system.number_of_atoms
 
-        self.averageDensity += nAtoms / x[0]
+        self.average_density += n_atoms / x[0]
 
         # The temporary distance histograms are normalized by the volume.
         # This is done for each step because the
@@ -252,5 +208,5 @@ class DistanceHistogram(IJob):
             self.h_intra += x[1]
         self.h_total += x[2]
 
-        for k, v in list(self._nAtomsPerElement.items()):
-            self._concentrations[k] += float(v) / nAtoms
+        for k, v in self._n_atoms_per_element.items():
+            self._concentrations[k] += float(v) / n_atoms

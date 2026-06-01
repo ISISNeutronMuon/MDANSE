@@ -15,66 +15,62 @@
 #
 from __future__ import annotations
 
-from qtpy.QtGui import QDoubleValidator
-from qtpy.QtWidgets import QDoubleSpinBox, QLineEdit
+from typing import TYPE_CHECKING
 
+from qtpy.QtCore import Qt, Slot
+from qtpy.QtGui import QDoubleValidator
+from qtpy.QtWidgets import QCheckBox, QDoubleSpinBox, QLineEdit
+
+from MDANSE.Framework.Parameters import Float
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class FloatWidget(WidgetBase):
+class FloatWidget(WidgetBase[Float]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        try:
-            default_option = float(self._configurator.default)
-        except ValueError:
-            default_option = 0.0
-        if self._configurator.choices:
-            field = QDoubleSpinBox(self._base)
-            field.setMinimum(self._configurator.choices[0])
-            field.setMaximum(self._configurator.choices[-1])
+
+        self._field = QDoubleSpinBox(self._base)
+
+        if self.parameter.choices:
+            self._field.setMinimum(min(self.parameter.choices))
+            self._field.setMaximum(max(self.parameter.choices))
             if len(self._configurator.choices) > 1:
-                field.setSingleStep(
+                self._field.setSingleStep(
                     self._configurator.choices[1] - self._configurator.choices[0]
                 )
-            field.setValue(default_option)
         else:
-            field = QLineEdit(self._base)
-            validator = QDoubleValidator(field)
-            minval, maxval = self._configurator.mini, self._configurator.maxi
-            if minval is not None:
-                validator.setBottom(minval)
-            if maxval is not None:
-                validator.setTop(maxval)
-            field.setValidator(validator)
-            field.setText(str(default_option))
-            field.textChanged.connect(self.updateValue)
-            field.setPlaceholderText(str(default_option))
-        field.setToolTip(self._tooltip)
-        self._layout.addWidget(field)
-        self._field = field
-        self._default_value = default_option
+            if self.parameter.minimum is not None:
+                self._field.setMinimum(self.parameter.minimum)
+            if self.parameter.maximum is not None:
+                self._field.setMaximum(self.parameter.maximum)
+
+        if self.parameter.optional and self.default is None:
+            pass
+        elif self.default != "N/A":
+            self._field.setValue(self.default)
+        else:
+            self._field.setValue(0.0)
+
+        self._layout.addWidget(self._field)
         self.default_labels()
         self.update_labels()
+        self.toggle_widgets()
         self.updateValue()
         tooltip_text = self._tooltip or "A single floating-point number"
-        field.setToolTip(tooltip_text)
+
+        self._field.valueChanged.connect(self.updateValue)
+        self._field.setToolTip(tooltip_text)
 
     def default_labels(self):
         """Each Widget should have a default tooltip and label,
         which will be set in this method, unless specific
         values are provided in the settings of the job that
         is being configured."""
-        if self._label_text == "":
+        if not self._label_text:
             self._label_text = "FloatWidget"
-        if self._tooltip == "":
+        if not self._tooltip:
             self._tooltip = "A single floating-point number"
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        strval = self._field.text().strip()
-        if len(strval) < 1:
-            self._empty = True
-            return self._default_value
-        else:
-            self._empty = False
-        return strval
+        return self._field.value()

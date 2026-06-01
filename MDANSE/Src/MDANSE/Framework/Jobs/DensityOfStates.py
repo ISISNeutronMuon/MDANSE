@@ -22,6 +22,21 @@ from MDANSE.Framework.Jobs.CartesianPowerSpectrum import CartesianPowerSpectrum
 from MDANSE.Framework.Jobs.VelocityCorrelationFunction import (
     VelocityCorrelationFunction,
 )
+from MDANSE.Framework.Parameters import (
+    AtomSelection,
+    AtomTransmutation,
+    CorrelationWindow,
+    FrameSelect,
+    GroupingLevel,
+    InstrumentResolution,
+    InterpOrder,
+    MDANSETrajectory,
+    OutputFile,
+    PartialCharge,
+    Projection,
+    RunningMode,
+    Weights,
+)
 
 
 class DensityOfStates(CartesianPowerSpectrum, VelocityCorrelationFunction):
@@ -36,21 +51,26 @@ class DensityOfStates(CartesianPowerSpectrum, VelocityCorrelationFunction):
 
     label = "Density Of States"
 
-    settings = copy.deepcopy(CartesianPowerSpectrum.settings)
-    settings = list(settings.items())
-    settings.insert(
-        3,
-        (
-            "interpolation_order",
-            (
-                "InterpolationOrderConfigurator",
-                {
-                    "dependencies": {"trajectory": "trajectory", "frames": "frames"},
-                },
-            ),
-        ),
+    trajectory = MDANSETrajectory(
+        selection="atom_selection",
+        grouping="grouping_level",
+        transmutation="atom_transmutation",
     )
-    settings = collections.OrderedDict(settings)
+    frames = FrameSelect(depends={"trajectory": "trajectory"})
+    frame_window = CorrelationWindow(depends={"frames": "frames"})
+    instrument_resolution = InstrumentResolution(
+        depends={"trajectory": "trajectory", "window": "frame_window"}
+    )
+    interpolation_order = InterpOrder(
+        depends={"trajectory": "trajectory", "frames": "frames"}
+    )
+    projection = Projection()
+    grouping_level = GroupingLevel(depends={"trajectory": "trajectory"})
+    atom_selection = AtomSelection(depends={"trajectory": "trajectory"})
+    atom_transmutation = AtomTransmutation(depends={"trajectory": "trajectory"})
+    weights = Weights(depends={"trajectory": "trajectory"}, default="atomic_weight")
+    output_files = OutputFile()
+    running_mode = RunningMode()
 
     PWR_NAME = "dos"
     PWR_UNITS = "au"
