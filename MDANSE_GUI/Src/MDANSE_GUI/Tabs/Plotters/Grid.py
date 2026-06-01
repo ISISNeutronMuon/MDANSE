@@ -154,6 +154,7 @@ class Grid(Plotter):
         self._active_curves = []
         self._normalisation_errors = []
         self.apply_settings(plotting_context)
+
         nplots = 0
         for databundle in plotting_context.datasets().values():
             ds = databundle.dataset
@@ -162,64 +163,9 @@ class Grid(Plotter):
             except KeyError:
                 axis_info = ds.longest_axis()
             curves = ds.curves_vs_axis(axis_info, max_limit=self._plot_limit)
-            nplots += len(curves)
-        nplots = min(nplots, self._plot_limit)
-        gridsize = math.ceil(nplots**0.5)
-        startnum = 1
-        counter = 0
-        for databundle in plotting_context.datasets().values():
-            dataset = databundle.dataset
-            try:
-                _, best_axis = (
-                    dataset._axes_units[databundle.main_axis],
-                    databundle.main_axis,
-                )
-            except KeyError:
-                _, best_axis = dataset.longest_axis()
-            for key, curve in islice(dataset._curves.items(), self._plot_limit):
-                counter += 1
-                if counter > self._plot_limit:
-                    LOG.warning(
-                        "Curves above the current limit of %s will be ignored",
-                        self._plot_limit,
-                    )
-                    break
-                axes = target.add_subplot(gridsize, gridsize, startnum)
-                self._axes.append(axes)
-                plotlabel = databundle.legend_label
-                if dataset._curve_labels[key]:
-                    plotlabel += ":" + dataset._curve_labels[key]
-                x_axis_label = dataset.x_axis_label(best_axis)
-                [temp_curve] = axes.plot(
-                    dataset.x_axis(best_axis),
-                    curve,
-                    linestyle=databundle.line_style,
-                    color=databundle.colour,
-                    label=plotlabel,
-                )
-                try:
-                    temp_curve.set_marker(databundle.marker)
-                except ValueError:
-                    with contextlib.suppress(Exception):
-                        temp_curve.set_marker(int(databundle.marker))
-                axes.set_xlabel(x_axis_label)
-                self._axes_titles.append(plotlabel)
-                axes.set_title(
-                    plotlabel if plotting_context.use_legend else "",
-                    fontsize=self.title_fontsize(plotlabel),
-                )
-                legend = axes.legend()
-                legend.set_visible(False)
-                axes.grid(plotting_context.use_grid)
-                startnum += 1
-                self._active_curves.append(temp_curve)
-                self._backup_curves.append(
-                    [temp_curve.get_xdata(), temp_curve.get_ydata()],
-                )
-        if counter == 0:
-            self.plot_blank()
-            return
+            nplots += ilen(curves)
 
+        nplots = min(nplots, self._plot_limit)
         gridsize = self.grid_size(nplots)
 
         for ind, (databundle, label, curve) in enumerate(
@@ -228,7 +174,7 @@ class Grid(Plotter):
             axes = target.add_subplot(*gridsize, ind)
             self._plot_single(
                 axes,
-                curve,
+                (curve,),
                 databundle,
                 label=label,
                 colour=databundle.colour,

@@ -22,7 +22,7 @@ from contextlib import suppress
 from itertools import islice
 from math import prod
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, Literal, NamedTuple, overload
 
 import h5py
 import matplotlib.pyplot as mpl
@@ -484,7 +484,7 @@ class SingleDataset:
         return {aname: axis for aname, axis in self._axes.items() if aname != la}
 
     @property
-    def data(self):
+    def data(self) -> npt.NDArray[np.floating]:
         """Data array, scaled if requested in the GUI table.
 
         Returns
@@ -497,22 +497,32 @@ class SingleDataset:
             return self._data * self._scaling_factor
         return self._data
 
+    @overload
     def generate_curve_label(
         self,
-        index_tuple: list[int],
-        axis_lookup: list[str],
+        index_tuple: Sequence[int],
+        axis_lookup: Iterable[str],
         *,
-        skip_text: bool = False,
-    ) -> str | float:
+        skip_text: Literal[False] = False,
+    ) -> str: ...
+    @overload
+    def generate_curve_label(
+        self,
+        index_tuple: Sequence[int],
+        axis_lookup: Iterable[str],
+        *,
+        skip_text: Literal[True],
+    ) -> float: ...
+    def generate_curve_label(self, index_tuple, axis_lookup, *, skip_text=False):
         """Get a meaningful label for a subset of data.
 
         Used when plotting 1D arrays out of a multidimensional array.
 
         Parameters
         ----------
-        index_tuple : list[int]
+        index_tuple : Sequence[int]
             indices of the 1D data array position in the ND array.
-        axis_lookup : list[str]
+        axis_lookup : Iterable[str]
             Names of the axes to use.
         skip_text : bool, optional
             If set to true, omits the text parts of the label. By default False.
@@ -536,14 +546,14 @@ class SingleDataset:
             picked_value = axis_values[index_tuple[axis_index]]
 
             if len(axis_values) > 1:
-                significant_digit = np.floor(
-                    np.log10(abs(np.mean(axis_values[1:] - axis_values[:-1]))),
-                ).astype(int)
+                data = np.mean(np.diff(axis_values))
             elif len(axis_values) == 1:
-                significant_digit = np.floor(np.log10(abs(axis_values[0]))).astype(int)
+                data: np.floating = axis_values[0]
             else:
                 label += f"{axis_label} has no values, unit {axis_unit}"
                 continue
+
+            significant_digit: np.integer = np.floor(np.log10(np.abs(data))).astype(int)
 
             if significant_digit < -20:
                 picked_value = 0
@@ -569,37 +579,49 @@ class SingleDataset:
 
     def curves_vs_axis(
         self,
-        x_axis_details: tuple[str, str],
+        axis_label: tuple[str, str] | str,
         max_limit: int = 1,
         *,
+        axis_unit: str | None = None,
         skip_label_text: bool = False,
-    ) -> dict[int, FloatArray]:
+    ) -> Generator[
+        tuple[
+            str | float | None,
+            tuple[FloatArray, FloatArray],
+        ]
+    ]:
         """Prepare a set of curves for plotting.
 
         Parameters
         ----------
-        main_axis : str
-            Name and original unit of the primary plotting axis.
+        axis_label : str
+            Name of the primary plotting axis.
+        axis_unit : str, optional
+            Unit of the primary plotting axis.
         max_limit : int, optional
             Maximum number of curves allowed by plotter, by default 1
         skip_label_text: bool, optional
             Whether to skip the axis name and unit in the curve label, by default False.
 
-        Returns
-        -------
-        dict[int, FloatArray]
-            List of data arrays ready for plotting
-
         Yields
         ------
         str
             Plot label.
-        np.ndarray
+        npt.NDArray[np.floating]
             x-axis.
-        np.ndarray
+        npt.NDArray[np.floating]
             Curve to plot.
         """
-        x_axis = self.x_axis(main_axis)
+        match axis_label:
+            case (str(unit), str(label)):
+                axis_unit = unit
+                axis_label = label
+            case str():
+                pass
+            case _:
+                raise ValueError(f"Cannot handle {axis_label} as axis label")
+
+        x_axis = self.x_axis(axis_label)
 
         if self._data.ndim == 1:
             yield None, (x_axis, self.data)
@@ -607,63 +629,64 @@ class SingleDataset:
 
         data_shape = self._data.shape
         slicer = []
-        indexer = []
+        indexer: list[Sequence[int]] = []
         label_lookup = []
         axis_lengths = [len(self._axes[name]) for name in self._axes_order]
+        match_unit = axis_unit is not None
 
-        if not np.allclose(data_shape, axis_lengths):
-            raise ValueError("Array shape does not match the order of the axes")
+        if np.allclose(data_shape, axis_lengths):
+            for current_dim, axis_name in enumerate(self._axes_order):
+                curr_unit = self._axes_units[axis_name]
 
-        for current_dim, axis_name in enumerate(self._axes_order):
-            if axis_name == main_axis:
-                slicer.append([slice(None)])
-                continue
+                if axis_name == axis_label and (
+                    not match_unit or (axis_unit == curr_unit)
+                ):
+                    slicer.append([slice(None)])
+                    continue
 
-            indices = np.arange(data_shape[current_dim])
-            slicer.append(indices)
-            indexer.append(indices)
-            label_lookup.append(axis_name)
+                indices: npt.NDArray[np.integer] = np.arange(data_shape[current_dim])
+                slicer.append(indices)
+                indexer.append(indices)
+                label_lookup.append(axis_name)
 
-        if not indexer:
-            LOG.warning("Empty selection for data set %s", self._name)
-            return
+            if not indexer:
+                LOG.warning("Empty selection for data set %s", self._name)
+                return
 
-        for index in self.curve_ind(max_limit):
-            try:
-                index_tuple = nth_product(index, *indexer)
-                index_slicer = nth_product(index, *slicer)
+            for index in self.curve_ind(max_limit):
+                try:
+                    index_tuple = nth_product(index, *indexer)
+                    index_slicer = nth_product(index, *slicer)
+                    yield (
+                        self.generate_curve_label(
+                            index_tuple, label_lookup, skip_text=skip_label_text
+                        ),
+                        (x_axis, self.data[index_slicer].squeeze()),
+                    )
+                except IndexError:
+                    LOG.warning(
+                        "Skipping: in dataset %s, index %s is out of bounds",
+                        self._name,
+                        index,
+                    )
+
+        elif (
+            len(axis_lengths) == 1
+            and len(data_shape) == 2
+            and data_shape[0] == axis_lengths[0]
+        ):
+            # Assume multiple lines in block
+
+            axis_name = first(self._axes_order)
+
+            for current_dim in range(data_shape[1]):
                 yield (
-                    self.generate_curve_label(index_tuple, label_lookup),
-                    (x_axis, self.data[index_slicer].squeeze()),
-                )
-            except IndexError:
-                LOG.warning(
-                    "Skipping: in dataset %s, index %s is out of bounds",
-                    self._name,
-                    index,
-                )
-            else:
-                self._curve_labels[index_tuple] = self.generate_curve_label(
-                    index_tuple,
-                    label_lookup,
-                    skip_text=skip_label_text,
+                    axis_name,
+                    (x_axis, self.data[:, current_dim]),
                 )
 
-        return self._curves
-
-    def curve_ind(self, limits: int, /) -> Iterator[int]:
-        """Return a generator of indices indexing only the curves within the limits.
-
-        Parameters
-        ----------
-        limits : int
-            Max number of curves to return.
-        """
-        return (
-            islice(self._data_limits, limits)
-            if self._data_limits is not None
-            else range(limits)
-        )
+        else:
+            raise ValueError("Array shape does not match the order of the axes")
 
     def planes_vs_axis(
         self,
@@ -681,22 +704,24 @@ class SingleDataset:
         ------
         str
             Grid label.
-        np.ndarray
+        npt.NDArray[np.floating]
             2D array.
 
         """
         match self._data.ndim:
             case 1:
                 pass
+            case 2 if axis_number == 1:
+                yield self._labels["medium"], self.data.T
             case 2:
-                if axis_number == 1:
-                    yield self._labels["medium"], self.data.T
-                else:
-                    yield self._labels["medium"], self.data
+                yield self._labels["medium"], self.data
             case 3:
                 perpendicular_axis_name, perpendicular_axis = nth(
-                    self._axes.items(), axis_number
+                    self._axes.items(), axis_number, default=(None, None)
                 )
+
+                if perpendicular_axis is None:
+                    return
 
                 reordered_view = np.moveaxis(self.data, axis_number, 0)
 
@@ -710,7 +735,7 @@ class SingleDataset:
                     f"Cannot handle {self._data.ndim}-dimensional data."
                 )
 
-    def main_axis_index(self, main_axis: str, *, default: int) -> int:
+    def main_axis_index(self, main_axis: str | None, *, default: int) -> int:
         """Find index of main axis.
 
         Parameters
@@ -726,30 +751,6 @@ class SingleDataset:
             Index of main axis.
         """
         return first(locate(self._axes, pred=lambda x: x == main_axis), default)
-
-    def axes_main_order(
-        self, main_axis: str | None = None, ind: int | None = None
-    ) -> Sequence[str]:
-        """Return axis keys with ``main_axis`` first then the others.
-
-        Parameters
-        ----------
-        main_axis : str, optional
-            Name of main axis to move to front.
-        ind : int, optional
-            Main axis by index (if `main_axis` not found).
-
-        Returns
-        -------
-        Sequence[str]
-            Reordered axes.
-        """
-        main_ind = self.main_axis_index(main_axis, default=ind)
-        return sort_together(
-            unzip(enumerate(self._axes)),
-            key=lambda x: x == main_ind,
-            reverse=True,
-        )[1]
 
 
 plotting_column_labels = [
@@ -929,15 +930,6 @@ class PlottingContext(QStandardItemModel):
 
             data_number_string = row_data["Use it?"].text()
             main_axis = row_data["Main axis"].text()
-
-            plot_args = {
-                "colour": row_data["Colour"].text(),
-                "line_style": row_data["Line style"].text(),
-                "marker": row_data["Marker"].text(),
-                "row": row,
-                "main_axis": main_axis,
-                "legend_label": row_data["Legend label"].text(),
-            }
 
             self._datasets[key].set_data_limits(data_number_string, main_axis=main_axis)
             self._datasets[key].set_current_units(self._unit_lookup)

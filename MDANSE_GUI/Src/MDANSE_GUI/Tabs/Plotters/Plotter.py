@@ -480,3 +480,28 @@ class Plotter(RegisterFactory):
             Grid size.
         """
         return cls.GRID_SIZES.get(n_plots, (math.ceil(n_plots**0.5),) * 2)
+
+    @staticmethod
+    def get_label(ind: int, n_curves: int, limit: int, label: str):
+        """Get label for legend.
+
+        For the abbreviated legend return None for those which are
+        between ``limit`` and ``n_curves`` (skipping them), and "..."
+        when it's at the limit.
+
+        Parameters
+        ----------
+        ind : int
+            Current index.
+        n_curves : int
+            Total number of "curves" to plot.
+        limit : int
+            Max number of entries in legend.
+        label : str
+            Current label.
+        """
+        if ind == limit:
+            return "..."
+        if limit < ind < n_curves - 1:
+            return None
+        return label

@@ -18,15 +18,14 @@ from __future__ import annotations
 import csv
 import math
 from collections.abc import Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from itertools import islice
 from typing import TYPE_CHECKING, Any, NamedTuple, TextIO
 
 import numpy as np
 from matplotlib.axes import Axes
-from matplotlib.image import AxesImage
 from matplotlib.pyplot import colorbar as mpl_colorbar
-from more_itertools import ilen
+from more_itertools import ilen, nth
 from scipy.interpolate import interp1d
 
 from MDANSE.MLogging import LOG
@@ -47,11 +46,11 @@ class Heatmap(Plotter):
     @dataclass
     class BackupInfo:
         ind: int
-        image: AxesImage
-        array: np.ndarray
-        minmax: tuple[float, float]
-        limits: tuple[float, float, float, float]
-        interp: interp1d
+        image: AxesImage | None = None
+        array: np.ndarray = field(default_factory=lambda: np.empty((0,), dtype=float))
+        minmax: tuple[float, float] = (-np.inf, np.inf)
+        limits: tuple[float, float, float, float] = (-np.inf, np.inf, -np.inf, np.inf)
+        interp: interp1d = None
 
     def __init__(self) -> None:
         """Initialise all plotting parameters to defaults."""
@@ -75,15 +74,15 @@ class Heatmap(Plotter):
         """Return labels for the sliders in heatmap mode."""
         return ["Minimum (percentile)", "Maximum (percentile)"]
 
-    def slider_limits(self) -> list[str]:
+    def slider_limits(self) -> list[tuple[float, float, float]]:
         """Return slider limits for the colormap, in percent."""
-        return self._number_of_sliders * [[0.0, 100.0, 0.01]]
+        return [(0.0, 100.0, 0.01)] * self._number_of_sliders
 
     def sliders_coupled(self) -> bool:
         """Confirm that sliders are coupled in heatmap mode."""
         return True
 
-    def get_figure(self, figure: Figure | None = None):
+    def get_figure(self, figure: Figure | None = None) -> Figure | None:
         """Return current figure which will be used for plotting."""
         target = self._figure if figure is None else figure
         if target is None:
@@ -108,10 +107,8 @@ class Heatmap(Plotter):
             backup.image.set_data(new_data)
             percentiles = np.linspace(0, 100.0, 21)
             results = np.percentile(np.nan_to_num(new_data), percentiles)
-            self._backup_scale_interpolators[ds_num] = interp1d(
-                percentiles,
-                results,
-            )
+            backup.interp = interp1d(percentiles, results)
+
         self.request_slider_values()
 
     def handle_slider(self, new_value: list[float]):
@@ -140,18 +137,20 @@ class Heatmap(Plotter):
                     newmin = float(newmax)
                 else:
                     newmax = float(newmin)
+
             if newmin == last_minmax[0] and newmax == last_minmax[1]:
                 return
+
             if newmax >= newmin:
                 try:
-                    backup.image.set_clim([newmin, newmax])
+                    backup.image.set_clim((newmin, newmax))
                 except ValueError:
                     LOG.error(
                         f"Matplotlib could not set colorbar limits to {newmin}, {newmax}"
                     )
                 else:
                     self._figure.canvas.draw_idle()
-                    backup.minmax = [newmin, newmax]
+                    backup.minmax = (newmin, newmax)
         target.canvas.draw()
 
     def check_curve_lengths(self):
@@ -180,6 +179,7 @@ class Heatmap(Plotter):
         """
         self.enable_slider(allow_slider=True)
         target = self.get_figure(figure)
+
         if target is None:
             return
 
@@ -189,9 +189,13 @@ class Heatmap(Plotter):
         self._figure = target
         self._figure.set_layout_engine(layout="constrained")
         self._current_x_axes = []
-        minmax_bak = {key: val.minmax for key, val in self._backup.items()}
+
+        # minmax_bak = {key: val.minmax for key, val in self._backup.items()}
         scale_interpolators = {val.ind: val.interp for val in self._backup.values()}
-        self._backup = {}
+        self._backup = {
+            databundle.row: self.BackupInfo(ind=databundle.row)
+            for databundle in plotting_context.datasets().values()
+        }
         self._axes = []
 
         self.apply_settings(plotting_context)
@@ -212,12 +216,17 @@ class Heatmap(Plotter):
             except Exception:
                 percentiles = np.linspace(0, 100.0, 21)
                 results = [
-                    np.percentile(np.nan_to_num(ds._data), perc) for perc in percentiles
+                    np.percentile(np.nan_to_num(databundle.dataset._data), perc)
+                    for perc in percentiles
                 ]
-                self._backup_scale_interpolators[databundle.row] = interp1d(
+                self._backup[databundle.row].interp = interp1d(
                     percentiles,
                     results,
                 )
+            else:
+                self._backup[databundle.row].interp = scale_interpolators[
+                    databundle.row
+                ]
 
         grid_size = self.grid_size(nplots)
         gs = self._figure.add_gridspec(*grid_size)
@@ -226,110 +235,71 @@ class Heatmap(Plotter):
             islice(plotting_context.planes(self._slice_axis), self._plot_limit),
         ):
             dataset = databundle.dataset
-            limits = []
-            x_axis_labels, y_axis_labels = [], []
 
-            for name in dataset._axes:
-                axis_array = dataset.x_axis(name)
-                limits += [axis_array[0], axis_array[-1]]
-                if not x_axis_labels:
-                    x_axis_labels.append(dataset.x_axis_label(name))
-                    self._current_x_axes.append(axis_array)
-                else:
-                    all_datasets = [dataset._data]
-                    transposed = True
-                all_labels = [dataset._name]
-                for counter, name in enumerate(dataset._axes.keys()):
-                    axis_array = dataset.x_axis(name)
-                    limits += [
-                        axis_array[0],
-                        axis_array[-1],
-                    ]
-                    if counter == primary_axis_number:
-                        x_axis_labels.append(dataset.x_axis_label(name))
-                        self._current_x_axes.append(axis_array)
-                    else:
-                        y_axis_labels.append(dataset.x_axis_label(name))
-            if transposed:
-                limits = limits[2:] + limits[:2]
-            for xnum in range(len(all_datasets)):
-                if startnum > self._plot_limit:
-                    LOG.warning(
-                        "Datasets above the current limit of %s will be ignored",
-                        self._plot_limit,
-                    )
-                    break
-                axes = target.add_subplot(gridsize, gridsize, startnum)
-                startnum += 1
-                self._axes.append(axes)
-                image = axes.imshow(
-                    all_datasets[xnum][::-1, :],
-                    extent=limits,
-                    aspect="auto",
-                    interpolation=None,
-                    cmap=plotting_context.colormap,
+            axes = self._figure.add_subplot(gs[ind])
+
+            x_label = databundle.main_axis
+            y_label = nth(dataset._axes, self._slice_axis)
+            if y_label is None:
+                y_label = nth(dataset._axes, 1)
+
+            x_axis = dataset.x_axis(x_label)
+            y_axis = dataset.x_axis(y_label)
+
+            limits = (x_axis[0], x_axis[-1], y_axis[0], y_axis[-1])
+            axes.set_xlabel(x_label)
+            axes.set_ylabel(y_label)
+
+            image = axes.imshow(
+                plane,
+                extent=limits,
+                aspect="auto",
+                interpolation=None,
+                cmap=plotting_context.colormap,
+            )
+            axes.set_title(label)
+            colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
+            colorbar.set_label(dataset._data_unit)
+            xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
+            self._axes.append(axes)
+            self._backup[databundle.row].array = plane
+            self._backup[databundle.row].image = image
+
+            interpolator = self._backup[databundle.row].interp
+            last_minmax = (
+                interpolator(self._slider_values[0]),
+                interpolator(self._slider_values[1]),
+            )
+
+            try:
+                image.set_clim(last_minmax)
+            except ValueError:
+                LOG.error(
+                    f"Matplotlib could not set colorbar limits to {last_minmax}",
                 )
-                axes.set_title(all_labels[xnum])
-                colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
-                colorbar.set_label(dataset._data_unit)
-                xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
-            self._backup_arrays[databundle.row] = all_datasets[xnum][::-1, :]
+
             if update_only:
-                interpolator = self._backup_scale_interpolators[databundle.row]
-                last_minmax = [
-                    interpolator(self._slider_values[0]),
-                    interpolator(self._slider_values[1]),
-                ]
-                try:
-                    image.set_clim(last_minmax)
-                except ValueError:
-                    LOG.error(
-                        f"Matplotlib could not set colorbar limits to {last_minmax}",
-                    )
-                self._backup_limits[databundle.row] = [
+                xlimits = axes.get_xlim()
+                ylimits = axes.get_ylim()
+                self._backup[databundle.row].limits = (
                     xlimits[0],
                     xlimits[1],
                     ylimits[0],
                     ylimits[1],
-                ]
-                xlim = axes.get_xlim()
-                self._backup_limits[databundle.row][0] = xlim[0]
-                self._backup_limits[databundle.row][1] = xlim[1]
-                ylim = axes.get_ylim()
-                self._backup_limits[databundle.row][2] = ylim[0]
-                self._backup_limits[databundle.row][3] = ylim[1]
+                )
             else:
-                self._backup_limits[databundle.row] = [
-                    xlimits[0],
-                    xlimits[1],
-                    ylimits[0],
-                    ylimits[1],
-                ]
-                interpolator = self._backup_scale_interpolators[databundle.row]
-                last_minmax = [
-                    interpolator(self._slider_values[0]),
-                    interpolator(self._slider_values[1]),
-                ]
-                try:
-                    image.set_clim(last_minmax)
-                except ValueError:
-                    LOG.error(
-                        f"Matplotlib could not set colorbar limits to {last_minmax}",
-                    )
-                self._backup_minmax[databundle.row] = [
+                self._backup[databundle.row].minmax = (
                     np.nanmin(dataset._data),
                     np.nanmax(dataset._data),
-                ]
-                self._backup_limits[databundle.row] = [
+                )
+                self._backup[databundle.row].limits = (
                     xlimits[0],
                     xlimits[1],
                     ylimits[0],
                     ylimits[1],
-                ]
-            axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
-            axes.set_ylabel(", ".join(np.unique(y_axis_labels)))
-            self._backup_images[databundle.row] = image
-        if startnum > 1:
+                )
+
+        if ind > 1:
             legend = axes.legend()
             legend.set_visible(plotting_context.use_legend)
             axes.grid(plotting_context.use_grid)
@@ -339,7 +309,7 @@ class Heatmap(Plotter):
 
         self.check_curve_lengths()
         self.request_slider_values()
-        target.canvas.draw()
+        self._figure.canvas.draw()
 
     @staticmethod
     def _write_save_data(

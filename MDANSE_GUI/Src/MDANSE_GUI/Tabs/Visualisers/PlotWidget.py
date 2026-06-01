@@ -339,7 +339,7 @@ class PlotWidget(QWidget):
         if self._plotting_context is None:
             return
 
-        self._figure.set_layout_engine("tight")
+        # self._figure.set_layout_engine("tight")
 
         self._plotter.plot(
             self._plotting_context,

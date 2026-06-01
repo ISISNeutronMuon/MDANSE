@@ -24,6 +24,7 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
+    from matplotlib.backends.backend_qt import NavigationToolbar2QT
     from matplotlib.figure import Figure
 
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
@@ -45,9 +46,9 @@ class Vectors3D(Plotter):
         """Return labels to show that sliders are not used."""
         return ["Inactive", "Inactive"]
 
-    def slider_limits(self) -> list[str]:
+    def slider_limits(self) -> list[tuple[float, float, float]]:
         """Return generic slider limit values."""
-        return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
+        return [(-1.0, 1.0, 0.01)] * self._number_of_sliders
 
     def clear(self, figure: Figure | None = None):
         """Clear the figure."""
@@ -81,7 +82,7 @@ class Vectors3D(Plotter):
         plotting_context: PlottingContext,
         figure: Figure | None = None,
         update_only: bool = False,
-        toolbar: type | None = None,
+        toolbar: NavigationToolbar2QT | None = None,
     ):
         """Plot all datasets in the same figure.
 
@@ -99,60 +100,88 @@ class Vectors3D(Plotter):
         """
         self.enable_slider(allow_slider=False)
         target = self.get_figure(figure)
+
         if target is None:
             return
         if toolbar is not None:
             self._toolbar = toolbar
+
         self._figure = target
         self._normalisation_errors = []
         self._axes = []
         self.apply_settings(plotting_context)
+
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
+
         if not plotting_context.datasets():
             target.clear()
             target.canvas.draw()
-        single_plot_stack = [221, 222, 223, 224]
-        first_shared_axes = target.add_subplot(single_plot_stack[0])
-        for ds_index, databundle in enumerate(plotting_context.datasets().values()):
+
+        gs = self._figure.add_gridspec(2, 2)
+        shared_axes = figure.add_subplot(gs[0])
+        self._axes = [shared_axes]
+
+        for databundle in plotting_context.datasets().values():
             dataset = databundle.dataset
-            try:
-                _, best_axis = (
-                    dataset._axes_units[databundle.main_axis],
-                    databundle.main_axis,
-                )
-            except KeyError:
-                _, best_axis = dataset.longest_axis()
             plotlabel = databundle.legend_label
-            if ds_index < 3:
-                axes = first_shared_axes
-                temp_curves = axes.plot(
-                    dataset.x_axis(best_axis),
+
+            x_axis_labels = [dataset.x_axis_label(databundle.main_axis)]
+
+            bins = dataset.x_axis(databundle.main_axis)
+
+            if "angle" in plotlabel:
+                axes = self._figure.add_subplot(
+                    gs[2 + plotlabel.startswith("Azimuthal")]
+                )
+
+                axes.bar(
+                    bins,
+                    dataset.data[0, :],
+                    linestyle="none",
+                    label=plotlabel,
+                    color=databundle.colour,
+                    width=np.mean(np.diff(bins)),
+                )
+                axes.bar(
+                    bins,
+                    dataset.data[1, :],
+                    linestyle=databundle.line_style,
+                    label="Unique counts",
+                    color="none",
+                    edgecolor="black",
+                    width=np.mean(np.diff(bins)),
+                )
+                self._axes.append(axes)
+                axes.set_xlabel(", ".join(x_axis_labels))
+                axes.set_title(dataset._name)
+            elif "vs" in plotlabel:
+                [curve] = shared_axes.plot(
+                    bins,
                     dataset.data,
                     linestyle=databundle.line_style,
                     label=plotlabel,
                     color=databundle.colour,
                 )
-                for temp in temp_curves:
-                    try:
-                        temp.set_marker(databundle.marker)
-                    except ValueError:
-                        with contextlib.suppress(Exception):
-                            temp.set_marker(int(databundle.marker))
-                self._axes.append(axes)
-                axes.set_xlabel(dataset.x_axis_label(best_axis))
-                axes.set_title(dataset._name)
-            elif ds_index < 4:
-                axes = target.add_subplot(
-                    single_plot_stack[ds_index - 2], projection="3d"
-                )
+                try:
+                    curve.set_marker(databundle.marker)
+                except ValueError:
+                    with contextlib.suppress(Exception):
+                        curve.set_marker(int(databundle.marker))
+
+                shared_axes.set_xlabel(", ".join(x_axis_labels))
+
+            elif "in 3D" in plotlabel:
+                axes = self._figure.add_subplot(gs[1], projection="3d")
+
                 all_coords = np.concatenate(
                     [dataset.x_axis("q_x"), dataset.x_axis("q_y"), dataset.data]
                 )
                 self.axis3d_min = np.min(all_coords)
                 self.axis3d_max = np.max(all_coords)
-                temp_curves = axes.scatter(
+
+                axes.scatter(
                     dataset.x_axis("q_x"),
                     dataset.x_axis("q_y"),
                     dataset.data,
@@ -165,38 +194,7 @@ class Vectors3D(Plotter):
                 axes.set_xlabel(dataset.x_axis_label("q_x"))
                 axes.set_ylabel(dataset.x_axis_label("q_y"))
                 axes.set_title(dataset._name)
-            else:
-                dataset = databundle.dataset
-                try:
-                    _, best_axis = (
-                        dataset._axes_units[databundle.main_axis],
-                        databundle.main_axis,
-                    )
-                except KeyError:
-                    _, best_axis = dataset.longest_axis()
-                plotlabel = databundle.legend_label
-                axes = target.add_subplot(single_plot_stack[ds_index - 2])
-                bins = dataset.x_axis(best_axis)
-                temp_curves = axes.bar(
-                    bins,
-                    dataset.data[0, :],
-                    linestyle="none",
-                    label=plotlabel,
-                    color=databundle.colour,
-                    width=np.mean(np.diff(bins)),
-                )
-                _ = axes.bar(
-                    bins,
-                    dataset.data[1, :],
-                    linestyle=databundle.line_style,
-                    label="Unique counts",
-                    color="none",
-                    edgecolor="black",
-                    width=np.mean(np.diff(bins)),
-                )
-                self._axes.append(axes)
-                axes.set_xlabel(dataset.x_axis_label(best_axis))
-                axes.set_title(dataset._name)
+
         for axes in self._axes:
             if update_only:
                 try:
@@ -214,15 +212,19 @@ class Vectors3D(Plotter):
             else:
                 xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
                 self._backup_limits = [xlimits[0], xlimits[1], ylimits[0], ylimits[1]]
+
         for axes in self._axes:
             legend = axes.legend()
             legend.set_visible(plotting_context.use_legend)
             axes.grid(plotting_context.use_grid)
             axes.relim()
             axes.autoscale()
+
         self.axes3d.set_xlim([self.axis3d_min, self.axis3d_max])
         self.axes3d.set_ylim([self.axis3d_min, self.axis3d_max])
         self.axes3d.set_zlim([self.axis3d_min, self.axis3d_max])
+
         if self._toolbar is not None:
             self._toolbar.update()
+
         target.canvas.draw()

@@ -57,9 +57,9 @@ class Vectors(Plotter):
         """Return labels to show that sliders are not used."""
         return ["Inactive", "Inactive"]
 
-    def slider_limits(self) -> list[str]:
+    def slider_limits(self) -> list[tuple[float, float, float]]:
         """Return generic slider limit values."""
-        return self._number_of_sliders * [[-1.0, 1.0, 0.01]]
+        return [(-1.0, 1.0, 0.01)] * self._number_of_sliders
 
     def clear(self, figure: Figure | None = None):
         """Clear the figure."""
@@ -125,8 +125,6 @@ class Vectors(Plotter):
         self._backup_curves = []
         self.apply_settings(plotting_context)
 
-        x_axis_labels = []
-
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
@@ -137,7 +135,7 @@ class Vectors(Plotter):
             return
 
         gs = self._figure.add_gridspec(2, 2)
-        labels = iter(("Total available", "Requested", "Selected"))
+        labels = iter(("Used", "Found"))
 
         for databundle in plotting_context.datasets().values():
             dataset = databundle.dataset
@@ -147,83 +145,47 @@ class Vectors(Plotter):
 
             match dataset._name:
                 case "Available vectors":
-                    axes = self._figure.add_subplot(gs[0])
-
-                    lab = plotlabel if dataset._n_dim == 2 else next(labels)
+                    axes = self._figure.add_subplot(gs[0, 0])
 
                     for _, curve in dataset.curves_vs_axis(databundle.main_axis):
-                        self._plot_single(
-                            axes,
-                            curve,
-                            databundle,
+                        lab = plotlabel if dataset._n_dim != 2 else next(labels)
+
+                        axes.bar(
+                            *curve,
                             label=lab,
                         )
-                        temp_curves.append(temp)
-                        if not label_stack:
-                            break
-                else:
-                    temp_curves = axes.plot(
-                        dataset.x_axis(best_axis),
-                        dataset.data,
-                        linestyle=databundle.line_style,
-                        label=plotlabel,
-                        color=databundle.colour,
-                    )
-                for temp in temp_curves:
-                    try:
-                        temp.set_marker(databundle.marker)
-                    except ValueError:
-                        with contextlib.suppress(Exception):
-                            temp.set_marker(int(databundle.marker))
-                self._axes.append(axes)
-                axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
-                axes.set_title(dataset._name)
-            elif dataset._name == r"<|q|> - q$_{target}$":
-                axes = target.add_subplot(single_plot_stack.pop())
-                xvals = dataset.x_axis(best_axis)
-                axes.violinplot(
-                    dataset.data,
-                    positions=xvals,
-                    widths=violin_plot_width(xvals),
-                )
-                self._axes.append(axes)
-                axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
-                axes.set_title(dataset._name)
 
-            elif dataset._name == "Shell population":
-                axes = target.add_subplot(212)
-                multi_curves = dataset.curves_vs_axis(
-                    (best_unit, best_axis),
-                    max_limit=self._curve_limit_per_dataset,
-                )
-                x_axis = dataset.x_axis(best_axis)
-                bottom = np.zeros(len(x_axis))
-                width = 0.8 * abs(np.mean(x_axis[1:] - x_axis[:-1]))
-                self._axes.append(axes)
-                add_legend_placeholder = (
-                    len(multi_curves) > self._legend_limit_for_histogram
-                )
-                add_last_entry = False
-                axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
-                for bar_index, (key, value) in enumerate(multi_curves.items()):
-                    legend_label = plotlabel + ":" + dataset._curve_labels[key]
-                    try:
-                        axes.bar(
-                            x_axis,
-                            value,
-                            label=legend_label
-                            if bar_index < self._legend_limit_for_histogram
-                            or add_last_entry
-                            else None,
-                            bottom=bottom,
-                            width=width,
-                            edgecolor="black",
+                    axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
+                    axes.set_title(dataset._name)
+                    self._axes.append(axes)
+
+                case r"<|q|> - q$_{target}$":
+                    axes = self._figure.add_subplot(gs[0, 1])
+                    xvals = dataset.x_axis(databundle.main_axis)
+                    axes.violinplot(
+                        dataset.data,
+                        positions=xvals,
+                        widths=violin_plot_width(xvals),
+                    )
+                    self._axes.append(axes)
+                    axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
+                    axes.set_title(dataset._name)
+
+                case "Shell population":
+                    axes = self._figure.add_subplot(gs[1, :])
+
+                    n_curves = ilen(
+                        dataset.curves_vs_axis(
+                            databundle.main_axis,
+                            max_limit=self._curve_limit_per_dataset,
                         )
                     )
 
                     x_axis = dataset.x_axis(databundle.main_axis)
                     bottom = np.zeros_like(x_axis)
-                    width = 0.8 * abs(np.mean(x_axis[1:] - x_axis[:-1]))
+                    width = 0.8 * abs(np.mean(np.diff(x_axis)))
+
+                    self._axes.append(axes)
 
                     axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
                     for ind, (label, curve) in enumerate(
@@ -234,11 +196,28 @@ class Vectors(Plotter):
                     ):
                         try:
                             axes.bar(
-                                x_axis,
-                                0,
-                                label="...",
-                                color=target.get_facecolor(),
+                                *curve,
+                                label=self.get_label(
+                                    ind=ind,
+                                    n_curves=n_curves,
+                                    limit=self._legend_limit_for_histogram,
+                                    label=f"{plotlabel}:{label}",
+                                ),
+                                bottom=bottom,
+                                width=width,
+                                edgecolor="black",
                             )
+                            bottom += curve[1]
+
+                        except ValueError:
+                            x, y = curve
+                            LOG.error(
+                                f"Plotting failed for {plotlabel} using {databundle.main_axis}"
+                            )
+                            LOG.error(f"x_axis={x}")
+                            LOG.error(f"values={y}")
+                            raise
+
         for axindex, axes in enumerate(self._axes):
             if update_only:
                 plot_limits = self._backup_limits[axindex]
@@ -252,7 +231,7 @@ class Vectors(Plotter):
                 else:
                     for databundle in plotting_context.datasets().values():
                         dataset = databundle.dataset
-                        best_unit, best_axis = dataset.longest_axis()
+                        _, best_axis = dataset.longest_axis()
                         if dataset._name == r"<|q|> - q$_{target}$":
                             axes.clear()
                             xvals = dataset.x_axis(best_axis)
@@ -277,80 +256,12 @@ class Vectors(Plotter):
                     ylimits[0],
                     ylimits[1],
                 ]
-
         for axes in self._axes:
             legend = axes.legend()
             legend.set_visible(plotting_context.use_legend)
             axes.grid(plotting_context.use_grid)
             axes.relim()
             axes.autoscale()
-
         if self._toolbar is not None:
             self._toolbar.update()
-
-        target.canvas.draw()
-
-    @staticmethod
-    def get_label(ind: int, n_curves: int, limit: int, label: str):
-        """Get label for legend.
-
-        For the abbreviated legend return None for those which are
-        between ``limit`` and ``n_curves`` (skipping them), and "..."
-        when it's at the limit.
-
-        Parameters
-        ----------
-        ind : int
-            Current index.
-        n_curves : int
-            Total number of "curves" to plot.
-        limit : int
-            Max number of entries in legend.
-        label : str
-            Current labe.
-        """
-        if ind == limit:
-            return "..."
-        if limit < ind < n_curves - 1:
-            return None
-        return label
-
-    def _plot_single(
-        self,
-        axes: Axes,
-        curve: tuple[np.ndarray, np.ndarray] | tuple[np.ndarray],
-        databundle: PlotArgs,
-        *,
-        yerr: np.ndarray | None = None,
-        label: str,
-    ):
-        """Plot a single curve to axes.
-
-        Parameters
-        ----------
-        axes : Axes
-            Axis to plot to.
-        curve : tuple[np.ndarray, np.ndarray] | tuple[np.ndarray]
-            Curve to plot.
-        databundle : PlotArgs
-            Data to plot.
-        yerr : ndarray, optional
-            Error bars to add.
-        label : str
-            Plot label.
-        """
-        line, _caps, _bars = axes.errorbar(
-            *curve,
-            yerr=yerr,
-            linestyle=databundle.line_style,
-            label=label,
-            color=databundle.colour,
-        )
-
-        axes.set_title(databundle.dataset._name)
-
-        try:
-            line.set_marker(databundle.marker)
-        except ValueError:
-            with contextlib.suppress(Exception):
-                line.set_marker(int(databundle.marker))
+        self._figure.canvas.draw()
