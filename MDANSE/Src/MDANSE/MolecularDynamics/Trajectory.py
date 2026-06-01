@@ -173,20 +173,28 @@ class Trajectory:
     such as the atom selection, atom transmutation and grouping.
     """
 
-    def __init__(self, filename,
+    def __init__(self,
+                 filename,
                  trajectory_format: ValidFormats | None = None,
                  hdf5_driver: str | None = None,
-                 dataset_cache_size: int | None = None):
+                 rdcc_nbytes: int | None = None,
+                 rdcc_w0: float | None = None,
+                 rdcc_nslots: int | None = None):
         self._filename = filename
         self._hdf5_driver = hdf5_driver
-        self._dataset_cache_size = dataset_cache_size
+        self._rdcc_nbytes = rdcc_nbytes
+        self._rdcc_w0 = rdcc_w0
+        self._rdcc_nslots = rdcc_nslots
         self._format = (
             trajectory_format if trajectory_format else self.guess_correct_format()
         )
 
         self._trajectory = self.open_trajectory(self._format,
-                                                self._hdf5_driver,
-                                                self._dataset_cache_size)
+                                                    self._hdf5_driver,
+                                                    self._rdcc_nbytes,
+                                                    self._rdcc_w0,
+                                                    self._rdcc_nslots,
+                                                    )
         self._min_span = None
         self._max_span = None
         self._grouping_level = GroupingLevels.ATOM
@@ -451,9 +459,20 @@ class Trajectory:
 
         return "MDANSE"
 
-    def open_trajectory(self, trajectory_format, hdf5_driver, dataset_cache_size):
+    def open_trajectory(self,
+                        trajectory_format,
+                        hdf5_driver,
+                        rdcc_nbytes,
+                        rdcc_w0,
+                        rdcc_nslots,
+                        ):
         trajectory_class = available_formats[trajectory_format]
-        trajectory = trajectory_class(self._filename, hdf5_driver=hdf5_driver, rdcc_nbytes=dataset_cache_size)
+        trajectory = trajectory_class(self._filename,
+                                      hdf5_driver=hdf5_driver,
+                                    rdcc_nbytes = rdcc_nbytes,
+                                    rdcc_w0 = rdcc_w0,
+                                    rdcc_nslots = rdcc_nslots,
+                                      )
         return trajectory
 
     def close(self):

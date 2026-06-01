@@ -15,6 +15,9 @@
 #
 from __future__ import annotations
 
+from pathlib import Path
+
+import h5py
 import numpy as np
 
 from MDANSE import PLATFORM
@@ -24,6 +27,92 @@ from MDANSE.MolecularDynamics.Trajectory import Trajectory, check_hdf5_driver
 
 TIME_STEP_TOL = 1e-8
 DATASET_CACHE_SIZE = 2**24
+
+HDF5_DRIVERS = h5py.registered_drivers()
+PRIMES = [
+    10831,
+    15991,
+    23599,
+    34871,
+    51511,
+    76099,
+    112429,
+    166099,
+    245383,
+    362521,
+    535571,
+    791251,
+    1168957,
+    1726993,
+    2551421,
+    3769397,
+    5568817,
+    8227259,
+    12154757,
+    17957167,
+    26529487,
+    39194117,
+    57904453,
+    85546733,
+    126384823,
+    186718139,
+    275853173,
+    407539309,
+    602089451,
+    889513501,
+    1314147377,
+    1941491989,
+    2868316837,
+    4237587173,
+    6260516599,
+    9249147301,
+    13664483509,
+    20187602569,
+    29824712917,
+    44062364303,
+    65096752333,
+    96172487161,
+    142083083267,
+    209910372047,
+    310116892681,
+    458159766907,
+    676875000961,
+    1000000000039,
+]
+
+
+def next_prime(nchunks: int) -> int:
+    """Return one of the precalculated prime numbers for HDF5 chunk list.
+
+    If the input number is larger than the largest prime from the list,
+    returns the input number, which is not a prime, but can still be
+    used by HDF5.
+
+    Parameters
+    ----------
+    nchunks : int
+        number of chunks that need to be cached.
+
+    Returns
+    -------
+    int
+        A prime number larger than the input number.
+    """
+    for prime in PRIMES:
+        if prime > nchunks:
+            return prime
+    return nchunks
+
+
+def guess_hdf5_trajectory_parameters(fname: str | Path) -> tuple[int, int]:
+    trajectory_instance = Trajectory(fname)
+    traj_length = len(trajectory_instance)
+    chunk_size = trajectory_instance.chunk_size()
+    bytes_per_num = trajectory_instance.dtype_size()
+    cache_size = 2 * traj_length * chunk_size * 3 * bytes_per_num
+    cache_slots = next_prime(80 * traj_length * 3)
+    trajectory_instance.close()
+    return cache_size, cache_slots
 
 
 @IConfigurator.register("HDFTrajectoryConfigurator")
@@ -55,24 +144,36 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         self.extract_information(traj_instance)
 
     def configure(self, value):
-        """
-        Configure a HDF trajectory file.
-
-        :param value: the path for the HDF trajectory file.
-        :type value: str
-        """
         if value == self._original_input:
             return
         self._original_input = value
         self.error_status = "OK"
         self.warning_status = ""
 
-        InputFileConfigurator.configure(self, value)
+        if isinstance(value, (str, Path)):
+            file_name = value
+            driver = None
+            rdcc_nbytes, rdcc_nslots = guess_hdf5_trajectory_parameters(value)
+            rdcc_w0 = None
+        else:
+            file_name = value[0]
+            driver = value[1] if value[1] in HDF5_DRIVERS else None
+            rdcc_nbytes = value[2]
+            rdcc_nslots = value[3]
+            rdcc_w0 = value[4]
+
+        self["driver"] = driver
+        self["rdcc_nbytes"] = rdcc_nbytes
+        self["rdcc_nslots"] = rdcc_nslots
+        self["rdcc_w0"] = rdcc_w0
+        InputFileConfigurator.configure(self, file_name)
         try:
             trajectory_instance = Trajectory(
                 self["value"],
                 hdf5_driver="core" if check_hdf5_driver() else None,
-                dataset_cache_size=DATASET_CACHE_SIZE,
+                rdcc_nbytes=rdcc_nbytes,
+                rdcc_nslots=rdcc_nslots,
+                rdcc_w0=rdcc_w0,
             )
         except KeyError:
             self.error_status = f"Could not use {value} as input trajectory."
