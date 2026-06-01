@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import numpy as np
-from scipy.signal import correlate
+from scipy import fft
 
 from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
@@ -275,12 +275,10 @@ class DynamicIncoherentStructureFactor(IJob):
                 * np.sqrt(qvec_weights)[:, None, None]
             )
             rho = np.swapaxes(rho, 0, 1)
-            res = np.hstack(
-                [
-                    correlate(rho[:, :, n], rho[:n_configs, :, n], mode="valid")
-                    for n in range(rho.shape[2])
-                ]
-            )
+            fast_len = fft.next_fast_len(rho.shape[0])
+            v = fft.fft(rho, n=fast_len, axis=0)
+            w = fft.fft(rho[:n_configs], n=fast_len, axis=0)
+            res = fft.ifft(np.sum(v * w.conj(), axis=1), axis=0)[: self._nFrames]
             norm = n_configs * np.sum(qvec_weights)
             res /= norm
 
