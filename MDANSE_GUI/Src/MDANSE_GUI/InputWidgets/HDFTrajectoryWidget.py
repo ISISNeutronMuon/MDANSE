@@ -56,7 +56,9 @@ class HDFTrajectoryWidget(WidgetBase):
             self._layout.addWidget(label)
             trajectory_path, _ = os.path.split(filename)
             self.default_path = PurePath(trajectory_path)
-        self.build_fields()
+        self.build_fields(
+            init_guess=guess_hdf5_trajectory_parameters(self._configurator["value"])
+        )
         hdf5_info_text = QLabel(
             "Check https://docs.h5py.org/en/stable/high/file.html#chunk-cache for parameter details.\n"
             "Uncheck the boxes to use the default values (old behaviour)."
@@ -72,14 +74,30 @@ class HDFTrajectoryWidget(WidgetBase):
         label.setToolTip(tooltip_text)
         self._label = label
 
-    def build_fields(self):
+    def build_fields(self, init_guess: tuple[int, int] = (None, None)):
         bar_layout = QHBoxLayout()
+        self._extra_widgets = {}
         combobox_inputs = [
-            ("HDF5 driver", "None"),
+            ("HDF5 driver", "default"),
         ]
+        init_nbytes, init_nslots = init_guess
         spinbox_inputs = [
-            ("rdcc_nbytes (MB)", -1, QSpinBox, 8, 4096, 4),
-            ("rdcc_nslots", -1, QSpinBox, 8191, 2147483647, 1000),
+            (
+                "rdcc_nbytes (MB)",
+                8 if init_nbytes is None else int(init_nbytes / 1024**2),
+                QSpinBox,
+                8,
+                4096,
+                4,
+            ),
+            (
+                "rdcc_nslots",
+                init_nslots if init_nslots is not None else 8191,
+                QSpinBox,
+                8191,
+                2147483647,
+                1000,
+            ),
             ("rdcc_w0", 1.0, QDoubleSpinBox, 0, 1.0, 0.05),
         ]
         for label, init_value in combobox_inputs:
@@ -91,6 +109,7 @@ class HDFTrajectoryWidget(WidgetBase):
             widget.setCurrentText(init_value)
             sublayout.addWidget(widget)
             bar_layout.addLayout(sublayout)
+            self._driver_widget = widget
         for label, init_value, widget_type, minval, maxval, step in spinbox_inputs:
             sublayout = QVBoxLayout()
             sublayout.addWidget(QLabel(label))
@@ -105,6 +124,7 @@ class HDFTrajectoryWidget(WidgetBase):
             checkbox.stateChanged.connect(widget.setEnabled)
             sublayout.addWidget(widget)
             bar_layout.addLayout(sublayout)
+            self._extra_widgets[label.split()[0]] = widget
         self._layout.addLayout(bar_layout)
 
     def configure_using_default(self):
@@ -131,4 +151,15 @@ class HDFTrajectoryWidget(WidgetBase):
             self._label.setToolTip(self._configurator.warning_status)
         else:
             self._label.setToolTip(self._tooltip)
-        return result
+        hdf5_driver = self._driver_widget.currentText()
+        hdf5_driver = None if hdf5_driver == "default" else hdf5_driver
+        rdcc = {}
+        for name, widget in self._extra_widgets.items():
+            rdcc[name] = widget.value() if widget.isEnabled() else None
+        return (
+            result,
+            hdf5_driver,
+            rdcc["rdcc_nbytes"] * 1024**2 if rdcc["rdcc_nbytes"] is not None else None,
+            rdcc["rdcc_nslots"],
+            rdcc["rdcc_w0"],
+        )

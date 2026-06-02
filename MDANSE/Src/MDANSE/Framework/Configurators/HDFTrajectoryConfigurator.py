@@ -104,7 +104,9 @@ def next_prime(nchunks: int) -> int:
     return nchunks
 
 
-def guess_hdf5_trajectory_parameters(fname: str | Path) -> tuple[int, int]:
+def guess_hdf5_trajectory_parameters(
+    fname: str | Path,
+) -> tuple[int, int] | tuple[None, None]:
     trajectory_instance = Trajectory(fname)
     traj_length = len(trajectory_instance)
     chunk_size = trajectory_instance.chunk_size()
@@ -169,17 +171,21 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         self["rdcc_nslots"] = rdcc_nslots
         self["rdcc_w0"] = rdcc_w0
         InputFileConfigurator.configure(self, file_name)
-        try:
-            trajectory_instance = Trajectory(
-                self["value"],
-                hdf5_driver="core" if check_hdf5_driver() else None,
-                rdcc_nbytes=rdcc_nbytes,
-                rdcc_nslots=rdcc_nslots,
-                rdcc_w0=rdcc_w0,
-            )
-        except KeyError:
-            self.error_status = f"Could not use {value} as input trajectory."
-            return
+        self._original_input = value
+        if "instance" in self and isinstance(self["instance"], Trajectory):
+            trajectory_instance = self["instance"]
+        else:
+            try:
+                trajectory_instance = Trajectory(
+                    self["value"],
+                    hdf5_driver=driver,
+                    rdcc_nbytes=rdcc_nbytes,
+                    rdcc_nslots=rdcc_nslots,
+                    rdcc_w0=rdcc_w0,
+                )
+            except KeyError:
+                self.error_status = f"Could not use {value} as input trajectory."
+                return
         self.extract_information(trajectory_instance)
         if not trajectory_instance.non_dummy_elements:
             self.warning_status += (
