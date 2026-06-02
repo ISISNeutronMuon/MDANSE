@@ -241,21 +241,6 @@ class MdanseTrajectory(TrajectoryFile):
         n_req = len(range(*indices.indices(self.chemical_system.number_of_atoms)))
         return np.zeros(n_req, dtype=np.float64)
 
-    def chunk_size(self, dataset_type: TrajDataArray = TrajDataArray.POSITION) -> int:
-        data_key = self.KEYS[dataset_type.name.lower()]
-        try:
-            dataset = self._h5_file[data_key]
-        except KeyError:
-            LOG.error("Dataset %s was not in the trajectory file", data_key)
-            return -1
-        if (chunk_shape := getattr(dataset, "chunks", None)) is None:
-            LOG.warning("Dataset %s is not chunked, and was expected to be", data_key)
-            return -1
-        if len(chunk_shape) < 2:
-            LOG.warning("Dataset %s does not have enough dimensions", data_key)
-            return -1
-        return chunk_shape[1]
-
     def coordinates(
         self, frame: slice | int, indices: slice | int = np.s_[:]
     ) -> FloatArray:
