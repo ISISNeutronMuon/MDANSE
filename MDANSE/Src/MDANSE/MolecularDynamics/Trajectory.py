@@ -514,8 +514,8 @@ class Trajectory:
         self._trajectory = self.open_trajectory(self._format,
                                                 self._hdf5_driver,
                                                 rdcc_nbytes=self._rdcc_nbytes,
-                                                rdcc_nslots=self._rdcc_nslots,
                                                 rdcc_w0=self._rdcc_w0,
+                                                rdcc_nslots=self._rdcc_nslots,
                                                 fast_load=True)
 
     def __len__(self):
