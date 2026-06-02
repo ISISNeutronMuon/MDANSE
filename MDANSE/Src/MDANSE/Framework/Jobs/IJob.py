@@ -225,6 +225,12 @@ class IJob(Configurable, metaclass=SubclassFactory):
     def __getstate__(self):
         d = self.__dict__.copy()
         del d["_processes"]
+        # Don't copy output data to the workers during multiprocessing
+        # runs as it could use up quite a bit of memory. This appears
+        # to occur for windows. Only the main process needs
+        # to write to this.
+        if "_outputData" in d:
+            d["_outputData"] = OutputData()
         return d
 
     @property
