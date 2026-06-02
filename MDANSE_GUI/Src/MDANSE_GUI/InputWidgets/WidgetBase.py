@@ -120,7 +120,7 @@ class WidgetBase(QObject):
             self._base.setTitle(self._label_text)
 
         for widget in self._layout.children():
-            if issubclass(widget, QWidget):
+            if isinstance(widget, QWidget):
                 widget.setToolTip(self._tooltip)
 
     def default_labels(self):
