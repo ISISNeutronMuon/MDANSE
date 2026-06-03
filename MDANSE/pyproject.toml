@@ -41,6 +41,7 @@ dependencies = [
     "mdtraj",
     "networkx",
     "more-itertools",
+    "finufft",
 ]
 
 [dependency-groups]
