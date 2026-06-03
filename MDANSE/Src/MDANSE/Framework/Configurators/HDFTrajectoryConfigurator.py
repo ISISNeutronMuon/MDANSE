@@ -170,6 +170,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         self["rdcc_nbytes"] = rdcc_nbytes
         self["rdcc_nslots"] = rdcc_nslots
         self["rdcc_w0"] = rdcc_w0
+        self["reopen_trajectory"] = True
         InputFileConfigurator.configure(self, file_name)
         self._original_input = value
         if "instance" in self and isinstance(self["instance"], Trajectory):
