@@ -35,6 +35,7 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.Databases import str_to_num
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.IO.IOUtils import UCEnum, summarise_array
+from MDANSE.Trajectory.FileTrajBase import TrajDataArray
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 
@@ -172,16 +173,21 @@ class Trajectory:
     such as the atom selection, atom transmutation and grouping.
     """
 
-    def __init__(self, filename, trajectory_format: ValidFormats | None = None,
-                 hdf5_driver: str | None = None):
+    def __init__(self, filename,
+                 trajectory_format: ValidFormats | None = None,
+                 hdf5_driver: str | None = None,
+                 dataset_cache_size: int | None = None):
         self._filename = filename
         self._hdf5_driver = hdf5_driver
+        self._dataset_cache_size = dataset_cache_size
         self._format = (
             trajectory_format if trajectory_format else self.guess_correct_format()
         )
 
         if self._format not in {"mock"}:
-            self._trajectory = self.open_trajectory(self._format, self._hdf5_driver)
+            self._trajectory = self.open_trajectory(self._format,
+                                                    self._hdf5_driver,
+                                                    self._dataset_cache_size)
         self._min_span = None
         self._max_span = None
         self._grouping_level = GroupingLevels.ATOM
@@ -243,6 +249,11 @@ class Trajectory:
                 overlap = set(cluster).intersection(self.atom_indices)
                 temp_dict[mol_name] += len(overlap)
         return {k: v for k, v in temp_dict.items() if v}
+
+    def chunk_size(self, array_name: str = "position") -> int:
+        """Return the number of atoms in a single chunk of the HDF5 dataset."""
+        dataset_type = TrajDataArray[array_name.upper()]
+        return self._trajectory.chunk_size(dataset_type)
 
     def group_elements(self, grp_name):
         """The elements in the group with the name grp_name.
@@ -441,9 +452,9 @@ class Trajectory:
 
         return "MDANSE"
 
-    def open_trajectory(self, trajectory_format, hdf5_driver):
+    def open_trajectory(self, trajectory_format, hdf5_driver, dataset_cache_size):
         trajectory_class = available_formats[trajectory_format]
-        trajectory = trajectory_class(self._filename, hdf5_driver=hdf5_driver)
+        trajectory = trajectory_class(self._filename, hdf5_driver=hdf5_driver, rdcc_nbytes=dataset_cache_size)
         return trajectory
 
     def close(self):
@@ -472,7 +483,7 @@ class Trajectory:
 
     def __setstate__(self, state):
         self.__dict__ = state
-        self._trajectory = self.open_trajectory(self._format, self._hdf5_driver)
+        self._trajectory = self.open_trajectory(self._format, self._hdf5_driver, self._dataset_cache_size)
 
     def __len__(self):
         return len(self._trajectory)
@@ -650,6 +661,44 @@ class Trajectory:
         """
         return self._trajectory.read_atomic_trajectory(
             index,
+            first=first,
+            last=last,
+            step=step,
+            box_coordinates=box_coordinates,
+        )
+
+    def read_atomic_trajectory_many(
+        self,
+        index_list: list[int],
+        first: int = 0,
+        last: int | None = None,
+        step: int | None = 1,
+        *,
+        box_coordinates: bool = False,
+    ) -> npt.NDArray[float]:
+        """Read an atomic trajectory. The trajectory is corrected from box jumps.
+
+        Parameters
+        ----------
+        index : int
+            The index of the atom.
+        first : int
+            The index of the first frame. (Default value = 0)
+        last : int
+            The index of the last frame. (Default value = None)
+        step : int
+            The step in frame. (Default value = 1)
+        box_coordinates : bool
+            If True, the coordiniates are returned in box coordinates (Default value = False).
+
+        Returns
+        -------
+        ndarray
+            2D array containing the atomic trajectory for the selected frames
+
+        """
+        return self._trajectory.read_atomic_trajectory_many(
+            index_list,
             first=first,
             last=last,
             step=step,

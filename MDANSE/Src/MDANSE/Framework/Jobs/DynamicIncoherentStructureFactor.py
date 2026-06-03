@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import numpy as np
-from scipy.signal import correlate
+from scipy import fft
 
 from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
@@ -24,6 +24,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
 
 @IJob.register("DynamicIncoherentStructureFactor")
@@ -110,8 +111,17 @@ class DynamicIncoherentStructureFactor(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = len(self.trajectory.atom_indices)
+        vectors_per_shell = self.configuration["q_vectors"]["parameters"].get(
+            "n_vectors", 1
+        )
+        n_proc = self.configuration["running_mode"].get("slots", 1)
 
+        self.grouped_indices = group_atom_indices(
+            self.trajectory, n_proc=n_proc, memory_scale_factor=vectors_per_shell
+        )
+        self.numberOfSteps = len(self.grouped_indices)
+
+        self._using_lattice_vectors = self.configuration["q_vectors"]["is_lattice"]
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
 
         self._nFrames = self.configuration["frames"]["n_frames"]
@@ -225,36 +235,54 @@ class DynamicIncoherentStructureFactor(IJob):
             #. atomicSF (np.array): The atomic structure factor
         """
 
-        atom_index = self.trajectory.atom_indices[index]
+        atom_index_group = self.grouped_indices[index]
+        n_atoms = len(atom_index_group)
 
-        series = self.trajectory.read_atomic_trajectory(
-            atom_index,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
-        )
+        if self._using_lattice_vectors:
+            series = self.trajectory.coordinates(
+                slice(
+                    self.configuration["frames"]["first"],
+                    self.configuration["frames"]["last"] + 1,
+                    self.configuration["frames"]["step"],
+                ),
+                atom_index_group,
+            )
+        else:
+            series = self.trajectory.read_atomic_trajectory_many(
+                atom_index_group,
+                first=self.configuration["frames"]["first"],
+                last=self.configuration["frames"]["last"] + 1,
+                step=self.configuration["frames"]["step"],
+            )
 
         series = self.configuration["projection"]["projector"](series)
 
         disf_per_q_shell = {}
         for q in self.configuration["q_vectors"]["shells"]:
-            disf_per_q_shell[q] = np.zeros((self._nFrames,), dtype=np.float64)
+            if self.configuration["q_vectors"]["value"][q] is None:
+                disf_per_q_shell[q] = np.nan
+                continue
+            disf_per_q_shell[q] = np.zeros((self._nFrames, n_atoms), dtype=np.float64)
 
         n_configs = self.configuration["frames"]["n_configs"]
         for q in self.configuration["q_vectors"]["shells"]:
             if self.configuration["q_vectors"]["value"][q] is None:
-                disf_per_q_shell[q] = np.nan
                 continue
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
             qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
-
-            rho = np.exp(1j * np.dot(series, qVectors)) * np.sqrt(qvec_weights[None, :])
-            res = correlate(rho, rho[:n_configs], mode="valid").T[0] / (
-                n_configs * np.sum(qvec_weights)
+            rho = (
+                np.exp(1j * np.dot(qVectors.T, np.swapaxes(series, 1, 2)))
+                * np.sqrt(qvec_weights)[:, None, None]
             )
+            rho = np.swapaxes(rho, 0, 1)
+            fast_len = fft.next_fast_len(rho.shape[0])
+            v = fft.fft(rho, n=fast_len, axis=0)
+            w = fft.fft(rho[:n_configs], n=fast_len, axis=0)
+            res = fft.ifft(np.sum(v * w.conj(), axis=1), axis=0)[: self._nFrames]
+            norm = n_configs * np.sum(qvec_weights)
+            res /= norm
 
             disf_per_q_shell[q] += res.real
-
         return index, disf_per_q_shell
 
     def combine(self, index, disf_per_q_shell):
@@ -264,10 +292,14 @@ class DynamicIncoherentStructureFactor(IJob):
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """
-
-        element = self._atoms[self.trajectory.atom_indices[index]]
-        for i, v in enumerate(disf_per_q_shell.values()):
-            self._outputData[f"disf/f(q,t)/{element}"][i, :] += v
+        at_indices = self.grouped_indices[index]
+        for rel_index, abs_index in enumerate(at_indices):
+            element = self._atoms[abs_index]
+            for i, v in enumerate(disf_per_q_shell.values()):
+                if hasattr(v, "shape"):
+                    self._outputData[f"disf/f(q,t)/{element}"][i, :] += v[:, rel_index]
+                else:
+                    self._outputData[f"disf/f(q,t)/{element}"][i, :] += v
 
     def finalize(self):
         """

@@ -43,7 +43,7 @@ from MDANSE.MolecularDynamics.UnitCell import (
     UnitCell,
 )
 
-from .FileTrajBase import TrajectoryFile
+from .FileTrajBase import TrajDataArray, TrajectoryFile
 
 SLICE_ALL = np.s_[:]
 
@@ -55,7 +55,18 @@ class MdanseTrajectory(TrajectoryFile):
     is the specific implementation for the Mdanse HDF5 format.
     """
 
-    def __init__(self, h5_filename: Path | str, hdf5_driver: str | None = None):
+    KEYS = {
+        "position": "/configuration/coordinates",
+        "velocity": "/configuration/velocities",
+        "force": "/configuration/gradients",
+    }
+
+    def __init__(
+        self,
+        h5_filename: Path | str,
+        hdf5_driver: str | None = None,
+        rdcc_nbytes: int | None = None,
+    ):
         """Open the file and build a trajectory.
 
         Parameters
@@ -72,8 +83,15 @@ class MdanseTrajectory(TrajectoryFile):
 
         self.unit_cell_warning = ""
         self._h5_filename = Path(h5_filename)
+        self._h5_driver = hdf5_driver
+        self._h5_cache_size = rdcc_nbytes
 
-        self._h5_file = h5py.File(self._h5_filename, "r", driver=hdf5_driver)
+        self._h5_file = h5py.File(
+            self._h5_filename,
+            "r",
+            driver=self._h5_driver,
+            rdcc_nbytes=self._h5_cache_size,
+        )
         self._has_database = "atom_database" in self._h5_file
         self._has_atoms = []
 
@@ -220,6 +238,21 @@ class MdanseTrajectory(TrajectoryFile):
 
         n_req = len(range(*indices.indices(self.chemical_system.number_of_atoms)))
         return np.zeros(n_req, dtype=np.float64)
+
+    def chunk_size(self, dataset_type: TrajDataArray = TrajDataArray.POSITION) -> int:
+        data_key = self.KEYS[dataset_type.name.lower()]
+        try:
+            dataset = self._h5_file[data_key]
+        except KeyError:
+            LOG.error("Dataset %s was not in the trajectory file", data_key)
+            return -1
+        if (chunk_shape := getattr(dataset, "chunks", None)) is None:
+            LOG.warning("Dataset %s is not chunked, and was expected to be", data_key)
+            return -1
+        if len(chunk_shape) < 2:
+            LOG.warning("Dataset %s does not have enough dimensions", data_key)
+            return -1
+        return chunk_shape[1]
 
     def coordinates(
         self, frame: slice | int, indices: slice | int = np.s_[:]
@@ -570,7 +603,7 @@ class MdanseTrajectory(TrajectoryFile):
 
     def variable(self, name: str):
         """Return a specific dataset corresponding to a variable called 'name'."""
-        return self._h5_file["/configuration/" + name]
+        return self._h5_file[self.KEYS.get(name, f"/configuration/{name}")]
 
     def variables(self) -> list[str]:
         """Return the configuration variables stored in this trajectory.

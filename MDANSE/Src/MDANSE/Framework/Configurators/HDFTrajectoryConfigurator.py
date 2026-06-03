@@ -20,9 +20,10 @@ import numpy as np
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MolecularDynamics.Trajectory import Trajectory, check_hdf5_driver
 
 TIME_STEP_TOL = 1e-8
+DATASET_CACHE_SIZE = 2**24
 
 
 @IConfigurator.register("HDFTrajectoryConfigurator")
@@ -68,7 +69,11 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
 
         InputFileConfigurator.configure(self, value)
         try:
-            trajectory_instance = Trajectory(self["value"])
+            trajectory_instance = Trajectory(
+                self["value"],
+                hdf5_driver="core" if check_hdf5_driver() else None,
+                dataset_cache_size=DATASET_CACHE_SIZE,
+            )
         except KeyError:
             self.error_status = f"Could not use {value} as input trajectory."
             return
