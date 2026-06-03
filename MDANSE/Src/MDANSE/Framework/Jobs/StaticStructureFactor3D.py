@@ -18,6 +18,7 @@ from __future__ import annotations
 import itertools as it
 from math import sqrt
 
+import finufft
 import numpy as np
 
 from MDANSE.Framework.AtomGrouping.grouping import (
@@ -26,17 +27,6 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 )
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
-
-
-def q_vectors_in_cube(inverse, max_hkl, start, stop):
-    hs = np.arange(-max_hkl[0], max_hkl[0] + 1)
-    ks = np.arange(-max_hkl[1], max_hkl[1] + 1)
-    ls = np.arange(-max_hkl[2], max_hkl[2] + 1)
-
-    hkls = np.array(
-        list(it.islice(it.product(hs, ks, ls), start, stop)),
-    )
-    return 2 * np.pi * inverse @ hkls.T, tuple((hkls + max_hkl).T)
 
 
 class StaticStructureFactor3D(IJob):
@@ -126,16 +116,9 @@ class StaticStructureFactor3D(IJob):
             self.max_hkl = np.maximum(self.max_hkl, np.floor(np.abs(hkl)).astype(int))
 
         self.gdim = 2 * self.max_hkl + 1
-
-        self.n_q_vecs = np.prod(self.gdim)
-        self.q_vec_chunk_size = 100
-        self.q_vec_n_chunks = self.n_q_vecs // self.q_vec_chunk_size + 1
-        self.n_frames = self.configuration["frames"]["number"]
-
-        self.numberOfSteps = self.n_frames * self.q_vec_n_chunks
+        self.numberOfSteps = self.configuration["frames"]["number"]
 
         self.min = -2 * np.pi * np.dot(unit_cell.inverse, self.max_hkl)
-        self.max = -self.min
         self.spacing = 2 * np.pi * np.sum(unit_cell.inverse, axis=0)
 
         self._outputData.add("origin", "LineOutputVariable", self.min, units="1/nm")
@@ -177,33 +160,32 @@ class StaticStructureFactor3D(IJob):
         )
 
     def run_step(self, index):
-        frame_idx = index // self.q_vec_n_chunks
-        chunk_idx = index % self.q_vec_n_chunks
-
-        frame = self.configuration["frames"]["value"][frame_idx]
+        frame = self.configuration["frames"]["value"][index]
         coords = self.trajectory.configuration(frame)["coordinates"]
-        start = chunk_idx * self.q_vec_chunk_size
-        stop = min((chunk_idx + 1) * self.q_vec_chunk_size, self.n_q_vecs)
-
-        q_vectors, q_idxs = q_vectors_in_cube(self.inverse, self.max_hkl, start, stop)
 
         rho = {}
         for element, idxs in self._indicesPerElement.items():
-            selectedCoordinates = np.take(coords, idxs, axis=0)
-            rho[element] = np.sum(
-                np.exp(1j * np.dot(selectedCoordinates, q_vectors)), axis=0
+            pts = 2 * np.pi * coords[idxs] @ self.inverse
+            rho[element] = finufft.nufft3d1(
+                pts[:, 0],
+                pts[:, 1],
+                pts[:, 2],
+                np.ones(len(pts), dtype=np.complex128),
+                n_modes=(
+                    2 * self.max_hkl[0] + 1,
+                    2 * self.max_hkl[1] + 1,
+                    2 * self.max_hkl[2] + 1,
+                ),
+                eps=1e-3,
             )
 
-        return index, (q_idxs, rho)
+        return index, rho
 
-    def combine(self, index, results):
-        q_idxs, rho = results
+    def combine(self, index, rho):
         for pair_str, (label_i, label_j) in self.labels:
-            np.add.at(
-                self._outputData[f"ssf3d/{pair_str}"],
-                q_idxs,
-                (rho[label_i] * rho[label_j].conj()).real,
-            )
+            self._outputData[f"ssf3d/{pair_str}"] += (
+                rho[label_i] * rho[label_j].conj()
+            ).real / self.numberOfSteps
 
     def finalize(self):
         nAtomsPerElement = self.trajectory.get_natoms()
