@@ -26,6 +26,7 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 from MDANSE.Mathematics.Signal import get_spectrum
 
 
+@IJob.register("DynamicIncoherentStructureFactor")
 class DynamicIncoherentStructureFactor(IJob):
     r"""Computes the dynamic incoherent structure factor :math:`S_{\text{inc}}(\mathbf{q},\omega)` for a set of atoms.
 

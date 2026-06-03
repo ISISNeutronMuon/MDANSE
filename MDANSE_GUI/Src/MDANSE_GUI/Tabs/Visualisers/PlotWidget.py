@@ -283,7 +283,7 @@ class PlotWidget(QWidget):
     @staticmethod
     def available_plotters() -> list[str]:
         """List all the plotters supported by this widget."""
-        return [str(x) for x in Plotter.indirect_subclasses() if str(x) not in ("Text")]
+        return [str(x) for x in Plotter.raw_names() if str(x) != "Text"]
 
     def plot_blank(
         self,

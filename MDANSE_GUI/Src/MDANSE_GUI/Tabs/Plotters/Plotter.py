@@ -24,7 +24,8 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, TextIO
 import numpy as np
 from more_itertools import consumer
 
-from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Core.RegisterFactory import RegisterFactory
+from MDANSE.IO.IOUtils import UCDict
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
@@ -95,11 +96,12 @@ NORMALISATION_DEFAULTS = {
 }
 
 
-class Plotter(metaclass=SubclassFactory):
+class Plotter(RegisterFactory):
     """Parent class to all classes used for displaying data."""
 
     slider_labels: ClassVar[tuple[str, ...]] = "Slider 1", "Slider 2"
     sliders_coupled: ClassVar[bool] = False
+    registry: ClassVar[UCDict[str, type[Plotter]]] = UCDict()
 
     def __init__(self) -> None:
         """Create defaults common to all plotters."""

@@ -22,6 +22,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
+@IInstrumentResolution.register("Gaussian")
 class Gaussian(IInstrumentResolution):
     """Defines an instrument resolution with a gaussian response"""
 

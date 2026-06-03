@@ -23,6 +23,7 @@ from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("OutputStructureConfigurator")
 class OutputStructureConfigurator(IConfigurator):
     """Defines the name of the output (average) structure file.
 

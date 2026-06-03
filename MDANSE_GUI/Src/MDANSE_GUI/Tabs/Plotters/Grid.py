@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
+@Plotter.register("Grid")
 class Grid(Plotter):
     """Plots each curve in its own subplot."""
 

@@ -52,6 +52,7 @@ def correlate_legendre(
     return results / corr_window
 
 
+@IJob.register("ReorientationalTimeCorrelationFunction")
 class ReorientationalTimeCorrelationFunction(IJob):
     r"""Correlation of molecule's orientation in time.
 

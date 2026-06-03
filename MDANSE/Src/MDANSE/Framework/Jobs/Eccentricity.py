@@ -23,6 +23,7 @@ from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 from MDANSE.MLogging import LOG
 
 
+@IJob.register("Eccentricity")
 class Eccentricity(IJob):
     r"""Computes the eccentricity of a selected set of atoms.
 

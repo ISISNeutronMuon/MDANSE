@@ -23,9 +23,10 @@ from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.IO.IOUtils import UCDict
 
 if TYPE_CHECKING:
-    from MDANSE.Core.SubclassFactory import SubclassFactory
+    from MDANSE.Core.RegisterFactory import RegisterFactory
     from MDANSE.Framework.Converters.Converter import Converter
     from MDANSE.Framework.Parameters.Parameters import Configurable
 
@@ -68,12 +69,16 @@ class JobTree(QStandardItemModel):
         self.populateTree(parent_class=parent_class, filter=filter)
 
     def populateTree(
-        self, parent_class: type[SubclassFactory] = IJob, filter: str | None = None
+        self, parent_class: type[RegisterFactory] = IJob, filter: str | None = None
     ):
         """This function starts the recursive process of scanning
         the registry tree. Only called once on startup.
         """
-        full_dict = parent_class.indirect_subclass_dictionary()
+        if isinstance(parent_class.registry, UCDict):
+            full_dict = parent_class.raw_dict()
+        else:
+            full_dict = parent_class.registered()
+
         sorted_keys = sorted(full_dict)
         cat_dicts = defaultdict(list)
 

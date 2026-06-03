@@ -126,6 +126,7 @@ def write_metadata(job: IJob, output_file: h5py.File):
             dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
 
 
+@IFormat.register("HDFFormat")
 class HDFFormat(IFormat):
     """Handles the writing of output variables in HDF file format.
 

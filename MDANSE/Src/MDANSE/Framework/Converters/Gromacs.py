@@ -22,6 +22,7 @@ from mdtraj.formats.trr import TRRTrajectoryFile
 from mdtraj.formats.xtc import XTCTrajectoryFile
 
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import PDBFile
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
@@ -32,6 +33,8 @@ class GromacsConverterError(Exception):
     pass
 
 
+@IJob.register("Gromacs")
+@Converter.register("Gromacs")
 class Gromacs(Converter):
     """Converts a Gromacs trajectory to an MDT trajectory."""
 

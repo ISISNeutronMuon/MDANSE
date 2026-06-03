@@ -19,9 +19,12 @@ from pathlib import Path
 
 from mdtraj.formats.registry import FormatRegistry
 
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
 from .MultiInputFileConfigurator import MultiInputFileConfigurator
 
 
+@IConfigurator.register("MDTrajTrajectoryFileConfigurator")
 class MDTrajTrajectoryFileConfigurator(MultiInputFileConfigurator):
     """Passes one or more trajectory files to the MDTraj converter.
 

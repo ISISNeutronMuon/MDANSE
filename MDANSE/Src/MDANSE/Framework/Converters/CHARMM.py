@@ -15,9 +15,13 @@
 #
 from __future__ import annotations
 
+from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Converters.DCD import DCD
+from MDANSE.Framework.Jobs.IJob import IJob
 
 
+@IJob.register("CHARMM")
+@Converter.register("CHARMM")
 class CHARMM(DCD):
     """Converts a CHARMM trajectory to an MDT trajectory."""
 

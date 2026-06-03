@@ -23,6 +23,7 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 
 
+@IJob.register("MeanSquareDisplacement")
 class MeanSquareDisplacement(IJob):
     r"""Calculates the mean square displacement (MSD) of atoms in the trajectory.
 

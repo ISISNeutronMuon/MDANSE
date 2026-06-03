@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import abc
 import json
 import multiprocessing
 import os
@@ -27,6 +26,8 @@ import string
 import sys
 import time
 import traceback
+from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from logging import FileHandler
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
@@ -36,10 +37,11 @@ from typing import TYPE_CHECKING, Any, ClassVar
 from more_itertools import consumer, first_true
 
 from MDANSE import PLATFORM
-from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Core.RegisterFactory import RegisterFactory
 from MDANSE.Framework.Configurable import Configurable
 from MDANSE.Framework.Jobs.JobStatus import JobStates, JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
+from MDANSE.IO.IOUtils import UCDict
 from MDANSE.MLogging import FMT, LOG
 
 if TYPE_CHECKING:
@@ -189,13 +191,15 @@ def _format_params(parameters: dict) -> str:
     return param_str
 
 
-class IJob(Configurable, metaclass=SubclassFactory):
+class IJob(Configurable, RegisterFactory, ABC):
     """The parent class for any MDANSE job.
 
     Both analysis runs and converters inherit from IJob,
     but typically analysis runs are the only ones that can
     be run in parallel.
     """
+
+    registry: ClassVar[UCDict[str, type[IJob]]] = UCDict()
 
     section = "job"
     key_gen = key_generator(6)
@@ -289,7 +293,7 @@ class IJob(Configurable, metaclass=SubclassFactory):
         if (grouping := self.configuration.get("grouping_level")) is not None:
             self.trajectory.set_grouping(grouping["level"])
 
-    @abc.abstractmethod
+    @abstractmethod
     def run_step(self, index):
         pass
 
@@ -593,3 +597,8 @@ class IJob(Configurable, metaclass=SubclassFactory):
             if handler.name == self._log_filename:
                 handler.close()
                 LOG.removeHandler(handler)
+
+
+class Dummy(IJob):
+    def run_step(self):
+        raise NotImplementedError(f"{type(self).__name__} is never meant to be run.")

@@ -90,6 +90,7 @@ def circle_of_vectors(
     return np.array(all_radii)[None, :n_vecs] * regular_circle
 
 
+@IQVectors.register("CircularQVectors")
 class CircularQVectors(IQVectors):
     """Generates Q vectors as concentric circles on a plane.
 

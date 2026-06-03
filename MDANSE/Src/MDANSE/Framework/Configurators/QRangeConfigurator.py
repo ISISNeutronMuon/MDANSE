@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.RangeConfigurator import (
     RangeConfigurator,
 )
@@ -22,6 +23,7 @@ from MDANSE.Framework.Configurators.RangeConfigurator import (
 from .IConfigurator import PredictionSettings
 
 
+@IConfigurator.register("QRangeConfigurator")
 class QRangeConfigurator(RangeConfigurator):
     """Range configurator for Q vector generation."""
 

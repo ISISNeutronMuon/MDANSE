@@ -15,10 +15,13 @@
 #
 from __future__ import annotations
 
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
 from .IConfigurator import PredictionSettings
 from .RangeConfigurator import RangeConfigurator
 
 
+@IConfigurator.register("FramesConfigurator")
 class FramesConfigurator(RangeConfigurator):
     """Select the trajectory frames on which to run the analysis.
 

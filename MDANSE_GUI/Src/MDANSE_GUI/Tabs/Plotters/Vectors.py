@@ -35,6 +35,7 @@ def violin_plot_width(positions: npt.NDArray[np.floating]) -> float:
     return np.mean(np.diff(positions)) if len(positions) > 1 else 0.5
 
 
+@Plotter.register("Vectors")
 class Vectors(Plotter):
     """Plots all the datasets in the same figure."""
 

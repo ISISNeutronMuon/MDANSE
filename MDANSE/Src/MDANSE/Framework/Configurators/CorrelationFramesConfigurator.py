@@ -17,10 +17,13 @@ from __future__ import annotations
 
 import math
 
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
 from .FramesConfigurator import FramesConfigurator
 from .IConfigurator import PredictionSettings
 
 
+@IConfigurator.register("CorrelationFramesConfigurator")
 class CorrelationFramesConfigurator(FramesConfigurator):
     """Parses the input of trajectory frames.
 

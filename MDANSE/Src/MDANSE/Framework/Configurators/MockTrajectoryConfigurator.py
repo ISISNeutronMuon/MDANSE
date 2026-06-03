@@ -19,6 +19,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.MockTrajectory import MockTrajectory
 
 
+@IConfigurator.register("MockTrajectoryConfigurator")
 class MockTrajectoryConfigurator(IConfigurator):
     """Uses a mock trajectory definition (from JSON) instead of Trajectory.
 

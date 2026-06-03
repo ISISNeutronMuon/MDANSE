@@ -24,6 +24,7 @@ from MDANSE.Mathematics.Signal import differentiate
 KB = measure(1.380649e-23, "kg m2/s2 K").toval("Da nm2/ps2 K")
 
 
+@IJob.register("Temperature")
 class Temperature(IJob):
     """Calculates the temperature of the system for every selected frame.
 

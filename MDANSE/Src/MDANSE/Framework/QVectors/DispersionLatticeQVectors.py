@@ -17,9 +17,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
+@IQVectors.register("DispersionLatticeQVectors")
 class DispersionLatticeQVectors(LatticeQVectors):
     r"""Generates Q vectors along a line in the HKL units of the simulation box.
 

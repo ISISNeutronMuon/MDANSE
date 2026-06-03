@@ -18,6 +18,7 @@ from __future__ import annotations
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("MDMCTrajectoryConfigurator")
 class MDMCTrajectoryConfigurator(IConfigurator):
     """Use an MDMC CompactTrajectory IN MEMORY.
 

@@ -24,6 +24,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Projectors.IProjector import IProjector, ProjectorError
 
 
+@IConfigurator.register("ProjectionConfigurator")
 class ProjectionConfigurator(IConfigurator):
     """Projects atomic coordinates onto an axis or plane.
 

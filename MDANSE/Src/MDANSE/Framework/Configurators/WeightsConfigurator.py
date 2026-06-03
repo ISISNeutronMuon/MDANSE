@@ -18,11 +18,13 @@ from __future__ import annotations
 import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
 )
 
 
+@IConfigurator.register("WeightsConfigurator")
 class WeightsConfigurator(SingleChoiceConfigurator):
     """Select the atom property to be used by the weight scheme.
 

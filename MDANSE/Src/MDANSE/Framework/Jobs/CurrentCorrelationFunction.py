@@ -40,6 +40,7 @@ class CurrentCorrelationFunctionError(Exception):
     pass
 
 
+@IJob.register("CurrentCorrelationFunction")
 class CurrentCorrelationFunction(IJob):
     """Computes the current correlation function for a set of atoms.
 

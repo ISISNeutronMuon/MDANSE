@@ -22,6 +22,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 
+@IConfigurator.register("OutputFilesConfigurator")
 class OutputFilesConfigurator(IConfigurator):
     """Allows the user to choose the output file for writing.
 
@@ -104,7 +105,7 @@ class OutputFilesConfigurator(IConfigurator):
                         f"The output file format {fmt} is not a valid output format."
                     )
 
-                if fmt not in IFormat.indirect_subclasses():
+                if fmt not in IFormat.available_names():
                     raise Exception(
                         f"the output file format {fmt} is not registered as a valid file format."
                     )

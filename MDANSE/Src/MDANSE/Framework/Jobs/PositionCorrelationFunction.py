@@ -20,8 +20,10 @@ import numpy as np
 from MDANSE.Framework.Jobs.CartesianCorrelationFunction import (
     CartesianCorrelationFunction,
 )
+from MDANSE.Framework.Jobs.IJob import IJob
 
 
+@IJob.register("PositionCorrelationFunction")
 class PositionCorrelationFunction(CartesianCorrelationFunction):
     """Calculates the position correlation function.
 

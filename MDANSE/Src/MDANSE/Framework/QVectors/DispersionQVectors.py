@@ -60,6 +60,7 @@ def dispersion_vectors(
     return vects, dists * np.sign(np.dot(normal, vects))
 
 
+@IQVectors.register("DispersionQVectors")
 class DispersionQVectors(IQVectors):
     """Generates Q vectors along a path between two points.
 

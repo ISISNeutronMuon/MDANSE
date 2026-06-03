@@ -18,5 +18,6 @@ from __future__ import annotations
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 
 
+@IOutputVariable.register("LineOutputVariable")
 class LineOutputVariable(IOutputVariable):
     _nDimensions = 1

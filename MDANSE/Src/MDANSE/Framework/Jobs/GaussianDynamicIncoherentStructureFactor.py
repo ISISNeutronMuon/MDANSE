@@ -26,6 +26,7 @@ from MDANSE.Mathematics.Signal import get_spectrum
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
 
 
+@IJob.register("GaussianDynamicIncoherentStructureFactor")
 class GaussianDynamicIncoherentStructureFactor(IJob):
     r"""Computes the dynamic incoherent structure factor in the Gaussian approximation.
 

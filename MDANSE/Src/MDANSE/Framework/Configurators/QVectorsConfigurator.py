@@ -23,6 +23,7 @@ from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from .IConfigurator import PredictionSettings
 
 
+@IConfigurator.register("QVectorsConfigurator")
 class QVectorsConfigurator(IConfigurator):
     """Creates and configures a q-vector generator.
 

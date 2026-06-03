@@ -17,9 +17,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors
 
 
+@IQVectors.register("MillerIndicesQVectors")
 class MillerIndicesQVectors(LatticeQVectors):
     """Generates vectors on a grid.
 

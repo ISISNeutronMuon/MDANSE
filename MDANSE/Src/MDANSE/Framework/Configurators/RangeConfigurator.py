@@ -22,6 +22,7 @@ from MDANSE.Framework.Configurators.IConfigurator import (
 )
 
 
+@IConfigurator.register("RangeConfigurator")
 class RangeConfigurator(IConfigurator):
     """Inputs a range of values as 3 parameters : start, stop, step.
 

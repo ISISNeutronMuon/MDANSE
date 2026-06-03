@@ -19,11 +19,13 @@ import collections
 import copy
 
 from MDANSE.Framework.Jobs.CartesianPowerSpectrum import CartesianPowerSpectrum
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Jobs.VelocityCorrelationFunction import (
     VelocityCorrelationFunction,
 )
 
 
+@IJob.register("DensityOfStates")
 class DensityOfStates(CartesianPowerSpectrum, VelocityCorrelationFunction):
     """Calculate the vibrational density of states of the trajectory.
 

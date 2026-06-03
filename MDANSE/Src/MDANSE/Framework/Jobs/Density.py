@@ -28,6 +28,7 @@ class DensityError(Exception):
     pass
 
 
+@IJob.register("Density")
 class Density(IJob):
     """Computes the atom and mass densities for a given trajectory.
 

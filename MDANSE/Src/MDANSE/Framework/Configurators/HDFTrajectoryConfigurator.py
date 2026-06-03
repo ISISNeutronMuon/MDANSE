@@ -18,12 +18,14 @@ from __future__ import annotations
 import numpy as np
 
 from MDANSE import PLATFORM
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 TIME_STEP_TOL = 1e-8
 
 
+@IConfigurator.register("HDFTrajectoryConfigurator")
 class HDFTrajectoryConfigurator(InputFileConfigurator):
     """Chooses the trajectory to be analysed.
 

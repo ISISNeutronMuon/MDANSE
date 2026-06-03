@@ -21,13 +21,13 @@ from math import sqrt
 
 import numpy as np
 from ase import Atoms
-from ase.io import iread, read
 from ase.io.trajectory import Trajectory as ASETrajectory
 from more_itertools import ilen
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import ASEParser
 from MDANSE.Framework.Units import INTERNAL_UNITS, UnitError, measure
 from MDANSE.MLogging import LOG
@@ -43,6 +43,8 @@ class ASETrajectoryFileError(Exception):
     pass
 
 
+@IJob.register("ASE")
+@Converter.register("ASE")
 class ASE(Converter):
     """Converts a trajectory to MDT format using ASE.
 

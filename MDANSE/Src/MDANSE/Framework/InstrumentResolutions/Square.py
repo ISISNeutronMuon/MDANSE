@@ -22,6 +22,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
+@IInstrumentResolution.register("Square")
 class Square(IInstrumentResolution):
     """Defines an instrument resolution with a square response"""
 

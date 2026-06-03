@@ -15,15 +15,16 @@
 #
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Core.RegisterFactory import RegisterFactory
+from MDANSE.IO.IOUtils import UCDict
 
 if TYPE_CHECKING:
     from MDANSE.Framework.Jobs.IJob import IJob
 
 
-class IFormat(metaclass=SubclassFactory):
+class IFormat(RegisterFactory):
     """
     This is the base class for writing MDANSE output data. In MDANSE, the output of an analysis can be written in different file format.
 
@@ -31,6 +32,8 @@ class IFormat(metaclass=SubclassFactory):
     subclass of IFormat and overload the "write" class method as defined in IFormat base class which will actually write the output variables,
     and redefine the "type", "extension" and "extensions" class attributes.
     """
+
+    registry: ClassVar[UCDict[str, IFormat]] = UCDict()
 
     @classmethod
     def write(cls, filename, data, header="", run_instance: IJob | None = None):

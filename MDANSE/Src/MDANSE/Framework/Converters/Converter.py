@@ -15,19 +15,22 @@
 #
 from __future__ import annotations
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
+from typing import ClassVar
 
 import h5py
 
-from MDANSE.Core.SubclassFactory import SubclassFactory
+from MDANSE.Core.RegisterFactory import RegisterFactory
 from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.IO.IOUtils import UCDict
 from MDANSE.MLogging import LOG
 
 
-class Converter(IJob, metaclass=SubclassFactory):
+class Converter(IJob, RegisterFactory, ABC):
     """Outputs a trajectory in the MDT format."""
 
+    registry: ClassVar[UCDict[str, type[Converter]]] = UCDict()
     category = ("Converters", "Specific")
     ancestor = ["empty_data"]
     runscript_import_line = (

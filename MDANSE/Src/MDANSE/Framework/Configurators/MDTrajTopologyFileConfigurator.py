@@ -23,10 +23,12 @@ import mdtraj as md
 from mdtraj.core.trajectory import _TOPOLOGY_EXTS
 
 from MDANSE.Framework.AtomMapping import AtomLabel
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
 
 
+@IConfigurator.register("MDTrajTopologyFileConfigurator")
 class MDTrajTopologyFileConfigurator(FileWithAtomDataConfigurator):
     """Uses MDTraj to read the system topology information from a file."""
 

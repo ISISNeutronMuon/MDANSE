@@ -22,6 +22,7 @@ import MDAnalysis as mda
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
     PeriodicRealConfiguration,
@@ -31,6 +32,8 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
+@IJob.register("MDAnalysis")
+@Converter.register("MDAnalysis")
 class MDAnalysis(Converter):
     """Converts a trajectory to the MDT format using MDAnalysis.
 

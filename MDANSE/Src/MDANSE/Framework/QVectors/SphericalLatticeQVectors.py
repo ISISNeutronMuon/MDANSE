@@ -20,10 +20,12 @@ from functools import partial
 import numpy as np
 from scipy.spatial import KDTree
 
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors, fpsampling
 from MDANSE.Framework.QVectors.SphericalQVectors import spherical_vectors
 
 
+@IQVectors.register("SphericalLatticeQVectors")
 class SphericalLatticeQVectors(LatticeQVectors):
     """Generates randomly-selected lattice vectors grouped into spheres.
 

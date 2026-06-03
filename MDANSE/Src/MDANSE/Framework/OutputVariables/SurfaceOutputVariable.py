@@ -18,5 +18,6 @@ from __future__ import annotations
 from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 
 
+@IOutputVariable.register("SurfaceOutputVariable")
 class SurfaceOutputVariable(IOutputVariable):
     _nDimensions = 2

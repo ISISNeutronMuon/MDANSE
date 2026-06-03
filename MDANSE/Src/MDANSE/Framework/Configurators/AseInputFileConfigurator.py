@@ -18,10 +18,12 @@ from __future__ import annotations
 from ase.io.formats import all_formats
 
 from MDANSE import PLATFORM
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 from MDANSE.MLogging import LOG
 
 
+@IConfigurator.register("AseInputFileConfigurator")
 class AseInputFileConfigurator(InputFileConfigurator):
     """Sets an input file for the ASE-based converters."""
 

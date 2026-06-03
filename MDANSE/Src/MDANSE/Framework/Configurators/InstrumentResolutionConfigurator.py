@@ -25,6 +25,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 from .IConfigurator import PredictionSettings
 
 
+@IConfigurator.register("InstrumentResolutionConfigurator")
 class InstrumentResolutionConfigurator(IConfigurator):
     r"""Defines the resolution function to use for signal broadening.
 
