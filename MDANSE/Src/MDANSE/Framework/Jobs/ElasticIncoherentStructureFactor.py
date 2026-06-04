@@ -22,6 +22,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 )
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
 
 @IJob.register("ElasticIncoherentStructureFactor")
@@ -103,11 +104,16 @@ class ElasticIncoherentStructureFactor(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = len(self.trajectory.atom_indices)
-
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
 
         self._nFrames = self.configuration["frames"]["number"]
+
+        n_proc = self.configuration["running_mode"].get("slots", 1)
+
+        self.grouped_indices = group_atom_indices(
+            self.trajectory, n_proc=n_proc, memory_scale_factor=self._nQShells
+        )
+        self.numberOfSteps = len(self.grouped_indices)
 
         self.labels = [
             (element, (element,)) for element in self.trajectory.get_natoms()
@@ -154,10 +160,11 @@ class ElasticIncoherentStructureFactor(IJob):
         """
 
         # get atom index
-        atom_index = self.trajectory.atom_indices[index]
+        atom_index_group = self.grouped_indices[index]
+        n_atoms = len(atom_index_group)
 
-        series = self.trajectory.read_atomic_trajectory(
-            atom_index,
+        series = self.trajectory.read_atomic_trajectory_many(
+            atom_index_group,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -165,24 +172,29 @@ class ElasticIncoherentStructureFactor(IJob):
 
         series = self.configuration["projection"]["projector"](series)
 
-        atomicEISF = np.zeros((self._nQShells,), dtype=np.float64)
+        atomicEISF = np.zeros((self._nQShells, n_atoms), dtype=np.float64)
 
         for i, q in enumerate(self.configuration["q_vectors"]["shells"]):
             if self.configuration["q_vectors"]["value"][q] is None:
-                atomicEISF[i] = np.nan
+                atomicEISF[i, :] = np.nan
                 continue
 
             qVectors = self.configuration["q_vectors"]["value"][q]["q_vectors"]
             qvec_weights = self.configuration["q_vectors"]["value"][q]["weights"]
 
-            a = np.average(np.exp(1j * np.dot(series, qVectors)), axis=0)
+            a = np.average(
+                np.swapaxes(
+                    np.exp(1j * np.dot(qVectors.T, np.swapaxes(series, 1, 2))), 0, 1
+                ),
+                axis=0,
+            )
             a = np.abs(a) ** 2
 
-            atomicEISF[i] = np.average(a, weights=qvec_weights)
+            atomicEISF[i, :] = np.average(a, axis=0, weights=qvec_weights)
 
         return index, atomicEISF
 
-    def combine(self, index, x):
+    def combine(self, step_index, x):
         """
         Combines returned results of run_step.\n
         :Parameters:
@@ -190,10 +202,12 @@ class ElasticIncoherentStructureFactor(IJob):
             #. x (any): The returned result(s) of run_step
         """
 
+        atom_index_group = self.grouped_indices[step_index]
         # The symbol of the atom.
-        element = self._atoms[self.trajectory.atom_indices[index]]
+        for arr_index, at_index in enumerate(atom_index_group):
+            element = self._atoms[self.trajectory.atom_indices[at_index]]
 
-        self._outputData[f"eisf/{element}"] += x
+            self._outputData[f"eisf/{element}"] += x[:, arr_index]
 
     def finalize(self):
         """

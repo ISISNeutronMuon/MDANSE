@@ -19,6 +19,7 @@ from itertools import groupby
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import mean_square_fluctuation
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
 
 @IJob.register("RootMeanSquareFluctuation")
@@ -68,7 +69,13 @@ class RootMeanSquareFluctuation(IJob):
     def initialize(self):
         """Initialize the input parameters and analysis self variables"""
         super().initialize()
-        self.numberOfSteps = len(self.trajectory.atom_indices)
+
+        n_proc = self.configuration["running_mode"].get("slots", 1)
+
+        self.grouped_indices = group_atom_indices(
+            self.trajectory, n_proc=n_proc, memory_scale_factor=2
+        )
+        self.numberOfSteps = len(self.grouped_indices)
 
         self.group_molecules = self.configuration["grouping_level"]["value"] != "atom"
         self.ele_idxs = {}
@@ -150,17 +157,18 @@ class RootMeanSquareFluctuation(IJob):
             The atom index and the calculated root mean square
             fluctuation for that atom.
         """
-        atom_index = self.trajectory.atom_indices[index]
-        series = self.trajectory.read_atomic_trajectory(
-            atom_index,
+        atom_index_group = self.grouped_indices[index]
+
+        series = self.trajectory.read_atomic_trajectory_many(
+            atom_index_group,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
         )
-        rmsf = mean_square_fluctuation(series, root=True)
+        rmsf = mean_square_fluctuation(series, root=True, sum_axis=2)
         return index, rmsf
 
-    def combine(self, index, x):
+    def combine(self, step_index, x):
         """Combines returned results of run_step.
 
         Parameters
@@ -170,10 +178,13 @@ class RootMeanSquareFluctuation(IJob):
         x : float
             The RMSF results for the atom.
         """
-        self._outputData["rmsf/all"][index] = x
-        name = self._names[index]
-        self._outputData[f"rmsf/{name}"][self.ele_idxs[name]] = x
-        self.ele_idxs[name] += 1
+        atom_index_group = self.grouped_indices[step_index]
+        # The symbol of the atom.
+        for arr_index, at_index in enumerate(atom_index_group):
+            self._outputData["rmsf/all"][at_index] = x[arr_index]
+            name = self._names[at_index]
+            self._outputData[f"rmsf/{name}"][self.ele_idxs[name]] = x[arr_index]
+            self.ele_idxs[name] += 1
 
     def finalize(self):
         """Finalizes the calculations (e.g. averaging the total term, output
