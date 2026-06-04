@@ -183,7 +183,7 @@ class MeanSquareDisplacement(IJob):
         atom_index_group = self.grouped_indices[step_index]
         # The symbol of the atom.
         for arr_index, at_index in enumerate(atom_index_group):
-            element = self._atoms[self.trajectory.atom_indices[at_index]]
+            element = self._atoms[at_index]
 
             self._outputData[f"msd/{element}"] += result[:, arr_index]
         self._outputData["msd/total"] += np.sum(result, axis=1)

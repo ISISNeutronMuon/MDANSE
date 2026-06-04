@@ -150,7 +150,7 @@ class AverageStructure(IJob):
         # The symbol of the atom.
         atom_index_group = self.grouped_indices[step_index]
         for arr_index, at_index in enumerate(atom_index_group):
-            element = self._atoms[self.trajectory.atom_indices[at_index]]
+            element = self._atoms[at_index]
 
             try:
                 the_atom = Atom(element, x[arr_index])

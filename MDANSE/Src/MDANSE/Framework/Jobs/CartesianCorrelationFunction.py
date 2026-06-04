@@ -185,7 +185,7 @@ class CartesianCorrelationFunction(IJob):
         isotropic = (cfs[0] + cfs[3] + cfs[5]) / 3
         # The symbol of the atom.
         for arr_index, at_index in enumerate(atom_index_group):
-            element = self.trajectory.atom_names[self.trajectory.atom_indices[at_index]]
+            element = self.trajectory.atom_names[at_index]
 
             self._outputData[f"{self.CF_NAME}/isotropic/{element}"] += isotropic[
                 :, arr_index

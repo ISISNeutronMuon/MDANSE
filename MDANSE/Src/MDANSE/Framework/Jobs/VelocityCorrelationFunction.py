@@ -59,7 +59,7 @@ class VelocityCorrelationFunction(CartesianCorrelationFunction):
         atom_index_group = self.grouped_indices[index]
 
         if self.configuration["interpolation_order"]["value"] == 0:
-            series = trajectory.read_configuration_trajectory_many(
+            series = trajectory.read_configuration_trajectory(
                 atom_index_group,
                 first=self.configuration["frames"]["first"],
                 last=self.configuration["frames"]["last"] + 1,
