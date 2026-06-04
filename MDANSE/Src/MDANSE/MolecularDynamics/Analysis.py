@@ -120,7 +120,9 @@ def mean_square_fluctuation(
         the mean-square fluctuation
 
     """
-    msf = np.average(np.sum((coords - np.average(coords, axis=0)) ** 2, axis=sum_axis))
+    msf = np.average(
+        np.sum((coords - np.average(coords, axis=0)) ** 2, axis=sum_axis), axis=0
+    )
 
     if root:
         msf = np.sqrt(msf)

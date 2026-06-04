@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, NamedTuple
 import numpy as np
 import numpy.typing as npt
 from scipy import fftpack, signal
+from scipy.interpolate import make_interp_spline
 
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
@@ -85,31 +86,6 @@ INTERPOLATION_ORDER[5] = np.array(
     ],
     dtype=np.float64,
 )
-
-
-def normalisation_factor(x: IOutputVariable, axis: int = 0) -> FloatArray:
-    """Normalizes the signal by dividing x by the zeroth elements
-    along the input axis.
-
-    Parameters
-    ----------
-    x : FloatArray
-        The input array to normalize.
-    axis : int
-        The axis to normalize the array along.
-
-    Returns
-    -------
-    FloatArray
-        The normalization factors.
-    """
-    s = [slice(None)] * x.ndim
-    s[axis] = slice(0, 1, 1)
-
-    s = tuple(s)
-    scaling_factor = x.scaling_factor
-
-    return 1 / (scaling_factor * x[s])
 
 
 def differentiate(a, dt=1.0, order=1):
@@ -202,6 +178,17 @@ def differentiate(a, dt=1.0, order=1):
     ts *= fact
 
     return ts
+
+
+def differentiate_many(input_array, dt: float = 1.0, order: int = 1):
+    time_axis = np.arange(len(input_array)) * dt
+    if order == 1:
+        spline = make_interp_spline(time_axis, input_array, k=order, axis=0)
+    else:
+        spline = make_interp_spline(
+            time_axis, input_array, k=order, axis=0, bc_type=None
+        )
+    return spline(time_axis, nu=1)
 
 
 def symmetrize(signal, axis=0):

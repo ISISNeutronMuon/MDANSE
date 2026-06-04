@@ -19,7 +19,7 @@ from MDANSE.Framework.Jobs.CartesianCorrelationFunction import (
     CartesianCorrelationFunction,
 )
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Signal import differentiate
+from MDANSE.Mathematics.Signal import differentiate_many
 
 
 @IJob.register("VelocityCorrelationFunction")
@@ -56,31 +56,28 @@ class VelocityCorrelationFunction(CartesianCorrelationFunction):
 
     def get_series(self, index):
         trajectory = self.trajectory
-        atom_index = self.trajectory.atom_indices[index]
+        atom_index_group = self.grouped_indices[index]
 
         if self.configuration["interpolation_order"]["value"] == 0:
-            series = trajectory.read_configuration_trajectory(
-                atom_index,
+            series = trajectory.read_configuration_trajectory_many(
+                atom_index_group,
                 first=self.configuration["frames"]["first"],
                 last=self.configuration["frames"]["last"] + 1,
                 step=self.configuration["frames"]["step"],
                 variable="velocities",
             )
         else:
-            series = trajectory.read_atomic_trajectory(
-                atom_index,
+            series = self.trajectory.read_atomic_trajectory_many(
+                atom_index_group,
                 first=self.configuration["frames"]["first"],
                 last=self.configuration["frames"]["last"] + 1,
                 step=self.configuration["frames"]["step"],
             )
 
             order = self.configuration["interpolation_order"]["value"]
-            for axis in range(3):
-                series[:, axis] = differentiate(
-                    series[:, axis],
-                    order=order,
-                    dt=self.configuration["frames"]["time_step"],
-                )
+            series = differentiate_many(
+                series, dt=self.configuration["frames"]["time_step"], order=order
+            )
 
         series = self.configuration["projection"]["projector"](series)
         return series
