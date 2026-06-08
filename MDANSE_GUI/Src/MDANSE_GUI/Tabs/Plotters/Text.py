@@ -20,7 +20,7 @@ from itertools import product as cart_prod
 from typing import TYPE_CHECKING
 
 import numpy as np
-from more_itertools import collapse, prepend, transpose
+from more_itertools import collapse, prepend, transpose, unzip
 
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
@@ -303,21 +303,14 @@ class DatasetFormatter:
                 dataset._data.shape[0] if flip_array else dataset._data.shape[1]
             )
 
-        multi_curves = np.vstack(
-            list(
-                dataset.curves_vs_axis(
-                    (best_unit, best_axis), max_limit=curves_limit, skip_label_text=True
-                ).values()
-            )
-        )
         # Add corner nil
         xaxis = prepend("_", new_axes[axis_numbers[flip_array]].flat)
 
         # Add axes to data
-        data_lines = zip(
-            dataset._curve_labels.values(),
-            multi_curves,
-            strict=True,
+        data_lines = list(
+            dataset.curves_vs_axis(
+                (best_unit, best_axis), max_limit=curves_limit, skip_label_text=True
+            )
         )
 
         # Put xaxis in

@@ -29,9 +29,11 @@ from more_itertools import ilen, nth
 from scipy.interpolate import interp1d
 
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
+    import numpy.typing as npt
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from matplotlib.figure import Figure
     from matplotlib.image import AxesImage
@@ -238,33 +240,11 @@ class Heatmap(Plotter):
 
             axes = self._figure.add_subplot(gs[ind])
 
-            x_label = databundle.main_axis
-            y_label = nth(dataset._axes, self._slice_axis)
-            if y_label is None:
-                y_label = nth(dataset._axes, 1)
-
-            x_axis = dataset.x_axis(x_label)
-            y_axis = dataset.x_axis(y_label)
-
-            limits = (x_axis[0], x_axis[-1], y_axis[0], y_axis[-1])
-            axes.set_xlabel(x_label)
-            axes.set_ylabel(y_label)
-
-            image = axes.imshow(
-                plane,
-                extent=limits,
-                aspect="auto",
-                interpolation=None,
-                cmap=plotting_context.colormap,
+            image = self._plot_single(
+                axes, plane, databundle, label=label, colour=plotting_context.colormap
             )
-            axes.set_title(label)
-            colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
-            colorbar.set_label(dataset._data_unit)
-            xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
-            self._axes.append(axes)
-            self._backup[databundle.row].array = plane
-            self._backup[databundle.row].image = image
 
+            xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
             interpolator = self._backup[databundle.row].interp
             last_minmax = (
                 interpolator(self._slider_values[0]),
@@ -279,8 +259,6 @@ class Heatmap(Plotter):
                 )
 
             if update_only:
-                xlimits = axes.get_xlim()
-                ylimits = axes.get_ylim()
                 self._backup[databundle.row].limits = (
                     xlimits[0],
                     xlimits[1],
@@ -372,3 +350,44 @@ class Heatmap(Plotter):
             Each image in dataset.
         """
         yield from axis.get_images()
+
+    def _plot_single(
+        self,
+        axes: Axes,
+        plane: npt.NDArray[np.floating],
+        databundle: PlotArgs,
+        *,
+        label: str,
+        colour: str,
+    ) -> AxesImage:
+
+        dataset = databundle.dataset
+
+        x_label = databundle.main_axis
+        y_label = nth(dataset._axes, self._slice_axis)
+        if y_label is None:
+            y_label = nth(dataset._axes, 1)
+
+        x_axis = dataset.x_axis(x_label)
+        y_axis = dataset.x_axis(y_label)
+
+        limits = (x_axis[0], x_axis[-1], y_axis[0], y_axis[-1])
+        axes.set_xlabel(x_label)
+        axes.set_ylabel(y_label)
+
+        image = axes.imshow(
+            plane,
+            extent=limits,
+            aspect="auto",
+            interpolation=None,
+            cmap=colour,
+        )
+        axes.set_title(label)
+        colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
+        colorbar.set_label(dataset._data_unit)
+
+        self._axes.append(axes)
+        self._backup[databundle.row].array = plane
+        self._backup[databundle.row].image = image
+
+        return image

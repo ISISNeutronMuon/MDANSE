@@ -19,10 +19,13 @@ import copy
 import csv
 import enum
 import math
+from collections.abc import Generator
 from itertools import count
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, TextIO
 
 import numpy as np
+from matplotlib import rcParams
+from matplotlib.colors import to_rgb
 from more_itertools import consumer
 
 from MDANSE.Core.RegisterFactory import RegisterFactory
@@ -109,6 +112,7 @@ class Plotter(RegisterFactory):
         5: (2, 3),
         6: (2, 3),
     }
+    _title_length_limit: ClassVar[int] = 30
 
     def __init__(self) -> None:
         """Create defaults common to all plotters."""
@@ -505,3 +509,32 @@ class Plotter(RegisterFactory):
         if limit < ind < n_curves - 1:
             return None
         return label
+
+    @staticmethod
+    def colours(colour: str, n_curves: int) -> Generator[tuple[float, float, float]]:
+        """Generate colours from root colour.
+
+        Parameters
+        ----------
+        colour : str
+            Root colour.
+
+        Returns
+        -------
+        Generator[tuple[float, float, float]]
+            Next colour in sequence.
+        """
+        main_colour = np.array(to_rgb(colour))
+        colour_increment = (0.5 - main_colour) / n_curves
+        for _ in range(n_curves):
+            yield tuple(main_colour)
+            main_colour += colour_increment
+
+    def title_fontsize(self, title_text: str) -> int:
+        normal_size = rcParams["font.size"]
+        new_size = (
+            normal_size
+            if len(title_text) < self._title_length_limit
+            else normal_size - round(len(title_text) / self._title_length_limit)
+        )
+        return new_size

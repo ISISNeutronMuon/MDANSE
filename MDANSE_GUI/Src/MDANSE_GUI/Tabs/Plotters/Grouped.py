@@ -20,13 +20,14 @@ import math
 from itertools import islice
 from typing import TYPE_CHECKING, Any
 
-from more_itertools import flatten, ilen
+import numpy as np
+from more_itertools import ilen
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
-    import numpy as np
+    import numpy.typing as npt
     from matplotlib.axes import Axes
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from matplotlib.figure import Figure
@@ -35,25 +36,84 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs, PlottingContext
 
 
-@Plotter.register("Grid")
-class Grid(Plotter):
-    """Plots each curve in its own subplot."""
+@Plotter.register("Grouped")
+class Grouped(Plotter):
+    """Plots each dataset in its own subplot."""
 
     def __init__(self) -> None:
         super().__init__()
         self._figure = None
-        self._backup_limits = []
-        self._active_curves = []
-        self._backup_curves = []
+        self._backup_limits: list[tuple[float, float, float, float]] = []
+        self._active_curves: list[Line2D] = []
+        self._backup_curves: list[
+            tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]
+        ] = []
         self._plot_limit = 9
+        self.height_max, self.length_max = -np.inf, -np.inf
 
     def slider_labels(self) -> list[str]:
         """Return labels to show that sliders are not used."""
-        return ["Inactive", "Inactive"]
+        return ["Y offset", "X offset"]
 
     def slider_limits(self) -> list[tuple[float, float, float]]:
         """Return generic slider limit values."""
         return [(-1.0, 1.0, 0.01)] * self._number_of_sliders
+
+    def handle_slider(self, new_value: list[float]):
+        """Save slider values and call offset_curves."""
+        super().handle_slider(new_value)
+        self.offset_curves()
+
+    def offset_curves(self):
+        """Offset curves against each other based on slider settings."""
+        target = self._figure
+        if target is None:
+            return
+
+        new_value = self._slider_values
+
+        backup = iter(self._backup_curves)
+        for ind, axes in enumerate(self._axes):
+            saved_xmin, saved_xmax, saved_ymin, saved_ymax = self._backup_limits[ind]
+
+            for num, curve in enumerate(axes.get_lines()):
+                xdata, ydata = next(backup)
+                xdata, ydata = self.normalise_curve(xdata, ydata)
+                new_xdata = xdata + num * self.length_max * new_value[1]
+                new_ydata = ydata + num * self.height_max * new_value[0]
+                curve.set_xdata(new_xdata)
+                curve.set_ydata(new_ydata)
+                xmin, xmax = np.nanmin(new_xdata), np.nanmax(new_xdata)
+                ymin, ymax = np.nanmin(new_ydata), np.nanmax(new_ydata)
+                saved_xmin = np.nanmin([xmin, saved_xmin])
+                saved_xmax = np.nanmax([xmax, saved_xmax])
+                saved_ymin = np.nanmin([ymin, saved_ymin])
+                saved_ymax = np.nanmax([ymax, saved_ymax])
+
+            axes.relim()
+            axes.autoscale()
+
+            self._backup_limits[ind] = (saved_xmin, saved_xmax, saved_ymin, saved_ymax)
+
+            try:
+                axes.set_xlim(saved_xmin, saved_xmax)
+            except ValueError:
+                LOG.error(
+                    f"Matplotlib could not set x limits to {saved_xmin}, {saved_xmax}",
+                )
+
+            try:
+                axes.set_ylim(saved_ymin, saved_ymax)
+            except ValueError:
+                LOG.error(
+                    f"Matplotlib could not set y limits to {saved_ymin}, {saved_ymax}",
+                )
+
+        if self._toolbar is not None:
+            self._toolbar.update()
+            self._toolbar.push_current()
+
+        target.canvas.draw()
 
     def check_curve_lengths(self):
         """Find the maximum number of elements in the x axes of the plot data."""
@@ -101,6 +161,7 @@ class Grid(Plotter):
                 title if enabled else "",
                 fontsize=self.title_fontsize(title),
             )
+            axes.get_legend().set_visible(enabled)
 
         self._figure.canvas.draw()
 
@@ -138,6 +199,7 @@ class Grid(Plotter):
             LOG.debug("Axis check failed.")
             return
 
+        self.height_max, self.length_max = 0.0, 0.0
         self._figure = target
         self._axes = []
         self._axes_titles = []
@@ -146,29 +208,64 @@ class Grid(Plotter):
         self._normalisation_errors = []
         self.apply_settings(plotting_context)
 
-        nplots = min(
-            sum(db.dataset.n_curves for db in plotting_context.datasets().values()),
-            self._plot_limit,
-        )
+        nplots = min(ilen(plotting_context.curves()), self._plot_limit)
         grid_size = self.grid_size(nplots)
         gs = self._figure.add_gridspec(*grid_size)
+        limits = [(0.0, 0.0, 0.0, 0.0) for _ in range(nplots)]
 
-        for ind, (databundle, label, curve) in enumerate(
-            islice(flatten(plotting_context.curves()), self._plot_limit)
-        ):
-            axes = target.add_subplot(gs[ind])
-            self._axes_titles.append(databundle.dataset._name)
-
-            self._plot_single(
-                axes,
-                curve,
-                databundle,
-                label=label,
-                colour=databundle.colour,
+        for ind, (db, dataclump) in enumerate(
+            islice(
+                zip(
+                    plotting_context.datasets().values(),
+                    plotting_context.curves(),
+                    strict=True,
+                ),
+                self._plot_limit,
             )
+        ):
+            ds = db.dataset
+            axes = target.add_subplot(gs[ind])
+            self._axes_titles.append(ds._name)
+
+            colours = self.colours(db.colour, ds.n_curves)
+
+            for (databundle, label, curve), colour in zip(
+                dataclump, colours, strict=True
+            ):
+                self._plot_single(
+                    axes,
+                    curve,
+                    databundle,
+                    label=label,
+                    colour=colour,
+                )
             axes.legend()
             self._axes.append(axes)
+            limits[ind] = (*axes.get_xlim(), *axes.get_ylim())
 
+            if update_only:
+                try:
+                    axes.set_xlim(self._backup_limits[ind][:2])
+                except ValueError:
+                    LOG.error(
+                        f"Matplotlib could not set x limits to {self._backup_limits[ind][:2]}"
+                    )
+
+                try:
+                    axes.set_ylim(self._backup_limits[ind][2:])
+                except ValueError:
+                    LOG.error(
+                        f"Matplotlib could not set y limits to {self._backup_limits[ind][2:]}"
+                    )
+
+        if not update_only:
+            self._backup_limits = limits
+
+        self.enable_slider(
+            allow_slider=any(
+                db.dataset.n_curves > 1 for db in plotting_context.datasets().values()
+            )
+        )
         self.toggle_legend(plotting_context.use_legend)
         self.toggle_grid(plotting_context.use_grid)
 
@@ -219,6 +316,9 @@ class Grid(Plotter):
             except ValueError:
                 with contextlib.suppress(Exception):
                     line.set_marker(int(databundle.marker))
+
+            self.height_max = np.nanmax([self.height_max, np.nanmax(line.get_ydata())])
+            self.length_max = np.nanmax([self.length_max, np.nanmax(line.get_xdata())])
 
         self._active_curves.extend(lines)
         self._backup_curves.extend(

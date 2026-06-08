@@ -497,23 +497,21 @@ class SingleDataset:
             return self._data * self._scaling_factor
         return self._data
 
-    @overload
+    @property
+    def n_curves(self) -> int:
+        """Number of curves in dataset."""
+        if self._data_limits is None:
+            return 0
+
+        return len(self._data_limits)
+
     def generate_curve_label(
         self,
         index_tuple: Sequence[int],
         axis_lookup: Iterable[str],
         *,
-        skip_text: Literal[False] = False,
-    ) -> str: ...
-    @overload
-    def generate_curve_label(
-        self,
-        index_tuple: Sequence[int],
-        axis_lookup: Iterable[str],
-        *,
-        skip_text: Literal[True],
-    ) -> float: ...
-    def generate_curve_label(self, index_tuple, axis_lookup, *, skip_text=False):
+        skip_text: bool = False,
+    ) -> str:
         """Get a meaningful label for a subset of data.
 
         Used when plotting 1D arrays out of a multidimensional array.
@@ -529,7 +527,7 @@ class SingleDataset:
 
         Returns
         -------
-        str | float
+        str
             A string label for the plot legend or a number for Text plotter.
 
         """
@@ -564,7 +562,7 @@ class SingleDataset:
 
             label += f"{axis_label}={picked_value} {axis_unit}, "
             if skip_text:
-                return float(picked_value)
+                return str(float(picked_value))
         return label.rstrip(", ")
 
     def curve_ind(self, limits: int | None = None, /):
@@ -580,7 +578,7 @@ class SingleDataset:
     def curves_vs_axis(
         self,
         axis_label: tuple[str, str] | str,
-        max_limit: int = 1,
+        max_limit: int | None = None,
         *,
         axis_unit: str | None = None,
         skip_label_text: bool = False,
@@ -624,7 +622,7 @@ class SingleDataset:
         x_axis = self.x_axis(axis_label)
 
         if self._data.ndim == 1:
-            yield None, (x_axis, self.data)
+            yield axis_label, (x_axis, self.data)
             return
 
         data_shape = self._data.shape
@@ -657,6 +655,7 @@ class SingleDataset:
                 try:
                     index_tuple = nth_product(index, *indexer)
                     index_slicer = nth_product(index, *slicer)
+
                     yield (
                         self.generate_curve_label(
                             index_tuple, label_lookup, skip_text=skip_label_text
@@ -1062,7 +1061,7 @@ class PlottingContext(QStandardItemModel):
 
     def planes(
         self, default_axis: int = 0, planes_per_dataset: int | None = None
-    ) -> Generator[tuple[PlotArgs, str, np.ndarray]]:
+    ) -> Generator[tuple[PlotArgs, str, npt.NDArray[np.floating]]]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
 
@@ -1076,11 +1075,21 @@ class PlottingContext(QStandardItemModel):
 
     def curves(
         self, curves_per_dataset: int | None = None
-    ) -> Generator[tuple[PlotArgs, str, np.ndarray]]:
+    ) -> Generator[
+        Generator[
+            tuple[
+                PlotArgs,
+                str,
+                tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]],
+            ]
+        ]
+    ]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
 
-            for label, curve in islice(
-                ds.curves_vs_axis(databundle.main_axis), curves_per_dataset
-            ):
-                yield databundle, label, curve
+            yield (
+                (databundle, label, curve)
+                for label, curve in islice(
+                    ds.curves_vs_axis(databundle.main_axis), curves_per_dataset
+                )
+            )

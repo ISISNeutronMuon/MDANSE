@@ -21,8 +21,7 @@ from itertools import islice
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from matplotlib.colors import to_rgb
-from more_itertools import ilen
+from more_itertools import flatten, ilen
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
@@ -48,6 +47,7 @@ class Single(Plotter):
         self._backup_curves: list[tuple[np.ndarray, np.ndarray]] = []
         self._backup_limits = []
         self._curve_limit_per_dataset = 12
+        self._plot_limit = 60
         self.height_max, self.length_max = 0.0, 0.0
 
     def clear(self, figure: Figure | None = None):
@@ -70,9 +70,9 @@ class Single(Plotter):
         """Return slider labels for single plot mode."""
         return ["Y offset", "X offset"]
 
-    def slider_limits(self) -> list[str]:
+    def slider_limits(self) -> list[tuple[float, float, float]]:
         """Return slider limits for single plot mode."""
-        return self._number_of_sliders * [[-1.0, 1.0, 0.001]]
+        return [(-1.0, 1.0, 0.001)] * self._number_of_sliders
 
     def handle_slider(self, new_value: list[float]):
         """Save slider values and call offset_curves."""
@@ -142,26 +142,6 @@ class Single(Plotter):
             xdata = self._backup_curves[num][0]
             self.curve_length_limit = max(self.curve_length_limit, len(xdata))
 
-    @staticmethod
-    def colours(colour: str, n_curves: int) -> Generator[tuple[float, float, float]]:
-        """Generate colours from root colour.
-
-        Parameters
-        ----------
-        colour : str
-            Root colour.
-
-        Returns
-        -------
-        Generator[tuple[float, float, float]]
-            Next colour in sequence.
-        """
-        main_colour = np.array(to_rgb(colour))
-        colour_increment = (0.5 - main_colour) / n_curves
-        for _ in range(n_curves):
-            yield tuple(main_colour)
-            main_colour += colour_increment
-
     def plot(
         self,
         plotting_context: PlottingContext,
@@ -198,8 +178,6 @@ class Single(Plotter):
         self._normalisation_errors = []
         x_axis_labels = []
 
-        axes = target.add_subplot(111)
-        self._axes = [axes]
         self.apply_settings(plotting_context)
 
         self.height_max, self.length_max = 0.0, 0.0
@@ -220,17 +198,17 @@ class Single(Plotter):
 
         colours = {}
         for databundle in plotting_context.datasets().values():
-            n_curves = ilen(
-                databundle.dataset.curves_vs_axis(
-                    databundle.main_axis,
-                    self._curve_limit_per_dataset,
-                )
+            colours[databundle.row] = self.colours(
+                databundle.colour, databundle.dataset.n_curves
             )
-            colours[databundle.row] = self.colours(databundle.colour, n_curves)
             x_axis_labels.append(databundle.dataset.x_axis_label(databundle.main_axis))
 
-        for databundle, _, curve in plotting_context.curves(
-            self._curve_limit_per_dataset
+        axes = target.add_subplot(111)
+        self._axes = [axes]
+
+        for databundle, _, curve in islice(
+            flatten(plotting_context.curves(self._curve_limit_per_dataset)),
+            self._plot_limit,
         ):
             self._plot_single(
                 axes,
@@ -300,8 +278,8 @@ class Single(Plotter):
                 with contextlib.suppress(Exception):
                     line.set_marker(int(databundle.marker))
 
-            self.height_max = max(self.height_max, line.get_ydata().max())
-            self.length_max = max(self.length_max, line.get_xdata().max())
+            self.height_max = np.nanmax([self.height_max, np.nanmax(line.get_ydata())])
+            self.length_max = np.nanmax([self.length_max, np.nanmax(line.get_xdata())])
 
         self._active_curves.extend(lines)
         self._backup_curves.extend(
