@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from collections import ChainMap
 from enum import Enum
+from functools import reduce
 from pathlib import Path
 from typing import TYPE_CHECKING
 
