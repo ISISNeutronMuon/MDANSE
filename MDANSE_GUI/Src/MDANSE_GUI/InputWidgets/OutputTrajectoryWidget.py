@@ -66,15 +66,17 @@ class OutputTrajectoryWidget(WidgetBase):
         self.dtype_box = QComboBox(self._base)
         self.dtype_box.addItems(["float16", "float32", "float64"])
         self.dtype_box.setCurrentText("float64")
-        self.chunk_box = QSpinBox(self._base)
-        self.chunk_box.setMinimum(1)
-        self.chunk_box.setMaximum(0xFFFF)
-        self.chunk_box.setValue(128)
-        self.chunk_box.setSingleStep(32)
-        self.chunk_box.setToolTip(
-            "Specifies the size of a single chunk in the HDF5 file."
-            "Affects the performance of reading and writing the trajectory."
-        )
+        self.chunk_atom_box = QSpinBox(self._base)
+        self.chunk_frame_box = QSpinBox(self._base)
+        for index, chunk_box in enumerate((self.chunk_atom_box, self.chunk_frame_box)):
+            chunk_box.setMinimum(1)
+            chunk_box.setMaximum(0xFFFF)
+            chunk_box.setValue(1 if index else 128)
+            chunk_box.setSingleStep(1 if index else 32)
+            chunk_box.setToolTip(
+                f"Specifies the number of {'frames' if index else 'atoms'} in a single chunk of the HDF5 file."
+                "Affects the performance of reading and writing the trajectory."
+            )
         self.compression_box = QComboBox(self._base)
         self.compression_box.addItems(["none", "gzip"])
         self.compression_box.setCurrentText("gzip")
@@ -86,7 +88,13 @@ class OutputTrajectoryWidget(WidgetBase):
         label2 = QLabel("Atoms per chunk")
         label2.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         label2.setToolTip(
-            "Specifies the size of a single chunk in the HDF5 file."
+            "Specifies the number of atoms in a single chunk of the HDF5 file."
+            "Affects the performance of reading and writing the trajectory."
+        )
+        label3 = QLabel("Frames per chunk")
+        label3.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        label3.setToolTip(
+            "Specifies the number of frames in a single chunk of the HDF5 file."
             "Affects the performance of reading and writing the trajectory."
         )
         self.logs_combo = QComboBox(self._base)
@@ -98,7 +106,9 @@ class OutputTrajectoryWidget(WidgetBase):
         self._layout.addWidget(label, 1, 0)
         self._layout.addWidget(self.logs_combo, 1, 1)
         self._layout.addWidget(label2, 1, 2)
-        self._layout.addWidget(self.chunk_box, 1, 3)
+        self._layout.addWidget(self.chunk_atom_box, 1, 3)
+        self._layout.addWidget(label3, 2, 2)
+        self._layout.addWidget(self.chunk_frame_box, 2, 3)
         self._default_value = default_value
         self._field.textChanged.connect(self.updateValue)
         self.default_labels()
@@ -152,7 +162,7 @@ class OutputTrajectoryWidget(WidgetBase):
         if len(filename) < 1:
             filename = self._default_value[0]
         dtype = dtype_lookup[self.dtype_box.currentText()]
-        chunk_size = self.chunk_box.value()
+        chunk_size = (self.chunk_frame_box.value(), self.chunk_atom_box.value())
         compression = self.compression_box.currentText()
         logs = self.logs_combo.currentText()
         return (filename, dtype, chunk_size, compression, logs)

@@ -1027,7 +1027,7 @@ class TrajectoryWriter:
         n_steps,
         selected_atoms=None,
         positions_dtype=np.float64,
-        chunking_limit=128,
+        chunking_limit=(1,128),
         compression="none",
         initial_charges=None,
     ):
@@ -1044,7 +1044,7 @@ class TrajectoryWriter:
         """
         self._h5_filename = Path(h5_filename)
         PLATFORM.create_directory(self._h5_filename.parent)
-        self._h5_file = h5py.File(self._h5_filename, "w")
+        self._h5_file = h5py.File(self._h5_filename, "w", meta_block_size=65536)
 
         self._chemical_system = chemical_system
         self._last_configuration = None
@@ -1070,16 +1070,14 @@ class TrajectoryWriter:
 
         self._dtype = positions_dtype
 
-        if self._n_atoms <= 1.5 * chunking_limit:
-            self._chunk_tuple = (1, self._n_atoms, 3)
-            self._padded_size = self._n_atoms
-            self._chunking_limit = self._n_atoms
+        if isinstance(chunking_limit, tuple):
+            frame_chunks, atom_chunks = chunking_limit
         else:
-            self._chunk_tuple = (1, chunking_limit, 3)
-            self._padded_size = (
-                math.ceil(self._n_atoms / chunking_limit) * chunking_limit
-            )
-            self._chunking_limit = chunking_limit
+            frame_chunks = 1
+            atom_chunks = chunking_limit
+        
+        self.frame_chunks = min(frame_chunks, self._n_steps)
+        self.atom_chunks = min(atom_chunks, self._n_atoms)
 
         self._compression = compression
 
@@ -1310,16 +1308,16 @@ class TrajectoryWriter:
             if self._compression in TrajectoryWriter.allowed_compression:
                 variable_charge_dset = self._h5_file.create_dataset(
                     "/configuration/charges",
-                    shape=(self._n_steps, self._padded_size),
-                    chunks=(1, self._chunking_limit),
+                    shape=(self._n_steps, self._n_atoms),
+                    chunks=(self.frame_chunks, self.atom_chunks),
                     dtype=self._dtype,
                     compression=self._compression,
                 )
             else:
                 variable_charge_dset = self._h5_file.create_dataset(
                     "/configuration/charges",
-                    shape=(self._n_steps, self._padded_size),
-                    chunks=(1, self._chunking_limit),
+                    shape=(self._n_steps, self._n_atoms),
+                    chunks=(self.frame_chunks, self.atom_chunks),
                     dtype=self._dtype,
                 )
         variable_charge_dset[index, : self._n_atoms] = charges
@@ -1374,16 +1372,16 @@ class TrajectoryWriter:
                 if self._compression in TrajectoryWriter.allowed_compression:
                     dset = configuration_grp.create_dataset(
                         k,
-                        shape=(self._n_steps, self._padded_size, 3),
-                        chunks=self._chunk_tuple,
+                        shape=(self._n_steps, self._n_atoms, 3),
+                        chunks=(self.frame_chunks, self.atom_chunks, 3),
                         dtype=self._dtype,
                         compression=self._compression,
                     )
                 else:
                     dset = configuration_grp.create_dataset(
                         k,
-                        shape=(self._n_steps, self._padded_size, 3),
-                        chunks=self._chunk_tuple,
+                        shape=(self._n_steps, self._n_atoms, 3),
+                        chunks=(self.frame_chunks, self.atom_chunks, 3),
                         dtype=self._dtype,
                     )
                 dset.attrs["units"] = units.get(k, "")
@@ -1397,7 +1395,7 @@ class TrajectoryWriter:
                 unit_cell_dset = self._h5_file.create_dataset(
                     "unit_cell",
                     shape=(self._n_steps, 3, 3),
-                    chunks=(1, 3, 3),
+                    chunks=True,
                     dtype=np.float64,
                 )
                 unit_cell_dset.attrs["units"] = units.get("unit_cell", "")
@@ -1409,7 +1407,7 @@ class TrajectoryWriter:
             time_dset = self._h5_file.create_dataset(
                 "time",
                 shape=(self._n_steps,),
-                chunks=(1,),
+                chunks=True,
                 dtype=np.float64,
             )
             time_dset.attrs["units"] = units.get("time", "")

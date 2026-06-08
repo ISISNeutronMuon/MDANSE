@@ -27,6 +27,7 @@ from qtpy.QtWidgets import (
     QLabel,
     QSpinBox,
     QVBoxLayout,
+    QWidget,
 )
 
 from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
@@ -56,6 +57,8 @@ class HDFTrajectoryWidget(WidgetBase):
             self._layout.addWidget(label)
             trajectory_path, _ = os.path.split(filename)
             self.default_path = PurePath(trajectory_path)
+        visibility_switch = QCheckBox("Show advanced settings")
+        self._layout.addWidget(visibility_switch)
         self.build_fields(
             init_guess=guess_hdf5_trajectory_parameters(self._configurator["value"])
         )
@@ -65,6 +68,10 @@ class HDFTrajectoryWidget(WidgetBase):
         )
         hdf5_info_text.setWordWrap(True)
         self._layout.addWidget(hdf5_info_text)
+        visibility_switch.stateChanged.connect(self.extra_bar.setVisible)
+        visibility_switch.stateChanged.connect(hdf5_info_text.setVisible)
+        self.extra_bar.setVisible(False)
+        hdf5_info_text.setVisible(False)
         self.default_labels()
         self.update_labels()
         if self._tooltip:
@@ -75,7 +82,9 @@ class HDFTrajectoryWidget(WidgetBase):
         self._label = label
 
     def build_fields(self, init_guess: tuple[int, int] = (None, None)):
+        bar_widget = QWidget()
         bar_layout = QHBoxLayout()
+        bar_widget.setLayout(bar_layout)
         self._extra_widgets = {}
         combobox_inputs = [
             ("HDF5 driver", "default"),
@@ -125,7 +134,8 @@ class HDFTrajectoryWidget(WidgetBase):
             sublayout.addWidget(widget)
             bar_layout.addLayout(sublayout)
             self._extra_widgets[label.split()[0]] = widget
-        self._layout.addLayout(bar_layout)
+        self._layout.addWidget(bar_widget)
+        self.extra_bar = bar_widget
 
     def configure_using_default(self):
         """This is too static to have a default value"""
